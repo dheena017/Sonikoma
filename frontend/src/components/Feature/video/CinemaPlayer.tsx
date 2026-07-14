@@ -21,17 +21,24 @@ import {
   PictureInPicture,
   Tv,
 } from "lucide-react";
-import { GeneratedPanel } from "../../../types.js";
+import { GeneratedPanel, PanelLayerItem } from "../../../types.js";
+import { motion, AnimatePresence } from "motion/react";
 
 interface PlayerPageProps {
   panels: GeneratedPanel[];
-  videoUrl: string | null;
+  videoUrl?: string | null;
   seriesSlug: string | null;
   chapterSlug: string | null;
   navigateTo: (path: string) => void;
   addNotification?: (msg: string, type: any) => void;
   variant?: "floating" | "theater";
   onCloseFloating?: () => void;
+  // External timeline control props
+  currentTime?: number;
+  isPlaying?: boolean;
+  onTimeUpdate?: (time: number) => void;
+  setIsPlaying?: (playing: boolean) => void;
+  hideHUD?: boolean;
 }
 
 interface Chapter {
@@ -40,18 +47,229 @@ interface Chapter {
   endTime: number; // in seconds
 }
 
+export function ManhwaPanelRenderer({
+  panel,
+  panelElapsed,
+  canvasSize,
+  setCanvasSize,
+}: {
+  panel: GeneratedPanel;
+  panelElapsed: number;
+  canvasSize: { width: number; height: number };
+  setCanvasSize: (size: { width: number; height: number }) => void;
+}) {
+  const bgUrl = panel.layers?.background_url || panel.image_url;
+
+  // Sync background dimensions
+  useEffect(() => {
+    if (!bgUrl) return;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      setCanvasSize({
+        width: img.naturalWidth || img.width || 1920,
+        height: img.naturalHeight || img.height || 1080,
+      });
+    };
+    img.src = bgUrl;
+  }, [panel.id, bgUrl, setCanvasSize]);
+
+  // Fallback Generator to convert old layers / flat images to PanelLayerItem[]
+  const layers = useMemo((): PanelLayerItem[] => {
+    const duration = panel.duration || 4.5;
+    if (panel.layersArray && panel.layersArray.length > 0) {
+      return panel.layersArray;
+    }
+
+    const items: PanelLayerItem[] = [];
+
+    if (panel.layers) {
+      if (panel.layers.background_url && panel.layers.bg_visible !== false) {
+        items.push({
+          id: `bg-${panel.id}`,
+          type: "background",
+          url: panel.layers.background_url,
+          x: 0,
+          y: 0,
+          scale: 1,
+          zIndex: 0,
+          animationTimings: { delay: 0, duration },
+        });
+      }
+
+      if (panel.layers.character_url && panel.layers.char_visible !== false) {
+        const x = panel.layers.char_x ?? 0;
+        const y = panel.layers.char_y ?? 0;
+        const scale = panel.layers.char_scale_x ?? 1;
+        items.push({
+          id: `char-${panel.id}`,
+          type: "character",
+          url: panel.layers.character_url,
+          x,
+          y,
+          scale,
+          zIndex: 1,
+          animationTimings: { delay: 0, duration, effect: "subtle-wiggle" },
+        });
+      }
+
+      if (panel.layers.text_url && panel.layers.text_visible !== false) {
+        const x = panel.layers.text_x ?? 0;
+        const y = panel.layers.text_y ?? 0;
+        const scale = panel.layers.text_scale_x ?? 1;
+        items.push({
+          id: `bubble-${panel.id}`,
+          type: "bubble",
+          url: panel.layers.text_url,
+          x,
+          y,
+          scale,
+          zIndex: 2,
+          animationTimings: { delay: 0.5, duration: Math.max(0.5, duration - 0.5), effect: "pop-in" },
+        });
+      }
+    } else if (panel.image_url) {
+      items.push({
+        id: `flat-bg-${panel.id}`,
+        type: "background",
+        url: panel.image_url,
+        x: 0,
+        y: 0,
+        scale: 1,
+        zIndex: 0,
+        animationTimings: { delay: 0, duration },
+      });
+    }
+
+    return items.sort((a, b) => a.zIndex - b.zIndex);
+  }, [panel]);
+
+  return (
+    <div className="absolute inset-0 w-full h-full overflow-hidden select-none">
+      <AnimatePresence mode="popLayout">
+        {layers.map((layer) => {
+          const isVisible =
+            panelElapsed >= layer.animationTimings.delay &&
+            panelElapsed <= layer.animationTimings.delay + layer.animationTimings.duration;
+
+          if (!isVisible) return null;
+
+          const isDefaultPos = layer.x === 0 && layer.y === 0;
+
+          // Compute absolute styling matching Fabric.js layout scaling
+          const baseStyle: React.CSSProperties = isDefaultPos
+            ? {
+                position: "absolute",
+                left: 0,
+                top: 0,
+                width: "100%",
+                height: "100%",
+                zIndex: layer.zIndex,
+              }
+            : {
+                position: "absolute",
+                left: `${layer.x}px`,
+                top: `${layer.y}px`,
+                zIndex: layer.zIndex,
+                transformOrigin: "center center",
+              };
+
+          if (layer.type === "character") {
+            const hasWiggle = layer.animationTimings.effect === "subtle-wiggle" || !layer.animationTimings.effect;
+            return (
+              <motion.div
+                key={layer.id}
+                style={baseStyle}
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: 1,
+                  x: hasWiggle ? [-2, 2, -2] : 0,
+                  y: hasWiggle ? [-2, 2, -2] : 0,
+                  scale: layer.scale,
+                }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  x: hasWiggle
+                    ? { repeat: Infinity, duration: 4, ease: "easeInOut" }
+                    : undefined,
+                  y: hasWiggle
+                    ? { repeat: Infinity, duration: 4, ease: "easeInOut" }
+                    : undefined,
+                  opacity: { duration: 0.3 },
+                }}
+              >
+                <img
+                  src={layer.url}
+                  className="w-full h-full object-contain pointer-events-none"
+                  alt={layer.type}
+                />
+              </motion.div>
+            );
+          }
+
+          if (layer.type === "bubble") {
+            const hasPopIn = layer.animationTimings.effect === "pop-in" || !layer.animationTimings.effect;
+            return (
+              <motion.div
+                key={layer.id}
+                style={baseStyle}
+                initial={hasPopIn ? { scale: 0, opacity: 0 } : { opacity: 0 }}
+                animate={{ scale: layer.scale, opacity: 1 }}
+                exit={hasPopIn ? { scale: 0, opacity: 0 } : { opacity: 0 }}
+                transition={
+                  hasPopIn
+                    ? { type: "spring", stiffness: 200, damping: 15 }
+                    : { duration: 0.3 }
+                }
+              >
+                <img
+                  src={layer.url}
+                  className="w-full h-full object-contain pointer-events-none"
+                  alt={layer.type}
+                />
+              </motion.div>
+            );
+          }
+
+          // Background Layer
+          return (
+            <motion.div
+              key={layer.id}
+              style={baseStyle}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, scale: layer.scale }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <img
+                src={layer.url}
+                className="w-full h-full object-contain pointer-events-none"
+                alt={layer.type}
+              />
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function CinemaPlayer({
   panels = [],
-  videoUrl,
   seriesSlug,
   chapterSlug,
   navigateTo,
   addNotification,
   variant = "theater",
   onCloseFloating,
+  currentTime: propCurrentTime,
+  isPlaying: propIsPlaying,
+  onTimeUpdate: propOnTimeUpdate,
+  setIsPlaying: propSetIsPlaying,
+  hideHUD = false,
 }: PlayerPageProps) {
   // Use either actual panels/video duration or fallback to high-fidelity mock duration (16:38 = 998 seconds)
-  const isMock = !videoUrl && panels.length === 0;
+  const isMock = panels.length === 0;
   const totalDuration = isMock
     ? 998 // 16 minutes 38 seconds
     : panels.reduce((acc, p) => acc + (p.duration || 4.5), 0);
@@ -87,9 +305,16 @@ export default function CinemaPlayer({
     }
   }, [isMock, panels]);
 
+  // Synchronize internal currentTime state to external prop if provided
+  const [internalCurrentTime, setInternalCurrentTime] = useState(0);
+  const currentTime = propCurrentTime !== undefined ? propCurrentTime : internalCurrentTime;
+  const setCurrentTime = propOnTimeUpdate !== undefined ? propOnTimeUpdate : setInternalCurrentTime;
+
+  const [internalIsPlaying, setInternalIsPlaying] = useState(false);
+  const isPlaying = propIsPlaying !== undefined ? propIsPlaying : internalIsPlaying;
+  const setIsPlaying = propSetIsPlaying !== undefined ? propSetIsPlaying : setInternalIsPlaying;
+
   // States
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
@@ -113,6 +338,11 @@ export default function CinemaPlayer({
   const spaceTimerRef = useRef<any>(null);
   const baseSpeedRef = useRef(1.0);
 
+  // Responsive Composition Canvas sizing & scaling states
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 800, height: 450 });
+  const [canvasSize, setCanvasSize] = useState({ width: 1920, height: 1080 });
+
   // Hover states for Precise Seeking
   const [hoverProgress, setHoverProgress] = useState<{
     percent: number;
@@ -127,7 +357,6 @@ export default function CinemaPlayer({
   });
 
   // Refs
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
   const playbackIntervalRef = useRef<any>(null);
@@ -138,6 +367,7 @@ export default function CinemaPlayer({
 
   // Mouse activity tracker for auto-hiding player control overlay
   useEffect(() => {
+    if (hideHUD) return;
     const handleMouseMove = () => {
       setControlsVisible(true);
       lastActiveRef.current = Date.now();
@@ -156,58 +386,36 @@ export default function CinemaPlayer({
       window.removeEventListener("mousemove", handleMouseMove);
       clearInterval(interval);
     };
-  }, [isPlaying]);
+  }, [isPlaying, hideHUD]);
 
   // Handle play/pause toggle
   const togglePlay = () => {
-    if (isMock) {
-      setIsPlaying(!isPlaying);
-    } else {
-      if (videoRef.current) {
-        if (isPlaying) {
-          videoRef.current.pause();
-        } else {
-          videoRef.current.play().catch((err) => {
-            console.error("Playback start error:", err);
-          });
-        }
-      }
-    }
+    setIsPlaying(!isPlaying);
   };
 
-  // Sync state if HTML5 Video is used
+  // Sync state playback timer
   useEffect(() => {
-    if (isMock) {
-      if (isPlaying) {
-        playbackIntervalRef.current = setInterval(() => {
-          setCurrentTime((prev) => {
-            const next = prev + playbackSpeed * 0.1;
-            if (next >= totalDuration) {
-              if (isLooping) {
-                return 0;
-              } else {
-                setIsPlaying(false);
-                clearInterval(playbackIntervalRef.current);
-                return 0;
-              }
+    if (propCurrentTime !== undefined) return; // External control handles playback ticker!
+
+    if (isPlaying) {
+      playbackIntervalRef.current = setInterval(() => {
+        setCurrentTime((prev) => {
+          const next = prev + playbackSpeed * 0.1;
+          if (next >= totalDuration) {
+            if (isLooping) {
+              return 0;
+            } else {
+              setIsPlaying(false);
+              clearInterval(playbackIntervalRef.current);
+              return 0;
             }
-            return next;
-          });
-        }, 100);
-      } else {
-        if (playbackIntervalRef.current) {
-          clearInterval(playbackIntervalRef.current);
-        }
-      }
+          }
+          return next;
+        });
+      }, 100);
     } else {
-      const v = videoRef.current;
-      if (v) {
-        v.loop = isLooping;
-        if (isPlaying) {
-          v.play().catch(() => {});
-        } else {
-          v.pause();
-        }
+      if (playbackIntervalRef.current) {
+        clearInterval(playbackIntervalRef.current);
       }
     }
 
@@ -216,59 +424,29 @@ export default function CinemaPlayer({
         clearInterval(playbackIntervalRef.current);
       }
     };
-  }, [isPlaying, isMock, playbackSpeed, totalDuration, isLooping]);
+  }, [isPlaying, playbackSpeed, totalDuration, isLooping, propCurrentTime]);
 
-  // Sync real HTML5 video state to React state
+  // Responsive scaling ResizeObserver
   useEffect(() => {
-    const v = videoRef.current;
-    if (!v || isMock) return;
-
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onTimeUpdate = () => setCurrentTime(v.currentTime);
-    const onEnded = () => {
-      if (!isLooping) {
-        setIsPlaying(false);
+    if (!viewportRef.current) return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setViewportSize({
+          width: entry.contentRect.width || 800,
+          height: entry.contentRect.height || 450,
+        });
       }
-    };
+    });
+    resizeObserver.observe(viewportRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
 
-    v.addEventListener("play", onPlay);
-    v.addEventListener("pause", onPause);
-    v.addEventListener("timeupdate", onTimeUpdate);
-    v.addEventListener("ended", onEnded);
-
-    return () => {
-      v.removeEventListener("play", onPlay);
-      v.removeEventListener("pause", onPause);
-      v.removeEventListener("timeupdate", onTimeUpdate);
-      v.removeEventListener("ended", onEnded);
-    };
-  }, [videoUrl, isMock, isLooping]);
-
-  // PiP API Listeners for Video Element
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v || isMock) return;
-
-    const onEnterPiP = () => setIsPiPActive(true);
-    const onLeavePiP = () => setIsPiPActive(false);
-
-    v.addEventListener("enterpictureinpicture", onEnterPiP);
-    v.addEventListener("leavepictureinpicture", onLeavePiP);
-
-    return () => {
-      v.removeEventListener("enterpictureinpicture", onEnterPiP);
-      v.removeEventListener("leavepictureinpicture", onLeavePiP);
-    };
-  }, [videoUrl, isMock]);
-
-  // Mute controls
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted;
-      videoRef.current.volume = volume;
-    }
-  }, [isMuted, volume]);
+  const scaleFactor = useMemo(() => {
+    const scaleX = viewportSize.width / canvasSize.width;
+    const scaleY = viewportSize.height / canvasSize.height;
+    const minScale = Math.min(scaleX, scaleY);
+    return isNaN(minScale) || minScale <= 0 ? 1 : minScale;
+  }, [viewportSize, canvasSize]);
 
   // Find active chapter by current time
   const getActiveChapter = (time: number): Chapter => {
@@ -321,9 +499,6 @@ export default function CinemaPlayer({
     }
 
     setCurrentTime(targetTime);
-    if (videoRef.current) {
-      videoRef.current.currentTime = targetTime;
-    }
   };
 
   // Hover precise seeking calculations
@@ -350,55 +525,29 @@ export default function CinemaPlayer({
   const handleSkipBackward = () => {
     const prev = Math.max(0, currentTime - 10);
     setCurrentTime(prev);
-    if (videoRef.current) videoRef.current.currentTime = prev;
     if (addNotification) addNotification("Skipped back 10 seconds", "info");
   };
 
   const handleSkipForward = () => {
     const next = Math.min(totalDuration, currentTime + 10);
     setCurrentTime(next);
-    if (videoRef.current) videoRef.current.currentTime = next;
     if (addNotification) addNotification("Skipped forward 10 seconds", "info");
   };
 
   // Toggle Picture in Picture Mode
-  const togglePictureInPicture = async () => {
-    if (isMock) {
-      // Simulate/mock visual feedback
-      setIsPiPActive((prev) => {
-        const next = !prev;
-        if (addNotification) {
-          addNotification(
-            next
-              ? "Entered Picture-in-Picture (Simulated Preview)"
-              : "Exited Picture-in-Picture Mode",
-            "info"
-          );
-        }
-        return next;
-      });
-      return;
-    }
-
-    const v = videoRef.current;
-    if (!v) return;
-
-    try {
-      if (document.pictureInPictureElement) {
-        await document.exitPictureInPicture();
-        setIsPiPActive(false);
-      } else {
-        if (document.pictureInPictureEnabled) {
-          await v.requestPictureInPicture();
-          setIsPiPActive(true);
-        } else {
-          if (addNotification) addNotification("Picture-in-Picture not supported on this browser.", "warning");
-        }
+  const togglePictureInPicture = () => {
+    setIsPiPActive((prev) => {
+      const next = !prev;
+      if (addNotification) {
+        addNotification(
+          next
+            ? "Entered Picture-in-Picture (Composition Overlay)"
+            : "Exited Picture-in-Picture Mode",
+          "info"
+        );
       }
-    } catch (err: any) {
-      console.error("PiP Toggle error:", err);
-      if (addNotification) addNotification("Picture-in-Picture initiation failed.", "error");
-    }
+      return next;
+    });
   };
 
   // Keyboard controls
@@ -414,19 +563,14 @@ export default function CinemaPlayer({
           spaceTimerRef.current = setTimeout(() => {
             setIsFastForwarding(true);
             setPlaybackSpeed(2.0);
-            if (videoRef.current) {
-              videoRef.current.playbackRate = 2.0;
-            }
           }, 450);
         }
       } else if (e.code === "ArrowRight") {
         const next = Math.min(currentTime + 5, totalDuration);
         setCurrentTime(next);
-        if (videoRef.current) videoRef.current.currentTime = next;
       } else if (e.code === "ArrowLeft") {
         const prev = Math.max(currentTime - 5, 0);
         setCurrentTime(prev);
-        if (videoRef.current) videoRef.current.currentTime = prev;
       } else if (e.code === "KeyM") {
         setIsMuted(!isMuted);
       } else if (e.code === "KeyF") {
@@ -446,20 +590,15 @@ export default function CinemaPlayer({
         const percent = digit / 10;
         const targetTime = percent * totalDuration;
         setCurrentTime(targetTime);
-        if (videoRef.current) videoRef.current.currentTime = targetTime;
         if (addNotification) addNotification(`Jumped to ${digit * 10}%`, "info");
       } else if (e.key === "," || e.key === "<") {
-        // Frame step backward
         e.preventDefault();
         const prev = Math.max(0, parseFloat((currentTime - 0.1).toFixed(1)));
         setCurrentTime(prev);
-        if (videoRef.current) videoRef.current.currentTime = prev;
       } else if (e.key === "." || e.key === ">") {
-        // Frame step forward
         e.preventDefault();
         const next = Math.min(totalDuration, parseFloat((currentTime + 0.1).toFixed(1)));
         setCurrentTime(next);
-        if (videoRef.current) videoRef.current.currentTime = next;
       } else if (e.key === "?" || e.key === "/") {
         setShowHudHelp(true);
       }
@@ -476,9 +615,6 @@ export default function CinemaPlayer({
         if (isFastForwarding) {
           setIsFastForwarding(false);
           setPlaybackSpeed(baseSpeedRef.current);
-          if (videoRef.current) {
-            videoRef.current.playbackRate = baseSpeedRef.current;
-          }
         } else {
           togglePlay();
         }
@@ -518,21 +654,40 @@ export default function CinemaPlayer({
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
-  // Fetch the active panel matching a given timestamp for thumbnail rendering
-  const getPanelAtTime = (time: number): GeneratedPanel | null => {
-    if (panels.length === 0) return null;
+  // Fetch the active panel matching a given timestamp
+  const getPanelTimeInfo = (time: number) => {
+    if (panels.length === 0) return { panel: null, elapsed: 0, startTime: 0, duration: 4.5 };
     let accumulatedTime = 0;
     for (const panel of panels) {
       const duration = panel.duration || 4.5;
       if (time >= accumulatedTime && time < accumulatedTime + duration) {
-        return panel;
+        return {
+          panel,
+          elapsed: time - accumulatedTime,
+          startTime: accumulatedTime,
+          duration,
+        };
       }
       accumulatedTime += duration;
     }
-    return panels[panels.length - 1];
+    const lastPanel = panels[panels.length - 1];
+    const lastDuration = lastPanel?.duration || 4.5;
+    return {
+      panel: lastPanel,
+      elapsed: Math.max(0, time - (accumulatedTime - lastDuration)),
+      startTime: accumulatedTime - lastDuration,
+      duration: lastDuration,
+    };
   };
 
-  // Find panel index (human-friendly: index + 1)
+  const activePanelTimeInfo = getPanelTimeInfo(currentTime);
+  const activePanelNow = activePanelTimeInfo.panel;
+
+  const getPanelAtTime = (time: number): GeneratedPanel | null => {
+    const info = getPanelTimeInfo(time);
+    return info.panel;
+  };
+
   const getPanelIndexAtTime = (time: number): number => {
     if (panels.length === 0) return 0;
     let accumulatedTime = 0;
@@ -547,11 +702,9 @@ export default function CinemaPlayer({
   };
 
   const activePanelForHover = getPanelAtTime(hoverProgress.time);
-  const activePanelNow = getPanelAtTime(currentTime);
 
   const panelCounterText = useMemo(() => {
     if (isMock) {
-      // In Mock Mode, divide into 10 mock scenes based on progress
       const totalMockPanels = 10;
       const currentMockIdx = Math.min(totalMockPanels, Math.floor((currentTime / totalDuration) * totalMockPanels) + 1);
       return `Scene ${currentMockIdx} / ${totalMockPanels}`;
@@ -578,7 +731,7 @@ export default function CinemaPlayer({
     return "text-sm md:text-lg";
   }, [subtitleSize]);
 
-  // Is Skip Intro Button active? (Only when current chapter title is "Intro" and currentTime has elapsed less than its duration)
+  // Is Skip Intro Button active?
   const isIntroActive = useMemo(() => {
     if (variant === "floating") return false;
     const introChapter = chapters.find((c) => c.title.toLowerCase() === "intro");
@@ -591,7 +744,6 @@ export default function CinemaPlayer({
     if (introChapter) {
       const targetTime = introChapter.endTime;
       setCurrentTime(targetTime);
-      if (videoRef.current) videoRef.current.currentTime = targetTime;
       if (addNotification) addNotification("Skipped Intro segment", "success");
     }
   };
@@ -600,7 +752,9 @@ export default function CinemaPlayer({
     <div
       ref={containerRef}
       className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${
-        variant === "floating"
+        hideHUD
+          ? "w-full h-full"
+          : variant === "floating"
           ? "w-full h-full rounded-2xl border border-neutral-800"
           : isTheaterMode
           ? "w-full h-[85vh] lg:h-[90vh]"
@@ -623,7 +777,7 @@ export default function CinemaPlayer({
       />
 
       {/* Visual HUD help overlay */}
-      {showHudHelp && (
+      {!hideHUD && showHudHelp && (
         <div className="absolute inset-0 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center space-y-4 z-[60] animate-fade-in p-6">
           <div className="h-10 w-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-1">
             <Sliders className="h-5 w-5 text-purple-400 animate-pulse" />
@@ -669,7 +823,7 @@ export default function CinemaPlayer({
       )}
 
       {/* FAST-FORWARD 2X BADGE */}
-      {isFastForwarding && (
+      {!hideHUD && isFastForwarding && (
         <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-purple-600/90 text-white font-mono text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl shadow-purple-950 animate-pulse border border-purple-400/30">
           <RotateCcw className="h-3.5 w-3.5 animate-spin" />
           <span>2x Fast-Forward Active</span>
@@ -677,7 +831,7 @@ export default function CinemaPlayer({
       )}
 
       {/* SIMULATED FLOATING PIP PREVIEW WINDOW */}
-      {isPiPActive && isMock && (
+      {!hideHUD && isPiPActive && (
         <div className="fixed bottom-24 right-6 w-72 aspect-video bg-neutral-900/95 border-2 border-purple-600 rounded-2xl shadow-2xl z-[80] flex flex-col overflow-hidden animate-fade-in pointer-events-auto">
           <div className="bg-neutral-950 px-3 py-1.5 flex items-center justify-between border-b border-neutral-800">
             <span className="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-wider flex items-center gap-1">
@@ -693,26 +847,12 @@ export default function CinemaPlayer({
           <div className="flex-1 relative flex items-center justify-center bg-[#060608]">
             {activePanelNow ? (
               <div className="relative w-full h-full flex items-center justify-center">
-                {activePanelNow.layers ? (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    <img
-                      src={activePanelNow.layers.background_url}
-                      className="absolute max-w-full max-h-full object-contain"
-                      alt="PiP Background"
-                    />
-                    <img
-                      src={activePanelNow.layers.character_url}
-                      className="absolute max-w-full max-h-full object-contain z-10"
-                      alt="PiP Character"
-                    />
-                  </div>
-                ) : (
-                  <img
-                    src={activePanelNow.image_url}
-                    className="w-full h-full object-cover"
-                    alt="PiP Current Panel"
-                  />
-                )}
+                <ManhwaPanelRenderer
+                  panel={activePanelNow}
+                  panelElapsed={activePanelTimeInfo.elapsed}
+                  canvasSize={canvasSize}
+                  setCanvasSize={setCanvasSize}
+                />
               </div>
             ) : (
               <span className="text-[10px] font-mono text-neutral-500">Preview Stream</span>
@@ -725,7 +865,7 @@ export default function CinemaPlayer({
       )}
 
       {/* SKIP INTRO PILL */}
-      {isIntroActive && (
+      {!hideHUD && isIntroActive && (
         <button
           onClick={handleSkipIntro}
           className="absolute bottom-28 right-6 z-50 bg-white hover:bg-neutral-100 text-neutral-950 hover:text-black font-sans font-extrabold text-xs tracking-wider px-5 py-3 rounded-full flex items-center gap-2 shadow-2xl active:scale-95 transition-all duration-300 hover:scale-105 border border-neutral-200 animate-bounce"
@@ -736,64 +876,32 @@ export default function CinemaPlayer({
       )}
 
       {/* RENDER ACTIVE SCREEN CANVAS CONTENT */}
-      <div className="relative w-full h-full flex items-center justify-center z-10">
-        {/* High Fidelity Animated Canvas preview for all playback track rendering */}
-        <div className="relative w-full h-full flex items-center justify-center bg-[#060608]">
+      <div
+        ref={viewportRef}
+        className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden"
+      >
+        <div className="relative flex items-center justify-center bg-[#060608] w-full h-full">
           {activePanelNow ? (
-            <div className="relative max-w-full max-h-[85%] aspect-video overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl flex items-center justify-center bg-neutral-950">
-              {activePanelNow.layers ? (
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {/* Stacks custom background and separate character elements for deep immersion */}
-                  <img
-                    src={activePanelNow.layers.background_url}
-                    className="absolute max-w-full max-h-full object-contain"
-                    style={{
-                      transform: isPlaying
-                        ? subtitlesStyle === "karaoke"
-                          ? `scale(${1 + (currentTime % 4.5) * 0.015})`
-                          : "scale(1.05) translateY(-2px)"
-                        : "scale(1)",
-                      transition: "transform 100ms linear",
-                    }}
-                    alt="Background"
-                  />
-                  <img
-                    src={activePanelNow.layers.character_url}
-                    className="absolute max-w-full max-h-full object-contain z-10"
-                    style={{
-                      transform: isPlaying
-                        ? subtitlesStyle === "karaoke"
-                          ? `scale(${1 + (currentTime % 4.5) * 0.035}) translateY(-4px)`
-                          : "scale(1.08) translateY(-6px)"
-                        : "scale(1)",
-                      transition: "transform 100ms linear",
-                    }}
-                    alt="Character"
-                  />
-                  {showSubtitles && activePanelNow.layers.text_url && (
-                    <img
-                      src={activePanelNow.layers.text_url}
-                      className="absolute max-w-full max-h-full object-contain z-20"
-                      alt="Subtitles Layer"
-                    />
-                  )}
-                </div>
-              ) : (
-                <img
-                  src={activePanelNow.image_url}
-                  className="max-w-full max-h-full object-contain"
-                  style={{
-                    transform: isPlaying
-                      ? `scale(${1 + (currentTime % 4.5) * 0.02})`
-                      : "scale(1)",
-                    transition: "transform 100ms linear",
-                  }}
-                  alt="Current Panel"
-                />
-              )}
+            <div
+              className="border border-neutral-900 rounded-3xl shadow-2xl overflow-hidden bg-neutral-950"
+              style={{
+                width: `${canvasSize.width}px`,
+                height: `${canvasSize.height}px`,
+                transform: `scale(${scaleFactor})`,
+                transformOrigin: "center center",
+                position: "relative",
+                flexShrink: 0,
+              }}
+            >
+              <ManhwaPanelRenderer
+                panel={activePanelNow}
+                panelElapsed={activePanelTimeInfo.elapsed}
+                canvasSize={canvasSize}
+                setCanvasSize={setCanvasSize}
+              />
             </div>
           ) : (
-            /* Simulated High Fidelity Cinematic Video Mock Screen */
+            /* Fallback Mock Canvas view */
             <div className="flex flex-col items-center justify-center text-center px-4">
               <div className="relative w-64 h-36 bg-neutral-900/50 border border-neutral-800 rounded-2xl flex flex-col items-center justify-center mb-6 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 to-transparent animate-pulse" />
@@ -801,11 +909,11 @@ export default function CinemaPlayer({
                   <Sliders className="h-5 w-5 text-purple-400 animate-pulse" />
                 </div>
                 <span className="text-[11px] font-mono text-neutral-400 font-bold uppercase tracking-wider">
-                  Simulated Cinematic Track
+                  Composition Engine
                 </span>
               </div>
               <h2 className="text-xl font-black font-sans text-neutral-100 tracking-tight mb-2">
-                Adaptation Cinema Studio
+                Layered Composition Engine
               </h2>
               <p className="text-xs text-neutral-500 max-w-sm leading-relaxed font-mono">
                 No direct MP4 compilation was found. Seamlessly playing back interactive storyboard timeline cuts and speech assets live.
@@ -830,10 +938,10 @@ export default function CinemaPlayer({
         )}
       </div>
 
-      {/* TOP BAR OVERLAYS (Chapter Title + Panel/Scene Counter + Close button) */}
+      {/* TOP BAR OVERLAYS */}
       <div
         className={`absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between px-6 z-30 transition-all duration-300 ${
-          controlsVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
+          controlsVisible && !hideHUD ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
         }`}
       >
         <div className="flex items-center gap-3">
@@ -842,13 +950,12 @@ export default function CinemaPlayer({
           </div>
           <div>
             <span className="text-[10px] font-mono text-purple-400 uppercase font-black tracking-widest block">
-              Adaptation Player
+              Layer Composition Player
             </span>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-neutral-200">
                 {activeChapter ? `${activeChapter.title} Segment` : "Preview Track"}
               </span>
-              {/* PANEL/SCENE COUNTER CHIP */}
               <span className="bg-neutral-900/90 border border-neutral-800/80 rounded px-2 py-0.5 text-[9px] font-mono font-bold text-purple-300 tracking-wider">
                 {panelCounterText}
               </span>
@@ -878,7 +985,7 @@ export default function CinemaPlayer({
       {/* BOTTOM CONTROL AND TIMELINE OVERLAYS */}
       <div
         className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-12 pb-6 px-6 z-30 transition-all duration-300 ${
-          controlsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+          controlsVisible && !hideHUD ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
         }`}
       >
         {/* PROGRESS SCRUBBER ROW WITH HOVER TIMELINE MARKS & CHIPS */}
@@ -889,35 +996,21 @@ export default function CinemaPlayer({
             <div
               className="absolute bottom-6 flex flex-col items-center z-45 transition-all duration-75 pointer-events-none"
               style={{
-                left: `calc(${hoverProgress.percent * 100}% - 75px)`, // Center floating preview over mouse coordinate
+                left: `calc(${hoverProgress.percent * 100}% - 75px)`,
               }}
             >
               <div className="bg-neutral-900 border border-neutral-800/80 rounded-2xl p-1.5 shadow-2xl backdrop-blur-md flex flex-col gap-1 w-[150px] overflow-hidden">
-                {/* Micro Thumbnail inside Seeking Box */}
                 <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-neutral-950 flex items-center justify-center">
                   {activePanelForHover ? (
-                    activePanelForHover.layers ? (
-                      <>
-                        <img
-                          src={activePanelForHover.layers.background_url}
-                          className="absolute inset-0 w-full h-full object-cover"
-                          alt="Seeking Thumbnail BG"
-                        />
-                        <img
-                          src={activePanelForHover.layers.character_url}
-                          className="absolute inset-0 w-full h-full object-contain z-10"
-                          alt="Seeking Thumbnail Char"
-                        />
-                      </>
-                    ) : (
-                      <img
-                        src={activePanelForHover.image_url}
-                        className="w-full h-full object-cover"
-                        alt="Seeking Panel"
+                    <div className="relative w-full h-full">
+                      <ManhwaPanelRenderer
+                        panel={activePanelForHover}
+                        panelElapsed={0}
+                        canvasSize={{ width: 150, height: 84 }}
+                        setCanvasSize={() => {}}
                       />
-                    )
+                    </div>
                   ) : (
-                    /* High fidelity fallback vector */
                     <div className="flex flex-col items-center justify-center w-full h-full">
                       <div className="h-5 w-5 rounded bg-purple-500/10 flex items-center justify-center">
                         <Sliders className="h-3 w-3 text-purple-400" />
@@ -926,7 +1019,6 @@ export default function CinemaPlayer({
                   )}
                 </div>
 
-                {/* Micro text inside Seeking popup */}
                 <div className="px-1 py-0.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black font-mono text-purple-400 tabular-nums">
@@ -944,7 +1036,6 @@ export default function CinemaPlayer({
                 </div>
               </div>
 
-              {/* Triangle pointer */}
               <div className="w-2.5 h-2.5 bg-neutral-900 border-r border-b border-neutral-800/80 rotate-45 -mt-1 shadow-md" />
             </div>
           )}
@@ -957,7 +1048,6 @@ export default function CinemaPlayer({
             onMouseLeave={handleProgressBarMouseLeave}
             className="relative h-1.5 group-hover/scrub:h-2.5 bg-neutral-800 rounded-full cursor-pointer transition-all duration-150 flex items-center"
           >
-            {/* Visual Chapter Markers */}
             {chapters.map((chapter, idx) => {
               if (idx === 0) return null;
               const markerPercent = (chapter.startTime / totalDuration) * 100;
@@ -970,13 +1060,11 @@ export default function CinemaPlayer({
               );
             })}
 
-            {/* Playing progress bar */}
             <div
               className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-violet-400 rounded-full z-10"
               style={{ width: `${(currentTime / totalDuration) * 100}%` }}
             />
 
-            {/* Sliding cursor knob */}
             <div
               className="absolute h-3.5 w-3.5 bg-white border border-neutral-300 rounded-full shadow-lg opacity-0 group-hover/scrub:opacity-100 pointer-events-none transition-opacity duration-150 z-30"
               style={{
@@ -989,9 +1077,7 @@ export default function CinemaPlayer({
         {/* BUTTON CONTROLS LINE */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
-          {/* LEFT COMMANDS (Play/Pause, Skip Back/Forward 10s, volume, timers, chapters label) */}
           <div className="flex items-center gap-4 flex-wrap">
-            {/* Skip Back 10s */}
             <button
               onClick={handleSkipBackward}
               className="h-8 w-8 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
@@ -1000,7 +1086,6 @@ export default function CinemaPlayer({
               <SkipBack className="h-4.5 w-4.5" />
             </button>
 
-            {/* Central Play/Pause button */}
             <button
               onClick={togglePlay}
               className="h-10 w-10 rounded-full bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-md shadow-purple-950/20"
@@ -1008,7 +1093,6 @@ export default function CinemaPlayer({
               {isPlaying ? <Pause className="h-4 w-4 fill-white" /> : <Play className="h-4 w-4 fill-white translate-x-px" />}
             </button>
 
-            {/* Skip Forward 10s */}
             <button
               onClick={handleSkipForward}
               className="h-8 w-8 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
@@ -1017,7 +1101,6 @@ export default function CinemaPlayer({
               <SkipForward className="h-4.5 w-4.5" />
             </button>
 
-            {/* VOLUME BUTTON & SLIDER */}
             <div className="flex items-center gap-2 group/volume">
               <button
                 onClick={() => setIsMuted(!isMuted)}
@@ -1040,12 +1123,10 @@ export default function CinemaPlayer({
               />
             </div>
 
-            {/* TIMERS INDICATORS */}
             <span className="text-[11px] font-mono text-neutral-300 tabular-nums select-none">
               {formatTime(currentTime)} <span className="text-neutral-600">/</span> {formatTime(totalDuration)}
             </span>
 
-            {/* CHAPTER DROPDOWN SELECTION */}
             <div className="relative">
               <button
                 onClick={() => {
@@ -1058,7 +1139,6 @@ export default function CinemaPlayer({
                 <ChevronRight className="h-3 w-3 shrink-0" />
               </button>
 
-              {/* FLOATING CHAPTERS DROPDOWN */}
               {showChaptersMenu && (
                 <div className="absolute bottom-11 left-0 bg-neutral-900/95 border border-neutral-800/80 rounded-2xl p-2 shadow-2xl backdrop-blur-md w-48 overflow-hidden flex flex-col gap-1 z-40 animate-fade-in">
                   <div className="px-3.5 py-2 border-b border-neutral-800/60 mb-1">
@@ -1073,7 +1153,6 @@ export default function CinemaPlayer({
                         key={idx}
                         onClick={() => {
                           setCurrentTime(chapter.startTime);
-                          if (videoRef.current) videoRef.current.currentTime = chapter.startTime;
                           setShowChaptersMenu(false);
                         }}
                         className={`flex items-center justify-between px-3.5 py-2 text-left rounded-xl transition-all cursor-pointer text-xs ${
@@ -1094,10 +1173,8 @@ export default function CinemaPlayer({
             </div>
           </div>
 
-          {/* RIGHT COMMANDS (Loop Toggle, Subtitles, PiP, settings, theater, fullscreen) */}
           <div className="flex items-center gap-2">
 
-            {/* LOOP PLAYBACK TOGGLE */}
             <button
               onClick={() => {
                 setIsLooping(!isLooping);
@@ -1113,7 +1190,6 @@ export default function CinemaPlayer({
               <RotateCcw className="h-4.5 w-4.5" />
             </button>
 
-            {/* PICTURE-IN-PICTURE BUTTON */}
             {variant !== "floating" && (
               <button
                 onClick={togglePictureInPicture}
@@ -1128,7 +1204,6 @@ export default function CinemaPlayer({
               </button>
             )}
 
-            {/* SUBTITLES CAPTIONS TOGGLER */}
             <button
               onClick={() => {
                 setShowSubtitles(!showSubtitles);
@@ -1149,7 +1224,6 @@ export default function CinemaPlayer({
               <Subtitles className="h-4.5 w-4.5" />
             </button>
 
-            {/* SETTINGS GEAR TOGGLER */}
             <div className="relative">
               <button
                 onClick={() => {
@@ -1166,7 +1240,6 @@ export default function CinemaPlayer({
                 <Settings className={`h-4.5 w-4.5 ${showSettings ? "rotate-45" : ""} transition-transform duration-200`} />
               </button>
 
-              {/* POPUP PLAYBACK SETTINGS MENU */}
               {showSettings && (
                 <div className="absolute bottom-11 right-0 bg-neutral-900/95 border border-neutral-800/80 rounded-2xl p-3.5 shadow-2xl backdrop-blur-md w-56 flex flex-col gap-3 z-40 animate-fade-in">
                   <div>
@@ -1175,7 +1248,6 @@ export default function CinemaPlayer({
                     </span>
                   </div>
 
-                  {/* Loop Toggle */}
                   <div className="flex items-center justify-between py-1">
                     <span className="text-[10px] font-mono text-neutral-400 font-bold">Loop Player</span>
                     <button
@@ -1190,7 +1262,6 @@ export default function CinemaPlayer({
                     </button>
                   </div>
 
-                  {/* Cinematic Letterbox Toggle */}
                   <div className="flex items-center justify-between py-1">
                     <span className="text-[10px] font-mono text-neutral-400 font-bold">Widescreen bars</span>
                     <button
@@ -1205,7 +1276,6 @@ export default function CinemaPlayer({
                     </button>
                   </div>
 
-                  {/* Speed tuner */}
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono text-neutral-400 block font-bold">Speed</label>
                     <select
@@ -1221,7 +1291,6 @@ export default function CinemaPlayer({
                     </select>
                   </div>
 
-                  {/* Subtitle Size Selector */}
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono text-neutral-400 block font-bold">Subtitle Size</label>
                     <select
@@ -1235,7 +1304,6 @@ export default function CinemaPlayer({
                     </select>
                   </div>
 
-                  {/* Quality Selector */}
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono text-neutral-400 block font-bold">Quality</label>
                     <select
@@ -1249,7 +1317,6 @@ export default function CinemaPlayer({
                     </select>
                   </div>
 
-                  {/* Subtitle style Selector */}
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono text-neutral-400 block font-bold">Subtitles Format</label>
                     <select
@@ -1265,7 +1332,6 @@ export default function CinemaPlayer({
               )}
             </div>
 
-            {/* THEATER MODE TOGGLER */}
             {variant !== "floating" && (
               <button
                 onClick={() => setIsTheaterMode(!isTheaterMode)}
@@ -1280,7 +1346,6 @@ export default function CinemaPlayer({
               </button>
             )}
 
-            {/* FULLSCREEN TOGGLER */}
             <button
               onClick={toggleFullscreen}
               className="h-9 w-9 rounded-full hover:bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-all border border-transparent hover:border-white/5 cursor-pointer"

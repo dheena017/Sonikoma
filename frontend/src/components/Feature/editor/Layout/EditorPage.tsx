@@ -467,7 +467,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 <div className="w-full h-full relative">
                   <CinemaPlayer
                     panels={panels}
-                    videoUrl={activePreviewTab === "video" ? videoUrl : null}
+                    videoUrl={null}
                     seriesSlug={null}
                     chapterSlug={null}
                     navigateTo={() => {}}
@@ -476,6 +476,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     onCloseFloating={() => {
                       useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
                     }}
+                    currentTime={playbackTime}
+                    isPlaying={storyboardPlaying}
+                    onTimeUpdate={setPlaybackTime}
+                    setIsPlaying={setStoryboardPlaying}
                   />
                 </div>
               </Rnd>
