@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import LiveScraperDeck from "../../scraper/LiveScraperDeck";
 import StoryboardTimeline from "../../timeline/StoryboardTimeline";
 import CinemaPlayer from "../../video/CinemaPlayer";
@@ -433,7 +434,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
         ) : (
           <>
             {/* Draggable & Resizable Floating CinemaPlayer Panel */}
-            {activeTab !== "settings" && activeTab !== "audio-settings" && playerSettings.isPlayerOpen && (
+            {activeTab !== "settings" && activeTab !== "audio-settings" && playerSettings.isPlayerOpen && createPortal(
               <Rnd
                 size={{
                   width: playerSettings.playerSize.width,
@@ -461,16 +462,16 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 minHeight={180}
                 lockAspectRatio={16 / 9}
                 bounds="window"
-                style={{ zIndex: 40 }}
+                style={{ zIndex: 60 }}
                 dragHandleClassName="absolute top-0 inset-x-0 h-12 cursor-move"
               >
                 <div className="w-full h-full relative">
                   <CinemaPlayer
                     panels={panels}
                     videoUrl={activePreviewTab === "video" ? videoUrl : null}
-                    seriesSlug={null}
-                    chapterSlug={null}
-                    navigateTo={() => {}}
+                    seriesSlug={seriesSlug || null}
+                    chapterSlug={chapterSlug || null}
+                    navigateTo={navigateTo}
                     addNotification={addNotification}
                     variant="floating"
                     onCloseFloating={() => {
@@ -478,7 +479,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     }}
                   />
                 </div>
-              </Rnd>
+              </Rnd>,
+              document.body
             )}
 
             {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}

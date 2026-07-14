@@ -510,6 +510,22 @@ export default function CinemaPlayer({
     }
   };
 
+  const handleExpandToTheaterMode = () => {
+    if (seriesSlug && chapterSlug) {
+      const target = `/workspace/editor/${seriesSlug}/${chapterSlug}/player`;
+      if (typeof navigateTo === "function") {
+        navigateTo(target);
+      } else {
+        window.history.pushState({}, "", target);
+        window.dispatchEvent(new Event("popstate"));
+      }
+    } else {
+      if (addNotification) {
+        addNotification("No series/chapter slug available for theater mode.", "warning");
+      }
+    }
+  };
+
   useEffect(() => {
     const onFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -1282,11 +1298,17 @@ export default function CinemaPlayer({
 
             {/* FULLSCREEN TOGGLER */}
             <button
-              onClick={toggleFullscreen}
+              onClick={variant === "floating" ? handleExpandToTheaterMode : toggleFullscreen}
               className="h-9 w-9 rounded-full hover:bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-all border border-transparent hover:border-white/5 cursor-pointer"
-              title="Fullscreen (F)"
+              title={variant === "floating" ? "Open Theater Mode" : "Fullscreen (F)"}
             >
-              {isFullscreen ? <Minimize2 className="h-4.5 w-4.5" /> : <Maximize2 className="h-4.5 w-4.5" />}
+              {variant === "floating" ? (
+                <Maximize className="h-4.5 w-4.5" />
+              ) : isFullscreen ? (
+                <Minimize2 className="h-4.5 w-4.5" />
+              ) : (
+                <Maximize2 className="h-4.5 w-4.5" />
+              )}
             </button>
           </div>
 
