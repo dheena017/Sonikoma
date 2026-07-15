@@ -19,8 +19,10 @@ export const EpisodeRatingDisplay: React.FC<EpisodeRatingDisplayProps> = ({
   }
 
   const renderStars = (score: number) => {
-    const fullStars = Math.floor(score);
-    const hasHalf = score % 1 !== 0;
+    const clamped = Math.max(0, Math.min(5, Number.isFinite(score) ? score : 0));
+
+    const fullStars = Math.floor(clamped);
+    const hasHalf = clamped % 1 !== 0;
     const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
 
     return (
