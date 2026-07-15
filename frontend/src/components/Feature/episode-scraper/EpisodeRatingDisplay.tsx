@@ -19,13 +19,28 @@ export const EpisodeRatingDisplay: React.FC<EpisodeRatingDisplayProps> = ({
   }
 
   const renderStars = (score: number) => {
-    const fullStars = Math.floor(score);
-    const hasHalf = score % 1 !== 0;
-    const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+    // Prevent `RangeError: Invalid array length` by ensuring we always pass
+    // sane integer counts to `Array(count)`.
+    const s = Number(score);
+    if (!Number.isFinite(s)) {
+      return null;
+    }
+
+    // Clamp to expected range (0..5). If backend sends something unexpected,
+    // we render a reasonable visualization instead of crashing.
+    const clamped = Math.min(5, Math.max(0, s));
+
+    const fullStars = Math.floor(clamped);
+    const hasHalf = clamped % 1 !== 0;
+    const halfStarsCount = hasHalf ? 1 : 0;
+    const emptyStars = 5 - fullStars - halfStarsCount;
+
+    const safeFullStars = Math.max(0, Math.min(5, fullStars));
+    const safeEmptyStars = Math.max(0, Math.min(5, emptyStars));
 
     return (
       <div className="flex items-center gap-1">
-        {Array(fullStars)
+        {Array(safeFullStars)
           .fill(0)
           .map((_, i) => (
             <Star
@@ -34,18 +49,30 @@ export const EpisodeRatingDisplay: React.FC<EpisodeRatingDisplayProps> = ({
               className="fill-yellow-400 text-yellow-400"
             />
           ))}
+
         {hasHalf && (
           <div className="relative w-4 h-4">
-            <Star size={compact ? 14 : 16} className="text-gray-400 absolute" />
+            <Star
+              size={compact ? 14 : 16}
+              className="text-gray-400 absolute"
+            />
             <div className="overflow-hidden w-1/2">
-              <Star size={compact ? 14 : 16} className="fill-yellow-400 text-yellow-400" />
+              <Star
+                size={compact ? 14 : 16}
+                className="fill-yellow-400 text-yellow-400"
+              />
             </div>
           </div>
         )}
-        {Array(emptyStars)
+
+        {Array(safeEmptyStars)
           .fill(0)
           .map((_, i) => (
-            <Star key={`empty-${i}`} size={compact ? 14 : 16} className="text-gray-400" />
+            <Star
+              key={`empty-${i}`}
+              size={compact ? 14 : 16}
+              className="text-gray-400"
+            />
           ))}
       </div>
     );
@@ -54,7 +81,7 @@ export const EpisodeRatingDisplay: React.FC<EpisodeRatingDisplayProps> = ({
   if (compact) {
     return (
       <div className="flex items-center gap-3 text-sm text-gray-300">
-        {rating && (
+        {rating !== undefined && rating !== null && Number.isFinite(rating) && (
           <div className="flex items-center gap-1">
             {renderStars(rating)}
             <span className="ml-1">{rating.toFixed(1)}</span>
@@ -78,7 +105,7 @@ export const EpisodeRatingDisplay: React.FC<EpisodeRatingDisplayProps> = ({
 
   return (
     <div className="space-y-2 text-sm text-gray-300">
-      {rating && (
+      {rating !== undefined && rating !== null && Number.isFinite(rating) && (
         <div className="flex items-center gap-2">
           <span className="text-gray-400 min-w-[60px]">Rating:</span>
           <div className="flex items-center gap-2">
