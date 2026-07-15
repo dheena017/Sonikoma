@@ -441,6 +441,20 @@ export function useAppState() {
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
 
+  // Sync local scrapedImages state with the activeProjectData's panels
+  const activeProjectPanels = activeProjectData?.panels;
+  useEffect(() => {
+    const panelImages = activeProjectPanels
+      ? activeProjectPanels.map((p: any) => p.image_url).filter(Boolean)
+      : [];
+    setScrapedImages((prev) => {
+      if (prev.length === panelImages.length && prev.every((val, index) => val === panelImages[index])) {
+        return prev;
+      }
+      return panelImages;
+    });
+  }, [activeProjectPanels]);
+
   const setConsoleLogs = useCallback((val: React.SetStateAction<any[]>) => {
     setRawConsoleLogs((prev) => {
       const incoming = typeof val === "function" ? val(prev) : val;
