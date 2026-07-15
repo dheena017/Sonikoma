@@ -219,7 +219,7 @@ class CacheStore(Generic[T]):
 # ─── Shared application caches ───────────────────────────────────────────────
 
 # Merged/stitched image cache — persistent=True so disk files survive server restarts.
-# Stored at: backend/database/image_cache/stitchedCache/
+# Stored at: data/image_cache/stitchedCache/
 stitched_cache = CacheStore[Dict[str, Any]](
     name='stitchedCache', default_ttl_sec=None, max_size=2000, persistent=True
 )
