@@ -457,10 +457,9 @@ export function useCompileActions({
 
         // Phase 2 & 3: Storyteller Narratives & Voiceovers
         if (!abortSignalRef.current.aborted) {
-          const visualDescriptions = panels.map((p) => {
-            const res = data.results.find((r: any) => r.url === p.image_url);
-            return res?.analysis?.visual_description || "An illustration panel.";
-          });
+          const visualDescriptions = data.results.map(
+            (r: any) => r.analysis?.visual_description || "An illustration panel."
+          );
 
           if (addNotification) {
             addNotification("Writing Narratives & Synthesizing Voiceovers... (Phase 2 & 3)", "info");

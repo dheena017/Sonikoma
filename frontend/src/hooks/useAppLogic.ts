@@ -502,7 +502,7 @@ export function useAppLogic() {
                   ...p,
                   grayscale: p.grayscale === 1 || p.grayscale === true,
                 }))
-              : finalImages.map((url: string) => ({ image_url: url }));
+              : []; // No saved panels → start with empty timeline; user adds manually
 
           let loadedChapterNumber = "";
           let loadedChapterTitle = "";
