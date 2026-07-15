@@ -83,7 +83,7 @@ export function PanelCardThumbnail({
             ? "opacity-20 scale-95 blur-[3px]"
             : "group-hover:scale-108 group-hover:rotate-[0.5deg]"
         }`}
-        loading="lazy"
+        loading="eager"
         decoding="async"
         draggable={false}
         onError={(e) => {
