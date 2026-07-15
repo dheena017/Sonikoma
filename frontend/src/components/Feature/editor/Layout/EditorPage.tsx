@@ -12,7 +12,6 @@ import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
 import { Sliders, X, Mic } from "lucide-react";
 import { useImageEditorStore } from "@/hooks/useImageEditorState";
-import { useProjectStore } from "@/store/useProjectStore";
 import { resolveWorkspaceReturnPath } from "../../../../utils/workspaceNavigation.js";
 import { Rnd } from "react-rnd";
 
@@ -183,13 +182,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
     handleRenderFinalVideo,
   } = appLogic;
 
-  const activeProjectData = useProjectStore((state) => state.activeProjectData);
-  const resolvedScrapedImages = React.useMemo(() => {
-    if (scrapedImages && scrapedImages.length > 0) {
-      return scrapedImages;
-    }
-    return activeProjectData?.panels.map((p) => p.image_url).filter(Boolean) || [];
-  }, [scrapedImages, activeProjectData?.panels]);
+
 
   const [selectedPanelIds, setSelectedPanelIds] = React.useState<Set<number>>(
     new Set()
@@ -702,7 +695,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     <div className="bg-transparent">
                       <LiveScraperDeck
                         isDashboardOnly={false}
-                        scrapedImages={resolvedScrapedImages}
+                        scrapedImages={scrapedImages}
                         isScraping={isScraping}
                         selectedScraped={selectedScraped}
                         setSelectedScraped={handleSetSelectedScraped}

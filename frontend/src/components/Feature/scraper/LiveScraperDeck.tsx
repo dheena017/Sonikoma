@@ -560,6 +560,36 @@ const LiveScraperDeck = React.memo(
                     />
                   );
                 })}
+
+                {/* Trailing skeleton cards while more images are still loading */}
+                {isScraping && [1, 2, 3].map((num) => (
+                  <div
+                    key={`loading-skeleton-${num}`}
+                    className="relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border border-purple-800/20 bg-neutral-950/40 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
+                    style={{ animationDelay: `${(num - 1) * 150}ms` }}
+                  >
+                    {/* Thumbnail Skeleton Frame */}
+                    <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/20 flex flex-col items-center justify-center overflow-hidden gap-2">
+                      <div className="h-10 w-10 rounded-full bg-purple-900/40 flex items-center justify-center">
+                        <RefreshCw className="h-5 w-5 text-purple-500/60 animate-spin" />
+                      </div>
+                      <div className="h-1.5 w-20 bg-purple-900/30 rounded-full" />
+                      <div className="h-1.5 w-14 bg-purple-900/20 rounded-full" />
+                    </div>
+
+                    {/* Metadata Skeleton */}
+                    <div className="flex items-center justify-between gap-2 px-1">
+                      <div className="h-3 w-16 bg-neutral-900/80 rounded" />
+                      <div className="h-3 w-12 bg-neutral-900/80 rounded" />
+                    </div>
+
+                    {/* Controls Skeleton */}
+                    <div className="h-9 w-full bg-purple-950/20 border border-purple-900/20 rounded-xl" />
+
+                    {/* Actions Skeleton */}
+                    <div className="h-8 w-full bg-neutral-900/30 rounded-lg" />
+                  </div>
+                ))}
               </div>
             </div>
           )}
