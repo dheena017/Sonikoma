@@ -21,7 +21,9 @@ except ImportError:
 
 DB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'database'))
 _BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-DB_PATH = os.path.join(DB_DIR, 'webtoon_local.db')
+_PROJECT_ROOT = os.path.abspath(os.path.join(_BACKEND_ROOT, '..'))
+DATA_DIR = os.path.join(_PROJECT_ROOT, 'data')
+DB_PATH = os.path.join(DATA_DIR, 'webtoon_local.db')
 SCHEMA_PATH = os.path.join(DB_DIR, 'schema.sql')
 SCHEMA_PG_PATH = os.path.join(DB_DIR, 'schema_postgres.sql')
 
@@ -246,6 +248,7 @@ def init_db() -> None:
         return
 
     logger.info(f"[Database] Opening local SQLite database at: {DB_PATH}")
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     os.makedirs(DB_DIR, exist_ok=True)
     conn = _create_db_connection()
     try:
@@ -1854,7 +1857,7 @@ def delete_project(project_id: str) -> None:
 
         # Clean up compiled video file
         if chap and chap['video_url']:
-            video_path = os.path.abspath(os.path.join(_BACKEND_ROOT, 'public', chap['video_url'].lstrip('/')))
+            video_path = os.path.abspath(os.path.join(_PROJECT_ROOT, 'data', 'media', chap['video_url'].split('/')[-1]))
             if os.path.exists(video_path):
                 try:
                     logger.info(f"[Database] Deleting project compiled video file from disk: {video_path}")
@@ -1891,7 +1894,7 @@ def delete_series(series_id: str) -> None:
         # Clean up compiled video files
         for c in chaps:
             if c['video_url']:
-                video_path = os.path.abspath(os.path.join(_BACKEND_ROOT, 'public', c['video_url'].lstrip('/')))
+                video_path = os.path.abspath(os.path.join(_PROJECT_ROOT, 'data', 'media', c['video_url'].split('/')[-1]))
                 if os.path.exists(video_path):
                     try:
                         logger.info(f"[Database] Deleting series compiled video file from disk: {video_path}")

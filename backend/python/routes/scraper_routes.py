@@ -412,7 +412,7 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest,
                 db.insert_panels(project_id, resolved_panels)
 
             try:
-                videos_dir = os.path.join(os.getcwd(), "public", "videos")
+                videos_dir = os.path.join(os.getcwd(), "data", "media")
                 compiled_filename = await compile_video_from_panels(project_id, resolved_panels, videos_dir)
                 video_url = f"/videos/{compiled_filename}"
                 if user_id and not project_id.startswith("temp_"): db.update_project(project_id, {"video_url": video_url})
@@ -435,7 +435,7 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest,
             db.insert_panels(project_id, response_panels)
 
         try:
-            videos_dir = os.path.join(os.getcwd(), "public", "videos")
+            videos_dir = os.path.join(os.getcwd(), "data", "media")
             compiled_filename = await compile_video_from_panels(project_id, response_panels, videos_dir)
             video_url = f"/videos/{compiled_filename}"
             if user_id and not project_id.startswith("temp_"): db.update_project(project_id, {"video_url": video_url})

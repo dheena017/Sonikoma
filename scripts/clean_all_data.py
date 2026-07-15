@@ -8,11 +8,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("clean_all_data")
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-DB_PATH = os.path.join(PROJECT_ROOT, "backend", "database", "webtoon_local.db")
+DB_PATH = os.path.join(PROJECT_ROOT, "data", "webtoon_local.db")
 SCRAPED_HTML_DIR = os.path.join(PROJECT_ROOT, "data", "scraped_html")
-PERSISTENT_CACHE_DIR = os.path.join(PROJECT_ROOT, "backend", "database", "image_cache")
-PUBLIC_VIDEOS_DIR = os.path.join(PROJECT_ROOT, "public", "videos")
-TRAINING_DATA_DIR = os.path.join(PROJECT_ROOT, "training_data")
+PERSISTENT_CACHE_DIR = os.path.join(PROJECT_ROOT, "data", "image_cache")
+PUBLIC_VIDEOS_DIR = os.path.join(PROJECT_ROOT, "data", "media")
+TRAINING_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "training_data")
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────

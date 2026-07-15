@@ -10,7 +10,7 @@ import cv2
 
 def main():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    training_dir = os.path.join(base_dir, "training_data")
+    training_dir = os.path.join(base_dir, "data", "training_data")
     os.makedirs(training_dir, exist_ok=True)
 
     samples = [

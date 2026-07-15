@@ -522,7 +522,7 @@ def render_pipeline_sync(
     durations: list[float] = []
 
     # Use a segments subdir alongside the other temp assets for this job
-    seg_dir = os.path.join(os.getcwd(), "temp", f"render_{video_id}", "_segments")
+    seg_dir = os.path.join(os.getcwd(), "data", "temp", f"render_{video_id}", "_segments")
     os.makedirs(seg_dir, exist_ok=True)
 
     # ── Step 1: Render each panel segment ────────────────────────────────────
@@ -788,12 +788,12 @@ async def process_render_job(
     speech_rate: float = 1.0,
     speech_pitch: float = 1.0,
 ):
-    work_dir = os.path.join(os.getcwd(), "temp", f"render_{video_id}")
+    work_dir = os.path.join(os.getcwd(), "data", "temp", f"render_{video_id}")
     os.makedirs(work_dir, exist_ok=True)
 
     ext = video_format if video_format in ("mp4", "webm", "mkv") else "mp4"
     output_filename = f"final_render_{video_id}.{ext}"
-    output_path = os.path.join(os.getcwd(), "public", "videos", output_filename)
+    output_path = os.path.join(os.getcwd(), "data", "media", output_filename)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     try:
