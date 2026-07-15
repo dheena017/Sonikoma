@@ -219,7 +219,9 @@ async function restartBackend(changedFile) {
     });
   }
 
-  const pythonPath = path.resolve(__dirname, "../.venv/Scripts/python.exe");
+  const pythonPath = process.platform === "win32"
+    ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
+    : "python3";
   const backendDir = path.resolve(__dirname, "../backend/python");
 
   pyProcess = spawn(pythonPath, ["main.py"], {
@@ -293,7 +295,9 @@ async function start() {
       );
     } else {
       logger.info(`Backend is not running. Launching backend in background...`);
-      const pythonPath = path.resolve(__dirname, "../.venv/Scripts/python.exe");
+      const pythonPath = process.platform === "win32"
+        ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
+        : "python3";
       const backendDir = path.resolve(__dirname, "../backend/python");
 
       pyProcess = spawn(pythonPath, ["main.py"], {

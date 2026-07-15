@@ -15,7 +15,7 @@ export default function DashboardHeader({
   onNewSeries,
 }: DashboardHeaderProps) {
   return (
-    <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
       <div>
         <img
           src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
@@ -23,12 +23,12 @@ export default function DashboardHeader({
             (e.currentTarget as HTMLImageElement).src = "/logo.png";
           }}
           alt="Sonikoma Logo"
-          className="h-16 w-16 mb-6 rounded-2xl shadow-lg shadow-purple-900/20 object-cover"
+          className="h-12 w-12 mb-4 rounded-xl shadow-md shadow-purple-900/20 object-cover"
           style={{
             background: themeMode === "light" ? "#ffffff" : "#000000",
           }}
         />
-        <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-3">
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-3">
           Welcome to{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500">
             Sonikoma

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useThemeMode } from "../../hooks/useThemeMode.js";
 import * as api from "@/api";
+import { useProjectStore } from "@/store/useProjectStore";
 
 export interface Project {
   project_id: string;
@@ -171,7 +172,30 @@ export default function useDashboardPage() {
     }
   }, []);
 
-  const handleOpenProject = useCallback((project: Project) => {
+  const handleOpenProject = useCallback(async (project: Project) => {
+    try {
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token") ||
+        "";
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      const res = await fetch(`/api/projects/${project.project_id}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.project) {
+          useProjectStore.getState().setActiveProject({
+            project: data.project,
+            panels: data.panels || [],
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to pre-fetch project data on dashboard click:", err);
+    }
+
     const nav = (window as any).navigateTo;
     const target =
       project.series_slug && project.chapter_slug

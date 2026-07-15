@@ -486,6 +486,7 @@ async def delete_single_project(projectId: str = Path(...), current_user: dict =
             logger.warning(f"[Database] Access denied for user {current_user['user_id']} to delete project {projectId}")
             raise HTTPException(status_code=403, detail="Access denied.")
 
+        db.delete_panels(projectId)
         db.delete_project(projectId)
         logger.info(f"[Database] Deleted project and panels successfully: {projectId}")
         return {"success": True}

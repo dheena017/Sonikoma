@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { History, Search, Filter, Download, User } from "lucide-react";
+import { adminGetAuditLogs } from "../../../api";
 
 export function AdminActivityTab({ fetchWithInterceptor }: any) {
   const [logs, setLogs] = useState<any[]>([]);
@@ -14,11 +15,8 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/audit-logs");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) setLogs(data.logs);
-      }
+      const data = await adminGetAuditLogs(fetchWithInterceptor);
+      if (data.success) setLogs(data.logs);
     } catch (err) {
       console.error("Failed to fetch audit logs:", err);
     } finally {

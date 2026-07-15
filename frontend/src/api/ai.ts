@@ -12,6 +12,20 @@ export const analyzeImage = async (
   return res.json();
 };
 
+export const analyzeNarrativeSequence = async (
+  fetchWithInterceptor: any,
+  data: any,
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor("/api/narratives/analyze-sequence", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+  return res.json();
+};
+
 export const analyzeSequence = async (
   fetchWithInterceptor: any,
   data: any,
@@ -101,4 +115,27 @@ export const executeSkill = async (
   });
 
   return res.json();
+};
+
+export const generateSequenceNarrative = async (
+  fetchWithInterceptor: any,
+  data: {
+    panels: { id: number; visual_description: string }[];
+    model?: string;
+    voice?: string;
+  },
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor("/api/generate-sequence-narrative", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+  const json = await res.json();
+  if (!res.ok) {
+    // FastAPI error responses use `detail`, surface it as a proper Error
+    throw new Error(json?.detail || `Request failed with status ${res.status}`);
+  }
+  return json;
 };

@@ -10,6 +10,7 @@ import {
   RotateCcw,
   AlertCircle,
 } from "lucide-react";
+import { adminGetSettings, adminUpdateSettings } from "../../../api";
 
 export function AdminSettingsTab({
   fetchWithInterceptor,
@@ -28,12 +29,9 @@ export function AdminSettingsTab({
   const fetchSettings = async () => {
     try {
       setLoading(true);
-      const res = await fetchWithInterceptor("/api/auth/admin/settings");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          setSettings(data.settings);
-        }
+      const data = await adminGetSettings(fetchWithInterceptor);
+      if (data.success) {
+        setSettings(data.settings);
       }
     } catch (err) {
       console.error("Failed to fetch settings:", err);
@@ -45,12 +43,8 @@ export function AdminSettingsTab({
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ settings }),
-      });
-      if (res.ok) {
+      const data = await adminUpdateSettings(fetchWithInterceptor, settings);
+      if (data.success) {
         addNotification("Settings updated successfully", "success");
       } else {
         addNotification("Failed to update settings", "error");

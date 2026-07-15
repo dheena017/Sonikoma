@@ -8,7 +8,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"))
 
 # Add backend/python to path
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from config.clients import genai_client, ai_initialized
 from routes.ai_routes import MODEL_FALLBACKS, validate_analysis

@@ -170,6 +170,8 @@ export function useSceneModifier({
     audioFeedback?.playTick();
   };
 
+
+
   const handleShiftPanel = (index: number, direction: "left" | "right") => {
     audioFeedback?.playTick();
     if (direction === "left" && index > 0) {
@@ -193,6 +195,21 @@ export function useSceneModifier({
     }
   };
 
+  const handleModifyNarrative = (panelId: number, text: string) => {
+    setPanels((prev) =>
+      prev.map((p) =>
+        p.id === panelId
+          ? {
+              ...p,
+              narrative: text,
+              narrative_audio_url: undefined, // invalidate existing audio when text changes
+            }
+          : p
+      )
+    );
+    audioFeedback?.playTick();
+  };
+
   return {
     handleModifySpeechText,
     handleModifyMotion,
@@ -200,5 +217,6 @@ export function useSceneModifier({
     handleShiftPanel,
     handleModifySFX,
     handleModifyVisualDescription,
+    handleModifyNarrative,
   };
 }

@@ -7,5 +7,6 @@ export interface Episode {
   index: number;
   rating?: number;
   likes?: string;
+  views?: number;
 }
 

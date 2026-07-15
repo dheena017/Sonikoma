@@ -4,11 +4,19 @@ import { create } from "zustand";
 
 export type ImageTool = "adjust" | "edit" | "slice" | "crop" | "merge" | "draw" | "separate" | "train";
 
+interface PlayerSettings {
+  isPlayerOpen: boolean;
+  playerPos: { x: number; y: number };
+  playerSize: { width: number; height: number };
+}
+
 interface ImageEditorGlobalState {
   activeTool: ImageTool;
   setActiveTool: (tool: ImageTool) => void;
   slicesCount: number;
   setSlicesCount: (count: number) => void;
+  playerSettings: PlayerSettings;
+  setPlayerSettings: (settings: Partial<PlayerSettings>) => void;
 }
 
 
@@ -29,6 +37,19 @@ export const useImageEditorStore = create<ImageEditorGlobalState & {
   editingImageIdx: number | null;
   setEditingImageIdx: (idx: number | null) => void;
 }>((set) => ({
+  playerSettings: {
+    isPlayerOpen: true,
+    playerPos: { x: 50, y: 150 },
+    playerSize: { width: 384, height: 216 },
+  },
+  setPlayerSettings: (settings) => {
+    set((state) => ({
+      playerSettings: {
+        ...state.playerSettings,
+        ...settings,
+      },
+    }));
+  },
   activeTool: getTabFromPathName() || "adjust",
   setActiveTool: (tool) => {
     set({ activeTool: tool });

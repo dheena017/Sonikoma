@@ -29,7 +29,7 @@ except ImportError:
 
 from media.image.ocr import extract_full_ocr_data
 from media.image.detect_panels import _detect_bg_color_and_threshold
-from media.image.segmentation_engine import segment_text_and_balloons
+from media.image.segmentation_engine import segment_text_and_balloons, segment_characters
 from utils.supabase_storage import upload_to_supabase_bucket
 
 # Initialize a global rembg session for U-2-Net model to prevent reloading it per request
@@ -54,6 +54,14 @@ def create_blank_webp(width: int, height: int) -> bytes:
     buffer = io.BytesIO()
     img.save(buffer, format="WEBP")
     return buffer.getvalue()
+
+def create_blank_png(width: int, height: int) -> bytes:
+    """Helper to generate a fully transparent PNG image of given dimensions."""
+    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    return buffer.getvalue()
+
 
 def smooth_contour(cnt, factor: float = 0.01):
     """Smooths a contour using Douglas-Peucker polygonal approximation."""
@@ -339,7 +347,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             # Extract final text layer
             text_layer = cv2.cvtColor(original_img, cv2.COLOR_BGR2BGRA)
             text_layer[text_mask == 0] = [0, 0, 0, 0]
-            _, buffer = cv2.imencode('.webp', text_layer)
+            _, buffer = cv2.imencode('.png', text_layer)
             text_layer_bytes = buffer.tobytes()
 
             # Clean text/bubbles out of working image immediately to prevent "Sticky Text" (Solves "Dilate Before Inpainting")
@@ -347,69 +355,70 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             textless_img = cv2.inpaint(original_img, dilated_text_mask, inpaintRadius=5, flags=cv2.INPAINT_TELEA)
         except Exception as e:
             logger.error(f"Error compiling text layer or inpainting textless image: {e}", exc_info=True)
-            text_layer_bytes = create_blank_webp(width, height)
+            text_layer_bytes = create_blank_png(width, height)
             textless_img = original_img.copy()
     else:
         logger.info("[Text Separation] No text regions detected. Creating blank placeholder text layer.")
-        text_layer_bytes = create_blank_webp(width, height)
+        text_layer_bytes = create_blank_png(width, height)
         textless_img = original_img.copy()
 
     # =========================================================================
     # Phase 3: Character & Background Separation
     # =========================================================================
+    char_mask = np.zeros((height, width), dtype=np.uint8)
+    yolo_success = False
+
+    try:
+        yolo_mask = segment_characters(image_path, conf_threshold=0.25)
+        if yolo_mask is not None:
+            logger.info("YOLOv8-seg successfully segmented character mask.")
+            char_mask = yolo_mask
+            yolo_success = True
+        else:
+            logger.warning("YOLOv8-seg returned None for character segmentation. Trying rembg fallback...")
+    except Exception as e:
+        logger.error(f"YOLOv8-seg character segmentation failed: {e}. Trying rembg fallback...", exc_info=True)
+
+    if not yolo_success:
+        try:
+            if not has_rembg:
+                logger.warning("rembg is not installed. Character mask will be blank.")
+            else:
+                session = get_rembg_session()
+                # rembg run STRICTLY on textless_img to guarantee character is fully clean
+                pil_textless = Image.fromarray(cv2.cvtColor(textless_img, cv2.COLOR_BGR2RGB))
+                char_pil = rembg_remove(pil_textless, session=session)
+                char_np = np.array(char_pil)
+                if char_np.shape[2] == 4:
+                    char_mask = char_np[:, :, 3]
+                logger.info("rembg fallback completed successfully.")
+        except Exception as e:
+            logger.error(f"Fallback character segmentation failed: {e}", exc_info=True)
+
+    # Foreground Generation: Apply the merged character mask to the original image,
+    # adding an alpha channel to create a transparent 'Foreground/Character Layer'.
     char_layer_bytes = None
     try:
-        if not has_rembg:
-            raise RuntimeError("rembg is not installed or failed to initialize. Character segmentation cannot proceed.")
-        else:
-            session = get_rembg_session()
-            # rembg run STRICTLY on textless_img to guarantee character is fully clean
-            pil_textless = Image.fromarray(cv2.cvtColor(textless_img, cv2.COLOR_BGR2RGB))
-            char_pil = rembg_remove(pil_textless, session=session)
-
-            char_np = np.array(char_pil)
-            if char_np.shape[2] == 4:
-                char_mask = char_np[:, :, 3]
-            else:
-                char_mask = np.zeros((height, width), dtype=np.uint8)
-
-            buffer = io.BytesIO()
-            char_pil.save(buffer, format="WEBP")
-            char_layer_bytes = buffer.getvalue()
-
+        char_layer = cv2.cvtColor(original_img, cv2.COLOR_BGR2BGRA)
+        char_layer[char_mask == 0] = [0, 0, 0, 0]
+        _, buffer = cv2.imencode('.png', char_layer)
+        char_layer_bytes = buffer.tobytes()
     except Exception as e:
-        logger.error(f"Error during character segmentation: {e}", exc_info=True)
-        raise RuntimeError(f"Character segmentation (rembg) failed: {e}")
+        logger.error(f"Error generating character foreground layer: {e}", exc_info=True)
+        char_layer_bytes = create_blank_png(width, height)
 
-    # 6. Generate final background by erasing character/text holes from the original image
+    # Background Generation: Invert the character mask. Apply this inverted mask to create the 'Background Layer'.
     bg_layer_bytes = None
     try:
-        combined_mask = cv2.bitwise_or(text_mask, char_mask)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        combined_mask = cv2.dilate(combined_mask, kernel, iterations=1)
-
-        # Pyramidal Guided Inpainting to generate pristine backgrounds
-        inpainted_bg = pyramid_guided_inpaint(original_img, combined_mask, radius=20)
-        
-        # Smooth and flood-fill inpainting artifacts using background color context
-        bg_color = [255, 255, 255] if is_white_bg else [0, 0, 0]
-        smooth_mask = cv2.dilate(combined_mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
-        
-        dist_transform = cv2.distanceTransform(smooth_mask, cv2.DIST_L2, 5)
-        max_dist = np.max(dist_transform) if np.any(dist_transform > 0) else 1.0
-        if max_dist > 0:
-            # Deep inside the masked regions, blend towards the solid background color to eliminate ghosting artifacts
-            blend_factor = np.clip(dist_transform / max_dist, 0.0, 1.0)
-            blend_factor = cv2.GaussianBlur(blend_factor, (5, 5), 0)
-            for c in range(3):
-                inpainted_bg[:, :, c] = (inpainted_bg[:, :, c] * (1.0 - 0.7 * blend_factor) + bg_color[c] * (0.7 * blend_factor)).astype(np.uint8)
-                
-        _, buffer = cv2.imencode('.webp', inpainted_bg)
+        bg_mask = cv2.bitwise_not(char_mask)
+        bg_layer = cv2.cvtColor(original_img, cv2.COLOR_BGR2BGRA)
+        bg_layer[bg_mask == 0] = [0, 0, 0, 0]
+        _, buffer = cv2.imencode('.png', bg_layer)
         bg_layer_bytes = buffer.tobytes()
-
     except Exception as e:
         logger.error(f"Error generating background layer: {e}", exc_info=True)
-        _, buffer = cv2.imencode('.webp', original_img)
+        bg_layer = cv2.cvtColor(original_img, cv2.COLOR_BGR2BGRA)
+        _, buffer = cv2.imencode('.png', bg_layer)
         bg_layer_bytes = buffer.tobytes()
 
     # =========================================================================
@@ -422,9 +431,9 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
         logger.info(f"[Layer Segmentation] ENVIRONMENT=production — uploading layers to Supabase for panel_id={panel_id}")
 
         try:
-            bg_url = upload_to_supabase_bucket(bg_layer_bytes, "panels", f"{folder_prefix}bg.webp", "image/webp")
-            char_url = upload_to_supabase_bucket(char_layer_bytes, "panels", f"{folder_prefix}char.webp", "image/webp")
-            text_url = upload_to_supabase_bucket(text_layer_bytes, "panels", f"{folder_prefix}text.webp", "image/webp")
+            bg_url = upload_to_supabase_bucket(bg_layer_bytes, "panels", f"{folder_prefix}bg.png", "image/png")
+            char_url = upload_to_supabase_bucket(char_layer_bytes, "panels", f"{folder_prefix}char.png", "image/png")
+            text_url = upload_to_supabase_bucket(text_layer_bytes, "panels", f"{folder_prefix}text.png", "image/png")
         except Exception as e:
             logger.error(f"[Layer Segmentation] Supabase upload failed for panel_id={panel_id}: {e}", exc_info=True)
             raise
@@ -451,9 +460,9 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     logger.info(f"[Layer Segmentation] ENVIRONMENT={env_mode} — saving layers locally for panel_id={panel_id} at {local_panel_dir}")
 
     local_files = {
-        "bg.webp": bg_layer_bytes,
-        "char.webp": char_layer_bytes,
-        "text.webp": text_layer_bytes,
+        "bg.png": bg_layer_bytes,
+        "char.png": char_layer_bytes,
+        "text.png": text_layer_bytes,
     }
 
     for fname, b in local_files.items():
@@ -466,13 +475,13 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             with open(out_path, "wb") as f:
                 f.write(b)
     except Exception as e:
-        logger.error(f"[Layer Segmentation] Failed writing local WebP files for panel_id={panel_id}: {e}", exc_info=True)
+        logger.error(f"[Layer Segmentation] Failed writing local PNG files for panel_id={panel_id}: {e}", exc_info=True)
         raise
 
     # Return paths frontend can load via FastAPI static mount (/media)
-    bg_url = f"{LOCAL_MEDIA_URL_PREFIX}/panels/layers/{panel_id}/bg.webp"
-    char_url = f"{LOCAL_MEDIA_URL_PREFIX}/panels/layers/{panel_id}/char.webp"
-    text_url = f"{LOCAL_MEDIA_URL_PREFIX}/panels/layers/{panel_id}/text.webp"
+    bg_url = f"{LOCAL_MEDIA_URL_PREFIX}/panels/layers/{panel_id}/bg.png"
+    char_url = f"{LOCAL_MEDIA_URL_PREFIX}/panels/layers/{panel_id}/char.png"
+    text_url = f"{LOCAL_MEDIA_URL_PREFIX}/panels/layers/{panel_id}/text.png"
 
     return {
         "background_url": bg_url,

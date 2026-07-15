@@ -47,7 +47,7 @@ export default function DashboardProjectSection({
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold flex items-center gap-2">
-          <Film className="h-5 w-5 text-purple-400" />
+          <Film className="h-5 w-5 text-neutral-400" />
           Recent Series
         </h2>
       </div>

@@ -30,6 +30,8 @@ interface PlayerPageProps {
   chapterSlug: string | null;
   navigateTo: (path: string) => void;
   addNotification?: (msg: string, type: any) => void;
+  variant?: "floating" | "theater";
+  onCloseFloating?: () => void;
 }
 
 interface Chapter {
@@ -45,11 +47,16 @@ export default function CinemaPlayer({
   chapterSlug,
   navigateTo,
   addNotification,
+  variant = "theater",
+  onCloseFloating,
 }: PlayerPageProps) {
   // Use either actual panels/video duration or fallback to high-fidelity mock duration (16:38 = 998 seconds)
   const isMock = !videoUrl && panels.length === 0;
+  const [videoDuration, setVideoDuration] = useState<number>(0);
   const totalDuration = isMock
     ? 998 // 16 minutes 38 seconds
+    : videoUrl && videoDuration > 0
+    ? videoDuration
     : panels.reduce((acc, p) => acc + (p.duration || 4.5), 0);
 
   // Define Chapters
@@ -86,13 +93,14 @@ export default function CinemaPlayer({
   // States
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [videoHasError, setVideoHasError] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [isTheaterMode, setIsTheaterMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showChaptersMenu, setShowChaptersMenu] = useState(false);
-  const [showSubtitles, setShowSubtitles] = useState(true);
+  const [showSubtitles, setShowSubtitles] = useState(false);
 
   // Expanded configurations
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
@@ -129,11 +137,20 @@ export default function CinemaPlayer({
   const playbackIntervalRef = useRef<any>(null);
 
   // Auto-close overlay timers
-  const [controlsVisible, setControlsVisible] = useState(true);
+  const [controlsVisible, setControlsVisible] = useState(variant === "floating" ? false : true);
   const lastActiveRef = useRef<number>(Date.now());
 
-  // Mouse activity tracker for auto-hiding player control overlay
+  // Hover behavior for control overlays.
+  // - In floating mode: show controls only while user hovers the player container.
+  // - In theater mode: keep existing auto-hide behavior based on mouse activity.
   useEffect(() => {
+    setVideoHasError(false);
+  }, [videoUrl, videoQuality]);
+
+  useEffect(() => {
+    if (variant === "floating") return;
+
+    // Mouse activity tracker for auto-hiding player control overlay
     const handleMouseMove = () => {
       setControlsVisible(true);
       lastActiveRef.current = Date.now();
@@ -152,28 +169,37 @@ export default function CinemaPlayer({
       window.removeEventListener("mousemove", handleMouseMove);
       clearInterval(interval);
     };
-  }, [isPlaying]);
+  }, [isPlaying, variant]);
 
-  // Handle play/pause toggle
+
   const togglePlay = () => {
-    if (isMock) {
-      setIsPlaying(!isPlaying);
-    } else {
-      if (videoRef.current) {
-        if (isPlaying) {
-          videoRef.current.pause();
-        } else {
-          videoRef.current.play().catch((err) => {
-            console.error("Playback start error:", err);
-          });
-        }
+    console.log("[CinemaPlayer] togglePlay clicked", {
+      isMock,
+      isPlaying,
+      hasVideoEl: !!videoRef.current,
+      videoUrl,
+      videoHasError,
+      panelsCount: panels.length,
+    });
+
+    if (videoRef.current && !videoHasError) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch((err) => {
+          console.error("Playback start error:", err);
+          setVideoHasError(true);
+          setIsPlaying(true);
+        });
       }
+    } else {
+      setIsPlaying(!isPlaying);
     }
   };
 
   // Sync state if HTML5 Video is used
   useEffect(() => {
-    if (isMock) {
+    if (!videoUrl || videoHasError || !videoRef.current) {
       if (isPlaying) {
         playbackIntervalRef.current = setInterval(() => {
           setCurrentTime((prev) => {
@@ -199,6 +225,7 @@ export default function CinemaPlayer({
       const v = videoRef.current;
       if (v) {
         v.loop = isLooping;
+        v.playbackRate = playbackSpeed;
         if (isPlaying) {
           v.play().catch(() => {});
         } else {
@@ -212,7 +239,7 @@ export default function CinemaPlayer({
         clearInterval(playbackIntervalRef.current);
       }
     };
-  }, [isPlaying, isMock, playbackSpeed, totalDuration, isLooping]);
+  }, [isPlaying, videoUrl, videoHasError, playbackSpeed, totalDuration, isLooping]);
 
   // Sync real HTML5 video state to React state
   useEffect(() => {
@@ -222,21 +249,28 @@ export default function CinemaPlayer({
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
     const onTimeUpdate = () => setCurrentTime(v.currentTime);
+    const onLoadedMetadata = () => setVideoDuration(v.duration);
     const onEnded = () => {
       if (!isLooping) {
         setIsPlaying(false);
       }
     };
 
+    if (v.duration) {
+      setVideoDuration(v.duration);
+    }
+
     v.addEventListener("play", onPlay);
     v.addEventListener("pause", onPause);
     v.addEventListener("timeupdate", onTimeUpdate);
+    v.addEventListener("loadedmetadata", onLoadedMetadata);
     v.addEventListener("ended", onEnded);
 
     return () => {
       v.removeEventListener("play", onPlay);
       v.removeEventListener("pause", onPause);
       v.removeEventListener("timeupdate", onTimeUpdate);
+      v.removeEventListener("loadedmetadata", onLoadedMetadata);
       v.removeEventListener("ended", onEnded);
     };
   }, [videoUrl, isMock, isLooping]);
@@ -490,6 +524,20 @@ export default function CinemaPlayer({
     };
   }, [currentTime, totalDuration, isMuted, isTheaterMode, isFastForwarding, isLooping]);
 
+  // Resolve quality shifted video url suffix (e.g. _480p, _720p, _1080p)
+  const getQualityVideoUrl = (url: string | null, quality: string) => {
+    if (!url) return null;
+    const extIdx = url.lastIndexOf(".");
+    if (extIdx === -1) return url;
+    const base = url.substring(0, extIdx);
+    const ext = url.substring(extIdx);
+    const qualityPattern = /_(1080p|720p|480p)$/;
+    if (qualityPattern.test(base)) {
+      return base.replace(qualityPattern, `_${quality}`) + ext;
+    }
+    return `${base}_${quality}${ext}`;
+  };
+
   // Fullscreen toggle API
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
@@ -576,10 +624,11 @@ export default function CinemaPlayer({
 
   // Is Skip Intro Button active? (Only when current chapter title is "Intro" and currentTime has elapsed less than its duration)
   const isIntroActive = useMemo(() => {
+    if (variant === "floating") return false;
     const introChapter = chapters.find((c) => c.title.toLowerCase() === "intro");
     if (!introChapter) return false;
     return currentTime >= introChapter.startTime && currentTime < introChapter.endTime;
-  }, [currentTime, chapters]);
+  }, [currentTime, chapters, variant]);
 
   const handleSkipIntro = () => {
     const introChapter = chapters.find((c) => c.title.toLowerCase() === "intro");
@@ -594,8 +643,24 @@ export default function CinemaPlayer({
   return (
     <div
       ref={containerRef}
+      onMouseEnter={() => {
+        if (variant === "floating") {
+          setControlsVisible(true);
+        }
+      }}
+      onMouseLeave={() => {
+        if (variant === "floating") {
+          setControlsVisible(false);
+          setShowSettings(false);
+          setShowChaptersMenu(false);
+        }
+      }}
       className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${
-        isTheaterMode ? "w-full h-[85vh] lg:h-[90vh]" : "fixed inset-0 z-50 w-screen h-screen"
+        variant === "floating"
+          ? "w-full h-full rounded-xl"
+          : isTheaterMode
+          ? "w-full h-[85vh] lg:h-[90vh]"
+          : "fixed inset-0 z-50 w-screen h-screen"
       }`}
     >
       {/* BACKGROUND GRAPHIC COMIC STYLED OVERLAYS */}
@@ -669,7 +734,8 @@ export default function CinemaPlayer({
 
       {/* SIMULATED FLOATING PIP PREVIEW WINDOW */}
       {isPiPActive && isMock && (
-        <div className="fixed bottom-24 right-6 w-72 aspect-video bg-neutral-900/95 border-2 border-purple-600 rounded-2xl shadow-2xl z-[80] flex flex-col overflow-hidden animate-fade-in pointer-events-auto">
+        <div className="fixed bottom-24 right-6 w-72 h-60 bg-neutral-900/95 border-2 border-purple-600 rounded-2xl shadow-2xl z-[80] flex flex-col overflow-hidden animate-fade-in pointer-events-auto">
+
           <div className="bg-neutral-950 px-3 py-1.5 flex items-center justify-between border-b border-neutral-800">
             <span className="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-wider flex items-center gap-1">
               <Tv className="h-3 w-3" /> PiP Preview Mode
@@ -683,11 +749,28 @@ export default function CinemaPlayer({
           </div>
           <div className="flex-1 relative flex items-center justify-center bg-[#060608]">
             {activePanelNow ? (
-              <img
-                src={activePanelNow.image_url}
-                className="w-full h-full object-cover"
-                alt="PiP Current Panel"
-              />
+              <div className="relative w-full h-full flex items-center justify-center">
+                {activePanelNow.layers ? (
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <img
+                      src={activePanelNow.layers.background_url}
+                      className="absolute inset-0 w-full h-full object-cover player-content"
+                      alt="PiP Background"
+                    />
+                    <img
+                      src={activePanelNow.layers.character_url}
+                      className="absolute max-w-full max-h-full object-fill z-10"
+                      alt="PiP Character"
+                    />
+                  </div>
+                ) : (
+                    <img
+                      src={activePanelNow.image_url}
+                      className="w-full h-full object-cover"
+                      alt="PiP Current Panel"
+                    />
+                )}
+              </div>
             ) : (
               <span className="text-[10px] font-mono text-neutral-500">Preview Stream</span>
             )}
@@ -710,125 +793,178 @@ export default function CinemaPlayer({
       )}
 
       {/* RENDER ACTIVE SCREEN CANVAS CONTENT */}
-      <div className="relative w-full h-full flex items-center justify-center z-10">
-        {videoUrl ? (
-          <video
-            ref={videoRef}
-            src={videoUrl}
-            className="w-full h-full object-contain max-h-full"
-            playsInline
-            onClick={togglePlay}
-          />
-        ) : (
-          /* High Fidelity Animated Canvas preview if no raw video is compiled */
-          <div className="relative w-full h-full flex items-center justify-center bg-[#060608]">
-            {activePanelNow ? (
-              <div className="relative max-w-full max-h-[85%] aspect-video overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl flex items-center justify-center bg-neutral-950">
-                {activePanelNow.layers ? (
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    {/* Stacks custom background and separate character elements for deep immersion */}
+          <div className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden">
+        {/* High Fidelity Animated Canvas preview for all playback track rendering */}
+        <div className="relative w-full h-full flex items-center justify-center bg-[#060608]">
+          {videoUrl && !videoHasError ? (
+            <video
+              ref={videoRef}
+              src={getQualityVideoUrl(videoUrl, videoQuality) || undefined}
+              onLoadedMetadata={(e) => setVideoDuration(e.currentTarget.duration)}
+              onError={(e) => {
+                const vid = e.currentTarget;
+                // If a quality variant 404s, fall back to the master URL
+                if (videoUrl && vid.src !== videoUrl && !vid.dataset.masterFallback) {
+                  vid.dataset.masterFallback = "1";
+                  vid.src = videoUrl;
+                  return;
+                }
+                console.warn("[CinemaPlayer] Video failed to load, falling back to simulated mode.");
+                setVideoHasError(true);
+              }}
+              className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950"
+              style={{ width: "auto", height: "auto" }}
+              playsInline
+            />
+          ) : activePanelNow ? (
+              <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950">
+              {activePanelNow.layers ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* Stacks custom background and separate character elements for deep immersion.
+                      Use contain so we avoid pillar-boxing during responsive resizing. */}
+                  <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                     <img
                       src={activePanelNow.layers.background_url}
-                      className="absolute max-w-full max-h-full object-contain"
+                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
+                      style={{ width: "auto", height: "auto" }}
+                      alt="Background"
+                    />
+                    <img
+                      src={activePanelNow.layers.background_url}
+                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
+                      style={{
+                        width: "auto",
+                        height: "auto",
+                        transform: isPlaying
+                          ? subtitlesStyle === "karaoke"
+                            ? `scale(${1 + (currentTime % 4.5) * 0.015})`
+                            : "scale(1.05) translateY(-2px)"
+                          : "scale(1)",
+                        transition: "transform 100ms linear",
+                      }}
                       alt="Background"
                     />
                     <img
                       src={activePanelNow.layers.character_url}
-                      className="absolute max-w-full max-h-full object-contain z-10 transition-transform duration-300"
+                      className="absolute w-auto h-auto max-w-full max-h-full object-contain z-10 player-panel-image"
                       style={{
-                        transform: isPlaying ? "scale(1.05) translateY(-4px)" : "scale(1)",
+                        width: "auto",
+                        height: "auto",
+                        transform: isPlaying
+                          ? subtitlesStyle === "karaoke"
+                            ? `scale(${1 + (currentTime % 4.5) * 0.035}) translateY(-4px)`
+                            : "scale(1.08) translateY(-6px)"
+                          : "scale(1)",
+                        transition: "transform 100ms linear",
                       }}
                       alt="Character"
                     />
                     {showSubtitles && activePanelNow.layers.text_url && (
                       <img
-                        src={activePanelNow.layers.text_url}
-                        className="absolute max-w-full max-h-full object-contain z-20"
+                      src={activePanelNow.layers.text_url}
+                        className="absolute w-auto h-auto max-w-full max-h-full object-contain z-20 player-panel-image"
+                        style={{ width: "auto", height: "auto" }}
                         alt="Subtitles Layer"
                       />
                     )}
                   </div>
-                ) : (
-                  <img
-                    src={activePanelNow.image_url}
-                    className="max-w-full max-h-full object-contain"
-                    alt="Current Panel"
-                  />
-                )}
-              </div>
-            ) : (
-              /* Simulated High Fidelity Cinematic Video Mock Screen */
-              <div className="flex flex-col items-center justify-center text-center px-4">
-                <div className="relative w-64 h-36 bg-neutral-900/50 border border-neutral-800 rounded-2xl flex flex-col items-center justify-center mb-6 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 to-transparent animate-pulse" />
-                  <div className="h-10 w-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-3">
-                    <Sliders className="h-5 w-5 text-purple-400 animate-pulse" />
-                  </div>
-                  <span className="text-[11px] font-mono text-neutral-400 font-bold uppercase tracking-wider">
-                    Simulated Cinematic Track
-                  </span>
                 </div>
-                <h2 className="text-xl font-black font-sans text-neutral-100 tracking-tight mb-2">
-                  Adaptation Cinema Studio
-                </h2>
-                <p className="text-xs text-neutral-500 max-w-sm leading-relaxed font-mono">
-                  No direct MP4 compilation was found. Seamlessly playing back interactive storyboard timeline cuts and speech assets live.
-                </p>
+              ) : (
+                <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                    <img
+                      src={activePanelNow.image_url}
+                      className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
+                      style={{
+                        width: "auto",
+                        height: "auto",
+                        transform: isPlaying
+                          ? `scale(${1 + (currentTime % 4.5) * 0.02})`
+                          : "scale(1)",
+                        transition: "transform 100ms linear",
+                      }}
+                      alt="Current Panel"
+                    />
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Simulated High Fidelity Cinematic Video Mock Screen */
+            <div className="flex flex-col items-center justify-center text-center px-4">
+              <div className="relative w-64 h-36 bg-neutral-900/50 border border-neutral-800 rounded-2xl flex flex-col items-center justify-center mb-6 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 to-transparent animate-pulse" />
+                <div className="h-10 w-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-3">
+                  <Sliders className="h-5 w-5 text-purple-400 animate-pulse" />
+                </div>
+                <span className="text-[11px] font-mono text-neutral-400 font-bold uppercase tracking-wider">
+                  Simulated Cinematic Track
+                </span>
               </div>
-            )}
-          </div>
-        )}
+              <h2 className="text-xl font-black font-sans text-neutral-100 tracking-tight mb-2">
+                Adaptation Cinema Studio
+              </h2>
+              <p className="text-xs text-neutral-500 max-w-sm leading-relaxed font-mono">
+                No direct MP4 compilation was found. Seamlessly playing back interactive storyboard timeline cuts and speech assets live.
+              </p>
+            </div>
+          )}
+        </div>
 
-        {/* SUBTITLES CAPTIONS OVERLAY (classic / karaoke styles) */}
-        {showSubtitles && activePanelNow && activePanelNow.speech_text && (
-          <div className="absolute bottom-28 left-4 right-4 z-20 text-center pointer-events-none animate-fade-in">
-            <span
-              className={`inline-block font-sans drop-shadow-[0_2px_8px_rgba(0,0,0,1)] text-center ${subtitleSizeClass} ${
-                subtitlesStyle === "karaoke"
-                  ? "bg-purple-600/95 text-white font-black border-2 border-white uppercase tracking-wide px-4 py-2 rounded-xl"
-                  : "bg-black/80 text-white font-bold px-3.5 py-1.5 rounded-lg border border-neutral-800"
-              }`}
-            >
-              {activePanelNow.speech_text}
-            </span>
+        {/* Subtitles Text Overlay */}
+        {showSubtitles && activePanelNow && (activePanelNow.speech_text || activePanelNow.narrative) && (
+          <div className="absolute bottom-8 inset-x-0 flex flex-col items-center justify-center z-30 pointer-events-none px-4 select-none animate-in fade-in duration-200">
+            <div className="flex flex-col gap-1.5 max-w-xl text-center">
+              {activePanelNow.narrative && (
+                <p className="bg-black/80 text-neutral-200 text-[10px] md:text-xs font-sans px-3.5 py-1.5 rounded-xl border border-white/5 backdrop-blur-sm tracking-wide leading-relaxed shadow-lg">
+                  <span className="text-purple-400 font-mono text-[8.5px] uppercase tracking-wider block mb-0.5 font-black">NARRATOR</span>
+                  {activePanelNow.narrative}
+                </p>
+              )}
+              {activePanelNow.speech_text && (
+                <p className={`bg-black/90 text-white font-bold font-sans px-4 py-2 rounded-xl border border-purple-500/20 backdrop-blur-sm tracking-wide leading-relaxed shadow-lg ${subtitleSizeClass}`}>
+                  {activePanelNow.speech_text}
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>
 
       {/* TOP BAR OVERLAYS (Chapter Title + Panel/Scene Counter + Close button) */}
-      <div
-        className={`absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between px-6 z-30 transition-all duration-300 ${
-          controlsVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
-        }`}
-      >
-        <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-lg bg-purple-600/15 border border-purple-500/30 flex items-center justify-center">
-            <Monitor className="h-3.5 w-3.5 text-purple-400" />
-          </div>
-          <div>
-            <span className="text-[10px] font-mono text-purple-400 uppercase font-black tracking-widest block">
-              Adaptation Player
-            </span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-neutral-200">
-                {activeChapter ? `${activeChapter.title} Segment` : "Preview Track"}
+      {variant !== "floating" && (
+        <div
+          className={`absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between px-6 z-30 transition-all duration-300 ${
+            controlsVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-7 w-7 rounded-lg bg-purple-600/15 border border-purple-500/30 flex items-center justify-center">
+              <Monitor className="h-3.5 w-3.5 text-purple-400" />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono text-purple-400 uppercase font-black tracking-widest block">
+                Adaptation Player
               </span>
-              {/* PANEL/SCENE COUNTER CHIP */}
-              <span className="bg-neutral-900/90 border border-neutral-800/80 rounded px-2 py-0.5 text-[9px] font-mono font-bold text-purple-300 tracking-wider">
-                {panelCounterText}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-neutral-200">
+                  {activeChapter ? `${activeChapter.title} Segment` : "Preview Track"}
+                </span>
+                {/* PANEL/SCENE COUNTER CHIP */}
+                <span className="bg-neutral-900/90 border border-neutral-800/80 rounded px-2 py-0.5 text-[9px] font-mono font-bold text-purple-300 tracking-wider">
+                  {panelCounterText}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <button
-          onClick={handleClose}
-          className="h-10 w-10 rounded-full bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95"
-          title="Back to Studio Workspace"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
+          <button
+            onClick={handleClose}
+            className="h-10 w-10 rounded-full bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-lg active:scale-95"
+            title="Back to Studio Workspace"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       {/* BOTTOM CONTROL AND TIMELINE OVERLAYS */}
       <div
@@ -836,6 +972,148 @@ export default function CinemaPlayer({
           controlsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
         }`}
       >
+        {/* FLOATING CHAPTERS DROPDOWN */}
+        {showChaptersMenu && (
+          <div className="absolute bottom-20 left-6 bg-neutral-900/95 border border-neutral-800/80 rounded-2xl p-2 shadow-2xl backdrop-blur-md w-48 overflow-hidden flex flex-col gap-1 z-50 animate-fade-in pointer-events-auto">
+            <div className="px-3.5 py-2 border-b border-neutral-800/60 mb-1">
+              <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest font-black block">
+                Video Chapters
+              </span>
+            </div>
+            {chapters.map((chapter, idx) => {
+              const isActive = activeChapter.title === chapter.title;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setCurrentTime(chapter.startTime);
+                    if (videoRef.current) videoRef.current.currentTime = chapter.startTime;
+                    setShowChaptersMenu(false);
+                  }}
+                  className={`flex items-center justify-between px-3.5 py-2 text-left rounded-xl transition-all cursor-pointer text-xs ${
+                    isActive
+                      ? "bg-purple-950/30 border border-purple-900/40 text-purple-400 font-bold"
+                      : "hover:bg-neutral-800/40 border border-transparent text-neutral-300"
+                  }`}
+                >
+                  <span>{chapter.title}</span>
+                  <span className="text-[10px] font-mono text-neutral-500 tabular-nums">
+                    {formatTime(chapter.startTime)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* POPUP PLAYBACK SETTINGS MENU */}
+        {showSettings && (
+          <div className="absolute bottom-20 right-6 bg-neutral-950/98 border border-neutral-800/85 rounded-2xl p-3.5 shadow-2xl backdrop-blur-md w-60 flex flex-col gap-2.5 z-50 animate-fade-in pointer-events-auto">
+            <div className="flex items-center justify-between border-b border-neutral-900 pb-1.5">
+              <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest font-black block">
+                Player Settings
+              </span>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="text-neutral-500 hover:text-neutral-300 transition-colors"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-neutral-400">
+              {/* Loop Toggle */}
+              <div className="flex flex-col gap-1 bg-neutral-900/60 p-2 rounded-lg border border-white/5">
+                <span className="font-bold text-[9px] uppercase text-neutral-500">Loop</span>
+                <button
+                  onClick={() => setIsLooping(!isLooping)}
+                  className={`py-1 rounded text-[9px] font-bold border transition-all ${
+                    isLooping
+                      ? "bg-purple-950/40 border-purple-800/40 text-purple-400"
+                      : "bg-neutral-950 border-neutral-800 text-neutral-500"
+                  }`}
+                >
+                  {isLooping ? "ON" : "OFF"}
+                </button>
+              </div>
+
+              {/* Widescreen bars */}
+              <div className="flex flex-col gap-1 bg-neutral-900/60 p-2 rounded-lg border border-white/5">
+                <span className="font-bold text-[9px] uppercase text-neutral-500">Widescreen</span>
+                <button
+                  onClick={() => setCinematicBars(!cinematicBars)}
+                  className={`py-1 rounded text-[9px] font-bold border transition-all ${
+                    cinematicBars
+                      ? "bg-purple-950/40 border-purple-800/40 text-purple-400"
+                      : "bg-neutral-950 border-neutral-800 text-neutral-500"
+                  }`}
+                >
+                  {cinematicBars ? "ON" : "OFF"}
+                </button>
+              </div>
+            </div>
+
+            {/* Selects */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] text-neutral-400 font-bold font-mono">Speed</span>
+                <select
+                  value={playbackSpeed}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setPlaybackSpeed(val);
+                    baseSpeedRef.current = val;
+                  }}
+                  className="bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-1 text-[10px] text-neutral-300 focus:outline-none cursor-pointer font-sans"
+                >
+                  <option value="0.5">0.5x</option>
+                  <option value="1.0">Normal</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2.0">2.0x</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] text-neutral-400 font-bold font-mono">Sub Size</span>
+                <select
+                  value={subtitleSize}
+                  onChange={(e) => setSubtitleSize(e.target.value as any)}
+                  className="bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-1 text-[10px] text-neutral-300 focus:outline-none cursor-pointer font-sans"
+                >
+                  <option value="small">Small</option>
+                  <option value="normal">Normal</option>
+                  <option value="large">Large</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] text-neutral-400 font-bold font-mono">Quality</span>
+                <select
+                  value={videoQuality}
+                  onChange={(e) => setVideoQuality(e.target.value)}
+                  className="bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-1 text-[10px] text-neutral-300 focus:outline-none cursor-pointer font-sans"
+                >
+                  <option value="480p">480p</option>
+                  <option value="720p">720p</option>
+                  <option value="1080p">1080p</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10px] text-neutral-400 font-bold font-mono">Sub Format</span>
+                <select
+                  value={subtitlesStyle}
+                  onChange={(e) => setSubtitlesStyle(e.target.value)}
+                  className="bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-1 text-[10px] text-neutral-300 focus:outline-none cursor-pointer font-sans"
+                >
+                  <option value="classic">Classic</option>
+                  <option value="karaoke">Comic</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* PROGRESS SCRUBBER ROW WITH HOVER TIMELINE MARKS & CHIPS */}
         <div className="relative group/scrub mb-4">
 
@@ -910,7 +1188,7 @@ export default function CinemaPlayer({
             onClick={handleProgressBarInteraction}
             onMouseMove={handleProgressBarMouseMove}
             onMouseLeave={handleProgressBarMouseLeave}
-            className="relative h-1.5 group-hover/scrub:h-2.5 bg-neutral-800 rounded-full cursor-pointer transition-all duration-150 flex items-center"
+            className="relative h-1 bg-neutral-700 rounded-full cursor-pointer transition-all duration-200 flex items-center group/scrub"
           >
             {/* Visual Chapter Markers */}
             {chapters.map((chapter, idx) => {
@@ -925,24 +1203,25 @@ export default function CinemaPlayer({
               );
             })}
 
-            {/* Playing progress bar */}
+            {/* Playing progress line */}
             <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-violet-400 rounded-full z-10"
+              className="absolute top-0 left-0 h-full bg-purple-600 rounded-full z-10"
               style={{ width: `${(currentTime / totalDuration) * 100}%` }}
             />
 
-            {/* Sliding cursor knob */}
+            {/* Hover-only thumb knob */}
             <div
-              className="absolute h-3.5 w-3.5 bg-white border border-neutral-300 rounded-full shadow-lg opacity-0 group-hover/scrub:opacity-100 pointer-events-none transition-opacity duration-150 z-30"
+              className="absolute top-1/2 -translate-y-1/2 h-0 w-0 bg-purple-600 rounded-full opacity-0 group-hover/scrub:opacity-100 group-hover/scrub:h-3.5 group-hover/scrub:w-3.5 pointer-events-none transition-all duration-200 z-30"
               style={{
                 left: `calc(${(currentTime / totalDuration) * 100}% - 7px)`,
+                boxShadow: "0 0 0 2px rgba(255,255,255,0.06), 0 0 16px rgba(168,85,247,0.25)",
               }}
             />
           </div>
         </div>
 
         {/* BUTTON CONTROLS LINE */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 px-4 py-2">
 
           {/* LEFT COMMANDS (Play/Pause, Skip Back/Forward 10s, volume, timers, chapters label) */}
           <div className="flex items-center gap-4 flex-wrap">
@@ -976,29 +1255,36 @@ export default function CinemaPlayer({
             <div className="flex items-center gap-2 group/volume">
               <button
                 onClick={() => setIsMuted(!isMuted)}
-                className="h-8 w-8 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+                className="h-8 w-8 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
               >
                 {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={isMuted ? 0 : volume}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value);
-                  setVolume(val);
-                  if (val > 0) setIsMuted(false);
-                }}
-                className="w-16 accent-purple-500 bg-neutral-800 rounded-full h-1 cursor-pointer"
-              />
+
+              {/* Slider expands on hover */}
+              <div className="flex items-center overflow-hidden transition-all duration-200 max-w-0 opacity-0 group-hover/volume:max-w-44 group-hover/volume:opacity-100">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={isMuted ? 0 : volume}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setVolume(val);
+                    if (val > 0) setIsMuted(false);
+                  }}
+                  className="w-24 accent-purple-500 bg-neutral-800 rounded-full h-1 cursor-pointer"
+                />
+              </div>
             </div>
 
             {/* TIMERS INDICATORS */}
-            <span className="text-[11px] font-mono text-neutral-300 tabular-nums select-none">
-              {formatTime(currentTime)} <span className="text-neutral-600">/</span> {formatTime(totalDuration)}
-            </span>
+            <div className="flex items-center gap-3">
+              {/* TIMESTAMP (right of volume slider) */}
+              <span className="text-xs font-mono text-neutral-300 tabular-nums select-none">
+                {formatTime(currentTime)} <span className="text-neutral-600">/</span> {formatTime(totalDuration)}
+              </span>
+            </div>
 
             {/* CHAPTER DROPDOWN SELECTION */}
             <div className="relative">
@@ -1012,40 +1298,6 @@ export default function CinemaPlayer({
                 <span className="font-bold text-purple-400 capitalize">{activeChapter.title}</span>
                 <ChevronRight className="h-3 w-3 shrink-0" />
               </button>
-
-              {/* FLOATING CHAPTERS DROPDOWN */}
-              {showChaptersMenu && (
-                <div className="absolute bottom-11 left-0 bg-neutral-900/95 border border-neutral-800/80 rounded-2xl p-2 shadow-2xl backdrop-blur-md w-48 overflow-hidden flex flex-col gap-1 z-40 animate-fade-in">
-                  <div className="px-3.5 py-2 border-b border-neutral-800/60 mb-1">
-                    <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest font-black block">
-                      Video Chapters
-                    </span>
-                  </div>
-                  {chapters.map((chapter, idx) => {
-                    const isActive = activeChapter.title === chapter.title;
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          setCurrentTime(chapter.startTime);
-                          if (videoRef.current) videoRef.current.currentTime = chapter.startTime;
-                          setShowChaptersMenu(false);
-                        }}
-                        className={`flex items-center justify-between px-3.5 py-2 text-left rounded-xl transition-all cursor-pointer text-xs ${
-                          isActive
-                            ? "bg-purple-950/30 border border-purple-900/40 text-purple-400 font-bold"
-                            : "hover:bg-neutral-800/40 border border-transparent text-neutral-300"
-                        }`}
-                      >
-                        <span>{chapter.title}</span>
-                        <span className="text-[10px] font-mono text-neutral-500 tabular-nums">
-                          {formatTime(chapter.startTime)}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
 
@@ -1069,17 +1321,19 @@ export default function CinemaPlayer({
             </button>
 
             {/* PICTURE-IN-PICTURE BUTTON */}
-            <button
-              onClick={togglePictureInPicture}
-              className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
-                isPiPActive
-                  ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
-                  : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
-              }`}
-              title="Picture-in-Picture (P)"
-            >
-              <PictureInPicture className="h-4.5 w-4.5" />
-            </button>
+            {variant !== "floating" && (
+              <button
+                onClick={togglePictureInPicture}
+                className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                  isPiPActive
+                    ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
+                    : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
+                }`}
+                title="Picture-in-Picture (P)"
+              >
+                <PictureInPicture className="h-4.5 w-4.5" />
+              </button>
+            )}
 
             {/* SUBTITLES CAPTIONS TOGGLER */}
             <button
@@ -1118,118 +1372,22 @@ export default function CinemaPlayer({
               >
                 <Settings className={`h-4.5 w-4.5 ${showSettings ? "rotate-45" : ""} transition-transform duration-200`} />
               </button>
-
-              {/* POPUP PLAYBACK SETTINGS MENU */}
-              {showSettings && (
-                <div className="absolute bottom-11 right-0 bg-neutral-900/95 border border-neutral-800/80 rounded-2xl p-3.5 shadow-2xl backdrop-blur-md w-56 flex flex-col gap-3 z-40 animate-fade-in">
-                  <div>
-                    <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest font-black block mb-2 border-b border-neutral-800/60 pb-1.5">
-                      Player Settings
-                    </span>
-                  </div>
-
-                  {/* Loop Toggle */}
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-[10px] font-mono text-neutral-400 font-bold">Loop Player</span>
-                    <button
-                      onClick={() => setIsLooping(!isLooping)}
-                      className={`px-2 py-1 rounded text-[9px] font-mono uppercase tracking-wider font-bold border transition-all ${
-                        isLooping
-                          ? "bg-purple-950/40 border-purple-800/40 text-purple-400"
-                          : "bg-neutral-950 border-neutral-800 text-neutral-500"
-                      }`}
-                    >
-                      {isLooping ? "ON" : "OFF"}
-                    </button>
-                  </div>
-
-                  {/* Cinematic Letterbox Toggle */}
-                  <div className="flex items-center justify-between py-1">
-                    <span className="text-[10px] font-mono text-neutral-400 font-bold">Widescreen bars</span>
-                    <button
-                      onClick={() => setCinematicBars(!cinematicBars)}
-                      className={`px-2 py-1 rounded text-[9px] font-mono uppercase tracking-wider font-bold border transition-all ${
-                        cinematicBars
-                          ? "bg-purple-950/40 border-purple-800/40 text-purple-400"
-                          : "bg-neutral-950 border-neutral-800 text-neutral-500"
-                      }`}
-                    >
-                      {cinematicBars ? "ON" : "OFF"}
-                    </button>
-                  </div>
-
-                  {/* Speed tuner */}
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-neutral-400 block font-bold">Speed</label>
-                    <select
-                      value={playbackSpeed}
-                      onChange={(e) => setPlaybackSpeed(parseFloat(e.target.value))}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none cursor-pointer font-sans"
-                    >
-                      <option value="0.5">0.5x</option>
-                      <option value="1.0">Normal</option>
-                      <option value="1.25">1.25x</option>
-                      <option value="1.5">1.5x</option>
-                      <option value="2.0">2.0x</option>
-                    </select>
-                  </div>
-
-                  {/* Subtitle Size Selector */}
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-neutral-400 block font-bold">Subtitle Size</label>
-                    <select
-                      value={subtitleSize}
-                      onChange={(e) => setSubtitleSize(e.target.value as any)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none cursor-pointer font-sans"
-                    >
-                      <option value="small">Small</option>
-                      <option value="normal">Normal</option>
-                      <option value="large">Large</option>
-                    </select>
-                  </div>
-
-                  {/* Quality Selector */}
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-neutral-400 block font-bold">Quality</label>
-                    <select
-                      value={videoQuality}
-                      onChange={(e) => setVideoQuality(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none cursor-pointer font-sans"
-                    >
-                      <option value="480p">480p (Mobile)</option>
-                      <option value="720p">720p (Draft HD)</option>
-                      <option value="1080p">1080p (Production Full HD)</option>
-                    </select>
-                  </div>
-
-                  {/* Subtitle style Selector */}
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-neutral-400 block font-bold">Subtitles Format</label>
-                    <select
-                      value={subtitlesStyle}
-                      onChange={(e) => setSubtitlesStyle(e.target.value)}
-                      className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none cursor-pointer font-sans"
-                    >
-                      <option value="classic">Classic Captions</option>
-                      <option value="karaoke">High-Retention Comic</option>
-                    </select>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* THEATER MODE TOGGLER */}
-            <button
-              onClick={() => setIsTheaterMode(!isTheaterMode)}
-              className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
-                isTheaterMode
-                  ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
-                  : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
-              }`}
-              title="Theater Mode (T)"
-            >
-              <Monitor className="h-4.5 w-4.5" />
-            </button>
+            {variant !== "floating" && (
+              <button
+                onClick={() => setIsTheaterMode(!isTheaterMode)}
+                className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+                  isTheaterMode
+                    ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
+                    : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
+                }`}
+                title="Theater Mode (T)"
+              >
+                <Monitor className="h-4.5 w-4.5" />
+              </button>
+            )}
 
             {/* FULLSCREEN TOGGLER */}
             <button

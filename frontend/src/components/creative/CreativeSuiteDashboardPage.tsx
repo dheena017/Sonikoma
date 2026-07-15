@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useProjectStore } from "@/store/useProjectStore";
 import {
   Sparkles,
   Film,
@@ -39,12 +40,21 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   seriesCoverImage = null,
   addNotification = () => {},
 }) => {
+  const activeProjectData = useProjectStore((state) => state.activeProjectData);
+  const activeProject = activeProjectData?.project || null;
+  const activePanels = activeProjectData?.panels || panels || [];
+
+  const projectIdVal = activeProject?.project_id ?? projectId;
+  const seriesTitleVal = activeProject?.title ?? seriesTitle;
+  const seriesCoverImageVal = activeProject?.cover_image ?? seriesCoverImage;
+  const chapterTitleVal = activeProject?.episode ? (activeProject.episode.split(" - ").slice(1).join(" - ") || "") : chapterTitle;
+
   // Stats calculations
-  const totalPanelsCount = panels.length;
+  const totalPanelsCount = activePanels.length;
   const totalAudioSeconds = useMemo(() => {
-    if (panels.length === 0) return 0;
-    return panels.reduce((acc, panel) => acc + (panel.duration || 3.0), 0);
-  }, [panels]);
+    if (activePanels.length === 0) return 0;
+    return activePanels.reduce((acc, panel) => acc + (panel.duration || 3.0), 0);
+  }, [activePanels]);
 
   const statsRibbon = [
     {
@@ -151,15 +161,6 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       badge: "Context",
     },
     {
-      id: "engagement",
-      label: "Community Coach",
-      desc: "Fetch audience sentiment summaries and optimization hints.",
-      icon: MessageSquare,
-      path: "/ai-engagement",
-      requiresPanels: false,
-      badge: "Distribution",
-    },
-    {
       id: "youtube",
       label: "YouTube Publisher",
       desc: "Push completed video exports to YouTube Shorts or channel feed.",
@@ -259,7 +260,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {tools.map((tool) => {
               const Icon = tool.icon;
-              const isLocked = tool.requiresPanels && panels.length === 0;
+              const isLocked = tool.requiresPanels && activePanels.length === 0;
 
               return (
                 <div
@@ -323,14 +324,14 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
               <Tv className="w-4 h-4" /> Active Timeline
             </h3>
 
-            {projectId ? (
+            {projectIdVal ? (
               <div className="space-y-4">
                 <div className="flex gap-4">
-                  {seriesCoverImage ? (
+                  {seriesCoverImageVal ? (
                     <img
-                      src={seriesCoverImage}
+                      src={seriesCoverImageVal}
                       className="w-16 h-20 rounded-xl object-cover border border-neutral-800"
-                      alt={seriesTitle || "Project"}
+                      alt={seriesTitleVal || "Project"}
                     />
                   ) : (
                     <div className="w-16 h-20 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-600 text-xs font-bold font-mono">
@@ -340,10 +341,10 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
 
                   <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-bold text-white truncate">
-                      {seriesTitle || "Untitled Series"}
+                      {seriesTitleVal || "Untitled Series"}
                     </h4>
                     <p className="text-xs text-purple-400 truncate mt-0.5">
-                      {chapterTitle || "Untitled Chapter"}
+                      {chapterTitleVal || "Untitled Chapter"}
                     </p>
                     <div className="text-[10px] text-neutral-500 font-mono mt-2">
                       Panels Count:{" "}
@@ -356,8 +357,8 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
 
                 <button
                   onClick={() => {
-                    const seriesSlug = localStorage.getItem("active_series_slug") || "active";
-                    const chapterSlug = localStorage.getItem("active_chapter_slug") || "active";
+                    const seriesSlug = activeProject?.series_slug || localStorage.getItem("active_series_slug") || "active";
+                    const chapterSlug = activeProject?.chapter_slug || localStorage.getItem("active_chapter_slug") || "active";
                     navigateTo(`/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
                   }}
                   className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold font-mono tracking-wider uppercase transition-all flex items-center justify-center gap-2 active:scale-95 shadow-md shadow-purple-950/20 cursor-pointer"

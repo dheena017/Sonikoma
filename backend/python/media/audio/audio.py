@@ -154,7 +154,7 @@ async def generate_panel_audio(
     rate_percent = int((speech_rate - 1.0) * 100)
     rate_str = f"{rate_percent:+}%"
     pitch_percent = int((speech_pitch - 1.0) * 100)
-    pitch_str = f"{pitch_percent:+}%"
+    pitch_str = f"{pitch_percent:+}Hz"
 
     try:
         # Phase 1: Generate individual audio strips asynchronously

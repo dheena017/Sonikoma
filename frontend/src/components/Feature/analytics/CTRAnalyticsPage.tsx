@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { AreaChart, ArrowLeft } from "lucide-react";
 import TitleABValidator from "./TitleABValidator.js";
-import OutroCliffhangerAnalyzer from "./OutroCliffhangerAnalyzer.js";
 import TokenUsageDashboard from "./TokenUsageDashboard.js";
 
 import { GeneratedPanel } from "@/types";
@@ -20,7 +19,7 @@ const CTRAnalyticsPage = React.memo(
     scrapedTitle,
     panels,
   }: CTRAnalyticsPageProps) => {
-    const [activeTab, setActiveTab] = useState<"titles" | "outros" | "tokens">(
+    const [activeTab, setActiveTab] = useState<"titles" | "tokens">(
       "titles"
     );
 
@@ -41,16 +40,6 @@ const CTRAnalyticsPage = React.memo(
             ✦ A/B Title Tester
           </button>
           <button
-            onClick={() => setActiveTab("outros")}
-            className={`px-4 py-2 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
-              activeTab === "outros"
-                ? "border-purple-500 text-white"
-                : "border-transparent text-neutral-400 hover:text-neutral-250"
-            }`}
-          >
-            ✦ Outro Cliffhanger Scores
-          </button>
-          <button
             onClick={() => setActiveTab("tokens")}
             className={`px-4 py-2 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap ${
               activeTab === "tokens"
@@ -68,12 +57,6 @@ const CTRAnalyticsPage = React.memo(
             <TitleABValidator
               addNotification={addNotification}
               scrapedTitle={scrapedTitle}
-              panels={panels}
-            />
-          )}
-          {activeTab === "outros" && (
-            <OutroCliffhangerAnalyzer
-              addNotification={addNotification}
               panels={panels}
             />
           )}

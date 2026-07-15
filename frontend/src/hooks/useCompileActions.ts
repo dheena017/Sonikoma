@@ -286,6 +286,65 @@ export function useCompileActions({
             ...prev,
           ]);
         }
+
+        // Chained Step B: Immediately pipe visual descriptions into narrative generation workflow
+        if (!abortSignalRef.current.aborted) {
+          const visualDescriptions = data.results.map(
+            (r: any) => r.analysis?.visual_description || "An illustration panel."
+          );
+
+          if (addNotification) {
+            addNotification(
+              "Generating Narrative... (Phase 1 & 2)",
+              "info"
+            );
+          }
+          if (setConsoleLogs) {
+            setConsoleLogs((prev) => [
+              `[Narrative Generation] Extracting visual descriptions and initiating narrative pipeline...`,
+              ...prev,
+            ]);
+          }
+
+          const narratorVoice = localStorage.getItem("ai_comic_narrator_voice") || "Sultry Narrative Tone (Female)";
+
+          const narrativeRes = await api.analyzeNarrativeSequence(
+            activeFetch,
+            {
+              visual_descriptions: visualDescriptions,
+              model: activeModel,
+              voice: narratorVoice,
+            },
+            { signal: abortControllerRef.current.signal }
+          );
+
+          if (narrativeRes.success && narrativeRes.results) {
+            setPanels((prev) =>
+              prev.map((p) => {
+                if (!selectedIds.includes(p.id)) return p;
+                const idxInSelection = selectedIds.indexOf(p.id);
+                const navResult = narrativeRes.results[idxInSelection];
+                if (navResult) {
+                  return {
+                    ...p,
+                    narrative: navResult.narrative,
+                    narrative_audio_url: navResult.narrative_audio_url,
+                  };
+                }
+                return p;
+              })
+            );
+
+            if (setConsoleLogs) {
+              setConsoleLogs((prev) => [
+                `[Narrative Generation] Successfully generated ${narrativeRes.results.length} narrative voiceovers and audio files!`,
+                ...prev,
+              ]);
+            }
+          } else {
+            console.warn("[Narrative Generation] Failed:", narrativeRes.error);
+          }
+        }
       } else {
         throw new Error(
           data.error || "Sequence analysis returned unsuccessful status"
@@ -332,7 +391,7 @@ export function useCompileActions({
     setIsAnalyzingAll(true);
     if (addNotification) {
       addNotification(
-        "Starting global Sequence Analysis for all panels...",
+        "Starting Narrative Sequence generation for all panels...",
         "info"
       );
     }
@@ -344,14 +403,16 @@ export function useCompileActions({
       const activeModel = selectedModel || "gemini-2.5-flash";
       abortControllerRef.current = new AbortController();
 
-      const imageUrls = panels.map((p) => p.image_url);
+      const payloadPanels = panels.map((p) => ({
+        id: p.id,
+        visual_description: p.visual_description || p.speech_text || `Panel #${p.id} showing storyboard image.`
+      }));
 
-      const data = await api.analyzeSequence(
+      const data = await api.generateSequenceNarrative(
         activeFetch,
         {
-          urls: imageUrls,
+          panels: payloadPanels,
           model: activeModel,
-          narrationStyle,
           voice: voiceActor,
         },
         { signal: abortControllerRef.current.signal }
@@ -360,19 +421,12 @@ export function useCompileActions({
       if (data.success && data.results) {
         setPanels((prev) =>
           prev.map((p) => {
-            const result = data.results.find((r: any) => r.url === p.image_url);
-            if (result && result.analysis) {
-              const aiDuration = Number(result.analysis.duration);
-              const aiMotion = String(result.analysis.motion_type || "").trim();
+            const resultItem = data.results.find((r: any) => r.id === p.id);
+            if (resultItem) {
               return {
                 ...p,
-                speech_text: result.analysis.speech_text || p.speech_text,
-                sfx: result.analysis.sfx || p.sfx,
-                duration: aiDuration > 0 ? aiDuration : p.duration,
-                motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                visual_description:
-                  result.analysis.visual_description || p.visual_description,
-                audio_url: result.audio_url || p.audio_url,
+                narrative: resultItem.narrative || "",
+                narrative_audio_url: resultItem.narrative_audio_url || p.narrative_audio_url,
                 isAnalyzing: false,
               };
             }
@@ -381,34 +435,91 @@ export function useCompileActions({
         );
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Sequence Analysis] Context-aware storyboard script generated for ${imageUrls.length} frames!`,
+            `[Narrative Sequence] Storyteller narrative generated for ${payloadPanels.length} panels!`,
             ...prev,
           ]);
         }
+
+        // Chained Step B: Immediately pipe visual descriptions into narrative generation workflow
+        if (!abortSignalRef.current.aborted) {
+          const visualDescriptions = data.results.map(
+            (r: any) => r.analysis?.visual_description || "An illustration panel."
+          );
+
+          if (addNotification) {
+            addNotification(
+              "Generating Narrative... (Phase 1 & 2)",
+              "info"
+            );
+          }
+          if (setConsoleLogs) {
+            setConsoleLogs((prev) => [
+              `[Narrative Generation] Extracting visual descriptions and initiating narrative pipeline...`,
+              ...prev,
+            ]);
+          }
+
+          const narratorVoice = localStorage.getItem("ai_comic_narrator_voice") || "Sultry Narrative Tone (Female)";
+
+          const narrativeRes = await api.analyzeNarrativeSequence(
+            activeFetch,
+            {
+              visual_descriptions: visualDescriptions,
+              model: activeModel,
+              voice: narratorVoice,
+            },
+            { signal: abortControllerRef.current.signal }
+          );
+
+          if (narrativeRes.success && narrativeRes.results) {
+            setPanels((prev) =>
+              prev.map((p, idx) => {
+                const navResult = narrativeRes.results[idx];
+                if (navResult) {
+                  return {
+                    ...p,
+                    narrative: navResult.narrative,
+                    narrative_audio_url: navResult.narrative_audio_url,
+                  };
+                }
+                return p;
+              })
+            );
+
+            if (setConsoleLogs) {
+              setConsoleLogs((prev) => [
+                `[Narrative Generation] Successfully generated ${narrativeRes.results.length} narrative voiceovers and audio files!`,
+                ...prev,
+              ]);
+            }
+          } else {
+            console.warn("[Narrative Generation] Failed:", narrativeRes.error);
+          }
+        }
       } else {
         throw new Error(
-          data.error || "Sequence analysis returned unsuccessful status"
+          data.error || "Narrative Sequence generation returned unsuccessful status"
         );
       }
 
       if (!abortSignalRef.current.aborted && addNotification) {
         addNotification(
-          "Smart Sequence Analysis completed for all panels!",
+          "Narrative Sequence generation completed for all panels!",
           "success"
         );
         audioFeedback?.playSuccess();
       }
     } catch (err: any) {
       if (err.name === "AbortError") {
-        console.log("[useCompileActions] Full sequence analysis cancelled.");
+        console.log("[useCompileActions] Narrative Sequence generation cancelled.");
         if (addNotification) {
-          addNotification("Full sequence analysis was cancelled.", "info");
+          addNotification("Narrative Sequence generation was cancelled.", "info");
         }
       } else {
-        console.error("[useCompileActions] Sequential analysis failed:", err);
+        console.error("[useCompileActions] Narrative Sequence generation failed:", err);
         if (addNotification) {
           addNotification(
-            "Smart Timeline analysis encountered an error.",
+            err?.message || "Narrative Sequence generation encountered an error.",
             "error"
           );
         }

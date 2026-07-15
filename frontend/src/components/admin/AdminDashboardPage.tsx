@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import * as api from "../../api";
 import AdminLayout from "./AdminLayout";
+import BackendStatusPanel from "../Status/BackendStatusPanel.js";
 
 const AdminDashboardPage = React.memo(
   ({
@@ -55,6 +56,10 @@ const AdminDashboardPage = React.memo(
     const [userSearch, setUserSearch] = useState("");
     const [processingAction, setProcessingAction] = useState<string | null>(null);
 
+    const [backendOnline, setBackendOnline] = useState<boolean>(true);
+    const [backendMetrics, setBackendMetrics] = useState<any>(null);
+    const [lastChecked, setLastChecked] = useState<string | null>(null);
+
     // Announcement broadcaster form state
     const [announcementTitle, setAnnouncementTitle] = useState("");
     const [announcementMsg, setAnnouncementMsg] = useState("");
@@ -75,8 +80,13 @@ const AdminDashboardPage = React.memo(
           cpuPct: data.memory?.cpuPct || 0,
           activeJobs: data.database?.activeJobs || 0,
         });
+        setBackendMetrics(data);
+        setBackendOnline(data.status === "healthy" || data.status === "ok" || !!data.server);
+        setLastChecked(new Date().toLocaleTimeString());
       } catch (err) {
         console.error("Failed to fetch stats:", err);
+        setBackendOnline(false);
+        setLastChecked(new Date().toLocaleTimeString());
       } finally {
         setLoadingStats(false);
       }
@@ -515,6 +525,14 @@ const AdminDashboardPage = React.memo(
               </div>
             </div>
           )}
+
+          {/* Backend Status Panel */}
+          <BackendStatusPanel
+            online={backendOnline}
+            metrics={backendMetrics}
+            lastChecked={lastChecked}
+            onRefresh={refreshData}
+          />
 
           {/* Stats Ribbon */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

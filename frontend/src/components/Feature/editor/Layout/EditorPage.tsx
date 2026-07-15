@@ -1,17 +1,19 @@
 import React from "react";
 import LiveScraperDeck from "../../scraper/LiveScraperDeck";
 import StoryboardTimeline from "../../timeline/StoryboardTimeline";
-import VideoMonitor from "../../video/VideoMonitor";
+import CinemaPlayer from "../../video/CinemaPlayer";
 import OutputMetadataPanel from "../../video/OutputMetadataPanel";
 import LayoutEditorPage from "../EditorPageLayout.js";
 import ImageEditorPage from "../Tools/ImageEditor/ImageEditorPage";
 import AdvancedSettings from "../../video/AdvancedSettings";
 import AudioSettingsPage from "../../audio_settings/AudioSettingsPage";
+import ProcessBar from "../../pipeline/ProcessBar";
 import { useBackendHealth } from "../../../../hooks/useBackendHealth.js";
 import { getUserCredits } from "../../../../api/auth";
 import { Sliders, X, Mic } from "lucide-react";
 import { useImageEditorStore } from "@/hooks/useImageEditorState";
 import { resolveWorkspaceReturnPath } from "../../../../utils/workspaceNavigation.js";
+import { Rnd } from "react-rnd";
 
 
 interface EditorPageProps {
@@ -20,6 +22,9 @@ interface EditorPageProps {
   onRequestProjectConfirmation: () => void;
   seriesSlug?: string | null;
   chapterSlug?: string | null;
+  rating?: number;
+  likes?: string;
+  views?: number;
 }
 
 const EditorPage: React.FC<EditorPageProps> = ({
@@ -28,9 +33,13 @@ const EditorPage: React.FC<EditorPageProps> = ({
   onRequestProjectConfirmation,
   seriesSlug,
   chapterSlug,
+  rating,
+  likes,
+  views,
 }: EditorPageProps) => {
   void seriesSlug;
   void chapterSlug;
+  const playerSettings = useImageEditorStore((state) => state.playerSettings);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
   const [currentSection, setCurrentSection] = React.useState("timeline");
   const [isFocusMode, setIsFocusMode] = React.useState(false);
@@ -352,26 +361,25 @@ const EditorPage: React.FC<EditorPageProps> = ({
               Compile all storyboard panels into a high-res video. <span className="text-purple-400 font-bold">(Cost: 20 Credits)</span>
             </p>
           </div>
-          <button
-            onClick={handleRenderFinalVideo}
-            disabled={isRendering || !hasEnoughCredits}
-            className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
-              isRendering || !hasEnoughCredits
-                ? "bg-neutral-900/50 text-neutral-500 cursor-not-allowed border border-neutral-800"
-                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10"
-            }`}
-          >
-            {isRendering ? (
-              <>
-                <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                Rendering {Math.round(renderProgress)}%
-              </>
-            ) : !hasEnoughCredits ? (
-              <>⚠️ Insufficient Credits (20 required)</>
-            ) : (
-              <>🎬 Export Master Video</>
-            )}
-          </button>
+          {isRendering ? (
+            <ProcessBar progressStatus={progressStatus} />
+          ) : (
+            <button
+              onClick={handleRenderFinalVideo}
+              disabled={!hasEnoughCredits}
+              className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
+                !hasEnoughCredits
+                  ? "bg-neutral-900/50 text-neutral-500 cursor-not-allowed border border-neutral-800"
+                  : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10"
+              }`}
+            >
+              {!hasEnoughCredits ? (
+                <>⚠️ Insufficient Credits (20 required)</>
+              ) : (
+                <>🎬 Export Master Video</>
+              )}
+            </button>
+          )}
         </div>
       </div>
     );
@@ -424,41 +432,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
           </div>
         ) : (
           <>
-            {/* Primary Canvas: Video Monitor (Sticky Background) */}
-            {activeTab !== "settings" && activeTab !== "audio-settings" && (
-              <div
-                id="section-monitor"
-                className={`relative md:sticky w-full max-w-[1600px] mx-auto flex flex-col z-0 transition-all duration-500 px-4 md:px-6 py-4 ${
-                  isFocusMode
-                    ? "top-0 h-screen"
-                    : "top-0 md:top-16 h-[40vh] min-h-[300px] md:h-[calc(100vh-64px)]"
-                }`}
-              >
-                <div className="flex-1 w-full h-full relative">
-                  <VideoMonitor
-                    activePreviewTab={activePreviewTab}
-                    setActivePreviewTab={setActivePreviewTab}
-                    videoUrl={videoUrl}
-                    panels={panels}
-                    aspectRatio={aspectRatio}
-                    videoPlayerRef={videoPlayerRef}
-                    currentPanelIndex={currentPanelIndex}
-                    playbackTime={playbackTime}
-                    reprocessingPanelId={reprocessingPanelId}
-                    quality={previewQuality}
-                    storyboardPlaying={storyboardPlaying}
-                    isMuted={isMuted}
-                    setCurrentPanelIndex={setCurrentPanelIndex}
-                    setPlaybackTime={setPlaybackTime}
-                    setStoryboardPlaying={setStoryboardPlaying}
-                    setIsMuted={setIsMuted}
-                    toggleStoryboardPlayback={toggleStoryboardPlayback}
-                    resetStoryboardPlayback={resetStoryboardPlayback}
-                  />
-                </div>
-              </div>
-            )}
-
             {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
             <div
               className={`relative z-10 bg-[#070709] min-h-screen min-w-0 ${
@@ -600,10 +573,61 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 </div>
               ) : (
                 <>
+                  {/* TOP: Inline CinemaPlayer */}
+                  {playerSettings.isPlayerOpen && (
+                    <div className="w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4">
+                      {/* Header */}
+                      <div className="flex items-center justify-between border-b border-neutral-800 pb-3 flex-wrap md:flex-nowrap gap-4">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-sm text-white uppercase tracking-wider font-sans">
+                            ADAPTATION PLAYER
+                          </h3>
+                          <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-mono shrink-0 uppercase tracking-widest font-black">
+                            LIVE
+                          </span>
+                        </div>
+
+                        <OutputMetadataPanel
+                          videoUrl={videoUrl}
+                          musicTheme={musicTheme}
+                          voiceActor={voiceActor}
+                          navigateTo={navigateTo}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+                          }}
+                          className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold font-mono active:scale-95 shrink-0"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                          Hide Player
+                        </button>
+                      </div>
+
+                      {/* Video Player */}
+                      <div className="w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black">
+                        <CinemaPlayer
+                          panels={panels}
+                          videoUrl={activePreviewTab === "video" ? videoUrl : null}
+                          seriesSlug={null}
+                          chapterSlug={null}
+                          navigateTo={() => {}}
+                          addNotification={addNotification}
+                          variant="floating"
+                          onCloseFloating={() => {
+                            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* MIDDLE: Storyboard Timeline */}
-                  <div
+                    <div
                     id="section-timeline"
-                    className="w-full max-w-[1600px] mx-auto space-y-4"
+                    className="w-full max-w-[1600px] ml-0 mr-0 space-y-4"
                   >
                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
                       <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
@@ -656,11 +680,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       setSelectedPanelIds={handleSetSelectedPanelIds}
                     />
                   </div>
-
                   {/* BOTTOM: Imported Assets (Resource Pool) */}
-                  <div
+                    <div
                     id="section-assets"
-                    className="w-full max-w-[1600px] mx-auto space-y-4"
+                    className="w-full max-w-[1600px] ml-0 mr-0 space-y-4"
                   >
                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
                       <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
@@ -711,21 +734,18 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         chapterTitle={chapterTitle}
                         targetUrl={targetUrl}
                         selectedSource={selectedSource}
+                        rating={rating}
+                        likes={likes}
+                        views={views}
                       />
                     </div>
                   </div>
-
-                  {/* Final Production panel and metadata below timeline */}
+                  {/* Final Production panel below timeline */}
                   <div
                     id="section-production"
-                    className="w-full max-w-[1600px] mx-auto mt-12 space-y-6 pt-8 border-t border-white/5"
+                    className="w-full max-w-[1600px] ml-0 mr-0 mt-12 pt-8 border-t border-white/5"
                   >
                     <FinalProductionPanel />
-                    <OutputMetadataPanel
-                      videoUrl={videoUrl}
-                      musicTheme={musicTheme}
-                      voiceActor={voiceActor}
-                    />
                   </div>
                 </>
               )}

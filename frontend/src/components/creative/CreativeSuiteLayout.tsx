@@ -3,6 +3,7 @@ import { Sparkles, ArrowLeft } from "lucide-react";
 import CreativeSuiteHeader from "./CreativeSuiteHeader";
 import CreativeSuiteMiniSidebar from "./CreativeSuiteMiniSidebar";
 import CreativeSuiteSidebar from "./CreativeSuiteSidebar";
+import { useProjectStore } from "@/store/useProjectStore";
 
 interface CreativeSuiteLayoutProps {
   children: React.ReactNode;
@@ -36,9 +37,39 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   hideSidebarAndHeader = false,
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const activeProjectData = useProjectStore((state) => state.activeProjectData);
+  const activePanels = activeProjectData?.panels ?? panels ?? [];
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
+
+  const FallbackUI = () => (
+    <div className="flex-grow flex flex-col items-center justify-center py-16 px-4 text-center">
+      <div className="bg-[#0b0b0f] border border-neutral-900/60 rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-500/5 rounded-full blur-2xl pointer-events-none" />
+        
+        <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto text-purple-400 mb-6 shadow-lg shadow-purple-500/5">
+          <Sparkles className="w-8 h-8" />
+        </div>
+        
+        <h3 className="text-xl font-bold text-white tracking-tight mb-2">
+          No Active Project Selected
+        </h3>
+        
+        <p className="text-sm text-neutral-400 leading-relaxed font-sans mb-6">
+          To use the Creative Suite tools (such as the Video Optimizer, Sound Lab, and Voice Studio), you must select and open a project from your dashboard first.
+        </p>
+        
+        <button
+          onClick={() => navigateTo("/dashboard")}
+          className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold font-mono tracking-wider uppercase transition-all active:scale-[0.98] shadow-lg shadow-purple-950/30 cursor-pointer border border-transparent"
+        >
+          Go to Dashboard
+        </button>
+      </div>
+    </div>
+  );
 
   // Normalize sub-route path naming for breadcrumbs
   const getBreadcrumbName = () => {
@@ -60,7 +91,6 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       "/ai-voice": "Voice Studio",
       "/ai-characters": "Character Database",
       "/ai-translation": "Translation Studio",
-      "/ai-engagement": "Community Coach",
       "/youtube": "YouTube Publisher",
     };
     
@@ -111,7 +141,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
             Main App
           </button>
         </div>
-        {children}
+        {activeProjectData ? children : <FallbackUI />}
       </div>
     );
   }
@@ -137,7 +167,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       <CreativeSuiteMiniSidebar
         currentPath={currentPath}
         navigateTo={navigateTo}
-        panels={panels}
+        panels={activePanels}
         onOpenSidebar={toggleSidebar}
       />
 
@@ -147,7 +177,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
         navigateTo={navigateTo}
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
-        panels={panels}
+        panels={activePanels}
       />
 
       {/* Main page offset container */}
@@ -194,7 +224,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
                 Main App
               </button>
             </div>
-            {children}
+            {activeProjectData ? children : <FallbackUI />}
           </div>
         </main>
 

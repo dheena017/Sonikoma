@@ -127,22 +127,6 @@ const SUPPORTED_SKILLS = [
     ],
   },
   {
-    id: "cliffhanger",
-    name: "Cliffhanger Generator",
-    endpoint: api.SKILL_ENDPOINTS.CLIFFHANGER,
-    description:
-      "Suggest narrative hook variations or cliffhanger statements to boost viewer retention.",
-    inputs: [
-      {
-        name: "story_outline",
-        label: "Story Outline / Scene Summary",
-        type: "textarea",
-        placeholder:
-          "The hero holds back the monster horde, but his sword cracks...",
-      },
-    ],
-  },
-  {
     id: "voice-cast",
     name: "Voice Casting Profiler",
     endpoint: api.SKILL_ENDPOINTS.VOICE_CAST,

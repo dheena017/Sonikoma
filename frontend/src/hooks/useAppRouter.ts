@@ -193,6 +193,8 @@ export function useAppRouter({
             path === "/creative-suite-dashboard" ||
             path === "/workspace" ||
             path === "/settings" ||
+            path === "/settings/account" ||
+            path === "/settings/account/" ||
             path === "/logs" ||
             path === "/status" ||
             path === "/ai-models" ||
@@ -204,7 +206,6 @@ export function useAppRouter({
             path === "/ai-audio-lab" ||
             path === "/ai-thumbnails" ||
             path === "/model-training" ||
-            path === "/ai-engagement" ||
             path === "/ai-voice" ||
             path === "/ai-analytics" ||
             path === "/youtube" ||
@@ -227,7 +228,8 @@ export function useAppRouter({
             path.startsWith("/editor/") ||
             path === "/image-editor" ||
             path === "/image-editor/" ||
-            path.startsWith("/image-editor/");
+            path.startsWith("/image-editor/") ||
+            /^\/workspace\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
 
           if (isProtectedRoute) {
             window.history.replaceState({}, "", "/");
@@ -260,6 +262,8 @@ export function useAppRouter({
 
       if (
         path === "/settings" ||
+        path === "/settings/account" ||
+        path === "/settings/account/" ||
         path === "/creative-suite" ||
         path === "/creative-suite/" ||
         path === "/creative-suite-dashboard" ||
@@ -273,7 +277,6 @@ export function useAppRouter({
         path === "/ai-translation" ||
         path === "/ai-audio-lab" ||
         path === "/ai-thumbnails" ||
-        path === "/ai-engagement" ||
         path === "/ai-voice" ||
         path === "/ai-analytics" ||
         path === "/youtube" ||
@@ -317,6 +320,16 @@ export function useAppRouter({
         path.startsWith("/image-editor")
       ) {
         const params = new URLSearchParams(window.location.search);
+
+        // Skip editor redirects or checks if this is the theater player mode
+        const isTheaterRoute = /^\/workspace\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
+        if (isTheaterRoute) {
+          setIsPipMode(false);
+          setShowAutoCropModal(false);
+          setShowBubbleModal(false);
+          setEditingImageIdx(null);
+          return;
+        }
 
         // Redirect /editor?importUrl=... to /workspace/editor?id=temp_...
         if (params.has("importUrl") && !params.has("id")) {

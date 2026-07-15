@@ -3,6 +3,7 @@ import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers } f
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 import { generateTts } from "../../../api";
+import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 
 let autoPlayHintShown = false;
 
@@ -22,6 +23,7 @@ interface TimelineCardProps {
   handleModifyDuration: (id: number, val: number) => void;
   handleModifySFX: (id: number, val: string) => void;
   handleModifyVisualDescription: (id: number, val: string) => void;
+  handleModifyNarrative?: (id: number, val: string) => void;
   handleAnalyzePanel: (id: number, url: string) => void;
   handleCancelAnalysis?: () => void;
   isSelected: boolean;
@@ -222,6 +224,7 @@ const TimelineCard = ({
   handleModifyDuration,
   handleModifySFX,
   handleModifyVisualDescription,
+  handleModifyNarrative,
   handleAnalyzePanel,
   handleCancelAnalysis,
   isSelected,
@@ -407,7 +410,16 @@ const TimelineCard = ({
     if (clickTimeoutRef.current) {
       clearTimeout(clickTimeoutRef.current);
       clickTimeoutRef.current = null;
+
+      // Perform double click actions
       onPanelDoubleClick?.(idx, panel.id);
+
+      // Snap floating player coordinates to { x: 20, y: 80 } and set isPlayerOpen: true
+      useImageEditorStore.getState().setPlayerSettings({
+        isPlayerOpen: true,
+        playerPos: { x: 20, y: 80 }
+      });
+
     } else {
       clickTimeoutRef.current = setTimeout(() => {
         clickTimeoutRef.current = null;
@@ -469,11 +481,17 @@ const TimelineCard = ({
           src={panel.image_url}
           alt={`Panel ${panel.id}`}
           className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
-          referrerPolicy="no-referrer"
           style={{ filter: getPanelFilterStyle(panel) }}
           onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = "none";
+            const img = e.currentTarget;
+            if (img.dataset.retried) return;
+            img.dataset.retried = "1";
+            const src = img.src;
+            if (!src.includes("/api/proxy-image") && !src.includes("/api/image/")) {
+              img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+            } else {
+              img.style.display = "none";
+            }
           }}
         />
 
@@ -578,6 +596,45 @@ const TimelineCard = ({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.speech_text}
           onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
+          placeholder=""
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
+            panel.isAnalyzing || analyzingPanelId === panel.id
+              ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
+              : ""
+          }`}
+        />
+      </div>
+
+      {/* Narrative Text Editable Input */}
+      <div className="space-y-1.5 animate-in fade-in duration-300">
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
+            Narrative Text
+          </label>
+          {panel.narrative_audio_url && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Play narrative audio
+                const audio = new Audio(panel.narrative_audio_url);
+                audio.play().catch(err => console.error("Narrative audio play failed:", err));
+              }}
+              className="p-1 rounded bg-indigo-950/40 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-900/60 hover:text-indigo-300 transition-all cursor-pointer flex items-center justify-center gap-1 shadow-sm shrink-0"
+              title="Play Narrative Audio"
+            >
+              <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <span className="text-[8px] font-mono leading-none">Play</span>
+            </button>
+          )}
+        </div>
+        <textarea
+          rows={2}
+          disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+          value={panel.narrative || ""}
+          onChange={(e) => handleModifyNarrative && handleModifyNarrative(panel.id, e.target.value)}
           placeholder=""
           className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id

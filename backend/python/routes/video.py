@@ -737,6 +737,38 @@ def render_pipeline_sync(
 
     logger.info(f"[Render] Done — {len(segment_paths)} panels → {output_path}")
 
+    # ── Step 5: Generate quality variants (_480p, _720p, _1080p) ─────────────
+    # Derive base path and extension for variant naming
+    _base, _ext = os.path.splitext(output_path)
+    _quality_variants = [
+        ("480p",  854,  480),
+        ("720p",  1280, 720),
+        ("1080p", 1920, 1080),
+    ]
+    for _label, _vw, _vh in _quality_variants:
+        # Skip 1080p if original canvas is smaller (upscaling wastes space)
+        if _vh > canvas_h and _vh > canvas_w:
+            continue
+        _variant_path = f"{_base}_{_label}{_ext}"
+        try:
+            _variant_cmd = [
+                "ffmpeg", "-y",
+                "-i", output_path,
+                "-vf", f"scale='if(gt(iw,ih),{_vw},-2)':'if(gt(iw,ih),-2,{_vh})',scale=trunc(iw/2)*2:trunc(ih/2)*2",
+                "-c:v", "libx264", "-preset", "faster", "-crf", "23",
+                "-c:a", "aac", "-b:a", "128k",
+                "-movflags", "+faststart",
+                _variant_path,
+            ]
+            _rv = subprocess.run(_variant_cmd, capture_output=True, text=True, timeout=300)
+            if _rv.returncode == 0:
+                logger.info(f"[Render] Quality variant created: {_label} → {_variant_path}")
+            else:
+                logger.warning(f"[Render] {_label} variant failed (skipped): {_rv.stderr[-300:]}")
+        except Exception as _e:
+            logger.warning(f"[Render] {_label} variant error (skipped): {_e}")
+
+
 
 async def process_render_job(
     video_id: str,
@@ -792,9 +824,12 @@ async def process_render_job(
             }
             
             if panel.layers:
-                bg_path = os.path.join(work_dir, f"panel_{idx}_bg.webp")
-                char_path = os.path.join(work_dir, f"panel_{idx}_char.webp")
-                text_path = os.path.join(work_dir, f"panel_{idx}_text.webp")
+                bg_ext = "png" if ".png" in panel.layers.background_url.lower() else "webp"
+                char_ext = "png" if ".png" in panel.layers.character_url.lower() else "webp"
+                text_ext = "png" if ".png" in panel.layers.text_url.lower() else "webp"
+                bg_path = os.path.join(work_dir, f"panel_{idx}_bg.{bg_ext}")
+                char_path = os.path.join(work_dir, f"panel_{idx}_char.{char_ext}")
+                text_path = os.path.join(work_dir, f"panel_{idx}_text.{text_ext}")
 
                 bg_ok = await download_asset(panel.layers.background_url, bg_path)
                 char_ok = await download_asset(panel.layers.character_url, char_path)

@@ -160,3 +160,91 @@ def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.25) -> 
         logger.error(f"Error running YOLO text/balloon segmentation: {e}", exc_info=True)
         # Return None so the caller can fall back to OpenCV instead of hard-crashing
         return None
+
+
+_yolo_char_model = None
+
+def get_yolo_char_model():
+    """
+    Lazily loads the YOLOv8-seg model for character detection.
+    Attempts to load local yolov8n-seg.pt or downloads it.
+    """
+    global _yolo_char_model
+    if _yolo_char_model is not None:
+        return _yolo_char_model
+
+    if not has_yolo_dependencies:
+        return None
+
+    try:
+        # Check if yolov8n-seg.pt is in backend/python/
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        local_path = os.path.join(base_dir, "yolov8n-seg.pt")
+        if os.path.exists(local_path):
+            logger.info(f"Loading local YOLOv8-seg character model from: {local_path}")
+            _yolo_char_model = YOLO(local_path)
+        else:
+            logger.info("Loading generic YOLOv8n-seg model for character detection...")
+            _yolo_char_model = YOLO("yolov8n-seg.pt")
+        return _yolo_char_model
+    except Exception as e:
+        logger.error(f"Failed to load YOLOv8-seg character model: {e}", exc_info=True)
+        return None
+
+
+def segment_characters(image_path: str, conf_threshold: float = 0.25) -> np.ndarray:
+    """
+    Detects characters (class 0: person in COCO dataset) in a panel image using YOLOv8-seg model.
+    Returns:
+      A single-channel binary mask (numpy uint8 array, 255 for character regions, 0 elsewhere),
+      or None if the model is unavailable.
+    """
+    if not has_yolo_dependencies:
+        logger.warning("ultralytics or huggingface_hub is not installed. YOLO segmentation cannot run.")
+        return None
+
+    model = get_yolo_char_model()
+    if model is None:
+        logger.warning("YOLO character segmentation model unavailable.")
+        return None
+
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(f"Image path does not exist for YOLO character segmentation: {image_path}")
+
+    try:
+        results = model.predict(image_path, conf=conf_threshold, verbose=False)
+        if not results or len(results) == 0:
+            return None
+
+        result = results[0]
+        if result.masks is None or len(result.masks) == 0:
+            logger.info("YOLO character segmentation completed: No masks found.")
+            # Return empty mask with correct dimensions
+            img = cv2.imread(image_path)
+            if img is not None:
+                return np.zeros(img.shape[:2], dtype=np.uint8)
+            return None
+
+        height, width = result.orig_shape[0], result.orig_shape[1]
+        combined_mask = np.zeros((height, width), dtype=np.uint8)
+
+        # Merge masks for multiple characters (class index 0 for person in COCO)
+        for i, mask_instance in enumerate(result.masks.data):
+            cls_id = int(result.boxes.cls[i].item())
+            confidence = float(result.boxes.conf[i].item())
+
+            # Check if class is person (character) and meets confidence threshold
+            if cls_id == 0 and confidence >= conf_threshold:
+                mask_np = mask_instance.cpu().numpy()
+                if mask_np.shape[:2] != (height, width):
+                    mask_np = cv2.resize(mask_np, (width, height), interpolation=cv2.INTER_NEAREST)
+
+                binary_slice = (mask_np > 0.5).astype(np.uint8) * 255
+                combined_mask = cv2.bitwise_or(combined_mask, binary_slice)
+
+        return combined_mask
+
+    except Exception as e:
+        logger.error(f"Error running YOLO character segmentation: {e}", exc_info=True)
+        return None
+

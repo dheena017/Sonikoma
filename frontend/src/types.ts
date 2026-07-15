@@ -56,6 +56,8 @@ export interface GeneratedPanel {
   audio_url?: string;
   layers?: PanelLayers;
   syncMap?: PanelSyncMap;
+  narrative?: string;
+  narrative_audio_url?: string
   audio_reactive_shake?: boolean;
 }
 

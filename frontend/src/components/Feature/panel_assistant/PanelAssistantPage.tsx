@@ -62,7 +62,13 @@ const PanelAssistantPage = React.memo(
       );
     };
 
-
+    const handleUpdateNarrative = (val: string) => {
+      setPanels((prev) =>
+        prev.map((p, idx) =>
+          idx === selectedIdx ? { ...p, narrative: val, narrative_audio_url: undefined } : p
+        )
+      );
+    };
 
     return (
       <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
@@ -114,13 +120,25 @@ const PanelAssistantPage = React.memo(
               <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest block">
                 Active Dialogue
               </span>
-              <p className="text-xs text-neutral-200 bg-neutral-900/60 p-2.5 rounded-xl border border-neutral-850/50 font-sans leading-relaxed">
-                {activePanel.speech_text || (
-                  <span className="text-neutral-600 font-mono">
-                    (Silent panel script)
-                  </span>
-                )}
-              </p>
+              <textarea
+                value={activePanel.speech_text || ""}
+                onChange={(e) => handleUpdateDialogue(e.target.value)}
+                rows={2}
+                placeholder="(Silent panel script)"
+                className="w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none"
+              />
+            </div>
+            <div className="space-y-1">
+              <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest block">
+                Narrative Text
+              </span>
+              <textarea
+                value={activePanel.narrative || ""}
+                onChange={(e) => handleUpdateNarrative(e.target.value)}
+                rows={2}
+                placeholder="(No narrative voiceover text generated yet)"
+                className="w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none"
+              />
             </div>
           </div>
 

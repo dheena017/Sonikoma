@@ -28,6 +28,8 @@ interface TimelineHeaderProps {
   handleCancelAnalysis?: () => void;
 }
 
+
+
 export default function TimelineHeader({
   panelsLength,
   selectedCount = 0,
@@ -52,6 +54,8 @@ export default function TimelineHeader({
   handleCancelBatch,
   handleCancelAnalysis,
 }: TimelineHeaderProps) {
+
+
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-neutral-800 pb-4">
       <div>
@@ -73,12 +77,15 @@ export default function TimelineHeader({
             <button
               type="button"
               onClick={handleAnalyzeAllPanels}
-              className="text-[10px] font-bold border border-indigo-500/50 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer"
+              disabled={isAnalyzingAll}
+              className="text-[10px] font-bold border border-indigo-500/50 bg-indigo-600 hover:bg-indigo-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-md active:scale-95 cursor-pointer disabled:cursor-not-allowed"
             >
-              <Sparkles className="w-3 h-3" />
-              Analyze Full Sequence
+              <Sparkles className={`w-3 h-3 ${isAnalyzingAll ? "animate-spin" : ""}`} />
+              {isAnalyzingAll ? "Generating Narrative..." : "Analyze Full Sequence"}
             </button>
           )}
+
+
 
           {handleDownloadZip && (
             <button
