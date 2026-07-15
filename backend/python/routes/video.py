@@ -7,6 +7,7 @@ import aiohttp
 import tempfile
 import shutil
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from config.ports import BACKEND_PORT
 from routes.auth_routes import get_current_user
 from database.db import deduct_credits, get_available_credits, record_credit_transaction, LOW_BALANCE_THRESHOLD
 from pydantic import BaseModel
@@ -88,7 +89,7 @@ async def download_asset(url: str, dest_path: str) -> bool:
         return False
     # Handle local API routes
     if url.startswith("/"):
-        backend_port = os.getenv("PORT", os.getenv("BACKEND_PORT", "5173"))
+        backend_port = BACKEND_PORT
         url = f"http://127.0.0.1:{backend_port}{url}"
     try:
         async with aiohttp.ClientSession() as session:

@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import http from "http";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,22 +46,38 @@ const logger = {
     console.error(formatLog("ERROR", "wait-for-backend.js", msg), ...args),
 };
 
-// Read BACKEND_PORT from .env in parent folder
-let port = 5173;
-try {
-  const envPath = path.join(__dirname, "../.env");
-  if (fs.existsSync(envPath)) {
-    const envContent = fs.readFileSync(envPath, "utf8");
-    const match = envContent.match(/^BACKEND_PORT\s*=\s*(.*)$/m);
-    if (match && match[1]) {
-      const parsedPort = parseInt(match[1].replace(/['"]/g, "").trim(), 10);
-      if (!isNaN(parsedPort)) {
-        port = parsedPort;
-      }
-    }
-  }
-} catch (err) {
-  logger.warn("Failed to read .env file, defaulting to port 5173");
+// Initialize dotenv from parent .env file
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+const backendPortStr = process.env.BACKEND_PORT || process.env.PORT;
+if (!backendPortStr) {
+  logger.error("Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!");
+  logger.error("Please configure them in your .env file.");
+  process.exit(1);
+}
+const port = parseInt(backendPortStr, 10);
+if (isNaN(port)) {
+  logger.error(`Configuration Error: BACKEND_PORT/PORT must be a valid integer, got "${backendPortStr}"`);
+  process.exit(1);
+}
+
+const frontendPortStr = process.env.FRONTEND_PORT;
+if (!frontendPortStr) {
+  logger.error("Configuration Error: FRONTEND_PORT environment variable is missing!");
+  logger.error("Please configure it in your .env file.");
+  process.exit(1);
+}
+const frontendPort = parseInt(frontendPortStr, 10);
+if (isNaN(frontendPort)) {
+  logger.error(`Configuration Error: FRONTEND_PORT must be a valid integer, got "${frontendPortStr}"`);
+  process.exit(1);
+}
+
+const appUrl = process.env.APP_URL;
+if (!appUrl) {
+  logger.error("Configuration Error: APP_URL environment variable is missing!");
+  logger.error("Please configure it in your .env file.");
+  process.exit(1);
 }
 
 const url = `http://127.0.0.1:${port}/api/health`;

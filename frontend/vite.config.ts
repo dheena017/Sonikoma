@@ -6,9 +6,43 @@ import { spawn } from "child_process";
 import http from "http";
 import fs from "fs";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, path.resolve(__dirname, ".."));
-  const backendPort = env.BACKEND_PORT || "5173";
+
+  const isCIOrBuild = process.env.CI || command === "build";
+
+  const backendPortStr = env.BACKEND_PORT || process.env.BACKEND_PORT || process.env.PORT;
+  if (!backendPortStr && !isCIOrBuild) {
+    throw new Error(
+      "Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!\n" +
+      "Please define BACKEND_PORT or PORT in your .env file."
+    );
+  }
+  const backendPort = parseInt(backendPortStr || "5173", 10);
+  if (isNaN(backendPort) && !isCIOrBuild) {
+    throw new Error(`Configuration Error: BACKEND_PORT/PORT must be a valid integer, got "${backendPortStr}"`);
+  }
+
+  const frontendPortStr = env.FRONTEND_PORT || process.env.FRONTEND_PORT;
+  if (!frontendPortStr && !isCIOrBuild) {
+    throw new Error(
+      "Configuration Error: FRONTEND_PORT environment variable is missing!\n" +
+      "Please define FRONTEND_PORT in your .env file."
+    );
+  }
+  const frontendPort = parseInt(frontendPortStr || "3000", 10);
+  if (isNaN(frontendPort) && !isCIOrBuild) {
+    throw new Error(`Configuration Error: FRONTEND_PORT must be a valid integer, got "${frontendPortStr}"`);
+  }
+
+  const appUrl = env.APP_URL || process.env.APP_URL;
+  if (!appUrl && !isCIOrBuild) {
+    throw new Error(
+      "Configuration Error: APP_URL environment variable is missing!\n" +
+      "Please define APP_URL (e.g., http://localhost:3000) in your .env file."
+    );
+  }
+
   const backendTarget = `http://127.0.0.1:${backendPort}`;
 
   return {
@@ -263,7 +297,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      port: parseInt(env.FRONTEND_PORT || "3000", 10),
+      port: frontendPort,
       hmr: process.env.DISABLE_HMR !== "true",
       watch:
         process.env.DISABLE_HMR === "true"

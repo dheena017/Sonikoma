@@ -20,6 +20,7 @@ from urllib.parse import urlparse, parse_qs
 
 # Import stitched_cache safely (we resolve circular import by keeping it clean)
 from utils.cache import stitched_cache
+from config.ports import BACKEND_PORT
 
 logger = logging.getLogger("sonikoma.utils.image_utils")
 
@@ -154,7 +155,7 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
     # 6. Relative paths
     if working_url.startswith('/'):
         # Re-route to loopback port
-        port = os.getenv("BACKEND_PORT", "5173")
+        port = BACKEND_PORT
         working_url = f"http://127.0.0.1:{port}{working_url}"
 
     # 7. Remote fetch with referrer-bypass headers & retry logic
@@ -266,7 +267,7 @@ async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClie
     # 6. Relative paths
     if working_url.startswith('/'):
         # Re-route to loopback port
-        port = os.getenv("BACKEND_PORT", "5173")
+        port = BACKEND_PORT
         working_url = f"http://127.0.0.1:{port}{working_url}"
 
     # 7. Remote fetch with referrer-bypass headers & retry logic

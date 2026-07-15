@@ -14,6 +14,7 @@ import platform
 import logging
 import subprocess
 from typing import Optional
+from config.ports import BACKEND_PORT
 from fastapi import APIRouter, Request, Query, HTTPException, Header, Depends
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
@@ -273,7 +274,7 @@ async def server_metrics():
             "env": os.getenv("NODE_ENV", "development"),
         },
         "config": {
-            "port": int(os.getenv("BACKEND_PORT", "5173")),
+            "port": BACKEND_PORT,
         },
         "memory": {
             "rssMB": mem_used,
