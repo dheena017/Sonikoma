@@ -1233,10 +1233,159 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
         }
 
     except Exception as e:
-        if "API_KEY_INVALID" in str(e).upper() or "API KEY NOT VALID" in str(e).upper():
+        err_str = str(e)
+        if "API_KEY_INVALID" in err_str.upper() or "API KEY NOT VALID" in err_str.upper():
             raise HTTPException(status_code=401, detail="Your API key is invalid.")
+        if "503" in err_str or "high demand" in err_str.lower() or "unavailable" in err_str.lower():
+            logger.warning(f"[Sequence] Gemini temporarily unavailable: {e}")
+            raise HTTPException(status_code=503, detail="The AI model is temporarily overloaded. Please try again in a moment.")
         logger.error(f"[Sequence] Analysis failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=err_str)
+
+
+class PanelDescriptionItem(BaseModel):
+    id: int
+    visual_description: str
+
+class GenerateSequenceNarrativeRequest(BaseModel):
+    panels: List[PanelDescriptionItem]
+    model: Optional[str] = "gemini-2.5-flash"
+    voice: Optional[str] = "en-US-GuyNeural"
+
+@router.post("/generate-sequence-narrative", summary="Generate narrative texts and audios based on visual descriptions of panels")
+async def generate_sequence_narrative(
+    body: GenerateSequenceNarrativeRequest,
+    user_api_key: str = Depends(get_user_gemini_key),
+    current_user: dict = Depends(get_current_user)
+):
+    start_time = time.time()
+    logger.info(f"[Narrative] Received sequence narrative request for {len(body.panels)} panels.")
+
+    if not body.panels:
+        raise HTTPException(status_code=400, detail="Panels list cannot be empty")
+
+    # Credit check: 5 credits per panel, capped at 50 per sequence request
+    COST = min(50, len(body.panels) * 5)
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
+    target_model = body.model or MODEL_FALLBACKS[0]
+    if target_model.lower().startswith("gemini") and "gemini-3.5" in target_model.lower():
+        if "pro" in target_model.lower():
+            target_model = "gemini-2.5-pro"
+        else:
+            target_model = "gemini-2.5-flash"
+        logger.info(f"[Narrative] Translated gemini-3.5 model selection to: {target_model}")
+
+    try:
+        # Phase 1: Story Generation using sequence_narrative skill
+        skill = registry.get("sequence_narrative")
+        panels_json = json.dumps([{"id": p.id, "visual_description": p.visual_description} for p in body.panels])
+        
+        raw_text = await skill.execute(
+            model=target_model,
+            api_key=user_api_key.get("gemini") if isinstance(user_api_key, dict) else user_api_key,
+            user_keys=user_api_key,
+            panels_json=panels_json
+        )
+
+        if not raw_text:
+            raise HTTPException(
+                status_code=500,
+                detail="AI model returned an empty response (no retrievable narrative payload)."
+            )
+
+        from skills.base import extract_json
+        try:
+            narrative_data = json.loads(extract_json(raw_text))
+        except Exception:
+            logger.error(f"[Narrative] Failed to parse JSON from response. Raw_text: {raw_text[:500]}")
+            raise HTTPException(status_code=500, detail="AI returned invalid JSON format.")
+
+        panels_narrative = narrative_data.get("panels", [])
+
+        # Phase 2: Audio Synthesis in parallel
+        results = [None] * len(body.panels)
+        semaphore = asyncio.Semaphore(5)
+
+        async def process_narrative_audio(i, panel_input):
+            async with semaphore:
+                panel_id = panel_input.id
+                # Find matching generated narrative by matching ID
+                narrative_text = ""
+                matched_item = next((item for item in panels_narrative if item.get("id") == panel_id), None)
+                if matched_item:
+                    narrative_text = matched_item.get("narrative", "")
+                
+                if not narrative_text:
+                    # Fallback to visual description if AI failed to generate narrative for this panel
+                    narrative_text = f"Panel {panel_id}. {panel_input.visual_description}"
+
+                audio_url = None
+                try:
+                    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
+                        temp_audio_path = tmp_audio.name
+
+                    # Generate panel audio for the narrative text
+                    _, actual_dur = await generate_panel_audio(
+                        dialogue_list=[narrative_text],
+                        target_duration=4.5,
+                        output_path=temp_audio_path,
+                        voice=body.voice or "en-US-GuyNeural",
+                        force_duration=False
+                    )
+
+                    if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
+                        with open(temp_audio_path, "rb") as f:
+                            audio_bytes = f.read()
+                        
+                        import uuid
+                        unique_audio_id = f"audio_narrative_{uuid.uuid4().hex[:8]}"
+                        stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
+                        audio_url = f"/api/image/cached/{unique_audio_id}"
+
+                    if os.path.exists(temp_audio_path):
+                        os.remove(temp_audio_path)
+                except Exception as audio_err:
+                    logger.error(f"[Narrative] Audio generation failed for panel ID {panel_id}: {audio_err}")
+
+                results[i] = {
+                    "id": panel_id,
+                    "narrative": narrative_text,
+                    "narrative_audio_url": audio_url
+                }
+
+        tasks = []
+        for i, panel_input in enumerate(body.panels):
+            tasks.append(process_narrative_audio(i, panel_input))
+
+        await asyncio.gather(*tasks)
+
+        elapsed = int((time.time() - start_time) * 1000)
+        
+        # Deduct credits
+        record_credit_transaction(current_user["user_id"], -COST, "generate_sequence_narrative")
+
+        return {
+            "success": True,
+            "results": results,
+            "latencyMs": elapsed
+        }
+
+    except Exception as e:
+        err_str = str(e)
+        if "API_KEY_INVALID" in err_str.upper() or "API KEY NOT VALID" in err_str.upper():
+            raise HTTPException(status_code=401, detail="Your API key is invalid.")
+        # Surface transient Gemini overload errors with a proper 503 so the
+        # frontend knows to retry rather than treating it as a hard failure.
+        if "503" in err_str or "high demand" in err_str.lower() or "unavailable" in err_str.lower():
+            logger.warning(f"[Narrative] Gemini temporarily unavailable: {e}")
+            raise HTTPException(
+                status_code=503,
+                detail="The AI model is temporarily overloaded. Please try again in a moment."
+            )
+        logger.error(f"[Narrative] Generation failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=err_str)
 
 
 @router.post("/ai-smart-crop", summary="Crop panels automatically using local CV or Gemini")
@@ -1543,10 +1692,14 @@ async def run_md_skill(skill_name: str, model: str, api_key: Any = None, **kwarg
             "outputTokens": getattr(skill, "last_output_tokens", 0)
         }
     except Exception as e:
-        if "API_KEY_INVALID" in str(e).upper() or "API KEY NOT VALID" in str(e).upper():
+        err_str = str(e)
+        if "API_KEY_INVALID" in err_str.upper() or "API KEY NOT VALID" in err_str.upper():
             raise HTTPException(status_code=401, detail="Your API key is invalid.")
+        if "503" in err_str or "high demand" in err_str.lower() or "unavailable" in err_str.lower():
+            logger.warning(f"[{skill_name}] Gemini temporarily unavailable: {e}")
+            raise HTTPException(status_code=503, detail="The AI model is temporarily overloaded. Please try again in a moment.")
         logger.error(f"Endpoint skill execution failed for '{skill_name}': {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=err_str)
 
 
 @router.post("/skills/dramatize")

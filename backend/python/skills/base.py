@@ -200,6 +200,14 @@ class YouTubeChapterModel(BaseModel):
     chapters: List[YouTubeChapterItem] = Field(description="List of chronological video chapters")
 
 
+class PanelNarrativeModel(BaseModel):
+    id: int = Field(description="The matching panel ID")
+    narrative: str = Field(description="The storytelling narrative text for this panel (strictly 25-50 words, motion comic style)")
+
+class SequenceNarrativeModel(BaseModel):
+    panels: List[PanelNarrativeModel] = Field(description="Chronological narrative texts matching each panel")
+
+
 # ─── Pydantic Dynamic Schema Mapper ───────────────────────────────────────────
 
 SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
@@ -233,7 +241,8 @@ SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
     "ThumbnailVisualModel":    ThumbnailVisualModel,
     "ThumbnailCompositionRecipeModel": ThumbnailCompositionRecipeModel,
     "TransitionSpeedModel":    TransitionSpeedModel,
-    "YouTubeChapterModel":     YouTubeChapterModel
+    "YouTubeChapterModel":     YouTubeChapterModel,
+    "SequenceNarrativeModel":   SequenceNarrativeModel
 }
 
 
