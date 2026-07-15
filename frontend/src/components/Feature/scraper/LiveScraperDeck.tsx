@@ -393,6 +393,7 @@ const LiveScraperDeck = React.memo(
       }
     };
 
+    const isLoadingScrape = isScraping && scrapedImages.length === 0;
     const showEmptyState = !isScraping && scrapedImages.length === 0;
 
     return (
@@ -450,7 +451,50 @@ const LiveScraperDeck = React.memo(
             </div>
           </div>
 
-          {showEmptyState ? (
+          {isLoadingScrape ? (
+            <div className="space-y-6 py-6 animate-in fade-in duration-300">
+              {/* Scraping Banner */}
+              <div className="flex flex-col gap-2.5 p-5 rounded-2xl bg-purple-950/20 border border-purple-800/30 shadow-md">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 text-purple-400 animate-spin flex-shrink-0" />
+                  <p className="text-sm text-purple-300 font-mono font-bold tracking-tight">
+                    Running live Webtoon scraper... preparing to download frames
+                  </p>
+                </div>
+                <div className="relative h-2 w-full bg-black/60 rounded-full overflow-hidden border border-purple-950/40 shadow-inner">
+                  <div className="absolute top-0 bottom-0 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 rounded-full w-1/3 animate-infinite-scroll" />
+                </div>
+              </div>
+
+              {/* Skeleton Cards Deck Grid */}
+              <div className="w-full max-w-full flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin px-4 md:px-6">
+                {[1, 2, 3, 4].map((num) => (
+                  <div
+                    key={`skeleton-card-${num}`}
+                    className="relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border border-neutral-800/50 bg-neutral-950/40 p-4 space-y-4 text-center cursor-not-allowed select-none animate-pulse"
+                  >
+                    {/* Thumbnail Skeleton Frame */}
+                    <div className="relative aspect-[3/4] w-full rounded-xl bg-neutral-900/60 border border-neutral-850/50 flex flex-col items-center justify-center overflow-hidden">
+                      <ImageIcon className="h-10 w-10 text-neutral-800/80 mb-2" />
+                      <div className="h-2 w-24 bg-neutral-850/60 rounded" />
+                    </div>
+
+                    {/* Metadata Skeleton */}
+                    <div className="flex items-center justify-between gap-2 px-1">
+                      <div className="h-3 w-16 bg-neutral-900 rounded" />
+                      <div className="h-3 w-12 bg-neutral-900 rounded" />
+                    </div>
+
+                    {/* Controls Skeleton */}
+                    <div className="h-9 w-full bg-neutral-900/50 border border-neutral-850/30 rounded-xl" />
+
+                    {/* Actions Skeleton */}
+                    <div className="h-8 w-full bg-neutral-900/30 rounded-lg" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : showEmptyState ? (
             <LiveScraperDeckEmptyState />
           ) : (
             <div className="space-y-4">
@@ -487,10 +531,17 @@ const LiveScraperDeck = React.memo(
               <div className="w-full max-w-full flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin px-4 md:px-6">
                 {scrapedImages.map((imgUrl, idx) => {
                   const isSelected = selectedScraped.includes(imgUrl);
+
+                  // IMPORTANT: PanelCard's useEffect loads `imgUrl` directly via `img.src`.
+                  // Ensure we never pass raw Webtoon URLs into PanelCard.
+                  const proxiedUrl = imgUrl?.startsWith("/api/proxy-image")
+                    ? imgUrl
+                    : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+
                   return (
                     <PanelCard
                       key={`${imgUrl}-${idx}`}
-                      imgUrl={imgUrl}
+                      imgUrl={proxiedUrl}
                       idx={idx}
                       isSelected={isSelected}
                       isBatchCropping={isBatchCropping}

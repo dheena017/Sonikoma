@@ -79,6 +79,14 @@ export function PanelCardThumbnail({
     setRetryKey((prev) => prev + 1);
   };
 
+  const resolvedImgSrc = imgUrl
+    ? imgUrl.startsWith("http")
+      ? imgUrl.includes("/api/proxy-image")
+        ? imgUrl
+        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`
+      : imgUrl
+    : imgUrl;
+
   return (
     <div className="relative h-56 sm:h-64 rounded-2xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
@@ -102,8 +110,9 @@ export function PanelCardThumbnail({
       ) : (
         <img
           key={retryKey}
-          src={imgUrl}
+          src={resolvedImgSrc}
           alt={`Panel #${idx + 1}`}
+
           className={`w-full h-full object-contain transition-all duration-500 ease-out ${
             isProcessing
               ? "opacity-20 scale-95 blur-[3px]"
@@ -119,15 +128,27 @@ export function PanelCardThumbnail({
               return;
             }
             img.dataset.retried = "1";
-            const src = img.src;
-            if (src.includes("/api/proxy-image") || src.includes("/api/image/")) {
+
+            const currentSrc = img.src;
+
+            // If already using the proxy, don't wrap again.
+            if (currentSrc.includes("/api/proxy-image")) {
               setHasError(true);
               return;
             }
-            img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+
+            // If this is an internal/API path, retrying won't help—mark error.
+            if (currentSrc.includes("/api/")) {
+              setHasError(true);
+              return;
+            }
+
+            // Otherwise, last resort: proxy external URL.
+            img.src = `/api/proxy-image?url=${encodeURIComponent(currentSrc)}`;
           }}
         />
       )}
+
 
       {/* Shimmer overlay while processing */}
       {isProcessing && (

@@ -65,6 +65,7 @@ function PanelCard({
     if (!imgUrl) return;
     const img = new Image();
     img.src = imgUrl;
+    
     img.onload = () => {
       setDimensions({ width: img.naturalWidth, height: img.naturalHeight });
     };
