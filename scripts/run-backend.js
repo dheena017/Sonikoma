@@ -87,6 +87,20 @@ if (!appUrl) {
   process.exit(1);
 }
 
+const jwtSecretKey = process.env.JWT_SECRET_KEY;
+if (!jwtSecretKey) {
+  logger.error("Configuration Error: JWT_SECRET_KEY environment variable is missing!");
+  logger.error("Please configure it in your .env file.");
+  process.exit(1);
+}
+
+const geminiApiKey = process.env.GEMINI_API_KEY;
+if (!geminiApiKey) {
+  logger.error("Configuration Error: GEMINI_API_KEY environment variable is missing!");
+  logger.error("Please configure it in your .env file.");
+  process.exit(1);
+}
+
 const pythonPath = process.platform === "win32"
   ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
   : "python3";

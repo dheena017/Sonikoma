@@ -1,7 +1,7 @@
 """
 backend/python/config/ports.py
 ─────────────────────────────────────────────────────────────────────────────
-Centralized port, app URL, and environment configuration and validation.
+Centralized configuration validation hub (ports, URLs, keys, limits, and more).
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -19,7 +19,7 @@ if os.path.exists(dotenv_path):
 else:
     load_dotenv()
 
-# 1. FRONTEND_PORT
+# 1. FRONTEND_PORT (strictly required)
 FRONTEND_PORT_STR = os.getenv("FRONTEND_PORT")
 if not FRONTEND_PORT_STR:
     raise RuntimeError(
@@ -33,8 +33,7 @@ except ValueError:
         f"Configuration Error: FRONTEND_PORT must be a valid integer, got '{FRONTEND_PORT_STR}'"
     )
 
-# 2. BACKEND_PORT
-# Fallback logic: BACKEND_PORT > PORT
+# 2. BACKEND_PORT (strictly required)
 BACKEND_PORT_STR = os.getenv("BACKEND_PORT") or os.getenv("PORT")
 if not BACKEND_PORT_STR:
     raise RuntimeError(
@@ -48,10 +47,49 @@ except ValueError:
         f"Configuration Error: BACKEND_PORT/PORT must be a valid integer, got '{BACKEND_PORT_STR}'"
     )
 
-# 3. APP_URL
+# 3. APP_URL (strictly required)
 APP_URL = os.getenv("APP_URL")
 if not APP_URL:
     raise RuntimeError(
         "Configuration Error: APP_URL environment variable is missing!\n"
         "Please define APP_URL (e.g., http://localhost:3000) in your .env file."
     )
+
+# 4. JWT_SECRET_KEY (strictly required)
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not JWT_SECRET_KEY:
+    raise RuntimeError(
+        "Configuration Error: JWT_SECRET_KEY environment variable is missing!\n"
+        "Please define a secure random JWT_SECRET_KEY in your .env file."
+    )
+
+# 5. GEMINI_API_KEY (strictly required)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise RuntimeError(
+        "Configuration Error: GEMINI_API_KEY environment variable is missing!\n"
+        "Please define GEMINI_API_KEY in your .env file."
+    )
+
+# 6. Optional keys and settings
+HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+
+NODE_ENV = os.getenv("NODE_ENV", "development")
+API_VERSION = os.getenv("API_VERSION", "1.0.0")
+
+try:
+    RATE_LIMIT_RPM = int(os.getenv("RATE_LIMIT_RPM", "120"))
+except ValueError:
+    RATE_LIMIT_RPM = 120
+
+try:
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
+except ValueError:
+    ACCESS_TOKEN_EXPIRE_MINUTES = 1440
+
+try:
+    MAX_PROXY_MB = int(os.getenv("MAX_PROXY_MB", "20"))
+except ValueError:
+    MAX_PROXY_MB = 20
