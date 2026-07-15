@@ -304,6 +304,7 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
     sfx = raw.get("sfx", "")
     vis = raw.get("visual_description", "")
     motion = raw.get("motion_type", "")
+    narrative = raw.get("narrative", "")
 
     # 1. Get raw suggested duration from AI, defaulting to 0.0
     raw_duration = raw.get("duration")
@@ -333,6 +334,7 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
         "duration": final_duration,
         "motion_type": motion if motion in VALID_MOTIONS else "zoom_in",
         "visual_description": vis.strip()[:400] if isinstance(vis, str) and vis.strip() else "",
+        "narrative": narrative.strip()[:600] if isinstance(narrative, str) and narrative.strip() else "",
     }
 
 
@@ -1110,11 +1112,12 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
 
         You MUST return ONLY a JSON array of objects, with exactly {len(image_parts)} items (one for each image in order).
         Each object must have:
-        - "speech_text" (string)
-        - "sfx" (string)
+        - "speech_text" (string, dialogue or subtitles spoken in the panel)
+        - "sfx" (string, sound effects in the panel)
         - "duration" (float, estimated reading time in seconds)
         - "motion_type" (string, one of: zoom_in, zoom_out, pan_left, pan_right, pan_up, pan_down)
-        - "visual_description" (string)
+        - "visual_description" (string, detail of actions and setting)
+        - "narrative" (string, dramatic, engaging storytelling narrative text for this panel suitable for motion comic voiceover, strictly 25-50 words)
         """
 
         if provider == "gemini":
@@ -1310,37 +1313,68 @@ async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Dep
 
                 analysis = validate_analysis(panel_data)
                 audio_url = None
+                narrative_audio_url = None
 
-                try:
-                    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
-                        temp_audio_path = tmp_audio.name
+                # Generate dialogue speech audio
+                if analysis["speech_text"]:
+                    try:
+                        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
+                            temp_audio_path = tmp_audio.name
 
-                    _, actual_dur = await generate_panel_audio(
-                        dialogue_list=[analysis["speech_text"]],
-                        target_duration=analysis["duration"],
-                        output_path=temp_audio_path,
-                        voice=body.voice or "en-US-GuyNeural",
-                        force_duration=False
-                    )
-                    analysis["duration"] = actual_dur
+                        _, actual_dur = await generate_panel_audio(
+                            dialogue_list=[analysis["speech_text"]],
+                            target_duration=analysis["duration"],
+                            output_path=temp_audio_path,
+                            voice=body.voice or "en-US-GuyNeural",
+                            force_duration=False
+                        )
+                        analysis["duration"] = actual_dur
 
-                    if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
-                        with open(temp_audio_path, "rb") as f:
-                            audio_bytes = f.read()
-                        import uuid
-                        unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}"
-                        stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
-                        audio_url = f"/api/image/cached/{unique_audio_id}"
+                        if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
+                            with open(temp_audio_path, "rb") as f:
+                                audio_bytes = f.read()
+                            import uuid
+                            unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}"
+                            stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
+                            audio_url = f"/api/image/cached/{unique_audio_id}"
 
-                    if os.path.exists(temp_audio_path):
-                        os.remove(temp_audio_path)
-                except Exception as audio_err:
-                    logger.error(f"[Sequence] Audio gen failed for panel {i}: {audio_err}")
+                        if os.path.exists(temp_audio_path):
+                            os.remove(temp_audio_path)
+                    except Exception as audio_err:
+                        logger.error(f"[Sequence] Dialogue Audio gen failed for panel {i}: {audio_err}")
+
+                # Generate storyteller narrative audio
+                if analysis["narrative"]:
+                    try:
+                        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_narrative:
+                            temp_narrative_path = tmp_narrative.name
+
+                        _, _ = await generate_panel_audio(
+                            dialogue_list=[analysis["narrative"]],
+                            target_duration=0.0,
+                            output_path=temp_narrative_path,
+                            voice=body.voice or "en-US-GuyNeural",
+                            force_duration=False
+                        )
+
+                        if os.path.exists(temp_narrative_path) and os.path.getsize(temp_narrative_path) > 0:
+                            with open(temp_narrative_path, "rb") as f:
+                                narrative_bytes = f.read()
+                            import uuid
+                            unique_narrative_id = f"narrative_{uuid.uuid4().hex[:8]}"
+                            stitched_cache.set(unique_narrative_id, {"data": narrative_bytes, "content_type": "audio/mpeg"})
+                            narrative_audio_url = f"/api/image/cached/{unique_narrative_id}"
+
+                        if os.path.exists(temp_narrative_path):
+                            os.remove(temp_narrative_path)
+                    except Exception as narrative_audio_err:
+                        logger.error(f"[Sequence] Narrative Audio gen failed for panel {i}: {narrative_audio_err}")
 
                 results[i] = {
                     "url": body.urls[i],
                     "analysis": analysis,
-                    "audio_url": audio_url
+                    "audio_url": audio_url,
+                    "narrative_audio_url": narrative_audio_url
                 }
 
         tasks = []
