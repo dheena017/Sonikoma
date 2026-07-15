@@ -40,7 +40,8 @@ def spoof_referer(url: str) -> str:
     try:
         parsed = urlparse(url)
         host = (parsed.hostname or "").lower()
-        if "webtoons" in host:
+        if "webtoon" in host or "pstatic" in host:
+            # Webtoon CDN assets (e.g. webtoon-phinf.pstatic.net) typically expect this referer.
             return "https://www.webtoons.com/"
         if "naver" in host:
             return "https://comic.naver.com/"

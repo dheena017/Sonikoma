@@ -70,38 +70,64 @@ export function PanelCardThumbnail({
   const label = processingLabel(isBatchCropping, bubbleCroppingImgUrl, imgUrl);
   const status = getScrapedImageStatus(imgUrl);
 
+  const [hasError, setHasError] = React.useState(false);
+  const [retryKey, setRetryKey] = React.useState(0);
+
+  const handleRetry = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setHasError(false);
+    setRetryKey((prev) => prev + 1);
+  };
+
   return (
     <div className="relative h-56 sm:h-64 rounded-2xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10 pointer-events-none" />
 
-      <img
-        src={imgUrl}
-        alt={`Panel #${idx + 1}`}
-        className={`w-full h-full object-contain transition-all duration-500 ease-out ${
-          isProcessing
-            ? "opacity-20 scale-95 blur-[3px]"
-            : "group-hover:scale-108 group-hover:rotate-[0.5deg]"
-        }`}
-        loading="lazy"
-        decoding="async"
-        draggable={false}
-        onError={(e) => {
-          const img = e.currentTarget;
-          // Only retry once — prevent infinite loop
-          if (img.dataset.retried) return;
-          img.dataset.retried = "1";
-          const src = img.src;
-          // If it's already going through the proxy or is a local API URL, show placeholder
-          if (src.includes("/api/proxy-image") || src.includes("/api/image/")) {
-            img.style.opacity = "0.15";
-            img.style.filter = "grayscale(1)";
-            return;
-          }
-          // Re-route raw CDN/external URLs through the backend proxy
-          img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
-        }}
-      />
+      {hasError ? (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-950/90 backdrop-blur-md rounded-2xl p-4 text-center z-20 animate-in fade-in duration-200">
+          <span className="text-rose-500 text-base mb-1.5">⚠️</span>
+          <span className="text-[9px] font-mono font-extrabold text-rose-350 uppercase tracking-widest mb-3">
+            Load Failed
+          </span>
+          <button
+            type="button"
+            onClick={handleRetry}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-bold font-mono uppercase bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-purple-300 border border-neutral-800 hover:border-purple-500/40 rounded-xl cursor-pointer transition-all shadow-sm active:scale-95"
+          >
+            <RefreshCw className="h-3 w-3 animate-spin-reverse-once" />
+            Reload Frame
+          </button>
+        </div>
+      ) : (
+        <img
+          key={retryKey}
+          src={imgUrl}
+          alt={`Panel #${idx + 1}`}
+          className={`w-full h-full object-contain transition-all duration-500 ease-out ${
+            isProcessing
+              ? "opacity-20 scale-95 blur-[3px]"
+              : "group-hover:scale-108 group-hover:rotate-[0.5deg]"
+          }`}
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+          onError={(e) => {
+            const img = e.currentTarget;
+            if (img.dataset.retried) {
+              setHasError(true);
+              return;
+            }
+            img.dataset.retried = "1";
+            const src = img.src;
+            if (src.includes("/api/proxy-image") || src.includes("/api/image/")) {
+              setHasError(true);
+              return;
+            }
+            img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+          }}
+        />
+      )}
 
       {/* Shimmer overlay while processing */}
       {isProcessing && (

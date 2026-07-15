@@ -634,7 +634,7 @@ const TimelineCard = ({
           rows={2}
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.narrative || ""}
-          onChange={(e) => handleModifyNarrative && handleModifyNarrative(panel.id, e.target.value)}
+          onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
           placeholder=""
           className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id

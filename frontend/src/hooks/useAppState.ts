@@ -107,11 +107,8 @@ export function useAppState() {
   const [consoleLogs, setRawConsoleLogs] = useState<LogEntry[]>([]);
   const [characters, setCharacters] = useState<CharacterBio[]>([]);
 
-  const projectIdRef = useRef(projectId);
-  projectIdRef.current = projectId;
+  // Refs removed: useAppState popstate handler relies on Zustand reads to avoid batching/race issues.
 
-  const chapterSlugStateRef = useRef(chapterSlugState);
-  chapterSlugStateRef.current = chapterSlugState;
 
   const [scrapedImages, setScrapedImages] = useState<string[]>(() => {
     try {
@@ -744,9 +741,14 @@ export function useAppState() {
       const lookupId = urlProjectId ?? chapterSlug;
       if (!lookupId) return;
 
+      // Query Zustand store directly to avoid stale React refs during batching
+      const currentActiveProject = useProjectStore.getState().activeProjectData;
+      const currentActiveId = currentActiveProject?.project?.project_id;
+      const currentChapterSlug = currentActiveProject?.project?.chapter_slug;
+
       if (
-        lookupId === projectIdRef.current ||
-        lookupId === chapterSlugStateRef.current
+        lookupId === currentActiveId ||
+        (currentChapterSlug && lookupId === currentChapterSlug)
       )
         return;
 
