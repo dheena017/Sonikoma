@@ -100,7 +100,7 @@ export default function CinemaPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showChaptersMenu, setShowChaptersMenu] = useState(false);
-  const [showSubtitles, setShowSubtitles] = useState(true);
+  const [showSubtitles, setShowSubtitles] = useState(false);
 
   // Expanded configurations
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
@@ -145,7 +145,7 @@ export default function CinemaPlayer({
   // - In theater mode: keep existing auto-hide behavior based on mouse activity.
   useEffect(() => {
     setVideoHasError(false);
-  }, [videoUrl]);
+  }, [videoUrl, videoQuality]);
 
   useEffect(() => {
     if (variant === "floating") return;
@@ -801,7 +801,14 @@ export default function CinemaPlayer({
               ref={videoRef}
               src={getQualityVideoUrl(videoUrl, videoQuality) || undefined}
               onLoadedMetadata={(e) => setVideoDuration(e.currentTarget.duration)}
-              onError={() => {
+              onError={(e) => {
+                const vid = e.currentTarget;
+                // If a quality variant 404s, fall back to the master URL
+                if (videoUrl && vid.src !== videoUrl && !vid.dataset.masterFallback) {
+                  vid.dataset.masterFallback = "1";
+                  vid.src = videoUrl;
+                  return;
+                }
                 console.warn("[CinemaPlayer] Video failed to load, falling back to simulated mode.");
                 setVideoHasError(true);
               }}

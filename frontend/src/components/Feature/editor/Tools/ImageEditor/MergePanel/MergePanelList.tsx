@@ -44,7 +44,15 @@ export default function MergePanelList({
                     src={imgUrl}
                     alt={`Frame ${imgIdx + 1}`}
                     className="w-full h-full object-contain"
-                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      if (img.dataset.retried) return;
+                      img.dataset.retried = "1";
+                      const src = img.src;
+                      if (!src.includes("/api/proxy-image") && !src.includes("/api/image/")) {
+                        img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+                      }
+                    }}
                   />
                 </div>
                 <div className="flex-1 min-w-0">

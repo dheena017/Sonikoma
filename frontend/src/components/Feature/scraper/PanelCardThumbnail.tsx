@@ -85,8 +85,22 @@ export function PanelCardThumbnail({
         }`}
         loading="lazy"
         decoding="async"
-        referrerPolicy="no-referrer"
         draggable={false}
+        onError={(e) => {
+          const img = e.currentTarget;
+          // Only retry once — prevent infinite loop
+          if (img.dataset.retried) return;
+          img.dataset.retried = "1";
+          const src = img.src;
+          // If it's already going through the proxy or is a local API URL, show placeholder
+          if (src.includes("/api/proxy-image") || src.includes("/api/image/")) {
+            img.style.opacity = "0.15";
+            img.style.filter = "grayscale(1)";
+            return;
+          }
+          // Re-route raw CDN/external URLs through the backend proxy
+          img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+        }}
       />
 
       {/* Shimmer overlay while processing */}

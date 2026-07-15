@@ -321,9 +321,7 @@ export function useAppState() {
   const [backgroundStyle, setBackgroundStyle] = useState<"black" | "white" | "transparent" | "blurred">(
     () => (localStorage.getItem("ai_video_bg_style") as any) || "black"
   );
-  const [subtitlesStyle, setSubtitlesStyle] = useState<"none" | "burn-in" | "soft">(
-    () => (localStorage.getItem("ai_video_subtitles_style") as any) || "none"
-  );
+  const [subtitlesStyle, setSubtitlesStyle] = useState<"none" | "burn-in" | "soft">("none");
 
   const audioFeedback = useAudioFeedback(sfxVolume, !sfxEnabled);
 

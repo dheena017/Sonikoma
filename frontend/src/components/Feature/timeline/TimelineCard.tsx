@@ -481,11 +481,17 @@ const TimelineCard = ({
           src={panel.image_url}
           alt={`Panel ${panel.id}`}
           className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
-          referrerPolicy="no-referrer"
           style={{ filter: getPanelFilterStyle(panel) }}
           onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = "none";
+            const img = e.currentTarget;
+            if (img.dataset.retried) return;
+            img.dataset.retried = "1";
+            const src = img.src;
+            if (!src.includes("/api/proxy-image") && !src.includes("/api/image/")) {
+              img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+            } else {
+              img.style.display = "none";
+            }
           }}
         />
 
