@@ -70,7 +70,9 @@ try {
   logger.warn("Failed to read .env file, defaulting to port 5173");
 }
 
-const pythonPath = path.resolve(__dirname, "../.venv/Scripts/python.exe");
+const pythonPath = process.platform === "win32"
+  ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
+  : "python3";
 const backendDir = path.resolve(__dirname, "../backend/python");
 
 let pyProcess = null;

@@ -205,6 +205,18 @@ const AdvancedSettings = React.memo(
       () => localStorage.getItem("ai_bubble_detection_style") || bubbleDetectionStyle
     );
 
+    const [localNarratorVoice, setLocalNarratorVoice] = React.useState<string>(
+      () => localStorage.getItem("ai_comic_narrator_voice") || "Sultry Narrative Tone (Female)"
+    );
+
+    const handleNarratorVoiceChange = (val: string) => {
+      setLocalNarratorVoice(val);
+      localStorage.setItem("ai_comic_narrator_voice", val);
+      if (addNotification) {
+        addNotification(`Narrator Voice updated to "${val}"`, "success");
+      }
+    };
+
     // Persist AI Crop settings to localStorage
     React.useEffect(() => {
       localStorage.setItem("ai_crop_sensitivity", String(localCropSensitivity));
@@ -691,6 +703,25 @@ const AdvancedSettings = React.memo(
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Dedicated Narrator Voice */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
+                  <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                  Narrator Voice Preset
+                </label>
+                <select
+                  value={localNarratorVoice}
+                  onChange={(e) => handleNarratorVoiceChange(e.target.value)}
+                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
+                >
+                  {displayVoices.map((voice) => (
+                    <option key={voice.code} value={voice.code}>
+                      {voice.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

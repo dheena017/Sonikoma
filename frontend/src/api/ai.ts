@@ -12,6 +12,20 @@ export const analyzeImage = async (
   return res.json();
 };
 
+export const analyzeNarrativeSequence = async (
+  fetchWithInterceptor: any,
+  data: any,
+  options?: RequestInit
+) => {
+  const res = await fetchWithInterceptor("/api/narratives/analyze-sequence", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+  return res.json();
+};
+
 export const analyzeSequence = async (
   fetchWithInterceptor: any,
   data: any,
