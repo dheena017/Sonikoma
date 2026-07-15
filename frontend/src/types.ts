@@ -54,13 +54,11 @@ export interface GeneratedPanel {
   detection_style?: string;
   bubble_method?: string;
   audio_url?: string;
-  narrative?: string;
-  narrative_audio_url?: string;
   layers?: PanelLayers;
   syncMap?: PanelSyncMap;
-  audio_reactive_shake?: boolean;
   narrative?: string;
-  narrative_audio_url?: string;
+  narrative_audio_url?: string
+  audio_reactive_shake?: boolean;
 }
 
 export interface CharacterBio {
