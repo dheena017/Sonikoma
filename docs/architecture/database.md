@@ -6,7 +6,7 @@ Sonikoma uses a localized file-based **SQLite** database. This eliminates comple
 
 ## 📂 Database Components
 
-- **Database Path:** [webtoon_local.db](file:///c:/Users/dheen/Downloads/sonikoma/backend/database/webtoon_local.db) (git-ignored, created on first boot)
+- **Database Path:** [webtoon_local.db](file:///c:/Users/dheen/Downloads/sonikoma/data/webtoon_local.db) (git-ignored, created on first boot inside the `data/` folder)
 - **Schema Bootstrap File:** [schema.sql](file:///c:/Users/dheen/Downloads/sonikoma/backend/database/schema.sql)
 - **Singleton Connection File:** [db.ts](file:///c:/Users/dheen/Downloads/sonikoma/backend/database/db.ts)
 

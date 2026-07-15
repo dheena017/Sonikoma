@@ -709,11 +709,11 @@ def seed_data():
 
 
 def seed_training_data():
-    """Seed 3 mock training pairs inside training_data/ to unlock fine-tuning."""
+    """Seed 3 mock training pairs inside data/training_data/ to unlock fine-tuning."""
     import numpy as np
     import cv2
     
-    training_dir = os.path.join(PROJECT_ROOT, "training_data")
+    training_dir = os.path.join(PROJECT_ROOT, "data", "training_data")
     os.makedirs(training_dir, exist_ok=True)
     logger.info(f"Seeding mock training pairs in {training_dir}...")
     

@@ -162,7 +162,7 @@ def main():
 
 
 def print_training_data_summary():
-    training_dir = os.path.join(PROJECT_ROOT, "training_data")
+    training_dir = os.path.join(PROJECT_ROOT, "data", "training_data")
     logger.info("=" * 80)
     logger.info("📂 LOCAL TRAINING DATA SAMPLES (DATA FLYWHEEL)")
     logger.info("=" * 80)

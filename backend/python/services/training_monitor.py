@@ -11,7 +11,7 @@ logger = logging.getLogger("sonikoma.services.training_monitor")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
-TRAINING_DATA_DIR = os.path.join(PROJECT_ROOT, "training_data")
+TRAINING_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "training_data")
 METADATA_FILE = os.path.join(TRAINING_DATA_DIR, "training_metadata.json")
 
 # Lock for loading/saving metadata to prevent concurrent read/write issues

@@ -18,8 +18,8 @@ class TestFineTuning(unittest.TestCase):
         self.client = TestClient(self.app)
         
         self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.training_dir = os.path.join(self.base_dir, "training_data")
-        self.backup_dir = os.path.join(self.base_dir, "training_data_backup_test")
+        self.training_dir = os.path.join(self.base_dir, "data", "training_data")
+        self.backup_dir = os.path.join(self.base_dir, "data", "training_data_backup_test")
 
         # Temporarily backup training_data to verify empty check
         if os.path.exists(self.training_dir):

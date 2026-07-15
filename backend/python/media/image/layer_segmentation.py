@@ -11,7 +11,8 @@ logger = logging.getLogger("sonikoma.services.layer_segmentation")
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower().strip()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "local_media"))
+PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, "..", ".."))
+LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "local_media"))
 # Matches main.py mount: /media -> <LOCAL_MEDIA_ROOT>
 LOCAL_MEDIA_URL_PREFIX = "/media"
 

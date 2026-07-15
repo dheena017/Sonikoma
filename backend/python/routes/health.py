@@ -311,7 +311,7 @@ async def flush_temp_files():
     try:
         import shutil
         import os
-        dirs_to_clean = ["public/videos", "public/exports", "public/temp"]
+        dirs_to_clean = ["data/media", "data/temp", "public/exports"]
         cleaned_count = 0
         for d in dirs_to_clean:
             if os.path.exists(d):

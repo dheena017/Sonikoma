@@ -14,10 +14,11 @@ from typing import Dict, Any, Optional, TypeVar, Generic
 
 T = TypeVar('T')
 
-# Stable persistent directory for image caches — lives next to the SQLite DB
+# Stable persistent directory for image caches — lives under data/image_cache/
 # so it survives server restarts (unlike tempfile.gettempdir() which Windows may clear)
 _BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-PERSISTENT_CACHE_DIR = os.path.join(_BACKEND_ROOT, 'database', 'image_cache')
+_PROJECT_ROOT = os.path.abspath(os.path.join(_BACKEND_ROOT, '..'))
+PERSISTENT_CACHE_DIR = os.path.join(_PROJECT_ROOT, 'data', 'image_cache')
 
 
 class CacheEntry(Generic[T]):
@@ -218,7 +219,7 @@ class CacheStore(Generic[T]):
 # ─── Shared application caches ───────────────────────────────────────────────
 
 # Merged/stitched image cache — persistent=True so disk files survive server restarts.
-# Stored at: backend/database/image_cache/stitchedCache/
+# Stored at: data/image_cache/stitchedCache/
 stitched_cache = CacheStore[Dict[str, Any]](
     name='stitchedCache', default_ttl_sec=None, max_size=2000, persistent=True
 )

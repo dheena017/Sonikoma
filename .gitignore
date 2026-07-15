@@ -5,17 +5,11 @@ dist/
 coverage/
 .DS_Store
 *.log
-*scraped_html/
 .env*
 !.env.example
-# Local SQLite database files
-*.db
-*.db-wal
-*.db-shm
-# Persistent scraped panel image cache (binary blobs — do not commit)
-backend/database/image_cache/
+# Consolidated stateful data folder (sqlite db, caches, training, media, temp files)
+data/
 .llm-chat-history/
-local_media
 *public
 
 # Python cache & bytecode
