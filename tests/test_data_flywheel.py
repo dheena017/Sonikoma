@@ -49,7 +49,7 @@ class TestDataFlywheel(unittest.TestCase):
 
         # Cleanup
         pair_id = save_data["pair_id"]
-        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "training_data"))
+        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "training_data"))
         orig_path = os.path.join(training_dir, f"original_{pair_id}.png")
         mask_path = os.path.join(training_dir, f"mask_{pair_id}.png")
 

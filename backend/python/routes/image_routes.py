@@ -1127,7 +1127,7 @@ async def upload_image(file: UploadFile = File(...)):
 @router.get("/training-data-count", summary="Get the total count of training pairs in the local training_data folder")
 async def get_training_data_count():
     try:
-        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "training_data"))
         if not os.path.exists(training_dir):
             return {"count": 0}
         files = os.listdir(training_dir)
@@ -1141,7 +1141,7 @@ async def get_training_data_count():
 @router.get("/training-data-list", summary="List all training sample pairs saved locally")
 async def get_training_data_list():
     try:
-        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "training_data"))
         if not os.path.exists(training_dir):
             return []
         files = os.listdir(training_dir)
@@ -1177,7 +1177,7 @@ async def get_training_data_list():
 @router.get("/training-data-file/{filename}", summary="Get a training file directly from training_data folder")
 async def get_training_data_file(filename: str):
     from fastapi.responses import FileResponse
-    training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+    training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "training_data"))
     file_path = os.path.join(training_dir, filename)
     if not os.path.abspath(file_path).startswith(training_dir):
         raise HTTPException(status_code=400, detail="Invalid path")
@@ -1196,7 +1196,7 @@ async def save_training_data(
     logger.info(f"[Data Flywheel] Received human-corrected training sample pairs.")
     try:
         # Define local directory inside the container/sandbox
-        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "training_data"))
         os.makedirs(training_dir, exist_ok=True)
 
         unique_pair_id = uuid.uuid4().hex[:12]
@@ -1287,7 +1287,7 @@ async def start_training(epochs: int = 20, batch_size: int = 4):
     from media.image.train_yolo import trigger_fine_tuning
     
     # Check if we have any training data to train on
-    training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+    training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "training_data"))
     orig_files = glob.glob(os.path.join(training_dir, "original_*.*"))
     if len(orig_files) == 0:
         raise HTTPException(
@@ -1305,7 +1305,7 @@ async def start_training(epochs: int = 20, batch_size: int = 4):
 @router.delete("/training-data-pair/{pair_id}", summary="Delete a human-corrected training pair by ID")
 async def delete_training_data_pair(pair_id: str):
     try:
-        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "training_data"))
+        training_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "training_data"))
         if not os.path.exists(training_dir):
             raise HTTPException(status_code=404, detail="Training directory does not exist")
         

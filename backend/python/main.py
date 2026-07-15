@@ -104,6 +104,10 @@ from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+import tempfile
+tempfile.tempdir = os.path.join(PROJECT_ROOT, "data", "temp")
+os.makedirs(tempfile.tempdir, exist_ok=True)
+
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"))
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, "backend", ".env"))
 
@@ -470,7 +474,7 @@ async def lifespan(app: FastAPI):
     try:
         base_dir = os.path.dirname(os.path.abspath(__file__)) # backend/python
         project_root = os.path.abspath(os.path.join(base_dir, "..", ".."))
-        training_dir = os.path.join(project_root, "training_data")
+        training_dir = os.path.join(project_root, "data", "training_data")
         lock_file = os.path.join(training_dir, "training.lock")
         if os.path.exists(lock_file):
             os.remove(lock_file)
@@ -884,18 +888,17 @@ app.include_router(health_router,         prefix="/api/py", tags=["Health & Syst
 app.include_router(audio_router,          prefix="/api/py/audio", tags=["Audio Synthesis (Legacy)"])
 
 # 3. Serve generated videos
-videos_path = os.path.join(os.getcwd(), "public", "videos")
+videos_path = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "media"))
 os.makedirs(videos_path, exist_ok=True)
 app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
 
 # 4. Serve locally generated panel layer WebPs (development bypass)
-# layer_segmentation.py writes to backend/python/local_media/...
-local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "local_media"))
+local_media_dir = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "local_media"))
 os.makedirs(local_media_dir, exist_ok=True)
 app.mount("/media", StaticFiles(directory=local_media_dir), name="media")
 
 # 5. Serve locally saved training data (Data Flywheel)
-training_data_dir = os.path.abspath(os.path.join(PROJECT_ROOT, "training_data"))
+training_data_dir = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "training_data"))
 os.makedirs(training_data_dir, exist_ok=True)
 app.mount("/training_data", StaticFiles(directory=training_data_dir), name="training_data")
 

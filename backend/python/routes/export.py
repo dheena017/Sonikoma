@@ -421,7 +421,7 @@ async def export_to_youtube(
 
     is_remote = request.video_url.startswith("http://") or request.video_url.startswith("https://")
     tmp_video_path = None
-    video_path = os.path.join(os.getcwd(), "public", "videos", request.video_url.split("/")[-1])
+    video_path = os.path.join(os.getcwd(), "data", "media", request.video_url.split("/")[-1])
 
     if is_remote:
         fd, tmp_video_path = tempfile.mkstemp(suffix=".mp4")

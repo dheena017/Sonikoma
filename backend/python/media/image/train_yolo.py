@@ -208,8 +208,8 @@ def _train_worker(epochs: int, batch_size: int = 4):
     # __file__ is backend/python/media/image/train_yolo.py
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # backend/python
     project_root = os.path.abspath(os.path.join(base_dir, "..", "..")) # project root
-    training_data_dir = os.path.join(project_root, "training_data")
-    dataset_dir = os.path.abspath(os.path.join(base_dir, "temp", "yolo_dataset"))
+    training_data_dir = os.path.join(project_root, "data", "training_data")
+    dataset_dir = os.path.abspath(os.path.join(project_root, "data", "temp", "yolo_dataset"))
     lock_file_path = os.path.join(training_data_dir, "training.lock")
 
     lock_acquired = False
@@ -360,7 +360,7 @@ def trigger_fine_tuning(epochs: int = 20, batch_size: int = 4) -> bool:
     """Spawns a new training run background worker thread if not already running."""
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) # backend/python
     project_root = os.path.abspath(os.path.join(base_dir, "..", "..")) # project root
-    training_data_dir = os.path.join(project_root, "training_data")
+    training_data_dir = os.path.join(project_root, "data", "training_data")
     lock_file_path = os.path.join(training_data_dir, "training.lock")
 
     if status.to_dict()["is_training"] or is_training_locked(lock_file_path):
