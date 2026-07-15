@@ -56,8 +56,7 @@ sonikoma/
 │   │   └── clients.ts                ← Gemini & HuggingFace API configurations
 │   ├── database/
 │   │   ├── db.ts                     ← SQLite helper singleton (better-sqlite3)
-│   │   ├── schema.sql                ← Local SQL bootstrapping table setups
-│   │   └── webtoon_local.db          ← Git-ignored local DB file
+│   │   └── schema.sql                ← Local SQL bootstrapping table setups
 │   ├── routes/                       ← Express HTTP endpoints segregated by domain
 │   │   ├── health.ts
 │   │   ├── projects.ts
@@ -82,7 +81,13 @@ sonikoma/
 │       ├── cvUtils.py                ← Shared python OpenCV helper functions
 │       └── imageUtils.ts             ← Node image buffer fetch helpers
 │
-├── data/                             ← Output caches, file dumps, temp buffers
+├── data/                             ← Centralized stateful folder (ignored by Git)
+│   ├── webtoon_local.db              ← SQLite DB file
+│   ├── image_cache/                  ← Persistent scraped and edited image caches
+│   ├── training_data/                ← Human-corrected dataset for fine-tuning
+│   ├── scraped_html/                 ← Scraped raw HTML dump diagnostics
+│   ├── media/                        ← Final compiled videos (.mp4) and audios
+│   └── temp/                         ← System-wide and MoviePy intermediate processing files
 ├── tests/                            ← Code quality and integration scripts
 ├── requirements.txt                  ← Python script dependencies list
 └── package.json                      ← Node package scripts and dev options
