@@ -100,9 +100,27 @@ def _create_db_connection():
 
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    conn.execute('PRAGMA journal_mode = WAL')
+
+    # WAL improves concurrency, but on some environments (e.g. transient disk
+    # write issues / read-only mounts) SQLite can raise:
+    #   sqlite3.OperationalError: disk I/O error
+    # Auth and other read paths should still work, so we degrade gracefully.
+    try:
+        conn.execute('PRAGMA journal_mode = WAL')
+    except sqlite3.OperationalError as e:
+        logger.warning(
+            f"[Database] PRAGMA journal_mode=WAL failed; continuing without WAL. error={e}"
+        )
+        try:
+            # Explicitly set a safer journal mode if possible; otherwise just
+            # keep SQLite defaults.
+            conn.execute('PRAGMA journal_mode = DELETE')
+        except Exception:
+            pass
+
     conn.execute('PRAGMA foreign_keys = ON')
     return conn
+
 
 
 def get_db_connection():
