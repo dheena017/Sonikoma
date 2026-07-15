@@ -170,15 +170,6 @@ export function useSceneModifier({
     audioFeedback?.playTick();
   };
 
-  const handleModifyNarrative = (panelId: number, narrativeVal: string) => {
-    setPanels((prev) =>
-      prev.map((p) =>
-        p.id === panelId ? { ...p, narrative: narrativeVal } : p
-      )
-    );
-    audioFeedback?.playTick();
-  };
-
   const handleShiftPanel = (index: number, direction: "left" | "right") => {
     audioFeedback?.playTick();
     if (direction === "left" && index > 0) {
@@ -224,6 +215,5 @@ export function useSceneModifier({
     handleShiftPanel,
     handleModifySFX,
     handleModifyVisualDescription,
-    handleModifyNarrative,
   };
 }

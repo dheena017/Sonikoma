@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { X, Trash2, Sparkles } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { useStoryboardOperations } from "@/hooks/useStoryboardOperations";
 import { processWithConcurrency, chunkArray } from "@/utils/batchUtils";
@@ -778,7 +778,6 @@ const StoryboardTimeline = React.memo(
       handleShiftPanel,
       handleModifySFX,
       handleModifyVisualDescription,
-      handleModifyNarrative,
       handleBulkSetDuration,
       handleBulkSetMotion,
       handleBulkSetPreset,
@@ -822,20 +821,8 @@ const StoryboardTimeline = React.memo(
     return (
       <div
         id="panels_timeline_section"
-        className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 transition-all pb-24 relative"
+        className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 transition-all pb-24"
       >
-        {isAnalyzingAll && (
-          <div className="absolute inset-0 z-[60] bg-black/65 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-200">
-            <div className="relative flex items-center justify-center">
-              <div className="w-12 h-12 rounded-full border-4 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
-              <Sparkles className="w-5 h-5 text-indigo-400 absolute animate-pulse" />
-            </div>
-            <div className="text-center px-4">
-              <h4 className="text-sm font-bold text-white tracking-wide">Generating Narrative Sequence</h4>
-              <p className="text-xs text-neutral-400 mt-1">AI is composing story narrative and synthesizing TTS voiceover...</p>
-            </div>
-          </div>
-        )}
         <TimelineHeader
           showBulkOps={showBulkOps}
           setShowBulkOps={setShowBulkOps}
@@ -908,7 +895,6 @@ const StoryboardTimeline = React.memo(
               handleModifyDuration={handleModifyDuration}
               handleModifySFX={handleModifySFX}
               handleModifyVisualDescription={handleModifyVisualDescription}
-              handleModifyNarrative={handleModifyNarrative}
               handleAnalyzePanel={handleAnalyzePanel}
               handleCancelAnalysis={handleCancelAnalysis}
               isSelected={selectedPanelIds.has(panel.id)}

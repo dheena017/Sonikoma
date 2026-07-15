@@ -11,7 +11,6 @@ import { ErrorPopupDetail } from "../components/confirmationmodels/ErrorPopupMod
 import { parseWebtoonUrl } from "../utils/url";
 import { useAudioFeedback } from "./useAudioFeedback";
 import { LogEntry, normalizeLog } from "../types/logs";
-import { useProjectStore } from "../store/useProjectStore";
 
 export function useAppState() {
   const [user, setUser] = useState<any>(() => {
@@ -59,51 +58,10 @@ export function useAppState() {
     return true;
   });
 
-  const activeProjectData = useProjectStore((state) => state.activeProjectData);
-
-  const panels = useMemo(() => activeProjectData?.panels ?? [], [activeProjectData]);
-  const setPanels = useCallback((val: GeneratedPanel[] | ((prev: GeneratedPanel[]) => GeneratedPanel[])) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    const currentPanels = cur?.panels ?? [];
-    const nextPanels = typeof val === "function" ? val(currentPanels) : val;
-    useProjectStore.getState().setActiveProject({
-      project: cur?.project ?? { project_id: "", title: "", url: "" },
-      panels: nextPanels,
-    });
-  }, []);
-
-  const projectId = activeProjectData?.project?.project_id ?? null;
-  const setProjectId = useCallback((val: string | null) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    if (!val) {
-      useProjectStore.getState().clearActiveProject();
-      return;
-    }
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { title: "", url: "" }), project_id: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
-
-  const seriesSlugState = activeProjectData?.project?.series_slug ?? null;
-  const setSeriesSlugState = useCallback((val: string | null) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    if (!cur) return;
-    useProjectStore.getState().setActiveProject({
-      ...cur,
-      project: { ...cur.project, series_slug: val },
-    });
-  }, []);
-
-  const chapterSlugState = activeProjectData?.project?.chapter_slug ?? null;
-  const setChapterSlugState = useCallback((val: string | null) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    if (!cur) return;
-    useProjectStore.getState().setActiveProject({
-      ...cur,
-      project: { ...cur.project, chapter_slug: val },
-    });
-  }, []);
+  const [panels, setPanels] = useState<GeneratedPanel[]>([]);
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [seriesSlugState, setSeriesSlugState] = useState<string | null>(null);
+  const [chapterSlugState, setChapterSlugState] = useState<string | null>(null);
   const [consoleLogs, setRawConsoleLogs] = useState<LogEntry[]>([]);
   const [characters, setCharacters] = useState<CharacterBio[]>([]);
 
@@ -237,25 +195,19 @@ export function useAppState() {
   const [errorPopup, setErrorPopup] = useState<ErrorPopupDetail | null>(null);
 
   // Settings — all useState MUST come before any useCallback/useEffect
-  const targetUrl = activeProjectData?.project?.url ?? (() => {
-    try {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("idx") !== null) {
-          return "https://www.webtoons.com/en/fantasy/tower-of-god/season-3-ep-1/viewer?title_no=95&episode_no=418";
+  const [targetUrl, setTargetUrl] = useState<string>(
+    () => {
+      try {
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get("idx") !== null) {
+            return "https://www.webtoons.com/en/fantasy/tower-of-god/season-3-ep-1/viewer?title_no=95&episode_no=418";
+          }
         }
-      }
-    } catch (e) {}
-    return localStorage.getItem("ai_comic_url") || "";
-  })();
-  
-  const setTargetUrl = useCallback((val: string) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "" }), url: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
+      } catch (e) {}
+      return localStorage.getItem("ai_comic_url") || "";
+    }
+  );
   const [voiceActor, setVoiceActor] = useState<string>(
     () =>
       localStorage.getItem("ai_comic_voice") || "Standard Comic Narrator (Male)"
@@ -325,16 +277,7 @@ export function useAppState() {
 
   const audioFeedback = useAudioFeedback(sfxVolume, !sfxEnabled);
 
-  const videoUrl = activeProjectData?.project?.video_url ?? null;
-  const setVideoUrl = useCallback((val: string | null) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    if (!cur) return;
-    useProjectStore.getState().setActiveProject({
-      ...cur,
-      project: { ...cur.project, video_url: val },
-    });
-  }, []);
-
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
   const [isScraping, setIsScraping] = useState<boolean>(false);
   const [narrationStyle, setNarrationStyle] = useState<string>(
@@ -343,78 +286,16 @@ export function useAppState() {
   const [smartSlice, setSmartSlice] = useState<boolean>(
     () => localStorage.getItem("ai_comic_smart_slice") !== "false"
   );
-
-  const scrapedTitle = activeProjectData?.project?.title || "Overpowered S-Rank Recap";
-  const setScrapedTitle = useCallback((val: string) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", url: "" }), title: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
-
-  const scrapedGenre = activeProjectData?.project?.genre ?? "Fantasy Action";
-  const setScrapedGenre = useCallback((val: string) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), genre: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
-
-  const seriesTitle = activeProjectData?.project?.title ?? "";
-  const setSeriesTitle = useCallback((val: string) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", url: "" }), title: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
-
-  const chapterNumber = activeProjectData?.project?.chapterNumber ?? "";
-  const setChapterNumber = useCallback((val: string) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), chapterNumber: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
-
-  const chapterTitle = activeProjectData?.project?.chapterTitle ?? "";
-  const setChapterTitle = useCallback((val: string) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), chapterTitle: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
-
-  const seriesAuthor = activeProjectData?.project?.author ?? "";
-  const setSeriesAuthor = useCallback((val: string) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), author: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
-
-  const seriesCoverImage = activeProjectData?.project?.cover_image ?? "";
-  const setSeriesCoverImage = useCallback((val: string) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), cover_image: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
-
-  const seriesSynopsis = activeProjectData?.project?.synopsis ?? "";
-  const setSeriesSynopsis = useCallback((val: string) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), synopsis: val },
-      panels: cur?.panels ?? [],
-    });
-  }, []);
+  const [scrapedTitle, setScrapedTitle] = useState<string>(
+    "Overpowered S-Rank Recap"
+  );
+  const [scrapedGenre, setScrapedGenre] = useState<string>("Fantasy Action");
+  const [seriesTitle, setSeriesTitle] = useState<string>("");
+  const [chapterNumber, setChapterNumber] = useState<string>("");
+  const [chapterTitle, setChapterTitle] = useState<string>("");
+  const [seriesAuthor, setSeriesAuthor] = useState<string>("");
+  const [seriesCoverImage, setSeriesCoverImage] = useState<string>("");
+  const [seriesSynopsis, setSeriesSynopsis] = useState<string>("");
 
   useEffect(() => {
     if (projectId) return;
@@ -732,11 +613,15 @@ export function useAppState() {
       if (!urlProjectId && !chapterSlug) {
         // If we cleared the state (navigated to clean /workspace), reset workspace
         if (path === "/workspace") {
-          useProjectStore.getState().clearActiveProject();
+          setProjectId(null);
+          setSeriesSlugState(null);
+          setChapterSlugState(null);
           localStorage.removeItem("active_project_id");
           localStorage.removeItem("active_series_slug");
           localStorage.removeItem("active_chapter_slug");
+          setPanels([]);
           setScrapedImages([]);
+          setTargetUrl("");
         }
         return;
       }
@@ -751,16 +636,9 @@ export function useAppState() {
         return;
 
       if (lookupId.startsWith("temp_")) {
-        useProjectStore.getState().setActiveProject({
-          project: {
-            project_id: lookupId,
-            title: "",
-            url: "",
-            series_slug: null,
-            chapter_slug: null,
-          },
-          panels: [],
-        });
+        setProjectId(lookupId);
+        setSeriesSlugState(null);
+        setChapterSlugState(null);
         localStorage.setItem("active_project_id", lookupId);
         localStorage.removeItem("active_series_slug");
         localStorage.removeItem("active_chapter_slug");
@@ -775,6 +653,9 @@ export function useAppState() {
         const token = getToken();
         const data = await api.getProject(fetchWithInterceptor, lookupId);
         if (data.success && data.project) {
+          setProjectId(data.project.project_id);
+          setSeriesSlugState(data.project.series_slug || null);
+          setChapterSlugState(data.project.chapter_slug || null);
           localStorage.setItem("active_project_id", data.project.project_id);
           if (data.project.series_slug) {
             localStorage.setItem(
@@ -798,6 +679,8 @@ export function useAppState() {
               window.history.replaceState(null, "", newPath);
             }
           }
+          setTargetUrl(data.project.url || "");
+          setVideoUrl(data.project.video_url || null);
 
           // Populate details from loaded project
           const loadedSettings = data.project.audio_settings || {};
@@ -850,43 +733,52 @@ export function useAppState() {
             setSubtitlesStyle(loadedSettings.subtitlesStyle);
           }
 
-          let loadedChapterNumber = "";
-          let loadedChapterTitle = "";
+          if (data.project.cover_image) {
+            setSeriesCoverImage(data.project.cover_image);
+          }
+          if (data.project.title) {
+            setSeriesTitle(data.project.title);
+            setScrapedTitle(data.project.title);
+          }
+          if (data.project.author) {
+            setSeriesAuthor(data.project.author);
+          }
+          if (data.project.synopsis) {
+            setSeriesSynopsis(data.project.synopsis);
+          }
+          if (data.project.genre) {
+            setScrapedGenre(data.project.genre);
+          }
           if (data.project.episode) {
             const epStr = data.project.episode;
             const epParts = epStr.split(" - ");
-            loadedChapterNumber = epParts[0].replace("Chapter ", "").trim();
-            loadedChapterTitle = epParts.slice(1).join(" - ").trim();
+            const numStr = epParts[0].replace("Chapter ", "").trim();
+            const nameStr = epParts.slice(1).join(" - ").trim();
+            setChapterNumber(numStr);
+            setChapterTitle(nameStr);
           }
 
-          const mappedPanels = data.panels ? data.panels.map((p: any) => {
-            const img = p.image_url;
-            const proxiedImg =
-              img && img.startsWith("http") && !api.isApiUrl(img)
-                ? api.getProxyImageUrl(img)
-                : img;
-            return {
-              ...p,
-              image_url: proxiedImg,
-              grayscale: p.grayscale === 1 || p.grayscale === true,
-            };
-          }) : [];
+          if (data.panels && data.panels.length > 0) {
+            const mappedPanels = data.panels.map((p: any) => {
+              const img = p.image_url;
+              const proxiedImg =
+                img && img.startsWith("http") && !api.isApiUrl(img)
+                  ? api.getProxyImageUrl(img)
+                  : img;
+              return {
+                ...p,
+                image_url: proxiedImg,
+                grayscale: p.grayscale === 1 || p.grayscale === true,
+              };
+            });
+            setPanels(mappedPanels);
 
-          // Save directly to global Zustand store in a single transaction
-          useProjectStore.getState().setActiveProject({
-            project: {
-              ...data.project,
-              chapterNumber: loadedChapterNumber,
-              chapterTitle: loadedChapterTitle,
-            },
-            panels: mappedPanels,
-          });
-
-          // Populate scraped images list from panels
-          const panelImages = mappedPanels
-            .map((p: any) => p.image_url)
-            .filter(Boolean);
-          setScrapedImages(panelImages);
+            // Populate scraped images list from panels
+            const panelImages = mappedPanels
+              .map((p: any) => p.image_url)
+              .filter(Boolean);
+            setScrapedImages(panelImages);
+          }
           addNotification(
             `Loaded project "${
               data.project.title || "Untitled"
@@ -1050,11 +942,22 @@ export function useAppState() {
   }, [smartSlice]);
 
   const resetWorkspace = useCallback(() => {
-    useProjectStore.getState().clearActiveProject();
+    setProjectId(null);
+    setSeriesSlugState(null);
+    setChapterSlugState(null);
     localStorage.removeItem("active_project_id");
     localStorage.removeItem("active_series_slug");
     localStorage.removeItem("active_chapter_slug");
+    setPanels([]);
     setScrapedImages([]);
+    setVideoUrl(null);
+    setSeriesTitle("");
+    setChapterNumber("");
+    setChapterTitle("");
+    setScrapedGenre("Fantasy Action");
+    setSeriesAuthor("");
+    setSeriesCoverImage("");
+    setSeriesSynopsis("");
     setRawConsoleLogs([
       normalizeLog(`[System] Workspace initialized for new project.`),
     ]);

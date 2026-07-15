@@ -59,7 +59,6 @@ export function useStoryboardOperations({
     handleShiftPanel,
     handleModifySFX,
     handleModifyVisualDescription,
-    handleModifyNarrative,
   } = useSceneModifier({
     panels,
     setPanels,
@@ -126,7 +125,6 @@ export function useStoryboardOperations({
     handleShiftPanel,
     handleModifySFX,
     handleModifyVisualDescription,
-    handleModifyNarrative,
     handleBulkSetDuration,
     handleBulkSetMotion,
     handleBulkSetPreset,

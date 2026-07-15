@@ -577,7 +577,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   {playerSettings.isPlayerOpen && (
                     <div className="w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4">
                       {/* Header */}
-                      <div className="flex items-center justify-between border-b border-neutral-800 pb-3 flex-wrap md:flex-nowrap gap-4">
+                      <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
                         <div className="flex items-center gap-2">
                           <h3 className="font-bold text-sm text-white uppercase tracking-wider font-sans">
                             ADAPTATION PLAYER
@@ -586,20 +586,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
                             LIVE
                           </span>
                         </div>
-
-                        <OutputMetadataPanel
-                          videoUrl={videoUrl}
-                          musicTheme={musicTheme}
-                          voiceActor={voiceActor}
-                          navigateTo={navigateTo}
-                        />
-
                         <button
                           type="button"
                           onClick={() => {
                             useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
                           }}
-                          className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold font-mono active:scale-95 shrink-0"
+                          className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold font-mono active:scale-95"
                         >
                           <X className="h-3.5 w-3.5" />
                           Hide Player
@@ -740,12 +732,17 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       />
                     </div>
                   </div>
-                  {/* Final Production panel below timeline */}
-                  <div
+                  {/* Final Production panel and metadata below timeline */}
+                    <div
                     id="section-production"
-                    className="w-full max-w-[1600px] ml-0 mr-0 mt-12 pt-8 border-t border-white/5"
+                    className="w-full max-w-[1600px] ml-0 mr-0 mt-12 space-y-6 pt-8 border-t border-white/5"
                   >
                     <FinalProductionPanel />
+                    <OutputMetadataPanel
+                      videoUrl={videoUrl}
+                      musicTheme={musicTheme}
+                      voiceActor={voiceActor}
+                    />
                   </div>
                 </>
               )}

@@ -23,7 +23,6 @@ interface TimelineCardProps {
   handleModifyDuration: (id: number, val: number) => void;
   handleModifySFX: (id: number, val: string) => void;
   handleModifyVisualDescription: (id: number, val: string) => void;
-  handleModifyNarrative?: (id: number, val: string) => void;
   handleAnalyzePanel: (id: number, url: string) => void;
   handleCancelAnalysis?: () => void;
   isSelected: boolean;
@@ -224,7 +223,6 @@ const TimelineCard = ({
   handleModifyDuration,
   handleModifySFX,
   handleModifyVisualDescription,
-  handleModifyNarrative,
   handleAnalyzePanel,
   handleCancelAnalysis,
   isSelected,
@@ -450,6 +448,10 @@ const TimelineCard = ({
       }, 250);
     };
   };
+
+  function handleModifyNarrative(id: number, value: string): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <div
