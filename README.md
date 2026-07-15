@@ -93,7 +93,7 @@ HUGGINGFACE_API_KEY="hf_..."
 npm run start
 ```
 
-The frontend app opens at **http://localhost:3000** while the backend API listens on **http://localhost:5173**.
+The ports are strictly validated on startup from the `.env` file (`FRONTEND_PORT`, `BACKEND_PORT`, and `APP_URL`). By default, the frontend app opens at **http://localhost:3000** (defined by `FRONTEND_PORT` and `APP_URL`) while the backend API listens on **http://localhost:5173** (defined by `BACKEND_PORT`).
 
 ---
 

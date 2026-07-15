@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from config.ports import APP_URL
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 import bcrypt
@@ -487,7 +488,7 @@ async def google_callback(request: Request):
             user["google_id"] = google_id
 
         access_token = create_access_token(data={"sub": user["user_id"]})
-        frontend_url = "http://localhost:3000"
+        frontend_url = APP_URL
         return RedirectResponse(f"{frontend_url}/?token={access_token}")
     except Exception as e:
         logger.error(f"[Google Auth] Callback processing error: {e}")
