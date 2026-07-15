@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { useAppState } from "./useAppState.js";
 import * as api from "../api/index.js";
+import { useProjectStore } from "../store/useProjectStore.js";
 import { usePlaybackEngine } from "./usePlaybackEngine.js";
 import { usePipelineActions } from "./usePipelineActions.js";
 import { parseWebtoonUrl } from "../utils.js";
@@ -495,34 +496,46 @@ export function useAppLogic() {
             }
           }
 
-          if (data.panels && data.panels.length > 0) {
-            const mappedPanels = data.panels.map((p: any) => ({
-              ...p,
-              grayscale: p.grayscale === 1 || p.grayscale === true,
-            }));
-            state.setPanels(mappedPanels);
-          } else {
-            state.setPanels([]);
-          }
+          const resolvedPanels =
+            data.panels && data.panels.length > 0
+              ? data.panels.map((p: any) => ({
+                  ...p,
+                  grayscale: p.grayscale === 1 || p.grayscale === true,
+                }))
+              : finalImages.map((url: string) => ({ image_url: url }));
 
-          if (data.cover_image) state.setSeriesCoverImage(data.cover_image);
-          if (data.title) {
-            state.setSeriesTitle(data.title);
-            state.setScrapedTitle(data.title);
-          }
-          if (data.author) state.setSeriesAuthor(data.author);
-          if (data.synopsis) state.setSeriesSynopsis(data.synopsis);
-          if (data.genre) state.setScrapedGenre(data.genre);
-
+          let loadedChapterNumber = "";
+          let loadedChapterTitle = "";
           if (data.episode) {
             const epMatch = data.episode.match(
               /^Chapter\s+(\d+)(?:\s+-\s+(.+))?$/i
             );
             if (epMatch) {
-              state.setChapterNumber(epMatch[1]);
-              state.setChapterTitle(epMatch[2] || "");
+              loadedChapterNumber = epMatch[1];
+              loadedChapterTitle = epMatch[2] || "";
+            } else {
+              const epParts = data.episode.split(" - ");
+              loadedChapterNumber = epParts[0].replace("Chapter ", "").trim();
+              loadedChapterTitle = epParts.slice(1).join(" - ").trim();
             }
           }
+
+          useProjectStore.getState().setActiveProject({
+            project: {
+              project_id: data.project_id || state.projectId || "",
+              title: data.title || state.seriesTitle || "",
+              url: normalizedTargetUrl,
+              series_slug: data.series_slug || null,
+              chapter_slug: data.chapter_slug || null,
+              author: data.author || "",
+              cover_image: data.cover_image || "",
+              synopsis: data.synopsis || "",
+              genre: data.genre || "",
+              chapterNumber: loadedChapterNumber,
+              chapterTitle: loadedChapterTitle,
+            },
+            panels: resolvedPanels,
+          });
 
           setCurrentPanelIndex(0);
           setPlaybackTime(0);
