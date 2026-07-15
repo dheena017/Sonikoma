@@ -23,6 +23,7 @@ interface TimelineCardProps {
   handleModifyDuration: (id: number, val: number) => void;
   handleModifySFX: (id: number, val: string) => void;
   handleModifyVisualDescription: (id: number, val: string) => void;
+  handleModifyNarrative?: (id: number, val: string) => void;
   handleAnalyzePanel: (id: number, url: string) => void;
   handleCancelAnalysis?: () => void;
   isSelected: boolean;
@@ -223,6 +224,7 @@ const TimelineCard = ({
   handleModifyDuration,
   handleModifySFX,
   handleModifyVisualDescription,
+  handleModifyNarrative,
   handleAnalyzePanel,
   handleCancelAnalysis,
   isSelected,
@@ -588,6 +590,25 @@ const TimelineCard = ({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.speech_text}
           onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
+          placeholder=""
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
+            panel.isAnalyzing || analyzingPanelId === panel.id
+              ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
+              : ""
+          }`}
+        />
+      </div>
+
+      {/* Narrative Text Editable Input */}
+      <div className="space-y-1.5">
+        <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
+          Narrative Text
+        </label>
+        <textarea
+          rows={2}
+          disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+          value={panel.narrative || ""}
+          onChange={(e) => handleModifyNarrative && handleModifyNarrative(panel.id, e.target.value)}
           placeholder=""
           className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id

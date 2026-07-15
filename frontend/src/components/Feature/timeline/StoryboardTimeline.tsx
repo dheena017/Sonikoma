@@ -778,6 +778,7 @@ const StoryboardTimeline = React.memo(
       handleShiftPanel,
       handleModifySFX,
       handleModifyVisualDescription,
+      handleModifyNarrative,
       handleBulkSetDuration,
       handleBulkSetMotion,
       handleBulkSetPreset,
@@ -895,6 +896,7 @@ const StoryboardTimeline = React.memo(
               handleModifyDuration={handleModifyDuration}
               handleModifySFX={handleModifySFX}
               handleModifyVisualDescription={handleModifyVisualDescription}
+              handleModifyNarrative={handleModifyNarrative}
               handleAnalyzePanel={handleAnalyzePanel}
               handleCancelAnalysis={handleCancelAnalysis}
               isSelected={selectedPanelIds.has(panel.id)}

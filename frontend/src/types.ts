@@ -57,6 +57,8 @@ export interface GeneratedPanel {
   layers?: PanelLayers;
   syncMap?: PanelSyncMap;
   audio_reactive_shake?: boolean;
+  narrative?: string;
+  narrative_audio_url?: string;
 }
 
 export interface CharacterBio {

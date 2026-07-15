@@ -101,6 +101,10 @@ export default function AudioSettingsPage({
   const [availableVoices, setAvailableVoices] = useState<Array<{ code: string; label: string }>>([]);
   const [loadingVoices, setLoadingVoices] = useState(false);
 
+  const [localNarratorVoice, setLocalNarratorVoice] = useState<string>(
+    () => localStorage.getItem("ai_comic_narrator_voice") || "Sultry Narrative Tone (Female)"
+  );
+
   // 1. Resolve projectId from URL query parameters if not passed as prop
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -140,6 +144,9 @@ export default function AudioSettingsPage({
       onSave();
       return;
     }
+
+    // Save narrator voice choice directly
+    localStorage.setItem("ai_comic_narrator_voice", localNarratorVoice);
 
     if (!projectId) {
       // Local Storage Fallback if no project is active
@@ -384,6 +391,31 @@ export default function AudioSettingsPage({
                     onChange={(e) => {
                       const val = e.target.value;
                       setVoiceActor(val);
+                    }}
+                    className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
+                  >
+                    {displayVoices.map((voice) => (
+                      <option key={voice.code} value={voice.code}>
+                        {voice.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Dedicated Narrator Voice Profile */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between gap-1.5 font-mono">
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                      Dedicated Narrator Voice Profile
+                    </span>
+                  </label>
+                  <select
+                    value={localNarratorVoice}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setLocalNarratorVoice(val);
+                      localStorage.setItem("ai_comic_narrator_voice", val);
                     }}
                     className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
                   >

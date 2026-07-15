@@ -99,6 +99,12 @@ class AnalyzeSequenceRequest(BaseModel):
     voice: Optional[str] = "en-US-GuyNeural"
 
 
+class AnalyzeNarrativeSequenceRequest(BaseModel):
+    visual_descriptions: List[str]
+    model: Optional[str] = "gemini-2.5-flash"
+    voice: Optional[str] = "en-US-GuyNeural"
+
+
 class ListModelsRequest(BaseModel):
     apiKey: Optional[str] = None
     provider: Optional[str] = "gemini"
@@ -920,6 +926,131 @@ async def analyze_batch(body: AnalyzeBatchRequest, user_api_key: str = Depends(g
         "latencyMs": elapsed,
         "avgMs": elapsed // len(results) if len(results) > 0 else 0
     }
+
+@router.post("/narratives/analyze-sequence", summary="Generate chronological narrative/voiceovers sequentially and synthesize TTS")
+async def analyze_narrative_sequence(
+    body: AnalyzeNarrativeSequenceRequest,
+    user_api_key: str = Depends(get_user_gemini_key),
+    current_user: dict = Depends(get_current_user)
+):
+    start_time = time.time()
+    logger.info(f"[Narrative Sequence] Received request to generate narrative for {len(body.visual_descriptions)} panels.")
+
+    if not body.visual_descriptions:
+        raise HTTPException(status_code=400, detail="Visual descriptions list cannot be empty")
+
+    COST = min(50, len(body.visual_descriptions) * 3)
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
+    target_model = body.model or MODEL_FALLBACKS[0]
+    if target_model.lower().startswith("gemini") and "gemini-3.5" in target_model.lower():
+        target_model = "gemini-2.5-flash"
+
+    try:
+        from skills.base import get_provider_and_model, resolve_api_key
+        provider, clean_model = get_provider_and_model(target_model)
+
+        if provider != "gemini":
+            provider = "gemini"
+            clean_model = "gemini-2.5-flash"
+
+        system_instruction = f"""
+        You are an elite voiceover narrator for a cinematic story.
+        You are given a sequence of {len(body.visual_descriptions)} consecutive scenes described visually:
+        {json.dumps(body.visual_descriptions, indent=2)}
+
+        Analyze the scene sequence and create a cohesive, chronological storytelling voiceover narrative (exactly one short, dramatic sentence or paragraph per scene, between 15 and 45 words each) that flows beautifully from one frame to the next like a professional YouTube recap narrator.
+
+        You MUST return ONLY a JSON array of strings containing exactly {len(body.visual_descriptions)} strings.
+        Example output format:
+        [
+          "The warrior stands at the precipice, looking down at the dark, desolate land.",
+          "Suddenly, a brilliant flare of energy erupts from the sky, blinding everyone nearby."
+        ]
+        """
+
+        from google import genai
+        from google.genai import types
+
+        gemini_key = resolve_api_key("gemini", user_keys=user_api_key)
+        client = genai.Client(api_key=gemini_key)
+
+        response = await call_gemini_with_retry(
+            lambda: client.models.generate_content(
+                model=clean_model,
+                contents=system_instruction,
+                config=types.GenerateContentConfig(response_mime_type="application/json")
+            )
+        )
+        raw_text = getattr(response, "text", None)
+
+        if not raw_text:
+            raise HTTPException(status_code=500, detail="Gemini model returned an empty narrative response.")
+
+        from skills.base import extract_json
+        narrative_texts = json.loads(extract_json(raw_text))
+
+        if not isinstance(narrative_texts, list):
+            raise HTTPException(status_code=500, detail="Narrative AI did not return a JSON list of strings.")
+
+        while len(narrative_texts) < len(body.visual_descriptions):
+            narrative_texts.append("The story continues silently.")
+        narrative_texts = narrative_texts[:len(body.visual_descriptions)]
+
+        results = []
+        semaphore = asyncio.Semaphore(5)
+
+        async def process_narrative_audio(idx: int, text: str):
+            async with semaphore:
+                audio_url = None
+                try:
+                    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
+                        temp_audio_path = tmp_audio.name
+
+                    voice_code = body.voice or "en-US-GuyNeural"
+                    _, actual_dur = await generate_panel_audio(
+                        dialogue_list=[text],
+                        target_duration=0.0,
+                        output_path=temp_audio_path,
+                        voice=voice_code,
+                        force_duration=False
+                    )
+
+                    if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
+                        with open(temp_audio_path, "rb") as f:
+                            audio_bytes = f.read()
+                        import uuid
+                        unique_audio_id = f"narrative_{uuid.uuid4().hex[:8]}"
+                        stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
+                        audio_url = f"/api/image/cached/{unique_audio_id}"
+
+                    if os.path.exists(temp_audio_path):
+                        os.remove(temp_audio_path)
+                except Exception as audio_err:
+                    logger.error(f"[Narrative Sequence] Audio gen failed for narrative index {idx}: {audio_err}")
+
+                return {
+                    "narrative": text,
+                    "narrative_audio_url": audio_url
+                }
+
+        tasks = [process_narrative_audio(idx, text) for idx, text in enumerate(narrative_texts)]
+        results = await asyncio.gather(*tasks)
+
+        record_credit_transaction(current_user["user_id"], -COST, "analyze_narrative_sequence")
+
+        elapsed = int((time.time() - start_time) * 1000)
+        return {
+            "success": True,
+            "results": results,
+            "latencyMs": elapsed
+        }
+
+    except Exception as e:
+        logger.error(f"[Narrative Sequence] Failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/analyze-sequence", summary="Analyze multiple panels together for context-aware narrative")
 async def analyze_sequence(body: AnalyzeSequenceRequest, user_api_key: str = Depends(get_user_gemini_key), current_user: dict = Depends(get_current_user)):
