@@ -9,7 +9,7 @@
     "frontend:dev": "npm run frontend",
     "backend": "node scripts/run-backend.js",
     "python": "npm run backend",
-    "python:prod": "cd backend/python && cross-env NODE_ENV=production ..\\..\\.venv\\Scripts\\python.exe main.py",
+    "python:prod": "cd backend/app && cross-env NODE_ENV=production ..\\..\\.venv\\Scripts\\python.exe main.py",
     "frontend": "node scripts/run-frontend.js --only-frontend",
     "build:frontend": "vite build --config frontend/vite.config.ts",
     "build": "npm run build:frontend",

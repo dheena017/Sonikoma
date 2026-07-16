@@ -472,7 +472,7 @@ async def lifespan(app: FastAPI):
 
     # Clean up stale training lock file on startup (safely using local paths)
     try:
-        base_dir = os.path.dirname(os.path.abspath(__file__)) # backend/python
+        base_dir = os.path.dirname(os.path.abspath(__file__)) # backend/app
         project_root = os.path.abspath(os.path.join(base_dir, "..", ".."))
         training_dir = os.path.join(project_root, "data", "training_data")
         lock_file = os.path.join(training_dir, "training.lock")
@@ -565,7 +565,7 @@ async def lifespan(app: FastAPI):
         logger.warning("GEMINI_API_KEY not set - AI panel analysis disabled")
 
     # AI model connection tests disabled — run manually via:
-    #   python backend/python/utils/ai_test.py
+    #   python backend/app/utils/ai_test.py
     # try:
     #     from utils.ai_test import run_ai_connection_tests
     #     await run_ai_connection_tests()

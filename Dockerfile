@@ -45,5 +45,5 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Start the unified FastAPI application
-WORKDIR /app/backend/python
+WORKDIR /app/backend/app
 CMD ["python", "main.py"]

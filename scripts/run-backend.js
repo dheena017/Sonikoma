@@ -104,7 +104,7 @@ if (!geminiApiKey) {
 const pythonPath = process.platform === "win32"
   ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
   : "python3";
-const backendDir = path.resolve(__dirname, "../backend/python");
+const backendDir = path.resolve(__dirname, "../backend/app");
 
 let pyProcess = null;
 let isRestarting = false;

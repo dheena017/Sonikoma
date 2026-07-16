@@ -5,8 +5,8 @@ import shutil
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-# Add backend/python to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'python')))
+# Add backend/app to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app')))
 
 from routes.image_routes import router as image_router
 from media.image.train_yolo import status

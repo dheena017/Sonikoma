@@ -2,9 +2,9 @@
     "DockerRun.DisableDockerrc": true,
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
     "python.analysis.extraPaths": [
-        "${workspaceFolder}/backend/python"
+        "${workspaceFolder}/backend/app"
     ],
     "python.autoComplete.extraPaths": [
-        "${workspaceFolder}/backend/python"
+        "${workspaceFolder}/backend/app"
     ]
 }

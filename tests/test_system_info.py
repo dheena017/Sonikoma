@@ -3,17 +3,17 @@ from unittest.mock import patch, MagicMock
 import sys
 import os
 
-# Add backend directory to sys.path so it can find python.utils
+# Add backend directory to sys.path so it can find app.utils
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend')))
 
-from python.utils.system_info import get_engine_snapshot
+from app.utils.system_info import get_engine_snapshot
 
 class TestSystemInfo(unittest.TestCase):
 
-    @patch('python.utils.system_info.psutil')
-    @patch('python.utils.system_info.platform')
-    @patch('python.utils.system_info.time')
-    @patch('python.utils.system_info.os')
+    @patch('app.utils.system_info.psutil')
+    @patch('app.utils.system_info.platform')
+    @patch('app.utils.system_info.time')
+    @patch('app.utils.system_info.os')
     def test_get_engine_snapshot_success(self, mock_os, mock_time, mock_platform, mock_psutil):
         # Setup mocks
         mock_os.getpid.return_value = 1234
@@ -60,7 +60,7 @@ class TestSystemInfo(unittest.TestCase):
         self.assertEqual(result, expected)
         mock_psutil.Process.assert_called_once_with(1234)
 
-    @patch('python.utils.system_info.psutil')
+    @patch('app.utils.system_info.psutil')
     def test_get_engine_snapshot_exception(self, mock_psutil):
         # Setup mock to raise an exception
         mock_psutil.Process.side_effect = Exception("Some internal error")

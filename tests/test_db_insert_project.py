@@ -3,7 +3,7 @@ import sys
 import tempfile
 import unittest
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend', 'python'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app'))
 
 import database.db as db
 

@@ -3,8 +3,8 @@ import os
 import io
 from PIL import Image
 
-# Add backend/python to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'python')))
+# Add backend/app to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app')))
 
 # pyrefly: ignore [missing-import]
 from utils.image_utils import stitch_images_together

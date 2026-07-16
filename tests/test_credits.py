@@ -18,7 +18,7 @@ import shutil
 import threading
 import unittest
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend", "python"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend", "app"))
 
 import database.db as db
 

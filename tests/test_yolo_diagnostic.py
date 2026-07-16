@@ -4,7 +4,7 @@ Quick YOLO model diagnostic — run from the project root using the backend venv
 """
 import sys, os
 sys.stdout.reconfigure(encoding='utf-8')
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "backend", "python"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "backend", "app"))
 
 def run():
     print("=" * 60)

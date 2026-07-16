@@ -135,7 +135,7 @@ export default defineConfig(({ mode, command }) => {
                   __dirname,
                   "../.venv/Scripts/python.exe"
                 );
-                const backendDir = path.resolve(__dirname, "../backend/python");
+                const backendDir = path.resolve(__dirname, "../backend/app");
 
                 if (!fs.existsSync(pythonPath)) {
                   res.writeHead(500, { "Content-Type": "application/json" });

@@ -14,8 +14,8 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-# Add backend/python to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'python')))
+# Add backend/app to path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app')))
 
 from routes.ai_routes import router as ai_router
 from routes.auth_routes import get_current_user

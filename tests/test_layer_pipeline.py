@@ -10,8 +10,8 @@ import numpy as np
 from PIL import Image
 from unittest.mock import patch, MagicMock
 
-# Inject backend/python into sys.path to correctly import modules
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'python')))
+# Inject backend/app into sys.path to correctly import modules
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app')))
 
 from media.image.layer_segmentation import process_layers
 from media.audio.dialogue_aligner import align_dialogue_and_extract_peaks
