@@ -61,15 +61,22 @@ function PanelCard({
 
   const [dimensions, setDimensions] = React.useState<{ width: number; height: number } | null>(null);
 
+  const proxiedUrl = React.useMemo(() => {
+    if (!imgUrl) return "";
+    return imgUrl.startsWith("/api/proxy-image")
+      ? imgUrl
+      : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+  }, [imgUrl]);
+
   React.useEffect(() => {
-    if (!imgUrl) return;
+    if (!proxiedUrl) return;
     const img = new Image();
-    img.src = imgUrl;
+    img.src = proxiedUrl;
     
     img.onload = () => {
       setDimensions({ width: img.naturalWidth, height: img.naturalHeight });
     };
-  }, [imgUrl]);
+  }, [proxiedUrl]);
 
   const getAspectRatioLabel = () => {
     if (!dimensions) return null;
@@ -241,7 +248,7 @@ function PanelCard({
       ].join(" ")}
     >
       <PanelCardThumbnail
-        imgUrl={imgUrl}
+        imgUrl={proxiedUrl}
         idx={idx}
         isSelected={isSelected}
         isProcessing={isProcessing}

@@ -532,16 +532,10 @@ const LiveScraperDeck = React.memo(
                 {scrapedImages.map((imgUrl, idx) => {
                   const isSelected = selectedScraped.includes(imgUrl);
 
-                  // IMPORTANT: PanelCard's useEffect loads `imgUrl` directly via `img.src`.
-                  // Ensure we never pass raw Webtoon URLs into PanelCard.
-                  const proxiedUrl = imgUrl?.startsWith("/api/proxy-image")
-                    ? imgUrl
-                    : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
-
                   return (
                     <PanelCard
                       key={`${imgUrl}-${idx}`}
-                      imgUrl={proxiedUrl}
+                      imgUrl={imgUrl}
                       idx={idx}
                       isSelected={isSelected}
                       isBatchCropping={isBatchCropping}
