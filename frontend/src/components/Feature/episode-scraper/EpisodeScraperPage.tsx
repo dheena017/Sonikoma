@@ -1,7 +1,7 @@
 import React from "react";
 import { Zap, ArrowLeft } from "lucide-react";
 import { EpisodeScraper } from "./EpisodeScraper";
-import { NotificationType } from "@/components/notification/NotificationStack";
+import { NotificationType } from "@/components/notification";
 import { resolveWorkspaceReturnPath } from "../../../utils/workspaceNavigation";
 
 interface EpisodeScraperPageProps {

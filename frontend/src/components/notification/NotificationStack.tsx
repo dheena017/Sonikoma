@@ -2,22 +2,7 @@ import React, { useState } from "react";
 import { X, Play } from "lucide-react";
 import { useNotificationCountdown } from "./hooks";
 import { getToastStyles, getToastIcon, getToastTitle } from "./utils";
-
-export type NotificationType = "error" | "success" | "info" | "warning";
-
-export interface Notification {
-  id: number;
-  message: string;
-  type: NotificationType;
-  errorCode?: number;
-  retryDelay?: number;
-  onRetry?: () => void;
-  timestamp: number;
-  details?: string;
-  link?: string;
-  isRead: boolean;
-  toastDismissed?: boolean;
-}
+import { Notification } from "./types";
 
 interface NotificationStackProps {
   notifications: Notification[];

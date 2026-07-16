@@ -18,7 +18,7 @@ import glob
 import base64
 
 from typing import List, Optional, Literal, Dict, Any
-from fastapi import APIRouter, HTTPException, Response, Query, Body, Path, Request
+from fastapi import APIRouter, HTTPException, Response, Path, Request
 from pydantic import BaseModel, Field
 from PIL import Image
 import uuid

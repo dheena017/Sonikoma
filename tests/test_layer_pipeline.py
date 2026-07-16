@@ -50,6 +50,7 @@ class TestLayerPipelineIntegration(unittest.TestCase):
         if os.path.exists(cls.temp_dir):
             shutil.rmtree(cls.temp_dir)
 
+    @patch.dict(os.environ, {"ENVIRONMENT": "production"})
     @patch('media.image.layer_segmentation.upload_to_supabase_bucket')
     @patch('media.audio.whisper_engine.WhisperEngine.extract_words_with_timestamps')
     @patch('subprocess.run')
@@ -96,9 +97,9 @@ class TestLayerPipelineIntegration(unittest.TestCase):
         self.assertIn("background_url", seg_result)
         self.assertIn("character_url", seg_result)
         self.assertIn("text_url", seg_result)
-        self.assertTrue(os.path.exists(layer_paths["bg.webp"]))
-        self.assertTrue(os.path.exists(layer_paths["char.webp"]))
-        self.assertTrue(os.path.exists(layer_paths["text.webp"]))
+        self.assertTrue(os.path.exists(layer_paths["bg.png"]))
+        self.assertTrue(os.path.exists(layer_paths["char.png"]))
+        self.assertTrue(os.path.exists(layer_paths["text.png"]))
 
         # 3. Run Audio & Dialogue Sync Map Extraction
         ocr_texts = ["hello world"]
@@ -116,9 +117,9 @@ class TestLayerPipelineIntegration(unittest.TestCase):
 
         # Form layer dictionary using the local files we mock-saved
         layers_dict = {
-            "background": layer_paths["bg.webp"],
-            "character": layer_paths["char.webp"],
-            "text": layer_paths["text.webp"],
+            "background": layer_paths["bg.png"],
+            "character": layer_paths["char.png"],
+            "text": layer_paths["text.png"],
             "char_x": 0.0,
             "char_y": 0.0,
             "char_scale_x": 1.0,
@@ -132,7 +133,7 @@ class TestLayerPipelineIntegration(unittest.TestCase):
 
         # Render the motion comic panel segment with parallax, sync timing, and audio-reactive shake enabled
         _render_panel_segment_ffmpeg(
-            img_path=layer_paths["bg.webp"],
+            img_path=layer_paths["bg.png"],
             audio_path=self.dummy_wav_path,
             duration=3.0,
             out_path=self.output_mp4_path,

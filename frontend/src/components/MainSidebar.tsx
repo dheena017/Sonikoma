@@ -25,7 +25,7 @@ import {
 
 import { useThemeMode } from "../hooks/useThemeMode";
 import { GeneratedPanel } from "../types";
-import { Notification } from "./notification/NotificationStack";
+import { Notification } from "./notification";
 
 interface SidebarProps {
   isProcessing: boolean;

@@ -15,7 +15,7 @@ import {
   Download,
   Trash,
 } from "lucide-react";
-import { Notification } from "./NotificationStack";
+import { Notification } from "./types";
 import { formatDistanceToNow } from "date-fns";
 import { useNotificationExpand, useNotificationFiltering } from "./hooks";
 import { getNotificationIconBox, getTypeStyles } from "./utils";

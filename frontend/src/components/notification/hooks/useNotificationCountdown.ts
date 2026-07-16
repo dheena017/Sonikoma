@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Notification } from "../NotificationStack";
+import { Notification } from "../types";
 
 export const useNotificationCountdown = (
   note: Notification,

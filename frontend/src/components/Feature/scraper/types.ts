@@ -1,6 +1,6 @@
 import React from "react";
 import { GeneratedPanel } from "@/types";
-import { NotificationType } from "@/components/notification/NotificationStack";
+import { NotificationType } from "@/components/notification";
 import { ErrorPopupDetail } from "@/components/confirmationmodels/ErrorPopupModal";
 import { LogEntry } from "@/types/logs";
 

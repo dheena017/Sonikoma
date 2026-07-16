@@ -27,7 +27,7 @@ import { FavoritesManager, FavoritesList, FavoriteSeries, FAVORITES_UPDATED_EVEN
 import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
 import { EpisodePreviewModal } from "./EpisodePreviewModal";
 import { AnalyticsDashboard } from "./AnalyticsDashboard";
-import { NotificationType } from "@/components/notification/NotificationStack";
+import { NotificationType } from "@/components/notification";
 import type { Episode } from "./EpisodeTypes";
 
 interface SeriesMetadata {

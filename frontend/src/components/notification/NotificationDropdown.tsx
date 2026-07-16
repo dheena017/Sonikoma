@@ -10,7 +10,7 @@ import {
   ExternalLink,
   Clock,
 } from "lucide-react";
-import { Notification } from "./NotificationStack";
+import { Notification } from "./types";
 import { formatDistanceToNow } from "date-fns";
 import { useNotificationExpand } from "./hooks";
 import { getNotificationIcon } from "./utils";

@@ -1,7 +1,7 @@
 import { normalizeLog } from "../types/logs";
 import React from "react";
 import { Slice, DetectedPanel } from "@/components/Feature/editor/shared";
-import { NotificationType } from "../components/notification/NotificationStack.js";
+import { NotificationType } from "../components/notification";
 import * as api from "../api/index.js";
 
 interface UsePanelDetectionProps {

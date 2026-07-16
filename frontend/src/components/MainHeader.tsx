@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { GeneratedPanel } from "../types";
 import NotificationDropdown from "./notification/NotificationDropdown";
-import { Notification } from "./notification/NotificationStack";
+import { Notification } from "./notification";
 import { useAIModels } from "@/hooks/useAIModels";
 import { getUserCredits, getUserCreditsPayload } from "../api/auth";
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2, Bell, BellOff, Zap, Monitor } from "lucide-react";
 import NotificationDropdown from "../../notification/NotificationDropdown";
-import { Notification } from "../../notification/NotificationStack";
+import { Notification } from "../../notification";
 import { getUserCreditsPayload } from "../../../api/auth";
 import { useImageEditorStore } from "@/hooks/useImageEditorState";
 

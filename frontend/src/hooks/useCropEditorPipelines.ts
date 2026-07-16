@@ -1,6 +1,6 @@
 import React from "react";
 import { Slice } from "@/components/Feature/editor/shared";
-import { NotificationType } from "../components/notification/NotificationStack";
+import { NotificationType } from "../components/notification";
 import { usePanelDetection } from "./usePanelDetection";
 import { useImageTransform } from "./useImageTransform";
 
