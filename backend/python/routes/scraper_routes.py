@@ -16,9 +16,7 @@ import os
 import jwt
 import database.db as db
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-if not SECRET_KEY:
-    raise ValueError("FATAL: JWT_SECRET_KEY environment variable is not set.")
+from routes.auth_routes import SECRET_KEY
 
 ALGORITHM = "HS256"
 
