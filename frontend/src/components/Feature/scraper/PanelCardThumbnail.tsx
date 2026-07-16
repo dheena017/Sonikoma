@@ -84,7 +84,7 @@ export function PanelCardThumbnail({
       ? imgUrl.includes("/api/proxy-image")
         ? imgUrl
         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`
-      : imgUrl
+      : imgUrl // relative paths (including /api/image/cached/...) served directly
     : imgUrl;
 
   return (

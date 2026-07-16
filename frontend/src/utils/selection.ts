@@ -32,13 +32,14 @@ export function updateSelection<T>(
       nextArray = Array.from(new Set([...currentArray, ...action.items]));
       break;
     case "double":
-      // Always appends/adds if not present, never removes, preserving other selections
+      // Toggles selection on double click, preserving other selections
       if (currentArray.includes(action.item)) {
-        nextArray = currentArray;
+        nextArray = currentArray.filter((x) => x !== action.item);
       } else {
         nextArray = [...currentArray, action.item];
       }
       break;
+
     default:
       nextArray = currentArray;
   }

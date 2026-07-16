@@ -7,6 +7,8 @@ import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 interface PanelCardActionsProps {
   idx: number;
   imgUrl: string;
+  /** Raw URL matching scrapedImages entries, used for selection state updates */
+  rawImgUrl: string;
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
   setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>>;
@@ -16,6 +18,7 @@ interface PanelCardActionsProps {
 export function PanelCardActions({
   idx,
   imgUrl,
+  rawImgUrl,
   setScrapedImages,
   setSelectedScraped,
   setConsoleLogs,
@@ -43,7 +46,8 @@ export function PanelCardActions({
 
   const executeDelete = () => {
     setScrapedImages((prev) => prev.filter((_, i) => i !== idx));
-    setSelectedScraped((prev) => prev.filter((img) => img !== imgUrl));
+    // Use rawImgUrl so we match the raw URL stored in selectedScraped
+    setSelectedScraped((prev) => prev.filter((img) => img !== rawImgUrl));
     setConsoleLogs((prev) => [`[GUI] Deleted image #${idx + 1} from deck.`, ...prev]);
     addNotification(`Deleted image #${idx + 1} from deck.`, "success");
     setShowDeleteConfirm(false);

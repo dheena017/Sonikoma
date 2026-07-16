@@ -43,6 +43,7 @@ import { LoginPage, RegisterPage, ForgotPasswordPage } from "./components/auth";
 import ProfilePage from "./components/profile/ProfilePage";
 import SettingsAccountPage from "./components/settings/SettingsAccountPage";
 import LoadingPage from "./components/LoadingPage";
+import ImageScraperLoadingPage from "./components/Feature/scraper/ImageScraperLoadingPage";
 import { TerminalLogs, LogsPage } from "./components/Feature/terminal";
 import DisplayPage from "./components/DisplayPage";
 import DashboardPage from "./components/Dashboard/DashboardPage";
@@ -1175,6 +1176,7 @@ export default function App() {
     setTimeout(() => navigateTo("/"), 0);
     return <LoadingPage status="Redirecting to Landing Page..." />;
   }
+
 
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.4: APPLICATION WORKSPACE AND PAGE RENDERING (JSX)

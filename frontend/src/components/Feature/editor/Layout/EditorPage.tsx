@@ -117,7 +117,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
     targetUrl,
     selectedSource,
     selectedModel,
+    consoleLogs,
+    resetWorkspace,
     frameRate,
+
     isProcessing,
     handleGenerateVideo,
     isScraping,
@@ -736,10 +739,14 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         chapterTitle={chapterTitle}
                         targetUrl={targetUrl}
                         selectedSource={selectedSource}
+                        selectedModel={selectedModel}
+                        consoleLogs={consoleLogs}
+                        resetWorkspace={resetWorkspace}
                         rating={rating}
                         likes={likes}
                         views={views}
                       />
+
                     </div>
                   </div>
                   {/* Final Production panel below timeline */}

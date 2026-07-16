@@ -18,6 +18,8 @@ interface PanelCardProps
     | "bubbleCroppingImgUrl"
   > {
   imgUrl: string;
+  /** The original raw URL (matching scrapedImages entries) used for callbacks & selection state */
+  rawImgUrl: string;
   idx: number;
   isSelected: boolean;
   isBatchCropping: boolean;
@@ -39,6 +41,7 @@ interface PanelCardProps
 
 function PanelCard({
   imgUrl,
+  rawImgUrl,
   idx,
   isSelected,
   isBatchCropping,
@@ -90,7 +93,7 @@ function PanelCard({
     ]);
     try {
       const data = await api.submitImageEdits(fetch, {
-        url: imgUrl,
+        url: rawImgUrl,
         rotate: 90,
         autoTrim: false,
       });
@@ -99,7 +102,7 @@ function PanelCard({
         prev.map((img: any, i: number) => (i === idx ? data.url : img))
       );
       setSelectedScraped?.((prev: any[]) =>
-        prev.map((img: string) => (img === imgUrl ? data.url : img))
+        prev.map((img: string) => (img === rawImgUrl ? data.url : img))
       );
       setConsoleLogs?.((prev: any) => [
         `[Image Editor] Successfully rotated Panel #${idx + 1}!`,
@@ -125,7 +128,7 @@ function PanelCard({
     ]);
     try {
       const data = await api.submitImageEdits(fetch, {
-        url: imgUrl,
+        url: rawImgUrl,
         flipHorizontal: true,
         autoTrim: false,
       });
@@ -134,7 +137,7 @@ function PanelCard({
         prev.map((img: any, i: number) => (i === idx ? data.url : img))
       );
       setSelectedScraped?.((prev: any[]) =>
-        prev.map((img: string) => (img === imgUrl ? data.url : img))
+        prev.map((img: string) => (img === rawImgUrl ? data.url : img))
       );
       setConsoleLogs?.((prev: any) => [
         `[Image Editor] Successfully flipped Panel #${idx + 1} horizontally!`,
@@ -159,7 +162,7 @@ function PanelCard({
       ...prev,
     ]);
     try {
-      const data = await api.undoImageEdit(fetch, { url: imgUrl });
+      const data = await api.undoImageEdit(fetch, { url: rawImgUrl });
 
       if (data.success && data.previous_url) {
         setScrapedImages?.((prev: any[]) =>
@@ -168,7 +171,7 @@ function PanelCard({
           )
         );
         setSelectedScraped?.((prev: any[]) =>
-          prev.map((img: string) => (img === imgUrl ? data.previous_url : img))
+          prev.map((img: string) => (img === rawImgUrl ? data.previous_url : img))
         );
         setConsoleLogs?.((prev: any) => [
           `[Image Editor] Successfully restored previous state for Panel #${
@@ -209,11 +212,13 @@ function PanelCard({
     if (clickTimeoutRef.current) {
       clearTimeout(clickTimeoutRef.current);
       clickTimeoutRef.current = null;
-      onCardDoubleClick?.(idx, imgUrl);
+      // Use rawImgUrl so selectedScraped matches scrapedImages entries
+      onCardDoubleClick?.(idx, rawImgUrl);
     } else {
       clickTimeoutRef.current = setTimeout(() => {
         clickTimeoutRef.current = null;
-        onCardClick(idx, imgUrl, shiftKey, ctrlOrMeta);
+        // Use rawImgUrl so selectedScraped matches scrapedImages entries
+        onCardClick(idx, rawImgUrl, shiftKey, ctrlOrMeta);
       }, 250);
     }
   };
@@ -222,10 +227,11 @@ function PanelCard({
     e.stopPropagation();
     e.preventDefault();
     setSelectedScraped?.((prev: string[]) => {
-      if (prev.includes(imgUrl)) {
-        return prev.filter((x) => x !== imgUrl);
+      // Use rawImgUrl to stay consistent with scrapedImages entries
+      if (prev.includes(rawImgUrl)) {
+        return prev.filter((x) => x !== rawImgUrl);
       } else {
-        return [...prev, imgUrl];
+        return [...prev, rawImgUrl];
       }
     });
   };
@@ -289,6 +295,7 @@ function PanelCard({
       <PanelCardActions
         idx={idx}
         imgUrl={imgUrl}
+        rawImgUrl={rawImgUrl}
         setScrapedImages={setScrapedImages}
         setSelectedScraped={setSelectedScraped}
         setConsoleLogs={setConsoleLogs}

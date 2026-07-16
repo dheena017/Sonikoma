@@ -58,11 +58,17 @@ export default function LiveScraperGrid({
   return (
     <div className="flex gap-4 overflow-x-auto pb-6 pt-1.5 scrollbar-thin">
       {scrapedImages.map((imgUrl, idx) => {
+        // selectedScraped stores raw URLs — compare directly
         const isSelected = selectedScraped.includes(imgUrl);
+        // Internal /api/ URLs (e.g. /api/image/cached/...) must NOT be wrapped in proxy
+        const proxiedUrl = imgUrl?.startsWith("/api/")
+          ? imgUrl
+          : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
         return (
           <PanelCard
             key={`${imgUrl}-${idx}`}
-            imgUrl={imgUrl}
+            imgUrl={proxiedUrl}
+            rawImgUrl={imgUrl}
             idx={idx}
             isSelected={isSelected}
             isBatchCropping={isBatchCropping}

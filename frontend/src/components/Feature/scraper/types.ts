@@ -57,6 +57,10 @@ export interface ScraperDeckProps {
   rating?: number;
   likes?: string;
   views?: number;
+  consoleLogs?: any[];
+  selectedModel?: string;
+  resetWorkspace?: () => void;
 }
+
 
 export type LiveScraperDeckProps = ScraperDeckProps;
