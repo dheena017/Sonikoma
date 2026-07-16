@@ -1008,14 +1008,12 @@ async def process_render_job(
 
         # 5. Supabase Upload (95% to 100%)
         try:
-            from supabase import create_client
-            s_url = os.environ.get("SUPABASE_URL")
-            s_key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-            if s_url and s_key:
+            from db import supabase
+            if supabase:
                 RENDER_JOBS[video_id]["progress"] = 96
                 with open(output_path, "rb") as f:
-                    create_client(s_url, s_key).storage.from_("videos").upload(output_filename, f, {"content-type": "video/mp4", "upsert": "true"})
-                final_video_url = create_client(s_url, s_key).storage.from_("videos").get_public_url(output_filename)
+                    supabase.storage.from_("videos").upload(output_filename, f, {"content-type": "video/mp4", "upsert": "true"})
+                final_video_url = supabase.storage.from_("videos").get_public_url(output_filename)
         except Exception as e:
             logger.error(f"Supabase Error: {e}")
 

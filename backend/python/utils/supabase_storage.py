@@ -5,7 +5,7 @@ from typing import Optional
 logger = logging.getLogger("sonikoma.utils.supabase_storage")
 
 try:
-    from supabase import create_client, Client
+    from supabase import Client
     HAS_SUPABASE = True
 except ImportError:
     HAS_SUPABASE = False
@@ -23,16 +23,12 @@ def upload_to_supabase_bucket(
     if not HAS_SUPABASE:
         logger.warning("Supabase client is not installed. Cannot upload to Supabase.")
         return None
-        
-    url = os.environ.get("SUPABASE_URL", "")
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", os.environ.get("SUPABASE_ANON_KEY", ""))
-    
-    if not url or not key:
-        logger.debug(f"Supabase credentials not set, bypassing upload to {bucket_name}.")
-        return None
 
     try:
-        supabase: Client = create_client(url, key)
+        from db import supabase
+        if not supabase:
+            logger.debug(f"Supabase client not initialized, bypassing upload to {bucket_name}.")
+            return None
         
         # Upload using the bytes payload
         # file_options requires a dict with content-type to set the header
