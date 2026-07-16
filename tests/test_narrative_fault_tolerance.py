@@ -34,10 +34,10 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
         }
         self.client = TestClient(self.app)
 
-    @patch("routes.ai_routes.get_available_credits")
-    @patch("routes.ai_routes.record_credit_transaction")
-    @patch("routes.ai_routes.call_gemini_with_retry")
-    @patch("routes.ai_routes.generate_panel_audio")
+    @patch("api.v1.ai.get_available_credits")
+    @patch("api.v1.ai.record_credit_transaction")
+    @patch("api.v1.ai.call_gemini_with_retry")
+    @patch("api.v1.ai.generate_panel_audio")
     @patch("google.genai.Client")
     def test_tts_fault_tolerance_during_sequence_analysis(
         self,

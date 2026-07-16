@@ -6,14 +6,14 @@ import os
 # Add backend directory to sys.path so it can find app.utils
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend')))
 
-from app.utils.system_info import get_engine_snapshot
+from app.core.system import get_engine_snapshot
 
 class TestSystemInfo(unittest.TestCase):
 
-    @patch('app.utils.system_info.psutil')
-    @patch('app.utils.system_info.platform')
-    @patch('app.utils.system_info.time')
-    @patch('app.utils.system_info.os')
+    @patch('app.core.system.psutil')
+    @patch('app.core.system.platform')
+    @patch('app.core.system.time')
+    @patch('app.core.system.os')
     def test_get_engine_snapshot_success(self, mock_os, mock_time, mock_platform, mock_psutil):
         # Setup mocks
         mock_os.getpid.return_value = 1234
@@ -60,7 +60,7 @@ class TestSystemInfo(unittest.TestCase):
         self.assertEqual(result, expected)
         mock_psutil.Process.assert_called_once_with(1234)
 
-    @patch('app.utils.system_info.psutil')
+    @patch('app.core.system.psutil')
     def test_get_engine_snapshot_exception(self, mock_psutil):
         # Setup mock to raise an exception
         mock_psutil.Process.side_effect = Exception("Some internal error")

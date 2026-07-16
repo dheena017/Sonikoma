@@ -630,7 +630,7 @@ app.add_middleware(
 # NOTE: This project already has per-route auth via routes/auth_routes.py.
 # This centralized guard enforces your mapping without needing per-route duplication.
 
-from routes.auth_routes import get_current_user, get_admin_user
+from api.dependencies.auth import get_current_user, get_admin_user
 
 # Public routes (no Authorization header required)
 PUBLIC_ROUTE_SET = {
@@ -844,48 +844,11 @@ async def add_process_time_header(request: Request, call_next):
 # ─────────────────────────────────────────────────────────────────────────────
 # ROUTE REGISTRATION
 # ─────────────────────────────────────────────────────────────────────────────
-from routes.health  import router as health_router
-from routes.projects import router as projects_router
-from routes.auth_routes import router as auth_router
-from routes.proxy import router as proxy_router
-from routes.image_routes import router as image_routes_router, get_cached_stitch
-from routes.scraper_routes import router as scraper_routes_router
-from routes.ai_routes import router as ai_routes_router
-from routes.audio import router as audio_router
-from routes.video import router as video_router
-from routes.export import router as export_router
-from routes.ffmpeg_routes import router as ffmpeg_router
-from routes.librosa_routes import router as librosa_router
-from routes.whisper_routes import router as whisper_router
-from routes.imagemagick_routes import router as imagemagick_router
-from routes.stable_diffusion_routes import router as stable_diffusion_router
-from routes.compound_routes import router as compound_router
+from api.router import api_router
+from api.v1.images import get_cached_stitch
 
-# 1. Mount original Express routes under /api
-app.include_router(health_router,         prefix="/api", tags=["Health & System"])
-app.include_router(auth_router,           prefix="/api/auth", tags=["Authentication"])
-app.include_router(projects_router,       prefix="/api/projects", tags=["Projects"])
-app.include_router(proxy_router,          prefix="/api", tags=["Proxy"])
-app.include_router(image_routes_router,   prefix="/api/image", tags=["Image Editing"])
-app.include_router(scraper_routes_router, prefix="/api", tags=["Scraper"])
-app.include_router(ai_routes_router,      prefix="/api", tags=["AI Processing"])
-app.include_router(audio_router,          prefix="/api/audio", tags=["Audio Synthesis"])
-app.include_router(video_router,          prefix="/api/video", tags=["Video Rendering"])
-app.include_router(ffmpeg_router,         prefix="/api/ffmpeg", tags=["FFmpeg Video"])
-app.include_router(librosa_router,        prefix="/api/librosa", tags=["Librosa Audio"])
-app.include_router(whisper_router,        prefix="/api/whisper", tags=["Whisper Speech-to-Text"])
-app.include_router(imagemagick_router,    prefix="/api/imagemagick", tags=["ImageMagick Image"])
-app.include_router(stable_diffusion_router,prefix="/api/stable-diffusion", tags=["Stable Diffusion"])
-app.include_router(compound_router,       prefix="/api/compound", tags=["Compound Workflows"])
-app.include_router(export_router,         prefix="/api/export", tags=["Export"])
+app.include_router(api_router)
 
-# Legacy cached image endpoints compatibility
-app.get("/api/merge-images/cached/{cache_id}", tags=["Legacy Image Routing"], include_in_schema=False)(get_cached_stitch)
-app.get("/api/stitch-images/cached/{cache_id}", tags=["Legacy Image Routing"], include_in_schema=False)(get_cached_stitch)
-
-# 2. Maintain /api/py endpoints for backward compatibility (optional/fallback)
-app.include_router(health_router,         prefix="/api/py", tags=["Health & System (Legacy)"])
-app.include_router(audio_router,          prefix="/api/py/audio", tags=["Audio Synthesis (Legacy)"])
 
 # 3. Serve generated videos
 videos_path = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "media"))
