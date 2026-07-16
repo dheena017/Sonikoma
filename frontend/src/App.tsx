@@ -4,7 +4,7 @@
 
 // --- React & State Hooks ---
 import React from "react";
-import { AlertTriangle, X, ArrowLeft, Sliders, Zap } from "lucide-react";
+import { AlertTriangle, X, ArrowLeft, Sliders } from "lucide-react";
 
 // --- Custom Logic Hooks ---
 import {
@@ -34,7 +34,7 @@ import ShortcutsPage from "./components/Shortcuts/ShortcutsPage";
 // --- Processing & Editor Modals ---
 import { useImageEditorStore } from "./hooks/useImageEditorState";
 import AutoCropModal from "./components/Feature/processing/AutoCropModal";
-import NotificationStack from "./components/notification/NotificationStack";
+import NotificationStack from "./components/notification";
 import ConfirmModal from "./components/confirmationmodels/ConfirmModal";
 
 // --- Authentication & Landing Views ---

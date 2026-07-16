@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { Trash2, X, Edit2 } from "lucide-react";
-import { NotificationType } from "../../notification/NotificationStack";
+import { NotificationType } from "../../notification";
 import { useImageEditorStore } from "../../../hooks/useImageEditorState";
 
 interface PanelCardActionsProps {

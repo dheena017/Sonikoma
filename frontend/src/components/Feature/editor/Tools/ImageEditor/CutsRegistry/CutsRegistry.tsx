@@ -1,11 +1,9 @@
 import React from "react";
 import { Slice } from "../../../shared";
-import {
-  CutsRegistryHeader,
-  CutsRegistrySelector,
-  CutsRegistryFineTune,
-  CutsRegistryList,
-} from "./";
+import { CutsRegistryHeader } from "./CutsRegistryHeader";
+import { CutsRegistrySelector } from "./CutsRegistrySelector";
+import { CutsRegistryFineTune } from "./CutsRegistryFineTune";
+import { CutsRegistryList } from "./CutsRegistryList";
 
 interface CutsRegistryProps {
   slices: Slice[];

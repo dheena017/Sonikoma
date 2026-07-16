@@ -1,8 +1,6 @@
-export {
-  default as NotificationStack,
-  type Notification,
-  type NotificationType,
-} from "./NotificationStack";
+export { default as NotificationStack } from "./NotificationStack";
+export { default } from "./NotificationStack";
+export { type Notification, type NotificationType } from "./types";
 export { default as NotificationDropdown } from "./NotificationDropdown";
 export { default as NotificationsPage } from "./NotificationsPage";
 

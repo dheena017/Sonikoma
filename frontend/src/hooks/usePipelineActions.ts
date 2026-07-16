@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { GeneratedPanel } from "../types.js";
-import { NotificationType } from "../components/notification/NotificationStack.js";
+import { NotificationType } from "../components/notification";
 import { useAutoAnalysis } from "./useAutoAnalysis.js";
 import { useVideoGeneration } from "./useVideoGeneration.js";
 import { useBatchImageActions } from "./useBatchImageActions.js";

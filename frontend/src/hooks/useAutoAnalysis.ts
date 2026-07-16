@@ -1,7 +1,7 @@
 import { LogEntry, normalizeLog } from "../types/logs";
 import React, { useState, useCallback, useMemo } from "react";
 import { GeneratedPanel } from "../types.js";
-import { NotificationType } from "../components/notification/NotificationStack.js";
+import { NotificationType } from "../components/notification";
 import * as api from "../api/index.js";
 
 interface UseAutoAnalysisProps {

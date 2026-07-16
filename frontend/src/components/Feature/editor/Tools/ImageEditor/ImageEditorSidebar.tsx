@@ -1,7 +1,8 @@
 import React from "react";
 import { RefreshCw, Layers, Database } from "lucide-react";
 import MergePanel from "./MergePanel/MergePanel";
-import { ImageEditorPanel, FreehandPanel } from ".";
+import ImageEditorPanel from "./ImageEditorPanel";
+import FreehandPanel from "./FreehandPanel";
 import EnhancementsPanel from "./EnhancementsPanel";
 import LayerSeparationPanel from "./LayerSeparationPanel";
 import HorizontalSplitter from "./HorizontalSplitter/HorizontalSplitter";

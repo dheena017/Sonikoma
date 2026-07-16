@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Notification } from "../NotificationStack";
+import { Notification } from "../types";
 
 export const useNotificationFiltering = (notifications: Notification[]) => {
   const [filter, setFilter] = useState<string>("all");

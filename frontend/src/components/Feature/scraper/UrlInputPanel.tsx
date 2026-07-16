@@ -1,7 +1,7 @@
 import React from "react";
 import { Sparkles, Image as ImageIcon, Layout, Book } from "lucide-react";
 import { useAIModels } from "@/hooks/useAIModels";
-import { NotificationType } from "../../notification/NotificationStack";
+import { NotificationType } from "../../notification";
 import { extractWebtoonUrl, parseWebtoonUrl } from "../../../utils/url";
 import { FavoritesManager } from "../episode-scraper/FavoritesManager";
 
