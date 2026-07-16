@@ -1,123 +1,122 @@
-export const getProjects = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/projects");
-  return res.json();
+import { apiRequest } from "./request";
+import {
+  FetchClient,
+  ApiResponse,
+  CreateProjectPayload,
+  UpdateProjectPayload,
+  SaveScrapedImagesPayload,
+} from "./types";
+
+export const getProjects = async (
+  fetchWithInterceptor: FetchClient
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/projects");
 };
 
 export const getProject = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   projectId: string
-) => {
-  const res = await fetchWithInterceptor(`/api/projects/${projectId}`);
-  return res.json();
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}`);
 };
 
 export const getPublicProject = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   projectId: string
-) => {
-  const res = await fetchWithInterceptor(`/api/projects/public/${projectId}`);
-  return res.json();
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/public/${projectId}`);
 };
 
 export const createProject = async (
-  fetchWithInterceptor: any,
-  projectData: any
-) => {
-  const res = await fetchWithInterceptor("/api/projects", {
+  fetchWithInterceptor: FetchClient,
+  projectData: CreateProjectPayload
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/projects", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(projectData),
   });
-  return res.json();
 };
 
 export const updateProject = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   projectId: string,
-  projectData: any
-) => {
-  const res = await fetchWithInterceptor(`/api/projects/${projectId}`, {
+  projectData: UpdateProjectPayload
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(projectData),
   });
-  return res.json();
 };
 
 export const deleteProject = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   projectId: string
-) => {
-  const res = await fetchWithInterceptor(`/api/projects/${projectId}`, {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}`, {
     method: "DELETE",
   });
-  return res.json();
 };
 
 export const batchDeleteProjects = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   projectIds: string[]
-) => {
-  const res = await fetchWithInterceptor("/api/projects/batch-delete", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/projects/batch-delete", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ project_ids: projectIds }),
   });
-  return res.json();
 };
 
 export const getSeries = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   seriesSlug: string
-) => {
-  const res = await fetchWithInterceptor(`/api/projects/series/${seriesSlug}`);
-  return res.json();
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/series/${seriesSlug}`);
 };
 
 export const deleteSeries = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   seriesId: string
-) => {
-  const res = await fetchWithInterceptor(`/api/projects/series/${seriesId}`, {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/series/${seriesId}`, {
     method: "DELETE",
   });
-  return res.json();
 };
 
 export const updateProjectPanels = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   projectId: string,
   panels: any[]
-) => {
-  const res = await fetchWithInterceptor(`/api/projects/${projectId}/panels`, {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/panels`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ panels }),
   });
-  return res.json();
 };
 
 export const saveScrapedImages = async (
-  fetchWithInterceptor: any,
-  data: any
-) => {
-  const res = await fetchWithInterceptor("/api/save-scraped-images", {
+  fetchWithInterceptor: FetchClient,
+  data: SaveScrapedImagesPayload
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/save-scraped-images", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  return res.json();
 };
 
 export const updateProjectTokens = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   projectId: string,
   tokens: number
-) => {
-  const res = await fetchWithInterceptor(`/api/projects/${projectId}/tokens`, {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/tokens`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ tokens }),
   });
-  return res.json();
 };
