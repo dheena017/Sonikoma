@@ -1,17 +1,21 @@
-export const getProjectTokenAnalytics = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/projects/analytics/tokens");
-  return res.json();
+import { apiRequest } from "./request";
+import { ApiResponse } from "./types";
+
+export const getProjectTokenAnalytics = async (
+  fetchWithInterceptor: any
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/projects/analytics/tokens");
 };
 
-export const getCreatorAnalytics = async (fetchWithInterceptor: any) => {
+export const getCreatorAnalytics = async (
+  fetchWithInterceptor: any
+): Promise<ApiResponse<any>> => {
   const fetcher =
     typeof fetchWithInterceptor === "function"
       ? fetchWithInterceptor
       : (fetch as any);
 
-  const res = await fetcher("/api/auth/analytics");
-  return res.json();
+  return apiRequest(fetcher, "/api/auth/analytics");
 };
 
 export const getAnalytics = getCreatorAnalytics;
-

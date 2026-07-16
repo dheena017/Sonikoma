@@ -1,185 +1,216 @@
-export const login = async (fetchWithInterceptor: any, credentials: any) => {
-  const res = await fetchWithInterceptor("/api/auth/login", {
+import { apiRequest } from "./request";
+import {
+  FetchClient,
+  ApiResponse,
+  LoginCredentials,
+  RegisterUserData,
+  UpdateProfilePayload,
+  UpdatePasswordPayload,
+  CardData,
+  PurchaseCreditsPayload,
+  CreateApiKeyPayload,
+  RedeemRewardPayload,
+  CreditsPayload,
+  CreditTransaction,
+} from "./types";
+
+export type { CreditsPayload, CreditTransaction };
+
+export const login = async (
+  fetchWithInterceptor: FetchClient,
+  credentials: LoginCredentials
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
   });
-  return res.json();
 };
 
-export const register = async (fetchWithInterceptor: any, userData: any) => {
-  const res = await fetchWithInterceptor("/api/auth/register", {
+export const register = async (
+  fetchWithInterceptor: FetchClient,
+  userData: RegisterUserData
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData),
   });
-  return res.json();
 };
 
-export const getCurrentUser = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/auth/me");
-  return res.json();
+export const getCurrentUser = async (
+  fetchWithInterceptor: FetchClient
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/me");
 };
 
 export const forgotPassword = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   email: string
-) => {
-  const res = await fetchWithInterceptor("/api/auth/forgot-password", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/forgot-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
   });
-  return res.json();
 };
 
-export const googleLogin = async (fetchWithInterceptor: any, token: string) => {
-  const res = await fetchWithInterceptor("/api/auth/google", {
+export const googleLogin = async (
+  fetchWithInterceptor: FetchClient,
+  token: string
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/google", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token }),
   });
-  return res.json();
 };
 
-export const updateProfile = async (fetchWithInterceptor: any, data: any) => {
-  const res = await fetchWithInterceptor("/api/auth/profile", {
+export const updateProfile = async (
+  fetchWithInterceptor: FetchClient,
+  data: UpdateProfilePayload
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/profile", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
-
-  return res.json();
 };
 
-export const updatePassword = async (fetchWithInterceptor: any, data: any) => {
-  const res = await fetchWithInterceptor("/api/auth/password", {
+export const updatePassword = async (
+  fetchWithInterceptor: FetchClient,
+  data: UpdatePasswordPayload
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/password", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
-
-  return res.json();
 };
 
-export const getSessions = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/auth/sessions");
-  return res.json();
+export const getSessions = async (
+  fetchWithInterceptor: FetchClient
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/sessions");
 };
 
 export const terminateSession = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   sessionId: string
-) => {
-  const res = await fetchWithInterceptor(`/api/auth/sessions/${sessionId}`, {
-    method: "DELETE",
-  });
-
-  return res.json();
+): Promise<ApiResponse<any>> => {
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/auth/sessions/${sessionId}`,
+    {
+      method: "DELETE",
+    }
+  );
 };
 
-export const claimCredits = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/auth/claim-credits", {
+export const claimCredits = async (
+  fetchWithInterceptor: FetchClient
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/claim-credits", {
     method: "POST",
   });
-
-  return res.json();
 };
 
-export const upgradePlan = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/auth/upgrade-plan", {
+export const upgradePlan = async (
+  fetchWithInterceptor: FetchClient
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/upgrade-plan", {
     method: "POST",
   });
-
-  return res.json();
 };
 
-export const saveCard = async (fetchWithInterceptor: any, card: any) => {
-  const res = await fetchWithInterceptor("/api/auth/save-card", {
+export const saveCard = async (
+  fetchWithInterceptor: FetchClient,
+  card: CardData
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/save-card", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(card),
   });
-
-  return res.json();
 };
 
-export const purchaseCredits = async (fetchWithInterceptor: any, data: any) => {
-  const res = await fetchWithInterceptor("/api/auth/purchase-credits", {
+export const purchaseCredits = async (
+  fetchWithInterceptor: FetchClient,
+  data: PurchaseCreditsPayload
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/purchase-credits", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
-
-  return res.json();
 };
 
-export const getApiKeys = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/auth/api-keys");
-  return res.json();
+export const getApiKeys = async (
+  fetchWithInterceptor: FetchClient
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/api-keys");
 };
 
-export const createApiKey = async (fetchWithInterceptor: any, data: any) => {
-  const res = await fetchWithInterceptor("/api/auth/api-keys", {
+export const createApiKey = async (
+  fetchWithInterceptor: FetchClient,
+  data: CreateApiKeyPayload
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/api-keys", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
-
-  return res.json();
 };
 
 export const deleteApiKey = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   keyId: string
-) => {
-  const res = await fetchWithInterceptor(`/api/auth/api-keys/${keyId}`, {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/auth/api-keys/${keyId}`, {
     method: "DELETE",
   });
-
-  return res.json();
 };
 
-export const getInvoices = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/auth/invoices");
-  return res.json();
+export const getInvoices = async (
+  fetchWithInterceptor: FetchClient
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/invoices");
 };
 
 export const updateMfa = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   enabled: boolean
-) => {
-  const res = await fetchWithInterceptor("/api/auth/mfa", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/mfa", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ mfa_enabled: enabled }),
   });
-
-  return res.json();
 };
 
-export const redeemReward = async (fetchWithInterceptor: any, data: any) => {
-  const res = await fetchWithInterceptor("/api/auth/redeem-points", {
+export const redeemReward = async (
+  fetchWithInterceptor: FetchClient,
+  data: RedeemRewardPayload
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/redeem-points", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
-
-  return res.json();
 };
 
 export const getAuditLogs = async (
@@ -187,36 +218,28 @@ export const getAuditLogs = async (
   query: string,
   page: number,
   limit: number
-) => {
-  const res = await fetchWithInterceptor(
+): Promise<ApiResponse<any>> => {
+  return apiRequest(
+    fetchWithInterceptor,
     `/api/auth/audit-logs?query=${encodeURIComponent(
       query
     )}&page=${page}&limit=${limit}`
   );
-
-  return res.json();
 };
 
-export const deleteAccount = async (fetchWithInterceptor: any) => {
-  const res = await fetchWithInterceptor("/api/auth/me", {
+export const deleteAccount = async (
+  fetchWithInterceptor: FetchClient
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/me", {
     method: "DELETE",
   });
-
-  return res.json();
 };
 
-export interface CreditsPayload {
-  credits: number;
-  low_balance: boolean;
-  threshold: number;
-}
-
 export const getUserCredits = async (
-  fetchWithInterceptor: any
+  fetchWithInterceptor: FetchClient
 ): Promise<number | null> => {
   try {
-    const res = await fetchWithInterceptor("/api/auth/credits");
-    const data = await res.json();
+    const data = await apiRequest<any>(fetchWithInterceptor, "/api/auth/credits");
     if (data.success && typeof data.credits === "number") {
       return data.credits;
     }
@@ -228,11 +251,10 @@ export const getUserCredits = async (
 
 /** Full credits payload including low_balance flag. */
 export const getUserCreditsPayload = async (
-  fetchWithInterceptor: any
+  fetchWithInterceptor: FetchClient
 ): Promise<CreditsPayload | null> => {
   try {
-    const res = await fetchWithInterceptor("/api/auth/credits");
-    const data = await res.json();
+    const data = await apiRequest<any>(fetchWithInterceptor, "/api/auth/credits");
     if (data.success && typeof data.credits === "number") {
       return {
         credits: data.credits,
@@ -246,23 +268,15 @@ export const getUserCreditsPayload = async (
   }
 };
 
-export interface CreditTransaction {
-  id: string;
-  user_id: string;
-  amount: number;
-  feature_name: string;
-  created_at: string;
-  /** Running balance immediately after this transaction was applied (server-computed) */
-  balance_after?: number;
-}
-
 export const getTransactions = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   limit = 100
 ): Promise<CreditTransaction[]> => {
   try {
-    const res = await fetchWithInterceptor(`/api/auth/transactions?limit=${limit}`);
-    const data = await res.json();
+    const data = await apiRequest<any>(
+      fetchWithInterceptor,
+      `/api/auth/transactions?limit=${limit}`
+    );
     if (data.success && Array.isArray(data.transactions)) {
       return data.transactions;
     }

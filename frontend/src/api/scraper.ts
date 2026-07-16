@@ -1,103 +1,99 @@
+import { apiRequest } from "./request";
+import { FetchClient, ApiResponse } from "./types";
+
 export const scrapeImages = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/scrape-images", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/scrape-images", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const detectPanelsBatch = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/detect-panels-batch", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/detect-panels-batch", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const detectPanels = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/detect-panels", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/detect-panels", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const detectPanelsB64 = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/py/panels/detect-b64", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/py/panels/detect-b64", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const extractOcrB64 = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/py/ocr/extract-full-b64", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/py/ocr/extract-full-b64", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const generateStoryboard = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/generate-storyboard", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/generate-storyboard", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const scrapeEpisodes = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: { url?: string; title_no?: string; max_episodes?: number },
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/scrape-episodes", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/scrape-episodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const scrapeEpisodesAdvanced = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: {
     url?: string;
     title_no?: string;
@@ -107,43 +103,40 @@ export const scrapeEpisodesAdvanced = async (
     sort_by?: 'latest' | 'oldest' | 'rating' | 'likes';
   },
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/scrape-episodes-advanced", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/scrape-episodes-advanced", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const scrapeEpisodesPaginated = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: { title_no: string; max_episodes?: number },
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/scrape-episodes-paginated", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/scrape-episodes-paginated", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const batchScrapeSeriesAPI = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: {
     series: Array<{ url?: string; title_no?: string }>;
     max_episodes_per_series?: number;
   },
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/batch-scrape-series", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/batch-scrape-series", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
