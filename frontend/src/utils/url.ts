@@ -242,7 +242,8 @@ export function getProxiedImageUrl(url?: string): string {
 }
 
 export function convertToViewerUrl(url: string, chapterNum: string): string {
-  if (!url || !chapterNum) return url;
+  if (!url) return url;
+  const targetChapter = (chapterNum && chapterNum.trim()) ? chapterNum.trim() : "1";
   try {
     const cleanUrl = url.trim();
     if ((cleanUrl.includes("webtoons.com") || cleanUrl.includes("webtoon.com")) && cleanUrl.includes("title_no=")) {
@@ -256,7 +257,7 @@ export function convertToViewerUrl(url: string, chapterNum: string): string {
         } else if (!urlObj.pathname.endsWith("/viewer")) {
           urlObj.pathname = urlObj.pathname.replace(/\/$/, "") + "/viewer";
         }
-        urlObj.searchParams.set("episode_no", chapterNum);
+        urlObj.searchParams.set("episode_no", targetChapter);
         return urlObj.toString();
       }
     }

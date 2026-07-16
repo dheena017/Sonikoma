@@ -1274,6 +1274,48 @@ async def scrape_images_from_url(
     return [f"/api/proxy-image?url={quote(img)}" for img in filtered_images]
 
 
+def normalize_series_url(url: str) -> str:
+    if not url:
+        return url
+    if "webtoons.com" not in url and "webtoon.com" not in url:
+        return url
+    try:
+        from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
+        import re
+        parsed = urlparse(url)
+        query_params = parse_qs(parsed.query)
+        
+        # We only want title_no in the query parameters
+        title_no = query_params.get("title_no")
+        new_query = ""
+        if title_no:
+            new_query = urlencode({"title_no": title_no[0]})
+            
+        path_parts = [p for p in parsed.path.split('/') if p]
+        if path_parts:
+            # Check for region prefix
+            has_region = False
+            region = ""
+            if re.match(r'^[a-z]{2}(-[a-z]{2,4})?$', path_parts[0], re.IGNORECASE):
+                has_region = True
+                region = path_parts.pop(0)
+                
+            if path_parts and path_parts[-1] == "viewer":
+                if len(path_parts) >= 4:
+                    # Remove episode slug if it exists (e.g. ep-5-...)
+                    path_parts.pop(-2)
+                path_parts[-1] = "list"
+                
+            if has_region:
+                path_parts.insert(0, region)
+                
+        new_path = "/" + "/".join(path_parts)
+        return urlunparse(parsed._replace(path=new_path, query=new_query))
+    except Exception as e:
+        logger.error(f"[Episode Scraper] Error normalizing series URL: {e}")
+        return url
+
+
 # ─── WEBTOON Episode List Scraper ───────────────────────────────────────────
 
 async def scrape_webtoon_episodes(
@@ -1281,6 +1323,9 @@ async def scrape_webtoon_episodes(
     title_no: Optional[str] = None,
     max_episodes: Optional[int] = None
 ) -> Dict[str, Any]:
+    if series_url:
+        series_url = normalize_series_url(series_url)
+
     """
     Scrapes episode metadata from WEBTOON series list page.
     Extracts: episode number, title, date, thumbnail, episode URL.

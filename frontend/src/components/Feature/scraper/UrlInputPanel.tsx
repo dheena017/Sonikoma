@@ -148,7 +148,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
       const entered = FavoritesManager.getEnteredUrls();
       const merged = [...entered, ...bookmarks, ...reads];
       const uniqueUrls = Array.from(new Set(merged));
-      const suggestionsData = uniqueUrls.map(url => {
+      let suggestionsData = uniqueUrls.map(url => {
         const parsed = parseWebtoonUrl(url);
         return {
           url: url,
@@ -156,11 +156,20 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           genre: parsed.genre || "general",
         };
       });
+
+      if (targetUrl && targetUrl.trim()) {
+        const searchVal = targetUrl.trim().toLowerCase();
+        suggestionsData = suggestionsData.filter(item => 
+          item.url.toLowerCase().includes(searchVal) ||
+          item.title.toLowerCase().includes(searchVal)
+        );
+      }
+
       setSuggestions(suggestionsData.slice(0, 8));
     } catch (e) {
       console.warn("Failed to load autocomplete suggestions:", e);
     }
-  }, [showSuggestions]);
+  }, [showSuggestions, targetUrl]);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -394,7 +403,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               onFocus={() => setShowSuggestions(true)}
               onChange={(e) => {
                 setTargetUrl(e.target.value);
-                setShowSuggestions(false);
+                setShowSuggestions(true);
               }}
               onPaste={handlePaste}
               onKeyDown={(e) => {

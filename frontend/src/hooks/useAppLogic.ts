@@ -301,7 +301,7 @@ export function useAppLogic() {
     webcomicsapp: ["webcomicsapp.com"],
     mangadex: ["mangadex.org", "mangadex.com"],
     toomics: ["toomics.com"],
-    linewebtoon: ["webtoon.com"],
+    linewebtoon: ["webtoon.com", "webtoons.com"],
     asurascans: ["asurascans.com"],
     manhuato: ["manhuato.com"],
     reaperscans: ["reaperscans.com"],
