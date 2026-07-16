@@ -1,182 +1,168 @@
+import { apiRequest } from "./request";
+import { FetchClient, ApiResponse } from "./types";
+
 export const submitImageEdits = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/image/edit", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/image/edit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const editImage = submitImageEdits;
 
 export const removeSpeechBubblesBatch = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor(
-    "/api/image/remove-speech-bubbles-batch",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-      ...options,
-    }
-  );
-  return res.json();
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/image/remove-speech-bubbles-batch", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
 };
 
 export const mergeImages = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/image/merge", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/image/merge", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const removeSpeechBubbles = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/image/remove-speech-bubbles", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/image/remove-speech-bubbles", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const splitImage = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/image/split", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/image/split", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const transformImage = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/image/transform", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/image/transform", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const processLayers = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   panelId: string | number,
   data: { url: string },
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor(
-    `/api/image/process-layers/${panelId}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-      ...options,
-    }
-  );
-  return res.json();
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/image/process-layers/${panelId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
 };
 
 export const downloadZip = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/image/download-zip", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/image/download-zip", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const undoImageEdit = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/image/undo-edit", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/image/undo-edit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const undoCrop = undoImageEdit;
 
-export const getProxyImageUrl = (url: string) => {
+export const getProxyImageUrl = (url: string): string => {
   if (isProxyUrl(url)) {
     return url;
   }
   return `/api/proxy-image?url=${encodeURIComponent(url)}`;
 };
 
-export const isProxyUrl = (url: string) => {
-  return url && typeof url === "string" && url.includes("/api/proxy-image");
+export const isProxyUrl = (url: string): boolean => {
+  return !!(url && typeof url === "string" && url.includes("/api/proxy-image"));
 };
 
-export const isApiUrl = (url: string) => {
-  return url && typeof url === "string" && url.includes("/api/");
+export const isApiUrl = (url: string): boolean => {
+  return !!(url && typeof url === "string" && url.includes("/api/"));
 };
 
 export const saveTrainingData = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   originalPanel: Blob,
   correctedTextMask: Blob,
   options?: RequestInit
-) => {
+): Promise<ApiResponse<any>> => {
   const formData = new FormData();
   formData.append("original_panel", originalPanel, "original_panel.png");
   formData.append("corrected_text_mask", correctedTextMask, "corrected_text_mask.png");
 
-  const res = await fetchWithInterceptor("/api/image/save-training-data", {
+  return apiRequest(fetchWithInterceptor, "/api/image/save-training-data", {
     method: "POST",
     body: formData,
     ...options,
   });
-  return res.json();
 };
 
 export const getTrainingDataCount = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/image/training-data-count", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/image/training-data-count", {
     method: "GET",
     ...options,
   });
-  return res.json();
 };
 
 /**
@@ -184,7 +170,7 @@ export const getTrainingDataCount = async (
  * The caller is responsible for calling URL.revokeObjectURL() when done.
  */
 export const debugYolo = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   imageUrl: string,
   conf: number = 0.25
 ): Promise<string> => {
@@ -201,15 +187,18 @@ export const debugYolo = async (
 };
 
 export const startYoloTraining = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   epochs: number = 20,
   batchSize: number = 4,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor(`/api/image/start-training?epochs=${epochs}&batch_size=${batchSize}`, {
-    method: "POST",
-    ...options,
-  });
+): Promise<ApiResponse<any>> => {
+  const res = await fetchWithInterceptor(
+    `/api/image/start-training?epochs=${epochs}&batch_size=${batchSize}`,
+    {
+      method: "POST",
+      ...options,
+    }
+  );
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: "Unknown error" }));
     throw new Error(err.detail ?? "Failed to start YOLO training");
@@ -218,9 +207,9 @@ export const startYoloTraining = async (
 };
 
 export const getYoloTrainingStatus = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   options?: RequestInit
-) => {
+): Promise<ApiResponse<any>> => {
   const res = await fetchWithInterceptor("/api/image/training-status", {
     method: "GET",
     ...options,
@@ -233,7 +222,7 @@ export const getYoloTrainingStatus = async (
 };
 
 export const getYoloTrainingDataList = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   options?: RequestInit
 ): Promise<Array<{ pair_id: string; original_url: string; mask_url: string }>> => {
   const res = await fetchWithInterceptor("/api/image/training-data-list", {
@@ -248,10 +237,10 @@ export const getYoloTrainingDataList = async (
 };
 
 export const deleteYoloTrainingDataPair = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   pairId: string,
   options?: RequestInit
-) => {
+): Promise<ApiResponse<any>> => {
   const res = await fetchWithInterceptor(`/api/image/training-data-pair/${pairId}`, {
     method: "DELETE",
     ...options,
@@ -262,5 +251,3 @@ export const deleteYoloTrainingDataPair = async (
   }
   return res.json();
 };
-
-

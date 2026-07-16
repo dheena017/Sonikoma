@@ -1,51 +1,49 @@
+import { apiRequest } from "./request";
+import { FetchClient, ApiResponse } from "./types";
+
 export const generateVideo = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/generate", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const renderVideo = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/video/render", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/video/render", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
 
 export const getVideoStatus = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   jobId: string,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor(`/api/video/status/${jobId}`, options);
-  return res.json();
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/video/status/${jobId}`, options);
 };
 
 export const generateTts = async (
-  fetchWithInterceptor: any,
+  fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
-) => {
-  const res = await fetchWithInterceptor("/api/audio/generate", {
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/audio/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
-  return res.json();
 };
-
