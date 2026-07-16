@@ -19,7 +19,6 @@ import {
   ScraperSelectionToolbar,
 } from "@/components/Feature/editor/seloect";
 import LiveScraperDeckEmptyState from "./LiveScraperDeckEmptyState.js";
-import ImageScraperLoadingPage from "./ImageScraperLoadingPage.js";
 
 import { parseWebtoonUrl, getSourceName } from "../../../utils.js";
 import { updateSelection } from "@/utils/selection";
@@ -398,7 +397,6 @@ const LiveScraperDeck = React.memo(
       }
     };
 
-    const isLoadingScrape = isScraping && scrapedImages.length === 0;
     const showEmptyState = !isScraping && scrapedImages.length === 0;
 
     return (
@@ -456,44 +454,10 @@ const LiveScraperDeck = React.memo(
             </div>
           </div>
 
-          {isLoadingScrape ? (
-            <ImageScraperLoadingPage
-              targetUrl={targetUrl}
-              selectedSource={getSourceName(targetUrl) || "webtoon"}
-              selectedModel={selectedModel || "gemini-2.5-flash"}
-              consoleLogs={consoleLogs || []}
-              onCancel={resetWorkspace || (() => {})}
-              isFullPage={false}
-            />
-          ) : isBatchCropping ? (
-            <ImageScraperLoadingPage
-              consoleLogs={consoleLogs || []}
-              onCancel={handleCancelBatch || (() => {})}
-              isFullPage={false}
-              mode="autocrop"
-              progress={batchProgress}
-            />
-          ) : showEmptyState ? (
+          {showEmptyState ? (
             <LiveScraperDeckEmptyState />
           ) : (
             <div className="space-y-4">
-              {/* Live scraping progress banner */}
-              {isScraping && (
-                <div className="flex flex-col gap-2.5 p-4 rounded-2xl bg-purple-950/20 border border-purple-800/30 shadow-md">
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="h-3.5 w-3.5 text-purple-400 animate-spin flex-shrink-0" />
-                    <p className="text-xs text-purple-300 font-mono font-bold tracking-tight">
-                      Downloading images...{" "}
-                      {scrapedImages.length > 0
-                        ? `${scrapedImages.length} loaded so far`
-                        : "preparing to download"}
-                    </p>
-                  </div>
-                  <div className="relative h-1.5 w-full bg-black/60 rounded-full overflow-hidden border border-purple-950/40 shadow-inner">
-                    <div className="absolute top-0 bottom-0 bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-400 rounded-full w-1/3 animate-infinite-scroll" />
-                  </div>
-                </div>
-              )}
 
               {/* Shift-select hint banner */}
               {scrapedImages.length > 1 && (
@@ -543,7 +507,6 @@ const LiveScraperDeck = React.memo(
                   );
                 })}
 
-                {/* Trailing skeleton cards while more images are still loading */}
                 {isScraping && [1, 2, 3].map((num) => (
                   <div
                     key={`loading-skeleton-${num}`}

@@ -43,7 +43,6 @@ import { LoginPage, RegisterPage, ForgotPasswordPage } from "./components/auth";
 import ProfilePage from "./components/profile/ProfilePage";
 import SettingsAccountPage from "./components/settings/SettingsAccountPage";
 import LoadingPage from "./components/LoadingPage";
-import ImageScraperLoadingPage from "./components/Feature/scraper/ImageScraperLoadingPage";
 import { TerminalLogs, LogsPage } from "./components/Feature/terminal";
 import DisplayPage from "./components/DisplayPage";
 import DashboardPage from "./components/Dashboard/DashboardPage";

@@ -9,7 +9,6 @@ export { ConfigHistoryDropdown } from "./ConfigHistoryDropdown";
 export { GlobalScraperConfigTool } from "./GlobalScraperConfigTool";
 export { ScraperLogStream } from "./ScraperLogStream";
 export { default as UrlInputPanel } from "./UrlInputPanel";
-export { default as ImageScraperLoadingPage } from "./ImageScraperLoadingPage";
 
 export type { LiveScraperDeckProps } from "./types";
 export type {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Image as ImageIcon, Layout, ArrowRight, Book } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Layout, Book } from "lucide-react";
 import { useAIModels } from "@/hooks/useAIModels";
 import { NotificationType } from "../../notification/NotificationStack";
 import { extractWebtoonUrl, parseWebtoonUrl } from "../../../utils/url";
@@ -145,7 +145,8 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
     try {
       const bookmarks = FavoritesManager.getBookmarks();
       const reads = FavoritesManager.getReadEpisodes();
-      const merged = [...bookmarks, ...reads];
+      const entered = FavoritesManager.getEnteredUrls();
+      const merged = [...entered, ...bookmarks, ...reads];
       const uniqueUrls = Array.from(new Set(merged));
       const suggestionsData = uniqueUrls.map(url => {
         const parsed = parseWebtoonUrl(url);
@@ -194,6 +195,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
 
   const handleImportClick = () => {
     if (!targetUrl.trim()) return;
+    FavoritesManager.addEnteredUrl(targetUrl.trim());
     handleScrape?.();
   };
 
@@ -550,6 +552,3 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
 });
 
 export default UrlInputPanel;
-function handleScrape() {
-  throw new Error("Function not implemented.");
-}

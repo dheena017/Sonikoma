@@ -140,6 +140,27 @@ export class FavoritesManager {
   static isRead(url: string): boolean {
     return this.getReadEpisodes().includes(url);
   }
+
+  static getEnteredUrls(): string[] {
+    try {
+      const data = localStorage.getItem('sonikoma_entered_urls');
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  static addEnteredUrl(url: string) {
+    if (!url || !url.trim()) return;
+    const urls = this.getEnteredUrls();
+    const index = urls.indexOf(url);
+    if (index > -1) {
+      urls.splice(index, 1);
+    }
+    urls.unshift(url);
+    localStorage.setItem('sonikoma_entered_urls', JSON.stringify(urls.slice(0, 50)));
+    this.notifyUpdated();
+  }
 }
 
 interface FavoritesListProps {
