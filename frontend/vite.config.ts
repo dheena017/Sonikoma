@@ -9,7 +9,13 @@ import fs from "fs";
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, path.resolve(__dirname, ".."));
 
-  const isCIOrBuild = process.env.CI || command === "build";
+  const isCIOrBuild =
+    process.env.CI !== undefined ||
+    process.env.NETLIFY !== undefined ||
+    process.env.VERCEL !== undefined ||
+    command === "build" ||
+    mode === "production" ||
+    process.env.NODE_ENV === "production";
 
   const backendPortStr = env.BACKEND_PORT || process.env.BACKEND_PORT || process.env.PORT;
   if (!backendPortStr && !isCIOrBuild) {
