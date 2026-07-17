@@ -109,7 +109,7 @@ async def lifespan(app: FastAPI):
 
         # Start automatic training background monitor service
         try:
-            from services.training_monitor import start_background_monitor
+            from services.training.training_monitor import start_background_monitor
             start_background_monitor()
         except Exception as e:
             logger.warning(f"[Startup] Failed to start training data monitor service: {e}")

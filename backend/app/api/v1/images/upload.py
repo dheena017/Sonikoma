@@ -163,7 +163,7 @@ async def start_training(epochs: int = 20, batch_size: int = 4):
 async def get_training_status():
     try:
         from providers.vision.yolo import status, is_training_locked, get_lock_pid
-        from services.training_monitor import get_current_original_count, load_metadata, TRAINING_DATA_DIR
+        from services.training.training_monitor import get_current_original_count, load_metadata, TRAINING_DATA_DIR
 
         status_dict = status.to_dict()
 

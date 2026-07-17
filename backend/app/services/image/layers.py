@@ -147,7 +147,7 @@ async def extract_panel_layers_service(panel_id: str, url: str) -> Dict[str, Any
             pass
 
         try:
-            from services.training_monitor import check_and_trigger_training
+            from services.training.training_monitor import check_and_trigger_training
             await asyncio.to_thread(check_and_trigger_training)
         except Exception:
             pass

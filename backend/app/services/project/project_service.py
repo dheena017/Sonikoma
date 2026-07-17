@@ -207,6 +207,26 @@ class ProjectService:
         except Exception as e:
             logger.error(f"Failed to sync project JSON to Supabase: {e}")
 
+    def calculate_and_save_token_usage(self, project_id: str, panels: Any, price_per_million: float = 0.50) -> Dict[str, Any]:
+        input_tokens = sum(panel.get("inputTokens", 0) for panel in panels)
+        output_tokens = sum(panel.get("outputTokens", 0) for panel in panels)
+        total_tokens = input_tokens + output_tokens
+        cost = round((total_tokens / 1_000_000.0) * price_per_million, 6)
+
+        usage_metrics = {
+            "inputTokens": input_tokens,
+            "outputTokens": output_tokens,
+            "totalTokens": total_tokens,
+            "estimatedCostUSD": cost,
+        }
+
+        try:
+            self.sync_project_to_supabase(project_id, None, "")
+        except Exception as e:
+            logger.error(f"Failed to save token usage metrics to Supabase: {e}")
+
+        return usage_metrics
+
     def get_series_details(self, series_id_or_slug: str, current_user_id: str) -> Optional[Dict[str, Any]]:
         from database.connection import get_db_connection
         conn = get_db_connection()
