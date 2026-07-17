@@ -6,22 +6,17 @@ Project creation routes and token-usage calculation helper.
 """
 
 import logging
-import uuid
 from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends
 
 from api.dependencies.auth import get_current_user
 from schemas.project import ProjectCreateRequest
-from repositories.project_repository import (
-    get_project,
-    insert_project,
-    insert_token_log,
-)
-from database.connection import unwrap_proxy_url
+from services.project.project_service import ProjectService
 
 logger = logging.getLogger("sonikoma.routes.projects.create")
 router = APIRouter()
+service = ProjectService()
 
 
 # ── Token-usage helper ────────────────────────────────────────────────────
@@ -45,28 +40,8 @@ def calculate_and_save_token_usage(
         "estimatedCostUSD": cost,
     }
 
-    log_id = str(uuid.uuid4())
-
     try:
-        insert_token_log(
-            log_id, project_id, input_tokens, output_tokens, total_tokens, cost
-        )
-    except Exception as e:
-        logger.error(f"Failed to insert local token usage log: {e}")
-
-    try:
-        from database.supabase import supabase
-        if supabase:
-            supabase.table("projects").update({"usage_metrics": usage_metrics}).eq("id", project_id).execute()
-            supabase.table("token_usage_logs").insert({
-                "id": log_id,
-                "project_id": project_id,
-                "input_tokens": input_tokens,
-                "output_tokens": output_tokens,
-                "total_tokens": total_tokens,
-                "estimated_cost_usd": cost,
-            }).execute()
-            logger.info(f"Saved usage metrics for project {project_id}: {usage_metrics}")
+        service.sync_project_to_supabase(project_id, None, "")
     except Exception as e:
         logger.error(f"Failed to save token usage metrics to Supabase: {e}")
 
@@ -86,35 +61,11 @@ async def create_project(
             f"[Database] Attempting to create new project: {body.project_id} "
             f"for user {current_user['user_id']}"
         )
-        existing = get_project(body.project_id)
-        if existing:
-            logger.info(
-                f"[Database] Project {body.project_id} already exists. Skipping insertion."
-            )
-            return {
-                "success": True,
-                "project_id": body.project_id,
-                "message": "Project already exists.",
-            }
-
-        insert_project({
-            "project_id": body.project_id,
-            "url": unwrap_proxy_url(body.url),
-            "title": body.title,
-            "genre": body.genre,
-            "episode": body.episode,
-            "status": "pending",
-            "panels_count": body.panels_count,
-            "video_url": body.video_url,
-            "user_id": current_user["user_id"],
-            "author": body.author,
-            "cover_image": unwrap_proxy_url(body.cover_image),
-            "synopsis": body.synopsis,
-        })
+        result = service.create_project(body, current_user["user_id"])
         logger.info(
             f"[Database] Created project {body.project_id} successfully: '{body.title}'"
         )
-        return {"success": True, "project_id": body.project_id}
+        return result
     except Exception as e:
         logger.error(f"Failed to save project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to save project: {e}")

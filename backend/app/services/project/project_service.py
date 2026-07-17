@@ -2,6 +2,8 @@ import os
 import logging
 from typing import Dict, Any, Optional
 
+from database.connection import unwrap_proxy_url
+
 logger = logging.getLogger("sonikoma.services.project")
 
 
@@ -34,7 +36,7 @@ class ProjectService:
         self.repo.insert_project(
             {
                 "project_id": body.project_id,
-                "url": body.url,
+                "url": unwrap_proxy_url(body.url),
                 "title": body.title,
                 "genre": body.genre,
                 "episode": body.episode,
@@ -43,11 +45,147 @@ class ProjectService:
                 "video_url": body.video_url,
                 "user_id": current_user_id,
                 "author": body.author,
-                "cover_image": body.cover_image,
+                "cover_image": unwrap_proxy_url(body.cover_image),
                 "synopsis": body.synopsis,
             }
         )
         return {"success": True, "project_id": body.project_id}
+
+    def save_project_panels(self, project_id: str, panels: Any, current_user_id: str, audit_logger=None, request_client=None) -> Dict[str, Any]:
+        project = self.repo.get_project(project_id)
+        if not project:
+            project = self.repo.get_project_by_slug(project_id)
+            if project:
+                project_id = project["project_id"]
+
+        if not project:
+            raise ValueError("Project not found.")
+
+        if project.get("user_id") != current_user_id:
+            raise PermissionError("Access denied.")
+
+        db_panels = []
+        for panel in panels:
+            payload = {
+                "image_url": unwrap_proxy_url(panel.image_url),
+                "speech_text": panel.speech_text,
+                "sfx": panel.sfx,
+                "duration": panel.duration,
+                "motion_type": panel.motion_type,
+                "visual_description": panel.visual_description,
+                "brightness": panel.brightness,
+                "contrast": panel.contrast,
+                "saturation": panel.saturation,
+                "grayscale": panel.grayscale,
+                "filter_preset": panel.filter_preset,
+                "bubble_method": panel.bubble_method,
+                "bubble_sensitivity": panel.bubble_sensitivity,
+                "bubble_dilation": panel.bubble_dilation,
+                "inpaint_radius": panel.inpaint_radius,
+                "detection_style": panel.detection_style,
+                "original_url": unwrap_proxy_url(panel.original_image_url),
+            }
+            db_panels.append(payload)
+
+        self.repo.insert_panels(project_id, db_panels)
+        self.repo.update_project(project_id, {"panels_count": len(panels)})
+
+        if audit_logger and request_client:
+            audit_logger(current_user_id, "Saved Storyboard Panels", request_client, "Success")
+
+        return {"success": True, "saved": len(panels)}
+
+    def increment_project_tokens(self, project_id: str, tokens: int, current_user_id: str) -> Dict[str, Any]:
+        project = self.repo.get_project(project_id)
+        if not project:
+            project = self.repo.get_project_by_slug(project_id)
+            if project:
+                project_id = project["project_id"]
+
+        if not project:
+            raise ValueError("Project not found.")
+
+        if project.get("user_id") != current_user_id:
+            raise PermissionError("Access denied.")
+
+        self.repo.increment_project_tokens(project_id, tokens)
+        return {"success": True, "added": tokens}
+
+    def update_project_details(self, project_id: str, body: Any, current_user_id: str) -> Dict[str, Any]:
+        project = self.repo.get_project(project_id)
+        if not project:
+            project = self.repo.get_project_by_slug(project_id)
+            if project:
+                project_id = project["project_id"]
+
+        if not project:
+            self.repo.insert_project(
+                {
+                    "project_id": project_id,
+                    "url": body.url or "",
+                    "title": body.title or "Untitled Project",
+                    "genre": body.genre or "general",
+                    "episode": body.episode or "",
+                    "status": "pending",
+                    "panels_count": len(body.panels) if body.panels else 0,
+                    "video_url": None,
+                    "user_id": current_user_id,
+                    "author": body.author or "",
+                    "cover_image": unwrap_proxy_url(body.cover_image) if body.cover_image is not None else "",
+                    "synopsis": body.synopsis or "",
+                }
+            )
+            project = {"user_id": current_user_id}
+
+        if project.get("user_id") != current_user_id:
+            raise PermissionError("Access denied.")
+
+        field_map = {
+            "title": body.title,
+            "genre": body.genre,
+            "episode": body.episode,
+            "author": body.author,
+            "synopsis": body.synopsis,
+            "video_url": body.video_url,
+            "status": body.status,
+            "audio_settings": body.audio_settings,
+        }
+        updates = {k: v for k, v in field_map.items() if v is not None}
+        if body.cover_image is not None:
+            updates["cover_image"] = unwrap_proxy_url(body.cover_image)
+
+        db_panels = None
+        if body.panels is not None:
+            db_panels = []
+            for panel in body.panels:
+                payload = {
+                    "image_url": unwrap_proxy_url(panel.image_url),
+                    "speech_text": panel.speech_text,
+                    "sfx": panel.sfx,
+                    "duration": panel.duration,
+                    "motion_type": panel.motion_type,
+                    "visual_description": panel.visual_description,
+                    "brightness": panel.brightness,
+                    "contrast": panel.contrast,
+                    "saturation": panel.saturation,
+                    "grayscale": panel.grayscale,
+                    "filter_preset": panel.filter_preset,
+                    "bubble_method": panel.bubble_method,
+                    "bubble_sensitivity": panel.bubble_sensitivity,
+                    "bubble_dilation": panel.bubble_dilation,
+                    "inpaint_radius": panel.inpaint_radius,
+                    "detection_style": panel.detection_style,
+                    "original_url": unwrap_proxy_url(panel.original_image_url),
+                }
+                db_panels.append(payload)
+
+        self.repo.update_project_full(project_id, updates, db_panels)
+        updated_project = self.repo.get_project(project_id)
+        return {
+            "success": True,
+            "series_slug": updated_project.get("series_slug") if updated_project else None,
+            "chapter_slug": updated_project.get("chapter_slug") if updated_project else None,
+        }
 
     def sync_project_to_supabase(self, project_id: str, body: Any, current_user_id: str) -> None:
         try:
