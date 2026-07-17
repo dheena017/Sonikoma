@@ -17,6 +17,7 @@ from api.dependencies.auth import get_current_user
 from backend.schemas.export import YouTubeExportRequest
 from database.db import log_youtube_publication
 from services.export.youtube.workflow import execute_youtube_upload_workflow
+from domain.exceptions import ResourceNotFoundException, ProcessingException
 
 try:
     import google_auth_oauthlib.flow  # noqa: F401
@@ -108,6 +109,10 @@ async def export_to_youtube(
         except Exception as db_err:
             logger.error(f"[Database] Failed to log YouTube publication: {db_err}")
         return res
+    except ResourceNotFoundException as rnf:
+        raise HTTPException(status_code=404, detail=str(rnf.message))
+    except ProcessingException as pe:
+        raise HTTPException(status_code=500, detail=str(pe.message))
     finally:
         if tmp_video_path and os.path.exists(tmp_video_path):
             try:
@@ -187,6 +192,10 @@ async def upload_and_export_to_youtube(
         except Exception as db_err:
             logger.error(f"[Database] Failed to log YouTube publication: {db_err}")
         return res
+    except ResourceNotFoundException as rnf:
+        raise HTTPException(status_code=404, detail=str(rnf.message))
+    except ProcessingException as pe:
+        raise HTTPException(status_code=500, detail=str(pe.message))
     finally:
         if tmp_video_path and os.path.exists(tmp_video_path):
             try:

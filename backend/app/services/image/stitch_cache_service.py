@@ -4,7 +4,6 @@ import logging
 import httpx
 import json
 from urllib.parse import urlparse, parse_qs
-from fastapi import Request
 
 from utils.cache import stitched_cache
 # I am mocking the imports that were inside the function
@@ -18,7 +17,7 @@ logger = logging.getLogger("sonikoma.services.image.stitch_cache")
 # In transform.py it just did edit_history.get, maybe edit_history is from utils.cache? Let's assume it's from utils.cache
 from utils.cache import edit_history
 
-async def retrieve_cached_stitch_service(cache_id: str, request: Request = None):
+async def retrieve_cached_stitch_service(cache_id: str, referer: str = None):
     cached = stitched_cache.get(cache_id)
     if cached:
         return cached["data"], cached["content_type"]
@@ -53,7 +52,6 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
         if index is not None:
             try:
                 webtoon_url = None
-                referer = request.headers.get("referer") if request else None
                 if referer:
                     parsed_ref = urlparse(referer)
                     query_params = parse_qs(parsed_ref.query)
@@ -102,7 +100,6 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
     if not original_url and re.match(r'^stitched_\d+_full(?:_\d+)?$', cache_id):
         try:
             webtoon_url = None
-            referer = request.headers.get("referer") if request else None
             if referer:
                 parsed_ref = urlparse(referer)
                 query_params = parse_qs(parsed_ref.query)

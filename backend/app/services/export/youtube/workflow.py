@@ -7,8 +7,8 @@ Orchestrates the OAuth authentication, metadata formatting, and upload logic.
 import os
 import logging
 from typing import Optional, List
-from fastapi import HTTPException
 
+from domain.exceptions import ResourceNotFoundException, ProcessingException
 from .oauth import get_authenticated_service
 from .metadata import format_video_metadata
 from .upload import upload_video_and_thumbnail
@@ -28,7 +28,7 @@ async def execute_youtube_upload_workflow(
 ) -> dict:
     """Core workflow for authenticating and uploading a video file to YouTube."""
     if not os.path.exists(video_path):
-        raise HTTPException(status_code=404, detail="Video file not found.")
+        raise ResourceNotFoundException("Video file not found.")
 
     try:
         # Step 1: Authenticate
@@ -52,8 +52,8 @@ async def execute_youtube_upload_workflow(
             thumbnail_path=thumbnail_path
         )
         return result
-    except HTTPException:
+    except (ResourceNotFoundException, ProcessingException):
         raise
     except Exception as e:
         logger.error(f"YouTube export failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise ProcessingException(str(e))
