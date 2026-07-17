@@ -1,43 +1,40 @@
 """
-backend/app/api/v1/auth.py
+backend/app/api/v1/auth/profile.py
 ─────────────────────────────────────────────────────────────────────────────
-Authentication routes for User Registration, Login, and Google Auth.
-Acts as a thin controller delegating database operations to user/system repositories.
+User Profile, Billing, Credits, developer keys, and Administrative endpoints.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import os
-import uuid
-import logging
 import json
 import secrets
 import datetime
 from datetime import timedelta
-from typing import Optional
-
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
-from fastapi.responses import RedirectResponse, StreamingResponse
-from fastapi.security import OAuth2PasswordRequestForm
+import logging
 import jwt
-import requests
+from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi.responses import StreamingResponse
 
-from config.ports import APP_URL
-from core.security import (
-    verify_password,
-    get_password_hash,
-    create_access_token,
-    SECRET_KEY,
-    ALGORITHM
+from core.security import SECRET_KEY
+from api.dependencies.auth import get_current_user, get_admin_user
+from schemas.auth import (
+    AdminUpdateUser,
+    AdminAddCreditsRequest,
+    AdminBulkAction,
+    ProfileUpdate,
+    RedeemPointsRequest,
+    MfaUpdate,
+    ApiKeyCreate,
+    SaveCardRequest,
+    PurchaseCreditsRequest,
+    AdminUpdateSettings,
+    AdminUpdateProject,
+    AnnouncementCreateRequest
 )
-from api.dependencies.auth import get_current_user, get_admin_user, oauth2_scheme
 
 from repositories.user_repository import (
-    create_user,
-    create_user_relational,
-    get_user_by_email,
     get_user_by_id,
     update_user,
-    create_user_session,
     get_user_sessions,
     terminate_user_session,
     get_user_invoices,
@@ -46,19 +43,17 @@ from repositories.user_repository import (
     create_user_api_key,
     delete_user_api_key,
     get_creator_analytics,
-    get_user_by_api_key,
     create_user_invoice,
     get_user_achievements_and_points,
     get_all_users,
     delete_user,
-    check_credits,
     get_available_credits,
     record_credit_transaction,
     get_credit_transactions,
-    LowCreditBalanceError,
     write_audit_log,
     get_audit_logs
 )
+
 from repositories.system_repository import (
     get_platform_settings,
     update_platform_settings,
@@ -70,293 +65,18 @@ from repositories.system_repository import (
     purge_global_cache
 )
 
-# Re-export extra functions required for compatibility
-from database.db import get_all_projects_admin, get_global_analytics, delete_series_admin, update_series_admin, admin_query_db
-
-logger = logging.getLogger("sonikoma.auth")
-auth_router = APIRouter()
-router = auth_router
-
-LOW_BALANCE_THRESHOLD = 100
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 365
-
-from schemas.auth import (
-    UserRegister,
-    UserLogin,
-    ForgotPasswordRequest,
-    AdminUpdateUser,
-    AdminAddCreditsRequest,
-    AdminBulkAction,
-    ProfileUpdate,
-    PasswordUpdate,
-    RedeemPointsRequest,
-    MfaUpdate,
-    ApiKeyCreate,
-    SaveCardRequest,
-    PurchaseCreditsRequest,
-    AdminUpdateSettings,
-    AdminUpdateProject,
-    AnnouncementCreateRequest
+from database.db import (
+    get_all_projects_admin,
+    get_global_analytics,
+    delete_series_admin,
+    update_series_admin,
+    admin_query_db
 )
 
+logger = logging.getLogger("sonikoma.auth.profile")
+router = APIRouter()
 
-# ─── Auth Routes ─────────────────────────────────────────────────────────────
-
-@router.post("/token", include_in_schema=False)
-async def login_for_swagger_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    request: Request = None,
-):
-    user = get_user_by_email(form_data.username)
-    ip_addr = request.client.host if request and request.client else "127.0.0.1"
-
-    if (
-        not user
-        or not user.get("hashed_password")
-        or not verify_password(form_data.password, user["hashed_password"])
-    ):
-        if user:
-            write_audit_log(user["user_id"], "Swagger UI failed login attempt", ip_addr, "Failed")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    write_audit_log(user["user_id"], "Swagger UI Login", ip_addr, "Success")
-    access_token = create_access_token(data={"sub": user["user_id"]})
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
-@router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserRegister):
-    existing_user = get_user_by_email(user_data.email)
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
-        )
-
-    user_id = f"user_{uuid.uuid4().hex[:8]}"
-    hashed_password = get_password_hash(user_data.password)
-
-    new_user = {
-        "user_id": user_id,
-        "email": user_data.email,
-        "hashed_password": hashed_password,
-        "full_name": user_data.full_name,
-        "avatar_url": f"https://api.dicebear.com/7.x/avataaars/svg?seed={user_id}"
-    }
-
-    try:
-        create_user(new_user)
-        logger.info(f"[Auth] Registered new user: {user_data.email}")
-
-        access_token = create_access_token(data={"sub": user_id})
-        user_info = {
-            "user_id": user_id,
-            "email": user_data.email,
-            "full_name": user_data.full_name,
-            "avatar_url": new_user["avatar_url"]
-        }
-        return {"access_token": access_token, "token_type": "bearer", "user": user_info}
-    except Exception as e:
-        logger.error(f"[Auth] Error creating user: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-@router.post("/login")
-async def login(user_data: UserLogin, request: Request):
-    user = get_user_by_email(user_data.email)
-    ip_addr = request.client.host if request.client else "127.0.0.1"
-
-    if not user or not user["hashed_password"] or not verify_password(user_data.password, user["hashed_password"]):
-        if user:
-            write_audit_log(user["user_id"], "Failed login attempt", ip_addr, "Failed")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    session_id = f"sess_{uuid.uuid4().hex[:8]}"
-    user_agent = request.headers.get("user-agent", "Unknown Browser")
-    browser_name = "Chrome on Windows"
-    if "Firefox" in user_agent:
-        browser_name = "Firefox on Linux"
-    elif "Safari" in user_agent and "Chrome" not in user_agent:
-        browser_name = "Safari on macOS"
-    elif "Edge" in user_agent:
-        browser_name = "Edge on Windows"
-
-    create_user_session(user["user_id"], session_id, browser_name, ip_addr, "New York, USA")
-    write_audit_log(user["user_id"], f"User login via {browser_name}", ip_addr, "Success")
-
-    expires_delta = timedelta(days=365) if user_data.rememberMe else timedelta(days=30)
-    access_token = create_access_token(data={"sub": user["user_id"]}, expires_delta=expires_delta)
-    user_info = {
-        "user_id": user["user_id"],
-        "email": user["email"],
-        "full_name": user["full_name"],
-        "avatar_url": user["avatar_url"]
-    }
-    return {"access_token": access_token, "token_type": "bearer", "user": user_info}
-
-
-@router.post("/forgot-password")
-async def forgot_password(request: ForgotPasswordRequest):
-    user = get_user_by_email(request.email)
-    if not user:
-        return {"message": "If an account exists for this email, you will receive a reset link shortly."}
-
-    logger.info(f"[Auth] Forgot password request for {request.email}. Reset link would be sent.")
-    return {"message": "If an account exists for this email, you will receive a reset link shortly."}
-
-
-@router.get("/google/login", summary="Initiate Google OAuth2 authentication flow")
-async def google_login(request: Request):
-    PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    client_secrets_file = os.path.join(PROJECT_ROOT, "client_secrets.json")
-    if not os.path.exists(client_secrets_file):
-        cwd_secrets = os.path.join(os.getcwd(), "client_secrets.json")
-        if os.path.exists(cwd_secrets):
-            client_secrets_file = cwd_secrets
-
-    if not os.path.exists(client_secrets_file):
-        repo_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
-        if os.path.exists(repo_default):
-            client_secrets_file = repo_default
-
-    if not os.path.exists(client_secrets_file):
-        raise HTTPException(
-            status_code=400,
-            detail="Google login is not configured on the server. Please add 'client_secrets.json' to the project root."
-        )
-
-    try:
-        with open(client_secrets_file, "r", encoding="utf-8") as f:
-            secrets_data = json.load(f)
-        key = "web" if "web" in secrets_data else "installed"
-        client_id = secrets_data[key]["client_id"]
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse client_secrets.json: {e}")
-
-    host = request.headers.get("host", "localhost:8000")
-    scheme = "https" if request.url.scheme == "https" else "http"
-    redirect_uri = f"{scheme}://{host}/api/auth/google/callback"
-
-    scopes = [
-        "openid",
-        "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/youtube.upload"
-    ]
-
-    params = {
-        "client_id": client_id,
-        "redirect_uri": redirect_uri,
-        "response_type": "code",
-        "scope": " ".join(scopes),
-        "access_type": "offline",
-        "prompt": "consent"
-    }
-
-    import urllib.parse
-    auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
-    return RedirectResponse(auth_url)
-
-
-@router.get("/google/callback", summary="Google OAuth2 authentication callback")
-async def google_callback(request: Request):
-    code = request.query_params.get("code")
-    if not code:
-        raise HTTPException(status_code=400, detail="Missing authorization code")
-
-    PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    client_secrets_file = os.path.join(PROJECT_ROOT, "client_secrets.json")
-    if not os.path.exists(client_secrets_file):
-        cwd_secrets = os.path.join(os.getcwd(), "client_secrets.json")
-        if os.path.exists(cwd_secrets):
-            client_secrets_file = cwd_secrets
-
-    if not os.path.exists(client_secrets_file):
-        repo_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
-        if os.path.exists(repo_default):
-            client_secrets_file = repo_default
-
-    try:
-        with open(client_secrets_file, "r", encoding="utf-8") as f:
-            secrets_data = json.load(f)
-        key = "web" if "web" in secrets_data else "installed"
-        client_id = secrets_data[key]["client_id"]
-        client_secret = secrets_data[key]["client_secret"]
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to parse client_secrets.json: {e}")
-
-    host = request.headers.get("host", "localhost:8000")
-    scheme = "https" if request.url.scheme == "https" else "http"
-    redirect_uri = f"{scheme}://{host}/api/auth/google/callback"
-
-    token_url = "https://oauth2.googleapis.com/token"
-    token_payload = {
-        "code": code,
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "redirect_uri": redirect_uri,
-        "grant_type": "authorization_code"
-    }
-
-    try:
-        token_resp = requests.post(token_url, data=token_payload)
-        if token_resp.status_code != 200:
-            raise HTTPException(status_code=400, detail=f"Google token exchange failed: {token_resp.text}")
-
-        token_data = token_resp.json()
-        google_access_token = token_data.get("access_token")
-        if not google_access_token:
-            raise HTTPException(status_code=400, detail="Google response did not return an access token")
-
-        user_info_url = "https://www.googleapis.com/oauth2/v3/userinfo"
-        headers = {"Authorization": f"Bearer {google_access_token}"}
-        resp = requests.get(user_info_url, headers=headers)
-        if resp.status_code != 200:
-            raise HTTPException(status_code=400, detail="Failed to fetch userinfo from Google")
-
-        info = resp.json()
-        email = info.get("email")
-        google_id = info.get("sub")
-        name = info.get("name") or email.split("@")[0]
-        picture = info.get("picture") or f"https://api.dicebear.com/7.x/avataaars/svg?seed={google_id}"
-
-        if not email:
-            raise HTTPException(status_code=400, detail="Google account did not return a valid email address")
-
-        user = get_user_by_email(email)
-        if not user:
-            user_uuid = f"user_{uuid.uuid4().hex[:8]}"
-            password_hash = get_password_hash(f"google_oauth_{uuid.uuid4().hex}")
-            create_user_relational(
-                user_id=user_uuid,
-                username=name,
-                email=email,
-                password_hash=password_hash,
-                preferences="{}"
-            )
-            update_user(user_uuid, {
-                "google_id": google_id,
-                "full_name": name,
-                "avatar_url": picture
-            })
-            user = get_user_by_email(email)
-        elif not user.get("google_id"):
-            update_user(user["user_id"], {"google_id": google_id})
-            user["google_id"] = google_id
-
-        access_token = create_access_token(data={"sub": user["user_id"]})
-        return RedirectResponse(f"{APP_URL}/?token={access_token}")
-    except Exception as e:
-        logger.error(f"[Google Auth] Callback processing error: {e}")
-        raise HTTPException(status_code=500, detail=f"Google Callback processing failed: {e}")
+LOW_BALANCE_THRESHOLD = 100
 
 
 @router.get("/me")
@@ -425,116 +145,6 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     }
 
 
-@router.get("/admin/users")
-async def get_admin_users(current_user: dict = Depends(get_admin_user)):
-    users = get_all_users()
-    return {"success": True, "users": users}
-
-
-@router.put("/admin/users/{user_id}")
-async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Request, current_user: dict = Depends(get_admin_user)):
-    ip_addr = request.client.host if request.client else "127.0.0.1"
-
-    if user_id == current_user['user_id']:
-        if body.is_locked is True:
-            raise HTTPException(status_code=400, detail="Admins cannot lock their own account.")
-        if body.creator_role and body.creator_role != 'admin':
-             raise HTTPException(status_code=400, detail="Admins cannot downgrade their own role.")
-
-    updates = {}
-    if body.creator_role is not None:
-        updates["creator_role"] = body.creator_role
-    if body.credits is not None:
-        updates["credits"] = body.credits
-    if body.is_locked is not None:
-        updates["is_locked"] = 1 if body.is_locked else 0
-
-    if updates:
-        update_user(user_id, updates)
-        log_msg = f"Admin updated user {user_id} settings"
-        if "is_locked" in updates:
-            action = "locked" if updates["is_locked"] else "unlocked"
-            log_msg = f"Admin {action} account of user {user_id}"
-
-        write_audit_log(current_user["user_id"], log_msg, ip_addr, "Success")
-
-    return {"success": True, "message": "User updated successfully."}
-
-
-@router.post("/admin/users/{user_id}/add-credits")
-async def admin_add_credits(user_id: str, body: AdminAddCreditsRequest, request: Request, current_user: dict = Depends(get_admin_user)):
-    ip_addr = request.client.host if request.client else "127.0.0.1"
-    try:
-        new_balance = record_credit_transaction(
-            user_id,
-            body.amount,
-            f"admin_grant: {body.reason}" if body.reason else "admin_grant"
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    log_msg = f"Admin granted {body.amount} credits to user {user_id}. New balance: {new_balance}"
-    write_audit_log(current_user["user_id"], log_msg, ip_addr, "Success")
-
-    return {
-        "success": True,
-        "new_balance": new_balance,
-        "message": f"Successfully updated user credits by {body.amount}."
-    }
-
-
-@router.delete("/admin/users/{user_id}")
-async def admin_delete_user(user_id: str, request: Request, current_user: dict = Depends(get_admin_user)):
-    ip_addr = request.client.host if request.client else "127.0.0.1"
-
-    if user_id == current_user['user_id']:
-        raise HTTPException(status_code=400, detail="Admins cannot delete their own account.")
-
-    delete_user(user_id)
-    write_audit_log(current_user["user_id"], f"Admin deleted user {user_id}", ip_addr, "Success")
-    return {"success": True, "message": "User deleted successfully."}
-
-
-@router.get("/admin/users/{user_id}/logs")
-async def admin_get_user_logs(user_id: str, query: str = "", page: int = 1, limit: int = 20, current_user: dict = Depends(get_admin_user)):
-    offset = (page - 1) * limit
-    logs, total = get_audit_logs(user_id, query=query, limit=limit, offset=offset)
-    return {
-        "success": True,
-        "logs": logs,
-        "total": total,
-        "page": page,
-        "limit": limit
-    }
-
-
-@router.post("/admin/users/bulk")
-async def admin_bulk_action(body: AdminBulkAction, request: Request, current_user: dict = Depends(get_admin_user)):
-    ip_addr = request.client.host if request.client else "127.0.0.1"
-
-    success_count = 0
-    for uid in body.user_ids:
-        if body.action == "delete":
-            delete_user(uid)
-            success_count += 1
-        elif body.action == "set_role" and body.value:
-            update_user(uid, {"creator_role": body.value})
-            success_count += 1
-        elif body.action == "add_credits" and body.value:
-            try:
-                u = get_user_by_id(uid)
-                if u:
-                    current_credits = u.get("credits") if u.get("credits") is not None else 840
-                    added = int(body.value)
-                    update_user(uid, {"credits": current_credits + added})
-                    success_count += 1
-            except Exception as e:
-                logger.error(f"Failed to add credits to {uid}: {e}")
-
-    write_audit_log(current_user["user_id"], f"Admin performed bulk '{body.action}' on {success_count} users", ip_addr, "Success")
-    return {"success": True, "message": f"Successfully applied {body.action} to {success_count} users."}
-
-
 @router.put("/profile")
 async def update_profile(body: ProfileUpdate, request: Request, current_user: dict = Depends(get_current_user)):
     updates = {}
@@ -564,19 +174,18 @@ async def update_profile(body: ProfileUpdate, request: Request, current_user: di
     return {"success": True, "message": "Profile updated successfully."}
 
 
-@router.put("/password")
-async def update_password(body: PasswordUpdate, request: Request, current_user: dict = Depends(get_current_user)):
-    ip_addr = request.client.host if request.client else "127.0.0.1"
-
-    if not current_user["hashed_password"] or not verify_password(body.current_password, current_user["hashed_password"]):
-        write_audit_log(current_user["user_id"], "Change Password Attempt", ip_addr, "Failed")
-        raise HTTPException(status_code=400, detail="Incorrect current password")
-
-    hashed = get_password_hash(body.new_password)
-    update_user(current_user["user_id"], {"hashed_password": hashed})
-    write_audit_log(current_user["user_id"], "Changed Account Password", ip_addr, "Success")
-
-    return {"success": True, "message": "Password updated successfully."}
+@router.delete("/me")
+async def delete_my_account(request: Request, current_user: dict = Depends(get_current_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    user_id = current_user['user_id']
+    try:
+        write_audit_log(user_id, 'Self-deleted account', ip_addr, 'Success')
+        delete_user(user_id)
+        return {'success': True, 'message': 'Account deleted successfully'}
+    except Exception as e:
+        logger.error(f'Failed to delete account: {e}')
+        write_audit_log(user_id, 'Self-delete account failed', ip_addr, 'Failure')
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/sessions")
@@ -840,7 +449,119 @@ async def get_transactions(
     return {"success": True, "transactions": txs, "count": len(txs)}
 
 
-# ─── Admin settings/impersonate ──────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# Admin settings/impersonate & User Management
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.get("/admin/users")
+async def get_admin_users(current_user: dict = Depends(get_admin_user)):
+    users = get_all_users()
+    return {"success": True, "users": users}
+
+
+@router.put("/admin/users/{user_id}")
+async def admin_update_user(user_id: str, body: AdminUpdateUser, request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+
+    if user_id == current_user['user_id']:
+        if body.is_locked is True:
+            raise HTTPException(status_code=400, detail="Admins cannot lock their own account.")
+        if body.creator_role and body.creator_role != 'admin':
+             raise HTTPException(status_code=400, detail="Admins cannot downgrade their own role.")
+
+    updates = {}
+    if body.creator_role is not None:
+        updates["creator_role"] = body.creator_role
+    if body.credits is not None:
+        updates["credits"] = body.credits
+    if body.is_locked is not None:
+        updates["is_locked"] = 1 if body.is_locked else 0
+
+    if updates:
+        update_user(user_id, updates)
+        log_msg = f"Admin updated user {user_id} settings"
+        if "is_locked" in updates:
+            action = "locked" if updates["is_locked"] else "unlocked"
+            log_msg = f"Admin {action} account of user {user_id}"
+
+        write_audit_log(current_user["user_id"], log_msg, ip_addr, "Success")
+
+    return {"success": True, "message": "User updated successfully."}
+
+
+@router.post("/admin/users/{user_id}/add-credits")
+async def admin_add_credits(user_id: str, body: AdminAddCreditsRequest, request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    try:
+        new_balance = record_credit_transaction(
+            user_id,
+            body.amount,
+            f"admin_grant: {body.reason}" if body.reason else "admin_grant"
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    log_msg = f"Admin granted {body.amount} credits to user {user_id}. New balance: {new_balance}"
+    write_audit_log(current_user["user_id"], log_msg, ip_addr, "Success")
+
+    return {
+        "success": True,
+        "new_balance": new_balance,
+        "message": f"Successfully updated user credits by {body.amount}."
+    }
+
+
+@router.delete("/admin/users/{user_id}")
+async def admin_delete_user(user_id: str, request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+
+    if user_id == current_user['user_id']:
+        raise HTTPException(status_code=400, detail="Admins cannot delete their own account.")
+
+    delete_user(user_id)
+    write_audit_log(current_user["user_id"], f"Admin deleted user {user_id}", ip_addr, "Success")
+    return {"success": True, "message": "User deleted successfully."}
+
+
+@router.get("/admin/users/{user_id}/logs")
+async def admin_get_user_logs(user_id: str, query: str = "", page: int = 1, limit: int = 20, current_user: dict = Depends(get_admin_user)):
+    offset = (page - 1) * limit
+    logs, total = get_audit_logs(user_id, query=query, limit=limit, offset=offset)
+    return {
+        "success": True,
+        "logs": logs,
+        "total": total,
+        "page": page,
+        "limit": limit
+    }
+
+
+@router.post("/admin/users/bulk")
+async def admin_bulk_action(body: AdminBulkAction, request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+
+    success_count = 0
+    for uid in body.user_ids:
+        if body.action == "delete":
+            delete_user(uid)
+            success_count += 1
+        elif body.action == "set_role" and body.value:
+            update_user(uid, {"creator_role": body.value})
+            success_count += 1
+        elif body.action == "add_credits" and body.value:
+            try:
+                u = get_user_by_id(uid)
+                if u:
+                    current_credits = u.get("credits") if u.get("credits") is not None else 840
+                    added = int(body.value)
+                    update_user(uid, {"credits": current_credits + added})
+                    success_count += 1
+            except Exception as e:
+                logger.error(f"Failed to add credits to {uid}: {e}")
+
+    write_audit_log(current_user["user_id"], f"Admin performed bulk '{body.action}' on {success_count} users", ip_addr, "Success")
+    return {"success": True, "message": f"Successfully applied {body.action} to {success_count} users."}
+
 
 @router.get('/admin/settings')
 async def admin_get_settings(current_user: dict = Depends(get_admin_user)):
@@ -989,20 +710,6 @@ async def admin_delete_project(project_id: str, request: Request, current_user: 
         return {'success': True, 'message': 'Project deleted successfully'}
     except Exception as e:
         logger.error(f'Failed to delete project: {e}')
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete('/me')
-async def delete_my_account(request: Request, current_user: dict = Depends(get_current_user)):
-    ip_addr = request.client.host if request.client else '127.0.0.1'
-    user_id = current_user['user_id']
-    try:
-        write_audit_log(user_id, 'Self-deleted account', ip_addr, 'Success')
-        delete_user(user_id)
-        return {'success': True, 'message': 'Account deleted successfully'}
-    except Exception as e:
-        logger.error(f'Failed to delete account: {e}')
-        write_audit_log(user_id, 'Self-delete account failed', ip_addr, 'Failure')
         raise HTTPException(status_code=500, detail=str(e))
 
 
