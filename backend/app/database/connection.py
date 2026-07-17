@@ -55,6 +55,7 @@ from database.transaction import (
     create_slug,
     generate_unique_slug,
     generate_missing_slugs,
+    managed_transaction,
     unwrap_proxy_url,
 )
 
@@ -111,7 +112,7 @@ __all__ = [
     "_should_skip_system_log_persistence", "init_db",
     # transaction
     "create_slug", "generate_unique_slug", "generate_missing_slugs",
-    "unwrap_proxy_url",
+    "managed_transaction", "unwrap_proxy_url",
     # health
     "ensure_user_exists",
     # session

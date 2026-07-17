@@ -16,6 +16,8 @@ import uuid
 import sqlite3
 import logging
 import urllib.parse
+from contextlib import contextmanager
+from typing import Iterator
 
 logger = logging.getLogger("sonikoma.database.transaction")
 
@@ -78,6 +80,17 @@ def generate_missing_slugs(conn: sqlite3.Connection) -> None:
         conn.commit()
     except Exception as e:
         logger.error(f"[Database] Error generating missing slugs: {e}")
+
+
+@contextmanager
+def managed_transaction(conn) -> Iterator:
+    """Commit on success and roll back if the enclosed DB work fails."""
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
 
 
 # ── URL helpers ───────────────────────────────────────────────────────────
