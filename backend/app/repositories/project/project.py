@@ -1,4 +1,4 @@
-from infrastructure.storage.local_storage import cleanup_cached_url, delete_video_file
+from database.storage.local_storage import cleanup_cached_url, delete_video_file
 """
 backend/app/repositories/project/project.py
 ─────────────────────────────────────────────────────────────────────────────
