@@ -12,10 +12,10 @@ import logging
 import json
 import asyncio
 from typing import List, Optional
-from services.video.ffmpeg_types import FilterType, VideoMetadata, TransitionSpec, CutSpec
-from services.video.ffmpeg_commands import build_ffprobe_cmd
-from services.video.subtitle_service import SubtitleService
-from services.video.render_service import RenderService
+from engines.video.ffmpeg_types import FilterType, VideoMetadata, TransitionSpec, CutSpec
+from engines.video.ffmpeg_commands import build_ffprobe_cmd
+from engines.video.subtitle_service import SubtitleService
+from engines.video.render_service import RenderService
 
 logger = logging.getLogger("sonikoma.engines.ffmpeg")
 

@@ -1,5 +1,5 @@
 """
-backend/app/services/video/render_service.py
+backend/app/engines/video/render_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Orchestrations for cutting, mixing audio, applying filters, and concatenations.
 ─────────────────────────────────────────────────────────────────────────────
@@ -11,8 +11,8 @@ import subprocess
 import asyncio
 import tempfile
 from typing import List, Optional
-from services.video.ffmpeg_types import TransitionSpec, CutSpec, FilterType
-from services.video.ffmpeg_commands import (
+from engines.video.ffmpeg_types import TransitionSpec, CutSpec, FilterType
+from engines.video.ffmpeg_commands import (
     build_extract_frames_cmd,
     build_extract_audio_cmd,
     build_concatenate_videos_cmd,
