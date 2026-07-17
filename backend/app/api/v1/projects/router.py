@@ -1,4 +1,4 @@
-from services.project.project_service import sync_project_to_supabase, get_series_details, delete_temp_file
+from services.project.project_service import ProjectService, sync_project_to_supabase, get_series_details, delete_temp_file
 """
 api/v1/projects/router.py
 ─────────────────────────────────────────────────────────────────────────────
@@ -48,6 +48,7 @@ logger = logging.getLogger("sonikoma.routes.projects.router")
 # ── Routers ───────────────────────────────────────────────────────────────
 project_router = APIRouter()
 panel_router = APIRouter()
+project_service = ProjectService()
 
 
 # ── List & read ───────────────────────────────────────────────────────────
@@ -132,25 +133,9 @@ async def create_project(
     current_user: dict = Depends(get_current_user),
 ):
     try:
-        existing = get_project(body.project_id)
-        if existing:
-            return {"success": True, "project_id": body.project_id, "message": "Project already exists."}
-        insert_project({
-            "project_id": body.project_id,
-            "url": unwrap_proxy_url(body.url),
-            "title": body.title,
-            "genre": body.genre,
-            "episode": body.episode,
-            "status": "pending",
-            "panels_count": body.panels_count,
-            "video_url": body.video_url,
-            "user_id": current_user["user_id"],
-            "author": body.author,
-            "cover_image": unwrap_proxy_url(body.cover_image),
-            "synopsis": body.synopsis,
-        })
+        result = project_service.create_project(body, current_user["user_id"])
         logger.info(f"[Database] Created project {body.project_id}: '{body.title}'")
-        return {"success": True, "project_id": body.project_id}
+        return result
     except Exception as e:
         logger.error(f"Failed to save project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to save project: {e}")
