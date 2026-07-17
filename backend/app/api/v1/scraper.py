@@ -26,10 +26,12 @@ from routes.auth_routes import SECRET_KEY
 from database import db
 from services.scraper.scraper import (
     scrape_webtoon_episodes,
+    extract_webtoon_url
+)
+from services.workflows.scraper import (
     scrape_webtoon_episodes_advanced,
     scrape_webtoon_episodes_paginated,
-    batch_scrape_series,
-    extract_webtoon_url
+    batch_scrape_series
 )
 from services.scraper.scraper_service import (
     scrape_and_initialize_project,
