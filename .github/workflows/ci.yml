@@ -50,7 +50,18 @@ jobs:
           pip install --extra-index-url https://download.pytorch.org/whl/cpu torch torchvision torchaudio
           pip install -r backend/requirements.txt
 
+      - name: Run Backend Tests
+        env:
+          FRONTEND_PORT: 3000
+          BACKEND_PORT: 5173
+          APP_URL: "http://localhost:3000"
+          JWT_SECRET_KEY: "test_secret_key"
+          GEMINI_API_KEY: "test_gemini_key"
+        continue-on-error: true
+        run: |
+          PYTHONPATH=backend/app pytest backend/tests --continue-on-collection-errors
+
       - name: Check Backend Syntax
         run: |
           # Basic validation to ensure the backend app doesn't have syntax errors
-          python -m py_compile backend/main.py
+          python -m py_compile backend/app/main.py

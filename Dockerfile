@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
     ffmpeg \
+    curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -32,7 +33,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy backend source
 COPY backend/ ./backend/
-COPY backend/database/schema.sql /app/schema_backup.sql
+COPY backend/app/database/schema.sql /app/schema_backup.sql
 COPY scripts/ ./scripts/
 
 # Copy built frontend from Stage 1
@@ -43,6 +44,9 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=8080
 EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD curl -f http://127.0.0.1:8080/api/health || exit 1
 
 # Start the unified FastAPI application
 WORKDIR /app/backend/app
