@@ -9,7 +9,8 @@ import logging
 from fastapi import APIRouter, Depends, Request
 
 from api.v1.ai._deps import get_user_gemini_key, run_md_skill
-from routes.auth_routes import get_current_user
+from api.dependencies.auth import get_current_user
+
 from database.db import write_audit_log
 from schemas.ai import TranslationRequest
 

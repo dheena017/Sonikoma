@@ -11,7 +11,7 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from routes.auth_routes import get_current_user
+from api.dependencies.auth import get_current_user
 from schemas.project import ProjectCreateRequest
 from repositories.project_repository import (
     get_project,

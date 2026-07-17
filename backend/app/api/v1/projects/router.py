@@ -14,7 +14,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Path, Body, Depends, Request, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 
-from routes.auth_routes import get_current_user
+from api.dependencies.auth import get_current_user
 from schemas.project import (
     ProjectCreateRequest,
     PanelsSaveRequest,

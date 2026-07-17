@@ -22,7 +22,8 @@ from schemas.scraper import (
     ProcessUrlRequest,
     SaveScrapedImagesRequest
 )
-from routes.auth_routes import SECRET_KEY
+from core.security import SECRET_KEY
+
 from database import db
 from services.scraper.scraper import (
     scrape_webtoon_episodes,
