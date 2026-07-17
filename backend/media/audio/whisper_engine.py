@@ -1,10 +1,8 @@
+"""Compatibility wrapper for the canonical whisper engine module."""
+
 import sys
-try:
-    from engines.whisper import *
-    import engines.whisper as target
-except (ModuleNotFoundError, ImportError) as __e:
-    if 'services' not in str(__e):
-        raise
-    from app.engines.whisper import *
-    import app.engines.whisper as target
+
+from app.engines.whisper import *  # noqa: F401,F403
+import app.engines.whisper as target
+
 sys.modules[__name__] = target

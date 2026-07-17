@@ -1,10 +1,8 @@
+"""Compatibility wrapper for the canonical ImageMagick provider module."""
+
 import sys
-try:
-    from providers.media.imagemagick import *
-    import providers.media.imagemagick as target
-except (ModuleNotFoundError, ImportError) as __e:
-    if 'services' not in str(__e):
-        raise
-    from providers.media.imagemagick import *
-    import providers.media.imagemagick as target
+
+from providers.media.imagemagick import *  # noqa: F401,F403
+import providers.media.imagemagick as target
+
 sys.modules[__name__] = target
