@@ -18,8 +18,8 @@ Sub-modules:
 """
 
 # ── config ────────────────────────────────────────────────────────────────
-import infrastructure.database.config as config
-from infrastructure.database.config import (
+import database.config as config
+from database.config import (
     DB_DIR,
     DB_PATH,
     DATA_DIR,
@@ -31,7 +31,7 @@ from infrastructure.database.config import (
 )
 
 # ── engine ────────────────────────────────────────────────────────────────
-from infrastructure.database.engine import (
+from database.engine import (
     PostgresCursorWrapper,
     PostgresConnectionWrapper,
     _create_db_connection,
@@ -39,8 +39,8 @@ from infrastructure.database.engine import (
 )
 
 # ── migrations ────────────────────────────────────────────────────────────
-import infrastructure.database.bootstrap as migrations
-from infrastructure.database.bootstrap import (
+import database.bootstrap as migrations
+from database.bootstrap import (
     _db_initialized,
     _db_init_lock,
     _db_init_in_progress,
@@ -51,7 +51,7 @@ from infrastructure.database.bootstrap import (
 )
 
 # ── transaction (slug / URL helpers) ─────────────────────────────────────
-from infrastructure.database.transaction import (
+from database.transaction import (
     create_slug,
     generate_unique_slug,
     generate_missing_slugs,
@@ -59,10 +59,10 @@ from infrastructure.database.transaction import (
 )
 
 # ── health ────────────────────────────────────────────────────────────────
-from infrastructure.database.health import ensure_user_exists
+from database.health import ensure_user_exists
 
 # ── session helpers ───────────────────────────────────────────────────────
-from infrastructure.database.session import uuid_hex, datetime_now_date
+from database.session import uuid_hex, datetime_now_date
 
 import sys
 import types

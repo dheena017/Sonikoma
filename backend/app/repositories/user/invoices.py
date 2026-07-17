@@ -9,7 +9,7 @@ import random
 from datetime import datetime
 from typing import List, Dict, Any
 
-from infrastructure.database.connection import get_db_connection
+from database.connection import get_db_connection
 
 
 def get_user_invoices(user_id: str) -> List[Dict[str, Any]]:

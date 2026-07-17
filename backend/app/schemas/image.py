@@ -5,10 +5,9 @@ Pydantic request/response schemas for image.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Dict, Any, Optional, Literal, Union
-from datetime import datetime
-from services.image.providers.imagemagick import ResizeMode
+from pydantic import BaseModel, Field
+from typing import List, Optional, Literal
+from providers.media.imagemagick import ResizeMode
 
 class EditImageRequest(BaseModel):
     url: str

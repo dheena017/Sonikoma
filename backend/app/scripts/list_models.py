@@ -381,7 +381,7 @@ def run_interactive_inspection():
 
     if active_provider == "gemini":
         print(f"\n{CLR_HIGHLIGHT}Details for Gemini Model: {getattr(model, 'name', '')}{CLR_RESET}")
-        print(f"╔" + ("═" * 70) + "╗")
+        print("╔" + ("═" * 70) + "╗")
         fields = [
             ("Display Name", getattr(model, 'display_name', '')),
             ("Access / Cost", "Free Tier (Rate Limited)"),
@@ -397,7 +397,7 @@ def run_interactive_inspection():
         ]
     elif active_provider == "huggingface":
         print(f"\n{CLR_HIGHLIGHT}Details for Hugging Face Model: {model.get('id')}{CLR_RESET}")
-        print(f"╔" + ("═" * 70) + "╗")
+        print("╔" + ("═" * 70) + "╗")
         tags = model.get("tags", [])
         fields = [
             ("Model ID", model.get("id")),
@@ -414,7 +414,7 @@ def run_interactive_inspection():
     elif active_provider in ("openai", "anthropic"):
         model_id = model.get("id")
         print(f"\n{CLR_HIGHLIGHT}Details for {active_provider.upper()} Model: {model_id}{CLR_RESET}")
-        print(f"╔" + ("═" * 70) + "╗")
+        print("╔" + ("═" * 70) + "╗")
 
         if active_provider == "openai":
             created_ts = model.get("created")
@@ -454,7 +454,7 @@ def run_interactive_inspection():
         else:
             print(f"{label_str}{val}")
 
-    print(f"╚" + ("═" * 70) + "╝")
+    print("╚" + ("═" * 70) + "╝")
 
 def run_diagnostic_test():
     global client_instance, active_provider, configured_api_key

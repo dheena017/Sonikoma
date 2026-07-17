@@ -8,9 +8,8 @@ import re
 import yaml
 import numpy as np
 import cv2
-from PIL import Image
 
-logger = logging.getLogger("sonikoma.services.image.providers.yolo")
+logger = logging.getLogger("sonikoma.providers.vision.yolo")
 
 try:
     from ultralytics import YOLO
@@ -378,7 +377,7 @@ def convert_mask_to_yolo_txt(mask_path: str, txt_output_path: str):
             pts.append(f"{nx:.6f} {ny:.6f}")
 
         # Class 0: speech bubble
-        lines.append(f"0 " + " ".join(pts))
+        lines.append("0 " + " ".join(pts))
 
     # Write file (create empty label if no speech bubble contours exist)
     with open(txt_output_path, "w", encoding="utf-8") as f:
@@ -489,7 +488,7 @@ def _train_worker(epochs: int, batch_size: int = 4):
 
         # Now do the required lazy-imports to prevent NameError
         from ultralytics import YOLO
-        from services.image.providers.yolo import get_yolo_model
+        from providers.vision.yolo import get_yolo_model
 
         # Cleanup old run dataset if exists
         if os.path.exists(dataset_dir):
@@ -575,7 +574,7 @@ def _train_worker(epochs: int, batch_size: int = 4):
 
         # Hot-swap the model into active backend
         logger.info("[Training] Hot-swapping fine-tuned model into active server instance...")
-        import services.image.providers.yolo as se
+        import providers.vision.yolo as se
         se._yolo_model = YOLO(finetuned_path)
 
         # Set final status

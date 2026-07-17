@@ -10,7 +10,7 @@ import os
 import base64
 import tempfile
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 from media.audio.audio import generate_panel_audio
 

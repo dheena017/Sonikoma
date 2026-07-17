@@ -9,7 +9,7 @@ import os
 import logging
 from typing import Any, Optional
 
-logger = logging.getLogger("sonikoma.services.image.providers.yolo")
+logger = logging.getLogger("sonikoma.providers.vision.yolo")
 
 try:
     from ultralytics import YOLO

@@ -13,7 +13,7 @@ Stable Diffusion image generation engine via HuggingFace Diffusers:
 import os
 import logging
 import asyncio
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional, Dict, Any
 from dataclasses import dataclass
 from enum import Enum
 import tempfile

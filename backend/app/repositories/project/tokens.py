@@ -8,7 +8,7 @@ Token usage and LLM costs logging operations.
 import logging
 from typing import List, Dict, Any
 
-from infrastructure.database.connection import get_db_connection
+from database.connection import get_db_connection
 
 logger = logging.getLogger("sonikoma.repositories.project.tokens")
 

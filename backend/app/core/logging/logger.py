@@ -15,7 +15,6 @@ from core.logging.filters import EndpointFilter
 from core.logging.handlers import (
     UIStreamLogHandler,
     log_buffer,
-    log_seq,
     listeners
 )
 

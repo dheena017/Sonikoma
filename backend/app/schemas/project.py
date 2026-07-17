@@ -5,9 +5,8 @@ Pydantic request/response schemas for projects.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Dict, Any, Optional, Literal, Union
-from datetime import datetime
+from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Optional, Literal
 
 class ProjectCreateRequest(BaseModel):
     project_id: str = Field(..., description="Unique Project ID")

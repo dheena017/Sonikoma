@@ -5,10 +5,9 @@ Pydantic request/response schemas for audio.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Dict, Any, Optional, Literal, Union
-from datetime import datetime
-from services.audio.whisper_engine import WhisperModel
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from engines.whisper import WhisperModel
 
 class AlignDialogueRequest(BaseModel):
     audio_url: str = Field(..., description="URL of the audio file to analyze")

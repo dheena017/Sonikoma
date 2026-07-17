@@ -9,7 +9,7 @@ import json
 import datetime
 from typing import Dict, Any
 
-from infrastructure.database.connection import get_db_connection
+from database.connection import get_db_connection
 
 
 def get_creator_analytics(user_id: str) -> Dict[str, Any]:

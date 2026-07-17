@@ -3,9 +3,12 @@ from typing import List, Dict, Any, Optional
 import numpy as np
 import difflib
 
-from media.audio.whisper_engine import get_whisper_engine
-from media.audio.librosa_engine import get_librosa_engine
-import librosa
+from engines.whisper import get_whisper_engine
+from engines.librosa import get_librosa_engine
+try:
+    import librosa
+except ImportError:
+    librosa = None
 
 logger = logging.getLogger("sonikoma.services.dialogue_aligner")
 

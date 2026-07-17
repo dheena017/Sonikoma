@@ -130,7 +130,7 @@ def run_cv_detection(
 
     # YOLO Speech Bubble Bounds
     try:
-        from services.image.providers.yolo import get_yolo_model
+        from providers.vision.yolo import get_yolo_model
         yolo_model = get_yolo_model()
         if yolo_model is not None:
             results = yolo_model.predict(image_path, conf=0.25, verbose=False)

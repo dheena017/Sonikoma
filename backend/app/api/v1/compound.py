@@ -2,7 +2,6 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # FROM compound_routes.py
 # ─────────────────────────────────────────────────────────────────────────────
-from api.dependencies.auth import get_current_user, get_admin_user, oauth2_scheme
 from schemas.compound import *
 """
 backend/python/routes/compound_routes.py
@@ -14,13 +13,11 @@ import os
 import sys
 import logging
 import uuid
-from typing import List, Optional, Dict, Any
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.compound_processor import get_compound_processor, WorkflowType
+from services.compound_processor import get_compound_processor
 
 logger = logging.getLogger("sonikoma.routes.compound_routes")
 compound_router = APIRouter()

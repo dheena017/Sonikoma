@@ -4,7 +4,6 @@ backend/app/startup/bootstrap.py
 import os
 import sys
 import time
-import platform
 import warnings
 from dotenv import load_dotenv
 

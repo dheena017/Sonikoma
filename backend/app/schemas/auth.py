@@ -5,9 +5,8 @@ Pydantic request/response schemas for auth.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Dict, Any, Optional, Literal, Union
-from datetime import datetime
+from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 class UserRegister(BaseModel):
     email: EmailStr

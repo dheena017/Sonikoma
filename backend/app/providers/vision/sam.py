@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 from PIL import Image
 
-logger = logging.getLogger("sonikoma.services.image.providers.sam")
+logger = logging.getLogger("sonikoma.providers.vision.sam")
 
 # Try importing dependencies safely
 try:

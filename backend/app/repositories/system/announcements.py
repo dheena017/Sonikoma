@@ -7,7 +7,7 @@ System notifications and announcements data operations.
 
 from typing import List, Dict, Any
 
-from infrastructure.database.connection import get_db_connection
+from database.connection import get_db_connection
 
 
 def get_announcements() -> List[Dict[str, Any]]:

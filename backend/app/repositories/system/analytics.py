@@ -7,9 +7,9 @@ System-wide global analytics and database stats.
 
 import uuid
 import random
-from typing import Dict, Any
+from typing import Dict
 
-from infrastructure.database.connection import get_db_connection
+from database.connection import get_db_connection
 
 
 def get_db_stats() -> Dict[str, int]:

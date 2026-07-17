@@ -1,1 +1,1 @@
-from infrastructure.database.supabase import *
+from database.supabase import *

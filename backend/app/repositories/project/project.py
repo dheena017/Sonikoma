@@ -1,3 +1,4 @@
+from infrastructure.storage.local_storage import cleanup_cached_url, delete_video_file
 """
 backend/app/repositories/project/project.py
 ─────────────────────────────────────────────────────────────────────────────
@@ -6,12 +7,11 @@ Project (flat chapters) CRUD operations and cached assets cleanup.
 """
 
 import os
-import re
 import json
 import logging
 from typing import List, Dict, Any, Optional
 
-from infrastructure.database.connection import (
+from database.connection import (
     get_db_connection, uuid_hex, generate_unique_slug, unwrap_proxy_url,
     ensure_user_exists
 )
@@ -203,21 +203,6 @@ def increment_project_tokens(project_id: str, tokens: int) -> None:
         conn.close()
 
 
-def cleanup_cached_url(url: Optional[str]) -> None:
-    """Extract cache ID from URL and delete the corresponding file from disk cache."""
-    if not url:
-        return
-    match = re.search(r'/cached/([^/?#\s]+)', url)
-    if match:
-        cache_id = match.group(1)
-        try:
-            from utils.cache import stitched_cache
-            logger.info(f"[Database] Deleting cached panel asset file from disk: {cache_id}")
-            stitched_cache.delete(cache_id)
-        except Exception as e:
-            logger.error(f"[Database] Failed to delete cache file {cache_id}: {e}")
-
-
 def update_project_full(project_id: str, updates: Dict[str, Any], panels: Optional[List[Dict[str, Any]]] = None) -> None:
     """Update project metadata across chapters and series tables, and sync panels list atomically."""
     conn = get_db_connection()
@@ -376,13 +361,7 @@ def delete_project(project_id: str) -> None:
 
         # Clean up compiled video file
         if chap and chap['video_url']:
-            video_path = os.path.abspath(os.path.join(_PROJECT_ROOT, 'data', 'media', chap['video_url'].split('/')[-1]))
-            if os.path.exists(video_path):
-                try:
-                    logger.info(f"[Database] Deleting project compiled video file from disk: {video_path}")
-                    os.remove(video_path)
-                except Exception as e:
-                    logger.error(f"[Database] Failed to delete video file {video_path}: {e}")
+            delete_video_file(chap['video_url'])
     finally:
         conn.close()
 

@@ -5,7 +5,6 @@ FFmpeg video visual filters mapping and command builder helper utilities.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from typing import Dict
 from services.video.types import FilterType
 
 

@@ -13,7 +13,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from fastapi import Header, HTTPException
-from api.dependencies.auth import clean_api_key, get_all_user_keys
+from api.dependencies.auth import clean_api_key
 from services.ai.skills.registry import registry
 
 logger = logging.getLogger("sonikoma.api.ai")

@@ -21,7 +21,7 @@ from repositories.project_repository import (
     update_project_full,
 )
 from repositories.user_repository import write_audit_log
-from infrastructure.database.connection import unwrap_proxy_url
+from database.connection import unwrap_proxy_url
 
 logger = logging.getLogger("sonikoma.routes.projects.update")
 router = APIRouter()

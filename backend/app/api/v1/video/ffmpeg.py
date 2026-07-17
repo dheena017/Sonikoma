@@ -10,7 +10,7 @@ import tempfile
 import logging
 from fastapi import APIRouter, HTTPException
 
-from services.video.ffmpeg_engine import (
+from engines.ffmpeg import (
     get_ffmpeg_engine,
     CutSpec,
     TransitionSpec

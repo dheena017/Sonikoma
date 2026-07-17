@@ -9,9 +9,7 @@ import os
 
 # ── Directory & file paths ────────────────────────────────────────────────
 
-DB_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "database")
-)
+DB_DIR = os.path.abspath(os.path.dirname(__file__))
 _BACKEND_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "..")
 )

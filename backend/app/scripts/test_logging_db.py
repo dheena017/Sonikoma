@@ -1,8 +1,6 @@
 
 import sys
 import os
-import asyncio
-from typing import Optional
 
 # Add backend/python to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

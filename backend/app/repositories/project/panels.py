@@ -7,7 +7,7 @@ Storyboard panel data operations.
 
 from typing import List, Dict, Any, Optional
 
-from infrastructure.database.connection import get_db_connection, unwrap_proxy_url
+from database.connection import get_db_connection, unwrap_proxy_url
 from repositories.project.project import cleanup_cached_url
 
 

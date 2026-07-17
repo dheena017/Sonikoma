@@ -11,7 +11,7 @@ import re
 import time
 import logging
 import asyncio
-from typing import Dict, Any, Optional, Type, List
+from typing import Any, Optional, Type
 from pydantic import BaseModel
 
 from config.clients import ai_initialized, call_gemini_with_retry, genai_client
@@ -19,44 +19,6 @@ from google.genai import types
 
 # Import schemas and map
 from services.ai.skills.schemas import (
-    GeminiAnalysisModel,
-    StoryboardPanelModel,
-    StoryboardModel,
-    CropBox,
-    CropList,
-    DramatizedScriptModel,
-    SFXAudioPromptModel,
-    ThumbnailConceptModel,
-    TranslationModel,
-    VideoSEOMetadataModel,
-    VoiceCastingModel,
-    ThumbnailLayoutModel,
-    SeriesIntroHookModel,
-    CharacterBioModel,
-    NarrativePacingModel,
-    CommentReplyModel,
-    BGMVibeModel,
-    ShortsScriptModel,
-    CliffhangerModel,
-    TitleABModel,
-    SFXOverlayModel,
-    CameraShakeModel,
-    CharacterEmotionModel,
-    CopyrightScrubModel,
-    AdPlacement,
-    MidrollPlacementModel,
-    OutroCTAModel,
-    SceneCompositionModel,
-    ShortsHookModel,
-    SubtitleStylerModel,
-    ThumbnailVisualModel,
-    ThumbnailFocalAsset,
-    ThumbnailCompositionRecipeModel,
-    TransitionSpeedModel,
-    YouTubeChapterItem,
-    YouTubeChapterModel,
-    PanelNarrativeModel,
-    SequenceNarrativeModel,
     SCHEMA_MAP
 )
 

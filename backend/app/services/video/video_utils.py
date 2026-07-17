@@ -7,7 +7,6 @@ Shared utilities for video and audio processing, path creation, and validation.
 
 import os
 import logging
-from typing import Optional
 
 logger = logging.getLogger("sonikoma.services.video.utils")
 

@@ -16,7 +16,6 @@ import uuid
 import sqlite3
 import logging
 import urllib.parse
-from typing import Optional
 
 logger = logging.getLogger("sonikoma.database.transaction")
 

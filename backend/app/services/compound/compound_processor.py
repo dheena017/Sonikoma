@@ -11,17 +11,16 @@ Compound media processor orchestrating multi-step workflows:
 
 import os
 import logging
-import asyncio
 import tempfile
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-from media.video.ffmpeg_engine import get_ffmpeg_engine, CutSpec, TransitionSpec
-from media.audio.librosa_engine import get_librosa_engine, LIBROSA_AVAILABLE
-from media.audio.whisper_engine import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
-from media.image.imagemagick_engine import get_imagemagick_engine, ResizeMode, WAND_AVAILABLE
-from media.ai.stable_diffusion_engine import get_stable_diffusion_engine, StableDiffusionModel
+from engines.ffmpeg import get_ffmpeg_engine, CutSpec
+from engines.librosa import get_librosa_engine, LIBROSA_AVAILABLE
+from engines.whisper import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
+from providers.media.imagemagick import get_imagemagick_engine, WAND_AVAILABLE
+from engines.stable_diffusion_engine import get_stable_diffusion_engine
 
 logger = logging.getLogger("sonikoma.services.compound_processor")
 

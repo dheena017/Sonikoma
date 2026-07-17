@@ -175,7 +175,10 @@ async def render_pipeline_sync(
     Synchronous pipeline: renders all panels and concatenates them into a
     final output video. Returns the path to the completed video file.
     """
-    import asyncio, tempfile, subprocess, os
+    import asyncio
+    import tempfile
+    import subprocess
+    import os
 
     segment_paths = []
     temp_dir = tempfile.mkdtemp()

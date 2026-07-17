@@ -11,7 +11,7 @@ import logging
 import hashlib
 import numpy as np
 from PIL import Image, ImageOps, ImageDraw, ImageFont, ImageEnhance, ImageFilter
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional
 
 logger = logging.getLogger("sonikoma.services.image.image_ops")
 

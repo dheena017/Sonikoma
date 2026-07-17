@@ -9,7 +9,6 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.dependencies.auth import clean_api_key, get_all_user_keys
-from api.v1.ai._deps import run_md_skill
 from schemas.ai import ListModelsRequest, EnhancePromptRequest, TestModelLatencyRequest
 from services.ai.facade import facade_list_models, facade_enhance_prompt
 

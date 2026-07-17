@@ -15,9 +15,9 @@ from startup import API_VERSION, IS_PRODUCTION
 
 # 2. Import lifespan, middlewares, routers, and exception handlers
 from lifespan import lifespan
-from middleware import setup_middleware
+from core.middleware import setup_middleware
 from exception_handlers import global_exception_handler
-from router_registry import register_routers
+from router import register_routers
 from config.ports import BACKEND_PORT
 
 # Create FastAPI app instance

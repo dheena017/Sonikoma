@@ -12,7 +12,6 @@ import tempfile
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.dependencies.auth import get_all_user_keys
 from api.v1.ai._deps import get_user_gemini_key, default_output_path
 from routes.auth_routes import get_current_user
 from database.db import get_available_credits, record_credit_transaction, LOW_BALANCE_THRESHOLD
@@ -29,12 +28,16 @@ from schemas.ai import (
     BatchGenerateRequest,
 )
 from services.ai.facade import facade_analyze_image, facade_smart_crop
-from media.ai.stable_diffusion_engine import get_stable_diffusion_engine
+from engines.stable_diffusion_engine import get_stable_diffusion_engine
 
 logger = logging.getLogger("sonikoma.api.ai.image")
 
 router = APIRouter()
-stable_diffusion = get_stable_diffusion_engine()
+try:
+    stable_diffusion = get_stable_diffusion_engine()
+except ImportError:
+    stable_diffusion = None
+    logger.warning('Stable Diffusion engine could not be initialized.')
 
 
 @router.post("/analyze-image", summary="Generate narration script and SFX for a single panel")

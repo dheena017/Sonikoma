@@ -8,7 +8,7 @@ Utility parsers, token logging, API keys resolution, and provider mapping.
 import os
 import re
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger("sonikoma.skills.utils")
 

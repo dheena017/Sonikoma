@@ -5,18 +5,13 @@ YouTube integration credentials and publishing database repository.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-import os
-import uuid
-import sqlite3
+import json
 import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
 
 # Import DB connection helpers
-from infrastructure.database.connection import (
-    get_db_connection, uuid_hex, datetime_now_date, create_slug,
-    generate_unique_slug, generate_missing_slugs, unwrap_proxy_url,
-    ensure_user_exists, _is_postgres, LOW_BALANCE_THRESHOLD
+from database.connection import (
+    get_db_connection
 )
 
 logger = logging.getLogger("sonikoma.repositories.youtube_repository")

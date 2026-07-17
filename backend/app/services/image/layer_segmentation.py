@@ -1,8 +1,7 @@
 import os
 import io
-import uuid
 import logging
-from typing import Dict, Any, Tuple
+from typing import Dict
 import numpy as np
 import cv2
 from PIL import Image
@@ -18,9 +17,9 @@ LOCAL_MEDIA_URL_PREFIX = "/media"
 
 from media.image.ocr import extract_full_ocr_data
 from media.image.detect_panels import _detect_bg_color_and_threshold
-from services.image.providers.yolo import segment_text_and_balloons, segment_characters
+from providers.vision.yolo import segment_text_and_balloons, segment_characters
 from utils.supabase_storage import upload_to_supabase_bucket
-from services.image.providers.sam import has_rembg, get_rembg_session, segment_character_u2net
+from providers.vision.sam import has_rembg, segment_character_u2net
 
 def create_blank_webp(width: int, height: int) -> bytes:
     """Helper to generate a fully transparent WebP image of given dimensions."""

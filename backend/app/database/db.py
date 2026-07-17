@@ -9,7 +9,7 @@ intercept reads and writes (like DB_PATH) for runtime compatibility with tests.
 
 import sys
 import types
-import infrastructure.database.connection as _conn
+import database.connection as _conn
 import repositories.user_repository as _user
 import repositories.project_repository as _proj
 import repositories.scraper_repository as _scrape

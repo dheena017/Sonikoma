@@ -1,11 +1,10 @@
-import os
 import logging
 from typing import Optional
 
 logger = logging.getLogger("sonikoma.utils.supabase_storage")
 
 try:
-    from supabase import Client
+    from supabase import Client  # noqa: F401
     HAS_SUPABASE = True
 except ImportError:
     HAS_SUPABASE = False

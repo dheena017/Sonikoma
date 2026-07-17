@@ -5,7 +5,6 @@ Security utility functions (password hashing, JWT verification/generation).
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-import os
 import bcrypt
 import jwt
 import hashlib

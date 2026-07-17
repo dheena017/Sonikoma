@@ -3,7 +3,7 @@ import sys
 import argparse
 import logging
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image
 
 logger = logging.getLogger("sonikoma.services.cleaner")
 

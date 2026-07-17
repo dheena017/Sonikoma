@@ -9,9 +9,9 @@ import os
 import logging
 import sqlite3
 
-import infrastructure.database.config as config
-from infrastructure.database.transaction import generate_missing_slugs
-from infrastructure.database.seed import seed_default_settings
+import database.config as config
+from database.transaction import generate_missing_slugs
+from database.seed import seed_default_settings
 
 logger = logging.getLogger("sonikoma.database.migrations")
 
@@ -193,7 +193,7 @@ def init_sqlite(conn) -> None:
             schema_file = config.SCHEMA_PATH if os.path.exists(config.SCHEMA_PATH) else "/app/schema_backup.sql"
             if not os.path.exists(schema_file):
                 schema_file = os.path.join(
-                    os.path.dirname(__file__), "..", "..", "database", "schema.sql"
+                    os.path.dirname(__file__), "schema.sql"
                 )
             if os.path.exists(schema_file):
                 logger.info(f"[Database] Re-initializing schema from {schema_file}...")

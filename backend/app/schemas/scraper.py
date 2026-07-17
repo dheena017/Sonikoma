@@ -5,9 +5,8 @@ Pydantic request/response schemas for scraper.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Dict, Any, Optional, Literal, Union
-from datetime import datetime
+from pydantic import BaseModel
+from typing import List, Dict, Any, Optional
 
 class ScrapeImagesRequest(BaseModel):
     url: str

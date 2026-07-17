@@ -10,7 +10,7 @@ import tempfile
 import logging
 from typing import List, Optional, Any
 
-from media.image.imagemagick_engine import get_imagemagick_engine, ResizeMode, FilterType
+from providers.media.imagemagick import get_imagemagick_engine, ResizeMode, FilterType
 
 logger = logging.getLogger("sonikoma.services.image.imagemagick")
 

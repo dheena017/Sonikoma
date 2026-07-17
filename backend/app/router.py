@@ -12,7 +12,6 @@ from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 
 from startup import PROJECT_ROOT, IS_PRODUCTION, logger
 from api.router import api_router
-from api.v1.images import get_cached_stitch  # Preserved import
 
 
 def register_routers(app: FastAPI):

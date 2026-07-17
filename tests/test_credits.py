@@ -30,7 +30,7 @@ def _make_isolated_db() -> str:
 
 def _setup_db(db_path: str) -> None:
     schema_path = os.path.join(
-        os.path.dirname(__file__), "..", "backend", "database", "schema.sql"
+        os.path.dirname(__file__), "..", "backend", "app", "database", "schema.sql"
     )
     db.DB_PATH = db_path
     db.SCHEMA_PATH = schema_path

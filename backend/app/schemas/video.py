@@ -5,10 +5,9 @@ Pydantic request/response schemas for video.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Dict, Any, Optional, Literal, Union
-from datetime import datetime
-from services.video.ffmpeg_engine import FilterType
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from engines.ffmpeg import FilterType
 
 class PanelLayersData(BaseModel):
     background_url: str

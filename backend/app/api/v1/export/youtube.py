@@ -6,12 +6,10 @@ Core YouTube upload workflow and associated API endpoints.
 """
 
 import os
-import json
 import logging
-import asyncio
 import tempfile
 import aiohttp
-from typing import Optional, List
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 
@@ -21,10 +19,10 @@ from database.db import log_youtube_publication
 from services.export.youtube.workflow import execute_youtube_upload_workflow
 
 try:
-    import google_auth_oauthlib.flow
-    import googleapiclient.discovery
-    import googleapiclient.errors
-    from googleapiclient.http import MediaFileUpload
+    import google_auth_oauthlib.flow  # noqa: F401
+    import googleapiclient.discovery  # noqa: F401
+    import googleapiclient.errors  # noqa: F401
+    from googleapiclient.http import MediaFileUpload  # noqa: F401
     HAS_YOUTUBE_API = True
 except ImportError:
     HAS_YOUTUBE_API = False

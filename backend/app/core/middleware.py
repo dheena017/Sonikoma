@@ -8,15 +8,13 @@ Sonikoma FastAPI Middleware Stack
 import os
 import time
 import uuid
-import re
-import logging
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from startup import logger, IS_PRODUCTION, API_VERSION
-from config.ports import FRONTEND_PORT, BACKEND_PORT, APP_URL
+from startup import logger, API_VERSION
+from config.ports import FRONTEND_PORT, BACKEND_PORT
 from api.dependencies.auth import get_current_user
 
 # ─────────────────────────────────────────────────────────────────────────────

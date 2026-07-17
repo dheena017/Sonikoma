@@ -5,9 +5,8 @@ Wrapper interface for Google Gemini GenAI Client and retry helpers.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-import os
 import logging
-from typing import Callable, Any, Optional
+from typing import Any, Optional
 from core.config import call_gemini_with_retry, genai_client, ai_initialized
 
 logger = logging.getLogger("sonikoma.services.ai.providers.gemini")

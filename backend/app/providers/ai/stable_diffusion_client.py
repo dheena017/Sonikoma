@@ -14,7 +14,7 @@ try:
     from diffusers import (
         StableDiffusionPipeline,
         StableDiffusionInpaintPipeline,
-        StableDiffusionUpscalePipeline
+        StableDiffusionUpscalePipeline,  # noqa: F401
     )
     import torch
     DIFFUSERS_AVAILABLE = True

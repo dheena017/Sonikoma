@@ -7,7 +7,7 @@ User active login sessions and audit logs.
 
 from typing import List, Dict, Any
 
-from infrastructure.database.connection import get_db_connection
+from database.connection import get_db_connection
 
 
 def create_user_session(user_id: str, session_id: str, browser: str, ip: str, location: str) -> None:

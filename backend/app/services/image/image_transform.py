@@ -6,7 +6,6 @@ and enhancements using PIL and ImageMagick.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-import os
 import io
 import time
 import uuid
@@ -18,7 +17,7 @@ from PIL import Image
 import services.image.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history
 from utils.supabase_storage import upload_to_supabase_bucket
-from media.image.imagemagick_engine import get_imagemagick_engine, ResizeMode, FilterType
+from providers.media.imagemagick import get_imagemagick_engine, ResizeMode, FilterType
 
 logger = logging.getLogger("sonikoma.services.image.transform")
 

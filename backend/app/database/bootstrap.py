@@ -8,8 +8,8 @@ Database initialization orchestrator and startup guards.
 import os
 import logging
 import threading
-import infrastructure.database.config as config
-from infrastructure.database.engine import _create_db_connection
+import database.config as config
+from database.engine import _create_db_connection
 
 logger = logging.getLogger("sonikoma.database.bootstrap")
 
@@ -54,7 +54,7 @@ def init_db() -> None:
         if config.is_postgres:
             logger.info("[Database] Connecting to PostgreSQL (Supabase)...")
             conn = _create_db_connection()
-            from infrastructure.database.migrations import init_postgres
+            from database.migrations import init_postgres
             init_postgres(conn)
             logger.info("[Database] PostgreSQL ready [OK]")
         else:
@@ -62,7 +62,7 @@ def init_db() -> None:
             os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
             os.makedirs(config.DB_DIR, exist_ok=True)
             conn = _create_db_connection()
-            from infrastructure.database.migrations import init_sqlite
+            from database.migrations import init_sqlite
             init_sqlite(conn)
             logger.info("[Database] SQLite database ready [OK]")
     except Exception as e:

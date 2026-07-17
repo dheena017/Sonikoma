@@ -2,7 +2,6 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # FROM proxy.py
 # ─────────────────────────────────────────────────────────────────────────────
-from api.dependencies.auth import get_current_user, get_admin_user, oauth2_scheme
 """
 backend/python/routes/proxy.py
 ─────────────────────────────────────────────────────────────────────────────
@@ -18,7 +17,7 @@ import hashlib
 import time
 import httpx
 import asyncio
-from urllib.parse import urlparse, unquote, parse_qs
+from urllib.parse import urlparse, parse_qs
 from fastapi import APIRouter, Request, Response, Query, HTTPException
 
 from utils.cache import proxy_cache
@@ -116,7 +115,6 @@ async def proxy_image(
     request: Request,
     url: str = Query(..., description="Target image URL to fetch")
 ):
-    import asyncio  # Re-import to guarantee availability in route task thread
 
     start_time = time.time()
 

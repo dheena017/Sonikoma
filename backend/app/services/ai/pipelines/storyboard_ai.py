@@ -9,11 +9,9 @@ import json
 import logging
 import asyncio
 from typing import List, Dict, Any, Optional
-import pydantic
 
-from config.clients import ai_initialized, hf_client, call_gemini_with_retry, genai_client
+from config.clients import ai_initialized
 from services.ai.skills.registry import registry
-from services.ai.skills.base import StoryboardModel
 
 logger = logging.getLogger("sonikoma.services.storyboard_ai")
 

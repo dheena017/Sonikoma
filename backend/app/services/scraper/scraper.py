@@ -29,7 +29,6 @@ from services.scraper.url_utils import extract_webtoon_url
 from services.scraper.parsers import (
     USER_AGENTS,
     UNWANTED_PATTERNS,
-    natural_sort_key,
     parse_episode_index,
     decode_escaped_js_string,
     scrape_local_archive,
@@ -292,7 +291,7 @@ async def scrape_webtoon_episodes(
     Extracts: episode number, title, date, thumbnail, episode URL.
     """
     try:
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright  # noqa: F401
     except ImportError:
         logger.error("[Episode Scraper] Playwright not installed")
         return {"success": False, "error": "Playwright not available"}
@@ -353,7 +352,7 @@ async def scrape_webtoon_episodes(
             logger.info(f"[Episode Scraper] Fetch returned no/short HTML for: {test_url}")
 
     if not html:
-        logger.warning(f"[Episode Scraper] Failed to fetch episode list HTML")
+        logger.warning("[Episode Scraper] Failed to fetch episode list HTML")
         return {"success": False, "error": "Failed to fetch episode list"}
 
     series_metadata = extract_metadata(html, fetch_url)

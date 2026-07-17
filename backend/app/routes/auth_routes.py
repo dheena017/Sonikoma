@@ -14,10 +14,11 @@ Real implementations live in:
 # Auth router (from the modularised auth package)
 try:
     from api.v1.auth import auth_router
-    from api.v1.auth.router import auth_router as router
+    from api.v1.auth.router import auth_router as router  # noqa: F401
+
 except ModuleNotFoundError:
     from app.api.v1.auth import auth_router
-    from app.api.v1.auth.router import auth_router as router
+    from app.api.v1.auth.router import auth_router as router  # noqa: F401
 
 # Core auth dependencies (get_current_user, get_admin_user, …)
 try:

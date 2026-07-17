@@ -9,8 +9,8 @@ connection module globals.
 import logging
 from typing import List, Dict, Any, Optional
 
-from infrastructure.database.connection import get_db_connection
-import infrastructure.database.connection as db_conn
+from database.connection import get_db_connection
+import database.connection as db_conn
 from repositories.system.settings import get_platform_settings
 
 logger = logging.getLogger("sonikoma.repositories.system.logs")

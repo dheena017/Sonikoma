@@ -1,3 +1,4 @@
+from services.project.project_service import sync_project_to_supabase, get_series_details, delete_temp_file
 """
 api/v1/projects/router.py
 ─────────────────────────────────────────────────────────────────────────────
@@ -9,8 +10,6 @@ both the mount prefix and the route path are empty.
 """
 
 import logging
-import uuid
-from typing import List
 
 from fastapi import APIRouter, HTTPException, Path, Body, Depends, Request, UploadFile, File, Form
 from fastapi.responses import JSONResponse
@@ -37,12 +36,10 @@ from repositories.project_repository import (
     delete_panels,
     delete_project,
     get_token_logs,
-    insert_token_log,
 )
 from repositories.user_repository import write_audit_log
-from infrastructure.database.connection import get_db_connection, unwrap_proxy_url
+from database.connection import get_db_connection, unwrap_proxy_url
 from api.v1.projects._helpers import wrap_proxy_url
-from api.v1.projects.create import calculate_and_save_token_usage
 from api.v1.projects.update import _build_panel_dicts
 from api.v1.projects.files import _detect
 
@@ -113,15 +110,11 @@ async def get_series_route(
     current_user: dict = Depends(get_current_user),
 ):
     try:
-        conn = get_db_connection()
-        row = conn.execute("SELECT * FROM series WHERE id = ?", (series_id_or_slug,)).fetchone()
-        if not row:
-            row = conn.execute("SELECT * FROM series WHERE slug = ?", (series_id_or_slug,)).fetchone()
-        conn.close()
-        if not row:
-            raise HTTPException(status_code=404, detail="Series not found.")
-        series = dict(row)
-        if series["user_id"] != current_user["user_id"]:
+        try:
+            series = get_series_details(series_id_or_slug, current_user["user_id"])
+            if not series:
+                raise HTTPException(status_code=404, detail="Series not found.")
+        except PermissionError:
             raise HTTPException(status_code=403, detail="Access denied.")
         return {"success": True, "series": series}
     except HTTPException:
@@ -229,25 +222,7 @@ async def update_project_details(
     current_user: dict = Depends(get_current_user),
 ):
     try:
-        # Best-effort Supabase sync
-        try:
-            from db import supabase
-            if supabase:
-                supabase_data = {
-                    "id": projectId,
-                    "title": body.title or "Untitled Project",
-                    "genre": body.genre or "general",
-                    "episode": body.episode or "",
-                    "author": body.author or "",
-                    "cover_image": body.cover_image or "",
-                    "synopsis": body.synopsis or "",
-                    "panels": [p.dict(exclude_none=True) for p in body.panels] if body.panels else [],
-                    "user_id": current_user["user_id"],
-                    "audio_settings": body.audio_settings,
-                }
-                supabase.table("projects").upsert(supabase_data).execute()
-        except Exception as e:
-            logger.error(f"Failed to sync project JSON to Supabase: {e}")
+        sync_project_to_supabase(projectId, body, current_user["user_id"])
 
         project = get_project(projectId)
         if not project:
@@ -405,8 +380,9 @@ async def get_single_project(
 # ── Panel detection ───────────────────────────────────────────────────────
 # Imported and re-exported from files.py via the panel_router
 
-import os, base64, tempfile
-from media.image.detect_panels import run_cv_detection
+import os
+import base64
+import tempfile
 
 @panel_router.post("/detect", summary="Detect panel bounding boxes (file upload)")
 async def detect_panels_upload(
@@ -441,9 +417,7 @@ async def detect_panels_upload(
         logger.error(f"Panel detection failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
-        if image_path and os.path.exists(image_path):
-            try: os.remove(image_path)
-            except OSError: pass
+        delete_temp_file(image_path)
 
 
 @panel_router.post("/detect-b64", summary="Detect panel bounding boxes (base64)")
@@ -464,6 +438,4 @@ async def detect_panels_base64(body: DetectPanelsBase64Request):
         logger.error(f"Panel detection (base64) failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
     finally:
-        if image_path and os.path.exists(image_path):
-            try: os.remove(image_path)
-            except OSError: pass
+        delete_temp_file(image_path)

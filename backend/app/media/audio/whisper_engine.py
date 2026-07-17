@@ -1,10 +1,10 @@
 import sys
 try:
-    from services.audio.whisper_engine import *
-    import services.audio.whisper_engine as target
+    from engines.whisper import *
+    import engines.whisper as target
 except (ModuleNotFoundError, ImportError) as __e:
     if 'services' not in str(__e):
         raise
-    from app.services.audio.whisper_engine import *
-    import app.services.audio.whisper_engine as target
+    from app.engines.whisper import *
+    import app.engines.whisper as target
 sys.modules[__name__] = target

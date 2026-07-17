@@ -15,11 +15,9 @@ ImageMagick (Wand) based image transformation engine:
 import os
 import logging
 import asyncio
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Optional
 from dataclasses import dataclass
-from pathlib import Path
 from enum import Enum
-import concurrent.futures
 
 try:
     from wand.image import Image as WandImage
@@ -99,7 +97,7 @@ class ImageMagickEngine:
         """Verify ImageMagick/Wand is installed."""
         try:
             with WandImage(width=1, height=1, background=Color("white")) as img:
-                logger.info(f"✓ ImageMagick verified (Wand version compatible)")
+                logger.info("✓ ImageMagick verified (Wand version compatible)")
         except Exception as e:
             logger.error(f"✗ ImageMagick/Wand not available: {e}")
             raise RuntimeError("ImageMagick not installed or Wand misconfigured")

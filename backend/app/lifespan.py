@@ -98,7 +98,7 @@ async def lifespan(app: FastAPI):
         # /process-layers request does not pay the cold-start model-loading penalty.
         try:
             from media.image.layer_segmentation import get_rembg_session
-            from services.image.providers.yolo import get_yolo_model
+            from providers.vision.yolo import get_yolo_model
             logger.info("[Startup] Pre-warming rembg U-2-Net session...")
             await asyncio.to_thread(get_rembg_session)
             logger.info("[Startup] Pre-warming YOLO manga-segmentation model...")

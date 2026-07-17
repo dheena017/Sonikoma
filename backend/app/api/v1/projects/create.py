@@ -18,7 +18,7 @@ from repositories.project_repository import (
     insert_project,
     insert_token_log,
 )
-from infrastructure.database.connection import unwrap_proxy_url
+from database.connection import unwrap_proxy_url
 
 logger = logging.getLogger("sonikoma.routes.projects.create")
 router = APIRouter()

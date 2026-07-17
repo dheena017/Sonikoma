@@ -9,8 +9,7 @@ import time
 import json
 import logging
 import asyncio
-from typing import Dict, Any, Optional, List
-from pydantic import BaseModel
+from typing import Any, Optional
 
 from config.clients import ai_initialized, call_gemini_with_retry, genai_client
 from google.genai import types

@@ -10,7 +10,6 @@ smart cropping, skill executions, and multi-provider model registrations.
 import uuid
 import os
 import io
-import re
 import time
 import logging
 import asyncio
@@ -19,13 +18,12 @@ import json
 from typing import List, Optional, Dict, Any
 from PIL import Image
 
-from config.clients import ai_initialized, call_gemini_with_retry, genai_client
+from config.clients import call_gemini_with_retry
 from services.ai.skills.registry import registry
-from services.ai.skills.base import GeminiAnalysisModel, SCHEMA_MAP, get_provider_and_model, resolve_api_key
+from services.ai.skills.base import get_provider_and_model, resolve_api_key
 import utils.image_utils as img_utils
 from utils.cache import stitched_cache
 from media.audio.audio import generate_panel_audio
-from media.image.detect_panels import run_cv_detection
 
 logger = logging.getLogger("sonikoma.services.ai.facade")
 

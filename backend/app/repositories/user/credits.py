@@ -9,7 +9,7 @@ import uuid
 import logging
 from typing import List, Dict, Any
 
-from infrastructure.database.connection import get_db_connection, _is_postgres, LOW_BALANCE_THRESHOLD
+from database.connection import get_db_connection, _is_postgres
 
 logger = logging.getLogger("sonikoma.repositories.user.credits")
 

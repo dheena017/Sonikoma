@@ -5,9 +5,8 @@ Pydantic request/response schemas for compound.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field, EmailStr
-from typing import List, Dict, Any, Optional, Literal, Union
-from datetime import datetime
+from pydantic import BaseModel, Field
+from typing import List, Optional
 
 class VideoCutSpec(BaseModel):
     start: float = Field(..., ge=0.0)

@@ -37,7 +37,6 @@ except ImportError:
     pass
 
 # Initialize global logging interceptor immediately
-import utils.log_interceptor
 
 # Custom logging levels configuration
 logging.TRACE = 5

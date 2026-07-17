@@ -8,7 +8,6 @@ User settings, preferences, credits, billing, and gamification endpoints.
 import json
 import datetime
 import logging
-from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from api.dependencies.auth import get_current_user

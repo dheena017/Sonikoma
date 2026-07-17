@@ -5,9 +5,8 @@ Pure command-line construction helpers for FFmpeg and FFprobe executions.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-import os
-from typing import List, Optional, Tuple
-from services.video.ffmpeg_types import TransitionSpec, CutSpec, FilterType
+from typing import List, Optional
+from services.video.ffmpeg_types import FilterType
 from services.video.edit_helpers import get_ffmpeg_filter_string
 
 

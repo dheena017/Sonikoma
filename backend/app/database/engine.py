@@ -14,7 +14,7 @@ Provides:
 import sqlite3
 import logging
 
-import infrastructure.database.config as config
+import database.config as config
 
 try:
     import psycopg2
@@ -129,7 +129,7 @@ def get_db_connection():
     """Public entry point — ensures the schema is initialised before returning
     a connection. Import init_db lazily to avoid circular imports."""
     # Deferred import keeps engine.py independent of bootstrap.py
-    import infrastructure.database.bootstrap as bootstrap
+    import database.bootstrap as bootstrap
 
     if not bootstrap._db_initialized:
         bootstrap.init_db()

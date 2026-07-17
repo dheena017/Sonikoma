@@ -1,10 +1,10 @@
 import sys
 try:
-    from services.image.providers.yolo import *
-    import services.image.providers.yolo as target
+    from providers.vision.yolo import *
+    import providers.vision.yolo as target
 except (ModuleNotFoundError, ImportError) as __e:
     if 'services' not in str(__e):
         raise
-    from app.services.image.providers.yolo import *
-    import app.services.image.providers.yolo as target
+    from app.providers.vision.yolo import *
+    import app.providers.vision.yolo as target
 sys.modules[__name__] = target

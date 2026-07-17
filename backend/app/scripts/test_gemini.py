@@ -10,7 +10,7 @@ load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, ".env"))
 # Add backend/python to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from config.clients import genai_client, ai_initialized
+from config.clients import ai_initialized
 from services.ai.facade import validate_analysis
 from services.ai.skills.registry import registry
 import json

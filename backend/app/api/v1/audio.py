@@ -9,11 +9,9 @@ and Librosa audio analysis. Acts as a thin controller delegating logic to servic
 import os
 import tempfile
 import logging
-from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
 
 from schemas.audio import (
     AlignDialogueRequest,
@@ -40,7 +38,6 @@ from services.audio.alignment_service import (
     extract_words_service,
     batch_transcribe_service
 )
-from media.audio.whisper_engine import WhisperModel
 
 logger = logging.getLogger("sonikoma.api.audio")
 audio_router = APIRouter()

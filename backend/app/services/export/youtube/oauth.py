@@ -12,7 +12,7 @@ import asyncio
 import tempfile
 from typing import Optional
 
-from fastapi import HTTPException
+from core.exceptions import ServiceException
 from database.db import get_youtube_credentials
 
 try:
@@ -119,9 +119,9 @@ async def get_authenticated_service(user_id: Optional[str] = None):
                     client_secrets_file = legacy_default
                 else:
                     logger.warning("client_secrets.json not found (locally or via env).")
-                    raise HTTPException(
+                    raise ServiceException(
                         status_code=400,
-                        detail=(
+                        message=(
                             "YouTube export is not configured. Provide 'client_secrets.json' in the project root "
                             "or set env var 'YOUTUBE_CLIENT_SECRETS_JSON' (contents of the JSON file) to enable real uploads."
                         ),
@@ -162,7 +162,7 @@ async def get_authenticated_service(user_id: Optional[str] = None):
                             "Configuration Error: The provided YouTube client secrets are not formatted as valid JSON. "
                             "Please check your .env file and ensure YOUTUBE_CLIENT_SECRETS_JSON contains a properly formatted JSON object."
                         )
-                    raise HTTPException(status_code=400, detail=friendly_error)
+                    raise ServiceException(status_code=400, message=friendly_error)
             else:
                 clean_text = (secrets_text or "").strip()
                 looks_like_path = clean_text.startswith((".", "/", "\\")) or clean_text.endswith(".json")
@@ -177,7 +177,7 @@ async def get_authenticated_service(user_id: Optional[str] = None):
                         "Configuration Error: The provided YouTube client secrets are not formatted as valid JSON. "
                         "Please check your .env file and ensure YOUTUBE_CLIENT_SECRETS_JSON contains a properly formatted JSON object."
                     )
-                raise HTTPException(status_code=400, detail=friendly_error)
+                raise ServiceException(status_code=400, message=friendly_error)
 
         except Exception as ve:
             if client_secrets_file == tmp_secrets_path:
@@ -189,9 +189,9 @@ async def get_authenticated_service(user_id: Optional[str] = None):
                         secrets_text = f.read()
                     secrets_obj = json.loads(secrets_text)
                 else:
-                    raise HTTPException(status_code=400, detail=str(ve))
+                    raise ServiceException(status_code=400, message=str(ve))
             else:
-                raise HTTPException(status_code=400, detail=str(ve))
+                raise ServiceException(status_code=400, message=str(ve))
 
         scopes = ["https://www.googleapis.com/auth/youtube.upload"]
         flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
@@ -235,9 +235,9 @@ async def get_authenticated_service(user_id: Optional[str] = None):
                 "replace" in str(flow_err)
             )
             if is_timeout:
-                raise HTTPException(
+                raise ServiceException(
                     status_code=408,
-                    detail="YouTube authorization timed out (no response received within 120 seconds). Please try again and complete the authorization in your browser tab."
+                    message="YouTube authorization timed out (no response received within 120 seconds). Please try again and complete the authorization in your browser tab."
                 )
             
             is_web_client = "secrets_obj" in locals() and isinstance(secrets_obj, dict) and "web" in secrets_obj
@@ -250,7 +250,7 @@ async def get_authenticated_service(user_id: Optional[str] = None):
                 "Hint: Ensure that 'http://localhost:<port>/' is configured as an authorized redirect URI for your client ID "
                 "in the Google Cloud Console."
             )
-            raise HTTPException(status_code=400, detail=f"OAuth authorization flow failed: {flow_err}. {hint_msg}")
+            raise ServiceException(status_code=400, message=f"OAuth authorization flow failed: {flow_err}. {hint_msg}")
 
         youtube = googleapiclient.discovery.build("youtube", "v3", credentials=credentials)
         return youtube

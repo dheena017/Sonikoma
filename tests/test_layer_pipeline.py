@@ -52,7 +52,7 @@ class TestLayerPipelineIntegration(unittest.TestCase):
 
     @patch.dict(os.environ, {"ENVIRONMENT": "production"})
     @patch('media.image.layer_segmentation.upload_to_supabase_bucket')
-    @patch('media.audio.whisper_engine.WhisperEngine.extract_words_with_timestamps')
+    @patch('engines.whisper.WhisperEngine.extract_words_with_timestamps')
     @patch('subprocess.run')
     def test_complete_backend_pipeline(self, mock_subprocess_run, mock_extract_words, mock_upload_to_supabase):
         # 1. Setup mocks

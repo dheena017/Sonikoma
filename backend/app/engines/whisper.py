@@ -14,7 +14,7 @@ import os
 import logging
 import asyncio
 import json
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
@@ -178,6 +178,141 @@ class WhisperEngine:
 
 
 
+
+    async def generate_srt(
+        self,
+        audio_path: str,
+        output_path: str,
+        language: Optional[str] = None
+    ) -> str:
+        result = await self.transcribe(audio_path, language=language)
+        srt_lines = []
+        for segment in result.segments:
+            start_time = self._format_srt_time(segment.start_time)
+            end_time = self._format_srt_time(segment.end_time)
+            srt_lines.append(f"{segment.id + 1}")
+            srt_lines.append(f"{start_time} --> {end_time}")
+            srt_lines.append(segment.text)
+            srt_lines.append("")
+        srt_content = "\n".join(srt_lines)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(srt_content)
+        logger.info(f"✓ SRT file generated: {output_path}")
+        return output_path
+
+    async def generate_vtt(
+        self,
+        audio_path: str,
+        output_path: str,
+        language: Optional[str] = None
+    ) -> str:
+        result = await self.transcribe(audio_path, language=language)
+        vtt_lines = ["WEBVTT", ""]
+        for segment in result.segments:
+            start_time = self._format_vtt_time(segment.start_time)
+            end_time = self._format_vtt_time(segment.end_time)
+            vtt_lines.append(f"{start_time} --> {end_time}")
+            vtt_lines.append(segment.text)
+            vtt_lines.append("")
+        vtt_content = "\n".join(vtt_lines)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(vtt_content)
+        logger.info(f"✓ VTT file generated: {output_path}")
+        return output_path
+
+    async def extract_words_with_timestamps(
+        self,
+        audio_path: str,
+        language: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        result = await self.transcribe(audio_path, language=language)
+        words = []
+        word_id = 0
+        for segment in result.segments:
+            segment_words = segment.text.split()
+            segment_duration = segment.end_time - segment.start_time
+            word_duration = segment_duration / len(segment_words) if segment_words else 0
+            for i, word in enumerate(segment_words):
+                word_start = segment.start_time + (i * word_duration)
+                word_end = word_start + word_duration
+                words.append({
+                    "id": word_id,
+                    "text": word,
+                    "start_time": word_start,
+                    "end_time": word_end,
+                    "confidence": segment.confidence,
+                    "segment_id": segment.id
+                })
+                word_id += 1
+        logger.info(f"✓ Extracted {len(words)} words with timestamps")
+        return words
+
+    async def generate_json_transcript(
+        self,
+        audio_path: str,
+        output_path: str,
+        language: Optional[str] = None,
+        include_words: bool = False
+    ) -> str:
+        result = await self.transcribe(audio_path, language=language)
+        transcript_dict = {
+            "text": result.text,
+            "language": result.language,
+            "duration_s": result.duration,
+            "confidence": result.confidence,
+            "segments": [
+                {
+                    "id": s.id,
+                    "start_s": s.start_time,
+                    "end_s": s.end_time,
+                    "text": s.text,
+                    "confidence": s.confidence
+                }
+                for s in result.segments
+            ]
+        }
+        if include_words:
+            words = await self.extract_words_with_timestamps(audio_path, language=language)
+            transcript_dict["words"] = words
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(transcript_dict, f, indent=2, ensure_ascii=False)
+        logger.info(f"✓ JSON transcript generated: {output_path}")
+        return output_path
+
+    async def batch_transcribe(
+        self,
+        audio_paths: List[str],
+        language: Optional[str] = None
+    ) -> List[TranscriptionResult]:
+        logger.info(f"Batch transcribing {len(audio_paths)} files...")
+        results = []
+        for i, audio_path in enumerate(audio_paths):
+            logger.info(f"  [{i+1}/{len(audio_paths)}] {os.path.basename(audio_path)}")
+            try:
+                result = await self.transcribe(audio_path, language=language)
+                results.append(result)
+            except Exception as e:
+                logger.error(f"Failed to transcribe {audio_path}: {e}")
+                results.append(None)
+        successful = sum(1 for r in results if r is not None)
+        logger.info(f"✓ Batch transcription complete: {successful}/{len(audio_paths)} successful")
+        return results
+
+    @staticmethod
+    def _format_srt_time(seconds: float) -> str:
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = int(seconds % 60)
+        millis = int((seconds % 1) * 1000)
+        return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
+
+    @staticmethod
+    def _format_vtt_time(seconds: float) -> str:
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = int(seconds % 60)
+        millis = int((seconds % 1) * 1000)
+        return f"{hours:02d}:{minutes:02d}:{secs:02d}.{millis:03d}"
 
     def get_model_info(self) -> Dict[str, Any]:
         """Get information about loaded model."""

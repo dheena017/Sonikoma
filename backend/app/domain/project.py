@@ -15,8 +15,8 @@ against raw database row dicts returned by the repository layer.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field, asdict
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 
 # ─────────────────────────────────────────────────────────────────────────────
