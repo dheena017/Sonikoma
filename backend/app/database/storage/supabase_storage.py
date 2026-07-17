@@ -24,7 +24,7 @@ def upload_to_supabase_bucket(
         return None
 
     try:
-        from db import supabase
+        from database.supabase import supabase
         if not supabase:
             logger.debug(f"Supabase client not initialized, bypassing upload to {bucket_name}.")
             return None

@@ -6,7 +6,7 @@ logger = logging.getLogger("sonikoma.services.project")
 
 def sync_project_to_supabase(project_id: str, body: Any, current_user_id: str) -> None:
     try:
-        from db import supabase
+        from database.supabase import supabase
         if supabase:
             supabase_data = {
                 "id": project_id,

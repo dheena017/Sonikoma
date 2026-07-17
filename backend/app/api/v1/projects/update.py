@@ -153,7 +153,7 @@ async def update_project_details(
 
         # ── Supabase sync (best-effort) ───────────────────────────────────
         try:
-            from db import supabase
+            from database.supabase import supabase
             if supabase:
                 supabase_data = {
                     "id": projectId,

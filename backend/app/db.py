@@ -1,1 +1,0 @@
-from database.supabase import *

@@ -55,7 +55,7 @@ def calculate_and_save_token_usage(
         logger.error(f"Failed to insert local token usage log: {e}")
 
     try:
-        from db import supabase
+        from database.supabase import supabase
         if supabase:
             supabase.table("projects").update({"usage_metrics": usage_metrics}).eq("id", project_id).execute()
             supabase.table("token_usage_logs").insert({
