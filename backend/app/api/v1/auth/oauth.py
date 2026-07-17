@@ -14,7 +14,7 @@ import requests
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
-from config.ports import APP_URL
+from core.settings import APP_URL
 from core.security import get_password_hash, create_access_token
 from repositories.user_repository import (
     get_user_by_email,

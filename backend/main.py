@@ -27,7 +27,7 @@ from backend.lifespan import lifespan
 from core.middleware import setup_middleware
 from backend.exception_handlers import global_exception_handler
 from router import register_routers
-from config.ports import BACKEND_PORT
+from core.settings import BACKEND_PORT
 
 # Create FastAPI app instance
 app = FastAPI(

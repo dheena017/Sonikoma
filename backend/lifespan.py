@@ -22,7 +22,7 @@ from backend.startup import (
     API_VERSION,
     SERVER_START
 )
-from config.ports import BACKEND_PORT
+from core.settings import BACKEND_PORT
 
 
 class EndpointFilter(logging.Filter):

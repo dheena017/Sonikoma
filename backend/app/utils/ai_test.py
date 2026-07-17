@@ -50,7 +50,7 @@ def pad_cell(content: str, width: int, align: str = 'left') -> str:
         return (" " * left) + content + (" " * right)
 
 async def test_single_gemini(model_name: str) -> dict:
-    from config.clients import genai_client, call_gemini_with_retry
+    from core.config import genai_client, call_gemini_with_retry
 
     start_time = time.monotonic()
     try:
@@ -121,7 +121,7 @@ async def test_single_gemini(model_name: str) -> dict:
         }
 
 async def test_single_hf() -> dict:
-    from config.clients import hf_client
+    from core.config import hf_client
 
     start_time = time.monotonic()
     model_name = 'mistralai/Mistral-7B-Instruct-v0.3'
@@ -170,7 +170,7 @@ async def test_single_hf() -> dict:
         }
 
 async def run_ai_connection_tests():
-    from config.clients import ai_initialized, hf_client
+    from core.config import ai_initialized, hf_client
 
     gemini_key = os.getenv("GEMINI_API_KEY")
     hf_key = os.getenv("HUGGINGFACE_API_KEY")

@@ -15,7 +15,7 @@ from typing import Dict, Any, Optional
 from urllib.parse import urlparse, parse_qs
 
 from core.cache import stitched_cache
-from config.ports import BACKEND_PORT
+from core.settings import BACKEND_PORT
 
 logger = logging.getLogger("sonikoma.services.image.image_resolver")
 

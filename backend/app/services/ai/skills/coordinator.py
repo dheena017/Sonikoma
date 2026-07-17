@@ -11,7 +11,7 @@ import logging
 import asyncio
 from typing import Any, Optional
 
-from config.clients import ai_initialized, call_gemini_with_retry, genai_client
+from core.config import ai_initialized, call_gemini_with_retry, genai_client
 from google.genai import types
 from services.ai.skills.utils import resolve_api_key
 

@@ -6,7 +6,7 @@ import sys
 import platform
 import re
 from .bootstrap import IS_PRODUCTION, API_VERSION
-from config.ports import BACKEND_PORT
+from core.settings import BACKEND_PORT
 
 def _check_capability(module_name: str) -> bool:
     try:

@@ -18,7 +18,7 @@ import json
 from typing import List, Optional, Dict, Any
 from PIL import Image
 
-from config.clients import call_gemini_with_retry
+from core.config import call_gemini_with_retry
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
 import utils.image_utils as img_utils

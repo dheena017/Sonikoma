@@ -23,7 +23,7 @@ from api.dependencies.auth import get_admin_user
 
 from utils.log_interceptor import get_logs, add_log_listener, remove_log_listener
 from utils.cache import get_all_cache_stats, get_total_storage_size_bytes
-from config.ports import BACKEND_PORT
+from core.settings import BACKEND_PORT
 from backend.schemas.health import CustomLogPayload
 
 # Import repository functions directly

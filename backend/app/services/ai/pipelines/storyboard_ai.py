@@ -10,7 +10,7 @@ import logging
 import asyncio
 from typing import List, Dict, Any, Optional
 
-from config.clients import ai_initialized
+from core.config import ai_initialized
 from services.ai.skills.registry import registry
 
 logger = logging.getLogger("sonikoma.services.storyboard_ai")
