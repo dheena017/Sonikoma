@@ -318,7 +318,7 @@ console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
 
 # Preserve UIStreamLogHandler (attached by log_interceptor at import time).
-from utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
+from backend.app.utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
 root_logger = logging.getLogger()
 for handler in root_logger.handlers[:]:
     if not isinstance(handler, _UIStreamLogHandler):
