@@ -12,6 +12,7 @@ import time
 import uuid
 import logging
 import asyncio
+import tempfile
 from typing import Dict, Any, List, Optional
 from PIL import Image
 
@@ -35,66 +36,40 @@ def _ensure_imagemagick() -> Any:
     return imagemagick
 
 
-async def transform_image_service(
-    url: str,
-    scale_x: float = 1.0,
-    scale_y: float = 1.0,
-    rotation: float = 0.0,
-    flip_h: bool = False,
-    flip_v: bool = False,
-    quality: int = 90,
-    format_str: str = "jpeg"
-) -> Dict[str, Any]:
-    """Applies geometric transforms (scaling, rotation, flip) to an image buffer."""
+async def transform_image_service(url: str, trans_type: str, value: str) -> Dict[str, Any]:
     resolved = await img_utils.resolve_image_to_buffer(url)
-    
-    def transform_sync():
-        img = Image.open(io.BytesIO(resolved["data"]))
-        
-        # Scaling
-        if scale_x != 1.0 or scale_y != 1.0:
-            new_w = int(max(10, img.width * scale_x))
-            new_h = int(max(10, img.height * scale_y))
-            img = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
-            
-        # Rotation
-        if rotation != 0.0:
-            img = img.rotate(rotation, expand=True)
-            
-        # Flips
-        if flip_h:
+    img = Image.open(io.BytesIO(resolved["data"]))
+
+    if trans_type == "rotate":
+        degrees = int(value)
+        if degrees not in (90, -90, 180):
+            raise ValueError("Invalid rotation angle. Use 90, -90, or 180.")
+        img = img.rotate(degrees, expand=True)
+    elif trans_type == "flip":
+        if value == "h":
             img = img.transpose(Image.FLIP_LEFT_RIGHT)
-        if flip_v:
+        elif value == "v":
             img = img.transpose(Image.FLIP_TOP_BOTTOM)
-            
-        out = io.BytesIO()
-        fmt = format_str.upper()
-        if fmt == "JPG":
-            fmt = "JPEG"
-        if fmt == "JPEG" and img.mode in ("RGBA", "LA"):
-            img = img.convert("RGB")
-            
-        img.save(out, format=fmt, quality=quality)
-        return out.getvalue()
+        else:
+            raise ValueError("Invalid flip axis. Use 'h' or 'v'.")
 
-    out_bytes = await asyncio.to_thread(transform_sync)
-    content_type = f"image/{format_str.lower()}"
-    if format_str.lower() == "jpg":
-        content_type = "image/jpeg"
+    out = io.BytesIO()
+    img.save(out, format="JPEG", quality=92)
+    out_bytes = out.getvalue()
 
-    filename = f"transform_{uuid.uuid4().hex[:8]}.{format_str.lower()}"
+    filename = f"transform_{uuid.uuid4().hex[:8]}.jpeg"
     supabase_url = await asyncio.to_thread(
         upload_to_supabase_bucket,
         out_bytes,
         "panels",
         filename,
-        content_type
+        "image/jpeg"
     )
 
     unique_id = f"transform_{int(time.time() * 1000)}"
     proxy_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
 
-    stitched_cache.set(unique_id, {"data": out_bytes, "content_type": content_type})
+    stitched_cache.set(unique_id, {"data": out_bytes, "content_type": "image/jpeg"})
     edit_history.set(proxy_url, url)
     try:
         from database import db
@@ -107,70 +82,99 @@ async def transform_image_service(
 
 async def resize_image_service(
     image_path: str,
-    width: Optional[int] = None,
-    height: Optional[int] = None,
-    mode: ResizeMode = ResizeMode.FIT,
-    filter_type: FilterType = FilterType.LANCZOS,
-    quality: int = 85
+    output_path: Optional[str],
+    width: Optional[int],
+    height: Optional[int],
+    mode: ResizeMode,
+    filter_type: FilterType,
+    quality: int
 ) -> str:
     engine = _ensure_imagemagick()
-    return await asyncio.to_thread(
-        engine.resize, image_path, width, height, mode, filter_type, quality
-    )
+    out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
+    result = await engine.resize(image_path, out, width=width, height=height, mode=mode, filter_type=filter_type, quality=quality)
+    return result
 
 
-async def rotate_image_service(
-    image_path: str,
-    angle: float,
-    background_color: str = "white"
-) -> str:
+async def rotate_image_service(image_path: str, output_path: Optional[str], angle: float, background_color: str) -> str:
     engine = _ensure_imagemagick()
-    return await asyncio.to_thread(engine.rotate, image_path, angle, background_color)
+    out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
+    result = await engine.rotate(image_path, out, angle=angle, background_color=background_color)
+    return result
 
 
 async def apply_image_enhancements_service(
     image_path: str,
-    brightness: float = 1.0,
-    contrast: float = 1.0,
-    saturation: float = 1.0
+    output_path: Optional[str],
+    brightness: float,
+    contrast: float,
+    saturation: float
 ) -> str:
     engine = _ensure_imagemagick()
-    return await asyncio.to_thread(engine.enhance, image_path, brightness, contrast, saturation)
+    out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
+    result = await engine.auto_enhance(image_path, out, brightness=brightness, contrast=contrast, saturation=saturation)
+    return result
 
 
-async def remove_background_service(image_path: str, fuzz_threshold: int = 30) -> str:
+async def remove_background_service(image_path: str, output_path: Optional[str], fuzz_threshold: int) -> str:
     engine = _ensure_imagemagick()
-    return await asyncio.to_thread(engine.remove_background, image_path, fuzz_threshold)
+    out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
+    result = await engine.remove_background(image_path, out, fuzz_threshold=fuzz_threshold)
+    return result
 
 
 async def add_text_service(
     image_path: str,
+    output_path: Optional[str],
     text: str,
-    font_size: int = 40,
-    text_color: str = "white",
-    position: str = "center",
-    opacity: float = 1.0
+    font_size: int,
+    text_color: str,
+    position: str,
+    opacity: float
 ) -> str:
     engine = _ensure_imagemagick()
-    return await asyncio.to_thread(engine.add_text, image_path, text, font_size, text_color, position, opacity)
+    out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
+    result = await engine.add_text_overlay(
+        image_path,
+        out,
+        text=text,
+        font_size=font_size,
+        text_color=text_color,
+        position=position,
+        opacity=opacity
+    )
+    return result
 
 
 async def batch_resize_service(
     image_paths: List[str],
-    width: Optional[int] = None,
-    height: Optional[int] = None,
-    mode: ResizeMode = ResizeMode.FIT
+    output_dir: Optional[str],
+    width: Optional[int],
+    height: Optional[int],
+    mode: ResizeMode,
+    quality: int
 ) -> List[str]:
     engine = _ensure_imagemagick()
-    return await asyncio.to_thread(engine.batch_resize, image_paths, width, height, mode)
+    out = output_dir or os.path.join(tempfile.gettempdir(), "imagemagick_batch")
+    results = await engine.batch_resize(image_paths, out, width=width, height=height, mode=mode, quality=quality)
+    return results
 
 
 async def composite_images_service(
     base_image_path: str,
     overlay_image_path: str,
-    x: int = 0,
-    y: int = 0,
-    opacity: float = 1.0
+    output_path: Optional[str],
+    x: int,
+    y: int,
+    opacity: float
 ) -> str:
     engine = _ensure_imagemagick()
-    return await asyncio.to_thread(engine.composite, base_image_path, overlay_image_path, x, y, opacity)
+    out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
+    result = await engine.composite_images(
+        base_image_path,
+        overlay_image_path,
+        out,
+        x=x,
+        y=y,
+        opacity=opacity
+    )
+    return result

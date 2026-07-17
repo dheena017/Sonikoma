@@ -331,14 +331,21 @@ async def download_zip(body: DownloadZipRequest):
 @router.get("/download-zip/get/{zip_id}", summary="Stream compiled zip archive payload directly")
 async def get_download_zip(zip_id: str):
     from utils.cache import zip_cache
-    zip_bytes = zip_cache.get(zip_id)
-    if not zip_bytes:
+    zip_data = zip_cache.get(zip_id)
+    if not zip_data:
         raise HTTPException(status_code=404, detail="Zip file expired or not found.")
     
+    if isinstance(zip_data, dict):
+        zip_bytes = zip_data.get("data")
+        filename = zip_data.get("filename", f"panels_{zip_id[:8]}.zip")
+    else:
+        zip_bytes = zip_data
+        filename = f"panels_{zip_id[:8]}.zip"
+
     return Response(
         content=zip_bytes,
         media_type="application/zip",
-        headers={"Content-Disposition": f"attachment; filename=panels_{zip_id[:8]}.zip"}
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
 

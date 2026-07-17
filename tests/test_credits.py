@@ -46,7 +46,8 @@ def _create_test_user(role: str = "creator", starting_credits: int = 100) -> str
             "user_id": user_id,
             "email": f"{user_id}@test.local",
             "password_hash": "x",
-            "full_name": "Test User",
+            "username": f"testuser_{user_id}",
+            "full_name": f"Test User {user_id}",
             "creator_role": role,
         }
     )
