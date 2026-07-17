@@ -8,7 +8,7 @@ Endpoints for bubble detection, removal, and YOLO diagnostics.
 import logging
 from fastapi import APIRouter, HTTPException
 
-from schemas.image import (
+from backend.schemas.image import (
     RemoveBubblesRequest,
     RemoveBubblesBatchRequest,
     CleanerBase64Request

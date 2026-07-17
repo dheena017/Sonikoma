@@ -12,7 +12,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Request, Depends
 
 from api.dependencies.auth import get_all_user_keys
-from schemas.scraper import (
+from backend.schemas.scraper import (
     ScrapeImagesRequest,
     ScrapeEpisodesRequest,
     ScrapeEpisodesAdvancedRequest,

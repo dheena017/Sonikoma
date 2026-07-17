@@ -15,7 +15,7 @@ from engines.ffmpeg import (
     CutSpec,
     TransitionSpec
 )
-from schemas.video import (
+from backend.schemas.video import (
     MetadataRequest,
     CutVideoRequest,
     ExtractAudioRequest,

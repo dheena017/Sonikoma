@@ -13,8 +13,8 @@ from unittest.mock import patch, MagicMock
 # Inject backend/app into sys.path to correctly import modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app')))
 
-from media.image.layer_segmentation import process_layers
-from media.audio.dialogue_aligner import align_dialogue_and_extract_peaks
+from backend.media.image.layer_segmentation import process_layers
+from backend.media.audio.dialogue_aligner import align_dialogue_and_extract_peaks
 from routes.video import _render_panel_segment_ffmpeg
 
 

@@ -10,7 +10,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Path, Depends
 
 from api.dependencies.auth import get_current_user
-from schemas.project import BatchDeleteRequest
+from backend.schemas.project import BatchDeleteRequest
 from repositories.project_repository import (
     get_project,
     delete_project,

@@ -14,7 +14,7 @@ import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from startup import (
+from backend.startup import (
     logger,
     IS_PRODUCTION,
     ColoredFormatter,
@@ -97,7 +97,7 @@ async def lifespan(app: FastAPI):
         # Pre-warm rembg U-2-Net and YOLO segmentation models so the first
         # /process-layers request does not pay the cold-start model-loading penalty.
         try:
-            from media.image.layer_segmentation import get_rembg_session
+            from backend.media.image.layer_segmentation import get_rembg_session
             from providers.vision.yolo import get_yolo_model
             logger.info("[Startup] Pre-warming rembg U-2-Net session...")
             await asyncio.to_thread(get_rembg_session)

@@ -9,7 +9,7 @@ import logging
 from fastapi import APIRouter, Depends
 
 from api.v1.ai._deps import get_user_gemini_key, run_md_skill
-from schemas.ai import (
+from backend.schemas.ai import (
     DramatizeRequest,
     CharacterBioRequest,
     VoiceCastingRequest,

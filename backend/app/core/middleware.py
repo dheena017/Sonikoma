@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from startup import logger, API_VERSION
+from backend.startup import logger, API_VERSION
 from config.ports import FRONTEND_PORT, BACKEND_PORT
 from api.dependencies.auth import get_current_user
 

@@ -10,13 +10,13 @@ import uvicorn
 from fastapi import FastAPI
 
 # 1. Import startup FIRST to configure UTF-8, logging, colorama, and dotenv immediately
-import startup
-from startup import API_VERSION, IS_PRODUCTION
+import backend.startup as startup
+from backend.startup import API_VERSION, IS_PRODUCTION
 
 # 2. Import lifespan, middlewares, routers, and exception handlers
-from lifespan import lifespan
+from backend.lifespan import lifespan
 from core.middleware import setup_middleware
-from exception_handlers import global_exception_handler
+from backend.exception_handlers import global_exception_handler
 from router import register_routers
 from config.ports import BACKEND_PORT
 

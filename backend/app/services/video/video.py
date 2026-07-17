@@ -11,7 +11,7 @@ try:
     from moviepy import ImageClip, CompositeVideoClip, AudioFileClip, concatenate_videoclips
 except ImportError:
     from moviepy.editor import ImageClip, CompositeVideoClip, AudioFileClip, concatenate_videoclips
-from media.audio.audio import generate_panel_audio
+from backend.media.audio.audio import generate_panel_audio
 from services.image.image_utils import resolve_image_to_buffer
 
 logger = logging.getLogger("sonikoma.services.video")

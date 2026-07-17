@@ -13,7 +13,7 @@ from fastapi import APIRouter, HTTPException, Response, Path, Request
 from pydantic import Field
 
 from providers.media.imagemagick import ResizeMode, FilterType
-from schemas.image import (
+from backend.schemas.image import (
     TransformImageRequest,
     StitchImagesRequest,
     SplitImagesRequest,

@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 
-from startup import PROJECT_ROOT, IS_PRODUCTION, logger
+from backend.startup import PROJECT_ROOT, IS_PRODUCTION, logger
 from api.router import api_router
 
 

@@ -10,7 +10,7 @@ import logging
 from fastapi import APIRouter, Depends, Request
 
 from api.dependencies.auth import get_current_user
-from schemas.auth import ApiKeyCreate
+from backend.schemas.auth import ApiKeyCreate
 from repositories.user_repository import (
     get_user_api_keys,
     create_user_api_key,

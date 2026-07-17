@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app')))
 
 import services.training_monitor as monitor
-from media.image.train_yolo import status, trigger_fine_tuning, _train_worker
+from backend.media.image.train_yolo import status, trigger_fine_tuning, _train_worker
 
 class TestAutomaticTraining(unittest.TestCase):
     def setUp(self):

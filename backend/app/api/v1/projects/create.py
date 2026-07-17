@@ -10,7 +10,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Depends
 
 from api.dependencies.auth import get_current_user
-from schemas.project import ProjectCreateRequest
+from backend.schemas.project import ProjectCreateRequest
 from services.project.project_service import ProjectService
 
 logger = logging.getLogger("sonikoma.routes.projects.create")

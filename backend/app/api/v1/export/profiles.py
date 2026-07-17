@@ -10,7 +10,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Depends
 
 from api.dependencies.auth import get_current_user
-from schemas.export import YouTubeProfileRequest
+from backend.schemas.export import YouTubeProfileRequest
 from database.db import save_youtube_profile, get_youtube_profiles, delete_youtube_profile
 
 logger = logging.getLogger("sonikoma.api.export.profiles")

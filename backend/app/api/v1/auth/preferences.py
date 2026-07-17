@@ -11,7 +11,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from api.dependencies.auth import get_current_user
-from schemas.auth import (
+from backend.schemas.auth import (
     RedeemPointsRequest,
     MfaUpdate,
     SaveCardRequest,

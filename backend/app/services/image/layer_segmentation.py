@@ -15,8 +15,8 @@ LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "local_med
 # Matches main.py mount: /media -> <LOCAL_MEDIA_ROOT>
 LOCAL_MEDIA_URL_PREFIX = "/media"
 
-from media.image.ocr import extract_full_ocr_data
-from media.image.detect_panels import _detect_bg_color_and_threshold
+from backend.media.image.ocr import extract_full_ocr_data
+from backend.media.image.detect_panels import _detect_bg_color_and_threshold
 from providers.vision.yolo import segment_text_and_balloons, segment_characters
 from utils.supabase_storage import upload_to_supabase_bucket
 from providers.vision.sam import has_rembg, segment_character_u2net

@@ -101,7 +101,7 @@ def run_cv_detection(
     ocr_boxes: List[Dict[str, int]] = []
     try:
         import asyncio
-        from media.image.ocr import extract_full_ocr_data
+        from backend.media.image.ocr import extract_full_ocr_data
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError:

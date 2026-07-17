@@ -7,7 +7,7 @@ Sonikoma FastAPI Exception Handlers
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from startup import logger
+from backend.startup import logger
 from core.exceptions import SonikomaException
 
 async def sonikoma_exception_handler(request: Request, exc: SonikomaException):

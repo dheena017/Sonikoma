@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 
 from api.dependencies.auth import get_current_user
 from database.db import get_available_credits, record_credit_transaction, LOW_BALANCE_THRESHOLD
-from schemas.video import RenderRequest
+from backend.schemas.video import RenderRequest
 from services.video.job_queue import get_job_queue
 from services.video.video_service import process_render_job
 
