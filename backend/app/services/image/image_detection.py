@@ -16,6 +16,7 @@ from backend.media.image.cleaner import remove_speech_bubbles
 import services.image.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history
 from utils.supabase_storage import upload_to_supabase_bucket
+from repositories.project.panels import save_edit_history
 
 logger = logging.getLogger("sonikoma.services.image.detection")
 
@@ -76,8 +77,8 @@ async def bubble_cleaning_service(url: str, confidence: float = 0.25) -> Dict[st
     stitched_cache.set(unique_id, {"data": cleaned_bytes, "content_type": "image/png"})
     edit_history.set(proxy_url, url)
     try:
-        from database import db
-        db.save_edit_history(proxy_url, url)
+
+        save_edit_history(proxy_url, url)
     except Exception:
         pass
 

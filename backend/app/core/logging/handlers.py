@@ -79,7 +79,7 @@ class UIStreamLogHandler(logging.Handler):
 
             # Persist to Database asynchronously (lazy import to avoid circular)
             try:
-                from database.db import insert_system_log
+                from repositories.system.logs import insert_system_log
                 insert_system_log(
                     level,
                     module,

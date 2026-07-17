@@ -9,7 +9,7 @@ import os
 import logging
 from typing import List, Dict, Any, Optional
 
-from database.connection import get_db_connection
+from database.engine import get_db_connection
 from services.project.asset_service import cleanup_cached_url
 from repositories.project.project import _PROJECT_ROOT
 

@@ -274,7 +274,7 @@ def get_total_storage_size_bytes() -> int:
                     except OSError:
                         pass
     try:
-        from database.db import DB_PATH
+        from database.config import DB_PATH
         if os.path.exists(DB_PATH):
             total_size += os.path.getsize(DB_PATH)
     except Exception:

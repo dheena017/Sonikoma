@@ -5,7 +5,7 @@ import os
 # Add backend/python to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from database.db import insert_system_log, get_system_logs, wipe_system_logs
+from repositories.system.logs import insert_system_log, get_system_logs, wipe_system_logs
 
 def test_logging():
     print("Testing logging database operations...")

@@ -19,6 +19,7 @@ from PIL import Image
 import services.image.image_utils as img_utils
 from utils.cache import stitched_cache, edit_history, zip_cache
 from utils.supabase_storage import upload_to_supabase_bucket
+from repositories.project.panels import save_edit_history
 
 logger = logging.getLogger("sonikoma.services.image.compose")
 
@@ -60,8 +61,8 @@ async def merge_images_service(
     stitched_cache.set(unique_id, {"data": merged_bytes, "content_type": "image/png"})
     edit_history.set(new_url, urls[0])
     try:
-        from database import db
-        db.save_edit_history(new_url, urls[0])
+
+        save_edit_history(new_url, urls[0])
     except Exception:
         pass
 
@@ -123,8 +124,8 @@ async def execute_splits_service(url: str, splitLines: List[float]) -> Dict[str,
             stitched_cache.set(cache_id, {"data": seg_bytes, "content_type": "image/jpeg"})
             edit_history.set(new_url, url)
             try:
-                from database import db
-                db.save_edit_history(new_url, url)
+
+                save_edit_history(new_url, url)
             except Exception:
                 pass
             res_urls.append(new_url)

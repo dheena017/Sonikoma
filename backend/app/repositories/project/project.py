@@ -11,10 +11,13 @@ import json
 import logging
 from typing import List, Dict, Any, Optional
 
-from database.connection import (
-    get_db_connection, uuid_hex, generate_unique_slug, unwrap_proxy_url,
-    ensure_user_exists
+from database.engine import get_db_connection
+from database.session import uuid_hex
+from database.transaction import (
+    generate_unique_slug,
+    unwrap_proxy_url,
 )
+from database.health import ensure_user_exists
 
 logger = logging.getLogger("sonikoma.repositories.project.project")
 

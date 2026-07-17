@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, Request
 from api.v1.ai._deps import get_user_gemini_key, run_md_skill
 from api.dependencies.auth import get_current_user
 
-from database.db import write_audit_log
+from repositories.user.session import write_audit_log
 from backend.schemas.ai import TranslationRequest
 
 logger = logging.getLogger("sonikoma.api.ai.translation")

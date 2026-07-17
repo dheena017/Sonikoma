@@ -15,7 +15,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.v1.ai._deps import get_user_gemini_key, default_output_path
 from api.dependencies.auth import get_current_user
 
-from database.db import get_available_credits, record_credit_transaction, LOW_BALANCE_THRESHOLD
+from services.user.credit_service import get_available_credits, record_credit_transaction
+from database.config import LOW_BALANCE_THRESHOLD
 from backend.schemas.ai import (
     AnalyzeImageRequest,
     AnalyzeBatchRequest,

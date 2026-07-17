@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.v1.ai._deps import get_user_gemini_key, run_md_skill
 from api.dependencies.auth import get_current_user
 
-from database.db import get_available_credits, record_credit_transaction
+from services.user.credit_service import get_available_credits, record_credit_transaction
 from backend.schemas.ai import (
     AnalyzeNarrativeSequenceRequest,
     GenerateSequenceNarrativeRequest,

@@ -16,7 +16,7 @@ from repositories.project_repository import (
     delete_project,
     get_token_logs,
 )
-from database.connection import get_db_connection
+from database.engine import get_db_connection
 
 logger = logging.getLogger("sonikoma.routes.projects.settings")
 router = APIRouter()

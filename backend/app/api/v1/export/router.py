@@ -10,7 +10,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Depends
 
 from api.dependencies.auth import get_current_user
-from database.db import get_youtube_publications
+from repositories.youtube_repository import get_youtube_publications
 from api.v1.export.youtube import router as youtube_router
 from api.v1.export.profiles import router as profiles_router
 from api.v1.export.credentials import router as credentials_router

@@ -32,7 +32,7 @@ from repositories.system_repository import (
     get_system_logs,
     wipe_system_logs
 )
-from database.connection import get_db_connection
+from database.engine import get_db_connection
 
 logger = logging.getLogger("sonikoma.routes.health")
 health_router = APIRouter()

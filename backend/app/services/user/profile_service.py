@@ -2,7 +2,7 @@ import datetime
 import json
 from typing import Any, Dict
 
-from database.connection import get_db_connection
+from database.engine import get_db_connection
 
 
 def get_creator_analytics(user_id: str) -> Dict[str, Any]:

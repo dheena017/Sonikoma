@@ -8,8 +8,8 @@ from fastapi import Request
 
 from utils.cache import stitched_cache
 # I am mocking the imports that were inside the function
-from database import db
-from database.db import unwrap_proxy_url
+
+from database.transaction import unwrap_proxy_url
 from utils import img_utils
 
 logger = logging.getLogger("sonikoma.services.image.stitch_cache")
@@ -17,6 +17,8 @@ logger = logging.getLogger("sonikoma.services.image.stitch_cache")
 # (A global edit_history might be missing if it was in transform.py, but we'll import if needed)
 # In transform.py it just did edit_history.get, maybe edit_history is from utils.cache? Let's assume it's from utils.cache
 from utils.cache import edit_history
+from database.engine import get_db_connection
+from repositories.project.panels import get_panel_original_url, get_edit_history
 
 async def retrieve_cached_stitch_service(cache_id: str, request: Request = None):
     cached = stitched_cache.get(cache_id)
@@ -28,13 +30,13 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
 
     if not original_url:
         try:
-            original_url = db.get_panel_original_url(cached_url_key)
+            original_url = get_panel_original_url(cached_url_key)
         except Exception:
             pass
 
     if not original_url:
         try:
-            hist = db.get_edit_history(cached_url_key)
+            hist = get_edit_history(cached_url_key)
             if hist and hist.get("original_url"):
                 original_url = hist["original_url"]
         except Exception:
@@ -64,7 +66,7 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
                         if len(path_parts) >= 4 and path_parts[0] == "series":
                             series_slug = path_parts[1]
                             chapter_slug = path_parts[3]
-                            conn = db.get_db_connection()
+                            conn = get_db_connection()
                             session_row = conn.execute(
                                 "SELECT url FROM scrape_sessions WHERE url LIKE ? AND url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
                                 (f"%{series_slug}%", f"%{chapter_slug.replace('chapter-', 'episode-')}%")
@@ -73,7 +75,7 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
                                 webtoon_url = session_row["url"]
 
                 if not webtoon_url:
-                    conn = db.get_db_connection()
+                    conn = get_db_connection()
                     latest_session = conn.execute(
                         "SELECT url FROM scrape_sessions ORDER BY scraped_at DESC LIMIT 1"
                     ).fetchone()
@@ -81,7 +83,7 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
                         webtoon_url = latest_session["url"]
 
                 if webtoon_url:
-                    conn = db.get_db_connection()
+                    conn = get_db_connection()
                     session_row = conn.execute(
                         "SELECT image_urls FROM scrape_sessions WHERE url = ? AND image_urls LIKE '%http%' ORDER BY scraped_at ASC LIMIT 1",
                         (webtoon_url,)
@@ -113,7 +115,7 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
                     if len(path_parts) >= 4 and path_parts[0] == "series":
                         series_slug = path_parts[1]
                         chapter_slug = path_parts[3]
-                        conn = db.get_db_connection()
+                        conn = get_db_connection()
                         session_row = conn.execute(
                             "SELECT url FROM scrape_sessions WHERE url LIKE ? AND url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
                             (f"%{series_slug}%", f"%{chapter_slug.replace('chapter-', 'episode-')}%")
@@ -122,7 +124,7 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
                             webtoon_url = session_row["url"]
 
             if not webtoon_url:
-                conn = db.get_db_connection()
+                conn = get_db_connection()
                 latest_session = conn.execute(
                     "SELECT url FROM scrape_sessions ORDER BY scraped_at DESC LIMIT 1"
                 ).fetchone()
@@ -130,7 +132,7 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
                     webtoon_url = latest_session["url"]
 
             if webtoon_url:
-                conn = db.get_db_connection()
+                conn = get_db_connection()
                 session_row = conn.execute(
                     "SELECT image_urls FROM scrape_sessions WHERE url = ? AND image_urls LIKE '%http%' ORDER BY scraped_at ASC LIMIT 1",
                     (webtoon_url,)
