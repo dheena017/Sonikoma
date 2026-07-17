@@ -14,13 +14,7 @@ import logging
 import sqlite3
 import threading
 
-from infrastructure.database.config import (
-    DB_PATH,
-    DB_DIR,
-    SCHEMA_PATH,
-    SCHEMA_PG_PATH,
-    is_postgres,
-)
+import infrastructure.database.config as config
 from infrastructure.database.engine import _create_db_connection
 from infrastructure.database.transaction import generate_missing_slugs
 
@@ -55,8 +49,8 @@ def _init_postgres(conn) -> None:
         ).fetchone()
         if not row or not row.get("exists"):
             logger.info("[Database] Initializing PostgreSQL schema...")
-            if os.path.exists(SCHEMA_PG_PATH):
-                with open(SCHEMA_PG_PATH, "r", encoding="utf-8") as f:
+            if os.path.exists(config.SCHEMA_PG_PATH):
+                with open(config.SCHEMA_PG_PATH, "r", encoding="utf-8") as f:
                     schema = f.read()
                 conn.executescript(schema)
                 conn.commit()
@@ -215,7 +209,7 @@ def _init_sqlite(conn) -> None:
 
         # ── Apply base schema if tables are missing ───────────────────────
         if not users_table_exists:
-            schema_file = SCHEMA_PATH if os.path.exists(SCHEMA_PATH) else "/app/schema_backup.sql"
+            schema_file = config.SCHEMA_PATH if os.path.exists(config.SCHEMA_PATH) else "/app/schema_backup.sql"
             if not os.path.exists(schema_file):
                 schema_file = os.path.join(
                     os.path.dirname(__file__), "..", "..", "database", "schema.sql"
@@ -486,15 +480,15 @@ def init_db() -> None:
         _db_init_complete.wait(timeout=60)
         return
 
-    if is_postgres:
+    if config.is_postgres:
         logger.info("[Database] Connecting to PostgreSQL (Supabase)...")
         conn = _create_db_connection()
         _init_postgres(conn)
         logger.info("[Database] PostgreSQL ready [OK]")
     else:
-        logger.info(f"[Database] Opening local SQLite database at: {DB_PATH}")
-        os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-        os.makedirs(DB_DIR, exist_ok=True)
+        logger.info(f"[Database] Opening local SQLite database at: {config.DB_PATH}")
+        os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
+        os.makedirs(config.DB_DIR, exist_ok=True)
         conn = _create_db_connection()
         _init_sqlite(conn)
         logger.info("[Database] SQLite database ready [OK]")

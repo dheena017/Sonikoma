@@ -14,7 +14,7 @@ Provides:
 import sqlite3
 import logging
 
-from infrastructure.database.config import DATABASE_URL, DB_PATH, is_postgres
+import infrastructure.database.config as config
 
 try:
     import psycopg2
@@ -95,16 +95,16 @@ def _create_db_connection():
     Does NOT trigger init_db — call get_db_connection() for the guarded
     public version.
     """
-    if is_postgres:
+    if config.is_postgres:
         if not psycopg2:
             raise RuntimeError(
                 "psycopg2-binary is required for PostgreSQL support. "
                 "Please install it."
             )
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=DictCursor)
+        conn = psycopg2.connect(config.DATABASE_URL, cursor_factory=DictCursor)
         return PostgresConnectionWrapper(conn)
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(config.DB_PATH)
     conn.row_factory = sqlite3.Row
 
     # WAL improves concurrency, but can fail on read-only / transient mounts.
@@ -129,8 +129,8 @@ def get_db_connection():
     """Public entry point — ensures the schema is initialised before returning
     a connection. Import init_db lazily to avoid circular imports."""
     # Deferred import keeps engine.py independent of migrations.py
-    from infrastructure.database.migrations import _db_initialized, init_db
+    import infrastructure.database.migrations as migrations
 
-    if not _db_initialized:
-        init_db()
+    if not migrations._db_initialized:
+        migrations.init_db()
     return _create_db_connection()

@@ -18,6 +18,7 @@ Sub-modules:
 """
 
 # ── config ────────────────────────────────────────────────────────────────
+import infrastructure.database.config as config
 from infrastructure.database.config import (
     DB_DIR,
     DB_PATH,
@@ -38,6 +39,7 @@ from infrastructure.database.engine import (
 )
 
 # ── migrations ────────────────────────────────────────────────────────────
+import infrastructure.database.migrations as migrations
 from infrastructure.database.migrations import (
     _db_initialized,
     _db_init_lock,
@@ -61,6 +63,40 @@ from infrastructure.database.health import ensure_user_exists
 
 # ── session helpers ───────────────────────────────────────────────────────
 from infrastructure.database.session import uuid_hex, datetime_now_date
+
+import sys
+import types
+
+class ConnectionShimModule(types.ModuleType):
+    def __getattr__(self, name):
+        if name in ("DB_PATH", "DB_DIR", "DATA_DIR", "SCHEMA_PATH", "SCHEMA_PG_PATH", "DATABASE_URL", "LOW_BALANCE_THRESHOLD"):
+            return getattr(config, name)
+        if name in ("_is_postgres", "is_postgres"):
+            return getattr(config, "is_postgres")
+        if name in ("_db_initialized", "_db_init_lock", "_db_init_in_progress", "_db_init_complete", "_system_log_persist_in_progress"):
+            return getattr(migrations, name)
+        
+        # Fall back to attributes on connection.py itself
+        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
+    def __setattr__(self, name, value):
+        if name in ("_submodules", "__all__", "__class__"):
+            super().__setattr__(name, value)
+            return
+
+        if name in ("DB_PATH", "DB_DIR", "DATA_DIR", "SCHEMA_PATH", "SCHEMA_PG_PATH", "DATABASE_URL", "LOW_BALANCE_THRESHOLD"):
+            setattr(config, name, value)
+            return
+        if name in ("_is_postgres", "is_postgres"):
+            setattr(config, "is_postgres", value)
+            return
+        if name in ("_db_initialized", "_db_init_lock", "_db_init_in_progress", "_db_init_complete", "_system_log_persist_in_progress"):
+            setattr(migrations, name, value)
+            return
+
+        super().__setattr__(name, value)
+
+sys.modules[__name__].__class__ = ConnectionShimModule
 
 __all__ = [
     # config

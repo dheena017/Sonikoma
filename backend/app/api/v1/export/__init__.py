@@ -1,13 +1,7 @@
 """
-api/v1/export.py
+api/v1/export/__init__.py
 ─────────────────────────────────────────────────────────────────────────────
-Compatibility shim — all logic has moved to api/v1/export/ sub-package.
-
-Real implementations live in:
-  api/v1/export/router.py      – export_router
-  api/v1/export/youtube.py     – _execute_youtube_upload_workflow, upload/export
-  api/v1/export/profiles.py    – profiles CRUD
-  api/v1/export/credentials.py – custom OAuth secrets CRUD
+Public surface of the export package. Exposes export_router.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
