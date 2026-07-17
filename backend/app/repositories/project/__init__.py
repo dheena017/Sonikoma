@@ -65,4 +65,52 @@ __all__ = [
     "get_all_projects_admin",
     "delete_series_admin",
     "update_series_admin",
+    # ── Domain-typed wrappers (return domain models instead of raw dicts) ──
+    "get_project_domain",
+    "get_all_projects_domain",
+    "get_panels_domain",
+    "get_series_domain",
+    "get_token_logs_domain",
 ]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Domain-typed wrappers
+#
+# These thin functions call the existing raw-dict repository functions and
+# convert their output into domain model objects via from_dict().
+#
+# Services that need business-rule methods (is_complete, has_speech, …) should
+# use these wrappers instead of the raw-dict variants.
+# ─────────────────────────────────────────────────────────────────────────────
+
+from typing import List, Optional
+
+from domain.project import Panel, Project, Series, TokenLog
+
+
+def get_project_domain(project_id: str) -> Optional[Project]:
+    """Return a Project domain object for the given id, or None if not found."""
+    raw = get_project(project_id)
+    return Project.from_dict(raw) if raw else None
+
+
+def get_all_projects_domain(user_id: Optional[str] = None) -> List[Project]:
+    """Return all projects as typed Project domain objects."""
+    return [Project.from_dict(r) for r in get_all_projects(user_id)]
+
+
+def get_panels_domain(project_id: str) -> List[Panel]:
+    """Return all panels for a project as typed Panel domain objects."""
+    return [Panel.from_dict(r) for r in get_panels(project_id)]
+
+
+def get_series_domain(series_slug: str) -> Optional[Series]:
+    """Return a Series domain object by slug, or None if not found."""
+    raw = get_series_by_slug(series_slug)
+    return Series.from_dict(raw) if raw else None
+
+
+def get_token_logs_domain(user_id: str) -> List[TokenLog]:
+    """Return token usage logs as typed TokenLog domain objects."""
+    return [TokenLog.from_dict(r) for r in get_token_logs(user_id)]
