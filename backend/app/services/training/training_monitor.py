@@ -5,7 +5,7 @@ import glob
 import logging
 import asyncio
 import threading
-from media.image.train_yolo import trigger_fine_tuning, status
+from services.image.providers.yolo import trigger_fine_tuning, status
 
 logger = logging.getLogger("sonikoma.services.training_monitor")
 

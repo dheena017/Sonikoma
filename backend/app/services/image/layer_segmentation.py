@@ -16,38 +16,11 @@ LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "local_med
 # Matches main.py mount: /media -> <LOCAL_MEDIA_ROOT>
 LOCAL_MEDIA_URL_PREFIX = "/media"
 
-# Try importing dependencies safely
-try:
-    from rembg import remove as rembg_remove
-    from rembg import new_session
-    has_rembg = True
-except ImportError:
-    has_rembg = False
-    logger.warning(
-        "rembg is not installed. Character segmentation will return a blank layer. "
-        "To enable character segmentation, install rembg: `pip install rembg`"
-    )
-
 from media.image.ocr import extract_full_ocr_data
 from media.image.detect_panels import _detect_bg_color_and_threshold
-from media.image.segmentation_engine import segment_text_and_balloons, segment_characters
+from services.image.providers.yolo import segment_text_and_balloons, segment_characters
 from utils.supabase_storage import upload_to_supabase_bucket
-
-# Initialize a global rembg session for U-2-Net model to prevent reloading it per request
-_rembg_session = None
-
-def get_rembg_session():
-    global _rembg_session
-    if _rembg_session is None and has_rembg:
-        logger.info("Initializing rembg session (U-2-Net)")
-        try:
-            import torch
-            use_gpu = torch.cuda.is_available()
-        except ImportError:
-            use_gpu = False
-        providers = ["CUDAExecutionProvider", "CPUExecutionProvider"] if use_gpu else ["CPUExecutionProvider"]
-        _rembg_session = new_session("u2net", providers=providers)
-    return _rembg_session
+from services.image.providers.sam import has_rembg, get_rembg_session, segment_character_u2net
 
 def create_blank_webp(width: int, height: int) -> bytes:
     """Helper to generate a fully transparent WebP image of given dimensions."""
@@ -180,10 +153,10 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
     # 2. rembg character scan on original image (for localizing subject/bounding box)
     try:
         if has_rembg:
-            session = get_rembg_session()
             pil_orig = Image.fromarray(cv2.cvtColor(original_img, cv2.COLOR_BGR2RGB))
-            char_pil_scan = rembg_remove(pil_orig, session=session)
-            char_np_scan = np.array(char_pil_scan)
+            char_pil_scan = segment_character_u2net(pil_orig)
+            if char_pil_scan is not None:
+                char_np_scan = np.array(char_pil_scan)
             if char_np_scan.shape[2] == 4:
                 global_char_mask = char_np_scan[:, :, 3]
     except Exception as e:
@@ -385,11 +358,11 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             if not has_rembg:
                 logger.warning("rembg is not installed. Character mask will be blank.")
             else:
-                session = get_rembg_session()
                 # rembg run STRICTLY on textless_img to guarantee character is fully clean
                 pil_textless = Image.fromarray(cv2.cvtColor(textless_img, cv2.COLOR_BGR2RGB))
-                char_pil = rembg_remove(pil_textless, session=session)
-                char_np = np.array(char_pil)
+                char_pil = segment_character_u2net(pil_textless)
+                if char_pil is not None:
+                    char_np = np.array(char_pil)
                 if char_np.shape[2] == 4:
                     char_mask = char_np[:, :, 3]
                 logger.info("rembg fallback completed successfully.")

@@ -151,7 +151,7 @@ async def start_training(epochs: int = 20, batch_size: int = 4):
             detail="Cannot start training: No human-corrected samples have been saved yet."
         )
     try:
-        from media.image.train_yolo import trigger_fine_tuning
+        from services.image.providers.yolo import trigger_fine_tuning
         success = trigger_fine_tuning(epochs, batch_size)
         if not success:
             raise HTTPException(status_code=409, detail="A training run is already in progress.")
@@ -163,7 +163,7 @@ async def start_training(epochs: int = 20, batch_size: int = 4):
 @router.get("/training-status", summary="Get status of current YOLO fine-tuning run")
 async def get_training_status():
     try:
-        from media.image.train_yolo import status, is_training_locked, get_lock_pid
+        from services.image.providers.yolo import status, is_training_locked, get_lock_pid
         from services.training_monitor import get_current_original_count, load_metadata, TRAINING_DATA_DIR
 
         status_dict = status.to_dict()

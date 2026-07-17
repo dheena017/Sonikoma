@@ -128,9 +128,9 @@ def _create_db_connection():
 def get_db_connection():
     """Public entry point — ensures the schema is initialised before returning
     a connection. Import init_db lazily to avoid circular imports."""
-    # Deferred import keeps engine.py independent of migrations.py
-    import infrastructure.database.migrations as migrations
+    # Deferred import keeps engine.py independent of bootstrap.py
+    import infrastructure.database.bootstrap as bootstrap
 
-    if not migrations._db_initialized:
-        migrations.init_db()
+    if not bootstrap._db_initialized:
+        bootstrap.init_db()
     return _create_db_connection()

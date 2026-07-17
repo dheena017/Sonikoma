@@ -39,8 +39,8 @@ from infrastructure.database.engine import (
 )
 
 # ── migrations ────────────────────────────────────────────────────────────
-import infrastructure.database.migrations as migrations
-from infrastructure.database.migrations import (
+import infrastructure.database.bootstrap as migrations
+from infrastructure.database.bootstrap import (
     _db_initialized,
     _db_init_lock,
     _db_init_in_progress,

@@ -1,8 +1,8 @@
 import sys
 try:
-    from services.image.imagemagick_engine import *
-    import services.image.imagemagick_engine as target
+    from services.image.providers.imagemagick import *
+    import services.image.providers.imagemagick as target
 except (ModuleNotFoundError, ImportError):
-    from app.services.image.imagemagick_engine import *
-    import app.services.image.imagemagick_engine as target
+    from app.services.image.providers.imagemagick import *
+    import app.services.image.providers.imagemagick as target
 sys.modules[__name__] = target

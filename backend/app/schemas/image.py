@@ -8,7 +8,7 @@ Pydantic request/response schemas for image.
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Dict, Any, Optional, Literal, Union
 from datetime import datetime
-from services.image.imagemagick_engine import ResizeMode
+from services.image.providers.imagemagick import ResizeMode
 
 class EditImageRequest(BaseModel):
     url: str

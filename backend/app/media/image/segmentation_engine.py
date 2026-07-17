@@ -1,8 +1,8 @@
 import sys
 try:
-    from services.image.segmentation_engine import *
-    import services.image.segmentation_engine as target
+    from services.image.providers.yolo import *
+    import services.image.providers.yolo as target
 except (ModuleNotFoundError, ImportError):
-    from app.services.image.segmentation_engine import *
-    import app.services.image.segmentation_engine as target
+    from app.services.image.providers.yolo import *
+    import app.services.image.providers.yolo as target
 sys.modules[__name__] = target

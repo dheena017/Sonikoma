@@ -2,43 +2,24 @@
 infrastructure/database/migrations.py
 ─────────────────────────────────────────────────────────────────────────────
 Schema initialisation and incremental migration runner.
-
-Provides:
-  - init_db()                          – idempotent schema bootstrap
-  - _should_skip_system_log_persistence() – guard used by the log handler
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import os
 import logging
 import sqlite3
-import threading
 
 import infrastructure.database.config as config
-from infrastructure.database.engine import _create_db_connection
 from infrastructure.database.transaction import generate_missing_slugs
+from infrastructure.database.seed import seed_default_settings
 
 logger = logging.getLogger("sonikoma.database.migrations")
-
-# ── Initialisation state ──────────────────────────────────────────────────
-
-_db_initialized: bool = False
-_db_init_lock = threading.Lock()
-_db_init_in_progress: bool = False
-_db_init_complete = threading.Event()
-_system_log_persist_in_progress: bool = False
-
-
-def _should_skip_system_log_persistence() -> bool:
-    return _db_init_in_progress or (
-        not _db_init_complete.is_set() and not _db_initialized
-    )
 
 
 # ── PostgreSQL initialisation ─────────────────────────────────────────────
 
 
-def _init_postgres(conn) -> None:
+def init_postgres(conn) -> None:
     """Apply the Postgres schema and incremental table migrations."""
     try:
         row = conn.execute(
@@ -178,7 +159,7 @@ def _init_postgres(conn) -> None:
 # ── SQLite initialisation ─────────────────────────────────────────────────
 
 
-def _init_sqlite(conn) -> None:
+def init_sqlite(conn) -> None:
     """Apply the SQLite schema and incremental column/table migrations."""
     try:
         cursor = conn.cursor()
@@ -374,30 +355,8 @@ def _init_sqlite(conn) -> None:
             "CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at)"
         )
 
-        # ── Default platform settings ─────────────────────────────────────
-        cursor.execute("SELECT COUNT(*) FROM platform_settings")
-        if cursor.fetchone()[0] == 0:
-            defaults = [
-                ("maintenance_mode", "false"),
-                ("disable_signups", "false"),
-                ("global_banner", ""),
-                ("enable_beta", "false"),
-                ("max_upload_size_mb", "50"),
-                ("max_scenes_per_project", "100"),
-                ("default_starting_credits", "200"),
-                ("smtp_host", "smtp.mailgun.org"),
-                ("smtp_port", "587"),
-                ("smtp_user", ""),
-                ("enforce_2fa", "false"),
-                ("strict_ip_binding", "false"),
-                ("session_timeout_min", "120"),
-                ("webhook_url", "https://api.sonikoma.com/webhooks"),
-                ("log_retention_days", "7"),
-                ("log_max_entries", "5000"),
-            ]
-            cursor.executemany(
-                "INSERT INTO platform_settings (key, value) VALUES (?, ?)", defaults
-            )
+        # ── Default platform settings seeding ─────────────────────────────
+        seed_default_settings(conn)
 
         # ── credit_balance column on users ────────────────────────────────
         _run_safe_alter(
@@ -434,9 +393,6 @@ def _init_sqlite(conn) -> None:
 
     except sqlite3.Error as e:
         logger.error(f"[Database] Error checking or applying schema: {e}")
-        with _db_init_lock:
-            _db_init_in_progress = False
-            _db_init_complete.set()
         raise
     finally:
         conn.close()
@@ -453,47 +409,3 @@ def _run_safe_alter(cursor, conn, sql: str, description: str) -> None:
         logger.info(f"[Database] Migration: {description}.")
     except Exception:
         pass  # column/index already exists
-
-
-# ── Public entry point ────────────────────────────────────────────────────
-
-
-def init_db() -> None:
-    """Idempotent schema bootstrap. Thread-safe; safe to call from multiple
-    workers simultaneously."""
-    global _db_initialized, _db_init_in_progress
-
-    if _db_initialized:
-        return
-
-    with _db_init_lock:
-        if _db_initialized:
-            return
-        if _db_init_in_progress:
-            wait_for_init = True
-        else:
-            _db_init_in_progress = True
-            _db_init_complete.clear()
-            wait_for_init = False
-
-    if wait_for_init:
-        _db_init_complete.wait(timeout=60)
-        return
-
-    if config.is_postgres:
-        logger.info("[Database] Connecting to PostgreSQL (Supabase)...")
-        conn = _create_db_connection()
-        _init_postgres(conn)
-        logger.info("[Database] PostgreSQL ready [OK]")
-    else:
-        logger.info(f"[Database] Opening local SQLite database at: {config.DB_PATH}")
-        os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
-        os.makedirs(config.DB_DIR, exist_ok=True)
-        conn = _create_db_connection()
-        _init_sqlite(conn)
-        logger.info("[Database] SQLite database ready [OK]")
-
-    with _db_init_lock:
-        _db_initialized = True
-        _db_init_in_progress = False
-        _db_init_complete.set()

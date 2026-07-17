@@ -26,7 +26,7 @@ def draw_yolo_detections(image_path: str, conf_threshold: float = 0.25) -> bytes
 
     Returns None if YOLO is unavailable or produces no detections.
     """
-    from media.image.segmentation_engine import get_yolo_model
+    from services.image.providers.yolo import get_yolo_model
 
     model = get_yolo_model()
     if model is None:
