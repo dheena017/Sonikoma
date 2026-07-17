@@ -7,15 +7,14 @@ Authentication dependencies for FastAPI endpoints (current user, admin user).
 
 import os
 import re
-import jwt
 from typing import Optional
 from fastapi import Request, Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 
-from core.security import SECRET_KEY, ALGORITHM
-from repositories.user_repository import get_user_by_api_key, get_user_by_id
+from services.auth.auth_service import AuthService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token", auto_error=False)
+auth_service = AuthService()
 
 async def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_scheme)):
     # If called manually in middleware, token will be the Depends object.
@@ -40,22 +39,7 @@ async def get_current_user(request: Request, token: Optional[str] = Depends(oaut
     if not token or not isinstance(token, str):
         raise credentials_exception
 
-    # Authenticate via Developer API key if token starts with av_live_
-    if token.startswith("av_live_"):
-        user = get_user_by_api_key(token)
-        if user is None:
-            raise credentials_exception
-        return user
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
-        if user_id is None:
-            raise credentials_exception
-    except jwt.PyJWTError:
-        raise credentials_exception
-
-    user = get_user_by_id(user_id)
+    user = auth_service.authenticate_token(token)
     if user is None:
         raise credentials_exception
     return user
