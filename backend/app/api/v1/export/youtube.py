@@ -1,28 +1,17 @@
-
-# ─────────────────────────────────────────────────────────────────────────────
-# FROM export.py
-# ─────────────────────────────────────────────────────────────────────────────
-from api.dependencies.auth import get_current_user, get_admin_user, oauth2_scheme
-from schemas.export import *
 import os
 import logging
 import asyncio
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
-from pydantic import BaseModel
-import tempfile
 import json
+import tempfile
 import aiohttp
 from typing import Optional, List
-from routes.auth_routes import get_current_user
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
+
+from api.dependencies.auth import get_current_user
+from schemas.export import YouTubeExportRequest
 from database.db import (
-    save_youtube_profile,
-    get_youtube_profiles,
-    delete_youtube_profile,
     log_youtube_publication,
-    get_youtube_publications,
-    save_youtube_credentials,
     get_youtube_credentials,
-    delete_youtube_credentials,
 )
 
 try:
@@ -34,13 +23,8 @@ try:
 except ImportError:
     HAS_YOUTUBE_API = False
 
-export_router = APIRouter()
-router = export_router
-logger = logging.getLogger("sonikoma.api.export")
-
-
-
-
+router = APIRouter()
+logger = logging.getLogger("sonikoma.api.export.youtube")
 
 
 async def _execute_youtube_upload_workflow(
@@ -80,8 +64,8 @@ async def _execute_youtube_upload_workflow(
                 )
                 logger.info(f"Using user custom credentials from database for user_id: {user_id}")
 
-        # Resolve project root (3 levels up from routes/export.py)
-        PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+        # Resolve project root (4 levels up from api/v1/export/youtube.py)
+        PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 
         # Load Client Secrets from Env or Local File
         client_secrets_file = os.path.join(PROJECT_ROOT, "client_secrets.json")
@@ -187,8 +171,6 @@ async def _execute_youtube_upload_workflow(
                 raise ValueError("JSON does not look like an OAuth client secrets file (missing 'installed' or 'web')")
 
         except json.JSONDecodeError as je:
-            # Be Smart (Auto-Detect): backend tries fallback to repo default for dev.
-            # Be Professional (Human-Readable Error): returns clean, friendly guidance.
             if client_secrets_file == tmp_secrets_path:
                 repo_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
                 if os.path.exists(repo_default):
@@ -201,9 +183,7 @@ async def _execute_youtube_upload_workflow(
                     secrets_obj = json.loads(secrets_text)
                 else:
                     clean_text = (secrets_text or "").strip()
-
                     looks_like_path = clean_text.startswith((".", "/", "\\")) or clean_text.endswith(".json")
-
                     if looks_like_path:
                         friendly_error = (
                             f"Configuration Error: The YouTube client secrets variable appears to be a file path ('{clean_text[:40]}...'), "
@@ -215,13 +195,10 @@ async def _execute_youtube_upload_workflow(
                             "Configuration Error: The provided YouTube client secrets are not formatted as valid JSON. "
                             "Please check your .env file and ensure YOUTUBE_CLIENT_SECRETS_JSON contains a properly formatted JSON object."
                         )
-
                     raise HTTPException(status_code=400, detail=friendly_error)
             else:
                 clean_text = (secrets_text or "").strip()
-
                 looks_like_path = clean_text.startswith((".", "/", "\\")) or clean_text.endswith(".json")
-
                 if looks_like_path:
                     friendly_error = (
                         f"Configuration Error: The YouTube client secrets variable appears to be a file path ('{clean_text[:40]}...'), "
@@ -233,13 +210,10 @@ async def _execute_youtube_upload_workflow(
                         "Configuration Error: The provided YouTube client secrets are not formatted as valid JSON. "
                         "Please check your .env file and ensure YOUTUBE_CLIENT_SECRETS_JSON contains a properly formatted JSON object."
                     )
-
                 raise HTTPException(status_code=400, detail=friendly_error)
 
         except Exception as ve:
-            # Keep existing behavior for non-JSONDecode errors.
             if client_secrets_file == tmp_secrets_path:
-                # If env JSON parsing failed, retry with repo-local dev secrets.
                 repo_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
                 if os.path.exists(repo_default):
                     logger.warning(
@@ -272,7 +246,6 @@ async def _execute_youtube_upload_workflow(
             for uri in redirect_uris:
                 if "localhost:" in uri or "127.0.0.1:" in uri:
                     import urllib.parse
-
                     try:
                         parsed_uri = urllib.parse.urlparse(uri)
                         if parsed_uri.port:
@@ -286,8 +259,6 @@ async def _execute_youtube_upload_workflow(
 
         logger.info(f"Starting local server for OAuth flow on port {redirect_port}...")
         try:
-            # Run the blocking local server in a separate thread to keep the FastAPI event loop responsive
-            # and set a 120-second (2-minute) timeout.
             credentials = await asyncio.to_thread(
                 flow.run_local_server,
                 port=redirect_port,
@@ -295,14 +266,11 @@ async def _execute_youtube_upload_workflow(
             )
         except Exception as flow_err:
             logger.error(f"OAuth flow failed to start or timed out: {flow_err}")
-            
-            # Check if this is the library-specific AttributeError raised when run_local_server times out
             is_timeout = (
                 isinstance(flow_err, AttributeError) and 
                 "NoneType" in str(flow_err) and 
                 "replace" in str(flow_err)
             )
-            
             if is_timeout:
                 raise HTTPException(
                     status_code=408,
@@ -553,112 +521,3 @@ async def upload_and_export_to_youtube(
                 os.remove(tmp_thumb_path)
             except OSError:
                 pass
-
-
-@router.get("/youtube/profiles", summary="Get custom YouTube publishing profiles")
-async def api_get_youtube_profiles(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
-    try:
-        profiles = get_youtube_profiles(user_id)
-        return {"profiles": profiles}
-    except Exception as e:
-        logger.error(f"[YouTube Profiles] Error fetching: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/youtube/profiles", summary="Save or overwrite a YouTube publishing profile")
-async def api_save_youtube_profile(
-    profile_req: YouTubeProfileRequest, current_user: dict = Depends(get_current_user)
-):
-    user_id = current_user.get("id")
-    try:
-        profile_data = profile_req.dict()
-        saved = save_youtube_profile(user_id, profile_data)
-        return {"status": "success", "profile": saved}
-    except Exception as e:
-        logger.error(f"[YouTube Profiles] Error saving: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete("/youtube/profiles/{name}", summary="Delete a YouTube publishing profile")
-async def api_delete_youtube_profile(name: str, current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
-    try:
-        deleted = delete_youtube_profile(user_id, name)
-        if not deleted:
-            raise HTTPException(status_code=404, detail="Profile not found")
-        return {"status": "success", "message": f"Profile '{name}' deleted"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"[YouTube Profiles] Error deleting: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/youtube/history", summary="Get YouTube video upload history")
-async def api_get_youtube_history(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
-    try:
-        history = get_youtube_publications(user_id)
-        return {"history": history}
-    except Exception as e:
-        logger.error(f"[YouTube History] Error fetching: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/youtube/credentials", summary="Get status of YouTube custom credentials")
-async def api_get_youtube_credentials(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
-    try:
-        creds = get_youtube_credentials(user_id)
-        if creds:
-            return {
-                "has_credentials": True,
-                "client_id": creds["client_id"],
-                "project_id": creds["project_id"],
-                "updated_at": creds["updated_at"],
-            }
-        return {"has_credentials": False}
-    except Exception as e:
-        logger.error(f"[YouTube Credentials] Error checking: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/youtube/credentials", summary="Save user YouTube OAuth credentials")
-async def api_save_youtube_credentials(
-    creds_req: YouTubeCredentialsRequest, current_user: dict = Depends(get_current_user)
-):
-    user_id = current_user.get("id")
-    try:
-        saved = save_youtube_credentials(
-            user_id=user_id,
-            client_id=creds_req.client_id.strip(),
-            client_secret=creds_req.client_secret.strip(),
-            project_id=creds_req.project_id.strip(),
-        )
-        return {
-            "status": "success",
-            "message": "Custom credentials saved successfully",
-            "client_id": saved["client_id"],
-            "project_id": saved["project_id"],
-        }
-    except Exception as e:
-        logger.error(f"[YouTube Credentials] Error saving: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.delete("/youtube/credentials", summary="Remove user YouTube OAuth credentials")
-async def api_delete_youtube_credentials(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
-    try:
-        deleted = delete_youtube_credentials(user_id)
-        if not deleted:
-            raise HTTPException(status_code=404, detail="No custom credentials found to delete")
-        return {"status": "success", "message": "Custom credentials removed"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"[YouTube Credentials] Error deleting: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
