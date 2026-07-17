@@ -42,3 +42,8 @@ def seed_default_settings(conn) -> None:
             logger.info("[Database] Seeding default platform settings completed.")
     except Exception as e:
         logger.error(f"[Database] Failed to seed default platform settings: {e}")
+
+
+def run_seed(conn) -> None:
+    """Run the default seed set for a newly initialized database."""
+    seed_default_settings(conn)

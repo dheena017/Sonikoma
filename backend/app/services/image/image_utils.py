@@ -1,13 +1,24 @@
-"""
+""" 
 backend/app/services/image/image_utils.py
 ─────────────────────────────────────────────────────────────────────────────
-Lightweight facade coordinator for image utilities. Exposes and re-exports all
-resolution, operations, stitching, and analysis sub-service functions.
+Facade exports for image utilities.
+
+Some parts of the backend import helpers like:
+
+    from services.image.image_utils import resolve_image_to_buffer
+
+This module re-exports the concrete implementations from the underlying
+submodules so imports remain stable.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-# Re-export from image_resolver
+from .image_resolver import resolve_image_to_buffer, resolve_url_to_buffer
 
-# Re-export from image_ops
+# Other image utilities are expected to be imported directly from their
+# specific modules (image_ops, image_stitcher, etc.)
 
-# Re-export from image_stitcher
+__all__ = [
+    "resolve_image_to_buffer",
+    "resolve_url_to_buffer",
+]
+
