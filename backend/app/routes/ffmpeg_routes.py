@@ -1,7 +1,5 @@
 import sys
 try:
-    from api.v1.videos import *
-    from api.v1.videos import ffmpeg_router as router
+    from api.v1.video import ffmpeg_router as router
 except ModuleNotFoundError:
-    from app.api.v1.videos import *
-    from app.api.v1.videos import ffmpeg_router as router
+    from app.api.v1.video import ffmpeg_router as router

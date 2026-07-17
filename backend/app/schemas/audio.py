@@ -47,6 +47,17 @@ class AudioPathRequest(BaseModel):
     audio_path: str
 
 
+class SilenceDetectRequest(BaseModel):
+    audio_path: str
+    threshold_db: Optional[float] = Field(default=-40.0, description="Silence threshold in dB")
+    min_duration: Optional[float] = Field(default=0.5, description="Minimum silence duration in seconds")
+
+
+class EnergySegmentRequest(BaseModel):
+    audio_path: str
+    num_segments: Optional[int] = Field(default=10, description="Number of segments to divide audio into")
+    energy_threshold: Optional[float] = Field(default=0.01, description="Energy threshold for segmentation")
+
 
 class TranscribeRequest(BaseModel):
     audio_path: str

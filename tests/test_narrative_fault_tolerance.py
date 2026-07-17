@@ -17,7 +17,9 @@ from fastapi.testclient import TestClient
 # Add backend/app to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app')))
 
+# pyrefly: ignore [missing-import]
 from routes.ai_routes import router as ai_router
+# pyrefly: ignore [missing-import]
 from routes.auth_routes import get_current_user
 
 class TestNarrativeFaultTolerance(unittest.TestCase):
@@ -34,10 +36,10 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
         }
         self.client = TestClient(self.app)
 
-    @patch("api.v1.ai.get_available_credits")
-    @patch("api.v1.ai.record_credit_transaction")
-    @patch("api.v1.ai.call_gemini_with_retry")
-    @patch("api.v1.ai.generate_panel_audio")
+    @patch("api.v1.ai.narration.get_available_credits")
+    @patch("api.v1.ai.narration.record_credit_transaction")
+    @patch("services.ai.facade.call_gemini_with_retry")
+    @patch("services.ai.facade.generate_panel_audio")
     @patch("google.genai.Client")
     def test_tts_fault_tolerance_during_sequence_analysis(
         self,

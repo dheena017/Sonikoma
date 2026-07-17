@@ -11,7 +11,7 @@ from fastapi import APIRouter
 from api.v1.auth import auth_router
 from api.v1.projects import project_router, panel_router
 from api.v1.images import image_router, cleaner_router, imagemagick_router, ocr_router
-from api.v1.videos import video_router, ffmpeg_router
+from api.v1.video import video_router, ffmpeg_router
 from api.v1.ai import ai_router, stable_diffusion_router
 from api.v1.scraper import scraper_router
 from api.v1.export import export_router

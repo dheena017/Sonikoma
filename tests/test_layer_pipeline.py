@@ -132,19 +132,21 @@ class TestLayerPipelineIntegration(unittest.TestCase):
         }
 
         # Render the motion comic panel segment with parallax, sync timing, and audio-reactive shake enabled
-        _render_panel_segment_ffmpeg(
-            img_path=layer_paths["bg.png"],
-            audio_path=self.dummy_wav_path,
-            duration=3.0,
-            out_path=self.output_mp4_path,
-            w=640,
-            h=360,
-            motion_type="zoom_in",
-            fps=24,
-            layers=layers_dict,
-            sync_map=dialogue_map,
-            audio_peaks=audio_peaks,
-            audio_reactive_shake=True
+        loop.run_until_complete(
+            _render_panel_segment_ffmpeg(
+                img_path=layer_paths["bg.png"],
+                audio_path=self.dummy_wav_path,
+                duration=3.0,
+                out_path=self.output_mp4_path,
+                w=640,
+                h=360,
+                motion_type="zoom_in",
+                fps=24,
+                layers=layers_dict,
+                sync_map=dialogue_map,
+                audio_peaks=audio_peaks,
+                audio_reactive_shake=True
+            )
         )
 
         # Verify that subprocess.run was called to invoke FFmpeg

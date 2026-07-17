@@ -5,9 +5,11 @@ Authentication dependencies for FastAPI endpoints (current user, admin user).
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import os
+import re
 import jwt
 from typing import Optional
-from fastapi import Request, Depends, HTTPException, status
+from fastapi import Request, Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 
 from core.security import SECRET_KEY, ALGORITHM
@@ -62,3 +64,29 @@ async def get_admin_user(current_user: dict = Depends(get_current_user)):
     if current_user.get('creator_role') != 'admin':
         raise HTTPException(status_code=403, detail="Administrative privileges required.")
     return current_user
+
+
+def clean_api_key(key: Optional[str]) -> Optional[str]:
+    """Sanitize an API key string, returning None for empty/invalid values."""
+    if not key:
+        return None
+    val = key.strip()
+    val = re.sub(r'^[\s\'"()\[\]{}]+|[\s\'"()\[\]{}]+$', '', val)
+    if val in ("", "null", "undefined", "None"):
+        return None
+    return val
+
+
+def get_all_user_keys(
+    x_user_gemini_key: str = Header(None, alias="X-User-Gemini-Key"),
+    x_user_openai_key: str = Header(None, alias="X-User-OpenAI-Key"),
+    x_user_anthropic_key: str = Header(None, alias="X-User-Anthropic-Key"),
+    x_user_huggingface_key: str = Header(None, alias="X-User-HuggingFace-Key"),
+):
+    """Extract and sanitize all user-provided API keys from request headers."""
+    return {
+        "gemini": clean_api_key(x_user_gemini_key) or clean_api_key(os.getenv("GEMINI_API_KEY")),
+        "openai": clean_api_key(x_user_openai_key) or clean_api_key(os.getenv("OPENAI_API_KEY")),
+        "anthropic": clean_api_key(x_user_anthropic_key) or clean_api_key(os.getenv("ANTHROPIC_API_KEY")),
+        "huggingface": clean_api_key(x_user_huggingface_key) or clean_api_key(os.getenv("HUGGINGFACE_API_KEY")),
+    }
