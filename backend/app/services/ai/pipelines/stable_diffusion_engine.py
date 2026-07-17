@@ -23,11 +23,15 @@ try:
     import torch
     from PIL import Image
     import numpy as np
+    DIFFUSERS_AVAILABLE = True
 except ImportError:
-    raise ImportError(
-        "diffusers, torch, and Pillow required. "
-        "Install with: pip install diffusers torch Pillow transformers"
-    )
+    StableDiffusionPipeline = None
+    StableDiffusionInpaintPipeline = None
+    StableDiffusionUpscalePipeline = None
+    torch = None
+    Image = None
+    np = None
+    DIFFUSERS_AVAILABLE = False
 
 logger = logging.getLogger("sonikoma.services.stable_diffusion_engine")
 
@@ -42,9 +46,10 @@ class StableDiffusionModel(str, Enum):
 
 @dataclass
 class GeneratedImage:
-    """Generated image metadata."""
+    """Result of image generation."""
     image_path: str
-    image: Optional[Image.Image] = None
+    image: Optional['Any'] = None
+    nsfw_content_detected: bool = False
     width: int = 512
     height: int = 512
     seed: int = 0
@@ -391,6 +396,8 @@ def get_stable_diffusion_engine(
     enable_safety_checker: bool = False
 ) -> StableDiffusionEngine:
     """Get or create Stable Diffusion engine singleton."""
+    if not DIFFUSERS_AVAILABLE:
+        raise ImportError("diffusers, torch, and Pillow required. Install with: pip install diffusers torch Pillow transformers")
     global _stable_diffusion_instance
     if _stable_diffusion_instance is None:
         _stable_diffusion_instance = StableDiffusionEngine(
