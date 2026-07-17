@@ -9,7 +9,7 @@ import os
 import logging
 import threading
 import database.config as config
-from database.engine import _create_db_connection
+
 
 logger = logging.getLogger("sonikoma.database.bootstrap")
 
@@ -50,6 +50,7 @@ def init_db() -> None:
         _db_init_complete.wait(timeout=60)
         return
 
+    from database.core_engine import _create_db_connection
     try:
         if config.is_postgres:
             logger.info("[Database] Connecting to PostgreSQL (Supabase)...")
