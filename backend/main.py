@@ -25,7 +25,8 @@ from backend.startup import API_VERSION, IS_PRODUCTION
 # 2. Import lifespan, middlewares, routers, and exception handlers
 from backend.lifespan import lifespan
 from core.middleware import setup_middleware
-from backend.exception_handlers import global_exception_handler
+from backend.exception_handlers import global_exception_handler, sonikoma_exception_handler
+from core.exceptions import SonikomaException
 from router import register_routers
 from core.settings import BACKEND_PORT
 
@@ -44,6 +45,7 @@ app = FastAPI(
 setup_middleware(app)
 
 # Register exception handlers
+app.add_exception_handler(SonikomaException, sonikoma_exception_handler)
 app.add_exception_handler(Exception, global_exception_handler)
 
 # Register routes & SPA fallback
