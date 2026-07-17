@@ -65,7 +65,7 @@ npm install
 ### 2️⃣ Install Python Dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 ```
 
 > ⚠️ First install downloads ~2GB (PyTorch + EasyOCR models). Subsequent runs are instant.

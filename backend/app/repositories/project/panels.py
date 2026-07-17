@@ -8,7 +8,7 @@ Storyboard panel data operations.
 from typing import List, Dict, Any, Optional
 
 from database.connection import get_db_connection, unwrap_proxy_url
-from repositories.project.project import cleanup_cached_url
+from services.project.asset_service import cleanup_cached_url
 
 
 def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:

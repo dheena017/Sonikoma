@@ -36,7 +36,8 @@ def _load_google_secrets() -> tuple[str, str | None]:
     project_root = os.path.abspath(os.path.join(base_dir, "..", "..", "..", "..", ".."))
 
     candidates = [
-        os.path.join(project_root, "client_secrets.json"),
+        os.path.join(project_root, "backend", "client_secrets.json"),  # canonical location
+        os.path.join(project_root, "client_secrets.json"),              # legacy root fallback
         os.path.join(os.getcwd(), "client_secrets.json"),
         os.path.join(project_root, "backend", "app", "client_secrets.json"),
     ]

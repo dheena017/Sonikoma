@@ -19,7 +19,36 @@ router = APIRouter()
 service = ProjectService()
 
 
-# ── Routes ────────────────────────────────────────────────────────────────
+def _build_panel_dicts(panels, include_original: bool = False):
+    """Build DB-ready panel dicts.
+
+    Some modules import this helper from this file; keep it stable.
+    """
+    if not panels:
+        return []
+
+    built = []
+    for p in panels:
+        # PanelsSaveRequest.panels is a list of schema objects.
+        # Try to access both attribute-style and dict-style payloads.
+        image_url = getattr(p, "image_url", None) if not isinstance(p, dict) else p.get("image_url")
+        image_b64 = getattr(p, "image_base64", None) if not isinstance(p, dict) else p.get("image_base64")
+        prompt = getattr(p, "prompt", None) if not isinstance(p, dict) else p.get("prompt")
+        bbox = getattr(p, "bbox", None) if not isinstance(p, dict) else p.get("bbox")
+
+        item = {
+            "image_url": image_url or "",
+            "image_base64": image_b64 if include_original else None,
+            "prompt": prompt or "",
+            "bbox": bbox,
+        }
+        built.append(item)
+
+    return built
+
+
+# ── Routes ───────────────────────────────────────────────────────────────
+
 
 
 @router.post("/{projectId}/panels", summary="Save storyboard panels for a project")

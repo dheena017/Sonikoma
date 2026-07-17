@@ -49,11 +49,17 @@ async def get_authenticated_service(user_id: Optional[str] = None):
 
         PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 
-        client_secrets_file = os.path.join(PROJECT_ROOT, "client_secrets.json")
+        # Canonical location after restructure: backend/client_secrets.json
+        client_secrets_file = os.path.join(PROJECT_ROOT, "backend", "client_secrets.json")
         if not os.path.exists(client_secrets_file):
-            cwd_secrets = os.path.join(os.getcwd(), "client_secrets.json")
-            if os.path.exists(cwd_secrets):
-                client_secrets_file = cwd_secrets
+            # Legacy root fallback
+            root_secrets = os.path.join(PROJECT_ROOT, "client_secrets.json")
+            if os.path.exists(root_secrets):
+                client_secrets_file = root_secrets
+            else:
+                cwd_secrets = os.path.join(os.getcwd(), "client_secrets.json")
+                if os.path.exists(cwd_secrets):
+                    client_secrets_file = cwd_secrets
 
         env_secrets_raw = os.environ.get("YOUTUBE_CLIENT_SECRETS_JSON")
         env_secrets_raw = env_secrets_raw.strip() if isinstance(env_secrets_raw, str) else env_secrets_raw
@@ -108,24 +114,24 @@ async def get_authenticated_service(user_id: Optional[str] = None):
             client_secrets_file = tmp_secrets_path
 
         if not os.path.exists(client_secrets_file):
-            repo_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
+            # Try canonical backend/ location, then legacy backend/app/ location
+            repo_default = os.path.join(PROJECT_ROOT, "backend", "client_secrets.json")
+            legacy_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
             if os.path.exists(repo_default):
                 logger.warning(f"client_secrets.json not found; falling back to {repo_default} (dev secrets).")
                 client_secrets_file = repo_default
+            elif os.path.exists(legacy_default):
+                logger.warning(f"client_secrets.json not found; falling back to {legacy_default} (legacy dev secrets).")
+                client_secrets_file = legacy_default
             else:
-                legacy_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
-                if os.path.exists(legacy_default):
-                    logger.warning(f"client_secrets.json not found; falling back to {legacy_default} (legacy dev secrets).")
-                    client_secrets_file = legacy_default
-                else:
-                    logger.warning("client_secrets.json not found (locally or via env).")
-                    raise ServiceException(
-                        status_code=400,
-                        message=(
-                            "YouTube export is not configured. Provide 'client_secrets.json' in the project root "
-                            "or set env var 'YOUTUBE_CLIENT_SECRETS_JSON' (contents of the JSON file) to enable real uploads."
-                        ),
-                    )
+                logger.warning("client_secrets.json not found (locally or via env).")
+                raise ServiceException(
+                    status_code=400,
+                    message=(
+                        "YouTube export is not configured. Provide 'client_secrets.json' in backend/ "
+                        "or set env var 'YOUTUBE_CLIENT_SECRETS_JSON' (contents of the JSON file) to enable real uploads."
+                    ),
+                )
 
         try:
             with open(client_secrets_file, "r", encoding="utf-8") as f:
@@ -141,7 +147,9 @@ async def get_authenticated_service(user_id: Optional[str] = None):
 
         except json.JSONDecodeError as je:
             if client_secrets_file == tmp_secrets_path:
-                repo_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
+                repo_default = os.path.join(PROJECT_ROOT, "backend", "client_secrets.json")
+                if not os.path.exists(repo_default):
+                    repo_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
                 if os.path.exists(repo_default):
                     logger.warning(f"Failed to parse YOUTUBE_CLIENT_SECRETS_JSON; retrying with {repo_default}.")
                     client_secrets_file = repo_default
@@ -181,7 +189,9 @@ async def get_authenticated_service(user_id: Optional[str] = None):
 
         except Exception as ve:
             if client_secrets_file == tmp_secrets_path:
-                repo_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
+                repo_default = os.path.join(PROJECT_ROOT, "backend", "client_secrets.json")
+                if not os.path.exists(repo_default):
+                    repo_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
                 if os.path.exists(repo_default):
                     logger.warning(f"YouTube OAuth client secrets problem detected in YOUTUBE_CLIENT_SECRETS_JSON; retrying with {repo_default}.")
                     client_secrets_file = repo_default

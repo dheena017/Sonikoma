@@ -10,8 +10,17 @@ import uvicorn
 from fastapi import FastAPI
 
 # 1. Import startup FIRST to configure UTF-8, logging, colorama, and dotenv immediately
+import sys
+
+# Ensure project root is on PYTHONPATH so `import backend.*` works when launched from different CWDs.
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
 import backend.startup as startup
 from backend.startup import API_VERSION, IS_PRODUCTION
+
 
 # 2. Import lifespan, middlewares, routers, and exception handlers
 from backend.lifespan import lifespan

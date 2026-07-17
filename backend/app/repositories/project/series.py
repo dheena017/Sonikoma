@@ -10,7 +10,8 @@ import logging
 from typing import List, Dict, Any, Optional
 
 from database.connection import get_db_connection
-from repositories.project.project import cleanup_cached_url, _PROJECT_ROOT
+from services.project.asset_service import cleanup_cached_url
+from repositories.project.project import _PROJECT_ROOT
 
 logger = logging.getLogger("sonikoma.repositories.project.series")
 

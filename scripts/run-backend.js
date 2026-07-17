@@ -105,6 +105,8 @@ const pythonPath = process.platform === "win32"
   ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
   : "python3";
 const backendDir = path.resolve(__dirname, "../backend/app");
+const projectRootDir = path.resolve(__dirname, "../");
+const pythonImportRoot = projectRootDir;
 
 let pyProcess = null;
 let isRestarting = false;
@@ -143,10 +145,15 @@ async function restartBackend(changedFile) {
     });
   }
 
-  pyProcess = spawn(pythonPath, ["main.py"], {
+  pyProcess = spawn(pythonPath, ["../main.py"], {
     cwd: backendDir,
     stdio: "inherit",
-    env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
+    env: {
+      ...process.env,
+      PYTHONIOENCODING: "utf-8",
+      FORCE_COLOR: "1",
+      PYTHONPATH: pythonImportRoot,
+    },
   });
 
   const currentProcess = pyProcess;
@@ -221,10 +228,15 @@ async function init() {
 
   logger.info(`Starting python backend from ${backendDir}...`);
 
-  pyProcess = spawn(pythonPath, ["main.py"], {
+  pyProcess = spawn(pythonPath, ["../main.py"], {
     cwd: backendDir,
     stdio: "inherit",
-    env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
+    env: {
+      ...process.env,
+      PYTHONIOENCODING: "utf-8",
+      FORCE_COLOR: "1",
+      PYTHONPATH: backendDir,
+    },
   });
 
   const initialProcess = pyProcess;
