@@ -219,7 +219,7 @@ export function usePanelDetection({
           aspectRatio: settings?.aspectRatio ?? "free",
           minAreaPct: settings?.minAreaPct ?? 0.15,
           mergeThreshold: settings?.mergeThreshold ?? 20,
-          strategy: settings?.strategy ?? "ai",
+          strategy: settings?.strategy ?? "local-cv",
           model: settings?.model ?? "gemini-2.5-flash",
           cannyLow: settings?.cannyLow ?? 20,
           cannyHigh: settings?.cannyHigh ?? 100,
