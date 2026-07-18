@@ -12,6 +12,29 @@ from database.transaction import unwrap_proxy_url
 from services.project.asset_service import cleanup_cached_url
 
 
+def save_edit_history(edited_url: str, original_url: str, edit_type: str = 'edit') -> None:
+    """Persist an edit-history entry for panel image edits."""
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            INSERT OR REPLACE INTO edit_history (edited_url, original_url, edit_type)
+            VALUES (?, ?, ?)
+        """, (edited_url, original_url, edit_type))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_edit_history(edited_url: str) -> Optional[Dict[str, Any]]:
+    """Retrieve the stored edit history for a given edited URL."""
+    conn = get_db_connection()
+    try:
+        row = conn.execute('SELECT * FROM edit_history WHERE edited_url = ?', (edited_url,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
 def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
     """Insert multiple panels inside a single atomic transaction."""
     conn = get_db_connection()
