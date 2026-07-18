@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from core.security import get_password_hash, create_access_token
 from repositories.user_repository import get_user_by_email, create_user
-from backend.schemas.auth import UserRegister
+from schemas.auth import UserRegister
 
 logger = logging.getLogger("sonikoma.auth.register")
 router = APIRouter()

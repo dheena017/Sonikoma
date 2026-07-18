@@ -9,7 +9,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.dependencies.auth import clean_api_key, get_all_user_keys
-from backend.schemas.ai import ListModelsRequest, EnhancePromptRequest, TestModelLatencyRequest
+from schemas.ai import ListModelsRequest, EnhancePromptRequest, TestModelLatencyRequest
 from services.ai.facade import facade_list_models, facade_enhance_prompt
 
 logger = logging.getLogger("sonikoma.api.ai.prompts")

@@ -21,9 +21,9 @@ from PIL import Image
 from core.config import call_gemini_with_retry
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
-import utils.image_utils as img_utils
-from utils.cache import stitched_cache
-from backend.media.audio.audio import generate_panel_audio
+import services.image.image_utils as img_utils
+from core.cache import stitched_cache
+from media.audio.audio import generate_panel_audio
 
 logger = logging.getLogger("sonikoma.services.ai.facade")
 
@@ -222,7 +222,7 @@ async def facade_analyze_image(
 
     has_dialogue = True
     try:
-        from backend.media.image.ocr import extract_dialogue_from_panel
+        from media.image.ocr import extract_dialogue_from_panel
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_ocr:
             tmp_ocr.write(img_buffer)
             tmp_ocr_path = tmp_ocr.name

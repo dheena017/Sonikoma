@@ -6,7 +6,7 @@ from PIL import Image
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
 # pyrefly: ignore [missing-import]
-from utils.image_utils import stitch_images_together
+from app.services.image.image_stitcher import stitch_images_together
 
 def create_test_image(color, size=(100, 100)):
     img = Image.new('RGB', size, color)

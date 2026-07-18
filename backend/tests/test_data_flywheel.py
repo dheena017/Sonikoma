@@ -1,13 +1,12 @@
 import os
 import sys
-import tempfile
 import unittest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
-from routes.image_routes import router as image_router
+from api.v1.images.router import image_router
 
 class TestDataFlywheel(unittest.TestCase):
     def setUp(self):

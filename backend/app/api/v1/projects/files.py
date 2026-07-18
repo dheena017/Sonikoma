@@ -14,7 +14,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 
-from backend.schemas.project import DetectPanelsBase64Request
+from schemas.project import DetectPanelsBase64Request
 from media.image.detect_panels import run_cv_detection
 
 logger = logging.getLogger("sonikoma.routes.projects.files")

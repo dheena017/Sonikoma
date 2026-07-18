@@ -14,13 +14,13 @@ import logging
 from typing import List, Optional, Dict, Any
 
 from database import db
-from utils.url_utils import extract_webtoon_url, parse_webtoon_url
-from utils.id_utils import generate_project_id
-from utils.cache import stitched_cache, edit_history
-import utils.image_utils as img_utils
+from core.utils.url_utils import extract_webtoon_url, parse_webtoon_url
+from core.utils.id_utils import generate_project_id
+from core.cache import stitched_cache, edit_history
+import services.image.image_utils as img_utils
 from services.scraper.scraper import scrape_images_from_url, scraped_metadata_cache
-from backend.media.ai.storyboard_ai import generate_dynamic_panels
-from backend.media.video.video import compile_video_from_panels
+from media.ai.storyboard_ai import generate_dynamic_panels
+from media.video.video import compile_video_from_panels
 
 logger = logging.getLogger("sonikoma.services.scraper.scraper_service")
 

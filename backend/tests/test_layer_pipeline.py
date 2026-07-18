@@ -2,19 +2,17 @@ import sys
 import os
 import unittest
 import asyncio
-import io
 import wave
 import shutil
 import cv2
 import numpy as np
-from PIL import Image
 from unittest.mock import patch, MagicMock
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
-from backend.media.image.layer_segmentation import process_layers
-from backend.media.audio.dialogue_aligner import align_dialogue_and_extract_peaks
-from routes.video import _render_panel_segment_ffmpeg
+from app.services.image.layer_segmentation import process_layers
+from app.services.audio.dialogue_aligner import align_dialogue_and_extract_peaks
+from app.services.video.video_service import _render_panel_segment_ffmpeg
 
 
 class TestLayerPipelineIntegration(unittest.TestCase):

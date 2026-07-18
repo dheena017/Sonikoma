@@ -17,8 +17,8 @@ from typing import List, Optional, Dict, Any, Literal
 from PIL import Image
 
 import services.image.image_utils as img_utils
-from utils.cache import stitched_cache, edit_history, zip_cache
-from utils.supabase_storage import upload_to_supabase_bucket
+from core.cache import stitched_cache, edit_history, zip_cache
+from database.storage.supabase_storage import upload_to_supabase_bucket
 
 logger = logging.getLogger("sonikoma.services.image.compose")
 
@@ -165,7 +165,7 @@ async def download_zip_service(urls: List[str], referer_url: Optional[str] = Non
     zip_filename = "comic_panels_archive.zip"
     if referer_url:
         try:
-            from utils.url_utils import parse_webtoon_url
+            from core.utils.url_utils import parse_webtoon_url
 
             def make_safe_filename(name: str) -> str:
                 cleaned = re.sub(r'[^\w\s-]', '', name)

@@ -10,7 +10,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Depends
 
 from api.dependencies.auth import get_current_user
-from backend.schemas.export import YouTubeCredentialsRequest
+from schemas.export import YouTubeCredentialsRequest
 from database.db import save_youtube_credentials, get_youtube_credentials, delete_youtube_credentials
 
 logger = logging.getLogger("sonikoma.api.export.credentials")

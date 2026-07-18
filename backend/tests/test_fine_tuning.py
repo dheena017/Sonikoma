@@ -7,8 +7,7 @@ from fastapi.testclient import TestClient
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
-from routes.image_routes import router as image_router
-from backend.media.image.train_yolo import status
+from api.v1.images.router import image_router
 
 class TestFineTuning(unittest.TestCase):
     def setUp(self):

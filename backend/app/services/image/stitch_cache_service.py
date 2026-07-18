@@ -6,7 +6,7 @@ import json
 from urllib.parse import urlparse, parse_qs
 from fastapi import Request
 
-from utils.cache import stitched_cache
+from core.cache import stitched_cache
 # I am mocking the imports that were inside the function
 from database import db
 from database.db import unwrap_proxy_url
@@ -16,7 +16,7 @@ logger = logging.getLogger("sonikoma.services.image.stitch_cache")
 
 # (A global edit_history might be missing if it was in transform.py, but we'll import if needed)
 # In transform.py it just did edit_history.get, maybe edit_history is from utils.cache? Let's assume it's from utils.cache
-from utils.cache import edit_history
+from core.cache import edit_history
 
 async def retrieve_cached_stitch_service(cache_id: str, request: Request = None):
     cached = stitched_cache.get(cache_id)

@@ -20,7 +20,7 @@ import asyncio
 from urllib.parse import urlparse, parse_qs
 from fastapi import APIRouter, Request, Response, Query, HTTPException
 
-from utils.cache import proxy_cache
+from core.cache import proxy_cache
 
 logger = logging.getLogger("sonikoma.routes.proxy")
 proxy_router = APIRouter()
@@ -37,7 +37,7 @@ PROXY_RETRY_BASE_SEC = 0.4
 
 def make_etag(buf: bytes) -> str:
     """Generate MD5 fingerprint for a bytes buffer (used as ETag)."""
-    return f'"{hashlib.md5(buf).hexdigest()}"'
+    return f'"{hashlib.md5(buf, usedforsecurity=False).hexdigest()}"'
 
 
 def spoof_referer(url: str) -> str:
@@ -168,7 +168,7 @@ async def proxy_image(
 
     # Cache lookup
     cache_key_str = f"{fetch_url}_{tighter}_{crop_padding}"
-    cache_key = hashlib.md5(cache_key_str.encode('utf-8')).hexdigest()
+    cache_key = hashlib.md5(cache_key_str.encode('utf-8'), usedforsecurity=False).hexdigest()
     cached = proxy_cache.get(cache_key)
 
     if cached:
@@ -234,7 +234,7 @@ async def proxy_image(
             )
 
         if tighter or crop_padding is not None:
-            from utils.image_utils import crop_auto_borders
+            from services.image.image_utils import crop_auto_borders
             crop_res = crop_auto_borders(buffer, tighter=tighter, crop_padding=crop_padding)
             buffer = crop_res["data"]
             content_type = crop_res["content_type"]

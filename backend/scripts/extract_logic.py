@@ -1,5 +1,4 @@
 import ast
-import os
 import re
 
 def process_file(filepath, methods_to_remove, rewrite_func, new_file):

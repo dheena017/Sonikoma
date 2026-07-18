@@ -12,7 +12,7 @@ class InsertProjectTests(unittest.TestCase):
     def test_insert_project_creates_missing_user_for_anonymous_scrape(self):
         temp_dir = tempfile.mkdtemp(prefix='sonikoma-test-', dir=os.getcwd())
         db_path = os.path.join(temp_dir, 'test.db')
-        schema_path = os.path.join(os.getcwd(), 'backend', 'app', 'database', 'schema.sql')
+        schema_path = os.path.join(os.path.dirname(__file__), '..', 'app', 'database', 'schema.sql')
 
         db.DB_PATH = db_path
         db.SCHEMA_PATH = schema_path

@@ -10,7 +10,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Path, Body, Depends, Request
 
 from api.dependencies.auth import get_current_user
-from backend.schemas.project import PanelsSaveRequest, TokenIncrementRequest, ProjectUpdateRequest
+from schemas.project import PanelsSaveRequest, TokenIncrementRequest, ProjectUpdateRequest
 from repositories.user_repository import write_audit_log
 from services.project.project_service import ProjectService
 

@@ -16,7 +16,7 @@ from typing import Dict, Any
 import services.image.image_utils as img_utils
 from PIL import Image
 from services.image.detect_panels import run_cv_detection
-from backend.media.image.layer_segmentation import process_layers
+from media.image.layer_segmentation import process_layers
 
 logger = logging.getLogger("sonikoma.services.image.layers")
 
@@ -50,7 +50,7 @@ async def extract_panel_layers_service(panel_id: str, url: str) -> Dict[str, Any
                 warnings = []
             except Exception as ex:
                 logger.error(f"[Layers Service] Sliceless processing failed: {ex}", exc_info=True)
-                from backend.media.image.layer_segmentation import create_blank_webp
+                from media.image.layer_segmentation import create_blank_webp
                 layers = {
                     "background_url": url,
                     "character_url": f"data:image/webp;base64,{base64.b64encode(create_blank_webp(100, 100)).decode('utf-8')}",
@@ -111,7 +111,7 @@ async def extract_panel_layers_service(panel_id: str, url: str) -> Dict[str, Any
                     }
                 except Exception as panel_err:
                     logger.error(f"[Layers Service] Panel {idx} failed: {panel_err}", exc_info=True)
-                    from backend.media.image.layer_segmentation import create_blank_webp
+                    from media.image.layer_segmentation import create_blank_webp
                     fallback_bg_url = box.get("url") or url
                     fallback_layers = {
                         "background_url": fallback_bg_url,
@@ -175,7 +175,7 @@ async def debug_yolo_detections_service(url: str, conf: float = 0.25) -> bytes:
             tmp_f.write(resolved["data"])
             tmp_path = tmp_f.name
 
-        from backend.media.image.debug_visualizer import draw_yolo_detections
+        from media.image.debug_visualizer import draw_yolo_detections
         annotated_bytes = await asyncio.to_thread(draw_yolo_detections, tmp_path, conf)
         if annotated_bytes is None:
             raise ValueError("YOLO model is not available.")
