@@ -1,3 +1,10 @@
+"""
+Service layer for managing stitched image cache.
+
+Handles caching mechanisms specifically for the resource-intensive process
+of stitching multiple vertical webtoon panels together.
+"""
+
 import re
 import asyncio
 import logging

@@ -1,3 +1,10 @@
+"""
+Service layer for authentication and authorization.
+
+Orchestrates user login, token generation (JWT), password hashing, and user validation.
+Delegates to the UserRepository for any database verifications.
+"""
+
 import logging
 from typing import Any, Callable, Optional
 

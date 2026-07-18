@@ -1,3 +1,10 @@
+"""
+Service layer for managing projects and chapters.
+
+This module acts as the core business logic orchestrator for Project entities.
+It delegates persistence to the repository layer and ensures no data access logic leaks into the API.
+"""
+
 import os
 import logging
 from typing import Dict, Any, Optional

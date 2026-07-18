@@ -1,3 +1,10 @@
+"""
+Service layer for managing project assets (images, audio).
+
+Handles the business logic for storing, validating, and structuring physical media files
+associated with projects.
+"""
+
 import logging
 import os
 from typing import Optional
