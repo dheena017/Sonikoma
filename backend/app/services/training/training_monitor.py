@@ -5,7 +5,7 @@ import glob
 import logging
 import asyncio
 import threading
-from providers.vision.yolo import trigger_fine_tuning, status
+from services.vision_training import trigger_fine_tuning, status
 
 logger = logging.getLogger("sonikoma.services.training_monitor")
 
