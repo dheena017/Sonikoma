@@ -1,65 +1,146 @@
 # Sonikoma Backend Architecture
 
-This document maps the Python backend routing architecture, local database schemas, and media rendering pipelines.
+This document describes the current architecture of the Sonikoma Python FastAPI backend, detailing the layer responsibilities, dependency flow, and core patterns.
 
 ---
 
-## 🐍 1. Service Layer Design Pattern
+## 1. High-Level Architecture Overview
 
-The Sonikoma backend is powered by FastAPI. To separate routing interfaces from media math:
+The backend employs a strict Layered Architecture to separate concerns, improve testability, and decouple the HTTP transport mechanism from the core business logic and data access.
 
-- **Routers (`backend/python/routes/`):** Define endpoints (e.g., `/api/projects`, `/api/cleaner`, `/api/video`). They parse parameters, handle authorization, validate schemas, and write standard JSON.
-- **Service Layers (`backend/python/services/`):** Houses business logic. `cleaner.py` manages OpenCV inpainting routines; `video.py` orchestrates MoviePy video render tracks; `ocr.py` handles EasyOCR processing.
-- **Database Model Layers (`backend/python/db.py`):** Holds SQL connections, executes query statements, and maps tables to python entities.
+```mermaid
+graph TD
+    Client[Frontend Client] --> API[API Layer (FastAPI Routers)]
 
----
+    subgraph Backend [Python FastAPI Backend]
+        API --> Core[Core Layer (Config/Middleware)]
+        API --> Service[Service Layer (Business Logic)]
 
-## 💾 2. Relational Database Architecture
+        Service --> Repository[Repository Layer (Data Access)]
+        Service --> Provider[Provider Layer (External APIs)]
+        Service --> Engine[Engine Layer (Heavy Computation)]
 
-All entities are persisted in a zero-configuration SQLite instance (`webtoon_local.db`). The primary data structure maintains cascading relational boundaries:
-
-```text
-  ┌─────────────────────────────────────────────────────────────┐
-  │                         SERIES                              │
-  │  (Represents the overall Webtoon Series Title & Cover URL)  │
-  └──────────────────────────────┬──────────────────────────────┘
-                                 │ 1 : N Cascade
-                                 ▼
-  ┌─────────────────────────────────────────────────────────────┐
-  │                        CHAPTERS                             │
-  │  (Represents a specific Episode, holds Video URL & narrative)│
-  └──────────────────────────────┬──────────────────────────────┘
-                                 │ 1 : N Cascade
-                                 ▼
-  ┌─────────────────────────────────────────────────────────────┐
-  │                         PANELS                              │
-  │  (Represents distinct panels with visual filters, duration, │
-  │   transitions, coordinates, and dual speech/narration URLs) │
-  └─────────────────────────────────────────────────────────────┘
+        Repository --> DB[(Local SQLite Database)]
+        Provider --> ExtAI[External AI/TTS Services (Gemini, EdgeTTS)]
+        Engine --> SubProc[Subprocesses (ffmpeg, ImageMagick)]
+    end
 ```
 
-### Table Mappings:
-1. **`series`:** Parent information (Title, Slug, Cover Artwork, Author, Synopsis).
-2. **`chapters`:** Child episodes (Slug, Episode Number, Status, JSON narrative script persistence, accumulated AI credits/token metrics, volume mixer profiles).
-3. **`panels`:** Individual cut panels. Stores dialogue parameters, brightness, crop points, isolated layer offsets, speech bubble parameters, custom durations, camera motion types (`zoom_in`, `pan_left`, etc.), and compiled sound assets (`audio_url`, `narrative_audio_url`).
+---
+
+## 2. Layer Definitions & Boundaries
+
+### 2.1 API Layer (`backend/app/api/`)
+**Responsibility:** Handling HTTP requests, routing, parameter validation, and formatting JSON responses.
+**Rules:**
+- Must only use FastAPI primitives (`APIRouter`, `Depends`, `HTTPException`).
+- Must not contain business logic.
+- Must delegate processing to the Service Layer.
+
+### 2.2 Service Layer (`backend/app/services/`)
+**Responsibility:** Orchestrating business logic and complex workflows (e.g., video compilation pipeline).
+**Rules:**
+- Coordinates calls between Repositories, Providers, and Engines.
+- Must not execute SQL directly.
+- Must not format HTTP responses.
+- Raises Domain Exceptions (`SonikomaException`), not `HTTPException`.
+
+### 2.3 Repository Layer (`backend/app/repositories/`)
+**Responsibility:** Abstracting data persistence and retrieval.
+**Rules:**
+- The *only* layer permitted to interact with the database engine.
+- Translates domain models to database schemas.
+
+### 2.4 Provider Layer (`backend/app/providers/`)
+**Responsibility:** Abstracting interactions with external third-party APIs (e.g., Google Gemini, Text-to-Speech APIs).
+**Rules:**
+- Exposes generic interfaces to the Service Layer, hiding vendor-specific implementation details.
+
+### 2.5 Engine Layer (`backend/app/engines/`)
+**Responsibility:** Encapsulating low-level, resource-intensive computational logic.
+**Rules:**
+- Manages subprocesses for tools like `ffmpeg`.
+- Handles complex mathematical or matrix operations (e.g., OpenCV, Librosa).
+
+### 2.6 Core Layer (`backend/app/core/`)
+**Responsibility:** Application-wide configuration, security settings, custom exceptions, and middleware.
 
 ---
 
-## 🎬 3. Video Compilation Pipeline
+## 3. Directory Structure
 
-When a user requests full project compilation (`/api/video/compile`), MoviePy reads the active database panel records to construct a widescreen MP4 clip:
+The backend is organized under the `backend/app/` directory:
 
 ```text
-Panel Records ──► Image Processing ──► Keyframe Animation ──► Audio Merging ──► FFmpeg Rendering ──► MP4 File
+backend/app/
+├── api/             # FastAPI routers and dependency injection
+│   └── v1/          # Versioned endpoints (e.g., auth, projects, video)
+├── core/            # App configuration, exceptions, settings, middleware
+├── database/        # Database setup, connection management, schema definitions
+├── domain/          # Core domain models and entities
+├── engines/         # Heavy computation wrappers (ffmpeg, whisper, SD)
+├── providers/       # External service adapters (AI, Vision, Media)
+├── repositories/    # Data access objects (ProjectRepository, UserRepository)
+├── services/        # Business logic orchestration (Workflows, Auth, Export)
+└── utils/           # Shared helper functions (ID generation, File I/O)
 ```
 
-### Processing Steps:
-1. **Image Pre-Processing:** For each panel, raw image assets are loaded via Pillow. Standard CSS filters (contrast, brightness, saturation, and custom color presets) are applied before rendering.
-2. **Keyframe Animation (Choreography):**
-   - **`zoom_in` / `zoom_out`:** Scales the image from base scale to target scale across the panel's active duration.
-   - **`pan_left` / `pan_right` / `pan_up` / `pan_down`:** Linearly translates crop coordinates over the panel's active duration.
-3. **Audio Channel Merging:**
-   - Evaluates the custom audio mixer profile.
-   - Merges character dialogue TTS audio, narrative TTS audio, and localized Sound Effects (SFX) with ducking triggers applied to background music.
-4. **Soft Subtitle Compilation:** Compiles dialogue text timestamps and appends a matching SRT/WebVTT soft subtitle package.
-5. **FFmpeg Compilation:** Invokes FFmpeg via MoviePy to render and compress the composite timeline into an H.264 widescreen MP4 served from the consolidated data storage.
+---
+
+## 4. Request Flow Example (Video Compilation)
+
+```mermaid
+sequenceDiagram
+    participant Client as Frontend
+    participant API as Router (api/v1/video)
+    participant Service as VideoService
+    participant Repo as ProjectRepository
+    participant Engine as FfmpegEngine
+    participant DB as SQLite DB
+
+    Client->>API: POST /api/v1/video/compile {project_id}
+    API->>Service: compile_project(project_id)
+    Service->>Repo: get_project_with_panels(project_id)
+    Repo->>DB: SELECT ...
+    DB-->>Repo: Data
+    Repo-->>Service: Project Entity
+
+    Service->>Engine: render_timeline(panels)
+    Engine-->>Service: mp4_file_path
+
+    Service->>Repo: update_project_status()
+    Repo->>DB: UPDATE ...
+
+    Service-->>API: Compilation Result
+    API-->>Client: 200 OK JSON
+```
+
+---
+
+## 5. Database Design
+
+Sonikoma utilizes a local SQLite database (`webtoon_local.db`) for zero-configuration persistence. The core relational hierarchy is:
+
+```mermaid
+erDiagram
+    SERIES ||--o{ CHAPTERS : contains
+    CHAPTERS ||--o{ PANELS : contains
+
+    SERIES {
+        string id PK
+        string title
+        string slug
+    }
+    CHAPTERS {
+        string id PK
+        string series_id FK
+        int episode_number
+        string status
+    }
+    PANELS {
+        string id PK
+        string chapter_id FK
+        string audio_url
+        string motion_type
+    }
+```

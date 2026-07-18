@@ -6,6 +6,7 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?logo=sqlite&logoColor=white)](https://sqlite.org)
 [![Gemini](https://img.shields.io/badge/AI-Gemini%202.5-4285F4?logo=google&logoColor=white)](https://aistudio.google.com)
@@ -25,7 +26,7 @@
 - 🗄️ **Local Database** — SQLite stores all projects and panels (no cloud required)
 - 🤖 **Multi-AI** — Supports Gemini 2.5 Flash, Gemini 2.0 Pro, Llama 3, Mistral 7B
 - 📟 **Real-Time Shell Logs** — ANSI-colored SSE/polling log stream piped from the backend terminal directly into the UI
-- 📊 **Live Metrics** — `/api/metrics` endpoint reports uptime, memory, request stats, rate limits, and cache state
+- 📊 **Live Metrics** — `/api/health` endpoint reports system health, memory, and database state
 - 🛡️ **Security Middleware** — Rate limiting, request timeouts, CSP headers, request IDs, and CORS baked into the server
 
 ---
@@ -65,6 +66,8 @@ npm install
 ### 2️⃣ Install Python Dependencies
 
 ```bash
+# Create and activate a virtual environment (optional but recommended)
+# Then install dependencies:
 pip install -r backend/requirements.txt
 ```
 
@@ -93,21 +96,21 @@ HUGGINGFACE_API_KEY="hf_..."
 npm run start
 ```
 
-The ports are strictly validated on startup from the `.env` file (`FRONTEND_PORT`, `BACKEND_PORT`, and `APP_URL`). By default, the frontend app opens at **http://localhost:3000** (defined by `FRONTEND_PORT` and `APP_URL`) while the backend API listens on **http://localhost:5173** (defined by `BACKEND_PORT`).
+The ports are strictly validated on startup from the `.env` file (`FRONTEND_PORT`, `BACKEND_PORT`, and `APP_URL`). By default, the frontend app opens at **http://localhost:3000** (defined by `FRONTEND_PORT` and `APP_URL`) while the backend API listens on **http://localhost:8000** (defined by `BACKEND_PORT`).
 
 ---
 
 ## 🌐 API Reference
 
-The server exposes detailed endpoints for authentication, metrics, image transformations, speech bubble removal, and MoviePy audio/video compile routines. View the complete API reference in:
+The Python FastAPI backend exposes endpoints for authentication, metrics, image transformations, speech bubble removal, and MoviePy audio/video compile routines. View the complete API reference in:
 
-👉 **[Sonikoma API Reference & Routes](./docs/architecture/api_reference.md)**
+👉 **[Sonikoma API Reference & Routes](./docs/api/endpoints.md)**
 
 ---
 
 ## 🗄️ Local Database
 
-The application utilizes a zero-config local SQLite instance managed via `better-sqlite3`. Check the tables structure and database guidelines in:
+The application utilizes a zero-config local SQLite instance managed by the backend engine. Check the tables structure and database guidelines in:
 
 👉 **[Local Database Architecture](./docs/architecture/database.md)**
 
@@ -134,15 +137,16 @@ A variety of npm scripts are configured to control dev daemons, production compi
 
 ## 🐍 Python Services
 
-| File                 | Library                 | Purpose                           |
-| -------------------- | ----------------------- | --------------------------------- |
-| `cleaner.py`         | OpenCV, Pillow, EasyOCR | Speech bubble detection + removal |
-| `bubble_detector.py` | OpenCV, NumPy           | Bubble detection core logic       |
-| `audio.py`           | edge-tts, pydub         | TTS voice synthesis               |
-| `ocr.py`             | OpenCV, Pillow, NumPy   | Panel OCR + cropping processor    |
-| `video.py`           | MoviePy, NumPy          | MP4 animation + audio compilation |
-| `detect_panels.py`   | OpenCV                  | Panel boundary detection          |
-| `cvUtils.py`         | OpenCV                  | Shared OpenCV utility functions   |
+| Directory            | Purpose                           |
+| -------------------- | --------------------------------- |
+| `api/`               | FastAPI endpoints and routers     |
+| `core/`              | Application settings, security    |
+| `database/`          | Database connections and models   |
+| `engines/`           | Video, audio, and SD engines      |
+| `providers/`         | AI and TTS provider integrations  |
+| `repositories/`      | Data access layer for DB entities |
+| `services/`          | Core business logic orchestration |
+| `utils/`             | Shared helper functions           |
 
 ---
 
@@ -162,5 +166,5 @@ It contains the full project structure, coding rules, API patterns, and session 
 ---
 
 <div align="center">
-Built with ❤️ using React, Express, Python, OpenCV, MoviePy & Gemini AI
+Built with ❤️ using React, Python, FastAPI, OpenCV, MoviePy & Gemini AI
 </div>
