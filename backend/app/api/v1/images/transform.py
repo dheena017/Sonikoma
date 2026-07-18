@@ -110,7 +110,8 @@ async def merge_images(body: StitchImagesRequest):
 async def get_cached_stitch(cache_id: str = Path(...), request: Request = None):
     from services.image.stitch_cache_service import retrieve_cached_stitch_service
     try:
-        content_bytes, media_type = await retrieve_cached_stitch_service(cache_id, request)
+        referer = request.headers.get("referer") if request else None
+        content_bytes, media_type = await retrieve_cached_stitch_service(cache_id, referer)
         return Response(
             content=content_bytes,
             media_type=media_type,
