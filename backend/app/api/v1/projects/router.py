@@ -15,7 +15,7 @@ from fastapi import APIRouter, HTTPException, Path, Body, Depends, Request, Uplo
 from fastapi.responses import JSONResponse
 
 from api.dependencies.auth import get_current_user
-from backend.schemas.project import (
+from schemas.project import (
     ProjectCreateRequest,
     PanelsSaveRequest,
     TokenIncrementRequest,

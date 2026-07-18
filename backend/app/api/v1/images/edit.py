@@ -8,8 +8,8 @@ Endpoints for cropping, editing, and restoring image states.
 import logging
 from fastapi import APIRouter, HTTPException
 
-from utils.cache import edit_history
-from backend.schemas.image import EditImageRequest, UndoEditRequest
+from core.cache import edit_history
+from schemas.image import EditImageRequest, UndoEditRequest
 from services.image.image_service import apply_image_edits_service
 
 logger = logging.getLogger("sonikoma.api.images.edit")

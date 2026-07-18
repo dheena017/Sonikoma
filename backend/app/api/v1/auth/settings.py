@@ -15,7 +15,7 @@ from fastapi.responses import StreamingResponse
 
 from core.security import SECRET_KEY
 from api.dependencies.auth import get_admin_user
-from backend.schemas.auth import (
+from schemas.auth import (
     AdminUpdateUser,
     AdminAddCreditsRequest,
     AdminBulkAction,

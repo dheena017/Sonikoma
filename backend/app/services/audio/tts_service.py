@@ -12,7 +12,7 @@ import tempfile
 import logging
 from typing import List, Dict, Any
 
-from backend.media.audio.audio import generate_panel_audio
+from media.audio.audio import generate_panel_audio
 
 logger = logging.getLogger("sonikoma.services.audio.tts_service")
 

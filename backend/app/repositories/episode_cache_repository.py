@@ -66,7 +66,7 @@ class EpisodeCacheManager:
     def _make_cache_key(self, title_no: str, genre: Optional[str] = None) -> str:
         """Generate cache key."""
         key_str = f"{title_no}:{genre or 'any'}"
-        return hashlib.md5(key_str.encode()).hexdigest()
+        return hashlib.md5(key_str.encode(), usedforsecurity=False).hexdigest()
 
     def save_episodes(
         self,

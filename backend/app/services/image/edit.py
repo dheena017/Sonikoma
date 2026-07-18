@@ -15,8 +15,8 @@ from typing import Optional, Dict, Any
 from PIL import Image
 
 import services.image.image_utils as img_utils
-from utils.cache import stitched_cache, edit_history
-from utils.supabase_storage import upload_to_supabase_bucket
+from core.cache import stitched_cache, edit_history
+from database.storage.supabase_storage import upload_to_supabase_bucket
 from repositories.project.panels import save_edit_history
 
 logger = logging.getLogger("sonikoma.services.image.edit")

@@ -21,10 +21,10 @@ from fastapi.responses import JSONResponse, StreamingResponse
 
 from api.dependencies.auth import get_admin_user
 
-from utils.log_interceptor import get_logs, add_log_listener, remove_log_listener
-from utils.cache import get_all_cache_stats, get_total_storage_size_bytes
+from core.logging.log_interceptor import get_logs, add_log_listener, remove_log_listener
+from core.cache import get_all_cache_stats, get_total_storage_size_bytes
 from core.settings import BACKEND_PORT
-from backend.schemas.health import CustomLogPayload
+from schemas.health import CustomLogPayload
 
 # Import repository functions directly
 from repositories.system_repository import (
@@ -289,7 +289,7 @@ async def server_metrics():
 @router.post("/metrics/purge-cache", summary="Force clear all backend LRU caches")
 async def purge_server_caches():
     try:
-        from utils.cache import stitched_cache, edit_history, zip_cache, proxy_cache
+        from core.cache import stitched_cache, edit_history, zip_cache, proxy_cache
         stitched_cache.clear()
         edit_history.clear()
         zip_cache.clear()

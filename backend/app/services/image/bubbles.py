@@ -14,8 +14,8 @@ import logging
 from typing import List, Dict, Any
 
 import services.image.image_utils as img_utils
-from utils.cache import stitched_cache, edit_history
-from utils.supabase_storage import upload_to_supabase_bucket
+from core.cache import stitched_cache, edit_history
+from database.storage.supabase_storage import upload_to_supabase_bucket
 from backend.media.image.cleaner import remove_speech_bubbles
 from repositories.project.panels import save_edit_history
 

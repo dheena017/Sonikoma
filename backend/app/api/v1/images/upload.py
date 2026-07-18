@@ -15,8 +15,8 @@ import uuid
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
-from utils.cache import stitched_cache
-from utils.supabase_storage import upload_to_supabase_bucket
+from core.cache import stitched_cache
+from database.storage.supabase_storage import upload_to_supabase_bucket
 import asyncio
 import time
 

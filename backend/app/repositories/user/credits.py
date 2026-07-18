@@ -6,7 +6,6 @@ Credits and transaction history operations.
 """
 
 import logging
-from typing import List, Dict, Any
 
 from services.user.credit_service import (
     LowCreditBalanceError,

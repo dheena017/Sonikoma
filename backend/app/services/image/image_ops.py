@@ -61,7 +61,7 @@ def get_image_meta(image_bytes: bytes) -> ImageMeta:
 
 def fingerprint_image(image_bytes: bytes) -> str:
     """Generate MD5 fingerprint of image bytes."""
-    return hashlib.md5(image_bytes).hexdigest()
+    return hashlib.md5(image_bytes, usedforsecurity=False).hexdigest()
 
 
 def convert_format(image_bytes: bytes, output_format: str = 'jpeg', quality: int = 90) -> Dict[str, Any]:

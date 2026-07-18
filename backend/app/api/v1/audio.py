@@ -13,7 +13,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
-from backend.schemas.audio import (
+from schemas.audio import (
     AlignDialogueRequest,
     AudioGenerateRequest,
     AudioPathRequest,

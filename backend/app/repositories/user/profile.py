@@ -5,7 +5,6 @@ User analytics, rewards, achievements, and statistics.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from typing import Dict, Any
 
 from services.user.profile_service import (
     get_creator_analytics,

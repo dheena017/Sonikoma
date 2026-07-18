@@ -10,16 +10,17 @@ import os
 import sys
 import json
 import unittest
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import MagicMock, patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
 # pyrefly: ignore [missing-import]
-from routes.ai_routes import router as ai_router
+from api.v1.ai.narration import router as ai_router
 # pyrefly: ignore [missing-import]
-from routes.auth_routes import get_current_user
+from app.services.auth.auth_service import AuthService
+from app.api.v1.auth.routes import get_current_user
 
 class TestNarrativeFaultTolerance(unittest.TestCase):
     def setUp(self):
@@ -27,7 +28,7 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
         self.app.include_router(ai_router)
 
         # FastAPI dependency override to bypass OAuth/Auth middleware for unit testing
-        self.app.dependency_overrides[get_current_user] = lambda: {
+        self.app.dependency_overrides[AuthService.get_current_user] = lambda: {
             "user_id": "test_user_123",
             "email": "test@test.local",
             "full_name": "Test User",

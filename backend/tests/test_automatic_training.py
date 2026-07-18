@@ -1,15 +1,14 @@
 import os
 import sys
-import json
 import shutil
 import unittest
 import tempfile
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
-import services.training_monitor as monitor
-from backend.media.image.train_yolo import status, trigger_fine_tuning, _train_worker
+from app.services.training import training_monitor as monitor
+from app.providers.vision.yolo import trigger_fine_tuning
 
 class TestAutomaticTraining(unittest.TestCase):
     def setUp(self):
