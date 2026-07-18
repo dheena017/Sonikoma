@@ -121,17 +121,24 @@ async def lifespan(app: FastAPI):
 
     # Re-apply ColoredFormatter to all non-UI handlers for beautiful console output.
     # UIStreamLogHandler keeps its own plain formatter so log entries reach the frontend cleanly.
-    from utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
+    try:
+        from utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
+        ui_handler_cls = _UIStreamLogHandler
+    except ModuleNotFoundError:
+        ui_handler_cls = None
+
     for name in list(logging.root.manager.loggerDict.keys()):
         l = logging.getLogger(name)
         for h in l.handlers:
-            if not isinstance(h, _UIStreamLogHandler):
+            if ui_handler_cls is None or not isinstance(h, ui_handler_cls):
                 h.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
+
     for h in logging.getLogger().handlers:
-        if not isinstance(h, _UIStreamLogHandler):
+        if ui_handler_cls is None or not isinstance(h, ui_handler_cls):
             h.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
 
     _print_startup_banner()
+
 
     # Emit structured startup logs so the frontend terminal shows them on connect.
     # (banner uses print() which bypasses the handler; these go through the buffer)

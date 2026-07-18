@@ -318,12 +318,21 @@ console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
 
 # Preserve UIStreamLogHandler (attached by log_interceptor at import time).
-from utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
+# If log_interceptor isn't present (e.g., stripped deployment), fall back to plain console logging.
 root_logger = logging.getLogger()
-for handler in root_logger.handlers[:]:
-    if not isinstance(handler, _UIStreamLogHandler):
-        root_logger.removeHandler(handler)
+try:
+    from utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
 
-root_logger.addHandler(console_handler)
+    for handler in root_logger.handlers[:]:
+        if not isinstance(handler, _UIStreamLogHandler):
+            root_logger.removeHandler(handler)
+
+    root_logger.addHandler(console_handler)
+except ModuleNotFoundError:
+    # Keep existing handlers and just ensure console handler exists.
+    if console_handler not in root_logger.handlers:
+        root_logger.addHandler(console_handler)
+
 root_logger.setLevel(logging.INFO)
 logger = logging.getLogger('sonikoma.api')
+
