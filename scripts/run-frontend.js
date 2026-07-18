@@ -252,8 +252,8 @@ async function restartBackend(changedFile) {
 
   const pythonPath = process.platform === "win32"
     ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
-    : "python3";
-  const backendDir = path.resolve(__dirname, "../backend/app");
+    : path.resolve(__dirname, "../.venv/bin/python");
+  const backendDir = path.resolve(__dirname, "../backend");
 
   pyProcess = spawn(pythonPath, ["main.py"], {
     cwd: backendDir,
@@ -329,7 +329,7 @@ async function start() {
       const pythonPath = process.platform === "win32"
         ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
         : "python3";
-      const backendDir = path.resolve(__dirname, "../backend/app");
+      const backendDir = path.resolve(__dirname, "../backend");
 
       pyProcess = spawn(pythonPath, ["main.py"], {
         cwd: backendDir,
@@ -384,7 +384,7 @@ async function start() {
 
   // Set up file watcher to restart backend on changes
   if (!onlyFrontend) {
-    const backendDir = path.resolve(__dirname, "../backend/app");
+    const backendDir = path.resolve(__dirname, "../backend");
     const fileMtimes = new Map();
 
     function populateMtimes(dir) {
