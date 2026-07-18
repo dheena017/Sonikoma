@@ -20,6 +20,33 @@ export const login = async (
   fetchWithInterceptor: FetchClient,
   credentials: LoginCredentials
 ): Promise<ApiResponse<any>> => {
+  if (import.meta.env.DEV) {
+    if (credentials.email === "creator@sonikoma.com" && credentials.password === "password123") {
+      try {
+        return await apiRequest(fetchWithInterceptor, "/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
+        });
+      } catch (err: any) {
+        console.warn("Dev mode: Backend not reachable, using hardcoded local mock token.", err);
+        const mockUser = {
+          user_id: "dev_user_1",
+          email: "creator@sonikoma.com",
+          full_name: "Dev Creator",
+          avatar_url: ""
+        };
+        // Mock successful login response for dev mode
+        return {
+          success: true,
+          access_token: "dev_mock_token_123456789",
+          token_type: "bearer",
+          user: mockUser
+        } as unknown as ApiResponse<any>;
+      }
+    }
+  }
+
   return apiRequest(fetchWithInterceptor, "/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
