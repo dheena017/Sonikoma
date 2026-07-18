@@ -1,7 +1,7 @@
 import logging
 from typing import Optional
 
-logger = logging.getLogger("sonikoma.utils.supabase_storage")
+logger = logging.getLogger("sonikoma.database.storage.supabase_storage")
 
 try:
     from supabase import Client  # noqa: F401

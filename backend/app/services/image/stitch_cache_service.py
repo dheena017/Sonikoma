@@ -3,20 +3,21 @@ import asyncio
 import logging
 import httpx
 import json
+from services.image.image_stitcher import stitch_images_together
 from urllib.parse import urlparse, parse_qs
 from fastapi import Request
 
-from utils.cache import stitched_cache
+from core.cache import stitched_cache
 # I am mocking the imports that were inside the function
 from database import db
 from database.db import unwrap_proxy_url
-from utils import img_utils
+from services.image import image_utils as img_utils
 
 logger = logging.getLogger("sonikoma.services.image.stitch_cache")
 
 # (A global edit_history might be missing if it was in transform.py, but we'll import if needed)
 # In transform.py it just did edit_history.get, maybe edit_history is from utils.cache? Let's assume it's from utils.cache
-from utils.cache import edit_history
+from core.cache import edit_history
 
 async def retrieve_cached_stitch_service(cache_id: str, request: Request = None):
     cached = stitched_cache.get(cache_id)
@@ -159,7 +160,7 @@ async def retrieve_cached_stitch_service(cache_id: str, request: Request = None)
 
                         if resolved_buffers_data:
                             stitched_bytes = await asyncio.to_thread(
-                                img_utils.stitch_images_together, resolved_buffers_data, layout="vertical"
+                                stitch_images_together, resolved_buffers_data, layout="vertical"
                             )
                             stitched_cache.set(cache_id, {"data": stitched_bytes, "content_type": "image/png"})
                             logger.info(f"[Cache Fallback] Successfully re-stitched and cached '{cache_id}' ({len(stitched_bytes)} bytes)")

@@ -283,7 +283,7 @@ def get_total_storage_size_bytes() -> int:
 
 
 import logging
-logger = logging.getLogger("sonikoma.utils.cache")
+logger = logging.getLogger("sonikoma.core.cache")
 
 
 def purge_all_expired() -> None:

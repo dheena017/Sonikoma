@@ -1,5 +1,5 @@
 """
-backend/python/utils/ai_test.py
+backend/tests/test_ai_connection.py
 ─────────────────────────────────────────────────────────────────────────────
 Utility to test connections and verify operational status of all AI models,
 rendering a clean, colorized, and aligned console table on startup.
@@ -22,7 +22,7 @@ try:
 except Exception:
     pass
 
-logger = logging.getLogger("sonikoma.utils.ai_test")
+logger = logging.getLogger("sonikoma.tests.ai_connection")
 
 def visual_len(s: str) -> int:
     """Returns the visual length of a string, ignoring ANSI escape codes."""

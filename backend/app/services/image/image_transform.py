@@ -15,8 +15,8 @@ from typing import Dict, Any, List, Optional
 from PIL import Image
 
 import services.image.image_utils as img_utils
-from utils.cache import stitched_cache, edit_history
-from utils.supabase_storage import upload_to_supabase_bucket
+from core.cache import stitched_cache, edit_history
+from database.storage.supabase_storage import upload_to_supabase_bucket
 from providers.media.imagemagick import get_imagemagick_engine, ResizeMode, FilterType
 
 logger = logging.getLogger("sonikoma.services.image.transform")

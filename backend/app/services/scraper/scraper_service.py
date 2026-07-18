@@ -14,13 +14,13 @@ import logging
 from typing import List, Optional, Dict, Any
 
 from database import db
-from utils.url_utils import extract_webtoon_url, parse_webtoon_url
-from utils.id_utils import generate_project_id
-from utils.cache import stitched_cache, edit_history
-import utils.image_utils as img_utils
+from services.scraper.url_utils import extract_webtoon_url, parse_webtoon_url
+from core.utils.id_utils import generate_project_id
+from core.cache import stitched_cache, edit_history
+from services.image import image_utils as img_utils
 from services.scraper.scraper import scrape_images_from_url, scraped_metadata_cache
 from backend.media.ai.storyboard_ai import generate_dynamic_panels
-from backend.media.video.video import compile_video_from_panels
+from services.video.video import compile_video_from_panels
 
 logger = logging.getLogger("sonikoma.services.scraper.scraper_service")
 
@@ -98,7 +98,7 @@ async def scrape_and_initialize_project(
         if not cache_hit and len(resolved_buffers_data) > 1 and not smart_slice:
             try:
                 stitched_bytes = await asyncio.to_thread(
-                    img_utils.stitch_images_together, [item["data"] for item in resolved_buffers_data], layout="vertical"
+                    stitch_images_together, [item["data"] for item in resolved_buffers_data], layout="vertical"
                 )
                 uid = f"stitched_{int(time.time() * 1000)}_full"
                 stitched_url = f"/api/image/cached/{uid}"
