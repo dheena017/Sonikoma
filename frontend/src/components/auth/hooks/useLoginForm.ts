@@ -28,6 +28,14 @@ export default function useLoginForm(props: LoginFormProps) {
   const [isTourOpen, setIsTourOpen] = React.useState(false);
   const [tourStep, setTourStep] = React.useState(0);
 
+
+  React.useEffect(() => {
+    if (import.meta.env.DEV) {
+      setEmail("creator@sonikoma.com");
+      setPassword("password123");
+    }
+  }, []);
+
   React.useEffect(() => {
     if (!isQrLogin || qrTimer <= 0) return;
     const interval = setInterval(() => {

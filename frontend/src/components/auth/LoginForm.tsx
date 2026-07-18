@@ -504,19 +504,34 @@ export default function LoginPage({
               </button>
             </div>
 
-            {/* Quick Demo Fill Utility Banner */}
+                        {/* Quick Demo Fill Utility Banner */}
             {!isQrLogin && (
-              <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between text-xs">
-                <span className="text-neutral-500 flex items-center gap-1 font-medium">
-                  <Info className={`w-3.5 h-3.5 ${currentTheme.accentText}`} />
-                  {t.demo}
-                </span>
-                <button
-                  onClick={handleQuickFill}
-                  className={`hover:opacity-85 hover:underline font-bold cursor-pointer transition-colors active:scale-95 ${currentTheme.accentText}`}
-                >
-                  {t.demoBtn}
-                </button>
+              <div className="mt-5 pt-4 border-t border-white/5 flex flex-col gap-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-neutral-500 flex items-center gap-1 font-medium">
+                    <Info className={`w-3.5 h-3.5 ${currentTheme.accentText}`} />
+                    {t.demo}
+                  </span>
+                  <button
+                    onClick={handleQuickFill}
+                    className={`hover:opacity-85 hover:underline font-bold cursor-pointer transition-colors active:scale-95 ${currentTheme.accentText}`}
+                  >
+                    {t.demoBtn}
+                  </button>
+                </div>
+                {import.meta.env.DEV && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleQuickFill();
+                      // Timeout to ensure state updates before submitting
+                      setTimeout(() => handleSubmit(e as any), 0);
+                    }}
+                    className={`w-full py-2 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/30 hover:bg-orange-500/30 text-xs font-bold transition-colors cursor-pointer mt-2`}
+                  >
+                    Dev Login (Auto-fill & Submit)
+                  </button>
+                )}
               </div>
             )}
           </div>
