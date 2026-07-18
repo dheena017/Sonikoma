@@ -1,12 +1,11 @@
 """
-backend/app/engines/video/ffmpeg_commands.py
+backend/app/engines/ffmpeg/commands.py
 ─────────────────────────────────────────────────────────────────────────────
-Pure command-line construction helpers for FFmpeg and FFprobe executions.
-─────────────────────────────────────────────────────────────────────────────
+FFmpeg command builders (moved from engines.video.ffmpeg_commands).
 """
 
 from typing import List, Optional
-from engines.video.ffmpeg_types import FilterType
+from engines.ffmpeg.types import FilterType
 from engines.video.edit_helpers import get_ffmpeg_filter_string
 
 

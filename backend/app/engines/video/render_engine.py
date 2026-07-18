@@ -1,7 +1,8 @@
 """
-backend/app/engines/video/render_service.py
+backend/app/engines/video/render_engine.py
 ─────────────────────────────────────────────────────────────────────────────
-Orchestrations for cutting, mixing audio, applying filters, and concatenations.
+Execution primitives for cutting, mixing audio, applying filters, and concatenations.
+This replaces the previous `render_service.py` and exposes the engine-level API.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -11,8 +12,8 @@ import subprocess
 import asyncio
 import tempfile
 from typing import List, Optional
-from engines.video.ffmpeg_types import TransitionSpec, CutSpec, FilterType
-from engines.video.ffmpeg_commands import (
+from engines.ffmpeg.types import TransitionSpec, CutSpec, FilterType
+from engines.ffmpeg.commands import (
     build_extract_frames_cmd,
     build_extract_audio_cmd,
     build_concatenate_videos_cmd,
@@ -22,11 +23,11 @@ from engines.video.ffmpeg_commands import (
     build_mix_audio_cmd
 )
 
-logger = logging.getLogger("sonikoma.services.video.render")
+logger = logging.getLogger("sonikoma.engines.video.render")
 
 
-class RenderService:
-    """Service to coordinate all high-level rendering operations."""
+class RenderEngine:
+    """Engine coordinating high-level rendering operations."""
 
     def __init__(self, ffmpeg_path: str = "ffmpeg"):
         self.ffmpeg_path = ffmpeg_path
@@ -45,7 +46,7 @@ class RenderService:
             self.ffmpeg_path, video_path, output_pattern,
             fps, start_time, end_time, width, height
         )
-        logger.info(f"[RenderService] Extracting frames: {video_path}")
+        logger.info(f"[RenderEngine] Extracting frames: {video_path}")
         result = await asyncio.to_thread(
             subprocess.run, cmd, capture_output=True, text=True, timeout=300
         )
@@ -68,7 +69,7 @@ class RenderService:
         bitrate: str = "192k"
     ) -> str:
         cmd = build_extract_audio_cmd(self.ffmpeg_path, video_path, output_path, format_str, bitrate)
-        logger.info(f"[RenderService] Extracting audio track to: {output_path}")
+        logger.info(f"[RenderEngine] Extracting audio track to: {output_path}")
         result = await asyncio.to_thread(
             subprocess.run, cmd, capture_output=True, text=True, timeout=120
         )
@@ -94,7 +95,7 @@ class RenderService:
                 f.write(f"file '{os.path.abspath(vp)}'\n")
 
         cmd = build_concatenate_videos_cmd(self.ffmpeg_path, concat_file, output_path, fps, width, height)
-        logger.info(f"[RenderService] Concatenating {len(video_paths)} videos -> {output_path}")
+        logger.info(f"[RenderEngine] Concatenating {len(video_paths)} videos -> {output_path}")
         try:
             result = await asyncio.to_thread(
                 subprocess.run, cmd, capture_output=True, text=True, timeout=600
@@ -142,7 +143,7 @@ class RenderService:
                 "-crf", "23",
                 output_path
             ]
-            logger.info(f"[RenderService] Re-stitching {len(cuts)} cuts -> {output_path}")
+            logger.info(f"[RenderEngine] Re-stitching {len(cuts)} cuts -> {output_path}")
             result = await asyncio.to_thread(subprocess.run, cmd, capture_output=True, text=True, timeout=600)
             if result.returncode != 0:
                 raise RuntimeError(f"Re-stitching cuts failed: {result.stderr}")
@@ -168,7 +169,7 @@ class RenderService:
             raise ValueError("Speed factor must be positive.")
 
         cmd = build_adjust_speed_cmd(self.ffmpeg_path, video_path, output_path, speed_factor, preserve_pitch)
-        logger.info(f"[RenderService] Adjusting speed: {speed_factor}x")
+        logger.info(f"[RenderEngine] Adjusting speed: {speed_factor}x")
         result = await asyncio.to_thread(
             subprocess.run, cmd, capture_output=True, text=True, timeout=300
         )
@@ -184,7 +185,7 @@ class RenderService:
         intensity: float = 1.0
     ) -> str:
         cmd = build_apply_filter_cmd(self.ffmpeg_path, video_path, output_path, filter_type, intensity)
-        logger.info(f"[RenderService] Applying visual filter: {filter_type}")
+        logger.info(f"[RenderEngine] Applying visual filter: {filter_type}")
         result = await asyncio.to_thread(
             subprocess.run, cmd, capture_output=True, text=True, timeout=300
         )
@@ -209,7 +210,7 @@ class RenderService:
             raise ValueError("audio_volumes must match audio_paths length.")
 
         cmd = build_mix_audio_cmd(self.ffmpeg_path, video_path, audio_paths, audio_volumes, output_path)
-        logger.info(f"[RenderService] Mixing {len(audio_paths)} audio tracks -> {output_path}")
+        logger.info(f"[RenderEngine] Mixing {len(audio_paths)} audio tracks -> {output_path}")
         result = await asyncio.to_thread(
             subprocess.run, cmd, capture_output=True, text=True, timeout=300
         )

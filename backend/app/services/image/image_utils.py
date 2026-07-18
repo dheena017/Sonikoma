@@ -12,13 +12,8 @@ submodules so imports remain stable.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from .image_resolver import resolve_image_to_buffer, resolve_url_to_buffer
+from .utils.image_utils import *
+from .image_ops import *
 
-# Other image utilities are expected to be imported directly from their
-# specific modules (image_ops, image_stitcher, etc.)
-
-__all__ = [
-    "resolve_image_to_buffer",
-    "resolve_url_to_buffer",
-]
+# Backwards-compatible shim: re-export from services.image.utils.image_utils and image_ops
 

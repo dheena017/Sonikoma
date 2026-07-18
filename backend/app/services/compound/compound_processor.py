@@ -20,7 +20,7 @@ from engines.ffmpeg import get_ffmpeg_engine, CutSpec
 from engines.librosa import get_librosa_engine, LIBROSA_AVAILABLE
 from engines.whisper import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
 from providers.media.imagemagick import get_imagemagick_engine, WAND_AVAILABLE
-from engines.stable_diffusion_engine import get_stable_diffusion_engine
+from engines.stable_diffusion import get_stable_diffusion_engine
 
 logger = logging.getLogger("sonikoma.services.compound_processor")
 

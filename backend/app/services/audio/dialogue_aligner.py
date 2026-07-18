@@ -3,8 +3,8 @@ from typing import List, Dict, Any, Optional
 import numpy as np
 import difflib
 
-from engines.whisper import get_whisper_engine
-from engines.librosa import get_librosa_engine
+from engines.whisper.engine import get_whisper_engine
+from engines.librosa.engine import get_librosa_engine
 try:
     import librosa
 except ImportError:

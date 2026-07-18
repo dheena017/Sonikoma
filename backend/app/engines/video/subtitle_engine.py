@@ -1,20 +1,21 @@
 """
-backend/app/engines/video/subtitle_service.py
+backend/app/engines/video/subtitle_engine.py
 ─────────────────────────────────────────────────────────────────────────────
-Subtitles rendering service.
+Subtitle engine: low-level operations to burn subtitles into video.
+Replaces the previous `subtitle_service.py`.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import logging
 import subprocess
 import asyncio
-from engines.video.ffmpeg_commands import build_add_subtitles_cmd
+from engines.ffmpeg.commands import build_add_subtitles_cmd
 
-logger = logging.getLogger("sonikoma.services.video.subtitles")
+logger = logging.getLogger("sonikoma.engines.video.subtitles")
 
 
-class SubtitleService:
-    """Service to handle subtitle operations using FFmpeg."""
+class SubtitleEngine:
+    """Engine to handle subtitle operations using FFmpeg."""
 
     def __init__(self, ffmpeg_path: str = "ffmpeg"):
         self.ffmpeg_path = ffmpeg_path
@@ -32,7 +33,7 @@ class SubtitleService:
             subtitle_path,
             output_path
         )
-        logger.info(f"[SubtitleService] Burning subtitles: {subtitle_path} -> {video_path}")
+        logger.info(f"[SubtitleEngine] Burning subtitles: {subtitle_path} -> {video_path}")
         
         result = await asyncio.to_thread(
             subprocess.run,
@@ -42,8 +43,8 @@ class SubtitleService:
             timeout=300
         )
         if result.returncode != 0:
-            logger.error(f"[SubtitleService] Burning subtitles failed: {result.stderr}")
+            logger.error(f"[SubtitleEngine] Burning subtitles failed: {result.stderr}")
             raise RuntimeError(f"FFmpeg subtitle burn failed: {result.stderr}")
             
-        logger.info(f"[SubtitleService] Burn-in complete: {output_path}")
+        logger.info(f"[SubtitleEngine] Burn-in complete: {output_path}")
         return output_path

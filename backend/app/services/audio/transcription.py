@@ -12,7 +12,7 @@ except ImportError:
     sf = None
     librosa = None
 
-from engines.whisper import TranscriptionResult
+from engines.whisper.engine import TranscriptionResult
 
 logger = logging.getLogger("sonikoma.services.audio")
 

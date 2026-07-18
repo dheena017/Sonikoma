@@ -21,7 +21,7 @@ class AuthService:
         self.jwt_decoder = jwt_decoder or self._default_jwt_decoder()
 
     def _default_user_repo(self):
-        from repositories.user_repository import get_user_by_api_key, get_user_by_id
+        from repositories.user import get_user_by_api_key, get_user_by_id
 
         return type(
             "_UserRepositoryAdapter",

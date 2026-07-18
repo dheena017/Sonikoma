@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Path, Body, Depends, Request
 
 from api.dependencies.auth import get_current_user
 from schemas.project import PanelsSaveRequest, TokenIncrementRequest, ProjectUpdateRequest
-from repositories.user_repository import write_audit_log
+from repositories.user import write_audit_log
 from services.project.project_service import ProjectService
 
 logger = logging.getLogger("sonikoma.routes.projects.update")

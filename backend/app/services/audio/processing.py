@@ -11,7 +11,7 @@ except ImportError:
     sf = None
     librosa = None
 
-from engines.librosa import SilenceSegment, EnergySegment
+from engines.librosa.engine import SilenceSegment, EnergySegment
 
 logger = logging.getLogger("sonikoma.services.audio")
 

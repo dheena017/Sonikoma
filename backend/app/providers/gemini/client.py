@@ -1,8 +1,6 @@
 """
-backend/app/services/ai/providers/gemini_provider.py
-─────────────────────────────────────────────────────────────────────────────
-Wrapper interface for Google Gemini GenAI Client and retry helpers.
-─────────────────────────────────────────────────────────────────────────────
+backend/app/providers/gemini/client.py
+Wrapper for Gemini provider (moved from providers/ai/gemini.py).
 """
 
 import logging

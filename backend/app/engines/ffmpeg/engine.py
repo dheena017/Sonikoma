@@ -1,10 +1,8 @@
 """
-backend/app/services/video/ffmpeg_engine.py
+backend/app/engines/ffmpeg/engine.py
 ─────────────────────────────────────────────────────────────────────────────
-Refactored FFmpeg video processing engine. Exposes high-level FFmpeg actions
-while delegating enums/types, commands, subtitle operations, and rendering 
-to sub-modules. Acts as the primary interface/facade for backward-compatibility.
-─────────────────────────────────────────────────────────────────────────────
+FFmpeg engine facade (moved from engines/ffmpeg.py). Delegates to
+`engines.ffmpeg.commands` and engine-level primitives.
 """
 
 import subprocess
@@ -12,10 +10,10 @@ import logging
 import json
 import asyncio
 from typing import List, Optional
-from engines.video.ffmpeg_types import FilterType, VideoMetadata, TransitionSpec, CutSpec
-from engines.video.ffmpeg_commands import build_ffprobe_cmd
-from engines.video.subtitle_service import SubtitleService
-from engines.video.render_service import RenderService
+from engines.ffmpeg.types import FilterType, VideoMetadata, TransitionSpec, CutSpec
+from engines.ffmpeg.commands import build_ffprobe_cmd
+from engines.video.subtitle_engine import SubtitleEngine
+from engines.video.render_engine import RenderEngine
 
 logger = logging.getLogger("sonikoma.engines.ffmpeg")
 
@@ -35,9 +33,9 @@ class FFmpegEngine:
         self.ffprobe_path = ffprobe_path
         self._verify_ffmpeg()
         
-        # Instantiate delegate sub-services
-        self._render_service = RenderService(ffmpeg_path=ffmpeg_path)
-        self._subtitle_service = SubtitleService(ffmpeg_path=ffmpeg_path)
+        # Instantiate delegate engine primitives
+        self._render_service = RenderEngine(ffmpeg_path=ffmpeg_path)
+        self._subtitle_service = SubtitleEngine(ffmpeg_path=ffmpeg_path)
 
     def _verify_ffmpeg(self) -> None:
         """Verify FFmpeg is installed and accessible."""
@@ -101,7 +99,7 @@ class FFmpegEngine:
         width: Optional[int] = None,
         height: Optional[int] = None
     ) -> List[str]:
-        """Extract frames from video as image files (delegated to RenderService)."""
+        """Extract frames from video as image files (delegated to RenderEngine)."""
         return await self._render_service.extract_frames(
             video_path, output_pattern, fps, start_time, end_time, width, height
         )
@@ -113,7 +111,7 @@ class FFmpegEngine:
         format: str = "mp3",
         bitrate: str = "192k"
     ) -> str:
-        """Extract audio track from video (delegated to RenderService)."""
+        """Extract audio track from video (delegated to RenderEngine)."""
         return await self._render_service.extract_audio(video_path, output_path, format, bitrate)
 
     async def concatenate_videos(
@@ -125,7 +123,7 @@ class FFmpegEngine:
         width: int = 1920,
         height: int = 1080
     ) -> str:
-        """Concatenate multiple videos with optional transitions (delegated to RenderService)."""
+        """Concatenate multiple videos with optional transitions (delegated to RenderEngine)."""
         return await self._render_service.concatenate_videos(
             video_paths, output_path, transitions, fps, width, height
         )
@@ -138,7 +136,7 @@ class FFmpegEngine:
         width: int = 1920,
         height: int = 1080
     ) -> str:
-        """Cut/trim video to specific segments (delegated to RenderService)."""
+        """Cut/trim video to specific segments (delegated to RenderEngine)."""
         return await self._render_service.cut_video(video_path, cuts, output_path, width, height)
 
     async def adjust_speed(
@@ -148,7 +146,7 @@ class FFmpegEngine:
         speed_factor: float = 1.0,
         preserve_pitch: bool = True
     ) -> str:
-        """Adjust video playback speed (delegated to RenderService)."""
+        """Adjust video playback speed (delegated to RenderEngine)."""
         return await self._render_service.adjust_speed(video_path, output_path, speed_factor, preserve_pitch)
 
     async def apply_filter(
@@ -158,7 +156,7 @@ class FFmpegEngine:
         filter_type: FilterType,
         intensity: float = 1.0
     ) -> str:
-        """Apply visual filter to video (delegated to RenderService)."""
+        """Apply visual filter to video (delegated to RenderEngine)."""
         return await self._render_service.apply_filter(video_path, output_path, filter_type, intensity)
 
     async def add_subtitles(
@@ -167,7 +165,7 @@ class FFmpegEngine:
         subtitle_path: str,
         output_path: str
     ) -> str:
-        """Burn subtitles into video (delegated to SubtitleService)."""
+        """Burn subtitles into video (delegated to SubtitleEngine)."""
         return await self._subtitle_service.add_subtitles(video_path, subtitle_path, output_path)
 
     async def mix_audio(
@@ -177,7 +175,7 @@ class FFmpegEngine:
         audio_volumes: Optional[List[float]] = None,
         output_path: str = ""
     ) -> str:
-        """Mix multiple audio tracks with video (delegated to RenderService)."""
+        """Mix multiple audio tracks with video (delegated to RenderEngine)."""
         return await self._render_service.mix_audio(video_path, audio_paths, audio_volumes, output_path)
 
 

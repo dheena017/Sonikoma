@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Path, Depends
 
 from api.dependencies.auth import get_current_user
 from schemas.project import BatchDeleteRequest
-from repositories.project_repository import (
+from repositories.project import (
     get_project,
     delete_project,
     get_token_logs,

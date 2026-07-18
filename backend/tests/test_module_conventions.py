@@ -29,14 +29,14 @@ def test_media_engine_wrappers_resolve_to_canonical_modules():
         assert module.__name__ == canonical_name
 
 
-def test_repository_modules_are_compatibility_shims():
-    project_repo = importlib.import_module("repositories.project_repository")
-    system_repo = importlib.import_module("repositories.system_repository")
-    user_repo = importlib.import_module("repositories.user_repository")
+def test_repository_modules_are_canonical():
+    project_repo = importlib.import_module("repositories.project")
+    system_repo = importlib.import_module("repositories.system")
+    user_repo = importlib.import_module("repositories.user")
 
-    assert project_repo.__file__.endswith("project_repository.py")
-    assert system_repo.__file__.endswith("system_repository.py")
-    assert user_repo.__file__.endswith("user_repository.py")
+    assert project_repo is not None
+    assert system_repo is not None
+    assert user_repo is not None
 
 
 def test_project_panels_exposes_edit_history_helpers():

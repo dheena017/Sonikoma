@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from core.security import verify_password, get_password_hash
 from api.dependencies.auth import get_current_user
-from repositories.user_repository import get_user_by_email, update_user, write_audit_log
+from repositories.user import get_user_by_email, update_user, write_audit_log
 from schemas.auth import ForgotPasswordRequest, PasswordUpdate
 
 logger = logging.getLogger("sonikoma.auth.password")

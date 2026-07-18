@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from api.dependencies.auth import get_current_user
 from schemas.auth import ProfileUpdate
-from repositories.user_repository import (
+from repositories.user import (
     update_user,
     get_user_sessions,
     terminate_user_session,

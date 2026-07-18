@@ -30,7 +30,7 @@ from backend.schemas.ai import (
     BatchGenerateRequest,
 )
 from services.ai.facade import facade_analyze_image, facade_smart_crop
-from engines.stable_diffusion_engine import get_stable_diffusion_engine
+from engines.stable_diffusion import get_stable_diffusion_engine
 
 logger = logging.getLogger("sonikoma.api.ai.image")
 
