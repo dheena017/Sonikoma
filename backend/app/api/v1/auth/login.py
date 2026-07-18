@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from core.security import verify_password, create_access_token
-from repositories.user_repository import get_user_by_email, create_user_session, write_audit_log
+from repositories.user import get_user_by_email, create_user_session, write_audit_log
 from backend.schemas.auth import UserLogin
 
 logger = logging.getLogger("sonikoma.auth.login")

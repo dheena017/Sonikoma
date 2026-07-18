@@ -17,7 +17,7 @@ from backend.schemas.auth import (
     SaveCardRequest,
     PurchaseCreditsRequest
 )
-from repositories.user_repository import (
+from repositories.user import (
     update_user,
     get_creator_analytics,
     create_user_invoice,

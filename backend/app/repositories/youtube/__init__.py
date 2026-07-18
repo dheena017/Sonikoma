@@ -14,7 +14,7 @@ from database.connection import (
     get_db_connection
 )
 
-logger = logging.getLogger("sonikoma.repositories.youtube_repository")
+logger = logging.getLogger("sonikoma.repositories.youtube")
 
 def save_youtube_profile(user_id: str, profile: Dict[str, Any]) -> Dict[str, Any]:
     conn = get_db_connection()
