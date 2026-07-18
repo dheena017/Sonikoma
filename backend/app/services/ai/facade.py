@@ -21,7 +21,7 @@ from PIL import Image
 from core.config import call_gemini_with_retry
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
-import services.image.image_utils as img_utils
+import services.image.utils.image_utils as img_utils
 from core.cache import stitched_cache
 from media.audio.audio import generate_panel_audio
 
@@ -341,7 +341,7 @@ async def facade_smart_crop(
         w_box = max(1, xmax - xmin)
         h_box = max(1, ymax - ymin)
 
-        from services.image.panel_box_utils import adjust_to_aspect_ratio
+        from services.image.utils.panel_box_utils import adjust_to_aspect_ratio
         coords = adjust_to_aspect_ratio(xmin, ymin, w_box, h_box, w_img, h_img, aspect_ratio)
         final_panels.append(coords)
 

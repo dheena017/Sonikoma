@@ -13,7 +13,7 @@ import tempfile
 import logging
 from typing import Dict, Any
 
-import services.image.image_utils as img_utils
+import services.image.utils.image_utils as img_utils
 from PIL import Image
 from services.image.detect_panels import run_cv_detection
 from media.image.layer_segmentation import process_layers

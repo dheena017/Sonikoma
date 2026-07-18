@@ -3,7 +3,7 @@ import logging
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from typing import List, Dict, Any
 
-from services.image.image_utils import resolve_image_to_buffer
+from services.image.utils.image_utils import resolve_image_to_buffer
 
 logger = logging.getLogger("sonikoma.services.thumbnail")
 

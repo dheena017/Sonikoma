@@ -13,7 +13,7 @@ import tempfile
 from typing import Optional
 
 from core.exceptions import ServiceException
-from repositories.youtube_repository import get_youtube_credentials
+from repositories.youtube import get_youtube_credentials
 
 try:
     import google_auth_oauthlib.flow

@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
 from app.services.image.layer_segmentation import process_layers
-from app.services.audio.dialogue_aligner import align_dialogue_and_extract_peaks
+from app.services.audio.dialogue_aligner_impl import align_dialogue_and_extract_peaks
 from app.services.video.video_service import _render_panel_segment_ffmpeg
 
 

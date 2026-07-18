@@ -1,8 +1,3 @@
-"""
-Compose helpers moved into processing
-"""
+"""Backward-compatible shim: re-export compose.py from services.image subpackages."""
 
-import services.image.image_utils as img_utils
-
-def compose_images(*args, **kwargs):
-    raise NotImplementedError("Compose logic moved; import specific helpers from processing modules")
+from .processing.compose import *

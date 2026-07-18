@@ -1,6 +1,3 @@
-"""
-Edit helpers moved into processing
-"""
+"""Backward-compatible shim: re-export edit.py from services.image subpackages."""
 
-def edit_image(*args, **kwargs):
-    raise NotImplementedError("Image editing helpers moved; import from processing.image_ops or specific modules")
+from .processing.edit import *

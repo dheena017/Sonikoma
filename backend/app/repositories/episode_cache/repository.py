@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 
 try:
-    from repositories.scraper_repository import save_scrape_session, get_latest_scrape_session
+    from repositories.scraper import save_scrape_session, get_latest_scrape_session
 except ImportError:
     save_scrape_session = None
     get_latest_scrape_session = None

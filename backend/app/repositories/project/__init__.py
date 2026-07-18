@@ -1,11 +1,12 @@
-"""
-backend/app/repositories/project/__init__.py
-─────────────────────────────────────────────────────────────────────────────
-Public interface for project repository package.
-─────────────────────────────────────────────────────────────────────────────
-"""
+"""Project repository package.
 
-from repositories.project.project import (
+Domain wrapper functions are defined at the bottom of this file.
+"""
+# Import functions directly from their modules when needed
+
+from typing import List, Optional
+from domain.project import Panel, Project, Series, TokenLog
+from .project import (
     insert_project,
     _parse_audio_settings,
     get_all_projects,
@@ -18,13 +19,7 @@ from repositories.project.project import (
     delete_project,
     get_all_projects_admin,
 )
-from repositories.project.panels import (
-    insert_panels,
-    get_panels,
-    delete_panels,
-    get_panel_original_url,
-)
-from repositories.project.series import (
+from .series import (
     get_series_by_slug,
     delete_series,
     create_series,
@@ -34,61 +29,19 @@ from repositories.project.series import (
     delete_series_admin,
     update_series_admin,
 )
-from repositories.project.tokens import (
+from .panels import (
+    insert_panels,
+    get_panels,
+    delete_panels,
+    get_panel_original_url,
+)
+from .tokens import (
     insert_token_log,
     get_token_logs,
 )
 
-__all__ = [
-    "insert_project",
-    "_parse_audio_settings",
-    "get_all_projects",
-    "get_project",
-    "get_project_by_slug",
-    "get_series_by_slug",
-    "update_project",
-    "increment_project_tokens",
-    "update_project_full",
-    "cleanup_cached_url",
-    "delete_project",
-    "delete_series",
-    "insert_panels",
-    "get_panels",
-    "delete_panels",
-    "get_panel_original_url",
-    "create_series",
-    "get_series_for_user",
-    "add_chapter_to_series",
-    "get_chapters_for_series",
-    "insert_token_log",
-    "get_token_logs",
-    "get_all_projects_admin",
-    "delete_series_admin",
-    "update_series_admin",
-    # ── Domain-typed wrappers (return domain models instead of raw dicts) ──
-    "get_project_domain",
-    "get_all_projects_domain",
-    "get_panels_domain",
-    "get_series_domain",
-    "get_token_logs_domain",
-]
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Domain-typed wrappers
-#
-# These thin functions call the existing raw-dict repository functions and
-# convert their output into domain model objects via from_dict().
-#
-# Services that need business-rule methods (is_complete, has_speech, …) should
-# use these wrappers instead of the raw-dict variants.
-# ─────────────────────────────────────────────────────────────────────────────
-
-from typing import List, Optional
-
-from domain.project import Panel, Project, Series, TokenLog
-
-
+# Domain-typed wrapper functions
 def get_project_domain(project_id: str) -> Optional[Project]:
     """Return a Project domain object for the given id, or None if not found."""
     raw = get_project(project_id)

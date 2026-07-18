@@ -1,1 +1,1 @@
-from .compound_processor import *
+"""Compound service module."""

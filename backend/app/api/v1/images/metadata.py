@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException
 
 from media.image.ocr import extract_dialogue_from_panel, extract_full_ocr_data
 from schemas.image import MetadataRequest, OCRBase64Request
-import services.image.image_utils as img_utils
+import services.image.utils.image_utils as img_utils
 
 logger = logging.getLogger("sonikoma.api.images.metadata")
 router = APIRouter()

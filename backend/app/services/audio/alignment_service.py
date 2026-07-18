@@ -14,7 +14,7 @@ from typing import List, Dict, Any, Optional
 from media.audio.dialogue_aligner import align_dialogue_and_extract_peaks
 from engines.librosa.engine import get_librosa_engine
 from engines.whisper.engine import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
-import services.image.image_utils as img_utils
+import services.image.utils.image_utils as img_utils
 
 logger = logging.getLogger("sonikoma.services.audio.alignment_service")
 

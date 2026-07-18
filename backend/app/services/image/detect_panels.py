@@ -16,7 +16,7 @@ import numpy as np
 from PIL import Image
 
 # Import helper sub-modules
-from services.image.panel_box_utils import (
+from services.image.utils.panel_box_utils import (
     adjust_to_aspect_ratio,
     merge_overlapping_boxes
 )
@@ -28,7 +28,7 @@ from services.image.panel_grid_detect import (
     _detect_panels_grid_cv,
     _detect_panels_grid_pil
 )
-from services.image.panel_image_utils import (
+from services.image.utils.panel_image_utils import (
     trim_solid_borders,
     _filter_solid_noise
 )

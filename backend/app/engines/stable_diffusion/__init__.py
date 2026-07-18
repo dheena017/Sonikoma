@@ -1,1 +1,1 @@
-from .engine import get_stable_diffusion_engine, StableDiffusionEngine, StableDiffusionModel, GeneratedImage
+"""Stable Diffusion image generation engine."""

@@ -7,14 +7,14 @@ Consolidated API router registry. Enforces correct prefixes and tags.
 
 from fastapi import APIRouter
 
-# Import all specific sub-routers from api/v1/
-from api.v1.auth import auth_router
-from api.v1.projects import project_router, panel_router
-from api.v1.images import image_router, cleaner_router, imagemagick_router
-from api.v1.video import video_router, ffmpeg_router
-from api.v1.ai import ai_router, stable_diffusion_router
+# Import all specific sub-routers directly from their router modules
+from api.v1.auth.router import auth_router
+from api.v1.projects.router import project_router, panel_router
+from api.v1.images.router import image_router, cleaner_router, imagemagick_router
+from api.v1.video.router import video_router, ffmpeg_router
+from api.v1.ai.router import ai_router, stable_diffusion_router
 from api.v1.scraper import scraper_router
-from api.v1.export import export_router
+from api.v1.export.router import export_router
 from api.v1.health import health_router
 from api.v1.proxy import proxy_router
 from api.v1.audio import audio_router, librosa_router, whisper_router

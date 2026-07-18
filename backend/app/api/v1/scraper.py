@@ -34,7 +34,7 @@ from services.workflows.scraper import (
     scrape_webtoon_episodes_paginated,
     batch_scrape_series
 )
-from repositories.scraper_repository import save_scrape_session
+from repositories.scraper import save_scrape_session
 from services.scraper.scraper_service import (
     scrape_and_initialize_project,
     generate_storyboard_and_video,

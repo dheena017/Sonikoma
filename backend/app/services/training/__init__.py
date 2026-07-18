@@ -1,1 +1,1 @@
-from .training_monitor import *
+"""Training service module."""

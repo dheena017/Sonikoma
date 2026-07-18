@@ -19,11 +19,11 @@ Real implementations live in:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from services.image.edit import (
+from services.image.processing.edit import (
     apply_image_edits_service,
     transform_image_service,
 )
-from services.image.compose import (
+from services.image.processing.compose import (
     merge_images_service,
     execute_splits_service,
     download_zip_service,
@@ -32,7 +32,7 @@ from services.image.layers import (
     extract_panel_layers_service,
     debug_yolo_detections_service,
 )
-from services.image.bubbles import (
+from services.image.processing.bubbles import (
     bubble_cleaning_service,
     bubble_cleaning_batch_service,
 )

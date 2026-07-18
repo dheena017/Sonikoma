@@ -10,7 +10,7 @@ import logging
 import numpy as np
 from typing import List, Dict, Tuple, Optional
 
-from services.image.panel_box_utils import protect_slice_x, protect_slice_y
+from services.image.utils.panel_box_utils import protect_slice_x, protect_slice_y
 
 logger = logging.getLogger("sonikoma.services.image.panel_webtoon_detect")
 

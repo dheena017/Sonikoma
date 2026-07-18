@@ -14,7 +14,7 @@ from api.v1.auth.profile import router as profile_router
 from api.v1.auth.avatar import router as avatar_router
 from api.v1.auth.preferences import router as preferences_router
 from api.v1.auth.api_keys import router as api_keys_router
-from api.v1.auth.settings import router as settings_router
+from api.v1.auth.admin_settings import router as settings_router
 from api.v1.auth.password import router as password_router
 from api.v1.auth.oauth import router as oauth_router
 
