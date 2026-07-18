@@ -12,7 +12,7 @@ class ProjectService:
         self.repo = repo or self._default_repo()
 
     def _default_repo(self):
-        from repositories.project_repository import (
+        from repositories.project import (
             get_project,
             get_project_by_slug,
             insert_project,

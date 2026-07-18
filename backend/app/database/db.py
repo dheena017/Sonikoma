@@ -10,11 +10,11 @@ intercept reads and writes (like DB_PATH) for runtime compatibility with tests.
 import sys
 import types
 import database.connection as _conn
-import repositories.user_repository as _user
-import repositories.project_repository as _proj
-import repositories.scraper_repository as _scrape
-import repositories.youtube_repository as _yt
-import repositories.system_repository as _sys
+import repositories.user as _user
+import repositories.project as _proj
+import repositories.scraper as _scrape
+import repositories.youtube as _yt
+import repositories.system as _sys
 
 _submodules = [_conn, _user, _proj, _scrape, _yt, _sys]
 

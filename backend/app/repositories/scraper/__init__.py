@@ -15,7 +15,7 @@ from database.connection import (
     get_db_connection
 )
 
-logger = logging.getLogger("sonikoma.repositories.scraper_repository")
+logger = logging.getLogger("sonikoma.repositories.scraper")
 
 def save_scrape_session(url: str, image_urls: List[str]) -> None:
     """Save a scrape session result."""

@@ -27,7 +27,7 @@ from core.settings import BACKEND_PORT
 from backend.schemas.health import CustomLogPayload
 
 # Import repository functions directly
-from repositories.system_repository import (
+from repositories.system import (
     get_db_stats,
     get_system_logs,
     wipe_system_logs

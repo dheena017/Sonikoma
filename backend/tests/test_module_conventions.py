@@ -30,10 +30,10 @@ def test_media_engine_wrappers_resolve_to_canonical_modules():
 
 
 def test_repository_modules_are_compatibility_shims():
-    project_repo = importlib.import_module("repositories.project_repository")
-    system_repo = importlib.import_module("repositories.system_repository")
-    user_repo = importlib.import_module("repositories.user_repository")
+    project_repo = importlib.import_module("repositories.project")
+    system_repo = importlib.import_module("repositories.system")
+    user_repo = importlib.import_module("repositories.user")
 
-    assert project_repo.__file__.endswith("project_repository.py")
-    assert system_repo.__file__.endswith("system_repository.py")
-    assert user_repo.__file__.endswith("user_repository.py")
+    assert project_repo.__file__.endswith("__init__.py")
+    assert system_repo.__file__.endswith("__init__.py")
+    assert user_repo.__file__.endswith("__init__.py")

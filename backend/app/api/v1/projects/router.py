@@ -23,7 +23,7 @@ from backend.schemas.project import (
     BatchDeleteRequest,
     DetectPanelsBase64Request,
 )
-from repositories.project_repository import (
+from repositories.project import (
     get_all_projects,
     get_project,
     get_project_by_slug,
@@ -37,7 +37,7 @@ from repositories.project_repository import (
     delete_project,
     get_token_logs,
 )
-from repositories.user_repository import write_audit_log
+from repositories.user import write_audit_log
 from database.connection import get_db_connection, unwrap_proxy_url
 from api.v1.projects._helpers import wrap_proxy_url
 from api.v1.projects.update import _build_panel_dicts

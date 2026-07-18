@@ -16,7 +16,7 @@ from fastapi.responses import RedirectResponse
 
 from core.settings import APP_URL
 from core.security import get_password_hash, create_access_token
-from repositories.user_repository import (
+from repositories.user import (
     get_user_by_email,
     create_user_relational,
     update_user,

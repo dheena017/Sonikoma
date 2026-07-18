@@ -23,7 +23,7 @@ from backend.schemas.auth import (
     AdminUpdateProject,
     AnnouncementCreateRequest
 )
-from repositories.user_repository import (
+from repositories.user import (
     get_user_by_id,
     update_user,
     delete_user,
@@ -32,7 +32,7 @@ from repositories.user_repository import (
     write_audit_log,
     get_all_users
 )
-from repositories.system_repository import (
+from repositories.system import (
     get_platform_settings,
     update_platform_settings,
     get_global_audit_logs,
