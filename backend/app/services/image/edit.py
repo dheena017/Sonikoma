@@ -17,6 +17,7 @@ from PIL import Image
 import services.image.image_utils as img_utils
 from core.cache import stitched_cache, edit_history
 from database.storage.supabase_storage import upload_to_supabase_bucket
+from repositories.project.panels import save_edit_history
 
 logger = logging.getLogger("sonikoma.services.image.edit")
 
@@ -106,8 +107,8 @@ async def apply_image_edits_service(
     stitched_cache.set(unique_id, {"data": img_buffer, "content_type": content_type})
     edit_history.set(new_url, url)
     try:
-        from database import db
-        db.save_edit_history(new_url, url)
+
+        save_edit_history(new_url, url)
     except Exception:
         pass
 
@@ -150,8 +151,8 @@ async def transform_image_service(url: str, trans_type: str, value: str) -> Dict
     stitched_cache.set(unique_id, {"data": out_bytes, "content_type": "image/jpeg"})
     edit_history.set(proxy_url, url)
     try:
-        from database import db
-        db.save_edit_history(proxy_url, url)
+
+        save_edit_history(proxy_url, url)
     except Exception:
         pass
 

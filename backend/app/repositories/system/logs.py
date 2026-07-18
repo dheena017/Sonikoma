@@ -9,8 +9,8 @@ connection module globals.
 import logging
 from typing import List, Dict, Any, Optional
 
-from database.connection import get_db_connection
-import database.connection as db_conn
+from database.engine import get_db_connection
+from database import bootstrap
 from repositories.system.settings import get_platform_settings
 
 logger = logging.getLogger("sonikoma.repositories.system.logs")
@@ -34,15 +34,15 @@ def insert_system_log(level: str, module: str, message: str, details: Optional[s
     """
     Inserts a log entry into the database.
     """
-    if db_conn._should_skip_system_log_persistence():
+    if bootstrap._should_skip_system_log_persistence():
         return
 
     import datetime
 
-    with db_conn._db_init_lock:
-        if db_conn._should_skip_system_log_persistence():
+    with bootstrap._db_init_lock:
+        if bootstrap._should_skip_system_log_persistence():
             return
-        db_conn._system_log_persist_in_progress = True
+        bootstrap._system_log_persist_in_progress = True
 
     try:
         conn = get_db_connection()
@@ -60,8 +60,8 @@ def insert_system_log(level: str, module: str, message: str, details: Optional[s
         finally:
             conn.close()
     finally:
-        with db_conn._db_init_lock:
-            db_conn._system_log_persist_in_progress = False
+        with bootstrap._db_init_lock:
+            bootstrap._system_log_persist_in_progress = False
 
 
 def get_system_logs(limit: int = 200, offset: int = 0, level: Optional[str] = None, module: Optional[str] = None, search: Optional[str] = None) -> List[Dict[str, Any]]:

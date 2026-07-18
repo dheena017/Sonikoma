@@ -8,7 +8,7 @@ Platform settings management operations.
 import logging
 from typing import Dict
 
-from database.connection import get_db_connection
+from database.engine import get_db_connection
 
 logger = logging.getLogger("sonikoma.repositories.system.settings")
 

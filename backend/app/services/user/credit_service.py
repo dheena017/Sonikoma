@@ -2,7 +2,8 @@ import logging
 import uuid
 from typing import Any, Dict, List
 
-from database.connection import _is_postgres, get_db_connection
+from database.config import is_postgres as _is_postgres
+from database.engine import get_db_connection
 
 logger = logging.getLogger("sonikoma.services.user.credit_service")
 

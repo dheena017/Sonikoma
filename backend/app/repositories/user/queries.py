@@ -7,7 +7,7 @@ Queries for fetching user records.
 
 from typing import List, Dict, Any, Optional
 
-from database.connection import get_db_connection
+from database.engine import get_db_connection
 
 
 def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:

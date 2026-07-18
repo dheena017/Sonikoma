@@ -37,3 +37,10 @@ def test_repository_modules_are_compatibility_shims():
     assert project_repo.__file__.endswith("project_repository.py")
     assert system_repo.__file__.endswith("system_repository.py")
     assert user_repo.__file__.endswith("user_repository.py")
+
+
+def test_project_panels_exposes_edit_history_helpers():
+    panels_module = importlib.import_module("repositories.project.panels")
+
+    assert hasattr(panels_module, "save_edit_history")
+    assert hasattr(panels_module, "get_edit_history")

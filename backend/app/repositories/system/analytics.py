@@ -9,7 +9,7 @@ import uuid
 import random
 from typing import Dict
 
-from database.connection import get_db_connection
+from database.engine import get_db_connection
 
 
 def get_db_stats() -> Dict[str, int]:

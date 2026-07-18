@@ -14,8 +14,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 
 from api.dependencies.auth import get_current_user
-from schemas.export import YouTubeExportRequest
-from database.db import log_youtube_publication
+from backend.schemas.export import YouTubeExportRequest
+from repositories.youtube_repository import log_youtube_publication
 from services.export.youtube.workflow import execute_youtube_upload_workflow
 
 try:

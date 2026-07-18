@@ -18,6 +18,7 @@ import services.image.image_utils as img_utils
 from core.cache import stitched_cache, edit_history
 from database.storage.supabase_storage import upload_to_supabase_bucket
 from providers.media.imagemagick import get_imagemagick_engine, ResizeMode, FilterType
+from repositories.project.panels import save_edit_history
 
 logger = logging.getLogger("sonikoma.services.image.transform")
 
@@ -96,8 +97,8 @@ async def transform_image_service(
     stitched_cache.set(unique_id, {"data": out_bytes, "content_type": content_type})
     edit_history.set(proxy_url, url)
     try:
-        from database import db
-        db.save_edit_history(proxy_url, url)
+
+        save_edit_history(proxy_url, url)
     except Exception:
         pass
 

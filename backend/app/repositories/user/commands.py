@@ -7,7 +7,7 @@ Commands for creating, updating, and deleting user records.
 
 from typing import Dict, Any
 
-from database.connection import get_db_connection
+from database.engine import get_db_connection
 
 
 def create_user(data: Dict[str, Any]) -> None:

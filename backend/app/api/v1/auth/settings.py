@@ -42,13 +42,13 @@ from repositories.system_repository import (
     reset_platform_settings,
     purge_global_cache
 )
-from database.db import (
-    get_all_projects_admin,
-    get_global_analytics,
+from repositories.project.project import get_all_projects_admin
+from repositories.system.analytics import get_global_analytics
+from repositories.project.series import (
     delete_series_admin,
     update_series_admin,
-    admin_query_db
 )
+from repositories.system.admin import admin_query_db
 
 logger = logging.getLogger("sonikoma.auth.settings")
 router = APIRouter()

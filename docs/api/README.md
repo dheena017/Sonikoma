@@ -1,28 +1,32 @@
-# 🔌 API Documentation Index
+# API Documentation
 
-Welcome to the Sonikoma API documentation. The API is modularized by domain to reflect the backend architecture.
+Welcome to the Sonikoma API documentation. This directory contains detailed references for the REST APIs exposed by the Python FastAPI backend.
 
-## 📂 API Domains
+## Table of Contents
 
-- [🔐 Authentication](./auth.md) - User registration, login, and profile management.
-- [🩺 System & Diagnostics](./system.md) - Health checks, metrics, and logs.
-- [🎨 Image Processing](./image.md) - Editing, merging, and cleaning panels.
-- [🤖 AI & Computer Vision](./ai.md) - Detection, analysis, and smart cropping.
-- [🕸️ Scraper & Generation](./scraper.md) - Web crawling and storyboard generation.
-- [🗣️ Audio & Video](./video.md) - TTS and video compilation.
-- [📂 Projects](./projects.md) - CRUD operations for user projects.
+- [Endpoints Overview](./endpoints.md) - Summary of available REST endpoints, authentication requirements, and data models.
 
----
+## Authentication
 
-## 📟 Architecture Overview
+Most endpoints (except `/api/health` and `/api/v1/auth/login`) require a valid JSON Web Token (JWT) passed in the `Authorization` header as a Bearer token:
 
-The Node.js backend serves as a gateway proxying to specialized Python modules (FastAPI) for resource-intensive tasks like image processing and AI analysis.
+```
+Authorization: Bearer <your_jwt_token>
+```
 
-### 🐍 Python FastAPI Service
+## Error Handling
 
-FastAPI runs on a child thread or separate worker (usually port **8000**) handling resource-intensive processes.
+The API uses standard HTTP status codes. Common codes include:
+- `200 OK`: Successful request.
+- `400 Bad Request`: Validation error in the request payload.
+- `401 Unauthorized`: Missing or invalid JWT token.
+- `403 Forbidden`: Authenticated, but lacking permissions for the action.
+- `404 Not Found`: Resource does not exist.
+- `500 Internal Server Error`: An unexpected failure occurred on the server.
 
-| Endpoint         | Method | Input Parameters         | Description                                                           |
-| :--------------- | :----- | :----------------------- | :-------------------------------------------------------------------- |
-| `/process`       | `POST` | `url`, `method`, `voice` | Full automated compilation: Scrape → OCR → TTS → video compilation.   |
-| `/detect-panels` | `POST` | `image_path`             | OpenCV contour scanner returning detected panel bounding coordinates. |
+Error responses typically follow this JSON structure:
+```json
+{
+  "detail": "Descriptive error message here."
+}
+```

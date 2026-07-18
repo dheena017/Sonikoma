@@ -1,8 +1,15 @@
+"""
+Service layer for managing projects and chapters.
+
+This module acts as the core business logic orchestrator for Project entities.
+It delegates persistence to the repository layer and ensures no data access logic leaks into the API.
+"""
+
 import os
 import logging
 from typing import Dict, Any, Optional
 
-from database.connection import unwrap_proxy_url
+from database.transaction import unwrap_proxy_url
 
 logger = logging.getLogger("sonikoma.services.project")
 
@@ -228,7 +235,7 @@ class ProjectService:
         return usage_metrics
 
     def get_series_details(self, series_id_or_slug: str, current_user_id: str) -> Optional[Dict[str, Any]]:
-        from database.connection import get_db_connection
+        from database.engine import get_db_connection
         conn = get_db_connection()
         row = conn.execute("SELECT * FROM series WHERE id = ?", (series_id_or_slug,)).fetchone()
         if not row:

@@ -63,7 +63,7 @@ async def lifespan(app: FastAPI):
     logging.getLogger().addFilter(EndpointFilter())
 
     # Initialize database inside the worker process and defer some maintenance work
-    from database.db import init_db
+    from database.bootstrap import init_db
     init_db()
 
     # Clean up stale training lock file on startup (safely using local paths)
@@ -81,7 +81,7 @@ async def lifespan(app: FastAPI):
     # Run startup maintenance asynchronously so the API can start responding quickly
     async def _startup_maintenance():
         try:
-            from database.db import prune_system_logs
+            from repositories.system.logs import prune_system_logs
             pruned = prune_system_logs()
             if pruned > 0:
                 logger.info(f"[System] Startup maintenance: Pruned {pruned} old log entries.")

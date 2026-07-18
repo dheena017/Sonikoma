@@ -24,7 +24,7 @@ from schemas.scraper import (
 )
 from core.security import SECRET_KEY
 
-from database import db
+
 from services.scraper.scraper import (
     scrape_webtoon_episodes,
     extract_webtoon_url
@@ -34,6 +34,7 @@ from services.workflows.scraper import (
     scrape_webtoon_episodes_paginated,
     batch_scrape_series
 )
+from repositories.scraper_repository import save_scrape_session
 from services.scraper.scraper_service import (
     scrape_and_initialize_project,
     generate_storyboard_and_video,
@@ -230,7 +231,7 @@ async def process_url(body: ProcessUrlRequest):
 @router.put("/save-scraped-images", summary="Update scraped images cache")
 async def save_scraped_images(body: SaveScrapedImagesRequest):
     try:
-        db.save_scrape_session(extract_webtoon_url(body.url), body.images)
+        save_scrape_session(extract_webtoon_url(body.url), body.images)
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

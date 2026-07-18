@@ -5,7 +5,7 @@ Shared utilities used across all project sub-modules.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from database.connection import unwrap_proxy_url
+from database.transaction import unwrap_proxy_url
 
 
 def wrap_proxy_url(url_str: str) -> str:

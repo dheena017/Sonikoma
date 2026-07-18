@@ -11,9 +11,7 @@ import logging
 from typing import List, Dict, Any, Optional
 
 # Import DB connection helpers
-from database.connection import (
-    get_db_connection
-)
+from database.engine import get_db_connection
 
 logger = logging.getLogger("sonikoma.repositories.scraper_repository")
 

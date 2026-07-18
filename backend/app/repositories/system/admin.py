@@ -5,7 +5,7 @@ Admin console raw database query handler.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from database.connection import get_db_connection
+from database.engine import get_db_connection
 
 
 def admin_query_db(table: str, limit: int = 100, offset: int = 0) -> list[dict]:

@@ -13,14 +13,17 @@ import asyncio
 import logging
 from typing import List, Optional, Dict, Any
 
-from database import db
-from core.utils.url_utils import extract_webtoon_url, parse_webtoon_url
+
+from services.scraper.url_utils import extract_webtoon_url, parse_webtoon_url
 from core.utils.id_utils import generate_project_id
 from core.cache import stitched_cache, edit_history
 import services.image.image_utils as img_utils
 from services.scraper.scraper import scrape_images_from_url, scraped_metadata_cache
-from media.ai.storyboard_ai import generate_dynamic_panels
-from media.video.video import compile_video_from_panels
+from backend.media.ai.storyboard_ai import generate_dynamic_panels
+from backend.media.video.video import compile_video_from_panels
+from repositories.scraper_repository import save_scrape_session, get_latest_scrape_session
+from repositories.project.panels import save_edit_history, insert_panels
+from repositories.project.project import update_project, insert_project, get_project
 
 logger = logging.getLogger("sonikoma.services.scraper.scraper_service")
 
@@ -106,7 +109,7 @@ async def scrape_and_initialize_project(
                 stitched_cache.set(cache_key, stitched_url)
                 edit_history.set(stitched_url, proxied_urls[0])
                 try:
-                    db.save_edit_history(stitched_url, proxied_urls[0])
+                    save_edit_history(stitched_url, proxied_urls[0])
                 except Exception:
                     pass
                 final_images = [stitched_url]
@@ -118,12 +121,12 @@ async def scrape_and_initialize_project(
 
     resolved_project_id = project_id or generate_project_id()
     if final_images and not resolved_project_id.startswith("temp_"):
-        db.save_scrape_session(normalized_url, final_images)
+        save_scrape_session(normalized_url, final_images)
 
     determined_cover = parsed.get("cover_image") or (final_images[0] if final_images else "")
 
     if resolved_project_id and not resolved_project_id.startswith("temp_"):
-        db.insert_project({
+        insert_project({
             "project_id": resolved_project_id,
             "url": normalized_url,
             "title": parsed.get("title") or "Untitled Project",
@@ -142,7 +145,7 @@ async def scrape_and_initialize_project(
         for u in final_images
     }
 
-    proj = db.get_project(resolved_project_id) if not resolved_project_id.startswith("temp_") else None
+    proj = get_project(resolved_project_id) if not resolved_project_id.startswith("temp_") else None
 
     return {
         "success": bool(final_images),
@@ -207,20 +210,20 @@ async def generate_storyboard_and_video(
 
         if user_id and not resolved_project_id.startswith("temp_"):
             cover = parsed.get("cover_image") or (resolved_panels[0].get("image_url") if resolved_panels else "")
-            db.insert_project({
+            insert_project({
                 "project_id": resolved_project_id, "url": url, "title": parsed["title"], "genre": parsed["genre"],
                 "episode": parsed["episode"], "author": parsed.get("author"), "cover_image": cover,
                 "synopsis": parsed.get("synopsis"), "status": "pending", "panels_count": len(resolved_panels),
                 "user_id": user_id
             })
-            db.insert_panels(resolved_project_id, resolved_panels)
+            insert_panels(resolved_project_id, resolved_panels)
 
         try:
             videos_dir = os.path.join(os.getcwd(), "data", "media")
             compiled_filename = await compile_video_from_panels(resolved_project_id, resolved_panels, videos_dir)
             video_url = f"/videos/{compiled_filename}"
             if user_id and not resolved_project_id.startswith("temp_"):
-                db.update_project(resolved_project_id, {"video_url": video_url})
+                update_project(resolved_project_id, {"video_url": video_url})
         except Exception:
             video_url = None
 
@@ -236,20 +239,20 @@ async def generate_storyboard_and_video(
 
     if user_id and not resolved_project_id.startswith("temp_"):
         cover = parsed.get("cover_image") or (response_panels[0].get("image_url") if response_panels else "")
-        db.insert_project({
+        insert_project({
             "project_id": resolved_project_id, "url": url, "title": parsed["title"], "genre": parsed["genre"],
             "episode": parsed["episode"], "author": parsed.get("author"), "cover_image": cover,
             "synopsis": parsed.get("synopsis"), "status": "pending", "panels_count": len(response_panels),
             "user_id": user_id
         })
-        db.insert_panels(resolved_project_id, response_panels)
+        insert_panels(resolved_project_id, response_panels)
 
     try:
         videos_dir = os.path.join(os.getcwd(), "data", "media")
         compiled_filename = await compile_video_from_panels(resolved_project_id, response_panels, videos_dir)
         video_url = f"/videos/{compiled_filename}"
         if user_id and not resolved_project_id.startswith("temp_"):
-            db.update_project(resolved_project_id, {"video_url": video_url})
+            update_project(resolved_project_id, {"video_url": video_url})
     except Exception:
         video_url = None
 
@@ -282,7 +285,7 @@ async def generate_storyboard_only_service(
 
     scraped_urls = await scrape_images_from_url(url, bypass_cache=False)
     if not scraped_urls:
-        session = db.get_latest_scrape_session(url)
+        session = get_latest_scrape_session(url)
         if session:
             scraped_urls = session.get("image_urls", [])
 
@@ -296,12 +299,12 @@ async def generate_storyboard_only_service(
 
     if user_id and not project_id.startswith("temp_"):
         cover = parsed.get("cover_image") or (response_panels[0].get("image_url") if response_panels else "")
-        db.insert_project({
+        insert_project({
             "project_id": project_id, "url": url, "title": parsed["title"], "genre": parsed["genre"],
             "episode": parsed["episode"], "author": parsed.get("author"), "cover_image": cover,
             "synopsis": parsed.get("synopsis"), "status": "pending", "panels_count": len(response_panels),
             "user_id": user_id
         })
-        db.insert_panels(project_id, response_panels)
+        insert_panels(project_id, response_panels)
 
     return {"success": True, "project_id": project_id, "panels": response_panels}

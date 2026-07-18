@@ -1,11 +1,17 @@
+from repositories.user import commands as db_commands
+
 import os
 import sys
 import tempfile
 import unittest
+from database import config
+from database import bootstrap
+from repositories.user.queries import get_user_by_id
+from repositories.project.project import get_project, insert_project
+from database.bootstrap import init_db
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'app'))
 
-import database.db as db
 
 
 class InsertProjectTests(unittest.TestCase):
@@ -14,15 +20,15 @@ class InsertProjectTests(unittest.TestCase):
         db_path = os.path.join(temp_dir, 'test.db')
         schema_path = os.path.join(os.path.dirname(__file__), '..', 'app', 'database', 'schema.sql')
 
-        db.DB_PATH = db_path
-        db.SCHEMA_PATH = schema_path
-        db._db_initialized = False
-        db._is_postgres = False
+        config.DB_PATH = db_path
+        config.SCHEMA_PATH = schema_path
+        bootstrap._db_initialized = False
+        config.is_postgres = False
 
-        db.init_db()
+        init_db()
 
         project_id = 'proj_test_123'
-        db.insert_project({
+        insert_project({
             'project_id': project_id,
             'user_id': 'system_default',
             'title': 'Copycat',
@@ -36,11 +42,11 @@ class InsertProjectTests(unittest.TestCase):
             'synopsis': 'Test synopsis',
         })
 
-        project = db.get_project(project_id)
+        project = get_project(project_id)
         self.assertIsNotNone(project)
         self.assertEqual(project['project_id'], project_id)
         self.assertEqual(project['title'], 'Copycat')
-        self.assertIsNotNone(db.get_user_by_id('system_default'))
+        self.assertIsNotNone(get_user_by_id('system_default'))
 
 
 if __name__ == '__main__':

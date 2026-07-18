@@ -38,7 +38,8 @@ from repositories.project_repository import (
     get_token_logs,
 )
 from repositories.user_repository import write_audit_log
-from database.connection import get_db_connection, unwrap_proxy_url
+from database.engine import get_db_connection
+from database.transaction import unwrap_proxy_url
 from api.v1.projects._helpers import wrap_proxy_url
 from api.v1.projects.update import _build_panel_dicts
 from api.v1.projects.files import _detect
