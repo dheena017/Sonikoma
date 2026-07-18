@@ -23,7 +23,7 @@ class PackageChecker(BaseChecker):
                         checker_name=self.name,
                         file_path=str(d),
                         line_number=0,
-                        message=f"Directory '{d.relative_to(root_path)}' contains Python files but no __init__.py (Orphan Package).",
+                        message=f"Directory '{d.relative_to(root_path) if d.is_relative_to(root_path) else d.name}' contains Python files but no __init__.py (Orphan Package).",
                         severity=Severity.LOW
                     )
                 )

@@ -1,2 +1,3 @@
 [console_scripts]
 healthcheck = backend_health_checker.cli.main:app
+healthcheck-lsp = backend_health_checker.integrations.lsp:main

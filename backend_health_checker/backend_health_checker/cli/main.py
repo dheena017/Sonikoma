@@ -12,6 +12,8 @@ from backend_health_checker.core.engine import HealthCheckEngine
 from backend_health_checker.checkers import *
 from backend_health_checker.scanners import *
 from backend_health_checker.reporters import Reporter
+from backend_health_checker.plugins.manager import PluginManager
+from backend_health_checker.fixes.engine import AutoFixEngine
 import backend_health_checker
 
 app = typer.Typer(help="Professional Backend Health Checker for Python Projects.")
@@ -41,9 +43,15 @@ def run_engine(path: str, config_path: Optional[Path], selected_checkers=None) -
         MetricsScanner
     ]
 
+    # Load core checkers
     for checker in all_checkers:
         if not selected_checkers or checker.__name__ in selected_checkers:
             engine.register_checker(checker)
+
+    # Dynamically load plugins
+    for plugin_checker in PluginManager.load_plugins():
+        if not selected_checkers or plugin_checker.__name__ in selected_checkers:
+            engine.register_checker(plugin_checker)
 
     with Progress(
         SpinnerColumn(),
@@ -111,6 +119,18 @@ def scan(
     print_summary(engine)
 
 @app.command()
+def fix(
+    path: str = typer.Argument(".", help="Path to the project root"),
+    config: Optional[Path] = typer.Option(None, "--config", "-c", help="Path to config file")
+):
+    """Automatically fix safe, detectable issues (like unused imports) via LibCST."""
+    engine = run_engine(path, config)
+    console.print("[cyan]Applying automatic fixes...[/cyan]")
+    fix_engine = AutoFixEngine(engine.issues)
+    fix_engine.fix_all()
+    console.print("[green]Auto-fix complete. Run scan again to verify.[/green]")
+
+@app.command()
 def report(
     path: str = typer.Argument(".", help="Path to the project root"),
     out_dir: Path = typer.Option("reports", "--out", "-o", help="Directory to save reports"),
@@ -127,11 +147,17 @@ def report(
     reporter.to_csv(out_dir / "report.csv")
     reporter.to_txt(out_dir / "report.txt")
     reporter.to_markdown(out_dir / "report.md")
+    reporter.to_sarif(out_dir / "report.sarif")
+
+    from backend_health_checker.history.tracker import HistoryTracker
+    tracker = HistoryTracker(Path(path) / ".healthcheck" / "history.db")
+    tracker.record_scan(engine.metrics, len(engine.issues))
+    trends = tracker.get_trends()
 
     # Locate templates dir safely
     pkg_root = Path(backend_health_checker.__file__).parent
     template_dir = pkg_root / "templates"
-    reporter.to_html(out_dir / "dashboard.html", template_dir)
+    reporter.to_html(out_dir / "dashboard.html", template_dir, trends)
 
     console.print("[green]Reports generated successfully![/green]")
 

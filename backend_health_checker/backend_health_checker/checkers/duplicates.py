@@ -1,7 +1,7 @@
 import ast
 import hashlib
 from pathlib import Path
-from typing import List, Dict, Set
+from typing import List, Dict
 from .base import BaseChecker
 from backend_health_checker.models.issues import Issue, Severity
 from backend_health_checker.core.ast_cache import ast_cache
