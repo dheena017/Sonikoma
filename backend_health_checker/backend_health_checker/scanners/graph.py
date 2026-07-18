@@ -1,7 +1,7 @@
 import ast
 import networkx as nx
 from pathlib import Path
-from typing import List, Dict, Set
+from typing import List
 from backend_health_checker.core.ast_cache import ast_cache
 
 class DependencyGraphScanner:

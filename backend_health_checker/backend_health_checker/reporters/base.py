@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List
 from jinja2 import Environment, FileSystemLoader
 from backend_health_checker.models.issues import Issue, ProjectMetrics
+from backend_health_checker.exporters.sarif import SarifExporter
 
 class Reporter:
     def __init__(self, issues: List[Issue], metrics: ProjectMetrics):
@@ -70,11 +71,15 @@ class Reporter:
             lines.append(f"| {issue.severity.value.upper()} | {issue.checker_name} | {loc} | {issue.message} |")
         output_path.write_text("\n".join(lines) + "\n")
 
-    def to_html(self, output_path: Path, template_dir: Path):
+    def to_sarif(self, output_path: Path):
+        SarifExporter.export(self.issues, output_path)
+
+    def to_html(self, output_path: Path, template_dir: Path, trends: list = None):
         env = Environment(loader=FileSystemLoader(str(template_dir)))
         template = env.get_template("dashboard.html")
         html_content = template.render(
             issues=self.issues,
-            metrics=self.metrics
+            metrics=self.metrics,
+            trends=trends or []
         )
         output_path.write_text(html_content, encoding="utf-8")

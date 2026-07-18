@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "backend-health-checker"
-version = "0.1.0"
-description = "A professional backend health checker for Python projects."
+version = "1.0.0"
+description = "Enterprise Static Analysis Framework for Python."
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [
@@ -18,10 +18,14 @@ dependencies = [
     "jinja2>=3.1.0",
     "networkx>=3.0",
     "pyyaml>=6.0",
+    "libcst>=1.0.0",
+    "pygls>=1.1.2",
+    "lsprotocol>=3.16.0"
 ]
 
 [project.scripts]
 healthcheck = "backend_health_checker.cli.main:app"
+healthcheck-lsp = "backend_health_checker.integrations.lsp:main"
 
 [project.optional-dependencies]
 dev = [

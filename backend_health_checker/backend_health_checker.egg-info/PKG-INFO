@@ -1,7 +1,7 @@
 Metadata-Version: 2.4
 Name: backend-health-checker
-Version: 0.1.0
-Summary: A professional backend health checker for Python projects.
+Version: 1.0.0
+Summary: Enterprise Static Analysis Framework for Python.
 Author-email: Jules <jules@example.com>
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
@@ -11,6 +11,9 @@ Requires-Dist: pydantic>=2.0.0
 Requires-Dist: jinja2>=3.1.0
 Requires-Dist: networkx>=3.0
 Requires-Dist: pyyaml>=6.0
+Requires-Dist: libcst>=1.0.0
+Requires-Dist: pygls>=1.1.2
+Requires-Dist: lsprotocol>=3.16.0
 Provides-Extra: dev
 Requires-Dist: pytest>=7.0; extra == "dev"
 

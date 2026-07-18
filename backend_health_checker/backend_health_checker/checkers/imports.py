@@ -1,10 +1,9 @@
 import ast
 from pathlib import Path
-from typing import List, Set, Dict
+from typing import List
 from .base import BaseChecker
 from backend_health_checker.models.issues import Issue, Severity
 from backend_health_checker.core.ast_cache import ast_cache
-import threading
 
 class ImportChecker(BaseChecker):
     def check_file(self, file_path: Path) -> List[Issue]:

@@ -42,3 +42,8 @@ __all__.extend([
     "PackageChecker",
     "MetricsScanner"
 ])
+from .types_async import TypeHintChecker
+
+__all__.extend([
+    "TypeHintChecker"
+])
