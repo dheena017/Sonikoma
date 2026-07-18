@@ -1,5 +1,5 @@
 """
-backend/app/services/video/ffmpeg_types.py
+backend/app/engines/video/ffmpeg_types.py
 ─────────────────────────────────────────────────────────────────────────────
 Video and FFmpeg processing specifications: enums and metadata dataclasses.
 ─────────────────────────────────────────────────────────────────────────────

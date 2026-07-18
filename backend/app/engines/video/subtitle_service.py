@@ -1,5 +1,5 @@
 """
-backend/app/services/video/subtitle_service.py
+backend/app/engines/video/subtitle_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Subtitles rendering service.
 ─────────────────────────────────────────────────────────────────────────────
@@ -8,7 +8,7 @@ Subtitles rendering service.
 import logging
 import subprocess
 import asyncio
-from services.video.ffmpeg_commands import build_add_subtitles_cmd
+from engines.video.ffmpeg_commands import build_add_subtitles_cmd
 
 logger = logging.getLogger("sonikoma.services.video.subtitles")
 

@@ -1,13 +1,13 @@
 """
-backend/app/services/video/ffmpeg_commands.py
+backend/app/engines/video/ffmpeg_commands.py
 ─────────────────────────────────────────────────────────────────────────────
 Pure command-line construction helpers for FFmpeg and FFprobe executions.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 from typing import List, Optional
-from services.video.ffmpeg_types import FilterType
-from services.video.edit_helpers import get_ffmpeg_filter_string
+from engines.video.ffmpeg_types import FilterType
+from engines.video.edit_helpers import get_ffmpeg_filter_string
 
 
 def build_ffprobe_cmd(ffprobe_path: str, video_path: str) -> List[str]:

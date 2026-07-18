@@ -1,5 +1,5 @@
 """
-backend/app/services/video/types.py
+backend/app/engines/video/types.py
 ─────────────────────────────────────────────────────────────────────────────
 Backward-compatible proxy re-exporting symbols from ffmpeg_types.py.
 ─────────────────────────────────────────────────────────────────────────────

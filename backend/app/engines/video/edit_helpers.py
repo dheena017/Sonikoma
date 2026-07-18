@@ -1,11 +1,11 @@
 """
-backend/app/services/video/edit_helpers.py
+backend/app/engines/video/edit_helpers.py
 ─────────────────────────────────────────────────────────────────────────────
 FFmpeg video visual filters mapping and command builder helper utilities.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from services.video.types import FilterType
+from engines.video.types import FilterType
 
 
 def get_ffmpeg_filter_string(filter_type: FilterType, intensity: float = 1.0) -> str:
