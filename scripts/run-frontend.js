@@ -451,12 +451,12 @@ async function start() {
   // Now start the Vite frontend dev server
   logger.info(`Starting Vite frontend...`);
 
-  const viteBin = path.resolve(__dirname, "../node_modules/vite/bin/vite.js");
+  const viteBin = path.resolve(__dirname, "../frontend/node_modules/vite/bin/vite.js");
   const configPath = path.resolve(__dirname, "../frontend/vite.config.ts");
   const rootDir = path.resolve(__dirname, "..");
 
   viteProcess = spawn("node", [viteBin, "--config", configPath], {
-    cwd: rootDir,
+    cwd: path.resolve(__dirname, "../frontend"),
     stdio: "inherit",
   });
 
