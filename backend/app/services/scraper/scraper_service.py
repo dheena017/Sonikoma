@@ -19,8 +19,8 @@ from core.utils.id_utils import generate_project_id
 from core.cache import stitched_cache, edit_history
 import services.image.utils.image_utils as img_utils
 from services.scraper.scraper import scrape_images_from_url, scraped_metadata_cache
-from backend.media.ai.storyboard_ai import generate_dynamic_panels
-from backend.media.video.video import compile_video_from_panels
+from media.ai.storyboard_ai import generate_dynamic_panels
+from services.video.video import compile_video_from_panels
 from repositories.scraper import save_scrape_session, get_latest_scrape_session
 from repositories.project.panels import save_edit_history, insert_panels
 from repositories.project.project import update_project, insert_project, get_project

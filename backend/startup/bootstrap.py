@@ -49,7 +49,7 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 import tempfile
 tempfile.tempdir = os.path.join(PROJECT_ROOT, 'data', 'temp')
 os.makedirs(tempfile.tempdir, exist_ok=True)
