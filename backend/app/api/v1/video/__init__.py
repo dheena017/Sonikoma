@@ -1,2 +1,0 @@
-"""Video API routes module."""
-

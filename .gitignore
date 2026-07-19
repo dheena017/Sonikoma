@@ -1,5 +1,4 @@
 node_modules/
-.venv/
 build/
 dist/
 coverage/
@@ -7,42 +6,14 @@ coverage/
 *.log
 .env*
 !.env.example
-# Local SQLite database files
-*.db
-*.db-wal
-*.db-shm
-# Persistent scraped panel image cache (binary blobs — do not commit)
-backend/database/image_cache/
-.llm-chat-history/
-data/
-*public
-
-# Python cache & bytecode
-__pycache__/
-*.py[cod]
-*$py.class
-.pytest_cache/
 
 # Editor & IDE settings
 .vscode/
 .idea/
 *.swp
 *.swo
-client_secrets.json
 
 # OS files
 Thumbs.db
 ehthumbs.db
 Desktop.ini
-
-# Test images / temp assets
-test_panel_input.png
-*.png_cropped
-*.png_clean_bubbles
-
-# Temporary scratch, workspace, and test directories
-scratch/
-temp/
-temp_test_combos/
-skills-lock.json
-verify_fix.cjs
