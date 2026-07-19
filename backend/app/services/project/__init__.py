@@ -1,1 +1,1 @@
-"""Project service module."""
+from .project_service import ProjectService
