@@ -14,18 +14,20 @@ class TestAutomaticTraining(unittest.TestCase):
     def setUp(self):
         # We will use a temp folder for training data to avoid polluting the actual one
         self.test_dir = tempfile.mkdtemp()
-        self.patcher_dir = patch("services.training_monitor.TRAINING_DATA_DIR", self.test_dir)
-        self.patcher_meta = patch("services.training_monitor.METADATA_FILE", os.path.join(self.test_dir, "training_metadata.json"))
+        self.patcher_dir = patch("services.training.training_monitor.TRAINING_DATA_DIR", self.test_dir)
+        self.patcher_meta = patch("services.training.training_monitor.METADATA_FILE", os.path.join(self.test_dir, "training_metadata.json"))
 
         self.patcher_dir.start()
         self.patcher_meta.start()
 
+        from services.training.training_monitor import status
         status.reset()
 
     def tearDown(self):
         self.patcher_dir.stop()
         self.patcher_meta.stop()
         shutil.rmtree(self.test_dir, ignore_errors=True)
+        from services.training.training_monitor import status
         status.reset()
 
     def create_mock_sample_pairs(self, count: int):
@@ -63,7 +65,7 @@ class TestAutomaticTraining(unittest.TestCase):
         self.assertEqual(loaded["last_trained_count"], 15)
         self.assertEqual(loaded["total_runs"], 2)
 
-    @patch("services.training_monitor.trigger_fine_tuning")
+    @patch("services.training.training_monitor.trigger_fine_tuning")
     def test_check_and_trigger_training_below_threshold(self, mock_trigger):
         mock_trigger.return_value = True
 
@@ -78,7 +80,7 @@ class TestAutomaticTraining(unittest.TestCase):
         meta = monitor.load_metadata()
         self.assertEqual(meta["last_trained_count"], 0)
 
-    @patch("services.training_monitor.trigger_fine_tuning")
+    @patch("services.training.training_monitor.trigger_fine_tuning")
     def test_check_and_trigger_training_at_threshold(self, mock_trigger):
         mock_trigger.return_value = True
 
@@ -94,9 +96,10 @@ class TestAutomaticTraining(unittest.TestCase):
         self.assertEqual(meta["last_trained_count"], 20)
         self.assertEqual(meta["total_runs"], 1)
 
-    @patch("services.training_monitor.trigger_fine_tuning")
+    @patch("services.training.training_monitor.trigger_fine_tuning")
     def test_lock_file_and_active_status_blocks_trigger(self, mock_trigger):
         # 1. Set status to is_training=True
+        from services.training.training_monitor import status
         status.update(is_training=True)
         self.create_mock_sample_pairs(20)
 
@@ -105,6 +108,7 @@ class TestAutomaticTraining(unittest.TestCase):
         mock_trigger.assert_not_called()
 
         # Reset training status
+        from services.training.training_monitor import status
         status.update(is_training=False)
 
         # 2. Create lock file manually to simulate active run

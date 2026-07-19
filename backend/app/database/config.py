@@ -13,7 +13,7 @@ DB_DIR = os.path.abspath(os.path.dirname(__file__))
 _BACKEND_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "..")
 )
-_PROJECT_ROOT = os.path.abspath(os.path.join(_BACKEND_ROOT, ".."))
+_PROJECT_ROOT = _BACKEND_ROOT
 DATA_DIR = os.path.join(_PROJECT_ROOT, "data")
 
 DB_PATH = os.path.join(DATA_DIR, "webtoon_local.db")
