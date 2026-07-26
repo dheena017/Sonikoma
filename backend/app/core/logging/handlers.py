@@ -20,13 +20,34 @@ listeners = set()
 ANSI_ESCAPE = re.compile(r'\x1b\[[0-9;]*[mK]')
 
 
+# Track last log message to suppress rapid infinite loop duplicates
+_last_emitted_msg = ""
+_last_emitted_time = 0.0
+_repeat_count = 0
+
+
 class UIStreamLogHandler(logging.Handler):
     def emit(self, record):
-        global log_seq
+        global log_seq, _last_emitted_msg, _last_emitted_time, _repeat_count
         try:
-            timestamp = time.strftime("%H:%M:%S", time.localtime(record.created))
+            from core.logging.filters import EndpointFilter
+            if not EndpointFilter().filter(record):
+                return
+
             msg = record.getMessage()
             clean_msg = ANSI_ESCAPE.sub('', msg)
+
+            # Suppress rapid duplicate loop messages (drop any identical message within 3s)
+            now = time.time()
+            if clean_msg == _last_emitted_msg and (now - _last_emitted_time) < 3.0:
+                _repeat_count += 1
+                return
+            else:
+                _last_emitted_msg = clean_msg
+                _last_emitted_time = now
+                _repeat_count = 0
+
+            timestamp = time.strftime("%H:%M:%S", time.localtime(record.created))
 
             # Determine Module & Level
             module = "System"

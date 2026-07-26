@@ -48,8 +48,7 @@ const logger = {
     console.error(formatLog("ERROR", "run-backend.js", msg), ...args),
 };
 
-// Overwrite npm startup lines with formatted logs
-process.stdout.write("\x1b[A\x1b[2K\x1b[A\x1b[2K\x1b[A\x1b[2K\r");
+// Formatted startup logs
 logger.info("sonikoma@0.0.0 backend");
 logger.info("node scripts/run-backend.js");
 
@@ -107,6 +106,7 @@ const pythonPath = process.platform === "win32"
 const backendDir = path.resolve(__dirname, "../backend/app");
 const projectRootDir = path.resolve(__dirname, "../");
 const pythonImportRoot = projectRootDir;
+const pythonPathEnv = [backendDir, projectRootDir].join(path.delimiter);
 
 let pyProcess = null;
 let isRestarting = false;
@@ -152,7 +152,7 @@ async function restartBackend(changedFile) {
       ...process.env,
       PYTHONIOENCODING: "utf-8",
       FORCE_COLOR: "1",
-      PYTHONPATH: pythonImportRoot,
+      PYTHONPATH: pythonPathEnv,
     },
   });
 
@@ -235,7 +235,7 @@ async function init() {
       ...process.env,
       PYTHONIOENCODING: "utf-8",
       FORCE_COLOR: "1",
-      PYTHONPATH: backendDir,
+      PYTHONPATH: pythonPathEnv,
     },
   });
 

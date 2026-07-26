@@ -84,7 +84,10 @@ def check_and_trigger_training() -> bool:
         last_trained = current_count
 
     new_samples = current_count - last_trained
-    logger.info(f"[Monitor] Current samples: {current_count}, Last trained at: {last_trained}, New samples: {new_samples}/20")
+    if new_samples > 0:
+        logger.info(f"[Monitor] Current samples: {current_count}, Last trained at: {last_trained}, New samples: {new_samples}/20")
+    else:
+        logger.debug(f"[Monitor] Current samples: {current_count}, Last trained at: {last_trained}, New samples: 0/20")
 
     if new_samples >= 20:
         logger.info(f"[Monitor] Reached threshold of {new_samples} new samples! Triggering automatic YOLO fine-tuning.")

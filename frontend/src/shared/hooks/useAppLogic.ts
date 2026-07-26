@@ -200,7 +200,19 @@ export function useAppLogic() {
       if (logBuffer.length > 0) {
         const newEntries = [...logBuffer];
         logBuffer.length = 0;
-        state.setConsoleLogs((prev) => [...prev, ...newEntries]);
+        state.setConsoleLogs((prev) => {
+          let updated = [...prev];
+          for (const item of newEntries) {
+            const itemMsg = typeof item === 'string' ? item : item.message;
+            const last = updated[updated.length - 1];
+            const lastMsg = typeof last === 'string' ? last : last?.message;
+            if (lastMsg && itemMsg && lastMsg === itemMsg) {
+              continue; // Drop duplicate repeated log
+            }
+            updated.push(item);
+          }
+          return updated.slice(-500);
+        });
       }
     };
 

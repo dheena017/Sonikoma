@@ -35,7 +35,27 @@ export function AdminConsoleTab() {
         if (isPaused) return;
         try {
           const log = JSON.parse(event.data);
-          setLogs((prev) => [...prev, log].slice(-500)); // Keep last 500 lines
+          setLogs((prev) => {
+            if (prev.length > 0) {
+              const last = prev[prev.length - 1];
+              const logModule = log.module || log.logger || "System";
+              const lastModule = last.module || last.logger || "System";
+              if (
+                last.message === log.message &&
+                last.level === log.level &&
+                lastModule === logModule
+              ) {
+                const updated = [...prev];
+                updated[updated.length - 1] = {
+                  ...last,
+                  count: (last.count || 1) + 1,
+                  timestamp: log.timestamp || last.timestamp,
+                };
+                return updated;
+              }
+            }
+            return [...prev, { ...log, count: 1 }].slice(-500);
+          });
         } catch (err) {
           // Heartbeats or malformed JSON
         }
@@ -74,15 +94,30 @@ export function AdminConsoleTab() {
 
   const getLevelColor = (level: string) => {
     switch (level) {
+      case "CRITICAL":
       case "ERROR":
         return "text-red-400";
+      case "WARN":
       case "WARNING":
         return "text-amber-400";
-      case "DEBUG":
-        return "text-blue-400";
-      default:
+      case "SUCCESS":
         return "text-emerald-400";
+      case "NOTICE":
+        return "text-purple-400";
+      case "DEBUG":
+      case "TRACE":
+        return "text-neutral-500";
+      default:
+        return "text-cyan-400";
     }
+  };
+
+  const formatTimestamp = (ts: any) => {
+    if (!ts) return "00:00:00";
+    if (typeof ts === "number") {
+      return new Date(ts * 1000).toLocaleTimeString();
+    }
+    return String(ts);
   };
 
   return (
@@ -190,25 +225,30 @@ export function AdminConsoleTab() {
         ) : (
           <div className="space-y-1">
             {filteredLogs.map((log, i) => (
-              <div key={i} className="flex gap-4 group">
+              <div key={i} className="flex gap-3 group items-baseline">
                 <span className="text-neutral-600 shrink-0 select-none">
-                  [{new Date(log.timestamp * 1000).toLocaleTimeString()}]
+                  [{formatTimestamp(log.timestamp)}]
                 </span>
                 <span
                   className={`font-bold shrink-0 w-16 select-none ${getLevelColor(
                     log.level
                   )}`}
                 >
-                  {log.level}
+                  {log.level || "INFO"}
                 </span>
                 <span
-                  className="text-neutral-500 shrink-0 w-24 truncate select-none"
-                  title={log.logger}
+                  className="text-neutral-500 shrink-0 w-24 truncate select-none font-semibold"
+                  title={log.module || log.logger || "System"}
                 >
-                  {log.logger}
+                  [{log.module || log.logger || "System"}]
                 </span>
-                <span className="text-neutral-300 break-all">
-                  {log.message}
+                <span className="text-neutral-300 break-all inline-flex items-center gap-2">
+                  <span>{log.message}</span>
+                  {log.count && log.count > 1 && (
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 select-none">
+                      ×{log.count}
+                    </span>
+                  )}
                 </span>
               </div>
             ))}
