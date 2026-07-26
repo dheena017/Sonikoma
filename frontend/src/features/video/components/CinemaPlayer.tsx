@@ -12,6 +12,7 @@ import { PlayerSettingsMenu } from "./player/PlayerSettingsMenu";
 import { PlayerChaptersMenu } from "./player/PlayerChaptersMenu";
 import { PlayerTopBar } from "./player/PlayerTopBar";
 import { PlayerBottomControls } from "./player/PlayerBottomControls";
+import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/scraper/components/LiveScraperDeck";
 
 interface PlayerPageProps {
   panels: GeneratedPanel[];
@@ -51,33 +52,58 @@ export default function CinemaPlayer({
     ? panels.reduce((acc, p) => acc + (p.duration || 4.5), 0)
     : 0;
 
-  // Define Chapters
+  // Define Chapters dynamically from scraped episode groups or scene panels
   const chapters: Chapter[] = useMemo(() => {
+    const rawGroups =
+      ((window as any).__scrapeEpisodeGroups as Array<{
+        episodeLabel: string;
+        startIndex: number;
+        count: number;
+      }>) || [];
+
+    if (rawGroups.length > 0) {
+      const sorted = getSortedEpisodeGroups(rawGroups);
+      return sorted.map(({ grp }) => {
+        const startIdx = Math.max(0, Math.min(grp.startIndex || 0, panels.length));
+        const count = grp.count || 0;
+        const endIdx = Math.min(startIdx + count, panels.length);
+
+        const startTime = panels.slice(0, startIdx).reduce((acc, p) => acc + (p.duration || 4.5), 0);
+        const episodeDuration = panels.slice(startIdx, endIdx).reduce((acc, p) => acc + (p.duration || 4.5), 0);
+        const endTime = startTime + episodeDuration;
+
+        return {
+          title: formatDisplayEpisodeLabel(grp.episodeLabel),
+          startTime,
+          endTime: endTime > startTime ? endTime : startTime + 10,
+        };
+      });
+    }
+
     if (panels.length === 0) {
-      return [
-        { title: "Intro", startTime: 0, endTime: totalDuration },
-      ];
-    } else {
-      // Divide panels into 3 chapters
-      const part1 = Math.floor(panels.length * 0.15) || 1;
-      const part2 = Math.floor(panels.length * 0.75) || 2;
+      return [{ title: "Full Video", startTime: 0, endTime: totalDuration || 10 }];
+    }
 
-      let t1 = 0;
-      let t2 = 0;
-      let acc = 0;
+    // Single episode / un-grouped panels: split into logical scene chapters (e.g. Scene 1, Scene 2...)
+    const sceneChunkSize = Math.max(1, Math.ceil(panels.length / 3));
+    const result: Chapter[] = [];
+    let accTime = 0;
 
-      panels.forEach((p, idx) => {
-        if (idx === part1) t1 = acc;
-        if (idx === part2) t2 = acc;
-        acc += p.duration || 4.5;
+    for (let i = 0; i < panels.length; i += sceneChunkSize) {
+      const chunk = panels.slice(i, i + sceneChunkSize);
+      const chunkDuration = chunk.reduce((acc, p) => acc + (p.duration || 4.5), 0);
+      const sceneNum = Math.floor(i / sceneChunkSize) + 1;
+
+      result.push({
+        title: `Scene ${sceneNum}`,
+        startTime: accTime,
+        endTime: accTime + chunkDuration,
       });
 
-      return [
-        { title: "Intro", startTime: 0, endTime: t1 || acc * 0.15 },
-        { title: "Story", startTime: t1 || acc * 0.15, endTime: t2 || acc * 0.75 },
-        { title: "Climax", startTime: t2 || acc * 0.75, endTime: acc },
-      ];
+      accTime += chunkDuration;
     }
+
+    return result;
   }, [panels, totalDuration]);
 
   // States
@@ -133,6 +159,17 @@ export default function CinemaPlayer({
   useEffect(() => {
     setVideoHasError(false);
   }, [videoUrl, videoQuality]);
+
+  useEffect(() => {
+    if (currentPanelIndex !== undefined && panels && panels.length > 0) {
+      const targetIdx = Math.min(Math.max(0, currentPanelIndex), panels.length - 1);
+      const targetTime = panels.slice(0, targetIdx).reduce((acc, p) => acc + (p.duration || 4.5), 0);
+      setCurrentTime(targetTime);
+      if (videoRef.current) {
+        videoRef.current.currentTime = targetTime;
+      }
+    }
+  }, [currentPanelIndex, panels]);
 
   useEffect(() => {
     if (variant === "floating") return;

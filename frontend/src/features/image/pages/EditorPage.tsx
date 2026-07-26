@@ -769,6 +769,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           <CinemaPlayer
                             panels={panels}
                             videoUrl={activePreviewTab === "video" ? videoUrl : null}
+                            currentPanelIndex={currentPanelIndex}
                             seriesSlug={null}
                             chapterSlug={null}
                             navigateTo={() => {}}
