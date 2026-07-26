@@ -662,7 +662,15 @@ export function useAppLogic() {
       for (let i = 0; i < episodesList.length; i++) {
         const ep = episodesList[i];
         const target = extractWebtoonUrl(ep.url);
-        const epLabel = ep.number ? `${ep.number}${ep.title ? ' - ' + ep.title : ''}` : target;
+        const numStr = (ep.number || "").trim();
+        const titleStr = (ep.title || "").trim();
+        let epLabel = numStr || titleStr || target;
+        if (numStr && titleStr && numStr.toLowerCase() !== titleStr.toLowerCase()) {
+          const cleanTitle = titleStr.replace(/^[-:\s]+/, "").trim();
+          if (cleanTitle && cleanTitle.toLowerCase() !== numStr.toLowerCase() && !numStr.toLowerCase().includes(cleanTitle.toLowerCase())) {
+            epLabel = `${numStr} - ${cleanTitle}`;
+          }
+        }
         const startIndex = allImages.length;
 
         state.setConsoleLogs((prev) => [

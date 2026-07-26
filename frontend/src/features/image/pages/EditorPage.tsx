@@ -1,5 +1,5 @@
 import React from "react";
-import LiveScraperDeck from "@/features/scraper/components/LiveScraperDeck";
+import LiveScraperDeck, { formatDisplayEpisodeLabel } from "@/features/scraper/components/LiveScraperDeck";
 import StoryboardTimeline from "@/features/timeline/components/StoryboardTimeline";
 import CinemaPlayer from "@/features/video/components/CinemaPlayer";
 import OutputMetadataPanel from "@/features/video/components/OutputMetadataPanel";
@@ -348,43 +348,117 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
   const FinalProductionPanel: React.FC = () => {
     const hasEnoughCredits = userCredits === null || userCredits >= 20;
+    const [selectedExportTarget, setSelectedExportTarget] = React.useState<string>("master");
+    const episodeGroups =
+      ((window as any).__scrapeEpisodeGroups as Array<{
+        episodeLabel: string;
+        startIndex: number;
+        count: number;
+      }>) || [];
 
     return (
-      <div className="space-y-6">
-        <div className="bg-[#111115] border border-white/5 rounded-3xl p-6 flex flex-col gap-4 relative overflow-hidden shadow-2xl">
-          {isRendering && (
-            <div
-              className="absolute left-0 top-0 bottom-0 bg-purple-600/20 transition-all duration-300"
-              style={{ width: `${renderProgress}%` }}
-            />
-          )}
-          <div className="relative z-10 space-y-1">
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-              Final Production
-            </h3>
-            <p className="text-[10px] text-neutral-500 font-mono">
-              Compile all storyboard panels into a high-res video. <span className="text-purple-400 font-bold">(Cost: 20 Credits)</span>
-            </p>
+      <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+        {/* IN-PANEL LEFT SIDEBAR: EXPORT PRESETS & EPISODES */}
+        <aside className="w-full lg:w-56 bg-neutral-955 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-xl self-start">
+          <div className="flex items-center justify-between border-b border-neutral-850 pb-2.5">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
+                Export Targets
+              </h4>
+            </div>
           </div>
-          {isRendering ? (
-            <ProcessBar progressStatus={progressStatus} />
-          ) : (
+
+          <div className="space-y-1.5 font-mono text-xs">
             <button
-              onClick={handleRenderFinalVideo}
-              disabled={!hasEnoughCredits}
-              className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
-                !hasEnoughCredits
-                  ? "bg-neutral-900/50 text-neutral-500 cursor-not-allowed border border-neutral-800"
-                  : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10"
+              type="button"
+              onClick={() => setSelectedExportTarget("master")}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${
+                selectedExportTarget === "master"
+                  ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                  : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
               }`}
             >
-              {!hasEnoughCredits ? (
-                <>⚠️ Insufficient Credits (20 required)</>
-              ) : (
-                <>🎬 Export Master Video</>
-              )}
+              <span>Full Master Video</span>
+              <span className="text-[9px] px-1.5 py-0.5 bg-neutral-950 text-emerald-400 rounded border border-emerald-900/40 font-mono">
+                1080p
+              </span>
             </button>
-          )}
+          </div>
+
+          <div className="pt-2 border-t border-neutral-850 space-y-2">
+            <span className="text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
+              Batch Render Episodes
+            </span>
+            {episodeGroups.length > 0 ? (
+              <div className="space-y-1 max-h-40 overflow-y-auto pr-0.5 scrollbar-thin">
+                {episodeGroups.map((grp, idx) => {
+                  const isSelected = selectedExportTarget === `ep-${idx}`;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedExportTarget(`ep-${idx}`)}
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all text-left border cursor-pointer ${
+                        isSelected
+                          ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                          : "bg-neutral-900/50 border-neutral-850 text-neutral-350 hover:text-white"
+                      }`}
+                    >
+                      <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
+                      <span className="text-[9px] text-purple-400 font-bold bg-neutral-950 px-1.5 py-0.5 rounded border border-purple-900/30 shrink-0">
+                        {grp.count}f
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-2.5 rounded-xl bg-neutral-900/40 border border-neutral-850 text-center space-y-1">
+                <p className="text-[10px] font-mono text-neutral-400 font-semibold">Single Episode Active</p>
+                <p className="text-[9px] font-mono text-neutral-600">No multi-episode batch found</p>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        {/* RIGHT MAIN AREA: RENDER CONTROLS */}
+        <div className="flex-1 w-full space-y-6 min-w-0">
+          <div className="bg-[#111115] border border-white/5 rounded-3xl p-6 flex flex-col gap-4 relative overflow-hidden shadow-2xl">
+            {isRendering && (
+              <div
+                className="absolute left-0 top-0 bottom-0 bg-purple-600/20 transition-all duration-300"
+                style={{ width: `${renderProgress}%` }}
+              />
+            )}
+            <div className="relative z-10 space-y-1">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                Final Production — {selectedExportTarget === "master" ? "Full Master Video" : `Selected Episode (${selectedExportTarget})`}
+              </h3>
+              <p className="text-[10px] text-neutral-500 font-mono">
+                Compile selected panels into a high-res video. <span className="text-purple-400 font-bold">(Cost: 20 Credits)</span>
+              </p>
+            </div>
+            {isRendering ? (
+              <ProcessBar progressStatus={progressStatus} />
+            ) : (
+              <button
+                onClick={handleRenderFinalVideo}
+                disabled={!hasEnoughCredits}
+                className={`relative z-10 w-full py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3 ${
+                  !hasEnoughCredits
+                    ? "bg-neutral-900/50 text-neutral-500 cursor-not-allowed border border-neutral-800"
+                    : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-white/10 cursor-pointer"
+                }`}
+              >
+                {!hasEnoughCredits ? (
+                  <>⚠️ Insufficient Credits (20 required)</>
+                ) : (
+                  <>🎬 Export Master Video ({selectedExportTarget === "master" ? "All Panels" : "Selected Episode"})</>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -611,20 +685,98 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         </button>
                       </div>
 
-                      {/* Video Player */}
-                      <div className="w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black">
-                        <CinemaPlayer
-                          panels={panels}
-                          videoUrl={activePreviewTab === "video" ? videoUrl : null}
-                          seriesSlug={null}
-                          chapterSlug={null}
-                          navigateTo={() => {}}
-                          addNotification={addNotification}
-                          variant="floating"
-                          onCloseFloating={() => {
-                            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
-                          }}
-                        />
+                      {/* Video Monitor Split Layout with Internal Left Sidebar */}
+                      <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+                        {/* IN-PANEL LEFT SIDEBAR: MONITOR PRESETS & EPISODES */}
+                        <aside className="w-full lg:w-56 bg-neutral-955 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-xl self-start">
+                          <div className="flex items-center justify-between border-b border-neutral-850 pb-2.5">
+                            <div className="flex items-center gap-2">
+                              <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                              <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
+                                Playback Monitor
+                              </h4>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1.5 font-mono text-xs">
+                            <button
+                              type="button"
+                              onClick={() => setActivePreviewTab?.("timeline")}
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${
+                                activePreviewTab === "timeline"
+                                  ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                                  : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
+                              }`}
+                            >
+                              <span>Storyboard Live</span>
+                              <span className="text-[9px] px-1.5 py-0.5 bg-neutral-950 text-purple-300 rounded border border-purple-900/40">
+                                {panels.length}p
+                              </span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setActivePreviewTab?.("video")}
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${
+                                activePreviewTab === "video"
+                                  ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                                  : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
+                              }`}
+                            >
+                              <span>Compiled Video</span>
+                              <span className="text-[9px] px-1.5 py-0.5 bg-neutral-950 text-emerald-400 rounded border border-emerald-900/40">
+                                MP4
+                              </span>
+                            </button>
+                          </div>
+
+                          {/* Episode Playback Selectors */}
+                          <div className="pt-2 border-t border-neutral-850 space-y-2">
+                            <span className="text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
+                              Episode Replays
+                            </span>
+                            {((window as any).__scrapeEpisodeGroups as Array<any> || []).length > 0 ? (
+                              <div className="space-y-1 max-h-36 overflow-y-auto pr-0.5 scrollbar-thin">
+                                {((window as any).__scrapeEpisodeGroups as Array<any>).map((grp, idx) => (
+                                  <button
+                                    key={idx}
+                                    type="button"
+                                    onClick={() => {
+                                      if (grp.startIndex !== undefined) {
+                                        setCurrentPanelIndex(grp.startIndex);
+                                      }
+                                    }}
+                                    className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-neutral-900/50 hover:bg-purple-900/30 text-[11px] font-mono text-purple-200 hover:text-white transition-all text-left border border-neutral-850 hover:border-purple-500/40 cursor-pointer"
+                                  >
+                                    <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
+                                    <span className="text-[9px] text-neutral-400 font-normal">{grp.count}f</span>
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="p-2.5 rounded-xl bg-neutral-900/40 border border-neutral-850 text-center space-y-1">
+                                <p className="text-[10px] font-mono text-neutral-400 font-semibold">Single Episode Active</p>
+                                <p className="text-[9px] font-mono text-neutral-600">No multi-episode batch found</p>
+                              </div>
+                            )}
+                          </div>
+                        </aside>
+
+                        {/* RIGHT: Video Player */}
+                        <div className="flex-1 w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black min-w-0">
+                          <CinemaPlayer
+                            panels={panels}
+                            videoUrl={activePreviewTab === "video" ? videoUrl : null}
+                            seriesSlug={null}
+                            chapterSlug={null}
+                            navigateTo={() => {}}
+                            addNotification={addNotification}
+                            variant="floating"
+                            onCloseFloating={() => {
+                              useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   )}

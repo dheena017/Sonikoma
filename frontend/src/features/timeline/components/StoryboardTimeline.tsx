@@ -12,6 +12,7 @@ import TimelineHeader from "@/features/timeline/components/TimelineHeader";
 import TimelineBulkOps from "@/features/timeline/components/TimelineBulkOps";
 import TimelineCard from "@/features/timeline/components/TimelineCard";
 import { TimelineSelectionBar } from "@/features/image/components/editor/select";
+import { formatDisplayEpisodeLabel } from "@/features/scraper/components/LiveScraperDeck";
 
 interface StoryboardTimelineProps {
   panels: GeneratedPanel[];
@@ -113,6 +114,7 @@ const StoryboardTimeline = React.memo(
     const setSelectedPanelIds = propSetSelectedPanelIds ?? setLocalSelectedPanelIds;
 
     const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+    const [selectedTimelineEp, setSelectedTimelineEp] = useState<number | "all">("all");
 
     const handlePanelClick = useCallback(
       (idx: number, panelId: number, shiftKey: boolean, ctrlOrMeta: boolean) => {
@@ -884,54 +886,239 @@ const StoryboardTimeline = React.memo(
           />
         )}
 
-        {/* Storyboard grid */}
-        <div
-          className={`w-full max-w-full flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin px-4 md:px-6 ${
-            selectedCount > 0 ? "pb-2" : "pb-4"
-          }`}
-        >
-          {panels.map((panel, idx) => (
-            <TimelineCard
-              key={panel.id}
-              panel={panel}
-              idx={idx}
-              currentPanelIndex={currentPanelIndex}
-              activePreviewTab={activePreviewTab}
-              setCurrentPanelIndex={setCurrentPanelIndex}
-              setActivePreviewTab={setActivePreviewTab}
-              setPlaybackTime={setPlaybackTime}
-              analyzingPanelId={analyzingPanelId}
-              handleShiftPanel={handleShiftPanel}
-              panelsLength={panels.length}
-              handleModifySpeechText={handleModifySpeechText}
-              handleModifyMotion={handleModifyMotion}
-              handleModifyDuration={handleModifyDuration}
-              handleModifySFX={handleModifySFX}
-              handleModifyVisualDescription={handleModifyVisualDescription}
-              handleModifyNarrative={handleModifyNarrative}
-              handleAnalyzePanel={handleAnalyzePanel}
-              handleCancelAnalysis={handleCancelAnalysis}
-              isSelected={selectedPanelIds.has(panel.id)}
-              onToggleSelect={() => togglePanelSelection(panel.id)}
-              onPanelClick={handlePanelClick}
-              onPanelDoubleClick={handlePanelDoubleClick}
-              playStoryboardAudio={playStoryboardAudio}
-              autoPlayAudio={autoPlayAudio}
-              addNotification={addNotification}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDragEnd={handleDragEnd}
-              onDrop={handleDrop}
-              isDragging={draggedIndex === idx}
-              isDragOver={dragOverIndex === idx}
-              setPanels={setPanels}
-              fetchWithInterceptor={fetchWithInterceptor}
-              voiceActor={voiceActor}
-              speechRate={speechRate}
-              speechPitch={speechPitch}
-            />
-          ))}
-        </div>
+        {/* Storyboard Split Layout with In-Panel Left Sidebar */}
+        {(() => {
+          const episodeGroups =
+            ((window as any).__scrapeEpisodeGroups as Array<{
+              episodeLabel: string;
+              startIndex: number;
+              count: number;
+            }>) || [];
+
+          return (
+            <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+              {/* IN-PANEL LEFT SIDEBAR: TIMELINE SCENES & EPISODES */}
+              <aside className="w-full lg:w-56 bg-neutral-955 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-xl lg:sticky lg:top-24 self-start">
+                <div className="flex items-center justify-between border-b border-neutral-850/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
+                    <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
+                      Timeline Sequence
+                    </h4>
+                  </div>
+                </div>
+
+                {(() => {
+                  const totalTimelineCount = episodeGroups.length > 0
+                    ? episodeGroups.reduce((acc, g) => acc + g.count, 0)
+                    : panels.length;
+
+                  return (
+                    <div className="space-y-1.5 font-mono text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTimelineEp("all")}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${
+                          selectedTimelineEp === "all"
+                            ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                            : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
+                        }`}
+                      >
+                        <span>All Scenes</span>
+                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-purple-300 border border-purple-900/40 shrink-0">
+                          {totalTimelineCount}f
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })()}
+
+                <div className="pt-2 border-t border-neutral-850 space-y-2">
+                  <span className="text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
+                    Filter Episode
+                  </span>
+                  {episodeGroups.length > 0 ? (
+                    <div className="space-y-1 max-h-40 overflow-y-auto pr-0.5 scrollbar-thin">
+                      {episodeGroups.map((grp, gIdx) => {
+                        const isSelected = selectedTimelineEp === gIdx;
+                        return (
+                          <button
+                            key={gIdx}
+                            type="button"
+                            onClick={() => {
+                              setSelectedTimelineEp(gIdx);
+                              if (grp.startIndex !== undefined) {
+                                setCurrentPanelIndex(grp.startIndex);
+                              }
+                            }}
+                            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all text-left border cursor-pointer ${
+                              isSelected
+                                ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                                : "bg-neutral-900/50 border-neutral-850 text-neutral-350 hover:text-white"
+                            }`}
+                          >
+                            <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
+                            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-purple-300 border border-purple-900/40 shrink-0">
+                              {grp.count}f
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-2.5 rounded-xl bg-neutral-900/40 border border-neutral-850 text-center space-y-1">
+                      <p className="text-[10px] font-mono text-neutral-400 font-semibold">Single Episode Active</p>
+                      <p className="text-[9px] font-mono text-neutral-600">No multi-episode batch found</p>
+                    </div>
+                  )}
+                </div>
+              </aside>
+
+              {/* RIGHT MAIN AREA: TIMELINE CARDS */}
+              <div className="flex-1 w-full min-w-0 space-y-6">
+                {(() => {
+                  if (episodeGroups.length > 0) {
+                    const visibleGroups =
+                      selectedTimelineEp === "all"
+                        ? episodeGroups.map((grp, originalIdx) => ({ grp, gIdx: originalIdx }))
+                        : episodeGroups[selectedTimelineEp]
+                        ? [{ grp: episodeGroups[selectedTimelineEp], gIdx: selectedTimelineEp as number }]
+                        : episodeGroups.map((grp, originalIdx) => ({ grp, gIdx: originalIdx }));
+
+                    return visibleGroups.map(({ grp, gIdx }) => {
+                      const grpPanels = panels.slice(
+                        grp.startIndex,
+                        grp.startIndex + grp.count
+                      );
+
+                      return (
+                        <div
+                          key={`timeline-ep-${gIdx}`}
+                          className="bg-neutral-955 border border-neutral-850 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl"
+                        >
+                          {/* Episode Banner */}
+                          <div className="flex items-center justify-between border-b border-neutral-850/80 pb-2.5">
+                            <div className="flex items-center gap-2">
+                              <div className="px-3 py-1 rounded-xl bg-purple-950/90 border border-purple-800/60 text-purple-200 font-mono text-xs font-bold flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                                {formatDisplayEpisodeLabel(grp.episodeLabel)}
+                              </div>
+                              <span className="text-[10px] font-mono font-bold bg-neutral-900 text-neutral-400 px-2.5 py-1 rounded-lg border border-neutral-800">
+                                {grpPanels.length} PANELS
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Episode Horizontal Timeline Grid */}
+                          <div
+                            className={`w-full max-w-full flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin px-1 ${
+                              selectedCount > 0 ? "pb-2" : "pb-4"
+                            }`}
+                          >
+                            {grpPanels.map((panel, localIdx) => {
+                              const globalIdx = grp.startIndex + localIdx;
+                              return (
+                                <TimelineCard
+                                  key={panel.id}
+                                  panel={panel}
+                                  idx={globalIdx}
+                                  currentPanelIndex={currentPanelIndex}
+                                  activePreviewTab={activePreviewTab}
+                                  setCurrentPanelIndex={setCurrentPanelIndex}
+                                  setActivePreviewTab={setActivePreviewTab}
+                                  setPlaybackTime={setPlaybackTime}
+                                  analyzingPanelId={analyzingPanelId}
+                                  handleShiftPanel={handleShiftPanel}
+                                  panelsLength={panels.length}
+                                  handleModifySpeechText={handleModifySpeechText}
+                                  handleModifyMotion={handleModifyMotion}
+                                  handleModifyDuration={handleModifyDuration}
+                                  handleModifySFX={handleModifySFX}
+                                  handleModifyVisualDescription={handleModifyVisualDescription}
+                                  handleModifyNarrative={handleModifyNarrative}
+                                  handleAnalyzePanel={handleAnalyzePanel}
+                                  handleCancelAnalysis={handleCancelAnalysis}
+                                  isSelected={selectedPanelIds.has(panel.id)}
+                                  onToggleSelect={() => togglePanelSelection(panel.id)}
+                                  onPanelClick={handlePanelClick}
+                                  onPanelDoubleClick={handlePanelDoubleClick}
+                                  playStoryboardAudio={playStoryboardAudio}
+                                  autoPlayAudio={autoPlayAudio}
+                                  addNotification={addNotification}
+                                  onDragStart={handleDragStart}
+                                  onDragOver={handleDragOver}
+                                  onDragEnd={handleDragEnd}
+                                  onDrop={handleDrop}
+                                  isDragging={draggedIndex === globalIdx}
+                                  isDragOver={dragOverIndex === globalIdx}
+                                  setPanels={setPanels}
+                                  fetchWithInterceptor={fetchWithInterceptor}
+                                  voiceActor={voiceActor}
+                                  speechRate={speechRate}
+                                  speechPitch={speechPitch}
+                                />
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    });
+                  }
+
+                  return (
+                    <div
+                      className={`w-full max-w-full flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin px-2 md:px-4 ${
+                        selectedCount > 0 ? "pb-2" : "pb-4"
+                      }`}
+                    >
+                      {panels.map((panel, idx) => (
+                        <TimelineCard
+                          key={panel.id}
+                          panel={panel}
+                          idx={idx}
+                          currentPanelIndex={currentPanelIndex}
+                          activePreviewTab={activePreviewTab}
+                          setCurrentPanelIndex={setCurrentPanelIndex}
+                          setActivePreviewTab={setActivePreviewTab}
+                          setPlaybackTime={setPlaybackTime}
+                          analyzingPanelId={analyzingPanelId}
+                          handleShiftPanel={handleShiftPanel}
+                          panelsLength={panels.length}
+                          handleModifySpeechText={handleModifySpeechText}
+                          handleModifyMotion={handleModifyMotion}
+                          handleModifyDuration={handleModifyDuration}
+                          handleModifySFX={handleModifySFX}
+                          handleModifyVisualDescription={handleModifyVisualDescription}
+                          handleModifyNarrative={handleModifyNarrative}
+                          handleAnalyzePanel={handleAnalyzePanel}
+                          handleCancelAnalysis={handleCancelAnalysis}
+                          isSelected={selectedPanelIds.has(panel.id)}
+                          onToggleSelect={() => togglePanelSelection(panel.id)}
+                          onPanelClick={handlePanelClick}
+                          onPanelDoubleClick={handlePanelDoubleClick}
+                          playStoryboardAudio={playStoryboardAudio}
+                          autoPlayAudio={autoPlayAudio}
+                          addNotification={addNotification}
+                          onDragStart={handleDragStart}
+                          onDragOver={handleDragOver}
+                          onDragEnd={handleDragEnd}
+                          onDrop={handleDrop}
+                          isDragging={draggedIndex === idx}
+                          isDragOver={dragOverIndex === idx}
+                          setPanels={setPanels}
+                          fetchWithInterceptor={fetchWithInterceptor}
+                          voiceActor={voiceActor}
+                          speechRate={speechRate}
+                          speechPitch={speechPitch}
+                        />
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Delete Panels Confirmation Modal */}
         {showDeleteConfirm &&

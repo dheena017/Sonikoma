@@ -24,6 +24,22 @@ import { parseWebtoonUrl, getSourceName } from "@/utils";
 import { updateSelection } from "@/utils/selection";
 import { EpisodeRatingDisplay } from "@/features/scraper/components/EpisodeRatingDisplay";
 
+export function formatDisplayEpisodeLabel(label: string): string {
+  if (!label) return "Episode";
+  const trimmed = label.trim();
+  const duplicateMatch = trimmed.match(/^(Episode\s*\d+|Chapter\s*\d+|Ep\.\s*\d+)\s*[-:]\s*\1(.*)$/i);
+  if (duplicateMatch) {
+    const main = duplicateMatch[1];
+    const rest = duplicateMatch[2]?.replace(/^[-:\s]+/, "").trim();
+    return rest ? `${main}: ${rest}` : main;
+  }
+  const trailingTruncateMatch = trimmed.match(/^(Episode\s*\d+|Chapter\s*\d+|Ep\.\s*\d+)\s*[-:]\s*E(?:\.\.\.|\s*)$/i);
+  if (trailingTruncateMatch) {
+    return trailingTruncateMatch[1];
+  }
+  return trimmed;
+}
+
 const LiveScraperDeck = React.memo(
   ({
     scrapedImages,
@@ -512,20 +528,28 @@ const LiveScraperDeck = React.memo(
 
                         <div className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-0.5 scrollbar-thin">
                           {/* All Episodes Button */}
-                          <button
-                            type="button"
-                            onClick={() => setSelectedEpisodeIdx("all")}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
-                              selectedEpisodeIdx === "all"
-                                ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                                : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-850"
-                            }`}
-                          >
-                            <span className="truncate">All Episodes</span>
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-950 text-neutral-400 border border-neutral-800 shrink-0">
-                              {scrapedImages.length}
-                            </span>
-                          </button>
+                          {(() => {
+                            const totalScrapedFrames = episodeGroups.length > 0
+                              ? episodeGroups.reduce((acc, g) => acc + g.count, 0)
+                              : scrapedImages.length;
+
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedEpisodeIdx("all")}
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
+                                  selectedEpisodeIdx === "all"
+                                    ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                                    : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-850"
+                                }`}
+                              >
+                                <span className="truncate">All Episodes</span>
+                                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
+                                  {totalScrapedFrames}f
+                                </span>
+                              </button>
+                            );
+                          })()}
 
                           {/* Individual Episode Item Buttons */}
                           {episodeGroups.map((grp, gIdx) => {
@@ -547,7 +571,7 @@ const LiveScraperDeck = React.memo(
                                       isSelected ? "bg-purple-400 animate-pulse" : "bg-neutral-600"
                                     }`}
                                   />
-                                  <span className="truncate">{grp.episodeLabel}</span>
+                                  <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
                                 </div>
                                 <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
                                   {grp.count}f
@@ -580,7 +604,7 @@ const LiveScraperDeck = React.memo(
                                 <div className="flex items-center gap-3">
                                   <div className="px-3.5 py-1.5 rounded-xl bg-purple-950/90 border border-purple-800/60 text-purple-200 font-mono text-xs font-bold shadow-md flex items-center gap-2">
                                     <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
-                                    {grp.episodeLabel}
+                                    {formatDisplayEpisodeLabel(grp.episodeLabel)}
                                   </div>
                                   <span className="text-[10px] font-mono font-bold bg-neutral-900 text-neutral-400 px-2.5 py-1 rounded-lg border border-neutral-800">
                                     {grp.count} FRAMES
