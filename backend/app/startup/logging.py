@@ -321,17 +321,26 @@ console_handler.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
 # If log_interceptor isn't present (e.g., stripped deployment), fall back to plain console logging.
 root_logger = logging.getLogger()
 try:
-    from utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
+    from core.logging.handlers import UIStreamLogHandler as _UIStreamLogHandler
 
     for handler in root_logger.handlers[:]:
         if not isinstance(handler, _UIStreamLogHandler):
             root_logger.removeHandler(handler)
 
     root_logger.addHandler(console_handler)
-except ModuleNotFoundError:
-    # Keep existing handlers and just ensure console handler exists.
-    if console_handler not in root_logger.handlers:
+except (ModuleNotFoundError, ImportError):
+    try:
+        from app.core.logging.handlers import UIStreamLogHandler as _UIStreamLogHandler
+
+        for handler in root_logger.handlers[:]:
+            if not isinstance(handler, _UIStreamLogHandler):
+                root_logger.removeHandler(handler)
+
         root_logger.addHandler(console_handler)
+    except (ModuleNotFoundError, ImportError):
+        # Keep existing handlers and just ensure console handler exists.
+        if console_handler not in root_logger.handlers:
+            root_logger.addHandler(console_handler)
 
 root_logger.setLevel(logging.INFO)
 logger = logging.getLogger('sonikoma.api')

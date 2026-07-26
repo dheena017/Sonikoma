@@ -136,10 +136,14 @@ async def lifespan(app: FastAPI):
     # Re-apply ColoredFormatter to all non-UI handlers for beautiful console output.
     # UIStreamLogHandler keeps its own plain formatter so log entries reach the frontend cleanly.
     try:
-        from utils.log_interceptor import UIStreamLogHandler as _UIStreamLogHandler
+        from core.logging.handlers import UIStreamLogHandler as _UIStreamLogHandler
         ui_handler_cls = _UIStreamLogHandler
-    except ModuleNotFoundError:
-        ui_handler_cls = None
+    except (ModuleNotFoundError, ImportError):
+        try:
+            from app.core.logging.handlers import UIStreamLogHandler as _UIStreamLogHandler
+            ui_handler_cls = _UIStreamLogHandler
+        except (ModuleNotFoundError, ImportError):
+            ui_handler_cls = None
 
     for name in list(logging.root.manager.loggerDict.keys()):
         l = logging.getLogger(name)
