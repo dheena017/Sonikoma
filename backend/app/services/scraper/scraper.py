@@ -211,6 +211,39 @@ async def scrape_images_from_url(
                 if val.startswith(('http://', 'https://')):
                     image_dict[val] = True
 
+    # Strategy 4: Series Landing Page Auto-Resolver (e.g. GlobalComix https://globalcomix.com/c/the-backwards-house or any comic hub)
+    if len(image_dict) < 2 and BeautifulSoup:
+        logger.info("[Scraper] Running Strategy 4 (Series Page Chapter Resolver)...")
+        try:
+            soup = BeautifulSoup(html, 'html.parser')
+            ch_links = []
+            for a in soup.find_all('a', href=True):
+                href = a.get('href')
+                if isinstance(href, list):
+                    href = " ".join(href)
+                if not isinstance(href, str):
+                    continue
+                if any(term in href.lower() for term in ['/read/', '/chapters/', '/chapter', '/episode', '/ep-', '/ch-']) and href != fetch_url:
+                    full_ch = urljoin(fetch_url, href)
+                    if full_ch != fetch_url and full_ch not in ch_links and not full_ch.endswith('/c/'):
+                        ch_links.append(full_ch)
+            
+            if ch_links:
+                target_ch = ch_links[0]
+                logger.info(f"[Scraper] Series page auto-resolving to Chapter URL: {target_ch}")
+                ch_html = await try_fetch_url_resilient(target_ch, fetch_headers, cookies=merged_cookies)
+                if not ch_html:
+                    ch_html = await try_fetch_with_playwright(target_ch, user_agent=fetch_headers["User-Agent"], referer=fetch_headers["Referer"])
+                if ch_html:
+                    ch_bs4_imgs = parse_with_bs4(ch_html, target_ch)
+                    for img in ch_bs4_imgs:
+                        image_dict[img] = True
+                    ch_nuxt_imgs = extract_images_from_nuxt_payload(ch_html)
+                    for img in ch_nuxt_imgs:
+                        image_dict[img] = True
+        except Exception as res_err:
+            logger.warning(f"[Scraper] Strategy 4 resolver warning: {res_err}")
+
     raw_images = list(image_dict.keys())
     filtered_images = []
 
@@ -294,11 +327,22 @@ def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> L
             episode_container = list(items)
             break
 
+    def _extract_str_attr(node, *attrs: str) -> str:
+        if not node:
+            return ""
+        for attr in attrs:
+            val = node.get(attr)
+            if isinstance(val, list):
+                val = " ".join(val)
+            if isinstance(val, str) and val.strip():
+                return val.strip()
+        return ""
+
     if len(episode_container) == 0:
         all_links = soup.find_all('a')
         episode_container = [
             link for link in all_links
-            if 'episode_no=' in (link.get('href') or '') or '/episode/' in (link.get('href') or '')
+            if 'episode_no=' in _extract_str_attr(link, 'href') or '/episode/' in _extract_str_attr(link, 'href')
         ]
 
     episodes = []
@@ -313,7 +357,7 @@ def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> L
                 ep_url_early = ""
             else:
                 link_elem_early = ep_elem.find('a')
-                ep_url_early = link_elem_early.get('href', '') if link_elem_early else ""
+                ep_url_early = _extract_str_attr(link_elem_early, 'href')
                 extracted = parse_episode_index(ep_title) or parse_episode_index(ep_url_early)
                 if extracted is not None:
                     ep_no = f"Episode {int(extracted) if extracted == int(extracted) else extracted}"
@@ -329,14 +373,14 @@ def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> L
             img_elem = ep_elem.find('img')
             thumbnail = ""
             if img_elem:
-                thumbnail = img_elem.get('src') or img_elem.get('data-src') or img_elem.get('data-lazy-src') or ""
-                if thumbnail:
-                    thumbnail = urljoin(fetch_url, thumbnail)
+                raw_thumb = _extract_str_attr(img_elem, 'src', 'data-src', 'data-lazy-src')
+                if raw_thumb:
+                    thumbnail = urljoin(fetch_url, raw_thumb)
 
             link_elem = ep_elem.find('a')
             ep_url = ""
             if link_elem:
-                ep_url = link_elem.get('href', '')
+                ep_url = _extract_str_attr(link_elem, 'href')
                 if ep_url:
                     ep_url = urljoin(fetch_url, ep_url)
                 elif ep_url_early:

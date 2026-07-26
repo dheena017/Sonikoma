@@ -150,14 +150,24 @@ def get_source_name(url_str: str) -> str:
         working_url = url_str if url_str.startswith("http") else "https://" + url_str
         parsed = urlparse(working_url)
         host = parsed.netloc.lower()
-        if "asurascans.com" in host:
+        if "globalcomix.com" in host:
+            return "GlobalComix"
+        if "asurascans.com" in host or "asura" in host:
             return "Asura Scans"
         if "webtoons.com" in host or "webtoon.com" in host:
             return "Webtoons"
-        if "manhuato.com" in host:
-            return "ManhuaTo"
+        if "reaperscans.com" in host or "reaper" in host:
+            return "Reaper Scans"
+        if "flamecomics.com" in host or "flamescans" in host:
+            return "Flame Comics"
         if "mangadex.org" in host:
             return "MangaDex"
+        if "comick.io" in host or "comick.app" in host:
+            return "ComicK"
+        if "tapas.io" in host:
+            return "Tapas"
+        if "manhuato.com" in host:
+            return "ManhuaTo"
         if "webcomicsapp.com" in host:
             return "WebComics App"
         if "toomics.com" in host:

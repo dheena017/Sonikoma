@@ -67,9 +67,20 @@ export function useAppRouter({
   seriesSlug,
   chapterSlug,
 }: UseAppRouterProps) {
-  const [currentPath, setCurrentPath] = React.useState(
-    window.location.pathname
-  );
+  const getInitialPath = () => {
+    const path = window.location.pathname;
+    const isEditorRoute =
+      path.startsWith("/editor") ||
+      path.startsWith("/image-editor") ||
+      path.startsWith("/workspace/editor");
+    if (isEditorRoute) {
+      window.history.replaceState({}, document.title, "/workspace");
+      return "/workspace";
+    }
+    return path;
+  };
+
+  const [currentPath, setCurrentPath] = React.useState(getInitialPath);
   const [lastEditorPath, setLastEditorPath] = React.useState<string>(
     "/editor/adjust?idx=0"
   );
@@ -103,6 +114,18 @@ export function useAppRouter({
 
   // Sync settings and state URL parameters on load
   React.useEffect(() => {
+    // If reloaded on an editor route, exit editor to main workspace
+    const path = window.location.pathname;
+    const isEditorRoute =
+      path.startsWith("/editor") ||
+      path.startsWith("/image-editor") ||
+      path.startsWith("/workspace/editor");
+    if (isEditorRoute) {
+      setEditingImageIdx(null);
+      window.history.replaceState({}, document.title, "/workspace");
+      setCurrentPath("/workspace");
+    }
+
     const params = new URLSearchParams(window.location.search);
     const urlParam = params.get("url");
     const modelParam = params.get("model");

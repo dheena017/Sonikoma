@@ -295,42 +295,67 @@ const LiveScraperDeck = React.memo(
       setLastSelectedIndex(null);
     };
 
+    const episodeGroups =
+      ((window as any).__scrapeEpisodeGroups as Array<{
+        episodeLabel: string;
+        startIndex: number;
+        count: number;
+      }>) || [];
+
+    // Get currently active deck images (scoped to selected episode or all)
+    const currentActiveImages = React.useMemo(() => {
+      if (selectedEpisodeIdx === "all" || selectedEpisodeIdx === null) {
+        return scrapedImages;
+      }
+      const grp = typeof selectedEpisodeIdx === "number" ? episodeGroups[selectedEpisodeIdx] : undefined;
+      if (!grp) return scrapedImages;
+      return scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
+    }, [scrapedImages, episodeGroups, selectedEpisodeIdx]);
+
     const handleClearAll = () => {
-      setSelectedScraped([]);
+      setSelectedScraped((prev) => prev.filter((img) => !currentActiveImages.includes(img)));
       setLastSelectedIndex(null);
     };
 
     const handleSelectAllToggle = () => {
-      if (
-        selectedScraped.length === scrapedImages.length &&
-        scrapedImages.length > 0
-      ) {
-        setSelectedScraped([]);
+      const activeSelectedCount = currentActiveImages.filter((img) => selectedScraped.includes(img)).length;
+      if (activeSelectedCount === currentActiveImages.length && currentActiveImages.length > 0) {
+        setSelectedScraped((prev) => prev.filter((img) => !currentActiveImages.includes(img)));
         setLastSelectedIndex(null);
-        setConsoleLogs((prev) => ["[GUI] Cleared selections", ...prev]);
+        setConsoleLogs((prev) => ["[GUI] Cleared episode selections", ...prev]);
       } else {
-        setSelectedScraped([...scrapedImages]);
-        setConsoleLogs((prev) => ["[GUI] Selected all images", ...prev]);
+        setSelectedScraped((prev) => Array.from(new Set([...prev, ...currentActiveImages])));
+        setConsoleLogs((prev) => ["[GUI] Selected all episode images", ...prev]);
       }
     };
 
-    // Selection / filter helpers (moved from ScraperControls)
+    // Selection / filter helpers (scoped to currentActiveImages)
     const handleInvertSelection = () => {
-      setSelectedScraped((prev) =>
-        scrapedImages.filter((img) => !prev.includes(img))
-      );
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        const activeInverted = currentActiveImages.filter((img) => !prev.includes(img));
+        return [...otherSelected, ...activeInverted];
+      });
       setLastSelectedIndex(null);
       setConsoleLogs((prev) => ["[GUI] Inverted selection set", ...prev]);
     };
 
     const handleSelectOdd = () => {
-      setSelectedScraped(scrapedImages.filter((_, idx) => idx % 2 === 0));
+      const oddImages = currentActiveImages.filter((_, idx) => idx % 2 === 0);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        return [...otherSelected, ...oddImages];
+      });
       setLastSelectedIndex(null);
       setConsoleLogs((prev) => ["[GUI] Selected odd-numbered frames", ...prev]);
     };
 
     const handleSelectEven = () => {
-      setSelectedScraped(scrapedImages.filter((_, idx) => idx % 2 !== 0));
+      const evenImages = currentActiveImages.filter((_, idx) => idx % 2 !== 0);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        return [...otherSelected, ...evenImages];
+      });
       setLastSelectedIndex(null);
       setConsoleLogs((prev) => [
         "[GUI] Selected even-numbered frames",
@@ -346,8 +371,12 @@ const LiveScraperDeck = React.memo(
     };
 
     const handleSelectFirstN = (n: number) => {
-      const clamped = Math.min(Math.max(1, n), scrapedImages.length);
-      setSelectedScraped(scrapedImages.slice(0, clamped));
+      const clamped = Math.min(Math.max(1, n), currentActiveImages.length);
+      const firstNImages = currentActiveImages.slice(0, clamped);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        return [...otherSelected, ...firstNImages];
+      });
       setLastSelectedIndex(null);
       setConsoleLogs((prev) => [
         `[GUI] Selected first ${clamped} frames`,
@@ -356,8 +385,12 @@ const LiveScraperDeck = React.memo(
     };
 
     const handleSelectLastN = (n: number) => {
-      const clamped = Math.min(Math.max(1, n), scrapedImages.length);
-      setSelectedScraped(scrapedImages.slice(-clamped));
+      const clamped = Math.min(Math.max(1, n), currentActiveImages.length);
+      const lastNImages = currentActiveImages.slice(-clamped);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        return [...otherSelected, ...lastNImages];
+      });
       setLastSelectedIndex(null);
       setConsoleLogs((prev) => [
         `[GUI] Selected last ${clamped} frames`,
@@ -367,8 +400,12 @@ const LiveScraperDeck = React.memo(
 
     const handleSelectRange = (a: number, b: number) => {
       const lo = Math.max(0, Math.min(a, b) - 1);
-      const hi = Math.min(scrapedImages.length, Math.max(a, b));
-      setSelectedScraped(scrapedImages.slice(lo, hi));
+      const hi = Math.min(currentActiveImages.length, Math.max(a, b));
+      const rangeImages = currentActiveImages.slice(lo, hi);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        return [...otherSelected, ...rangeImages];
+      });
       setLastSelectedIndex(null);
       setConsoleLogs((prev) => [`[GUI] Selected panels ${a} to ${b}`, ...prev]);
     };
@@ -475,7 +512,7 @@ const LiveScraperDeck = React.memo(
               <div className="hidden sm:block">
                 <ScraperSelectionToolbar
                   align="down"
-                  scrapedImages={scrapedImages}
+                  scrapedImages={currentActiveImages}
                   selectedScraped={selectedScraped}
                   handleInvertSelection={handleInvertSelection}
                   handleSelectOdd={handleSelectOdd}

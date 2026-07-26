@@ -133,15 +133,19 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
         return []
 
     selectors = custom_selectors or [
-        # Webtoons-specific: the actual panel image list (excludes thumbnail sidebar)
-        '#_imageList', '._img_viewer_area',
-        # Generic Webtoons/Naver viewer
-        '.viewer_lst', '.wt_viewer',
-        # Other common readers
-        '._imageList', '.reader-area', '.comic-page',
-        '.chapter-content', '.episode-view', '.comic-content', '.panel-container',
-        '#comic_view_area', '#comic-image', '#comic-view', '.ep-contents', '.chapter-img',
-        '#readerarea', '.readerarea', '#reader-area', '.wp-manga-chapter-img'
+        # GlobalComix reader
+        '.read-container', '.reader-page', '.gc-reader', '[data-gc-page]', '#reader', '.reader-area-wrap',
+        # Webtoons-specific: panel image list
+        '#_imageList', '._img_viewer_area', '.viewer_lst', '.wt_viewer', '._imageList',
+        # Asura, Reaper, Flame, WordPress Manga / Madara themes
+        '#readerarea', '.readerarea', '#reader-area', '.wp-manga-chapter-img',
+        '.rd-page', '.page-break', '.reading-content', '.main-col', '.entry-content',
+        '.reading-detail', '.chapter-content', '.episode-view', '.comic-content',
+        '.panel-container', '#comic_view_area', '#comic-image', '#comic-view',
+        '.ep-contents', '.chapter-img', '.page-content', '.comic-page-img',
+        '.chapter-images', '.viewer-images', '.comic-pages', '.manga-reader',
+        '#chapter-reader', '#manga-reader', '.vng-reader', '.reader-image-list',
+        '[class*="reader"]', '[class*="chapter-content"]', '[id*="reader"]'
     ]
 
     container = None
@@ -153,21 +157,57 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
 
     search_root = container if container else soup
     images = []
+    
+    def _to_str(val: Any) -> str:
+        if isinstance(val, list):
+            val = " ".join(val)
+        return val.strip() if isinstance(val, str) else ""
+
+    # 1. Standard img elements
     for img in search_root.find_all('img'):
         src = (
-            img.get('data-url') or
-            img.get('data-src') or
-            img.get('data-lazy-src') or
-            img.get('data-original') or
-            img.get('origin-src') or
-            img.get('lazy-src') or
-            img.get('src')
+            _to_str(img.get('data-url')) or
+            _to_str(img.get('data-src')) or
+            _to_str(img.get('data-original')) or
+            _to_str(img.get('data-lazy-src')) or
+            _to_str(img.get('data-raw-src')) or
+            _to_str(img.get('data-cdn')) or
+            _to_str(img.get('data-image')) or
+            _to_str(img.get('data-bg')) or
+            _to_str(img.get('origin-src')) or
+            _to_str(img.get('lazy-src')) or
+            _to_str(img.get('src'))
         )
         if src:
-            src = src.strip()
-            # Skip transparent placeholder images used by Webtoons
-            if 'bg_transparency' in src or src.endswith('1x1.gif') or src.endswith('spacer.gif'):
+            # Skip transparent placeholder images used by Webtoons/readers
+            if 'bg_transparency' in src or src.endswith('1x1.gif') or src.endswith('spacer.gif') or 'blank.gif' in src:
                 continue
             abs_src = urljoin(base_url, src)
-            images.append(abs_src)
+            if abs_src not in images:
+                images.append(abs_src)
+
+    # 2. Div / Picture / Canvas elements with data-src or inline background-image (GlobalComix & SPAs)
+    for div in search_root.find_all(['div', 'picture', 'canvas', 'a', 'section']):
+        data_src = (
+            _to_str(div.get('data-src')) or
+            _to_str(div.get('data-original')) or
+            _to_str(div.get('data-url')) or
+            _to_str(div.get('data-image')) or
+            _to_str(div.get('data-cdn'))
+        )
+        if data_src:
+            abs_src = urljoin(base_url, data_src)
+            if abs_src not in images and not any(ext in abs_src for ext in ['1x1.gif', 'spacer.gif']):
+                images.append(abs_src)
+        
+        style = _to_str(div.get('style'))
+        if 'url(' in style:
+            bg_match = re.search(r'url\s*\(\s*["\']?([^"\'\)]+)["\']?\s*\)', style, re.IGNORECASE)
+            if bg_match:
+                bg_url = bg_match.group(1).strip()
+                if bg_url and not bg_url.startswith('data:'):
+                    abs_src = urljoin(base_url, bg_url)
+                    if abs_src not in images:
+                        images.append(abs_src)
+
     return images

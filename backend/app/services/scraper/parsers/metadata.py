@@ -88,8 +88,19 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
         except Exception:
             soup = BeautifulSoup(html, 'html.parser')
 
+        def _get_str(tag, *attrs: str) -> str:
+            if not tag:
+                return ""
+            for a in attrs:
+                val = tag.get(a)
+                if isinstance(val, list):
+                    val = " ".join(val)
+                if isinstance(val, str) and val.strip():
+                    return val.strip()
+            return ""
+
         og_title = soup.find('meta', attrs={'property': 'og:title'}) or soup.find('meta', attrs={'name': 'twitter:title'})
-        metadata["title"] = og_title['content'] if og_title and og_title.has_attr('content') else (soup.title.string if soup.title else "")
+        metadata["title"] = _get_str(og_title, 'content') or (soup.title.string.strip() if soup.title and soup.title.string else "")
 
         title_str = metadata["title"]
         if title_str:
@@ -97,11 +108,12 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
             metadata["title"] = title_str.strip()
 
         og_desc = soup.find('meta', attrs={'property': 'og:description'}) or soup.find('meta', attrs={'name': 'description'})
-        metadata["description"] = og_desc['content'] if og_desc and og_desc.has_attr('content') else ""
+        metadata["description"] = _get_str(og_desc, 'content')
 
         og_img = soup.find('meta', attrs={'property': 'og:image'}) or soup.find('meta', attrs={'name': 'twitter:image'})
-        if og_img and og_img.has_attr('content'):
-            metadata["cover_image"] = urljoin(url, og_img['content'])
+        og_img_content = _get_str(og_img, 'content')
+        if og_img_content:
+            metadata["cover_image"] = urljoin(url, og_img_content)
 
         if not metadata["cover_image"]:
             cover_selectors = [
@@ -114,15 +126,15 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
                 try:
                     img_tag = soup.select_one(sel)
                     if img_tag:
-                        src = img_tag.get('src') or img_tag.get('data-src') or img_tag.get('data-lazy-src') or img_tag.get('data-original')
+                        src = _get_str(img_tag, 'src', 'data-src', 'data-lazy-src', 'data-original')
                         if src:
-                            metadata["cover_image"] = urljoin(url, src.strip())
+                            metadata["cover_image"] = urljoin(url, src)
                             break
                 except Exception:
                     continue
 
         author_tag = soup.find('meta', attrs={'name': 'author'}) or soup.find('meta', attrs={'property': 'og:creator'})
-        metadata["author"] = author_tag['content'] if author_tag and author_tag.has_attr('content') else ""
+        metadata["author"] = _get_str(author_tag, 'content')
 
         if not metadata["author"]:
             author_selectors = [
@@ -144,7 +156,7 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
                     continue
 
         genre_tag = soup.find('meta', attrs={'property': 'og:genre'}) or soup.find('meta', attrs={'property': 'comic:genre'})
-        metadata["genre"] = genre_tag['content'] if genre_tag and genre_tag.has_attr('content') else ""
+        metadata["genre"] = str(genre_tag['content']) if genre_tag and genre_tag.has_attr('content') else ""
 
         if not metadata["genre"]:
             genre_selectors = [

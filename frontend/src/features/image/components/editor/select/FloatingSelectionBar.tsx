@@ -27,6 +27,7 @@ import {
   Trash,
 } from "lucide-react";
 import * as api from "@/api";
+import { useProjectStore } from "@/store/useProjectStore";
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -350,6 +351,32 @@ export function ScraperSelectionToolbar({
     }
   };
 
+  const handleSelectInTimeline = () => {
+    if (!setSelectedScraped) return;
+    const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+    const matches = scrapedImages.filter((imgUrl) => {
+      const proxiedUrl = imgUrl?.startsWith("/api/") ? imgUrl : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+      return activePanels.some(
+        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+      );
+    });
+    setSelectedScraped(matches);
+    setIsOpen(false);
+  };
+
+  const handleSelectNotInTimeline = () => {
+    if (!setSelectedScraped) return;
+    const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+    const matches = scrapedImages.filter((imgUrl) => {
+      const proxiedUrl = imgUrl?.startsWith("/api/") ? imgUrl : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+      return !activePanels.some(
+        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+      );
+    });
+    setSelectedScraped(matches);
+    setIsOpen(false);
+  };
+
   return (
     <div className="relative inline-block text-left">
       <button
@@ -399,6 +426,26 @@ export function ScraperSelectionToolbar({
               className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-neutral-455 hover:text-white hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium"
             >
               Deselect All Panels
+            </button>
+
+            <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
+              Timeline Status Filters
+            </div>
+            <button
+              type="button"
+              onClick={handleSelectInTimeline}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-emerald-400 hover:text-emerald-300 hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium flex items-center justify-between"
+            >
+              <span>Select Panels In Timeline</span>
+              <span className="text-[9px] bg-emerald-955 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-800/40">✓ Added</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleSelectNotInTimeline}
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-purple-400 hover:text-purple-300 hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium flex items-center justify-between"
+            >
+              <span>Select Panels Not In Timeline</span>
+              <span className="text-[9px] bg-purple-955 text-purple-400 px-1.5 py-0.5 rounded border border-purple-800/40">+ Not Added</span>
             </button>
 
             <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
