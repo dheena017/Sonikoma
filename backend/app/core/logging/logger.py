@@ -43,7 +43,7 @@ logging.Logger.success = success
 
 def setup_logging():
     """Initializes the global logging configuration."""
-    IS_PRODUCTION = os.getenv("NODE_ENV") == "production"
+    from startup.bootstrap import IS_PRODUCTION
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
     console_handler.addFilter(EndpointFilter())

@@ -415,14 +415,11 @@ const NotificationsPage = React.memo(
                                                   has_retry_handler:
                                                     !!note.onRetry,
                                                 },
-                                                context: {
+                                                  context: {
                                                   environment:
-                                                    typeof process !==
-                                                    "undefined"
-                                                      ? process.env.NODE_ENV
-                                                      : (import.meta as any).env
-                                                          ?.MODE ||
-                                                        "development",
+                                                    (import.meta as any).env
+                                                      ?.MODE ||
+                                                    "development",
                                                   browser:
                                                     typeof window !==
                                                     "undefined"

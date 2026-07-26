@@ -15,7 +15,7 @@ export default defineConfig(({ mode, command }) => {
     process.env.VERCEL !== undefined ||
     command === "build" ||
     mode === "production" ||
-    process.env.NODE_ENV === "production";
+    (env.NODE_ENV || process.env.NODE_ENV) === "production";
 
   const backendPortStr = env.BACKEND_PORT || process.env.BACKEND_PORT || process.env.PORT;
   if (!backendPortStr) {

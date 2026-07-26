@@ -22,6 +22,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from api.dependencies.auth import get_admin_user
 
 from core.logging import get_logs, add_log_listener, remove_log_listener
+from core.settings import NODE_ENV
 
 from core.cache import get_all_cache_stats, get_total_storage_size_bytes
 from core.settings import BACKEND_PORT
@@ -266,7 +267,7 @@ async def server_metrics():
             "apiVersion": os.getenv("API_VERSION", "1.0.0"),
             "pythonVersion": sys.version.split(" ")[0],
             "platform": f"{platform.system()} {platform.machine()}",
-            "env": os.getenv("NODE_ENV", "development"),
+            "env": NODE_ENV,
         },
         "config": {
             "port": BACKEND_PORT,

@@ -519,19 +519,6 @@ export default function LoginPage({
                     {t.demoBtn}
                   </button>
                 </div>
-                {import.meta.env.DEV && (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleQuickFill();
-                      // Timeout to ensure state updates before submitting
-                      setTimeout(() => handleSubmit(e as any), 0);
-                    }}
-                    className={`w-full py-2 rounded-lg bg-orange-500/20 text-orange-400 border border-orange-500/30 hover:bg-orange-500/30 text-xs font-bold transition-colors cursor-pointer mt-2`}
-                  >
-                    Dev Login (Auto-fill & Submit)
-                  </button>
-                )}
               </div>
             )}
           </div>
