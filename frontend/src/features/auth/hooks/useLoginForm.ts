@@ -30,10 +30,7 @@ export default function useLoginForm(props: LoginFormProps) {
 
 
   React.useEffect(() => {
-    if (import.meta.env.DEV) {
-      setEmail("creator@sonikoma.com");
-      setPassword("password123");
-    }
+    // No auto-fill: credentials must be entered by the user
   }, []);
 
   React.useEffect(() => {
@@ -82,10 +79,7 @@ export default function useLoginForm(props: LoginFormProps) {
   };
 
   const handleQuickFill = () => {
-    setEmail("creator@sonikoma.com");
-    setPassword("password123");
-    setRememberMe(true);
-    if (error) setError(null);
+    // Quick fill removed — no hardcoded credentials allowed
   };
 
   const handlePasskeySignIn = () => {
@@ -95,27 +89,15 @@ export default function useLoginForm(props: LoginFormProps) {
       setPasskeyStatus("Scanning TouchID / FaceID sensors...");
       setTimeout(() => {
         setIsPasskeyLoading(false);
-        setPasskeyStatus(null);
-        setEmail("passkey_creator@sonikoma.com");
-        setPassword("passkey_secret_2026");
-        setRememberMe(true);
-        setError(null);
+        setPasskeyStatus("Passkey authentication is not yet configured.");
       }, 1400);
     }, 1000);
   };
 
   const handleQrSimulateSuccess = async () => {
-    setIsLoading(true);
-    setTimeout(async () => {
-      setEmail("qr_direct_creator@sonikoma.com");
-      setPassword("qr_token_verified_99");
-      setRememberMe(true);
-      setIsLoading(false);
-      setIsQrLogin(false);
-      await (window as any).alertAsync(
-        "Mobile authenticator token successfully verified! Logging in..."
-      );
-    }, 1200);
+    await (window as any).alertAsync(
+      "QR login is not yet configured for this environment."
+    );
   };
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {

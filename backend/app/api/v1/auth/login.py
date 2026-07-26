@@ -11,10 +11,9 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
-from core.security import verify_password, create_access_token, get_password_hash
-from repositories.user import get_user_by_email, create_user_session, write_audit_log, create_user
+from core.security import verify_password, create_access_token
+from repositories.user import get_user_by_email, create_user_session, write_audit_log
 from schemas.auth import UserLogin
-from startup import IS_PRODUCTION
 
 logger = logging.getLogger("sonikoma.auth.login")
 router = APIRouter()
@@ -49,23 +48,6 @@ async def login_for_swagger_access_token(
 @router.post("/login")
 async def login(user_data: UserLogin, request: Request):
     ip_addr = request.client.host if request.client else "127.0.0.1"
-
-    if not IS_PRODUCTION and user_data.email == "creator@sonikoma.com":
-        existing_dev = get_user_by_email(user_data.email)
-        if not existing_dev:
-            try:
-                dev_user = {
-                    "id": f"user_dev_{uuid.uuid4().hex[:8]}",
-                    "username": "creator",
-                    "email": "creator@sonikoma.com",
-                    "password_hash": get_password_hash("password123"),
-                    "full_name": "Dev Creator",
-                    "creator_role": "creator"
-                }
-                create_user(dev_user)
-                logger.info("Automatically created development user creator@sonikoma.com")
-            except Exception as e:
-                logger.warning(f"Failed to auto-create dev user: {e}")
 
     user = get_user_by_email(user_data.email)
 
