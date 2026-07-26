@@ -1,24 +1,26 @@
-from repositories.user import commands as db_commands
-
 import os
 import sys
+import shutil
 import tempfile
 import unittest
-from database import config
-from database import bootstrap
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
+
+from database import config, bootstrap
+from database.bootstrap import init_db
+from repositories.user import commands as db_commands
 from repositories.user.queries import get_user_by_id
 from repositories.project.project import get_project, insert_project
-from database.bootstrap import init_db
-
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'app'))
-
 
 
 class InsertProjectTests(unittest.TestCase):
-    def test_insert_project_creates_missing_user_for_anonymous_scrape(self):
-        temp_dir = tempfile.mkdtemp(prefix='sonikoma-test-', dir=os.getcwd())
-        db_path = os.path.join(temp_dir, 'test.db')
-        schema_path = os.path.join(os.path.dirname(__file__), '..', 'app', 'database', 'schema.sql')
+    def setUp(self):
+        data_temp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'temp'))
+        os.makedirs(data_temp_dir, exist_ok=True)
+
+        self.temp_dir = tempfile.mkdtemp(prefix='sonikoma-test-', dir=data_temp_dir)
+        db_path = os.path.join(self.temp_dir, 'test.db')
+        schema_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app', 'database', 'schema.sql'))
 
         config.DB_PATH = db_path
         config.SCHEMA_PATH = schema_path
@@ -27,6 +29,11 @@ class InsertProjectTests(unittest.TestCase):
 
         init_db()
 
+    def tearDown(self):
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_insert_project_creates_missing_user_for_anonymous_scrape(self):
         project_id = 'proj_test_123'
         insert_project({
             'project_id': project_id,

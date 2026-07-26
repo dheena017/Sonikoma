@@ -28,11 +28,20 @@ out/
 client_secrets.json
 backend/data/client_secrets.json
 
-# ── Database & Persistent Media Storage (backend/data/) ───────────────────────
+# ── Database & Persistent Media Storage (data/ & backend/data/) ───────────────
+data/
 backend/data/
+sonikoma-test-*
+sonikoma-credits-test-*
 *.db
 *.db-wal
 *.db-shm
+data/media/
+data/local_media/
+data/scraped_html/
+data/training_data/
+data/image_cache/
+data/temp/
 backend/data/media/
 backend/data/local_media/
 backend/data/scraped_html/

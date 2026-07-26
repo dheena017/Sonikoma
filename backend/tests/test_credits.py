@@ -30,7 +30,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "app"))
 
 
 def _make_isolated_db() -> str:
-    tmp = tempfile.mkdtemp(prefix="sonikoma-credits-test-")
+    data_temp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "temp"))
+    os.makedirs(data_temp_dir, exist_ok=True)
+    tmp = tempfile.mkdtemp(prefix="sonikoma-credits-test-", dir=data_temp_dir)
     return os.path.join(tmp, "test.db")
 
 

@@ -1,38 +1,30 @@
 import os
 import sys
 import unittest
+import tempfile
 import shutil
+from unittest.mock import patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
-from api.v1.images.router import image_router
+from api.v1.images.upload import router as upload_router
+
 
 class TestFineTuning(unittest.TestCase):
     def setUp(self):
-        self.app = FastAPI()
-        self.app.include_router(image_router)
-        self.client = TestClient(self.app)
-        
-        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.training_dir = os.path.join(self.base_dir, "data", "training_data")
-        self.backup_dir = os.path.join(self.base_dir, "data", "training_data_backup_test")
+        self.test_dir = tempfile.mkdtemp()
+        self.patcher = patch("api.v1.images.upload._TRAINING_DIR", self.test_dir)
+        self.patcher.start()
 
-        # Temporarily backup training_data to verify empty check
-        if os.path.exists(self.training_dir):
-            shutil.copytree(self.training_dir, self.backup_dir, dirs_exist_ok=True)
-            # empty out training_dir
-            for f in os.listdir(self.training_dir):
-                fp = os.path.join(self.training_dir, f)
-                if os.path.isfile(fp):
-                    os.remove(fp)
+        self.app = FastAPI()
+        self.app.include_router(upload_router)
+        self.client = TestClient(self.app)
 
     def tearDown(self):
-        # Restore training_data
-        if os.path.exists(self.backup_dir):
-            shutil.copytree(self.backup_dir, self.training_dir, dirs_exist_ok=True)
-            shutil.rmtree(self.backup_dir)
+        self.patcher.stop()
+        shutil.rmtree(self.test_dir, ignore_errors=True)
 
     def test_start_training_with_empty_data_returns_400(self):
         # Trigger training without samples
@@ -56,6 +48,7 @@ class TestFineTuning(unittest.TestCase):
         self.assertIn("metrics", data)
         self.assertIn("error", data)
         self.assertFalse(data["is_training"])
+
 
 if __name__ == "__main__":
     unittest.main()

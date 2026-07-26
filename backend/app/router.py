@@ -19,17 +19,17 @@ def register_routers(app: FastAPI):
     app.include_router(api_router)
 
     # Serve generated videos
-    videos_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "media"))
+    videos_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media"))
     os.makedirs(videos_path, exist_ok=True)
     app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
 
     # Serve locally generated panel layer WebPs (development bypass)
-    local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "local_media"))
+    local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "local_media"))
     os.makedirs(local_media_dir, exist_ok=True)
     app.mount("/media", StaticFiles(directory=local_media_dir), name="media")
 
     # Serve locally saved training data (Data Flywheel)
-    training_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "training_data"))
+    training_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "training_data"))
     os.makedirs(training_data_dir, exist_ok=True)
     app.mount("/training_data", StaticFiles(directory=training_data_dir), name="training_data")
 

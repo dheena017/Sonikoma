@@ -7,13 +7,18 @@ from unittest.mock import patch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
-from app.services.training import training_monitor as monitor
-from app.providers.vision.yolo import trigger_fine_tuning
+try:
+    from services.training import training_monitor as monitor
+    from providers.vision.yolo import trigger_fine_tuning
+except ImportError:
+    from app.services.training import training_monitor as monitor
+    from app.providers.vision.yolo import trigger_fine_tuning
 
 class TestAutomaticTraining(unittest.TestCase):
     def setUp(self):
-        # We will use a temp folder for training data to avoid polluting the actual one
-        self.test_dir = tempfile.mkdtemp()
+        data_temp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'temp'))
+        os.makedirs(data_temp_dir, exist_ok=True)
+        self.test_dir = tempfile.mkdtemp(dir=data_temp_dir)
         self.patcher_dir = patch("services.training.training_monitor.TRAINING_DATA_DIR", self.test_dir)
         self.patcher_meta = patch("services.training.training_monitor.METADATA_FILE", os.path.join(self.test_dir, "training_metadata.json"))
 

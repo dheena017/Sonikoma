@@ -29,7 +29,8 @@ class ProcessTimeLoggingMiddleware(BaseHTTPMiddleware):
         response.headers["X-API-Version"]  = API_VERSION
 
         # Avoid logging SSE/logs polling endpoint spam
-        if not any(path in request.url.path for path in ["/system-logs", "/api/metrics", "/api/health"]):
+        NOISY_SUBSTRINGS = ["/system-logs", "/metrics", "/health", "/status", "/favicon.ico"]
+        if not any(path in request.url.path for path in NOISY_SUBSTRINGS):
             method_colors = {
                 "GET": "\x1b[32m",
                 "POST": "\x1b[33m",
