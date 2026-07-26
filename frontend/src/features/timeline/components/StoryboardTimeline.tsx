@@ -115,6 +115,9 @@ const StoryboardTimeline = React.memo(
 
     const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
     const [selectedTimelineEp, setSelectedTimelineEp] = useState<number | "all">("all");
+    const [timelineEpSearchQuery, setTimelineEpSearchQuery] = useState("");
+    const [timelineEpSortAscending, setTimelineEpSortAscending] = useState(true);
+    const [hoveredTimelineEpIdx, setHoveredTimelineEpIdx] = useState<number | null>(null);
 
     const handlePanelClick = useCallback(
       (idx: number, panelId: number, shiftKey: boolean, ctrlOrMeta: boolean) => {
@@ -897,8 +900,9 @@ const StoryboardTimeline = React.memo(
 
           return (
             <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
-              {/* IN-PANEL LEFT SIDEBAR: TIMELINE SCENES & EPISODES */}
+              {/* IN-PANEL LEFT SIDEBAR: TIMELINE SEQUENCE & EPISODES */}
               <aside className="w-full lg:w-56 bg-neutral-955 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-xl lg:sticky lg:top-24 self-start">
+                {/* Header with Sort Toggle */}
                 <div className="flex items-center justify-between border-b border-neutral-850/80 pb-2.5">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
@@ -906,7 +910,39 @@ const StoryboardTimeline = React.memo(
                       Timeline Sequence
                     </h4>
                   </div>
+                  {episodeGroups.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setTimelineEpSortAscending((prev) => !prev)}
+                      title="Toggle Sort Order (Ascending / Descending)"
+                      className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
+                    >
+                      {timelineEpSortAscending ? "1 → N" : "N → 1"}
+                    </button>
+                  )}
                 </div>
+
+                {/* Search & Filter Input */}
+                {episodeGroups.length > 0 && (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={timelineEpSearchQuery}
+                      onChange={(e) => setTimelineEpSearchQuery(e.target.value)}
+                      placeholder="Filter sequence..."
+                      className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/60 font-mono transition-all"
+                    />
+                    {timelineEpSearchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setTimelineEpSearchQuery("")}
+                        className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {(() => {
                   const totalTimelineCount = episodeGroups.length > 0
@@ -915,6 +951,7 @@ const StoryboardTimeline = React.memo(
 
                   return (
                     <div className="space-y-1.5 font-mono text-xs">
+                      {/* All Scenes Button */}
                       <button
                         type="button"
                         onClick={() => setSelectedTimelineEp("all")}
@@ -924,7 +961,7 @@ const StoryboardTimeline = React.memo(
                             : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
                         }`}
                       >
-                        <span>All Scenes</span>
+                        <span className="truncate">All Scenes</span>
                         <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-purple-300 border border-purple-900/40 shrink-0">
                           {totalTimelineCount}f
                         </span>
@@ -933,37 +970,107 @@ const StoryboardTimeline = React.memo(
                   );
                 })()}
 
+                {/* Filter Episode Section */}
                 <div className="pt-2 border-t border-neutral-850 space-y-2">
-                  <span className="text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
-                    Filter Episode
-                  </span>
+                  <div className="flex items-center justify-between text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
+                    <span>Sequence Filter</span>
+                    <span>({episodeGroups.length})</span>
+                  </div>
+
                   {episodeGroups.length > 0 ? (
-                    <div className="space-y-1 max-h-48 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                      {getSortedEpisodeGroups(episodeGroups).map(({ grp, originalIdx }) => {
-                        const isSelected = selectedTimelineEp === originalIdx;
-                        return (
-                          <button
-                            key={originalIdx}
-                            type="button"
-                            onClick={() => {
-                              setSelectedTimelineEp(originalIdx);
-                              if (grp.startIndex !== undefined) {
-                                setCurrentPanelIndex(grp.startIndex);
-                              }
-                            }}
-                            className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all text-left border cursor-pointer ${
-                              isSelected
-                                ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                                : "bg-neutral-900/50 border-neutral-850 text-neutral-350 hover:text-white"
-                            }`}
-                          >
-                            <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
-                            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-purple-300 border border-purple-900/40 shrink-0">
-                              {grp.count}f
-                            </span>
-                          </button>
-                        );
-                      })}
+                    <div className="space-y-1.5 max-h-52 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                      {(() => {
+                        const rawSorted = getSortedEpisodeGroups(episodeGroups);
+                        const sorted = timelineEpSortAscending ? rawSorted : [...rawSorted].reverse();
+                        const filtered = sorted.filter(({ grp }) => {
+                          if (!timelineEpSearchQuery.trim()) return true;
+                          return formatDisplayEpisodeLabel(grp.episodeLabel)
+                            .toLowerCase()
+                            .includes(timelineEpSearchQuery.toLowerCase());
+                        });
+
+                        return filtered.map(({ grp, originalIdx }) => {
+                          const isSelected = selectedTimelineEp === originalIdx;
+                          const epPanels = panels.filter((panel, globalIdx) => {
+                            if (panel.episode_label) {
+                              return panel.episode_label === grp.episodeLabel;
+                            }
+                            return globalIdx >= grp.startIndex && globalIdx < grp.startIndex + grp.count;
+                          });
+
+                          const inTimelineCount = epPanels.length;
+                          const totalImportedCount = grp.count;
+
+                          const seconds = grp.count * 4.0;
+                          const mins = Math.floor(seconds / 60);
+                          const secs = Math.round(seconds % 60);
+                          const durationStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+                          return (
+                            <div key={`timeline-ep-wrapper-${originalIdx}`} className="relative group/ep">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedTimelineEp(originalIdx);
+                                  if (grp.startIndex !== undefined) {
+                                    setCurrentPanelIndex(grp.startIndex);
+                                  }
+                                }}
+                                onMouseEnter={() => setHoveredTimelineEpIdx(originalIdx)}
+                                onMouseLeave={() => setHoveredTimelineEpIdx(null)}
+                                className={`w-full flex flex-col gap-1 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left border cursor-pointer ${
+                                  isSelected
+                                    ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.25)]"
+                                    : "bg-neutral-900/50 border-neutral-850 text-neutral-350 hover:text-white"
+                                }`}
+                              >
+                                <div className="flex items-center justify-between gap-1.5 w-full">
+                                  <div className="flex items-center gap-2 truncate">
+                                    <span
+                                      className={`h-2 w-2 rounded-full shrink-0 ${
+                                        isSelected ? "bg-purple-400 animate-pulse" : "bg-emerald-500/80"
+                                      }`}
+                                    />
+                                    <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
+                                  </div>
+                                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-purple-300 border border-purple-900/40 shrink-0">
+                                    {grp.count}f
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center justify-between text-[9px] text-neutral-400 font-normal pl-4 pt-0.5">
+                                  <span>⏱️ {durationStr}</span>
+                                  <span className="text-emerald-400 font-bold uppercase tracking-wider text-[8px]">✓ Sequenced</span>
+                                </div>
+                              </button>
+
+                              {/* AI Tooltip on Hover */}
+                              {hoveredTimelineEpIdx === originalIdx && (
+                                <div className="absolute left-full top-0 ml-3 z-50 w-56 p-3 bg-neutral-955/95 border border-purple-900/60 rounded-xl shadow-2xl backdrop-blur-md hidden lg:block animate-in fade-in duration-150 pointer-events-none">
+                                  <div className="space-y-1.5">
+                                    <div className="flex items-center justify-between border-b border-neutral-800 pb-1">
+                                      <span className="text-[10px] font-black text-purple-300 uppercase tracking-wider">
+                                        {formatDisplayEpisodeLabel(grp.episodeLabel)}
+                                      </span>
+                                      <span className="text-[8px] bg-purple-950 text-purple-400 px-1.5 py-0.5 rounded border border-purple-800">
+                                        Timeline Card
+                                      </span>
+                                    </div>
+                                    <p className="text-[10px] text-neutral-400 leading-tight font-mono">
+                                      {grp.count} storyboard panels sequenced. Total playback time ~{durationStr}.
+                                    </p>
+                                    {epPanels[0]?.image_url && (
+                                      <div className="w-full h-20 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900 mt-1">
+                                        <img src={epPanels[0].image_url} alt="Thumbnail" className="w-full h-full object-cover" />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        });
+                      })()}
                     </div>
                   ) : (
                     <div className="p-2.5 rounded-xl bg-neutral-900/40 border border-neutral-850 text-center space-y-1">
@@ -971,6 +1078,19 @@ const StoryboardTimeline = React.memo(
                       <p className="text-[9px] font-mono text-neutral-600">No multi-episode batch found</p>
                     </div>
                   )}
+                </div>
+
+                {/* Quick Tools */}
+                <div className="pt-2 border-t border-neutral-850">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addNotification?.("All Timeline panels selected", "info");
+                    }}
+                    className="w-full px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-850 text-xs font-mono font-bold text-neutral-300 border border-neutral-800 text-center transition-all cursor-pointer truncate"
+                  >
+                    ✅ Select All Scenes
+                  </button>
                 </div>
               </aside>
 
@@ -987,10 +1107,12 @@ const StoryboardTimeline = React.memo(
                         : sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }));
 
                     return visibleGroups.map(({ grp, gIdx }) => {
-                      const grpPanels = panels.slice(
-                        grp.startIndex,
-                        grp.startIndex + grp.count
-                      );
+                      const grpPanels = panels.filter((panel, globalIdx) => {
+                        if (panel.episode_label) {
+                          return panel.episode_label === grp.episodeLabel;
+                        }
+                        return globalIdx >= grp.startIndex && globalIdx < grp.startIndex + grp.count;
+                      });
 
                       return (
                         <div

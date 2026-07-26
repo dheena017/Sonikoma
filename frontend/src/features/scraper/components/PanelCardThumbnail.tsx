@@ -15,6 +15,7 @@ interface PanelCardThumbnailProps {
   isProcessing: boolean;
   isBatchCropping: boolean;
   bubbleCroppingImgUrl: string | null;
+  isInTimeline?: boolean;
   handleRotateClockwise: () => void;
   handleFlipHorizontal: () => void;
   handleUndo: () => void;
@@ -62,6 +63,7 @@ export function PanelCardThumbnail({
   isProcessing,
   isBatchCropping,
   bubbleCroppingImgUrl,
+  isInTimeline,
   handleRotateClockwise,
   handleFlipHorizontal,
   handleUndo,
@@ -191,6 +193,18 @@ export function PanelCardThumbnail({
           ].join(" ")}
         >
           {status.text}
+        </div>
+      )}
+
+      {/* In Timeline Badge */}
+      {isInTimeline && (
+        <div
+          className={`absolute top-2 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border z-20 transition-all duration-300 border-emerald-400/60 bg-gradient-to-r from-emerald-600 to-teal-600 text-emerald-100 shadow-[0_4px_12px_rgba(16,185,129,0.35)] flex items-center gap-1 ${
+            status ? "left-28" : "left-12"
+          }`}
+        >
+          <span>✓</span>
+          <span>TIMELINE</span>
         </div>
       )}
 

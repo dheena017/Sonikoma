@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { normalizeLog } from "@/types/logs";
 import { createPortal } from "react-dom";
 import {
@@ -11,6 +11,7 @@ import {
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import * as api from "@/api/index";
+import { useProjectStore } from "@/store/useProjectStore";
 import { LiveScraperDeckProps } from "@/features/scraper/components/types";
 import PanelCard from "@/features/scraper/components/PanelCard";
 // ScraperControls moved into the floating selection bar; remove header rendering to free space
@@ -110,6 +111,10 @@ const LiveScraperDeck = React.memo(
     const [episodeSortAscending, setEpisodeSortAscending] = useState(true);
     const [hoveredEpisodeIdx, setHoveredEpisodeIdx] = useState<number | null>(null);
     const activeFetch = fetchWithInterceptor || fetch;
+
+    useEffect(() => {
+      (window as any).__scrapedImagesList = scrapedImages;
+    }, [scrapedImages]);
 
     /** Core card click handler — supports shift-range selection and Ctrl/Cmd toggling */
     const handleCardClick = useCallback(
@@ -455,6 +460,12 @@ const LiveScraperDeck = React.memo(
                     {scrapedImages.length} Frames
                   </span>
                 )}
+                {isScraping && (
+                  <span className="text-[10px] px-3 py-1 rounded-full bg-purple-600/30 text-purple-200 border border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.3)] font-mono uppercase tracking-wider flex items-center gap-1.5 animate-pulse">
+                    <RefreshCw className="h-3 w-3 animate-spin text-purple-400" />
+                    <span>Extracting HD Panels...</span>
+                  </span>
+                )}
               </div>
               <EpisodeRatingDisplay rating={rating} likes={likes} views={views} compact={true} />
             </div>
@@ -606,7 +617,12 @@ const LiveScraperDeck = React.memo(
                           {filteredGroups.map(({ grp, originalIdx }) => {
                             const isSelected = selectedEpisodeIdx === originalIdx;
                             const grpImages = scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
-                            const selectedInGrp = grpImages.filter((u) => selectedScraped.includes(u)).length;
+
+                            const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                            const timelineCountForGrp = activePanels.filter((p) => {
+                              if (p.episode_label) return p.episode_label === grp.episodeLabel;
+                              return grpImages.includes(p.image_url);
+                            }).length;
 
                             const seconds = grp.count * 4.0;
                             const mins = Math.floor(seconds / 60);
@@ -640,16 +656,10 @@ const LiveScraperDeck = React.memo(
                                     </span>
                                   </div>
 
-                                  {/* Episode Duration & Selection Progress */}
+                                  {/* Episode Duration & Status */}
                                   <div className="flex items-center justify-between text-[9px] text-neutral-400 font-normal pl-4 pt-0.5">
                                     <span>⏱️ {durationStr}</span>
-                                    {selectedInGrp > 0 ? (
-                                      <span className="text-purple-300 font-bold bg-purple-950/80 px-1.5 py-0.2 rounded border border-purple-800/40">
-                                        {selectedInGrp}/{grp.count} sel
-                                      </span>
-                                    ) : (
-                                      <span className="text-emerald-400 text-[8px] uppercase tracking-wider font-bold">✓ Ready</span>
-                                    )}
+                                    <span className="text-emerald-400 font-bold uppercase tracking-wider text-[8px]">✓ Ready</span>
                                   </div>
                                 </button>
 
@@ -682,37 +692,22 @@ const LiveScraperDeck = React.memo(
                         </div>
 
                         {/* Quick Tool Actions at Bottom of Sidebar */}
-                        <div className="pt-2 border-t border-neutral-850 space-y-1.5">
-                          <div className="flex items-center justify-between text-[9px] font-mono text-neutral-400 px-1">
-                            <span>Quick Tools</span>
-                            <span className="text-purple-400 font-bold">16:9 / 9:16</span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (selectedEpisodeIdx !== "all" && episodeGroups[selectedEpisodeIdx]) {
-                                  const grp = episodeGroups[selectedEpisodeIdx];
-                                  const grpImages = scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
-                                  setSelectedScraped((prev) => Array.from(new Set([...prev, ...grpImages])));
-                                } else {
-                                  setSelectedScraped([...scrapedImages]);
-                                }
-                              }}
-                              className="px-2 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-850 text-[10px] font-mono text-neutral-300 border border-neutral-800 text-center transition-all cursor-pointer truncate"
-                            >
-                              ✅ Select All
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                addNotification?.("Format Presets: 16:9 Cinema & 9:16 Shorts Ready", "success");
-                              }}
-                              className="px-2 py-1.5 rounded-lg bg-neutral-900 hover:bg-purple-950/60 text-[10px] font-mono text-purple-300 border border-neutral-800 hover:border-purple-800/60 text-center transition-all cursor-pointer truncate"
-                            >
-                              📱 Preset 9:16
-                            </button>
-                          </div>
+                        <div className="pt-2 border-t border-neutral-850">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (selectedEpisodeIdx !== "all" && episodeGroups[selectedEpisodeIdx]) {
+                                const grp = episodeGroups[selectedEpisodeIdx];
+                                const grpImages = scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
+                                setSelectedScraped((prev) => Array.from(new Set([...prev, ...grpImages])));
+                              } else {
+                                setSelectedScraped([...scrapedImages]);
+                              }
+                            }}
+                            className="w-full px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-850 text-xs font-mono font-bold text-neutral-300 border border-neutral-800 text-center transition-all cursor-pointer truncate"
+                          >
+                            ✅ Select All Panels
+                          </button>
                         </div>
                       </aside>
 
@@ -784,6 +779,10 @@ const LiveScraperDeck = React.memo(
                                   const proxiedUrl = imgUrl?.startsWith("/api/")
                                     ? imgUrl
                                     : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+                                  const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                                  const isInTimeline = activePanels.some(
+                                    (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                                  );
 
                                   return (
                                     <PanelCard
@@ -792,6 +791,7 @@ const LiveScraperDeck = React.memo(
                                       rawImgUrl={imgUrl}
                                       idx={globalIdx}
                                       isSelected={isSelected}
+                                      isInTimeline={isInTimeline}
                                       isBatchCropping={isBatchCropping}
                                       croppingImgUrl={croppingImgUrl}
                                       bubbleCroppingImgUrl={bubbleCroppingImgUrl}
@@ -818,12 +818,16 @@ const LiveScraperDeck = React.memo(
                 }
 
                 return (
-                  <div className="w-full max-w-full flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin px-4 md:px-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-1.5 px-1 w-full">
                     {scrapedImages.map((imgUrl, idx) => {
                       const isSelected = selectedScraped.includes(imgUrl);
                       const proxiedUrl = imgUrl?.startsWith("/api/")
                         ? imgUrl
                         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+                      const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                      const isInTimeline = activePanels.some(
+                        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                      );
 
                       return (
                         <PanelCard
@@ -832,6 +836,7 @@ const LiveScraperDeck = React.memo(
                           rawImgUrl={imgUrl}
                           idx={idx}
                           isSelected={isSelected}
+                          isInTimeline={isInTimeline}
                           isBatchCropping={isBatchCropping}
                           croppingImgUrl={croppingImgUrl}
                           bubbleCroppingImgUrl={bubbleCroppingImgUrl}
@@ -849,16 +854,17 @@ const LiveScraperDeck = React.memo(
                       );
                     })}
 
-                    {isScraping && [1, 2, 3].map((num) => (
+                    {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
                       <div
                         key={`loading-skeleton-${num}`}
-                        className="relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border border-purple-800/20 bg-neutral-950/40 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
+                        className="relative rounded-2xl border border-purple-800/30 bg-neutral-955/60 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
                         style={{ animationDelay: `${(num - 1) * 150}ms` }}
                       >
-                        <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/20 flex flex-col items-center justify-center overflow-hidden gap-2">
-                          <div className="h-10 w-10 rounded-full bg-purple-900/40 flex items-center justify-center">
-                            <RefreshCw className="h-5 w-5 text-purple-500/60 animate-spin" />
+                        <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/30 flex flex-col items-center justify-center overflow-hidden gap-2">
+                          <div className="h-10 w-10 rounded-full bg-purple-900/50 flex items-center justify-center border border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.3)]">
+                            <RefreshCw className="h-5 w-5 text-purple-400 animate-spin" />
                           </div>
+                          <span className="text-[10px] font-mono text-purple-300 font-bold">Extracting Panels...</span>
                         </div>
                       </div>
                     ))}

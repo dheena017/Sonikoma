@@ -232,12 +232,30 @@ export function useAutoAnalysis({
       const baseId =
         panels.length > 0 ? Math.max(...panels.map((p) => p.id)) + 1 : 1;
 
+      const episodeGroups: Array<{ episodeLabel: string; startIndex: number; count: number }> =
+        ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || [];
+      const scrapedList: string[] = currentScrapedList || (window as any).__scrapedImagesList || scrapedImages || [];
+
       const newPanelsToAdd = imgUrls.map((imgUrl, loopIdx) => {
         // Resolve original_url from the scrape origins map so the DB can recover
         // this image if the in-memory cache is lost after a server restart
         const origins: Record<string, string> =
           (window as any).__scrapeImageOrigins || {};
         const originalUrl = origins[imgUrl] || null;
+
+        // Find which episode group this image belongs to
+        let targetEpLabel: string | undefined = undefined;
+        if (episodeGroups.length > 0 && scrapedList.length > 0) {
+          const imgIdx = scrapedList.indexOf(imgUrl);
+          if (imgIdx !== -1) {
+            const matchedGrp = episodeGroups.find(
+              (g) => imgIdx >= g.startIndex && imgIdx < g.startIndex + g.count
+            );
+            if (matchedGrp) {
+              targetEpLabel = matchedGrp.episodeLabel;
+            }
+          }
+        }
 
         return {
           id: baseId + loopIdx,
@@ -248,6 +266,7 @@ export function useAutoAnalysis({
           duration: 4.5,
           motion_type: "zoom_in",
           isAnalyzing: false,
+          episode_label: targetEpLabel,
         };
       });
 

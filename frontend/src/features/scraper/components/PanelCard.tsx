@@ -24,6 +24,7 @@ interface PanelCardProps
   isSelected: boolean;
   isBatchCropping: boolean;
   croppingImgUrl: string | null;
+  isInTimeline?: boolean;
   addPanelsToStoryboard: (
     urls: string[],
     currentScrapedList?: string[],
@@ -46,6 +47,7 @@ function PanelCard({
   isSelected,
   isBatchCropping,
   croppingImgUrl,
+  isInTimeline,
   bubbleCroppingImgUrl,
   scrapedImages,
   mergingIndices,
@@ -253,6 +255,7 @@ function PanelCard({
         isProcessing={isProcessing}
         isBatchCropping={isBatchCropping}
         bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+        isInTimeline={isInTimeline}
         handleRotateClockwise={handleRotateClockwise}
         handleFlipHorizontal={handleFlipHorizontal}
         handleUndo={handleUndo}
