@@ -122,13 +122,14 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
     return "bg-purple-500 shadow-purple-500/35";
   };
 
-  const renderRatingStars = (rating: number) => {
+  const renderRatingStars = (rating: number | null | undefined) => {
+    if (rating === null || rating === undefined || isNaN(rating)) return null;
     const isScale10 = rating > 5.0;
     const maxVal = isScale10 ? 10 : 5;
     const scaledRating = isScale10 ? rating / 2 : rating;
 
     return (
-      <div className="flex items-center gap-0.5" title={`Rating: ${rating.toFixed(1)}/${maxVal}`}>
+      <div className="flex items-center gap-0.5" title={`Rating: ${Number(rating).toFixed(1)}/${maxVal}`}>
         {Array(5)
           .fill(0)
           .map((_, i) => {
@@ -226,7 +227,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
         {episode.thumbnail ? (
           <img
-            src={getProxiedImageUrl(episode.thumbnail)}
+            src={getProxiedImageUrl(episode.thumbnail, episode.url)}
             alt={episode.title}
             className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
               isHovered ? "scale-105 brightness-105" : "scale-100"
@@ -294,10 +295,10 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
               <Flame size={10} className="fill-current text-black" /> POPULAR
             </span>
           )}
-          {episode.rating && (
+          {episode.rating !== null && episode.rating !== undefined && (
             <div className="bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-1 shadow-md border border-white/10 shrink-0">
               <Star size={10} className="fill-amber-400 text-amber-400" />
-              <span className="text-[10px] font-extrabold text-amber-300 font-mono">{episode.rating.toFixed(1)}</span>
+              <span className="text-[10px] font-extrabold text-amber-300 font-mono">{Number(episode.rating).toFixed(1)}</span>
             </div>
           )}
         </div>
@@ -376,7 +377,9 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
                   );
                 })}
               </div>
-              <span className="text-[10px] font-extrabold text-amber-300 font-mono">{episode.rating.toFixed(1)}</span>
+              <span className="text-[10px] font-extrabold text-amber-300 font-mono">
+                {episode.rating !== null && episode.rating !== undefined ? Number(episode.rating).toFixed(1) : "N/A"}
+              </span>
               <span className="text-[10px] text-neutral-600 font-mono">/10</span>
             </div>
           )}

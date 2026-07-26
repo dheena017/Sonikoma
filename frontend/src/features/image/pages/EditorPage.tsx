@@ -386,11 +386,11 @@ const EditorPage: React.FC<EditorPageProps> = ({
             </button>
           </div>
 
-          <div className="pt-2 border-t border-neutral-850 space-y-2">
-            <span className="text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
-              Batch Render Episodes
-            </span>
-            {episodeGroups.length > 0 ? (
+          {episodeGroups.length > 0 && (
+            <div className="pt-2 border-t border-neutral-850 space-y-2">
+              <span className="text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
+                Batch Render Episodes
+              </span>
               <div className="space-y-1 max-h-48 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {getSortedEpisodeGroups(episodeGroups).map(({ grp, originalIdx }) => {
                   const isSelected = selectedExportTarget === `ep-${originalIdx}`;
@@ -413,13 +413,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   );
                 })}
               </div>
-            ) : (
-              <div className="p-2.5 rounded-xl bg-neutral-900/40 border border-neutral-850 text-center space-y-1">
-                <p className="text-[10px] font-mono text-neutral-400 font-semibold">Single Episode Active</p>
-                <p className="text-[9px] font-mono text-neutral-600">No multi-episode batch found</p>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </aside>
 
         {/* RIGHT MAIN AREA: RENDER CONTROLS */}

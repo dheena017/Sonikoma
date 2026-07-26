@@ -367,38 +367,26 @@ export function useAppLogic() {
             normalizedTargetUrl.startsWith("data:image/"))
       );
 
-      const isSourceMismatch = Boolean(
+      // Auto-resolve source mismatch if host doesn't match selected source
+      if (
         normalizedTargetUrl &&
-          !isDirectImage &&
-          selectedSource !== "custom" &&
-          currentHost &&
-          !allowedHosts.some(
-            (allowedHost) =>
-              currentHost === allowedHost ||
-              currentHost.endsWith(`.${allowedHost}`)
-          )
-      );
-
-      if (isSourceMismatch) {
-        if (!sourceMismatchNotified.current) {
-          state.addNotification(
-            `Selected source ${selectedSource} does not match the current URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
-            "error"
-          );
-          sourceMismatchNotified.current = true;
+        !isDirectImage &&
+        selectedSource !== "custom" &&
+        currentHost &&
+        !allowedHosts.some(
+          (allowedHost) =>
+            currentHost === allowedHost ||
+            currentHost.endsWith(`.${allowedHost}`)
+        )
+      ) {
+        const matchedEntry = Object.entries(SOURCE_DOMAINS).find(([key, hosts]) =>
+          hosts.some((h) => currentHost === h || currentHost.endsWith(`.${h}`))
+        );
+        if (matchedEntry) {
+          state.setSelectedSource(matchedEntry[0]);
+        } else {
+          state.setSelectedSource("custom");
         }
-        state.setPanels([]);
-        state.setScrapedImages([]);
-        state.setSelectedScraped([]);
-        setCurrentPanelIndex(0);
-        setPlaybackTime(0);
-        setStoryboardPlaying(false);
-        state.setIsScraping(false);
-        state.setConsoleLogs((prev) => [
-          `[Scraper] Aborting automatic scrape because selected source ${selectedSource} does not match the URL host ${currentHost}.`,
-          ...prev,
-        ]);
-        return;
       }
 
       sourceMismatchNotified.current = false;

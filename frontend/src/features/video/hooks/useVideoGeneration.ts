@@ -13,6 +13,7 @@ interface UseVideoGenerationProps {
   targetUrl: string;
   selectedModel: string;
   selectedSource: string;
+  setSelectedSource?: (source: string) => void;
   frameRate: number;
   voiceActor: string;
   musicTheme: string;
@@ -62,6 +63,7 @@ export function useVideoGeneration({
   voiceActor,
   musicTheme,
   selectedSource,
+  setSelectedSource,
   setVideoUrl,
   setActivePreviewTab,
   narrationStyle = "long",
@@ -198,21 +200,24 @@ export function useVideoGeneration({
       custom: [],
     };
 
-    const isSourceMismatch = Boolean(
+    // Auto-resolve source mismatch if host doesn't match selected source
+    if (
       currentHost &&
-        !allowedHosts[selectedSource]?.some(
-          (allowedHost) =>
-            currentHost === allowedHost ||
-            currentHost.endsWith(`.${allowedHost}`)
-        )
-    );
-
-    if (isSourceMismatch) {
-      addNotification(
-        `Selected source ${selectedSourceName} does not match the URL host (${currentHost}). Please choose the correct website or paste a matching URL.`,
-        "error"
+      selectedSource !== "custom" &&
+      !allowedHosts[selectedSource]?.some(
+        (allowedHost) =>
+          currentHost === allowedHost ||
+          currentHost.endsWith(`.${allowedHost}`)
+      )
+    ) {
+      const matchedKey = Object.keys(allowedHosts).find((key) =>
+        allowedHosts[key]?.some((h) => currentHost === h || currentHost.endsWith(`.${h}`))
       );
-      return;
+      if (matchedKey) {
+        setSelectedSource?.(matchedKey);
+      } else {
+        setSelectedSource?.("custom");
+      }
     }
 
     console.log(

@@ -94,7 +94,7 @@ async def scrape_images_from_url(
 
         if is_img:
             logger.info(f"[Scraper] Direct image URL detected: {fetch_url}")
-            return [f"/api/proxy-image?url={quote(fetch_url)}"]
+            return [f"/api/proxy-image?url={quote(fetch_url)}&referer={quote(fetch_url)}"]
 
     start_time = time.time()
 
@@ -117,7 +117,7 @@ async def scrape_images_from_url(
     if not bypass_cache:
         cached = check_sqlite_cache(fetch_url)
         if cached:
-            return [f"/api/proxy-image?url={quote(img)}" for img in cached]
+            return [f"/api/proxy-image?url={quote(img)}&referer={quote(fetch_url)}" for img in cached]
 
     parsed_domain = urlparse(fetch_url)
     base_domain = f"{parsed_domain.scheme}://{parsed_domain.netloc}/"
@@ -206,7 +206,7 @@ async def scrape_images_from_url(
         ]
         for pat in loose_regex:
             for match in re.finditer(pat, html, re.IGNORECASE):
-                val = match.group(1) if '(' in pat or ')' in pat else match.group(0)
+                val = match.group(1) if (match.lastindex and match.group(1) is not None) else match.group(0)
                 val = decode_escaped_js_string(val)
                 if val.startswith(('http://', 'https://')):
                     image_dict[val] = True
@@ -267,7 +267,7 @@ async def scrape_images_from_url(
     # Save cache
     save_sqlite_cache(fetch_url, filtered_images)
 
-    return [f"/api/proxy-image?url={quote(img)}" for img in filtered_images]
+    return [f"/api/proxy-image?url={quote(img)}&referer={quote(fetch_url)}" for img in filtered_images]
 
 
 def normalize_series_url(url: str) -> str:
@@ -316,8 +316,23 @@ def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> L
         return []
 
     episode_selectors = [
+        # ── Webtoons ──────────────────────────────────────────────
         '.episode_lst li', '.comic_episode_lst li', '.episode-item',
-        '[data-episode-no]', '.ep_item'
+        '[data-episode-no]', '.ep_item',
+        # ── WordPress Madara / WP Manga / MangaStream ─────────────
+        '.wp-manga-chapter', '.listing-chapters_wrap li', 'li.wp-manga-chapter',
+        '#chapterlist li', '#chapterlist a', '.chapterlist li', '.chapters-list li',
+        '.chapter-item', '.chapters li', '.chapter-list li', '.chap-item',
+        '.chapter_list li', '.chapter-row', '.version-chap li', '.vol-list li',
+        '.chapter-box li', '.main-chapter-list li', '.ts-chapter-list li',
+        '[class*="chapter-item"]', '[class*="chap_item"]', '[class*="wp-manga-chapter"]',
+        # ── MangaDex / SPA sites ─────────────────────────────────
+        '[data-chapter]', '[data-chapter-id]', '[class*="ChapterRow"]', '[class*="chapter_row"]',
+        # ── Asura Scans / Flame Comics / Reaper / Tachiyomi sites ─
+        '.eph-num a', '.item__wrap', '.clstyle li', '.epcur', '.epl-num',
+        '[class*="epcur"]', '[class*="epl-num"]', '.ep-item', '.chapter-card',
+        # ── Broad fallback selectors ──────────────────────────────
+        'ul.row-content-chapter li', '.list-chapter li', '.ep-list li', '.episode-list li',
     ]
 
     episode_container: List[Any] = []
@@ -325,6 +340,7 @@ def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> L
         items = soup.select(sel)
         if len(items) > 0:
             episode_container = list(items)
+            logger.debug(f"[Episode Scraper] Matched selector '{sel}' with {len(items)} items")
             break
 
     def _extract_str_attr(node, *attrs: str) -> str:
@@ -338,26 +354,34 @@ def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> L
                 return val.strip()
         return ""
 
+    # Broad link fallback — recognises Webtoon AND generic chapter URL patterns
+    CHAPTER_URL_PATTERNS = (
+        'episode_no=', '/episode/', '/chapter/', '/manga/',
+        '/vol', '/ch-', '/chap', 'chapter_no=', '/read/',
+        '/ep-', '/c/', '/series/', '/comic/', 'chapter-', 'episode-',
+    )
     if len(episode_container) == 0:
         all_links = soup.find_all('a')
         episode_container = [
             link for link in all_links
-            if 'episode_no=' in _extract_str_attr(link, 'href') or '/episode/' in _extract_str_attr(link, 'href')
+            if any(pat in _extract_str_attr(link, 'href').lower() for pat in CHAPTER_URL_PATTERNS)
         ]
+        logger.debug(f"[Episode Scraper] Link fallback found {len(episode_container)} chapter links")
 
     episodes = []
     for idx, ep_elem in enumerate(episode_container):
         try:
-            ep_no_elem = ep_elem.find(attrs={'class': re.compile(r'ep.*no|episode.*no', re.I)})
-            title_elem = ep_elem.find(attrs={'class': re.compile(r'title|ep.*title|subject', re.I)})
+            link_elem = ep_elem if ep_elem.name == 'a' else (ep_elem.find('a') or ep_elem)
+            
+            ep_no_elem = ep_elem.find(attrs={'class': re.compile(r'ep.*no|episode.*no|chap.*num|chapter.*num', re.I)})
+            title_elem = ep_elem.find(attrs={'class': re.compile(r'title|ep.*title|subject|chap.*title|chapter.*title', re.I)})
             ep_title = title_elem.get_text(strip=True) if title_elem else ""
 
             if ep_no_elem:
                 ep_no = ep_no_elem.get_text(strip=True)
                 ep_url_early = ""
             else:
-                link_elem_early = ep_elem.find('a')
-                ep_url_early = _extract_str_attr(link_elem_early, 'href')
+                ep_url_early = _extract_str_attr(link_elem, 'href')
                 extracted = parse_episode_index(ep_title) or parse_episode_index(ep_url_early)
                 if extracted is not None:
                     ep_no = f"Episode {int(extracted) if extracted == int(extracted) else extracted}"
@@ -365,26 +389,25 @@ def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> L
                     ep_no = f"Episode {idx + 1}"
 
             if not ep_title:
-                ep_title = ep_no
+                # Try to read the link text or the full element text
+                ep_title = link_elem.get_text(strip=True) if link_elem else ep_elem.get_text(strip=True)
+                ep_title = ep_title or ep_no
 
-            date_elem = ep_elem.find(attrs={'class': re.compile(r'date|time|upload', re.I)})
+            date_elem = ep_elem.find(attrs={'class': re.compile(r'date|time|upload|release', re.I)})
             ep_date = date_elem.get_text(strip=True) if date_elem else ""
 
             img_elem = ep_elem.find('img')
             thumbnail = ""
             if img_elem:
-                raw_thumb = _extract_str_attr(img_elem, 'src', 'data-src', 'data-lazy-src')
+                raw_thumb = _extract_str_attr(img_elem, 'src', 'data-src', 'data-lazy-src', 'data-original')
                 if raw_thumb:
                     thumbnail = urljoin(fetch_url, raw_thumb)
 
-            link_elem = ep_elem.find('a')
-            ep_url = ""
-            if link_elem:
-                ep_url = _extract_str_attr(link_elem, 'href')
-                if ep_url:
-                    ep_url = urljoin(fetch_url, ep_url)
-                elif ep_url_early:
-                    ep_url = urljoin(fetch_url, ep_url_early)
+            ep_url = _extract_str_attr(link_elem, 'href')
+            if ep_url:
+                ep_url = urljoin(fetch_url, ep_url)
+            elif ep_url_early:
+                ep_url = urljoin(fetch_url, ep_url_early)
 
             rating = None
             likes = None
@@ -426,10 +449,14 @@ def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> L
                     except ValueError:
                         pass
 
+            ch_num = parse_episode_index(ep_no) or parse_episode_index(ep_title) or (idx + 1)
+            display_name = ep_title if ep_title and ep_title != ep_no else (ep_no or f"Chapter {ch_num}")
+
             episodes.append({
                 "number": ep_no,
-                "chapter_number": parse_episode_index(ep_no) or parse_episode_index(ep_title) or (idx + 1),
+                "chapter_number": ch_num,
                 "title": ep_title,
+                "name": display_name,
                 "date": ep_date,
                 "thumbnail": thumbnail,
                 "url": ep_url,
@@ -478,12 +505,6 @@ async def scrape_webtoon_episodes(
 ) -> Dict[str, Any]:
     if series_url:
         series_url = normalize_series_url(series_url)
-
-    try:
-        from playwright.async_api import async_playwright  # noqa: F401
-    except ImportError:
-        logger.error("[Episode Scraper] Playwright not installed")
-        return {"success": False, "error": "Playwright not available"}
 
     logger.info(f"[Episode Scraper] Starting episode list scrape: {series_url}")
 
@@ -534,17 +555,41 @@ async def scrape_webtoon_episodes(
     fetch_url = None
     for test_url in candidate_urls:
         logger.info(f"[Episode Scraper] Attempting fetch: {test_url}")
-        html = await try_fetch_with_playwright(
-            test_url,
-            user_agent=random.choice(USER_AGENTS),
-            referer="https://www.webtoons.com/",
-            interactive=True
-        )
+        
+        # Derive dynamic referer based on test_url domain
+        p_test = urlparse(test_url)
+        dynamic_ref = f"{p_test.scheme}://{p_test.netloc}/" if p_test.scheme and p_test.netloc else "https://www.webtoons.com/"
+        
+        headers = {
+            "User-Agent": random.choice(USER_AGENTS),
+            "Referer": dynamic_ref,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9"
+        }
+        
+        # Fast HTTP resilient fetch first
+        try:
+            html = await try_fetch_url_resilient(test_url, headers)
+        except Exception as e:
+            logger.debug(f"[Episode Scraper] Resilient fetch exception: {e}")
+            html = None
+            
+        # Playwright browser rendering fallback for SPA / JS-only sites
+        if not html or len(html) < 1000:
+            logger.info(f"[Episode Scraper] HTTP fetch produced short/no HTML. Fallback to Playwright browser for: {test_url}")
+            html = await try_fetch_with_playwright(
+                test_url,
+                user_agent=headers["User-Agent"],
+                referer=dynamic_ref,
+                interactive=True
+            )
+
         if html and len(html) > 1000:
             fetch_url = test_url
-            logger.info(f"[Episode Scraper] Successfully fetched URL: {fetch_url}")
+            logger.info(f"[Episode Scraper] Successfully fetched URL: {fetch_url} ({len(html)} bytes)")
             break
         else:
+            logger.info(f"[Episode Scraper] Fetch returned no/short HTML for: {test_url}")
             logger.info(f"[Episode Scraper] Fetch returned no/short HTML for: {test_url}")
 
     if not html or not fetch_url:

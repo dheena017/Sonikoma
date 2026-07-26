@@ -10,13 +10,16 @@ bypassing referrer restrictions from Webtoon / Manhwa CDNs.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+from PIL import GimpGradientFile
 import logging
 import os
 import json
 import hashlib
 import time
+import re
 import httpx
 import asyncio
+from typing import Optional
 from urllib.parse import urlparse, parse_qs
 from fastapi import APIRouter, Request, Response, Query, HTTPException
 
@@ -46,7 +49,6 @@ def spoof_referer(url: str) -> str:
         parsed = urlparse(url)
         host = (parsed.hostname or "").lower()
         if "webtoon" in host or "pstatic" in host:
-            # Webtoon CDN assets (e.g. webtoon-phinf.pstatic.net) typically expect this referer.
             return "https://www.webtoons.com/"
         if "naver" in host:
             return "https://comic.naver.com/"
@@ -61,15 +63,26 @@ def spoof_referer(url: str) -> str:
         if "manhuato" in host or "manhua" in host:
             return "https://manhuato.com/"
 
-        # Remove common CDN subdomains to construct a clean fallback base domain referer
-        clean_host = host
-        for prefix in ["cdn.", "img.", "images.", "pic.", "pics.", "static.", "assets.", "media.", "uploads.", "files.", "storage."]:
-            if clean_host.startswith(prefix):
-                clean_host = clean_host[len(prefix):]
-                break
+        # Remove CDN prefixes (cdn4., img2., etc.)
+        clean_host = re.sub(r'^(?:cdn\d*|img\d*|images\d*|pic\d*|pics\d*|static\d*|assets\d*|media\d*|uploads\d*|files\d*|storage\d*)\.', '', host, flags=re.IGNORECASE)
         return f"{parsed.scheme}://{clean_host}/"
     except Exception:
         return "https://www.webtoons.com/"
+
+
+def get_alternate_referer(url: str) -> Optional[str]:
+    """Alternative referer variant stripping numbers (e.g. zinmanga1.com -> zinmanga.com) for 403 fallback."""
+    try:
+        parsed = urlparse(url)
+        host = (parsed.hostname or "").lower()
+        clean_host = re.sub(r'^(?:cdn\d*|img\d*|images\d*|pic\d*|pics\d*|static\d*|assets\d*|media\d*|uploads\d*|files\d*|storage\d*)\.', '', host, flags=re.IGNORECASE)
+        # Strip numbers before domain extension
+        clean_no_num = re.sub(r'(\w+)\d+\.(\w+)$', r'\1.\2', clean_host)
+        if clean_no_num != clean_host:
+            return f"{parsed.scheme}://{clean_no_num}/"
+        return f"{parsed.scheme}://{host}/"
+    except Exception:
+        return None
 
 
 async def fetch_with_retry(
@@ -113,7 +126,8 @@ async def fetch_with_retry(
 @router.get("/proxy/image", include_in_schema=False)
 async def proxy_image(
     request: Request,
-    url: str = Query(..., description="Target image URL to fetch")
+    url: str = Query(..., description="Target image URL to fetch"),
+    referer: Optional[str] = Query(None, description="Optional custom Referer header")
 ):
 
     start_time = time.time()
@@ -195,15 +209,96 @@ async def proxy_image(
 
     # Remote fetch
     try:
-        headers = {
+        referer_candidates = []
+
+        def _add_ref(ref_str: Optional[str]):
+            if not ref_str:
+                return
+            clean_ref = ref_str.strip()
+            if not clean_ref:
+                return
+            if clean_ref not in referer_candidates:
+                referer_candidates.append(clean_ref)
+
+        # 1. User-supplied referer parameter (origin root with trailing slash & full URL)
+        if referer:
+            try:
+                pref = urlparse(referer)
+                if pref.scheme and pref.netloc:
+                    _add_ref(f"{pref.scheme}://{pref.netloc}/")
+                    if not pref.netloc.startswith("www."):
+                        _add_ref(f"{pref.scheme}://www.{pref.netloc}/")
+            except Exception:
+                pass
+            _add_ref(referer)
+
+        # 2. Host-derived referers
+        primary_spoof = spoof_referer(fetch_url)
+        _add_ref(primary_spoof)
+
+        try:
+            pf = urlparse(fetch_url)
+            if pf.scheme and pf.netloc:
+                host = (pf.hostname or "").lower()
+                clean_host = re.sub(r'^(?:cdn\d*|img\d*|images\d*|pic\d*|pics\d*|static\d*|assets\d*|media\d*|uploads\d*|files\d*|storage\d*)\.', '', host, flags=re.IGNORECASE)
+                if not clean_host.startswith("www."):
+                    _add_ref(f"{pf.scheme}://www.{clean_host}/")
+                _add_ref(f"{pf.scheme}://{clean_host}/")
+        except Exception:
+            pass
+
+        # 3. Alternate referer (e.g. without numbers in hostname like zinmanga1.com -> zinmanga.com)
+        alt_ref = get_alternate_referer(fetch_url)
+        if alt_ref:
+            _add_ref(alt_ref)
+            try:
+                palt = urlparse(alt_ref)
+                if palt.scheme and palt.netloc and not palt.netloc.startswith("www."):
+                    _add_ref(f"{palt.scheme}://www.{palt.netloc}/")
+            except Exception:
+                pass
+
+        # 4. Common manhua/manga reader origins
+        for popular in ["https://www.topmanhua.fan/", "https://topmanhua.fan/", "https://manhwatop.com/", "https://manhuato.com/"]:
+            _add_ref(popular)
+
+        headers_base = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Referer':    spoof_referer(fetch_url),
             'Accept':     'image/webp,image/avif,image/jpeg,image/png,image/*,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9',
             'Accept-Encoding': 'gzip, deflate, br',
+            'Sec-Ch-Ua': '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"',
+            'Sec-Fetch-Dest': 'image',
+            'Sec-Fetch-Mode': 'no-cors',
+            'Sec-Fetch-Site': 'cross-site',
         }
 
-        response = await fetch_with_retry(fetch_url, headers)
+        response = None
+        first_ref = referer_candidates[0] if referer_candidates else "https://www.webtoons.com/"
+        response = await fetch_with_retry(fetch_url, {**headers_base, 'Referer': first_ref})
+
+        if response.status_code in (403, 401):
+            logger.info(f"[Proxy] Upstream {response.status_code} on initial Referer ({first_ref}). Testing {len(referer_candidates)-1} fallback candidates...")
+            for cand in referer_candidates[1:]:
+                try:
+                    alt_resp = await fetch_with_retry(fetch_url, {**headers_base, 'Referer': cand}, retries=1)
+                    if alt_resp.status_code == 200:
+                        logger.info(f"[Proxy] Successfully bypassed {response.status_code} using Referer: {cand}")
+                        response = alt_resp
+                        break
+                except Exception:
+                    pass
+
+        if response.status_code in (403, 401):
+            try:
+                no_ref_resp = await fetch_with_retry(fetch_url, headers_base, retries=1)
+                if no_ref_resp.status_code == 200:
+                    logger.info(f"[Proxy] Successfully bypassed 403 with empty Referer header")
+                    response = no_ref_resp
+            except Exception:
+                pass
 
         if response.status_code != 200:
             logger.warning(f"[Proxy] Upstream error {response.status_code} | {fetch_url[:60]}")

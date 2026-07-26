@@ -44,7 +44,7 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
           body: JSON.stringify({
             url: episode.url,
             scrape_only: true,
-            bypass_cache: false,
+            bypass_cache: true,
           }),
         });
 
@@ -284,7 +284,7 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
               {images.map((imgUrl, idx) => (
                 <img
                   key={idx}
-                  src={getProxiedImageUrl(imgUrl)}
+                  src={getProxiedImageUrl(imgUrl, episode?.url)}
                   alt={`Panel ${idx + 1}`}
                   className="w-full h-auto select-none pointer-events-none block m-0 p-0 min-h-[300px] bg-neutral-900/20 shadow-2xl"
                   style={{ width: "100%" }}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, ExternalLink } from 'lucide-react';
+import { getProxiedImageUrl } from '@/utils/url';
 
 export interface FavoriteSeries {
   title_no: string;
@@ -222,7 +223,7 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
         >
           {series.cover_image && (
             <img
-              src={series.cover_image}
+              src={getProxiedImageUrl(series.cover_image, series.url)}
               alt={series.title}
               className="w-full h-32 object-cover"
             />

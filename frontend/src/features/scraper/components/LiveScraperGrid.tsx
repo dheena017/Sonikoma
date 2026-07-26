@@ -1,5 +1,6 @@
 import React from "react";
 import PanelCard from "@/features/scraper/components/PanelCard";
+import { HorizontalScrollContainer } from "@/features/scraper/components/LiveScraperDeck";
 
 interface LiveScraperGridProps {
   scrapedImages: string[];
@@ -56,7 +57,7 @@ export default function LiveScraperGrid({
   onCardDoubleClick,
 }: LiveScraperGridProps) {
   return (
-    <div className="flex gap-4 overflow-x-auto pb-6 pt-1.5 scrollbar-thin">
+    <HorizontalScrollContainer>
       {scrapedImages.map((imgUrl, idx) => {
         // selectedScraped stores raw URLs — compare directly
         const isSelected = selectedScraped.includes(imgUrl);
@@ -87,6 +88,6 @@ export default function LiveScraperGrid({
           />
         );
       })}
-    </div>
+    </HorizontalScrollContainer>
   );
 }

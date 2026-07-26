@@ -8,6 +8,15 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional, Tuple
 from urllib.parse import urljoin
 
+def _to_str(val: Any) -> str:
+    """Safely convert an HTML element attribute value (str, list, or None) to a string."""
+    if val is None:
+        return ""
+    if isinstance(val, list):
+        return " ".join(str(v) for v in val).strip()
+    return str(val).strip()
+
+
 try:
     from bs4 import BeautifulSoup
 except ImportError:
@@ -145,69 +154,79 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
         '.ep-contents', '.chapter-img', '.page-content', '.comic-page-img',
         '.chapter-images', '.viewer-images', '.comic-pages', '.manga-reader',
         '#chapter-reader', '#manga-reader', '.vng-reader', '.reader-image-list',
-        '[class*="reader"]', '[class*="chapter-content"]', '[id*="reader"]'
+        '.reader-content', '.reader-area', '.reading-area', '.chapter-area',
+        '[class*="reader-content"]', '[class*="chapter-content"]', '[class*="reader-area"]'
     ]
 
     container = None
     for sel in selectors:
-        container = soup.select_one(sel)
-        if container:
-            logger.info(f"[Scraper] BS4 isolated reader container: {sel}")
-            break
+        cand = soup.select_one(sel)
+        if cand:
+            if cand.name == 'img':
+                container = cand.parent
+                logger.info(f"[Scraper] BS4 isolated reader matched img selector '{sel}', using parent element")
+                break
+            elif cand.find('img') or cand.find(attrs={'data-src': True}) or cand.find(attrs={'data-original': True}):
+                container = cand
+                logger.info(f"[Scraper] BS4 isolated reader container matched: {sel}")
+                break
 
-    search_root = container if container else soup
+    def _extract_images_from_root(root, target_list: List[str]):
+        for img in root.find_all(['img', 'source']):
+            src = (
+                _to_str(img.get('data-url')) or
+                _to_str(img.get('data-src')) or
+                _to_str(img.get('data-original')) or
+                _to_str(img.get('data-original-src')) or
+                _to_str(img.get('data-lazy-src')) or
+                _to_str(img.get('data-raw-src')) or
+                _to_str(img.get('data-cdn')) or
+                _to_str(img.get('data-image')) or
+                _to_str(img.get('data-bg')) or
+                _to_str(img.get('data-echo')) or
+                _to_str(img.get('origin-src')) or
+                _to_str(img.get('lazy-src')) or
+                _to_str(img.get('srcset')) or
+                _to_str(img.get('src'))
+            )
+            if src:
+                if ' ' in src and not src.startswith(('http://', 'https://')):
+                    src = src.split()[0]
+                if 'bg_transparency' in src or src.endswith('1x1.gif') or src.endswith('spacer.gif') or 'blank.gif' in src or 'avatar' in src.lower():
+                    continue
+                abs_src = urljoin(base_url, src)
+                if abs_src not in target_list:
+                    target_list.append(abs_src)
+
+        for div in root.find_all(['div', 'picture', 'canvas', 'a', 'section']):
+            data_src = (
+                _to_str(div.get('data-src')) or
+                _to_str(div.get('data-original')) or
+                _to_str(div.get('data-url')) or
+                _to_str(div.get('data-image')) or
+                _to_str(div.get('data-cdn'))
+            )
+            if data_src:
+                abs_src = urljoin(base_url, data_src)
+                if abs_src not in target_list and not any(ext in abs_src for ext in ['1x1.gif', 'spacer.gif']):
+                    target_list.append(abs_src)
+            
+            style = _to_str(div.get('style'))
+            if 'url(' in style:
+                bg_match = re.search(r'url\s*\(\s*["\']?([^"\'\)]+)["\']?\s*\)', style, re.IGNORECASE)
+                if bg_match:
+                    bg_url = bg_match.group(1).strip()
+                    if bg_url and not bg_url.startswith('data:'):
+                        abs_src = urljoin(base_url, bg_url)
+                        if abs_src not in target_list:
+                            target_list.append(abs_src)
+
     images = []
-    
-    def _to_str(val: Any) -> str:
-        if isinstance(val, list):
-            val = " ".join(val)
-        return val.strip() if isinstance(val, str) else ""
+    if container:
+        _extract_images_from_root(container, images)
 
-    # 1. Standard img elements
-    for img in search_root.find_all('img'):
-        src = (
-            _to_str(img.get('data-url')) or
-            _to_str(img.get('data-src')) or
-            _to_str(img.get('data-original')) or
-            _to_str(img.get('data-lazy-src')) or
-            _to_str(img.get('data-raw-src')) or
-            _to_str(img.get('data-cdn')) or
-            _to_str(img.get('data-image')) or
-            _to_str(img.get('data-bg')) or
-            _to_str(img.get('origin-src')) or
-            _to_str(img.get('lazy-src')) or
-            _to_str(img.get('src'))
-        )
-        if src:
-            # Skip transparent placeholder images used by Webtoons/readers
-            if 'bg_transparency' in src or src.endswith('1x1.gif') or src.endswith('spacer.gif') or 'blank.gif' in src:
-                continue
-            abs_src = urljoin(base_url, src)
-            if abs_src not in images:
-                images.append(abs_src)
-
-    # 2. Div / Picture / Canvas elements with data-src or inline background-image (GlobalComix & SPAs)
-    for div in search_root.find_all(['div', 'picture', 'canvas', 'a', 'section']):
-        data_src = (
-            _to_str(div.get('data-src')) or
-            _to_str(div.get('data-original')) or
-            _to_str(div.get('data-url')) or
-            _to_str(div.get('data-image')) or
-            _to_str(div.get('data-cdn'))
-        )
-        if data_src:
-            abs_src = urljoin(base_url, data_src)
-            if abs_src not in images and not any(ext in abs_src for ext in ['1x1.gif', 'spacer.gif']):
-                images.append(abs_src)
-        
-        style = _to_str(div.get('style'))
-        if 'url(' in style:
-            bg_match = re.search(r'url\s*\(\s*["\']?([^"\'\)]+)["\']?\s*\)', style, re.IGNORECASE)
-            if bg_match:
-                bg_url = bg_match.group(1).strip()
-                if bg_url and not bg_url.startswith('data:'):
-                    abs_src = urljoin(base_url, bg_url)
-                    if abs_src not in images:
-                        images.append(abs_src)
+    # Fallback to full document if isolated container produced no images
+    if not images:
+        _extract_images_from_root(soup, images)
 
     return images

@@ -2,7 +2,7 @@ import React from "react";
 import { Sparkles, Image as ImageIcon, Layout, Book, Zap } from "lucide-react";
 import { useAIModels } from "@/features/ai/hooks/useAIModels";
 import { NotificationType } from "@/features/notification";
-import { extractWebtoonUrl, parseWebtoonUrl } from "@/utils/url";
+import { extractWebtoonUrl, parseWebtoonUrl, isKnownSite, addCustomSite, getProxiedImageUrl } from "@/utils/url";
 import { FavoritesManager } from "@/features/scraper/components/FavoritesManager";
 
 // Configuration Constants (Removed hardcoding from JSX)
@@ -54,6 +54,7 @@ interface UrlInputPanelProps {
   setAutoSplitTallStrips?: (v: boolean) => void;
   actionSlot?: React.ReactNode;
   onOpenEpisodeScraper?: (url: string) => void;
+  fetchWithInterceptor?: typeof fetch;
 }
 
 const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
@@ -92,12 +93,84 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
     setAutoSplitTallStrips,
     actionSlot,
     onOpenEpisodeScraper,
+    fetchWithInterceptor,
   } = props;
 
+  const [isAiSetupRunning, setIsAiSetupRunning] = React.useState(false);
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = React.useState(false);
   const [showSuggestions, setShowSuggestions] = React.useState(false);
+
+  const handleAiAutoSetup = async (urlToUse?: string) => {
+    const rawUrl = (urlToUse || targetUrl).trim();
+    if (!rawUrl) {
+      addNotification("Please paste or enter a comic/webtoon URL first.", "error");
+      return;
+    }
+
+    setIsAiSetupRunning(true);
+    try {
+      // 1. Structural URL heuristic parsing
+      const parsed = parseWebtoonUrl(rawUrl);
+      if (parsed) {
+        if (setSeriesTitle && parsed.title && parsed.title !== "Webtoon Comic") {
+          setSeriesTitle(parsed.title);
+        }
+        if (setChapterNumber && parsed.chapterNumber) {
+          setChapterNumber(parsed.chapterNumber);
+        }
+        if (setScrapedGenre && parsed.genre && parsed.genre !== "general") {
+          setScrapedGenre(parsed.genre);
+        }
+        if (setChapterTitle && parsed.chapterTitle) {
+          setChapterTitle(parsed.chapterTitle);
+        }
+      }
+
+      // Add custom site if domain is unrecognised
+      try {
+        const cleanUrl = rawUrl.startsWith("http") ? rawUrl : "https://" + rawUrl;
+        const urlObj = new URL(cleanUrl);
+        if (!isKnownSite(rawUrl)) {
+          addCustomSite(urlObj.hostname);
+          setCustomSiteAdded(true);
+        }
+      } catch {}
+
+      // 2. Fetch AI / backend scraped metadata
+      const fetcher = fetchWithInterceptor || window.fetch;
+      const response = await fetcher("/api/scrape-episodes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: rawUrl, max_episodes: 5 }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.series_metadata) {
+          const meta = data.series_metadata;
+          if (meta.title && setSeriesTitle) setSeriesTitle(meta.title);
+          if (meta.genre && setScrapedGenre) setScrapedGenre(meta.genre);
+          if (meta.author && setSeriesAuthor) setSeriesAuthor(meta.author);
+          if (meta.cover_image && setSeriesCoverImage) setSeriesCoverImage(meta.cover_image);
+          if (meta.description && setSeriesSynopsis) setSeriesSynopsis(meta.description);
+        }
+      }
+
+      FavoritesManager.addEnteredUrl(rawUrl);
+      addNotification("✨ AI Auto-Setup complete! Title, chapter, genre & cover image metadata applied.", "success");
+    } catch (e: any) {
+      console.warn("[AI Auto-Setup] Metadata fetch warning:", e);
+      addNotification("AI Auto-Setup applied URL structural parameters.", "info");
+    } finally {
+      setIsAiSetupRunning(false);
+    }
+  };
   const [suggestions, setSuggestions] = React.useState<any[]>([]);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const [customSiteAdded, setCustomSiteAdded] = React.useState(false);
+
+  // Reset the "added" badge when URL changes
+  React.useEffect(() => { setCustomSiteAdded(false); }, [targetUrl]);
 
   const [showTitleSuggestions, setShowTitleSuggestions] = React.useState(false);
   const [showGenreSuggestions, setShowGenreSuggestions] = React.useState(false);
@@ -247,9 +320,20 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             Initialize New Video Pipeline
           </h2>
           <p className="text-xs text-neutral-400 font-medium">
-            Define your project parameters and source link to begin.
+            Define your project parameters and Manhwa, Manga, or Webcomic source link to begin.
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => handleAiAutoSetup()}
+          disabled={isAiSetupRunning || !targetUrl.trim()}
+          className="px-4 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-bold transition-all shadow-lg shadow-purple-900/30 active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer self-start md:self-auto shrink-0 border border-purple-400/30"
+          title="Use AI to automatically extract series title, chapter number, genre, author, and cover image from any Manhwa or Manga URL"
+        >
+          <Sparkles className={`h-4 w-4 text-amber-300 ${isAiSetupRunning ? 'animate-spin' : ''}`} />
+          {isAiSetupRunning ? "AI Extracting & Setting Up..." : "✨ AI Auto-Setup"}
+        </button>
       </div>
 
       {/* 2. Series Metadata */}
@@ -294,7 +378,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                     >
                       {series.cover_image && (
                         <img
-                          src={series.cover_image.startsWith("http") ? `/api/proxy-image?url=${encodeURIComponent(series.cover_image)}` : series.cover_image}
+                          src={getProxiedImageUrl(series.cover_image, series.url)}
                           alt=""
                           className="w-6 h-6 object-cover rounded border border-neutral-850"
                           onError={(e) => {
@@ -410,9 +494,22 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
 
       {/* 3. URL Input & Action */}
       <div className="space-y-4">
-        <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] font-mono pl-1">
-          Source Link
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] font-mono pl-1">
+            Source Link
+          </label>
+          {targetUrl.trim() && (
+            <button
+              type="button"
+              onClick={() => handleAiAutoSetup()}
+              disabled={isAiSetupRunning}
+              className="text-[10px] font-bold text-purple-300 hover:text-purple-200 flex items-center gap-1.5 bg-purple-950/60 hover:bg-purple-900/70 border border-purple-700/50 px-3 py-1 rounded-lg transition-all cursor-pointer shadow-sm active:scale-95"
+            >
+              <Sparkles className={`w-3 h-3 text-amber-300 ${isAiSetupRunning ? 'animate-spin' : ''}`} />
+              {isAiSetupRunning ? "Extracting..." : "Auto-Fill Setup with AI"}
+            </button>
+          )}
+        </div>
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative group flex-grow z-30" ref={containerRef}>
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-500" />
@@ -432,7 +529,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                   handleImportClick();
                 }
               }}
-              placeholder="Paste any comic or manga viewer URL..."
+              placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic reader URL..."
               className="relative w-full bg-neutral-950 border border-neutral-800 rounded-2xl px-6 py-4 text-sm text-neutral-200 outline-none placeholder:text-neutral-700 focus:border-purple-500 transition-all shadow-inner"
             />
 
@@ -481,6 +578,62 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               </div>
             )}
           </div>
+
+          {/* Unknown-site banner: only shown for unrecognised domains */}
+          {targetUrl.trim() && !isKnownSite(targetUrl) && (
+            <div className="flex items-center justify-between gap-3 mt-2 px-4 py-2 rounded-xl bg-amber-950/30 border border-amber-800/40 text-amber-300 animate-in fade-in duration-300">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-widest font-mono shrink-0">⚠ Unknown Site</span>
+                <span className="text-[10px] text-amber-400/80 font-mono truncate">
+                  {(() => { try { return new URL(targetUrl.startsWith("http") ? targetUrl : "https://" + targetUrl).hostname; } catch { return targetUrl; } })()}
+                </span>
+              </div>
+              {customSiteAdded ? (
+                <span className="text-[10px] font-bold text-emerald-400 font-mono shrink-0 flex items-center gap-1">
+                  ✓ Added
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      const cleanUrl = targetUrl.startsWith("http") ? targetUrl : "https://" + targetUrl;
+                      const urlObj = new URL(cleanUrl);
+                      addCustomSite(urlObj.hostname);
+                      setCustomSiteAdded(true);
+
+                      // Automatically extract and set up project metadata from URL
+                      const parsed = parseWebtoonUrl(targetUrl);
+                      if (parsed) {
+                        if (setSeriesTitle && parsed.title && parsed.title !== "Webtoon Comic") {
+                          setSeriesTitle(parsed.title);
+                        }
+                        if (setChapterNumber && parsed.chapterNumber) {
+                          setChapterNumber(parsed.chapterNumber);
+                        }
+                        if (setScrapedGenre && parsed.genre && parsed.genre !== "general") {
+                          setScrapedGenre(parsed.genre);
+                        }
+                        if (setChapterTitle && parsed.chapterTitle) {
+                          setChapterTitle(parsed.chapterTitle);
+                        }
+                      }
+
+                      // Save to recents / entered URLs setup history
+                      FavoritesManager.addEnteredUrl(targetUrl.trim());
+
+                      addNotification(`Site "${urlObj.hostname}" added to known sites & project setup applied!`, "success");
+                    } catch {
+                      addNotification("Could not parse the URL to extract a hostname.", "error");
+                    }
+                  }}
+                  className="text-[10px] font-bold font-mono shrink-0 px-3 py-1 rounded-lg bg-amber-700/30 hover:bg-amber-600/40 border border-amber-700/50 hover:border-amber-500/60 text-amber-200 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                >
+                  + Add URL
+                </button>
+              )}
+            </div>
+          )}
 
           {actionSlot || (
             <div className="flex flex-wrap items-center gap-3 shrink-0">

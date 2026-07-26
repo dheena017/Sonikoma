@@ -44,7 +44,7 @@ async def prefetch_image_dimensions(url: str, headers: dict) -> Optional[Tuple[i
                 if response.status_code != 200:
                     return None
                 data = b''
-                async for chunk in response.iter_bytes(chunk_size=1024):
+                async for chunk in response.aiter_bytes(chunk_size=1024):
                     data += chunk
                     dims = parse_image_dimensions_from_bytes(data)
                     if dims:
@@ -94,7 +94,7 @@ async def try_fetch_url_resilient(
 
         start_t = time.time()
         try:
-            if client_type == "httpx":
+            if client_type == "httpx" and httpx is not None:
                 async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
                     resp = await client.get(url, headers=headers)
                     if resp.status_code == 200:
@@ -103,9 +103,9 @@ async def try_fetch_url_resilient(
                     elif resp.status_code in (403, 429):
                         logger.warning(f"[Scraper] Blocked status {resp.status_code} in client {client_type}")
                         return None
-            elif client_type == "aiohttp":
+            elif client_type == "aiohttp" and aiohttp is not None:
                 async with aiohttp.ClientSession(headers=headers) as session:
-                    async with session.get(url, timeout=30.0, allow_redirects=True) as resp:
+                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=30.0), allow_redirects=True) as resp:
                         if resp.status == 200:
                             text = await resp.text()
                             logger.info(f"[Scraper] Fetch success ({int((time.time() - start_t)*1000)}ms)")
@@ -113,9 +113,10 @@ async def try_fetch_url_resilient(
                         elif resp.status in (403, 429):
                             logger.warning(f"[Scraper] Blocked status {resp.status} in client {client_type}")
                             return None
-            elif client_type == "requests":
+            elif client_type == "requests" and requests is not None:
+                req_mod = requests
                 def sync_req():
-                    return requests.get(url, headers=headers, timeout=30.0, allow_redirects=True)
+                    return req_mod.get(url, headers=headers, timeout=30.0, allow_redirects=True)
                 loop = asyncio.get_running_loop()
                 resp = await loop.run_in_executor(None, sync_req)
                 if resp.status_code == 200:
@@ -189,13 +190,39 @@ async def try_fetch_with_playwright(
 
             # Scrolling script to trigger lazy loading
             logger.info("[Scraper] Running scroll script for lazy-loaded assets...")
-            for _ in range(8):
-                await page.evaluate("window.scrollBy(0, 2000)")
-                await page.wait_for_timeout(1000)
+            for _ in range(10):
+                await page.evaluate("window.scrollBy(0, 2500)")
+                await page.wait_for_timeout(600)
 
-            # Extract HTML5 canvases to base64 Data URLs
-            logger.info("[Scraper] Running canvas extraction script...")
+            # DOM Normalization & Canvas extraction script
+            logger.info("[Scraper] Running lazy-load DOM normalization and canvas extraction...")
             await page.evaluate("""() => {
+                // 1. Copy lazy image attributes into src
+                const lazyTags = document.querySelectorAll('img, source, [data-src], [data-original], [data-lazy-src], [data-url], [data-bg], [data-raw-src]');
+                lazyTags.forEach((el) => {
+                    const lazySrc = el.getAttribute('data-src') || 
+                                    el.getAttribute('data-original') || 
+                                    el.getAttribute('data-lazy-src') || 
+                                    el.getAttribute('data-url') ||
+                                    el.getAttribute('data-bg') ||
+                                    el.getAttribute('data-original-src') ||
+                                    el.getAttribute('data-raw-src') ||
+                                    el.getAttribute('data-cdn') ||
+                                    el.getAttribute('data-echo') ||
+                                    el.getAttribute('srcset');
+                    if (lazySrc) {
+                        let cleanVal = lazySrc.trim();
+                        if (cleanVal.includes(' ') && !cleanVal.startsWith('http')) {
+                            cleanVal = cleanVal.split(' ')[0];
+                        }
+                        const curSrc = el.getAttribute('src') || '';
+                        if (!curSrc || curSrc.includes('1x1.gif') || curSrc.includes('spacer.gif') || curSrc.includes('blank.gif') || curSrc.startsWith('data:image/gif')) {
+                            el.setAttribute('src', cleanVal);
+                        }
+                    }
+                });
+
+                // 2. Extract HTML5 canvases to JPEG Data URLs
                 const canvases = document.querySelectorAll('canvas');
                 canvases.forEach((canvas) => {
                     try {
@@ -212,7 +239,7 @@ async def try_fetch_with_playwright(
                 });
             }""")
 
-            await page.wait_for_timeout(200)
+            await page.wait_for_timeout(300)
             html = await page.content()
             await browser.close()
             return html

@@ -69,7 +69,7 @@ export function parseWebtoonUrl(urlStr: string) {
     }
 
     let genre = "general";
-    let title = "Webtoon Comic";
+    let title = "Manhwa Series";
     let chapterNumber = epVal || "1";
     let chapterTitle = "";
 
@@ -80,12 +80,12 @@ export function parseWebtoonUrl(urlStr: string) {
           raw
         );
       if (isOriginalUuid) {
-        return getSourceName(urlStr) + " Comic";
+        return getSourceName(urlStr) + " Series";
       }
       let cleaned = raw.replace(/^\d+[-_]/, "");
       const isPureNum = /^\d+$/.test(cleaned);
       if (isPureNum) {
-        return getSourceName(urlStr) + " Comic";
+        return getSourceName(urlStr) + " Series";
       }
       const replaced = cleaned.replace(/-/g, " ");
       // Strip 8-character hex suffix commonly appended to Webtoon series slugs
@@ -184,6 +184,76 @@ export function parseWebtoonUrl(urlStr: string) {
   }
 }
 
+const KNOWN_DOMAINS = [
+  "asurascans.com",
+  "asuracomics.com",
+  "reaperscans.com",
+  "flamecomics.xyz",
+  "flamecomics.com",
+  "flamescans.org",
+  "voidscans.com",
+  "hivescans.com",
+  "drakescans.com",
+  "zeroscans.com",
+  "zinmanga.com",
+  "mangadex.org",
+  "manhuato.com",
+  "manhwatop.com",
+  "webtoons.com",
+  "webtoon.com",
+  "comic.naver.com",
+  "naver.com",
+  "page.kakao.com",
+  "kakao.com",
+  "tapas.io",
+  "lezhin.com",
+  "toomics.com",
+  "webcomicsapp.com",
+  "manganato.com",
+  "readmanganato.com",
+  "mangakakalot.com",
+  "batotoo.com",
+  "bato.to",
+];
+
+const CUSTOM_SITES_KEY = "sonikoma_custom_sites";
+
+export function getCustomSites(): string[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_SITES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addCustomSite(hostname: string): void {
+  const sites = getCustomSites();
+  const clean = hostname.replace(/^www\./, "").toLowerCase();
+  if (!sites.includes(clean)) {
+    sites.unshift(clean);
+    localStorage.setItem(CUSTOM_SITES_KEY, JSON.stringify(sites.slice(0, 100)));
+  }
+}
+
+export function isKnownSite(urlStr: string): boolean {
+  if (!urlStr || !urlStr.trim()) return false;
+  try {
+    const cleaned = urlStr.trim();
+    const urlObj = new URL(
+      cleaned.startsWith("http") ? cleaned : "https://" + cleaned
+    );
+    const host = urlObj.hostname.toLowerCase();
+    if (host && host.includes(".")) {
+      addCustomSite(host);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export function getSourceName(urlStr: string): string {
   try {
     if (!urlStr) return "Custom Source";
@@ -193,13 +263,34 @@ export function getSourceName(urlStr: string): string {
     );
     const host = urlObj.hostname.toLowerCase();
 
-    if (host.includes("asurascans.com")) return "Asura Scans";
-    if (host.includes("webtoons.com") || host.includes("webtoon.com"))
-      return "Webtoons";
-    if (host.includes("manhuato.com")) return "ManhuaTo";
+    if (host.includes("asurascans.com") || host.includes("asuracomics.com")) return "Asura Scans";
+    if (host.includes("reaperscans.com")) return "Reaper Scans";
+    if (host.includes("flamecomics") || host.includes("flamescans")) return "Flame Comics";
+    if (host.includes("voidscans.com")) return "Void Scans";
+    if (host.includes("hivescans.com")) return "Hive Scans";
+    if (host.includes("drakescans.com")) return "Drake Scans";
+    if (host.includes("zeroscans.com")) return "Zero Scans";
+    if (host.includes("zinmanga.com")) return "ZinManga";
     if (host.includes("mangadex.org")) return "MangaDex";
+    if (host.includes("manhuato.com")) return "ManhuaTo";
+    if (host.includes("manhwatop.com")) return "ManhwaTop";
+    if (host.includes("webtoons.com") || host.includes("webtoon.com")) return "Webtoons";
+    if (host.includes("naver.com")) return "Naver Webtoon";
+    if (host.includes("kakao.com")) return "Kakao Page";
+    if (host.includes("tapas.io")) return "Tapas";
+    if (host.includes("lezhin.com")) return "Lezhin";
     if (host.includes("webcomicsapp.com")) return "WebComics App";
     if (host.includes("toomics.com")) return "Toomics";
+    if (host.includes("manganato.com") || host.includes("mangakakalot")) return "Manganato";
+
+    // Check user-registered custom sites
+    const customSites = getCustomSites();
+    for (const site of customSites) {
+      if (host.includes(site)) {
+        const parts = site.split(".");
+        return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+      }
+    }
 
     const parts = host.replace("www.", "").split(".");
     if (parts.length > 0) {
@@ -230,7 +321,7 @@ export function getSourceIcon(urlStr: string) {
   }
 }
 
-export function getProxiedImageUrl(url?: string): string {
+export function getProxiedImageUrl(url?: string, referer?: string): string {
   if (!url) return "";
   try {
     const decoded = decodeURIComponent(url);
@@ -240,15 +331,27 @@ export function getProxiedImageUrl(url?: string): string {
       decoded.includes("/api/proxy-image") ||
       decoded.includes("/api/proxy/image")
     ) {
+      if (referer && !url.includes("referer=") && !decoded.includes("referer=")) {
+        const sep = url.includes("?") ? "&" : "?";
+        return `${url}${sep}referer=${encodeURIComponent(referer)}`;
+      }
       return url;
     }
   } catch {
     if (url.includes("/api/proxy-image") || url.includes("/api/proxy/image")) {
+      if (referer && !url.includes("referer=")) {
+        const sep = url.includes("?") ? "&" : "?";
+        return `${url}${sep}referer=${encodeURIComponent(referer)}`;
+      }
       return url;
     }
   }
   if (url.startsWith("http") && !url.startsWith("/api/")) {
-    return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+    let proxied = `/api/proxy-image?url=${encodeURIComponent(url)}`;
+    if (referer) {
+      proxied += `&referer=${encodeURIComponent(referer)}`;
+    }
+    return proxied;
   }
   return url;
 }

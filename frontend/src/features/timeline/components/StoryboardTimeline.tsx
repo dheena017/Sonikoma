@@ -900,84 +900,84 @@ const StoryboardTimeline = React.memo(
 
           return (
             <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
-              {/* IN-PANEL LEFT SIDEBAR: TIMELINE SEQUENCE & EPISODES */}
-              <aside className="w-full lg:w-56 bg-neutral-955 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-xl lg:sticky lg:top-24 self-start">
-                {/* Header with Sort Toggle */}
-                <div className="flex items-center justify-between border-b border-neutral-850/80 pb-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
-                    <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
-                      Timeline Sequence
-                    </h4>
-                  </div>
-                  {episodeGroups.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setTimelineEpSortAscending((prev) => !prev)}
-                      title="Toggle Sort Order (Ascending / Descending)"
-                      className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
-                    >
-                      {timelineEpSortAscending ? "1 → N" : "N → 1"}
-                    </button>
-                  )}
-                </div>
-
-                {/* Search & Filter Input */}
-                {episodeGroups.length > 0 && (
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={timelineEpSearchQuery}
-                      onChange={(e) => setTimelineEpSearchQuery(e.target.value)}
-                      placeholder="Filter sequence..."
-                      className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/60 font-mono transition-all"
-                    />
-                    {timelineEpSearchQuery && (
+              {/* IN-PANEL LEFT SIDEBAR: TIMELINE SEQUENCE & EPISODES (Only rendered during multi-episode batch) */}
+              {episodeGroups.length > 0 && (
+                <aside className="w-full lg:w-56 bg-neutral-955 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-xl lg:sticky lg:top-24 self-start">
+                  {/* Header with Sort Toggle */}
+                  <div className="flex items-center justify-between border-b border-neutral-850/80 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
+                      <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
+                        Timeline Sequence
+                      </h4>
+                    </div>
+                    {episodeGroups.length > 0 && (
                       <button
                         type="button"
-                        onClick={() => setTimelineEpSearchQuery("")}
-                        className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold"
+                        onClick={() => setTimelineEpSortAscending((prev) => !prev)}
+                        title="Toggle Sort Order (Ascending / Descending)"
+                        className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
                       >
-                        ✕
+                        {timelineEpSortAscending ? "1 → N" : "N → 1"}
                       </button>
                     )}
                   </div>
-                )}
 
-                {(() => {
-                  const totalTimelineCount = episodeGroups.length > 0
-                    ? episodeGroups.reduce((acc, g) => acc + g.count, 0)
-                    : panels.length;
-
-                  return (
-                    <div className="space-y-1.5 font-mono text-xs">
-                      {/* All Scenes Button */}
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTimelineEp("all")}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${
-                          selectedTimelineEp === "all"
-                            ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                            : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
-                        }`}
-                      >
-                        <span className="truncate">All Scenes</span>
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-purple-300 border border-purple-900/40 shrink-0">
-                          {totalTimelineCount}f
-                        </span>
-                      </button>
+                  {/* Search & Filter Input */}
+                  {episodeGroups.length > 0 && (
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={timelineEpSearchQuery}
+                        onChange={(e) => setTimelineEpSearchQuery(e.target.value)}
+                        placeholder="Filter sequence..."
+                        className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/60 font-mono transition-all"
+                      />
+                      {timelineEpSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setTimelineEpSearchQuery("")}
+                          className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold"
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
-                  );
-                })()}
+                  )}
 
-                {/* Filter Episode Section */}
-                <div className="pt-2 border-t border-neutral-850 space-y-2">
-                  <div className="flex items-center justify-between text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
-                    <span>Sequence Filter</span>
-                    <span>({episodeGroups.length})</span>
-                  </div>
+                  {(() => {
+                    const totalTimelineCount = episodeGroups.length > 0
+                      ? episodeGroups.reduce((acc, g) => acc + g.count, 0)
+                      : panels.length;
 
-                  {episodeGroups.length > 0 ? (
+                    return (
+                      <div className="space-y-1.5 font-mono text-xs">
+                        {/* All Scenes Button */}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTimelineEp("all")}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${
+                            selectedTimelineEp === "all"
+                              ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                              : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
+                          }`}
+                        >
+                          <span className="truncate">All Scenes</span>
+                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-purple-300 border border-purple-900/40 shrink-0">
+                            {totalTimelineCount}f
+                          </span>
+                        </button>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Filter Episode Section */}
+                  <div className="pt-2 border-t border-neutral-850 space-y-2">
+                    <div className="flex items-center justify-between text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
+                      <span>Sequence Filter</span>
+                      <span>({episodeGroups.length})</span>
+                    </div>
+
                     <div className="space-y-1.5 max-h-52 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                       {(() => {
                         const rawSorted = getSortedEpisodeGroups(episodeGroups);
@@ -998,13 +998,7 @@ const StoryboardTimeline = React.memo(
                             return globalIdx >= grp.startIndex && globalIdx < grp.startIndex + grp.count;
                           });
 
-                          const inTimelineCount = epPanels.length;
-                          const totalImportedCount = grp.count;
-
-                          const seconds = grp.count * 4.0;
-                          const mins = Math.floor(seconds / 60);
-                          const secs = Math.round(seconds % 60);
-                          const durationStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+                          const durationStr = `${grp.count * 4}s`;
 
                           return (
                             <div key={`timeline-ep-wrapper-${originalIdx}`} className="relative group/ep">
@@ -1043,56 +1037,27 @@ const StoryboardTimeline = React.memo(
                                   <span className="text-emerald-400 font-bold uppercase tracking-wider text-[8px]">✓ Sequenced</span>
                                 </div>
                               </button>
-
-                              {/* AI Tooltip on Hover */}
-                              {hoveredTimelineEpIdx === originalIdx && (
-                                <div className="absolute left-full top-0 ml-3 z-50 w-56 p-3 bg-neutral-955/95 border border-purple-900/60 rounded-xl shadow-2xl backdrop-blur-md hidden lg:block animate-in fade-in duration-150 pointer-events-none">
-                                  <div className="space-y-1.5">
-                                    <div className="flex items-center justify-between border-b border-neutral-800 pb-1">
-                                      <span className="text-[10px] font-black text-purple-300 uppercase tracking-wider">
-                                        {formatDisplayEpisodeLabel(grp.episodeLabel)}
-                                      </span>
-                                      <span className="text-[8px] bg-purple-950 text-purple-400 px-1.5 py-0.5 rounded border border-purple-800">
-                                        Timeline Card
-                                      </span>
-                                    </div>
-                                    <p className="text-[10px] text-neutral-400 leading-tight font-mono">
-                                      {grp.count} storyboard panels sequenced. Total playback time ~{durationStr}.
-                                    </p>
-                                    {epPanels[0]?.image_url && (
-                                      <div className="w-full h-20 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900 mt-1">
-                                        <img src={epPanels[0].image_url} alt="Thumbnail" className="w-full h-full object-cover" />
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
                             </div>
                           );
                         });
                       })()}
                     </div>
-                  ) : (
-                    <div className="p-2.5 rounded-xl bg-neutral-900/40 border border-neutral-850 text-center space-y-1">
-                      <p className="text-[10px] font-mono text-neutral-400 font-semibold">Single Episode Active</p>
-                      <p className="text-[9px] font-mono text-neutral-600">No multi-episode batch found</p>
-                    </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* Quick Tools */}
-                <div className="pt-2 border-t border-neutral-850">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      addNotification?.("All Timeline panels selected", "info");
-                    }}
-                    className="w-full px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-850 text-xs font-mono font-bold text-neutral-300 border border-neutral-800 text-center transition-all cursor-pointer truncate"
-                  >
-                    ✅ Select All Scenes
-                  </button>
-                </div>
-              </aside>
+                  {/* Quick Tools */}
+                  <div className="pt-2 border-t border-neutral-850">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addNotification?.("All Timeline panels selected", "info");
+                      }}
+                      className="w-full px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-850 text-xs font-mono font-bold text-neutral-300 border border-neutral-800 text-center transition-all cursor-pointer truncate"
+                    >
+                      ✅ Select All Scenes
+                    </button>
+                  </div>
+                </aside>
+              )}
 
               {/* RIGHT MAIN AREA: TIMELINE CARDS */}
               <div className="flex-1 w-full min-w-0 space-y-6">

@@ -36,6 +36,7 @@ import { EpisodePreviewModal } from "@/features/scraper/components/EpisodePrevie
 import { AnalyticsDashboard } from "@/features/scraper/components/AnalyticsDashboard";
 import { NotificationType } from "@/features/notification";
 import type { Episode } from "@/features/scraper/components/EpisodeTypes";
+import { isKnownSite, addCustomSite, getProxiedImageUrl } from "@/utils/url";
 
 interface SeriesMetadata {
   title: string;
@@ -129,6 +130,10 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
   const [suggestions, setSuggestions] = useState<FavoriteSeries[]>([]);
   const suggestionsContainerRef = useRef<HTMLDivElement>(null);
+  const [customSiteAdded, setCustomSiteAdded] = useState(false);
+
+  // Reset "Added" badge whenever URL input changes
+  useEffect(() => { setCustomSiteAdded(false); }, [urlInput]);
 
   // Suggestions listing from favorites/recent
   useEffect(() => {
@@ -281,7 +286,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     bookmarkedUrls
   ]);
 
-  const triggerScrape = async (url?: string, titleNo?: string, bypassCache = false) => {
+  const triggerScrape = async (url?: string, titleNo?: string, bypassCache = true) => {
     const activeUrl = url !== undefined ? url : urlInput;
     const activeTitleNo = titleNo !== undefined ? titleNo : titleNoInput;
 
@@ -611,7 +616,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
               <input
                 type="text"
                 autoComplete="off"
-                placeholder="Paste any series URL (e.g. webtoons, mangadex, asurascans, etc.)..."
+                placeholder="Paste any series URL (e.g. Asura Scans, Reaper Scans, Flame Comics, Webtoons, MangaDex, etc.)..."
                 value={urlInput}
                 onFocus={() => setShowSuggestions(true)}
                 onChange={(e) => {
@@ -642,7 +647,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                       >
                         {series.cover_image && (
                           <img
-                            src={`/api/proxy-image?url=${encodeURIComponent(series.cover_image)}`}
+                            src={getProxiedImageUrl(series.cover_image, series.url || urlInput)}
                             alt=""
                             className="w-8 h-8 object-cover rounded-lg border border-neutral-800 flex-shrink-0"
                           />
@@ -658,6 +663,40 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
               )}
             </div>
           </div>
+
+          {/* Unknown-site banner */}
+          {urlInput.trim() && !isKnownSite(urlInput) && (
+            <div className="flex items-center justify-between gap-3 mt-3 px-4 py-2 rounded-xl bg-amber-950/30 border border-amber-800/40 text-amber-300 animate-in fade-in duration-300">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-widest font-mono shrink-0">⚠ Unknown Site</span>
+                <span className="text-[10px] text-amber-400/80 font-mono truncate">
+                  {(() => { try { return new URL(urlInput.startsWith("http") ? urlInput : "https://" + urlInput).hostname; } catch { return urlInput; } })()}
+                </span>
+              </div>
+              {customSiteAdded ? (
+                <span className="text-[10px] font-bold text-emerald-400 font-mono shrink-0 flex items-center gap-1">✓ Added</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      const cleanUrl = urlInput.startsWith("http") ? urlInput : "https://" + urlInput;
+                      const urlObj = new URL(cleanUrl);
+                      addCustomSite(urlObj.hostname);
+                      setCustomSiteAdded(true);
+                      FavoritesManager.addEnteredUrl(urlInput.trim());
+                      addNotification(`Site "${urlObj.hostname}" added to known sites & setup saved.`, "success");
+                    } catch {
+                      addNotification("Could not parse the URL to extract a hostname.", "error");
+                    }
+                  }}
+                  className="text-[10px] font-bold font-mono shrink-0 px-3 py-1 rounded-lg bg-amber-700/30 hover:bg-amber-600/40 border border-amber-700/50 hover:border-amber-500/60 text-amber-200 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                >
+                  + Add URL
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Input 2: Series ID (Optional) */}
           <div className="space-y-2">
@@ -755,7 +794,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
         <div className="bg-neutral-900/30 border border-neutral-800/80 p-6 rounded-3xl flex flex-col md:flex-row gap-6 relative overflow-hidden backdrop-blur-sm">
           {seriesMetadata.cover_image && (
             <img
-              src={`/api/proxy-image?url=${encodeURIComponent(seriesMetadata.cover_image)}`}
+              src={getProxiedImageUrl(seriesMetadata.cover_image, seriesMetadata.url || urlInput)}
               alt={seriesMetadata.title}
               className="w-full md:w-36 h-48 md:h-auto object-cover rounded-2xl border border-neutral-800/60 flex-shrink-0 shadow-lg"
               onError={(e) => {
@@ -1040,7 +1079,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                     >
                       {series.cover_image ? (
                         <img
-                          src={`/api/proxy-image?url=${encodeURIComponent(series.cover_image)}`}
+                          src={getProxiedImageUrl(series.cover_image, series.url || urlInput)}
                           alt={series.title}
                           className="w-14 h-18 object-cover rounded-xl border border-neutral-800 flex-shrink-0 group-hover:scale-105 transition-transform"
                         />

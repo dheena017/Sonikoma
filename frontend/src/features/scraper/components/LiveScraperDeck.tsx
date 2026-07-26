@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { normalizeLog } from "@/types/logs";
 import { createPortal } from "react-dom";
 import {
@@ -7,6 +7,10 @@ import {
   Download,
   X,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  Rows,
 } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -21,7 +25,7 @@ import {
 } from "@/features/image/components/editor/select";
 import LiveScraperDeckEmptyState from "@/features/scraper/components/LiveScraperDeckEmptyState";
 
-import { parseWebtoonUrl, getSourceName } from "@/utils";
+import { parseWebtoonUrl, getSourceName, getProxiedImageUrl } from "@/utils";
 import { updateSelection } from "@/utils/selection";
 import { EpisodeRatingDisplay } from "@/features/scraper/components/EpisodeRatingDisplay";
 
@@ -56,6 +60,104 @@ export function getSortedEpisodeGroups<T extends { episodeLabel: string }>(
 
   return mapped.sort((a, b) => parseNum(a.grp.episodeLabel) - parseNum(b.grp.episodeLabel));
 }
+
+export const HorizontalScrollContainer: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className = "" }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 5);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 5);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
+
+    const handleNativeWheel = (e: WheelEvent) => {
+      if (e.deltaY !== 0 && Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
+        const maxScroll = el.scrollWidth - el.clientWidth;
+        if (maxScroll <= 0) return;
+
+        const isScrollingRight = e.deltaY > 0;
+        const isScrollingLeft = e.deltaY < 0;
+
+        const canScrollRight = el.scrollLeft < maxScroll - 1;
+        const canScrollLeft = el.scrollLeft > 1;
+
+        if ((isScrollingRight && canScrollRight) || (isScrollingLeft && canScrollLeft)) {
+          e.preventDefault(); // Stop whole page from vertical scrolling!
+          el.scrollLeft += e.deltaY * 1.2;
+        }
+      }
+    };
+
+    el.addEventListener("wheel", handleNativeWheel, { passive: false });
+
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+      el.removeEventListener("wheel", handleNativeWheel);
+    };
+  }, [checkScroll, children]);
+
+  const scroll = (direction: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollAmount = el.clientWidth * 0.75;
+    el.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <div className="relative group/scroll-container w-full min-w-0">
+      {/* Scroll Left Navigation Arrow Button */}
+      {canScrollLeft && (
+        <button
+          type="button"
+          onClick={() => scroll("left")}
+          aria-label="Scroll Left"
+          title="Scroll Left (Left to Right)"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-neutral-955/95 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </button>
+      )}
+
+      {/* Scroll Right Navigation Arrow Button */}
+      {canScrollRight && (
+        <button
+          type="button"
+          onClick={() => scroll("right")}
+          aria-label="Scroll Right"
+          title="Scroll Right (Left to Right)"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-neutral-955/95 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </button>
+      )}
+
+      {/* Horizontal Scroll Container Track */}
+      <div
+        ref={scrollRef}
+        className={`w-full max-w-full flex gap-4 overflow-x-auto pb-4 pt-1.5 scrollbar-thin scroll-smooth px-1 select-none ${className}`}
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
 
 const LiveScraperDeck = React.memo(
   ({
@@ -106,6 +208,7 @@ const LiveScraperDeck = React.memo(
       null
     );
     const [isBatchMerging, setIsBatchMerging] = useState(false);
+    const [viewLayout, setViewLayout] = useState<"scroll" | "grid">("scroll");
     const [selectedEpisodeIdx, setSelectedEpisodeIdx] = useState<number | "all">("all");
     const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
     const [episodeSortAscending, setEpisodeSortAscending] = useState(true);
@@ -508,6 +611,36 @@ const LiveScraperDeck = React.memo(
             </div>
 
             <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2 self-start sm:self-end lg:self-auto w-full lg:w-auto mt-2 lg:mt-0">
+              {/* Left-to-Right Horizontal Scroll vs Grid View Toggle */}
+              <div className="flex items-center bg-neutral-950 p-1 rounded-xl border border-neutral-800 shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => setViewLayout("scroll")}
+                  title="Horizontal Scroll View (Left to Right)"
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    viewLayout === "scroll"
+                      ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+                      : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
+                  }`}
+                >
+                  <Rows className="w-3.5 h-3.5" />
+                  <span>Scroll</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewLayout("grid")}
+                  title="Grid View"
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    viewLayout === "grid"
+                      ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+                      : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
+                  }`}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>Grid</span>
+                </button>
+              </div>
+
               {/* Inline selection toolbar in header (also available in floating bar) */}
               <div className="hidden sm:block">
                 <ScraperSelectionToolbar
@@ -717,7 +850,7 @@ const LiveScraperDeck = React.memo(
                                       </p>
                                       {grpImages[0] && (
                                         <div className="w-full h-20 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900 mt-1">
-                                          <img src={grpImages[0]} alt="Hero Preview" className="w-full h-full object-cover" />
+                                          <img src={getProxiedImageUrl(grpImages[0], targetUrl)} alt="Hero Preview" className="w-full h-full object-cover" />
                                         </div>
                                       )}
                                     </div>
@@ -808,105 +941,193 @@ const LiveScraperDeck = React.memo(
                                 </div>
                               </div>
 
-                              {/* Episode Horizontal Scroll Cards */}
-                              <div className="w-full max-w-full flex gap-4 overflow-x-auto pb-4 pt-1.5 scrollbar-thin px-1">
-                                {grpImages.map((imgUrl, localIdx) => {
-                                  const globalIdx = grp.startIndex + localIdx;
-                                  const isSelected = selectedScraped.includes(imgUrl);
-                                  const proxiedUrl = imgUrl?.startsWith("/api/")
-                                    ? imgUrl
-                                    : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
-                                  const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
-                                  const isInTimeline = activePanels.some(
-                                    (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
-                                  );
+                               {/* Episode Horizontal / Grid Cards */}
+                               {viewLayout === "scroll" ? (
+                                 <HorizontalScrollContainer>
+                                   {grpImages.map((imgUrl, localIdx) => {
+                                     const globalIdx = grp.startIndex + localIdx;
+                                     const isSelected = selectedScraped.includes(imgUrl);
+                                     const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+                                     const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                                     const isInTimeline = activePanels.some(
+                                       (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                                     );
 
-                                  return (
-                                    <PanelCard
-                                      key={`${imgUrl}-${globalIdx}`}
-                                      imgUrl={proxiedUrl}
-                                      rawImgUrl={imgUrl}
-                                      idx={globalIdx}
-                                      isSelected={isSelected}
-                                      isInTimeline={isInTimeline}
-                                      isBatchCropping={isBatchCropping}
-                                      croppingImgUrl={croppingImgUrl}
-                                      bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                                      scrapedImages={scrapedImages}
-                                      mergingIndices={mergingIndices}
-                                      handleMergeWithNext={handleMergeWithNext}
-                                      setScrapedImages={setScrapedImages}
-                                      setSelectedScraped={setSelectedScraped}
-                                      setConsoleLogs={setConsoleLogs}
-                                      addPanelsToStoryboard={addPanelsToStoryboard}
-                                      addNotification={addNotification}
-                                      onCardClick={handleCardClick}
-                                      onCardDoubleClick={handleCardDoubleClick}
-                                    />
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                }
+                                     return (
+                                       <PanelCard
+                                         key={`${imgUrl}-${globalIdx}`}
+                                         imgUrl={proxiedUrl}
+                                         rawImgUrl={imgUrl}
+                                         idx={globalIdx}
+                                         isSelected={isSelected}
+                                         isInTimeline={isInTimeline}
+                                         isBatchCropping={isBatchCropping}
+                                         croppingImgUrl={croppingImgUrl}
+                                         bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                                         scrapedImages={scrapedImages}
+                                         mergingIndices={mergingIndices}
+                                         handleMergeWithNext={handleMergeWithNext}
+                                         setScrapedImages={setScrapedImages}
+                                         setSelectedScraped={setSelectedScraped}
+                                         setConsoleLogs={setConsoleLogs}
+                                         addPanelsToStoryboard={addPanelsToStoryboard}
+                                         addNotification={addNotification}
+                                         onCardClick={handleCardClick}
+                                         onCardDoubleClick={handleCardDoubleClick}
+                                       />
+                                     );
+                                   })}
+                                 </HorizontalScrollContainer>
+                               ) : (
+                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-1.5 px-1 w-full">
+                                   {grpImages.map((imgUrl, localIdx) => {
+                                     const globalIdx = grp.startIndex + localIdx;
+                                     const isSelected = selectedScraped.includes(imgUrl);
+                                     const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+                                     const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                                     const isInTimeline = activePanels.some(
+                                       (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                                     );
 
-                return (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-1.5 px-1 w-full">
-                    {scrapedImages.map((imgUrl, idx) => {
-                      const isSelected = selectedScraped.includes(imgUrl);
-                      const proxiedUrl = imgUrl?.startsWith("/api/")
-                        ? imgUrl
-                        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
-                      const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
-                      const isInTimeline = activePanels.some(
-                        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
-                      );
+                                     return (
+                                       <PanelCard
+                                         key={`${imgUrl}-${globalIdx}`}
+                                         imgUrl={proxiedUrl}
+                                         rawImgUrl={imgUrl}
+                                         idx={globalIdx}
+                                         isSelected={isSelected}
+                                         isInTimeline={isInTimeline}
+                                         isBatchCropping={isBatchCropping}
+                                         croppingImgUrl={croppingImgUrl}
+                                         bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                                         scrapedImages={scrapedImages}
+                                         mergingIndices={mergingIndices}
+                                         handleMergeWithNext={handleMergeWithNext}
+                                         setScrapedImages={setScrapedImages}
+                                         setSelectedScraped={setSelectedScraped}
+                                         setConsoleLogs={setConsoleLogs}
+                                         addPanelsToStoryboard={addPanelsToStoryboard}
+                                         addNotification={addNotification}
+                                         onCardClick={handleCardClick}
+                                         onCardDoubleClick={handleCardDoubleClick}
+                                       />
+                                     );
+                                   })}
+                                 </div>
+                               )}
+                             </div>
+                           );
+                         })}
+                       </div>
+                     </div>
+                   );
+                 }
 
-                      return (
-                        <PanelCard
-                          key={`${imgUrl}-${idx}`}
-                          imgUrl={proxiedUrl}
-                          rawImgUrl={imgUrl}
-                          idx={idx}
-                          isSelected={isSelected}
-                          isInTimeline={isInTimeline}
-                          isBatchCropping={isBatchCropping}
-                          croppingImgUrl={croppingImgUrl}
-                          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                          scrapedImages={scrapedImages}
-                          mergingIndices={mergingIndices}
-                          handleMergeWithNext={handleMergeWithNext}
-                          setScrapedImages={setScrapedImages}
-                          setSelectedScraped={setSelectedScraped}
-                          setConsoleLogs={setConsoleLogs}
-                          addPanelsToStoryboard={addPanelsToStoryboard}
-                          addNotification={addNotification}
-                          onCardClick={handleCardClick}
-                          onCardDoubleClick={handleCardDoubleClick}
-                        />
-                      );
-                    })}
+                 return viewLayout === "scroll" ? (
+                   <HorizontalScrollContainer>
+                     {scrapedImages.map((imgUrl, idx) => {
+                       const isSelected = selectedScraped.includes(imgUrl);
+                       const proxiedUrl = imgUrl?.startsWith("/api/")
+                         ? imgUrl
+                         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+                       const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                       const isInTimeline = activePanels.some(
+                         (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                       );
 
-                    {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
-                      <div
-                        key={`loading-skeleton-${num}`}
-                        className="relative rounded-2xl border border-purple-800/30 bg-neutral-955/60 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
-                        style={{ animationDelay: `${(num - 1) * 150}ms` }}
-                      >
-                        <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/30 flex flex-col items-center justify-center overflow-hidden gap-2">
-                          <div className="h-10 w-10 rounded-full bg-purple-900/50 flex items-center justify-center border border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.3)]">
-                            <RefreshCw className="h-5 w-5 text-purple-400 animate-spin" />
-                          </div>
-                          <span className="text-[10px] font-mono text-purple-300 font-bold">Extracting Panels...</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
+                       return (
+                         <PanelCard
+                           key={`${imgUrl}-${idx}`}
+                           imgUrl={proxiedUrl}
+                           rawImgUrl={imgUrl}
+                           idx={idx}
+                           isSelected={isSelected}
+                           isInTimeline={isInTimeline}
+                           isBatchCropping={isBatchCropping}
+                           croppingImgUrl={croppingImgUrl}
+                           bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                           scrapedImages={scrapedImages}
+                           mergingIndices={mergingIndices}
+                           handleMergeWithNext={handleMergeWithNext}
+                           setScrapedImages={setScrapedImages}
+                           setSelectedScraped={setSelectedScraped}
+                           setConsoleLogs={setConsoleLogs}
+                           addPanelsToStoryboard={addPanelsToStoryboard}
+                           addNotification={addNotification}
+                           onCardClick={handleCardClick}
+                           onCardDoubleClick={handleCardDoubleClick}
+                         />
+                       );
+                     })}
+
+                     {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
+                       <div
+                         key={`loading-skeleton-${num}`}
+                         className="relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border border-purple-800/30 bg-neutral-955/60 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
+                         style={{ animationDelay: `${(num - 1) * 150}ms` }}
+                       >
+                         <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/30 flex flex-col items-center justify-center overflow-hidden gap-2">
+                           <div className="h-10 w-10 rounded-full bg-purple-900/50 flex items-center justify-center border border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.3)]">
+                             <RefreshCw className="h-5 w-5 text-purple-400 animate-spin" />
+                           </div>
+                           <span className="text-[10px] font-mono text-purple-300 font-bold">Extracting Panels...</span>
+                         </div>
+                       </div>
+                     ))}
+                   </HorizontalScrollContainer>
+                 ) : (
+                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-1.5 px-1 w-full">
+                     {scrapedImages.map((imgUrl, idx) => {
+                       const isSelected = selectedScraped.includes(imgUrl);
+                       const proxiedUrl = imgUrl?.startsWith("/api/")
+                         ? imgUrl
+                         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+                       const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                       const isInTimeline = activePanels.some(
+                         (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                       );
+
+                       return (
+                         <PanelCard
+                           key={`${imgUrl}-${idx}`}
+                           imgUrl={proxiedUrl}
+                           rawImgUrl={imgUrl}
+                           idx={idx}
+                           isSelected={isSelected}
+                           isInTimeline={isInTimeline}
+                           isBatchCropping={isBatchCropping}
+                           croppingImgUrl={croppingImgUrl}
+                           bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                           scrapedImages={scrapedImages}
+                           mergingIndices={mergingIndices}
+                           handleMergeWithNext={handleMergeWithNext}
+                           setScrapedImages={setScrapedImages}
+                           setSelectedScraped={setSelectedScraped}
+                           setConsoleLogs={setConsoleLogs}
+                           addPanelsToStoryboard={addPanelsToStoryboard}
+                           addNotification={addNotification}
+                           onCardClick={handleCardClick}
+                           onCardDoubleClick={handleCardDoubleClick}
+                         />
+                       );
+                     })}
+
+                     {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
+                       <div
+                         key={`loading-skeleton-${num}`}
+                         className="relative rounded-2xl border border-purple-800/30 bg-neutral-955/60 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
+                         style={{ animationDelay: `${(num - 1) * 150}ms` }}
+                       >
+                         <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/30 flex flex-col items-center justify-center overflow-hidden gap-2">
+                           <div className="h-10 w-10 rounded-full bg-purple-900/50 flex items-center justify-center border border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.3)]">
+                             <RefreshCw className="h-5 w-5 text-purple-400 animate-spin" />
+                           </div>
+                           <span className="text-[10px] font-mono text-purple-300 font-bold">Extracting Panels...</span>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 );
               })()}
             </div>
           )}

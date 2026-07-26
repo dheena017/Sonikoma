@@ -1,4 +1,5 @@
 import React from "react";
+import { getProxiedImageUrl } from "@/utils/url";
 import {
   RefreshCw,
   Check,
@@ -81,13 +82,7 @@ export function PanelCardThumbnail({
     setRetryKey((prev) => prev + 1);
   };
 
-  const resolvedImgSrc = imgUrl
-    ? imgUrl.startsWith("http")
-      ? imgUrl.includes("/api/proxy-image")
-        ? imgUrl
-        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`
-      : imgUrl // relative paths (including /api/image/cached/...) served directly
-    : imgUrl;
+  const resolvedImgSrc = getProxiedImageUrl(imgUrl);
 
   return (
     <div className="relative h-56 sm:h-64 rounded-2xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
