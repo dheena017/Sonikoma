@@ -1,22 +1,21 @@
 import React from "react";
 import { AlertTriangle, X } from "lucide-react";
-import * as api from "../../api";
+import * as api from "@/api";
 
-import Header from "../MainHeader";
-import Sidebar from "../MainSidebar";
-import ProjectConfirmPanel from "../confirmationmodels/ProjectConfirmPanel";
-import { useImageEditorStore } from "../../hooks/useImageEditorState";
-import AutoCropModal from "../Feature/processing/AutoCropModal";
-import NotificationStack from "../notification/NotificationStack";
-import ConfirmModal from "../confirmationmodels/ConfirmModal";
-import { TerminalLogs } from "../Feature/terminal";
-import { AdminSidebar, AdminMiniSidebar } from "../admin";
-import MiniSidebar from "../MainMiniSidebar";
-import {
-  CreativeSuiteHeader,
-  CreativeSuiteSidebar,
-  CreativeSuiteMiniSidebar,
-} from "../creative";
+import Header from "@/components/layout/MainHeader";
+import Sidebar from "@/components/layout/MainSidebar";
+import ProjectConfirmPanel from "@/shared/ui/modal/ProjectConfirmPanel";
+import { useImageEditorStore } from "@/features/image/hooks/useImageEditorState";
+import AutoCropModal from "@/features/processing/components/AutoCropModal";
+import NotificationStack from "@/features/notification/components/NotificationStack";
+import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
+import TerminalLogs from "@/features/terminal/components/TerminalLogs";
+import AdminSidebar from "@/features/admin/components/AdminSidebar";
+import AdminMiniSidebar from "@/features/admin/components/AdminMiniSidebar";
+import MiniSidebar from "@/components/layout/MainMiniSidebar";
+import CreativeSuiteHeader from "@/features/creative/components/CreativeSuiteHeader";
+import CreativeSuiteSidebar from "@/features/creative/components/CreativeSuiteSidebar";
+import CreativeSuiteMiniSidebar from "@/features/creative/components/CreativeSuiteMiniSidebar";
 
 export interface MainLayoutProps {
   children: React.ReactNode;

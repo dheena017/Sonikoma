@@ -1,49 +1,57 @@
-# Stage 1: Build Frontend
+# ==============================================================================
+# Sonikoma MonOREPO DOCKERFILE
+# Multi-stage production build for React + TypeScript frontend & FastAPI backend
+# ==============================================================================
+
+# ── Stage 1: Build Frontend ───────────────────────────────────────────────────
 FROM node:22-slim AS frontend-builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-# Copy the entire project to build the frontend correctly
-COPY . .
-RUN npm run build:frontend
+WORKDIR /app/frontend
 
-# Stage 2: Build Backend and Final Image
-FROM python:3.11-slim
+COPY frontend/package*.json ./
+RUN npm ci || npm install
+
+COPY frontend/ ./
+RUN npm run build
+
+# ── Stage 2: Production Backend & Combined Service ───────────────────────────
+FROM python:3.11-slim AS production
 WORKDIR /app
 
-# Prevent Python from writing pyc files and enable unbuffered logging
+# Prevent Python bytecode files and enable unbuffered output logging
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies for OpenCV, EasyOCR, and MoviePy
+# Install OS-level C dependencies for OpenCV, EasyOCR, FFmpeg, and ImageMagick
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
     libgl1 \
     libglib2.0-0 \
-    ffmpeg \
+    imagemagick \
+    curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PyTorch CPU first to avoid pulling 2.5GB GPU wheels and running out of memory
+# Install PyTorch CPU first to optimize image size and build speed
 RUN pip install --no-cache-dir torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 
-# Install Python dependencies
-COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy & install Python requirements
+COPY backend/requirements.txt ./backend/requirements.txt
+RUN pip install --no-cache-dir -r ./backend/requirements.txt
 
-# Copy backend source
+# Copy backend source code & scripts
 COPY backend/ ./backend/
-COPY backend/database/schema.sql /app/schema_backup.sql
 COPY scripts/ ./scripts/
 
-# Copy built frontend from Stage 1
-COPY --from=frontend-builder /app/frontend/dist ./dist
+# Copy built frontend assets from Stage 1 into frontend/dist
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# Set environment variables for production
+# Set production environment variables
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
-ENV PORT=8080
-EXPOSE 8080
+ENV PORT=5173
 
-# Start the unified FastAPI application
+EXPOSE 5173
+
+# Launch FastAPI computational engine from backend/app
 WORKDIR /app/backend/app
 CMD ["python", "main.py"]

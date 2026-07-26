@@ -145,7 +145,7 @@ async function restartBackend(changedFile) {
     });
   }
 
-  pyProcess = spawn(pythonPath, ["../main.py"], {
+  pyProcess = spawn(pythonPath, ["main.py"], {
     cwd: backendDir,
     stdio: "inherit",
     env: {
@@ -228,7 +228,7 @@ async function init() {
 
   logger.info(`Starting python backend from ${backendDir}...`);
 
-  pyProcess = spawn(pythonPath, ["../main.py"], {
+  pyProcess = spawn(pythonPath, ["main.py"], {
     cwd: backendDir,
     stdio: "inherit",
     env: {

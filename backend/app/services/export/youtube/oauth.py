@@ -50,7 +50,7 @@ async def get_authenticated_service(user_id: Optional[str] = None):
         PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 
         # Canonical location after restructure: backend/client_secrets.json
-        client_secrets_file = os.path.join(PROJECT_ROOT, "backend", "client_secrets.json")
+        client_secrets_file = os.path.join(PROJECT_ROOT, "backend", "data", "client_secrets.json")
         if not os.path.exists(client_secrets_file):
             # Legacy root fallback
             root_secrets = os.path.join(PROJECT_ROOT, "client_secrets.json")

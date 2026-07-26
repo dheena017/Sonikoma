@@ -14,7 +14,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from core.security import verify_password, create_access_token, get_password_hash
 from repositories.user import get_user_by_email, create_user_session, write_audit_log, create_user
 from schemas.auth import UserLogin
-from backend.startup import IS_PRODUCTION
+from startup import IS_PRODUCTION
 
 logger = logging.getLogger("sonikoma.auth.login")
 router = APIRouter()

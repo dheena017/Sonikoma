@@ -38,12 +38,6 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
             }
         self.app.dependency_overrides[get_current_user] = override_get_current_user
 
-        # remove lambda
-            "user_id": "test_user_123",
-            "email": "test@test.local",
-            "full_name": "Test User",
-            "creator_role": "creator"
-        }
         self.client = TestClient(self.app)
 
     @patch("api.v1.ai.narration.get_available_credits")

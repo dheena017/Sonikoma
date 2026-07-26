@@ -17,7 +17,7 @@ from api.dependencies.auth import get_current_user
 
 from services.user.credit_service import get_available_credits, record_credit_transaction
 from database.config import LOW_BALANCE_THRESHOLD
-from backend.schemas.ai import (
+from schemas.ai import (
     AnalyzeImageRequest,
     AnalyzeBatchRequest,
     AnalyzeSequenceRequest,

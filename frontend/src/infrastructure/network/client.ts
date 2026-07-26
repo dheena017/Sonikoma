@@ -1,5 +1,5 @@
-import type { ErrorPopupDetail } from "../../components/confirmationmodels/ErrorPopupModal";
-import type { NotificationType } from "../../components/notification";
+import type { ErrorPopupDetail } from "@/shared/ui/modal/ErrorPopupModal";
+import type { NotificationType } from "@/features/notification";
 
 export type AddNotificationFn = (
   message: string,

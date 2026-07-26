@@ -1,48 +1,75 @@
+# ==============================================================================
+# SONIKOMA MONOREPO .GITIGNORE
+# Comprehensive Ignore Rules for React + TypeScript + Vite & FastAPI Backend
+# ==============================================================================
+
+# ── Dependencies & Virtual Environments ──────────────────────────────────────
 node_modules/
 .venv/
-build/
+venv/
+env/
+ENV/
+
+# ── Build & Production Artifacts ─────────────────────────────────────────────
 dist/
-coverage/
-.DS_Store
-*.log
-.env*
+dist-ssr/
+build/
+out/
+*.tsbuildinfo
+
+# ── Environment & Secret Credentials ─────────────────────────────────────────
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 !.env.example
-# Local SQLite database files
+!.env.template
+client_secrets.json
+backend/data/client_secrets.json
+
+# ── Database & Persistent Media Storage (backend/data/) ───────────────────────
+backend/data/
 *.db
 *.db-wal
 *.db-shm
-# Persistent scraped panel image cache (binary blobs — do not commit)
+backend/data/media/
+backend/data/local_media/
+backend/data/scraped_html/
+backend/data/training_data/
 backend/database/image_cache/
-.llm-chat-history/
-data/
-*public
 
-# Python cache & bytecode
+# ── Python Cache & Bytecode ──────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+.mypy_cache/
 
-# Editor & IDE settings
+# ── Logs & Debugging Output ──────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── IDEs & Operating System Files ────────────────────────────────────────────
 .vscode/
 .idea/
 *.swp
 *.swo
-client_secrets.json
-
-# OS files
+.DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Test images / temp assets
-test_panel_input.png
-*.png_cropped
-*.png_clean_bubbles
-
-# Temporary scratch, workspace, and test directories
+# ── Temporary Diagnostics & Scratch Scripts ──────────────────────────────────
 scratch/
 temp/
 temp_test_combos/
 skills-lock.json
 verify_fix.cjs
+.llm-chat-history/

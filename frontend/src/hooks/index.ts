@@ -1,35 +1,12 @@
-export { useAIModels } from "./useAIModels";
-export { useAppLogic } from "./useAppLogic";
-export { useAppRouter } from "./useAppRouter";
-export { useAppState } from "./useAppState";
-export { useAudioFeedback } from "./useAudioFeedback";
-export { useAutoAnalysis } from "./useAutoAnalysis";
-export { useAutoCropPresets } from "./useAutoCropPresets";
-export { useAutoSave } from "./useAutoSave";
-export { useBackendHealth } from "./useBackendHealth";
-export { useBatchImageActions } from "./useBatchImageActions";
-export { useBulkOperations } from "./useBulkOperations";
-export { useCompileActions } from "./useCompileActions";
-export { useConfigHistory } from "./useConfigHistory";
-export { useCredits } from "./useCredits";
-export { useImageEditor, useCropEditor } from "./useImageEditor";
-export { useCropEditorDrag } from "./useCropEditorDrag";
-export { useCropEditorHistory } from "./useCropEditorHistory";
-export { useCropEditorPipelines } from "./useCropEditorPipelines";
-export { useImageEditorState, useCropEditorState } from "./useImageEditorState";
-export { useImageEditorStore, useCropEditorStore } from "./useImageEditorState";
-export { useGlobalShortcuts } from "./useGlobalShortcuts";
-export { useImageTransform } from "./useImageTransform";
-export { useLiveScraperActions } from "./useLiveScraperActions";
-export { usePanelDetection } from "./usePanelDetection";
-export { usePersistedState } from "./usePersistedState";
-export { usePipelineActions } from "./usePipelineActions";
-export { usePlaybackEngine } from "./usePlaybackEngine";
-export { useSandboxLogic } from "./useSandboxLogic";
-export { useSceneModifier } from "./useSceneModifier";
-export { useSingleImageEdits } from "./useSingleImageEdits";
-export { useStoryboardOperations } from "./useStoryboardOperations";
-export { useThemeMode } from "./useThemeMode";
-export { useVideoGeneration } from "./useVideoGeneration";
-export { useYouTubePublisher } from "./useYouTubePublisher";
+// Master Hook Barrel Exporter (Phase 5 Enterprise Hook Architecture)
+// Exports shared cross-feature hooks and localized domain hooks
 
+export * from "@/shared/hooks";
+export * from "@/features/image/hooks";
+export * from "@/features/workspace/hooks";
+export * from "@/features/ai/hooks";
+export * from "@/features/video/hooks";
+export * from "@/features/audio/hooks";
+export * from "@/features/auth/hooks";
+export * from "@/features/projects/hooks";
+export * from "@/features/scraper/hooks";

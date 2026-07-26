@@ -1,0 +1,213 @@
+import React, { useState, useEffect } from "react";
+import { Sparkles, Sliders, ArrowLeft, RefreshCw } from "lucide-react";
+import { GeneratedPanel } from "@/types";
+
+import PanelTranslationTool from "@/features/panel_assistant/components/PanelTranslationTool";
+import PanelAudioTool from "@/features/panel_assistant/components/PanelAudioTool";
+import PanelCreativeTool from "@/features/panel_assistant/components/PanelCreativeTool";
+import PanelPacingTool from "@/features/panel_assistant/components/PanelPacingTool";
+
+interface PanelAssistantPageProps {
+  panels: GeneratedPanel[];
+  setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
+  onNavigateHome: () => void;
+  addNotification?: (msg: string, type: any) => void;
+}
+
+const PanelAssistantPage = React.memo(
+  ({
+    panels,
+    setPanels,
+    onNavigateHome,
+    addNotification,
+  }: PanelAssistantPageProps) => {
+    const [selectedIdx, setSelectedIdx] = useState(0);
+    const [activeTab, setActiveTab] = useState<
+      "translation" | "audio" | "creative" | "pacing"
+    >("translation");
+
+    // Sync index from URL query param if present
+    useEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      const idxVal = params.get("idx");
+      if (idxVal !== null) {
+        const parsed = parseInt(idxVal);
+        if (!isNaN(parsed) && parsed >= 0 && parsed < panels.length) {
+          setSelectedIdx(parsed);
+        }
+      }
+    }, [panels.length]);
+
+    if (panels.length === 0) {
+      return (
+        <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
+          <Sparkles className="h-10 w-10 text-neutral-600 mb-3" />
+          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
+            No Panels Available
+          </h3>
+          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
+            Please import a series or add panels to your storyboard timeline to start editing.
+          </p>
+        </div>
+      );
+    }
+
+    const activePanel = panels[selectedIdx];
+
+    const handleUpdateDialogue = (val: string) => {
+      setPanels((prev) =>
+        prev.map((p, idx) =>
+          idx === selectedIdx ? { ...p, speech_text: val } : p
+        )
+      );
+    };
+
+    const handleUpdateNarrative = (val: string) => {
+      setPanels((prev) =>
+        prev.map((p, idx) =>
+          idx === selectedIdx ? { ...p, narrative: val, narrative_audio_url: undefined } : p
+        )
+      );
+    };
+
+    return (
+      <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
+
+        {/* PANEL HORIZONTAL RIBBON SELECTOR */}
+
+        <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-thin">
+          {panels.map((panel, idx) => (
+            <button
+              key={panel.id}
+              onClick={() => {
+                setSelectedIdx(idx);
+                window.history.replaceState(
+                  {},
+                  "",
+                  `/panel-assistant?idx=${idx}`
+                );
+              }}
+              className={`w-20 shrink-0 h-16 rounded-lg overflow-hidden border transition-all cursor-pointer relative flex items-center justify-center bg-black/40 ${
+                selectedIdx === idx
+                  ? "border-purple-500 shadow-md shadow-purple-900/30 scale-102 bg-neutral-900"
+                  : "border-neutral-800 bg-neutral-950/60 opacity-60 hover:opacity-100"
+              }`}
+            >
+              <img
+                src={panel.image_url}
+                alt=""
+                className="w-full h-full object-contain"
+              />
+              <div className="absolute bottom-1 right-1 bg-black/80 px-1 rounded text-[8px] font-mono font-bold text-neutral-300">
+                #{panel.id}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* DUAL COLUMN PANEL PREVIEW & ACTIVE TAB CONTAINER */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+          {/* Left pane: Active Panel Card preview */}
+          <div className="md:col-span-4 bg-neutral-950/45 border border-neutral-800 p-4 rounded-2xl space-y-4">
+            <div className="h-44 sm:h-48 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-900 flex items-center justify-center">
+              <img
+                src={activePanel.image_url}
+                alt=""
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+            <div className="space-y-1">
+              <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest block">
+                Active Dialogue
+              </span>
+              <textarea
+                value={activePanel.speech_text || ""}
+                onChange={(e) => handleUpdateDialogue(e.target.value)}
+                rows={2}
+                placeholder="(Silent panel script)"
+                className="w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none"
+              />
+            </div>
+            <div className="space-y-1">
+              <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest block">
+                Narrative Text
+              </span>
+              <textarea
+                value={activePanel.narrative || ""}
+                onChange={(e) => handleUpdateNarrative(e.target.value)}
+                rows={2}
+                placeholder="(No narrative voiceover text generated yet)"
+                className="w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none"
+              />
+            </div>
+          </div>
+
+          {/* Right pane: Tool Tab Selector & Form views */}
+          <div className="md:col-span-8 bg-neutral-950/45 border border-neutral-800 p-5 rounded-2xl space-y-4">
+            <div className="flex border-b border-neutral-800 font-mono text-[10px] overflow-x-auto scrollbar-none">
+              <button
+                onClick={() => setActiveTab("translation")}
+                className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
+                  activeTab === "translation"
+                    ? "border-purple-500 text-white"
+                    : "border-transparent text-neutral-400 hover:text-white"
+                }`}
+              >
+                Translation
+              </button>
+              <button
+                onClick={() => setActiveTab("audio")}
+                className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
+                  activeTab === "audio"
+                    ? "border-purple-500 text-white"
+                    : "border-transparent text-neutral-400 hover:text-white"
+                }`}
+              >
+                Audio & TTS
+              </button>
+              <button
+                onClick={() => setActiveTab("creative")}
+                className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
+                  activeTab === "creative"
+                    ? "border-purple-500 text-white"
+                    : "border-transparent text-neutral-400 hover:text-white"
+                }`}
+              >
+                Creative Prompts
+              </button>
+              <button
+                onClick={() => setActiveTab("pacing")}
+                className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
+                  activeTab === "pacing"
+                    ? "border-purple-500 text-white"
+                    : "border-transparent text-neutral-400 hover:text-white"
+                }`}
+              >
+                Pacing & Shake
+              </button>
+            </div>
+
+            <div className="pt-2">
+              {activeTab === "translation" && (
+                <PanelTranslationTool
+                  panel={activePanel}
+                  onUpdateDialogue={handleUpdateDialogue}
+                  addNotification={addNotification}
+                />
+              )}
+              {activeTab === "audio" && <PanelAudioTool panel={activePanel} />}
+              {activeTab === "creative" && (
+                <PanelCreativeTool panel={activePanel} />
+              )}
+              {activeTab === "pacing" && (
+                <PanelPacingTool panel={activePanel} />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
+export default PanelAssistantPage;
