@@ -12,7 +12,7 @@ import TimelineHeader from "@/features/timeline/components/TimelineHeader";
 import TimelineBulkOps from "@/features/timeline/components/TimelineBulkOps";
 import TimelineCard from "@/features/timeline/components/TimelineCard";
 import { TimelineSelectionBar } from "@/features/image/components/editor/select";
-import { formatDisplayEpisodeLabel } from "@/features/scraper/components/LiveScraperDeck";
+import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/scraper/components/LiveScraperDeck";
 
 interface StoryboardTimelineProps {
   panels: GeneratedPanel[];
@@ -939,14 +939,14 @@ const StoryboardTimeline = React.memo(
                   </span>
                   {episodeGroups.length > 0 ? (
                     <div className="space-y-1 max-h-40 overflow-y-auto pr-0.5 scrollbar-thin">
-                      {episodeGroups.map((grp, gIdx) => {
-                        const isSelected = selectedTimelineEp === gIdx;
+                      {getSortedEpisodeGroups(episodeGroups).map(({ grp, originalIdx }) => {
+                        const isSelected = selectedTimelineEp === originalIdx;
                         return (
                           <button
-                            key={gIdx}
+                            key={originalIdx}
                             type="button"
                             onClick={() => {
-                              setSelectedTimelineEp(gIdx);
+                              setSelectedTimelineEp(originalIdx);
                               if (grp.startIndex !== undefined) {
                                 setCurrentPanelIndex(grp.startIndex);
                               }
@@ -978,12 +978,13 @@ const StoryboardTimeline = React.memo(
               <div className="flex-1 w-full min-w-0 space-y-6">
                 {(() => {
                   if (episodeGroups.length > 0) {
+                    const sortedGroups = getSortedEpisodeGroups(episodeGroups);
                     const visibleGroups =
                       selectedTimelineEp === "all"
-                        ? episodeGroups.map((grp, originalIdx) => ({ grp, gIdx: originalIdx }))
+                        ? sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }))
                         : episodeGroups[selectedTimelineEp]
                         ? [{ grp: episodeGroups[selectedTimelineEp], gIdx: selectedTimelineEp as number }]
-                        : episodeGroups.map((grp, originalIdx) => ({ grp, gIdx: originalIdx }));
+                        : sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }));
 
                     return visibleGroups.map(({ grp, gIdx }) => {
                       const grpPanels = panels.slice(

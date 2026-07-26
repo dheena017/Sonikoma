@@ -40,6 +40,22 @@ export function formatDisplayEpisodeLabel(label: string): string {
   return trimmed;
 }
 
+export function getSortedEpisodeGroups<T extends { episodeLabel: string }>(
+  groups: T[]
+): Array<{ grp: T; originalIdx: number }> {
+  if (!groups || groups.length === 0) return [];
+  const mapped = groups.map((grp, originalIdx) => ({ grp, originalIdx }));
+
+  const parseNum = (label: string) => {
+    const match = label.match(/(?:Episode|Chapter|Ep\.?|Ch\.?)\s*(\d+)/i);
+    if (match) return parseInt(match[1], 10);
+    const num = label.match(/\d+/);
+    return num ? parseInt(num[0], 10) : 0;
+  };
+
+  return mapped.sort((a, b) => parseNum(a.grp.episodeLabel) - parseNum(b.grp.episodeLabel));
+}
+
 const LiveScraperDeck = React.memo(
   ({
     scrapedImages,
@@ -497,12 +513,13 @@ const LiveScraperDeck = React.memo(
                   }>) || [];
 
                 if (episodeGroups.length > 0) {
+                  const sortedGroups = getSortedEpisodeGroups(episodeGroups);
                   const visibleGroups =
                     selectedEpisodeIdx === "all"
-                      ? episodeGroups.map((grp, originalIdx) => ({ grp, gIdx: originalIdx }))
+                      ? sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }))
                       : episodeGroups[selectedEpisodeIdx]
-                      ? [{ grp: episodeGroups[selectedEpisodeIdx], gIdx: selectedEpisodeIdx }]
-                      : episodeGroups.map((grp, originalIdx) => ({ grp, gIdx: originalIdx }));
+                      ? [{ grp: episodeGroups[selectedEpisodeIdx], gIdx: selectedEpisodeIdx as number }]
+                      : sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }));
 
                   return (
                     <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
@@ -551,14 +568,14 @@ const LiveScraperDeck = React.memo(
                             );
                           })()}
 
-                          {/* Individual Episode Item Buttons */}
-                          {episodeGroups.map((grp, gIdx) => {
-                            const isSelected = selectedEpisodeIdx === gIdx;
+                          {/* Individual Episode Item Buttons in Ascending Order */}
+                          {sortedGroups.map(({ grp, originalIdx }) => {
+                            const isSelected = selectedEpisodeIdx === originalIdx;
                             return (
                               <button
-                                key={`ep-nav-${gIdx}`}
+                                key={`ep-nav-${originalIdx}`}
                                 type="button"
-                                onClick={() => setSelectedEpisodeIdx(gIdx)}
+                                onClick={() => setSelectedEpisodeIdx(originalIdx)}
                                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
                                   isSelected
                                     ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.25)]"

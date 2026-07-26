@@ -1,5 +1,5 @@
 import React from "react";
-import LiveScraperDeck, { formatDisplayEpisodeLabel } from "@/features/scraper/components/LiveScraperDeck";
+import LiveScraperDeck, { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/scraper/components/LiveScraperDeck";
 import StoryboardTimeline from "@/features/timeline/components/StoryboardTimeline";
 import CinemaPlayer from "@/features/video/components/CinemaPlayer";
 import OutputMetadataPanel from "@/features/video/components/OutputMetadataPanel";
@@ -392,13 +392,13 @@ const EditorPage: React.FC<EditorPageProps> = ({
             </span>
             {episodeGroups.length > 0 ? (
               <div className="space-y-1 max-h-40 overflow-y-auto pr-0.5 scrollbar-thin">
-                {episodeGroups.map((grp, idx) => {
-                  const isSelected = selectedExportTarget === `ep-${idx}`;
+                {getSortedEpisodeGroups(episodeGroups).map(({ grp, originalIdx }) => {
+                  const isSelected = selectedExportTarget === `ep-${originalIdx}`;
                   return (
                     <button
-                      key={idx}
+                      key={originalIdx}
                       type="button"
-                      onClick={() => setSelectedExportTarget(`ep-${idx}`)}
+                      onClick={() => setSelectedExportTarget(`ep-${originalIdx}`)}
                       className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all text-left border cursor-pointer ${
                         isSelected
                           ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
@@ -737,9 +737,11 @@ const EditorPage: React.FC<EditorPageProps> = ({
                             </span>
                             {((window as any).__scrapeEpisodeGroups as Array<any> || []).length > 0 ? (
                               <div className="space-y-1 max-h-36 overflow-y-auto pr-0.5 scrollbar-thin">
-                                {((window as any).__scrapeEpisodeGroups as Array<any>).map((grp, idx) => (
+                                {getSortedEpisodeGroups(
+                                  ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || []
+                                ).map(({ grp, originalIdx }) => (
                                   <button
-                                    key={idx}
+                                    key={originalIdx}
                                     type="button"
                                     onClick={() => {
                                       if (grp.startIndex !== undefined) {

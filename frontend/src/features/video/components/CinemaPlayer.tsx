@@ -16,6 +16,7 @@ import { PlayerBottomControls } from "./player/PlayerBottomControls";
 interface PlayerPageProps {
   panels: GeneratedPanel[];
   videoUrl: string | null;
+  currentPanelIndex?: number;
   seriesSlug: string | null;
   chapterSlug: string | null;
   navigateTo: (path: string) => void;
@@ -33,6 +34,7 @@ interface Chapter {
 export default function CinemaPlayer({
   panels = [],
   videoUrl,
+  currentPanelIndex,
   seriesSlug,
   chapterSlug,
   navigateTo,
