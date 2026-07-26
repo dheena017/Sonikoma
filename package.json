@@ -22,7 +22,7 @@
     "install:python": ".venv\\Scripts\\python.exe -m pip install -r backend/requirements.txt",
     "clean": "rimraf frontend/dist",
     "docker:build": "docker build -t sonikoma .",
-    "docker:run": "docker run -p 3000:3000 sonikoma",
+    "docker:run": "docker run -p ${FRONTEND_PORT:-3000}:${FRONTEND_PORT:-3000} sonikoma",
     "lint": "cd frontend && npm run lint"
   },
   "dependencies": {

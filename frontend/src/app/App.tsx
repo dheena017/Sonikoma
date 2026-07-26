@@ -91,7 +91,7 @@ export default function App() {
   React.useEffect(() => {
     (window as any).alertAsync = (
       message: string,
-      title: string = "localhost:3000 says",
+      title: string = `${window.location.host} says`,
       accentColor: string = "purple"
     ) => {
       return new Promise<void>((resolve) => {
@@ -121,7 +121,7 @@ export default function App() {
   React.useEffect(() => {
     (window as any).confirmAsync = (
       message: string,
-      title: string = "localhost:3000 says",
+      title: string = `${window.location.host} says`,
       accentColor: string = "purple"
     ) => {
       return new Promise<boolean>((resolve) => {

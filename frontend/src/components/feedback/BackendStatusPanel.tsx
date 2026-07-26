@@ -82,7 +82,7 @@ export default function BackendStatusPanel({
             <p>
               Port:{" "}
               <span className="font-mono text-white">
-                {metrics?.config?.port ?? "5173"}
+                {metrics?.config?.port ?? "—"}
               </span>
             </p>
             <p>
