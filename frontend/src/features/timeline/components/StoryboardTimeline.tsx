@@ -938,7 +938,7 @@ const StoryboardTimeline = React.memo(
                     Filter Episode
                   </span>
                   {episodeGroups.length > 0 ? (
-                    <div className="space-y-1 max-h-40 overflow-y-auto pr-0.5 scrollbar-thin">
+                    <div className="space-y-1 max-h-48 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                       {getSortedEpisodeGroups(episodeGroups).map(({ grp, originalIdx }) => {
                         const isSelected = selectedTimelineEp === originalIdx;
                         return (

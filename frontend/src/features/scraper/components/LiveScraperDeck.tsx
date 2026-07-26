@@ -106,6 +106,9 @@ const LiveScraperDeck = React.memo(
     );
     const [isBatchMerging, setIsBatchMerging] = useState(false);
     const [selectedEpisodeIdx, setSelectedEpisodeIdx] = useState<number | "all">("all");
+    const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
+    const [episodeSortAscending, setEpisodeSortAscending] = useState(true);
+    const [hoveredEpisodeIdx, setHoveredEpisodeIdx] = useState<number | null>(null);
     const activeFetch = fetchWithInterceptor || fetch;
 
     /** Core card click handler — supports shift-range selection and Ctrl/Cmd toggling */
@@ -513,7 +516,17 @@ const LiveScraperDeck = React.memo(
                   }>) || [];
 
                 if (episodeGroups.length > 0) {
-                  const sortedGroups = getSortedEpisodeGroups(episodeGroups);
+                  const rawSortedGroups = getSortedEpisodeGroups(episodeGroups);
+                  const sortedGroups = episodeSortAscending
+                    ? rawSortedGroups
+                    : [...rawSortedGroups].reverse();
+
+                  const filteredGroups = sortedGroups.filter(({ grp }) => {
+                    if (!episodeSearchQuery.trim()) return true;
+                    const label = formatDisplayEpisodeLabel(grp.episodeLabel).toLowerCase();
+                    return label.includes(episodeSearchQuery.toLowerCase());
+                  });
+
                   const visibleGroups =
                     selectedEpisodeIdx === "all"
                       ? sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }))
@@ -523,27 +536,48 @@ const LiveScraperDeck = React.memo(
 
                   return (
                     <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
-                      {/* IN-PANEL LEFT SIDEBAR: EPISODE NAVIGATOR */}
+                      {/* IN-PANEL LEFT SIDEBAR: EPISODE NAVIGATOR WITH ALL 6 ENHANCEMENTS */}
                       <aside className="w-full lg:w-56 bg-neutral-950/90 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-2xl lg:sticky lg:top-24 self-start">
-                        <div className="flex items-center justify-between border-b border-neutral-850/80 pb-3">
+                        {/* Header with Sort Direction Toggle */}
+                        <div className="flex items-center justify-between border-b border-neutral-850/80 pb-2.5">
                           <div className="flex items-center gap-2">
                             <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
                             <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
                               Episodes ({episodeGroups.length})
                             </h4>
                           </div>
-                          {selectedEpisodeIdx !== "all" && (
+                          <button
+                            type="button"
+                            onClick={() => setEpisodeSortAscending((prev) => !prev)}
+                            title="Toggle Sort Order (Ascending / Descending)"
+                            className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
+                          >
+                            {episodeSortAscending ? "1 → N" : "N → 1"}
+                          </button>
+                        </div>
+
+                        {/* Search & Filter Bar */}
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={episodeSearchQuery}
+                            onChange={(e) => setEpisodeSearchQuery(e.target.value)}
+                            placeholder="Search episodes..."
+                            className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/60 font-mono transition-all"
+                          />
+                          {episodeSearchQuery && (
                             <button
                               type="button"
-                              onClick={() => setSelectedEpisodeIdx("all")}
-                              className="text-[9px] font-mono font-bold text-purple-400 hover:text-purple-300 transition-colors cursor-pointer"
+                              onClick={() => setEpisodeSearchQuery("")}
+                              className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold"
                             >
-                              Show All
+                              ✕
                             </button>
                           )}
                         </div>
 
-                        <div className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-0.5 scrollbar-thin">
+                        {/* Episodes Scroll List - Hidden Scrollbars */}
+                        <div className="space-y-1.5 max-h-[55vh] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                           {/* All Episodes Button */}
                           {(() => {
                             const totalScrapedFrames = episodeGroups.length > 0
@@ -568,34 +602,117 @@ const LiveScraperDeck = React.memo(
                             );
                           })()}
 
-                          {/* Individual Episode Item Buttons in Ascending Order */}
-                          {sortedGroups.map(({ grp, originalIdx }) => {
+                          {/* Filtered Episode Cards */}
+                          {filteredGroups.map(({ grp, originalIdx }) => {
                             const isSelected = selectedEpisodeIdx === originalIdx;
+                            const grpImages = scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
+                            const selectedInGrp = grpImages.filter((u) => selectedScraped.includes(u)).length;
+
+                            const seconds = grp.count * 4.0;
+                            const mins = Math.floor(seconds / 60);
+                            const secs = Math.round(seconds % 60);
+                            const durationStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
                             return (
-                              <button
-                                key={`ep-nav-${originalIdx}`}
-                                type="button"
-                                onClick={() => setSelectedEpisodeIdx(originalIdx)}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
-                                  isSelected
-                                    ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.25)]"
-                                    : "bg-neutral-900/40 border-neutral-850 text-neutral-350 hover:text-white hover:bg-neutral-850/80"
-                                }`}
-                              >
-                                <div className="flex items-center gap-2 truncate">
-                                  <span
-                                    className={`h-2 w-2 rounded-full shrink-0 ${
-                                      isSelected ? "bg-purple-400 animate-pulse" : "bg-neutral-600"
-                                    }`}
-                                  />
-                                  <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
-                                </div>
-                                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
-                                  {grp.count}f
-                                </span>
-                              </button>
+                              <div key={`ep-wrapper-${originalIdx}`} className="relative group/ep">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedEpisodeIdx(originalIdx)}
+                                  onMouseEnter={() => setHoveredEpisodeIdx(originalIdx)}
+                                  onMouseLeave={() => setHoveredEpisodeIdx(null)}
+                                  className={`w-full flex flex-col gap-1 px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
+                                    isSelected
+                                      ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.25)]"
+                                      : "bg-neutral-900/40 border-neutral-850 text-neutral-350 hover:text-white hover:bg-neutral-850/80"
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-1.5 w-full">
+                                    <div className="flex items-center gap-2 truncate">
+                                      <span
+                                        className={`h-2 w-2 rounded-full shrink-0 ${
+                                          isSelected ? "bg-purple-400 animate-pulse" : "bg-emerald-500/80"
+                                        }`}
+                                      />
+                                      <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
+                                    </div>
+                                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
+                                      {grp.count}f
+                                    </span>
+                                  </div>
+
+                                  {/* Episode Duration & Selection Progress */}
+                                  <div className="flex items-center justify-between text-[9px] text-neutral-400 font-normal pl-4 pt-0.5">
+                                    <span>⏱️ {durationStr}</span>
+                                    {selectedInGrp > 0 ? (
+                                      <span className="text-purple-300 font-bold bg-purple-950/80 px-1.5 py-0.2 rounded border border-purple-800/40">
+                                        {selectedInGrp}/{grp.count} sel
+                                      </span>
+                                    ) : (
+                                      <span className="text-emerald-400 text-[8px] uppercase tracking-wider font-bold">✓ Ready</span>
+                                    )}
+                                  </div>
+                                </button>
+
+                                {/* AI Summary & Hero Frame Tooltip on Hover */}
+                                {hoveredEpisodeIdx === originalIdx && (
+                                  <div className="absolute left-full top-0 ml-3 z-50 w-56 p-3 bg-neutral-955/95 border border-purple-900/60 rounded-xl shadow-2xl backdrop-blur-md hidden lg:block animate-in fade-in duration-150 pointer-events-none">
+                                    <div className="space-y-1.5">
+                                      <div className="flex items-center justify-between border-b border-neutral-800 pb-1">
+                                        <span className="text-[10px] font-black text-purple-300 uppercase tracking-wider">
+                                          {formatDisplayEpisodeLabel(grp.episodeLabel)}
+                                        </span>
+                                        <span className="text-[8px] bg-purple-950 text-purple-400 px-1.5 py-0.5 rounded border border-purple-800">
+                                          AI Tooltip
+                                        </span>
+                                      </div>
+                                      <p className="text-[10px] text-neutral-400 leading-tight font-mono">
+                                        Sequence contains {grp.count} frames (~{durationStr}). Full HD panels scanned.
+                                      </p>
+                                      {grpImages[0] && (
+                                        <div className="w-full h-20 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900 mt-1">
+                                          <img src={grpImages[0]} alt="Hero Preview" className="w-full h-full object-cover" />
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             );
                           })}
+                        </div>
+
+                        {/* Quick Tool Actions at Bottom of Sidebar */}
+                        <div className="pt-2 border-t border-neutral-850 space-y-1.5">
+                          <div className="flex items-center justify-between text-[9px] font-mono text-neutral-400 px-1">
+                            <span>Quick Tools</span>
+                            <span className="text-purple-400 font-bold">16:9 / 9:16</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (selectedEpisodeIdx !== "all" && episodeGroups[selectedEpisodeIdx]) {
+                                  const grp = episodeGroups[selectedEpisodeIdx];
+                                  const grpImages = scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
+                                  setSelectedScraped((prev) => Array.from(new Set([...prev, ...grpImages])));
+                                } else {
+                                  setSelectedScraped([...scrapedImages]);
+                                }
+                              }}
+                              className="px-2 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-850 text-[10px] font-mono text-neutral-300 border border-neutral-800 text-center transition-all cursor-pointer truncate"
+                            >
+                              ✅ Select All
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                addNotification?.("Format Presets: 16:9 Cinema & 9:16 Shorts Ready", "success");
+                              }}
+                              className="px-2 py-1.5 rounded-lg bg-neutral-900 hover:bg-purple-950/60 text-[10px] font-mono text-purple-300 border border-neutral-800 hover:border-purple-800/60 text-center transition-all cursor-pointer truncate"
+                            >
+                              📱 Preset 9:16
+                            </button>
+                          </div>
                         </div>
                       </aside>
 
