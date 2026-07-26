@@ -101,7 +101,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
 
   if (hideSidebarAndHeader) {
     return (
-      <div className="flex-grow w-full max-w-7xl mx-auto px-6 py-6 md:px-8 md:py-8 flex flex-col min-h-full">
+      <div className="flex-grow w-full px-6 py-6 md:px-8 md:py-8 flex flex-col min-h-full">
         {/* Standard layout header for all Creative Suite pages */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900 pb-5 mb-6">
           <div>
@@ -183,7 +183,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       {/* Main page offset container */}
       <div className="flex-1 flex flex-col pt-16 lg:pl-20 min-h-screen transition-all duration-300">
         <main className="flex-1 px-6 pb-6 pt-6 md:px-8 md:pb-8 md:pt-8">
-          <div className="max-w-7xl mx-auto animate-[fadeIn_0.3s_ease-out]">
+          <div className="w-full animate-[fadeIn_0.3s_ease-out]">
             
             {/* Standard layout header for all Creative Suite pages */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900 pb-5 mb-6">

@@ -22,7 +22,7 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(true);
   const [zoom, setZoom] = useState(100); // 40% to 150%
   const [scrollProgress, setScrollProgress] = useState(0);
   const [autoScrollSpeed, setAutoScrollSpeed] = useState(0); // 0 = off, 1, 2, 3, 5 = pixels per interval
@@ -83,6 +83,10 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
       if (!scrollContainerRef.current) return;
       const scrollStep = 80;
       if (e.key === "ArrowDown") {
@@ -99,7 +103,7 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [onClose]);
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
@@ -112,46 +116,63 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
   if (!episode) return null;
 
   const renderInner = () => {
+    // Calculate strip width based on zoom level (default 100% = 800px optimal webtoon width)
+    const stripWidthPx = Math.round(800 * (zoom / 100));
+
     return (
-      <>
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-900/50">
-          <div>
-            <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest font-mono">
-              Webtoon Quick Reader Preview
-            </span>
-            <h2 className="text-sm font-bold text-white mt-0.5">
-              {episode.number} — {episode.title}
-            </h2>
+      <div className="w-full h-full flex flex-col bg-neutral-950 text-white overflow-hidden font-sans">
+        {/* Fullscreen Header Bar */}
+        <div className="flex items-center justify-between px-4 sm:px-8 py-3 border-b border-neutral-800/80 bg-neutral-900/90 backdrop-blur-md shrink-0 z-30 shadow-xl">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
+              <span className="text-purple-400 font-bold text-xs">WP</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest font-mono">
+                  Full Page Webtoon Reader
+                </span>
+                <span className="text-[10px] bg-purple-900/40 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full font-mono">
+                  Live Stream
+                </span>
+              </div>
+              <h2 className="text-sm font-bold text-white tracking-tight truncate max-w-xs sm:max-w-md">
+                {episode.number} — {episode.title}
+              </h2>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
-              title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+              onClick={() => onImport(episode)}
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-900/30 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
-              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              <Play size={14} />
+              <span className="hidden sm:inline">Open in Editor</span>
+              <span className="sm:hidden">Editor</span>
             </button>
             <button
               onClick={onClose}
-              className="p-2 text-neutral-400 hover:text-red-400 hover:bg-neutral-850 rounded-lg transition-colors"
+              className="px-3.5 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-neutral-700"
+              title="Close Full Page Reader (Esc)"
             >
-              <X size={18} />
+              <X size={16} />
+              <span className="hidden sm:inline">Close</span>
             </button>
           </div>
         </div>
 
-        {/* Premium Control Bar */}
+        {/* Premium Control Toolbar */}
         {!loading && !error && images.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-3 border-b border-neutral-800 bg-neutral-950/60 backdrop-blur-sm text-xs text-neutral-350">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-8 py-2.5 border-b border-neutral-800/60 bg-neutral-900/40 backdrop-blur-md text-xs text-neutral-300 shrink-0 z-20">
             {/* Auto Scroll Speed Controls */}
             <div className="flex items-center gap-2">
-              <span className="font-mono text-neutral-500 uppercase tracking-wider text-[10px]">Auto-Scroll:</span>
-              <div className="flex items-center bg-neutral-900 border border-neutral-850 rounded-lg p-0.5">
+              <span className="font-mono text-neutral-400 uppercase tracking-wider text-[10px] font-bold">Auto-Scroll:</span>
+              <div className="flex items-center bg-neutral-950 border border-neutral-800 rounded-xl p-0.5">
                 <button
                   onClick={() => setAutoScrollSpeed(0)}
-                  className={`px-2 py-1 rounded text-[11px] font-semibold transition-colors ${
-                    autoScrollSpeed === 0 ? 'bg-purple-650 text-white' : 'hover:bg-neutral-800 text-neutral-450 hover:text-white'
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                    autoScrollSpeed === 0 ? 'bg-purple-600 text-white shadow-sm' : 'hover:bg-neutral-800 text-neutral-400 hover:text-white'
                   }`}
                 >
                   Off
@@ -160,10 +181,10 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
                   <button
                     key={speed}
                     onClick={() => setAutoScrollSpeed(speed)}
-                    className={`px-2 py-1 rounded text-[11px] font-semibold transition-colors ${
-                      autoScrollSpeed === speed ? 'bg-purple-650 text-white' : 'hover:bg-neutral-800 text-neutral-450 hover:text-white'
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                      autoScrollSpeed === speed ? 'bg-purple-600 text-white shadow-sm' : 'hover:bg-neutral-800 text-neutral-400 hover:text-white'
                     }`}
-                    title={`Speed ${speed}`}
+                    title={`Auto Scroll Speed ${speed}px`}
                   >
                     S{i + 1}
                   </button>
@@ -173,78 +194,80 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
 
             {/* Zoom / Width Adjustments */}
             <div className="flex items-center gap-2">
-              <span className="font-mono text-neutral-500 uppercase tracking-wider text-[10px]">Reader Width:</span>
-              <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-850 rounded-lg p-0.5">
+              <span className="font-mono text-neutral-400 uppercase tracking-wider text-[10px] font-bold">Reader Width:</span>
+              <div className="flex items-center gap-2 bg-neutral-950 border border-neutral-800 rounded-xl p-0.5">
                 <button
-                  onClick={() => setZoom(Math.max(40, zoom - 10))}
-                  className="px-2.5 py-1 hover:bg-neutral-800 hover:text-white text-neutral-400 rounded font-bold transition-colors"
+                  onClick={() => setZoom(Math.max(50, zoom - 10))}
+                  className="px-2.5 py-1 hover:bg-neutral-800 hover:text-white text-neutral-400 rounded-lg font-bold transition-colors cursor-pointer"
+                  title="Narrower Width"
                 >
                   -
                 </button>
-                <span className="min-w-[40px] text-center font-mono text-white text-[11px] font-bold">{zoom}%</span>
+                <span className="min-w-[50px] text-center font-mono text-purple-300 text-[11px] font-bold">{stripWidthPx}px</span>
                 <button
-                  onClick={() => setZoom(Math.min(150, zoom + 10))}
-                  className="px-2.5 py-1 hover:bg-neutral-800 hover:text-white text-neutral-400 rounded font-bold transition-colors"
+                  onClick={() => setZoom(Math.min(180, zoom + 10))}
+                  className="px-2.5 py-1 hover:bg-neutral-800 hover:text-white text-neutral-400 rounded-lg font-bold transition-colors cursor-pointer"
+                  title="Wider Width"
                 >
                   +
                 </button>
               </div>
             </div>
 
-            {/* Reading progress */}
-            <div className="flex items-center gap-2 font-mono text-[10px] text-neutral-400 bg-neutral-900 border border-neutral-850 rounded-lg px-2.5 py-1 font-bold">
+            {/* Reading progress badge */}
+            <div className="flex items-center gap-2 font-mono text-[10px] text-purple-300 bg-purple-950/40 border border-purple-500/20 rounded-xl px-3 py-1 font-bold">
               <span>Read: {Math.round(scrollProgress)}%</span>
             </div>
           </div>
         )}
 
-        {/* Reading Progress Line */}
+        {/* Reading Progress Top Bar Indicator */}
         {!loading && !error && images.length > 0 && (
-          <div className="w-full bg-neutral-900 h-0.5 relative z-10">
+          <div className="w-full bg-neutral-900 h-1 relative z-20 shrink-0">
             <div 
-              className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 transition-all duration-75"
+              className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 transition-all duration-75 shadow-[0_0_8px_rgba(168,85,247,0.8)]"
               style={{ width: `${scrollProgress}%` }}
             />
           </div>
         )}
 
-        {/* Modal Content */}
+        {/* Main Full Page Scrollable Reader Container */}
         <div 
           ref={scrollContainerRef}
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto bg-neutral-950 flex flex-col items-center justify-start relative scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-neutral-950 p-0"
         >
           {loading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-neutral-950/80 z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-neutral-950 z-10">
               <div className="relative">
-                <div className="w-12 h-12 rounded-full border-4 border-purple-900/50 border-t-purple-500 animate-spin" />
-                <Loader className="w-6 h-6 text-purple-400 absolute top-3 left-3 animate-pulse" />
+                <div className="w-14 h-14 rounded-full border-4 border-purple-900/40 border-t-purple-500 animate-spin" />
+                <Loader className="w-7 h-7 text-purple-400 absolute top-3.5 left-3.5 animate-pulse" />
               </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-neutral-200">Scraping panels live...</p>
-                <p className="text-xs text-neutral-500 mt-1">Connecting via secure image proxy & Playwright renderer</p>
+              <div className="text-center space-y-1">
+                <p className="text-base font-bold text-white">Scraping panels live...</p>
+                <p className="text-xs text-neutral-400">Connecting via secure image proxy & Playwright renderer</p>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center bg-neutral-950/90 z-10">
-              <AlertTriangle className="w-12 h-12 text-red-500 animate-bounce" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center bg-neutral-950 z-10">
+              <AlertTriangle className="w-14 h-14 text-rose-500 animate-bounce" />
               <div className="max-w-md space-y-2">
-                <h3 className="text-base font-bold text-white">Failed to Preview Panels</h3>
+                <h3 className="text-lg font-bold text-white">Failed to Preview Panels</h3>
                 <p className="text-sm text-neutral-400">{error}</p>
-                <p className="text-xs text-neutral-600">The server might be rate-limited, or the Webtoon slug is private/restricted.</p>
+                <p className="text-xs text-neutral-500">The server might be rate-limited, or the Webtoon slug is private/restricted.</p>
               </div>
-              <div className="flex gap-3 mt-2">
+              <div className="flex gap-3 mt-4">
                 <button
                   onClick={onClose}
-                  className="px-5 py-2 bg-neutral-800 hover:bg-neutral-750 text-white rounded-xl text-sm font-medium transition-colors"
+                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
                 >
                   Close
                 </button>
                 <button
                   onClick={() => onImport(episode)}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   Force Open Editor <ArrowRight size={14} />
                 </button>
@@ -255,20 +278,20 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
           {/* Webtoon Panels Continuous Strip */}
           {!loading && !error && images.length > 0 && (
             <div 
-              className="w-full flex flex-col items-center space-y-0 transition-all duration-300"
-              style={{ maxWidth: `${zoom}%` }}
+              className="w-full flex flex-col items-center space-y-0 transition-all duration-300 py-4"
+              style={{ maxWidth: `${stripWidthPx}px` }}
             >
               {images.map((imgUrl, idx) => (
                 <img
                   key={idx}
                   src={getProxiedImageUrl(imgUrl)}
                   alt={`Panel ${idx + 1}`}
-                  className="w-full h-auto select-none pointer-events-none block m-0 p-0 min-h-[400px] bg-neutral-900/20"
+                  className="w-full h-auto select-none pointer-events-none block m-0 p-0 min-h-[300px] bg-neutral-900/20 shadow-2xl"
                   style={{ width: "100%" }}
                   loading={idx < 5 ? 'eager' : 'lazy'}
                   onError={(e) => {
                     (e.target as HTMLImageElement).src =
-                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='150'%3E%3Crect fill='%231f2937' width='400' height='150'/%3E%3Ctext fill='%236b7280' font-family='sans-serif' font-size='14' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3EFailed to load panel %23" + (idx + 1) + "%3C/text%3E%3C/svg%3E";
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='150'%3E%3Crect fill='%23171717' width='400' height='150'/%3E%3Ctext fill='%236b7280' font-family='sans-serif' font-size='14' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3EFailed to load panel %23" + (idx + 1) + "%3C/text%3E%3C/svg%3E";
                   }}
                 />
               ))}
@@ -276,44 +299,39 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
           )}
         </div>
 
-        {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-neutral-800 bg-neutral-900/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs text-neutral-500 font-mono">
-            {images.length > 0 && `Total: ${images.length} scrollable panels detected`}
+        {/* Bottom Status Bar */}
+        <div className="px-6 py-3 border-t border-neutral-800/80 bg-neutral-900/80 backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 z-30">
+          <div className="text-xs text-neutral-400 font-mono flex items-center gap-2">
+            {images.length > 0 && (
+              <>
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Total: {images.length} scrollable panels loaded</span>
+              </>
+            )}
           </div>
-          <div className="flex gap-3 w-full sm:w-auto">
+          <div className="flex gap-3 w-full sm:w-auto justify-end">
             <button
               onClick={onClose}
-              className="flex-1 sm:flex-initial px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-300 hover:text-white rounded-xl text-sm font-semibold transition-all"
+              className="px-5 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
             >
-              Close
+              Close Reader
             </button>
             <button
               onClick={() => onImport(episode)}
-              className="flex-1 sm:flex-initial px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-purple-900/35 transition-all flex items-center justify-center gap-2"
+              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-950/40 transition-all flex items-center gap-2 cursor-pointer"
             >
-              <Play size={15} />
+              <Play size={14} />
               Open in Editor
             </button>
           </div>
         </div>
-      </>
+      </div>
     );
   };
 
-  if (isFullscreen) {
-    return (
-      <div className="fixed inset-0 z-[100] w-full h-screen bg-black flex flex-col overflow-hidden animate-in fade-in duration-300">
-        {renderInner()}
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-      <div className="bg-neutral-950 border border-neutral-800 rounded-2xl flex flex-col shadow-2xl overflow-hidden w-full max-w-5xl h-[88vh]">
-        {renderInner()}
-      </div>
+    <div className="fixed inset-0 z-[9999] w-screen h-screen bg-black flex flex-col overflow-hidden animate-in fade-in duration-300">
+      {renderInner()}
     </div>
   );
 };

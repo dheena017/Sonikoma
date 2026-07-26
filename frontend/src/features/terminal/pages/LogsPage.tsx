@@ -225,7 +225,7 @@ ${JSON.stringify(
   };
 
   return (
-    <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
+    <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
       <LogsPageHeader
         viewMode={viewMode}
         onViewModeChange={(mode) => {

@@ -147,7 +147,7 @@ export default function SettingsAccountPage({
 
   return (
     <div className="min-h-screen bg-[#08080c] text-neutral-200 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="w-full space-y-8">
         
         {/* Navigation & Header */}
         <div className="flex items-center justify-between">

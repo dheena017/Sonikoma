@@ -11,7 +11,7 @@ export default function TimelineEmptyState({
     return (
       <div
         id="panels_timeline_section_empty"
-        className="bg-neutral-900/30 rounded-2xl border border-purple-500/20 border-dashed p-10 text-center space-y-4 max-w-4xl mx-auto"
+        className="bg-neutral-900/30 rounded-2xl border border-purple-500/20 border-dashed p-10 text-center space-y-4 w-full"
       >
         <div className="icon-pill icon-pill--purple mx-auto animate-pulse h-12 w-12 text-xl font-mono">
           ✦

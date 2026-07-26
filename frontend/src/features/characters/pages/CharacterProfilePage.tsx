@@ -81,7 +81,7 @@ const CharacterProfilePage = React.memo(
     };
 
     return (
-      <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
+      <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
 
 
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">

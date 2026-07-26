@@ -333,26 +333,23 @@ export default function ProjectConfirmPanel({
               <button
                 type="button"
                 onClick={() => toggleTask("generateScript")}
-                className={`p-3 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${
-                  aiTasks.generateScript
+                className={`p-3 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${aiTasks.generateScript
                     ? "bg-purple-600/10 border-purple-500/40 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]"
                     : "bg-[#0a0a0e] border-neutral-800 hover:border-neutral-700"
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <Wand2
-                    className={`h-4 w-4 ${
-                      aiTasks.generateScript
+                    className={`h-4 w-4 ${aiTasks.generateScript
                         ? "text-purple-400"
                         : "text-neutral-500"
-                    }`}
+                      }`}
                   />
                   <div
-                    className={`w-3 h-3 rounded-full border flex items-center justify-center ${
-                      aiTasks.generateScript
+                    className={`w-3 h-3 rounded-full border flex items-center justify-center ${aiTasks.generateScript
                         ? "bg-purple-500 border-purple-400"
                         : "border-neutral-700"
-                    }`}
+                      }`}
                   >
                     {aiTasks.generateScript && (
                       <CheckCircle className="h-2 w-2 text-white" />
@@ -360,11 +357,10 @@ export default function ProjectConfirmPanel({
                   </div>
                 </div>
                 <h4
-                  className={`text-xs font-bold ${
-                    aiTasks.generateScript
+                  className={`text-xs font-bold ${aiTasks.generateScript
                       ? "text-purple-200"
                       : "text-neutral-400"
-                  }`}
+                    }`}
                 >
                   Extract Scripts
                 </h4>
@@ -374,26 +370,23 @@ export default function ProjectConfirmPanel({
               <button
                 type="button"
                 onClick={() => toggleTask("generateVoice")}
-                className={`p-3 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${
-                  aiTasks.generateVoice
+                className={`p-3 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${aiTasks.generateVoice
                     ? "bg-purple-600/10 border-purple-500/40 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]"
                     : "bg-[#0a0a0e] border-neutral-800 hover:border-neutral-700"
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <Mic
-                    className={`h-4 w-4 ${
-                      aiTasks.generateVoice
+                    className={`h-4 w-4 ${aiTasks.generateVoice
                         ? "text-purple-400"
                         : "text-neutral-500"
-                    }`}
+                      }`}
                   />
                   <div
-                    className={`w-3 h-3 rounded-full border flex items-center justify-center ${
-                      aiTasks.generateVoice
+                    className={`w-3 h-3 rounded-full border flex items-center justify-center ${aiTasks.generateVoice
                         ? "bg-purple-500 border-purple-400"
                         : "border-neutral-700"
-                    }`}
+                      }`}
                   >
                     {aiTasks.generateVoice && (
                       <CheckCircle className="h-2 w-2 text-white" />
@@ -401,11 +394,10 @@ export default function ProjectConfirmPanel({
                   </div>
                 </div>
                 <h4
-                  className={`text-xs font-bold ${
-                    aiTasks.generateVoice
+                  className={`text-xs font-bold ${aiTasks.generateVoice
                       ? "text-purple-200"
                       : "text-neutral-400"
-                  }`}
+                    }`}
                 >
                   Synthesize TTS
                 </h4>
@@ -415,26 +407,23 @@ export default function ProjectConfirmPanel({
               <button
                 type="button"
                 onClick={() => toggleTask("generateSFX")}
-                className={`p-3 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${
-                  aiTasks.generateSFX
+                className={`p-3 rounded-xl border text-left transition-all active:scale-95 cursor-pointer ${aiTasks.generateSFX
                     ? "bg-purple-600/10 border-purple-500/40 shadow-[inset_0_0_12px_rgba(168,85,247,0.1)]"
                     : "bg-[#0a0a0e] border-neutral-800 hover:border-neutral-700"
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <Music
-                    className={`h-4 w-4 ${
-                      aiTasks.generateSFX
+                    className={`h-4 w-4 ${aiTasks.generateSFX
                         ? "text-purple-400"
                         : "text-neutral-500"
-                    }`}
+                      }`}
                   />
                   <div
-                    className={`w-3 h-3 rounded-full border flex items-center justify-center ${
-                      aiTasks.generateSFX
+                    className={`w-3 h-3 rounded-full border flex items-center justify-center ${aiTasks.generateSFX
                         ? "bg-purple-500 border-purple-400"
                         : "border-neutral-700"
-                    }`}
+                      }`}
                   >
                     {aiTasks.generateSFX && (
                       <CheckCircle className="h-2 w-2 text-white" />
@@ -442,9 +431,8 @@ export default function ProjectConfirmPanel({
                   </div>
                 </div>
                 <h4
-                  className={`text-xs font-bold ${
-                    aiTasks.generateSFX ? "text-purple-200" : "text-neutral-400"
-                  }`}
+                  className={`text-xs font-bold ${aiTasks.generateSFX ? "text-purple-200" : "text-neutral-400"
+                    }`}
                 >
                   Map Audio/SFX
                 </h4>

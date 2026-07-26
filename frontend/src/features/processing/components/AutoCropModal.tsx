@@ -415,7 +415,7 @@ export default function AutoCropModal({
 
   if (isPage) {
     return (
-      <div className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
+      <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">

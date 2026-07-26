@@ -1046,7 +1046,7 @@ ${playgroundPrompt}
 
     return (
       <div className="flex-1 bg-neutral-955 text-neutral-100 overflow-y-auto min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-8 animate-[fadeIn_0.22s_ease-out]">
+        <div className="w-full px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-8 animate-[fadeIn_0.22s_ease-out]">
           {/* HEADER SECTION */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
             <div>

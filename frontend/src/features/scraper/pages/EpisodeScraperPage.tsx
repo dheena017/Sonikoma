@@ -26,7 +26,7 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
   };
 
   return (
-    <div className="page-transition w-full flex-1 flex flex-col max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6">
+    <div className="page-transition w-full flex-1 flex flex-col px-4 sm:px-6 py-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
@@ -77,7 +77,7 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
         </div>
       </div>
 
-      <div className="bg-neutral-900/20 border border-neutral-800/80 rounded-3xl p-6 sm:p-8 backdrop-blur-md">
+      <div className="w-full flex-1">
         <EpisodeScraper
           addNotification={addNotification}
           fetchWithInterceptor={fetchWithInterceptor}

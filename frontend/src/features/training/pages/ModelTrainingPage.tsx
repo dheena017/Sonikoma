@@ -118,7 +118,7 @@ const ModelTrainingPage: React.FC<ModelTrainingPageProps> = ({
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-8 animate-in fade-in duration-300">
+    <div className="w-full px-4 sm:px-6 py-6 md:py-10 space-y-8 animate-in fade-in duration-300">
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">

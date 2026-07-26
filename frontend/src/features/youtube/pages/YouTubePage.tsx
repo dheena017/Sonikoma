@@ -182,7 +182,7 @@ const YouTubePage = React.memo(
     });
 
     return (
-      <div className="flex-grow w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 md:py-6 space-y-4 animate-fade-in animate-duration-300">
+      <div className="flex-grow w-full px-4 sm:px-6 py-4 md:py-6 space-y-4 animate-fade-in animate-duration-300">
 
         {/* Outer 2-Column Grid aligned exactly at the same top-level axis */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

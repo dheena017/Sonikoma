@@ -369,12 +369,16 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     [filteredProjects, showAll]
   );
 
-  const handleWorkspaceImport = async () => {
+  const handleWorkspaceImport = () => {
     if (!targetUrl.trim()) return;
 
     const temporaryProjectId = `temp_${Date.now()}_${Math.random()
       .toString(36)
       .substring(2, 10)}`;
+
+    // Save URL to localStorage so App.tsx auto-import picks it up
+    // (same pattern as Episode Scraper — ensures scrapeImages runs in correct context)
+    localStorage.setItem("auto_import_url", targetUrl.trim());
 
     const nav = navigateTo || (window as any).navigateTo;
     const targetPath = `/workspace/editor?id=${temporaryProjectId}`;
@@ -384,19 +388,9 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
       window.history.pushState({}, "", targetPath);
       window.dispatchEvent(new Event("popstate"));
     }
-
-    try {
-      await scrapeImages(targetUrl, temporaryProjectId);
-    } catch (err: any) {
-      console.error(err);
-      addNotification(
-        `Failed to import images: ${err.message || "Unknown error"}`,
-        "error"
-      );
-    }
   };
 
-  const handleEpisodeSelect = async (episode: any) => {
+  const handleEpisodeSelect = (episode: any) => {
     if (!episode.url) return;
 
     setTargetUrl(episode.url);
@@ -426,6 +420,9 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
       .toString(36)
       .substring(2, 10)}`;
 
+    // Save URL to localStorage so App.tsx auto-import picks it up
+    localStorage.setItem("auto_import_url", episode.url);
+
     const nav = navigateTo || (window as any).navigateTo;
     const targetPath = `/workspace/editor?id=${temporaryProjectId}`;
     if (typeof nav === "function") {
@@ -433,16 +430,6 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     } else {
       window.history.pushState({}, "", targetPath);
       window.dispatchEvent(new Event("popstate"));
-    }
-
-    try {
-      await scrapeImages(episode.url, temporaryProjectId);
-    } catch (err: any) {
-      console.error(err);
-      addNotification(
-        `Failed to import images: ${err.message || "Unknown error"}`,
-        "error"
-      );
     }
   };
 
@@ -473,7 +460,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
   return (
     <main
       id="main_workspace"
-      className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-8 md:py-16 flex flex-col gap-12 items-center justify-start min-h-[80vh]"
+      className="flex-1 w-full px-4 sm:px-6 py-8 md:py-12 flex flex-col gap-12 items-center justify-start min-h-[80vh]"
     >
       <div className="w-full space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
         {/* RESUME CARD (Optimized UX with Thumbnail) */}
@@ -866,6 +853,16 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           setCropSensitivity={setCropSensitivity}
           autoSplitTallStrips={autoSplitTallStrips}
           setAutoSplitTallStrips={setAutoSplitTallStrips}
+          onOpenEpisodeScraper={(url) => {
+            const nav = navigateTo || (window as any).navigateTo;
+            const path = `/episode-scraper?url=${encodeURIComponent(url)}`;
+            if (typeof nav === "function") {
+              nav(path);
+            } else {
+              window.history.pushState({}, "", path);
+              window.dispatchEvent(new Event("popstate"));
+            }
+          }}
         />
 
 

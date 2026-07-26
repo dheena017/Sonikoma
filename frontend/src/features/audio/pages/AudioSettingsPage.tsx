@@ -220,7 +220,7 @@ export default function AudioSettingsPage({
   const displayVoices = availableVoices.length > 0 ? availableVoices : defaultVoices;
 
   return (
-    <div className={isEmbed ? "w-full space-y-6 pt-2" : "flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 md:py-10 space-y-6"}>
+    <div className={isEmbed ? "w-full space-y-6 pt-2" : "flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6"}>
       {/* HEADER SECTION */}
       {!isEmbed && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Search,
   Loader,
@@ -19,7 +20,13 @@ import {
   XCircle,
   FileJson,
   RefreshCw,
-  ArrowRight
+  ArrowRight,
+  Dices,
+  Sparkles,
+  Copy,
+  FileText,
+  Star,
+  Flame,
 } from "lucide-react";
 import { EpisodeGrid } from "@/features/scraper/components/EpisodeGrid";
 import { EpisodeControls } from "@/features/scraper/components/EpisodeControls";
@@ -318,6 +325,29 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
 
   const handleScrape = () => triggerScrape();
 
+  // Auto-fill and auto-scrape URL if passed via query params or localStorage
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paramUrl = params.get("url");
+    const storedUrl = localStorage.getItem("episode_scraper_url");
+    const target = paramUrl || storedUrl;
+
+    if (target) {
+      setUrlInput(target);
+      localStorage.removeItem("episode_scraper_url");
+
+      if (paramUrl) {
+        const newParams = new URLSearchParams(window.location.search);
+        newParams.delete("url");
+        const newSearch = newParams.toString();
+        const newUrl = window.location.pathname + (newSearch ? "?" + newSearch : "");
+        window.history.replaceState(null, "", newUrl);
+      }
+
+      triggerScrape(target);
+    }
+  }, []);
+
   const handleEpisodeClick = (episode: Episode) => {
     FavoritesManager.markAsRead(episode.url);
     setReadUrls(FavoritesManager.getReadEpisodes());
@@ -512,6 +542,37 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     setBookmarksOnly(false);
     setFromDate('');
     setToDate('');
+  };
+
+  const handleRandomEpisode = () => {
+    if (filteredEpisodes.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * filteredEpisodes.length);
+    const randomEp = filteredEpisodes[randomIndex];
+    setPreviewEpisode(randomEp);
+    addNotification(`Randomly picked ${randomEp.number}: "${randomEp.title || 'Untitled'}"!`, "info");
+  };
+
+  const handleSelectTopN = (n: number) => {
+    if (filteredEpisodes.length === 0) return;
+    const topN = filteredEpisodes.slice(0, n).map(e => e.url);
+    setIsMultiSelectMode(true);
+    setSelectedUrls(topN);
+    addNotification(`Selected top ${topN.length} episodes!`, "success");
+  };
+
+  const handleCopyAiPrompt = () => {
+    if (!seriesMetadata) return;
+    const prompt = `Series Title: ${seriesMetadata.title}
+Author: ${seriesMetadata.author || 'Unknown'}
+Genre: ${seriesMetadata.genre || 'Webtoon'}
+Synopsis: ${seriesMetadata.description || 'N/A'}
+Total Episodes: ${episodes.length}
+URL: ${seriesMetadata.url || ''}
+
+Task: Generate a detailed video recap script, panel selection strategy, and AI voiceover narration breakdown for this series.`;
+
+    navigator.clipboard.writeText(prompt);
+    addNotification("Copied AI Script Prompt to clipboard!", "success");
   };
 
   return (
@@ -709,7 +770,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
               </p>
             </div>
             {seriesMetadata.url && (
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                 <a
                   href={seriesMetadata.url}
                   target="_blank"
@@ -718,6 +779,15 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
                 >
                   Original Webtoon URL <ExternalLink size={12} />
                 </a>
+
+                <button
+                  onClick={handleCopyAiPrompt}
+                  className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-purple-500/40 rounded-xl text-xs font-mono font-bold text-purple-300 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  title="Copy AI Script Prompt for video creation"
+                >
+                  <FileText size={13} className="text-purple-400" />
+                  Copy AI Script Prompt
+                </button>
               </div>
             )}
           </div>
@@ -727,30 +797,58 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       {/* 4. ACTIVE WORKSPACE CONTAINER (EPISODES VS ANALYTICS) */}
       {episodes.length > 0 && (
         <div className="space-y-6">
-          {/* Glassmorphic Tabs Bar */}
-          <div className="flex border border-neutral-800 bg-neutral-950/60 p-1.5 rounded-2xl w-fit gap-2">
-            <button
-              onClick={() => setActiveTab("episodes")}
-              className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 ${
-                activeTab === "episodes"
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-              }`}
-            >
-              <List size={14} />
-              Episodes List ({filteredEpisodes.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("analytics")}
-              className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 ${
-                activeTab === "analytics"
-                  ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-              }`}
-            >
-              <BarChart2 size={14} />
-              Analytics & Trends
-            </button>
+          {/* Glassmorphic Tabs Bar & Quick Actions */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex border border-neutral-800 bg-neutral-950/60 p-1.5 rounded-2xl gap-2">
+              <button
+                onClick={() => setActiveTab("episodes")}
+                className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+                  activeTab === "episodes"
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
+                    : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+                }`}
+              >
+                <List size={14} />
+                Episodes List ({filteredEpisodes.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("analytics")}
+                className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+                  activeTab === "analytics"
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
+                    : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+                }`}
+              >
+                <BarChart2 size={14} />
+                Analytics &amp; Trends
+              </button>
+            </div>
+
+            {/* Quick Utility Tools */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleRandomEpisode}
+                className="px-3.5 py-2 bg-neutral-900 hover:bg-purple-950/30 border border-neutral-800 hover:border-purple-500/40 text-purple-300 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+                title="Randomly pick an episode to preview or import"
+              >
+                <Dices size={14} className="text-purple-400" />
+                Surprise Me!
+              </button>
+
+              <button
+                onClick={() => handleSelectTopN(5)}
+                className="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 rounded-xl text-xs font-mono font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                title="Select Top 5 Episodes"
+              >
+                <Sparkles size={13} className="text-amber-400" />
+                Select Top 5
+              </button>
+
+              <div className="text-[11px] font-mono text-neutral-400 bg-neutral-950/80 border border-neutral-800 px-3 py-2 rounded-xl flex items-center gap-1.5">
+                <Clock size={12} className="text-neutral-500" />
+                <span>Est. Read: ~{Math.max(1, Math.round(filteredEpisodes.length * 3.5))} mins</span>
+              </div>
+            </div>
           </div>
 
           {/* TAB VIEW 1: EPISODE GRID & CONTROLS */}
@@ -889,20 +987,21 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
         </div>
       )}
 
-      {/* QUICK PREVIEW LIGHTBOX MODAL */}
-      {previewEpisode && (
-        <EpisodePreviewModal
-          episode={previewEpisode}
-          onClose={() => setPreviewEpisode(null)}
-          onImport={(ep) => {
-            // Preview modal uses the shared Episode type; safe to forward
-            setPreviewEpisode(null);
-            handleEpisodeClick(ep);
-          }}
-
-          fetchWithInterceptor={fetchWithInterceptor}
-        />
-      )}
+      {/* QUICK PREVIEW LIGHTBOX MODAL (Rendered at Application Root Level via Portal) */}
+      {previewEpisode &&
+        createPortal(
+          <EpisodePreviewModal
+            episode={previewEpisode}
+            onClose={() => setPreviewEpisode(null)}
+            onImport={(ep) => {
+              // Preview modal uses the shared Episode type; safe to forward
+              setPreviewEpisode(null);
+              handleEpisodeClick(ep);
+            }}
+            fetchWithInterceptor={fetchWithInterceptor}
+          />,
+          document.body
+        )}
     </div>
   );
 };

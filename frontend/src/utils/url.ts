@@ -232,8 +232,20 @@ export function getSourceIcon(urlStr: string) {
 
 export function getProxiedImageUrl(url?: string): string {
   if (!url) return "";
-  if (url.includes("/api/proxy-image") || url.includes("/api/proxy/image")) {
-    return url;
+  try {
+    const decoded = decodeURIComponent(url);
+    if (
+      url.includes("/api/proxy-image") ||
+      url.includes("/api/proxy/image") ||
+      decoded.includes("/api/proxy-image") ||
+      decoded.includes("/api/proxy/image")
+    ) {
+      return url;
+    }
+  } catch {
+    if (url.includes("/api/proxy-image") || url.includes("/api/proxy/image")) {
+      return url;
+    }
   }
   if (url.startsWith("http") && !url.startsWith("/api/")) {
     return `/api/proxy-image?url=${encodeURIComponent(url)}`;

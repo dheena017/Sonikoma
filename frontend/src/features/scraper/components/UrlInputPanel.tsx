@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Image as ImageIcon, Layout, Book } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Layout, Book, Zap } from "lucide-react";
 import { useAIModels } from "@/features/ai/hooks/useAIModels";
 import { NotificationType } from "@/features/notification";
 import { extractWebtoonUrl, parseWebtoonUrl } from "@/utils/url";
@@ -53,6 +53,7 @@ interface UrlInputPanelProps {
   autoSplitTallStrips?: boolean;
   setAutoSplitTallStrips?: (v: boolean) => void;
   actionSlot?: React.ReactNode;
+  onOpenEpisodeScraper?: (url: string) => void;
 }
 
 const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
@@ -90,6 +91,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
     autoSplitTallStrips = true,
     setAutoSplitTallStrips,
     actionSlot,
+    onOpenEpisodeScraper,
   } = props;
 
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = React.useState(false);
@@ -206,6 +208,25 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
     if (!targetUrl.trim()) return;
     FavoritesManager.addEnteredUrl(targetUrl.trim());
     handleScrape?.();
+  };
+
+  const handleOpenEpisodeScraperClick = () => {
+    if (!targetUrl.trim()) return;
+    const url = targetUrl.trim();
+    FavoritesManager.addEnteredUrl(url);
+    localStorage.setItem("episode_scraper_url", url);
+    if (onOpenEpisodeScraper) {
+      onOpenEpisodeScraper(url);
+    } else {
+      const nav = (window as any).navigateTo;
+      const targetPath = `/episode-scraper?url=${encodeURIComponent(url)}`;
+      if (typeof nav === "function") {
+        nav(targetPath);
+      } else {
+        window.history.pushState({}, "", targetPath);
+        window.dispatchEvent(new Event("popstate"));
+      }
+    }
   };
 
   return (
@@ -462,21 +483,33 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           </div>
 
           {actionSlot || (
-            <button
-              type="button"
-              onClick={handleImportClick}
-              disabled={isScraping || !targetUrl.trim()}
-              className="relative px-8 py-4 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-sm font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 shrink-0 flex items-center gap-3"
-            >
-              {isScraping ? (
-                "Initializing..."
-              ) : (
-                <>
-                  {" "}
-                  <ImageIcon className="h-4 w-4" /> Import Images{" "}
-                </>
-              )}
-            </button>
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={handleImportClick}
+                disabled={isScraping || !targetUrl.trim()}
+                className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-xs sm:text-sm font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+              >
+                {isScraping ? (
+                  "Initializing..."
+                ) : (
+                  <>
+                    <ImageIcon className="h-4 w-4" /> Import Images
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOpenEpisodeScraperClick}
+                disabled={!targetUrl.trim()}
+                className="relative px-5 py-3.5 bg-neutral-950 hover:bg-neutral-900 border border-purple-500/30 hover:border-purple-500/60 rounded-2xl text-xs sm:text-sm font-bold text-purple-300 hover:text-purple-200 transition-all shadow-lg active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer"
+                title="Browse and select specific episodes for this WEBTOON URL"
+              >
+                <Zap className="h-4 w-4 text-purple-400" />
+                Open in Episode Scraper
+              </button>
+            </div>
           )}
         </div>
       </div>

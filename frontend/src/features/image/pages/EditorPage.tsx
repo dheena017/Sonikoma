@@ -448,7 +448,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
               }`}
             >
               {activeTab === "settings" ? (
-                <div className="w-full max-w-[1600px] mx-auto space-y-6">
+                <div className="w-full space-y-6">
                   {/* Settings Header */}
                   <div className="flex items-center justify-between border-b border-white/5 pb-4">
                     <div className="flex items-center gap-3">
@@ -524,7 +524,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   </div>
                 </div>
               ) : activeTab === "audio-settings" ? (
-                <div className="w-full max-w-[1600px] mx-auto space-y-6">
+                <div className="w-full space-y-6">
                   {/* Settings Header */}
                   <div className="flex items-center justify-between border-b border-white/5 pb-4">
                     <div className="flex items-center gap-3">
