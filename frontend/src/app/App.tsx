@@ -332,6 +332,7 @@ export default function App() {
     setVideoUrl,
     totalCalculatedDuration,
     scrapeImages,
+    scrapeBatchEpisodes,
     handleGenerateVideo,
     handleStitchWithNext,
     isRendering,
@@ -478,17 +479,16 @@ export default function App() {
     chapterSlug: chapterSlugState,
   });
 
-  // Trigger automatic scraping if ?importUrl=... is present in the URL on mount or path change, or if auto_import_url exists in localStorage
+  // Trigger automatic scraping if ?importUrl=... is present in the URL on mount or path change, or if auto_import_url/auto_import_batch exists in localStorage
   React.useEffect(() => {
     if (!isAuthenticated || authLoading || isInitializing) return;
 
     const params = new URLSearchParams(window.location.search);
+    const importBatchRaw = localStorage.getItem("auto_import_batch");
     const importUrl = params.get("importUrl") || localStorage.getItem("auto_import_url");
     const projId = params.get("id") || params.get("project_id");
 
-    if (importUrl && projId && projId.startsWith("temp_")) {
-      console.log(`[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`);
-      
+    if (projId && projId.startsWith("temp_")) {
       // Clean up the URL parameters so it doesn't trigger again on reload/navigation
       const newParams = new URLSearchParams(window.location.search);
       newParams.delete("importUrl");
@@ -496,16 +496,33 @@ export default function App() {
       const newUrl = window.location.pathname + (newSearch ? "?" + newSearch : "");
       window.history.replaceState(null, "", newUrl);
 
-      // Clean up localStorage
-      localStorage.removeItem("auto_import_url");
+      if (importBatchRaw) {
+        localStorage.removeItem("auto_import_batch");
+        localStorage.removeItem("auto_import_url");
+        try {
+          const episodesList = JSON.parse(importBatchRaw);
+          if (Array.isArray(episodesList) && episodesList.length > 0) {
+            console.log(`[Auto Scrape] Triggering batch import for ${episodesList.length} episodes on project: ${projId}`);
+            if (scrapeBatchEpisodes) {
+              scrapeBatchEpisodes(episodesList, projId);
+            }
+            return;
+          }
+        } catch (e) {
+          console.error("[Auto Scrape] Error parsing auto_import_batch:", e);
+        }
+      }
 
-      // Run the scraping
-      setTargetUrl(importUrl);
-      scrapeImages(importUrl, projId).catch((err) => {
-        console.error("[Auto Scrape] Failed to scrape images:", err);
-      });
+      if (importUrl) {
+        console.log(`[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`);
+        localStorage.removeItem("auto_import_url");
+        setTargetUrl(importUrl);
+        scrapeImages(importUrl, projId).catch((err) => {
+          console.error("[Auto Scrape] Failed to scrape images:", err);
+        });
+      }
     }
-  }, [isAuthenticated, authLoading, isInitializing, scrapeImages, setTargetUrl, currentPath]);
+  }, [isAuthenticated, authLoading, isInitializing, scrapeImages, scrapeBatchEpisodes, setTargetUrl, currentPath]);
 
   // --- Global Keyboard Shortcuts Hook ---
   const { shortcuts, setShortcuts } = useGlobalShortcuts({

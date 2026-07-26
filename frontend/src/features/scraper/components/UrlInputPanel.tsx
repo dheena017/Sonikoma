@@ -504,7 +504,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 onClick={handleOpenEpisodeScraperClick}
                 disabled={!targetUrl.trim()}
                 className="relative px-5 py-3.5 bg-neutral-950 hover:bg-neutral-900 border border-purple-500/30 hover:border-purple-500/60 rounded-2xl text-xs sm:text-sm font-bold text-purple-300 hover:text-purple-200 transition-all shadow-lg active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer"
-                title="Browse and select specific episodes for this WEBTOON URL"
+                title="Browse and select specific episodes for this series URL"
               >
                 <Zap className="h-4 w-4 text-purple-400" />
                 Open in Episode Scraper

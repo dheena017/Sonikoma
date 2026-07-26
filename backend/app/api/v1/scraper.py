@@ -121,7 +121,8 @@ async def scrape_episodes_advanced(request: Request, body: ScrapeEpisodesAdvance
             max_episodes=body.max_episodes,
             page=body.page or 1,
             include_ratings=body.include_ratings,
-            sort_by=body.sort_by or "latest"
+            sort_by=body.sort_by or "latest",
+            bypass_cache=body.bypass_cache or False
         )
         if not result.get("success"):
             raise HTTPException(status_code=500, detail=result.get("error", "Failed to scrape episodes"))

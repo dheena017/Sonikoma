@@ -65,6 +65,13 @@ const EditorSidebar = ({
   chapterSlug,
 }: EditorSidebarProps) => {
   const editingImageIdx = useImageEditorStore((state) => state.editingImageIdx);
+  const episodeGroups =
+    ((window as any).__scrapeEpisodeGroups as Array<{
+      episodeLabel: string;
+      startIndex: number;
+      count: number;
+    }>) || [];
+
   const menuGroups: SidebarGroup[] = [
     {
       title: "Workspace Navigation",
@@ -251,6 +258,9 @@ const EditorSidebar = ({
                             window.dispatchEvent(new Event("popstate"));
                           }
                         } else {
+                          if (item.id === "monitor") {
+                            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: true });
+                          }
                           setCurrentSection(item.id);
                           const el = document.getElementById(`section-${item.id}`);
                           if (el) el.scrollIntoView({ behavior: "smooth" });

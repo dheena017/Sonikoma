@@ -21,13 +21,15 @@ async def scrape_webtoon_episodes_advanced(
     page: int = 1,
     per_page: int = 50,
     include_ratings: bool = True,
-    sort_by: str = "latest"
+    sort_by: str = "latest",
+    bypass_cache: bool = False
 ) -> Dict[str, Any]:
     """Advanced episode scraper with pagination, ratings, sorting, and caching."""
     result = await scrape_webtoon_episodes(
         series_url=series_url,
         title_no=title_no,
-        max_episodes=None
+        max_episodes=None,
+        bypass_cache=bypass_cache
     )
 
     if not result.get("success"):

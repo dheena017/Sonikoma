@@ -1,8 +1,6 @@
 import React from "react";
 import { EpisodeCard } from "@/features/scraper/components/EpisodeCard";
-
 import type { Episode } from "@/features/scraper/components/EpisodeTypes";
-
 
 interface EpisodeGridProps {
   episodes: Episode[];
@@ -30,10 +28,10 @@ export const EpisodeGrid: React.FC<EpisodeGridProps> = ({
   if (!episodes || episodes.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 p-4 justify-items-center">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-5 w-full">
       {episodes.map((episode) => (
         <EpisodeCard
-          key={episode.index}
+          key={episode.index || episode.url}
           episode={episode}
           onClick={onEpisodeClick}
           onPreviewClick={onPreviewClick}

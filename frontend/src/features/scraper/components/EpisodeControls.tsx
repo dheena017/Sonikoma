@@ -35,6 +35,11 @@ interface EpisodeControlsProps {
   isMultiSelectMode: boolean;
   onToggleMultiSelectMode: () => void;
 
+  startEpisodeNum?: string;
+  onStartEpisodeChange?: (val: string) => void;
+  endEpisodeNum?: string;
+  onEndEpisodeChange?: (val: string) => void;
+
   onClearFilters: () => void;
   onExportCSV: () => void;
   onExportJSON: () => void;
@@ -62,6 +67,11 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
 
   isMultiSelectMode,
   onToggleMultiSelectMode,
+
+  startEpisodeNum,
+  onStartEpisodeChange,
+  endEpisodeNum,
+  onEndEpisodeChange,
 
   onClearFilters,
   onExportCSV,
@@ -237,6 +247,29 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
                 <option value="unread">Unread Only</option>
                 <option value="read">Read Only</option>
               </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">Start Ep #</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 1"
+                  value={startEpisodeNum || ''}
+                  onChange={(e) => onStartEpisodeChange?.(e.target.value)}
+                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 block mb-1">End Ep #</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 50"
+                  value={endEpisodeNum || ''}
+                  onChange={(e) => onEndEpisodeChange?.(e.target.value)}
+                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">

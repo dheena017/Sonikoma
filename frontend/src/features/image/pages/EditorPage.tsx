@@ -580,7 +580,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 <>
                   {/* TOP: Inline CinemaPlayer */}
                   {playerSettings.isPlayerOpen && (
-                    <div className="w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4">
+                    <div id="section-monitor" className="w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4 scroll-mt-24">
                       {/* Header */}
                       <div className="flex items-center justify-between border-b border-neutral-800 pb-3 flex-wrap md:flex-nowrap gap-4">
                         <div className="flex items-center gap-2">
@@ -632,7 +632,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   {/* MIDDLE: Storyboard Timeline */}
                     <div
                     id="section-timeline"
-                    className="w-full max-w-[1600px] ml-0 mr-0 space-y-4"
+                    className="w-full max-w-[1600px] ml-0 mr-0 space-y-4 scroll-mt-24"
                   >
                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
                       <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
@@ -688,7 +688,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   {/* BOTTOM: Imported Assets (Resource Pool) */}
                     <div
                     id="section-assets"
-                    className="w-full max-w-[1600px] ml-0 mr-0 space-y-4"
+                    className="w-full max-w-[1600px] ml-0 mr-0 space-y-4 scroll-mt-24"
                   >
                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
                       <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
@@ -752,7 +752,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   {/* Final Production panel below timeline */}
                   <div
                     id="section-production"
-                    className="w-full max-w-[1600px] ml-0 mr-0 mt-12 pt-8 border-t border-white/5"
+                    className="w-full max-w-[1600px] ml-0 mr-0 mt-12 pt-8 border-t border-white/5 scroll-mt-24"
                   >
                     <FinalProductionPanel />
                   </div>

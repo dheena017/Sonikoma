@@ -6,13 +6,13 @@ entry points while delegating fetching, parsing, and caching to sub-modules.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+from urllib.parse import urlparse, urlunparse, urljoin, quote, parse_qs, urlencode
 import os
 import re
 import time
 import logging
 import random
 from typing import List, Dict, Any, Optional
-from urllib.parse import urlparse, urljoin, quote, parse_qs
 
 # Graceful optional imports
 try:
@@ -278,18 +278,163 @@ def normalize_series_url(url: str) -> str:
         return url
 
 
+def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> List[Dict[str, Any]]:
+    if not soup:
+        return []
+
+    episode_selectors = [
+        '.episode_lst li', '.comic_episode_lst li', '.episode-item',
+        '[data-episode-no]', '.ep_item'
+    ]
+
+    episode_container: List[Any] = []
+    for sel in episode_selectors:
+        items = soup.select(sel)
+        if len(items) > 0:
+            episode_container = list(items)
+            break
+
+    if len(episode_container) == 0:
+        all_links = soup.find_all('a')
+        episode_container = [
+            link for link in all_links
+            if 'episode_no=' in (link.get('href') or '') or '/episode/' in (link.get('href') or '')
+        ]
+
+    episodes = []
+    for idx, ep_elem in enumerate(episode_container):
+        try:
+            ep_no_elem = ep_elem.find(attrs={'class': re.compile(r'ep.*no|episode.*no', re.I)})
+            title_elem = ep_elem.find(attrs={'class': re.compile(r'title|ep.*title|subject', re.I)})
+            ep_title = title_elem.get_text(strip=True) if title_elem else ""
+
+            if ep_no_elem:
+                ep_no = ep_no_elem.get_text(strip=True)
+                ep_url_early = ""
+            else:
+                link_elem_early = ep_elem.find('a')
+                ep_url_early = link_elem_early.get('href', '') if link_elem_early else ""
+                extracted = parse_episode_index(ep_title) or parse_episode_index(ep_url_early)
+                if extracted is not None:
+                    ep_no = f"Episode {int(extracted) if extracted == int(extracted) else extracted}"
+                else:
+                    ep_no = f"Episode {idx + 1}"
+
+            if not ep_title:
+                ep_title = ep_no
+
+            date_elem = ep_elem.find(attrs={'class': re.compile(r'date|time|upload', re.I)})
+            ep_date = date_elem.get_text(strip=True) if date_elem else ""
+
+            img_elem = ep_elem.find('img')
+            thumbnail = ""
+            if img_elem:
+                thumbnail = img_elem.get('src') or img_elem.get('data-src') or img_elem.get('data-lazy-src') or ""
+                if thumbnail:
+                    thumbnail = urljoin(fetch_url, thumbnail)
+
+            link_elem = ep_elem.find('a')
+            ep_url = ""
+            if link_elem:
+                ep_url = link_elem.get('href', '')
+                if ep_url:
+                    ep_url = urljoin(fetch_url, ep_url)
+                elif ep_url_early:
+                    ep_url = urljoin(fetch_url, ep_url_early)
+
+            rating = None
+            likes = None
+            views = None
+
+            rating_elem = (
+                ep_elem.find(class_=re.compile(r'grade_num|rating_num|score_num', re.I)) or
+                ep_elem.find(attrs={'class': re.compile(r'rating|score|like|vote', re.I)})
+            )
+            if rating_elem:
+                rating_text = rating_elem.get_text(strip=True)
+                rating_match = re.search(r'(\d+(?:\.\d+)?)', rating_text)
+                if rating_match:
+                    try:
+                        rating = float(rating_match.group(1))
+                    except ValueError:
+                        pass
+
+            likes_elem = (
+                ep_elem.find(class_=re.compile(r'like_area|ico_like|like_num|heart_num', re.I)) or
+                ep_elem.find(attrs={'class': re.compile(r'likes?|thumbs?up|favorites?', re.I)})
+            )
+            if likes_elem:
+                likes_text = likes_elem.get_text(strip=True)
+                likes_match = re.search(r'([\d,]+(?:\.\d+)?[KMB]?)', likes_text)
+                if likes_match:
+                    likes = likes_match.group(1).replace(',', '')
+
+            views_elem = (
+                ep_elem.find(class_=re.compile(r'view_count|cnt_view|view_num|read_count', re.I)) or
+                ep_elem.find(attrs={'class': re.compile(r'views?|reads?|count', re.I)})
+            )
+            if views_elem:
+                views_text = views_elem.get_text(strip=True)
+                views_match = re.search(r'([\d,]+)', views_text)
+                if views_match:
+                    try:
+                        views = int(views_match.group(1).replace(',', ''))
+                    except ValueError:
+                        pass
+
+            episodes.append({
+                "number": ep_no,
+                "chapter_number": parse_episode_index(ep_no) or parse_episode_index(ep_title) or (idx + 1),
+                "title": ep_title,
+                "date": ep_date,
+                "thumbnail": thumbnail,
+                "url": ep_url,
+                "index": idx,
+                "rating": rating,
+                "likes": likes,
+                "views": views,
+            })
+        except Exception as e:
+            logger.debug(f"[Episode Scraper] Error parsing item {idx}: {e}")
+            continue
+
+    return episodes
+
+
+def extract_max_page_from_soup(soup: Optional[BeautifulSoup]) -> int:
+    max_page = 1
+    if not soup:
+        return max_page
+    paginate_links = soup.select('.paginate a, .comic_paginate a, [class*="paginate"] a, #_pg a')
+    for a in paginate_links:
+        href = a.get('href')
+        if isinstance(href, str):
+            m = re.search(r'[?&]page=(\d+)', href)
+            if m:
+                try:
+                    max_page = max(max_page, int(m.group(1)))
+                except ValueError:
+                    pass
+    return max_page
+
+
+def build_page_url(base_url: str, page_num: int) -> str:
+    parsed = urlparse(base_url)
+    qs = parse_qs(parsed.query)
+    qs['page'] = [str(page_num)]
+    new_query = urlencode(qs, doseq=True)
+    return urlunparse(parsed._replace(query=new_query))
+
+
 async def scrape_webtoon_episodes(
     series_url: str,
     title_no: Optional[str] = None,
-    max_episodes: Optional[int] = None
+    max_episodes: Optional[int] = None,
+    bypass_cache: bool = False
 ) -> Dict[str, Any]:
     if series_url:
         series_url = normalize_series_url(series_url)
 
-    """
-    Scrapes episode metadata from WEBTOON series list page.
-    Extracts: episode number, title, date, thumbnail, episode URL.
-    """
     try:
         from playwright.async_api import async_playwright  # noqa: F401
     except ImportError:
@@ -299,31 +444,38 @@ async def scrape_webtoon_episodes(
     logger.info(f"[Episode Scraper] Starting episode list scrape: {series_url}")
 
     if not title_no:
-        parsed = urlparse(series_url)
+        parsed = urlparse(series_url or "")
         query_params = parse_qs(parsed.query)
         if 'title_no' in query_params:
             title_no = query_params['title_no'][0]
         else:
             path_parts = [p for p in parsed.path.split('/') if p]
-            if len(path_parts) >= 2:
+            if len(path_parts) >= 2 and path_parts[1].split('?')[0].isdigit():
                 title_no = path_parts[1].split('?')[0]
 
     if not title_no:
-        return {"success": False, "error": "Could not extract title_no from URL"}
+        if series_url:
+            import hashlib
+            title_no = "url_" + hashlib.md5(series_url.encode('utf-8')).hexdigest()[:12]
+        else:
+            return {"success": False, "error": "Could not identify series URL or ID"}
 
-    # Check cache first
+    # Check cache first (skip if bypass_cache=True)
     cache_mgr = get_episode_cache()
-    cached = cache_mgr.get_episodes(title_no)
-    if cached:
-        logger.info(f"[Episode Scraper] Returning cached episodes for {title_no}")
-        return {
-            "success": True,
-            "title_no": title_no,
-            "series": cached.get("series_metadata", {}),
-            "total_episodes": len(cached.get("episodes", [])),
-            "episodes": cached.get("episodes", []),
-            "from_cache": True
-        }
+    if not bypass_cache:
+        cached = cache_mgr.get_episodes(title_no)
+        if cached:
+            logger.info(f"[Episode Scraper] Returning cached episodes for {title_no}")
+            return {
+                "success": True,
+                "title_no": title_no,
+                "series": cached.get("series_metadata", {}),
+                "total_episodes": len(cached.get("episodes", [])),
+                "episodes": cached.get("episodes", []),
+                "from_cache": True
+            }
+    else:
+        logger.info(f"[Episode Scraper] Bypassing cache for fresh scrape: {title_no}")
 
     candidate_urls = []
     if series_url and series_url.startswith("http"):
@@ -351,7 +503,7 @@ async def scrape_webtoon_episodes(
         else:
             logger.info(f"[Episode Scraper] Fetch returned no/short HTML for: {test_url}")
 
-    if not html:
+    if not html or not fetch_url:
         logger.warning("[Episode Scraper] Failed to fetch episode list HTML")
         return {"success": False, "error": "Failed to fetch episode list"}
 
@@ -368,92 +520,61 @@ async def scrape_webtoon_episodes(
 
     try:
         soup = BeautifulSoup(html, 'html.parser')
-        episode_selectors = [
-            '.episode_lst li', '.comic_episode_lst li', '.episode-item',
-            '[data-episode-no]', '.ep_item'
-        ]
+        episodes = parse_episodes_from_soup(soup, fetch_url)
+        max_page = extract_max_page_from_soup(soup)
 
-        episode_container = None
-        for sel in episode_selectors:
-            items = soup.select(sel)
-            if items:
-                logger.info(f"[Episode Scraper] Found {len(items)} episodes with selector: {sel}")
-                episode_container = items
-                break
+        logger.info(f"[Episode Scraper] Page 1 fetched {len(episodes)} episodes (detected max_page: {max_page})")
 
-        if not episode_container:
-            logger.warning("[Episode Scraper] Could not find episode container")
-            all_links = soup.find_all('a')
-            for link in all_links:
-                href = link.get('href', '')
-                if 'episode_no=' in href or '/episode/' in href:
-                    episode_container = [link]
+        # Multi-page fetching if pagination exists
+        if max_page > 1:
+            page_limit = min(max_page, 20)
+            seen_urls = set(ep["url"] for ep in episodes if ep.get("url"))
+
+            for p in range(2, page_limit + 1):
+                if max_episodes and len(episodes) >= max_episodes:
+                    break
+                p_url = build_page_url(fetch_url, p)
+                logger.info(f"[Episode Scraper] Fetching extra page {p}/{page_limit}: {p_url}")
+                page_html = None
+
+                headers = {"User-Agent": random.choice(USER_AGENTS), "Referer": "https://www.webtoons.com/"}
+                try:
+                    page_html = await try_fetch_url_resilient(p_url, headers)
+                except Exception:
+                    page_html = None
+
+                if not page_html or len(page_html) < 1000:
+                    page_html = await try_fetch_with_playwright(
+                        p_url,
+                        user_agent=random.choice(USER_AGENTS),
+                        referer="https://www.webtoons.com/",
+                        interactive=True
+                    )
+
+                if page_html and len(page_html) > 1000:
+                    p_soup = BeautifulSoup(page_html, 'html.parser')
+                    p_eps = parse_episodes_from_soup(p_soup, fetch_url)
+                    added_count = 0
+                    for ep in p_eps:
+                        if ep.get("url") and ep["url"] in seen_urls:
+                            continue
+                        if ep.get("url"):
+                            seen_urls.add(ep["url"])
+                        episodes.append(ep)
+                        added_count += 1
+                    logger.info(f"[Episode Scraper] Page {p} added {added_count} episodes")
+                else:
+                    logger.warning(f"[Episode Scraper] Failed to fetch page {p}")
                     break
 
-        for idx, ep_elem in enumerate(episode_container or []):
-            if max_episodes and len(episodes) >= max_episodes:
-                break
+        # Re-index all accumulated episodes sequentially
+        for idx, ep in enumerate(episodes):
+            ep["index"] = idx
 
-            try:
-                ep_no_elem = ep_elem.find(attrs={'class': re.compile(r'ep.*no|episode.*no', re.I)})
-                ep_no = ep_no_elem.get_text(strip=True) if ep_no_elem else f"Episode {idx + 1}"
+        if max_episodes:
+            episodes = episodes[:max_episodes]
 
-                title_elem = ep_elem.find(attrs={'class': re.compile(r'title|ep.*title|subject', re.I)})
-                ep_title = title_elem.get_text(strip=True) if title_elem else ep_no
-
-                date_elem = ep_elem.find(attrs={'class': re.compile(r'date|time|upload', re.I)})
-                ep_date = date_elem.get_text(strip=True) if date_elem else ""
-
-                img_elem = ep_elem.find('img')
-                thumbnail = ""
-                if img_elem:
-                    thumbnail = img_elem.get('src') or img_elem.get('data-src') or img_elem.get('data-lazy-src')
-                    if thumbnail:
-                        thumbnail = urljoin(fetch_url, thumbnail)
-
-                link_elem = ep_elem.find('a')
-                ep_url = ""
-                if link_elem:
-                    ep_url = link_elem.get('href', '')
-                    if ep_url:
-                        ep_url = urljoin(fetch_url, ep_url)
-
-                rating = None
-                likes = None
-                rating_elem = ep_elem.find(attrs={'class': re.compile(r'rating|score|like|vote', re.I)})
-                if rating_elem:
-                    rating_text = rating_elem.get_text(strip=True)
-                    rating_match = re.search(r'(\d+(?:\.\d+)?)', rating_text)
-                    if rating_match:
-                        try:
-                            rating = float(rating_match.group(1))
-                        except ValueError:
-                            pass
-
-                likes_elem = ep_elem.find(attrs={'class': re.compile(r'likes?|thumbs?up|favorites?', re.I)})
-                if likes_elem:
-                    likes_text = likes_elem.get_text(strip=True)
-                    likes_match = re.search(r'(\d+(?:[KMB])?)', likes_text)
-                    if likes_match:
-                        likes = likes_match.group(1)
-
-                episode_data = {
-                    "number": ep_no,
-                    "chapter_number": parse_episode_index(ep_no) or parse_episode_index(ep_title) or (idx + 1),
-                    "title": ep_title,
-                    "date": ep_date,
-                    "thumbnail": thumbnail,
-                    "url": ep_url,
-                    "index": idx,
-                    "rating": rating,
-                    "likes": likes
-                }
-                episodes.append(episode_data)
-            except Exception as e:
-                logger.debug(f"[Episode Scraper] Error parsing episode {idx}: {e}")
-                continue
-
-        logger.info(f"[Episode Scraper] Successfully extracted {len(episodes)} episodes")
+        logger.info(f"[Episode Scraper] Successfully extracted total {len(episodes)} episodes across pages")
 
         cache_mgr = get_episode_cache()
         genre = series_metadata.get("genre") if series_metadata else None

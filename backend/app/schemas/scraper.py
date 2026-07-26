@@ -74,6 +74,7 @@ class ScrapeEpisodesAdvancedRequest(BaseModel):
     page: Optional[int] = 1
     include_ratings: Optional[bool] = True
     sort_by: Optional[str] = "latest"  # latest, oldest, rating, likes
+    bypass_cache: Optional[bool] = False
 
 
 class BatchScrapeSeriesRequest(BaseModel):

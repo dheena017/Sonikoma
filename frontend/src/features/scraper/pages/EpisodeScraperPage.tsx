@@ -48,13 +48,13 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
               </>
             )}
             <span>&gt;</span>
-            <span className="text-purple-400 font-bold">WEBTOON Scraper</span>
+            <span className="text-purple-400 font-bold">Episode Scraper</span>
           </div>
           <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
             <div className="icon-pill icon-pill--purple">
               <Zap className="h-5 w-5 text-purple-400" />
             </div>
-            WEBTOON Episode Scraper
+            Manga & Manhwa Episode Scraper
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
             Browse episodes, manage bookmarks, filter by likes/rating/date, and batch import panels
@@ -109,13 +109,13 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
           }}
           onMultipleEpisodesSelect={(episodes) => {
             if (episodes.length > 0) {
-              const episode = episodes[0];
               const temporaryProjectId = `temp_${Date.now()}_${Math.random()
                 .toString(36)
                 .substring(2, 10)}`;
-              localStorage.setItem("auto_import_url", episode.url);
+              localStorage.setItem("auto_import_batch", JSON.stringify(episodes));
+              localStorage.setItem("auto_import_url", episodes[0].url);
 
-              // Save visual metadata to localStorage
+              const episode = episodes[0];
               if (episode.rating !== undefined && episode.rating !== null) {
                 localStorage.setItem("active_episode_rating", String(episode.rating));
               } else {

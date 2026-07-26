@@ -73,18 +73,6 @@ export default defineConfig(({ mode, command }) => {
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {
             const url = req.url || "";
-            const isNoisy =
-              url.includes("system-logs") ||
-              url.includes("health") ||
-              url.includes("metrics");
-
-            if (!isNoisy) {
-              console.log(
-                "[Vite Middleware] Incoming request:",
-                req.method,
-                req.url
-              );
-            }
 
             if (url === "/favicon.ico" || url === "/favicon.svg") {
               const filePath = path.resolve(__dirname, "public", url.slice(1));
@@ -290,6 +278,36 @@ export default defineConfig(({ mode, command }) => {
           });
         },
       },
+      // ── HMR File-Change Logger ────────────────────────────────────────────
+      {
+        name: "hmr-file-change-logger",
+        handleHotUpdate({ file, server }) {
+          const relativePath = file
+            .replace(path.resolve(__dirname, "src") + path.sep, "src/")
+            .replace(/\\/g, "/");
+
+          const now = new Date().toLocaleTimeString();
+
+          // Terminal: coloured log line
+          console.log(
+            `\x1b[90m${now}\x1b[0m ` +
+              `\x1b[35m[Vite HMR]\x1b[0m ` +
+              `\x1b[33m📝 File changed:\x1b[0m ` +
+              `\x1b[36m${relativePath}\x1b[0m ` +
+              `\x1b[32m→ pushing live update…\x1b[0m`
+          );
+
+          // Forward to in-app system-logs so it appears in the UI terminal
+          if (backendTarget) {
+            const logMsg = `[Vite HMR] 📝 File changed: ${relativePath} → pushing live update…`;
+            fetch(`${backendTarget}/api/system-logs/log`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: logMsg, level: "info" }),
+            }).catch(() => {});
+          }
+        },
+      },
     ],
     resolve: {
       alias: {
@@ -317,27 +335,22 @@ export default defineConfig(({ mode, command }) => {
     },
     server: {
       port: frontendPort,
-      hmr: process.env.DISABLE_HMR !== "true",
+      hmr: process.env.DISABLE_HMR !== "true"
+        ? {
+            overlay: true,
+          }
+        : false,
       watch:
         process.env.DISABLE_HMR === "true"
           ? null
           : {
-              // Only watch frontend source files — backend/DB/script changes must NOT trigger a reload
-              include: [
-                path.resolve(__dirname, "src/**"),
-                path.resolve(__dirname, "index.html"),
-                path.resolve(__dirname, "public/**"),
-              ],
               ignored: [
                 "**/.venv/**",
                 "**/backend/**",
                 "**/scripts/**",
                 "**/data/**",
                 "**/database/**",
-                "**/*.db",
-                "**/*.db-journal",
-                "**/*.db-wal",
-                "**/*.db-shm",
+                "**/*.db*",
                 "**/dist/**",
                 "**/node_modules/**",
               ],

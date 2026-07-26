@@ -278,6 +278,9 @@ const EditorMiniSidebarInner = ({
                 window.dispatchEvent(new Event("popstate"));
               }
             } else {
+              if (item.id === "monitor") {
+                useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: true });
+              }
               setCurrentSection(item.id);
               const el = document.getElementById(`section-${item.id}`);
               if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -324,6 +327,13 @@ const EditorMiniSidebarInner = ({
       </div>
     );
   };
+
+  const episodeGroups =
+    ((window as any).__scrapeEpisodeGroups as Array<{
+      episodeLabel: string;
+      startIndex: number;
+      count: number;
+    }>) || [];
 
   return (
     // Premium Glassmorphism Container

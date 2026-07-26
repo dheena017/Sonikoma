@@ -484,6 +484,8 @@ export function useAppLogic() {
 
           const origins: Record<string, string> = data.image_origins || {};
           (window as any).__scrapeImageOrigins = origins;
+          // Clear any stale batch episode groups so single-episode view renders cleanly
+          (window as any).__scrapeEpisodeGroups = [];
 
           state.setScrapedImages(finalImages);
 
@@ -633,6 +635,94 @@ export function useAppLogic() {
     ]
   );
 
+  const scrapeBatchEpisodes = useCallback(
+    async (
+      episodesList: Array<{ url: string; number?: string; title?: string }>,
+      overrideProjectId?: string
+    ) => {
+      if (!episodesList || episodesList.length === 0) return;
+
+      state.setIsScraping(true);
+      state.setPanels([]);
+      state.setScrapedImages([]);
+      state.setSelectedScraped([]);
+      setCurrentPanelIndex(0);
+      setPlaybackTime(0);
+      setStoryboardPlaying(false);
+
+      const allImages: string[] = [];
+      const origins: Record<string, string> = {};
+      const episodeGroups: Array<{ episodeLabel: string; startIndex: number; count: number }> = [];
+
+      state.setConsoleLogs((prev) => [
+        `[Batch Import] Starting batch import for ${episodesList.length} episodes...`,
+        ...prev,
+      ]);
+
+      for (let i = 0; i < episodesList.length; i++) {
+        const ep = episodesList[i];
+        const target = extractWebtoonUrl(ep.url);
+        const epLabel = ep.number ? `${ep.number}${ep.title ? ' - ' + ep.title : ''}` : target;
+        const startIndex = allImages.length;
+
+        state.setConsoleLogs((prev) => [
+          `[Batch Import] (${i + 1}/${episodesList.length}) Scraping ${epLabel}...`,
+          ...prev,
+        ]);
+
+        try {
+          const data = await api.scrapeImages(state.fetchWithInterceptor, {
+            url: target,
+            model: selectedModel,
+            source: selectedSource,
+            bypass_cache: false,
+            smart_slice: state.smartSlice,
+            episode: epLabel,
+            project_id: overrideProjectId || undefined,
+            scrape_only: state.smartSlice,
+          });
+
+          if (data.success && data.images && data.images.length > 0) {
+            const finalImages = data.images.map((img: string) =>
+              img.startsWith("http") && !api.isApiUrl(img)
+                ? api.getProxyImageUrl(img)
+                : img
+            );
+            allImages.push(...finalImages);
+            episodeGroups.push({
+              episodeLabel: epLabel,
+              startIndex,
+              count: finalImages.length,
+            });
+            if (data.image_origins) {
+              Object.assign(origins, data.image_origins);
+            }
+          }
+        } catch (err) {
+          console.error(`[Batch Import] Failed to scrape ${epLabel}:`, err);
+        }
+      }
+
+      (window as any).__scrapeImageOrigins = origins;
+      (window as any).__scrapeEpisodeGroups = episodeGroups;
+      state.setScrapedImages(allImages);
+      state.setIsScraping(false);
+
+      state.addNotification(
+        `Batch import completed! Imported ${episodesList.length} episodes with ${allImages.length} images.`,
+        "success"
+      );
+    },
+    [
+      state,
+      selectedModel,
+      selectedSource,
+      setCurrentPanelIndex,
+      setPlaybackTime,
+      setStoryboardPlaying,
+    ]
+  );
+
   useEffect(() => {
     if (!targetUrl.trim()) {
       lastScrapedUrlRef.current = "";
@@ -701,6 +791,7 @@ export function useAppLogic() {
       croppingImgUrl,
       handleCancelBatch,
       scrapeImages,
+      scrapeBatchEpisodes,
       isGeneratingStoryboard,
       handleGenerateStoryboardAI,
       clearAllNotifications: state.clearAllNotifications,

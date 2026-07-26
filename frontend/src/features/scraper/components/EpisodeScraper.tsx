@@ -111,6 +111,8 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   const [bookmarksOnly, setBookmarksOnly] = useState<boolean>(false);
   const [fromDate, setFromDate] = useState<string>('');
   const [toDate, setToDate] = useState<string>('');
+  const [startEpisodeNum, setStartEpisodeNum] = useState<string>('');
+  const [endEpisodeNum, setEndEpisodeNum] = useState<string>('');
 
   // Multi-Select
   const [isMultiSelectMode, setIsMultiSelectMode] = useState<boolean>(false);
@@ -180,6 +182,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     title_no?: string;
     max_episodes?: number | null;
     sort_by?: string;
+    bypass_cache?: boolean;
   }) => {
     const body = { ...data };
     if (body.max_episodes === null) {
@@ -248,6 +251,19 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       });
     }
 
+    if (startEpisodeNum !== '') {
+      const start = parseInt(startEpisodeNum, 10);
+      if (!isNaN(start)) {
+        result = result.filter((ep) => (ep.chapter_number ?? 0) >= start);
+      }
+    }
+    if (endEpisodeNum !== '') {
+      const end = parseInt(endEpisodeNum, 10);
+      if (!isNaN(end)) {
+        result = result.filter((ep) => (ep.chapter_number ?? Infinity) <= end);
+      }
+    }
+
     setFilteredEpisodes(result);
   }, [
     episodes,
@@ -257,19 +273,21 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     minLikes,
     readStatusFilter,
     bookmarksOnly,
+    startEpisodeNum,
+    endEpisodeNum,
     fromDate,
     toDate,
     readUrls,
     bookmarkedUrls
   ]);
 
-  const triggerScrape = async (url?: string, titleNo?: string) => {
+  const triggerScrape = async (url?: string, titleNo?: string, bypassCache = false) => {
     const activeUrl = url !== undefined ? url : urlInput;
     const activeTitleNo = titleNo !== undefined ? titleNo : titleNoInput;
 
     if (!activeUrl && !activeTitleNo) {
-      setError("Please enter a WEBTOON URL or Series ID");
-      addNotification("Please enter a WEBTOON URL or Series ID", "error");
+      setError("Please enter a Comic, Manga, or Manhwa URL");
+      addNotification("Please enter a Comic, Manga, or Manhwa URL", "error");
       return;
     }
 
@@ -285,6 +303,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
         title_no: activeTitleNo || undefined,
         max_episodes: maxEpisodes,
         sort_by: sortBy,
+        bypass_cache: bypassCache,
       });
 
       if (result.success) {
@@ -308,7 +327,8 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
           setIsFavorite(FavoritesManager.isFavorite(result.title_no));
         }
 
-        addNotification(`Found ${result.total_episodes || 0} episodes!`, "success");
+        const cacheNote = result.from_cache ? " (from cache)" : " (fresh)";
+        addNotification(`Found ${result.total_episodes || 0} episodes!${cacheNote}`, "success");
       } else {
         const errorMsg = result.error || "Failed to scrape episodes";
         setError(errorMsg);
@@ -324,6 +344,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   };
 
   const handleScrape = () => triggerScrape();
+  const handleRefresh = () => triggerScrape(undefined, undefined, true);
 
   // Auto-fill and auto-scrape URL if passed via query params or localStorage
   useEffect(() => {
@@ -361,7 +382,12 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       .toString(36)
       .substring(2, 10)}`;
     localStorage.setItem("auto_import_url", episode.url);
-    window.location.assign(`/workspace/editor?id=${temporaryProjectId}`);
+    const nav = (window as any).navigateTo;
+    if (nav) {
+      nav(`/workspace/editor?id=${temporaryProjectId}`);
+    } else {
+      window.location.assign(`/workspace/editor?id=${temporaryProjectId}`);
+    }
   };
 
   const handleAddToFavorites = () => {
@@ -445,60 +471,38 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   };
 
   const handleBatchScrape = async () => {
-    cancelBatchRef.current = false;
-    setBatchProgress({
-      current: 0,
-      total: selectedUrls.length,
-      active: true,
-      title: 'Initializing batch import...'
-    });
+    if (selectedUrls.length === 0) return;
 
-    const urlsToScrape = [...selectedUrls];
-    let importedCount = 0;
+    selectedUrls.forEach((url) => FavoritesManager.markAsRead(url));
+    setReadUrls(FavoritesManager.getReadEpisodes());
 
-    for (let i = 0; i < urlsToScrape.length; i++) {
-      if (cancelBatchRef.current) {
-        addNotification("Batch import cancelled", "info");
-        break;
-      }
+    const selectedEpObjects = episodes.filter((ep) => selectedUrls.includes(ep.url));
+    const fallbackList: Episode[] = selectedUrls.map((url, idx) => ({
+      url,
+      number: `Episode ${idx + 1}`,
+      title: "",
+      date: "",
+      thumbnail: "",
+      index: idx,
+    }));
+    const finalEpisodes = selectedEpObjects.length > 0 ? selectedEpObjects : fallbackList;
 
-      const url = urlsToScrape[i];
-      const ep = episodes.find((e) => e.url === url);
-      const epTitle = ep ? `${ep.number} - ${ep.title}` : url;
-
-      setBatchProgress((p) => ({
-        ...p,
-        current: i + 1,
-        title: `Scraping: ${epTitle}`
-      }));
-
-      try {
-        const res = await fetchWithInterceptor("/api/scrape-images", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: url,
-            smart_slice: true,
-            bypass_cache: true,
-            scrape_only: false
-          })
-        });
-
-        if (res.ok) {
-          FavoritesManager.markAsRead(url);
-          importedCount++;
-        }
-      } catch (err) {
-        console.error(`Failed to batch import ${url}:`, err);
-      }
+    if (onMultipleEpisodesSelect) {
+      onMultipleEpisodesSelect(finalEpisodes);
+      return;
     }
 
-    setReadUrls(FavoritesManager.getReadEpisodes());
-    setSelectedUrls([]);
-    setBatchProgress({ current: 0, total: 0, active: false, title: '' });
-    
-    if (importedCount > 0) {
-      addNotification(`Successfully imported ${importedCount} projects!`, "success");
+    const temporaryProjectId = `temp_${Date.now()}_${Math.random()
+      .toString(36)
+      .substring(2, 10)}`;
+
+    localStorage.setItem("auto_import_batch", JSON.stringify(finalEpisodes));
+    localStorage.setItem("auto_import_url", finalEpisodes[0].url);
+    const nav = (window as any).navigateTo;
+    if (nav) {
+      nav(`/workspace/editor?id=${temporaryProjectId}`);
+    } else {
+      window.location.assign(`/workspace/editor?id=${temporaryProjectId}`);
     }
   };
 
@@ -542,6 +546,8 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     setBookmarksOnly(false);
     setFromDate('');
     setToDate('');
+    setStartEpisodeNum('');
+    setEndEpisodeNum('');
   };
 
   const handleRandomEpisode = () => {
@@ -598,14 +604,14 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
           {/* Input 1: Series URL */}
           <div className="relative space-y-2 md:col-span-2" ref={suggestionsContainerRef}>
             <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest font-mono">
-              Webtoon Series URL
+              Manga / Manhwa Series URL
             </label>
             <div className="relative group">
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-500" />
               <input
                 type="text"
                 autoComplete="off"
-                placeholder="https://www.webtoons.com/en/action/duo-leveling/list?title_no=10193"
+                placeholder="Paste any series URL (e.g. webtoons, mangadex, asurascans, etc.)..."
                 value={urlInput}
                 onFocus={() => setShowSuggestions(true)}
                 onChange={(e) => {
@@ -653,15 +659,15 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
             </div>
           </div>
 
-          {/* Input 2: Series ID */}
+          {/* Input 2: Series ID (Optional) */}
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest font-mono">
-              Series ID
+              Series ID (Optional)
             </label>
             <input
               type="text"
               autoComplete="off"
-              placeholder="e.g. 10193"
+              placeholder="Optional numeric ID"
               value={titleNoInput}
               onChange={(e) => setTitleNoInput(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl px-5 py-3.5 text-sm text-neutral-200 outline-none focus:border-purple-500 transition-all shadow-inner"
@@ -701,14 +707,27 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
             </button>
           </div>
 
-          <button
-            onClick={handleScrape}
-            disabled={isLoading}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-neutral-800 disabled:to-neutral-800 disabled:text-neutral-600 text-white text-xs font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2"
-          >
-            {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <Zap size={14} />}
-            Scrape Episodes
-          </button>
+          <div className="flex items-center gap-3">
+            {episodes.length > 0 && (
+              <button
+                onClick={handleRefresh}
+                disabled={isLoading}
+                title="Force fresh scrape — bypasses cache to get latest ratings, likes & views"
+                className="px-4 py-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 hover:border-purple-500/50 disabled:opacity-40 text-neutral-300 hover:text-white text-xs font-bold rounded-2xl transition-all flex items-center gap-2"
+              >
+                <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
+                Refresh
+              </button>
+            )}
+            <button
+              onClick={handleScrape}
+              disabled={isLoading}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-neutral-800 disabled:to-neutral-800 disabled:text-neutral-600 text-white text-xs font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2"
+            >
+              {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <Zap size={14} />}
+              Scrape Episodes
+            </button>
+          </div>
         </div>
 
         {/* Favorites list / Recent list containers */}
@@ -795,11 +814,11 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
       )}
 
       {/* 4. ACTIVE WORKSPACE CONTAINER (EPISODES VS ANALYTICS) */}
-      {episodes.length > 0 && (
+      {episodes.length > 0 ? (
         <div className="space-y-6">
           {/* Glassmorphic Tabs Bar & Quick Actions */}
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex border border-neutral-800 bg-neutral-950/60 p-1.5 rounded-2xl gap-2">
+            <div className="flex border border-neutral-800 bg-neutral-955 p-1.5 rounded-2xl gap-2">
               <button
                 onClick={() => setActiveTab("episodes")}
                 className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
@@ -828,7 +847,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleRandomEpisode}
-                className="px-3.5 py-2 bg-neutral-900 hover:bg-purple-950/30 border border-neutral-800 hover:border-purple-500/40 text-purple-300 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+                className="px-3.5 py-2 bg-neutral-900 hover:bg-purple-955 border border-neutral-800 hover:border-purple-500/40 text-purple-300 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
                 title="Randomly pick an episode to preview or import"
               >
                 <Dices size={14} className="text-purple-400" />
@@ -844,7 +863,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                 Select Top 5
               </button>
 
-              <div className="text-[11px] font-mono text-neutral-400 bg-neutral-950/80 border border-neutral-800 px-3 py-2 rounded-xl flex items-center gap-1.5">
+              <div className="text-[11px] font-mono text-neutral-400 bg-neutral-955 border border-neutral-800 px-3 py-2 rounded-xl flex items-center gap-1.5">
                 <Clock size={12} className="text-neutral-500" />
                 <span>Est. Read: ~{Math.max(1, Math.round(filteredEpisodes.length * 3.5))} mins</span>
               </div>
@@ -878,6 +897,10 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                   setIsMultiSelectMode(!isMultiSelectMode);
                   setSelectedUrls([]);
                 }}
+                startEpisodeNum={startEpisodeNum}
+                onStartEpisodeChange={setStartEpisodeNum}
+                endEpisodeNum={endEpisodeNum}
+                onEndEpisodeChange={setEndEpisodeNum}
                 onClearFilters={handleClearFilters}
                 onExportCSV={handleExportCSV}
                 onExportJSON={handleExportJSON}
@@ -921,7 +944,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
 
               {/* Batch Processing Status Overlay */}
               {batchProgress.active && (
-                <div className="bg-neutral-950/90 border border-neutral-850 p-6 rounded-2xl space-y-3 relative z-30">
+                <div className="bg-neutral-955 border border-neutral-850 p-6 rounded-2xl space-y-3 relative z-30">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-bold text-white">{batchProgress.title}</p>
@@ -949,7 +972,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
 
               {/* Episode Grid View */}
               {filteredEpisodes.length > 0 ? (
-                <div className="bg-neutral-950/25 border border-neutral-900/60 rounded-3xl p-2 sm:p-4">
+                <div className="bg-neutral-955 border border-neutral-900/60 rounded-3xl p-2 sm:p-4">
                   <EpisodeGrid
                     episodes={filteredEpisodes}
                     onEpisodeClick={handleEpisodeClick}
@@ -980,11 +1003,118 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
 
           {/* TAB VIEW 2: ANALYTICS & TRENDS */}
           {activeTab === "analytics" && (
-            <div className="bg-neutral-950/25 border border-neutral-900/60 rounded-3xl p-6">
+            <div className="bg-neutral-955 border border-neutral-900/60 rounded-3xl p-6">
               <AnalyticsDashboard episodes={episodes} seriesTitle={seriesMetadata?.title || "Scraped Series"} />
             </div>
           )}
         </div>
+      ) : (
+        /* RICH EMPTY STATE WORKSPACE DASHBOARD (WHEN NO EPISODES ARE LOADED) */
+        !isLoading && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* DYNAMIC USER RECENT / FAVORITE SERIES (IF ANY EXIST) */}
+            {suggestions.length > 0 ? (
+              <div className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md space-y-6">
+                <div className="flex items-center justify-between border-b border-neutral-800/80 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
+                      <Clock className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-white tracking-wide">Your Recent &amp; Favorite Series</h3>
+                      <p className="text-xs text-neutral-400 font-mono mt-0.5">Click any series below to load episodes instantly</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {suggestions.map((series, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        if (series.url) setUrlInput(series.url);
+                        if (series.title_no) setTitleNoInput(series.title_no);
+                        triggerScrape(series.url, series.title_no);
+                      }}
+                      className="group bg-neutral-955 hover:bg-neutral-900 border border-neutral-800 hover:border-purple-500/40 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex items-center gap-4"
+                    >
+                      {series.cover_image ? (
+                        <img
+                          src={`/api/proxy-image?url=${encodeURIComponent(series.cover_image)}`}
+                          alt={series.title}
+                          className="w-14 h-18 object-cover rounded-xl border border-neutral-800 flex-shrink-0 group-hover:scale-105 transition-transform"
+                        />
+                      ) : (
+                        <div className="w-14 h-18 bg-purple-950/20 border border-purple-800/30 rounded-xl flex items-center justify-center text-purple-400 flex-shrink-0">
+                          <BookOpen className="w-6 h-6" />
+                        </div>
+                      )}
+                      <div className="flex-grow min-w-0 space-y-1">
+                        {series.genre && (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/20 font-mono">
+                            {series.genre}
+                          </span>
+                        )}
+                        <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors line-clamp-1">
+                          {series.title || "Untitled Series"}
+                        </h4>
+                        <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-purple-400">
+                          <span>Load Episodes</span>
+                          <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* DYNAMIC WORKFLOW & GETTING STARTED GUIDE */
+              <div className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-8 text-center space-y-6 backdrop-blur-md">
+                <div className="w-14 h-14 rounded-3xl bg-purple-600/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mx-auto shadow-inner">
+                  <Zap className="w-7 h-7" />
+                </div>
+                <div className="max-w-md mx-auto space-y-2">
+                  <h3 className="text-lg font-bold text-white">Ready to Scrape Webtoon Episodes</h3>
+                  <p className="text-xs text-neutral-400 leading-relaxed font-mono">
+                    Paste any official WEBTOON series URL (or enter a Series ID) in the input bar above to automatically fetch chapters, panel images, likes, and ratings.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-3xl mx-auto pt-4">
+                  <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-purple-400 font-bold text-xs font-mono">
+                      <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">1</span>
+                      Paste Webtoon URL
+                    </div>
+                    <p className="text-[11px] text-neutral-500 font-mono">
+                      Copy the URL from webtoons.com or use a series ID number.
+                    </p>
+                  </div>
+
+                  <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-purple-400 font-bold text-xs font-mono">
+                      <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">2</span>
+                      Preview &amp; Filter
+                    </div>
+                    <p className="text-[11px] text-neutral-500 font-mono">
+                      Filter by likes, date, rating, or preview panels full screen.
+                    </p>
+                  </div>
+
+                  <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-purple-400 font-bold text-xs font-mono">
+                      <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">3</span>
+                      Import to Editor
+                    </div>
+                    <p className="text-[11px] text-neutral-500 font-mono">
+                      Directly import scraped images into the timeline video workspace.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )
       )}
 
       {/* QUICK PREVIEW LIGHTBOX MODAL (Rendered at Application Root Level via Portal) */}

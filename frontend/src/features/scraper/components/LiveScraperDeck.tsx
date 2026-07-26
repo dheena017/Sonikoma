@@ -73,6 +73,7 @@ const LiveScraperDeck = React.memo(
       null
     );
     const [isBatchMerging, setIsBatchMerging] = useState(false);
+    const [selectedEpisodeIdx, setSelectedEpisodeIdx] = useState<number | "all">("all");
     const activeFetch = fetchWithInterceptor || fetch;
 
     /** Core card click handler — supports shift-range selection and Ctrl/Cmd toggling */
@@ -471,71 +472,241 @@ const LiveScraperDeck = React.memo(
               )}
 
               {/* Grid list of extracted cards */}
-              <div className="w-full max-w-full flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin px-4 md:px-6">
-                {scrapedImages.map((imgUrl, idx) => {
-                  // selectedScraped stores raw URLs, so compare directly
-                  const isSelected = selectedScraped.includes(imgUrl);
+              {(() => {
+                const episodeGroups =
+                  ((window as any).__scrapeEpisodeGroups as Array<{
+                    episodeLabel: string;
+                    startIndex: number;
+                    count: number;
+                  }>) || [];
 
-                  // IMPORTANT: PanelCard's useEffect loads `imgUrl` directly via `img.src`.
-                  // Ensure we never pass raw Webtoon URLs into PanelCard for display.
-                  // Internal /api/ URLs (e.g. /api/image/cached/...) must NOT be wrapped in proxy.
-                  const proxiedUrl = imgUrl?.startsWith("/api/")
-                    ? imgUrl
-                    : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+                if (episodeGroups.length > 0) {
+                  const visibleGroups =
+                    selectedEpisodeIdx === "all"
+                      ? episodeGroups.map((grp, originalIdx) => ({ grp, gIdx: originalIdx }))
+                      : episodeGroups[selectedEpisodeIdx]
+                      ? [{ grp: episodeGroups[selectedEpisodeIdx], gIdx: selectedEpisodeIdx }]
+                      : episodeGroups.map((grp, originalIdx) => ({ grp, gIdx: originalIdx }));
 
                   return (
-                    <PanelCard
-                      key={`${imgUrl}-${idx}`}
-                      imgUrl={proxiedUrl}
-                      rawImgUrl={imgUrl}
-                      idx={idx}
-                      isSelected={isSelected}
-                      isBatchCropping={isBatchCropping}
-                      croppingImgUrl={croppingImgUrl}
-                      bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                      scrapedImages={scrapedImages}
-                      mergingIndices={mergingIndices}
-                      handleMergeWithNext={handleMergeWithNext}
-                      setScrapedImages={setScrapedImages}
-                      setSelectedScraped={setSelectedScraped}
-                      setConsoleLogs={setConsoleLogs}
-                      addPanelsToStoryboard={addPanelsToStoryboard}
-                      addNotification={addNotification}
-                      onCardClick={handleCardClick}
-                      onCardDoubleClick={handleCardDoubleClick}
-                    />
-                  );
-                })}
+                    <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+                      {/* IN-PANEL LEFT SIDEBAR: EPISODE NAVIGATOR */}
+                      <aside className="w-full lg:w-56 bg-neutral-950/90 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-2xl lg:sticky lg:top-24 self-start">
+                        <div className="flex items-center justify-between border-b border-neutral-850/80 pb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
+                            <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
+                              Episodes ({episodeGroups.length})
+                            </h4>
+                          </div>
+                          {selectedEpisodeIdx !== "all" && (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedEpisodeIdx("all")}
+                              className="text-[9px] font-mono font-bold text-purple-400 hover:text-purple-300 transition-colors cursor-pointer"
+                            >
+                              Show All
+                            </button>
+                          )}
+                        </div>
 
-                {isScraping && [1, 2, 3].map((num) => (
-                  <div
-                    key={`loading-skeleton-${num}`}
-                    className="relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border border-purple-800/20 bg-neutral-950/40 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
-                    style={{ animationDelay: `${(num - 1) * 150}ms` }}
-                  >
-                    {/* Thumbnail Skeleton Frame */}
-                    <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/20 flex flex-col items-center justify-center overflow-hidden gap-2">
-                      <div className="h-10 w-10 rounded-full bg-purple-900/40 flex items-center justify-center">
-                        <RefreshCw className="h-5 w-5 text-purple-500/60 animate-spin" />
+                        <div className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-0.5 scrollbar-thin">
+                          {/* All Episodes Button */}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedEpisodeIdx("all")}
+                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
+                              selectedEpisodeIdx === "all"
+                                ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                                : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-850"
+                            }`}
+                          >
+                            <span className="truncate">All Episodes</span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-950 text-neutral-400 border border-neutral-800 shrink-0">
+                              {scrapedImages.length}
+                            </span>
+                          </button>
+
+                          {/* Individual Episode Item Buttons */}
+                          {episodeGroups.map((grp, gIdx) => {
+                            const isSelected = selectedEpisodeIdx === gIdx;
+                            return (
+                              <button
+                                key={`ep-nav-${gIdx}`}
+                                type="button"
+                                onClick={() => setSelectedEpisodeIdx(gIdx)}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
+                                  isSelected
+                                    ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.25)]"
+                                    : "bg-neutral-900/40 border-neutral-850 text-neutral-350 hover:text-white hover:bg-neutral-850/80"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2 truncate">
+                                  <span
+                                    className={`h-2 w-2 rounded-full shrink-0 ${
+                                      isSelected ? "bg-purple-400 animate-pulse" : "bg-neutral-600"
+                                    }`}
+                                  />
+                                  <span className="truncate">{grp.episodeLabel}</span>
+                                </div>
+                                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
+                                  {grp.count}f
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </aside>
+
+                      {/* IN-PANEL RIGHT MAIN AREA: EPISODE IMAGES */}
+                      <div className="flex-1 w-full space-y-6 min-w-0">
+                        {visibleGroups.map(({ grp, gIdx }) => {
+                          const grpImages = scrapedImages.slice(
+                            grp.startIndex,
+                            grp.startIndex + grp.count
+                          );
+                          const grpSelectedCount = grpImages.filter((img) =>
+                            selectedScraped.includes(img)
+                          ).length;
+
+                          return (
+                            <div
+                              key={`ep-section-${gIdx}`}
+                              id={`ep-section-${gIdx}`}
+                              className="bg-neutral-955 border border-neutral-850 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl scroll-mt-24"
+                            >
+                              {/* Episode Section Header */}
+                              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-850/80 pb-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="px-3.5 py-1.5 rounded-xl bg-purple-950/90 border border-purple-800/60 text-purple-200 font-mono text-xs font-bold shadow-md flex items-center gap-2">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-purple-400 animate-pulse" />
+                                    {grp.episodeLabel}
+                                  </div>
+                                  <span className="text-[10px] font-mono font-bold bg-neutral-900 text-neutral-400 px-2.5 py-1 rounded-lg border border-neutral-800">
+                                    {grp.count} FRAMES
+                                  </span>
+                                  {grpSelectedCount > 0 && (
+                                    <span className="text-[10px] font-mono font-bold bg-purple-900/60 text-purple-300 px-2.5 py-1 rounded-lg border border-purple-700/50">
+                                      {grpSelectedCount} SELECTED
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const allSelected = grpImages.every((u) =>
+                                        selectedScraped.includes(u)
+                                      );
+                                      if (allSelected) {
+                                        setSelectedScraped((prev) =>
+                                          prev.filter((u) => !grpImages.includes(u))
+                                        );
+                                      } else {
+                                        setSelectedScraped((prev) =>
+                                          Array.from(new Set([...prev, ...grpImages]))
+                                        );
+                                      }
+                                    }}
+                                    className="text-[10px] font-mono font-bold px-3 py-1.5 bg-neutral-900 hover:bg-neutral-850 text-neutral-300 rounded-xl border border-neutral-800 transition-all cursor-pointer"
+                                  >
+                                    {grpImages.every((u) => selectedScraped.includes(u))
+                                      ? "Deselect Episode"
+                                      : "Select Episode Panels"}
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Episode Horizontal Scroll Cards */}
+                              <div className="w-full max-w-full flex gap-4 overflow-x-auto pb-4 pt-1.5 scrollbar-thin px-1">
+                                {grpImages.map((imgUrl, localIdx) => {
+                                  const globalIdx = grp.startIndex + localIdx;
+                                  const isSelected = selectedScraped.includes(imgUrl);
+                                  const proxiedUrl = imgUrl?.startsWith("/api/")
+                                    ? imgUrl
+                                    : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+
+                                  return (
+                                    <PanelCard
+                                      key={`${imgUrl}-${globalIdx}`}
+                                      imgUrl={proxiedUrl}
+                                      rawImgUrl={imgUrl}
+                                      idx={globalIdx}
+                                      isSelected={isSelected}
+                                      isBatchCropping={isBatchCropping}
+                                      croppingImgUrl={croppingImgUrl}
+                                      bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                                      scrapedImages={scrapedImages}
+                                      mergingIndices={mergingIndices}
+                                      handleMergeWithNext={handleMergeWithNext}
+                                      setScrapedImages={setScrapedImages}
+                                      setSelectedScraped={setSelectedScraped}
+                                      setConsoleLogs={setConsoleLogs}
+                                      addPanelsToStoryboard={addPanelsToStoryboard}
+                                      addNotification={addNotification}
+                                      onCardClick={handleCardClick}
+                                      onCardDoubleClick={handleCardDoubleClick}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div className="h-1.5 w-20 bg-purple-900/30 rounded-full" />
-                      <div className="h-1.5 w-14 bg-purple-900/20 rounded-full" />
                     </div>
+                  );
+                }
 
-                    {/* Metadata Skeleton */}
-                    <div className="flex items-center justify-between gap-2 px-1">
-                      <div className="h-3 w-16 bg-neutral-900/80 rounded" />
-                      <div className="h-3 w-12 bg-neutral-900/80 rounded" />
-                    </div>
+                return (
+                  <div className="w-full max-w-full flex gap-4 overflow-x-auto pb-8 pt-1.5 scrollbar-thin px-4 md:px-6">
+                    {scrapedImages.map((imgUrl, idx) => {
+                      const isSelected = selectedScraped.includes(imgUrl);
+                      const proxiedUrl = imgUrl?.startsWith("/api/")
+                        ? imgUrl
+                        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
 
-                    {/* Controls Skeleton */}
-                    <div className="h-9 w-full bg-purple-950/20 border border-purple-900/20 rounded-xl" />
+                      return (
+                        <PanelCard
+                          key={`${imgUrl}-${idx}`}
+                          imgUrl={proxiedUrl}
+                          rawImgUrl={imgUrl}
+                          idx={idx}
+                          isSelected={isSelected}
+                          isBatchCropping={isBatchCropping}
+                          croppingImgUrl={croppingImgUrl}
+                          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                          scrapedImages={scrapedImages}
+                          mergingIndices={mergingIndices}
+                          handleMergeWithNext={handleMergeWithNext}
+                          setScrapedImages={setScrapedImages}
+                          setSelectedScraped={setSelectedScraped}
+                          setConsoleLogs={setConsoleLogs}
+                          addPanelsToStoryboard={addPanelsToStoryboard}
+                          addNotification={addNotification}
+                          onCardClick={handleCardClick}
+                          onCardDoubleClick={handleCardDoubleClick}
+                        />
+                      );
+                    })}
 
-                    {/* Actions Skeleton */}
-                    <div className="h-8 w-full bg-neutral-900/30 rounded-lg" />
+                    {isScraping && [1, 2, 3].map((num) => (
+                      <div
+                        key={`loading-skeleton-${num}`}
+                        className="relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border border-purple-800/20 bg-neutral-950/40 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
+                        style={{ animationDelay: `${(num - 1) * 150}ms` }}
+                      >
+                        <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/20 flex flex-col items-center justify-center overflow-hidden gap-2">
+                          <div className="h-10 w-10 rounded-full bg-purple-900/40 flex items-center justify-center">
+                            <RefreshCw className="h-5 w-5 text-purple-500/60 animate-spin" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           )}
         </div>

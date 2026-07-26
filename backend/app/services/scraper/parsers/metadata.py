@@ -80,7 +80,7 @@ def parse_image_dimensions_from_bytes(data: bytes) -> Optional[Tuple[int, int]]:
 def extract_metadata(html: str, url: str) -> Dict[str, str]:
     """Extracts Title, Description, Genre, Cover Image, and Author from page headers."""
     metadata = {"title": "", "description": "", "cover_image": "", "author": "", "genre": ""}
-    if not BeautifulSoup:
+    if not BeautifulSoup or not html:
         return metadata
     try:
         try:
