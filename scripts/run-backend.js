@@ -32,8 +32,10 @@ function formatLog(level, filename, message) {
   const timestamp = `${COLORS.GREY}${getTimestamp()}${COLORS.RESET}`;
   const tag = `${COLORS.MAGENTA}[BACKEND]${COLORS.RESET}`;
   const levelColor = COLORS.LEVELS[level] || COLORS.LEVELS.INFO;
-  const levelStr = `${levelColor}[${level}]${COLORS.RESET}`;
-  const fileStr = `${COLORS.BLUE}[${filename}]${COLORS.RESET}`;
+  const levelPadded = level.padEnd(7, " ");
+  const levelStr = `${levelColor}[${levelPadded}]${COLORS.RESET}`;
+  const filePadded = `[${filename}]`.padEnd(20, " ");
+  const fileStr = `${COLORS.BLUE}${filePadded}${COLORS.RESET}`;
   return `${timestamp} ${tag} ${levelStr} ${fileStr} ${message}`;
 }
 

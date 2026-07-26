@@ -296,14 +296,18 @@ class ColoredFormatter(logging.Formatter):
         if self.use_colors and isinstance(record.msg, str):
             record.msg = self.colorize_message(record.msg)
 
+        level_padded = record.levelname.ljust(7)
+        filename_bracket = f"[{record.filename}]"
+        file_padded = filename_bracket.ljust(20)
+
         if self.use_colors:
             color = self.COLORS.get(record.levelname, '')
             grey = '\x1b[90m'
             magenta = '\x1b[35m'
             blue = '\x1b[94m'
-            log_fmt = f"{grey}%(asctime)s{self.RESET} {magenta}[BACKEND]{self.RESET} [{color}%(levelname)s{self.RESET}] {blue}[%(filename)s]{self.RESET} %(message)s"
+            log_fmt = f"{grey}%(asctime)s{self.RESET} {magenta}[BACKEND]{self.RESET} [{color}{level_padded}{self.RESET}] {blue}{file_padded}{self.RESET} %(message)s"
         else:
-            log_fmt = "%(asctime)s [BACKEND] [%(levelname)s] [%(filename)s] %(message)s"
+            log_fmt = f"%(asctime)s [BACKEND] [{level_padded}] {file_padded} %(message)s"
         formatter = logging.Formatter(log_fmt, datefmt="%H:%M:%S")
         result = formatter.format(record)
 
@@ -343,5 +347,8 @@ except (ModuleNotFoundError, ImportError):
             root_logger.addHandler(console_handler)
 
 root_logger.setLevel(logging.INFO)
+logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 logger = logging.getLogger('sonikoma.api')
 
