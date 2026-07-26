@@ -7,12 +7,8 @@ from unittest.mock import patch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
-try:
-    from services.training import training_monitor as monitor
-    from providers.vision.yolo import trigger_fine_tuning
-except ImportError:
-    from app.services.training import training_monitor as monitor
-    from app.providers.vision.yolo import trigger_fine_tuning
+from services.training import training_monitor as monitor
+from providers.vision.yolo import trigger_fine_tuning
 
 class TestAutomaticTraining(unittest.TestCase):
     def setUp(self):
