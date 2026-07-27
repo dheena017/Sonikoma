@@ -39,7 +39,7 @@ class EndpointFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         try:
             msg = record.getMessage()
-            if any(path in msg for path in ["/system-logs", "/api/metrics", "/api/health", "/metrics", "/health"]):
+            if any(path in msg for path in ["/system-logs", "/api/metrics", "/api/health", "/metrics", "/health", "/api/auth/credits", "auth/credits"]):
                 return False
         except Exception:
             pass

@@ -72,7 +72,9 @@ export default defineConfig(({ mode, command }) => {
         const isQuietEndpoint =
           url.includes("system-logs") ||
           url.includes("health") ||
-          url.includes("metrics");
+          url.includes("metrics") ||
+          url.includes("auth/credits") ||
+          url.includes("credits");
 
         const isConnRefused = err?.code === "ECONNREFUSED" || (err?.message && err.message.includes("ECONNREFUSED"));
         const now = Date.now();
@@ -274,7 +276,9 @@ export default defineConfig(({ mode, command }) => {
               if (
                 url.includes("system-logs") ||
                 url.includes("health") ||
-                url.includes("metrics")
+                url.includes("metrics") ||
+                url.includes("auth/credits") ||
+                url.includes("credits")
               )
                 return;
 

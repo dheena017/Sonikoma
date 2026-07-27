@@ -195,7 +195,7 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-API-Version"]  = API_VERSION
 
     # Avoid logging SSE/logs polling endpoint spam
-    if not any(path in request.url.path for path in ["/system-logs", "/api/metrics", "/api/health"]):
+    if not any(path in request.url.path for path in ["/system-logs", "/api/metrics", "/api/health", "auth/credits", "credits"]):
         method_colors = {
             "GET": "\x1b[32m",
             "POST": "\x1b[33m",

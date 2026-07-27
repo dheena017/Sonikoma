@@ -23,6 +23,8 @@ class EndpointFilter(logging.Filter):
         "/api/status",
         "/api/v1/status",
         "/status",
+        "/api/auth/credits",
+        "auth/credits",
         "/favicon.ico",
         "OPTIONS /",
     )
