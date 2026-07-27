@@ -42,17 +42,22 @@ class StitchImagesRequest(BaseModel):
     imageUrl1: Optional[str] = None
     imageUrl2: Optional[str] = None
     urls: Optional[List[str]] = None
+    direction: Optional[Literal["vertical", "horizontal"]] = "vertical"
     layout: Optional[Literal["vertical", "horizontal"]] = "vertical"
     spacing: Optional[int] = 0
     spacingColor: Optional[str] = "white"
     scaleToFit: Optional[bool] = True
+    alignment: Optional[Literal["center", "start", "end"]] = "center"
     alignMode: Optional[Literal["center", "start", "end"]] = "center"
     padding: Optional[int] = 0
+    format: Optional[str] = "PNG"
 
 
 class SplitImagesRequest(BaseModel):
     url: str
-    splitLines: List[float]
+    splitLines: Optional[List[float]] = Field(default_factory=list)
+    split_points: Optional[List[float]] = None
+    format: Optional[str] = "jpeg"
 
 
 class DownloadZipRequest(BaseModel):

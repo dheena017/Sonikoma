@@ -366,7 +366,7 @@ async def facade_smart_crop(
 
     # 2. Otherwise execute AI detection with skill (with automatic free model fallback on quota limit)
     requested_model = model or "gemini-2.5-flash"
-    fallback_models = [requested_model, "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash"]
+    fallback_models = [requested_model, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"]
     models_to_try = []
     for m in fallback_models:
         if m not in models_to_try:
@@ -397,20 +397,46 @@ async def facade_smart_crop(
             logger.warning(f"[facade_smart_crop] Gemini model '{m}' failed: {exc}. Trying next free model fallback...")
             continue
 
-    if not panels_raw and last_exc:
-        logger.error(f"[facade_smart_crop] All Gemini AI models failed: {last_exc}")
-        raise RuntimeError(
-            f"AI Smart Engine (Gemini) failed to detect panels: {last_exc}. "
-            "Please check your Gemini API key, daily quota, or switch to the local OpenCV engine."
-        ) from last_exc
-
-    # If AI returned an empty panels list, raise a clear error
     if not panels_raw:
-        logger.warning("[facade_smart_crop] Gemini returned 0 panels — no panels detected.")
-        raise RuntimeError(
-            "AI Smart Engine detected 0 panels in this image. "
-            "Try adjusting your guidance prompt, switching to the OpenCV engine, or cropping manually."
-        )
+        logger.warning(f"[facade_smart_crop] Gemini AI detection failed/returned 0 panels ({last_exc}). Falling back to local OpenCV panel detection...")
+        tmp_in_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+                tmp_in.write(img_buffer)
+                tmp_in_path = tmp_in.name
+
+            from services.image.detect_panels import run_cv_detection
+            cv_panels = run_cv_detection(
+                image_path=tmp_in_path,
+                sensitivity=sensitivity,
+                bg_mode=background_color_mode,
+                min_width_pct=min_area_pct,
+                min_height_px=min_height_px,
+                merge_threshold=merge_threshold,
+                aspect_ratio_str=aspect_ratio,
+                canny_low=canny_low,
+                canny_high=canny_high,
+                close_kernel_size=close_kernel_size,
+                auto_split=auto_split,
+                padding_px=padding_px
+            )
+            return {
+                "success": True,
+                "total_panels": len(cv_panels),
+                "panels": cv_panels,
+                "provider": "opencv_fallback"
+            }
+        except Exception as cv_exc:
+            logger.error(f"[facade_smart_crop] Local OpenCV fallback also failed: {cv_exc}")
+            raise RuntimeError(
+                f"AI Smart Engine (Gemini) failed ({last_exc}). OpenCV fallback failed: {cv_exc}"
+            ) from last_exc
+        finally:
+            if tmp_in_path and os.path.exists(tmp_in_path):
+                try:
+                    os.remove(tmp_in_path)
+                except Exception:
+                    pass
 
 
     final_panels = []

@@ -22,7 +22,7 @@ router = APIRouter()
 @router.post("/token", include_in_schema=False)
 async def login_for_swagger_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    request: Request = None,
+    request: Request | None = None,
 ):
     user = get_user_by_email(form_data.username)
     ip_addr = request.client.host if request and request.client else "127.0.0.1"

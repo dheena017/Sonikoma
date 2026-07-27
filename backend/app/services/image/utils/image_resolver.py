@@ -40,7 +40,7 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
 
     # 1. Check in-memory merged/stitch cache first (zero-cost retrieval)
     if '/api/image/cached/' in working_url or '/api/merge-images/cached/' in working_url or '/api/stitch-images/cached/' in working_url:
-        match = re.search(r'/(?:image|merge|stitch)-images?/cached/([^/?&]+)', working_url)
+        match = re.search(r'/(?:image|(?:merge|stitch)-images?)/cached/([^/?&]+)', working_url)
         if match:
             cache_id = match.group(1)
             cached = stitched_cache.get(cache_id)

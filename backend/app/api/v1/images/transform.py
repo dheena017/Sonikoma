@@ -80,13 +80,8 @@ async def transform_image(body: TransformImageRequest):
     try:
         result = await transform_image_service(
             url=body.url,
-            scale_x=body.scaleX,
-            scale_y=body.scaleY,
-            rotation=body.rotation,
-            flip_h=body.flipHorizontal,
-            flip_v=body.flipVertical,
-            quality=body.quality,
-            format_str=body.format
+            trans_type=body.type,
+            value=body.value,
         )
         return result
     except Exception as e:
@@ -96,10 +91,29 @@ async def transform_image(body: TransformImageRequest):
 
 @router.post("/merge", summary="Stitch a series of panel segments vertically or horizontally")
 async def merge_images(body: StitchImagesRequest):
-    if not body.urls:
+    urls = body.urls or []
+    if not urls:
+        if body.url1 and body.url2:
+            urls = [body.url1, body.url2]
+        elif body.imageUrl1 and body.imageUrl2:
+            urls = [body.imageUrl1, body.imageUrl2]
+
+    if not urls:
         raise HTTPException(status_code=400, detail="Cannot stitch an empty list of image URLs.")
+
+    layout = body.layout or body.direction or "vertical"
+    align_mode = body.alignMode or body.alignment or "center"
+
     try:
-        result = await merge_images_service(body.urls, body.direction, body.alignment, body.spacing, body.format)
+        result = await merge_images_service(
+            urls=urls,
+            layout=layout,
+            spacing=body.spacing or 0,
+            spacingColor=body.spacingColor or "white",
+            scaleToFit=body.scaleToFit if body.scaleToFit is not None else True,
+            alignMode=align_mode,
+            padding=body.padding or 0
+        )
         return result
     except Exception as e:
         logger.error(f"[Stitch API] Error stitching panel list: {e}", exc_info=True)
@@ -107,7 +121,7 @@ async def merge_images(body: StitchImagesRequest):
 
 
 @router.get("/cached/{cache_id}", summary="Retrieve stitched cached panel image")
-async def get_cached_stitch(cache_id: str = Path(...), request: Request = None):
+async def get_cached_stitch(cache_id: str = Path(...), request: Request | None = None):
     from services.image.stitch_cache_service import retrieve_cached_stitch_service
     try:
         referer = request.headers.get("referer") if request else None
@@ -125,7 +139,9 @@ async def get_cached_stitch(cache_id: str = Path(...), request: Request = None):
 @router.post("/split", summary="Split a webtoon strip vertically into individual panel files")
 async def split_strip(body: SplitImagesRequest):
     try:
-        result = await execute_splits_service(body.url, body.split_points, body.format)
+        split_points = body.split_points if body.split_points is not None else (body.splitLines or [])
+        output_format = body.format or "jpeg"
+        result = await execute_splits_service(body.url, split_points, output_format)
         return result
     except Exception as e:
         logger.error(f"[Split API] Error splitting strip layout: {e}", exc_info=True)
@@ -173,7 +189,14 @@ async def process_layers_endpoint(panel_id: str, body: ProcessLayersRequest):
 @router.post("/resize", summary="Resize image using ImageMagick fit or cover mode")
 async def resize_image(body: ResizeImageRequest):
     try:
-        result = await resize_image_service(body.image_path, body.width, body.height, body.mode, body.filter_type, body.quality)
+        result = await resize_image_service(
+            image_path=body.image_path,
+            width=body.width,
+            height=body.height,
+            mode=body.mode,
+            filter_type=body.filter_type,
+            quality=body.quality
+        )
         return {"success": True, "image_path": result}
     except Exception as e:
         logger.error(f"[ImageMagick API] Resize failed: {e}", exc_info=True)
@@ -183,7 +206,11 @@ async def resize_image(body: ResizeImageRequest):
 @router.post("/rotate", summary="Rotate image by angle in degrees using ImageMagick")
 async def rotate_image(body: RotateImageRequest):
     try:
-        result = await rotate_image_service(body.image_path, body.angle, body.background_color)
+        result = await rotate_image_service(
+            image_path=body.image_path,
+            angle=body.angle,
+            background_color=body.background_color if body.background_color is not None else "white"
+        )
         return {"success": True, "image_path": result}
     except Exception as e:
         logger.error(f"[ImageMagick API] Rotation failed: {e}", exc_info=True)
@@ -193,7 +220,12 @@ async def rotate_image(body: RotateImageRequest):
 @router.post("/enhance", summary="Adjust brightness, contrast, and saturation using ImageMagick")
 async def enhance_image(body: ImageEnhancementRequest):
     try:
-        result = await apply_image_enhancements_service(body.image_path, body.brightness, body.contrast, body.saturation)
+        result = await apply_image_enhancements_service(
+            image_path=body.image_path,
+            brightness=body.brightness if body.brightness is not None else 1.0,
+            contrast=body.contrast if body.contrast is not None else 1.0,
+            saturation=body.saturation if body.saturation is not None else 1.0
+        )
         return {"success": True, "image_path": result}
     except Exception as e:
         logger.error(f"[ImageMagick API] Enhancements failed: {e}", exc_info=True)
@@ -203,7 +235,10 @@ async def enhance_image(body: ImageEnhancementRequest):
 @router.post("/remove-background", summary="Make specific background color transparent using fuzz threshold")
 async def remove_background(body: RemoveBackgroundRequest):
     try:
-        result = await remove_background_service(body.image_path, body.fuzz_threshold)
+        result = await remove_background_service(
+            image_path=body.image_path,
+            fuzz_threshold=body.fuzz_threshold if body.fuzz_threshold is not None else 30
+        )
         return {"success": True, "image_path": result}
     except Exception as e:
         logger.error(f"[ImageMagick API] Background removal failed: {e}", exc_info=True)
@@ -213,7 +248,14 @@ async def remove_background(body: RemoveBackgroundRequest):
 @router.post("/add-text", summary="Draw text onto image using ImageMagick")
 async def add_text(body: AddTextRequest):
     try:
-        result = await add_text_service(body.image_path, body.text, body.font_size, body.text_color, body.position, body.opacity)
+        result = await add_text_service(
+            image_path=body.image_path,
+            text=body.text,
+            font_size=body.font_size if body.font_size is not None else 40,
+            text_color=body.text_color or "white",
+            position=body.position or "center",
+            opacity=body.opacity if body.opacity is not None else 1.0
+        )
         return {"success": True, "image_path": result}
     except Exception as e:
         logger.error(f"[ImageMagick API] Add text failed: {e}", exc_info=True)
@@ -223,7 +265,12 @@ async def add_text(body: AddTextRequest):
 @router.post("/batch-resize", summary="Resize a batch of images to a uniform width or height")
 async def batch_resize(body: BatchResizeRequest):
     try:
-        results = await batch_resize_service(body.image_paths, body.width, body.height, body.mode)
+        results = await batch_resize_service(
+            image_paths=body.image_paths,
+            width=body.width,
+            height=body.height,
+            mode=body.mode or ResizeMode.FIT
+        )
         return {"success": True, "resized_images": results}
     except Exception as e:
         logger.error(f"[ImageMagick API] Batch resize failed: {e}", exc_info=True)
@@ -233,7 +280,14 @@ async def batch_resize(body: BatchResizeRequest):
 @router.post("/composite", summary="Composite/overlay one image onto another at a specific position")
 async def composite_images(body: CompositeRequest):
     try:
-        result = await composite_images_service(body.base_image_path, body.overlay_image_path, body.x, body.y, body.opacity)
+        result = await composite_images_service(
+            base_image_path=body.base_image_path,
+            overlay_image_path=body.overlay_image_path,
+            output_path=body.output_path,
+            x=body.x if body.x is not None else 0,
+            y=body.y if body.y is not None else 0,
+            opacity=body.opacity if body.opacity is not None else 1.0,
+        )
         return {"success": True, "image_path": result}
     except Exception as e:
         logger.error(f"[ImageMagick API] Composite failed: {e}", exc_info=True)

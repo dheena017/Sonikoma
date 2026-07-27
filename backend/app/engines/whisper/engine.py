@@ -80,6 +80,8 @@ class WhisperEngine:
     def _load_model(self) -> None:
         """Load Whisper model."""
         logger.info(f"Loading Whisper model: {self.model_name}...")
+        if whisper is None:
+            raise RuntimeError("openai-whisper module is not available.")
         try:
             self.model = whisper.load_model(
                 self.model_name.value,
@@ -103,6 +105,9 @@ class WhisperEngine:
         use_language = language or self.language
 
         logger.info(f"Transcribing: {audio_path} (language={use_language}, task={task})")
+
+        if self.model is None:
+            raise RuntimeError("Whisper model is not loaded.")
 
         try:
             result = await asyncio.to_thread(
@@ -148,8 +153,49 @@ class WhisperEngine:
         except Exception as e:
             logger.error(f"Transcription failed: {e}")
             raise
+    async def generate_srt(
+        self,
+        audio_path: str,
+        output_path: str,
+        language: Optional[str] = None
+    ) -> str:
+        from services.audio.transcription_impl import generate_srt as _gen_srt
+        return await _gen_srt(self, audio_path, output_path, language=language)
 
-    # additional helper methods (generate_srt, generate_vtt, extract_words_with_timestamps, etc.)
+    async def generate_vtt(
+        self,
+        audio_path: str,
+        output_path: str,
+        language: Optional[str] = None
+    ) -> str:
+        from services.audio.transcription_impl import generate_vtt as _gen_vtt
+        return await _gen_vtt(self, audio_path, output_path, language=language)
+
+    async def extract_words_with_timestamps(
+        self,
+        audio_path: str,
+        language: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        from services.audio.transcription_impl import extract_words_with_timestamps as _ext_words
+        return await _ext_words(self, audio_path, language=language)
+
+    async def generate_json_transcript(
+        self,
+        audio_path: str,
+        output_path: str,
+        language: Optional[str] = None,
+        include_words: bool = False
+    ) -> str:
+        from services.audio.transcription_impl import generate_json_transcript as _gen_json
+        return await _gen_json(self, audio_path, output_path, language=language, include_words=include_words)
+
+    async def batch_transcribe(
+        self,
+        audio_paths: List[str],
+        language: Optional[str] = None
+    ) -> List[Optional[TranscriptionResult]]:
+        from services.audio.transcription_impl import batch_transcribe as _batch_transcribe
+        return await _batch_transcribe(self, audio_paths, language=language)
 
 
 _whisper_instance: Optional[WhisperEngine] = None

@@ -34,23 +34,25 @@ def _ensure_imagemagick() -> Any:
 
 async def resize_image_service(
     image_path: str,
-    output_path: Optional[str],
-    width: Optional[int],
-    height: Optional[int],
-    mode: ResizeMode,
-    filter_type: FilterType,
-    quality: int
+    output_path: Optional[str] = None,
+    width: Optional[int] = None,
+    height: Optional[int] = None,
+    mode: Optional[ResizeMode] = ResizeMode.FIT,
+    filter_type: Optional[FilterType] = FilterType.LANCZOS,
+    quality: Optional[int] = 85
 ) -> str:
     engine = _ensure_imagemagick()
     out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
-    return await engine.resize(image_path, out, width=width, height=height, mode=mode, filter_type=filter_type, quality=quality)
+    m = mode or ResizeMode.FIT
+    f = filter_type or FilterType.LANCZOS
+    return await engine.resize(image_path, out, width=width, height=height, mode=m, filter_type=f, quality=quality)
 
 
 async def rotate_image_service(
     image_path: str,
-    output_path: Optional[str],
-    angle: float,
-    background_color: str
+    output_path: Optional[str] = None,
+    angle: float = 0.0,
+    background_color: str = "white"
 ) -> str:
     engine = _ensure_imagemagick()
     out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
@@ -59,20 +61,23 @@ async def rotate_image_service(
 
 async def apply_image_enhancements_service(
     image_path: str,
-    output_path: Optional[str],
-    brightness: float,
-    contrast: float,
-    saturation: float
+    output_path: Optional[str] = None,
+    brightness: Optional[float] = 1.0,
+    contrast: Optional[float] = 1.0,
+    saturation: Optional[float] = 1.0
 ) -> str:
     engine = _ensure_imagemagick()
     out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
-    return await engine.auto_enhance(image_path, out, brightness=brightness, contrast=contrast, saturation=saturation)
+    b = brightness if brightness is not None else 1.0
+    c = contrast if contrast is not None else 1.0
+    s = saturation if saturation is not None else 1.0
+    return await engine.auto_enhance(image_path, out, brightness=b, contrast=c, saturation=s)
 
 
 async def remove_background_service(
     image_path: str,
-    output_path: Optional[str],
-    fuzz_threshold: int
+    output_path: Optional[str] = None,
+    fuzz_threshold: int = 30
 ) -> str:
     engine = _ensure_imagemagick()
     out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
@@ -81,12 +86,12 @@ async def remove_background_service(
 
 async def add_text_service(
     image_path: str,
-    output_path: Optional[str],
-    text: str,
-    font_size: int,
-    text_color: str,
-    position: str,
-    opacity: float
+    output_path: Optional[str] = None,
+    text: str = "",
+    font_size: int = 40,
+    text_color: str = "white",
+    position: str = "center",
+    opacity: float = 1.0
 ) -> str:
     engine = _ensure_imagemagick()
     out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
@@ -103,24 +108,24 @@ async def add_text_service(
 
 async def batch_resize_service(
     image_paths: List[str],
-    output_dir: Optional[str],
-    width: Optional[int],
-    height: Optional[int],
-    mode: ResizeMode,
-    quality: int
+    output_dir: Optional[str] = None,
+    width: Optional[int] = None,
+    height: Optional[int] = None,
+    mode: Optional[ResizeMode] = ResizeMode.FIT,
+    quality: int = 85
 ) -> List[str]:
     engine = _ensure_imagemagick()
     out = output_dir or os.path.join(tempfile.gettempdir(), "imagemagick_batch")
-    return await engine.batch_resize(image_paths, out, width=width, height=height, mode=mode, quality=quality)
+    return await engine.batch_resize(image_paths, out, width=width, height=height, mode=mode or ResizeMode.FIT, quality=quality)
 
 
 async def composite_images_service(
     base_image_path: str,
     overlay_image_path: str,
-    output_path: Optional[str],
-    x: int,
-    y: int,
-    opacity: float
+    output_path: Optional[str] = None,
+    x: int = 0,
+    y: int = 0,
+    opacity: float = 1.0
 ) -> str:
     engine = _ensure_imagemagick()
     out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")

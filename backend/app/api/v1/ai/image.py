@@ -42,6 +42,16 @@ except ImportError:
     logger.warning('Stable Diffusion engine could not be initialized.')
 
 
+def _get_sd_engine():
+    if stable_diffusion is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Stable Diffusion engine is not available. Please ensure diffusers, torch, and Pillow are installed."
+        )
+    return stable_diffusion
+
+
+
 @router.post("/analyze-image", summary="Generate narration script and SFX for a single panel")
 async def analyze_image(
     body: AnalyzeImageRequest,
@@ -199,14 +209,18 @@ async def generate_ai(body: GenerateAIRequest, current_user: dict = Depends(get_
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     output_dir = body.output_dir or tempfile.gettempdir()
     try:
-        results = await stable_diffusion.generate_images(
-            prompt=body.prompt, negative_prompt=body.negative_prompt,
-            num_images=body.num_images, height=body.height, width=body.width,
-            guidance_scale=body.guidance_scale, num_inference_steps=body.num_inference_steps,
+        sd = _get_sd_engine()
+        results = await sd.generate_images(
+            prompt=body.prompt, negative_prompt=body.negative_prompt or "",
+            num_images=body.num_images or 1, height=body.height or 512, width=body.width or 512,
+            guidance_scale=body.guidance_scale if body.guidance_scale is not None else 7.5,
+            num_inference_steps=body.num_inference_steps or 50,
             seed=body.seed, output_dir=output_dir,
         )
         new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_generate")
         return {"success": True, "images": [img.image_path for img in results], "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -218,13 +232,18 @@ async def inpaint(body: InpaintRequest, current_user: dict = Depends(get_current
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     output_path = body.output_path or default_output_path(".png")
     try:
-        result = await stable_diffusion.inpaint(
+        sd = _get_sd_engine()
+        result = await sd.inpaint(
             body.image_path, body.mask_path, body.prompt,
-            negative_prompt=body.negative_prompt, output_path=output_path,
-            guidance_scale=body.guidance_scale, num_inference_steps=body.num_inference_steps, strength=body.strength,
+            negative_prompt=body.negative_prompt or "", output_path=output_path,
+            guidance_scale=body.guidance_scale if body.guidance_scale is not None else 7.5,
+            num_inference_steps=body.num_inference_steps or 50,
+            strength=body.strength if body.strength is not None else 0.8,
         )
         new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_inpaint")
         return {"success": True, "output_path": result.image_path, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -236,9 +255,15 @@ async def upscale(body: UpscaleRequest, current_user: dict = Depends(get_current
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     output_path = body.output_path or default_output_path(".png")
     try:
-        result = await stable_diffusion.upscale(body.image_path, output_path=output_path, scale_factor=body.scale_factor)
+        sd = _get_sd_engine()
+        result = await sd.upscale(
+            body.image_path, output_path=output_path,
+            scale_factor=body.scale_factor or 2
+        )
         new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_upscale")
         return {"success": True, "output_path": result, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -250,12 +275,16 @@ async def style_transfer(body: StyleTransferRequest, current_user: dict = Depend
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     output_path = body.output_path or default_output_path(".png")
     try:
-        result = await stable_diffusion.style_transfer(
+        sd = _get_sd_engine()
+        result = await sd.style_transfer(
             body.image_path, style_prompt=body.style_prompt, output_path=output_path,
-            guidance_scale=body.guidance_scale, num_inference_steps=body.num_inference_steps,
+            guidance_scale=body.guidance_scale if body.guidance_scale is not None else 7.5,
+            num_inference_steps=body.num_inference_steps or 50,
         )
         new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_style_transfer")
         return {"success": True, "output_path": result.image_path, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 
@@ -267,14 +296,20 @@ async def batch_generate(body: BatchGenerateRequest, current_user: dict = Depend
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     output_dir = body.output_dir or tempfile.gettempdir()
     try:
+        sd = _get_sd_engine()
         images = []
         for prompt in body.prompts:
-            results = await stable_diffusion.generate_images(
-                prompt=prompt, num_images=1, height=body.height, width=body.width,
-                guidance_scale=body.guidance_scale, num_inference_steps=body.num_inference_steps, output_dir=output_dir,
+            results = await sd.generate_images(
+                prompt=prompt, num_images=1,
+                height=body.height or 512, width=body.width or 512,
+                guidance_scale=body.guidance_scale if body.guidance_scale is not None else 7.5,
+                num_inference_steps=body.num_inference_steps or 50,
+                output_dir=output_dir,
             )
             images.extend([img.image_path for img in results])
         new_balance = record_credit_transaction(current_user["user_id"], -COST, "sd_batch_generate")
         return {"success": True, "images": images, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))

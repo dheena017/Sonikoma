@@ -248,7 +248,7 @@ async def batch_transcribe(
     engine,
     audio_paths: List[str],
     language: Optional[str] = None
-) -> List[TranscriptionResult]:
+) -> List[Optional[TranscriptionResult]]:
     """
     Transcribe multiple audio files.
 

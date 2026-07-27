@@ -71,7 +71,7 @@ def _detect_panels_webtoon(
 
     smoothed_content = np.copy(is_content_row)
     gap_count = 0
-    gap_thresh = max(15, min(80, int(w * 0.04)))
+    gap_thresh = max(6, min(25, int(w * 0.015)))
     for i in range(len(smoothed_content)):
         if not smoothed_content[i]:
             gap_count += 1
@@ -155,9 +155,9 @@ def _detect_panels_webtoon(
 
         slice_h = end_y - start_y
         is_header = False
-        if start_y < int(h * 0.15):
+        if start_y < min(250, int(h * 0.01)):
             is_header = True
-        elif float(w) / float(slice_h) > 3.0 if slice_h > 0 else False:
+        elif float(w) / float(slice_h) > 5.0 if slice_h > 0 else False:
             is_header = True
 
         if is_header:

@@ -29,16 +29,18 @@ def _ensure_imagemagick() -> Any:
 
 async def resize_image_service(
     image_path: str,
-    output_path: Optional[str],
-    width: Optional[int],
-    height: Optional[int],
-    mode: ResizeMode,
-    filter_type: FilterType,
-    quality: int,
+    output_path: Optional[str] = None,
+    width: Optional[int] = None,
+    height: Optional[int] = None,
+    mode: Optional[ResizeMode] = ResizeMode.FIT,
+    filter_type: Optional[FilterType] = FilterType.LANCZOS,
+    quality: Optional[int] = 85,
 ) -> str:
     engine = _ensure_imagemagick()
     out = output_path or os.path.join(tempfile.gettempdir(), f"imagemagick_{os.urandom(4).hex()}.png")
-    result = await engine.resize(image_path, out, width=width, height=height, mode=mode, filter_type=filter_type, quality=quality)
+    m = mode or ResizeMode.FIT
+    f = filter_type or FilterType.LANCZOS
+    result = await engine.resize(image_path, out, width=width, height=height, mode=m, filter_type=f, quality=quality)
     return result
 
 

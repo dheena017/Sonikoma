@@ -20,7 +20,7 @@ from engines.ffmpeg import get_ffmpeg_engine, CutSpec
 from engines.librosa import get_librosa_engine, LIBROSA_AVAILABLE
 from engines.whisper import get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
 from providers.media.imagemagick import get_imagemagick_engine, WAND_AVAILABLE
-from engines.stable_diffusion import get_stable_diffusion_engine
+from engines.stable_diffusion import get_stable_diffusion_engine, DIFFUSERS_AVAILABLE
 
 logger = logging.getLogger("sonikoma.services.compound_processor")
 
@@ -44,7 +44,7 @@ class WorkflowProgress:
     total_steps: int
     current_step_num: int
     error: Optional[str] = None
-    results: Dict[str, Any] = None
+    results: Optional[Dict[str, Any]] = None
 
 
 class CompoundProcessor:
@@ -56,7 +56,8 @@ class CompoundProcessor:
         self.librosa = get_librosa_engine() if LIBROSA_AVAILABLE else None
         self.whisper = get_whisper_engine(model_name=WhisperModel.BASE) if WHISPER_AVAILABLE else None
         self.imagemagick = get_imagemagick_engine() if WAND_AVAILABLE else None
-        self.stable_diffusion = get_stable_diffusion_engine(device="cpu")
+        self.stable_diffusion = get_stable_diffusion_engine(device="cpu") if DIFFUSERS_AVAILABLE else None
+
 
         # Workflow tracking
         self.active_workflows: Dict[str, WorkflowProgress] = {}
@@ -272,6 +273,12 @@ class CompoundProcessor:
         os.makedirs(output_dir, exist_ok=True)
 
         try:
+            if self.stable_diffusion is None:
+                raise RuntimeError(
+                    "Image generation requested but diffusers is not installed or unavailable. "
+                    "Install with: pip install diffusers torch"
+                )
+
             total_steps = len(prompts) + (1 if enhance else 0)
             workflow_type = WorkflowType.IMAGE_GENERATION
 
@@ -294,6 +301,11 @@ class CompoundProcessor:
 
             # Enhance if requested
             if enhance:
+                if self.imagemagick is None:
+                    raise RuntimeError(
+                        "Image enhancement requested but Wand/ImageMagick is not installed or unavailable. "
+                        "Install Wand/ImageMagick to use image enhancement."
+                    )
                 self._progress(workflow_id, workflow_type, "Enhancing images", total_steps, total_steps)
 
                 for img in generated_images:
