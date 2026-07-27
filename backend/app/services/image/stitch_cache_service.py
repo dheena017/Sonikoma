@@ -16,14 +16,14 @@ from core.cache import stitched_cache, edit_history
 # I am mocking the imports that were inside the function
 
 from database.transaction import unwrap_proxy_url
-from utils import img_utils
+import services.image.utils as img_utils
 
 logger = logging.getLogger("sonikoma.services.image.stitch_cache")
 
 from database.engine import get_db_connection
 from repositories.project.panels import get_panel_original_url, get_edit_history
 
-async def retrieve_cached_stitch_service(cache_id: str, referer: str = None):
+async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = None):
     cached = stitched_cache.get(cache_id)
     if cached:
         return cached["data"], cached["content_type"]
@@ -157,7 +157,7 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str = None):
                                     return await img_utils.resolve_image_to_buffer(u, client=client)
                             resolved_results = await asyncio.gather(*[fetch_item(u) for u in unwrapped_urls], return_exceptions=True)
                             for idx, res in enumerate(resolved_results):
-                                if not isinstance(res, Exception):
+                                if not isinstance(res, BaseException) and res and "data" in res:
                                     resolved_buffers_data.append(res["data"])
 
                         if resolved_buffers_data:

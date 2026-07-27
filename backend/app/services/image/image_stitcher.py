@@ -20,9 +20,15 @@ def stitch_images_together(
     spacing_color: str = "white",
     scale_to_fit: bool = True,
     align_mode: Literal["center", "start", "end"] = "center",
-    padding: int = 0
+    padding: int = 0,
+    **kwargs: Any
 ) -> bytes:
     """Consolidates multiple image buffers into a single stitched canvas."""
+    if kwargs:
+        spacing_color = kwargs.get("spacingColor", spacing_color)
+        scale_to_fit = kwargs.get("scaleToFit", scale_to_fit)
+        align_mode = kwargs.get("alignMode", align_mode)
+
     if not image_buffers:
         raise ValueError("No image buffers provided for stitching")
 
@@ -46,7 +52,7 @@ def stitch_images_together(
         for img in imgs:
             w, h = img.size
             if scale_to_fit and h != canonical_h:
-                new_w = int(round(w * (canonical_h / h)))
+                new_w = round(w * (canonical_h / h))
                 img_res = img.resize((new_w, canonical_h), Image.Resampling.BICUBIC)
                 prepared_images.append(img_res)
             else:
@@ -56,7 +62,7 @@ def stitch_images_together(
         for img in imgs:
             w, h = img.size
             if scale_to_fit and w != canonical_w:
-                new_h = int(round(h * (canonical_w / w)))
+                new_h = round(h * (canonical_w / w))
                 img_res = img.resize((canonical_w, new_h), Image.Resampling.BICUBIC)
                 prepared_images.append(img_res)
             else:

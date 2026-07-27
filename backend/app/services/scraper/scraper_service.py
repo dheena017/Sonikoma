@@ -77,9 +77,9 @@ async def scrape_and_initialize_project(
     if not scrape_only:
         cache_key = f"stitched_full_{normalized_url}"
         if not bypass_cache:
-            cached_url = stitched_cache.get(cache_key)
-            if cached_url:
-                final_images = [cached_url]
+            cached_data = stitched_cache.get(cache_key)
+            if cached_data and isinstance(cached_data, dict) and "url" in cached_data:
+                final_images = [cached_data["url"]]
                 cache_hit = True
 
         resolved_buffers_data = []
@@ -91,11 +91,11 @@ async def scrape_and_initialize_project(
                         return await img_utils.resolve_image_to_buffer(u, client=client)
                 resolved_results = await asyncio.gather(*[fetch_item(u) for u in proxied_urls], return_exceptions=True)
                 for idx, res in enumerate(resolved_results):
-                    if not isinstance(res, Exception):
+                    if not isinstance(res, BaseException) and res and "data" in res:
                         resolved_buffers_data.append({
                             "url": proxied_urls[idx],
                             "data": res["data"],
-                            "content_type": res["contentType"]
+                            "content_type": res.get("contentType", "image/png")
                         })
 
         if not cache_hit and len(resolved_buffers_data) > 1 and not smart_slice:
@@ -106,7 +106,7 @@ async def scrape_and_initialize_project(
                 uid = f"stitched_{int(time.time() * 1000)}_full"
                 stitched_url = f"/api/image/cached/{uid}"
                 stitched_cache.set(uid, {"data": stitched_bytes, "content_type": "image/png"})
-                stitched_cache.set(cache_key, stitched_url)
+                stitched_cache.set(cache_key, {"url": stitched_url})
                 edit_history.set(stitched_url, proxied_urls[0])
                 try:
                     save_edit_history(stitched_url, proxied_urls[0])

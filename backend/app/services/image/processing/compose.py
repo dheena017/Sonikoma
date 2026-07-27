@@ -31,9 +31,9 @@ async def merge_images_service(
         image_buffers=[r["data"] for r in resolved],
         layout=layout,
         spacing=spacing,
-        spacingColor=spacingColor,
-        scaleToFit=scaleToFit,
-        alignMode=alignMode,
+        spacing_color=spacingColor,
+        scale_to_fit=scaleToFit,
+        align_mode=alignMode,
         padding=padding
     )
     if not merged_bytes:
