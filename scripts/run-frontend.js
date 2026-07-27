@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import http from "http";
 import net from "net";
+import readline from "readline";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 
@@ -139,13 +140,56 @@ function cleanup() {
   return Promise.all(promises);
 }
 
+function printFrontendShutdownBanner() {
+  const CLR_BORDER  = "\x1b[38;5;39m";    // Bright Cyan border
+  const CLR_TITLE   = "\x1b[1;31m";       // Bold Red
+  const CLR_TEXT    = "\x1b[1;37m";       // Bold White
+  const CLR_MUTED   = "\x1b[90m";         // Muted Grey
+  const CLR_RESET   = "\x1b[0m";
+
+  const INNER_WIDTH = 76;
+
+  function stripAnsi(text) {
+    return text.replace(/\x1b\[[0-9;]*[mK]/g, "");
+  }
+
+  function formatLine(content) {
+    const cleanLen = stripAnsi(content).length;
+    const pad = " ".repeat(Math.max(0, INNER_WIDTH - cleanLen));
+    return `${CLR_BORDER}│${CLR_RESET} ${content}${pad} ${CLR_BORDER}│${CLR_RESET}`;
+  }
+
+  const lineTitle  = formatLine(`🛑 ${CLR_TITLE}SONIKOMA FRONTEND STUDIO${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_TEXT}Dev Server Shutdown Complete${CLR_RESET}`);
+  const lineP1     = formatLine(`● Vite frontend dev server terminated cleanly.`);
+  const lineP2     = formatLine(`● Port ${frontendPort || 3000} released.`);
+  const lineP3     = formatLine(`● See you next time! 👋`);
+
+  const topBorder = `${CLR_BORDER}┌` + "─".repeat(INNER_WIDTH + 2) + `┐${CLR_RESET}`;
+  const midBorder = `${CLR_BORDER}├` + "─".repeat(INNER_WIDTH + 2) + `┤${CLR_RESET}`;
+  const botBorder = `${CLR_BORDER}└` + "─".repeat(INNER_WIDTH + 2) + `┘${CLR_RESET}`;
+
+  const banner = `${topBorder}
+${lineTitle}
+${midBorder}
+${lineP1}
+${lineP2}
+${lineP3}
+${botBorder}`;
+
+  console.log(banner);
+}
+
 process.on("SIGINT", async () => {
   await cleanup();
+  printFrontendShutdownBanner();
+  logger.success(`👋 Frontend dev server stopped cleanly.`);
   process.exit(0);
 });
 
 process.on("SIGTERM", async () => {
   await cleanup();
+  printFrontendShutdownBanner();
+  logger.success(`👋 Frontend dev server stopped cleanly.`);
   process.exit(0);
 });
 
@@ -445,8 +489,106 @@ async function start() {
     });
   }
 
+function printFrontendBanner() {
+  const CLR_BORDER  = "\x1b[38;5;39m";    // Bright Cyan border
+  const CLR_HEADER  = "\x1b[1;36m";       // Bold Cyan
+  const CLR_TITLE   = "\x1b[1;35m";       // Bold Magenta
+  const CLR_TEXT    = "\x1b[1;37m";       // Bold White
+  const CLR_MUTED   = "\x1b[90m";         // Muted Grey
+  const CLR_SUCCESS = "\x1b[32m";         // Green
+  const CLR_ALERT   = "\x1b[31m";         // Red
+  const CLR_RESET   = "\x1b[0m";
+
+  const nodeVer = process.version;
+  const osName = `${process.platform} ${process.arch}`;
+  const fPort = frontendPort || 3000;
+  const bPort = port || 5173;
+  const aUrl = appUrl || "http://localhost:3000";
+
+  function checkNpmPkg(pkgName) {
+    const p1 = path.resolve(__dirname, "../frontend/node_modules", pkgName);
+    const p2 = path.resolve(__dirname, "../node_modules", pkgName);
+    return fs.existsSync(p1) || fs.existsSync(p2);
+  }
+
+  function b(name, pkg) {
+    return checkNpmPkg(pkg) ? `${CLR_SUCCESS}${name} ✔${CLR_RESET}` : `${CLR_ALERT}${name} ✖${CLR_RESET}`;
+  }
+
+  const pkgReact    = b("React", "react");
+  const pkgDom      = b("React-DOM", "react-dom");
+  const pkgVite     = b("Vite", "vite");
+  const pkgTS       = b("TypeScript", "typescript");
+  const pkgZustand  = b("Zustand", "zustand");
+
+  const pkgTailwind = b("Tailwind", "tailwindcss");
+  const pkgLucide   = b("Lucide-React", "lucide-react");
+  const pkgFabric   = b("Fabric.js", "fabric");
+  const pkgRnd      = b("React-RND", "react-rnd");
+
+  const pkgSupa     = b("Supabase", "@supabase/supabase-js");
+  const pkgZip      = b("JSZip", "jszip");
+  const pkgSaver    = b("File-Saver", "file-saver");
+  const pkgFns      = b("Date-Fns", "date-fns");
+
+  const pkgEsbuild  = b("ESBuild", "esbuild");
+  const pkgAutoP    = b("Autoprefixer", "autoprefixer");
+
+  const INNER_WIDTH = 76;
+
+  function stripAnsi(text) {
+    return text.replace(/\x1b\[[0-9;]*[mK]/g, "");
+  }
+
+  function formatLine(content) {
+    const cleanLen = stripAnsi(content).length;
+    const pad = " ".repeat(Math.max(0, INNER_WIDTH - cleanLen));
+    return `${CLR_BORDER}│${CLR_RESET} ${content}${pad} ${CLR_BORDER}│${CLR_RESET}`;
+  }
+
+  const lineTitle   = formatLine(`❖ ${CLR_TITLE}SONIKOMA FRONTEND STUDIO${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_HEADER}Vite v6.4.3${CLR_RESET} ${CLR_MUTED}(Node.js ${nodeVer})${CLR_RESET}`);
+  const lineLocal   = formatLine(`● ${CLR_TEXT}Local App URL     :${CLR_RESET} ${CLR_HEADER}${aUrl}${CLR_RESET}`);
+  const lineProxy   = formatLine(`● ${CLR_TEXT}Backend API Proxy :${CLR_RESET} ${CLR_HEADER}http://localhost:${bPort}/api${CLR_RESET}`);
+  const lineHealth  = formatLine(`● ${CLR_TEXT}Backend Health    :${CLR_RESET} ${CLR_HEADER}http://localhost:${bPort}/api/health${CLR_RESET}`);
+
+  const lineEnv     = formatLine(`● ${CLR_MUTED}Environment       :${CLR_RESET} Development (Vite HMR Active)`);
+  const linePort    = formatLine(`● ${CLR_MUTED}Frontend Port     :${CLR_RESET} ${fPort}`);
+  const lineSys     = formatLine(`● ${CLR_MUTED}System & Runtime  :${CLR_RESET} Node.js ${nodeVer}  │  ${osName}`);
+  const lineEngine  = formatLine(`● ${CLR_MUTED}Build Engine      :${CLR_RESET} ESBuild  │  Rollup  │  PostCSS`);
+
+  const lineCore    = formatLine(`● ${CLR_MUTED}Core & Framework  :${CLR_RESET} ${pkgReact} │ ${pkgDom} │ ${pkgVite} │ ${pkgTS} │ ${pkgZustand}`);
+  const lineUI      = formatLine(`● ${CLR_MUTED}UI & Styling      :${CLR_RESET} ${pkgTailwind} │ ${pkgLucide} │ ${pkgFabric} │ ${pkgRnd}`);
+  const lineData    = formatLine(`● ${CLR_MUTED}Data & Storage    :${CLR_RESET} ${pkgSupa} │ ${pkgZip} │ ${pkgSaver} │ ${pkgFns}`);
+  const lineDev     = formatLine(`● ${CLR_MUTED}Dev Tools & Build :${CLR_RESET} ${pkgEsbuild} │ ${pkgAutoP}`);
+
+  const topBorder = `${CLR_BORDER}┌` + "─".repeat(INNER_WIDTH + 2) + `┐${CLR_RESET}`;
+  const midBorder = `${CLR_BORDER}├` + "─".repeat(INNER_WIDTH + 2) + `┤${CLR_RESET}`;
+  const botBorder = `${CLR_BORDER}└` + "─".repeat(INNER_WIDTH + 2) + `┘${CLR_RESET}`;
+
+  const banner = `${topBorder}
+${lineTitle}
+${midBorder}
+${lineLocal}
+${lineProxy}
+${lineHealth}
+${midBorder}
+${lineEnv}
+${linePort}
+${lineSys}
+${lineEngine}
+${midBorder}
+${lineCore}
+${lineUI}
+${lineData}
+${lineDev}
+${botBorder}`;
+
+  console.log(banner);
+}
+
   // Now start the Vite frontend dev server
-  logger.info(`Starting Vite frontend...`);
+  printFrontendBanner();
+  logger.success(`🎉 Frontend dev server is starting on http://localhost:${frontendPort || 3000}/`);
 
   const viteBin = path.resolve(__dirname, "../frontend/node_modules/vite/bin/vite.js");
   const configPath = path.resolve(__dirname, "../frontend/vite.config.ts");
@@ -454,7 +596,30 @@ async function start() {
 
   viteProcess = spawn("node", [viteBin, "--config", configPath], {
     cwd: path.resolve(__dirname, "../frontend"),
-    stdio: "inherit",
+    stdio: ["inherit", "pipe", "pipe"],
+  });
+
+  const rlOut = readline.createInterface({ input: viteProcess.stdout });
+  const rlErr = readline.createInterface({ input: viteProcess.stderr });
+
+  rlOut.on("line", (line) => {
+    if (line.includes("[vite] hmr update")) {
+      const match = line.match(/hmr update\s+(.+)$/i);
+      const file = match ? match[1].trim() : "file";
+      logger.info(`⚡ HMR Reloaded frontend file (${file})`);
+    } else if (line.includes("[vite] page reload")) {
+      const match = line.match(/page reload\s+(.+)$/i);
+      const file = match ? match[1].trim() : "file";
+      logger.info(`🔄 Full Page Reload (${file})`);
+    } else if (line.includes("[Vite] GET /src/") || line.includes("[Vite] GET /node_modules/") || line.includes("[Vite] GET /@")) {
+      // Quietly filter out static GET 304 request log spam during dev navigation
+    } else {
+      console.log(line);
+    }
+  });
+
+  rlErr.on("line", (line) => {
+    console.error(line);
   });
 
   viteProcess.on("error", (err) => {

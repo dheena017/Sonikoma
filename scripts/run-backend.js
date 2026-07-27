@@ -312,20 +312,70 @@ fs.watch(backendDir, { recursive: true }, (eventType, filename) => {
   }
 });
 
+function printBackendShutdownBanner() {
+  const CLR_BORDER  = "\x1b[38;5;39m";    // Bright Cyan border
+  const CLR_TITLE   = "\x1b[1;31m";       // Bold Red
+  const CLR_TEXT    = "\x1b[1;37m";       // Bold White
+  const CLR_MUTED   = "\x1b[90m";         // Muted Grey
+  const CLR_RESET   = "\x1b[0m";
+
+  const INNER_WIDTH = 76;
+
+  function stripAnsi(text) {
+    return text.replace(/\x1b\[[0-9;]*[mK]/g, "");
+  }
+
+  function formatLine(content) {
+    const cleanLen = stripAnsi(content).length;
+    const pad = " ".repeat(Math.max(0, INNER_WIDTH - cleanLen));
+    return `${CLR_BORDER}│${CLR_RESET} ${content}${pad} ${CLR_BORDER}│${CLR_RESET}`;
+  }
+
+  const lineTitle  = formatLine(`🛑 ${CLR_TITLE}SONIKOMA COMPUTE ENGINE${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_TEXT}Server Shutdown Complete${CLR_RESET}`);
+  const lineP1     = formatLine(`● Backend process terminated cleanly.`);
+  const lineP2     = formatLine(`● All SQLite database connections & background tasks released.`);
+  const lineP3     = formatLine(`● Have a great session! 👋`);
+
+  const topBorder = `${CLR_BORDER}┌` + "─".repeat(INNER_WIDTH + 2) + `┐${CLR_RESET}`;
+  const midBorder = `${CLR_BORDER}├` + "─".repeat(INNER_WIDTH + 2) + `┤${CLR_RESET}`;
+  const botBorder = `${CLR_BORDER}└` + "─".repeat(INNER_WIDTH + 2) + `┘${CLR_RESET}`;
+
+  const banner = `${topBorder}
+${lineTitle}
+${midBorder}
+${lineP1}
+${lineP2}
+${lineP3}
+${botBorder}`;
+
+  console.log(banner);
+}
+
 // Clean up and wait for backend to close to prevent output collision in terminal on Ctrl+C
 let isExiting = false;
 function handleSignal(signal) {
   if (isExiting) return;
   isExiting = true;
-  logger.info(`Received ${signal}, stopping backend process...`);
+  logger.info(`Received ${signal}, shutting down backend process...`);
+  
+  function finish() {
+    printBackendShutdownBanner();
+    logger.success(`👋 Backend server stopped cleanly.`);
+    process.exit(0);
+  }
+
   if (pyProcess && !pyProcess.killed && pyProcess.exitCode === null) {
     pyProcess.on("exit", () => {
-      process.exit(0);
+      finish();
     });
-    pyProcess.kill("SIGINT");
-    setTimeout(() => process.exit(0), 3000);
+    if (process.platform === "win32") {
+      spawn("taskkill", ["/F", "/T", "/PID", pyProcess.pid.toString()]);
+    } else {
+      pyProcess.kill("SIGINT");
+    }
+    setTimeout(finish, 2500);
   } else {
-    process.exit(0);
+    finish();
   }
 }
 
