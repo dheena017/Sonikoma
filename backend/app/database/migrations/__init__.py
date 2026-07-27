@@ -204,7 +204,7 @@ def init_sqlite(conn) -> None:
             else:
                 logger.warning("[Database] schema.sql not found — skipping schema apply.")
         else:
-            logger.info("[Database] Relational database schema is already initialized.")
+            logger.debug("[Database] Relational database schema is already initialized.")
 
         # ── Column migrations ─────────────────────────────────────────────
         _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN synopsis TEXT",
@@ -256,7 +256,7 @@ def init_sqlite(conn) -> None:
                 "CREATE INDEX IF NOT EXISTS idx_token_logs_created_at ON token_usage_logs(created_at)"
             )
             conn.commit()
-            logger.info("[Database] Migration: verified token_usage_logs table.")
+            logger.debug("[Database] Migration: verified token_usage_logs table.")
         except Exception:
             logger.error("[Database] Failed to verify token_usage_logs table.")
 
@@ -311,7 +311,7 @@ def init_sqlite(conn) -> None:
               updated_at          TEXT    NOT NULL DEFAULT (datetime('now')),
               FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )""")
-            logger.info("[Database] SQLite YouTube tables and credentials checked.")
+            logger.debug("[Database] SQLite YouTube tables and credentials checked.")
         except Exception as e:
             logger.error(f"[Database] Error checking SQLite YouTube schema: {e}")
 
@@ -387,7 +387,7 @@ def init_sqlite(conn) -> None:
             "CREATE INDEX IF NOT EXISTS idx_credit_transactions_user "
             "ON credit_transactions(user_id)"
         )
-        logger.info("[Database] Migration: verified credit_transactions table.")
+        logger.debug("[Database] Migration: verified credit_transactions table.")
 
         conn.commit()
 
@@ -406,6 +406,6 @@ def _run_safe_alter(cursor, conn, sql: str, description: str) -> None:
     try:
         cursor.execute(sql)
         conn.commit()
-        logger.info(f"[Database] Migration: {description}.")
+        logger.debug(f"[Database] Migration: {description}.")
     except Exception:
         pass  # column/index already exists

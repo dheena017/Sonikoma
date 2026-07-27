@@ -50,7 +50,7 @@ class SkillRegistry:
             except Exception as e:
                 logger.error(f"Failed to load AI skill from {filepath}: {e}", exc_info=True)
 
-        logger.info(f"✓ Registered {loaded_count} Markdown AI Skills from \x1b[36m{current_dir}\x1b[0m")
+        logger.debug(f"✓ Registered {loaded_count} Markdown AI Skills from \x1b[36m{current_dir}\x1b[0m")
 
 # Global singleton registry instance
 registry = SkillRegistry()

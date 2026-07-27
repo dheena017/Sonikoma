@@ -22,7 +22,7 @@ _rembg_session = None
 def get_rembg_session():
     global _rembg_session
     if _rembg_session is None and has_rembg:
-        logger.info("Initializing rembg session (U-2-Net)")
+        logger.debug("Initializing rembg session (U-2-Net)")
         try:
             import torch
             use_gpu = torch.cuda.is_available()

@@ -33,7 +33,7 @@ try:
     else:
         genai_client = genai.Client(api_key=api_key)
         ai_initialized = True
-        logger.info("Gemini GenAI client successfully configured server-side.")
+        logger.debug("Gemini GenAI client successfully configured server-side.")
 except ImportError:
     logger.error("Failed to import google-genai package.")
 
@@ -44,9 +44,9 @@ try:
     if hf_api_key:
         from huggingface_hub import InferenceClient
         hf_client = InferenceClient(token=hf_api_key)
-        logger.info("HuggingFace Inference client successfully initialized.")
+        logger.debug("HuggingFace Inference client successfully initialized.")
     else:
-        logger.info("No HUGGINGFACE_API_KEY detected.")
+        logger.debug("No HUGGINGFACE_API_KEY detected.")
 except ImportError:
     # Quiet fallback if huggingface_hub is not installed
     pass

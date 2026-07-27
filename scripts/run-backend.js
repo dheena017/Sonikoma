@@ -123,11 +123,8 @@ function handleBackendExit(proc, code) {
 async function restartBackend(changedFile) {
   if (isRestarting) return;
   isRestarting = true;
-  logger.warn(
-    `🔄 Detected change in backend Python files (${
-      changedFile || "unknown"
-    }). Restarting backend process...`
-  );
+  const formattedPath = changedFile ? changedFile.replace(/\\/g, "/") : "code";
+  logger.info(`🔄 Reloading backend (${formattedPath})...`);
 
   const oldProcess = pyProcess;
   if (oldProcess) {
@@ -164,7 +161,6 @@ async function restartBackend(changedFile) {
     handleBackendExit(currentProcess, code);
   });
 
-  logger.info(`Waiting for backend to re-initialize...`);
   setTimeout(checkHealth, 500);
   isRestarting = false;
 }

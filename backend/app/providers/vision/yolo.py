@@ -53,15 +53,17 @@ def get_yolo_model():
 
     # Priority 1: kitsumed YOLOv8m-seg — produces pixel-level masks (best for our use case)
 
+    hf_token = os.getenv("HUGGINGFACE_API_KEY") or os.getenv("HF_TOKEN")
     try:
-        logger.info("Downloading kitsumed/yolov8m_seg-speech-bubble (YOLOv8m-seg, manga/comic) from HuggingFace...")
+        logger.debug("Downloading kitsumed/yolov8m_seg-speech-bubble (YOLOv8m-seg, manga/comic) from HuggingFace...")
         model_path = hf_hub_download(
             repo_id="kitsumed/yolov8m_seg-speech-bubble",
-            filename="model.pt"  # confirmed filename via HF API
+            filename="model.pt",  # confirmed filename via HF API
+            token=hf_token
         )
-        logger.info(f"Loading YOLO manga segmentation model from: {model_path}")
+        logger.debug(f"Loading YOLO manga segmentation model from: {model_path}")
         _yolo_model = YOLO(model_path)
-        logger.info("kitsumed/yolov8m_seg-speech-bubble model loaded successfully.")
+        logger.debug("kitsumed/yolov8m_seg-speech-bubble model loaded successfully.")
         return _yolo_model
     except Exception as e:
         logger.warning(f"kitsumed model unavailable: {e}. Trying ogkalu fallback...")
@@ -71,7 +73,8 @@ def get_yolo_model():
         logger.info("Downloading ogkalu/comic-speech-bubble-detector-yolov8m from HuggingFace...")
         model_path = hf_hub_download(
             repo_id="ogkalu/comic-speech-bubble-detector-yolov8m",
-            filename="comic-speech-bubble-detector.pt"
+            filename="comic-speech-bubble-detector.pt",
+            token=hf_token
         )
         logger.info(f"Loading ogkalu YOLO fallback model from: {model_path}")
         _yolo_model = YOLO(model_path)
@@ -123,19 +126,28 @@ def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.25) -> 
 
     try:
         # Run inference (disable console logging to keep stdout clean)
-        results = model.predict(image_path, conf=conf_threshold, verbose=False)
-        if not results or len(results) == 0:
+        raw_results = model.predict(image_path, conf=conf_threshold, verbose=False)
+        results = list(raw_results) if raw_results is not None else []
+        if not results:
             return None
 
         result = results[0]
         # Check if any segmentations (masks) were detected
-        if result.masks is None or len(result.masks) == 0:
+        if not hasattr(result, "masks") or result.masks is None or len(result.masks) == 0:
             logger.info("YOLO segmentation completed: No masks found in this panel.")
             return None
 
         # Original image dimensions
-        orig_shape = result.orig_shape  # (height, width)
-        height, width = orig_shape[0], orig_shape[1]
+        if hasattr(result, "orig_shape") and result.orig_shape is not None:
+            orig_shape = result.orig_shape  # (height, width)
+            height, width = int(orig_shape[0]), int(orig_shape[1])
+        else:
+            img = cv2.imread(image_path)
+            if img is not None:
+                height, width = img.shape[:2]
+            else:
+                logger.warning(f"Could not determine image dimensions for YOLO segmentation: {image_path}")
+                return None
 
         # Initialize unified mask
         combined_mask = np.zeros((height, width), dtype=np.uint8)
@@ -148,7 +160,10 @@ def segment_text_and_balloons(image_path: str, conf_threshold: float = 0.25) -> 
         # We accept ALL detected classes since this model focuses specifically on
         # speech bubbles and text regions; all are relevant for the text layer.
         for i, mask_instance in enumerate(result.masks.data):
-            confidence = float(result.boxes.conf[i].item())
+            if hasattr(result, "boxes") and result.boxes is not None and hasattr(result.boxes, "conf") and len(result.boxes.conf) > i:
+                confidence = float(result.boxes.conf[i].item())
+            else:
+                confidence = 1.0
 
             if confidence >= conf_threshold:
                 # Resize mask slice back to original image dimensions if needed
@@ -229,7 +244,7 @@ def segment_characters(image_path: str, conf_threshold: float = 0.25) -> np.ndar
             return None
 
         result = results[0]
-        if result.masks is None or len(result.masks) == 0:
+        if not hasattr(result, "masks") or result.masks is None or len(result.masks) == 0:
             logger.info("YOLO character segmentation completed: No masks found.")
             # Return empty mask with correct dimensions
             img = cv2.imread(image_path)
@@ -237,13 +252,26 @@ def segment_characters(image_path: str, conf_threshold: float = 0.25) -> np.ndar
                 return np.zeros(img.shape[:2], dtype=np.uint8)
             return None
 
-        height, width = result.orig_shape[0], result.orig_shape[1]
+        if hasattr(result, "orig_shape") and result.orig_shape is not None:
+            height, width = int(result.orig_shape[0]), int(result.orig_shape[1])
+        else:
+            img = cv2.imread(image_path)
+            if img is not None:
+                height, width = img.shape[:2]
+            else:
+                logger.warning(f"Could not determine image dimensions for YOLO character segmentation: {image_path}")
+                return None
+
         combined_mask = np.zeros((height, width), dtype=np.uint8)
 
         # Merge masks for multiple characters (class index 0 for person in COCO)
         for i, mask_instance in enumerate(result.masks.data):
-            cls_id = int(result.boxes.cls[i].item())
-            confidence = float(result.boxes.conf[i].item())
+            if hasattr(result, "boxes") and result.boxes is not None and hasattr(result.boxes, "cls") and len(result.boxes.cls) > i and hasattr(result.boxes, "conf") and len(result.boxes.conf) > i:
+                cls_id = int(result.boxes.cls[i].item())
+                confidence = float(result.boxes.conf[i].item())
+            else:
+                cls_id = 0
+                confidence = 1.0
 
             # Check if class is person (character) and meets confidence threshold
             if cls_id == 0 and confidence >= conf_threshold:

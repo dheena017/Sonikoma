@@ -8,6 +8,7 @@ easyocr==1.7.2
 fastapi>=0.110.0
 google_api_python_client==2.198.0
 google_auth_oauthlib==1.4.0
+google-genai
 httpx==0.28.1
 huggingface_hub==1.21.0
 moviepy==1.0.3
@@ -22,6 +23,7 @@ psycopg2_binary==2.9.12
 pydantic==2.13.4
 email-validator
 python-multipart
+edge-tts
 pydub==0.25.1
 PyJWT==2.13.0
 python-dotenv==1.2.2
@@ -39,3 +41,4 @@ uvicorn
 wand==0.7.2
 matplotlib>=3.9.0
 numba>=0.59.0
+librosa

@@ -351,6 +351,10 @@ except (ModuleNotFoundError, ImportError):
 
 root_logger.setLevel(logging.INFO)
 logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
+logging.getLogger("huggingface_hub.utils").setLevel(logging.ERROR)
+logging.getLogger("huggingface_hub.utils._http").setLevel(logging.ERROR)
+logging.getLogger("sonikoma.services.image.magick").setLevel(logging.ERROR)
+logging.getLogger("sonikoma.services.image.imagemagick").setLevel(logging.ERROR)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 # Silence noisy third-party libraries

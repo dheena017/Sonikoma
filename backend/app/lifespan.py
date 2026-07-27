@@ -113,11 +113,11 @@ async def lifespan(app: FastAPI):
         try:
             from providers.vision.sam import get_rembg_session
             from providers.vision.yolo import get_yolo_model
-            logger.info("[Startup] Pre-warming rembg U-2-Net session...")
+            logger.debug("[Startup] Pre-warming rembg U-2-Net session...")
             await asyncio.to_thread(get_rembg_session)
-            logger.info("[Startup] Pre-warming YOLO manga-segmentation model...")
+            logger.debug("[Startup] Pre-warming YOLO manga-segmentation model...")
             await asyncio.to_thread(get_yolo_model)
-            logger.info("[Startup] rembg U-2-Net and YOLO models pre-warmed successfully — first request will be fast.")
+            logger.debug("[Startup] rembg U-2-Net and YOLO models pre-warmed successfully — first request will be fast.")
         except Exception as e:
             logger.warning(f"[Startup] Model pre-warm failed (non-critical, will lazy-load on first request): {e}")
 
@@ -128,7 +128,7 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"[Startup] Failed to start training data monitor service: {e}")
 
-    asyncio.create_task(_startup_maintenance())
+    await _startup_maintenance()
 
     # Purge stale temporary workspace directories
     _clean_temp_workspace()

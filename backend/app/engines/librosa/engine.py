@@ -65,7 +65,7 @@ class LibrosaEngine:
         self.sr = sr
         self.hop_length = 512
         self.n_fft = 2048
-        logger.info(f"✓ Librosa Engine initialized (sr={sr}Hz, hop_length={self.hop_length})")
+        logger.debug(f"✓ Librosa Engine initialized (sr={sr}Hz, hop_length={self.hop_length})")
 
     async def load_audio(self, audio_path: str, duration: Optional[float] = None) -> Tuple[np.ndarray, int]:
         if librosa is None:
