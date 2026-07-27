@@ -30,24 +30,25 @@ from schemas.ai import (
     BatchGenerateRequest,
 )
 from services.ai.facade import facade_analyze_image, facade_smart_crop
-from engines.stable_diffusion import get_stable_diffusion_engine
 
 logger = logging.getLogger("sonikoma.api.ai.image")
 
 router = APIRouter()
-try:
-    stable_diffusion = get_stable_diffusion_engine()
-except ImportError:
-    stable_diffusion = None
-    logger.warning('Stable Diffusion engine could not be initialized.')
+stable_diffusion = None
 
 
 def _get_sd_engine():
+    global stable_diffusion
     if stable_diffusion is None:
-        raise HTTPException(
-            status_code=503,
-            detail="Stable Diffusion engine is not available. Please ensure diffusers, torch, and Pillow are installed."
-        )
+        try:
+            from engines.stable_diffusion import get_stable_diffusion_engine
+            stable_diffusion = get_stable_diffusion_engine()
+        except Exception as e:
+            logger.warning(f"Stable Diffusion engine could not be initialized: {e}")
+            raise HTTPException(
+                status_code=503,
+                detail="Stable Diffusion engine is not available. Please ensure diffusers, torch, and Pillow are installed."
+            )
     return stable_diffusion
 
 

@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException
 
 from core.cache import edit_history
 from schemas.image import EditImageRequest, UndoEditRequest
-from services.image.image_service import apply_image_edits_service
+from services.image.processing.edit import apply_image_edits_service
 
 logger = logging.getLogger("sonikoma.api.images.edit")
 router = APIRouter()

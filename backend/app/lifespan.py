@@ -128,7 +128,8 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"[Startup] Failed to start training data monitor service: {e}")
 
-    await _startup_maintenance()
+    # Launch background maintenance non-blocking so backend starts listening instantly
+    asyncio.create_task(_startup_maintenance())
 
     # Purge stale temporary workspace directories
     _clean_temp_workspace()

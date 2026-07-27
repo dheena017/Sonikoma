@@ -8,7 +8,6 @@ Endpoints for extracting image metadata and performing OCR dialogue extraction.
 import logging
 from fastapi import APIRouter, HTTPException
 
-from media.image.ocr import extract_dialogue_from_panel, extract_full_ocr_data
 from schemas.image import MetadataRequest, OCRBase64Request
 import services.image.utils.image_utils as img_utils
 
@@ -41,6 +40,7 @@ async def get_image_metadata(body: MetadataRequest):
 @router.post("/extract", summary="Extract speech dialogue transcriptions sequentially from panel URL")
 async def extract_text(body: MetadataRequest):
     try:
+        from media.image.ocr import extract_dialogue_from_panel
         dialogue = await extract_dialogue_from_panel(body.url)
         return {"success": True, "dialogue": dialogue}
     except Exception as e:
@@ -51,6 +51,7 @@ async def extract_text(body: MetadataRequest):
 @router.post("/extract-full", summary="Extract full bounding-box dialogue map sequentially from panel URL")
 async def extract_full_text(body: MetadataRequest):
     try:
+        from media.image.ocr import extract_full_ocr_data
         full_data = await extract_full_ocr_data(body.url)
         return {"success": True, "ocr_data": full_data}
     except Exception as e:

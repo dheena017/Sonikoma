@@ -17,8 +17,6 @@ import uuid
 from fastapi import APIRouter, HTTPException
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from services.compound.compound_processor import get_compound_processor
-
 logger = logging.getLogger("sonikoma.routes.compound_routes")
 compound_router = APIRouter()
 router = compound_router
@@ -28,6 +26,7 @@ processor = None
 def _get_processor():
     global processor
     if processor is None:
+        from services.compound.compound_processor import get_compound_processor
         processor = get_compound_processor()
     return processor
 

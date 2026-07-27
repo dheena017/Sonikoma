@@ -28,10 +28,6 @@ from services.image.processing.compose import (
     execute_splits_service,
     download_zip_service,
 )
-from services.image.layers import (
-    extract_panel_layers_service,
-    debug_yolo_detections_service,
-)
 from services.image.processing.bubbles import (
     bubble_cleaning_service,
     bubble_cleaning_batch_service,
@@ -48,6 +44,14 @@ from services.image.magick import (
     ResizeMode,
     FilterType,
 )
+
+async def extract_panel_layers_service(*args, **kwargs):
+    from services.image.layers import extract_panel_layers_service as _impl
+    return await _impl(*args, **kwargs)
+
+async def debug_yolo_detections_service(*args, **kwargs):
+    from services.image.layers import debug_yolo_detections_service as _impl
+    return await _impl(*args, **kwargs)
 
 __all__ = [
     # edit
