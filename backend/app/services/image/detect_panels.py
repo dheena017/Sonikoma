@@ -143,13 +143,15 @@ def run_cv_detection(
             from providers.vision.yolo import get_yolo_model
             yolo_model = get_yolo_model()
             if yolo_model is not None:
-                results = yolo_model.predict(image_path, conf=yolo_conf, verbose=False)
-                if results and len(results) > 0:
+                raw_results = yolo_model.predict(image_path, conf=yolo_conf, verbose=False)
+                results = list(raw_results) if raw_results is not None else []
+                if results:
                     result = results[0]
-                    if result.boxes is not None:
+                    boxes = getattr(result, "boxes", None)
+                    if boxes is not None:
                         yolo_count = 0
                         min_w_px = int(orig_w * scaled_min_width_pct)
-                        for box_instance in result.boxes:
+                        for box_instance in boxes:  # type: ignore
                             coords = box_instance.xyxy[0].cpu().numpy()
                             conf_score = float(box_instance.conf[0].cpu().numpy()) if box_instance.conf is not None else 0.8
                             bx1, by1, bx2, by2 = coords
@@ -194,7 +196,7 @@ def run_cv_detection(
     is_white_bg, threshold_val = _detect_bg_color_and_threshold(gray_arr_processed, bg_mode, sensitivity)
     is_tall_strip = (h / max(1, w) > 1.2)
 
-    passes = [False, True] if has_cv else [False]
+    passes = [False] if (auto_split and is_tall_strip) else ([False, True] if has_cv else [False])
     raw_boxes: List[Dict[str, Any]] = []
     merged_boxes: List[Dict[str, Any]] = []
 
@@ -235,8 +237,9 @@ def run_cv_detection(
                     })
 
         min_w = w * scaled_min_width_pct
+        effective_merge_thresh = 0 if (auto_split and is_tall_strip) else merge_threshold
         filtered_boxes = _filter_solid_noise(raw_boxes, gray_arr_processed, min_w, scaled_min_height_px, auto_split)
-        merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, merge_threshold)
+        merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, effective_merge_thresh)
 
         if bg_mode == "white":
             median_bg = 255.0
@@ -253,13 +256,17 @@ def run_cv_detection(
             ])
             median_bg = float(np.median(edge_samples))
 
-        trimmed_boxes = []
-        for box in merged_boxes:
-            bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
-            tx, ty, tw, th = trim_solid_borders(gray_arr_processed, bx, by, bw, bh, bg_mode, median_bg)
-            if tw >= 15 and th >= 15:
-                trimmed_boxes.append({"x": tx, "y": ty, "w": tw, "h": th})
-        merged_boxes = merge_overlapping_boxes(trimmed_boxes, w, h, merge_threshold)
+        if auto_split and is_tall_strip:
+            # Webtoon strips preserve full horizontal width and continuous scene heights
+            trimmed_boxes = [{"x": 0, "y": box["y"], "w": w, "h": box["h"]} for box in merged_boxes]
+        else:
+            trimmed_boxes = []
+            for box in merged_boxes:
+                bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
+                tx, ty, tw, th = trim_solid_borders(gray_arr_processed, bx, by, bw, bh, bg_mode, median_bg)
+                if tw >= 15 and th >= 15:
+                    trimmed_boxes.append({"x": tx, "y": ty, "w": tw, "h": th})
+        merged_boxes = merge_overlapping_boxes(trimmed_boxes, w, h, effective_merge_thresh)
 
         if len(merged_boxes) > 0:
             has_irregular = False
@@ -296,10 +303,8 @@ def run_cv_detection(
         bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
         
         if auto_split and is_tall_strip:
-            pad_by = max(0, by - 8)
-            pad_ey = min(h, by + bh + 8)
-            by = pad_by
-            bh = pad_ey - pad_by
+            bx = 0
+            bw = w
             
         bx += crop_x
         by += crop_y
@@ -387,14 +392,25 @@ def run_cv_detection(
     unique_panels = []
     for panel in sorted_panels:
         is_dup = False
+        py1, py2 = panel["y"], panel["y"] + panel["height"]
+        p_area = max(1, panel["height"] * panel["width"])
+        
         for existing in unique_panels:
+            ey1, ey2 = existing["y"], existing["y"] + existing["height"]
+            e_area = max(1, existing["height"] * existing["width"])
+            
+            # Calculate vertical overlap
+            y_inter = max(0, min(py2, ey2) - max(py1, ey1))
+            min_h = min(panel["height"], existing["height"])
+            overlap_ratio = y_inter / float(min_h) if min_h > 0 else 0.0
+            
             dt = abs(panel["cropTop"] - existing["cropTop"])
             db = abs(panel["cropBottom"] - existing["cropBottom"])
-            dl = abs(panel["cropLeft"] - existing["cropLeft"])
-            dr = abs(panel["cropRight"] - existing["cropRight"])
-            if dt < 1.5 and db < 1.5 and dl < 1.5 and dr < 1.5:
+            
+            if (dt < 4.0 and db < 4.0) or (overlap_ratio > 0.70):
                 is_dup = True
                 break
+                
         if not is_dup:
             unique_panels.append(panel)
 

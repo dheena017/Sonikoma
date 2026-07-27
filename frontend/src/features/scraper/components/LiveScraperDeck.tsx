@@ -1177,9 +1177,13 @@ const LiveScraperDeck = React.memo(
                        );
                      })}
 
-                     {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
-                        <ExtractingPanelSkeleton key={`loading-skeleton-${num}`} index={num} isScroll={false} />
-                     ))}
+                     {isScraping && (
+                       <ExtractingPanelSkeleton
+                         key={`loading-skeleton-${scrapedImages.length + 1}`}
+                         index={scrapedImages.length + 1}
+                         isScroll={false}
+                       />
+                     )}
                    </div>
                  );
               })()}

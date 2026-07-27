@@ -62,6 +62,8 @@ def spoof_referer(url: str) -> str:
             return "https://manhwatop.com/"
         if "manhuato" in host or "manhua" in host:
             return "https://manhuato.com/"
+        if "zinmanga" in host:
+            return "https://zinmanga.com/"
 
         # Remove CDN prefixes (cdn4., img2., etc.)
         clean_host = re.sub(r'^(?:cdn\d*|img\d*|images\d*|pic\d*|pics\d*|static\d*|assets\d*|media\d*|uploads\d*|files\d*|storage\d*)\.', '', host, flags=re.IGNORECASE)

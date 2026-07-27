@@ -108,6 +108,7 @@ const pythonPathEnv = [backendDir, projectRootDir].join(path.delimiter);
 
 let pyProcess = null;
 let isExiting = false;
+let isRestarting = false;
 
 function handleBackendExit(proc, code) {
   if (proc !== pyProcess) return; // Ignore old killed processes

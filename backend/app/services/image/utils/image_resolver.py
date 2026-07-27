@@ -66,6 +66,8 @@ def spoof_referer(url: str) -> str:
             return "https://manhwatop.com/"
         if "manhuato" in host or "manhua" in host:
             return "https://manhuato.com/"
+        if "zinmanga" in host:
+            return "https://zinmanga.com/"
 
         # Remove CDN prefixes (cdn4., img2., etc.)
         clean_host = re.sub(r'^(?:cdn\d*|img\d*|images\d*|pic\d*|pics\d*|static\d*|assets\d*|media\d*|uploads\d*|files\d*|storage\d*)\.', '', host, flags=re.IGNORECASE)
@@ -88,7 +90,11 @@ def get_alternate_referer(url: str) -> Optional[str]:
         return None
 
 
-async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient] = None) -> Dict[str, Any]:
+async def resolve_url_to_buffer(
+    url_str: str,
+    client: Optional[httpx.AsyncClient] = None,
+    referer: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Resolve ANY URL (absolute, relative, /api/merge-images/cached, proxied)
     into a raw bytes + contentType. Can be used for images or audio files.
@@ -198,15 +204,30 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
 
     parsed_working = urlparse(working_url)
 
-    # Build referer list: alternate (number-stripped) first so zinmanga1.com → zinmanga.com
-    # is tried before the cdn-prefixed form which is more likely to fail
+    # Build referer list: custom referer first, then topmanhua/alternate variants
     alternate = get_alternate_referer(working_url)
     primary = spoof_referer(working_url)
     origin = f"{parsed_working.scheme}://{parsed_working.hostname}/" if parsed_working.hostname else None
+
+    custom_ref_origin = None
+    if referer:
+        try:
+            pref = urlparse(referer)
+            if pref.scheme and pref.netloc:
+                custom_ref_origin = f"{pref.scheme}://{pref.netloc}/"
+        except Exception:
+            pass
+
     referer_candidates = [
+        referer,
+        custom_ref_origin,
+        "https://www.topmanhua.fan/",
+        "https://topmanhua.fan/",
         alternate,
         primary,
         origin,
+        "https://manhwatop.com/",
+        "https://manhuato.com/",
         "https://www.google.com/",
         None,
     ]
@@ -271,5 +292,9 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
             return await _fetch_remote(remote_client)
 
 
-async def resolve_image_to_buffer(url_str: str, client: Optional[httpx.AsyncClient] = None) -> Dict[str, Any]:
-    return await resolve_url_to_buffer(url_str, client)
+async def resolve_image_to_buffer(
+    url_str: str,
+    client: Optional[httpx.AsyncClient] = None,
+    referer: Optional[str] = None
+) -> Dict[str, Any]:
+    return await resolve_url_to_buffer(url_str, client, referer)
