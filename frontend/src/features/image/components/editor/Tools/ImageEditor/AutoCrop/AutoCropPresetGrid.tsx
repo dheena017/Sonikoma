@@ -15,8 +15,8 @@ export function AutoCropPresetGrid({
 }: Props) {
   const border = (slot: string) =>
     activeSlot === slot
-      ? "border-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.12)]"
-      : "border-neutral-800 hover:border-neutral-700";
+      ? "border-emerald-500/80 bg-emerald-950/20 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30"
+      : "border-neutral-800/80 bg-neutral-900/60 hover:border-neutral-700 hover:bg-neutral-900";
 
   const presets = [
     {
@@ -116,7 +116,7 @@ export function AutoCropPresetGrid({
         <button
           onClick={autoOptimize}
           disabled={!firstImageUrl}
-          className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[8px] font-bold uppercase hover:bg-emerald-500/20 transition-all disabled:opacity-20"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] font-bold uppercase hover:bg-emerald-500/20 transition-all disabled:opacity-20 cursor-pointer"
         >
           <Wand2 className="h-2.5 w-2.5" />
           Auto-Optimize
@@ -128,14 +128,14 @@ export function AutoCropPresetGrid({
             key={p.id}
             type="button"
             onClick={() => applyPreset({ ...p.config, id: p.id })}
-            className={`bg-neutral-950/40 border px-3 py-2.5 sm:px-4 sm:py-3.5 rounded-xl sm:rounded-2xl text-left transition-all cursor-pointer ${border(
+            className={`border px-3.5 py-3 sm:px-4 sm:py-3.5 rounded-2xl text-left transition-all duration-200 cursor-pointer ${border(
               p.id
             )}`}
           >
             <span className="text-[11px] font-bold text-white block">
               {p.label}
             </span>
-            <span className="text-[9px] text-neutral-500 font-sans block mt-0.5">
+            <span className="text-[9px] text-neutral-400 font-sans block mt-0.5">
               {p.sub}
             </span>
           </button>

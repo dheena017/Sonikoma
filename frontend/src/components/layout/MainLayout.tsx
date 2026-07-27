@@ -140,6 +140,7 @@ export interface MainLayoutProps {
   seriesSlugState: string | null;
   chapterSlugState: string | null;
   showAutoCropModal: boolean;
+  showBubbleModal?: boolean;
 }
 
 export default function MainLayout(props: MainLayoutProps) {
@@ -254,6 +255,7 @@ export default function MainLayout(props: MainLayoutProps) {
     seriesSlugState,
     chapterSlugState,
     showAutoCropModal,
+    showBubbleModal = false,
   } = props;
 
   const isWorkspacePath =
@@ -362,7 +364,11 @@ export default function MainLayout(props: MainLayoutProps) {
       <div
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between transition-all duration-300 ${
-          !isAnyAdmin ? "lg:overflow-y-auto" : "overflow-y-auto"
+          showAutoCropModal || showBubbleModal
+            ? "overflow-hidden"
+            : !isAnyAdmin
+            ? "lg:overflow-y-auto"
+            : "overflow-y-auto"
         } ${!isAnyAdmin && isSidebarOpen ? "overflow-hidden" : ""}`}
       >
         {/* Top Header */}

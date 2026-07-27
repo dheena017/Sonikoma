@@ -170,15 +170,26 @@ export function useAppState() {
   const [cropPaddingPx, setCropPaddingPx] = useState<number>(
     () => parseInt(localStorage.getItem("ai_crop_padding") || "10", 10)
   );
-  const [cropBackgroundMode, setCropBackgroundMode] = useState<string>("auto");
-  const [autoSplitTallStrips, setAutoSplitTallStrips] = useState<boolean>(true);
+  const [cropBackgroundMode, setCropBackgroundMode] = useState<string>(
+    () => localStorage.getItem("ai_crop_bg_mode") || "auto"
+  );
+  const [autoSplitTallStrips, setAutoSplitTallStrips] = useState<boolean>(
+    () => localStorage.getItem("ai_crop_auto_split") !== "false"
+  );
   const [processingStrategy, setProcessingStrategy] =
     useState<string>("balanced");
-  const [aspectRatioLock, setAspectRatioLock] = useState<string>("free");
-  const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(2);
-  const [overlapMergeThreshold, setOverlapMergeThreshold] =
-    useState<number>(20);
-  const [useLocalCV, setUseLocalCV] = useState<boolean>(true);
+  const [aspectRatioLock, setAspectRatioLock] = useState<string>(
+    () => localStorage.getItem("ai_crop_aspect_ratio") || "free"
+  );
+  const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(
+    () => parseFloat(localStorage.getItem("ai_crop_min_area") || "2.0")
+  );
+  const [overlapMergeThreshold, setOverlapMergeThreshold] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_crop_merge_thresh") || "20", 10)
+  );
+  const [useLocalCV, setUseLocalCV] = useState<boolean>(
+    () => localStorage.getItem("ai_crop_use_local_cv") !== "false"
+  );
   const [isBatchCropping, setIsBatchCropping] = useState<boolean>(false);
   const [batchProgress, setBatchProgress] = useState<{
     current: number;
@@ -188,15 +199,63 @@ export function useAppState() {
   const [cropModel, setCropModel] = useState<string>(
     () => localStorage.getItem("ai_crop_model") || "gemini-2.0-flash-lite"
   );
-  const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(60);
-  const [cropCannyLow, setCropCannyLow] = useState<number>(20);
-  const [cropCannyHigh, setCropCannyHigh] = useState<number>(100);
-  const [cropCloseKernelSize, setCropCloseKernelSize] = useState<number>(15);
+  const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_crop_min_height") || "60", 10)
+  );
+  const [cropCannyLow, setCropCannyLow] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_crop_canny_low") || "20", 10)
+  );
+  const [cropCannyHigh, setCropCannyHigh] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_crop_canny_high") || "100", 10)
+  );
+  const [cropCloseKernelSize, setCropCloseKernelSize] = useState<number>(
+    () => parseInt(localStorage.getItem("ai_crop_close_kernel") || "15", 10)
+  );
   const [activeAutoCropTab, setActiveAutoCropTab] = useState<string>("general");
-  const [cropGuidance, setCropGuidance] = useState<string>("");
+  const [cropGuidance, setCropGuidance] = useState<string>(
+    () => localStorage.getItem("ai_crop_guidance") || ""
+  );
   const [cropFocusMode, setCropFocusMode] = useState<string>(
     () => localStorage.getItem("ai_crop_focus_mode") || "standard"
   );
+
+  // Sync auto crop configuration to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("ai_crop_use_local_cv", String(useLocalCV));
+      localStorage.setItem("ai_crop_sensitivity", String(cropSensitivity));
+      localStorage.setItem("ai_crop_padding", String(cropPaddingPx));
+      localStorage.setItem("ai_crop_bg_mode", cropBackgroundMode);
+      localStorage.setItem("ai_crop_auto_split", String(autoSplitTallStrips));
+      localStorage.setItem("ai_crop_aspect_ratio", aspectRatioLock);
+      localStorage.setItem("ai_crop_min_area", String(minPanelAreaPct));
+      localStorage.setItem("ai_crop_merge_thresh", String(overlapMergeThreshold));
+      localStorage.setItem("ai_crop_model", cropModel);
+      localStorage.setItem("ai_crop_min_height", String(cropMinHeightPx));
+      localStorage.setItem("ai_crop_canny_low", String(cropCannyLow));
+      localStorage.setItem("ai_crop_canny_high", String(cropCannyHigh));
+      localStorage.setItem("ai_crop_close_kernel", String(cropCloseKernelSize));
+      localStorage.setItem("ai_crop_guidance", cropGuidance);
+      localStorage.setItem("ai_crop_focus_mode", cropFocusMode);
+    } catch (_) {}
+  }, [
+    useLocalCV,
+    cropSensitivity,
+    cropPaddingPx,
+    cropBackgroundMode,
+    autoSplitTallStrips,
+    aspectRatioLock,
+    minPanelAreaPct,
+    overlapMergeThreshold,
+    cropModel,
+    cropMinHeightPx,
+    cropCannyLow,
+    cropCannyHigh,
+    cropCloseKernelSize,
+    cropGuidance,
+    cropFocusMode,
+  ]);
+
   const [showScrapeConfirmModal, setShowScrapeConfirmModal] =
     useState<boolean>(false);
   const [accumulatedTokens, setAccumulatedTokens] = useState<number>(0);

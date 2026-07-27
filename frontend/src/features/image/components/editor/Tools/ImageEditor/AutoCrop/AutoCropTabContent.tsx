@@ -4,9 +4,7 @@
  */
 import React from "react";
 import { AutoCropGeneralTab } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropGeneralTab";
-import { AutoCropLayoutTab } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropLayoutTab";
 import { AutoCropAdvancedTab } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropAdvancedTab";
-import { AutoCropHelpTab } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropHelpTab";
 
 export interface AutoCropTabContentProps {
   activeTab: string;
@@ -53,26 +51,6 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
   return (
     <div className="flex-1 overflow-y-auto pr-2 space-y-6 relative">
       {activeTab === "general" && <AutoCropGeneralTab {...props} />}
-      {activeTab === "layout" && (
-        <AutoCropLayoutTab
-          cropPaddingPx={props.cropPaddingPx}
-          setCropPaddingPx={props.setCropPaddingPx}
-          cropBackgroundMode={props.cropBackgroundMode}
-          setCropBackgroundMode={props.setCropBackgroundMode}
-          aspectRatioLock={props.aspectRatioLock}
-          setAspectRatioLock={props.setAspectRatioLock}
-          scrapedImages={props.scrapedImages}
-          selectedScraped={props.selectedScraped}
-          autoSplitTallStrips={props.autoSplitTallStrips}
-          overlapMergeThreshold={props.overlapMergeThreshold}
-          cropSensitivity={props.cropSensitivity}
-          cropCannyLow={props.cropCannyLow}
-          cropCannyHigh={props.cropCannyHigh}
-          cropCloseKernelSize={props.cropCloseKernelSize}
-          addNotification={props.addNotification}
-          previewImageUrl={props.previewImageUrl}
-        />
-      )}
       {activeTab === "advanced" && (
         <AutoCropAdvancedTab
           useLocalCV={props.useLocalCV}
@@ -101,7 +79,6 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
           previewImageUrl={props.previewImageUrl}
         />
       )}
-      {activeTab === "help" && <AutoCropHelpTab />}
     </div>
   );
 }

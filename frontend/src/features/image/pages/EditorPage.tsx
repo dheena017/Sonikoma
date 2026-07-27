@@ -160,6 +160,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
     setCropSensitivity,
     cropPaddingPx,
     setCropPaddingPx,
+    cropGuidance,
+    setCropGuidance,
     cropFocusMode,
     setCropFocusMode,
     cropBackgroundMode,
@@ -817,6 +819,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       bubbleDilation={bubbleDilation}
                       bubbleInpaintRadius={bubbleInpaintRadius}
                       cropSensitivity={cropSensitivity}
+                      cropPaddingPx={cropPaddingPx}
                       cropBackgroundMode={cropBackgroundMode}
                       aspectRatioLock={aspectRatioLock}
                       minPanelAreaPct={minPanelAreaPct}
@@ -829,6 +832,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       cropCannyHigh={cropCannyHigh}
                       cropCloseKernelSize={cropCloseKernelSize}
                       autoSplitTallStrips={autoSplitTallStrips}
+                      cropGuidance={cropGuidance}
+                      cropFocusMode={cropFocusMode}
                       handleCancelBatch={handleCancelBatch}
                       audioFeedback={audioFeedback}
                       selectedPanelIds={selectedPanelIds}

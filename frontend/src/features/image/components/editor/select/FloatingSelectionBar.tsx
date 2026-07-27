@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
   Brain,
   Trash,
+  Settings2,
 } from "lucide-react";
 import * as api from "@/api";
 import { useProjectStore } from "@/store/useProjectStore";
@@ -1221,15 +1222,30 @@ export function FloatingSelectionBar({
                     Stop Crop
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={handleAutoCropSelected}
-                    disabled={isAnyBusy || busyLocal}
-                    className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 rounded-xl"
-                  >
-                    <Scissors className="h-4 w-4 text-purple-400" />
-                    Auto-Crop
-                  </button>
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={handleAutoCropSelected}
+                      disabled={isAnyBusy || busyLocal}
+                      className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 rounded-l-xl border-r-0"
+                    >
+                      <Scissors className="h-4 w-4 text-purple-400" />
+                      Auto-Crop
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        console.log("[FloatingSelectionBar] Opening AutoCrop modal");
+                        setShowAutoCropModal?.(true);
+                      }}
+                      className="px-2 py-2 text-xs font-bold flex items-center justify-center cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 rounded-r-xl"
+                      title="Auto-Crop Settings"
+                    >
+                      <Settings2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 )}
 
                 {/* Clean Bubbles */}

@@ -228,38 +228,36 @@ export function AutoCropEngineSelector({
         <button
           type="button"
           onClick={() => setUseLocalCV(true)}
-          className={`group flex flex-col gap-2 p-5 rounded-2xl border text-left transition-all duration-300 cursor-pointer select-none relative overflow-hidden ${
+          className={`group flex flex-col gap-2.5 p-4 sm:p-5 rounded-2xl border text-left transition-all duration-300 cursor-pointer select-none relative overflow-hidden ${
             useLocalCV
-              ? "bg-cyan-950/10 border-cyan-500/80 shadow-[0_0_20px_rgba(6,182,212,0.12)]"
-              : "bg-neutral-950/40 border-neutral-800 hover:border-neutral-700/80"
+              ? "bg-cyan-950/20 border-cyan-500/80 shadow-[0_0_24px_rgba(6,182,212,0.15)] ring-1 ring-cyan-500/30"
+              : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900"
           }`}
         >
           {useLocalCV && (
-            <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-28 h-28 bg-cyan-500/10 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none" />
           )}
           <div className="flex items-center justify-between w-full">
-            <span
-              className={`text-[11px] font-extrabold uppercase tracking-wider ${
-                useLocalCV ? "text-cyan-400" : "text-neutral-400"
-              }`}
-            >
-              OPENCV ONLY
-            </span>
-            <span
-              className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center transition-all ${
-                useLocalCV
-                  ? "border-cyan-400 bg-cyan-950 text-cyan-400"
-                  : "border-neutral-800 bg-neutral-900"
-              }`}
-            >
-              {useLocalCV && (
-                <div className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-              )}
+            <div className="flex items-center gap-2">
+              <span className={`text-[12px] font-bold uppercase tracking-wider ${
+                useLocalCV ? "text-cyan-400" : "text-white"
+              }`}>
+                OpenCV Engine
+              </span>
+              <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                useLocalCV ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30" : "bg-neutral-800 text-neutral-400"
+              }`}>
+                Offline · Fast
+              </span>
+            </div>
+            <span className={`h-4 w-4 rounded-full border flex items-center justify-center transition-all ${
+              useLocalCV ? "border-cyan-400 bg-cyan-950 text-cyan-400" : "border-neutral-700 bg-neutral-900"
+            }`}>
+              {useLocalCV && <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />}
             </span>
           </div>
-          <p className="text-[10px] text-neutral-400 leading-relaxed font-sans font-medium">
-            Local Python edge and contour finder. Uses Canny filtering for fast
-            page gutter cutting. Offline capable, fast, and completely reliable.
+          <p className="text-[11px] text-neutral-400 leading-relaxed font-sans font-medium">
+            Local Python edge and contour detection using Canny filtering. Works 100% offline with zero API limits.
           </p>
         </button>
 
@@ -267,41 +265,36 @@ export function AutoCropEngineSelector({
         <button
           type="button"
           onClick={() => setUseLocalCV(false)}
-          className={`group flex flex-col gap-2 p-5 rounded-2xl border text-left transition-all duration-300 cursor-pointer select-none relative overflow-hidden ${
+          className={`group flex flex-col gap-2.5 p-4 sm:p-5 rounded-2xl border text-left transition-all duration-300 cursor-pointer select-none relative overflow-hidden ${
             !useLocalCV
-              ? "bg-indigo-950/10 border-indigo-500/80 shadow-[0_0_20px_rgba(99,102,241,0.12)]"
-              : "bg-neutral-950/40 border-neutral-800 hover:border-neutral-700/80"
+              ? "bg-indigo-950/20 border-indigo-500/80 shadow-[0_0_24px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/30"
+              : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900"
           }`}
         >
           {!useLocalCV && (
-            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none animate-pulse" />
+            <div className="absolute top-0 right-0 w-28 h-28 bg-indigo-500/10 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none animate-pulse" />
           )}
           <div className="flex items-center justify-between w-full">
-            <span
-              className={`text-[11px] font-extrabold uppercase tracking-wider ${
-                !useLocalCV
-                  ? "text-indigo-400 animate-pulse"
-                  : "text-neutral-400"
-              }`}
-            >
-              SMART SCANNER
-            </span>
-            <span
-              className={`h-3.5 w-3.5 rounded-full border flex items-center justify-center transition-all ${
-                !useLocalCV
-                  ? "border-indigo-400 bg-indigo-950 text-indigo-400"
-                  : "border-neutral-800 bg-neutral-900"
-              }`}
-            >
-              {!useLocalCV && (
-                <div className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-              )}
+            <div className="flex items-center gap-2">
+              <span className={`text-[12px] font-bold uppercase tracking-wider ${
+                !useLocalCV ? "text-indigo-400" : "text-white"
+              }`}>
+                AI Vision Scanner
+              </span>
+              <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                !useLocalCV ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30" : "bg-neutral-800 text-neutral-400"
+              }`}>
+                Gemini LLM
+              </span>
+            </div>
+            <span className={`h-4 w-4 rounded-full border flex items-center justify-center transition-all ${
+              !useLocalCV ? "border-indigo-400 bg-indigo-950 text-indigo-400" : "border-neutral-700 bg-neutral-900"
+            }`}>
+              {!useLocalCV && <div className="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_6px_rgba(99,102,241,0.8)]" />}
             </span>
           </div>
-          <p className="text-[10px] text-neutral-400 leading-relaxed font-sans font-medium">
-            Vision LLM segmentation. Understands panel layouts semantically,
-            ignoring overlapping speech balloons, background splash lines, and
-            complex gutters.
+          <p className="text-[11px] text-neutral-400 leading-relaxed font-sans font-medium">
+            Vision LLM panel segmentation. Understands complex comic layouts, overlapping speech balloons, and splash art.
           </p>
         </button>
       </div>

@@ -6,9 +6,8 @@ import {
   Sparkles,
   RotateCcw,
   Cpu,
-  Maximize2,
   Sliders,
-  HelpCircle,
+  Layers,
 } from "lucide-react";
 import AutoCropTabContent from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropTabContent";
 
@@ -118,6 +117,50 @@ export default function AutoCropModal({
       ? scrapedImages[0]
       : null);
 
+  // Lock body, html, and main container scroll when modal is open so only the modal contents scroll
+  React.useEffect(() => {
+    if (!isPage) {
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+
+      // Lock all background scroll containers (like <main> in MainLayout)
+      const scrollContainers = document.querySelectorAll("main, .overflow-y-auto");
+      const originalContainerStyles: { elem: HTMLElement; overflow: string }[] = [];
+
+      scrollContainers.forEach((el) => {
+        const elem = el as HTMLElement;
+        if (!elem.closest(".fixed.inset-0")) {
+          originalContainerStyles.push({ elem, overflow: elem.style.overflow });
+          elem.style.overflow = "hidden";
+        }
+      });
+
+      const preventBackgroundScroll = (e: WheelEvent | TouchEvent) => {
+        const target = e.target as HTMLElement | null;
+        // If event target is NOT inside the modal container, block scrolling completely
+        if (!target || !target.closest(".fixed.inset-0")) {
+          e.preventDefault();
+        }
+      };
+
+      window.addEventListener("wheel", preventBackgroundScroll, { passive: false });
+      window.addEventListener("touchmove", preventBackgroundScroll, { passive: false });
+
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+        window.removeEventListener("wheel", preventBackgroundScroll);
+        window.removeEventListener("touchmove", preventBackgroundScroll);
+        originalContainerStyles.forEach(({ elem, overflow }) => {
+          elem.style.overflow = overflow;
+        });
+      };
+    }
+  }, [isPage]);
+
   const handleResetAll = () => {
     console.log("[AutoCropModal] Resetting all parameters to defaults");
     setSensitivity(30);
@@ -145,70 +188,175 @@ export default function AutoCropModal({
   const tabs = [
     { id: "general", label: "General", icon: <Cpu className="h-3.5 w-3.5" /> },
     {
-      id: "layout",
-      label: "Layout & Guides",
-      icon: <Maximize2 className="h-3.5 w-3.5" />,
-    },
-    {
       id: "advanced",
       label: "Advanced CV",
       icon: <Sliders className="h-3.5 w-3.5" />,
-    },
-    {
-      id: "help",
-      label: "Help Guide",
-      icon: <HelpCircle className="h-3.5 w-3.5" />,
     },
   ];
 
   const mainCard = (
     <div className="bg-neutral-900 border border-neutral-800 sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full">
       {/* Header */}
-      <div className="px-4 py-4 sm:px-6 sm:py-5 border-b border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between bg-neutral-950/40 gap-4">
+      <div className="px-4 py-2.5 sm:px-5 sm:py-3 border-b border-neutral-800/80 flex flex-wrap items-center justify-between bg-neutral-950/80 backdrop-blur-md gap-3">
+        {/* Left: Title + Mode Badges + Selected Images info */}
         <div className="flex items-center gap-3">
-          <div className="icon-pill icon-pill--indigo">
-            <Scissors className="h-5 w-5" />
+          <div className="h-8 w-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+            <Scissors className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                Auto Panel Detection
+              </h3>
+              <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
+                useLocalCV 
+                  ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30" 
+                  : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"
+              }`}>
+                {useLocalCV ? "⚡ OpenCV Engine" : `🧠 AI (${cropModel})`}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[10px] text-neutral-400 font-sans">
+                Targeting: <strong className="text-neutral-200">{selectedScraped.length || scrapedImages.length}</strong> image{(selectedScraped.length || scrapedImages.length) === 1 ? "" : "s"}
+              </span>
+              <span className="text-neutral-700">•</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                Sens: <strong className="text-neutral-200">{sensitivity}%</strong>
+              </span>
+              <span className="text-neutral-700">•</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                Pad: <strong className="text-neutral-200">{padding}px</strong>
+              </span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-2 sm:gap-3">
+
+        {/* Right: Quick Controls & Close */}
+        <div className="flex items-center justify-end gap-2 sm:gap-2.5">
           <button
             type="button"
             onClick={handleResetAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-850 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-450 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-neutral-800 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer shrink-0"
+            title="Reset all settings to defaults"
           >
-            <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-neutral-500" />
+            <RotateCcw className="h-3 w-3 text-neutral-400" />
             <span className="hidden sm:inline">Reset Defaults</span>
             <span className="sm:hidden">Reset</span>
           </button>
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-white p-2 sm:p-1.5 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer shrink-0 bg-neutral-900 sm:bg-transparent"
+            className="text-neutral-400 hover:text-white p-1.5 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer shrink-0 bg-neutral-900/80 border border-neutral-800"
+            title="Close modal"
           >
-            <X className="h-4 w-4 sm:h-4 sm:w-4" />
+            <X className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Tab Selection Row */}
-      <div className="flex overflow-x-auto scrollbar-none border-b border-neutral-800 bg-neutral-950/20 px-2 sm:px-6 shrink-0 custom-scrollbar pb-1 sm:pb-0">
-        {tabs.map((tab) => (
+      {/* Compact Tabs & Quick Actions Row */}
+      <div className="flex flex-wrap items-center justify-between border-b border-neutral-800/80 bg-neutral-950/40 px-3 sm:px-5 py-1.5 sm:py-2 shrink-0 gap-2">
+        {/* Left: Tab Buttons */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                console.log(`[AutoCropModal] Switching to tab: ${tab.id}`);
+                setActiveTab(tab.id);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer select-none whitespace-nowrap ${
+                activeTab === tab.id
+                  ? "text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.15)]"
+                  : "text-neutral-400 border border-transparent hover:text-neutral-200 hover:bg-neutral-800/50"
+              }`}
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Right: Integrated Quick Actions & Controls */}
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+          {/* Quick Engine Switcher Pills */}
+          <div className="flex items-center bg-neutral-900/90 border border-neutral-800 rounded-lg p-0.5" title="Engine Strategy Mode">
+            <button
+              type="button"
+              onClick={() => setUseLocalCV(true)}
+              className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                useLocalCV
+                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                  : "text-neutral-500 hover:text-neutral-300"
+              }`}
+            >
+              OpenCV
+            </button>
+            <button
+              type="button"
+              onClick={() => setUseLocalCV(false)}
+              className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                !useLocalCV
+                  ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                  : "text-neutral-500 hover:text-neutral-300"
+              }`}
+            >
+              Gemini AI
+            </button>
+          </div>
+
+          {/* Background Gutter Mode Pills */}
+          <div className="flex items-center bg-neutral-900/90 border border-neutral-800 rounded-lg p-0.5" title="Background Gutter Mode">
+            {(["auto", "white", "black"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setBackgroundColorMode(mode)}
+                className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                  backgroundColorMode === mode
+                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                    : "text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+
+          {/* Aspect Ratio Lock Pills */}
+          <div className="flex items-center bg-neutral-900/90 border border-neutral-800 rounded-lg p-0.5" title="Aspect Ratio Lock Mode">
+            {(["free", "1:1", "16:9"] as const).map((ratio) => (
+              <button
+                key={ratio}
+                type="button"
+                onClick={() => setAspectRatioLock(ratio)}
+                className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                  aspectRatioLock === ratio
+                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                    : "text-neutral-500 hover:text-neutral-300"
+                }`}
+              >
+                {ratio}
+              </button>
+            ))}
+          </div>
+
+          {/* Auto-Split Strips Quick Toggle */}
           <button
-            key={tab.id}
             type="button"
-            onClick={() => {
-              console.log(`[AutoCropModal] Switching to tab: ${tab.id}`);
-              setActiveTab(tab.id);
-            }}
-            className={`relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-3 text-[10px] sm:text-xs font-bold font-mono transition-all border-b-2 cursor-pointer select-none whitespace-nowrap shrink-0 ${
-              activeTab === tab.id
-                ? "text-indigo-400 border-indigo-500 bg-indigo-500/5"
-                : "text-neutral-500 border-transparent hover:text-neutral-300 hover:bg-neutral-800/30"
+            onClick={() => setAutoSplitTallStrips(!autoSplitTallStrips)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
+              autoSplitTallStrips
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                : "bg-neutral-900/80 border-neutral-800 text-neutral-500 hover:text-neutral-300"
             }`}
+            title="Automatically split tall webtoon strips into separate scene panels"
           >
-            {tab.icon}
-            <span>{tab.label}</span>
+            <Layers className="h-3 w-3" />
+            <span>Auto-Split: {autoSplitTallStrips ? "ON" : "OFF"}</span>
           </button>
-        ))}
+        </div>
       </div>
 
       {/* Scrollable Body */}
@@ -253,61 +401,7 @@ export default function AutoCropModal({
         />
       </div>
 
-      {/* Scrollable Horizontal Preview Ribbon */}
-      {scrapedImages.length > 0 && (
-        <div className="px-6 py-3 border-t border-neutral-800 bg-neutral-950/35 flex flex-col gap-2 shrink-0 animate-[fadeIn_0.15s_ease-out]">
-          <span className="text-[9px] font-mono font-bold text-neutral-500 uppercase tracking-wider select-none">
-            All Scraped Panels ({scrapedImages.length})
-          </span>
-          <div className="flex flex-wrap gap-3 overflow-y-auto py-1.5 pr-2 scrollbar-thin max-h-28 sm:max-h-32">
-            {scrapedImages.map((imgUrl) => {
-              const globalIdx = scrapedImages.indexOf(imgUrl);
-              const isSelected = selectedScraped.includes(imgUrl);
-              const isCurrentPreview = imgUrl === previewImageUrl;
-              return (
-                <div
-                  key={imgUrl}
-                  onClick={() => {
-                    console.log(
-                      `[AutoCropModal] Selected preview image: ${imgUrl}`
-                    );
-                    setActivePreviewUrl(imgUrl);
-                    setSelectedScraped((prev) =>
-                      prev.includes(imgUrl)
-                        ? prev.filter((u) => u !== imgUrl)
-                        : [...prev, imgUrl]
-                    );
-                  }}
-                  className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden bg-neutral-900 border shrink-0 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
-                    isCurrentPreview
-                      ? "border-emerald-500/80 shadow-[0_0_12px_rgba(16,185,129,0.3)] ring-2 ring-emerald-500/30"
-                      : isSelected
-                      ? "border-indigo-500/50 shadow-[0_0_8px_rgba(99,102,241,0.15)]"
-                      : "border-neutral-800 hover:border-neutral-700"
-                  }`}
-                >
-                  <img
-                    src={imgUrl}
-                    alt={`Panel #${globalIdx + 1}`}
-                    className="w-full h-full object-contain pointer-events-none"
-                  />
-                  <div
-                    className={`absolute bottom-1.5 right-1.5 backdrop-blur-sm px-1.5 py-0.5 rounded text-[8px] font-mono leading-none border transition-all duration-200 ${
-                      isCurrentPreview
-                        ? "bg-emerald-600/90 border-emerald-400/60 text-white"
-                        : isSelected
-                        ? "bg-indigo-600/90 border-indigo-400/60 text-white"
-                        : "bg-black/80 border-indigo-900/30 text-indigo-400"
-                    }`}
-                  >
-                    #{globalIdx + 1}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+
 
       {/* Live Config Summary Bar */}
       <div className="px-6 py-2.5 bg-neutral-950/20 border-t border-neutral-800 flex items-center gap-4 text-[9px] font-mono text-neutral-500 tracking-wider">
@@ -450,8 +544,11 @@ export default function AutoCropModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto">
-      <div className="relative w-full max-w-6xl min-h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] flex flex-col gap-0 animate-[fadeIn_0.18s_ease-out]">
+    <div
+      onWheel={(e) => e.stopPropagation()}
+      className="fixed inset-0 z-[100] bg-black/92 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-6 overflow-hidden transition-all duration-300"
+    >
+      <div className="relative w-full max-w-5xl h-[calc(100vh-3rem)] max-h-[880px] flex flex-col overflow-hidden rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10 animate-[fadeIn_0.18s_ease-out]">
         {mainCard}
       </div>
     </div>

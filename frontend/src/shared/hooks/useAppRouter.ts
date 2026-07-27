@@ -383,8 +383,6 @@ export function useAppRouter({
         }
         setIsPipMode(false);
         setLastEditorPath(path + window.location.search);
-        setShowAutoCropModal(false);
-        setShowBubbleModal(false);
 
         // Parse idx query parameter
         const idxVal = params.get("idx");

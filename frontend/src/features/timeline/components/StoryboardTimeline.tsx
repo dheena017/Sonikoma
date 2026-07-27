@@ -40,6 +40,7 @@ interface StoryboardTimelineProps {
   bubbleDilation?: number;
   bubbleInpaintRadius?: number;
   cropSensitivity?: number;
+  cropPaddingPx?: number;
   cropBackgroundMode?: string;
   aspectRatioLock?: string;
   minPanelAreaPct?: number;
@@ -51,11 +52,15 @@ interface StoryboardTimelineProps {
   cropCannyHigh?: number;
   cropCloseKernelSize?: number;
   autoSplitTallStrips?: boolean;
+  cropGuidance?: string;
+  cropFocusMode?: string;
   playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
   autoPlayAudio?: boolean;
   saveProject?: (customPanels?: GeneratedPanel[]) => Promise<boolean>;
   handleCancelBatch?: () => void;
   audioFeedback?: any;
+  showAutoCropModal?: boolean;
+  setShowAutoCropModal?: (show: boolean) => void;
   selectedPanelIds?: Set<number>;
   setSelectedPanelIds?: React.Dispatch<React.SetStateAction<Set<number>>>;
 }
@@ -87,6 +92,7 @@ const StoryboardTimeline = React.memo(
     bubbleDilation = -1,
     bubbleInpaintRadius = 3,
     cropSensitivity = 30,
+    cropPaddingPx = 10,
     cropBackgroundMode = "auto",
     aspectRatioLock = "free",
     minPanelAreaPct = 2,
@@ -98,11 +104,14 @@ const StoryboardTimeline = React.memo(
     cropCannyHigh = 100,
     cropCloseKernelSize = 15,
     autoSplitTallStrips = true,
+    cropGuidance = "",
+    cropFocusMode = "standard",
     playStoryboardAudio,
     autoPlayAudio,
     saveProject,
     handleCancelBatch,
     audioFeedback,
+    setShowAutoCropModal,
     selectedPanelIds: propSelectedPanelIds,
     setSelectedPanelIds: propSetSelectedPanelIds,
   }: StoryboardTimelineProps) => {
@@ -566,6 +575,8 @@ const StoryboardTimeline = React.memo(
                 closeKernelSize: cropCloseKernelSize,
                 minHeightPx: cropMinHeightPx,
                 autoSplit: autoSplitTallStrips,
+                guidanceInstructions: cropGuidance,
+                focusMode: cropFocusMode,
               });
 
               if (data.success && data.results) {
@@ -593,7 +604,7 @@ const StoryboardTimeline = React.memo(
                           cropLeft: box.cropLeft,
                           cropRight: box.cropRight,
                           autoTrim: true,
-                          padding: 10,
+                          padding: cropPaddingPx,
                           sensitivity: cropSensitivity,
                           backgroundColorMode: cropBackgroundMode,
                         });
@@ -1301,6 +1312,7 @@ const StoryboardTimeline = React.memo(
           selectedPanelIds={selectedPanelIds}
           fetchWithInterceptor={fetchWithInterceptor}
           addNotification={addNotification}
+          setShowAutoCropModal={setShowAutoCropModal}
         />
       </div>
     );

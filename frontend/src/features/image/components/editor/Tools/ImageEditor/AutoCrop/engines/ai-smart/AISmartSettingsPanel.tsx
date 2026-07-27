@@ -8,7 +8,7 @@ export function AISmartSettingsPanel(props: any) {
         <AutoCropEngineSelector
            {...props}
            useLocalCV={false}
-           setUseLocalCV={() => {}}
+           setUseLocalCV={props.setUseLocalCV || (() => {})}
         />
      </div>
   );

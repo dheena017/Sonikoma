@@ -119,7 +119,7 @@ async def scrape_and_initialize_project(
         elif not cache_hit and smart_slice and resolved_buffers_data:
             final_images = proxied_urls  # Fallback/Simplified behavior preservation
 
-    resolved_project_id = project_id or generate_project_id()
+    resolved_project_id = project_id or f"temp_{generate_project_id()}"
     if final_images and not resolved_project_id.startswith("temp_"):
         save_scrape_session(normalized_url, final_images)
 

@@ -887,6 +887,7 @@ export default function AppRouter(props: AppRouterProps) {
       seriesSlugState={seriesSlugState}
       chapterSlugState={chapterSlugState}
       showAutoCropModal={showAutoCropModal}
+      showBubbleModal={showBubbleModal}
     >
       {/* PAGE VIEW 1: Main Editor Workspace */}
       <div

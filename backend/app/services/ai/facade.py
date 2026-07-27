@@ -301,49 +301,158 @@ async def facade_analyze_image(
 
 async def facade_smart_crop(
     url: str,
-    aspect_ratio: str,
-    model: Optional[str],
-    user_keys: Dict[str, str]
+    aspect_ratio: Optional[str] = "free",
+    model: Optional[str] = None,
+    user_keys: Optional[Dict[str, str]] = None,
+    strategy: Optional[str] = "ai",
+    sensitivity: float = 30.0,
+    background_color_mode: str = "auto",
+    min_area_pct: float = 0.15,
+    merge_threshold: int = 20,
+    canny_low: int = 20,
+    canny_high: int = 100,
+    close_kernel_size: int = 15,
+    min_height_px: int = 60,
+    auto_split: bool = True,
+    guidance_instructions: Optional[str] = None,
+    focus_mode: Optional[str] = None
 ) -> Dict[str, Any]:
-    """Uses LLM panel detection to identify the most salient bounding boxes."""
+    """Uses LLM or local OpenCV panel detection based on strategy & configuration."""
     resolved = await img_utils.resolve_image_to_buffer(url)
     img_buffer = resolved["data"]
 
     with Image.open(io.BytesIO(img_buffer)) as img:
         w_img, h_img = img.size
 
-    target_model = model or "gemini-2.5-flash"
-    skill = registry.get("smart_crop")
-    raw_text = await skill.execute(
-        model=target_model,
-        image_bytes=img_buffer,
-        user_keys=user_keys
-    )
+    aspect_ratio = aspect_ratio or "free"
+    user_keys = user_keys or {}
 
+    # 1. Directly execute local OpenCV detection if user chose local-cv strategy
+    if strategy == "local-cv":
+        tmp_in_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+                tmp_in.write(img_buffer)
+                tmp_in_path = tmp_in.name
+
+            from services.image.detect_panels import run_cv_detection
+            cv_panels = run_cv_detection(
+                image_path=tmp_in_path,
+                sensitivity=sensitivity,
+                bg_mode=background_color_mode,
+                min_width_pct=min_area_pct,
+                min_height_px=min_height_px,
+                merge_threshold=merge_threshold,
+                aspect_ratio_str=aspect_ratio,
+                canny_low=canny_low,
+                canny_high=canny_high,
+                close_kernel_size=close_kernel_size,
+                auto_split=auto_split
+            )
+            return {
+                "success": True,
+                "total_panels": len(cv_panels),
+                "panels": cv_panels,
+                "provider": "opencv"
+            }
+        finally:
+            if tmp_in_path and os.path.exists(tmp_in_path):
+                try:
+                    os.remove(tmp_in_path)
+                except Exception:
+                    pass
+
+    # 2. Otherwise execute AI detection with skill
+    target_model = model or "gemini-2.5-flash"
+    panels_raw = []
+    
     try:
+        skill = registry.get("smart_crop")
+        raw_text = await skill.execute(
+            model=target_model,
+            image_bytes=img_buffer,
+            user_keys=user_keys,
+            guidance_instructions=guidance_instructions or ""
+        )
         data = json.loads(raw_text)
         panels_raw = data.get("panels", [])
-    except Exception:
-        panels_raw = []
+    except Exception as exc:
+        logger.warning(f"[facade_smart_crop] Gemini panel detection failed ({exc}). Falling back to local OpenCV detection.")
+
+    # 3. Fallback to local OpenCV detection if AI detection fails or returns empty panels
+    if not panels_raw:
+        tmp_in_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:
+                tmp_in.write(img_buffer)
+                tmp_in_path = tmp_in.name
+
+            from services.image.detect_panels import run_cv_detection
+            cv_panels = run_cv_detection(
+                image_path=tmp_in_path,
+                sensitivity=sensitivity,
+                bg_mode=background_color_mode,
+                min_width_pct=min_area_pct,
+                min_height_px=min_height_px,
+                merge_threshold=merge_threshold,
+                aspect_ratio_str=aspect_ratio,
+                canny_low=canny_low,
+                canny_high=canny_high,
+                close_kernel_size=close_kernel_size,
+                auto_split=auto_split
+            )
+            return {
+                "success": True,
+                "total_panels": len(cv_panels),
+                "panels": cv_panels,
+                "fallback": True,
+                "provider": "opencv_fallback"
+            }
+        except Exception as cv_exc:
+            logger.error(f"[facade_smart_crop] OpenCV fallback detection failed: {cv_exc}")
+            raise cv_exc
+        finally:
+            if tmp_in_path and os.path.exists(tmp_in_path):
+                try:
+                    os.remove(tmp_in_path)
+                except Exception:
+                    pass
 
     final_panels = []
-    for p in panels_raw:
-        ymin = int(round((p.get("cropTop", 0) / 100.0) * h_img))
-        ymax = int(round((p.get("cropBottom", 100) / 100.0) * h_img))
-        xmin = int(round((p.get("cropLeft", 0) / 100.0) * w_img))
-        xmax = int(round((p.get("cropRight", 100) / 100.0) * w_img))
+    safe_h = max(1, h_img)
+    safe_w = max(1, w_img)
 
-        xmin = max(0, min(w_img, xmin))
-        xmax = max(0, min(w_img, xmax))
-        ymin = max(0, min(h_img, ymin))
-        ymax = max(0, min(h_img, ymax))
+    for p in panels_raw:
+        ymin = int(round((p.get("cropTop", 0) / 100.0) * safe_h))
+        ymax = int(round((p.get("cropBottom", 100) / 100.0) * safe_h))
+        xmin = int(round((p.get("cropLeft", 0) / 100.0) * safe_w))
+        xmax = int(round((p.get("cropRight", 100) / 100.0) * safe_w))
+
+        xmin = max(0, min(safe_w, xmin))
+        xmax = max(0, min(safe_w, xmax))
+        ymin = max(0, min(safe_h, ymin))
+        ymax = max(0, min(safe_h, ymax))
 
         w_box = max(1, xmax - xmin)
         h_box = max(1, ymax - ymin)
 
         from services.image.utils.panel_box_utils import adjust_to_aspect_ratio
-        coords = adjust_to_aspect_ratio(xmin, ymin, w_box, h_box, w_img, h_img, aspect_ratio)
-        final_panels.append(coords)
+        x, y, w_box, h_box = adjust_to_aspect_ratio(xmin, ymin, w_box, h_box, safe_w, safe_h, aspect_ratio)
+
+        crop_top = (y / safe_h) * 100.0
+        crop_bottom = ((safe_h - (y + h_box)) / safe_h) * 100.0
+        crop_left = (x / safe_w) * 100.0
+        crop_right = ((safe_w - (x + w_box)) / safe_w) * 100.0
+
+        final_panels.append({
+            "cropTop": round(max(0.0, min(100.0, crop_top)), 2),
+            "cropBottom": round(max(0.0, min(100.0, crop_bottom)), 2),
+            "cropLeft": round(max(0.0, min(100.0, crop_left)), 2),
+            "cropRight": round(max(0.0, min(100.0, crop_right)), 2),
+            "width": w_box,
+            "height": h_box,
+            "area": (w_box * h_box)
+        })
 
     return {
         "success": True,

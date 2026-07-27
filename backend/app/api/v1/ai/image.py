@@ -125,8 +125,22 @@ async def ai_smart_crop(
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     try:
         result = await facade_smart_crop(
-            url=body.url, aspect_ratio=body.aspectRatio,
-            model=body.model, user_keys=user_api_key
+            url=body.url,
+            aspect_ratio=body.aspectRatio or "free",
+            model=body.model,
+            user_keys=user_api_key,
+            strategy=body.strategy or "ai",
+            sensitivity=body.sensitivity if body.sensitivity is not None else 30.0,
+            background_color_mode=body.backgroundColorMode or "auto",
+            min_area_pct=body.minAreaPct if body.minAreaPct is not None else 0.15,
+            merge_threshold=body.mergeThreshold if body.mergeThreshold is not None else 20,
+            canny_low=body.cannyLow if body.cannyLow is not None else 20,
+            canny_high=body.cannyHigh if body.cannyHigh is not None else 100,
+            close_kernel_size=body.closeKernelSize if body.closeKernelSize is not None else 15,
+            min_height_px=body.minHeightPx if body.minHeightPx is not None else 60,
+            auto_split=body.autoSplit if body.autoSplit is not None else True,
+            guidance_instructions=body.guidanceInstructions,
+            focus_mode=body.focusMode
         )
         record_credit_transaction(current_user["user_id"], -COST, "ai_smart_crop")
         return result
@@ -149,7 +163,24 @@ async def ai_smart_crop_batch(
     results = []
     for url in body.urls:
         try:
-            res = await facade_smart_crop(url, body.aspectRatio, body.model, user_api_key)
+            res = await facade_smart_crop(
+                url=url,
+                aspect_ratio=body.aspectRatio or "free",
+                model=body.model,
+                user_keys=user_api_key,
+                strategy=body.strategy or "ai",
+                sensitivity=body.sensitivity if body.sensitivity is not None else 30.0,
+                background_color_mode=body.backgroundColorMode or "auto",
+                min_area_pct=body.minAreaPct if body.minAreaPct is not None else 0.15,
+                merge_threshold=body.mergeThreshold if body.mergeThreshold is not None else 20,
+                canny_low=body.cannyLow if body.cannyLow is not None else 20,
+                canny_high=body.cannyHigh if body.cannyHigh is not None else 100,
+                close_kernel_size=body.closeKernelSize if body.closeKernelSize is not None else 15,
+                min_height_px=body.minHeightPx if body.minHeightPx is not None else 60,
+                auto_split=body.autoSplit if body.autoSplit is not None else True,
+                guidance_instructions=getattr(body, "guidanceInstructions", None),
+                focus_mode=getattr(body, "focusMode", None)
+            )
             results.append({"url": url, "success": True, "data": res})
         except Exception as e:
             results.append({"url": url, "success": False, "error": str(e)})

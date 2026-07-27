@@ -4,7 +4,6 @@ import { AutoCropSharedProps } from "@/features/scraper/components/tabTypes";
 import { AutoCropPresetGrid } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropPresetGrid";
 import { AutoCropEngineSelectorV2 } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineSelectorV2";
 import { AutoCropContextWrapper } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropContextWrapper";
-import { AutoCropEngineComparison } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineComparison";
 
 export function AutoCropGeneralTab(props: AutoCropSharedProps) {
   const { activeSlot, applyBuiltInPreset } = useAutoCropPresets(props);
@@ -48,20 +47,6 @@ export function AutoCropGeneralTab(props: AutoCropSharedProps) {
           </label>
         </div>
 
-        {/* ────────────────── Run & Preview Section ────────────────── */}
-        <div className="pt-4 border-t border-neutral-800/60">
-           <AutoCropEngineComparison
-             firstImageUrl={firstImageUrl}
-             sensitivity={props.cropSensitivity}
-             bgMode={props.cropBackgroundMode}
-             overlapMerge={props.overlapMergeThreshold}
-             aspectRatio={props.aspectRatioLock}
-             cannyLow={props.cropCannyLow}
-             cannyHigh={props.cropCannyHigh}
-             closeKernel={props.cropCloseKernelSize}
-             autoSplit={props.autoSplitTallStrips}
-           />
-        </div>
       </div>
     </AutoCropContextWrapper>
   );

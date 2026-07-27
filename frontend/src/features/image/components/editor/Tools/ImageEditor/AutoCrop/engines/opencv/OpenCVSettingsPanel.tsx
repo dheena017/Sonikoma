@@ -8,7 +8,7 @@ export function OpenCVSettingsPanel(props: any) {
         <AutoCropEngineSelector
            {...props}
            useLocalCV={true}
-           setUseLocalCV={() => {}}
+           setUseLocalCV={props.setUseLocalCV || (() => {})}
         />
      </div>
   );

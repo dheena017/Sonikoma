@@ -38,8 +38,17 @@ interface AutoCropContextProps {
 
 const AutoCropContext = createContext<AutoCropContextProps | undefined>(undefined);
 
-export function AutoCropProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<AutoCropSettings>(defaultAutoCropSettings);
+export function AutoCropProvider({
+  children,
+  initialEngine = "opencv"
+}: {
+  children: React.ReactNode;
+  initialEngine?: "opencv" | "aiSmart";
+}) {
+  const [settings, setSettings] = useState<AutoCropSettings>(() => ({
+    ...defaultAutoCropSettings,
+    engine: initialEngine,
+  }));
 
   const updateSettings = (newSettings: Partial<AutoCropSettings>) => {
     setSettings((prev) => ({ ...prev, ...newSettings }));
