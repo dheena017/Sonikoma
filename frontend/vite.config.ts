@@ -63,6 +63,56 @@ export default defineConfig(({ mode, command }) => {
 
   const backendTarget = backendPort > 0 ? `http://127.0.0.1:${backendPort}` : "";
 
+  let lastProxyErrorTime = 0;
+  const createProxyErrorHandler = (routeLabel: string) => (proxy: any) => {
+    process.nextTick(() => {
+      proxy.removeAllListeners("error");
+      proxy.on("error", (err: any, req: any, res: any) => {
+        const url = req?.url || "";
+        const isQuietEndpoint =
+          url.includes("system-logs") ||
+          url.includes("health") ||
+          url.includes("metrics");
+
+        const isConnRefused = err?.code === "ECONNREFUSED" || (err?.message && err.message.includes("ECONNREFUSED"));
+        const now = Date.now();
+
+        if (!isQuietEndpoint) {
+          if (isConnRefused) {
+            if (now - lastProxyErrorTime > 10000) {
+              lastProxyErrorTime = now;
+              console.warn(
+                `\x1b[31m[Vite Proxy]\x1b[0m \x1b[33m⚠️ Backend server (${backendTarget}) is offline. Run 'npm run backend' or 'npm run dev' to start FastAPI.\x1b[0m`
+              );
+            }
+          } else {
+            console.error(
+              `\x1b[31m[Vite Proxy]\x1b[0m \x1b[33m${routeLabel} proxy error:\x1b[0m`,
+              err && err.message ? err.message : err
+            );
+          }
+        }
+
+        if (res && !res.headersSent) {
+          const isHealth = url.includes("health");
+          const statusCode = isConnRefused ? 503 : 502;
+          res.writeHead(statusCode, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              success: false,
+              error: isConnRefused ? "Backend Offline" : "Proxy Error",
+              message: isConnRefused
+                ? `Python backend engine is not running on ${backendTarget}.`
+                : err && err.message ? err.message : String(err),
+              hint: isConnRefused ? "Run 'npm run dev' or 'npm run backend' to start the backend engine." : undefined,
+              ...(isHealth ? { status: "offline", backend: false } : {}),
+            })
+          );
+        }
+      });
+    });
+  };
+
   return {
     root: path.resolve(__dirname),
     plugins: [
@@ -360,33 +410,10 @@ export default defineConfig(({ mode, command }) => {
           target: backendTarget,
           changeOrigin: true,
           secure: false,
-          ws: false, // Ensure EventSource (SSE) isn't treated as a websocket
+          ws: false,
           proxyTimeout: 0,
           timeout: 0,
-          configure: (proxy, _options) => {
-            process.nextTick(() => {
-              proxy.removeAllListeners("error");
-              proxy.on("error", (err: any, req: any, res: any) => {
-                const isSystemLogs = req?.url?.includes("system-logs");
-                if (!isSystemLogs) {
-                  console.error(
-                    "\x1b[31m[Vite Proxy]\x1b[0m \x1b[33m/api proxy error:\x1b[0m",
-                    err && err.message ? err.message : err
-                  );
-                }
-                if (res && !res.headersSent) {
-                  res.writeHead(502, { "Content-Type": "application/json" });
-                  res.end(
-                    JSON.stringify({
-                      success: false,
-                      error: "Proxy Error",
-                      message: err && err.message ? err.message : String(err),
-                    })
-                  );
-                }
-              });
-            });
-          },
+          configure: createProxyErrorHandler("/api"),
         },
         "/media": {
           target: backendTarget,
@@ -395,6 +422,7 @@ export default defineConfig(({ mode, command }) => {
           ws: false,
           proxyTimeout: 0,
           timeout: 0,
+          configure: createProxyErrorHandler("/media"),
         },
         "/videos": {
           target: backendTarget,
@@ -403,6 +431,7 @@ export default defineConfig(({ mode, command }) => {
           ws: false,
           proxyTimeout: 0,
           timeout: 0,
+          configure: createProxyErrorHandler("/videos"),
         },
         "/training_data": {
           target: backendTarget,
@@ -411,8 +440,10 @@ export default defineConfig(({ mode, command }) => {
           ws: false,
           proxyTimeout: 0,
           timeout: 0,
+          configure: createProxyErrorHandler("/training_data"),
         },
       },
     },
   };
+
 });
