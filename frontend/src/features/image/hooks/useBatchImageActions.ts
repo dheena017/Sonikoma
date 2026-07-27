@@ -260,10 +260,11 @@ export function useBatchImageActions({
   ]);
 
   const handleAutoCropSelected = useCallback(async () => {
-    const targetImages = selectedScraped;
+    // Fall back to all images when nothing is explicitly selected
+    const targetImages = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (targetImages.length === 0) {
       addNotification(
-        "No panels selected — select panels first in the scraper deck.",
+        "No images available to crop — scrape some images first.",
         "warning"
       );
       return;
@@ -439,6 +440,7 @@ export function useBatchImageActions({
     setSelectedScraped([]);
   }, [
     selectedScraped,
+    scrapedImages,
     addNotification,
     setIsBatchCropping,
     setBatchProgress,

@@ -2,6 +2,7 @@ aiohttp==3.14.1
 alembic==1.18.5
 beautifulsoup4==4.15.0
 colorama==0.4.6
+curl_cffi==0.15.0
 diffusers==0.39.0
 easyocr==1.7.2
 fastapi==0.139.2

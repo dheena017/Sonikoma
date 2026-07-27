@@ -43,7 +43,7 @@ export default function AutoSlicer({
   clearDetectedBoxes,
 }: AutoSlicerProps) {
   // Advanced parameters states
-  const [strategy, setStrategy] = useState<"local-cv" | "ai">("ai");
+  const [strategy, setStrategy] = useState<"local-cv" | "ai">("local-cv");
   const [model, setModel] = useState<string>("gemini-2.5-flash");
   const [sensitivity, setSensitivity] = useState<number>(30);
   const [backgroundMode, setBackgroundMode] = useState<string>("auto");
@@ -64,7 +64,7 @@ export default function AutoSlicer({
 
   const resetSettings = () => {
     console.log("[AutoSlicer] Resetting scanner settings");
-    setStrategy("ai");
+    setStrategy("local-cv");
     setModel("gemini-2.5-flash");
     setSensitivity(30);
     setBackgroundMode("auto");

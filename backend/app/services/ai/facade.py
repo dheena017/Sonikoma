@@ -304,7 +304,7 @@ async def facade_smart_crop(
     aspect_ratio: Optional[str] = "free",
     model: Optional[str] = None,
     user_keys: Optional[Dict[str, str]] = None,
-    strategy: Optional[str] = "ai",
+    strategy: Optional[str] = "local-cv",
     sensitivity: float = 30.0,
     background_color_mode: str = "auto",
     min_area_pct: float = 0.15,

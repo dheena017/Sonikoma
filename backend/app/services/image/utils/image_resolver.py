@@ -2,6 +2,7 @@
 Moved image_resolver into services.image.utils
 """
 
+import io
 import os
 import re
 import base64
@@ -14,18 +15,77 @@ from urllib.parse import urlparse, parse_qs
 from core.cache import stitched_cache
 from core.settings import BACKEND_PORT
 
+try:
+    from curl_cffi.requests import AsyncSession as CurlAsyncSession
+    HAS_CURL_CFFI = True
+except ImportError:
+    HAS_CURL_CFFI = False
+
 logger = logging.getLogger("sonikoma.services.image.image_resolver")
+
+
+def create_fallback_image_buffer(url: str, error_msg: str) -> Dict[str, Any]:
+    """Generates an 800x300 placeholder PNG when remote image fetching fails."""
+    try:
+        from PIL import Image, ImageDraw
+        img = Image.new("RGB", (800, 300), color=(40, 44, 52))
+        draw = ImageDraw.Draw(img)
+
+        domain = urlparse(url).netloc or "Remote Host"
+        short_url = url[:50] + ("..." if len(url) > 50 else "")
+        text = f"Image Unavailable\n[{domain}]\n{short_url}\n{error_msg}"
+
+        draw.text((400, 150), text, fill=(220, 220, 220), anchor="mm")
+
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+        data = buf.getvalue()
+        return {"data": data, "content_type": "image/png", "contentType": "image/png"}
+    except Exception:
+        # Fallback 1x1 transparent PNG if PIL is unavailable
+        transparent_png = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==")
+        return {"data": transparent_png, "content_type": "image/png", "contentType": "image/png"}
 
 
 def spoof_referer(url: str) -> str:
     try:
         parsed = urlparse(url)
         host = (parsed.hostname or "").lower()
-        if "webtoons" in host:
+        if "webtoon" in host or "pstatic" in host:
             return "https://www.webtoons.com/"
-        return f"{parsed.scheme}://{host}/"
+        if "naver" in host:
+            return "https://comic.naver.com/"
+        if "kakao" in host:
+            return "https://page.kakao.com/"
+        if "lezhin" in host:
+            return "https://www.lezhin.com/"
+        if "tapas" in host:
+            return "https://tapas.io/"
+        if "manhwatop" in host or "manhwa" in host:
+            return "https://manhwatop.com/"
+        if "manhuato" in host or "manhua" in host:
+            return "https://manhuato.com/"
+
+        # Remove CDN prefixes (cdn4., img2., etc.)
+        clean_host = re.sub(r'^(?:cdn\d*|img\d*|images\d*|pic\d*|pics\d*|static\d*|assets\d*|media\d*|uploads\d*|files\d*|storage\d*)\.', '', host, flags=re.IGNORECASE)
+        return f"{parsed.scheme}://{clean_host}/"
     except Exception:
         return "https://www.webtoons.com/"
+
+
+def get_alternate_referer(url: str) -> Optional[str]:
+    """Alternative referer variant stripping numbers (e.g. zinmanga1.com -> zinmanga.com) for 403 fallback."""
+    try:
+        parsed = urlparse(url)
+        host = (parsed.hostname or "").lower()
+        clean_host = re.sub(r'^(?:cdn\d*|img\d*|images\d*|pic\d*|pics\d*|static\d*|assets\d*|media\d*|uploads\d*|files\d*|storage\d*)\.', '', host, flags=re.IGNORECASE)
+        clean_no_num = re.sub(r'(\w+)\d+\.(\w+)$', r'\1.\2', clean_host)
+        if clean_no_num != clean_host:
+            return f"{parsed.scheme}://{clean_no_num}/"
+        return f"{parsed.scheme}://{host}/"
+    except Exception:
+        return None
 
 
 async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient] = None) -> Dict[str, Any]:
@@ -73,7 +133,7 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
         file_path = unquote(file_path)
         with open(file_path, 'rb') as f:
             buf = f.read()
-        ext = os.path.splitext(file_path)[1].lower()
+
         import mimetypes
         mime = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
         return {"data": buf, "content_type": mime, "contentType": mime}
@@ -109,16 +169,45 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
                 return await _fetch_local(local_client)
 
     # 7. Fallback to external remote fetch (e.g. raw Webtoon URLs or unproxied remote assets)
-    headers = {
+    base_headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Referer': spoof_referer(working_url),
         'Accept': 'image/webp,image/avif,image/jpeg,image/png,image/*,*/*;q=0.8,audio/*,video/*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Sec-Fetch-Dest': 'image',
+        'Sec-Fetch-Mode': 'no-cors',
+        'Sec-Fetch-Site': 'cross-site',
     }
 
+    parsed_working = urlparse(working_url)
+
+    # Build referer list: alternate (number-stripped) first so zinmanga1.com → zinmanga.com
+    # is tried before the cdn-prefixed form which is more likely to fail
+    alternate = get_alternate_referer(working_url)
+    primary = spoof_referer(working_url)
+    origin = f"{parsed_working.scheme}://{parsed_working.hostname}/" if parsed_working.hostname else None
+    referer_candidates = [
+        alternate,
+        primary,
+        origin,
+        "https://www.google.com/",
+        None,
+    ]
+    seen_refs: set = set()
+    referers = []
+    for ref in referer_candidates:
+        if ref not in seen_refs:
+            seen_refs.add(ref)
+            if ref is not None:
+                referers.append(ref)
+    referers.append(None)  # always end with a no-referer attempt
+
     async def _fetch_remote(http_client):
-        # 3 retries for transient failures
         last_err = None
-        for attempt in range(3):
+        # 1. Try standard httpx with various Referer candidates
+        for attempt, ref in enumerate(referers):
+            headers = dict(base_headers)
+            if ref:
+                headers['Referer'] = ref
             try:
                 r = await http_client.get(working_url, headers=headers)
                 r.raise_for_status()
@@ -126,8 +215,36 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
                 return {"data": r.content, "content_type": mime, "contentType": mime}
             except Exception as e:
                 last_err = e
-                await asyncio.sleep(0.5 * (attempt + 1))
-        raise Exception(f"Failed to fetch {working_url[:50]}... Error: {last_err}")
+                await asyncio.sleep(0.1 * (attempt + 1))
+
+        # 2. Try curl_cffi with browser TLS impersonation if available
+        # Cycles multiple profiles because some CDNs fingerprint the TLS handshake
+        if HAS_CURL_CFFI:
+            from typing import Literal, cast
+            _ImpersonateProfile = Literal["chrome124", "chrome110", "safari17_0", "firefox133"]
+            _impersonate_profiles: list[_ImpersonateProfile] = ["chrome124", "chrome110", "safari17_0", "firefox133"]
+            for profile in _impersonate_profiles:
+                try:
+                    async with CurlAsyncSession(impersonate=profile, verify=False) as session:
+                        for ref in referers:
+                            headers = dict(base_headers)
+                            if ref:
+                                headers['Referer'] = ref
+                            try:
+                                res = await session.get(working_url, headers=headers, timeout=10)
+                                if res.status_code == 200 and len(res.content) > 500:
+                                    mime = res.headers.get("Content-Type", "image/webp")
+                                    return {"data": res.content, "content_type": mime, "contentType": mime}
+                                elif res.status_code == 403:
+                                    logger.debug(f"[ImageResolver] curl_cffi({profile}) 403 with referer={ref!r} for {working_url[:60]}")
+                            except Exception as ce:
+                                last_err = ce
+                except Exception as e:
+                    last_err = e
+
+        # 3. Fallback: Log warning and return clean placeholder panel image instead of crashing API
+        logger.warning(f"[ImageResolver] Failed to fetch remote image '{working_url[:60]}...': {last_err}. Returning fallback placeholder.")
+        return create_fallback_image_buffer(working_url, str(last_err))
 
     if client:
         return await _fetch_remote(client)

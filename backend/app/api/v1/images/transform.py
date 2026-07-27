@@ -121,7 +121,7 @@ async def merge_images(body: StitchImagesRequest):
 
 
 @router.get("/cached/{cache_id}", summary="Retrieve stitched cached panel image")
-async def get_cached_stitch(cache_id: str = Path(...), request: Request | None = None):
+async def get_cached_stitch(request: Request, cache_id: str = Path(...)):
     from services.image.stitch_cache_service import retrieve_cached_stitch_service
     try:
         referer = request.headers.get("referer") if request else None
