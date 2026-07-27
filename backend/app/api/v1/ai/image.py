@@ -138,6 +138,7 @@ async def ai_smart_crop(
             canny_high=body.cannyHigh if body.cannyHigh is not None else 100,
             close_kernel_size=body.closeKernelSize if body.closeKernelSize is not None else 15,
             min_height_px=body.minHeightPx if body.minHeightPx is not None else 60,
+            padding_px=body.paddingPx if body.paddingPx is not None else 10,
             auto_split=body.autoSplit if body.autoSplit is not None else True,
             guidance_instructions=body.guidanceInstructions,
             focus_mode=body.focusMode
@@ -177,6 +178,7 @@ async def ai_smart_crop_batch(
                 canny_high=body.cannyHigh if body.cannyHigh is not None else 100,
                 close_kernel_size=body.closeKernelSize if body.closeKernelSize is not None else 15,
                 min_height_px=body.minHeightPx if body.minHeightPx is not None else 60,
+                padding_px=body.paddingPx if body.paddingPx is not None else 10,
                 auto_split=body.autoSplit if body.autoSplit is not None else True,
                 guidance_instructions=getattr(body, "guidanceInstructions", None),
                 focus_mode=getattr(body, "focusMode", None)

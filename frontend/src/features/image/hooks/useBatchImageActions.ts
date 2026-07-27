@@ -309,6 +309,7 @@ export function useBatchImageActions({
                 cannyHigh: cropCannyHigh,
                 closeKernelSize: cropCloseKernelSize,
                 minHeightPx: cropMinHeightPx,
+                paddingPx: cropPaddingPx,
                 autoSplit: autoSplitTallStrips,
                 guidanceInstructions: cropGuidance,
                 focusMode: cropFocusMode,

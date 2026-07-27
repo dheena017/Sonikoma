@@ -17,7 +17,7 @@ const defaultOpenCVSettings: OpenCVSettings = {
 };
 
 const defaultAISmartSettings: AISmartSettings = {
-  model: "gemini-1.5-flash",
+  model: "gemini-2.5-flash",
   guidance: "",
   focusMode: "standard",
 };

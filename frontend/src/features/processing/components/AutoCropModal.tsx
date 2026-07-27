@@ -171,7 +171,7 @@ export default function AutoCropModal({
     setMinPanelAreaPct(2);
     setOverlapMergeThreshold(20);
     setUseLocalCV(true);
-    setCropModel("gemini-2.0-flash-lite");
+    setCropModel("gemini-2.5-flash");
     setCropMinHeightPx(60);
     setCropCannyLow(20);
     setCropCannyHigh(100);
@@ -195,49 +195,64 @@ export default function AutoCropModal({
   ];
 
   const mainCard = (
-    <div className="bg-neutral-900 border border-neutral-800 sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col h-full">
+    <div className="bg-neutral-950 border border-neutral-850 overflow-hidden flex flex-col h-full w-full flex-1">
       {/* Header */}
-      <div className="px-4 py-2.5 sm:px-5 sm:py-3 border-b border-neutral-800/80 flex flex-wrap items-center justify-between bg-neutral-950/80 backdrop-blur-md gap-3">
-        {/* Left: Title + Mode Badges + Selected Images info */}
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
-            <Scissors className="h-4 w-4" />
+      <div className="px-4 py-2.5 sm:px-6 sm:py-3.5 border-b border-neutral-800/80 flex flex-wrap items-center justify-between bg-neutral-950/90 backdrop-blur-md gap-3 shrink-0">
+        {/* Left: Title + Active Strategy Badges & Breakdown */}
+        <div className="flex items-center gap-3.5">
+          <div className="h-9 w-9 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 shadow-md">
+            <Scissors className="h-4.5 w-4.5" />
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider font-mono">
                 Auto Panel Detection
               </h3>
-              <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
+              <span className={`text-[9px] font-mono px-2.5 py-0.5 rounded-full font-bold uppercase ${
                 useLocalCV 
-                  ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/30" 
-                  : "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"
+                  ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-[0_0_8px_rgba(6,182,212,0.15)]" 
+                  : "bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 shadow-[0_0_8px_rgba(99,102,241,0.15)]"
               }`}>
-                {useLocalCV ? "⚡ OpenCV Engine" : `🧠 AI (${cropModel})`}
+                {useLocalCV ? "⚡ LOCAL OPENCV ACTIVE" : `🧠 AI SCANNER (${cropModel.toUpperCase()})`}
               </span>
+              {aspectRatioLock !== "free" && (
+                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                  {aspectRatioLock} LOCKED
+                </span>
+              )}
             </div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-[10px] text-neutral-400 font-sans">
-                Targeting: <strong className="text-neutral-200">{selectedScraped.length || scrapedImages.length}</strong> image{(selectedScraped.length || scrapedImages.length) === 1 ? "" : "s"}
+
+            {/* Integrated Strategy Summary Line */}
+            <div className="flex items-center gap-x-2.5 text-[10px] text-neutral-400 font-mono flex-wrap leading-none">
+              <span>
+                Targeting: <strong className="text-white">{selectedScraped.length || scrapedImages.length}</strong> img{(selectedScraped.length || scrapedImages.length) === 1 ? "" : "s"}
               </span>
               <span className="text-neutral-700">•</span>
-              <span className="text-[10px] text-neutral-400 font-sans">
-                Sens: <strong className="text-neutral-200">{sensitivity}%</strong>
+              <span>
+                Sens: <strong className="text-white">{sensitivity}%</strong>
               </span>
               <span className="text-neutral-700">•</span>
-              <span className="text-[10px] text-neutral-400 font-sans">
-                Pad: <strong className="text-neutral-200">{padding}px</strong>
+              <span>
+                Pad: <strong className="text-white">{padding}px</strong>
+              </span>
+              <span className="text-neutral-700">•</span>
+              <span>
+                Split Tall: <strong className="text-white">{autoSplitTallStrips ? "YES" : "NO"}</strong>
+              </span>
+              <span className="text-neutral-700">•</span>
+              <span>
+                Canny: <strong className="text-white">{cropCannyLow}/{cropCannyHigh}</strong>
               </span>
             </div>
           </div>
         </div>
 
         {/* Right: Quick Controls & Close */}
-        <div className="flex items-center justify-end gap-2 sm:gap-2.5">
+        <div className="flex items-center justify-end gap-2 sm:gap-2.5 shrink-0">
           <button
             type="button"
             onClick={handleResetAll}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-neutral-800 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer shrink-0"
             title="Reset all settings to defaults"
           >
             <RotateCcw className="h-3 w-3 text-neutral-400" />
@@ -246,7 +261,7 @@ export default function AutoCropModal({
           </button>
           <button
             onClick={onClose}
-            className="text-neutral-400 hover:text-white p-1.5 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer shrink-0 bg-neutral-900/80 border border-neutral-800"
+            className="text-neutral-400 hover:text-white p-2 rounded-xl hover:bg-neutral-800 transition-colors cursor-pointer shrink-0 bg-neutral-900/80 border border-neutral-800"
             title="Close modal"
           >
             <X className="h-4 w-4" />
@@ -359,8 +374,8 @@ export default function AutoCropModal({
         </div>
       </div>
 
-      {/* Scrollable Body */}
-      <div className="p-6 overflow-y-auto flex flex-col flex-1 min-h-0 bg-neutral-900/50">
+      {/* Scrollable Workspace Workstation Body */}
+      <div className="p-4 sm:p-6 overflow-y-auto flex flex-col flex-1 min-h-0 bg-neutral-950">
         <AutoCropTabContent
           activeTab={activeTab}
           useLocalCV={useLocalCV}
@@ -401,92 +416,15 @@ export default function AutoCropModal({
         />
       </div>
 
-
-
-      {/* Live Config Summary Bar */}
-      <div className="px-6 py-2.5 bg-neutral-950/20 border-t border-neutral-800 flex items-center gap-4 text-[9px] font-mono text-neutral-500 tracking-wider">
-        <span className="font-bold text-neutral-400 uppercase">
-          Active Strategy:
-        </span>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span>
-            Engine:{" "}
-            <strong className="text-neutral-350">
-              {useLocalCV ? "LOCAL OPENCV" : "GEMINI VISION AI"}
-            </strong>
-          </span>
-          <span>•</span>
-          {useLocalCV ? (
-            <>
-              <span>
-                Sensitivity:{" "}
-                <strong className="text-neutral-350">{sensitivity}</strong>
-              </span>
-              <span>•</span>
-            </>
-          ) : (
-            <>
-              <span>
-                Model:{" "}
-                <strong className="text-neutral-350">
-                  {cropModel.toUpperCase()}
-                </strong>
-              </span>
-              <span>•</span>
-              <span>
-                Focus Mode:{" "}
-                <strong className="text-neutral-350">
-                  {cropFocusMode.toUpperCase()}
-                </strong>
-              </span>
-              <span>•</span>
-            </>
-          )}
-          <span>
-            Padding: <strong className="text-neutral-350">{padding}px</strong>
-          </span>
-          <span>•</span>
-          <span>
-            Split Tall:{" "}
-            <strong className="text-neutral-350">
-              {autoSplitTallStrips ? "YES" : "NO"}
-            </strong>
-          </span>
-          <span>•</span>
-          <span>
-            Canny:{" "}
-            <strong className="text-neutral-350">
-              {cropCannyLow}/{cropCannyHigh}
-            </strong>
-          </span>
-        </div>
-      </div>
-
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-neutral-800 bg-neutral-950/40 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <p className="text-[10px] text-neutral-500 font-mono">
-            Settings will be applied to future auto-crop tasks.
-          </p>
-          {useLocalCV ? (
-            <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-cyan-950/80 text-cyan-400 border border-cyan-800/40">
-              LOCAL CV ACTIVE
-            </span>
-          ) : (
-            <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-indigo-950/85 text-indigo-400 border border-indigo-800/40">
-              SMART SCANNER ACTIVE
-            </span>
-          )}
-          {aspectRatioLock !== "free" && (
-            <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg bg-violet-950/80 text-violet-400 border border-violet-800/40">
-              {aspectRatioLock} LOCKED
-            </span>
-          )}
-        </div>
-        <div className="flex gap-2.5">
+      <div className="px-6 py-3.5 border-t border-neutral-800/80 bg-neutral-950/90 flex items-center justify-between gap-3 shrink-0">
+        <p className="text-[10px] text-neutral-500 font-mono hidden sm:block">
+          Settings apply to all current and future auto-crop jobs.
+        </p>
+        <div className="flex items-center gap-3 ml-auto">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-bold font-sans transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white text-xs font-bold font-sans transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -509,36 +447,8 @@ export default function AutoCropModal({
 
   if (isPage) {
     return (
-      <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-              <span
-                className="hover:text-indigo-400 cursor-pointer"
-                onClick={onClose}
-              >
-                Dashboard
-              </span>
-              <span>&gt;</span>
-              <span className="text-indigo-400">Auto-Crop</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-              <Scissors className="h-6 w-6 text-indigo-400" />
-              Auto-Crop Settings & Configuration
-            </h2>
-            <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Configure parameters for Canny thresholds, model sizes, overlap
-              filters or Smart Scanner custom prompts
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-350 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800 hover:border-neutral-700 cursor-pointer font-bold"
-          >
-            Dashboard
-          </button>
-        </div>
-        <div className="flex-grow min-h-0">{mainCard}</div>
+      <div className="flex-1 w-full h-full min-h-screen flex flex-col animate-[fadeIn_0.22s_ease-out] bg-neutral-950">
+        <div className="flex-grow flex flex-col min-h-0 w-full">{mainCard}</div>
       </div>
     );
   }
@@ -546,9 +456,9 @@ export default function AutoCropModal({
   return (
     <div
       onWheel={(e) => e.stopPropagation()}
-      className="fixed inset-0 z-[100] bg-black/92 backdrop-blur-2xl flex items-center justify-center p-4 sm:p-6 overflow-hidden transition-all duration-300"
+      className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-2xl flex items-center justify-center p-2 sm:p-4 overflow-hidden transition-all duration-300"
     >
-      <div className="relative w-full max-w-5xl h-[calc(100vh-3rem)] max-h-[880px] flex flex-col overflow-hidden rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10 animate-[fadeIn_0.18s_ease-out]">
+      <div className="relative w-full h-full max-w-[96vw] max-h-[92vh] flex flex-col overflow-hidden rounded-2xl md:rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.95)] border border-neutral-800/80 ring-1 ring-white/10 animate-[fadeIn_0.18s_ease-out] bg-neutral-950">
         {mainCard}
       </div>
     </div>

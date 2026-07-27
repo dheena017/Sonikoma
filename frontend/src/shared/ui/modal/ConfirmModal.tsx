@@ -19,7 +19,7 @@ export default function ConfirmModal({
   onCancel,
   isAlert = false,
 }: ConfirmModalProps) {
-  const isRed = accentColor === "red";
+  const isRed = accentColor === "red" || accentColor === "rose";
 
   React.useEffect(() => {
     document.body.style.overflow = "hidden";

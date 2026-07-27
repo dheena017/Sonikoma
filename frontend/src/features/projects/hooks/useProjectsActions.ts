@@ -104,15 +104,12 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
         )
       ) {
         try {
+          const token =
+            localStorage.getItem("sonikoma_token") ||
+            sessionStorage.getItem("sonikoma_token");
           const res = await fetch(`/api/projects/${projectId}`, {
             method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${
-                localStorage.getItem("sonikoma_token") ||
-                sessionStorage.getItem("sonikoma_token") ||
-                ""
-              }`,
-            },
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
           const data = await res.json();
           if (data.success) {
@@ -148,16 +145,18 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
         )
       ) {
         try {
+          const token =
+            localStorage.getItem("sonikoma_token") ||
+            sessionStorage.getItem("sonikoma_token");
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+          };
+          if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+          }
           const res = await fetch(`/api/projects/batch-delete`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${
-                localStorage.getItem("sonikoma_token") ||
-                sessionStorage.getItem("sonikoma_token") ||
-                ""
-              }`,
-            },
+            headers,
             body: JSON.stringify({ project_ids: selectedIds }),
           });
           const data = await res.json();

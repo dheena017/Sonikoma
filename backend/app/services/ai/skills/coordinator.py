@@ -144,6 +144,9 @@ async def execute_provider_call(
         from google import genai
         client_to_use = genai.Client(api_key=key_to_use) if key_to_use else genai_client
 
+        if not client_to_use:
+            raise RuntimeError("Gemini client is not initialized and no API key was provided.")
+
         response = await call_gemini_with_retry(
             lambda: client_to_use.models.generate_content(
                 model=clean_model_id,
@@ -203,7 +206,7 @@ async def execute_provider_call(
         else:
             messages = [{"role": "user", "content": prompt}]
 
-        payload = {
+        payload: dict[str, Any] = {
             "model": clean_model_id,
             "messages": messages,
         }
@@ -214,7 +217,7 @@ async def execute_provider_call(
                 if hasattr(schema, "model_json_schema"):
                     schema_dict = schema.model_json_schema()
                 else:
-                    schema_dict = schema.schema()
+                    schema_dict = getattr(schema, "schema")()
 
                 payload["response_format"] = {
                     "type": "json_schema",
@@ -277,7 +280,7 @@ async def execute_provider_call(
                 if hasattr(schema, "model_json_schema"):
                     schema_dict = schema.model_json_schema()
                 else:
-                    schema_dict = schema.schema()
+                    schema_dict = getattr(schema, "schema")()
                 system_prompt = f"You MUST return ONLY a valid JSON object matching this schema:\n{json.dumps(schema_dict)}\nNo other conversational text, no explanations, no wrapping except clean JSON."
             except Exception:
                 pass

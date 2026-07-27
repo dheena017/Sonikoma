@@ -25,13 +25,13 @@ class GeminiProvider:
     @staticmethod
     def get_client(api_key: Optional[str] = None) -> Any:
         """Returns a configured Gemini Client instance."""
-        if not GEMINI_AVAILABLE:
+        if not GEMINI_AVAILABLE or genai is None:
             raise RuntimeError("google-genai package is not installed.")
         
         if api_key:
             return genai.Client(api_key=api_key)
         
-        if not ai_initialized:
+        if not ai_initialized or not genai_client:
             raise RuntimeError("Gemini is not initialized and no API key was provided.")
             
         return genai_client

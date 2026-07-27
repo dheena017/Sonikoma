@@ -29,6 +29,76 @@ import { parseWebtoonUrl, getSourceName, getProxiedImageUrl } from "@/utils";
 import { updateSelection } from "@/utils/selection";
 import { EpisodeRatingDisplay } from "@/features/scraper/components/EpisodeRatingDisplay";
 
+function ExtractingPanelSkeleton({ index, isScroll }: { index: number; isScroll?: boolean }) {
+  return (
+    <div
+      key={`loading-skeleton-${index}`}
+      className={`relative group overflow-hidden rounded-2xl border border-purple-500/30 bg-neutral-950/80 p-3 sm:p-4 space-y-3 cursor-wait select-none transition-all duration-300 shadow-[0_0_20px_rgba(168,85,247,0.12)] hover:border-purple-500/50 ${
+        isScroll ? "w-[240px] sm:w-[270px] shrink-0" : "w-full"
+      }`}
+      style={{ animationDelay: `${(index - 1) * 120}ms` }}
+    >
+      {/* Scanning Laser Line Sweeping Vertically */}
+      <div className="scanner-line opacity-75" style={{ animationDelay: `${(index - 1) * 300}ms` }} />
+
+      {/* Header Pill Info */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
+          </span>
+          <span className="text-[10px] font-mono font-bold text-purple-300 tracking-wider">
+            FRAME #{String(index).padStart(2, "0")}
+          </span>
+        </div>
+        <span className="text-[9px] font-mono px-2 py-0.5 rounded-md bg-purple-950/80 text-purple-300 border border-purple-800/60 shadow-inner tracking-wide animate-pulse">
+          PARSING...
+        </span>
+      </div>
+
+      {/* Main Aspect Ratio Container */}
+      <div className="relative aspect-[3/4] w-full rounded-xl bg-neutral-900/90 border border-purple-900/40 flex flex-col items-center justify-center overflow-hidden p-4 gap-3 shadow-inner group-hover:border-purple-500/40 transition-colors">
+        {/* Background Animated Geometric Grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-neutral-950/80 to-neutral-950" />
+        <div className="absolute inset-0 opacity-15 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:16px_16px]" />
+
+        {/* Pulsing Spinning Core */}
+        <div className="relative z-20 flex flex-col items-center gap-2.5">
+          <div className="relative flex items-center justify-center">
+            {/* Glowing Aura Ring */}
+            <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 opacity-40 blur-md animate-pulse" />
+            <div className="relative h-12 w-12 rounded-full bg-neutral-950/90 flex items-center justify-center border border-purple-400/40 shadow-[0_0_20px_rgba(168,85,247,0.4)] backdrop-blur-md">
+              <RefreshCw className="h-5 w-5 text-purple-300 animate-spin" />
+            </div>
+          </div>
+
+          {/* Text Label */}
+          <div className="text-center space-y-0.5">
+            <span className="block text-[11px] font-mono font-bold bg-gradient-to-r from-purple-200 via-fuchsia-200 to-indigo-200 bg-clip-text text-transparent tracking-wide">
+              Extracting Panel...
+            </span>
+            <span className="block text-[9px] font-mono text-purple-400/70">
+              AI Segmentation
+            </span>
+          </div>
+        </div>
+
+        {/* Wireframe Placeholder Lines for Speech Bubbles & Captions */}
+        <div className="absolute bottom-3 inset-x-3 space-y-1.5 opacity-40">
+          <div className="h-2 w-3/4 rounded bg-purple-800/40 animate-pulse" />
+          <div className="h-2 w-1/2 rounded bg-purple-800/30 animate-pulse delay-150" />
+        </div>
+      </div>
+
+      {/* Bottom Shimmer Bar */}
+      <div className="relative h-1.5 w-full rounded-full bg-neutral-950 overflow-hidden border border-purple-900/40">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500 to-indigo-500 animate-shimmer-sweep" />
+      </div>
+    </div>
+  );
+}
+
 export function formatDisplayEpisodeLabel(label: string): string {
   if (!label) return "Episode";
   const trimmed = label.trim();
@@ -179,6 +249,7 @@ const LiveScraperDeck = React.memo(
     fetchWithInterceptor,
     openEditingImageIdx,
     // Bubble Cleaner props from App.tsx
+    showBubbleModal,
     setShowBubbleModal,
     isCleaningBubbles,
     cleanProgress,
@@ -601,9 +672,14 @@ const LiveScraperDeck = React.memo(
                   </span>
                 )}
                 {isScraping && (
-                  <span className="text-[10px] px-3 py-1 rounded-full bg-purple-600/30 text-purple-200 border border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.3)] font-mono uppercase tracking-wider flex items-center gap-1.5 animate-pulse">
-                    <RefreshCw className="h-3 w-3 animate-spin text-purple-400" />
-                    <span>Extracting HD Panels...</span>
+                  <span className="relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gradient-to-r from-purple-950/90 via-purple-900/70 to-indigo-950/90 text-purple-200 border border-purple-500/40 shadow-[0_0_16px_rgba(168,85,247,0.35)] backdrop-blur-md font-mono text-[10px] uppercase tracking-wider overflow-hidden">
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/20 to-transparent animate-shimmer-sweep" />
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
+                    </span>
+                    <RefreshCw className="h-3 w-3 animate-spin text-purple-300 relative z-10" />
+                    <span className="font-bold relative z-10 text-purple-100">Extracting HD Panels...</span>
                   </span>
                 )}
               </div>
@@ -1061,18 +1137,7 @@ const LiveScraperDeck = React.memo(
                      })}
 
                      {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
-                       <div
-                         key={`loading-skeleton-${num}`}
-                         className="relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border border-purple-800/30 bg-neutral-955/60 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
-                         style={{ animationDelay: `${(num - 1) * 150}ms` }}
-                       >
-                         <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/30 flex flex-col items-center justify-center overflow-hidden gap-2">
-                           <div className="h-10 w-10 rounded-full bg-purple-900/50 flex items-center justify-center border border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.3)]">
-                             <RefreshCw className="h-5 w-5 text-purple-400 animate-spin" />
-                           </div>
-                           <span className="text-[10px] font-mono text-purple-300 font-bold">Extracting Panels...</span>
-                         </div>
-                       </div>
+                       <ExtractingPanelSkeleton key={`loading-skeleton-${num}`} index={num} isScroll={true} />
                      ))}
                    </HorizontalScrollContainer>
                  ) : (
@@ -1113,18 +1178,7 @@ const LiveScraperDeck = React.memo(
                      })}
 
                      {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
-                       <div
-                         key={`loading-skeleton-${num}`}
-                         className="relative rounded-2xl border border-purple-800/30 bg-neutral-955/60 p-4 space-y-4 text-center cursor-wait select-none animate-pulse"
-                         style={{ animationDelay: `${(num - 1) * 150}ms` }}
-                       >
-                         <div className="relative aspect-[3/4] w-full rounded-xl bg-purple-950/20 border border-purple-800/30 flex flex-col items-center justify-center overflow-hidden gap-2">
-                           <div className="h-10 w-10 rounded-full bg-purple-900/50 flex items-center justify-center border border-purple-500/30 shadow-[0_0_12px_rgba(168,85,247,0.3)]">
-                             <RefreshCw className="h-5 w-5 text-purple-400 animate-spin" />
-                           </div>
-                           <span className="text-[10px] font-mono text-purple-300 font-bold">Extracting Panels...</span>
-                         </div>
-                       </div>
+                        <ExtractingPanelSkeleton key={`loading-skeleton-${num}`} index={num} isScroll={false} />
                      ))}
                    </div>
                  );
@@ -1163,6 +1217,8 @@ const LiveScraperDeck = React.memo(
             handleSelectFirstN={handleSelectFirstN}
             handleSelectLastN={handleSelectLastN}
             handleSelectRange={handleSelectRange}
+            showAutoCropModal={showAutoCropModal}
+            showBubbleModal={showBubbleModal}
             setShowAutoCropModal={setShowAutoCropModal}
             setShowBubbleModal={setShowBubbleModal}
             handleCancelBatch={handleCancelBatch}

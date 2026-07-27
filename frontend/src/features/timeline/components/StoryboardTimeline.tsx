@@ -111,6 +111,7 @@ const StoryboardTimeline = React.memo(
     saveProject,
     handleCancelBatch,
     audioFeedback,
+    showAutoCropModal,
     setShowAutoCropModal,
     selectedPanelIds: propSelectedPanelIds,
     setSelectedPanelIds: propSetSelectedPanelIds,
@@ -1312,6 +1313,7 @@ const StoryboardTimeline = React.memo(
           selectedPanelIds={selectedPanelIds}
           fetchWithInterceptor={fetchWithInterceptor}
           addNotification={addNotification}
+          showAutoCropModal={showAutoCropModal}
           setShowAutoCropModal={setShowAutoCropModal}
         />
       </div>

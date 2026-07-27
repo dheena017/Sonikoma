@@ -1,11 +1,14 @@
 import React from "react";
+import { Image, Layers, Sparkles, Zap, ShieldCheck, Cpu } from "lucide-react";
 import { useAutoCropPresets } from "@/features/image/hooks/crop/useAutoCropPresets";
 import { AutoCropSharedProps } from "@/features/scraper/components/tabTypes";
 import { AutoCropPresetGrid } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropPresetGrid";
 import { AutoCropEngineSelectorV2 } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineSelectorV2";
 import { AutoCropContextWrapper } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropContextWrapper";
+import { AutoCropComplexityAnalysis } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropComplexityAnalysis";
+import { getProxiedImageUrl } from "@/utils";
 
-export function AutoCropGeneralTab(props: AutoCropSharedProps) {
+export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: AutoCropSharedProps) {
   const { activeSlot, applyBuiltInPreset } = useAutoCropPresets(props);
 
   const firstImageUrl =
@@ -16,38 +19,147 @@ export function AutoCropGeneralTab(props: AutoCropSharedProps) {
       ? props.scrapedImages[0]
       : null);
 
+  const batchCount = props.selectedScraped.length > 0
+    ? props.selectedScraped.length
+    : props.scrapedImages.length;
+
   return (
     <AutoCropContextWrapper legacyProps={props}>
-      <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
-        <AutoCropPresetGrid
-          activeSlot={activeSlot}
-          applyPreset={applyBuiltInPreset}
-          firstImageUrl={firstImageUrl}
-        />
-
-        <div className="space-y-6">
-          <AutoCropEngineSelectorV2 legacyProps={props} />
-
-          <label className="relative flex items-center gap-3 bg-neutral-950/40 border border-neutral-800 rounded-2xl px-5 py-4 cursor-pointer hover:bg-neutral-900 transition-all select-none">
-            <input
-              type="checkbox"
-              checked={props.autoSplitTallStrips}
-              onChange={(e) => props.setAutoSplitTallStrips(e.target.checked)}
-              className="accent-indigo-500 h-4.5 w-4.5 rounded cursor-pointer"
+      <div className="w-full h-full flex flex-col space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 animate-[fadeIn_0.22s_ease-out] items-start">
+        {/* ── Left Column (5 cols on lg+): Presets & Webtoon Seam Slicer ── */}
+        <div className="lg:col-span-5 flex flex-col space-y-5 w-full">
+          {/* Section 1: Presets */}
+          <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl space-y-4 shadow-xl backdrop-blur-md">
+            <AutoCropPresetGrid
+              activeSlot={activeSlot}
+              applyPreset={applyBuiltInPreset}
+              firstImageUrl={firstImageUrl}
             />
-            <div className="flex flex-col">
-              <span className="text-[12px] font-bold text-white">
-                Auto-Split Strips
-              </span>
-              <span className="text-[9px] text-neutral-500 mt-0.5 leading-normal">
-                Automatically detects vertical seams to split tall webtoon strip
-                pages into standalone scenes.
+          </div>
+
+          {/* Section 2: Webtoon Seam Slicer */}
+          <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl shadow-xl backdrop-blur-md">
+            <label className="group flex items-start justify-between gap-4 cursor-pointer select-none">
+              <div className="flex items-start gap-3">
+                <div className={`p-2.5 rounded-2xl border transition-all mt-0.5 ${
+                  props.autoSplitTallStrips
+                    ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400"
+                    : "bg-neutral-900 border-neutral-800 text-neutral-500"
+                }`}>
+                  <input
+                    type="checkbox"
+                    checked={props.autoSplitTallStrips}
+                    onChange={(e) => props.setAutoSplitTallStrips(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div className={`h-4 w-4 rounded-full border flex items-center justify-center transition-all ${
+                    props.autoSplitTallStrips ? "border-indigo-400 bg-indigo-500" : "border-neutral-700 bg-neutral-900"
+                  }`}>
+                    {props.autoSplitTallStrips && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">
+                      Auto-Split Tall Webtoon Strips
+                    </span>
+                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
+                      props.autoSplitTallStrips
+                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                        : "bg-neutral-850 text-neutral-500"
+                    }`}>
+                      {props.autoSplitTallStrips ? "ACTIVE" : "DISABLED"}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-neutral-400 font-sans leading-relaxed">
+                    Automatically detects vertical white/black gutters to slice long multi-scene webtoon strips into standalone panels.
+                  </p>
+                </div>
+              </div>
+
+              {/* Custom Toggle Switch */}
+              <button
+                type="button"
+                onClick={() => props.setAutoSplitTallStrips(!props.autoSplitTallStrips)}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  props.autoSplitTallStrips ? "bg-indigo-600" : "bg-neutral-800"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                    props.autoSplitTallStrips ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </label>
+          </div>
+
+          {/* Section 3: Live Image Edge Complexity Analysis */}
+          {firstImageUrl && (
+            <AutoCropComplexityAnalysis
+              firstImageUrl={firstImageUrl}
+              setCannyLow={props.setCropCannyLow}
+              setCannyHigh={props.setCropCannyHigh}
+              addNotification={props.addNotification}
+            />
+          )}
+
+          {/* Section 4: Live Image Preview & Batch Inspection Card */}
+          <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl space-y-4 shadow-xl backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Image className="h-4 w-4 text-indigo-400" />
+                <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                  Batch & Target Preview
+                </span>
+              </div>
+              <span className="text-[9px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-indigo-950/60 border border-indigo-900/40 text-indigo-300">
+                {batchCount > 0 ? `${batchCount} IMAGES QUEUED` : "NO IMAGES QUEUED"}
               </span>
             </div>
-          </label>
+
+            {firstImageUrl ? (
+              <div className="relative h-44 w-full bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 group">
+                <img
+                  src={getProxiedImageUrl(firstImageUrl)}
+                  alt="Target Preview"
+                  className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none" />
+                <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[9px] font-mono font-bold text-neutral-300">
+                  <span className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded border border-white/10">
+                    Aspect: {props.aspectRatioLock.toUpperCase()}
+                  </span>
+                  <span className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded border border-white/10 text-emerald-400">
+                    {props.useLocalCV ? "⚡ OPENCV ACTIVE" : "✨ GEMINI AI ACTIVE"}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="h-32 w-full bg-neutral-900/50 rounded-2xl border border-dashed border-neutral-800 flex flex-col items-center justify-center gap-2 text-neutral-500">
+                <Image className="h-8 w-8 text-neutral-700" />
+                <span className="text-[10px] font-mono">No target image loaded</span>
+              </div>
+            )}
+
+            {/* Smart Tip Banner */}
+            <div className="p-3 bg-neutral-900/60 border border-neutral-850 rounded-2xl text-[9.5px] font-mono text-neutral-400 leading-relaxed flex items-start gap-2 select-none">
+              <Sparkles className="h-4 w-4 shrink-0 text-indigo-400 mt-0.5" />
+              <p>
+                <strong>Pro Tip:</strong> OpenCV Engine runs 100% locally with zero API limits. For overlapping panels or splash art, switch to Gemini AI Engine on the right.
+              </p>
+            </div>
+          </div>
         </div>
 
+        {/* ── Right Column (7 cols on lg+): Detection Engine & Fine Tuning ── */}
+        <div className="lg:col-span-7 flex flex-col space-y-5 w-full">
+          <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl space-y-5 shadow-xl backdrop-blur-md">
+            <AutoCropEngineSelectorV2 legacyProps={props} />
+          </div>
+        </div>
       </div>
     </AutoCropContextWrapper>
   );
-}
+});

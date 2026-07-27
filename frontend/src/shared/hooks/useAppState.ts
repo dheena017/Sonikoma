@@ -197,7 +197,7 @@ export function useAppState() {
   } | null>(null);
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
   const [cropModel, setCropModel] = useState<string>(
-    () => localStorage.getItem("ai_crop_model") || "gemini-2.0-flash-lite"
+    () => localStorage.getItem("ai_crop_model") || "gemini-2.5-flash"
   );
   const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(
     () => parseInt(localStorage.getItem("ai_crop_min_height") || "60", 10)

@@ -131,7 +131,7 @@ const AdvancedSettings = React.memo(
     setCropPaddingPx,
     cropFocusMode = "standard",
     setCropFocusMode,
-    cropModel = "gemini-2.0-flash-lite",
+    cropModel = "gemini-2.5-flash",
     setCropModel,
 
     // Speech Bubble Props (with local fallback if unpassed)

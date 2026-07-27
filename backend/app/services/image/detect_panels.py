@@ -47,7 +47,8 @@ def run_cv_detection(
     canny_low: int = 20,
     canny_high: int = 100,
     close_kernel_size: int = 15,
-    auto_split: bool = True
+    auto_split: bool = True,
+    padding_px: int = 10
 ) -> List[Dict[str, any]]:
     """
     Main orchestration function for panel detection. Loads the image, runs background
@@ -246,6 +247,13 @@ def run_cv_detection(
             
         bx += crop_x
         by += crop_y
+
+        if padding_px > 0:
+            pad_bx = max(0, bx - padding_px)
+            pad_by = max(0, by - padding_px)
+            pad_bw = min(orig_w - pad_bx, bw + (padding_px * 2))
+            pad_bh = min(orig_h - pad_by, bh + (padding_px * 2))
+            bx, by, bw, bh = pad_bx, pad_by, pad_bw, pad_bh
 
         x, y, w_box, h_box = adjust_to_aspect_ratio(
             bx, by, bw, bh, orig_w, orig_h, aspect_ratio_str

@@ -222,13 +222,12 @@ export default function useDashboardPage() {
         )
       ) {
         try {
+          const token =
+            localStorage.getItem("sonikoma_token") ||
+            sessionStorage.getItem("sonikoma_token");
           const res = await fetch(`/api/projects/${projectId}`, {
             method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${
-                localStorage.getItem("sonikoma_token") || ""
-              }`,
-            },
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
           if (res.ok) {
             setProjects((current) =>

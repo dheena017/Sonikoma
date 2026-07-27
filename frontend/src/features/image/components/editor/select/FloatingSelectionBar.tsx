@@ -79,6 +79,8 @@ interface FloatingSelectionBarProps {
   handleSelectRange?: (a: number, b: number) => void;
   setShowAutoCropModal?: (show: boolean) => void;
   setShowBubbleModal?: (show: boolean) => void;
+  showAutoCropModal?: boolean;
+  showBubbleModal?: boolean;
 
   // Timeline panels data
   panels?: any[];
@@ -684,6 +686,8 @@ export function FloatingSelectionBar({
   panels = [],
   setPanels,
   selectedPanelIds = new Set(),
+  showAutoCropModal,
+  showBubbleModal,
 }: FloatingSelectionBarProps) {
   const isAllSelected = totalCount > 0 && selectedCount === totalCount;
   const isAnyBusy = isBatchCropping || isCleaningBubbles || isBatchMerging;
@@ -773,7 +777,12 @@ export function FloatingSelectionBar({
 
   if (typeof document === "undefined") return null;
 
-  const visible = (totalCount > 0 && selectedCount > 0) || isAnyBusy;
+  const isModalOpen = Boolean(
+    showAutoCropModal ||
+    showBubbleModal ||
+    (typeof document !== "undefined" && Boolean(document.querySelector(".fixed.inset-0")))
+  );
+  const visible = ((totalCount > 0 && selectedCount > 0) || isAnyBusy) && !isModalOpen;
 
   const zIndexClass = isTimeline ? "z-[9998]" : "z-[9999]";
   const outerClass = leftDock

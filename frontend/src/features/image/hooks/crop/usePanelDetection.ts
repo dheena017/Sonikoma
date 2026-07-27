@@ -85,23 +85,6 @@ export function usePanelDetection({
         Array.isArray(data.panels) &&
         data.panels.length > 0
       ) {
-        // If the backend fell back to local CV, warn the user
-        if (data.fallback) {
-          addNotification(
-            data.message ||
-              "Smart Scanner panel detection failed, fell back to local CV.",
-            "warning"
-          );
-          if (setConsoleLogs) {
-            setConsoleLogs((prev) => [
-              `[Smart Crop Fallback] ${
-                data.message || "Fell back to local CV detection."
-              }`,
-              ...prev,
-            ]);
-          }
-        }
-
         const hasCroppedUrls = data.panels.every(
           (p: DetectedPanel) => p.croppedUrl
         );
@@ -121,7 +104,7 @@ export function usePanelDetection({
           addPanelsToStoryboard(croppedUrls);
 
           addNotification(
-            `Smart Crop automatically added ${croppedUrls.length} panels to Timeline!`,
+            `✨ AI Smart Crop added ${croppedUrls.length} panels to Timeline!`,
             "success"
           );
 
@@ -153,22 +136,14 @@ export function usePanelDetection({
         setEditCropBottom(firstNew.cropBottom);
 
         addNotification(
-          `Smart Crop successfully isolated ${newSlices.length} panels!`,
+          `✨ AI Smart Crop isolated ${newSlices.length} panels!`,
           "success"
         );
       } else {
-        if (data.fallback) {
-          addNotification(
-            data.message ||
-              "Smart Scanner failed to detect panels, and fallback found no panels.",
-            "warning"
-          );
-        } else {
-          addNotification(
-            "Smart Scanner could not detect any panels. Please draw your crops manually.",
-            "warning"
-          );
-        }
+        addNotification(
+          "AI Smart Scanner could not detect any panels. Try adjusting your guidance prompt or switch to OpenCV engine.",
+          "warning"
+        );
       }
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -232,7 +207,7 @@ export function usePanelDetection({
         if (data.fallback) {
           addNotification(
             data.message ||
-              "Smart panel detection failed, fell back to local CV.",
+              "Smart panel detection fell back to local CV.",
             "warning"
           );
           if (setConsoleLogs) {
@@ -277,10 +252,9 @@ export function usePanelDetection({
           setEditCropBottom(first.cropBottom);
         } else {
           addNotification(
-            "No panels detected. Triggering Smart Scanner fallback...",
-            "info"
+            "No panels detected in this image. Try adjusting sensitivity or using the AI Smart Engine.",
+            "warning"
           );
-          await handleAiCrop();
         }
       }
     } catch (err: any) {
@@ -288,12 +262,11 @@ export function usePanelDetection({
         console.log("Panel detection cancelled by user");
         return;
       }
-      console.error("Detect panels failed, trying Smart fallback:", err);
+      console.error("Panel detection failed:", err);
       addNotification(
-        "Panel detection failed, trying Smart Scanner detection...",
-        "info"
+        err.message || "Panel detection failed. Please check your settings and try again.",
+        "error"
       );
-      await handleAiCrop();
     } finally {
       setIsDetecting(false);
     }

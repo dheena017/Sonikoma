@@ -60,6 +60,7 @@ class SmartCropRequest(BaseModel):
     cannyHigh: Optional[int] = 100
     closeKernelSize: Optional[int] = 15
     minHeightPx: Optional[int] = 60
+    paddingPx: Optional[int] = 10
     autoSplit: Optional[bool] = True
     targetWidth: Optional[int] = None
     targetHeight: Optional[int] = None
@@ -80,6 +81,7 @@ class SmartCropBatchRequest(BaseModel):
     cannyHigh: Optional[int] = 100
     closeKernelSize: Optional[int] = 15
     minHeightPx: Optional[int] = 60
+    paddingPx: Optional[int] = 10
     autoSplit: Optional[bool] = True
     targetWidth: Optional[int] = None
     targetHeight: Optional[int] = None

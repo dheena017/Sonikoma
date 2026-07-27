@@ -7,27 +7,57 @@ from datetime import datetime, timedelta
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("seed_test_data")
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-DB_DIR = os.path.join(PROJECT_ROOT, "backend", "database")
-DB_PATH = os.path.join(DB_DIR, "webtoon_local.db")
-SCHEMA_PATH = os.path.join(DB_DIR, "schema.sql")
+SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+REPO_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
+
+# Database path resolution — prioritize app data directory, fallback to backend/database
+DATA_DIR = os.path.join(REPO_ROOT, "data")
+DB_PATH = os.path.join(DATA_DIR, "webtoon_local.db")
+BACKEND_DB_PATH = os.path.join(PROJECT_ROOT, "database", "webtoon_local.db")
+SCHEMA_PATH = os.path.join(PROJECT_ROOT, "app", "database", "schema.sql")
+if not os.path.exists(SCHEMA_PATH):
+    SCHEMA_PATH = os.path.join(PROJECT_ROOT, "database", "schema.sql")
 
 
-def ensure_db_schema():
-    """Ensure the SQLite database file and tables are initialized from schema.sql."""
-    os.makedirs(DB_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+def ensure_db_schema(target_db):
+    """Ensure SQLite database schema and tables are initialized."""
+    os.makedirs(os.path.dirname(target_db), exist_ok=True)
+    conn = sqlite3.connect(target_db)
     try:
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
         if cursor.fetchone() is None:
-            logger.info("Database file empty/missing. Bootstrapping schema from schema.sql...")
+            logger.info(f"Database empty at {target_db}. Bootstrapping from {SCHEMA_PATH}...")
             with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
                 schema_sql = f.read()
             conn.executescript(schema_sql)
             logger.info("Database schema applied successfully.")
         else:
-            logger.info("Database schema is already present.")
+            logger.info(f"Database schema present at {target_db}.")
+
+        # Ensure dynamic migration tables exist
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS platform_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL,
+                updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            )
+        """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS episode_cache (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title_no TEXT NOT NULL,
+                genre TEXT,
+                cache_key TEXT UNIQUE NOT NULL,
+                episodes_json TEXT NOT NULL,
+                series_metadata TEXT,
+                cached_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                expires_at DATETIME,
+                hit_count INTEGER DEFAULT 0
+            )
+        """)
+        conn.commit()
     finally:
         conn.close()
 
@@ -38,18 +68,21 @@ def _dt(days_ago=0, hours=0, minutes=0, base="2026-06-20"):
     return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def seed_data():
-    conn = sqlite3.connect(DB_PATH)
+def seed_data_for_path(target_db):
+    logger.info(f"Seeding database at: {target_db}")
+    ensure_db_schema(target_db)
+
+    conn = sqlite3.connect(target_db)
     cursor = conn.cursor()
-    cursor.execute("PRAGMA foreign_keys = ON")
+    cursor.execute("PRAGMA foreign_keys = OFF")
 
     try:
         # ── 1. Clear ALL tables ───────────────────────────────────────────────
         tables = [
             "panels", "chapters", "series", "user_sessions", "user_audit_logs",
-            "user_invoices", "user_api_keys", "token_usage_logs",
-            "system_announcements", "platform_settings",
-            "youtube_publications", "youtube_profiles", "youtube_credentials",
+            "user_invoices", "user_api_keys", "token_usage_logs", "credit_transactions",
+            "system_announcements", "platform_settings", "youtube_publications",
+            "youtube_profiles", "youtube_credentials", "system_logs", "episode_cache",
             "users", "scrape_sessions", "edit_history",
         ]
         logger.info("Clearing existing records...")
@@ -57,9 +90,11 @@ def seed_data():
             try:
                 cursor.execute(f"DELETE FROM {table}")
             except Exception:
-                pass  # table might not exist yet
+                pass
 
-        # ── 2. Password hash (shared) ─────────────────────────────────────────
+        cursor.execute("PRAGMA foreign_keys = ON")
+
+        # ── 2. Password hash ──────────────────────────────────────────────────
         logger.info("Generating password hashes...")
         pw = "password123".encode("utf-8")[:72]
         pw_hash = bcrypt.hashpw(pw, bcrypt.gensalt()).decode("utf-8")
@@ -71,9 +106,9 @@ def seed_data():
                 "user_testuser1", "testuser1", "creator@sonikoma.com", pw_hash,
                 '{"theme":"dark","autoSave":true,"volume":0.8}',
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=testuser1",
-                "Test User One", "creator",
+                "Test User One", None, "creator",
                 "Casual webtoon compiler and creator testing the Sonikoma suite.",
-                1, "en", "[]", 1250, None, "[]", 0,
+                1, "en", "[]", 1250, 1250, None, "[]", 0,
                 '{"google":true,"github":false,"discord":false}',
                 _dt(30), _dt(1),
             ),
@@ -81,11 +116,11 @@ def seed_data():
                 "user_creator_pro", "creator_pro", "pro@gmail.com", pw_hash,
                 '{"theme":"cyberpunk","autoSave":true,"volume":1.0}',
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=creator_pro",
-                "Sarah Jenkins (Pro)", "director",
+                "Sarah Jenkins (Pro)", None, "director",
                 "Professional animator and comic creator pushing Webtoons to cinematic heights.",
                 1, "en",
                 '["https://behance.net/sarah","https://youtube.com/sarahanimations"]',
-                4850, _dt(1), '["badge_pro_creator","badge_early_bird"]', 1,
+                4850, 4850, _dt(1), '["badge_pro_creator","badge_early_bird"]', 1,
                 '{"google":true,"github":true,"discord":true}',
                 _dt(25), _dt(0),
             ),
@@ -93,9 +128,9 @@ def seed_data():
                 "user_editor_test", "editor_test", "editor@gmail.com", pw_hash,
                 '{"theme":"light","autoSave":false,"volume":0.5}',
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=editor_test",
-                "Alex Rivera", "editor",
+                "Alex Rivera", None, "editor",
                 "Collaborative editor testing timeline synchronization and audio syncing.",
-                0, "es", "[]", 350, None, "[]", 0,
+                0, "es", "[]", 350, 350, None, "[]", 0,
                 '{"google":false,"github":false,"discord":false}',
                 _dt(20), _dt(5),
             ),
@@ -103,9 +138,9 @@ def seed_data():
                 "user_manga_fan", "manga_fan", "manga@hotmail.com", pw_hash,
                 '{"theme":"dark","autoSave":true,"volume":0.6}',
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=manga_fan",
-                "Kenji Tanaka", "viewer",
+                "Kenji Tanaka", None, "viewer",
                 "Manga enthusiast exploring Sonikoma as a video-compilation tool.",
-                1, "ja", "[]", 200, None, "[]", 0,
+                1, "ja", "[]", 200, 200, None, "[]", 0,
                 '{"google":false,"github":false,"discord":true}',
                 _dt(15), _dt(3),
             ),
@@ -113,11 +148,11 @@ def seed_data():
                 "user_anim_studio", "anim_studio", "studio@animx.io", pw_hash,
                 '{"theme":"dark","autoSave":true,"volume":1.0}',
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=anim_studio",
-                "AnimX Studio", "director",
+                "AnimX Studio", None, "director",
                 "Studio account for batch-rendering multiple webtoon series into reels.",
                 1, "en",
                 '["https://animx.io","https://twitter.com/animxstudio"]',
-                9999, _dt(1), '["badge_studio_tier","badge_volume_creator","badge_early_bird"]', 1,
+                9999, 9999, _dt(1), '["badge_studio_tier","badge_volume_creator","badge_early_bird"]', 1,
                 '{"google":true,"github":true,"discord":true}',
                 _dt(60), _dt(0),
             ),
@@ -125,9 +160,9 @@ def seed_data():
                 "user_free_trial", "free_trial", "trial@example.com", pw_hash,
                 '{"theme":"light","autoSave":false,"volume":0.3}',
                 "https://api.dicebear.com/7.x/avataaars/svg?seed=free_trial",
-                "Trial User", "viewer",
+                "Trial User", None, "viewer",
                 "Free-tier trial user with limited credits, testing the basic pipeline.",
-                0, "en", "[]", 0, None, "[]", 0,
+                0, "en", "[]", 0, 0, None, "[]", 0,
                 '{"google":false,"github":false,"discord":false}',
                 _dt(2), _dt(2),
             ),
@@ -135,52 +170,52 @@ def seed_data():
         cursor.executemany("""
             INSERT INTO users (
                 id, username, email, password_hash, preferences, avatar_url,
-                full_name, creator_role, bio, newsletter, language, portfolio_links,
-                credits, last_claimed_date, unlocked_rewards, mfa_enabled, social_connections,
+                full_name, google_id, creator_role, bio, newsletter, language, portfolio_links,
+                credits, credit_balance, last_claimed_date, unlocked_rewards, mfa_enabled, social_connections,
                 created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, users)
 
         # ── 4. Series ─────────────────────────────────────────────────────────
         logger.info("Seeding series...")
         series = [
-            ("ser_lore_olympus", "user_testuser1", "Lore Olympus",
+            ("ser_lore_olympus", "user_testuser1", "Lore Olympus", "lore-olympus",
              "Rachel Smythe",
              "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=300&auto=format&fit=crop",
              "romance",
              "A modern retelling of one of mythology's greatest stories: the taking of Persephone.",
              _dt(30)),
-            ("ser_tower_of_god", "user_testuser1", "Tower of God",
+            ("ser_tower_of_god", "user_testuser1", "Tower of God", "tower-of-god",
              "SIU",
              "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=300&auto=format&fit=crop",
              "action",
              "What do you desire? Authority and power? Find it all at the top of the Tower.",
              _dt(25)),
-            ("ser_omniscient_reader", "user_creator_pro", "Omniscient Reader",
+            ("ser_omniscient_reader", "user_creator_pro", "Omniscient Reader", "omniscient-reader",
              "sing N song",
              "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&auto=format&fit=crop",
              "fantasy",
              "Only I know the end of this world. Survival begins the day the novel becomes reality.",
              _dt(25)),
-            ("ser_solo_leveling", "user_creator_pro", "Solo Leveling",
+            ("ser_solo_leveling", "user_creator_pro", "Solo Leveling", "solo-leveling",
              "Chugong",
              "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop",
              "action",
              "The weakest hunter of all mankind will face the world's deadliest dungeon raid.",
              _dt(20)),
-            ("ser_true_beauty", "user_anim_studio", "True Beauty",
+            ("ser_true_beauty", "user_anim_studio", "True Beauty", "true-beauty",
              "Yaongyi",
              "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=300&auto=format&fit=crop",
              "romance",
              "A girl who masterfully hides her plain face through the power of makeup.",
              _dt(18)),
-            ("ser_noblesse", "user_anim_studio", "Noblesse",
+            ("ser_noblesse", "user_anim_studio", "Noblesse", "noblesse",
              "Son Jeho",
              "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=300&auto=format&fit=crop",
              "action",
              "A powerful Noble awakens in the modern era after a 820-year slumber.",
              _dt(15)),
-            ("ser_unordinary", "user_manga_fan", "unOrdinary",
+            ("ser_unordinary", "user_manga_fan", "unOrdinary", "unordinary",
              "uru-chan",
              "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=300&auto=format&fit=crop",
              "action",
@@ -188,89 +223,82 @@ def seed_data():
              _dt(10)),
         ]
         cursor.executemany("""
-            INSERT INTO series (id, user_id, title, author, cover_image, genre, synopsis, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO series (id, user_id, title, slug, author, cover_image, genre, synopsis, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, series)
 
         # ── 5. Chapters ───────────────────────────────────────────────────────
         logger.info("Seeding chapters...")
         chapters = [
-            # Lore Olympus
-            ("chap_lore_c1", "ser_lore_olympus", "Chapter 1",
+            ("chap_lore_c1", "ser_lore_olympus", "Chapter 1", "lore-olympus-ch1",
              "https://www.webtoons.com/en/romance/lore-olympus/episode-1/viewer?title_no=1320&episode_no=1",
              "completed", 3,
              "https://assets.mixkit.co/videos/preview/mixkit-starry-night-sky-in-the-forest-43189-large.mp4",
-             _dt(29), _dt(28)),
-            ("chap_lore_c2", "ser_lore_olympus", "Chapter 2",
+             1650, '{"volume":0.8,"bgm":"starry_night.mp3"}', _dt(29), _dt(28)),
+            ("chap_lore_c2", "ser_lore_olympus", "Chapter 2", "lore-olympus-ch2",
              "https://www.webtoons.com/en/romance/lore-olympus/episode-2/viewer?title_no=1320&episode_no=2",
-             "completed", 4, None, _dt(22), _dt(21)),
-            ("chap_lore_c3", "ser_lore_olympus", "Chapter 3",
+             "completed", 4, None, 1200, '{"volume":0.8}', _dt(22), _dt(21)),
+            ("chap_lore_c3", "ser_lore_olympus", "Chapter 3", "lore-olympus-ch3",
              "https://www.webtoons.com/en/romance/lore-olympus/episode-3/viewer?title_no=1320&episode_no=3",
-             "processing", 0, None, _dt(10), _dt(10)),
+             "processing", 0, None, 0, None, _dt(10), _dt(10)),
 
-            # Tower of God
-            ("chap_tog_c1", "ser_tower_of_god", "Chapter 1",
+            ("chap_tog_c1", "ser_tower_of_god", "Chapter 1", "tower-of-god-ch1",
              "https://www.webtoons.com/en/fantasy/tower-of-god/season-1-ep-0/viewer?title_no=95&episode_no=1",
              "completed", 4,
              "https://assets.mixkit.co/videos/preview/mixkit-flying-through-clouds-in-a-sunny-sky-42861-large.mp4",
-             _dt(24), _dt(23)),
-            ("chap_tog_c2", "ser_tower_of_god", "Chapter 2",
+             2420, '{"volume":1.0,"bgm":"epic_intro.mp3"}', _dt(24), _dt(23)),
+            ("chap_tog_c2", "ser_tower_of_god", "Chapter 2", "tower-of-god-ch2",
              "https://www.webtoons.com/en/fantasy/tower-of-god/season-1-ep-1/viewer?title_no=95&episode_no=2",
-             "completed", 3, None, _dt(20), _dt(19)),
-            ("chap_tog_c3", "ser_tower_of_god", "Chapter 3",
+             "completed", 3, None, 1100, None, _dt(20), _dt(19)),
+            ("chap_tog_c3", "ser_tower_of_god", "Chapter 3", "tower-of-god-ch3",
              "https://www.webtoons.com/en/fantasy/tower-of-god/season-1-ep-2/viewer?title_no=95&episode_no=3",
-             "failed", 0, None, _dt(15), _dt(14)),
-            ("chap_tog_c4", "ser_tower_of_god", "Chapter 4",
+             "failed", 0, None, 0, None, _dt(15), _dt(14)),
+            ("chap_tog_c4", "ser_tower_of_god", "Chapter 4", "tower-of-god-ch4",
              "https://www.webtoons.com/en/fantasy/tower-of-god/season-1-ep-3/viewer?title_no=95&episode_no=4",
-             "pending", 0, None, _dt(5), _dt(5)),
+             "pending", 0, None, 0, None, _dt(5), _dt(5)),
 
-            # Omniscient Reader
-            ("chap_or_c1", "ser_omniscient_reader", "Chapter 1",
+            ("chap_or_c1", "ser_omniscient_reader", "Chapter 1", "omniscient-reader-ch1",
              "https://www.webtoons.com/en/action/omniscient-reader/episode-1/viewer?title_no=2154&episode_no=1",
              "completed", 5,
              "https://assets.mixkit.co/videos/preview/mixkit-rain-falling-on-a-window-pane-41617-large.mp4",
-             _dt(24), _dt(23)),
-            ("chap_or_c2", "ser_omniscient_reader", "Chapter 2",
+             4500, '{"volume":0.9}', _dt(24), _dt(23)),
+            ("chap_or_c2", "ser_omniscient_reader", "Chapter 2", "omniscient-reader-ch2",
              "https://www.webtoons.com/en/action/omniscient-reader/episode-2/viewer?title_no=2154&episode_no=2",
-             "completed", 4, None, _dt(18), _dt(17)),
-            ("chap_or_c3", "ser_omniscient_reader", "Chapter 3",
+             "completed", 4, None, 3880, None, _dt(18), _dt(17)),
+            ("chap_or_c3", "ser_omniscient_reader", "Chapter 3", "omniscient-reader-ch3",
              "https://www.webtoons.com/en/action/omniscient-reader/episode-3/viewer?title_no=2154&episode_no=3",
-             "pending", 0, None, _dt(3), _dt(3)),
+             "pending", 0, None, 0, None, _dt(3), _dt(3)),
 
-            # Solo Leveling
-            ("chap_sl_c1", "ser_solo_leveling", "Chapter 1",
+            ("chap_sl_c1", "ser_solo_leveling", "Chapter 1", "solo-leveling-ch1",
              "https://www.webtoons.com/en/action/solo-leveling/episode-1/viewer?title_no=1&episode_no=1",
-             "completed", 6, None, _dt(19), _dt(18)),
-            ("chap_sl_c2", "ser_solo_leveling", "Chapter 2",
+             "completed", 6, None, 5450, '{"volume":1.0}', _dt(19), _dt(18)),
+            ("chap_sl_c2", "ser_solo_leveling", "Chapter 2", "solo-leveling-ch2",
              "https://www.webtoons.com/en/action/solo-leveling/episode-2/viewer?title_no=1&episode_no=2",
-             "processing", 0, None, _dt(4), _dt(4)),
+             "processing", 0, None, 0, None, _dt(4), _dt(4)),
 
-            # True Beauty
-            ("chap_tb_c1", "ser_true_beauty", "Chapter 1",
+            ("chap_tb_c1", "ser_true_beauty", "Chapter 1", "true-beauty-ch1",
              "https://www.webtoons.com/en/romance/true-beauty/episode-1/viewer?title_no=1436&episode_no=1",
-             "completed", 4, None, _dt(17), _dt(16)),
-            ("chap_tb_c2", "ser_true_beauty", "Chapter 2",
+             "completed", 4, None, 2800, None, _dt(17), _dt(16)),
+            ("chap_tb_c2", "ser_true_beauty", "Chapter 2", "true-beauty-ch2",
              "https://www.webtoons.com/en/romance/true-beauty/episode-2/viewer?title_no=1436&episode_no=2",
-             "pending", 0, None, _dt(6), _dt(6)),
+             "pending", 0, None, 0, None, _dt(6), _dt(6)),
 
-            # Noblesse
-            ("chap_nob_c1", "ser_noblesse", "Chapter 1",
+            ("chap_nob_c1", "ser_noblesse", "Chapter 1", "noblesse-ch1",
              "https://www.webtoons.com/en/action/noblesse/episode-1/viewer?title_no=87&episode_no=1",
-             "completed", 5, None, _dt(14), _dt(13)),
+             "completed", 5, None, 3450, None, _dt(14), _dt(13)),
 
-            # unOrdinary
-            ("chap_uno_c1", "ser_unordinary", "Chapter 1",
+            ("chap_uno_c1", "ser_unordinary", "Chapter 1", "unordinary-ch1",
              "https://www.webtoons.com/en/action/unordinary/episode-1/viewer?title_no=679&episode_no=1",
-             "completed", 3, None, _dt(9), _dt(8)),
-            ("chap_uno_c2", "ser_unordinary", "Chapter 2",
+             "completed", 3, None, 1210, None, _dt(9), _dt(8)),
+            ("chap_uno_c2", "ser_unordinary", "Chapter 2", "unordinary-ch2",
              "https://www.webtoons.com/en/action/unordinary/episode-2/viewer?title_no=679&episode_no=2",
-             "failed", 0, None, _dt(4), _dt(3)),
+             "failed", 0, None, 0, None, _dt(4), _dt(3)),
         ]
         cursor.executemany("""
             INSERT INTO chapters (
-                id, series_id, episode_number, original_url, status,
-                panels_count, video_url, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                id, series_id, episode_number, slug, original_url, status,
+                panels_count, video_url, total_tokens_used, audio_settings, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, chapters)
 
         # ── 6. Panels ─────────────────────────────────────────────────────────
@@ -291,14 +319,13 @@ def seed_data():
         def _panel(chap, idx, text, sfx, dur, motion, desc,
                    br=None, ct=None, sat=None, gray=0, flt=None,
                    bub=None, sens=None, dil=None, inr=None, dstyle=None,
-                   created=None):
+                   audio=None, smart_crop=1, crop_pad=10, sanitized=0, created=None):
             img = _img[idx % len(_img)]
             return (chap, idx, img, img, text, sfx, dur, motion, desc,
                     br, ct, sat, gray, flt, bub, sens, dil, inr, dstyle,
-                    created or _dt(20))
+                    audio, smart_crop, crop_pad, sanitized, created or _dt(20))
 
         panels = [
-            # ── Lore Olympus C1
             _panel("chap_lore_c1", 0, "Welcome to the underworld!", "WHOOSH", 4.5, "zoom_in",
                    "Persephone gazes at the dark obsidian castle.", 10, 5, 0, 0, "cyberpunk", created=_dt(29)),
             _panel("chap_lore_c1", 1, "Wait, who is that in the shadows?", "SHINE", 3.5, "pan_right",
@@ -306,7 +333,6 @@ def seed_data():
             _panel("chap_lore_c1", 2, "Let our story begin.", "POP", 5.0, "zoom_out",
                    "Persephone and Hades meet at the banquet.", 0, 0, 0, 0, "vintage", created=_dt(29)),
 
-            # ── Lore Olympus C2
             _panel("chap_lore_c2", 0, "Are you lost, little goddess?", "ECHO", 4.0, "static",
                    "Hades looking down at Persephone near the gates.", created=_dt(22)),
             _panel("chap_lore_c2", 1, "I never get lost. I choose alternate routes.", "CHIME", 3.0, "pan_left",
@@ -316,7 +342,6 @@ def seed_data():
             _panel("chap_lore_c2", 3, "The underworld will never be the same.", "HEARTBEAT", 6.0, "zoom_out",
                    "Sweeping view of the dark kingdom lit by Persephone's aura.", created=_dt(22)),
 
-            # ── Tower of God C1
             _panel("chap_tog_c1", 0, "Bam! Why are you running away?!", "CRASH", 4.0, "pan_left",
                    "Rachel running toward massive iron gates.", None, None, None, 0, None, "manual", 0.85, 4.0, 15, "comic", created=_dt(24)),
             _panel("chap_tog_c1", 1, "I must reach the stars.", "WIND", 5.5, "zoom_in",
@@ -326,7 +351,6 @@ def seed_data():
             _panel("chap_tog_c1", 3, "Where am I? Who are you?", "ECHO", 5.0, "static",
                    "Bam waking on stone in front of Headon.", None, None, None, 0, "noir", created=_dt(24)),
 
-            # ── Tower of God C2
             _panel("chap_tog_c2", 0, "Pass the test and you shall climb.", "ROAR", 5.0, "zoom_in",
                    "Headon presenting the black steel ball.", created=_dt(20)),
             _panel("chap_tog_c2", 1, "I'll do it, for Rachel.", "DETERMINATION", 4.5, "static",
@@ -334,7 +358,6 @@ def seed_data():
             _panel("chap_tog_c2", 2, "The test begins. Survive.", "CRASH", 6.5, "pan_right",
                    "Bam sprinting across the floor toward the giant eel.", created=_dt(20)),
 
-            # ── Omniscient Reader C1
             _panel("chap_or_c1", 0, "I was reading the final chapter.", "KEYBOARD_TAP", 4.0, "static",
                    "Dokja staring at his phone on a crowded subway.", created=_dt(24)),
             _panel("chap_or_c1", 1, "The lights flickered. The train stopped.", "SPARK", 4.5, "pan_right",
@@ -347,7 +370,6 @@ def seed_data():
             _panel("chap_or_c1", 4, "This is the world I knew.", "DARK_HUM", 5.0, "pan_left",
                    "Dokja narrowing his eyes and bracing for the monsters.", None, None, None, 0, "noir", created=_dt(24)),
 
-            # ── Omniscient Reader C2
             _panel("chap_or_c2", 0, "I am the only one who knows how this ends.", "STATIC_BUZZ", 5.0, "zoom_in",
                    "Dokja surrounded by frightened people in the broken subway.", created=_dt(18)),
             _panel("chap_or_c2", 1, "The first scenario: eliminate the enemy.", "CRASH", 6.5, "zoom_out",
@@ -357,7 +379,6 @@ def seed_data():
             _panel("chap_or_c2", 3, "Fight.", "EXPLOSION", 3.0, "pan_right",
                    "Dokja charging at the monster alone in the dark tunnel.", 5, 10, 5, 0, None, created=_dt(18)),
 
-            # ── Solo Leveling C1
             _panel("chap_sl_c1", 0, "Sung Jinwoo, the weakest E-rank hunter.", "WIND", 4.0, "static",
                    "A thin young man standing behind a group of elite hunters.", created=_dt(19)),
             _panel("chap_sl_c1", 1, "Everyone enters the double dungeon.", "ECHO", 4.5, "pan_left",
@@ -371,7 +392,6 @@ def seed_data():
             _panel("chap_sl_c1", 5, "[You have been selected as a Player.]", "STATIC_BUZZ", 6.0, "zoom_in",
                    "A glowing blue quest window appearing before dying Jinwoo.", None, None, None, 0, "cyberpunk", created=_dt(19)),
 
-            # ── True Beauty C1
             _panel("chap_tb_c1", 0, "Without makeup, I'm nothing.", "WIND", 3.5, "static",
                    "Jugyeong without makeup, looking plain in the mirror.", created=_dt(17)),
             _panel("chap_tb_c1", 1, "But with it, I'm everything.", "SHINE", 4.5, "zoom_in",
@@ -381,7 +401,6 @@ def seed_data():
             _panel("chap_tb_c1", 3, "He saw me. Without my makeup.", "HEARTBEAT", 6.0, "zoom_out",
                    "Suho and Jugyeong's eyes meeting across a dark library.", created=_dt(17)),
 
-            # ── Noblesse C1
             _panel("chap_nob_c1", 0, "820 years of slumber ends today.", "DARK_HUM", 5.0, "static",
                    "Cadis rising from a stone coffin in a darkened chamber.", 0, 0, 0, 0, "noir", created=_dt(14)),
             _panel("chap_nob_c1", 1, "What is this strange new world?", "ECHO", 4.5, "pan_left",
@@ -393,7 +412,6 @@ def seed_data():
             _panel("chap_nob_c1", 4, "Let's enrol in high school.", "CHIME", 3.5, "static",
                    "Cadis and Frankenstein standing outside a high school gate.", created=_dt(14)),
 
-            # ── unOrdinary C1
             _panel("chap_uno_c1", 0, "In this world, ability is everything.", "STATIC_BUZZ", 4.0, "static",
                    "A high-school hallway, students casually using superpowers.", None, None, None, 0, "cyberpunk", created=_dt(9)),
             _panel("chap_uno_c1", 1, "John Doe. Cripple. Bottom of the hierarchy.", "WIND", 4.5, "pan_left",
@@ -406,8 +424,9 @@ def seed_data():
                 chapter_id, panel_index, image_url, original_url, speech_text, sfx,
                 duration, motion_type, visual_description, brightness, contrast, saturation,
                 grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
-                inpaint_radius, detection_style, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                inpaint_radius, detection_style, audio_url, smart_crop, crop_padding,
+                is_sanitized, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, panels)
 
         # ── 7. Scrape Sessions ─────────────────────────────────────────────────
@@ -543,29 +562,44 @@ def seed_data():
         """, api_keys)
 
         # ── 13. Token Usage Logs ──────────────────────────────────────────────
-        # Schema: project_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd, created_at
         logger.info("Seeding token usage logs...")
         try:
             token_logs = [
-                ("chap_lore_c1", 1200, 450, 1650, 0.0008, _dt(29)),
-                ("chap_tog_c1",  1800, 620, 2420, 0.0012, _dt(24)),
-                ("chap_or_c1",   3400, 1100, 4500, 0.0225, _dt(24)),
-                ("chap_or_c2",   2900, 980, 3880, 0.0194, _dt(18)),
-                ("chap_sl_c1",   4100, 1350, 5450, 0.0273, _dt(19)),
-                ("chap_tb_c1",   2100, 700, 2800, 0.0014, _dt(17)),
-                ("chap_nob_c1",  2600, 850, 3450, 0.0017, _dt(14)),
-                ("chap_uno_c1",  900,  310, 1210, 0.0006, _dt(9)),
+                ("tok_log_001", "chap_lore_c1", 1200, 450, 1650, 0.0008, _dt(29)),
+                ("tok_log_002", "chap_tog_c1",  1800, 620, 2420, 0.0012, _dt(24)),
+                ("tok_log_003", "chap_or_c1",   3400, 1100, 4500, 0.0225, _dt(24)),
+                ("tok_log_004", "chap_or_c2",   2900, 980, 3880, 0.0194, _dt(18)),
+                ("tok_log_005", "chap_sl_c1",   4100, 1350, 5450, 0.0273, _dt(19)),
+                ("tok_log_006", "chap_tb_c1",   2100, 700, 2800, 0.0014, _dt(17)),
+                ("tok_log_007", "chap_nob_c1",  2600, 850, 3450, 0.0017, _dt(14)),
+                ("tok_log_008", "chap_uno_c1",  900,  310, 1210, 0.0006, _dt(9)),
             ]
             cursor.executemany("""
                 INSERT INTO token_usage_logs
-                    (project_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd, created_at)
-                VALUES (?, ?, ?, ?, ?, ?)
+                    (id, project_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, token_logs)
         except Exception as e:
             logger.warning(f"token_usage_logs skipped: {e}")
 
-        # ── 14. System Announcements ──────────────────────────────────────────
-        # Schema: title, message, type, status, created_at
+        # ── 14. Credit Transactions ───────────────────────────────────────────
+        logger.info("Seeding credit transactions...")
+        try:
+            credit_txs = [
+                ("ctx_001", "user_testuser1", 500, "Daily Claim", _dt(28)),
+                ("ctx_002", "user_testuser1", -50, "AI Smart Crop", _dt(25)),
+                ("ctx_003", "user_creator_pro", 1000, "Pro Subscription Bonus", _dt(24)),
+                ("ctx_004", "user_creator_pro", -120, "Video Compilation Export", _dt(20)),
+                ("ctx_005", "user_anim_studio", 5000, "Studio Enterprise Top-Up", _dt(30)),
+            ]
+            cursor.executemany("""
+                INSERT INTO credit_transactions (id, user_id, amount, feature_name, created_at)
+                VALUES (?, ?, ?, ?, ?)
+            """, credit_txs)
+        except Exception as e:
+            logger.warning(f"credit_transactions skipped: {e}")
+
+        # ── 15. System Announcements ──────────────────────────────────────────
         logger.info("Seeding system announcements...")
         try:
             announcements = [
@@ -592,8 +626,7 @@ def seed_data():
         except Exception as e:
             logger.warning(f"system_announcements skipped: {e}")
 
-        # ── 15. Platform Settings ─────────────────────────────────────────────
-        # Schema: key, value, updated_at
+        # ── 16. Platform Settings ─────────────────────────────────────────────
         logger.info("Seeding platform settings...")
         try:
             platform_settings = [
@@ -613,10 +646,7 @@ def seed_data():
         except Exception as e:
             logger.warning(f"platform_settings skipped: {e}")
 
-        # ── 16. YouTube Profiles ──────────────────────────────────────────────
-        # Schema: user_id, name, title_template, description_template, tags, category_id,
-        #         privacy_status, is_short, made_for_kids, paid_promotion, license,
-        #         video_language, channel_link, discord_link, patreon_link
+        # ── 17. YouTube Profiles ──────────────────────────────────────────────
         logger.info("Seeding YouTube profiles...")
         try:
             yt_profiles = [
@@ -625,7 +655,7 @@ def seed_data():
                  "Fan-made cinematic adaptation of {series_title} by Sonikoma.",
                  '["webtoon","fanmade","sonikoma","cinematic"]',
                  "1", "public", 0, "no", 0, "youtube", "en",
-                 "https://youtube.com/@testuser1", None, None),
+                 "https://youtube.com/@testuser1", None, None, _dt(29)),
                 ("user_creator_pro", "Sarah's Cinematic Webtoons",
                  "{series_title} | Episode {episode_number} Cinematic",
                  "Premium cinematic adaptation by Sarah Jenkins.",
@@ -633,33 +663,32 @@ def seed_data():
                  "1", "public", 0, "no", 0, "youtube", "en",
                  "https://youtube.com/@sarahcinematic",
                  "https://discord.gg/sarahcinematic",
-                 "https://patreon.com/sarahcinematic"),
+                 "https://patreon.com/sarahcinematic", _dt(25)),
                 ("user_anim_studio", "AnimX Studio Official",
                  "{series_title} | AnimX Studio",
                  "Official AnimX Studio cinematic webtoon production.",
                  '["webtoon","studio","animx","sonikoma","official"]',
                  "1", "public", 0, "no", 0, "youtube", "en",
                  "https://youtube.com/@animxstudio",
-                 "https://discord.gg/animxstudio", None),
+                 "https://discord.gg/animxstudio", None, _dt(60)),
                 ("user_manga_fan", "Kenji's Manga Cinema",
                  "{series_title} EP{episode_number}",
                  "Manga-to-video by Kenji Tanaka.",
                  '["manga","webtoon","sonikoma","japan"]',
                  "1", "unlisted", 1, "no", 0, "youtube", "ja",
-                 None, None, None),
+                 None, None, None, _dt(15)),
             ]
             cursor.executemany("""
                 INSERT INTO youtube_profiles
                     (user_id, name, title_template, description_template, tags, category_id,
                      privacy_status, is_short, made_for_kids, paid_promotion, license,
-                     video_language, channel_link, discord_link, patreon_link)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     video_language, channel_link, discord_link, patreon_link, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, yt_profiles)
         except Exception as e:
             logger.warning(f"youtube_profiles skipped: {e}")
 
-        # ── 17. YouTube Publications ──────────────────────────────────────────
-        # Schema: user_id, chapter_id, youtube_url, title, privacy_status, published_at
+        # ── 18. YouTube Publications ──────────────────────────────────────────
         logger.info("Seeding YouTube publications...")
         try:
             yt_pubs = [
@@ -696,62 +725,119 @@ def seed_data():
         except Exception as e:
             logger.warning(f"youtube_publications skipped: {e}")
 
+        # ── 19. YouTube Credentials ───────────────────────────────────────────
+        logger.info("Seeding YouTube credentials...")
+        try:
+            yt_creds = [
+                ("user_testuser1", "client_123.apps.googleusercontent.com", "secret_abc123", "proj_yt_01", _dt(10)),
+                ("user_creator_pro", "client_456.apps.googleusercontent.com", "secret_xyz789", "proj_yt_02", _dt(5)),
+            ]
+            cursor.executemany("""
+                INSERT INTO youtube_credentials (user_id, client_id, client_secret, project_id, updated_at)
+                VALUES (?, ?, ?, ?, ?)
+            """, yt_creds)
+        except Exception as e:
+            logger.warning(f"youtube_credentials skipped: {e}")
+
+        # ── 20. System Logs ───────────────────────────────────────────────────
+        logger.info("Seeding system logs...")
+        try:
+            sys_logs = [
+                (_dt(0, 1), "OpenAI API request completed in 420ms", "INFO", "AI", '{"model":"gpt-4o","tokens":1200}', _dt(0, 1)),
+                (_dt(0, 2), "Scraped 15 webtoon panels successfully", "SUCCESS", "Scraper", '{"url":"https://webtoons.com/ep1"}', _dt(0, 2)),
+                (_dt(0, 3), "FFmpeg video compilation generated output.mp4", "SUCCESS", "VideoCompiler", '{"duration_sec":45}', _dt(0, 3)),
+                (_dt(0, 5), "Smart crop model inference warning: low confidence on panel 4", "WARN", "Model", '{"confidence":0.62}', _dt(0, 5)),
+            ]
+            cursor.executemany("""
+                INSERT INTO system_logs (timestamp, message, level, module, details, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, sys_logs)
+        except Exception as e:
+            logger.warning(f"system_logs skipped: {e}")
+
+        # ── 21. Episode Cache ─────────────────────────────────────────────────
+        logger.info("Seeding episode cache...")
+        try:
+            cache_entries = [
+                ("1320", "romance", "cache_lore_olympus", '{"episodes":[1,2,3]}', '{"title":"Lore Olympus"}', _dt(5), _dt(-30), 42),
+                ("95", "fantasy", "cache_tower_of_god", '{"episodes":[1,2,3,4]}', '{"title":"Tower of God"}', _dt(3), _dt(-30), 128),
+            ]
+            cursor.executemany("""
+                INSERT INTO episode_cache
+                    (title_no, genre, cache_key, episodes_json, series_metadata, cached_at, expires_at, hit_count)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, cache_entries)
+        except Exception as e:
+            logger.warning(f"episode_cache skipped: {e}")
+
         conn.commit()
-        logger.info("✅ Successfully seeded all database tables with rich mock data!")
+        logger.info(f"✅ Successfully seeded database at {target_db}")
 
     except Exception as e:
         conn.rollback()
-        logger.error(f"Error seeding database: {e}")
+        logger.error(f"Error seeding database {target_db}: {e}")
         raise
     finally:
         conn.close()
+
+
+def seed_data():
+    target_dbs = [DB_PATH, BACKEND_DB_PATH]
+    unique_dbs = list(dict.fromkeys(target_dbs))
+    for target_db in unique_dbs:
+        seed_data_for_path(target_db)
 
 
 def seed_training_data():
     """Seed 3 mock training pairs inside data/training_data/ to unlock fine-tuning."""
     import numpy as np
     import cv2
-    
-    training_dir = os.path.join(PROJECT_ROOT, "data", "training_data")
-    os.makedirs(training_dir, exist_ok=True)
-    logger.info(f"Seeding mock training pairs in {training_dir}...")
-    
-    samples = [
-        {"id": "sample001", "text": "BOOM!", "color": (150, 100, 250), "shape": "circle"},
-        {"id": "sample002", "text": "WHAT?", "color": (100, 200, 150), "shape": "rect"},
-        {"id": "sample003", "text": "AHA!", "color": (250, 150, 100), "shape": "ellipse"}
+
+    training_dirs = [
+        os.path.join(REPO_ROOT, "data", "training_data"),
+        os.path.join(PROJECT_ROOT, "data", "training_data"),
     ]
 
-    for s in samples:
-        pair_id = s["id"]
-        original = np.zeros((256, 256, 3), dtype=np.uint8)
-        original[:, :] = s["color"]
-        mask = np.zeros((256, 256), dtype=np.uint8)
+    for training_dir in list(dict.fromkeys(training_dirs)):
+        os.makedirs(training_dir, exist_ok=True)
+        logger.info(f"Seeding mock training pairs in {training_dir}...")
 
-        if s["shape"] == "rect":
-            cv2.rectangle(original, (40, 60), (210, 190), (255, 255, 255), -1)
-            cv2.putText(original, s["text"], (75, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
-            cv2.rectangle(mask, (40, 60), (210, 190), 255, -1)
-        elif s["shape"] == "circle":
-            cv2.circle(original, (128, 128), 80, (255, 255, 255), -1)
-            cv2.putText(original, s["text"], (70, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
-            cv2.circle(mask, (128, 128), 80, 255, -1)
-        else:
-            cv2.ellipse(original, (128, 128), (95, 65), 0, 0, 360, (255, 255, 255), -1)
-            cv2.putText(original, s["text"], (80, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
-            cv2.ellipse(mask, (128, 128), (95, 65), 0, 0, 360, 255, -1)
+        samples = [
+            {"id": "sample001", "text": "BOOM!", "color": (150, 100, 250), "shape": "circle"},
+            {"id": "sample002", "text": "WHAT?", "color": (100, 200, 150), "shape": "rect"},
+            {"id": "sample003", "text": "AHA!", "color": (250, 150, 100), "shape": "ellipse"}
+        ]
 
-        orig_path = os.path.join(training_dir, f"original_{pair_id}.png")
-        mask_path = os.path.join(training_dir, f"mask_{pair_id}.png")
+        for s in samples:
+            pair_id = str(s["id"])
+            text = str(s["text"])
+            original = np.zeros((256, 256, 3), dtype=np.uint8)
+            original[:, :] = s["color"]
+            mask = np.zeros((256, 256), dtype=np.uint8)
 
-        cv2.imwrite(orig_path, original)
-        cv2.imwrite(mask_path, mask)
-        logger.info(f"  Generated mock training pair: {pair_id}")
+            if s["shape"] == "rect":
+                cv2.rectangle(original, (40, 60), (210, 190), (255, 255, 255), -1)
+                cv2.putText(original, text, (75, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+                cv2.rectangle(mask, (40, 60), (210, 190), 255, -1)
+            elif s["shape"] == "circle":
+                cv2.circle(original, (128, 128), 80, (255, 255, 255), -1)
+                cv2.putText(original, text, (70, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+                cv2.circle(mask, (128, 128), 80, 255, -1)
+            else:
+                cv2.ellipse(original, (128, 128), (95, 65), 0, 0, 360, (255, 255, 255), -1)
+                cv2.putText(original, text, (80, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+                cv2.ellipse(mask, (128, 128), (95, 65), 0, 0, 360, 255, -1)
+
+            orig_path = os.path.join(training_dir, f"original_{pair_id}.png")
+            mask_path = os.path.join(training_dir, f"mask_{pair_id}.png")
+
+            cv2.imwrite(orig_path, original)
+            cv2.imwrite(mask_path, mask)
+            logger.info(f"  Generated mock training pair: {pair_id}")
 
 
 if __name__ == "__main__":
     logger.info("=== Sonikoma Seed Script Started ===")
-    ensure_db_schema()
     seed_data()
     seed_training_data()
     logger.info("=== Seeding Completed Successfully ===")

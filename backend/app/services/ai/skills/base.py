@@ -107,12 +107,16 @@ class BaseAISkill:
 
         try:
             if provider == "gemini":
-                if "gemini-3.5" in clean_model_id.lower():
-                    if "pro" in clean_model_id.lower():
-                        clean_model_id = "gemini-2.5-pro"
-                    else:
-                        clean_model_id = "gemini-2.5-flash"
-                    logger.info(f"[base.py] Translated gemini-3.5 model selection in '{self.name}' to: {clean_model_id}")
+                model_lower = clean_model_id.lower()
+                if "gemini-3" in model_lower:
+                    clean_model_id = "gemini-2.5-pro" if "pro" in model_lower else "gemini-2.5-flash"
+                elif clean_model_id == "gemini-1.5-flash":
+                    clean_model_id = "gemini-1.5-flash-001"
+                elif clean_model_id == "gemini-1.5-pro":
+                    clean_model_id = "gemini-1.5-pro-001"
+                elif clean_model_id == "gemini-2.0-flash-lite":
+                    clean_model_id = "gemini-2.5-flash"
+                logger.info(f"[base.py] Resolved Gemini model selection in '{self.name}' to: {clean_model_id}")
 
                 key_to_use = resolve_api_key("gemini", api_key, user_keys)
                 if not ai_initialized and not key_to_use:
@@ -128,11 +132,21 @@ class BaseAISkill:
 
                 contents = []
                 if image_bytes:
-                    contents.append(types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"))
+                    mime_type = "image/jpeg"
+                    if image_bytes.startswith(b"\x89PNG"):
+                        mime_type = "image/png"
+                    elif image_bytes.startswith(b"RIFF") and b"WEBP" in image_bytes[:16]:
+                        mime_type = "image/webp"
+                    elif image_bytes.startswith(b"GIF8"):
+                        mime_type = "image/gif"
+                    contents.append(types.Part.from_bytes(data=image_bytes, mime_type=mime_type))
                 contents.append(prompt)
 
                 from google import genai
                 client_to_use = genai.Client(api_key=key_to_use) if key_to_use else genai_client
+
+                if not client_to_use:
+                    raise RuntimeError("Gemini client is not initialized and no API key was provided.")
 
                 response = await call_gemini_with_retry(
                     lambda: client_to_use.models.generate_content(
@@ -196,7 +210,7 @@ class BaseAISkill:
                         {"role": "user", "content": prompt}
                     ]
 
-                payload = {
+                payload: dict[str, Any] = {
                     "model": clean_model_id,
                     "messages": messages,
                 }
@@ -207,7 +221,7 @@ class BaseAISkill:
                         if hasattr(schema, "model_json_schema"):
                             schema_dict = schema.model_json_schema()
                         else:
-                            schema_dict = schema.schema()
+                            schema_dict = getattr(schema, "schema")()
 
                         payload["response_format"] = {
                             "type": "json_schema",
@@ -271,7 +285,7 @@ class BaseAISkill:
                         if hasattr(schema, "model_json_schema"):
                             schema_dict = schema.model_json_schema()
                         else:
-                            schema_dict = schema.schema()
+                            schema_dict = getattr(schema, "schema")()
                         system_prompt = f"You MUST return ONLY a valid JSON object matching this schema:\n{json.dumps(schema_dict)}\nNo other conversational text, no explanations, no wrapping except clean JSON."
                     except Exception:
                         pass

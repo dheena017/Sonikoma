@@ -623,6 +623,22 @@ export default function MainLayout(props: MainLayoutProps) {
         />
       )}
 
+      {confirmDialog && confirmDialog.isOpen && (
+        <ConfirmModal
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          accentColor={confirmDialog.accentColor}
+          onConfirm={() => {
+            confirmDialog.resolve(true);
+            setConfirmDialog(null);
+          }}
+          onCancel={() => {
+            confirmDialog.resolve(false);
+            setConfirmDialog(null);
+          }}
+        />
+      )}
+
       <ProjectConfirmPanel
         isOpen={showScrapeConfirmModal}
         onClose={() => setShowScrapeConfirmModal(false)}
