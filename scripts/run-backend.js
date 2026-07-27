@@ -107,15 +107,21 @@ const pythonImportRoot = projectRootDir;
 const pythonPathEnv = [backendDir, projectRootDir].join(path.delimiter);
 
 let pyProcess = null;
-let isRestarting = false;
+let isExiting = false;
 
 function handleBackendExit(proc, code) {
   if (proc !== pyProcess) return; // Ignore old killed processes
-  if (code !== 0 && code !== null) {
+  if (isExiting) {
+    printBackendShutdownBanner();
+    logger.success(`👋 Backend server stopped cleanly.`);
+    process.exit(0);
+  } else if (code !== 0 && code !== null && code !== 3) {
     logger.error(`Backend process exited unexpectedly with code ${code}`);
     process.exit(code);
   } else {
-    logger.info(`Backend process exited cleanly.`);
+    isExiting = true;
+    printBackendShutdownBanner();
+    logger.success(`👋 Backend server stopped cleanly.`);
     process.exit(0);
   }
 }
@@ -351,33 +357,31 @@ ${botBorder}`;
   console.log(banner);
 }
 
-// Clean up and wait for backend to close to prevent output collision in terminal on Ctrl+C
-let isExiting = false;
-function handleSignal(signal) {
+function handleBackendShutdown() {
   if (isExiting) return;
   isExiting = true;
-  logger.info(`Received ${signal}, shutting down backend process...`);
-  
-  function finish() {
-    printBackendShutdownBanner();
-    logger.success(`👋 Backend server stopped cleanly.`);
-    process.exit(0);
-  }
-
+  printBackendShutdownBanner();
+  logger.success(`👋 Backend server stopped cleanly.`);
   if (pyProcess && !pyProcess.killed && pyProcess.exitCode === null) {
-    pyProcess.on("exit", () => {
-      finish();
-    });
-    if (process.platform === "win32") {
-      spawn("taskkill", ["/F", "/T", "/PID", pyProcess.pid.toString()]);
-    } else {
-      pyProcess.kill("SIGINT");
-    }
-    setTimeout(finish, 2500);
-  } else {
-    finish();
+    try {
+      if (process.platform === "win32") {
+        spawn("taskkill", ["/F", "/T", "/PID", pyProcess.pid.toString()]);
+      } else {
+        pyProcess.kill("SIGINT");
+      }
+    } catch (e) {}
+    pyProcess = null;
   }
+  process.exit(0);
 }
 
-process.on("SIGINT", () => handleSignal("SIGINT"));
-process.on("SIGTERM", () => handleSignal("SIGTERM"));
+process.on("SIGINT", () => handleBackendShutdown());
+process.on("SIGTERM", () => handleBackendShutdown());
+process.on("exit", () => {
+  if (!isExiting) {
+    isExiting = true;
+    try {
+      printBackendShutdownBanner();
+    } catch (e) {}
+  }
+});

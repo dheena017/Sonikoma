@@ -159,10 +159,13 @@ function printFrontendShutdownBanner() {
     return `${CLR_BORDER}│${CLR_RESET} ${content}${pad} ${CLR_BORDER}│${CLR_RESET}`;
   }
 
-  const lineTitle  = formatLine(`🛑 ${CLR_TITLE}SONIKOMA FRONTEND STUDIO${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_TEXT}Dev Server Shutdown Complete${CLR_RESET}`);
-  const lineP1     = formatLine(`● Vite frontend dev server terminated cleanly.`);
-  const lineP2     = formatLine(`● Port ${frontendPort || 3000} released.`);
-  const lineP3     = formatLine(`● See you next time! 👋`);
+  const isFullStack = !onlyFrontend;
+  const titleText = isFullStack ? "SONIKOMA FULL-STACK HYBRID STUDIO" : "SONIKOMA FRONTEND STUDIO";
+  const lineTitle  = formatLine(`🛑 ${CLR_TITLE}${titleText}${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_TEXT}System Shutdown Complete${CLR_RESET}`);
+  
+  const lineP1     = formatLine(isFullStack ? `● Python FastAPI Backend process terminated cleanly.` : `● Vite frontend dev server terminated cleanly.`);
+  const lineP2     = formatLine(isFullStack ? `● Vite React Frontend dev server terminated cleanly.` : `● Port ${frontendPort || 3000} released.`);
+  const lineP3     = formatLine(isFullStack ? `● Ports ${port || 5173} & ${frontendPort || 3000} released. Have a great session! 👋` : `● See you next time! 👋`);
 
   const topBorder = `${CLR_BORDER}┌` + "─".repeat(INNER_WIDTH + 2) + `┐${CLR_RESET}`;
   const midBorder = `${CLR_BORDER}├` + "─".repeat(INNER_WIDTH + 2) + `┤${CLR_RESET}`;
@@ -179,30 +182,33 @@ ${botBorder}`;
   console.log(banner);
 }
 
-process.on("SIGINT", async () => {
-  await cleanup();
-  printFrontendShutdownBanner();
-  logger.success(`👋 Frontend dev server stopped cleanly.`);
-  process.exit(0);
-});
+let hasPrintedShutdown = false;
 
-process.on("SIGTERM", async () => {
-  await cleanup();
+function handleShutdown() {
+  if (hasPrintedShutdown) return;
+  hasPrintedShutdown = true;
   printFrontendShutdownBanner();
-  logger.success(`👋 Frontend dev server stopped cleanly.`);
-  process.exit(0);
-});
-
-process.on("exit", () => {
-  // Synchronous fallback (does not await)
+  const isFullStack = !onlyFrontend;
+  logger.success(isFullStack ? `👋 Full-stack servers stopped cleanly.` : `👋 Frontend dev server stopped cleanly.`);
+  
   if (pyProcess) {
-    try {
-      pyProcess.kill();
-    } catch (e) {}
+    try { pyProcess.kill(); } catch (e) {}
+    pyProcess = null;
   }
   if (viteProcess) {
+    try { viteProcess.kill(); } catch (e) {}
+    viteProcess = null;
+  }
+  process.exit(0);
+}
+
+process.on("SIGINT", () => handleShutdown());
+process.on("SIGTERM", () => handleShutdown());
+process.on("exit", () => {
+  if (!hasPrintedShutdown) {
+    hasPrintedShutdown = true;
     try {
-      viteProcess.kill();
+      printFrontendShutdownBanner();
     } catch (e) {}
   }
 });
@@ -546,13 +552,15 @@ function printFrontendBanner() {
     return `${CLR_BORDER}│${CLR_RESET} ${content}${pad} ${CLR_BORDER}│${CLR_RESET}`;
   }
 
-  const lineTitle   = formatLine(`❖ ${CLR_TITLE}SONIKOMA FRONTEND STUDIO${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_HEADER}Vite v6.4.3${CLR_RESET} ${CLR_MUTED}(Node.js ${nodeVer})${CLR_RESET}`);
+  const isFullStack = !onlyFrontend;
+  const titleText = isFullStack ? "SONIKOMA FULL-STACK HYBRID STUDIO" : "SONIKOMA FRONTEND STUDIO";
+  const lineTitle   = formatLine(`❖ ${CLR_TITLE}${titleText}${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_HEADER}Vite & FastAPI${CLR_RESET} ${CLR_MUTED}(Node ${nodeVer})${CLR_RESET}`);
   const lineLocal   = formatLine(`● ${CLR_TEXT}Local App URL     :${CLR_RESET} ${CLR_HEADER}${aUrl}${CLR_RESET}`);
   const lineProxy   = formatLine(`● ${CLR_TEXT}Backend API Proxy :${CLR_RESET} ${CLR_HEADER}http://localhost:${bPort}/api${CLR_RESET}`);
   const lineHealth  = formatLine(`● ${CLR_TEXT}Backend Health    :${CLR_RESET} ${CLR_HEADER}http://localhost:${bPort}/api/health${CLR_RESET}`);
 
-  const lineEnv     = formatLine(`● ${CLR_MUTED}Environment       :${CLR_RESET} Development (Vite HMR Active)`);
-  const linePort    = formatLine(`● ${CLR_MUTED}Frontend Port     :${CLR_RESET} ${fPort}`);
+  const lineEnv     = formatLine(`● ${CLR_MUTED}Environment       :${CLR_RESET} Development ${isFullStack ? "(Backend Reload & Vite HMR Active)" : "(Vite HMR Active)"}`);
+  const linePort    = formatLine(isFullStack ? `● ${CLR_MUTED}Server Ports      :${CLR_RESET} Frontend: ${fPort}  │  Backend: ${bPort}` : `● ${CLR_MUTED}Frontend Port     :${CLR_RESET} ${fPort}`);
   const lineSys     = formatLine(`● ${CLR_MUTED}System & Runtime  :${CLR_RESET} Node.js ${nodeVer}  │  ${osName}`);
   const lineEngine  = formatLine(`● ${CLR_MUTED}Build Engine      :${CLR_RESET} ESBuild  │  Rollup  │  PostCSS`);
 
@@ -624,13 +632,11 @@ ${botBorder}`;
 
   viteProcess.on("error", (err) => {
     logger.error(`Failed to start Vite:`, err);
-    cleanup();
-    process.exit(1);
+    handleShutdown();
   });
 
   viteProcess.on("exit", (code) => {
-    cleanup();
-    process.exit(code !== null ? code : 0);
+    handleShutdown();
   });
 }
 
