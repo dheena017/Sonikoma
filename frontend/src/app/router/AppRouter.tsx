@@ -94,6 +94,8 @@ export interface AppRouterProps {
   isWorkspaceDirty: boolean;
   appLogic: any;
   saveProject: any;
+  saveStatus: "idle" | "saving" | "saved" | "error";
+  isDirty: boolean;
   videoUrl: string;
   setVideoUrl: (url: string) => void;
   consoleLogs: any[];
@@ -479,6 +481,8 @@ export default function AppRouter(props: AppRouterProps) {
     totalCalculatedDuration,
     autoPlayAudio,
     setAutoPlayAudio,
+    saveStatus,
+    isDirty,
   } = props;
 
   // --------------------------------------------------------------------------
@@ -728,10 +732,10 @@ export default function AppRouter(props: AppRouterProps) {
   }, [currentPath]);
 
   const headerProjectId = isChapterDetailsPath ? detailsProjectId : projectId;
-  const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isWorkspaceDirty;
+  const headerIsDirty = isChapterDetailsPath ? projectDetailsDirty : isDirty;
   const headerSaveStatus = isChapterDetailsPath
     ? projectDetailsSaveStatus
-    : appLogic.saveStatus;
+    : saveStatus;
 
   const handleNavigateHome = React.useCallback(() => {
     if (projectId) {

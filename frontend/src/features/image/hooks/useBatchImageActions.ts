@@ -132,6 +132,8 @@ export function useBatchImageActions({
     );
     setIsCleaningBubbles(true);
     setCleanProgress({ current: 0, total: targetImages.length });
+    // Immediately hide floating selection bar
+    setSelectedScraped([]);
     setConsoleLogs((prev) => [
       `[Speech Bubbles] Starting batch clean bubbles job for ${targetImages.length} images...`,
       ...prev,
@@ -275,6 +277,8 @@ export function useBatchImageActions({
     );
     setIsBatchCropping(true);
     setBatchProgress({ current: 0, total: targetImages.length });
+    // Immediately hide floating selection bar
+    setSelectedScraped([]);
     setConsoleLogs((prev) => [
       `[Auto Cropper] Starting batch auto crop job for ${targetImages.length} images...`,
       ...prev,
@@ -333,13 +337,16 @@ export function useBatchImageActions({
 
             if (data.success && Array.isArray(data.panels)) {
               if (data.panels.length > 0) {
-                const croppedUrls: string[] = [];
-                for (let i = 0; i < data.panels.length; i++) {
-                  const box = data.panels[i];
-
-                  if (box.croppedUrl) {
-                    croppedUrls.push(box.croppedUrl);
-                  } else {
+                // Ensure 2D spatial reading order (top-to-bottom row bands, left-to-right)
+                const sortedPanels = [...data.panels].sort((a: any, b: any) => {
+                  const rowA = Math.round((a.cropTop ?? 0) / 4.0);
+                  const rowB = Math.round((b.cropTop ?? 0) / 4.0);
+                  if (rowA !== rowB) return rowA - rowB;
+                  return (a.cropLeft ?? 0) - (b.cropLeft ?? 0);
+                });
+                const croppedUrls = await Promise.all(
+                  sortedPanels.map(async (box: any) => {
+                    if (box.croppedUrl) return box.croppedUrl;
                     const cropData = await api.submitImageEdits(fetchWithInterceptor, {
                       url: url,
                       cropTop: box.cropTop,
@@ -351,9 +358,9 @@ export function useBatchImageActions({
                       sensitivity: cropSensitivity,
                       backgroundColorMode: cropBackgroundMode,
                     });
-                    croppedUrls.push(cropData.url);
-                  }
-                }
+                    return cropData.url;
+                  })
+                );
                 newSlicedUrlsMap[url] = croppedUrls;
               } else {
                 newSlicedUrlsMap[url] = [url];

@@ -3,7 +3,7 @@ Moved panel utilities into services.image.utils
 """
 
 import numpy as np
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
 
 
 def trim_solid_borders(
@@ -87,12 +87,12 @@ def trim_solid_borders(
 
 
 def _filter_solid_noise(
-    raw_boxes: List[Dict[str, int]],
+    raw_boxes: List[Dict[str, Any]],
     gray_arr: np.ndarray,
     min_w: float,
     height_limit: int,
     auto_split: bool
-) -> List[Dict[str, int]]:
+) -> List[Dict[str, Any]]:
     filtered_boxes = []
     for box in raw_boxes:
         bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]

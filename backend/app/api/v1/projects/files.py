@@ -37,6 +37,7 @@ def _detect(image_path: str, params: dict) -> List[dict]:
         canny_high=params["canny_high"],
         close_kernel_size=params["close_kernel_size"],
         auto_split=params.get("auto_split", True),
+        use_yolo=params.get("use_yolo", True),
     )
 
 
@@ -59,6 +60,7 @@ async def detect_panels_upload(
     canny_high: int = Form(100),
     close_kernel_size: int = Form(15),
     auto_split: bool = Form(True),
+    use_yolo: bool = Form(True),
 ):
     image_path = None
     params = dict(
@@ -72,6 +74,7 @@ async def detect_panels_upload(
         canny_high=canny_high,
         close_kernel_size=close_kernel_size,
         auto_split=auto_split,
+        use_yolo=use_yolo,
     )
 
     try:

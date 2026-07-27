@@ -62,6 +62,7 @@ class SmartCropRequest(BaseModel):
     minHeightPx: Optional[int] = 60
     paddingPx: Optional[int] = 10
     autoSplit: Optional[bool] = True
+    useYolo: Optional[bool] = True
     targetWidth: Optional[int] = None
     targetHeight: Optional[int] = None
     guidanceInstructions: Optional[str] = None
@@ -83,6 +84,7 @@ class SmartCropBatchRequest(BaseModel):
     minHeightPx: Optional[int] = 60
     paddingPx: Optional[int] = 10
     autoSplit: Optional[bool] = True
+    useYolo: Optional[bool] = True
     targetWidth: Optional[int] = None
     targetHeight: Optional[int] = None
     guidanceInstructions: Optional[str] = None

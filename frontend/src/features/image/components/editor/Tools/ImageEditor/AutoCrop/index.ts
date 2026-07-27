@@ -13,6 +13,7 @@ export * from "./AutoCropHelpTab";
 export * from "./AutoCropJsonDebugger";
 export * from "./AutoCropLayoutTab";
 export * from "./AutoCropMarginPadding";
+export * from "./AutoCropPanelDetails";
 export * from "./AutoCropParameterSlider";
 export * from "./AutoCropPresetGrid";
 export * from "./AutoCropRatioLockSelector";

@@ -40,6 +40,8 @@ interface HeaderProps {
   lastEditorPath: string;
   isBatchCropping: boolean;
   isCleaningBubbles: boolean;
+  cleanProgress?: { current: number; total: number } | null;
+  batchProgress?: { current: number; total: number } | null;
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
   backendStatus: "online" | "offline" | "checking";
@@ -94,6 +96,8 @@ const HeaderInner = ({
   lastEditorPath,
   isBatchCropping,
   isCleaningBubbles,
+  cleanProgress,
+  batchProgress,
   onToggleSidebar,
   isSidebarOpen = false,
   backendStatus,
@@ -195,6 +199,17 @@ const HeaderInner = ({
         event.preventDefault();
         searchInputRef.current?.focus();
         setShowSearchDropdown(true);
+      } else if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key === "s" &&
+        !event.shiftKey &&
+        !event.altKey
+      ) {
+        // Ctrl+S / Cmd+S: save the project
+        event.preventDefault();
+        if (onSave && saveStatus !== "saving") {
+          onSave();
+        }
       } else if (
         event.key === "/" &&
         document.activeElement !== searchInputRef.current
@@ -707,6 +722,30 @@ const HeaderInner = ({
           </span>
         </div>
 
+        {/* 🧼 Speech Bubble Cleaning Processing Pill */}
+        {isCleaningBubbles && (
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-950/80 border border-purple-500/50 text-[10px] font-bold font-sans text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.25)] animate-pulse select-none">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-400 shrink-0" />
+            <span>
+              {cleanProgress
+                ? `Cleaning Bubbles (${cleanProgress.current}/${cleanProgress.total})`
+                : "Cleaning Bubbles..."}
+            </span>
+          </div>
+        )}
+
+        {/* ✂️ Auto-Cropping Panels Processing Pill */}
+        {isBatchCropping && (
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-950/80 border border-amber-500/50 text-[10px] font-bold font-sans text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.25)] animate-pulse select-none">
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-400 shrink-0" />
+            <span>
+              {batchProgress
+                ? `Cropping Panels (${batchProgress.current}/${batchProgress.total})`
+                : "Cropping Panels..."}
+            </span>
+          </div>
+        )}
+
         {/* ⚡ Credits Pill */}
         {credits !== null && (
           <button
@@ -737,7 +776,7 @@ const HeaderInner = ({
           >
             {saveStatus === "saving" ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-400" />
-            ) : saveStatus === "success" ? (
+            ) : saveStatus === "saved" ? (
               <Check className="h-3.5 w-3.5 text-emerald-400" />
             ) : (
               <Cloud className="h-3.5 w-3.5" />
@@ -745,7 +784,7 @@ const HeaderInner = ({
             <span className="hidden sm:inline">
               {saveStatus === "saving"
                 ? "Saving..."
-                : saveStatus === "success"
+                : saveStatus === "saved"
                 ? "Saved"
                 : saveStatus === "error"
                 ? "Save Error"

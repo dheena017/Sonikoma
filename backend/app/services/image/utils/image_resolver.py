@@ -98,7 +98,16 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
 
     working_url = url_str.strip()
 
-    # 1. Check in-memory merged/stitch cache first (zero-cost retrieval)
+    # 1. Fully unwrap any nested proxy-image URLs
+    while '/api/proxy' in working_url:
+        parsed = urlparse(working_url)
+        query = parse_qs(parsed.query)
+        if "url" in query and query["url"][0]:
+            working_url = query["url"][0]
+        else:
+            break
+
+    # 2. Check in-memory merged/stitch cache first (zero-cost retrieval)
     if '/api/image/cached/' in working_url or '/api/merge-images/cached/' in working_url or '/api/stitch-images/cached/' in working_url:
         match = re.search(r'/(?:image|(?:merge|stitch)-images?)/cached/([^/?&]+)', working_url)
         if match:
@@ -108,12 +117,21 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
                 mime = cached.get("content_type", "application/octet-stream")
                 return {"data": cached["data"], "content_type": mime, "contentType": mime}
 
-    # 2. Unwrap any double-proxied URLs
-    if '/api/proxy' in working_url:
-        parsed = urlparse(working_url)
-        query = parse_qs(parsed.query)
-        if "url" in query:
-            working_url = query["url"][0]
+            # Try base cache_id (stripping _full suffix if present)
+            clean_id = re.sub(r'_full$', '', cache_id)
+            cached_base = stitched_cache.get(clean_id)
+            if cached_base:
+                mime = cached_base.get("content_type", "application/octet-stream")
+                return {"data": cached_base["data"], "content_type": mime, "contentType": mime}
+
+            # Fallback to direct cache service retrieval (handles disk/db cache resolution)
+            try:
+                from services.image.stitch_cache_service import retrieve_cached_stitch_service
+                data, content_type = await retrieve_cached_stitch_service(cache_id)
+                if data:
+                    return {"data": data, "content_type": content_type, "contentType": content_type}
+            except Exception as e:
+                logger.warning(f"[resolve_url_to_buffer] Direct cache service resolution failed for '{cache_id}': {e}")
 
     # 3. Base64 data-URL shortcut — decode inline without any HTTP
     if working_url.startswith('data:'):
@@ -151,13 +169,13 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
         except Exception:
             pass
 
-    # 6. Fetch from local backend via internal network route
+    # 6. Fetch from local backend via internal network route (follow_redirects=True to handle 307 proxy redirects)
     if working_url.startswith('/api/'):
         port = BACKEND_PORT
         local_url = f"http://127.0.0.1:{port}{working_url}"
 
         async def _fetch_local(http_client):
-            r = await http_client.get(local_url)
+            r = await http_client.get(local_url, follow_redirects=True)
             r.raise_for_status()
             mime = r.headers.get("Content-Type", "application/octet-stream")
             return {"data": r.content, "content_type": mime, "contentType": mime}
@@ -165,7 +183,7 @@ async def resolve_url_to_buffer(url_str: str, client: Optional[httpx.AsyncClient
         if client:
             return await _fetch_local(client)
         else:
-            async with httpx.AsyncClient(timeout=30.0) as local_client:
+            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as local_client:
                 return await _fetch_local(local_client)
 
     # 7. Fallback to external remote fetch (e.g. raw Webtoon URLs or unproxied remote assets)

@@ -147,13 +147,39 @@ async def execute_provider_call(
         if not client_to_use:
             raise RuntimeError("Gemini client is not initialized and no API key was provided.")
 
-        response = await call_gemini_with_retry(
-            lambda: client_to_use.models.generate_content(
-                model=clean_model_id,
-                contents=contents,
-                config=config
-            )
-        )
+        fallback_candidates = [
+            clean_model_id,
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-lite",
+            "gemini-1.5-flash"
+        ]
+        models_to_try = []
+        for m in fallback_candidates:
+            if m and m not in models_to_try:
+                models_to_try.append(m)
+
+        response = None
+        last_exc = None
+        for target_m in models_to_try:
+            try:
+                response = await call_gemini_with_retry(
+                    lambda m_name=target_m: client_to_use.models.generate_content(
+                        model=m_name,
+                        contents=contents,
+                        config=config
+                    )
+                )
+                if response:
+                    break
+            except Exception as exc:
+                last_exc = exc
+                logger.warning(f"[coordinator.py] Skill '{skill.name}' model '{target_m}' failed: {exc}. Trying next fallback...")
+                continue
+
+        if not response:
+            raise last_exc or RuntimeError(f"All Gemini fallback models failed for skill '{skill.name}'.")
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
         raw_text = response.text or "{}"

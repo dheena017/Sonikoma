@@ -105,6 +105,7 @@ export default function AutoCropModal({
   addNotification,
   isPage = false,
 }: AutoCropModalProps) {
+  const [useYolo, setUseYolo] = React.useState(true);
   const [activePreviewUrl, setActivePreviewUrl] = React.useState<string | null>(
     null
   );
@@ -370,6 +371,21 @@ export default function AutoCropModal({
           >
             <Layers className="h-3 w-3" />
             <span>Auto-Split: {autoSplitTallStrips ? "ON" : "OFF"}</span>
+          </button>
+
+          {/* YOLO AI Vision Box Fusion Quick Toggle */}
+          <button
+            type="button"
+            onClick={() => setUseYolo(!useYolo)}
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
+              useYolo
+                ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.15)]"
+                : "bg-neutral-900/80 border-neutral-800 text-neutral-500 hover:text-neutral-300"
+            }`}
+            title="Use YOLO AI neural model for deep learning panel candidates & speech bubble protection"
+          >
+            <Sparkles className="h-3 w-3 text-cyan-400" />
+            <span>YOLO AI: {useYolo ? "ON" : "OFF"}</span>
           </button>
         </div>
       </div>

@@ -88,7 +88,19 @@ async def get_public_project(project_id: str = Path(..., description="Project ID
         for p in panels:
             if p.get("image_url"):
                 p["image_url"] = wrap_proxy_url(p["image_url"])
-        return {"success": True, "project": project, "panels": panels}
+        scraped_images = []
+        audio_set = project.get("audio_settings") or {}
+        if isinstance(audio_set, dict) and audio_set.get("scraped_images"):
+            scraped_images = [wrap_proxy_url(img) for img in audio_set.get("scraped_images") if img]
+        elif project.get("url"):
+            try:
+                from repositories.scraper import get_latest_scrape_session
+                sess = get_latest_scrape_session(project["url"])
+                if sess and sess.get("image_urls"):
+                    scraped_images = [wrap_proxy_url(img) for img in sess["image_urls"] if img]
+            except Exception:
+                pass
+        return {"success": True, "project": project, "panels": panels, "scraped_images": scraped_images}
     except HTTPException:
         raise
     except Exception as e:
@@ -355,7 +367,19 @@ async def get_single_project(
         for p in panels:
             if p.get("image_url"):
                 p["image_url"] = wrap_proxy_url(p["image_url"])
-        return {"success": True, "project": project, "panels": panels}
+        scraped_images = []
+        audio_set = project.get("audio_settings") or {}
+        if isinstance(audio_set, dict) and audio_set.get("scraped_images"):
+            scraped_images = [wrap_proxy_url(img) for img in audio_set.get("scraped_images") if img]
+        elif project.get("url"):
+            try:
+                from repositories.scraper import get_latest_scrape_session
+                sess = get_latest_scrape_session(project["url"])
+                if sess and sess.get("image_urls"):
+                    scraped_images = [wrap_proxy_url(img) for img in sess["image_urls"] if img]
+            except Exception:
+                pass
+        return {"success": True, "project": project, "panels": panels, "scraped_images": scraped_images}
     except HTTPException:
         raise
     except Exception as e:

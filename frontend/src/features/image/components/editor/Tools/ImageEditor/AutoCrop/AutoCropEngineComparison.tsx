@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import * as api from "@/api";
+import { AutoCropPanelDetails } from "./AutoCropPanelDetails";
 import {
   Sparkles,
   Brain,
@@ -335,6 +336,14 @@ export function AutoCropEngineComparison({
             : "Smart Scanner understands scene context, allowing it to segment panels even in complex webtoons with overlaps."}
         </p>
       </div>
+
+      {((activeEngine === "opencv" && opencvPanels.length > 0) ||
+        (activeEngine === "gemini" && geminiPanels.length > 0)) && (
+        <AutoCropPanelDetails
+          panels={activeEngine === "opencv" ? opencvPanels : geminiPanels}
+          detectedEngine={activeEngine === "opencv" ? "OpenCV Engine" : "Gemini AI Scanner"}
+        />
+      )}
     </div>
   );
 }

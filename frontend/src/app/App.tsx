@@ -416,6 +416,16 @@ export default function App() {
     videoFormat: appLogic.videoFormat,
     backgroundStyle: appLogic.backgroundStyle,
     subtitlesStyle: appLogic.subtitlesStyle,
+    activePreviewTab,
+    currentPanelIndex: appLogic.currentPanelIndex,
+    playbackTime: appLogic.playbackTime,
+    autoPlayAudio,
+    isMuted,
+    sfxVolume: appLogic.sfxVolume,
+    sfxEnabled: appLogic.sfxEnabled,
+    selectedScraped,
+    narrationStyle,
+    selectedModel,
   });
 
   React.useEffect(() => {
@@ -1002,6 +1012,8 @@ export default function App() {
       projectDetailsSaveStatus={projectDetailsSaveStatus}
       registerProjectDetailsSaveHandler={registerProjectDetailsSaveHandler}
       projectDetailsSaveRef={projectDetailsSaveRef}
+      saveStatus={saveStatus}
+      isDirty={isDirty}
     />
   );
 }

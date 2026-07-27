@@ -8,7 +8,7 @@ and column subdivision.
 
 import logging
 import numpy as np
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
 
 from services.image.utils.panel_box_utils import protect_slice_x, protect_slice_y
 
@@ -48,8 +48,8 @@ def _detect_panels_webtoon(
     threshold_val: int,
     min_height_px: int,
     min_width_pct: float,
-    ocr_boxes: Optional[List[Dict[str, int]]] = None
-) -> List[Dict[str, int]]:
+    ocr_boxes: Optional[List[Dict[str, Any]]] = None
+) -> List[Dict[str, Any]]:
     """
     Webtoon gutter slicing strategy for tall strips.
     Identifies horizontal gaps (gutters) containing mostly background pixels,
@@ -66,12 +66,12 @@ def _detect_panels_webtoon(
     else:
         bg_pixel_count = np.sum(gray_center < threshold_val, axis=1)
 
-    is_gutter_row = (bg_pixel_count / w_center) >= 0.95
+    is_gutter_row = (bg_pixel_count / w_center) >= 0.88
     is_content_row = ~is_gutter_row
 
     smoothed_content = np.copy(is_content_row)
     gap_count = 0
-    gap_thresh = max(6, min(25, int(w * 0.015)))
+    gap_thresh = max(3, min(12, int(w * 0.008)))
     for i in range(len(smoothed_content)):
         if not smoothed_content[i]:
             gap_count += 1
@@ -103,7 +103,7 @@ def _detect_panels_webtoon(
         if end_y - start_y >= min_height_px:
             panels.append((start_y, end_y))
 
-    raw_boxes: List[Dict[str, int]] = []
+    raw_boxes: List[Dict[str, Any]] = []
     for start_y, end_y in panels:
         panel_slice = gray_arr[start_y:end_y, :]
         col_vars = np.var(panel_slice, axis=0)
@@ -120,7 +120,7 @@ def _detect_panels_webtoon(
 
         smoothed_col = np.copy(is_content_col)
         col_gap_count = 0
-        col_gap_thresh = max(18, min(60, int(w * 0.08)))
+        col_gap_thresh = max(10, min(35, int(w * 0.04)))
 
         for j in range(len(smoothed_col)):
             if not smoothed_col[j]:

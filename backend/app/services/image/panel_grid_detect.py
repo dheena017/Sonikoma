@@ -6,7 +6,7 @@ Grid layout panel detection strategies using OpenCV contours or PIL projection p
 """
 
 import numpy as np
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 
 
 def _detect_panels_grid_cv(
@@ -17,7 +17,7 @@ def _detect_panels_grid_cv(
     canny_high: int,
     close_kernel_size: int,
     high_sensitivity: bool = False
-) -> List[Dict[str, int]]:
+) -> List[Dict[str, Any]]:
     """
     Standard contour detection strategy using OpenCV for grid layout pages.
     """
@@ -43,7 +43,7 @@ def _detect_panels_grid_cv(
     
     contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
-    raw_boxes: List[Dict[str, int]] = []
+    raw_boxes: List[Dict[str, Any]] = []
     if contours:
         for contour in contours:
             x_box, y_box, w_box, h_box = cv2.boundingRect(contour)
@@ -57,7 +57,7 @@ def _detect_panels_grid_pil(
     is_white_bg: bool,
     sensitivity: float,
     min_height_px: int
-) -> List[Dict[str, int]]:
+) -> List[Dict[str, Any]]:
     """
     Standard projection profile detection strategy using PIL fallback for grid layout pages.
     """
@@ -102,7 +102,7 @@ def _detect_panels_grid_pil(
         if end_y - start_y >= min_height_px:
             panels.append((start_y, end_y))
             
-    raw_boxes: List[Dict[str, int]] = []
+    raw_boxes: List[Dict[str, Any]] = []
     for start_y, end_y in panels:
         panel_slice = gray_arr[start_y:end_y, :]
         col_means = np.mean(panel_slice, axis=0)

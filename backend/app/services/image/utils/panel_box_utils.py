@@ -2,7 +2,7 @@
 Panel box utilities moved into services.image.utils
 """
 
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 
 
 def adjust_to_aspect_ratio(
@@ -58,12 +58,12 @@ def adjust_to_aspect_ratio(
 
 
 def merge_overlapping_boxes(
-    boxes: List[Dict[str, int]], w_img: int, h_img: int, merge_threshold: int
-) -> List[Dict[str, int]]:
-    if not boxes or merge_threshold <= 0:
+    boxes: List[Dict[str, Any]], w_img: int, h_img: int, merge_threshold: int
+) -> List[Dict[str, Any]]:
+    if not boxes:
         return boxes
     
-    boxes = sorted(boxes, key=lambda b: b["y"])
+    boxes = sorted(boxes, key=lambda b: (b.get("y", 0), b.get("x", 0)))
     
     merged = True
     while merged:
@@ -89,19 +89,29 @@ def merge_overlapping_boxes(
                 w_b, h_b = x2_b - x1_b, y2_b - y1_b
                 
                 w_min = min(w_a, w_b)
-                x_overlap_val = max(0, min(x2_a, x2_b) - max(x1_a, x1_b))
-                h_overlap_ratio = x_overlap_val / w_min if w_min > 0 else 0
+                h_min = min(h_a, h_b)
+                area_a = w_a * h_a
+                area_b = w_b * h_b
+                min_area = min(area_a, area_b)
                 
+                x_overlap_val = max(0, min(x2_a, x2_b) - max(x1_a, x1_b))
                 y_overlap_val = max(0, min(y2_a, y2_b) - max(y1_a, y1_b))
+                inter_area = x_overlap_val * y_overlap_val
+                
+                union_area = area_a + area_b - inter_area
+                iou = inter_area / union_area if union_area > 0 else 0.0
+                overlap_min_ratio = inter_area / min_area if min_area > 0 else 0.0
+
+                h_overlap_ratio = x_overlap_val / w_min if w_min > 0 else 0.0
                 y_dist = max(0, y1_b - y2_a) if y1_b >= y2_a else max(0, y1_a - y2_b)
                 
                 should_merge = False
-                if y_overlap_val > 0:
-                    if h_overlap_ratio >= 0.5:
-                        should_merge = True
-                else:
-                    if h_overlap_ratio > 0 and y_dist <= merge_threshold:
-                        should_merge = True
+                if iou >= 0.65 or overlap_min_ratio >= 0.80:
+                    should_merge = True
+                elif y_overlap_val > 0 and h_overlap_ratio >= 0.5:
+                    should_merge = True
+                elif merge_threshold > 0 and h_overlap_ratio > 0 and y_dist <= merge_threshold:
+                    should_merge = True
                 
                 if should_merge:
                     x1_a = min(x1_a, x1_b)
@@ -109,12 +119,16 @@ def merge_overlapping_boxes(
                     x2_a = max(x2_a, x2_b)
                     y2_a = max(y2_a, y2_b)
                     
-                    box_a = {
+                    merged_dict = dict(box_a)
+                    merged_dict.update({
                         "x": x1_a,
                         "y": y1_a,
                         "w": x2_a - x1_a,
                         "h": y2_a - y1_a
-                    }
+                    })
+                    if box_b.get("yolo_boosted"):
+                        merged_dict["yolo_boosted"] = True
+                    box_a = merged_dict
                     skip_indices.add(j)
                     merged = True
             
@@ -127,7 +141,7 @@ def merge_overlapping_boxes(
     return boxes
 
 
-def protect_slice_y(y: int, ocr_boxes: List[Dict[str, int]], h_img: int) -> int:
+def protect_slice_y(y: int, ocr_boxes: List[Dict[str, Any]], h_img: int) -> int:
     for box in ocr_boxes:
         by1 = box["y"]
         by2 = box["y"] + box["h"]
@@ -139,7 +153,7 @@ def protect_slice_y(y: int, ocr_boxes: List[Dict[str, int]], h_img: int) -> int:
     return y
 
 
-def protect_slice_x(x: int, ocr_boxes: List[Dict[str, int]], w_img: int) -> int:
+def protect_slice_x(x: int, ocr_boxes: List[Dict[str, Any]], w_img: int) -> int:
     for box in ocr_boxes:
         bx1 = box["x"]
         bx2 = box["x"] + box["w"]

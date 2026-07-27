@@ -11,9 +11,17 @@ import sys
 import json
 import argparse
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any, Union
 import numpy as np
 from PIL import Image
+
+try:
+    import cv2
+    HAS_CV = True
+except ImportError:
+    cv2 = None  # type: ignore
+    HAS_CV = False
+
 
 # Import helper sub-modules
 from services.image.utils.panel_box_utils import (
@@ -48,26 +56,24 @@ def run_cv_detection(
     canny_high: int = 100,
     close_kernel_size: int = 15,
     auto_split: bool = True,
-    padding_px: int = 10
-) -> List[Dict[str, any]]:
+    padding_px: int = 10,
+    use_yolo: bool = True,
+    yolo_conf: float = 0.20
+) -> List[Dict[str, Any]]:
     """
     Main orchestration function for panel detection. Loads the image, runs background
     detection, routes to the appropriate detection strategy (Webtoon Slicing vs. Grid Contours),
-    performs noise filtering, overlap merging, padding, and scales back to percentages.
+    performs YOLO deep learning box fusion, noise filtering, overlap merging, padding, and scaling.
     """
-    logger.info(f"[Panel Detection] Starting local panel detection on {image_path}")
+    logger.info(f"[Panel Detection] Starting local panel detection on {image_path} (use_yolo={use_yolo})")
     
-    try:
-        import cv2
-        has_cv = True
-    except ImportError:
-        has_cv = False
+    has_cv = HAS_CV and cv2 is not None
 
     gray_arr: Optional[np.ndarray] = None
     orig_w: int = 0
     orig_h: int = 0
 
-    if has_cv:
+    if has_cv and cv2 is not None:
         img = cv2.imread(image_path)
         if img is None:
             return []
@@ -100,6 +106,8 @@ def run_cv_detection(
 
     # Speech Bubble Protection (OCR)
     ocr_boxes: List[Dict[str, int]] = []
+    yolo_panel_candidates: List[Dict[str, Union[int, float]]] = []
+
     try:
         import asyncio
         from media.image.ocr import extract_full_ocr_data
@@ -119,7 +127,7 @@ def run_cv_detection(
 
         for res in ocr_results:
             pts = np.array(res["box"], dtype=np.int32)
-            if has_cv:
+            if has_cv and cv2 is not None:
                 bx, by, bw, bh = cv2.boundingRect(pts)
             else:
                 xs = [pt[0] for pt in res["box"]]
@@ -129,29 +137,37 @@ def run_cv_detection(
     except Exception as e:
         logger.warning(f"[Panel Detection] Failed to retrieve OCR bounds for speech bubble protection: {e}")
 
-    # YOLO Speech Bubble Bounds
-    try:
-        from providers.vision.yolo import get_yolo_model
-        yolo_model = get_yolo_model()
-        if yolo_model is not None:
-            results = yolo_model.predict(image_path, conf=0.25, verbose=False)
-            if results and len(results) > 0:
-                result = results[0]
-                if result.boxes is not None:
-                    yolo_count = 0
-                    for box_instance in result.boxes:
-                        coords = box_instance.xyxy[0].cpu().numpy()
-                        bx1, by1, bx2, by2 = coords
-                        ocr_boxes.append({
-                            "x": int(bx1),
-                            "y": int(by1),
-                            "w": int(bx2 - bx1),
-                            "h": int(by2 - by1)
-                        })
-                        yolo_count += 1
-                    logger.info(f"[Panel Detection] Successfully extracted {yolo_count} YOLO speech bubble bounds for Speech Bubble Protection.")
-    except Exception as e:
-        logger.warning(f"[Panel Detection] Failed to retrieve YOLO bounds for speech bubble protection: {e}")
+    # YOLO AI Object & Speech Bubble Detection + Panel Candidate Extraction
+    if use_yolo:
+        try:
+            from providers.vision.yolo import get_yolo_model
+            yolo_model = get_yolo_model()
+            if yolo_model is not None:
+                results = yolo_model.predict(image_path, conf=yolo_conf, verbose=False)
+                if results and len(results) > 0:
+                    result = results[0]
+                    if result.boxes is not None:
+                        yolo_count = 0
+                        min_w_px = int(orig_w * scaled_min_width_pct)
+                        for box_instance in result.boxes:
+                            coords = box_instance.xyxy[0].cpu().numpy()
+                            conf_score = float(box_instance.conf[0].cpu().numpy()) if box_instance.conf is not None else 0.8
+                            bx1, by1, bx2, by2 = coords
+                            bx, by, bw, bh = int(bx1), int(by1), int(bx2 - bx1), int(by2 - by1)
+                            
+                            # Add to speech bubble protection bounds
+                            ocr_boxes.append({"x": bx, "y": by, "w": bw, "h": bh})
+                            
+                            # Add to YOLO panel candidates if box matches panel proportions
+                            if bw >= min_w_px and bh >= scaled_min_height_px:
+                                yolo_panel_candidates.append({  # type: ignore
+                                    "x": bx, "y": by, "w": bw, "h": bh,
+                                    "confidence": conf_score
+                                })
+                            yolo_count += 1
+                        logger.info(f"[Panel Detection] Extracted {yolo_count} YOLO protection bounds & {len(yolo_panel_candidates)} YOLO panel candidates.")
+        except Exception as e:
+            logger.warning(f"[Panel Detection] Failed to retrieve YOLO bounds for panel detection: {e}")
 
     # Global Margin Trimming
     crop_x, crop_y, crop_w, crop_h = trim_solid_borders(gray_arr, 0, 0, orig_w, orig_h, bg_mode)
@@ -179,7 +195,8 @@ def run_cv_detection(
     is_tall_strip = (h / max(1, w) > 1.2)
 
     passes = [False, True] if has_cv else [False]
-    raw_boxes: List[Dict[str, int]] = []
+    raw_boxes: List[Dict[str, Any]] = []
+    merged_boxes: List[Dict[str, Any]] = []
 
     for high_sensitivity in passes:
         if auto_split and is_tall_strip:
@@ -191,6 +208,31 @@ def run_cv_detection(
                 raw_boxes = _detect_panels_grid_cv(gray_arr_processed, is_white_bg, threshold_val, canny_low, canny_high, scaled_close_kernel, high_sensitivity)
             else:
                 raw_boxes = _detect_panels_grid_pil(gray_arr_processed, is_white_bg, sensitivity, scaled_min_height_px)
+
+        # Fuse YOLO panel candidates with OpenCV raw boxes
+        if use_yolo and yolo_panel_candidates:
+            for yb in yolo_panel_candidates:
+                yx = max(0, yb["x"] - crop_x)
+                yy = max(0, yb["y"] - crop_y)
+                yw, yh = yb["w"], yb["h"]
+                
+                matched = False
+                for rb in raw_boxes:
+                    rx, ry, rw, rh = rb["x"], rb["y"], rb["w"], rb["h"]
+                    ix1, iy1 = max(rx, yx), max(ry, yy)
+                    ix2, iy2 = min(rx + rw, yx + yw), min(ry + rh, yy + yh)
+                    if ix2 > ix1 and iy2 > iy1:
+                        inter_area = (ix2 - ix1) * (iy2 - iy1)
+                        min_area = min(rw * rh, yw * yh)
+                        if min_area > 0 and (inter_area / min_area) > 0.4:
+                            matched = True
+                            rb["yolo_boosted"] = True
+                            break
+                if not matched:
+                    raw_boxes.append({
+                        "x": yx, "y": yy, "w": yw, "h": yh,
+                        "yolo_boosted": True
+                    })
 
         min_w = w * scaled_min_width_pct
         filtered_boxes = _filter_solid_noise(raw_boxes, gray_arr_processed, min_w, scaled_min_height_px, auto_split)
@@ -217,7 +259,7 @@ def run_cv_detection(
             tx, ty, tw, th = trim_solid_borders(gray_arr_processed, bx, by, bw, bh, bg_mode, median_bg)
             if tw >= 15 and th >= 15:
                 trimmed_boxes.append({"x": tx, "y": ty, "w": tw, "h": th})
-        merged_boxes = trimmed_boxes
+        merged_boxes = merge_overlapping_boxes(trimmed_boxes, w, h, merge_threshold)
 
         if len(merged_boxes) > 0:
             has_irregular = False
@@ -233,10 +275,24 @@ def run_cv_detection(
         else:
             logger.info("[Panel Detection] 0 panels detected; re-running with high sensitivity fallback.")
 
+    if len(merged_boxes) == 0:
+        logger.info("[Panel Detection] 0 panels detected after all passes; applying fallback segment slicing...")
+        if is_tall_strip:
+            num_segments = max(2, round(h / max(1.0, w * 1.2)))
+            seg_h = int(h / num_segments)
+            for seg_i in range(num_segments):
+                sy = (seg_i * seg_h)
+                sh = int(h - sy) if seg_i == num_segments - 1 else seg_h
+                merged_boxes.append({"x": 0, "y": sy, "w": w, "h": sh})
+        else:
+            merged_boxes.append({"x": 0, "y": 0, "w": w, "h": h})
+
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
     
-    for box in merged_boxes:
+    orig_area = max(1, orig_w * orig_h)
+    
+    for idx, box in enumerate(merged_boxes):
         bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
         
         if auto_split and is_tall_strip:
@@ -271,17 +327,82 @@ def run_cv_detection(
         crop_left = (x / safe_orig_w) * 100
         crop_right = ((safe_orig_w - (x + w_box)) / safe_orig_w) * 100
         
+        area = w_box * h_box
+        area_pct = round((area / orig_area) * 100.0, 2)
+        aspect = float(w_box) / float(h_box) if h_box > 0 else 1.0
+        aspect_ratio_val = round(aspect, 2)
+
+        if aspect >= 2.5:
+            aspect_label = "Wide Banner"
+        elif aspect >= 1.4:
+            aspect_label = "Landscape (16:9)"
+        elif aspect >= 1.15:
+            aspect_label = "4:3 Standard"
+        elif aspect >= 0.85:
+            aspect_label = "1:1 Square"
+        elif aspect >= 0.6:
+            aspect_label = "3:4 Portrait"
+        else:
+            aspect_label = "Vertical Strip"
+
+        is_header = y < min(250, int(orig_h * 0.02)) and aspect >= 2.5
+        if is_header:
+            panel_type = "Wide Banner / Header"
+        elif area_pct >= 80.0:
+            panel_type = "Full Page / Splash"
+        elif aspect < 0.5:
+            panel_type = "Vertical Strip Panel"
+        elif aspect > 2.0:
+            panel_type = "Horizontal Panoramic Panel"
+        else:
+            panel_type = "Standard Storyboard Panel"
+
+        confidence = 0.95 if (w_box > 40 and h_box > 40 and area_pct > 0.5) else 0.80
+
         final_panels.append({
+            "id": f"panel-{idx + 1}",
+            "index": idx + 1,
+            "x": x,
+            "y": y,
+            "width": w_box,
+            "height": h_box,
             "cropTop": round(max(0.0, min(100.0, crop_top)), 2),
             "cropBottom": round(max(0.0, min(100.0, crop_bottom)), 2),
             "cropLeft": round(max(0.0, min(100.0, crop_left)), 2),
             "cropRight": round(max(0.0, min(100.0, crop_right)), 2),
-            "width": int(w_box),
-            "height": int(h_box),
-            "area": int(w_box * h_box)
+            "area": area,
+            "areaPct": area_pct,
+            "aspectRatio": aspect_ratio_val,
+            "aspectRatioLabel": aspect_label,
+            "panelType": panel_type,
+            "confidence": confidence,
+            "isHeader": is_header,
         })
         
-    return sorted(final_panels, key=lambda b: b["cropTop"])
+    sorted_panels = sorted(
+        final_panels,
+        key=lambda b: (round(b.get("cropTop", 0.0) / 4.0), b.get("cropLeft", 0.0))
+    )
+    
+    unique_panels = []
+    for panel in sorted_panels:
+        is_dup = False
+        for existing in unique_panels:
+            dt = abs(panel["cropTop"] - existing["cropTop"])
+            db = abs(panel["cropBottom"] - existing["cropBottom"])
+            dl = abs(panel["cropLeft"] - existing["cropLeft"])
+            dr = abs(panel["cropRight"] - existing["cropRight"])
+            if dt < 1.5 and db < 1.5 and dl < 1.5 and dr < 1.5:
+                is_dup = True
+                break
+        if not is_dup:
+            unique_panels.append(panel)
+
+    for idx, panel in enumerate(unique_panels):
+        panel["id"] = f"panel-{idx + 1}"
+        panel["index"] = idx + 1
+
+    return unique_panels
 
 
 def main():

@@ -315,6 +315,7 @@ async def facade_smart_crop(
     min_height_px: int = 60,
     padding_px: int = 10,
     auto_split: bool = True,
+    use_yolo: bool = True,
     guidance_instructions: Optional[str] = None,
     focus_mode: Optional[str] = None
 ) -> Dict[str, Any]:
@@ -349,7 +350,8 @@ async def facade_smart_crop(
                 canny_high=canny_high,
                 close_kernel_size=close_kernel_size,
                 auto_split=auto_split,
-                padding_px=padding_px
+                padding_px=padding_px,
+                use_yolo=use_yolo
             )
             return {
                 "success": True,
@@ -366,7 +368,7 @@ async def facade_smart_crop(
 
     # 2. Otherwise execute AI detection with skill (with automatic free model fallback on quota limit)
     requested_model = model or "gemini-2.5-flash"
-    fallback_models = [requested_model, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash-latest"]
+    fallback_models = [requested_model, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
     models_to_try = []
     for m in fallback_models:
         if m not in models_to_try:
@@ -475,10 +477,14 @@ async def facade_smart_crop(
             "area": (w_box * h_box)
         })
 
+    sorted_final_panels = sorted(
+        final_panels,
+        key=lambda b: (round(b.get("cropTop", 0.0) / 4.0), b.get("cropLeft", 0.0))
+    )
     return {
         "success": True,
-        "total_panels": len(final_panels),
-        "panels": final_panels
+        "total_panels": len(sorted_final_panels),
+        "panels": sorted_final_panels
     }
 
 
@@ -494,21 +500,51 @@ async def facade_analyze_narrative_sequence(
     from services.ai.skills.base import extract_json
 
     target_model = model or "gemini-2.5-flash"
-    _, clean_model = get_provider_and_model(target_model)
     gemini_key = resolve_api_key("gemini", user_keys=user_keys)
     client = genai.Client(api_key=gemini_key)
 
+    scenes_prompt = "\n".join([f"Scene {i+1}: {desc}" for i, desc in enumerate(visual_descriptions)])
     system_instruction = (
         f"Generate a JSON array of strings containing exactly "
-        f"{len(visual_descriptions)} narrative voiceover sentences."
+        f"{len(visual_descriptions)} narrative voiceover sentences for these visual scenes:\n{scenes_prompt}"
     )
-    response = await call_gemini_with_retry(
-        lambda: client.models.generate_content(
-            model=clean_model,
-            contents=system_instruction,
-            config=types.GenerateContentConfig(response_mime_type="application/json")
-        )
-    )
+
+    fallback_candidates = [
+        target_model,
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite",
+        "gemini-1.5-flash"
+    ]
+    models_to_try = []
+    for m in fallback_candidates:
+        _, clean_m = get_provider_and_model(m)
+        if clean_m not in models_to_try:
+            models_to_try.append(clean_m)
+
+    response = None
+    last_exc = None
+    for m_name in models_to_try:
+        try:
+            response = await call_gemini_with_retry(
+                lambda target=m_name: client.models.generate_content(
+                    model=target,
+                    contents=system_instruction,
+                    config=types.GenerateContentConfig(response_mime_type="application/json")
+                )
+            )
+            if response:
+                logger.info(f"[facade_analyze_narrative_sequence] Successfully generated narratives using model: {m_name}")
+                break
+        except Exception as exc:
+            last_exc = exc
+            logger.warning(f"[facade_analyze_narrative_sequence] Gemini model '{m_name}' failed: {exc}. Trying next fallback model...")
+            continue
+
+    if not response:
+        raise last_exc or RuntimeError("All Gemini fallback models failed for narrative sequence analysis.")
+
     raw_text = getattr(response, "text", None)
     if not raw_text:
         raise RuntimeError("Gemini model returned empty response.")
@@ -560,7 +596,35 @@ async def facade_enhance_prompt(
     from google import genai
 
     client = genai.Client(api_key=api_key)
-    response = await call_gemini_with_retry(
-        lambda: client.models.generate_content(model=model or "gemini-2.5-flash", contents=prompt)
-    )
+    target_model = model or "gemini-2.5-flash"
+    fallback_candidates = [
+        target_model,
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-2.0-flash",
+        "gemini-2.0-flash-lite",
+        "gemini-1.5-flash"
+    ]
+    models_to_try = []
+    for m in fallback_candidates:
+        _, clean_m = get_provider_and_model(m)
+        if clean_m not in models_to_try:
+            models_to_try.append(clean_m)
+
+    response = None
+    last_exc = None
+    for m_name in models_to_try:
+        try:
+            response = await call_gemini_with_retry(
+                lambda target=m_name: client.models.generate_content(model=target, contents=prompt)
+            )
+            if response:
+                break
+        except Exception as exc:
+            last_exc = exc
+            continue
+
+    if not response:
+        raise last_exc or RuntimeError("All Gemini fallback models failed to enhance prompt.")
+
     return {"success": True, "enhanced_prompt": response.text}

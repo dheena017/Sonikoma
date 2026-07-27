@@ -65,6 +65,8 @@ export interface MainLayoutProps {
   lastEditorPath: string;
   isBatchCropping: boolean;
   isCleaningBubbles: boolean;
+  cleanProgress?: { current: number; total: number } | null;
+  batchProgress?: { current: number; total: number } | null;
   projectId: string | null;
   isWorkspaceDirty: boolean;
   notifications: any[];
@@ -180,6 +182,8 @@ export default function MainLayout(props: MainLayoutProps) {
     lastEditorPath,
     isBatchCropping,
     isCleaningBubbles,
+    cleanProgress,
+    batchProgress,
     projectId,
     isWorkspaceDirty,
     notifications,
@@ -398,6 +402,8 @@ export default function MainLayout(props: MainLayoutProps) {
               lastEditorPath={lastEditorPath}
               isBatchCropping={isBatchCropping}
               isCleaningBubbles={isCleaningBubbles}
+              cleanProgress={cleanProgress}
+              batchProgress={batchProgress}
               onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
               isSidebarOpen={isSidebarOpen}
               backendStatus={backendStatus as any}

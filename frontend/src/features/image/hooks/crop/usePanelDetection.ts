@@ -172,6 +172,7 @@ export function usePanelDetection({
     cannyHigh?: number;
     closeKernelSize?: number;
     minHeightPx?: number;
+    useYolo?: boolean;
     dryRun?: boolean;
   }) => {
     if (editingImageIdx === null) return;
@@ -200,6 +201,7 @@ export function usePanelDetection({
           cannyHigh: settings?.cannyHigh ?? 100,
           closeKernelSize: settings?.closeKernelSize ?? 15,
           minHeightPx: settings?.minHeightPx ?? 60,
+          useYolo: settings?.useYolo ?? true,
         },
         { signal: abortControllerRef.current.signal }
       );

@@ -51,6 +51,17 @@ interface AutoSaveState {
   videoFormat: string;
   backgroundStyle: string;
   subtitlesStyle: string;
+  // Workspace Navigation & Video Monitor & Assets & Export
+  activePreviewTab?: string;
+  currentPanelIndex?: number;
+  playbackTime?: number;
+  autoPlayAudio?: boolean;
+  isMuted?: boolean;
+  sfxVolume?: number;
+  sfxEnabled?: boolean;
+  selectedScraped?: string[];
+  narrationStyle?: string;
+  selectedModel?: string;
 }
 
 export function useAutoSave(state: AutoSaveState) {
@@ -84,6 +95,16 @@ export function useAutoSave(state: AutoSaveState) {
         videoFormat: state.videoFormat,
         backgroundStyle: state.backgroundStyle,
         subtitlesStyle: state.subtitlesStyle,
+        activePreviewTab: state.activePreviewTab,
+        currentPanelIndex: state.currentPanelIndex,
+        playbackTime: state.playbackTime,
+        autoPlayAudio: state.autoPlayAudio,
+        isMuted: state.isMuted,
+        sfxVolume: state.sfxVolume,
+        sfxEnabled: state.sfxEnabled,
+        selectedScraped: state.selectedScraped,
+        narrationStyle: state.narrationStyle,
+        selectedModel: state.selectedModel,
       },
       panels: state.panels.map((p) => ({
         image_url: p.image_url,
@@ -130,6 +151,16 @@ export function useAutoSave(state: AutoSaveState) {
     state.videoFormat,
     state.backgroundStyle,
     state.subtitlesStyle,
+    state.activePreviewTab,
+    state.currentPanelIndex,
+    state.playbackTime,
+    state.autoPlayAudio,
+    state.isMuted,
+    state.sfxVolume,
+    state.sfxEnabled,
+    state.selectedScraped,
+    state.narrationStyle,
+    state.selectedModel,
   ]);
 
   // Helper to serialize all editable aspects of the project
@@ -317,6 +348,17 @@ export function useAutoSave(state: AutoSaveState) {
             videoFormat: state.videoFormat,
             backgroundStyle: state.backgroundStyle,
             subtitlesStyle: state.subtitlesStyle,
+            activePreviewTab: state.activePreviewTab,
+            currentPanelIndex: state.currentPanelIndex,
+            playbackTime: state.playbackTime,
+            autoPlayAudio: state.autoPlayAudio,
+            isMuted: state.isMuted,
+            sfxVolume: state.sfxVolume,
+            sfxEnabled: state.sfxEnabled,
+            selectedScraped: state.selectedScraped,
+            narrationStyle: state.narrationStyle,
+            selectedModel: state.selectedModel,
+            scraped_images: state.scrapedImages,
           },
           panels: targetPanels.map((p) => ({
             image_url: p.image_url,
