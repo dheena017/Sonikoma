@@ -85,7 +85,7 @@ def check_and_trigger_training() -> bool:
 
     new_samples = current_count - last_trained
     if new_samples > 0:
-        logger.info(f"[Monitor] Current samples: {current_count}, Last trained at: {last_trained}, New samples: {new_samples}/20")
+        logger.debug(f"[Monitor] Current samples: {current_count}, Last trained at: {last_trained}, New samples: {new_samples}/20")
     else:
         logger.debug(f"[Monitor] Current samples: {current_count}, Last trained at: {last_trained}, New samples: 0/20")
 
@@ -133,7 +133,6 @@ def start_background_monitor(loop=None):
         logger.warning("Background monitor is already running.")
         return
 
-    logger.info("Initializing automatic training data monitor service...")
     if loop is None:
         try:
             loop = asyncio.get_running_loop()

@@ -158,33 +158,6 @@ async def lifespan(app: FastAPI):
     _print_startup_banner()
 
 
-    # Emit structured startup logs so the frontend terminal shows them on connect.
-    # (banner uses print() which bypasses the handler; these go through the buffer)
-    logger.info(f"Sonikoma Compute Engine v{API_VERSION} started on port {BACKEND_PORT}")
-    logger.info(f"Python {sys.version.split(' ')[0]} | {platform.system()} {platform.machine()}")
-    logger.info(f"Swagger docs available at http://localhost:{BACKEND_PORT}/api/docs")
-
-    # Capability probe results
-    caps = {
-        "OpenCV (cv2)": "cv2",
-        "MoviePy": "moviepy",
-        "EasyOCR": "easyocr",
-        "Edge TTS": "edge_tts",
-        "Google GenAI": "google.genai",
-    }
-    for label, mod in caps.items():
-        try:
-            __import__(mod)
-            logger.success(f"{label} loaded successfully")
-        except ImportError:
-            logger.warning(f"{label} not available - some features may be disabled")
-
-    # API key status
-    if os.getenv("GEMINI_API_KEY"):
-        logger.success("GEMINI_API_KEY detected - AI features enabled")
-    else:
-        logger.warning("GEMINI_API_KEY not set - AI panel analysis disabled")
-
     # Warm up the persistent image cache — loads all previously scraped panel images
     # from disk back into memory so they survive server restarts without 404s.
     try:

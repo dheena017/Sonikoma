@@ -50,10 +50,6 @@ const logger = {
     console.error(formatLog("ERROR", "run-frontend.js", msg), ...args),
 };
 
-// Formatted startup logs
-logger.info("sonikoma@0.0.0 start");
-logger.info("node scripts/run-frontend.js");
-
 // Initialize dotenv from parent .env file
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 

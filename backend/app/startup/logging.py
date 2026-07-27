@@ -39,26 +39,29 @@ except ImportError:
 # Initialize global logging interceptor immediately
 
 # Custom logging levels configuration
-logging.TRACE = 5
-logging.addLevelName(logging.TRACE, "TRACE")
+TRACE = 5
+logging.TRACE = TRACE  # type: ignore[attr-defined]
+logging.addLevelName(TRACE, "TRACE")
 def trace(self, message, *args, **kws):
-    if self.isEnabledFor(logging.TRACE):
-        self._log(logging.TRACE, message, args, **kws)
-logging.Logger.trace = trace
+    if self.isEnabledFor(TRACE):
+        self._log(TRACE, message, args, **kws)
+logging.Logger.trace = trace  # type: ignore[attr-defined]
 
-logging.NOTICE = 22
-logging.addLevelName(logging.NOTICE, "NOTICE")
+NOTICE = 22
+logging.NOTICE = NOTICE  # type: ignore[attr-defined]
+logging.addLevelName(NOTICE, "NOTICE")
 def notice(self, message, *args, **kws):
-    if self.isEnabledFor(logging.NOTICE):
-        self._log(logging.NOTICE, message, args, **kws)
-logging.Logger.notice = notice
+    if self.isEnabledFor(NOTICE):
+        self._log(NOTICE, message, args, **kws)
+logging.Logger.notice = notice  # type: ignore[attr-defined]
 
-logging.SUCCESS = 25
-logging.addLevelName(logging.SUCCESS, "SUCCESS")
+SUCCESS = 25
+logging.SUCCESS = SUCCESS  # type: ignore[attr-defined]
+logging.addLevelName(SUCCESS, "SUCCESS")
 def success(self, message, *args, **kws):
-    if self.isEnabledFor(logging.SUCCESS):
-        self._log(logging.SUCCESS, message, args, **kws)
-logging.Logger.success = success
+    if self.isEnabledFor(SUCCESS):
+        self._log(SUCCESS, message, args, **kws)
+logging.Logger.success = success  # type: ignore[attr-defined]
 
 class ColoredFormatter(logging.Formatter):
     COLORS = {
@@ -350,5 +353,23 @@ root_logger.setLevel(logging.INFO)
 logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
+# Silence noisy third-party libraries
+logging.getLogger("ultralytics").setLevel(logging.ERROR)
+logging.getLogger("PIL").setLevel(logging.WARNING)
+logging.getLogger("PIL.Image").setLevel(logging.WARNING)
+logging.getLogger("passlib").setLevel(logging.ERROR)
+logging.getLogger("multipart").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+logging.getLogger("aiosqlite").setLevel(logging.WARNING)
+logging.getLogger("filelock").setLevel(logging.WARNING)
+logging.getLogger("tqdm").setLevel(logging.WARNING)
+logging.getLogger("onnxruntime").setLevel(logging.ERROR)
+logging.getLogger("watchfiles").setLevel(logging.WARNING)
+logging.getLogger("h11").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("easyocr").setLevel(logging.WARNING)
+logging.getLogger("torch").setLevel(logging.WARNING)
+logging.getLogger("torchvision").setLevel(logging.WARNING)
 logger = logging.getLogger('sonikoma.api')
 

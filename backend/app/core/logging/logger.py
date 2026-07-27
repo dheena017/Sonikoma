@@ -18,27 +18,36 @@ from core.logging.handlers import (
     listeners
 )
 
-# Custom logging levels configuration
-logging.TRACE = 5
-logging.addLevelName(logging.TRACE, "TRACE")
-def trace(self, message, *args, **kws):
-    if self.isEnabledFor(logging.TRACE):
-        self._log(logging.TRACE, message, args, **kws)
-logging.Logger.trace = trace
+# Custom logging level integers (defined here to avoid monkey-patching the
+# logging module, which static analysers like Pylance/mypy don't support).
+TRACE: int = 5
+NOTICE: int = 22
+SUCCESS: int = 25
 
-logging.NOTICE = 22
-logging.addLevelName(logging.NOTICE, "NOTICE")
-def notice(self, message, *args, **kws):
-    if self.isEnabledFor(logging.NOTICE):
-        self._log(logging.NOTICE, message, args, **kws)
-logging.Logger.notice = notice
+# Register names so they appear correctly in formatted output.
+logging.addLevelName(TRACE, "TRACE")
+logging.addLevelName(NOTICE, "NOTICE")
+logging.addLevelName(SUCCESS, "SUCCESS")
 
-logging.SUCCESS = 25
-logging.addLevelName(logging.SUCCESS, "SUCCESS")
-def success(self, message, *args, **kws):
-    if self.isEnabledFor(logging.SUCCESS):
-        self._log(logging.SUCCESS, message, args, **kws)
-logging.Logger.success = success
+
+def trace(self: logging.Logger, message: str, *args: object, **kws: object) -> None:
+    if self.isEnabledFor(TRACE):
+        self._log(TRACE, message, args, **kws)  # type: ignore[arg-type]
+
+
+def notice(self: logging.Logger, message: str, *args: object, **kws: object) -> None:
+    if self.isEnabledFor(NOTICE):
+        self._log(NOTICE, message, args, **kws)  # type: ignore[arg-type]
+
+
+def success(self: logging.Logger, message: str, *args: object, **kws: object) -> None:
+    if self.isEnabledFor(SUCCESS):
+        self._log(SUCCESS, message, args, **kws)  # type: ignore[arg-type]
+
+
+logging.Logger.trace = trace   # type: ignore[attr-defined]
+logging.Logger.notice = notice  # type: ignore[attr-defined]
+logging.Logger.success = success  # type: ignore[attr-defined]
 
 
 def setup_logging():
@@ -69,7 +78,6 @@ def setup_logging():
     logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
     
     logger = logging.getLogger("sonikoma.api")
-    logger.info("Logging subsystem successfully initialized.")
 
 
 def get_logs(since: int = 0) -> List[Dict[str, Any]]:

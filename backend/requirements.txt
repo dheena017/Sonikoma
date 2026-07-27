@@ -11,7 +11,7 @@ google_auth_oauthlib==1.4.0
 httpx==0.28.1
 huggingface_hub==1.21.0
 moviepy==1.0.3
-numpy==2.5.1
+numpy>=1.22,<2.5
 opencv_python==4.13.0.92
 opencv_python_headless==4.13.0.92
 Pillow==12.3.0
@@ -23,7 +23,7 @@ pydantic==2.13.4
 pydub==0.25.1
 PyJWT==2.13.0
 python-dotenv==1.2.2
-python_bcrypt==0.3.2
+bcrypt
 PyYAML==6.0.3
 rembg==2.0.76
 Requests==2.34.2
@@ -35,3 +35,4 @@ ultralytics
 uvicorn
 wand==0.7.2
 matplotlib>=3.9.0
+numba>=0.59.0

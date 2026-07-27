@@ -122,7 +122,7 @@ async def execute_provider_call(
                 clean_model_id = "gemini-2.5-pro"
             else:
                 clean_model_id = "gemini-2.5-flash"
-            logger.info(f"[coordinator.py] Translated gemini-3.5 model selection in '{skill.name}' to: {clean_model_id}")
+            logger.debug(f"[coordinator.py] Translated gemini-3.5 model selection in '{skill.name}' to: {clean_model_id}")
 
         key_to_use = resolve_api_key("gemini", api_key, user_keys)
         if not ai_initialized and not key_to_use:

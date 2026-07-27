@@ -100,7 +100,7 @@ class BaseAISkill:
         target_model = model or self.default_model
 
         provider, clean_model_id = get_provider_and_model(target_model)
-        logger.info(f"[base.py] Resolved skill execution request to provider={provider}, model={clean_model_id}")
+        logger.debug(f"[base.py] Resolved skill execution request to provider={provider}, model={clean_model_id}")
 
         prompt = self.build_prompt(**kwargs)
         last_exception = None
