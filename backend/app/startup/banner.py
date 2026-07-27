@@ -2,6 +2,7 @@
 backend/app/startup/banner.py
 ─────────────────────────────────────────────────────────────────────────────
 Comprehensive, developer-centric, 100% pixel-perfect aligned startup banner.
+Includes real-time package installation audit checks for developer workspace.
 ─────────────────────────────────────────────────────────────────────────────
 """
 import os
@@ -11,9 +12,9 @@ import re
 from .bootstrap import IS_PRODUCTION, API_VERSION
 from core.settings import BACKEND_PORT, APP_URL, RATE_LIMIT_RPM, MAX_PROXY_MB
 
-def _check_capability(module_name: str) -> bool:
+def _check_pkg(mod_name: str) -> bool:
     try:
-        __import__(module_name)
+        __import__(mod_name)
         return True
     except ImportError:
         return False
@@ -63,7 +64,36 @@ def _print_startup_banner():
     venv_name = _get_venv_name()
     pid = os.getpid()
 
-    # Cloud & API Integrations
+    # Helper badge builder
+    def b(name: str, mod: str) -> str:
+        return f"{CLR_SUCCESS}{name} ✔{CLR_RESET}" if _check_pkg(mod) else f"{CLR_ALERT}{name} ✖{CLR_RESET}"
+
+    # Package audit categories
+    pkg_fastapi   = b("FastAPI", "fastapi")
+    pkg_uvicorn   = b("Uvicorn", "uvicorn")
+    pkg_pydantic  = b("Pydantic", "pydantic")
+    pkg_sql       = b("SQLAlchemy", "sqlalchemy")
+    pkg_jwt       = b("JWT", "jwt")
+
+    pkg_torch     = b("PyTorch", "torch")
+    pkg_yolo      = b("YOLOv8", "ultralytics")
+    pkg_rembg     = b("rembg", "rembg")
+    pkg_ocr       = b("EasyOCR", "easyocr")
+    pkg_genai     = b("GenAI", "google.genai")
+
+    pkg_cv2       = b("OpenCV", "cv2")
+    pkg_mpy       = b("MoviePy", "moviepy")
+    pkg_tts       = b("Edge-TTS", "edge_tts")
+    pkg_lbr       = b("Librosa", "librosa")
+    pkg_dub       = b("Pydub", "pydub")
+
+    pkg_pw        = b("Playwright", "playwright")
+    pkg_bs4       = b("BS4", "bs4")
+    pkg_pil       = b("Pillow", "PIL")
+    pkg_httpx     = b("HTTPX", "httpx")
+    pkg_wand      = b("Wand", "wand")
+
+    # Cloud & API Keys Integrations
     gemini_key = os.getenv("GEMINI_API_KEY")
     gemini_st = f"{CLR_SUCCESS}Gemini ✔{CLR_RESET}" if gemini_key else f"{CLR_ALERT}Gemini ✖{CLR_RESET}"
 
@@ -75,22 +105,6 @@ def _print_startup_banner():
 
     openai_key = os.getenv("OPENAI_API_KEY")
     openai_st = f"  │  {CLR_SUCCESS}OpenAI ✔{CLR_RESET}" if openai_key else ""
-
-    # Vision & ML Capability checks
-    cap_yolo  = f"{CLR_SUCCESS}YOLOv8 ✔{CLR_RESET}" if _check_capability("ultralytics") else f"{CLR_ALERT}YOLOv8 ✖{CLR_RESET}"
-    cap_rembg = f"{CLR_SUCCESS}rembg ✔{CLR_RESET}" if _check_capability("rembg") else f"{CLR_ALERT}rembg ✖{CLR_RESET}"
-    cap_ocr   = f"{CLR_SUCCESS}EasyOCR ✔{CLR_RESET}" if _check_capability("easyocr") else f"{CLR_MUTED}EasyOCR ℹ{CLR_RESET}"
-
-    # Media & Audio capability checks
-    cap_cv2 = f"{CLR_SUCCESS}OpenCV ✔{CLR_RESET}" if _check_capability("cv2") else f"{CLR_ALERT}OpenCV ✖{CLR_RESET}"
-    cap_mpy = f"{CLR_SUCCESS}MoviePy ✔{CLR_RESET}" if _check_capability("moviepy") else f"{CLR_ALERT}MoviePy ✖{CLR_RESET}"
-    cap_tts = f"{CLR_SUCCESS}Edge-TTS ✔{CLR_RESET}" if _check_capability("edge_tts") else f"{CLR_ALERT}Edge-TTS ✖{CLR_RESET}"
-    cap_lbr = f"{CLR_SUCCESS}Librosa ✔{CLR_RESET}" if _check_capability("librosa") else f"{CLR_MUTED}Librosa ℹ{CLR_RESET}"
-
-    # Utility capability checks
-    cap_pw  = f"{CLR_SUCCESS}Playwright ✔{CLR_RESET}" if _check_capability("playwright") else f"{CLR_MUTED}Playwright ℹ{CLR_RESET}"
-    cap_sd  = f"{CLR_SUCCESS}Diffusers ✔{CLR_RESET}" if _check_capability("diffusers") else f"{CLR_MUTED}Diffusers ℹ{CLR_RESET}"
-    cap_dub = f"{CLR_SUCCESS}Pydub ✔{CLR_RESET}" if _check_capability("pydub") else f"{CLR_ALERT}Pydub ✖{CLR_RESET}"
 
     pytorch_st = _get_pytorch_status(CLR_SUCCESS, CLR_ALERT, CLR_RESET)
     cpu_cores = os.cpu_count() or "?"
@@ -124,10 +138,12 @@ def _print_startup_banner():
     line_hw    = _format_line(f"● {CLR_MUTED}Hardware & ML     :{CLR_RESET} {cpu_cores} CPUs  │  {ram_total} RAM  │  {pytorch_st}")
     line_limits = _format_line(f"● {CLR_MUTED}Process & Limits  :{CLR_RESET} PID {pid}  │  Rate Limit: {rate_limit} RPM  │  Max Body: {max_proxy} MB")
     line_db    = _format_line(f"● {CLR_MUTED}Database          :{CLR_RESET} SQLite (data/webtoon_local.db)")
+    
+    line_web_db= _format_line(f"● {CLR_MUTED}Web & Database    :{CLR_RESET} {pkg_fastapi} │ {pkg_uvicorn} │ {pkg_pydantic} │ {pkg_sql} │ {pkg_jwt}")
+    line_ai_dl = _format_line(f"● {CLR_MUTED}AI & Deep Learning:{CLR_RESET} {pkg_torch} │ {pkg_yolo} │ {pkg_rembg} │ {pkg_ocr} │ {pkg_genai}")
+    line_media = _format_line(f"● {CLR_MUTED}Media & Audio     :{CLR_RESET} {pkg_cv2} │ {pkg_mpy} │ {pkg_tts} │ {pkg_lbr} │ {pkg_dub}")
+    line_utils = _format_line(f"● {CLR_MUTED}Utils & Scraping  :{CLR_RESET} {pkg_pw} │ {pkg_bs4} │ {pkg_pil} │ {pkg_httpx} │ {pkg_wand}")
     line_keys  = _format_line(f"● {CLR_MUTED}API Integrations  :{CLR_RESET} {gemini_st}  │  {hf_st}  │  {supabase_st}{openai_st}")
-    line_vision= _format_line(f"● {CLR_MUTED}Vision AI Models  :{CLR_RESET} {cap_yolo}  │  {cap_rembg}  │  {cap_ocr}")
-    line_media = _format_line(f"● {CLR_MUTED}Media & Audio     :{CLR_RESET} {cap_cv2}  │  {cap_mpy}  │  {cap_tts}  │  {cap_lbr}")
-    line_utils = _format_line(f"● {CLR_MUTED}Engine Utilities  :{CLR_RESET} {cap_pw}  │  {cap_sd}  │  {cap_dub}")
 
     top_border = f"{CLR_BORDER}┌" + "─" * (INNER_WIDTH + 2) + f"┐{CLR_RESET}"
     mid_border = f"{CLR_BORDER}├" + "─" * (INNER_WIDTH + 2) + f"┤{CLR_RESET}"
@@ -148,10 +164,12 @@ def _print_startup_banner():
 {line_limits}
 {line_db}
 {mid_border}
-{line_keys}
-{line_vision}
+{line_web_db}
+{line_ai_dl}
 {line_media}
 {line_utils}
+{mid_border}
+{line_keys}
 {bot_border}"""
 
     try:
