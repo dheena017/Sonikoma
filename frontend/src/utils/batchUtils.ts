@@ -3,8 +3,8 @@ export async function processWithConcurrency<T, R>(
   limit: number,
   fn: (item: T, index: number) => Promise<R>,
   abortSignal?: { aborted: boolean }
-): Promise<R[]> {
-  const results: R[] = new Array(items.length);
+): Promise<(R | null)[]> {
+  const results: (R | null)[] = new Array(items.length).fill(null);
   let index = 0;
 
   const workers = Array(Math.min(limit, items.length))
@@ -19,9 +19,9 @@ export async function processWithConcurrency<T, R>(
         try {
           results[currentIdx] = await fn(items[currentIdx], currentIdx);
         } catch (err) {
-          // Re-throw to fail the entire Promise.all or handle depending on requirements.
-          // For now, we'll let it reject the main promise.
-          throw err;
+          // Do NOT re-throw — log and continue so the rest of the batch finishes
+          console.error(`[processWithConcurrency] Item ${currentIdx} failed:`, err);
+          results[currentIdx] = null;
         }
       }
     });

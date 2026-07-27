@@ -644,6 +644,7 @@ const StoryboardTimeline = React.memo(
 
         const updatedPanelsMap = new Map<number, GeneratedPanel[]>();
         for (const chunkMap of results) {
+          if (!chunkMap) continue; // skip failed chunks
           for (const [id, newPanelsList] of chunkMap.entries()) {
             updatedPanelsMap.set(id, newPanelsList);
           }
