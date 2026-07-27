@@ -45,7 +45,7 @@ async def apply_image_edits_service(
 
         if flipHorizontal:
             img = Image.open(io.BytesIO(img_buffer))
-            img = img.transpose(Image.FLIP_LEFT_RIGHT)
+            img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
             out = io.BytesIO()
             img.save(out, format=img.format or 'JPEG')
             img_buffer = out.getvalue()
@@ -54,10 +54,10 @@ async def apply_image_edits_service(
             img = Image.open(io.BytesIO(img_buffer))
             w, h = img.size
 
-            top_px = int(round((cropTop / 100) * h))
-            bot_px = int(round((cropBottom / 100) * h))
-            left_px = int(round((cropLeft / 100) * w))
-            right_px = int(round((cropRight / 100) * w))
+            top_px = round((cropTop / 100) * h)
+            bot_px = round((cropBottom / 100) * h)
+            left_px = round((cropLeft / 100) * w)
+            right_px = round((cropRight / 100) * w)
 
             crop_w = w - left_px - right_px
             crop_h = h - top_px - bot_px
@@ -111,9 +111,9 @@ async def transform_image_service(url: str, trans_type: str, value: str) -> Dict
                 img = img.rotate(degrees, expand=True)
             elif trans_type == "flip":
                 if value == "h":
-                    img = img.transpose(Image.FLIP_LEFT_RIGHT)
+                    img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
                 elif value == "v":
-                    img = img.transpose(Image.FLIP_TOP_BOTTOM)
+                    img = img.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
                 else:
                     raise ValueError("Invalid flip axis. Use 'h' or 'v'.")
 
