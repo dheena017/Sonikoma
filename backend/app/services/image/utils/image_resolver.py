@@ -220,12 +220,12 @@ async def resolve_url_to_buffer(
 
     referer_candidates = [
         referer,
+        primary,
         custom_ref_origin,
+        origin,
+        alternate,
         "https://www.topmanhua.fan/",
         "https://topmanhua.fan/",
-        alternate,
-        primary,
-        origin,
         "https://manhwatop.com/",
         "https://manhuato.com/",
         "https://www.google.com/",
@@ -254,7 +254,6 @@ async def resolve_url_to_buffer(
                 return {"data": r.content, "content_type": mime, "contentType": mime}
             except Exception as e:
                 last_err = e
-                await asyncio.sleep(0.1 * (attempt + 1))
 
         # 2. Try curl_cffi with browser TLS impersonation if available
         # Cycles multiple profiles because some CDNs fingerprint the TLS handshake

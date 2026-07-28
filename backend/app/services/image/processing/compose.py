@@ -23,8 +23,14 @@ async def merge_images_service(
     alignMode: Literal["center", "start", "end"] = "center",
     padding: int = 0
 ) -> Dict[str, Any]:
-    """Orchestrates stitching together multiple image panels."""
-    resolved = [await img_utils.resolve_image_to_buffer(u) for u in urls]
+    """Orchestrates stitching together multiple image panels concurrently."""
+    import httpx
+    sem = asyncio.Semaphore(15)
+    async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
+        async def fetch_one(u: str):
+            async with sem:
+                return await img_utils.resolve_image_to_buffer(u, client=client)
+        resolved = await asyncio.gather(*[fetch_one(u) for u in urls])
 
     merged_bytes = await asyncio.to_thread(
         img_utils.stitch_images_together,
@@ -39,24 +45,32 @@ async def merge_images_service(
     if not merged_bytes:
         raise ValueError("Image merge failed.")
 
-    filename = f"merged_{uuid.uuid4().hex[:8]}.png"
-    supabase_url = await asyncio.to_thread(
-        upload_to_supabase_bucket,
-        merged_bytes,
-        "panels",
-        filename,
-        "image/png"
-    )
-
     unique_id = f"merged_{int(time.time() * 1000)}_merged"
-    new_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
+    cached_url = f"/api/image/cached/{unique_id}"
 
     try:
         stitched_cache.set(unique_id, {"data": merged_bytes, "content_type": "image/png"})
-        edit_history.set(new_url, urls[0])
+        edit_history.set(cached_url, urls[0])
     except Exception:
         pass
 
+    supabase_url = None
+    try:
+        filename = f"merged_{uuid.uuid4().hex[:8]}.png"
+        supabase_url = await asyncio.wait_for(
+            asyncio.to_thread(
+                upload_to_supabase_bucket,
+                merged_bytes,
+                "panels",
+                filename,
+                "image/png"
+            ),
+            timeout=2.0
+        )
+    except Exception as se:
+        logger.debug(f"[merge_images_service] Supabase upload skipped or timed out: {se}")
+
+    new_url = supabase_url if supabase_url else cached_url
     return {"success": True, "url": new_url}
 
 async def execute_splits_service(url: str, splitLines: List[float], output_format: str = "jpeg") -> Dict[str, Any]:

@@ -36,6 +36,24 @@ def test_stitching():
     assert h_h == 100
     print("Horizontal stitching test passed!")
 
+import pytest
+
+@pytest.mark.asyncio
+async def test_merge_images_service():
+    from services.image.processing.compose import merge_images_service
+    from core.cache import stitched_cache
+
+    img1 = create_test_image('red')
+    img2 = create_test_image('blue')
+    stitched_cache.set("test_p1", {"data": img1, "content_type": "image/png"})
+    stitched_cache.set("test_p2", {"data": img2, "content_type": "image/png"})
+
+    urls = ["/api/image/cached/test_p1", "/api/image/cached/test_p2"]
+    res = await merge_images_service(urls=urls, layout="vertical")
+    assert res.get("success") is True
+    assert "url" in res
+    assert "/api/image/cached/merged_" in res["url"]
+
 if __name__ == "__main__":
     try:
         test_stitching()
