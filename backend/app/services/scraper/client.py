@@ -167,7 +167,11 @@ async def try_fetch_with_playwright(
 
             page = await context.new_page()
             await page.set_viewport_size({"width": 1280, "height": 1080})
-            await page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            try:
+                await page.goto(url, wait_until="domcontentloaded", timeout=15000)
+            except Exception as nav_err:
+                logger.info(f"[Scraper] Playwright domcontentloaded timeout, proceeding with commit state: {nav_err}")
+                await page.goto(url, wait_until="commit", timeout=10000)
 
             # Interactive click expansions
             if interactive:

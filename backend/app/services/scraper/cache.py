@@ -1,8 +1,11 @@
 """
+backend/app/services/scraper/cache.py
+─────────────────────────────────────────────────────────────────────────────
 Service layer for managing scraper cache.
 
 Orchestrates the retrieval and storage of scraped HTML/Image data to prevent
 redundant external network calls during subsequent pipeline runs.
+─────────────────────────────────────────────────────────────────────────────
 """
 
 import logging

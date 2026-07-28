@@ -41,12 +41,17 @@ async def scrape_and_initialize_project(
     genre: Optional[str] = None,
     author: Optional[str] = None,
     cover_image: Optional[str] = None,
-    synopsis: Optional[str] = None
+    synopsis: Optional[str] = None,
+    limit: Optional[int] = None,
+    proxy_images: bool = True,
+    filter_banners: bool = True,
+    include_metadata: bool = True
 ) -> Dict[str, Any]:
     """
     Scrapes image panels from a Webtoon URL, merges metadata, handles stitching,
     caches the results, and initializes a database project record.
     """
+    start_time = time.time()
     normalized_url = extract_webtoon_url(url)
     parsed = parse_webtoon_url(normalized_url)
 
@@ -60,7 +65,14 @@ async def scrape_and_initialize_project(
             parsed[key] = val
 
     logger.info(f"[Scraper Service] Processing scrape request: {normalized_url}")
-    proxied_urls = await scrape_images_from_url(normalized_url, source, bypass_cache=bypass_cache)
+    proxied_urls = await scrape_images_from_url(
+        normalized_url,
+        source,
+        bypass_cache=bypass_cache,
+        limit=limit,
+        proxy_images=proxy_images,
+        filter_banners=filter_banners
+    )
 
     # Merge scraped metadata from cache
     metadata = scraped_metadata_cache.get(normalized_url, {})
@@ -146,8 +158,18 @@ async def scrape_and_initialize_project(
     }
 
     proj = get_project(resolved_project_id) if not resolved_project_id.startswith("temp_") else None
+    execution_time_ms = round((time.time() - start_time) * 1000, 2)
 
-    return {
+    metadata_payload = {
+        "title": parsed.get("title"),
+        "genre": parsed.get("genre"),
+        "episode": parsed.get("episode"),
+        "author": parsed.get("author"),
+        "cover_image": determined_cover,
+        "synopsis": parsed.get("synopsis"),
+    }
+
+    response_payload = {
         "success": bool(final_images),
         "project_id": resolved_project_id,
         "series_slug": proj.get("series_slug") if proj else None,
@@ -161,8 +183,20 @@ async def scrape_and_initialize_project(
         "images": final_images,
         "total_images": len(final_images),
         "image_origins": image_origins,
-        "debug": {"cache": "HIT" if cache_hit else "MISS", "smart_slice": smart_slice}
+        "execution_time_ms": execution_time_ms,
+        "debug": {
+            "cache": "HIT" if cache_hit else "MISS",
+            "smart_slice": smart_slice,
+            "proxy_images": proxy_images,
+            "filter_banners": filter_banners,
+            "limit": limit
+        }
     }
+
+    if include_metadata:
+        response_payload["metadata"] = metadata_payload
+
+    return response_payload
 
 
 async def generate_storyboard_and_video(

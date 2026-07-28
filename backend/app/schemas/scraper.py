@@ -21,6 +21,10 @@ class ScrapeImagesRequest(BaseModel):
     synopsis: Optional[str] = None
     project_id: Optional[str] = None
     scrape_only: Optional[bool] = False
+    limit: Optional[int] = None
+    proxy_images: Optional[bool] = True
+    filter_banners: Optional[bool] = True
+    include_metadata: Optional[bool] = True
 
 
 class GenerateStoryboardOnlyRequest(BaseModel):

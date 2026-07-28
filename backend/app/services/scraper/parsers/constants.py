@@ -18,9 +18,6 @@ UNWANTED_PATTERNS = [
     "icon",
     "banner",
     "avatar",
-    "thumbnail",
-    "cover",
-    "thumb",
     "favicon",
     "sprite",
     "button",
@@ -36,4 +33,10 @@ UNWANTED_PATTERNS = [
     "loading",
     "spinner",
     "background",
+    "facebook.com",
+    "google-analytics",
+    "googletagmanager",
+    "/tr?",
+    "doubleclick",
+    "analytics"
 ]

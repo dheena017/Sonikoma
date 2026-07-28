@@ -59,7 +59,9 @@ async def scrape_images_from_url(
     source: Optional[str] = None,
     cookies: Optional[Dict[str, str]] = None,
     bypass_cache: bool = False,
-    limit: Optional[int] = None
+    limit: Optional[int] = None,
+    proxy_images: bool = True,
+    filter_banners: bool = True
 ) -> List[str]:
     """
     Crawls a Webtoon episode page and isolates the panel image URLs.
@@ -94,6 +96,8 @@ async def scrape_images_from_url(
 
         if is_img:
             logger.info(f"[Scraper] Direct image URL detected: {fetch_url}")
+            if not proxy_images:
+                return [fetch_url]
             return [f"/api/proxy-image?url={quote(fetch_url)}&referer={quote(fetch_url)}"]
 
     start_time = time.time()
@@ -107,7 +111,10 @@ async def scrape_images_from_url(
             if local_path.startswith('/') and local_path[2] == ':':
                 local_path = local_path[1:]
         try:
-            return scrape_local_archive(local_path)
+            arch_imgs = scrape_local_archive(local_path)
+            if limit and limit > 0:
+                arch_imgs = arch_imgs[:limit]
+            return arch_imgs
         except Exception as e:
             logger.error(f"[Scraper] Archive extract failed: {e}")
             if fetch_url.startswith("file://"):
@@ -117,6 +124,10 @@ async def scrape_images_from_url(
     if not bypass_cache:
         cached = check_sqlite_cache(fetch_url)
         if cached:
+            if limit and limit > 0:
+                cached = cached[:limit]
+            if not proxy_images:
+                return cached
             return [f"/api/proxy-image?url={quote(img)}&referer={quote(fetch_url)}" for img in cached]
 
     parsed_domain = urlparse(fetch_url)
@@ -211,6 +222,24 @@ async def scrape_images_from_url(
                 if val.startswith(('http://', 'https://')):
                     image_dict[val] = True
 
+    # Strategy 3.5: Dynamic Playwright rendering fallback for JS-heavy web apps (GlobalComix, Webtoons React/Vue readers)
+    if not image_dict:
+        logger.info("[Scraper] Static HTML strategies produced no panel images. Triggering Playwright dynamic browser rendering...")
+        pw_html = await try_fetch_with_playwright(
+            fetch_url,
+            user_agent=fetch_headers["User-Agent"],
+            referer=fetch_headers["Referer"],
+            cookies=merged_cookies
+        )
+        if pw_html:
+            html = pw_html
+            pw_bs4_imgs = parse_with_bs4(pw_html, fetch_url)
+            for img in pw_bs4_imgs:
+                image_dict[img] = True
+            pw_nuxt_imgs = extract_images_from_nuxt_payload(pw_html)
+            for img in pw_nuxt_imgs:
+                image_dict[img] = True
+
     # Strategy 4: Series Landing Page Auto-Resolver (e.g. GlobalComix https://globalcomix.com/c/the-backwards-house or any comic hub)
     if len(image_dict) < 2 and BeautifulSoup:
         logger.info("[Scraper] Running Strategy 4 (Series Page Chapter Resolver)...")
@@ -244,19 +273,36 @@ async def scrape_images_from_url(
         except Exception as res_err:
             logger.warning(f"[Scraper] Strategy 4 resolver warning: {res_err}")
 
+    # Strategy 5: OpenGraph / Metadata cover image fallback
+    if not image_dict and metadata.get("cover_image"):
+        cov_img = metadata.get("cover_image")
+        if cov_img and cov_img.startswith(("http://", "https://")):
+            logger.info(f"[Scraper] Fallback to metadata cover/page image: {cov_img}")
+            image_dict[cov_img] = True
+
     raw_images = list(image_dict.keys())
     filtered_images = []
 
-    # Blacklist filter check
+    # Blacklist & banner filter check
+    banner_patterns = ['/logo', 'header', 'footer', 'banner', 'facebook', 'twitter', 'instagram', 'share_btn', 'icon_']
     for img in raw_images:
         lower = img.lower()
         if any(pat in lower for pat in UNWANTED_PATTERNS):
             continue
         if 'type=' in lower and 'type=q90' not in lower:
             continue
+        if filter_banners and any(b_pat in lower for b_pat in banner_patterns) and not any(k in lower for k in ['page', 'panel', 'episode', 'chapter']):
+            continue
         filtered_images.append(img)
 
-    if limit:
+    # Fallback to metadata cover/page image if no valid comic panel candidates survived filtering
+    if not filtered_images and metadata.get("cover_image"):
+        cov_img = metadata.get("cover_image")
+        if cov_img and cov_img.startswith(("http://", "https://")):
+            logger.info(f"[Scraper] Fallback to metadata cover/page image: {cov_img}")
+            filtered_images.append(cov_img)
+
+    if limit and limit > 0:
         filtered_images = filtered_images[:limit]
 
     logger.info(f"[Scraper] Final parsed panel candidates count: {len(filtered_images)} (elapsed: {int((time.time() - start_time)*1000)}ms)")
@@ -266,6 +312,9 @@ async def scrape_images_from_url(
 
     # Save cache
     save_sqlite_cache(fetch_url, filtered_images)
+
+    if not proxy_images:
+        return filtered_images
 
     return [f"/api/proxy-image?url={quote(img)}&referer={quote(fetch_url)}" for img in filtered_images]
 

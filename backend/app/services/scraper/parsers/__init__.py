@@ -1,5 +1,8 @@
 """
 backend/app/services/scraper/parsers/__init__.py
+─────────────────────────────────────────────────────────────────────────────
+Subpackage exposing HTML, Nuxt, metadata, archive, and utility parsers.
+─────────────────────────────────────────────────────────────────────────────
 """
 from .constants import USER_AGENTS, UNWANTED_PATTERNS
 from .utils import decode_escaped_js_string, natural_sort_key

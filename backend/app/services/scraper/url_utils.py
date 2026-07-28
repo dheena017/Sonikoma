@@ -1,5 +1,5 @@
 """
-backend/python/utils/url_utils.py
+backend/app/services/scraper/url_utils.py
 ─────────────────────────────────────────────────────────────────────────────
 URL parsing helpers for Webtoon episode URLs.
 ─────────────────────────────────────────────────────────────────────────────

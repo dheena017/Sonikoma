@@ -63,13 +63,15 @@ def get_optional_user_id(request: Request) -> Optional[str]:
 
 @router.post("/scrape-images", summary="Scrape comic panels from Webtoon URL")
 async def scrape_images(request: Request, body: ScrapeImagesRequest):
+    if not body.url or not body.url.strip():
+        raise HTTPException(status_code=400, detail="Target Webtoon URL is required and cannot be empty.")
     try:
         user_id = get_optional_user_id(request)
         result = await scrape_and_initialize_project(
             url=body.url,
             source=body.source,
-            bypass_cache=body.bypass_cache,
-            smart_slice=body.smart_slice,
+            bypass_cache=body.bypass_cache or False,
+            smart_slice=body.smart_slice if body.smart_slice is not None else True,
             scrape_only=getattr(body, "scrape_only", False),
             project_id=body.project_id,
             user_id=user_id,
@@ -78,9 +80,15 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
             genre=getattr(body, "genre", None),
             author=getattr(body, "author", None),
             cover_image=getattr(body, "cover_image", None),
-            synopsis=getattr(body, "synopsis", None)
+            synopsis=getattr(body, "synopsis", None),
+            limit=body.limit,
+            proxy_images=body.proxy_images if body.proxy_images is not None else True,
+            filter_banners=body.filter_banners if body.filter_banners is not None else True,
+            include_metadata=body.include_metadata if body.include_metadata is not None else True
         )
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"[Scraper Route Error] {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
