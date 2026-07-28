@@ -107,15 +107,32 @@ export function useBatchImageActions({
   audioFeedback,
 }: UseBatchImageActionsProps) {
   const abortBatchRef = React.useRef({ aborted: false });
-  const abortControllerRef = React.useRef<AbortController | null>(null);
+  const abortControllersRef = React.useRef<Set<AbortController>>(new Set());
 
   const handleCancelBatch = useCallback(() => {
     abortBatchRef.current.aborted = true;
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    addNotification("Cancelling batch operation...", "info");
-  }, [addNotification]);
+    abortControllersRef.current.forEach((controller) => {
+      try {
+        controller.abort();
+      } catch (e) {}
+    });
+    abortControllersRef.current.clear();
+    setIsBatchCropping(false);
+    setIsCleaningBubbles(false);
+    setBatchProgress(null);
+    setCleanProgress(null);
+    setCroppingImgUrl(null);
+    setBubbleCroppingImgUrl(null);
+    addNotification("Cancelled batch operation.", "info");
+  }, [
+    addNotification,
+    setIsBatchCropping,
+    setIsCleaningBubbles,
+    setBatchProgress,
+    setCleanProgress,
+    setCroppingImgUrl,
+    setBubbleCroppingImgUrl,
+  ]);
 
   const handleCleanBubblesSelected = useCallback(async () => {
     const targetImages = selectedScraped;
@@ -132,8 +149,6 @@ export function useBatchImageActions({
     );
     setIsCleaningBubbles(true);
     setCleanProgress({ current: 0, total: targetImages.length });
-    // Immediately hide floating selection bar
-    setSelectedScraped([]);
     setConsoleLogs((prev) => [
       `[Speech Bubbles] Starting batch clean bubbles job for ${targetImages.length} images...`,
       ...prev,
@@ -151,9 +166,9 @@ export function useBatchImageActions({
           if (abortBatchRef.current.aborted)
             throw new Error("Cancelled by user");
           setBubbleCroppingImgUrl(url);
+          const controller = new AbortController();
+          abortControllersRef.current.add(controller);
           try {
-            abortControllerRef.current = new AbortController();
-            // Need to pass signal to the API call. I'll update the api.removeSpeechBubbles to accept options.
             const data = await api.removeSpeechBubbles(
               fetchWithInterceptor,
               {
@@ -164,7 +179,7 @@ export function useBatchImageActions({
                 dilation: bubbleDilation,
                 inpaint_radius: bubbleInpaintRadius,
               },
-              { signal: abortControllerRef.current.signal }
+              { signal: controller.signal }
             );
 
             if (data.success && data.url) {
@@ -194,6 +209,7 @@ export function useBatchImageActions({
               `Image: ${url.substring(0, 40)}... - Error: ${err.message}`
             );
           } finally {
+            abortControllersRef.current.delete(controller);
             completedCount++;
             setCleanProgress({
               current: completedCount,
@@ -277,8 +293,6 @@ export function useBatchImageActions({
     );
     setIsBatchCropping(true);
     setBatchProgress({ current: 0, total: targetImages.length });
-    // Immediately hide floating selection bar
-    setSelectedScraped([]);
     setConsoleLogs((prev) => [
       `[Auto Cropper] Starting batch auto crop job for ${targetImages.length} images...`,
       ...prev,
@@ -297,8 +311,9 @@ export function useBatchImageActions({
           if (abortBatchRef.current.aborted)
             throw new Error("Cancelled by user");
           setCroppingImgUrl(url);
+          const controller = new AbortController();
+          abortControllersRef.current.add(controller);
           try {
-            abortControllerRef.current = new AbortController();
             const data = await api.detectPanels(
               fetchWithInterceptor,
               {
@@ -319,8 +334,10 @@ export function useBatchImageActions({
                 guidanceInstructions: cropGuidance,
                 focusMode: cropFocusMode,
               },
-              { signal: abortControllerRef.current.signal }
+              { signal: controller.signal }
             );
+            if (abortBatchRef.current.aborted)
+              throw new Error("Cancelled by user");
             if (data.fallback) {
               setConsoleLogs((prev) => [
                 `[Smart Cropper Fallback] Smart Scanner detection failed on ${url.substring(
@@ -390,6 +407,7 @@ export function useBatchImageActions({
             );
             newSlicedUrlsMap[url] = [url];
           } finally {
+            abortControllersRef.current.delete(controller);
             completedCount++;
             setBatchProgress({
               current: completedCount,

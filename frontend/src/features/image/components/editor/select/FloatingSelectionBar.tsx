@@ -775,13 +775,7 @@ export function FloatingSelectionBar({
     };
   }, [isTimeline]);
 
-  if (typeof document === "undefined") return null;
-
-  const isModalOpen = Boolean(
-    showAutoCropModal ||
-    showBubbleModal ||
-    (typeof document !== "undefined" && Boolean(document.querySelector(".fixed.inset-0")))
-  );
+  const isModalOpen = Boolean(showAutoCropModal || showBubbleModal);
   const visible = ((totalCount > 0 && selectedCount > 0) || isAnyBusy) && !isModalOpen;
 
   const zIndexClass = isTimeline ? "z-[9998]" : "z-[9999]";

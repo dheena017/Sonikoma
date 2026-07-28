@@ -22,6 +22,8 @@ interface ScraperControlsProps
     | "batchProgress"
     | "handleAutoCropSelected"
     | "handleCleanBubblesSelected"
+    | "handleBatchMergeSelected"
+    | "isBatchMerging"
   > {
   addPanelsToStoryboard: (
     urls: string[],
@@ -51,6 +53,8 @@ export default function ScraperControls({
   batchProgress,
   handleAutoCropSelected,
   handleCleanBubblesSelected,
+  handleBatchMergeSelected = () => {},
+  isBatchMerging = false,
   onLastSelectedReset,
   handleCancelBatch,
   audioFeedback,
@@ -184,8 +188,8 @@ export default function ScraperControls({
         isCleaningBubbles={isCleaningBubbles}
         cleanProgress={cleanProgress}
         handleCleanBubblesSelected={handleCleanBubblesSelected}
-        handleBatchMergeSelected={() => {}} // Not implemented at header level yet or pass from props
-        isBatchMerging={false}
+        handleBatchMergeSelected={handleBatchMergeSelected}
+        isBatchMerging={isBatchMerging}
         handleCancelBatch={handleCancelBatch}
       />
     </>

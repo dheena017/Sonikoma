@@ -45,6 +45,8 @@ export interface ScraperDeckProps {
   croppingImgUrl: string | null;
   handleAutoCropSelected: () => void;
   handleCleanBubblesSelected: () => void;
+  handleBatchMergeSelected?: () => void;
+  isBatchMerging?: boolean;
   handleCancelBatch?: () => void;
   isDashboardOnly?: boolean;
   seriesTitle?: string;
