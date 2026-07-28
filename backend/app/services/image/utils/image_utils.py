@@ -33,8 +33,8 @@ def crop_auto_borders(
     crop_padding: Optional[int] = None
 ) -> Dict[str, Any]:
     """
-    Automatically detects and crops solid/uniform borders (e.g. white/black margins)
-    from an image buffer.
+    Safely crops solid/uniform background borders (e.g. white/black margins) from an image.
+    Designed to prevent over-cropping webtoons, panel strips, and full episode images.
     """
     if not img_data:
         return {"data": img_data, "content_type": "image/jpeg"}
@@ -52,38 +52,77 @@ def crop_auto_borders(
             else:
                 content_type = f"image/{fmt_lower}"
 
+            w, h = img.size
+            if h < 30 or w < 30:
+                return {"data": img_data, "content_type": content_type}
+
             converted = img.convert("RGB")
             arr = np.array(converted)
 
-            h, w, _ = arr.shape
-            if h < 20 or w < 20:
+            # Check if outer border is low variance / solid color
+            top_strip = arr[:5, :, :]
+            bottom_strip = arr[-5:, :, :]
+            left_strip = arr[:, :5, :]
+            right_strip = arr[:, :, -5:]
+
+            top_std = float(np.std(top_strip))
+            bottom_std = float(np.std(bottom_strip))
+            left_std = float(np.std(left_strip))
+            right_std = float(np.std(right_strip))
+
+            max_border_std = 18.0 if not tighter else 30.0
+
+            top_bg = np.median(top_strip.reshape(-1, 3), axis=0) if top_std < max_border_std else None
+            bottom_bg = np.median(bottom_strip.reshape(-1, 3), axis=0) if bottom_std < max_border_std else None
+            left_bg = np.median(left_strip.reshape(-1, 3), axis=0) if left_std < max_border_std else None
+            right_bg = np.median(right_strip.reshape(-1, 3), axis=0) if right_std < max_border_std else None
+
+            if top_bg is None and bottom_bg is None and left_bg is None and right_bg is None:
                 return {"data": img_data, "content_type": content_type}
 
-            # Sample corners to determine background color
-            corners = np.concatenate([
-                arr[:5, :5].reshape(-1, 3),
-                arr[:5, -5:].reshape(-1, 3),
-                arr[-5:, :5].reshape(-1, 3),
-                arr[-5:, -5:].reshape(-1, 3),
-            ], axis=0)
-            bg_color = np.median(corners, axis=0)
+            y_min, y_max = 0, h
+            x_min, x_max = 0, w
 
-            # Measure channel difference from estimated background color
-            diff = np.abs(arr.astype(float) - bg_color)
-            dist = np.max(diff, axis=2)
+            threshold = 15.0 if tighter else 25.0
 
-            # Threshold: tighter mode uses lower threshold to crop aggressively
-            threshold = 12.0 if tighter else 25.0
-            content_mask = dist > threshold
+            if top_bg is not None:
+                diff_top = np.max(np.abs(arr.astype(float) - top_bg), axis=2)
+                row_has_content = np.any(diff_top > threshold, axis=1)
+                content_rows = np.where(row_has_content)[0]
+                if len(content_rows) > 0:
+                    y_min = int(content_rows[0])
 
-            coords = np.argwhere(content_mask)
-            if coords.size == 0:
-                return {"data": img_data, "content_type": content_type}
+            if bottom_bg is not None:
+                diff_bot = np.max(np.abs(arr.astype(float) - bottom_bg), axis=2)
+                row_has_content = np.any(diff_bot > threshold, axis=1)
+                content_rows = np.where(row_has_content)[0]
+                if len(content_rows) > 0:
+                    y_max = int(content_rows[-1]) + 1
 
-            y_min, x_min = coords.min(axis=0)
-            y_max, x_max = coords.max(axis=0) + 1
+            if left_bg is not None:
+                diff_left = np.max(np.abs(arr.astype(float) - left_bg), axis=2)
+                col_has_content = np.any(diff_left > threshold, axis=0)
+                content_cols = np.where(col_has_content)[0]
+                if len(content_cols) > 0:
+                    x_min = int(content_cols[0])
 
-            # Apply padding if requested
+            if right_bg is not None:
+                diff_right = np.max(np.abs(arr.astype(float) - right_bg), axis=2)
+                col_has_content = np.any(diff_right > threshold, axis=0)
+                content_cols = np.where(col_has_content)[0]
+                if len(content_cols) > 0:
+                    x_max = int(content_cols[-1]) + 1
+
+            # Safety cap: never crop more than 12% (or 20% if tighter) of any dimension
+            max_crop_pct = 0.20 if tighter else 0.12
+            max_crop_x = int(w * max_crop_pct)
+            max_crop_y = int(h * max_crop_pct)
+
+            x_min = min(x_min, max_crop_x)
+            y_min = min(y_min, max_crop_y)
+            x_max = max(x_max, w - max_crop_x)
+            y_max = max(y_max, h - max_crop_y)
+
             pad = crop_padding if crop_padding is not None else 0
             if pad > 0:
                 x_min = max(0, x_min - pad)
@@ -91,16 +130,18 @@ def crop_auto_borders(
                 x_max = min(w, x_max + pad)
                 y_max = min(h, y_max + pad)
 
-            if x_min < x_max and y_min < y_max and (x_min > 0 or y_min > 0 or x_max < w or y_max < h):
-                cropped_img = img.crop((x_min, y_min, x_max, y_max))
-                out = io.BytesIO()
-                cropped_img.save(out, format=orig_format, quality=95)
-                return {"data": out.getvalue(), "content_type": content_type}
+            if (x_max - x_min) >= 30 and (y_max - y_min) >= 30:
+                if x_min > 0 or y_min > 0 or x_max < w or y_max < h:
+                    cropped_img = img.crop((x_min, y_min, x_max, y_max))
+                    out = io.BytesIO()
+                    cropped_img.save(out, format=orig_format, quality=95)
+                    return {"data": out.getvalue(), "content_type": content_type}
 
             return {"data": img_data, "content_type": content_type}
     except Exception as e:
         logger.warning(f"crop_auto_borders failed: {e}")
         return {"data": img_data, "content_type": "image/jpeg"}
+
 
 
 __all__ = [

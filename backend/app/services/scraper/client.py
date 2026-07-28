@@ -206,26 +206,35 @@ async def try_fetch_with_playwright(
                 except Exception as click_err:
                     logger.debug(f"[Scraper] Interactive clicker exception: {click_err}")
 
-            # Scrolling script to trigger lazy loading down to page bottom
-            logger.info("[Scraper] Running dynamic scroll script to trigger all lazy-loaded panels...")
-            await page.evaluate("""async () => {
-                await new Promise((resolve) => {
-                    let totalHeight = 0;
-                    let distance = 2500;
-                    let maxScrolls = 40;
-                    let count = 0;
-                    let timer = setInterval(() => {
-                        let scrollHeight = document.body.scrollHeight;
-                        window.scrollBy(0, distance);
-                        totalHeight += distance;
-                        count++;
-                        if (totalHeight >= scrollHeight || count >= maxScrolls) {
-                            clearInterval(timer);
-                            resolve();
-                        }
-                    }, 250);
-                });
-            }""")
+            # Dynamic continuous scrolling script until true bottom of document is reached
+            logger.info("[Scraper] Running dynamic continuous scroll script to reach page bottom...")
+            try:
+                await page.evaluate("""async () => {
+                    await new Promise((resolve) => {
+                        let lastScrollTop = -1;
+                        let sameCount = 0;
+                        let maxTicks = 200;
+                        let tick = 0;
+                        const timer = setInterval(() => {
+                            window.scrollBy(0, 3500);
+                            const currentScrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+                            tick++;
+                            if (currentScrollTop === lastScrollTop) {
+                                sameCount++;
+                            } else {
+                                sameCount = 0;
+                                lastScrollTop = currentScrollTop;
+                            }
+                            if (sameCount >= 8 || tick >= maxTicks) {
+                                clearInterval(timer);
+                                resolve();
+                            }
+                        }, 120);
+                    });
+                }""")
+                await page.wait_for_timeout(3000)
+            except Exception as scroll_err:
+                logger.debug(f"[Scraper] Dynamic scroll exception: {scroll_err}")
 
             # DOM Normalization & Canvas extraction script
             logger.info("[Scraper] Running lazy-load DOM normalization and canvas extraction...")
@@ -272,7 +281,7 @@ async def try_fetch_with_playwright(
                 });
             }""")
 
-            await page.wait_for_timeout(300)
+            await page.wait_for_timeout(500)
             html = await page.content()
             if intercepted_image_urls:
                 import json

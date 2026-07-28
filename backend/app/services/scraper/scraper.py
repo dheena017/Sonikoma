@@ -196,6 +196,20 @@ async def scrape_images_from_url(
     metadata = extract_metadata(html, fetch_url)
     scraped_metadata_cache[fetch_url] = metadata
 
+    def extract_intercepted_images(raw_html: str) -> List[str]:
+        if not raw_html or "__intercepted_images__" not in raw_html:
+            return []
+        try:
+            import json
+            m = re.search(r'<script id="__intercepted_images__" type="application/json">(.*?)</script>', raw_html, re.DOTALL)
+            if m:
+                urls = json.loads(m.group(1))
+                if isinstance(urls, list):
+                    return [u for u in urls if isinstance(u, str) and u.startswith(("http://", "https://"))]
+        except Exception as ie:
+            logger.warning(f"[Scraper] Failed to parse intercepted images: {ie}")
+        return []
+
     # Strategy 1: Isolated BS4 Image extraction
     image_dict = {}
     bs4_imgs = parse_with_bs4(html, fetch_url)
@@ -207,10 +221,15 @@ async def scrape_images_from_url(
     for img in nuxt_imgs:
         image_dict[img] = True
 
-    # Strategy 3: Loose regular expressions matching typical panel content in HTML payload
+    # Strategy 2.5: Playwright Network Intercepted images
+    for img in extract_intercepted_images(html):
+        image_dict[img] = True
+
+    # Strategy 3: Loose regular expressions matching typical panel content in HTML/JSON payload
     logger.info("[Scraper] Running Strategy 3 (Loose regex patterns) payload harvester...")
     loose_regex = [
         r'https?://[^\s"\']+\.(?:png|jpg|jpeg|webp|gif|svg|bmp|tiff)(?:\?[^\s"\']*)?',
+        r'"(?:url|src|downloadUrl|download_url|originalUrl|image_url|imageUrl|cdn_url|cut_url)"\s*:\s*"([^"]+)"',
         r'"url"\s*:\s*"([^"]+)"',
         r'"src"\s*:\s*"([^"]+)"'
     ]
@@ -237,6 +256,8 @@ async def scrape_images_from_url(
                 image_dict[img] = True
             pw_nuxt_imgs = extract_images_from_nuxt_payload(pw_html)
             for img in pw_nuxt_imgs:
+                image_dict[img] = True
+            for img in extract_intercepted_images(pw_html):
                 image_dict[img] = True
 
     # Strategy 4: Series Landing Page Auto-Resolver (e.g. GlobalComix https://globalcomix.com/c/the-backwards-house or any comic hub)
