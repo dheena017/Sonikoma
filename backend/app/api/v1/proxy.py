@@ -44,32 +44,17 @@ def make_etag(buf: bytes) -> str:
 
 
 def spoof_referer(url: str) -> str:
-    """Derive a plausible Referer for CDN bypass based on the image URL."""
+    """Derive a plausible Referer for CDN bypass dynamically based on the image URL."""
     try:
         parsed = urlparse(url)
         host = (parsed.hostname or "").lower()
-        if "webtoon" in host or "pstatic" in host:
-            return "https://www.webtoons.com/"
-        if "naver" in host:
-            return "https://comic.naver.com/"
-        if "kakao" in host:
-            return "https://page.kakao.com/"
-        if "lezhin" in host:
-            return "https://www.lezhin.com/"
-        if "tapas" in host:
-            return "https://tapas.io/"
-        if "manhwatop" in host or "manhwa" in host:
-            return "https://manhwatop.com/"
-        if "manhuato" in host or "manhua" in host:
-            return "https://manhuato.com/"
-        if "zinmanga" in host:
-            return "https://zinmanga.com/"
-
+        if not host:
+            return "https://google.com/"
         # Remove CDN prefixes (cdn4., img2., etc.)
         clean_host = re.sub(r'^(?:cdn\d*|img\d*|images\d*|pic\d*|pics\d*|static\d*|assets\d*|media\d*|uploads\d*|files\d*|storage\d*)\.', '', host, flags=re.IGNORECASE)
-        return f"{parsed.scheme}://{clean_host}/"
+        return f"{parsed.scheme or 'https'}://{clean_host}/"
     except Exception:
-        return "https://www.webtoons.com/"
+        return "https://google.com/"
 
 
 def get_alternate_referer(url: str) -> Optional[str]:

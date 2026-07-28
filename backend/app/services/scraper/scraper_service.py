@@ -201,7 +201,7 @@ async def scrape_and_initialize_project(
 
 async def generate_storyboard_and_video(
     url: str,
-    model: str,
+    model: Optional[str] = "gemini-2.5-flash",
     narration_style: str = "long",
     bypass_cache: bool = False,
     panels: Optional[List[Dict[str, Any]]] = None,
@@ -265,7 +265,7 @@ async def generate_storyboard_and_video(
 
     # AI Generation path
     response_panels = await generate_dynamic_panels(
-        parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, model,
+        parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, model or "gemini-2.5-flash",
         narration_style=narration_style, user_keys=user_keys
     )
     if not response_panels:
@@ -296,7 +296,7 @@ async def generate_storyboard_and_video(
 async def generate_storyboard_only_service(
     url: str,
     project_id: str,
-    model: str,
+    model: Optional[str] = "gemini-2.5-flash",
     narration_style: str = "long",
     user_id: Optional[str] = None,
     user_keys: Optional[dict] = None,
@@ -327,7 +327,7 @@ async def generate_storyboard_only_service(
         raise ValueError("No images found.")
 
     response_panels = await generate_dynamic_panels(
-        parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, model,
+        parsed["title"], parsed["genre"], parsed["episode"], scraped_urls, model or "gemini-2.5-flash",
         narration_style=narration_style, user_keys=user_keys
     )
 

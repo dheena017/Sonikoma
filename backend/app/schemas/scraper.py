@@ -85,3 +85,27 @@ class BatchScrapeSeriesRequest(BaseModel):
     series: List[Dict[str, Optional[str]]]
     max_episodes_per_series: Optional[int] = 50
 
+
+class ExtractScriptRequest(BaseModel):
+    url: str
+    limit: Optional[int] = None
+
+
+class ExportArchiveRequest(BaseModel):
+    url: str
+    format: Optional[str] = "cbz"
+    limit: Optional[int] = None
+
+
+class BatchScrapeRequest(BaseModel):
+    urls: List[str]
+    limit: Optional[int] = None
+    proxy_images: Optional[bool] = True
+    filter_banners: Optional[bool] = True
+    include_metadata: Optional[bool] = True
+
+
+class SmartSplitRequest(BaseModel):
+    url: str
+    min_panel_height: Optional[int] = 250
+

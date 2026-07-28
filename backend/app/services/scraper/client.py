@@ -167,6 +167,20 @@ async def try_fetch_with_playwright(
 
             page = await context.new_page()
             await page.set_viewport_size({"width": 1280, "height": 1080})
+
+            intercepted_image_urls = []
+            async def handle_response(res):
+                try:
+                    ct = (res.headers.get("content-type") or "").lower()
+                    if "image/" in ct and not any(ign in ct for ign in ["svg", "gif", "icon"]):
+                        u = res.url
+                        if u and u.startswith(("http://", "https://")):
+                            intercepted_image_urls.append(u)
+                except Exception:
+                    pass
+
+            page.on("response", handle_response)
+
             try:
                 await page.goto(url, wait_until="domcontentloaded", timeout=15000)
             except Exception as nav_err:
@@ -192,11 +206,26 @@ async def try_fetch_with_playwright(
                 except Exception as click_err:
                     logger.debug(f"[Scraper] Interactive clicker exception: {click_err}")
 
-            # Scrolling script to trigger lazy loading
-            logger.info("[Scraper] Running scroll script for lazy-loaded assets...")
-            for _ in range(10):
-                await page.evaluate("window.scrollBy(0, 2500)")
-                await page.wait_for_timeout(600)
+            # Scrolling script to trigger lazy loading down to page bottom
+            logger.info("[Scraper] Running dynamic scroll script to trigger all lazy-loaded panels...")
+            await page.evaluate("""async () => {
+                await new Promise((resolve) => {
+                    let totalHeight = 0;
+                    let distance = 2500;
+                    let maxScrolls = 40;
+                    let count = 0;
+                    let timer = setInterval(() => {
+                        let scrollHeight = document.body.scrollHeight;
+                        window.scrollBy(0, distance);
+                        totalHeight += distance;
+                        count++;
+                        if (totalHeight >= scrollHeight || count >= maxScrolls) {
+                            clearInterval(timer);
+                            resolve();
+                        }
+                    }, 250);
+                });
+            }""")
 
             # DOM Normalization & Canvas extraction script
             logger.info("[Scraper] Running lazy-load DOM normalization and canvas extraction...")
@@ -245,6 +274,10 @@ async def try_fetch_with_playwright(
 
             await page.wait_for_timeout(300)
             html = await page.content()
+            if intercepted_image_urls:
+                import json
+                script_tag = f'<script id="__intercepted_images__" type="application/json">{json.dumps(intercepted_image_urls)}</script>'
+                html = html + "\n" + script_tag
             await browser.close()
             return html
     except Exception as e:

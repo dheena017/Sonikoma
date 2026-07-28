@@ -4,6 +4,7 @@ from .image_utils import (
     stitch_images_together,
     stack_vertical,
     compute_brightness,
+    crop_auto_borders,
 )
 
 __all__ = [
@@ -12,6 +13,8 @@ __all__ = [
     "stitch_images_together",
     "stack_vertical",
     "compute_brightness",
+    "crop_auto_borders",
 ]
+
 
 

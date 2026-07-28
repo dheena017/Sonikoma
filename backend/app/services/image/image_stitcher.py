@@ -35,7 +35,27 @@ def stitch_images_together(
     if len(image_buffers) == 1:
         return image_buffers[0]
 
-    imgs = [Image.open(io.BytesIO(b)) for b in image_buffers]
+    imgs = []
+    for b in image_buffers:
+        try:
+            if not b or len(b) < 10 or b.startswith(b"<!DOCTYPE") or b.startswith(b"<html"):
+                continue
+            im = Image.open(io.BytesIO(b))
+            im.load()
+            if im.mode in ("P", "1", "L", "LA", "CMYK") or "transparency" in im.info:
+                im = im.convert("RGBA")
+            imgs.append(im)
+        except Exception as err:
+            logger.warning(f"[Image Stitcher] Skipping unidentifiable/corrupt image buffer: {err}")
+            continue
+
+    if not imgs:
+        raise ValueError("No valid image buffers could be decoded for stitching")
+
+    if len(imgs) == 1:
+        out = io.BytesIO()
+        imgs[0].save(out, format="PNG")
+        return out.getvalue()
 
     bg_color = (255, 255, 255)
     if spacing_color == "black":
@@ -88,7 +108,7 @@ def stitch_images_together(
                 offset_y = pad + (max_h - h) // 2
             elif align_mode == "end":
                 offset_y = pad + (max_h - h)
-            canvas.paste(img, (offset_x, offset_y))
+            canvas.paste(img, (offset_x, offset_y), mask=img if img.mode == "RGBA" else None)
             offset_x += w + gap
     else:
         max_w = max(widths)
@@ -104,7 +124,7 @@ def stitch_images_together(
                 offset_x = pad + (max_w - w) // 2
             elif align_mode == "end":
                 offset_x = pad + (max_w - w)
-            canvas.paste(img, (offset_x, offset_y))
+            canvas.paste(img, (offset_x, offset_y), mask=img if img.mode == "RGBA" else None)
             offset_y += h + gap
 
     MAX_HEIGHT_LIMIT = 60000

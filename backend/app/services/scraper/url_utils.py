@@ -40,142 +40,118 @@ def strip_region_from_url(url_str: str) -> str:
         return url_str
 
 def parse_webtoon_url(url_str: str) -> dict:
-    """Extracts title, genre, and episode from a Webtoon URL path or query parameters."""
+    """Dynamically extracts title, genre, and episode from any Webtoon/Manhwa URL path or query parameters without hardcoded site branches."""
     try:
         import re
-        from urllib.parse import parse_qs, urlparse
+        from urllib.parse import parse_qs, urlparse, unquote
         
         cleaned_url = strip_region_from_url(url_str)
         working_url = cleaned_url if cleaned_url.startswith("http") else "https://" + cleaned_url
+        working_url = unquote(working_url)
         parsed = urlparse(working_url)
         parts = [p for p in parsed.path.split('/') if p]
-        host = parsed.netloc.lower()
-
-        genre = "general"
-        title = "Webtoon Comic"
-        episode = "Chapter 1"
-
-        # Check query params for episode/chapter indicators
         query_params = parse_qs(parsed.query)
-        ep_val = None
-        for key in ('episode_no', 'episode', 'chapter', 'ep', 'no', 'chapter_no'):
-            if key in query_params and query_params[key]:
-                ep_val = query_params[key][0]
-                break
 
-        def titlecase_hyphens(s: str) -> str:
-            # Check if original is UUID
-            is_uuid = bool(re.match(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', s, re.IGNORECASE))
-            if is_uuid:
-                return get_source_name(url_str) + " Comic"
-            # Strip leading numeric ID (e.g. 9523-solo-leveling -> solo-leveling)
-            cleaned = re.sub(r'^\d+[-_]', '', s)
-            is_pure_num = bool(re.match(r'^\d+$', cleaned))
-            if is_pure_num:
-                return get_source_name(url_str) + " Comic"
-            # Strip 8-character hex suffix commonly appended to Webtoon series slugs (e.g. boundless-necromancer-19cdf401 -> boundless-necromancer)
-            cleaned = re.sub(r'-[a-f0-9]{8}$', '', cleaned, flags=re.IGNORECASE)
-            words = cleaned.replace('-', ' ').split()
-            return ' '.join(w[0].upper() + w[1:] if len(w) > 0 else '' for w in words)
+        source_name = get_source_name(url_str)
+        genre = "general"
+        title = ""
+        chapter_number = ""
 
-        chapter_number = ep_val or "1"
-        chapter_title = ""
-
-        if len(parts) >= 2:
-            genre = parts[0] or "general"
-            
-            # Check for merged chapter inside series slug (e.g., aggregators)
-            merge_match = re.match(r'^(.*?)[-_](?:chapter|episode|ep|ch|no)[-_]?(\d+)(?:[-_].*)?$', parts[1], re.IGNORECASE)
-            if merge_match:
-                title = titlecase_hyphens(merge_match.group(1))
-                if not ep_val:
-                    chapter_number = merge_match.group(2)
-            else:
-                title = titlecase_hyphens(parts[1])
-                
-            # Scan remaining segments for episode number/title
-            ep_part = ""
-            for p in parts[2:]:
-                if re.search(r'\d+', p) and p != 'viewer':
-                    ep_part = p
+        # 1. Dynamic Episode extraction from query params
+        for q_key in ('no', 'episode_no', 'episodeId', 'episode', 'chapter', 'ep', 'chapter_no'):
+            if q_key in query_params and query_params[q_key]:
+                val = query_params[q_key][0]
+                m = re.search(r'\d+', val)
+                if m:
+                    chapter_number = m.group(0)
                     break
-            
-            if not ep_part and len(parts) >= 3 and parts[2] != 'viewer':
-                ep_part = parts[2]
 
-            if ep_part:
-                num_match = re.search(r'(?:^|[^0-9])(\d+)(?:[^0-9]|$)', ep_part)
-                path_num = num_match.group(1) if num_match else ""
-                if not ep_val and path_num:
-                    chapter_number = path_num
-                
-                raw_title = ep_part
-                if path_num:
-                    num_idx = ep_part.find(path_num)
-                    after = ep_part[num_idx + len(path_num):]
-                    raw_title = re.sub(r'[-_]+', ' ', after).strip()
-                    if not raw_title:
-                        before = ep_part[:num_idx]
-                        raw_title = re.sub(r'(?:chapter|episode|ep|no)', '', before, flags=re.IGNORECASE)
-                        raw_title = re.sub(r'[-_]+', ' ', raw_title).strip()
-                else:
-                    raw_title = re.sub(r'(?:chapter|episode|ep|no)', '', ep_part, flags=re.IGNORECASE)
-                    raw_title = re.sub(r'[-_]+', ' ', raw_title).strip()
-                
-                words = raw_title.split()
-                chapter_title = ' '.join(w[0].upper() + w[1:] if len(w) > 0 else '' for w in words)
-        elif len(parts) == 1:
-            merge_match = re.match(r'^(.*?)[-_](?:chapter|episode|ep|ch|no)[-_]?(\d+)(?:[-_].*)?$', parts[0], re.IGNORECASE)
-            if merge_match:
-                title = titlecase_hyphens(merge_match.group(1))
-                if not ep_val:
-                    chapter_number = merge_match.group(2)
+        # 2. Dynamic Path Segment Analysis
+        path_title = ""
+        path_ep = ""
+
+        keywords_series = {'series', 'comic', 'webtoon', 'campaign', 'content', 'action', 'fantasy', 'romance', 'drama', 'slice-of-life', 'thriller'}
+        keywords_ep = {'episode', 'episodes', 'chapter', 'chapters', 'viewer', 'detail', 'ep'}
+
+        for idx, p in enumerate(parts):
+            p_lower = p.lower()
+            if p_lower in keywords_series and idx + 1 < len(parts):
+                cand = parts[idx + 1]
+                if not cand.isdigit() and cand.lower() not in keywords_ep:
+                    path_title = cand
+            if p_lower in keywords_ep and idx + 1 < len(parts):
+                cand = parts[idx + 1]
+                m = re.search(r'\d+', cand)
+                if m:
+                    path_ep = m.group(0)
+
+        # 3. Title fallback if not set by structural keywords
+        if not path_title and parts:
+            for p in parts:
+                p_clean = re.sub(r'^[0-9]+[-_]', '', p)
+                if not p_clean.isdigit() and p.lower() not in keywords_ep and p.lower() not in keywords_series and p.lower() not in ('en', 'ko', 'list'):
+                    path_title = p
+                    break
+
+        def titlecase_slug(s: str) -> str:
+            if not s:
+                return f"{source_name} Comic"
+            # Check if UUID or numeric ID
+            if re.match(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', s, re.IGNORECASE) or s.isdigit():
+                return f"{source_name} #{s[:8]}"
+            # Strip numeric prefix and hex hash suffixes
+            cleaned = re.sub(r'^\d+[-_]', '', s)
+            cleaned = re.sub(r'-[a-f0-9]{8}$', '', cleaned, flags=re.IGNORECASE)
+            words = cleaned.replace('-', ' ').replace('_', ' ').split()
+            return ' '.join(w.capitalize() for w in words)
+
+        title = titlecase_slug(path_title)
+
+        # 4. Episode number fallback
+        if not chapter_number:
+            if path_ep:
+                chapter_number = path_ep
             else:
-                title = titlecase_hyphens(parts[0])
+                for p in reversed(parts):
+                    m = re.search(r'\b\d+\b', p)
+                    if m and p.lower() not in ('list', 'index'):
+                        chapter_number = m.group(0)
+                        break
 
-        episode = f"Chapter {chapter_number}"
-        if chapter_title:
-            episode = f"Chapter {chapter_number} - {chapter_title}"
+        episode = f"Episode {chapter_number}" if chapter_number else "Chapter 1"
 
-        return {"genre": genre, "title": title, "episode": episode, "source_name": get_source_name(url_str)}
+        if parts and parts[0].lower() in keywords_series:
+            genre = parts[0].lower()
+
+        return {
+            "genre": genre,
+            "title": title,
+            "episode": episode,
+            "source_name": source_name
+        }
     except Exception:
         return {"genre": "general", "title": "Custom Storyboard", "episode": "Dynamic Chapter", "source_name": "Custom Source"}
 
 def get_source_name(url_str: str) -> str:
-    """Derives a friendly website/source name from a URL string."""
+    """Derives a friendly website/source name dynamically from any URL string without hardcoded site links."""
+    if not url_str:
+        return "Custom Source"
     try:
         from urllib.parse import urlparse
-        if not url_str:
-            return "Custom Source"
         working_url = url_str if url_str.startswith("http") else "https://" + url_str
         parsed = urlparse(working_url)
         host = parsed.netloc.lower()
-        if "globalcomix.com" in host:
-            return "GlobalComix"
-        if "asurascans.com" in host or "asura" in host:
-            return "Asura Scans"
-        if "webtoons.com" in host or "webtoon.com" in host:
-            return "Webtoons"
-        if "reaperscans.com" in host or "reaper" in host:
-            return "Reaper Scans"
-        if "flamecomics.com" in host or "flamescans" in host:
-            return "Flame Comics"
-        if "mangadex.org" in host:
-            return "MangaDex"
-        if "comick.io" in host or "comick.app" in host:
-            return "ComicK"
-        if "tapas.io" in host:
-            return "Tapas"
-        if "manhuato.com" in host:
-            return "ManhuaTo"
-        if "webcomicsapp.com" in host:
-            return "WebComics App"
-        if "toomics.com" in host:
-            return "Toomics"
+        if not host:
+            return "Custom Source"
         
-        parts = host.replace("www.", "").split(".")
-        if parts:
-            return parts[0].capitalize()
-        return "Custom Source"
+        parts = [p for p in host.split('.') if p not in ('www', 'com', 'net', 'org', 'io', 'co', 'kr', 'app', 'fan', 'mobi', 'tv', 'cc', 'us', 'me', 'xyz', 'top', 'site', 'online', 'store')]
+        if not parts:
+            return "Custom Source"
+        
+        name_parts = [p for p in parts if p not in ('m', 'api', 'cdn', 'static', 'assets', 'v1', 'v2', 'v3', 'en', 'kr', 'jp', 'cn', 'fr', 'es', 'de')]
+        if not name_parts:
+            name_parts = parts
+            
+        return ' '.join(w.capitalize() for w in ' '.join(name_parts).replace('-', ' ').replace('_', ' ').split())
     except Exception:
         return "Custom Source"

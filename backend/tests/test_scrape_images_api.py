@@ -82,3 +82,23 @@ def test_scrape_images_successful_response(mock_scrape):
     assert kwargs["limit"] == 5
     assert kwargs["proxy_images"] is False
     assert kwargs["filter_banners"] is True
+
+
+def test_batch_scrape_endpoint():
+    payload = {
+        "urls": ["https://tapas.io/episode/3899239"],
+        "limit": 5
+    }
+    response = client.post("/batch-scrape", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert "job_id" in data
+    assert data["status"] == "queued"
+
+    job_id = data["job_id"]
+    status_resp = client.get(f"/batch-status/{job_id}")
+    assert status_resp.status_code == 200
+    status_data = status_resp.json()
+    assert status_data["success"] is True
+    assert status_data["job"]["job_id"] == job_id

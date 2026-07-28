@@ -193,30 +193,20 @@ export function getSourceName(urlStr: string): string {
     );
     const host = urlObj.hostname.toLowerCase();
 
-    if (host.includes("asurascans.com") || host.includes("asuracomics.com")) return "Asura Scans";
-    if (host.includes("reaperscans.com")) return "Reaper Scans";
-    if (host.includes("flamecomics") || host.includes("flamescans")) return "Flame Comics";
-    if (host.includes("voidscans.com")) return "Void Scans";
-    if (host.includes("hivescans.com")) return "Hive Scans";
-    if (host.includes("drakescans.com")) return "Drake Scans";
-    if (host.includes("zeroscans.com")) return "Zero Scans";
-    if (host.includes("zinmanga.com")) return "ZinManga";
-    if (host.includes("mangadex.org")) return "MangaDex";
-    if (host.includes("manhuato.com")) return "ManhuaTo";
-    if (host.includes("manhwatop.com")) return "ManhwaTop";
-    if (host.includes("webtoons.com") || host.includes("webtoon.com")) return "Webtoons";
-    if (host.includes("naver.com")) return "Naver Webtoon";
-    if (host.includes("kakao.com")) return "Kakao Page";
-    if (host.includes("tapas.io")) return "Tapas";
-    if (host.includes("lezhin.com")) return "Lezhin";
-    if (host.includes("webcomicsapp.com")) return "WebComics App";
-    if (host.includes("toomics.com")) return "Toomics";
-    if (host.includes("manganato.com") || host.includes("mangakakalot")) return "Manganato";
+    const parts = host
+      .replace(/^www\./, "")
+      .split(".")
+      .filter((p) => !["com", "net", "org", "io", "co", "kr", "app", "fan", "mobi", "tv", "cc", "us", "me", "xyz", "top", "site", "online", "store"].includes(p));
 
-    const parts = host.replace("www.", "").split(".");
-    if (parts.length > 0) {
-      return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+    const nameParts = parts.filter((p) => !["m", "api", "cdn", "static", "assets", "v1", "v2", "v3", "en", "kr", "jp", "cn", "fr", "es", "de"].includes(p));
+    const activeParts = nameParts.length > 0 ? nameParts : parts;
+
+    if (activeParts.length > 0) {
+      return activeParts
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+        .join(" ");
     }
+
     return "Custom Source";
   } catch {
     return "Custom Source";

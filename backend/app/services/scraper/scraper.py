@@ -207,24 +207,23 @@ async def scrape_images_from_url(
     for img in nuxt_imgs:
         image_dict[img] = True
 
-    # Strategy 3: Loose regular expressions matching typical panel content
-    if not image_dict:
-        logger.info("[Scraper] Running Strategy 3 (Loose regex patterns) fallback...")
-        loose_regex = [
-            r'https?://[^\s"\']+\.(?:png|jpg|jpeg|webp|gif|svg|bmp|tiff)(?:\?[^\s"\']*)?',
-            r'"url"\s*:\s*"([^"]+)"',
-            r'"src"\s*:\s*"([^"]+)"'
-        ]
-        for pat in loose_regex:
-            for match in re.finditer(pat, html, re.IGNORECASE):
-                val = match.group(1) if (match.lastindex and match.group(1) is not None) else match.group(0)
-                val = decode_escaped_js_string(val)
-                if val.startswith(('http://', 'https://')):
-                    image_dict[val] = True
+    # Strategy 3: Loose regular expressions matching typical panel content in HTML payload
+    logger.info("[Scraper] Running Strategy 3 (Loose regex patterns) payload harvester...")
+    loose_regex = [
+        r'https?://[^\s"\']+\.(?:png|jpg|jpeg|webp|gif|svg|bmp|tiff)(?:\?[^\s"\']*)?',
+        r'"url"\s*:\s*"([^"]+)"',
+        r'"src"\s*:\s*"([^"]+)"'
+    ]
+    for pat in loose_regex:
+        for match in re.finditer(pat, html, re.IGNORECASE):
+            val = match.group(1) if (match.lastindex and match.group(1) is not None) else match.group(0)
+            val = decode_escaped_js_string(val)
+            if val.startswith(('http://', 'https://')):
+                image_dict[val] = True
 
     # Strategy 3.5: Dynamic Playwright rendering fallback for JS-heavy web apps (GlobalComix, Webtoons React/Vue readers)
-    if not image_dict:
-        logger.info("[Scraper] Static HTML strategies produced no panel images. Triggering Playwright dynamic browser rendering...")
+    if len(image_dict) < 15:
+        logger.info("[Scraper] Harvested under 15 panel images from static HTML. Triggering Playwright dynamic browser rendering...")
         pw_html = await try_fetch_with_playwright(
             fetch_url,
             user_agent=fetch_headers["User-Agent"],
@@ -252,7 +251,7 @@ async def scrape_images_from_url(
                     href = " ".join(href)
                 if not isinstance(href, str):
                     continue
-                if any(term in href.lower() for term in ['/read/', '/chapters/', '/chapter', '/episode', '/ep-', '/ch-']) and href != fetch_url:
+                if any(term in href.lower() for term in ['/read/', '/chapters/', '/chapter', '/episode', '/episodes/', '/viewer/', '/detail', '/comic/', '/ep-', '/ch-', 'no=', 'episode_no=']) and href != fetch_url:
                     full_ch = urljoin(fetch_url, href)
                     if full_ch != fetch_url and full_ch not in ch_links and not full_ch.endswith('/c/'):
                         ch_links.append(full_ch)
@@ -288,8 +287,6 @@ async def scrape_images_from_url(
     for img in raw_images:
         lower = img.lower()
         if any(pat in lower for pat in UNWANTED_PATTERNS):
-            continue
-        if 'type=' in lower and 'type=q90' not in lower:
             continue
         if filter_banners and any(b_pat in lower for b_pat in banner_patterns) and not any(k in lower for k in ['page', 'panel', 'episode', 'chapter']):
             continue

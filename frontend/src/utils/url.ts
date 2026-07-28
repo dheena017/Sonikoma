@@ -184,37 +184,7 @@ export function parseWebtoonUrl(urlStr: string) {
   }
 }
 
-const KNOWN_DOMAINS = [
-  "asurascans.com",
-  "asuracomics.com",
-  "reaperscans.com",
-  "flamecomics.xyz",
-  "flamecomics.com",
-  "flamescans.org",
-  "voidscans.com",
-  "hivescans.com",
-  "drakescans.com",
-  "zeroscans.com",
-  "zinmanga.com",
-  "mangadex.org",
-  "manhuato.com",
-  "manhwatop.com",
-  "webtoons.com",
-  "webtoon.com",
-  "comic.naver.com",
-  "naver.com",
-  "page.kakao.com",
-  "kakao.com",
-  "tapas.io",
-  "lezhin.com",
-  "toomics.com",
-  "webcomicsapp.com",
-  "manganato.com",
-  "readmanganato.com",
-  "mangakakalot.com",
-  "batotoo.com",
-  "bato.to",
-];
+export const KNOWN_DOMAINS: string[] = [];
 
 const CUSTOM_SITES_KEY = "sonikoma_custom_sites";
 
@@ -263,39 +233,20 @@ export function getSourceName(urlStr: string): string {
     );
     const host = urlObj.hostname.toLowerCase();
 
-    if (host.includes("asurascans.com") || host.includes("asuracomics.com")) return "Asura Scans";
-    if (host.includes("reaperscans.com")) return "Reaper Scans";
-    if (host.includes("flamecomics") || host.includes("flamescans")) return "Flame Comics";
-    if (host.includes("voidscans.com")) return "Void Scans";
-    if (host.includes("hivescans.com")) return "Hive Scans";
-    if (host.includes("drakescans.com")) return "Drake Scans";
-    if (host.includes("zeroscans.com")) return "Zero Scans";
-    if (host.includes("zinmanga.com")) return "ZinManga";
-    if (host.includes("mangadex.org")) return "MangaDex";
-    if (host.includes("manhuato.com")) return "ManhuaTo";
-    if (host.includes("manhwatop.com")) return "ManhwaTop";
-    if (host.includes("webtoons.com") || host.includes("webtoon.com")) return "Webtoons";
-    if (host.includes("naver.com")) return "Naver Webtoon";
-    if (host.includes("kakao.com")) return "Kakao Page";
-    if (host.includes("tapas.io")) return "Tapas";
-    if (host.includes("lezhin.com")) return "Lezhin";
-    if (host.includes("webcomicsapp.com")) return "WebComics App";
-    if (host.includes("toomics.com")) return "Toomics";
-    if (host.includes("manganato.com") || host.includes("mangakakalot")) return "Manganato";
+    const parts = host
+      .replace(/^www\./, "")
+      .split(".")
+      .filter((p) => !["com", "net", "org", "io", "co", "kr", "app", "fan", "mobi", "tv", "cc", "us", "me", "xyz", "top", "site", "online", "store"].includes(p));
 
-    // Check user-registered custom sites
-    const customSites = getCustomSites();
-    for (const site of customSites) {
-      if (host.includes(site)) {
-        const parts = site.split(".");
-        return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-      }
+    const nameParts = parts.filter((p) => !["m", "api", "cdn", "static", "assets", "v1", "v2", "v3", "en", "kr", "jp", "cn", "fr", "es", "de"].includes(p));
+    const activeParts = nameParts.length > 0 ? nameParts : parts;
+
+    if (activeParts.length > 0) {
+      return activeParts
+        .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+        .join(" ");
     }
 
-    const parts = host.replace("www.", "").split(".");
-    if (parts.length > 0) {
-      return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-    }
     return "Custom Source";
   } catch {
     return "Custom Source";

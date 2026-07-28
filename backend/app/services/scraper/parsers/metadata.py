@@ -104,8 +104,11 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
 
         title_str = metadata["title"]
         if title_str:
-            title_str = re.sub(r'\s*[-|–—]\s*(?:Asura Scans|MangaDex|Webtoons|Line Webtoon|Flame Comics|Reaper Scans|Void Scans|Luminous Scans|Tapas|Tappytoon|ManhuaTo|Manhua Plus|Manganato|Mangakakalot|Bato\.to|Toomics|WebComics App|Copin Comics|Pocket Comics|Lezhin|Bilibili Comics|MangaToon|Webnovel)\b.*$', '', title_str, flags=re.IGNORECASE)
-            metadata["title"] = title_str.strip()
+            # Dynamically strip site branding after standard title delimiters (| :: — -)
+            parts = re.split(r'\s*[|::—–]\s*|\s+-\s+(?=[A-Z0-9\s]+$)', title_str)
+            if parts and parts[0].strip():
+                title_str = parts[0].strip()
+            metadata["title"] = title_str
 
         og_desc = soup.find('meta', attrs={'property': 'og:description'}) or soup.find('meta', attrs={'name': 'description'})
         metadata["description"] = _get_str(og_desc, 'content')

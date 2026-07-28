@@ -123,7 +123,7 @@ async def scrape_webtoon_episodes_paginated(
 
 
 async def batch_scrape_series(
-    series_list: List[Dict[str, str]],
+    series_list: List[Dict[str, Optional[str]]],
     max_episodes_per_series: Optional[int] = 50
 ) -> Dict[str, Any]:
     """Batch scrape multiple WEBTOON series."""
@@ -136,8 +136,9 @@ async def batch_scrape_series(
 
     for idx, series_info in enumerate(series_list):
         try:
+            url = series_info.get("url") or ""
             result = await scrape_webtoon_episodes(
-                series_url=series_info.get("url", ""),
+                series_url=url,
                 title_no=series_info.get("title_no"),
                 max_episodes=max_episodes_per_series
             )

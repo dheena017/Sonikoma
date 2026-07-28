@@ -7,9 +7,11 @@ parses authorization tokens, and delegates logic to scraper services.
 """
 
 import logging
+import asyncio
 import jwt
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi.responses import Response
 
 from api.dependencies.auth import get_all_user_keys
 from schemas.scraper import (
@@ -20,7 +22,11 @@ from schemas.scraper import (
     GenerateStoryboardRequest,
     GenerateStoryboardOnlyRequest,
     ProcessUrlRequest,
-    SaveScrapedImagesRequest
+    SaveScrapedImagesRequest,
+    ExtractScriptRequest,
+    ExportArchiveRequest,
+    BatchScrapeRequest,
+    SmartSplitRequest
 )
 from core.security import SECRET_KEY
 
@@ -40,6 +46,10 @@ from services.scraper.scraper_service import (
     generate_storyboard_and_video,
     generate_storyboard_only_service
 )
+from services.scraper.ocr_service import extract_script_from_panels
+from services.scraper.archive_exporter import create_comic_archive
+from services.scraper.batch_job_service import create_batch_job, get_batch_job_status, execute_batch_job
+from services.scraper.panel_splitter import split_vertical_strip_into_panels
 
 ALGORITHM = "HS256"
 logger = logging.getLogger("sonikoma.api.scraper")
@@ -128,7 +138,7 @@ async def scrape_episodes_advanced(request: Request, body: ScrapeEpisodesAdvance
             title_no=body.title_no,
             max_episodes=body.max_episodes,
             page=body.page or 1,
-            include_ratings=body.include_ratings,
+            include_ratings=body.include_ratings if body.include_ratings is not None else True,
             sort_by=body.sort_by or "latest",
             bypass_cache=body.bypass_cache or False
         )
@@ -188,9 +198,9 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest,
         user_id = get_optional_user_id(request)
         result = await generate_storyboard_and_video(
             url=body.url,
-            model=body.model,
+            model=body.model or "gemini-2.5-flash",
             narration_style=body.narrationStyle or "long",
-            bypass_cache=body.bypass_cache,
+            bypass_cache=body.bypass_cache if body.bypass_cache is not None else True,
             panels=body.panels,
             episode_id=body.episode_id,
             user_id=user_id,
@@ -215,7 +225,7 @@ async def generate_storyboard_only(request: Request, body: GenerateStoryboardOnl
         result = await generate_storyboard_only_service(
             url=body.url,
             project_id=body.project_id,
-            model=body.model,
+            model=body.model or "gemini-2.5-flash",
             narration_style=body.narrationStyle or "long",
             user_id=user_id,
             user_keys=user_keys,
@@ -243,4 +253,135 @@ async def save_scraped_images(body: SaveScrapedImagesRequest):
         save_scrape_session(extract_webtoon_url(body.url), body.images)
         return {"success": True}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/extract-script", summary="Extract AI speech bubble dialogue script via OCR")
+async def extract_script(body: ExtractScriptRequest):
+    if not body.url or not body.url.strip():
+        raise HTTPException(status_code=400, detail="Target Webtoon URL is required.")
+    try:
+        res = await scrape_and_initialize_project(url=body.url, limit=body.limit, proxy_images=False)
+        panel_urls = res.get("images", [])
+        
+        import httpx
+        buffers = []
+        async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
+            for u in panel_urls[:body.limit or 50]:
+                try:
+                    resp = await client.get(u)
+                    if resp.status_code == 200:
+                        buffers.append(resp.content)
+                except Exception:
+                    pass
+
+        script = await extract_script_from_panels(buffers)
+        return {
+            "success": True,
+            "url": body.url,
+            "total_dialogue_panels": sum(1 for p in script if p["has_dialogue"]),
+            "script": script
+        }
+    except Exception as e:
+        logger.error(f"[Extract Script Error] {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/export-archive", summary="Export scraped comic panels as .CBZ or .ZIP archive")
+async def export_archive(body: ExportArchiveRequest):
+    if not body.url or not body.url.strip():
+        raise HTTPException(status_code=400, detail="Target Webtoon URL is required.")
+    try:
+        res = await scrape_and_initialize_project(url=body.url, limit=body.limit, proxy_images=False)
+        panel_urls = res.get("images", [])
+        metadata = res.get("metadata", {})
+
+        import httpx
+        images_data = []
+        async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
+            for u in panel_urls:
+                try:
+                    resp = await client.get(u)
+                    if resp.status_code == 200:
+                        images_data.append({
+                            "data": resp.content,
+                            "content_type": resp.headers.get("content-type", "image/png")
+                        })
+                except Exception:
+                    pass
+
+        arch_format = (body.format or "cbz").lower()
+        archive_bytes = create_comic_archive(images_data, metadata, archive_format=arch_format)
+        
+        filename = f"{metadata.get('title', 'comic').replace(' ', '_')}.{arch_format}"
+        media_type = "application/x-cbz" if arch_format == "cbz" else "application/zip"
+
+        return Response(
+            content=archive_bytes,
+            media_type=media_type,
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        )
+    except Exception as e:
+        logger.error(f"[Export Archive Error] {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/batch-scrape", summary="Submit background batch scraping job for multiple URLs")
+async def batch_scrape(body: BatchScrapeRequest):
+    if not body.urls:
+        raise HTTPException(status_code=400, detail="URL list cannot be empty.")
+    try:
+        job_id = create_batch_job(body.urls)
+        options = {
+            "limit": body.limit,
+            "proxy_images": body.proxy_images,
+            "filter_banners": body.filter_banners,
+            "include_metadata": body.include_metadata
+        }
+        asyncio.create_task(execute_batch_job(job_id, options))
+        return {
+            "success": True,
+            "job_id": job_id,
+            "status": "queued",
+            "total_urls": len(body.urls),
+            "status_url": f"/api/v1/scraper/batch-status/{job_id}"
+        }
+    except Exception as e:
+        logger.error(f"[Batch Scrape Error] {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/batch-status/{job_id}", summary="Check background batch scraping status")
+async def get_batch_status(job_id: str):
+    job = get_batch_job_status(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Batch job '{job_id}' not found.")
+    return {"success": True, "job": job}
+
+
+@router.post("/smart-split", summary="Smart AI panel cutter for vertical Webtoon strips")
+async def smart_split(body: SmartSplitRequest):
+    if not body.url or not body.url.strip():
+        raise HTTPException(status_code=400, detail="Target image/Webtoon URL is required.")
+    try:
+        import httpx
+        async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
+            resp = await client.get(body.url)
+            if resp.status_code != 200:
+                raise HTTPException(status_code=400, detail="Failed to fetch image URL for splitting.")
+            img_bytes = resp.content
+
+        split_buffers = split_vertical_strip_into_panels(
+            img_bytes,
+            min_panel_height=body.min_panel_height or 250
+        )
+        
+        return {
+            "success": True,
+            "original_url": body.url,
+            "extracted_panels_count": len(split_buffers),
+            "message": f"Successfully split vertical strip into {len(split_buffers)} discrete panels."
+        }
+    except Exception as e:
+        logger.error(f"[Smart Split Error] {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

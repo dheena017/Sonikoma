@@ -141,21 +141,22 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
     except Exception:
         return []
 
+    # Universal reader container selectors for all Manhwa / Webtoon platforms
     selectors = custom_selectors or [
-        # GlobalComix reader
-        '.read-container', '.reader-page', '.gc-reader', '[data-gc-page]', '#reader', '.reader-area-wrap',
-        # Webtoons-specific: panel image list
+        '#readerarea', '.readerarea', '#reader-area', '.reader-area-wrap', '.reader-area',
         '#_imageList', '._img_viewer_area', '.viewer_lst', '.wt_viewer', '._imageList',
-        # Asura, Reaper, Flame, WordPress Manga / Madara themes
-        '#readerarea', '.readerarea', '#reader-area', '.wp-manga-chapter-img',
-        '.rd-page', '.page-break', '.reading-content', '.main-col', '.entry-content',
-        '.reading-detail', '.chapter-content', '.episode-view', '.comic-content',
-        '.panel-container', '#comic_view_area', '#comic-image', '#comic-view',
-        '.ep-contents', '.chapter-img', '.page-content', '.comic-page-img',
-        '.chapter-images', '.viewer-images', '.comic-pages', '.manga-reader',
-        '#chapter-reader', '#manga-reader', '.vng-reader', '.reader-image-list',
-        '.reader-content', '.reader-area', '.reading-area', '.chapter-area',
-        '[class*="reader-content"]', '[class*="chapter-content"]', '[class*="reader-area"]'
+        '.read-container', '.reader-page', '.gc-reader', '[data-gc-page]', '#reader',
+        '.wp-manga-chapter-img', '.rd-page', '.page-break', '.reading-content', '.main-col',
+        '.entry-content', '.reading-detail', '.chapter-content', '.episode-view', '.comic-content',
+        '.panel-container', '#comic_view_area', '#comic-image', '#comic-view', '.ep-contents',
+        '.chapter-img', '.page-content', '.comic-page-img', '.chapter-images', '.viewer-images',
+        '.comic-pages', '.manga-reader', '#chapter-reader', '#manga-reader', '.vng-reader',
+        '.reader-image-list', '.reader-content', '.reading-area', '.chapter-area',
+        '.viewer-cnt', '.viewer-wrap', '#viewer-container', '.manga-image', '.read-img',
+        '.chapter-img-list', '.chapter-image', '.reader-images', '#chapter-images', '.page-img',
+        '#pages', '#images-container', '#pages-container', '.canvas-container', '.manga-page',
+        '[data-page]', '[data-page-id]', '[class*="reader-content"]', '[class*="chapter-content"]',
+        '[class*="reader-area"]', '[class*="viewer-area"]', '[class*="comic-view"]'
     ]
 
     container = None
@@ -166,10 +167,24 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
                 container = cand.parent
                 logger.info(f"[Scraper] BS4 isolated reader matched img selector '{sel}', using parent element")
                 break
-            elif cand.find('img') or cand.find(attrs={'data-src': True}) or cand.find(attrs={'data-original': True}):
+            elif cand.select_one('img, [data-src], [data-original]'):
                 container = cand
                 logger.info(f"[Scraper] BS4 isolated reader container matched: {sel}")
                 break
+
+    if not container and soup.body:
+        # Universal Fallback: Find the container with the highest density of images
+        candidates = soup.body.find_all(['div', 'main', 'article', 'section'])
+        best_cand = None
+        max_imgs = 0
+        for cand in candidates:
+            img_count = len(cand.find_all(['img', 'source']))
+            if img_count > max_imgs:
+                max_imgs = img_count
+                best_cand = cand
+        if max_imgs >= 2 and best_cand:
+            container = best_cand
+            logger.info(f"[Scraper] BS4 universal image-density container matched element with {max_imgs} images")
 
     def _extract_images_from_root(root, target_list: List[str]):
         for img in root.find_all(['img', 'source']):
@@ -225,8 +240,7 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
     if container:
         _extract_images_from_root(container, images)
 
-    # Fallback to full document if isolated container produced no images
-    if not images:
-        _extract_images_from_root(soup, images)
+    # Always harvest full document to ensure no panel image outside container is missed
+    _extract_images_from_root(soup, images)
 
     return images
