@@ -105,7 +105,7 @@ export default function AutoCropModal({
   addNotification,
   isPage = false,
 }: AutoCropModalProps) {
-  const [useYolo, setUseYolo] = React.useState(true);
+  const [useYolo, setUseYolo] = React.useState(false);
   const [activePreviewUrl, setActivePreviewUrl] = React.useState<string | null>(
     null
   );

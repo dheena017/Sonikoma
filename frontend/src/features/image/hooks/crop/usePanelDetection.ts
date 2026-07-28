@@ -201,7 +201,7 @@ export function usePanelDetection({
           cannyHigh: settings?.cannyHigh ?? 100,
           closeKernelSize: settings?.closeKernelSize ?? 15,
           minHeightPx: settings?.minHeightPx ?? 60,
-          useYolo: settings?.useYolo ?? true,
+          useYolo: settings?.useYolo ?? false,
         },
         { signal: abortControllerRef.current.signal }
       );

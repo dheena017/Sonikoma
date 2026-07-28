@@ -151,7 +151,7 @@ async def ai_smart_crop(
             min_height_px=body.minHeightPx if body.minHeightPx is not None else 60,
             padding_px=body.paddingPx if body.paddingPx is not None else 10,
             auto_split=body.autoSplit if body.autoSplit is not None else True,
-            use_yolo=body.useYolo if body.useYolo is not None else True,
+            use_yolo=body.useYolo if body.useYolo is not None else False,
             guidance_instructions=body.guidanceInstructions,
             focus_mode=body.focusMode
         )

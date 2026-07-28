@@ -107,6 +107,10 @@ def _filter_solid_noise(
             box_slice = gray_arr[by:by+bh, bx:bx+bw]
             if np.std(box_slice) < 5.0:
                 continue
+            row_stds = np.std(box_slice, axis=1)
+            flat_rows = np.sum(row_stds < 3.0)
+            if float(flat_rows) / float(max(1, bh)) > 0.75:
+                continue
         except Exception:
             pass
 

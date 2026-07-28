@@ -315,7 +315,7 @@ async def facade_smart_crop(
     min_height_px: int = 60,
     padding_px: int = 10,
     auto_split: bool = True,
-    use_yolo: bool = True,
+    use_yolo: bool = False,
     guidance_instructions: Optional[str] = None,
     focus_mode: Optional[str] = None
 ) -> Dict[str, Any]:
@@ -328,8 +328,9 @@ async def facade_smart_crop(
 
     aspect_ratio = aspect_ratio or "free"
     user_keys = user_keys or {}
+    is_tall_strip = (h_img / max(1, w_img) > 1.7)
 
-    # 1. Directly execute local OpenCV detection if user chose local-cv strategy
+    # 1. Directly execute local OpenCV detection if user explicitly chose local-cv strategy
     if strategy == "local-cv":
         tmp_in_path = None
         try:
@@ -353,12 +354,13 @@ async def facade_smart_crop(
                 padding_px=padding_px,
                 use_yolo=use_yolo
             )
-            return {
-                "success": True,
-                "total_panels": len(cv_panels),
-                "panels": cv_panels,
-                "provider": "opencv"
-            }
+            if len(cv_panels) > 0:
+                return {
+                    "success": True,
+                    "total_panels": len(cv_panels),
+                    "panels": cv_panels,
+                    "provider": "opencv_webtoon" if is_tall_strip else "opencv"
+                }
         finally:
             if tmp_in_path and os.path.exists(tmp_in_path):
                 try:

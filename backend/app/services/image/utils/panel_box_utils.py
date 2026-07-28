@@ -106,9 +106,10 @@ def merge_overlapping_boxes(
                 y_dist = max(0, y1_b - y2_a) if y1_b >= y2_a else max(0, y1_a - y2_b)
                 
                 should_merge = False
+                y_overlap_ratio = y_overlap_val / float(h_min) if h_min > 0 else 0.0
                 if iou >= 0.65 or overlap_min_ratio >= 0.80:
                     should_merge = True
-                elif y_overlap_val > 0 and h_overlap_ratio >= 0.5:
+                elif y_overlap_ratio >= 0.50 and h_overlap_ratio >= 0.50:
                     should_merge = True
                 elif merge_threshold > 0 and h_overlap_ratio > 0 and y_dist <= merge_threshold:
                     should_merge = True

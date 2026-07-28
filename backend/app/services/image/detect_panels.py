@@ -57,7 +57,7 @@ def run_cv_detection(
     close_kernel_size: int = 15,
     auto_split: bool = True,
     padding_px: int = 10,
-    use_yolo: bool = True,
+    use_yolo: bool = False,
     yolo_conf: float = 0.20
 ) -> List[Dict[str, Any]]:
     """
@@ -98,7 +98,11 @@ def run_cv_detection(
     # Dynamic Parameter Scaling
     ref_area = 1500.0 * 1500.0
     img_area = float(orig_w * orig_h)
-    scale_factor = (img_area / ref_area) ** 0.5
+    aspect_strip = float(orig_h) / float(max(1, orig_w))
+    if aspect_strip > 1.5:
+        scale_factor = max(0.5, min(2.0, float(orig_w) / 1200.0))
+    else:
+        scale_factor = max(0.5, min(2.0, (img_area / ref_area) ** 0.5))
 
     scaled_min_height_px = max(15, min(120, int(min_height_px * scale_factor)))
     scaled_min_width_pct = max(0.05, min(0.25, min_width_pct * (0.5 + 0.5 * scale_factor)))
@@ -193,8 +197,8 @@ def run_cv_detection(
         gray_arr_processed = gray_arr
 
     # Background detection
-    is_white_bg, threshold_val = _detect_bg_color_and_threshold(gray_arr_processed, bg_mode, sensitivity)
-    is_tall_strip = (h / max(1, w) > 1.2)
+    is_white_bg, threshold_val, median_bg = _detect_bg_color_and_threshold(gray_arr_processed, bg_mode, sensitivity)
+    is_tall_strip = (h / max(1, w) > 1.7)
 
     passes = [False] if (auto_split and is_tall_strip) else ([False, True] if has_cv else [False])
     raw_boxes: List[Dict[str, Any]] = []
@@ -203,7 +207,9 @@ def run_cv_detection(
     for high_sensitivity in passes:
         if auto_split and is_tall_strip:
             logger.info(f"[Panel Detection] Running Webtoon Slicing strategy (high_sensitivity={high_sensitivity})")
-            raw_boxes = _detect_panels_webtoon(gray_arr_processed, is_white_bg, threshold_val, scaled_min_height_px, scaled_min_width_pct, ocr_boxes)
+            raw_boxes = _detect_panels_webtoon(
+                gray_arr_processed, is_white_bg, threshold_val, scaled_min_height_px, scaled_min_width_pct, ocr_boxes, median_bg, sensitivity
+            )
         else:
             logger.info(f"[Panel Detection] Running Grid strategy (high_sensitivity={high_sensitivity})")
             if has_cv:
@@ -256,25 +262,22 @@ def run_cv_detection(
             ])
             median_bg = float(np.median(edge_samples))
 
-        if auto_split and is_tall_strip:
-            # Webtoon strips preserve full horizontal width and continuous scene heights
-            trimmed_boxes = [{"x": 0, "y": box["y"], "w": w, "h": box["h"]} for box in merged_boxes]
-        else:
-            trimmed_boxes = []
-            for box in merged_boxes:
-                bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
-                tx, ty, tw, th = trim_solid_borders(gray_arr_processed, bx, by, bw, bh, bg_mode, median_bg)
-                if tw >= 15 and th >= 15:
-                    trimmed_boxes.append({"x": tx, "y": ty, "w": tw, "h": th})
+        trimmed_boxes = []
+        for box in merged_boxes:
+            bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
+            tx, ty, tw, th = trim_solid_borders(gray_arr_processed, bx, by, bw, bh, bg_mode, median_bg)
+            if tw >= 15 and th >= 15:
+                trimmed_boxes.append({"x": tx, "y": ty, "w": tw, "h": th})
         merged_boxes = merge_overlapping_boxes(trimmed_boxes, w, h, effective_merge_thresh)
 
         if len(merged_boxes) > 0:
             has_irregular = False
-            for box in merged_boxes:
-                aspect = float(box["w"]) / float(box["h"]) if box["h"] > 0 else 1.0
-                if aspect > 5.0 or aspect < 0.2:
-                    has_irregular = True
-                    break
+            if not (auto_split and is_tall_strip):
+                for box in merged_boxes:
+                    aspect = float(box["w"]) / float(box["h"]) if box["h"] > 0 else 1.0
+                    if aspect > 5.0 or aspect < 0.2:
+                        has_irregular = True
+                        break
             if not has_irregular:
                 break
             else:
@@ -301,10 +304,6 @@ def run_cv_detection(
     
     for idx, box in enumerate(merged_boxes):
         bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
-        
-        if auto_split and is_tall_strip:
-            bx = 0
-            bw = w
             
         bx += crop_x
         by += crop_y
