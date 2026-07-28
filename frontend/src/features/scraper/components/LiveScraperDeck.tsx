@@ -33,67 +33,23 @@ function ExtractingPanelSkeleton({ index, isScroll }: { index: number; isScroll?
   return (
     <div
       key={`loading-skeleton-${index}`}
-      className={`relative group overflow-hidden rounded-2xl border border-purple-500/30 bg-neutral-950/80 p-3 sm:p-4 space-y-3 cursor-wait select-none transition-all duration-300 shadow-[0_0_20px_rgba(168,85,247,0.12)] hover:border-purple-500/50 ${
+      className={`relative group overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/80 p-3 sm:p-4 space-y-3 cursor-wait select-none transition-all duration-300 ${
         isScroll ? "w-[240px] sm:w-[270px] shrink-0" : "w-full"
       }`}
-      style={{ animationDelay: `${(index - 1) * 120}ms` }}
     >
-      {/* Scanning Laser Line Sweeping Vertically */}
-      <div className="scanner-line opacity-75" style={{ animationDelay: `${(index - 1) * 300}ms` }} />
-
-      {/* Header Pill Info */}
+      {/* Header Info */}
       <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-1.5">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500" />
-          </span>
-          <span className="text-[10px] font-mono font-bold text-purple-300 tracking-wider">
-            FRAME #{String(index).padStart(2, "0")}
-          </span>
-        </div>
-        <span className="text-[9px] font-mono px-2 py-0.5 rounded-md bg-purple-950/80 text-purple-300 border border-purple-800/60 shadow-inner tracking-wide animate-pulse">
-          PARSING...
+        <span className="text-[10px] font-mono font-semibold text-neutral-400">
+          FRAME #{String(index).padStart(2, "0")}
         </span>
       </div>
 
       {/* Main Aspect Ratio Container */}
-      <div className="relative aspect-[3/4] w-full rounded-xl bg-neutral-900/90 border border-purple-900/40 flex flex-col items-center justify-center overflow-hidden p-4 gap-3 shadow-inner group-hover:border-purple-500/40 transition-colors">
-        {/* Background Animated Geometric Grid */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-neutral-950/80 to-neutral-950" />
-        <div className="absolute inset-0 opacity-15 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:16px_16px]" />
-
-        {/* Pulsing Spinning Core */}
-        <div className="relative z-20 flex flex-col items-center gap-2.5">
-          <div className="relative flex items-center justify-center">
-            {/* Glowing Aura Ring */}
-            <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 opacity-40 blur-md animate-pulse" />
-            <div className="relative h-12 w-12 rounded-full bg-neutral-950/90 flex items-center justify-center border border-purple-400/40 shadow-[0_0_20px_rgba(168,85,247,0.4)] backdrop-blur-md">
-              <RefreshCw className="h-5 w-5 text-purple-300 animate-spin" />
-            </div>
-          </div>
-
-          {/* Text Label */}
-          <div className="text-center space-y-0.5">
-            <span className="block text-[11px] font-mono font-bold bg-gradient-to-r from-purple-200 via-fuchsia-200 to-indigo-200 bg-clip-text text-transparent tracking-wide">
-              Extracting Panel...
-            </span>
-            <span className="block text-[9px] font-mono text-purple-400/70">
-              AI Segmentation
-            </span>
-          </div>
-        </div>
-
-        {/* Wireframe Placeholder Lines for Speech Bubbles & Captions */}
-        <div className="absolute bottom-3 inset-x-3 space-y-1.5 opacity-40">
-          <div className="h-2 w-3/4 rounded bg-purple-800/40 animate-pulse" />
-          <div className="h-2 w-1/2 rounded bg-purple-800/30 animate-pulse delay-150" />
-        </div>
-      </div>
-
-      {/* Bottom Shimmer Bar */}
-      <div className="relative h-1.5 w-full rounded-full bg-neutral-950 overflow-hidden border border-purple-900/40">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500 to-indigo-500 animate-shimmer-sweep" />
+      <div className="relative aspect-[3/4] w-full rounded-xl bg-neutral-900/70 border border-white/5 flex flex-col items-center justify-center p-4 gap-2">
+        <RefreshCw className="h-5 w-5 text-neutral-400 animate-spin" />
+        <span className="text-[11px] font-mono text-neutral-300 font-medium">
+          Extracting...
+        </span>
       </div>
     </div>
   );
