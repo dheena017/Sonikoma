@@ -564,6 +564,17 @@ export default function App() {
         seriesCoverImage: string;
         seriesSynopsis: string;
         status: string;
+        targetLayout: string;
+        narrationTone: string;
+        cropSensitivity: string;
+        splitTallStrips: boolean;
+        ageRating: string;
+        primaryLanguage: string;
+        subtitleLanguage: string;
+        customTags: string[];
+        workspaceFolder: string;
+        episodePrefix: string;
+        localCoverImage: string | null;
         aiTasks: {
           generateScript: boolean;
           generateVoice: boolean;
