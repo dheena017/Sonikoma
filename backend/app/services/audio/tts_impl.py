@@ -3,7 +3,7 @@ import re
 import logging
 import tempfile
 import asyncio
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, cast
 import edge_tts
 from edge_tts.exceptions import NoAudioReceived
 from pydub import AudioSegment
@@ -88,7 +88,12 @@ async def generate_segment_with_retry(
     """
     for attempt in range(1, max_retries + 1):
         try:
-            communicate = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch)
+            communicate_kwargs = {}
+            if rate is not None:
+                communicate_kwargs["rate"] = rate
+            if pitch is not None:
+                communicate_kwargs["pitch"] = pitch
+            communicate = edge_tts.Communicate(text, voice, **communicate_kwargs)
             await communicate.save(temp_file_path)
             # Verify the file was actually written with content
             if os.path.exists(temp_file_path) and os.path.getsize(temp_file_path) > 0:
@@ -158,11 +163,11 @@ async def generate_panel_audio(
     if not actual_voice or "-" not in actual_voice or actual_voice.strip().lower() in ("undefined", "null", "default"):
         actual_voice = "en-US-GuyNeural"
 
-    # Format speed/pitch as required by edge-tts (+10% / -5%)
+    # Format speed/pitch as required by edge-tts (rate: +10% / pitch: +0Hz)
     rate_percent = int((speech_rate - 1.0) * 100)
     rate_str = f"{rate_percent:+}%"
-    pitch_percent = int((speech_pitch - 1.0) * 100)
-    pitch_str = f"{pitch_percent:+}%"
+    pitch_hz = int((speech_pitch - 1.0) * 50)
+    pitch_str = f"{pitch_hz:+}Hz"
 
     try:
         # Phase 1: Generate individual audio strips asynchronously
@@ -233,7 +238,7 @@ async def generate_panel_audio(
 
                     if playback_speed > 1.0:
                         try:
-                            final_audio = speedup(combined_audio, playback_speed=playback_speed)
+                            final_audio = cast(AudioSegment, speedup(combined_audio, playback_speed=playback_speed))
                         except Exception as stretch_err:
                             logger.error(f"Pydub speedup failed, falling back to direct curtailing: {str(stretch_err)}")
                             final_audio = combined_audio
@@ -292,6 +297,7 @@ def uuid_hex() -> str:
 
 if __name__ == "__main__":
     import argparse
+    import json
 
     parser = argparse.ArgumentParser(description="Sonikoma TTS Audio Engine CLI")
     parser.add_argument("--dialogue_list", required=True, help="JSON list of dialogue strings")
@@ -301,6 +307,15 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    async def main():
+        dialogues = json.loads(args.dialogue_list)
+        out, duration = await generate_panel_audio(
+            dialogue_list=dialogues,
+            target_duration=args.target_duration,
+            output_path=args.output_path,
+            voice=args.voice
+        )
+        print(f"Generated audio: {out} ({duration}s)")
 
     asyncio.run(main())
 
