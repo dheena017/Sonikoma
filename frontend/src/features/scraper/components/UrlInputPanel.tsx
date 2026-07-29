@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Image as ImageIcon, Layout, Book, Zap } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Layout, Book, Zap, MoreVertical } from "lucide-react";
 import { useAIModels } from "@/features/ai/hooks/useAIModels";
 import { NotificationType } from "@/features/notification";
 import { extractWebtoonUrl, parseWebtoonUrl, isKnownSite, addCustomSite, getProxiedImageUrl } from "@/utils/url";
@@ -99,6 +99,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
   const [isAiSetupRunning, setIsAiSetupRunning] = React.useState(false);
   const [advancedSettingsOpen, setAdvancedSettingsOpen] = React.useState(false);
   const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [openSuggestionMenuIdx, setOpenSuggestionMenuIdx] = React.useState<number | null>(null);
 
   const handleAiAutoSetup = async (urlToUse?: string) => {
     const rawUrl = (urlToUse || targetUrl).trim();
@@ -534,46 +535,111 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             />
 
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-2 bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute left-0 right-0 top-full mt-2 bg-[#111116] border border-neutral-800 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-[200] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="px-3 py-2 border-b border-neutral-800/80 bg-neutral-950/40">
                   <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
                     Recent & Bookmarked Episodes
                   </span>
                 </div>
                 <div className="max-h-60 overflow-y-auto divide-y divide-neutral-800/50">
-                  {suggestions.map((series, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        if (series.url) {
-                          setTargetUrl(series.url);
-                          const parsed = parseWebtoonUrl(series.url);
-                          if (setSeriesTitle) setSeriesTitle(parsed.title);
-                          if (setScrapedGenre) setScrapedGenre(parsed.genre);
-                          if (setChapterNumber) setChapterNumber(parsed.chapterNumber);
-                          if (setChapterTitle && parsed.chapterTitle) setChapterTitle(parsed.chapterTitle);
-                        }
-                        setShowSuggestions(false);
-                      }}
-                      className="w-full px-4 py-2.5 hover:bg-neutral-800/60 flex items-center gap-3 transition-colors text-left"
-                    >
-                      <div className="w-9 h-9 bg-neutral-850 rounded-lg flex items-center justify-center border border-neutral-800 flex-shrink-0">
-                        <Book className="w-4 h-4 text-purple-400" />
+                  {suggestions.map((series, idx) => {
+                    const parsed = parseWebtoonUrl(series.url);
+                    const seriesTitleText = parsed.title || series.title || "Webtoon Series";
+                    const chapterText = parsed.chapterTitle || (parsed.chapterNumber ? `Chapter ${parsed.chapterNumber}` : "Chapter 1");
+
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          if (series.url) {
+                            setTargetUrl(series.url);
+                            if (setSeriesTitle) setSeriesTitle(parsed.title);
+                            if (setScrapedGenre) setScrapedGenre(parsed.genre);
+                            if (setChapterNumber) setChapterNumber(parsed.chapterNumber);
+                            if (setChapterTitle && parsed.chapterTitle) setChapterTitle(parsed.chapterTitle);
+                          }
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full px-4 py-2.5 hover:bg-neutral-800/60 flex items-center justify-between gap-3 transition-colors cursor-pointer group relative"
+                      >
+                        {/* Left: Icon & Text content */}
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-9 h-9 bg-neutral-850 rounded-lg flex items-center justify-center border border-neutral-800 flex-shrink-0">
+                            <Book className="w-4 h-4 text-purple-400" />
+                          </div>
+                          <div className="flex-grow min-w-0">
+                            <p className="text-xs font-bold text-neutral-200 truncate leading-snug">
+                              {seriesTitleText}
+                            </p>
+                            <p className="text-[10px] text-neutral-400 truncate mt-0.5">
+                              {chapterText}
+                            </p>
+                            <p className="text-[9px] text-neutral-600 font-mono truncate mt-0.5 select-all">
+                              {series.url}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Right side: Single DRAFT status badge & Single 3-dot menu button */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded border bg-neutral-800/80 text-neutral-400 border-neutral-700/50">
+                            DRAFT
+                          </span>
+
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenSuggestionMenuIdx(openSuggestionMenuIdx === idx ? null : idx);
+                              }}
+                              className="w-7 h-7 rounded-lg bg-black/40 hover:bg-black/70 text-neutral-400 hover:text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                            >
+                              <MoreVertical className="w-3.5 h-3.5" />
+                            </button>
+
+                            {openSuggestionMenuIdx === idx && (
+                              <div
+                                className="absolute right-0 top-full mt-1 w-36 bg-[#16161b] border border-white/10 rounded-xl shadow-2xl py-1 z-[300] animate-in fade-in zoom-in-95 duration-100"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (series.url) {
+                                      setTargetUrl(series.url);
+                                      if (setSeriesTitle) setSeriesTitle(parsed.title);
+                                      if (setScrapedGenre) setScrapedGenre(parsed.genre);
+                                      if (setChapterNumber) setChapterNumber(parsed.chapterNumber);
+                                      if (setChapterTitle && parsed.chapterTitle) setChapterTitle(parsed.chapterTitle);
+                                    }
+                                    setShowSuggestions(false);
+                                    setOpenSuggestionMenuIdx(null);
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  Use Episode
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigator.clipboard.writeText(series.url);
+                                    addNotification?.("URL copied to clipboard", "success");
+                                    setOpenSuggestionMenuIdx(null);
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors cursor-pointer"
+                                >
+                                  Copy Link
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex-grow min-w-0">
-                        <p className="text-xs font-bold text-neutral-200 truncate">
-                          {parseWebtoonUrl(series.url).title}
-                        </p>
-                        <p className="text-[10px] text-neutral-400 truncate">
-                          {series.title}
-                        </p>
-                        <p className="text-[9px] text-neutral-600 font-mono truncate select-all">
-                          {series.url}
-                        </p>
-                      </div>
-                    </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
