@@ -186,6 +186,11 @@ def test_yolo_class_filtering_speech_bubble_vs_panel():
 
         # Create dummy image for run_cv_detection to read
         img = Image.new("RGB", (500, 500), color=(255, 255, 255))
+        draw = ImageDraw.Draw(img)
+        # Draw some contents (non-solid noise) in the boxes
+        draw.rectangle([10, 10, 110, 110], outline=(0, 0, 0), fill=(150, 150, 150), width=2)
+        draw.rectangle([200, 200, 350, 350], outline=(0, 0, 0), fill=(120, 120, 120), width=2)
+        
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
             img.save(tmp.name)
             tmp_path = tmp.name
