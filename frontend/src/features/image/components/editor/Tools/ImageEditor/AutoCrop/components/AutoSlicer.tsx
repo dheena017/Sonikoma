@@ -7,8 +7,8 @@ import {
   Eye,
   HelpCircle,
 } from "lucide-react";
-import AutoSlicerSettings from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoSlicerSettings";
-import AutoSlicerCanny from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoSlicerCanny";
+import AutoSlicerSettings from "./AutoSlicerSettings";
+import AutoSlicerCanny from "./AutoSlicerCanny";
 
 interface AutoSlicerProps {
   handleDetectPanels: (settings?: {

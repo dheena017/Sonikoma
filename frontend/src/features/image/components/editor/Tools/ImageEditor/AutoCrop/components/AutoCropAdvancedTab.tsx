@@ -1,9 +1,9 @@
 import React from "react";
 import { AutoCropSharedProps } from "@/features/scraper/components/tabTypes";
-import { AutoCropParameterSlider } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropParameterSlider";
-import { AutoCropCannyControls } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropCannyControls";
-import { AutoCropJsonDebugger } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropJsonDebugger";
-import { AutoCropComplexityAnalysis } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropComplexityAnalysis";
+import { AutoCropParameterSlider } from "./AutoCropParameterSlider";
+import { AutoCropCannyControls } from "./AutoCropCannyControls";
+import { AutoCropJsonDebugger } from "./AutoCropJsonDebugger";
+import { AutoCropComplexityAnalysis } from "./AutoCropComplexityAnalysis";
 
 interface AutoCropAdvancedTabProps
   extends Pick<

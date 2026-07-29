@@ -13,7 +13,7 @@ import {
   Check,
   Zap,
 } from 'lucide-react';
-import { useOpenCV } from '@/features/image/components/editor/Tools/ImageEditor/AutoCrop/hooks/useOpenCV';
+import { useOpenCV } from '../../hooks/useOpenCV';
 
 interface OpenCVSettingsPanelProps {
   cropSensitivity?: number;

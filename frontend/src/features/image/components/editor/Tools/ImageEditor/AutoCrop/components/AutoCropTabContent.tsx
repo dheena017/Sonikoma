@@ -1,10 +1,9 @@
 /**
- * AutoCropTabContent — thin orchestrator that routes between the three
- * sub-tab components: General · Layout · Advanced · Help
+ * AutoCropTabContent — thin orchestrator that routes between the sub-tab components: General · Advanced
  */
 import React from "react";
-import { AutoCropGeneralTab } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropGeneralTab";
-import { AutoCropAdvancedTab } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropAdvancedTab";
+import { AutoCropGeneralTab } from "./AutoCropGeneralTab";
+import { AutoCropAdvancedTab } from "./AutoCropAdvancedTab";
 
 export interface AutoCropTabContentProps {
   activeTab: string;

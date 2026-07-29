@@ -1,5 +1,4 @@
-import React from 'react';
-import { AutoCropEngineSelector } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineSelector";
+import { AutoCropEngineSelector } from "../../components/AutoCropEngineSelector";
 
 export function AISmartSettingsPanel(props: any) {
   return (

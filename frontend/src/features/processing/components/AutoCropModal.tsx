@@ -9,7 +9,7 @@ import {
   Sliders,
   Layers,
 } from "lucide-react";
-import AutoCropTabContent from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropTabContent";
+import AutoCropTabContent from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/components/AutoCropTabContent";
 
 interface AutoCropModalProps {
   onClose: () => void;

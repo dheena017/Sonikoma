@@ -7,7 +7,7 @@ import EnhancementsPanel from "@/features/image/components/editor/Tools/ImageEdi
 import LayerSeparationPanel from "@/features/image/components/editor/Tools/ImageEditor/LayerSeparationPanel";
 import HorizontalSplitter from "@/features/image/components/editor/Tools/ImageEditor/HorizontalSplitter/HorizontalSplitter";
 import CutsRegistry from "@/features/image/components/editor/Tools/ImageEditor/CutsRegistry/CutsRegistry";
-import AutoSlicer from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoSlicer";
+import AutoSlicer from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/components/AutoSlicer";
 import * as api from "@/api";
 import { ImageTool } from "@/features/image/hooks/useImageEditorState";
 

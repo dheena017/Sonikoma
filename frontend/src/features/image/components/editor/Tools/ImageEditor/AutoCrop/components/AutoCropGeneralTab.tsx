@@ -2,10 +2,10 @@ import React from "react";
 import { Image, Layers, Sparkles, Zap, ShieldCheck, Cpu } from "lucide-react";
 import { useAutoCropPresets } from "@/features/image/hooks/crop/useAutoCropPresets";
 import { AutoCropSharedProps } from "@/features/scraper/components/tabTypes";
-import { AutoCropPresetGrid } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropPresetGrid";
-import { AutoCropEngineSelectorV2 } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropEngineSelectorV2";
-import { AutoCropContextWrapper } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropContextWrapper";
-import { AutoCropComplexityAnalysis } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropComplexityAnalysis";
+import { AutoCropPresetGrid } from "./AutoCropPresetGrid";
+import { AutoCropEngineSelectorV2 } from "./AutoCropEngineSelectorV2";
+import { AutoCropContextWrapper } from "./AutoCropContextWrapper";
+import { AutoCropComplexityAnalysis } from "./AutoCropComplexityAnalysis";
 import { getProxiedImageUrl } from "@/utils";
 
 export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: AutoCropSharedProps) {

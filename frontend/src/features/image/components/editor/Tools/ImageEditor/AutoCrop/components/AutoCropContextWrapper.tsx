@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { AutoCropProvider, useAutoCrop } from '@/features/image/components/editor/Tools/ImageEditor/AutoCrop/contexts/AutoCropContext';
-import { migrateLegacySettings } from '@/features/image/components/editor/Tools/ImageEditor/AutoCrop/utils/legacyMigration';
+import { AutoCropProvider, useAutoCrop } from '../contexts/AutoCropContext';
+import { migrateLegacySettings } from '../utils/legacyMigration';
 
 export function AutoCropContextWrapper({ legacyProps, children }: { legacyProps: any; children: React.ReactNode }) {
   const initialEngine = legacyProps?.useLocalCV === false ? "aiSmart" : "opencv";
