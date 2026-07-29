@@ -322,16 +322,31 @@ def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]]) ->
     ts = int(time.time() * 1000)
     for idx, panel in enumerate(panels):
         try:
-            x = int(panel.get("x", 0))
-            y = int(panel.get("y", 0))
-            w = int(panel.get("width", img_w))
-            h = int(panel.get("height", img_h))
+            if "x" in panel and "y" in panel and "width" in panel and "height" in panel:
+                x = int(panel["x"])
+                y = int(panel["y"])
+                w = int(panel["width"])
+                h = int(panel["height"])
 
-            # Clamp to image bounds
-            x1 = max(0, min(img_w, x))
-            y1 = max(0, min(img_h, y))
-            x2 = max(x1 + 1, min(img_w, x + w))
-            y2 = max(y1 + 1, min(img_h, y + h))
+                x1 = max(0, min(img_w - 1, x))
+                y1 = max(0, min(img_h - 1, y))
+                x2 = max(x1 + 1, min(img_w, x + w))
+                y2 = max(y1 + 1, min(img_h, y + h))
+            elif "cropTop" in panel and "cropBottom" in panel and "cropLeft" in panel and "cropRight" in panel:
+                c_top = float(panel.get("cropTop", 0.0))
+                c_bot = float(panel.get("cropBottom", 0.0))
+                c_left = float(panel.get("cropLeft", 0.0))
+                c_right = float(panel.get("cropRight", 0.0))
+
+                y1 = max(0, min(img_h - 1, round((c_top / 100.0) * img_h)))
+                bot_px = max(0, min(img_h - 1, round((c_bot / 100.0) * img_h)))
+                x1 = max(0, min(img_w - 1, round((c_left / 100.0) * img_w)))
+                right_px = max(0, min(img_w - 1, round((c_right / 100.0) * img_w)))
+
+                x2 = max(x1 + 1, img_w - right_px)
+                y2 = max(y1 + 1, img_h - bot_px)
+            else:
+                continue
 
             if (x2 - x1) < 5 or (y2 - y1) < 5:
                 logger.debug(f"[_crop_panels_server_side] Skipping panel {idx+1}: too small ({x2-x1}x{y2-y1})")
@@ -381,7 +396,7 @@ async def facade_smart_crop(
     min_height_px: int = 60,
     padding_px: int = 10,
     auto_split: bool = True,
-    use_yolo: bool = False,
+    use_yolo: bool = True,
     guidance_instructions: Optional[str] = None,
     focus_mode: Optional[str] = None
 ) -> Dict[str, Any]:
@@ -424,9 +439,12 @@ async def facade_smart_crop(
                 # Crop all panels server-side in one pass (image[y:y+h, x:x+w])
                 # so the frontend gets croppedUrl on each panel and skips extra API calls
                 await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels)
+                logger.info(f"[Panel Detection Debug JSON] Returning {len(cv_panels)} panels JSON (sample first 3: {json.dumps(cv_panels[:3])})")
                 return {
                     "success": True,
                     "total_panels": len(cv_panels),
+                    "imageWidth": w_img,
+                    "imageHeight": h_img,
                     "panels": cv_panels,
                     "provider": "opencv_webtoon" if is_tall_strip else "opencv",
                     "isTallStrip": is_tall_strip,
@@ -499,6 +517,8 @@ async def facade_smart_crop(
             return {
                 "success": True,
                 "total_panels": len(cv_panels),
+                "imageWidth": w_img,
+                "imageHeight": h_img,
                 "panels": cv_panels,
                 "provider": "opencv_fallback",
                 "isTallStrip": is_tall_strip,
@@ -565,6 +585,8 @@ async def facade_smart_crop(
     return {
         "success": True,
         "total_panels": len(sorted_final_panels),
+        "imageWidth": w_img,
+        "imageHeight": h_img,
         "panels": sorted_final_panels,
         "isTallStrip": is_tall_strip,
     }

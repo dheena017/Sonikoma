@@ -93,7 +93,7 @@ def run_cv_detection(
     # ── Fallback segment override ─────────────────────────────────────────────
     fallback_segments: int = 0,             # manual fallback segment count; 0 = auto
     # ── YOLO ──────────────────────────────────────────────────────────────────
-    use_yolo: bool = False,
+    use_yolo: bool = True,
     yolo_conf: float = 0.20,
 ) -> List[Dict[str, Any]]:
 
@@ -410,12 +410,22 @@ def run_cv_detection(
             logger.warning(f"[Panel Detection] Failed to retrieve YOLO bounds for panel detection: {e}")
 
     # Global Margin Trimming
+    logger.info(f"[DBG] Image input size: orig_w={orig_w}, orig_h={orig_h}, auto_split={auto_split}")
     crop_x, crop_y, crop_w, crop_h = trim_solid_borders(gray_arr, 0, 0, orig_w, orig_h, bg_mode)
+    logger.info(f"[DBG] trim_solid_borders result: crop_x={crop_x}, crop_y={crop_y}, crop_w={crop_w}, crop_h={crop_h}")
+
+    # color_arr holds the full BGR image (OpenCV) for use in background color detection.
+    # It mirrors gray_arr so we always slice them in sync.
+    color_arr: Optional[np.ndarray] = img if (has_cv and img is not None) else None
 
     w, h = orig_w, orig_h
     if crop_w > 0 and crop_h > 0 and (crop_w < orig_w or crop_h < orig_h):
         logger.info(f"[Panel Detection] Trimming global solid margins: x={crop_x}, y={crop_y}, w={crop_w}, h={crop_h}")
         gray_arr_processed = gray_arr[crop_y : crop_y + crop_h, crop_x : crop_x + crop_w]
+        color_arr_processed = (
+            color_arr[crop_y : crop_y + crop_h, crop_x : crop_x + crop_w]
+            if color_arr is not None else None
+        )
         w, h = crop_w, crop_h
 
         shifted_ocr_boxes = []
@@ -429,12 +439,20 @@ def run_cv_detection(
         ocr_boxes = shifted_ocr_boxes
     else:
         gray_arr_processed = gray_arr
+        color_arr_processed = color_arr
 
-    # Background detection
-    color_arr_processed = img[crop_y : crop_y + crop_h, crop_x : crop_x + crop_w] if (img is not None and crop_w > 0 and crop_h > 0) else img
     bg_res = _detect_bg_color_and_threshold(gray_arr_processed, bg_mode, sensitivity, color_arr=color_arr_processed)
     is_white_bg, threshold_val, median_bg, bg_std, top_median, bottom_median, bg_color_rgb = bg_res
     is_tall_strip = (h / max(1, w) > tall_strip_ratio)
+    logger.info(f"[DBG] is_tall_strip={is_tall_strip} (h/w ratio={h/max(1,w):.2f}, threshold={tall_strip_ratio}), is_white_bg={is_white_bg}, threshold_val={threshold_val}")
+
+    # For Webtoon mode, ensure crop_y = 0 so Panel 1 starts at y=0 (top of strip)
+    if auto_split and is_tall_strip:
+        logger.info(f"[DBG] WEBTOON MODE: Resetting crop_y=0, crop_h={orig_h}, w={orig_w}, h={orig_h} (was crop_y={crop_y}, w={w}, h={h})")
+        crop_y = 0
+        crop_h = orig_h
+        gray_arr_processed = gray_arr
+        w, h = orig_w, orig_h
 
     passes = [False, True]
     raw_boxes: List[Dict[str, Any]] = []
@@ -442,9 +460,10 @@ def run_cv_detection(
 
     for high_sensitivity in passes:
         if auto_split and is_tall_strip:
-            logger.info(f"[Panel Detection] Running Enhanced Webtoon Slicing strategy (high_sensitivity={high_sensitivity})")
+            webtoon_min_h = max(scaled_min_height_px, 150)
+            logger.info(f"[Panel Detection] Running Enhanced Webtoon Slicing strategy (min_height={webtoon_min_h}px, high_sensitivity={high_sensitivity})")
             raw_boxes = _detect_panels_webtoon(
-                gray_arr_processed, is_white_bg, threshold_val, scaled_min_height_px,
+                gray_arr_processed, is_white_bg, threshold_val, webtoon_min_h,
                 scaled_min_width_pct, ocr_boxes, median_bg, sensitivity,
                 gutter_bg_ratio=gutter_bg_ratio,
                 gutter_std_thresh=gutter_std_thresh,
@@ -454,6 +473,7 @@ def run_cv_detection(
                 enable_x_trimming=False,
                 high_sensitivity=high_sensitivity
             )
+            logger.info(f"[DBG] Webtoon slicer returned {len(raw_boxes)} raw_boxes (high_sensitivity={high_sensitivity})")
         else:
             logger.info(f"[Panel Detection] Running Grid strategy (high_sensitivity={high_sensitivity})")
             if has_cv:
@@ -499,6 +519,7 @@ def run_cv_detection(
 
         min_w = w * scaled_min_width_pct
         effective_merge_thresh = 0 if (auto_split and is_tall_strip) else merge_threshold
+        logger.info(f"[DBG] Filtering {len(raw_boxes)} raw_boxes with min_w={min_w:.1f}, min_h={scaled_min_height_px}, effective_merge_thresh={effective_merge_thresh}")
         filtered_boxes = _filter_solid_noise(
             raw_boxes, gray_arr_processed, min_w, scaled_min_height_px, auto_split,
             min_panel_area=min_panel_area,
@@ -507,7 +528,9 @@ def run_cv_detection(
             noise_std_thresh=noise_std_thresh,
             flat_row_ratio=flat_row_ratio,
         )
+        logger.info(f"[DBG] After _filter_solid_noise: {len(filtered_boxes)} boxes (was {len(raw_boxes)})")
         merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, effective_merge_thresh)
+        logger.info(f"[DBG] After merge_overlapping_boxes: {len(merged_boxes)} boxes")
 
         if bg_mode == "white":
             median_bg = 255.0
@@ -524,13 +547,18 @@ def run_cv_detection(
             ])
             median_bg = float(np.median(edge_samples))
 
-        trimmed_boxes = []
-        for box in merged_boxes:
-            bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
-            tx, ty, tw, th = trim_solid_borders(gray_arr_processed, bx, by, bw, bh, bg_mode, median_bg)
-            if tw >= 15 and th >= 15:
-                trimmed_boxes.append({"x": tx, "y": ty, "w": tw, "h": th})
-        merged_boxes = merge_overlapping_boxes(trimmed_boxes, w, h, effective_merge_thresh)
+        # Skip per-box border trimming in Webtoon mode to preserve 100% contiguous vertical Y slicing without gaps
+        if not (auto_split and is_tall_strip):
+            trimmed_boxes = []
+            for box in merged_boxes:
+                bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
+                tx, ty, tw, th = trim_solid_borders(gray_arr_processed, bx, by, bw, bh, bg_mode, median_bg)
+                if tw >= 15 and th >= 15:
+                    trimmed_boxes.append({"x": tx, "y": ty, "w": tw, "h": th})
+            merged_boxes = merge_overlapping_boxes(trimmed_boxes, w, h, effective_merge_thresh)
+            logger.info(f"[DBG] After per-box trim_solid_borders: {len(merged_boxes)} boxes")
+        else:
+            logger.info(f"[DBG] WEBTOON MODE: Skipping per-box trim_solid_borders to preserve contiguous slices. Boxes count: {len(merged_boxes)}")
 
         if len(merged_boxes) > 0:
             has_irregular = False
@@ -627,6 +655,7 @@ def run_cv_detection(
 
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
+    logger.info(f"[DBG] crop_y={crop_y} will be added to each panel y. Panel coords are in processed-image space, will be shifted to original space.")
     
     orig_area = max(1, orig_w * orig_h)
     
@@ -785,6 +814,10 @@ def run_cv_detection(
                 
         if not is_dup:
             unique_panels.append(panel)
+
+    logger.info(f"[DBG] After dedup: {len(unique_panels)} unique panels (from {len(sorted_panels)} sorted)")
+    for _pi, _pp in enumerate(unique_panels):
+        logger.info(f"[DBG]   Panel {_pi+1}: y={_pp['y']}, height={_pp['height']}, y_end={_pp['y']+_pp['height']}, x={_pp['x']}, width={_pp['width']}")
 
     if max_panels > 0 and len(unique_panels) > max_panels:
         unique_panels = unique_panels[:max_panels]

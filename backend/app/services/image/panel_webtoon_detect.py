@@ -179,34 +179,55 @@ def _detect_panels_webtoon(
             if by2 > by1:
                 is_content_row[by1:by2] = True
 
-    # Hysteresis smoothing for micro-gutters
-    smoothed_content = np.copy(is_content_row)
-    gap_count = 0
-    gap_thresh = max(2, min(6, int(w * 0.006)))
-    for i in range(len(smoothed_content)):
-        if not smoothed_content[i]:
-            gap_count += 1
+    # 1. Identify gutter cut-points between panels
+    is_gutter_row = ~is_content_row
+    cut_points: List[int] = []
+    
+    in_gutter = False
+    g_start = 0
+    min_gutter_h = max(2, min(10, int(w * 0.008)))
+    
+    for i in range(h):
+        if is_gutter_row[i] and not in_gutter:
+            in_gutter = True
+            g_start = i
+        elif not is_gutter_row[i] and in_gutter:
+            in_gutter = False
+            g_end = i
+            if g_end - g_start >= min_gutter_h:
+                cut_y = (g_start + g_end) // 2
+                cut_points.append(cut_y)
+    if in_gutter:
+        g_end = h
+        if g_end - g_start >= min_gutter_h:
+            cut_y = (g_start + g_end) // 2
+            cut_points.append(cut_y)
+
+    # 2. Form continuous gapless vertical slices from y=0 to y=h
+    raw_cuts = [0] + cut_points + [h]
+    
+    # Filter/merge cut points that create slices smaller than min_height_px
+    merged_cuts: List[int] = [0]
+    for cut in raw_cuts[1:]:
+        if cut - merged_cuts[-1] >= min_height_px:
+            merged_cuts.append(cut)
         else:
-            if 0 < gap_count < gap_thresh:
-                smoothed_content[i - gap_count : i] = True
-            gap_count = 0
+            # Merge tiny slice into the preceding slice
+            if cut == h and len(merged_cuts) > 1:
+                merged_cuts[-1] = h
+
+    if merged_cuts[-1] < h:
+        if h - merged_cuts[-1] < min_height_px and len(merged_cuts) > 1:
+            merged_cuts[-1] = h
+        else:
+            merged_cuts.append(h)
 
     vertical_slices: List[Tuple[int, int]] = []
-    in_panel = False
-    start_y = 0
-    for i in range(h):
-        if smoothed_content[i] and not in_panel:
-            in_panel = True
-            start_y = i
-        elif not smoothed_content[i] and in_panel:
-            in_panel = False
-            end_y = i
-            if end_y - start_y >= min_height_px:
-                vertical_slices.append((start_y, end_y))
-    if in_panel:
-        end_y = h
-        if end_y - start_y >= min_height_px:
-            vertical_slices.append((start_y, end_y))
+    for k in range(len(merged_cuts) - 1):
+        s_y = merged_cuts[k]
+        e_y = merged_cuts[k + 1]
+        if e_y - s_y >= 10:
+            vertical_slices.append((s_y, e_y))
 
     raw_boxes: List[Dict[str, Any]] = []
     med_bg_val = median_bg if median_bg is not None else (255.0 if is_white_bg else 0.0)
