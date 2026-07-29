@@ -13,6 +13,12 @@ import { PlayerChaptersMenu } from "./player/PlayerChaptersMenu";
 import { PlayerTopBar } from "./player/PlayerTopBar";
 import { PlayerBottomControls } from "./player/PlayerBottomControls";
 import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/scraper/components/LiveScraperDeck";
+import {
+  startAmbientBackgroundMusic,
+  stopAmbientBackgroundMusic,
+  duckAmbientBackgroundMusic,
+  playComicSoundEffect,
+} from "@/utils/audio";
 
 interface PlayerPageProps {
   panels: GeneratedPanel[];
@@ -151,6 +157,135 @@ export default function CinemaPlayer({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
   const playbackIntervalRef = useRef<any>(null);
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const lastSpokenPanelIdRef = useRef<string | number | null>(null);
+
+  // Audio & Settings Initialization
+  const savedAudioSettings = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("global_audio_settings");
+      if (raw) {
+        const p = JSON.parse(raw);
+        return {
+          voiceActor:
+            p.voiceActor ||
+            localStorage.getItem("ai_comic_voice_actor") ||
+            localStorage.getItem("ai_comic_narrator_voice") ||
+            "en-US-ChristopherNeural",
+          speechRate:
+            p.speechRate !== undefined
+              ? p.speechRate
+              : parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0") || 1.0,
+          speechPitch:
+            p.speechPitch !== undefined
+              ? p.speechPitch
+              : parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0") || 1.0,
+          bgmVolume: p.bgmVolume !== undefined ? p.bgmVolume : 50,
+          audioDucking: p.audioDucking !== undefined ? p.audioDucking : true,
+          musicTheme: p.musicTheme || localStorage.getItem("ai_comic_music_theme") || "Cinematic Tension",
+        };
+      }
+    } catch (e) {
+      console.warn("[AdaptationPlayer] Error loading audio settings profile:", e);
+    }
+    return {
+      voiceActor:
+        localStorage.getItem("ai_comic_voice_actor") ||
+        localStorage.getItem("ai_comic_narrator_voice") ||
+        "en-US-ChristopherNeural",
+      speechRate: parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0") || 1.0,
+      speechPitch: parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0") || 1.0,
+      bgmVolume: 50,
+      audioDucking: true,
+      musicTheme: "Cinematic Tension",
+    };
+  }, []);
+
+  // Unlock browser audio restrictions on user interaction
+  const unlockAudioContext = React.useCallback(() => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        if (ctx.state === "suspended") {
+          ctx.resume().catch((err) =>
+            console.warn("[AdaptationPlayer] AudioContext resume warning:", err)
+          );
+        }
+      }
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.resume();
+      }
+    } catch (err) {
+      console.warn("[AdaptationPlayer] unlockAudioContext exception:", err);
+    }
+  }, []);
+
+  // SpeechSynthesis voice loader awaiting onvoiceschanged
+  const getSpeechVoices = React.useCallback((): Promise<SpeechSynthesisVoice[]> => {
+    return new Promise((resolve) => {
+      if (typeof window === "undefined" || !window.speechSynthesis) {
+        return resolve([]);
+      }
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        return resolve(voices);
+      }
+      window.speechSynthesis.onvoiceschanged = () => {
+        resolve(window.speechSynthesis.getVoices());
+      };
+      setTimeout(() => {
+        resolve(window.speechSynthesis.getVoices());
+      }, 400);
+    });
+  }, []);
+
+  // Speak narration/dialogue via Web Speech API
+  const speakPanelSpeech = React.useCallback(
+    async (text: string) => {
+      if (!text || !text.trim() || isMuted || typeof window === "undefined" || !window.speechSynthesis) return;
+
+      try {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+
+        const voices = await getSpeechVoices();
+        const utt = new SpeechSynthesisUtterance(text);
+        const activeVol = Math.max(0.5, volume);
+        utt.volume = activeVol;
+        utt.rate = savedAudioSettings.speechRate * playbackSpeed;
+        utt.pitch = savedAudioSettings.speechPitch;
+
+        if (voices.length > 0) {
+          const targetVoiceName = savedAudioSettings.voiceActor.toLowerCase();
+          const matched = voices.find(
+            (v) =>
+              v.name.toLowerCase().includes(targetVoiceName) ||
+              v.lang.toLowerCase().includes(targetVoiceName)
+          );
+          if (matched) {
+            utt.voice = matched;
+          }
+        }
+
+        if (savedAudioSettings.audioDucking) {
+          duckAmbientBackgroundMusic(true);
+          utt.onend = () => duckAmbientBackgroundMusic(false);
+          utt.onerror = (e) => {
+            console.error("[AdaptationPlayer] SpeechSynthesis utterance error:", e);
+            duckAmbientBackgroundMusic(false);
+          };
+        } else {
+          utt.onerror = (e) => console.error("[AdaptationPlayer] SpeechSynthesis utterance error:", e);
+        }
+
+        window.speechSynthesis.speak(utt);
+      } catch (err) {
+        console.error("[AdaptationPlayer] SpeechSynthesis failed:", err);
+      }
+    },
+    [isMuted, volume, playbackSpeed, savedAudioSettings, getSpeechVoices]
+  );
 
   // Auto-close overlay timers
   const [controlsVisible, setControlsVisible] = useState(variant === "floating" ? false : true);
@@ -195,12 +330,13 @@ export default function CinemaPlayer({
   }, [isPlaying, variant]);
 
   const togglePlay = () => {
+    unlockAudioContext();
     if (videoRef.current && !videoHasError) {
       if (isPlaying) {
         videoRef.current.pause();
       } else {
         videoRef.current.play().catch((err) => {
-          console.error("Playback start error:", err);
+          console.error("[AdaptationPlayer] Playback start error:", err);
           setVideoHasError(true);
           setIsPlaying(true);
         });
@@ -305,13 +441,114 @@ export default function CinemaPlayer({
     };
   }, [videoUrl, isMock]);
 
-  // Mute controls
+  // Mute & Volume Controls
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = isMuted;
-      videoRef.current.volume = volume;
+      videoRef.current.volume = Math.max(0.5, volume);
     }
   }, [isMuted, volume]);
+
+  const getPanelAtTime = React.useCallback(
+    (time: number): GeneratedPanel | null => {
+      if (panels.length === 0) return null;
+      let accumulatedTime = 0;
+      for (const panel of panels) {
+        const duration = panel.duration || 4.5;
+        if (time >= accumulatedTime && time < accumulatedTime + duration) {
+          return panel;
+        }
+        accumulatedTime += duration;
+      }
+      return panels[panels.length - 1];
+    },
+    [panels]
+  );
+
+  const getPanelIndexAtTime = React.useCallback(
+    (time: number): number => {
+      if (panels.length === 0) return 0;
+      let accumulatedTime = 0;
+      for (let i = 0; i < panels.length; i++) {
+        const duration = panels[i].duration || 4.5;
+        if (time >= accumulatedTime && time < accumulatedTime + duration) {
+          return i + 1;
+        }
+        accumulatedTime += duration;
+      }
+      return panels.length;
+    },
+    [panels]
+  );
+
+  const activePanelForHover = getPanelAtTime(hoverProgress.time);
+  const activePanelNow = getPanelAtTime(currentTime);
+
+  // BGM Background Music Engine for Adaptation Player
+  useEffect(() => {
+    if (isPlaying && (!videoUrl || videoHasError)) {
+      startAmbientBackgroundMusic(
+        savedAudioSettings.musicTheme,
+        volume * 100,
+        isMuted,
+        savedAudioSettings.bgmVolume,
+        savedAudioSettings.audioDucking
+      );
+    } else {
+      stopAmbientBackgroundMusic();
+    }
+    return () => {
+      stopAmbientBackgroundMusic();
+    };
+  }, [isPlaying, videoUrl, videoHasError, savedAudioSettings, volume, isMuted]);
+
+  // Panel Speech & Narration Audio Trigger on Step
+  useEffect(() => {
+    if (!isPlaying || videoUrl) return;
+    if (!activePanelNow) return;
+
+    if (lastSpokenPanelIdRef.current === activePanelNow.id) return;
+    lastSpokenPanelIdRef.current = activePanelNow.id;
+
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current = null;
+    }
+
+    const audioUrl = activePanelNow.audio_url || activePanelNow.speech_audio_url;
+    if (audioUrl && !isMuted) {
+      try {
+        const audio = new Audio(audioUrl);
+        const activeVol = Math.max(0.5, volume);
+        audio.volume = activeVol;
+        activeAudioRef.current = audio;
+
+        if (savedAudioSettings.audioDucking) {
+          duckAmbientBackgroundMusic(true);
+          audio.onended = () => duckAmbientBackgroundMusic(false);
+        }
+
+        audio.play().catch((err) => {
+          console.warn("[AdaptationPlayer] Audio file blocked/failed, falling back to speech synthesis:", err);
+          const speech = activePanelNow.speech_text || activePanelNow.narrative;
+          if (speech) speakPanelSpeech(speech);
+        });
+      } catch (err) {
+        console.error("[AdaptationPlayer] Audio creation exception:", err);
+        const speech = activePanelNow.speech_text || activePanelNow.narrative;
+        if (speech) speakPanelSpeech(speech);
+      }
+    } else {
+      const speech = activePanelNow.speech_text || activePanelNow.narrative;
+      if (speech && !isMuted) {
+        speakPanelSpeech(speech);
+      }
+    }
+
+    if (activePanelNow.sfx && !isMuted) {
+      playComicSoundEffect(activePanelNow.sfx, Math.max(0.5, volume));
+    }
+  }, [isPlaying, videoUrl, activePanelNow, isMuted, volume, speakPanelSpeech, savedAudioSettings]);
 
   // Find active chapter by current time
   const getActiveChapter = (time: number): Chapter => {
@@ -571,35 +808,6 @@ export default function CinemaPlayer({
     document.addEventListener("fullscreenchange", onFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
-
-  const getPanelAtTime = (time: number): GeneratedPanel | null => {
-    if (panels.length === 0) return null;
-    let accumulatedTime = 0;
-    for (const panel of panels) {
-      const duration = panel.duration || 4.5;
-      if (time >= accumulatedTime && time < accumulatedTime + duration) {
-        return panel;
-      }
-      accumulatedTime += duration;
-    }
-    return panels[panels.length - 1];
-  };
-
-  const getPanelIndexAtTime = (time: number): number => {
-    if (panels.length === 0) return 0;
-    let accumulatedTime = 0;
-    for (let i = 0; i < panels.length; i++) {
-      const duration = panels[i].duration || 4.5;
-      if (time >= accumulatedTime && time < accumulatedTime + duration) {
-        return i + 1;
-      }
-      accumulatedTime += duration;
-    }
-    return panels.length;
-  };
-
-  const activePanelForHover = getPanelAtTime(hoverProgress.time);
-  const activePanelNow = getPanelAtTime(currentTime);
 
   const panelCounterText = useMemo(() => {
     if (panels.length === 0) {
