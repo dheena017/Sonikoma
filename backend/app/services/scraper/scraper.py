@@ -226,19 +226,21 @@ async def scrape_images_from_url(
         image_dict[img] = True
 
     # Strategy 3: Loose regular expressions matching typical panel content in HTML/JSON payload
-    logger.info("[Scraper] Running Strategy 3 (Loose regex patterns) payload harvester...")
-    loose_regex = [
-        r'https?://[^\s"\']+\.(?:png|jpg|jpeg|webp|gif|svg|bmp|tiff)(?:\?[^\s"\']*)?',
-        r'"(?:url|src|downloadUrl|download_url|originalUrl|image_url|imageUrl|cdn_url|cut_url)"\s*:\s*"([^"]+)"',
-        r'"url"\s*:\s*"([^"]+)"',
-        r'"src"\s*:\s*"([^"]+)"'
-    ]
-    for pat in loose_regex:
-        for match in re.finditer(pat, html, re.IGNORECASE):
-            val = match.group(1) if (match.lastindex and match.group(1) is not None) else match.group(0)
-            val = decode_escaped_js_string(val)
-            if val.startswith(('http://', 'https://')):
-                image_dict[val] = True
+    # Only run if primary isolated container/payload extractors found fewer than 3 panel images
+    if len(image_dict) < 3:
+        logger.info("[Scraper] Running Strategy 3 (Loose regex patterns) payload harvester...")
+        loose_regex = [
+            r'https?://[^\s"\']+\.(?:png|jpg|jpeg|webp|gif|svg|bmp|tiff)(?:\?[^\s"\']*)?',
+            r'"(?:url|src|downloadUrl|download_url|originalUrl|image_url|imageUrl|cdn_url|cut_url)"\s*:\s*"([^"]+)"',
+            r'"url"\s*:\s*"([^"]+)"',
+            r'"src"\s*:\s*"([^"]+)"'
+        ]
+        for pat in loose_regex:
+            for match in re.finditer(pat, html, re.IGNORECASE):
+                val = match.group(1) if (match.lastindex and match.group(1) is not None) else match.group(0)
+                val = decode_escaped_js_string(val)
+                if val.startswith(('http://', 'https://')):
+                    image_dict[val] = True
 
     # Strategy 3.5: Dynamic Playwright rendering fallback for JS-heavy web apps (GlobalComix, Webtoons React/Vue readers)
     if len(image_dict) < 15:
@@ -304,7 +306,10 @@ async def scrape_images_from_url(
     filtered_images = []
 
     # Blacklist & banner filter check
-    banner_patterns = ['/logo', 'header', 'footer', 'banner', 'facebook', 'twitter', 'instagram', 'share_btn', 'icon_']
+    banner_patterns = [
+        '/logo', 'header', 'footer', 'banner', 'facebook', 'twitter', 'instagram', 'share_btn', 'icon_',
+        'thum_', 'thumbnail', 'cover_', '_cover', 'poster_', '_poster', 'mobile_webtoon', 'recommend', 'author_', 'profile_'
+    ]
     for img in raw_images:
         lower = img.lower()
         if any(pat in lower for pat in UNWANTED_PATTERNS):

@@ -38,5 +38,16 @@ UNWANTED_PATTERNS = [
     "googletagmanager",
     "/tr?",
     "doubleclick",
-    "analytics"
+    "analytics",
+    "thum_",
+    "thumbnail",
+    "mobile_webtoon",
+    "poster_",
+    "_poster",
+    "cover_",
+    "_cover",
+    "recommend",
+    "author_",
+    "profile_"
 ]
+
