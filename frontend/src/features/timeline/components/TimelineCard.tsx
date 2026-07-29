@@ -274,6 +274,52 @@ const TimelineCard = ({
     };
   }, [panel.id, stopNarrativeAudio]);
 
+  const speakTextFallback = React.useCallback(() => {
+    const textToRead = panel.narrative || panel.speech_text || "";
+    if (!textToRead.trim()) {
+      addNotification?.("Please enter text in Narrative Text or Dialogue/Subtitle Text to hear audio preview.", "info");
+      return;
+    }
+
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+      window.speechSynthesis.cancel();
+
+      const utt = new SpeechSynthesisUtterance(textToRead);
+      utt.volume = 1.0;
+      if (speechRate) utt.rate = speechRate;
+      if (speechPitch) utt.pitch = speechPitch;
+
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const selectedVoice = voices.find(v => v.lang.startsWith("en") || v.default) || voices[0];
+        if (selectedVoice) {
+          utt.voice = selectedVoice;
+          utt.lang = selectedVoice.lang;
+        }
+      }
+
+      utt.onstart = () => {
+        setIsNarrativePlaying(true);
+        setIsNarrativePaused(false);
+      };
+      utt.onend = () => stopNarrativeAudio();
+      utt.onerror = (err) => {
+        console.error("[SpeechSynthesis] error:", err);
+        stopNarrativeAudio();
+      };
+
+      narrativeUtteranceRef.current = utt;
+      window.speechSynthesis.speak(utt);
+      setIsNarrativePlaying(true);
+      setIsNarrativePaused(false);
+    } else {
+      addNotification?.("Speech synthesis is not supported in this browser.", "error");
+    }
+  }, [panel.narrative, panel.speech_text, addNotification, speechRate, speechPitch, stopNarrativeAudio]);
+
   const handleToggleNarrativeAudio = () => {
     // Scenario 1: Currently Playing -> Pause
     if (isNarrativePlaying && !isNarrativePaused) {
@@ -291,22 +337,28 @@ const TimelineCard = ({
       if (narrativeAudioRef.current) {
         narrativeAudioRef.current.play().catch((err) => console.error("Narrative audio resume failed:", err));
       } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.resume();
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
       }
       setIsNarrativePaused(false);
       return;
     }
 
-    // Scenario 3: Stopped -> Start Playback (Audio Clip or SpeechSynthesis Live Preview)
+    // Scenario 3: Stopped -> Start Playback
     stopNarrativeAudio();
 
-    if (panel.narrative_audio_url) {
-      const audio = new Audio(panel.narrative_audio_url);
+    const targetAudioUrl = panel.narrative_audio_url || panel.audio_url;
+
+    if (targetAudioUrl) {
+      const audio = new Audio(targetAudioUrl);
       narrativeAudioRef.current = audio;
+      audio.volume = 1.0;
       audio.onended = () => stopNarrativeAudio();
-      audio.onerror = () => {
+      audio.onerror = (e) => {
+        console.warn("Narrative audio URL failed to load, using Speech Synthesis fallback:", e);
         stopNarrativeAudio();
-        addNotification?.("Failed to play narrative audio clip.", "error");
+        speakTextFallback();
       };
       audio.play()
         .then(() => {
@@ -314,29 +366,12 @@ const TimelineCard = ({
           setIsNarrativePaused(false);
         })
         .catch((err) => {
-          console.error("Narrative audio play failed:", err);
+          console.warn("Narrative audio play failed, using Speech Synthesis fallback:", err);
           stopNarrativeAudio();
+          speakTextFallback();
         });
     } else {
-      const textToRead = panel.narrative || panel.speech_text || "";
-      if (!textToRead.trim()) {
-        addNotification?.("No narrative text available to play.", "info");
-        return;
-      }
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-        const utt = new SpeechSynthesisUtterance(textToRead);
-        if (speechRate) utt.rate = speechRate;
-        if (speechPitch) utt.pitch = speechPitch;
-        utt.onend = () => stopNarrativeAudio();
-        utt.onerror = () => stopNarrativeAudio();
-        narrativeUtteranceRef.current = utt;
-        window.speechSynthesis.speak(utt);
-        setIsNarrativePlaying(true);
-        setIsNarrativePaused(false);
-      } else {
-        addNotification?.("Speech synthesis is not supported in this browser.", "error");
-      }
+      speakTextFallback();
     }
   };
 
