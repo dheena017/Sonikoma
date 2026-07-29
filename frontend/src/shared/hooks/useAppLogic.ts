@@ -145,6 +145,8 @@ export function useAppLogic() {
     autoPlayAudio: state.autoPlayAudio,
     sfxEnabled: state.sfxEnabled,
     sfxVolume: state.sfxVolume,
+    bgmVolume: state.bgmVolume,
+    audioDucking: state.audioDucking,
     activePreviewTab: state.activePreviewTab,
     videoPlayerRef,
   });

@@ -183,6 +183,20 @@ async def render_pipeline_sync(
     segment_paths = []
     temp_dir = tempfile.mkdtemp()
 
+    normalized_panels = []
+    for p in panels:
+        if isinstance(p, dict):
+            normalized_panels.append(p)
+        elif hasattr(p, "model_dump"):
+            normalized_panels.append(p.model_dump())
+        elif hasattr(p, "dict"):
+            normalized_panels.append(p.dict())
+        elif hasattr(p, "__dict__"):
+            normalized_panels.append(p.__dict__)
+        else:
+            normalized_panels.append(dict(p))
+    panels = normalized_panels
+
     try:
         for i, panel in enumerate(panels):
             seg_out = os.path.join(temp_dir, f"segment_{i:04d}.mp4")

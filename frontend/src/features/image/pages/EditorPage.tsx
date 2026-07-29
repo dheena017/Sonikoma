@@ -529,7 +529,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       <div>
                         <h2 className="text-lg font-bold text-white tracking-wide">Video Settings</h2>
                         <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                          Configure synthesis voice, compose soundtrack loops, and set rendering formats
+                          Configure canvas aspect ratios, audio-reactive camera shake, and render output codecs
                         </p>
                       </div>
                     </div>

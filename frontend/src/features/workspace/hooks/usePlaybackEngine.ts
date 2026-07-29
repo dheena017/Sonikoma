@@ -202,6 +202,8 @@ interface UsePlaybackEngineProps {
   autoPlayAudio: boolean;
   sfxEnabled: boolean;
   sfxVolume: number;
+  bgmVolume?: number;
+  audioDucking?: boolean;
   activePreviewTab?: "video" | "timeline";
   videoPlayerRef?: React.RefObject<HTMLVideoElement | null>;
 }
@@ -215,6 +217,8 @@ export function usePlaybackEngine({
   autoPlayAudio,
   sfxEnabled,
   sfxVolume,
+  bgmVolume = 50,
+  audioDucking = true,
   activePreviewTab = "timeline",
   videoPlayerRef,
 }: UsePlaybackEngineProps) {
@@ -358,14 +362,14 @@ export function usePlaybackEngine({
 
   useEffect(() => {
     if (storyboardPlaying) {
-      startAmbientBackgroundMusic(musicTheme, volume, isMuted);
+      startAmbientBackgroundMusic(musicTheme, volume, isMuted, bgmVolume, audioDucking);
     } else {
       stopAmbientBackgroundMusic();
     }
     return () => {
       stopAmbientBackgroundMusic();
     };
-  }, [storyboardPlaying, musicTheme, volume, isMuted]);
+  }, [storyboardPlaying, musicTheme, volume, bgmVolume, audioDucking, isMuted]);
 
   useEffect(() => {
     window.dispatchEvent(new CustomEvent("storyboard-time-update", { detail: playbackTime }));

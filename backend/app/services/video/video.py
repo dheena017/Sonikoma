@@ -33,6 +33,21 @@ async def compile_video_from_panels(
     if not panels:
         raise ValueError("No panels provided for video compilation.")
 
+    # Normalize panel items (e.g., Pydantic PanelData objects) to dicts
+    normalized_panels = []
+    for p in panels:
+        if isinstance(p, dict):
+            normalized_panels.append(p)
+        elif hasattr(p, "model_dump"):
+            normalized_panels.append(p.model_dump())
+        elif hasattr(p, "dict"):
+            normalized_panels.append(p.dict())
+        elif hasattr(p, "__dict__"):
+            normalized_panels.append(p.__dict__)
+        else:
+            normalized_panels.append(dict(p))
+    panels = normalized_panels
+
     os.makedirs(output_dir, exist_ok=True)
     temp_dir = tempfile.gettempdir()
 

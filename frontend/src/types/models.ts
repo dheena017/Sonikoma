@@ -194,6 +194,8 @@ export interface GeneratedPanel {
   syncMap?: PanelSyncMap;
   narrative?: string;
   narrative_audio_url?: string;
+  speech_audio_url?: string;
+  bgm_track?: string;
   audio_reactive_shake?: boolean;
   episode_label?: string;
 }

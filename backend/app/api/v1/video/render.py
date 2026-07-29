@@ -47,7 +47,7 @@ async def render_video(
     background_tasks.add_task(
         process_render_job,
         video_id,
-        request.panels,
+        [p.model_dump() for p in request.panels],
         request.voice,
         request.music_theme or "none",
         request.aspect_ratio or "auto",

@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers, Play, Pause, Square } from "lucide-react";
+import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers, Play, Pause, Square, Sliders, Music, Mic } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 import { generateTts } from "@/api";
@@ -248,10 +248,40 @@ const TimelineCard = ({
 }: TimelineCardProps) => {
   const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
   const [isMagicProcessing, setIsMagicProcessing] = React.useState(false);
+  // Playback state for Narrative
   const [isNarrativePlaying, setIsNarrativePlaying] = React.useState(false);
   const [isNarrativePaused, setIsNarrativePaused] = React.useState(false);
   const narrativeAudioRef = React.useRef<HTMLAudioElement | null>(null);
   const narrativeUtteranceRef = React.useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Playback state for Dialogue
+  const [isDialoguePlaying, setIsDialoguePlaying] = React.useState(false);
+  const [isDialoguePaused, setIsDialoguePaused] = React.useState(false);
+  const dialogueAudioRef = React.useRef<HTMLAudioElement | null>(null);
+  const dialogueUtteranceRef = React.useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Audio & Voice Settings State synced with central AudioSettings profile
+  const [selectedVoiceModel, setSelectedVoiceModel] = React.useState<string>(
+    () => voiceActor || localStorage.getItem("ai_comic_voice_actor") || localStorage.getItem("ai_comic_narrator_voice") || "en-US-ChristopherNeural"
+  );
+  const [customSpeechRate, setCustomSpeechRate] = React.useState<number>(
+    () => speechRate || parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0") || 1.0
+  );
+  const [customSpeechPitch, setCustomSpeechPitch] = React.useState<number>(
+    () => speechPitch || parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0") || 1.0
+  );
+
+  React.useEffect(() => {
+    if (voiceActor) setSelectedVoiceModel(voiceActor);
+  }, [voiceActor]);
+
+  React.useEffect(() => {
+    if (speechRate !== undefined) setCustomSpeechRate(speechRate);
+  }, [speechRate]);
+
+  React.useEffect(() => {
+    if (speechPitch !== undefined) setCustomSpeechPitch(speechPitch);
+  }, [speechPitch]);
 
   const stopNarrativeAudio = React.useCallback(() => {
     if (narrativeAudioRef.current) {
@@ -267,17 +297,37 @@ const TimelineCard = ({
     setIsNarrativePaused(false);
   }, []);
 
-  React.useEffect(() => {
-    stopNarrativeAudio();
-    return () => {
-      stopNarrativeAudio();
-    };
-  }, [panel.id, stopNarrativeAudio]);
+  const stopDialogueAudio = React.useCallback(() => {
+    if (dialogueAudioRef.current) {
+      dialogueAudioRef.current.pause();
+      dialogueAudioRef.current.currentTime = 0;
+      dialogueAudioRef.current = null;
+    }
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    dialogueUtteranceRef.current = null;
+    setIsDialoguePlaying(false);
+    setIsDialoguePaused(false);
+  }, []);
 
-  const speakTextFallback = React.useCallback(() => {
+  const stopAllAudio = React.useCallback(() => {
+    stopNarrativeAudio();
+    stopDialogueAudio();
+  }, [stopNarrativeAudio, stopDialogueAudio]);
+
+  React.useEffect(() => {
+    stopAllAudio();
+    return () => {
+      stopAllAudio();
+    };
+  }, [panel.id, stopAllAudio]);
+
+  // Speech Synthesis fallback for Narrative Text
+  const speakNarrativeFallback = React.useCallback(() => {
     const textToRead = panel.narrative || panel.speech_text || "";
     if (!textToRead.trim()) {
-      addNotification?.("Please enter text in Narrative Text or Dialogue/Subtitle Text to hear audio preview.", "info");
+      addNotification?.("Please enter text in Narrative Text to hear audio preview.", "info");
       return;
     }
 
@@ -289,12 +339,12 @@ const TimelineCard = ({
 
       const utt = new SpeechSynthesisUtterance(textToRead);
       utt.volume = 1.0;
-      if (speechRate) utt.rate = speechRate;
-      if (speechPitch) utt.pitch = speechPitch;
+      utt.rate = customSpeechRate;
+      utt.pitch = customSpeechPitch;
 
       const voices = window.speechSynthesis.getVoices();
       if (voices.length > 0) {
-        const selectedVoice = voices.find(v => v.lang.startsWith("en") || v.default) || voices[0];
+        const selectedVoice = voices.find(v => v.name.includes(selectedVoiceModel) || v.lang.startsWith("en") || v.default) || voices[0];
         if (selectedVoice) {
           utt.voice = selectedVoice;
           utt.lang = selectedVoice.lang;
@@ -307,7 +357,7 @@ const TimelineCard = ({
       };
       utt.onend = () => stopNarrativeAudio();
       utt.onerror = (err) => {
-        console.error("[SpeechSynthesis] error:", err);
+        console.error("[SpeechSynthesis Narrative] error:", err);
         stopNarrativeAudio();
       };
 
@@ -318,8 +368,56 @@ const TimelineCard = ({
     } else {
       addNotification?.("Speech synthesis is not supported in this browser.", "error");
     }
-  }, [panel.narrative, panel.speech_text, addNotification, speechRate, speechPitch, stopNarrativeAudio]);
+  }, [panel.narrative, panel.speech_text, addNotification, customSpeechRate, customSpeechPitch, selectedVoiceModel, stopNarrativeAudio]);
 
+  // Speech Synthesis fallback for Dialogue Text
+  const speakDialogueFallback = React.useCallback(() => {
+    const textToRead = panel.speech_text || panel.narrative || "";
+    if (!textToRead.trim()) {
+      addNotification?.("Please enter dialogue text to hear audio preview.", "info");
+      return;
+    }
+
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+      window.speechSynthesis.cancel();
+
+      const utt = new SpeechSynthesisUtterance(textToRead);
+      utt.volume = 1.0;
+      utt.rate = customSpeechRate;
+      utt.pitch = customSpeechPitch;
+
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const selectedVoice = voices.find(v => v.name.includes(selectedVoiceModel) || v.lang.startsWith("en") || v.default) || voices[0];
+        if (selectedVoice) {
+          utt.voice = selectedVoice;
+          utt.lang = selectedVoice.lang;
+        }
+      }
+
+      utt.onstart = () => {
+        setIsDialoguePlaying(true);
+        setIsDialoguePaused(false);
+      };
+      utt.onend = () => stopDialogueAudio();
+      utt.onerror = (err) => {
+        console.error("[SpeechSynthesis Dialogue] error:", err);
+        stopDialogueAudio();
+      };
+
+      dialogueUtteranceRef.current = utt;
+      window.speechSynthesis.speak(utt);
+      setIsDialoguePlaying(true);
+      setIsDialoguePaused(false);
+    } else {
+      addNotification?.("Speech synthesis is not supported in this browser.", "error");
+    }
+  }, [panel.speech_text, panel.narrative, addNotification, customSpeechRate, customSpeechPitch, selectedVoiceModel, stopDialogueAudio]);
+
+  // Toggle Narrative Audio
   const handleToggleNarrativeAudio = () => {
     // Scenario 1: Currently Playing -> Pause
     if (isNarrativePlaying && !isNarrativePaused) {
@@ -345,8 +443,8 @@ const TimelineCard = ({
       return;
     }
 
-    // Scenario 3: Stopped -> Start Playback
-    stopNarrativeAudio();
+    // Scenario 3: Stopped -> Stop Dialogue audio first and start Narrative Playback
+    stopAllAudio();
 
     const targetAudioUrl = panel.narrative_audio_url || panel.audio_url;
 
@@ -358,7 +456,7 @@ const TimelineCard = ({
       audio.onerror = (e) => {
         console.warn("Narrative audio URL failed to load, using Speech Synthesis fallback:", e);
         stopNarrativeAudio();
-        speakTextFallback();
+        speakNarrativeFallback();
       };
       audio.play()
         .then(() => {
@@ -368,10 +466,66 @@ const TimelineCard = ({
         .catch((err) => {
           console.warn("Narrative audio play failed, using Speech Synthesis fallback:", err);
           stopNarrativeAudio();
-          speakTextFallback();
+          speakNarrativeFallback();
         });
     } else {
-      speakTextFallback();
+      speakNarrativeFallback();
+    }
+  };
+
+  // Toggle Dialogue Audio
+  const handleToggleDialogueAudio = () => {
+    // Scenario 1: Currently Playing -> Pause
+    if (isDialoguePlaying && !isDialoguePaused) {
+      if (dialogueAudioRef.current) {
+        dialogueAudioRef.current.pause();
+      } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.pause();
+      }
+      setIsDialoguePaused(true);
+      return;
+    }
+
+    // Scenario 2: Currently Paused -> Resume
+    if (isDialoguePlaying && isDialoguePaused) {
+      if (dialogueAudioRef.current) {
+        dialogueAudioRef.current.play().catch((err) => console.error("Dialogue audio resume failed:", err));
+      } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      }
+      setIsDialoguePaused(false);
+      return;
+    }
+
+    // Scenario 3: Stopped -> Stop Narrative audio first and start Dialogue Playback
+    stopAllAudio();
+
+    const targetAudioUrl = panel.audio_url || panel.speech_audio_url;
+
+    if (targetAudioUrl) {
+      const audio = new Audio(targetAudioUrl);
+      dialogueAudioRef.current = audio;
+      audio.volume = 1.0;
+      audio.onended = () => stopDialogueAudio();
+      audio.onerror = (e) => {
+        console.warn("Dialogue audio URL failed to load, using Speech Synthesis fallback:", e);
+        stopDialogueAudio();
+        speakDialogueFallback();
+      };
+      audio.play()
+        .then(() => {
+          setIsDialoguePlaying(true);
+          setIsDialoguePaused(false);
+        })
+        .catch((err) => {
+          console.warn("Dialogue audio play failed, using Speech Synthesis fallback:", err);
+          stopDialogueAudio();
+          speakDialogueFallback();
+        });
+    } else {
+      speakDialogueFallback();
     }
   };
 
@@ -712,11 +866,68 @@ const TimelineCard = ({
           <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
             Dialogue/Subtitle Text
           </label>
-          {(panel.isAnalyzing || analyzingPanelId === panel.id) && (
-            <span className="text-[9px] font-mono font-bold text-purple-400 animate-pulse flex items-center gap-0.5">
-              <span>✦ Loading...</span>
-            </span>
-          )}
+          <div className="flex items-center gap-1 shrink-0">
+            {(panel.isAnalyzing || analyzingPanelId === panel.id) && (
+              <span className="text-[9px] font-mono font-bold text-purple-400 animate-pulse flex items-center gap-0.5 mr-1">
+                <span>✦ Loading...</span>
+              </span>
+            )}
+            {/* Play / Pause / Resume Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleToggleDialogueAudio();
+              }}
+              className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer border shadow-sm ${
+                isDialoguePlaying && !isDialoguePaused
+                  ? "bg-amber-950/40 border-amber-500/40 text-amber-300 hover:bg-amber-900/60"
+                  : isDialoguePaused
+                  ? "bg-purple-950/40 border-purple-500/40 text-purple-300 hover:bg-purple-900/60"
+                  : "bg-indigo-950/40 border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 hover:text-indigo-200"
+              }`}
+              title={
+                isDialoguePlaying && !isDialoguePaused
+                  ? "Pause Dialogue"
+                  : isDialoguePaused
+                  ? "Resume Dialogue"
+                  : "Play Dialogue Preview"
+              }
+            >
+              {isDialoguePlaying && !isDialoguePaused ? (
+                <>
+                  <Pause className="w-2.5 h-2.5 fill-current" />
+                  <span>Pause</span>
+                </>
+              ) : isDialoguePaused ? (
+                <>
+                  <Play className="w-2.5 h-2.5 fill-current" />
+                  <span>Resume</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-2.5 h-2.5 fill-current" />
+                  <span>Play</span>
+                </>
+              )}
+            </button>
+
+            {/* Stop Button */}
+            {(isDialoguePlaying || isDialoguePaused) && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  stopDialogueAudio();
+                }}
+                className="px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/60 shadow-sm"
+                title="Stop Dialogue"
+              >
+                <Square className="w-2.5 h-2.5 fill-current" />
+                <span>Stop</span>
+              </button>
+            )}
+          </div>
         </div>
         <textarea
           rows={2}

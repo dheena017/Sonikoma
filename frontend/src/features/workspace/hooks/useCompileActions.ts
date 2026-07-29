@@ -17,6 +17,8 @@ interface UseCompileActionsProps {
   voiceActor?: string;
   musicTheme?: string;
   narrationStyle?: string;
+  speechRate?: number;
+  speechPitch?: number;
   audioFeedback?: any;
 }
 
@@ -33,6 +35,8 @@ export function useCompileActions({
   voiceActor,
   musicTheme,
   narrationStyle = "long",
+  speechRate = 1.0,
+  speechPitch = 1.0,
   audioFeedback,
 }: UseCompileActionsProps) {
   const activeFetch = fetchWithInterceptor || fetch;
@@ -251,6 +255,8 @@ export function useCompileActions({
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
+          speech_rate: speechRate,
+          speech_pitch: speechPitch,
         },
         { signal: abortControllerRef.current.signal }
       );
@@ -419,6 +425,8 @@ export function useCompileActions({
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
+          speech_rate: speechRate,
+          speech_pitch: speechPitch,
         },
         { signal: abortControllerRef.current.signal }
       );

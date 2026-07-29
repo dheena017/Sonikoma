@@ -52,17 +52,30 @@ export function stopAmbientBackgroundMusic() {
   }
 }
 
+export function duckAmbientBackgroundMusic(duck: boolean = true, duckRatio = 0.3) {
+  if (!ambientGain || !audioCtx) return;
+  const currentVal = ambientGain.gain.value;
+  const target = duck ? currentVal * duckRatio : currentVal;
+  ambientGain.gain.setTargetAtTime(target, audioCtx.currentTime, 0.05);
+}
+
 export function startAmbientBackgroundMusic(
   theme: string,
   volume: number,
-  isMuted: boolean = false
+  isMuted: boolean = false,
+  bgmVolume: number = 50,
+  audioDucking: boolean = true
 ) {
   const ctx = getAudioContext();
   if (!ctx) return;
   stopAmbientBackgroundMusic();
 
   ambientGain = ctx.createGain();
-  ambientGain.gain.value = isMuted ? 0 : (volume / 100) * 0.05;
+  const masterFactor = Math.min(Math.max(volume / 100, 0), 1);
+  const bgmFactor = Math.min(Math.max(bgmVolume / 100, 0), 1);
+  const targetGain = isMuted ? 0 : masterFactor * bgmFactor * 0.12;
+
+  ambientGain.gain.value = targetGain;
   ambientGain.connect(masterGain || ctx.destination);
 
   ambientOscillator = ctx.createOscillator();
