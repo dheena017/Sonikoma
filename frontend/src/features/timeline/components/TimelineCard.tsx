@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers } from "lucide-react";
+import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers, Play, Pause, Square } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 import { generateTts } from "@/api";
@@ -248,6 +248,98 @@ const TimelineCard = ({
 }: TimelineCardProps) => {
   const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
   const [isMagicProcessing, setIsMagicProcessing] = React.useState(false);
+  const [isNarrativePlaying, setIsNarrativePlaying] = React.useState(false);
+  const [isNarrativePaused, setIsNarrativePaused] = React.useState(false);
+  const narrativeAudioRef = React.useRef<HTMLAudioElement | null>(null);
+  const narrativeUtteranceRef = React.useRef<SpeechSynthesisUtterance | null>(null);
+
+  const stopNarrativeAudio = React.useCallback(() => {
+    if (narrativeAudioRef.current) {
+      narrativeAudioRef.current.pause();
+      narrativeAudioRef.current.currentTime = 0;
+      narrativeAudioRef.current = null;
+    }
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+    narrativeUtteranceRef.current = null;
+    setIsNarrativePlaying(false);
+    setIsNarrativePaused(false);
+  }, []);
+
+  React.useEffect(() => {
+    stopNarrativeAudio();
+    return () => {
+      stopNarrativeAudio();
+    };
+  }, [panel.id, stopNarrativeAudio]);
+
+  const handleToggleNarrativeAudio = () => {
+    // Scenario 1: Currently Playing -> Pause
+    if (isNarrativePlaying && !isNarrativePaused) {
+      if (narrativeAudioRef.current) {
+        narrativeAudioRef.current.pause();
+      } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.pause();
+      }
+      setIsNarrativePaused(true);
+      return;
+    }
+
+    // Scenario 2: Currently Paused -> Resume
+    if (isNarrativePlaying && isNarrativePaused) {
+      if (narrativeAudioRef.current) {
+        narrativeAudioRef.current.play().catch((err) => console.error("Narrative audio resume failed:", err));
+      } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.resume();
+      }
+      setIsNarrativePaused(false);
+      return;
+    }
+
+    // Scenario 3: Stopped -> Start Playback (Audio Clip or SpeechSynthesis Live Preview)
+    stopNarrativeAudio();
+
+    if (panel.narrative_audio_url) {
+      const audio = new Audio(panel.narrative_audio_url);
+      narrativeAudioRef.current = audio;
+      audio.onended = () => stopNarrativeAudio();
+      audio.onerror = () => {
+        stopNarrativeAudio();
+        addNotification?.("Failed to play narrative audio clip.", "error");
+      };
+      audio.play()
+        .then(() => {
+          setIsNarrativePlaying(true);
+          setIsNarrativePaused(false);
+        })
+        .catch((err) => {
+          console.error("Narrative audio play failed:", err);
+          stopNarrativeAudio();
+        });
+    } else {
+      const textToRead = panel.narrative || panel.speech_text || "";
+      if (!textToRead.trim()) {
+        addNotification?.("No narrative text available to play.", "info");
+        return;
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        const utt = new SpeechSynthesisUtterance(textToRead);
+        if (speechRate) utt.rate = speechRate;
+        if (speechPitch) utt.pitch = speechPitch;
+        utt.onend = () => stopNarrativeAudio();
+        utt.onerror = () => stopNarrativeAudio();
+        narrativeUtteranceRef.current = utt;
+        window.speechSynthesis.speak(utt);
+        setIsNarrativePlaying(true);
+        setIsNarrativePaused(false);
+      } else {
+        addNotification?.("Speech synthesis is not supported in this browser.", "error");
+      }
+    }
+  };
+
   const isCurrent =
     idx === currentPanelIndex && activePreviewTab === "timeline";
 
@@ -611,24 +703,63 @@ const TimelineCard = ({
           <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
             Narrative Text
           </label>
-          {panel.narrative_audio_url && (
+          <div className="flex items-center gap-1 shrink-0">
+            {/* Play / Pause / Resume Button */}
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                // Play narrative audio
-                const audio = new Audio(panel.narrative_audio_url);
-                audio.play().catch(err => console.error("Narrative audio play failed:", err));
+                handleToggleNarrativeAudio();
               }}
-              className="p-1 rounded bg-indigo-950/40 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-900/60 hover:text-indigo-300 transition-all cursor-pointer flex items-center justify-center gap-1 shadow-sm shrink-0"
-              title="Play Narrative Audio"
+              className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer border shadow-sm ${
+                isNarrativePlaying && !isNarrativePaused
+                  ? "bg-amber-950/40 border-amber-500/40 text-amber-300 hover:bg-amber-900/60"
+                  : isNarrativePaused
+                  ? "bg-purple-950/40 border-purple-500/40 text-purple-300 hover:bg-purple-900/60"
+                  : "bg-indigo-950/40 border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 hover:text-indigo-200"
+              }`}
+              title={
+                isNarrativePlaying && !isNarrativePaused
+                  ? "Pause Narration"
+                  : isNarrativePaused
+                  ? "Resume Narration"
+                  : "Play Narration Preview"
+              }
             >
-              <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              <span className="text-[8px] font-mono leading-none">Play</span>
+              {isNarrativePlaying && !isNarrativePaused ? (
+                <>
+                  <Pause className="w-2.5 h-2.5 fill-current" />
+                  <span>Pause</span>
+                </>
+              ) : isNarrativePaused ? (
+                <>
+                  <Play className="w-2.5 h-2.5 fill-current" />
+                  <span>Resume</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-2.5 h-2.5 fill-current" />
+                  <span>Play</span>
+                </>
+              )}
             </button>
-          )}
+
+            {/* Stop Button */}
+            {(isNarrativePlaying || isNarrativePaused) && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  stopNarrativeAudio();
+                }}
+                className="px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/60 shadow-sm"
+                title="Stop Narration"
+              >
+                <Square className="w-2.5 h-2.5 fill-current" />
+                <span>Stop</span>
+              </button>
+            )}
+          </div>
         </div>
         <textarea
           rows={2}
