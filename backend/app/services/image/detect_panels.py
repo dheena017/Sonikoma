@@ -313,6 +313,49 @@ def run_cv_detection(
             sh = int(h - sy) if seg_i == num_segments - 1 else seg_h
             merged_boxes.append({"x": 0, "y": sy, "w": w, "h": sh})
 
+    # Speech Bubble / OCR Box Expansion & Panel Snapping
+    # Smartly groups floating speech bubbles directly associated with a panel into that panel’s bounding box
+    if ocr_boxes and len(merged_boxes) > 0:
+        expanded_boxes = []
+        for box in merged_boxes:
+            bx1, by1 = box["x"], box["y"]
+            bx2, by2 = box["x"] + box["w"], box["y"] + box["h"]
+            
+            for ob in ocr_boxes:
+                ox1, oy1 = ob["x"], ob["y"]
+                ox2, oy2 = ob["x"] + ob["w"], ob["y"] + ob["h"]
+                
+                # Check horizontal overlap
+                h_overlap = max(0, min(bx2, ox2) - max(bx1, ox1))
+                if h_overlap > 0:
+                    # Check vertical distance (close to the panel vertically, e.g. within 150px or 40% of panel height)
+                    v_dist = min(abs(oy2 - by1), abs(by2 - oy1))
+                    is_adjacent = v_dist < min(150, max(50, int((by2 - by1) * 0.40)))
+                    
+                    # Also check if it's already overlapping vertically
+                    v_overlap = max(0, min(by2, oy2) - max(by1, oy1))
+                    
+                    if is_adjacent or v_overlap > 0:
+                        # Associate and expand the panel box to contain the bubble
+                        bx1 = min(bx1, ox1)
+                        by1 = min(by1, oy1)
+                        bx2 = max(bx2, ox2)
+                        by2 = max(by2, oy2)
+            
+            # Constrain to image dimensions
+            bx1 = max(0, bx1)
+            by1 = max(0, by1)
+            bx2 = min(w, bx2)
+            by2 = min(h, by2)
+            
+            expanded_boxes.append({
+                "x": bx1,
+                "y": by1,
+                "w": bx2 - bx1,
+                "h": by2 - by1
+            })
+        merged_boxes = expanded_boxes
+
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
     

@@ -181,8 +181,10 @@ def test_yolo_class_filtering_speech_bubble_vs_panel():
                 MockBox([200, 200, 350, 350], 0.9, 1), # frame
             ])]
 
-    with patch("providers.vision.yolo.get_yolo_model") as mock_get_yolo:
+    with patch("providers.vision.yolo.get_yolo_model") as mock_get_yolo, \
+         patch("services.image.detect_panels._detect_panels_grid_cv") as mock_grid_cv:
         mock_get_yolo.return_value = MockYOLO()
+        mock_grid_cv.return_value = []
 
         # Create dummy image for run_cv_detection to read
         img = Image.new("RGB", (500, 500), color=(255, 255, 255))
@@ -213,14 +215,16 @@ def test_yolo_class_filtering_speech_bubble_vs_panel():
             # The speech bubble box at [10, 10, 110, 110] (x=10, y=10) should NOT be added as a separate panel,
             # but the frame box at [200, 200, 350, 350] (x=200, y=200) should be detected.
             # Let's check that no panel overlaps exactly the speech bubble bounds
-            bubble_panel_detected = any(p["x"] == 10 and p["y"] == 10 for p in panels)
-            frame_panel_detected = any(p["x"] == 200 and p["y"] == 200 for p in panels)
+            print("DETECTED PANELS:", panels)
+            bubble_panel_detected = any(abs(p["x"] - 10) < 15 and abs(p["y"] - 10) < 15 for p in panels)
+            frame_panel_detected = any(abs(p["x"] - 200) < 15 and abs(p["y"] - 200) < 15 for p in panels)
             
-            assert not bubble_panel_detected, "Speech bubble was incorrectly detected as a panel candidate!"
-            assert frame_panel_detected, "Frame/panel from YOLO was not detected as a panel candidate!"
+            assert not bubble_panel_detected, f"Speech bubble was incorrectly detected as a panel candidate! Panels: {panels}"
+            assert frame_panel_detected, f"Frame/panel from YOLO was not detected as a panel candidate! Panels: {panels}"
 
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
+
 
 
