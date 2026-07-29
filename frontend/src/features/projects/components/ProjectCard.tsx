@@ -95,7 +95,7 @@ export default function ProjectCard({
       {/* Selection checkbox */}
       {showSelection && onToggleSelect && (
         <div
-          className="absolute top-3 left-3 z-30 cursor-pointer"
+          className="absolute top-3 left-3 z-10 cursor-pointer"
           onClick={(e) => onToggleSelect(e, project.project_id)}
         >
           {isSelected ? (
@@ -137,7 +137,7 @@ export default function ProjectCard({
         </div>
 
         {/* Top badges row */}
-        <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5">
+        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
           {/* Status badge */}
           <div className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded-md border backdrop-blur-md ${statusColor}`}>
             {project.status || "Draft"}
@@ -154,7 +154,7 @@ export default function ProjectCard({
 
         {/* Episode badge */}
         {project.episode !== undefined && project.episode !== null && (
-          <div className="absolute bottom-2.5 left-2.5 z-20">
+          <div className="absolute bottom-2.5 left-2.5 z-10">
             <div className="px-2 py-0.5 bg-black/70 backdrop-blur-md border border-white/10 rounded-md text-[9px] font-bold text-white tracking-wider">
               EP {project.episode}
             </div>
@@ -166,7 +166,7 @@ export default function ProjectCard({
       {/* Dropdown menu — at card level so thumbnail overflow-hidden doesn't clip it */}
       {openMenuId === project.project_id && (
         <div
-          className="absolute right-2.5 top-10 w-44 bg-[#16161b] border border-white/10 rounded-xl shadow-2xl py-1.5 z-[100] animate-in fade-in zoom-in-95 duration-100"
+          className="absolute right-2.5 top-10 w-44 bg-[#16161b] border border-white/10 rounded-xl shadow-2xl py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100"
           onClick={(e) => e.stopPropagation()}
         >
           <button

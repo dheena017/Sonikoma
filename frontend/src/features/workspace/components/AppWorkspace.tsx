@@ -907,52 +907,54 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
           </div>
         </div>
 
-        <UrlInputPanel
-          targetUrl={targetUrl}
-          setTargetUrl={setTargetUrl}
-          selectedSource={selectedSource}
-          setSelectedSource={setSelectedSource}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          isProcessing={isProcessing}
-          isScraping={isScraping}
-          handleGenerateVideo={() => {}}
-          handleScrape={handleWorkspaceImport}
-          addNotification={addNotification}
-          narrationStyle={narrationStyle}
-          setNarrationStyle={setNarrationStyle}
-          seriesTitle={seriesTitle}
-          setSeriesTitle={setSeriesTitle}
-          chapterNumber={chapterNumber}
-          setChapterNumber={setChapterNumber}
-          chapterTitle={chapterTitle}
-          setChapterTitle={setChapterTitle}
-          scrapedGenre={scrapedGenre}
-          setScrapedGenre={setScrapedGenre}
-          seriesAuthor={seriesAuthor}
-          setSeriesAuthor={setSeriesAuthor}
-          seriesCoverImage={seriesCoverImage}
-          setSeriesCoverImage={setSeriesCoverImage}
-          seriesSynopsis={seriesSynopsis}
-          setSeriesSynopsis={setSeriesSynopsis}
-          smartSlice={smartSlice}
-          setSmartSlice={setSmartSlice}
-          resetWorkspace={resetWorkspace}
-          cropSensitivity={cropSensitivity}
-          setCropSensitivity={setCropSensitivity}
-          autoSplitTallStrips={autoSplitTallStrips}
-          setAutoSplitTallStrips={setAutoSplitTallStrips}
-          onOpenEpisodeScraper={(url) => {
-            const nav = navigateTo || (window as any).navigateTo;
-            const path = `/episode-scraper?url=${encodeURIComponent(url)}`;
-            if (typeof nav === "function") {
-              nav(path);
-            } else {
-              window.history.pushState({}, "", path);
-              window.dispatchEvent(new Event("popstate"));
-            }
-          }}
-        />
+        <div className="relative z-50">
+          <UrlInputPanel
+            targetUrl={targetUrl}
+            setTargetUrl={setTargetUrl}
+            selectedSource={selectedSource}
+            setSelectedSource={setSelectedSource}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+            isProcessing={isProcessing}
+            isScraping={isScraping}
+            handleGenerateVideo={() => {}}
+            handleScrape={handleWorkspaceImport}
+            addNotification={addNotification}
+            narrationStyle={narrationStyle}
+            setNarrationStyle={setNarrationStyle}
+            seriesTitle={seriesTitle}
+            setSeriesTitle={setSeriesTitle}
+            chapterNumber={chapterNumber}
+            setChapterNumber={setChapterNumber}
+            chapterTitle={chapterTitle}
+            setChapterTitle={setChapterTitle}
+            scrapedGenre={scrapedGenre}
+            setScrapedGenre={setScrapedGenre}
+            seriesAuthor={seriesAuthor}
+            setSeriesAuthor={setSeriesAuthor}
+            seriesCoverImage={seriesCoverImage}
+            setSeriesCoverImage={setSeriesCoverImage}
+            seriesSynopsis={seriesSynopsis}
+            setSeriesSynopsis={setSeriesSynopsis}
+            smartSlice={smartSlice}
+            setSmartSlice={setSmartSlice}
+            resetWorkspace={resetWorkspace}
+            cropSensitivity={cropSensitivity}
+            setCropSensitivity={setCropSensitivity}
+            autoSplitTallStrips={autoSplitTallStrips}
+            setAutoSplitTallStrips={setAutoSplitTallStrips}
+            onOpenEpisodeScraper={(url) => {
+              const nav = navigateTo || (window as any).navigateTo;
+              const path = `/episode-scraper?url=${encodeURIComponent(url)}`;
+              if (typeof nav === "function") {
+                nav(path);
+              } else {
+                window.history.pushState({}, "", path);
+                window.dispatchEvent(new Event("popstate"));
+              }
+            }}
+          />
+        </div>
 
 
 

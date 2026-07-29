@@ -535,7 +535,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             />
 
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-2 bg-[#111116] border border-neutral-800 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-[200] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute left-0 right-0 top-full mt-2 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="px-3 py-2 border-b border-neutral-800/80 bg-neutral-950/40">
                   <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
                     Recent & Bookmarked Episodes
