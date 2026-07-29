@@ -40,10 +40,13 @@ interface ProjectCardProps {
   onSaveRename?: (projectId: string, newName: string) => void;
 }
 
-function timeAgo(dateStr: string): string {
-  const now = Date.now();
+function timeAgo(dateStr?: string | null): string {
+  if (!dateStr) return "Recently";
   const then = new Date(dateStr).getTime();
+  if (isNaN(then)) return "Recently";
+  const now = Date.now();
   const diff = Math.floor((now - then) / 1000);
+  if (diff < 0) return "Recently";
   if (diff < 60) return `${diff}s ago`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
@@ -108,7 +111,7 @@ export default function ProjectCard({
         {project.cover_image ? (
           <>
             <img
-              src={getProxiedImageUrl(project.cover_image)}
+              src={getProxiedImageUrl(project.cover_image, project.url)}
               alt={project.title}
               className={`w-full h-full object-cover transition-transform duration-700 ${
                 isSelected ? "scale-105 opacity-75" : "group-hover:scale-105"

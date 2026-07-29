@@ -112,6 +112,11 @@ export default function DashboardProjectSection({
               onOpenProject={onOpenProject}
               onRename={(e, projectItem) => onRename(e, projectItem)}
               onExport={(e, projectItem) => onExport(e, projectItem)}
+              onCopyLink={(e, projectItem) => {
+                e.stopPropagation();
+                const link = `${window.location.origin}/workspace?id=${projectItem.project_id}`;
+                navigator.clipboard.writeText(link);
+              }}
               onDelete={(e, projectId) => onDelete(e, projectId)}
               openMenuId={openMenuId}
               onToggleMenu={(e, projectId) => onToggleMenu(e, projectId)}

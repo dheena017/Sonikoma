@@ -35,6 +35,8 @@ import {
 } from "lucide-react";
 import UrlInputPanel from "@/features/scraper/components/UrlInputPanel";
 import ProjectConfirmPanel from "@/shared/ui/modal/ProjectConfirmPanel";
+import ProjectCard from "@/features/projects/components/ProjectCard";
+import type { Project } from "@/features/projects/hooks/ProjectTypes";
 
 interface AppWorkspaceProps {
   [key: string]: any;
@@ -157,6 +159,8 @@ const KEYBOARD_SHORTCUTS = [
 const AppWorkspaceInner = (props: AppWorkspaceProps) => {
   const [recentProjects, setRecentProjects] = useState<StoredProject[]>([]);
   const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [renamingProjectId, setRenamingProjectId] = useState<string | null>(null);
   const [activeGuideTab, setActiveGuideTab] = useState<string>("general");
   const [searchQuery,    setSearchQuery]    = useState<string>("");
   const [showAll,        setShowAll]        = useState<boolean>(false);
@@ -168,6 +172,91 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(false);
+
+  const handleOpenProject = (project: Project) => {
+    if (props.navigateTo) {
+      props.navigateTo(`/workspace?id=${project.project_id}`);
+    } else {
+      window.location.href = `/workspace?id=${project.project_id}`;
+    }
+  };
+
+  const handleRenameProject = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setRenamingProjectId(project.project_id);
+    setOpenMenuId(null);
+  };
+
+  const handleSaveRename = async (projectId: string, newName: string) => {
+    if (!newName.trim()) {
+      setRenamingProjectId(null);
+      return;
+    }
+    try {
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token") ||
+        "";
+      await fetch(`/api/projects/${projectId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title: newName }),
+      });
+    } catch (err) {
+      console.error("Failed to rename project:", err);
+    }
+    setRecentProjects((prev) =>
+      prev.map((p) => (p.project_id === projectId ? { ...p, title: newName } : p))
+    );
+    setRenamingProjectId(null);
+    props.addNotification?.(`Renamed project to "${newName}"`, "success");
+  };
+
+  const handleDeleteProject = async (e: React.MouseEvent, projectId: string) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    if (!window.confirm("Are you sure you want to delete this project?")) return;
+    try {
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token") ||
+        "";
+      await fetch(`/api/projects/${projectId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to delete project:", err);
+    }
+    setRecentProjects((prev) => prev.filter((p) => p.project_id !== projectId));
+    props.addNotification?.("Project deleted successfully.", "info");
+  };
+
+  const handleExportProject = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    if (props.navigateTo) {
+      props.navigateTo(`/workspace?id=${project.project_id}&export=true`);
+    }
+  };
+
+  const handleCopyLink = (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    setOpenMenuId(null);
+    const link = `${window.location.origin}/workspace?id=${project.project_id}`;
+    navigator.clipboard.writeText(link);
+    props.addNotification?.("Project link copied to clipboard!", "success");
+  };
+
+  const handleToggleMenu = (e: React.MouseEvent, projectId: string) => {
+    e.stopPropagation();
+    setOpenMenuId((current) => (current === projectId ? null : projectId));
+  };
 
   const toggleVideoPlay = () => {
     if (!videoRef.current) return;
@@ -963,77 +1052,37 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                 {displayedProjects.map((project) => {
-                  const statusInfo = getStatusInfo(project.status);
+                  const projectCardItem: Project = {
+                    project_id: project.project_id,
+                    title: project.title || "Untitled Series",
+                    url: project.url || "",
+                    created_at: project.created_at || "",
+                    status: project.status || "ready",
+                    panels_count: project.panels_count ?? 0,
+                    series_slug: project.series_slug || undefined,
+                    chapter_slug: project.chapter_slug || undefined,
+                    genre: project.genre || undefined,
+                    author: project.author || undefined,
+                    cover_image: project.cover_image || undefined,
+                    synopsis: project.synopsis || undefined,
+                    episode: project.episode || undefined,
+                  };
                   return (
-                    <div
+                    <ProjectCard
                       key={project.project_id}
-                      className="group relative bg-[#111116]/60 border border-neutral-800 hover:border-purple-500/30 rounded-2xl overflow-hidden flex flex-col justify-between transition-all duration-300 hover:shadow-[0_0_20px_rgba(168,85,247,0.08)]"
-                    >
-                      {/* Cover image strip */}
-                      <div className="relative h-24 bg-neutral-950 overflow-hidden shrink-0">
-                        {project.cover_image ? (
-                          <img
-                            src={project.cover_image} alt={project.title || ""}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <BookOpenCheck className="h-7 w-7 text-neutral-800" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#111116] via-transparent to-transparent" />
-                        {project.genre && (
-                          <span className={`absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-bold ${getGenreStyle(project.genre)}`}>
-                            <Tag className="h-2.5 w-2.5" />{project.genre}
-                          </span>
-                        )}
-                        <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 bg-black/60 rounded-full backdrop-blur-sm">
-                          <span className={`h-1.5 w-1.5 rounded-full ${statusInfo.dot}`} />
-                          <span className={`text-[9px] font-bold uppercase ${statusInfo.text}`}>{statusInfo.label}</span>
-                        </div>
-                      </div>
-
-                      {/* Card body */}
-                      <div className="p-4 space-y-3 flex-1">
-                        <div>
-                          <h4 className="text-sm font-black text-white truncate leading-tight">{project.title || "Untitled Series"}</h4>
-                          {project.episode && <p className="text-[10px] text-purple-400 font-bold mt-0.5">{project.episode}</p>}
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          {project.author && (
-                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-medium">
-                              <User2 className="h-3 w-3 shrink-0" /><span className="truncate">{project.author}</span>
-                            </span>
-                          )}
-                          {project.created_at && (
-                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-500 font-medium">
-                              <Clock className="h-3 w-3 shrink-0" />{formatRelativeTime(project.created_at)}
-                            </span>
-                          )}
-                          {project.url && (
-                            <span className="flex items-center gap-1.5 text-[10px] text-neutral-600 font-medium">
-                              <Globe className="h-3 w-3 shrink-0" />
-                              <span className="truncate">{(() => { try { return new URL(project.url).hostname; } catch { return project.url.substring(0, 30); } })()}</span>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Card footer */}
-                      <div className="flex items-center justify-between border-t border-neutral-800/60 px-4 py-3">
-                        <span className="flex items-center gap-1 text-[10px] font-mono text-neutral-500">
-                          <Layers className="h-3 w-3" />{project.panels_count || 0} panels
-                        </span>
-                        <button
-                          onClick={() => navigateTo?.(`/workspace?id=${project.project_id}`)}
-                          className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-[10px] transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-                        >
-                          Resume <Play className="h-2.5 w-2.5" />
-                        </button>
-                      </div>
-                    </div>
+                      project={projectCardItem}
+                      onOpenProject={handleOpenProject}
+                      onRename={handleRenameProject}
+                      onSaveRename={handleSaveRename}
+                      onDelete={handleDeleteProject}
+                      onExport={handleExportProject}
+                      onCopyLink={handleCopyLink}
+                      openMenuId={openMenuId}
+                      onToggleMenu={handleToggleMenu}
+                      renamingProjectId={renamingProjectId}
+                    />
                   );
                 })}
               </div>
