@@ -32,7 +32,7 @@ def extract_episode_date_pairs_from_html(html: str) -> List[Tuple[int, Optional[
     if not html:
         return results
 
-    if BeautifulSoup:
+    if BeautifulSoup is not None:
         try:
             soup = BeautifulSoup(html, 'html.parser')
             text_nodes = []
@@ -134,7 +134,7 @@ def write_csv(rows: List[Dict[str, Any]], outpath: str) -> None:
 
 def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str]] = None) -> List[str]:
     """Uses BeautifulSoup to fetch images inside typical reader containers."""
-    if not BeautifulSoup:
+    if BeautifulSoup is None:
         return []
     try:
         soup = BeautifulSoup(html, 'html.parser')
@@ -240,7 +240,19 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
     if container:
         _extract_images_from_root(container, images)
 
-    # Always harvest full document to ensure no panel image outside container is missed
-    _extract_images_from_root(soup, images)
+    # Only harvest full document if isolated reader container produced no valid panel images
+    if not images:
+        soup_copy = BeautifulSoup(str(soup), 'html.parser') if BeautifulSoup is not None else None
+        if soup_copy:
+            for unwanted in soup_copy.select(
+                'header, footer, nav, aside, .creator_note, .author_area, .profile_area, '
+                '#cList, .area_comment, .rt_area, .recommend_area, .comment_area, '
+                '.viewer_lst_recommend, .viewer_lst_author, .author_avatar, .user_avatar, '
+                '.reply_area, .comment_list, .aside, .header, .footer'
+            ):
+                unwanted.decompose()
+            _extract_images_from_root(soup_copy, images)
+        else:
+            _extract_images_from_root(soup, images)
 
     return images

@@ -32,46 +32,95 @@ async def apply_image_edits_service(
 ) -> Dict[str, Any]:
     resolved = await img_utils.resolve_image_to_buffer(url)
     img_buffer = resolved["data"]
-    content_type = resolved["contentType"]
+    content_type = resolved.get("contentType", "image/png")
 
     def edit_sync():
         nonlocal img_buffer, content_type
+        if not img_buffer:
+            return
+
+        img = Image.open(io.BytesIO(img_buffer))
+
+        # 1. Rotate
         if rotate and rotate != 0:
-            img = Image.open(io.BytesIO(img_buffer))
             img = img.rotate(rotate, expand=True)
-            out = io.BytesIO()
-            img.save(out, format=img.format or 'JPEG')
-            img_buffer = out.getvalue()
 
+        # 2. Horizontal Flip
         if flipHorizontal:
-            img = Image.open(io.BytesIO(img_buffer))
             img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-            out = io.BytesIO()
-            img.save(out, format=img.format or 'JPEG')
-            img_buffer = out.getvalue()
 
+        # 3. Crop percentages (cropTop, cropBottom, cropLeft, cropRight are 0-100 values)
         if cropTop > 0 or cropBottom > 0 or cropLeft > 0 or cropRight > 0:
-            img = Image.open(io.BytesIO(img_buffer))
             w, h = img.size
-
-            top_px = round((cropTop / 100) * h)
-            bot_px = round((cropBottom / 100) * h)
-            left_px = round((cropLeft / 100) * w)
-            right_px = round((cropRight / 100) * w)
+            top_px = max(0, min(h - 1, round((cropTop / 100.0) * h)))
+            bot_px = max(0, min(h - 1, round((cropBottom / 100.0) * h)))
+            left_px = max(0, min(w - 1, round((cropLeft / 100.0) * w)))
+            right_px = max(0, min(w - 1, round((cropRight / 100.0) * w)))
 
             crop_w = w - left_px - right_px
             crop_h = h - top_px - bot_px
-            if crop_w > 10 and crop_h > 10:
-                img_cropped = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
-                out = io.BytesIO()
-                img_cropped.save(out, format=img.format or 'JPEG')
-                img_buffer = out.getvalue()
+
+            if crop_w >= 5 and crop_h >= 5:
+                right_edge = min(w, left_px + crop_w)
+                bottom_edge = min(h, top_px + crop_h)
+                img = img.crop((left_px, top_px, right_edge, bottom_edge))
+
+        # 4. Optional Auto Trim solid background margins
+        if autoTrim:
+            try:
+                import numpy as np
+                from services.image.utils.panel_image_utils import trim_solid_borders
+                gray = np.array(img.convert("L"))
+                tw, th = gray.shape[1], gray.shape[0]
+                tx, ty, t_w, t_h = trim_solid_borders(gray, 0, 0, tw, th, backgroundColorMode)
+                if t_w >= 10 and t_h >= 10:
+                    img = img.crop((tx, ty, tx + t_w, ty + t_h))
+            except Exception as trim_err:
+                logger.warning(f"Auto-trim failed during image edit: {trim_err}")
+
+        # 5. Optional Padding
+        if padding and padding > 0:
+            try:
+                from PIL import ImageOps
+                bg_color = (255, 255, 255) if backgroundColorMode in ('auto', 'white') else (0, 0, 0)
+                img = ImageOps.expand(img, border=padding, fill=bg_color)
+            except Exception as pad_err:
+                logger.warning(f"Padding failed during image edit: {pad_err}")
+
+        # 6. Format Determination & Mode Conversion
+        target_fmt = (outputFormat or 'png').upper()
+        if target_fmt == 'JPG':
+            target_fmt = 'JPEG'
+
+        if target_fmt in ('JPEG', 'JPG'):
+            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                bg = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode != 'RGBA':
+                    img = img.convert('RGBA')
+                bg.paste(img, mask=img.split()[3])
+                img = bg
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+            content_type = 'image/jpeg'
+        elif target_fmt == 'WEBP':
+            content_type = 'image/webp'
+        else:
+            target_fmt = 'PNG'
+            content_type = 'image/png'
+
+        out = io.BytesIO()
+        save_kwargs = {}
+        if target_fmt in ('JPEG', 'WEBP'):
+            save_kwargs['quality'] = cropQuality or 90
+
+        img.save(out, format=target_fmt, **save_kwargs)
+        img_buffer = out.getvalue()
 
     try:
         if img_buffer:
             await asyncio.to_thread(edit_sync)
     except Exception as e:
-        logger.error(f"Image edit failed: {e}")
+        logger.error(f"Image edit failed: {e}", exc_info=True)
 
     unique_id = f"merged_{int(time.time() * 1000)}_edited"
     try:
@@ -117,13 +166,22 @@ async def transform_image_service(url: str, trans_type: str, value: str) -> Dict
                 else:
                     raise ValueError("Invalid flip axis. Use 'h' or 'v'.")
 
+            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                bg = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode != 'RGBA':
+                    img = img.convert('RGBA')
+                bg.paste(img, mask=img.split()[3])
+                img = bg
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+
             out = io.BytesIO()
             img.save(out, format="JPEG", quality=92)
             out_bytes = out.getvalue()
         else:
             out_bytes = b""
     except Exception as e:
-        logger.error(f"Image transform failed: {e}")
+        logger.error(f"Image transform failed: {e}", exc_info=True)
         out_bytes = b""
 
     try:

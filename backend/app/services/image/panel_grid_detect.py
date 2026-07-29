@@ -17,7 +17,9 @@ def _detect_panels_grid_cv(
     canny_high: int,
     close_kernel_size: int,
     high_sensitivity: bool = False,
-    min_panel_area: float = 5000.0
+    min_panel_area: float = 5000.0,
+    max_aspect_ratio: float = 10.0,
+    min_aspect_ratio: float = 0.1,
 ) -> List[Dict[str, Any]]:
     """
     Standard contour detection strategy using OpenCV for grid layout pages.
@@ -73,7 +75,7 @@ def _detect_panels_grid_cv(
 
             # Discard thin horizontal/vertical strip artifacts and extreme aspect ratio noise
             aspect = float(w_box) / float(h_box) if h_box > 0 else 1.0
-            if aspect > 10.0 or aspect < 0.1 or w_box < 30 or h_box < 30:
+            if aspect > max_aspect_ratio or aspect < min_aspect_ratio or w_box < 30 or h_box < 30:
                 continue
 
             raw_boxes.append({"x": x_box, "y": y_box, "w": w_box, "h": h_box})
@@ -86,7 +88,9 @@ def _detect_panels_grid_pil(
     is_white_bg: bool,
     sensitivity: float,
     min_height_px: int,
-    min_panel_area: float = 5000.0
+    min_panel_area: float = 5000.0,
+    max_aspect_ratio: float = 10.0,
+    min_aspect_ratio: float = 0.1,
 ) -> List[Dict[str, Any]]:
     """
     Standard projection profile detection strategy using PIL fallback for grid layout pages.
@@ -158,7 +162,7 @@ def _detect_panels_grid_pil(
         area = float(bw * bh)
         aspect = float(bw) / float(bh) if bh > 0 else 1.0
 
-        if area >= effective_min_area and 0.1 <= aspect <= 10.0 and bw >= 30 and bh >= 30:
+        if area >= effective_min_area and min_aspect_ratio <= aspect <= max_aspect_ratio and bw >= 30 and bh >= 30:
             raw_boxes.append({
                 "x": start_x,
                 "y": start_y,

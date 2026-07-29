@@ -604,7 +604,7 @@ const StoryboardTimeline = React.memo(
                           cropBottom: box.cropBottom,
                           cropLeft: box.cropLeft,
                           cropRight: box.cropRight,
-                          autoTrim: true,
+                          autoTrim: false, // detection coordinates are already precise; autoTrim would over-crop artwork
                           padding: cropPaddingPx,
                           sensitivity: cropSensitivity,
                           backgroundColorMode: cropBackgroundMode,

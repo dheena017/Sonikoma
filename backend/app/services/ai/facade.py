@@ -222,7 +222,7 @@ async def facade_analyze_image(
 
     has_dialogue = True
     try:
-        from media.image.ocr import extract_dialogue_from_panel
+        from services.image.ocr import extract_dialogue_from_panel
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_ocr:
             tmp_ocr.write(img_buffer)
             tmp_ocr_path = tmp_ocr.name
@@ -297,6 +297,72 @@ async def facade_analyze_image(
         "inputTokens": getattr(skill, "last_input_tokens", 0),
         "outputTokens": getattr(skill, "last_output_tokens", 0)
     }
+def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]]) -> None:
+    """
+    Crop each detected panel from the image buffer directly in memory (server-side).
+
+    For every panel that has x / y / width / height pixel coordinates, this function:
+      1. Crops the region image[y : y+height,  x : x+width]  (exact PIL equivalent)
+      2. Converts to JPEG and stores the bytes in stitched_cache
+      3. Writes the '/api/image/cached/{key}' URL into panel['croppedUrl']
+
+    The frontend's useBatchImageActions.ts already checks:
+        if (box.croppedUrl) return box.croppedUrl;
+    so it will skip the N separate /api/image/edit round-trips when this field is set.
+    """
+    try:
+        full_img = Image.open(io.BytesIO(img_buffer))
+        if full_img.mode not in ("RGB", "RGBA"):
+            full_img = full_img.convert("RGB")
+        img_w, img_h = full_img.size
+    except Exception as exc:
+        logger.warning(f"[_crop_panels_server_side] Failed to open image buffer: {exc}")
+        return
+
+    ts = int(time.time() * 1000)
+    for idx, panel in enumerate(panels):
+        try:
+            x = int(panel.get("x", 0))
+            y = int(panel.get("y", 0))
+            w = int(panel.get("width", img_w))
+            h = int(panel.get("height", img_h))
+
+            # Clamp to image bounds
+            x1 = max(0, min(img_w, x))
+            y1 = max(0, min(img_h, y))
+            x2 = max(x1 + 1, min(img_w, x + w))
+            y2 = max(y1 + 1, min(img_h, y + h))
+
+            if (x2 - x1) < 5 or (y2 - y1) < 5:
+                logger.debug(f"[_crop_panels_server_side] Skipping panel {idx+1}: too small ({x2-x1}x{y2-y1})")
+                continue
+
+            cropped = full_img.crop((x1, y1, x2, y2))
+
+            # Ensure RGB (no alpha) for JPEG output
+            if cropped.mode == "RGBA":
+                bg = Image.new("RGB", cropped.size, (255, 255, 255))
+                bg.paste(cropped, mask=cropped.split()[3])
+                cropped = bg
+            elif cropped.mode != "RGB":
+                cropped = cropped.convert("RGB")
+
+            out = io.BytesIO()
+            cropped.save(out, format="JPEG", quality=90)
+            cropped_bytes = out.getvalue()
+
+            cache_key = f"panel_crop_{ts}_{idx + 1}"
+            stitched_cache.set(cache_key, {"data": cropped_bytes, "content_type": "image/jpeg"})
+            panel["croppedUrl"] = f"/api/image/cached/{cache_key}"
+
+        except Exception as exc:
+            logger.warning(f"[_crop_panels_server_side] Error cropping panel {idx+1}: {exc}")
+            # Leave croppedUrl unset; frontend will fall back to a separate edit call
+
+    try:
+        full_img.close()
+    except Exception:
+        pass
 
 
 async def facade_smart_crop(
@@ -355,11 +421,15 @@ async def facade_smart_crop(
                 use_yolo=use_yolo
             )
             if len(cv_panels) > 0:
+                # Crop all panels server-side in one pass (image[y:y+h, x:x+w])
+                # so the frontend gets croppedUrl on each panel and skips extra API calls
+                await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels)
                 return {
                     "success": True,
                     "total_panels": len(cv_panels),
                     "panels": cv_panels,
-                    "provider": "opencv_webtoon" if is_tall_strip else "opencv"
+                    "provider": "opencv_webtoon" if is_tall_strip else "opencv",
+                    "isTallStrip": is_tall_strip,
                 }
         finally:
             if tmp_in_path and os.path.exists(tmp_in_path):
@@ -424,11 +494,14 @@ async def facade_smart_crop(
                 auto_split=auto_split,
                 padding_px=padding_px
             )
+            # Crop all panels server-side before returning
+            await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels)
             return {
                 "success": True,
                 "total_panels": len(cv_panels),
                 "panels": cv_panels,
-                "provider": "opencv_fallback"
+                "provider": "opencv_fallback",
+                "isTallStrip": is_tall_strip,
             }
         except Exception as cv_exc:
             logger.error(f"[facade_smart_crop] Local OpenCV fallback also failed: {cv_exc}")
@@ -470,23 +543,30 @@ async def facade_smart_crop(
         crop_right = ((safe_w - (x + w_box)) / safe_w) * 100.0
 
         final_panels.append({
+            "x": int(x),
+            "y": int(y),
+            "width": int(w_box),
+            "height": int(h_box),
             "cropTop": round(max(0.0, min(100.0, crop_top)), 2),
             "cropBottom": round(max(0.0, min(100.0, crop_bottom)), 2),
             "cropLeft": round(max(0.0, min(100.0, crop_left)), 2),
             "cropRight": round(max(0.0, min(100.0, crop_right)), 2),
-            "width": w_box,
-            "height": h_box,
-            "area": (w_box * h_box)
+            "area": int(w_box * h_box)
         })
 
+    # Sort strictly top-to-bottom (by pixel y), then left-to-right (by pixel x).
+    # The old row-band approach (cropTop / 4.0) caused wrong ordering on tall webtoon strips.
     sorted_final_panels = sorted(
         final_panels,
-        key=lambda b: (round(b.get("cropTop", 0.0) / 4.0), b.get("cropLeft", 0.0))
+        key=lambda b: (b.get("y", 0), b.get("x", 0))
     )
+    # Crop all AI-detected panels server-side before returning
+    await asyncio.to_thread(_crop_panels_server_side, img_buffer, sorted_final_panels)
     return {
         "success": True,
         "total_panels": len(sorted_final_panels),
-        "panels": sorted_final_panels
+        "panels": sorted_final_panels,
+        "isTallStrip": is_tall_strip,
     }
 
 

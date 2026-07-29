@@ -298,6 +298,29 @@ export function useBatchImageActions({
       ...prev,
     ]);
 
+    let finalTargetImages = targetImages;
+    let isStitchedCombined = false;
+
+    if (targetImages.length > 1) {
+      setConsoleLogs((prev) => [
+        `[Auto Cropper] Merging ${targetImages.length} images into a single long strip for full-page panel detection...`,
+        ...prev,
+      ]);
+      try {
+        const mergeData = await api.mergeImages(fetchWithInterceptor, { urls: targetImages });
+        if (mergeData && mergeData.url) {
+          finalTargetImages = [mergeData.url];
+          isStitchedCombined = true;
+          setConsoleLogs((prev) => [
+            `[Auto Cropper] Successfully stitched full long strip! Running panel detection on combined image...`,
+            ...prev,
+          ]);
+        }
+      } catch (mergeErr: any) {
+        console.warn("[Auto Cropper] Pre-crop image stitching failed, proceeding on individual images:", mergeErr);
+      }
+    }
+
     let completedCount = 0;
     const errors: string[] = [];
     const newSlicedUrlsMap: Record<string, string[]> = {};
@@ -305,7 +328,7 @@ export function useBatchImageActions({
     try {
       abortBatchRef.current.aborted = false;
       await processWithConcurrency(
-        targetImages,
+        finalTargetImages,
         8,
         async (url) => {
           if (abortBatchRef.current.aborted)
@@ -354,13 +377,22 @@ export function useBatchImageActions({
 
             if (data.success && Array.isArray(data.panels)) {
               if (data.panels.length > 0) {
-                // Ensure 2D spatial reading order (top-to-bottom row bands, left-to-right)
+                // Sort strictly top-to-bottom (y pixel), then left-to-right (x pixel).
+                // Using pixel coords is accurate for both webtoon strips and manga grids.
+                // The old 4%-cropTop row-band method reordered panels incorrectly on tall
+                // stitched strips (one band = ~2400px on a 60k-px strip).
                 const sortedPanels = [...data.panels].sort((a: any, b: any) => {
-                  const rowA = Math.round((a.cropTop ?? 0) / 4.0);
-                  const rowB = Math.round((b.cropTop ?? 0) / 4.0);
-                  if (rowA !== rowB) return rowA - rowB;
-                  return (a.cropLeft ?? 0) - (b.cropLeft ?? 0);
+                  const dy = (a.y ?? 0) - (b.y ?? 0);
+                  if (dy !== 0) return dy;
+                  return (a.x ?? 0) - (b.x ?? 0);
                 });
+                const serverCroppedCount = sortedPanels.filter((b: any) => !!b.croppedUrl).length;
+                setConsoleLogs((prev) => [
+                  serverCroppedCount === sortedPanels.length
+                    ? `[Auto Cropper] ✓ All ${sortedPanels.length} panels cropped server-side (no extra API calls needed)`
+                    : `[Auto Cropper] ${serverCroppedCount}/${sortedPanels.length} panels pre-cropped server-side, ${sortedPanels.length - serverCroppedCount} need edit API fallback`,
+                  ...prev,
+                ]);
                 const croppedUrls = await Promise.all(
                   sortedPanels.map(async (box: any) => {
                     if (box.croppedUrl) return box.croppedUrl;
@@ -370,7 +402,7 @@ export function useBatchImageActions({
                       cropBottom: box.cropBottom,
                       cropLeft: box.cropLeft,
                       cropRight: box.cropRight,
-                      autoTrim: true,
+                      autoTrim: false, // detection coordinates are already precise; autoTrim would over-trim artwork
                       padding: cropPaddingPx,
                       sensitivity: cropSensitivity,
                       backgroundColorMode: cropBackgroundMode,
@@ -411,7 +443,7 @@ export function useBatchImageActions({
             completedCount++;
             setBatchProgress({
               current: completedCount,
-              total: targetImages.length,
+              total: finalTargetImages.length,
             });
           }
         },
@@ -426,6 +458,9 @@ export function useBatchImageActions({
     }
 
     setScrapedImages((prev) => {
+      if (isStitchedCombined && finalTargetImages[0] && newSlicedUrlsMap[finalTargetImages[0]]) {
+        return newSlicedUrlsMap[finalTargetImages[0]];
+      }
       const copy: string[] = [];
       prev.forEach((img) => {
         if (newSlicedUrlsMap[img]) {

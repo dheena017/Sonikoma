@@ -48,6 +48,12 @@ UNWANTED_PATTERNS = [
     "_cover",
     "recommend",
     "author_",
-    "profile_"
+    "profile_",
+    "creator_note",
+    "creator_info",
+    "author_area",
+    "profile_area",
+    "author_avatar",
+    "user_avatar"
 ]
 

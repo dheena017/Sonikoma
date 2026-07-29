@@ -205,7 +205,13 @@ async def scrape_images_from_url(
             if m:
                 urls = json.loads(m.group(1))
                 if isinstance(urls, list):
-                    return [u for u in urls if isinstance(u, str) and u.startswith(("http://", "https://"))]
+                    filtered = []
+                    for u in urls:
+                        if isinstance(u, str) and u.startswith(("http://", "https://")):
+                            lower_u = u.lower()
+                            if not any(pat in lower_u for pat in UNWANTED_PATTERNS):
+                                filtered.append(u)
+                    return filtered
         except Exception as ie:
             logger.warning(f"[Scraper] Failed to parse intercepted images: {ie}")
         return []
@@ -221,9 +227,10 @@ async def scrape_images_from_url(
     for img in nuxt_imgs:
         image_dict[img] = True
 
-    # Strategy 2.5: Playwright Network Intercepted images
-    for img in extract_intercepted_images(html):
-        image_dict[img] = True
+    # Strategy 2.5: Playwright Network Intercepted images (Fallback ONLY if isolated reader containers found 0 images)
+    if not image_dict:
+        for img in extract_intercepted_images(html):
+            image_dict[img] = True
 
     # Strategy 3: Loose regular expressions matching typical panel content in HTML/JSON payload
     # Only run if primary isolated container/payload extractors found fewer than 3 panel images
@@ -259,8 +266,9 @@ async def scrape_images_from_url(
             pw_nuxt_imgs = extract_images_from_nuxt_payload(pw_html)
             for img in pw_nuxt_imgs:
                 image_dict[img] = True
-            for img in extract_intercepted_images(pw_html):
-                image_dict[img] = True
+            if not image_dict:
+                for img in extract_intercepted_images(pw_html):
+                    image_dict[img] = True
 
     # Strategy 4: Series Landing Page Auto-Resolver (e.g. GlobalComix https://globalcomix.com/c/the-backwards-house or any comic hub)
     if len(image_dict) < 2 and BeautifulSoup:
@@ -308,7 +316,8 @@ async def scrape_images_from_url(
     # Blacklist & banner filter check
     banner_patterns = [
         '/logo', 'header', 'footer', 'banner', 'facebook', 'twitter', 'instagram', 'share_btn', 'icon_',
-        'thum_', 'thumbnail', 'cover_', '_cover', 'poster_', '_poster', 'mobile_webtoon', 'recommend', 'author_', 'profile_'
+        'thum_', 'thumbnail', 'cover_', '_cover', 'poster_', '_poster', 'mobile_webtoon', 'recommend', 'author_', 'profile_',
+        'creator_note', 'author_area', 'profile_area', 'author_avatar', 'user_avatar'
     ]
     for img in raw_images:
         lower = img.lower()

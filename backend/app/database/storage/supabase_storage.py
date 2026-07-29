@@ -17,8 +17,15 @@ def upload_to_supabase_bucket(
 ) -> Optional[str]:
     """
     Uploads bytes to a Supabase Storage bucket and returns the public URL.
-    Returns None if Supabase is not configured or an error occurs.
+    Supabase uploads are enabled only in production mode (NODE_ENV=production).
+    In development mode, returns None so local/memory caching handles storage.
     """
+    import os
+    node_env = os.getenv("NODE_ENV", "development").lower()
+    if node_env != "production":
+        logger.debug(f"Non-production environment ({node_env}): Bypassing Supabase upload for {filename}.")
+        return None
+
     if not HAS_SUPABASE:
         logger.warning("Supabase client is not installed. Cannot upload to Supabase.")
         return None

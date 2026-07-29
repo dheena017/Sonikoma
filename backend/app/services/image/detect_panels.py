@@ -11,7 +11,7 @@ import sys
 import json
 import argparse
 import logging
-from typing import List, Dict, Optional, Any, Union
+from typing import List, Dict, Optional, Any, Union, Tuple
 import numpy as np
 from PIL import Image
 
@@ -45,6 +45,7 @@ logger = logging.getLogger("sonikoma.services.detect_panels")
 
 
 def run_cv_detection(
+    # ── Required ──────────────────────────────────────────────────────────────
     image_path: str,
     sensitivity: float,
     bg_mode: str,
@@ -52,26 +53,95 @@ def run_cv_detection(
     min_height_px: int,
     merge_threshold: int,
     aspect_ratio_str: str,
-    canny_low: int = 20,
+    # ── OpenCV / Canny edge detection ─────────────────────────────────────────
+    canny_low: int = 10,
     canny_high: int = 100,
     close_kernel_size: int = 15,
+    # ── General detection behaviour ───────────────────────────────────────────
     auto_split: bool = True,
     padding_px: int = 10,
+    min_panel_area: float = 5000.0,
+    # ── Tall-strip / Webtoon heuristics ──────────────────────────────────────
+    tall_strip_ratio: float = 1.7,          # h/w ratio threshold to enter webtoon mode
+    gutter_bg_ratio: float = 0.55,          # min background fraction for a gutter row
+    gutter_std_thresh: float = 8.0,         # row std below which a row is "flat"
+    gutter_flat_bg_ratio: float = 0.45,     # min bg ratio for flat rows to count as gutters
+    # ── Noise / solid-box filtering ───────────────────────────────────────────
+    max_aspect_ratio: float = 10.0,         # w/h above this → discard as horizontal strip
+    min_aspect_ratio: float = 0.1,          # w/h below this → discard as vertical strip
+    noise_std_thresh: float = 5.0,          # pixel std-dev below this → solid colour noise
+    flat_row_ratio: float = 0.80,           # fraction of flat rows above this → solid band
+    # ── OCR / speech-bubble snapping ──────────────────────────────────────────
+    ocr_snap_distance_px: int = 150,        # max vertical gap (px) to snap a bubble to a panel
+    ocr_snap_pct: float = 0.40,             # max snap gap as fraction of panel height
+    # ── Preprocessing ─────────────────────────────────────────────────────────
+    enable_clahe: bool = False,             # apply CLAHE equalisation before detection
+    clahe_clip_limit: float = 2.0,          # CLAHE clip limit (higher = more contrast)
+    clahe_tile_grid: int = 8,               # CLAHE tile grid size
+    bilateral_d: int = 0,                   # bilateral filter diameter; 0 = disabled
+    bilateral_sigma: float = 75.0,          # bilateral filter colour/space sigma
+    # ── Reading order & output control ───────────────────────────────────────
+    reading_order: str = "ltr",             # "ltr" (western) or "rtl" (manga right-to-left)
+    min_confidence: float = 0.0,            # discard panels below this confidence (0.0-1.0)
+    max_panels: int = 0,                    # max panels to return; 0 = unlimited
+    # ── Deduplication thresholds ──────────────────────────────────────────────
+    dedup_overlap_thresh: float = 0.70,     # IoU-style vertical overlap to treat as duplicate
+    dedup_crop_tolerance: float = 4.0,      # max cropTop/Bottom diff (%) to treat as duplicate
+    # ── Irregular panel / high-sensitivity retry ──────────────────────────────
+    irregular_aspect_high: float = 5.0,     # w/h above this triggers high-sensitivity retry
+    irregular_aspect_low: float = 0.2,      # w/h below this triggers high-sensitivity retry
+    # ── Fallback segment override ─────────────────────────────────────────────
+    fallback_segments: int = 0,             # manual fallback segment count; 0 = auto
+    # ── YOLO ──────────────────────────────────────────────────────────────────
     use_yolo: bool = False,
     yolo_conf: float = 0.20,
-    min_panel_area: float = 5000.0
 ) -> List[Dict[str, Any]]:
 
     """
     Main orchestration function for panel detection. Loads the image, runs background
     detection, routes to the appropriate detection strategy (Webtoon Slicing vs. Grid Contours),
     performs YOLO deep learning box fusion, noise filtering, overlap merging, padding, and scaling.
+
+    All tunable parameters have sensible defaults so existing callers need no changes.
+
+    Key tuning parameters:
+      ── Preprocessing ─────────────────────────────────────────────────────────
+      enable_clahe         – apply CLAHE contrast equalisation before detection
+      clahe_clip_limit     – CLAHE clip limit, higher = more contrast boost (default 2.0)
+      clahe_tile_grid      – CLAHE tile grid size in pixels (default 8)
+      bilateral_d          – bilateral filter diameter; 0 = disabled (default 0)
+      bilateral_sigma      – bilateral filter colour+space sigma (default 75.0)
+      ── Reading order & output ────────────────────────────────────────────────
+      reading_order        – "ltr" (western, left-to-right) or "rtl" (manga, right-to-left)
+      min_confidence       – discard panels below this confidence score 0.0–1.0 (default 0.0)
+      max_panels           – cap on number of returned panels; 0 = unlimited (default 0)
+      ── Deduplication ─────────────────────────────────────────────────────────
+      dedup_overlap_thresh – vertical IoU above which a panel is a duplicate (default 0.70)
+      dedup_crop_tolerance – max cropTop/Bottom % difference for duplicate (default 4.0)
+      ── Irregular fallback ────────────────────────────────────────────────────
+      irregular_aspect_high – w/h above this ratio triggers high-sensitivity retry (default 5.0)
+      irregular_aspect_low  – w/h below this ratio triggers high-sensitivity retry (default 0.2)
+      fallback_segments    – override auto fallback segment count; 0 = auto (default 0)
+      ── Webtoon heuristics ────────────────────────────────────────────────────
+      tall_strip_ratio     – h/w above which webtoon slicing is used (default 1.7)
+      gutter_bg_ratio      – fraction of background pixels for a gutter row (default 0.55)
+      gutter_std_thresh    – row pixel std below which a row is flat (default 8.0)
+      gutter_flat_bg_ratio – bg ratio for flat rows to count as gutters (default 0.45)
+      ── Noise filtering ───────────────────────────────────────────────────────
+      max_aspect_ratio     – w/h limit above which a box is discarded as noise (default 10.0)
+      min_aspect_ratio     – w/h limit below which a box is discarded as noise (default 0.1)
+      noise_std_thresh     – pixel std below which a box is solid-colour noise (default 5.0)
+      flat_row_ratio       – flat-row fraction above which a box is a solid band (default 0.80)
+      ── OCR snapping ──────────────────────────────────────────────────────────
+      ocr_snap_distance_px – max vertical px gap to snap a speech bubble to a panel (default 150)
+      ocr_snap_pct         – max snap gap as fraction of panel height (default 0.40)
     """
     logger.info(f"[Panel Detection] Starting local panel detection on {image_path} (use_yolo={use_yolo})")
     
     has_cv = HAS_CV and cv2 is not None
 
     gray_arr: Optional[np.ndarray] = None
+    img: Optional[Any] = None
     orig_w: int = 0
     orig_h: int = 0
 
@@ -97,6 +167,14 @@ def run_cv_detection(
     if gray_arr is None:
         return []
 
+    # Optional Preprocessing: CLAHE & Bilateral Filter
+    if has_cv and cv2 is not None:
+        if enable_clahe:
+            clahe = cv2.createCLAHE(clipLimit=clahe_clip_limit, tileGridSize=(clahe_tile_grid, clahe_tile_grid))
+            gray_arr = clahe.apply(gray_arr)
+        if bilateral_d > 0:
+            gray_arr = cv2.bilateralFilter(gray_arr, bilateral_d, bilateral_sigma, bilateral_sigma)
+
     # Dynamic Parameter Scaling
     ref_area = 1500.0 * 1500.0
     img_area = float(orig_w * orig_h)
@@ -111,37 +189,51 @@ def run_cv_detection(
     scaled_close_kernel = max(3, min(40, int(close_kernel_size * scale_factor)))
 
     # Speech Bubble Protection (OCR)
+    # Skip OCR when YOLO is enabled — YOLO already detects speech bubbles/balloons and
+    # populates ocr_boxes below, so running EasyOCR here too is redundant and causes
+    # multi-minute hangs on tall CPU-only strips (e.g. 57 tiles × ~3s each = 3+ min).
+    # Also skip for very large images (>4 MP) on CPU to prevent accidental hangs.
+    _OCR_MAX_PIXELS = 4_000_000  # ~2000×2000 — safe upper bound for CPU OCR during detection
     ocr_boxes: List[Dict[str, int]] = []
     yolo_panel_candidates: List[Dict[str, Union[int, float]]] = []
 
-    try:
-        import asyncio
-        from media.image.ocr import extract_full_ocr_data
+    _run_ocr_for_protection = (
+        not use_yolo and
+        (orig_w * orig_h) <= _OCR_MAX_PIXELS
+    )
+
+    if _run_ocr_for_protection:
         try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            import asyncio
+            from services.image.ocr import extract_full_ocr_data
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
 
-        if loop.is_running():
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(lambda: asyncio.run(extract_full_ocr_data(image_path)))
-                ocr_results = future.result()
-        else:
-            ocr_results = loop.run_until_complete(extract_full_ocr_data(image_path))
-
-        for res in ocr_results:
-            pts = np.array(res["box"], dtype=np.int32)
-            if has_cv and cv2 is not None:
-                bx, by, bw, bh = cv2.boundingRect(pts)
+            if loop.is_running():
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(lambda: asyncio.run(extract_full_ocr_data(image_path)))
+                    ocr_results = future.result()
             else:
-                xs = [pt[0] for pt in res["box"]]
-                ys = [pt[1] for pt in res["box"]]
-                bx, by, bw, bh = min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)
-            ocr_boxes.append({"x": bx, "y": by, "w": bw, "h": bh})
-    except Exception as e:
-        logger.warning(f"[Panel Detection] Failed to retrieve OCR bounds for speech bubble protection: {e}")
+                ocr_results = loop.run_until_complete(extract_full_ocr_data(image_path))
+
+            for res in ocr_results:
+                pts = np.array(res["box"], dtype=np.int32)
+                if has_cv and cv2 is not None:
+                    bx, by, bw, bh = cv2.boundingRect(pts)
+                else:
+                    xs = [pt[0] for pt in res["box"]]
+                    ys = [pt[1] for pt in res["box"]]
+                    bx, by, bw, bh = min(xs), min(ys), max(xs) - min(xs), max(ys) - min(ys)
+                ocr_boxes.append({"x": bx, "y": by, "w": bw, "h": bh})
+        except Exception as e:
+            logger.warning(f"[Panel Detection] Failed to retrieve OCR bounds for speech bubble protection: {e}")
+    else:
+        reason = "YOLO enabled (bubble detection handled below)" if use_yolo else f"image too large for CPU OCR ({orig_w}×{orig_h}px)"
+        logger.debug(f"[Panel Detection] Skipping OCR bubble protection: {reason}")
 
     # YOLO AI Object & Speech Bubble Detection + Panel Candidate Extraction
     if use_yolo:
@@ -149,38 +241,171 @@ def run_cv_detection(
             from providers.vision.yolo import get_yolo_model
             yolo_model = get_yolo_model()
             if yolo_model is not None:
-                raw_results = yolo_model.predict(image_path, conf=yolo_conf, verbose=False)
-                results = list(raw_results) if raw_results is not None else []
-                if results:
+                is_tall_strip_image = orig_h > 2000 and (float(orig_h) / float(max(1, orig_w)) > 1.5)
+
+                # ── Detect whether this is a bubble-specialist model ───────────────
+                # Generic COCO models detect person/car/etc — don't treat unknown classes as bubbles.
+                # Bubble-specialist models (kitsumed/ogkalu) have very few classes, all bubble-related.
+                _model_names = getattr(yolo_model, "names", {}) or {}
+                _num_classes = len(_model_names)
+                _is_bubble_specialist = _num_classes <= 5  # kitsumed=1 class, ogkalu=1-2 classes
+
+                # ── Build tile list ───────────────────────────────────────────────
+                # Use a larger tile height to give YOLO more context and reduce seam misses.
+                # Overlap at 25% of tile height to catch objects spanning tile boundaries.
+                tiles: List[Tuple[int, int]] = []
+                if is_tall_strip_image:
+                    # Target ~2x image width, clamped 1200–2000px — balances quality vs memory
+                    tile_h = min(2000, max(1200, int(orig_w * 2.5)))
+                    overlap = max(250, tile_h // 4)   # 25% overlap minimum
+                    step = tile_h - overlap
+                    for y_start in range(0, orig_h, step):
+                        y_end = min(orig_h, y_start + tile_h)
+                        tiles.append((y_start, y_end))
+                        if y_end >= orig_h:
+                            break
+                else:
+                    tiles.append((0, orig_h))
+
+                # ── Open PIL image once for tile cropping (avoid per-tile re-open) ─
+                _pil_full = None
+                if is_tall_strip_image and not (has_cv and img is not None):
+                    try:
+                        _pil_full = Image.open(image_path)
+                    except Exception:
+                        pass
+
+                # ── Separate confidence thresholds ────────────────────────────────
+                # Bubbles: we want high recall (lower conf), panels: we want high precision
+                _bubble_conf = max(0.10, yolo_conf - 0.05)  # slightly more permissive
+                _panel_conf  = max(yolo_conf, 0.25)         # stricter for panel candidates
+
+                yolo_count = 0
+                min_w_px = int(orig_w * scaled_min_width_pct)
+
+                # Raw lists before deduplication
+                _raw_bubble_boxes: List[Dict] = []
+                _raw_panel_boxes:  List[Dict] = []
+
+                for y_start, y_end in tiles:
+                    if is_tall_strip_image:
+                        if has_cv and img is not None:
+                            tile_src = img[y_start:y_end, :]
+                        elif _pil_full is not None:
+                            tile_src = _pil_full.crop((0, y_start, orig_w, y_end))
+                        else:
+                            tile_src = image_path
+                    else:
+                        tile_src = image_path
+
+                    try:
+                        raw_results = yolo_model.predict(
+                            tile_src,
+                            conf=_bubble_conf,   # use lower conf — we'll filter panels separately
+                            iou=0.45,            # tighter NMS within a single tile (default 0.7 is too loose)
+                            verbose=False,
+                            agnostic_nms=True,   # class-agnostic NMS handles multi-class bubble overlap
+                        )
+                        results = list(raw_results) if raw_results is not None else []
+                    except Exception as pred_err:
+                        logger.debug(f"[Panel Detection] Tile prediction warning ({y_start}-{y_end}): {pred_err}")
+                        continue
+
+                    if not results:
+                        continue
                     result = results[0]
                     boxes = getattr(result, "boxes", None)
-                    if boxes is not None:
-                        yolo_count = 0
-                        min_w_px = int(orig_w * scaled_min_width_pct)
-                        for box_instance in boxes:  # type: ignore
-                            coords = box_instance.xyxy[0].cpu().numpy()
-                            conf_score = float(box_instance.conf[0].cpu().numpy()) if box_instance.conf is not None else 0.8
-                            bx1, by1, bx2, by2 = coords
-                            bx, by, bw, bh = int(bx1), int(by1), int(bx2 - bx1), int(by2 - by1)
-                            
-                            # Add to speech bubble protection bounds if it's a bubble/text, or if class is not specified
-                            cls_id = int(box_instance.cls[0].cpu().numpy()) if hasattr(box_instance, "cls") and box_instance.cls is not None else 0
-                            cls_name = yolo_model.names.get(cls_id, "").lower() if hasattr(yolo_model, "names") and yolo_model.names is not None else ""
+                    if boxes is None:
+                        continue
 
-                            is_bubble = "bubble" in cls_name or "balloon" in cls_name or "text" in cls_name or "caption" in cls_name or not cls_name
-                            is_panel = "frame" in cls_name or "panel" in cls_name
+                    for box_instance in boxes:  # type: ignore
+                        coords = box_instance.xyxy[0].cpu().numpy()
+                        conf_score = float(box_instance.conf[0].cpu().numpy()) if box_instance.conf is not None else 0.8
+                        bx1, by1, bx2, by2 = float(coords[0]), float(coords[1]), float(coords[2]), float(coords[3])
 
-                            if is_bubble:
-                                ocr_boxes.append({"x": bx, "y": by, "w": bw, "h": bh})
-                            
-                            # Add to YOLO panel candidates ONLY if it is classified as a frame/panel
-                            if is_panel and bw >= min_w_px and bh >= scaled_min_height_px:
-                                yolo_panel_candidates.append({  # type: ignore
-                                    "x": bx, "y": by, "w": bw, "h": bh,
-                                    "confidence": conf_score
-                                })
-                            yolo_count += 1
-                        logger.info(f"[Panel Detection] Extracted {yolo_count} YOLO protection bounds & {len(yolo_panel_candidates)} YOLO panel candidates.")
+                        # Reproject tile-local coordinates back to full image space
+                        by1 += y_start
+                        by2 += y_start
+                        bx, by, bw, bh = int(bx1), int(by1), int(bx2 - bx1), int(by2 - by1)
+
+                        cls_id = int(box_instance.cls[0].cpu().numpy()) if hasattr(box_instance, "cls") and box_instance.cls is not None else 0
+                        cls_name = _model_names.get(cls_id, "").lower() if _model_names else ""
+
+                        # ── Class routing ─────────────────────────────────────────
+                        # Bubble detection: explicit class names OR unknown class on specialist models
+                        _is_named_bubble = (
+                            "bubble" in cls_name or
+                            "balloon" in cls_name or
+                            "text"   in cls_name or
+                            "caption" in cls_name or
+                            "speech" in cls_name or
+                            "dialog" in cls_name or
+                            "sfx"    in cls_name
+                        )
+                        # Only fall back "unknown = bubble" for specialist models; generic COCO
+                        # models detect people/cars/etc with no class name which should NOT be bubbles.
+                        is_bubble = _is_named_bubble or (not cls_name and _is_bubble_specialist)
+                        is_panel  = "frame" in cls_name or "panel" in cls_name or "page" in cls_name
+
+                        if is_bubble and bw > 5 and bh > 5:
+                            _raw_bubble_boxes.append({
+                                "x": bx, "y": by, "w": bw, "h": bh, "conf": conf_score
+                            })
+
+                        if is_panel and conf_score >= _panel_conf and bw >= min_w_px and bh >= scaled_min_height_px:
+                            _raw_panel_boxes.append({
+                                "x": bx, "y": by, "w": bw, "h": bh, "confidence": conf_score
+                            })
+
+                        yolo_count += 1
+
+                # ── Cross-tile NMS deduplication ──────────────────────────────────
+                # Tiles overlap by 25%, so the same bubble/panel appears in two tile results.
+                # Run a simple greedy IoU-based dedup to consolidate duplicates.
+                def _nms_boxes(raw: List[Dict], iou_thresh: float = 0.40) -> List[Dict]:
+                    if not raw:
+                        return []
+                    # Sort by confidence descending so we keep the highest-conf detection
+                    srt = sorted(raw, key=lambda d: -d.get("conf", d.get("confidence", 0.0)))
+                    kept: List[Dict] = []
+                    for cand in srt:
+                        cx1 = cand["x"];          cy1 = cand["y"]
+                        cx2 = cx1 + cand["w"];    cy2 = cy1 + cand["h"]
+                        duplicate = False
+                        for k in kept:
+                            kx1 = k["x"];          ky1 = k["y"]
+                            kx2 = kx1 + k["w"];    ky2 = ky1 + k["h"]
+                            ix1, iy1 = max(cx1, kx1), max(cy1, ky1)
+                            ix2, iy2 = min(cx2, kx2), min(cy2, ky2)
+                            inter = max(0, ix2 - ix1) * max(0, iy2 - iy1)
+                            if inter > 0:
+                                area_c = max(1, cand["w"] * cand["h"])
+                                area_k = max(1, k["w"]    * k["h"])
+                                iou = inter / float(area_c + area_k - inter)
+                                if iou >= iou_thresh:
+                                    duplicate = True
+                                    break
+                        if not duplicate:
+                            kept.append(cand)
+                    return kept
+
+                deduped_bubbles = _nms_boxes(_raw_bubble_boxes, iou_thresh=0.40)
+                deduped_panels  = _nms_boxes(_raw_panel_boxes,  iou_thresh=0.50)
+
+                # Populate final lists
+                for b in deduped_bubbles:
+                    ocr_boxes.append({"x": b["x"], "y": b["y"], "w": b["w"], "h": b["h"]})
+                for p in deduped_panels:
+                    yolo_panel_candidates.append({  # type: ignore
+                        "x": p["x"], "y": p["y"], "w": p["w"], "h": p["h"],
+                        "confidence": p["confidence"]
+                    })
+
+                logger.info(
+                    f"[Panel Detection] YOLO: {yolo_count} raw detections → "
+                    f"{len(deduped_bubbles)} bubbles + {len(deduped_panels)} panel candidates "
+                    f"across {len(tiles)} tiles (specialist_model={_is_bubble_specialist})."
+                )
         except Exception as e:
             logger.warning(f"[Panel Detection] Failed to retrieve YOLO bounds for panel detection: {e}")
 
@@ -206,25 +431,46 @@ def run_cv_detection(
         gray_arr_processed = gray_arr
 
     # Background detection
-    is_white_bg, threshold_val, median_bg = _detect_bg_color_and_threshold(gray_arr_processed, bg_mode, sensitivity)
-    is_tall_strip = (h / max(1, w) > 1.7)
+    color_arr_processed = img[crop_y : crop_y + crop_h, crop_x : crop_x + crop_w] if (img is not None and crop_w > 0 and crop_h > 0) else img
+    bg_res = _detect_bg_color_and_threshold(gray_arr_processed, bg_mode, sensitivity, color_arr=color_arr_processed)
+    is_white_bg, threshold_val, median_bg, bg_std, top_median, bottom_median, bg_color_rgb = bg_res
+    is_tall_strip = (h / max(1, w) > tall_strip_ratio)
 
-    passes = [False] if (auto_split and is_tall_strip) else ([False, True] if has_cv else [False])
+    passes = [False, True]
     raw_boxes: List[Dict[str, Any]] = []
     merged_boxes: List[Dict[str, Any]] = []
 
     for high_sensitivity in passes:
         if auto_split and is_tall_strip:
-            logger.info(f"[Panel Detection] Running Webtoon Slicing strategy (high_sensitivity={high_sensitivity})")
+            logger.info(f"[Panel Detection] Running Enhanced Webtoon Slicing strategy (high_sensitivity={high_sensitivity})")
             raw_boxes = _detect_panels_webtoon(
-                gray_arr_processed, is_white_bg, threshold_val, scaled_min_height_px, scaled_min_width_pct, ocr_boxes, median_bg, sensitivity
+                gray_arr_processed, is_white_bg, threshold_val, scaled_min_height_px,
+                scaled_min_width_pct, ocr_boxes, median_bg, sensitivity,
+                gutter_bg_ratio=gutter_bg_ratio,
+                gutter_std_thresh=gutter_std_thresh,
+                gutter_flat_bg_ratio=gutter_flat_bg_ratio,
+                top_median=top_median,
+                bottom_median=bottom_median,
+                enable_x_trimming=False,
+                high_sensitivity=high_sensitivity
             )
         else:
             logger.info(f"[Panel Detection] Running Grid strategy (high_sensitivity={high_sensitivity})")
             if has_cv:
-                raw_boxes = _detect_panels_grid_cv(gray_arr_processed, is_white_bg, threshold_val, canny_low, canny_high, scaled_close_kernel, high_sensitivity, min_panel_area=min_panel_area)
+                raw_boxes = _detect_panels_grid_cv(
+                    gray_arr_processed, is_white_bg, threshold_val,
+                    canny_low, canny_high, scaled_close_kernel, high_sensitivity,
+                    min_panel_area=min_panel_area,
+                    max_aspect_ratio=max_aspect_ratio,
+                    min_aspect_ratio=min_aspect_ratio,
+                )
             else:
-                raw_boxes = _detect_panels_grid_pil(gray_arr_processed, is_white_bg, sensitivity, scaled_min_height_px, min_panel_area=min_panel_area)
+                raw_boxes = _detect_panels_grid_pil(
+                    gray_arr_processed, is_white_bg, sensitivity, scaled_min_height_px,
+                    min_panel_area=min_panel_area,
+                    max_aspect_ratio=max_aspect_ratio,
+                    min_aspect_ratio=min_aspect_ratio,
+                )
 
         # Fuse YOLO panel candidates with OpenCV raw boxes
         if use_yolo and yolo_panel_candidates:
@@ -253,7 +499,14 @@ def run_cv_detection(
 
         min_w = w * scaled_min_width_pct
         effective_merge_thresh = 0 if (auto_split and is_tall_strip) else merge_threshold
-        filtered_boxes = _filter_solid_noise(raw_boxes, gray_arr_processed, min_w, scaled_min_height_px, auto_split, min_panel_area=min_panel_area)
+        filtered_boxes = _filter_solid_noise(
+            raw_boxes, gray_arr_processed, min_w, scaled_min_height_px, auto_split,
+            min_panel_area=min_panel_area,
+            max_aspect_ratio=max_aspect_ratio,
+            min_aspect_ratio=min_aspect_ratio,
+            noise_std_thresh=noise_std_thresh,
+            flat_row_ratio=flat_row_ratio,
+        )
         merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, effective_merge_thresh)
 
         if bg_mode == "white":
@@ -281,18 +534,30 @@ def run_cv_detection(
 
         if len(merged_boxes) > 0:
             has_irregular = False
+            # For Grid mode: check aspect ratio irregularity to trigger high-sensitivity retry
             if not (auto_split and is_tall_strip):
                 for box in merged_boxes:
                     aspect = float(box["w"]) / float(box["h"]) if box["h"] > 0 else 1.0
-                    if aspect > 5.0 or aspect < 0.2:
+                    if aspect > irregular_aspect_high or aspect < irregular_aspect_low:
                         has_irregular = True
                         break
+            # For Webtoon mode: check if the result is a single full-frame (detection failed)
+            else:
+                is_webtoon_full_frame = (
+                    len(merged_boxes) == 1 and
+                    merged_boxes[0]["w"] >= int(w * 0.95) and
+                    merged_boxes[0]["h"] >= int(h * 0.95)
+                )
+                if is_webtoon_full_frame and not high_sensitivity:
+                    has_irregular = True
+                    logger.info("[Panel Detection] Webtoon single full-frame detected on Pass 1; retrying with high sensitivity.")
+
             if not has_irregular:
                 break
             else:
-                logger.info("[Panel Detection] Irregular panels detected; re-running with high sensitivity fallback.")
+                logger.info(f"[Panel Detection] Panels need retry (high_sensitivity={high_sensitivity}); re-running with high sensitivity fallback.")
         else:
-            logger.info("[Panel Detection] 0 panels detected; re-running with high sensitivity fallback.")
+            logger.info(f"[Panel Detection] 0 panels detected (high_sensitivity={high_sensitivity}); re-running with high sensitivity fallback.")
 
     is_full_frame_only = (
         len(merged_boxes) == 0 or
@@ -302,8 +567,10 @@ def run_cv_detection(
     if is_full_frame_only:
         logger.info(f"[Panel Detection] 0 panels or single full-frame box detected; applying vertical fallback segment slicing (is_tall_strip={is_tall_strip})...")
         merged_boxes = []
-        if is_tall_strip:
-            num_segments = max(2, int(round(h / max(1.0, w * 0.9))))
+        if fallback_segments > 0:
+            num_segments = fallback_segments
+        elif is_tall_strip:
+            num_segments = max(2, round(h / max(1.0, w * 0.9)))
         else:
             num_segments = 2 if h >= w else 3
 
@@ -314,40 +581,42 @@ def run_cv_detection(
             merged_boxes.append({"x": 0, "y": sy, "w": w, "h": sh})
 
     # Speech Bubble / OCR Box Expansion & Panel Snapping
-    # Smartly groups floating speech bubbles directly associated with a panel into that panel’s bounding box
+    # Smartly groups floating speech bubbles directly overlapping a panel into that panel’s bounding box.
+    # Strictly caps expansion (max 15px or 8% height) to prevent cascading panel mergers across webtoon gutters.
     if ocr_boxes and len(merged_boxes) > 0:
         expanded_boxes = []
         for box in merged_boxes:
+            orig_by1, orig_by2 = box["y"], box["y"] + box["h"]
+            max_expand_y = max(15, int(box["h"] * 0.08))  # max 8% height expansion limit
+
             bx1, by1 = box["x"], box["y"]
             bx2, by2 = box["x"] + box["w"], box["y"] + box["h"]
-            
+
             for ob in ocr_boxes:
                 ox1, oy1 = ob["x"], ob["y"]
                 ox2, oy2 = ob["x"] + ob["w"], ob["y"] + ob["h"]
-                
+
                 # Check horizontal overlap
                 h_overlap = max(0, min(bx2, ox2) - max(bx1, ox1))
                 if h_overlap > 0:
-                    # Check vertical distance (close to the panel vertically, e.g. within 150px or 40% of panel height)
-                    v_dist = min(abs(oy2 - by1), abs(by2 - oy1))
-                    is_adjacent = v_dist < min(150, max(50, int((by2 - by1) * 0.40)))
-                    
-                    # Also check if it's already overlapping vertically
-                    v_overlap = max(0, min(by2, oy2) - max(by1, oy1))
-                    
-                    if is_adjacent or v_overlap > 0:
-                        # Associate and expand the panel box to contain the bubble
+                    v_dist = min(abs(oy2 - orig_by1), abs(orig_by2 - oy1))
+                    v_overlap = max(0, min(orig_by2, oy2) - max(orig_by1, oy1))
+
+                    # Only snap if bubble is already overlapping vertically or within 15px
+                    if v_overlap > 0 or v_dist <= 15:
+                        cand_by1 = max(orig_by1 - max_expand_y, min(by1, oy1))
+                        cand_by2 = min(orig_by2 + max_expand_y, max(by2, oy2))
                         bx1 = min(bx1, ox1)
-                        by1 = min(by1, oy1)
+                        by1 = cand_by1
                         bx2 = max(bx2, ox2)
-                        by2 = max(by2, oy2)
-            
+                        by2 = cand_by2
+
             # Constrain to image dimensions
             bx1 = max(0, bx1)
             by1 = max(0, by1)
             bx2 = min(w, bx2)
             by2 = min(h, by2)
-            
+
             expanded_boxes.append({
                 "x": bx1,
                 "y": by1,
@@ -363,7 +632,8 @@ def run_cv_detection(
     
     for idx, box in enumerate(merged_boxes):
         bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
-            
+
+        # Translate from trimmed-image space back to original-image space
         bx += crop_x
         by += crop_y
 
@@ -374,15 +644,29 @@ def run_cv_detection(
             pad_bh = min(orig_h - pad_by, bh + (padding_px * 2))
             bx, by, bw, bh = pad_bx, pad_by, pad_bw, pad_bh
 
+        # Clamp to original image bounds (guards against floating-point/padding overshoot)
+        bx = max(0, min(bx, orig_w - 1))
+        by = max(0, min(by, orig_h - 1))
+        bw = max(1, min(bw, orig_w - bx))
+        bh = max(1, min(bh, orig_h - by))
+
         x, y, w_box, h_box = adjust_to_aspect_ratio(
             bx, by, bw, bh, orig_w, orig_h, aspect_ratio_str
         )
-        
+
+        # Final bounds check — skip (don't crash) if still out of range after clamping
         if x < 0 or y < 0 or w_box <= 0 or h_box <= 0 or (x + w_box) > orig_w or (y + h_box) > orig_h:
-            raise ValueError(
-                f"Panel coordinates out of bounds: x={x}, y={y}, w_box={w_box}, h_box={h_box} for image of size {orig_w}x{orig_h}"
+            logger.warning(
+                f"[Panel Detection] Skipping panel {idx+1}: out-of-bounds after adjust "
+                f"(x={x}, y={y}, w={w_box}, h={h_box}, img={orig_w}x{orig_h})"
             )
+            continue
         
+        # For Webtoon tall strips (free aspect ratio), slice across full content column width
+        if is_tall_strip and auto_split and (not aspect_ratio_str or aspect_ratio_str == "free"):
+            x = crop_x if (crop_w > 0 and crop_w < orig_w) else 0
+            w_box = crop_w if (crop_w > 0 and crop_w < orig_w) else orig_w
+
         safe_orig_h = max(1, orig_h)
         safe_orig_w = max(1, orig_w)
         crop_top = (y / safe_orig_h) * 100
@@ -420,7 +704,9 @@ def run_cv_detection(
         else:
             panel_type = "Standard Storyboard Panel"
 
-        confidence = 0.95 if (w_box > 40 and h_box > 40 and area_pct > 0.5) else 0.80
+        yolo_boosted = box.get("yolo_boosted", False)
+        base_conf = 0.95 if (w_box > 40 and h_box > 40 and area_pct > 0.5) else 0.80
+        confidence = min(0.99, base_conf + (0.04 if yolo_boosted else 0.0))
 
         final_panels.append({
             "id": f"panel-{idx + 1}",
@@ -442,41 +728,90 @@ def run_cv_detection(
             "isHeader": is_header,
         })
         
-    sorted_panels = sorted(
-        final_panels,
-        key=lambda b: (round(b.get("cropTop", 0.0) / 4.0), b.get("cropLeft", 0.0))
-    )
+    # Sort according to requested reading order (LTR Western vs RTL Manga).
+    # Use pixel y (top-to-bottom) as primary key, then pixel x (left-to-right / right-to-left).
+    # Avoid the old 4%-cropTop row-band grouping which reorders panels incorrectly on
+    # tall stitched strips (one band ≈ 2,400 px on a 60,000 px image).
+    if reading_order.lower() == "rtl":
+        sorted_panels = sorted(
+            final_panels,
+            key=lambda b: (b.get("y", 0), -b.get("x", 0))
+        )
+    else:
+        sorted_panels = sorted(
+            final_panels,
+            key=lambda b: (b.get("y", 0), b.get("x", 0))
+        )
     
     unique_panels = []
     for panel in sorted_panels:
+        if panel.get("confidence", 1.0) < min_confidence:
+            continue
+            
         is_dup = False
+        px1, px2 = panel["x"], panel["x"] + panel["width"]
         py1, py2 = panel["y"], panel["y"] + panel["height"]
         p_area = max(1, panel["height"] * panel["width"])
         
         for existing in unique_panels:
+            ex1, ex2 = existing["x"], existing["x"] + existing["width"]
             ey1, ey2 = existing["y"], existing["y"] + existing["height"]
             e_area = max(1, existing["height"] * existing["width"])
             
-            # Calculate vertical overlap
-            y_inter = max(0, min(py2, ey2) - max(py1, ey1))
-            min_h = min(panel["height"], existing["height"])
-            overlap_ratio = y_inter / float(min_h) if min_h > 0 else 0.0
+            # Calculate 2D Intersection Area (X and Y)
+            ix1 = max(px1, ex1)
+            iy1 = max(py1, ey1)
+            ix2 = min(px2, ex2)
+            iy2 = min(py2, ey2)
             
-            dt = abs(panel["cropTop"] - existing["cropTop"])
-            db = abs(panel["cropBottom"] - existing["cropBottom"])
+            iw = max(0, ix2 - ix1)
+            ih = max(0, iy2 - iy1)
+            intersection_area = iw * ih
             
-            if (dt < 4.0 and db < 4.0) or (overlap_ratio > 0.70):
-                is_dup = True
-                break
+            if intersection_area > 0:
+                min_area = min(p_area, e_area)
+                iou_min = intersection_area / float(min_area)
+                
+                # Calculate difference across all 4 crop bounds
+                dt = abs(panel.get("cropTop", 0.0) - existing.get("cropTop", 0.0))
+                db = abs(panel.get("cropBottom", 0.0) - existing.get("cropBottom", 0.0))
+                dl = abs(panel.get("cropLeft", 0.0) - existing.get("cropLeft", 0.0))
+                dr = abs(panel.get("cropRight", 0.0) - existing.get("cropRight", 0.0))
+                
+                # Only treat as duplicate if 2D overlap exceeds threshold OR all 4 crop corners match
+                if iou_min > dedup_overlap_thresh or (dt < dedup_crop_tolerance and db < dedup_crop_tolerance and dl < dedup_crop_tolerance and dr < dedup_crop_tolerance):
+                    is_dup = True
+                    break
                 
         if not is_dup:
             unique_panels.append(panel)
 
-    for idx, panel in enumerate(unique_panels):
-        panel["id"] = f"panel-{idx + 1}"
-        panel["index"] = idx + 1
+    if max_panels > 0 and len(unique_panels) > max_panels:
+        unique_panels = unique_panels[:max_panels]
 
-    return unique_panels
+    sanitized_panels = []
+    for idx, panel in enumerate(unique_panels):
+        sanitized_panels.append({
+            "id": f"panel-{idx + 1}",
+            "index": int(idx + 1),
+            "x": int(panel["x"]),
+            "y": int(panel["y"]),
+            "width": int(panel["width"]),
+            "height": int(panel["height"]),
+            "cropTop": float(panel["cropTop"]),
+            "cropBottom": float(panel["cropBottom"]),
+            "cropLeft": float(panel["cropLeft"]),
+            "cropRight": float(panel["cropRight"]),
+            "area": int(panel["area"]),
+            "areaPct": float(panel["areaPct"]),
+            "aspectRatio": float(panel["aspectRatio"]),
+            "aspectRatioLabel": str(panel["aspectRatioLabel"]),
+            "panelType": str(panel["panelType"]),
+            "confidence": float(panel["confidence"]),
+            "isHeader": bool(panel["isHeader"]),
+        })
+
+    return sanitized_panels
 
 
 def main():
@@ -496,6 +831,12 @@ def main():
     parser.add_argument("--auto_split", action="store_true", default=True, help="Automatically split tall strips at gutters")
     parser.add_argument("--no_auto_split", dest="auto_split", action="store_false", help="Disable automatic strip splitting")
     
+    parser.add_argument("--enable_clahe", action="store_true", help="Apply CLAHE contrast equalisation before detection")
+    parser.add_argument("--bilateral_d", type=int, default=0, help="Bilateral filter diameter (0=disabled)")
+    parser.add_argument("--reading_order", default="ltr", choices=["ltr", "rtl"], help="Reading order sorting (ltr or rtl)")
+    parser.add_argument("--min_confidence", type=float, default=0.0, help="Minimum confidence threshold (0.0-1.0)")
+    parser.add_argument("--max_panels", type=int, default=0, help="Maximum panel cap (0 = unlimited)")
+
     args = parser.parse_args()
     
     if not os.path.exists(args.image_path):
@@ -515,7 +856,12 @@ def main():
             canny_high=args.canny_high,
             close_kernel_size=args.close_kernel_size,
             auto_split=args.auto_split,
-            min_panel_area=args.min_panel_area
+            min_panel_area=args.min_panel_area,
+            enable_clahe=args.enable_clahe,
+            bilateral_d=args.bilateral_d,
+            reading_order=args.reading_order,
+            min_confidence=args.min_confidence,
+            max_panels=args.max_panels
         )
         print(json.dumps({"success": True, "panels": panels, "message": f"Detected {len(panels)} panels."}))
     except Exception as e:

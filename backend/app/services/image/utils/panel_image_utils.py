@@ -72,8 +72,8 @@ def trim_solid_borders(
         trim_x1 = x1 + int(col_indices[0])
         trim_x2 = x1 + int(col_indices[-1]) + 1
 
-        max_trim_x = int((x2 - x1) * 0.45)
-        max_trim_y = int((y2 - y1) * 0.45)
+        max_trim_x = int((x2 - x1) * 0.08)
+        max_trim_y = int((y2 - y1) * 0.08)
 
         new_x1 = max(x1, min(trim_x1, x1 + max_trim_x))
         new_y1 = max(y1, min(trim_y1, y1 + max_trim_y))
@@ -92,7 +92,11 @@ def _filter_solid_noise(
     min_w: float,
     height_limit: int,
     auto_split: bool,
-    min_panel_area: float = 5000.0
+    min_panel_area: float = 5000.0,
+    max_aspect_ratio: float = 10.0,
+    min_aspect_ratio: float = 0.1,
+    noise_std_thresh: float = 5.0,
+    flat_row_ratio: float = 0.80,
 ) -> List[Dict[str, Any]]:
     filtered_boxes = []
     h_img, w_img = gray_arr.shape
@@ -115,7 +119,7 @@ def _filter_solid_noise(
 
         # Discard thin horizontal/vertical strip artifacts
         aspect = float(bw) / float(bh) if bh > 0 else 1.0
-        if aspect > 10.0 or aspect < 0.1 or bw < 30 or bh < 30:
+        if aspect > max_aspect_ratio or aspect < min_aspect_ratio or bw < 30 or bh < 30:
             continue
 
         if auto_split:
@@ -127,11 +131,11 @@ def _filter_solid_noise(
 
         try:
             box_slice = gray_arr[by:by+bh, bx:bx+bw]
-            if np.std(box_slice) < 5.0:
+            if np.std(box_slice) < noise_std_thresh:
                 continue
             row_stds = np.std(box_slice, axis=1)
             flat_rows = np.sum(row_stds < 3.0)
-            if float(flat_rows) / float(max(1, bh)) > 0.80:
+            if float(flat_rows) / float(max(1, bh)) > flat_row_ratio:
                 continue
         except Exception:
             pass

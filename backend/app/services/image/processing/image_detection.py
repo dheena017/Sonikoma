@@ -8,7 +8,7 @@ import logging
 import asyncio
 from typing import List, Dict, Any
 
-from media.image.cleaner import remove_speech_bubbles
+from services.image.cleaner import remove_speech_bubbles
 import services.image.utils.image_utils as img_utils
 from core.cache import stitched_cache, edit_history
 from database.storage.supabase_storage import upload_to_supabase_bucket

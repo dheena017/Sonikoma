@@ -15,8 +15,8 @@ LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "local_med
 # Matches main.py mount: /media -> <LOCAL_MEDIA_ROOT>
 LOCAL_MEDIA_URL_PREFIX = "/media"
 
-from media.image.ocr import extract_full_ocr_data
-from media.image.detect_panels import _detect_bg_color_and_threshold
+from services.image.ocr import extract_full_ocr_data
+from services.image.panel_webtoon_detect import _detect_bg_color_and_threshold
 from providers.vision.yolo import segment_text_and_balloons, segment_characters
 from database.storage.supabase_storage import upload_to_supabase_bucket
 from providers.vision.sam import has_rembg, segment_character_u2net
@@ -131,7 +131,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
 
     # Detect dominant background color and threshold
     gray_img = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
-    is_white_bg, threshold_val = _detect_bg_color_and_threshold(gray_img, bg_mode="auto", sensitivity=30.0)
+    is_white_bg, threshold_val, median_bg, bg_std, top_median, bottom_median, bg_color_rgb = _detect_bg_color_and_threshold(gray_img, bg_mode="auto", sensitivity=30.0)
     logger.info(f"[Background Context] Detected background is {'white/light' if is_white_bg else 'black/dark'} (threshold_val={threshold_val})")
 
     # Initialize masks and layer containers
@@ -156,8 +156,8 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
             char_pil_scan = segment_character_u2net(pil_orig)
             if char_pil_scan is not None:
                 char_np_scan = np.array(char_pil_scan)
-            if char_np_scan.shape[2] == 4:
-                global_char_mask = char_np_scan[:, :, 3]
+                if char_np_scan.ndim == 3 and char_np_scan.shape[2] == 4:
+                    global_char_mask = char_np_scan[:, :, 3]
     except Exception as e:
         logger.error(f"[Global Detection] Character pre-detection scan failed: {e}", exc_info=True)
 
@@ -241,7 +241,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, str]:
                         if cv2.pointPolygonTest(cnt, (cx, cy), False) >= 0:
                             hull = cv2.convexHull(cnt)
                             hull_area = cv2.contourArea(hull)
-                            solidity = float(area) / hull_area if hull_area > 0 else 0
+                            solidity = area / hull_area if hull_area > 0 else 0
 
                             if solidity > 0.7:
                                 closed_cnt = smooth_contour(cnt)
