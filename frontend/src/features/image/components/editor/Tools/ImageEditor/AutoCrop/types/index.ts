@@ -7,3 +7,6 @@ export interface OpenCVSettings {
 export interface AISmartSettings {
   [key: string]: any;
 }
+export interface HybridSettings {
+  [key: string]: any;
+}

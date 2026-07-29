@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AutoCropSettings, OpenCVSettings, AISmartSettings } from '@/features/image/components/editor/Tools/ImageEditor/AutoCrop/types';
+import { AutoCropSettings, OpenCVSettings, AISmartSettings, HybridSettings } from '@/features/image/components/editor/Tools/ImageEditor/AutoCrop/types';
 import { EngineRegistry } from '@/features/image/components/editor/Tools/ImageEditor/AutoCrop/services/EngineRegistry';
 
 const defaultOpenCVSettings: OpenCVSettings = {
@@ -22,28 +22,34 @@ const defaultAISmartSettings: AISmartSettings = {
   focusMode: "standard",
 };
 
+const defaultHybridSettings: HybridSettings = {
+  mode: "balanced",
+};
+
 export const defaultAutoCropSettings: AutoCropSettings = {
-  engine: "opencv",
+  engine: "hybrid",
+  imageType: "auto",
   opencv: defaultOpenCVSettings,
   aiSmart: defaultAISmartSettings,
+  hybrid: defaultHybridSettings,
 };
 
 interface AutoCropContextProps {
   settings: AutoCropSettings;
   updateSettings: (newSettings: Partial<AutoCropSettings>) => void;
-  updateEngineSettings: (engine: "opencv" | "aiSmart", engineSettings: Partial<OpenCVSettings | AISmartSettings>) => void;
+  updateEngineSettings: (engine: "opencv" | "aiSmart" | "hybrid", engineSettings: Partial<OpenCVSettings | AISmartSettings | HybridSettings>) => void;
   activeEngine: string;
-  setActiveEngine: (engineId: "opencv" | "aiSmart") => void;
+  setActiveEngine: (engineId: "opencv" | "aiSmart" | "hybrid") => void;
 }
 
 const AutoCropContext = createContext<AutoCropContextProps | undefined>(undefined);
 
 export function AutoCropProvider({
   children,
-  initialEngine = "opencv"
+  initialEngine = "hybrid"
 }: {
   children: React.ReactNode;
-  initialEngine?: "opencv" | "aiSmart";
+  initialEngine?: "opencv" | "aiSmart" | "hybrid";
 }) {
   const [settings, setSettings] = useState<AutoCropSettings>(() => ({
     ...defaultAutoCropSettings,
@@ -54,7 +60,7 @@ export function AutoCropProvider({
     setSettings((prev) => ({ ...prev, ...newSettings }));
   };
 
-  const updateEngineSettings = (engine: "opencv" | "aiSmart", engineSettings: Partial<OpenCVSettings | AISmartSettings>) => {
+  const updateEngineSettings = (engine: "opencv" | "aiSmart" | "hybrid", engineSettings: Partial<OpenCVSettings | AISmartSettings | HybridSettings>) => {
     setSettings((prev) => ({
       ...prev,
       [engine]: {
@@ -64,7 +70,7 @@ export function AutoCropProvider({
     }));
   };
 
-  const setActiveEngine = (engineId: "opencv" | "aiSmart") => {
+  const setActiveEngine = (engineId: "opencv" | "aiSmart" | "hybrid") => {
     updateSettings({ engine: engineId });
   };
 

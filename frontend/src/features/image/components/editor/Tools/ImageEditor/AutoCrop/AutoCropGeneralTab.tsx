@@ -7,96 +7,79 @@ import { AutoCropEngineSelectorV2 } from "@/features/image/components/editor/Too
 import { AutoCropContextWrapper } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropContextWrapper";
 import { AutoCropComplexityAnalysis } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/AutoCropComplexityAnalysis";
 import { getProxiedImageUrl } from "@/utils";
+import { useAutoCrop } from "@/features/image/components/editor/Tools/ImageEditor/AutoCrop/contexts/AutoCropContext";
 
-export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: AutoCropSharedProps) {
-  const { activeSlot, applyBuiltInPreset } = useAutoCropPresets(props);
+const GeneralTabInner = React.memo(function GeneralTabInner(props: AutoCropSharedProps & { firstImageUrl: string | null; batchCount: number; activeSlot: string | null; applyBuiltInPreset: any }) {
+  const { settings, updateSettings, setActiveEngine, activeEngine } = useAutoCrop();
+  const { firstImageUrl, batchCount, activeSlot, applyBuiltInPreset } = props;
 
-  const firstImageUrl =
-    props.previewImageUrl ||
-    (props.selectedScraped.length > 0
-      ? props.selectedScraped[0]
-      : props.scrapedImages.length > 0
-      ? props.scrapedImages[0]
-      : null);
-
-  const batchCount = props.selectedScraped.length > 0
-    ? props.selectedScraped.length
-    : props.scrapedImages.length;
+  const handleImageTypeChange = (type: "auto" | "strip" | "panel") => {
+    updateSettings({ imageType: type });
+    // Legacy sync
+    if (type === "strip") props.setAutoSplitTallStrips(true);
+    if (type === "panel") props.setAutoSplitTallStrips(false);
+  };
 
   return (
-    <AutoCropContextWrapper legacyProps={props}>
-      <div className="w-full h-full flex flex-col space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 animate-[fadeIn_0.22s_ease-out] items-start">
-        {/* ── Left Column (5 cols on lg+): Presets & Webtoon Seam Slicer ── */}
-        <div className="lg:col-span-5 flex flex-col space-y-5 w-full">
-          {/* Section 1: Presets */}
-          <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl space-y-4 shadow-xl backdrop-blur-md">
-            <AutoCropPresetGrid
-              activeSlot={activeSlot}
-              applyPreset={applyBuiltInPreset}
-              firstImageUrl={firstImageUrl}
-            />
+    <div className="w-full h-full flex flex-col space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 animate-[fadeIn_0.22s_ease-out] items-start">
+      {/* ── Left Column (5 cols on lg+): Image Type & Presets ── */}
+      <div className="lg:col-span-5 flex flex-col space-y-5 w-full">
+
+        {/* New Image Type Selector */}
+        <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl shadow-xl backdrop-blur-md flex flex-col gap-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Image className="h-4 w-4 text-indigo-400" />
+            <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+              Image Type
+            </span>
           </div>
-
-          {/* Section 2: Webtoon Seam Slicer */}
-          <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl shadow-xl backdrop-blur-md">
-            <label className="group flex items-start justify-between gap-4 cursor-pointer select-none">
-              <div className="flex items-start gap-3">
-                <div className={`p-2.5 rounded-2xl border transition-all mt-0.5 ${
-                  props.autoSplitTallStrips
-                    ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-500"
-                }`}>
-                  <input
-                    type="checkbox"
-                    checked={props.autoSplitTallStrips}
-                    onChange={(e) => props.setAutoSplitTallStrips(e.target.checked)}
-                    className="sr-only"
-                  />
-                  <div className={`h-4 w-4 rounded-full border flex items-center justify-center transition-all ${
-                    props.autoSplitTallStrips ? "border-indigo-400 bg-indigo-500" : "border-neutral-700 bg-neutral-900"
-                  }`}>
-                    {props.autoSplitTallStrips && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">
-                      Auto-Split Tall Webtoon Strips
-                    </span>
-                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
-                      props.autoSplitTallStrips
-                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                        : "bg-neutral-850 text-neutral-500"
-                    }`}>
-                      {props.autoSplitTallStrips ? "ACTIVE" : "DISABLED"}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-neutral-400 font-sans leading-relaxed">
-                    Automatically detects vertical white/black gutters to slice long multi-scene webtoon strips into standalone panels.
-                  </p>
-                </div>
-              </div>
-
-              {/* Custom Toggle Switch */}
-              <button
-                type="button"
-                onClick={() => props.setAutoSplitTallStrips(!props.autoSplitTallStrips)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  props.autoSplitTallStrips ? "bg-indigo-600" : "bg-neutral-800"
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                    props.autoSplitTallStrips ? "translate-x-5" : "translate-x-0"
+          <div className="flex flex-col gap-2">
+            {[
+              { id: "auto", label: "Auto Detect", desc: "Recommended. Automatically determines strip vs panel." },
+              { id: "strip", label: "Long Comic Strip", desc: "Multiple panels combined in a single long image." },
+              { id: "panel", label: "Individual Panels", desc: "Every image is already a single panel." },
+            ].map((type) => {
+              const isActive = settings.imageType === type.id;
+              return (
+                <button
+                  key={type.id}
+                  onClick={() => handleImageTypeChange(type.id as "auto" | "strip" | "panel")}
+                  className={`flex items-start gap-3 p-3 rounded-2xl border text-left transition-all ${
+                    isActive
+                      ? "bg-indigo-500/10 border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.1)]"
+                      : "bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/80"
                   }`}
-                />
-              </button>
-            </label>
+                >
+                  <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    isActive ? "border-indigo-400" : "border-neutral-600"
+                  }`}>
+                    {isActive && <div className="w-2 h-2 rounded-full bg-indigo-400" />}
+                  </div>
+                  <div>
+                    <div className={`text-xs font-bold ${isActive ? "text-indigo-300" : "text-neutral-300"}`}>
+                      {type.label}
+                    </div>
+                    <div className="text-[10px] text-neutral-500 mt-0.5 leading-tight">
+                      {type.desc}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
+        </div>
 
-          {/* Section 3: Live Image Edge Complexity Analysis */}
-          {firstImageUrl && (
+        {/* Section 1: Presets */}
+        <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl space-y-4 shadow-xl backdrop-blur-md">
+          <AutoCropPresetGrid
+            activeSlot={activeSlot as any}
+            applyPreset={applyBuiltInPreset}
+            firstImageUrl={firstImageUrl}
+          />
+        </div>
+
+        {/* Section 3: Live Image Edge Complexity Analysis */}
+          {firstImageUrl && typeof firstImageUrl === "string" && (
             <AutoCropComplexityAnalysis
               firstImageUrl={firstImageUrl}
               setCannyLow={props.setCropCannyLow}
@@ -120,19 +103,31 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: 
             </div>
 
             {firstImageUrl ? (
-              <div className="relative h-44 w-full bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 group">
+              <div className="relative h-44 w-full bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-800 group flex items-center justify-center">
                 <img
                   src={getProxiedImageUrl(firstImageUrl)}
                   alt="Target Preview"
-                  className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+                  className="max-w-full max-h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 pointer-events-none" />
+                <div className="absolute top-2.5 left-3 right-3 flex flex-col gap-1 items-start text-[9px] font-mono font-bold text-neutral-300 pointer-events-none">
+                   {settings.imageType === "strip" && (
+                     <div className="bg-indigo-950/80 backdrop-blur-sm px-2 py-1 rounded border border-indigo-500/30 text-indigo-300 flex items-center gap-1.5">
+                       <Zap className="w-3 h-3" /> Analyzing image...
+                     </div>
+                   )}
+                   {settings.imageType === "strip" && (
+                      <div className="bg-emerald-950/80 backdrop-blur-sm px-2 py-1 rounded border border-emerald-500/30 text-emerald-300 flex items-center gap-1.5">
+                        <ShieldCheck className="w-3 h-3" /> Long Comic Strip detected
+                      </div>
+                   )}
+                </div>
                 <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[9px] font-mono font-bold text-neutral-300">
                   <span className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded border border-white/10">
-                    Aspect: {props.aspectRatioLock.toUpperCase()}
+                    Aspect: {props.aspectRatioLock?.toUpperCase() || "FREE"}
                   </span>
                   <span className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded border border-white/10 text-emerald-400">
-                    {props.useLocalCV ? "⚡ OPENCV ACTIVE" : "✨ GEMINI AI ACTIVE"}
+                    {activeEngine === "opencv" ? "⚡ OPENCV ACTIVE" : activeEngine === "aiSmart" ? "✨ AI ACTIVE" : "⭐ HYBRID ACTIVE"}
                   </span>
                 </div>
               </div>
@@ -155,11 +150,83 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: 
 
         {/* ── Right Column (7 cols on lg+): Detection Engine & Fine Tuning ── */}
         <div className="lg:col-span-7 flex flex-col space-y-5 w-full">
+          {/* New Engine Selector */}
           <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl space-y-5 shadow-xl backdrop-blur-md">
+             <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-indigo-400" />
+                  <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                    Crop Engine
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { id: "hybrid", label: "Hybrid ⭐", desc: "Recommended" },
+                    { id: "aiSmart", label: "AI (YOLO)", desc: "Deep Learning" },
+                    { id: "opencv", label: "OpenCV", desc: "Fast & Local" },
+                  ].map((engine) => {
+                    const isActive = activeEngine === engine.id;
+                    return (
+                      <button
+                        key={engine.id}
+                        onClick={() => {
+                          setActiveEngine(engine.id as any);
+                          // Sync with legacy props for now
+                          if (engine.id === "aiSmart") props.setUseLocalCV?.(false);
+                          else if (engine.id === "opencv") props.setUseLocalCV?.(true);
+                          else props.setUseLocalCV?.(true); // hybrid uses local CV base
+                        }}
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all ${
+                          isActive
+                            ? "bg-indigo-500/10 border-indigo-500/40 shadow-[0_0_15px_rgba(99,102,241,0.1)]"
+                            : "bg-neutral-900 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/80"
+                        }`}
+                      >
+                        <span className={`text-xs font-bold ${isActive ? "text-indigo-300" : "text-neutral-300"}`}>
+                          {engine.label}
+                        </span>
+                        <span className="text-[9px] text-neutral-500 mt-1">
+                          {engine.desc}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+             </div>
+
+             <div className="h-px w-full bg-neutral-800 my-4" />
+
             <AutoCropEngineSelectorV2 legacyProps={props} />
           </div>
         </div>
       </div>
+  );
+});
+
+export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: AutoCropSharedProps) {
+  const { activeSlot, applyBuiltInPreset } = useAutoCropPresets(props);
+
+  const firstImageUrl =
+    props.previewImageUrl ||
+    (props.selectedScraped.length > 0
+      ? props.selectedScraped[0]
+      : props.scrapedImages.length > 0
+      ? props.scrapedImages[0]
+      : null);
+
+  const batchCount = props.selectedScraped.length > 0
+    ? props.selectedScraped.length
+    : props.scrapedImages.length;
+
+  return (
+    <AutoCropContextWrapper legacyProps={props}>
+      <GeneralTabInner
+        {...props}
+        firstImageUrl={firstImageUrl as any}
+        batchCount={batchCount}
+        activeSlot={activeSlot as any}
+        applyBuiltInPreset={applyBuiltInPreset}
+      />
     </AutoCropContextWrapper>
   );
 });

@@ -3,7 +3,7 @@ import { AutoCropProvider, useAutoCrop } from '@/features/image/components/edito
 import { migrateLegacySettings } from '@/features/image/components/editor/Tools/ImageEditor/AutoCrop/utils/legacyMigration';
 
 export function AutoCropContextWrapper({ legacyProps, children }: { legacyProps: any; children: React.ReactNode }) {
-  const initialEngine = legacyProps?.useLocalCV === false ? "aiSmart" : "opencv";
+  const initialEngine = legacyProps?.useLocalCV === false ? "aiSmart" : "hybrid";
   return (
     <AutoCropProvider initialEngine={initialEngine}>
       <AutoCropStateSynchronizer legacyProps={legacyProps}>
@@ -41,9 +41,13 @@ function AutoCropStateSynchronizer({ legacyProps, children }: { legacyProps: any
   ]);
 
   useEffect(() => {
-    const targetEngine = legacyProps?.useLocalCV === false ? "aiSmart" : "opencv";
-    if (activeEngine !== targetEngine) {
-      setActiveEngine(targetEngine);
+    // Only force engine switch if it's currently on an engine that directly contradicts useLocalCV
+    // If useLocalCV is true, and engine is aiSmart, switch to opencv or hybrid.
+    // We'll trust the migrateLegacySettings more now, but keep this simple safeguard.
+    if (legacyProps?.useLocalCV === false && activeEngine !== "aiSmart") {
+       setActiveEngine("aiSmart");
+    } else if (legacyProps?.useLocalCV === true && activeEngine === "aiSmart") {
+       setActiveEngine("hybrid"); // default back to hybrid if AI turned off
     }
   }, [legacyProps?.useLocalCV, activeEngine, setActiveEngine]);
 

@@ -17,7 +17,6 @@ export * from "./AutoCropPanelDetails";
 export * from "./AutoCropParameterSlider";
 export * from "./AutoCropPresetGrid";
 export * from "./AutoCropRatioLockSelector";
-export * from "./AutoCropSettingsPanel";
 export * from "./AutoCropTabContent";
 export * from "./AutoCropVisualGuide";
 export * from "./AutoSlicer";
