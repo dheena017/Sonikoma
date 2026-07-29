@@ -543,7 +543,10 @@ export default function CinemaPlayer({
     if (qualityPattern.test(base)) {
       return base.replace(qualityPattern, `_${quality}`) + ext;
     }
-    return `${base}_${quality}${ext}`;
+    if (quality !== "1080p" && (quality === "720p" || quality === "480p")) {
+      return `${base}_${quality}${ext}`;
+    }
+    return url;
   };
 
   const toggleFullscreen = () => {
