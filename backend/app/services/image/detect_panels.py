@@ -58,8 +58,10 @@ def run_cv_detection(
     auto_split: bool = True,
     padding_px: int = 10,
     use_yolo: bool = False,
-    yolo_conf: float = 0.20
+    yolo_conf: float = 0.20,
+    min_panel_area: float = 5000.0
 ) -> List[Dict[str, Any]]:
+
     """
     Main orchestration function for panel detection. Loads the image, runs background
     detection, routes to the appropriate detection strategy (Webtoon Slicing vs. Grid Contours),
@@ -161,11 +163,18 @@ def run_cv_detection(
                             bx1, by1, bx2, by2 = coords
                             bx, by, bw, bh = int(bx1), int(by1), int(bx2 - bx1), int(by2 - by1)
                             
-                            # Add to speech bubble protection bounds
-                            ocr_boxes.append({"x": bx, "y": by, "w": bw, "h": bh})
+                            # Add to speech bubble protection bounds if it's a bubble/text, or if class is not specified
+                            cls_id = int(box_instance.cls[0].cpu().numpy()) if hasattr(box_instance, "cls") and box_instance.cls is not None else 0
+                            cls_name = yolo_model.names.get(cls_id, "").lower() if hasattr(yolo_model, "names") and yolo_model.names is not None else ""
+
+                            is_bubble = "bubble" in cls_name or "balloon" in cls_name or "text" in cls_name or "caption" in cls_name or not cls_name
+                            is_panel = "frame" in cls_name or "panel" in cls_name
+
+                            if is_bubble:
+                                ocr_boxes.append({"x": bx, "y": by, "w": bw, "h": bh})
                             
-                            # Add to YOLO panel candidates if box matches panel proportions
-                            if bw >= min_w_px and bh >= scaled_min_height_px:
+                            # Add to YOLO panel candidates ONLY if it is classified as a frame/panel
+                            if is_panel and bw >= min_w_px and bh >= scaled_min_height_px:
                                 yolo_panel_candidates.append({  # type: ignore
                                     "x": bx, "y": by, "w": bw, "h": bh,
                                     "confidence": conf_score
@@ -213,9 +222,9 @@ def run_cv_detection(
         else:
             logger.info(f"[Panel Detection] Running Grid strategy (high_sensitivity={high_sensitivity})")
             if has_cv:
-                raw_boxes = _detect_panels_grid_cv(gray_arr_processed, is_white_bg, threshold_val, canny_low, canny_high, scaled_close_kernel, high_sensitivity)
+                raw_boxes = _detect_panels_grid_cv(gray_arr_processed, is_white_bg, threshold_val, canny_low, canny_high, scaled_close_kernel, high_sensitivity, min_panel_area=min_panel_area)
             else:
-                raw_boxes = _detect_panels_grid_pil(gray_arr_processed, is_white_bg, sensitivity, scaled_min_height_px)
+                raw_boxes = _detect_panels_grid_pil(gray_arr_processed, is_white_bg, sensitivity, scaled_min_height_px, min_panel_area=min_panel_area)
 
         # Fuse YOLO panel candidates with OpenCV raw boxes
         if use_yolo and yolo_panel_candidates:
@@ -244,7 +253,7 @@ def run_cv_detection(
 
         min_w = w * scaled_min_width_pct
         effective_merge_thresh = 0 if (auto_split and is_tall_strip) else merge_threshold
-        filtered_boxes = _filter_solid_noise(raw_boxes, gray_arr_processed, min_w, scaled_min_height_px, auto_split)
+        filtered_boxes = _filter_solid_noise(raw_boxes, gray_arr_processed, min_w, scaled_min_height_px, auto_split, min_panel_area=min_panel_area)
         merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, effective_merge_thresh)
 
         if bg_mode == "white":
@@ -285,17 +294,24 @@ def run_cv_detection(
         else:
             logger.info("[Panel Detection] 0 panels detected; re-running with high sensitivity fallback.")
 
-    if len(merged_boxes) == 0:
-        logger.info("[Panel Detection] 0 panels detected after all passes; applying fallback segment slicing...")
+    is_full_frame_only = (
+        len(merged_boxes) == 0 or
+        (len(merged_boxes) == 1 and merged_boxes[0]["w"] >= int(w * 0.95) and merged_boxes[0]["h"] >= int(h * 0.95))
+    )
+
+    if is_full_frame_only:
+        logger.info(f"[Panel Detection] 0 panels or single full-frame box detected; applying vertical fallback segment slicing (is_tall_strip={is_tall_strip})...")
+        merged_boxes = []
         if is_tall_strip:
-            num_segments = max(2, round(h / max(1.0, w * 1.2)))
-            seg_h = int(h / num_segments)
-            for seg_i in range(num_segments):
-                sy = (seg_i * seg_h)
-                sh = int(h - sy) if seg_i == num_segments - 1 else seg_h
-                merged_boxes.append({"x": 0, "y": sy, "w": w, "h": sh})
+            num_segments = max(2, int(round(h / max(1.0, w * 0.9))))
         else:
-            merged_boxes.append({"x": 0, "y": 0, "w": w, "h": h})
+            num_segments = 2 if h >= w else 3
+
+        seg_h = int(h / num_segments)
+        for seg_i in range(num_segments):
+            sy = seg_i * seg_h
+            sh = int(h - sy) if seg_i == num_segments - 1 else seg_h
+            merged_boxes.append({"x": 0, "y": sy, "w": w, "h": sh})
 
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
@@ -432,6 +448,7 @@ def main():
     parser.add_argument("--canny_low", type=int, default=20, help="Canny low threshold")
     parser.add_argument("--canny_high", type=int, default=100, help="Canny high threshold")
     parser.add_argument("--close_kernel_size", type=int, default=15, help="Morphological close kernel size")
+    parser.add_argument("--min_panel_area", type=float, default=5000.0, help="Minimum area threshold suitable for comic panels")
     
     parser.add_argument("--auto_split", action="store_true", default=True, help="Automatically split tall strips at gutters")
     parser.add_argument("--no_auto_split", dest="auto_split", action="store_false", help="Disable automatic strip splitting")
@@ -454,7 +471,8 @@ def main():
             canny_low=args.canny_low,
             canny_high=args.canny_high,
             close_kernel_size=args.close_kernel_size,
-            auto_split=args.auto_split
+            auto_split=args.auto_split,
+            min_panel_area=args.min_panel_area
         )
         print(json.dumps({"success": True, "panels": panels, "message": f"Detected {len(panels)} panels."}))
     except Exception as e:

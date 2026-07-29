@@ -16,10 +16,14 @@ def _detect_panels_grid_cv(
     canny_low: int,
     canny_high: int,
     close_kernel_size: int,
-    high_sensitivity: bool = False
+    high_sensitivity: bool = False,
+    min_panel_area: float = 5000.0
 ) -> List[Dict[str, Any]]:
     """
     Standard contour detection strategy using OpenCV for grid layout pages.
+    Performs Morphological Closing prior to finding contours to bridge border lines so panels
+    are detected as complete, unified blocks instead of being chopped in half.
+    Applies bounding box filtering with min_panel_area and discards thin strip artifacts.
     """
     import cv2
     if high_sensitivity:
@@ -38,15 +42,40 @@ def _detect_panels_grid_cv(
     edges = cv2.Canny(gray, canny_low, canny_high)
     merged_mask = cv2.bitwise_or(thresh, edges)
     
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (close_kernel_size, close_kernel_size))
+    # Morphological Closing: Bridges border lines and whitespace gaps inside panels prior to contour detection
+    kernel_size = max(5, close_kernel_size)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
     closed = cv2.morphologyEx(merged_mask, cv2.MORPH_CLOSE, kernel)
     
+    # Extract outer contours on closed morphological mask
     contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
+    h_img, w_img = gray.shape
+    img_area = float(w_img * h_img)
+    effective_min_area = min(min_panel_area, max(500.0, img_area * 0.01))
+
     raw_boxes: List[Dict[str, Any]] = []
     if contours:
         for contour in contours:
             x_box, y_box, w_box, h_box = cv2.boundingRect(contour)
+
+            # Filter out full-page bounding box that encloses >= 98% of width and height
+            if w_box >= w_img * 0.98 and h_box >= h_img * 0.98:
+                continue
+
+            area = float(w_box * h_box)
+            if area >= (img_area * 0.95):
+                continue
+
+            # Filter noise by minimum panel area threshold (e.g. min_panel_area = 5000)
+            if area < effective_min_area:
+                continue
+
+            # Discard thin horizontal/vertical strip artifacts and extreme aspect ratio noise
+            aspect = float(w_box) / float(h_box) if h_box > 0 else 1.0
+            if aspect > 10.0 or aspect < 0.1 or w_box < 30 or h_box < 30:
+                continue
+
             raw_boxes.append({"x": x_box, "y": y_box, "w": w_box, "h": h_box})
             
     return raw_boxes
@@ -56,12 +85,16 @@ def _detect_panels_grid_pil(
     gray_arr: np.ndarray,
     is_white_bg: bool,
     sensitivity: float,
-    min_height_px: int
+    min_height_px: int,
+    min_panel_area: float = 5000.0
 ) -> List[Dict[str, Any]]:
     """
     Standard projection profile detection strategy using PIL fallback for grid layout pages.
+    Filters bounding boxes by min_panel_area threshold and discards thin horizontal/vertical strip artifacts.
     """
     h, w = gray_arr.shape
+    img_area = float(w * h)
+    effective_min_area = min(min_panel_area, max(500.0, img_area * 0.01))
     row_means = np.mean(gray_arr, axis=1)
     
     thresh_limit = int(255 - (sensitivity * 2.5)) if is_white_bg else int(sensitivity * 2.5)
@@ -119,12 +152,19 @@ def _detect_panels_grid_pil(
         else:
             start_x = 0
             end_x = w
-            
-        raw_boxes.append({
-            "x": start_x,
-            "y": start_y,
-            "w": end_x - start_x,
-            "h": end_y - start_y
-        })
+
+        bw = end_x - start_x
+        bh = end_y - start_y
+        area = float(bw * bh)
+        aspect = float(bw) / float(bh) if bh > 0 else 1.0
+
+        if area >= effective_min_area and 0.1 <= aspect <= 10.0 and bw >= 30 and bh >= 30:
+            raw_boxes.append({
+                "x": start_x,
+                "y": start_y,
+                "w": bw,
+                "h": bh
+            })
         
     return raw_boxes
+

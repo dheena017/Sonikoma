@@ -91,11 +91,33 @@ def _filter_solid_noise(
     gray_arr: np.ndarray,
     min_w: float,
     height_limit: int,
-    auto_split: bool
+    auto_split: bool,
+    min_panel_area: float = 5000.0
 ) -> List[Dict[str, Any]]:
     filtered_boxes = []
+    h_img, w_img = gray_arr.shape
+    img_area = float(w_img * h_img)
+    effective_min_area = min(min_panel_area, max(500.0, img_area * 0.01))
+
     for box in raw_boxes:
         bx, by, bw, bh = box["x"], box["y"], box["w"], box["h"]
+        area = float(bw * bh)
+
+        # Reject full-frame outer bounding boxes (>= 98% width AND >= 98% height or >= 96% area)
+        if bw >= w_img * 0.98 and bh >= h_img * 0.98:
+            continue
+        if area >= (img_area * 0.96):
+            continue
+
+        # Enforce minimum area threshold suitable for comic panels (e.g. min_panel_area = 5000)
+        if area < effective_min_area:
+            continue
+
+        # Discard thin horizontal/vertical strip artifacts
+        aspect = float(bw) / float(bh) if bh > 0 else 1.0
+        if aspect > 10.0 or aspect < 0.1 or bw < 30 or bh < 30:
+            continue
+
         if auto_split:
             if bh < height_limit:
                 continue
@@ -109,10 +131,11 @@ def _filter_solid_noise(
                 continue
             row_stds = np.std(box_slice, axis=1)
             flat_rows = np.sum(row_stds < 3.0)
-            if float(flat_rows) / float(max(1, bh)) > 0.75:
+            if float(flat_rows) / float(max(1, bh)) > 0.80:
                 continue
         except Exception:
             pass
 
         filtered_boxes.append(box)
     return filtered_boxes
+
