@@ -358,20 +358,14 @@ export default function AutoCropModal({
             ))}
           </div>
 
-          {/* Auto-Split Strips Quick Toggle */}
-          <button
-            type="button"
-            onClick={() => setAutoSplitTallStrips(!autoSplitTallStrips)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
-              autoSplitTallStrips
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                : "bg-neutral-900/80 border-neutral-800 text-neutral-500 hover:text-neutral-300"
-            }`}
-            title="Automatically split tall webtoon strips into separate scene panels"
+          {/* Auto-Split Strips Indicator */}
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold"
+            title="Auto-Split is automatically active for all tall webtoon strips"
           >
             <Layers className="h-3 w-3" />
-            <span>Auto-Split: {autoSplitTallStrips ? "ON" : "OFF"}</span>
-          </button>
+            <span>Auto-Split: ACTIVE</span>
+          </div>
 
           {/* YOLO AI Vision Box Fusion Quick Toggle */}
           <button

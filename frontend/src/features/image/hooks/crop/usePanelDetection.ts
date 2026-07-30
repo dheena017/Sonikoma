@@ -27,6 +27,7 @@ interface UsePanelDetectionProps {
     shouldScroll?: boolean
   ) => void;
   setEditingImageIdx: (idx: number | null) => void;
+  autoSplitTallStrips?: boolean;
 }
 
 export interface UsePanelDetectionReturn {
@@ -54,6 +55,7 @@ export function usePanelDetection({
   editAutoTrim,
   addPanelsToStoryboard,
   setEditingImageIdx,
+  autoSplitTallStrips,
 }: UsePanelDetectionProps): UsePanelDetectionReturn {
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
@@ -172,6 +174,8 @@ export function usePanelDetection({
     cannyHigh?: number;
     closeKernelSize?: number;
     minHeightPx?: number;
+    paddingPx?: number;
+    autoSplit?: boolean;
     useYolo?: boolean;
     dryRun?: boolean;
   }) => {
@@ -201,7 +205,9 @@ export function usePanelDetection({
           cannyHigh: settings?.cannyHigh ?? 100,
           closeKernelSize: settings?.closeKernelSize ?? 15,
           minHeightPx: settings?.minHeightPx ?? 60,
-          useYolo: settings?.useYolo ?? false,
+          paddingPx: settings?.paddingPx ?? 10,
+          autoSplit: settings?.autoSplit ?? autoSplitTallStrips ?? true,
+          useYolo: settings?.useYolo ?? true,
         },
         { signal: abortControllerRef.current.signal }
       );

@@ -56,7 +56,7 @@ export function AutoCropPresetGrid({
         cropPaddingPx: 5,
         cropBackgroundMode: "white",
         aspectRatioLock: "free",
-        autoSplitTallStrips: false,
+        autoSplitTallStrips: true,
         minPanelAreaPct: 2.0,
         overlapMergeThreshold: 20,
       },

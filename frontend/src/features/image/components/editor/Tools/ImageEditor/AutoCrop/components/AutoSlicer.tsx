@@ -23,6 +23,9 @@ interface AutoSlicerProps {
     cannyHigh?: number;
     closeKernelSize?: number;
     minHeightPx?: number;
+    paddingPx?: number;
+    autoSplit?: boolean;
+    useYolo?: boolean;
     dryRun?: boolean;
   }) => Promise<void>;
   handleCancelDetect: () => void;

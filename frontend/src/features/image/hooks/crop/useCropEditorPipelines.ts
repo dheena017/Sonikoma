@@ -55,6 +55,7 @@ interface UseCropEditorPipelinesProps {
   setSelectedSliceId: (id: string | null) => void;
 
   pushHistory: () => void;
+  autoSplitTallStrips?: boolean;
 }
 
 export function useCropEditorPipelines(props: UseCropEditorPipelinesProps) {
@@ -78,6 +79,7 @@ export function useCropEditorPipelines(props: UseCropEditorPipelinesProps) {
       editAutoTrim: props.editAutoTrim,
       addPanelsToStoryboard: props.addPanelsToStoryboard,
       setEditingImageIdx: props.setEditingImageIdx,
+      autoSplitTallStrips: props.autoSplitTallStrips,
     });
 
   const {

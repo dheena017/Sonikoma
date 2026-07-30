@@ -38,6 +38,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     imageEditStates,
     setImageEditStates,
     addPanelsToStoryboard,
+    autoSplitTallStrips,
   } = appLogic;
 
   const activeFetch = (fetchWithInterceptor || fetch) as typeof fetch;
@@ -121,6 +122,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     setEditCropRight,
     editAutoTrim,
     addPanelsToStoryboard,
+    autoSplitTallStrips,
 
     eraseMethod: state.eraseMethod,
     sensitivity: state.sensitivity,

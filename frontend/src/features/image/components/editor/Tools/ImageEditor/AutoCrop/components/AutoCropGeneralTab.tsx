@@ -37,63 +37,7 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: 
             />
           </div>
 
-          {/* Section 2: Webtoon Seam Slicer */}
-          <div className="bg-neutral-950/40 border border-neutral-850 p-4 sm:p-5 rounded-3xl shadow-xl backdrop-blur-md">
-            <label className="group flex items-start justify-between gap-4 cursor-pointer select-none">
-              <div className="flex items-start gap-3">
-                <div className={`p-2.5 rounded-2xl border transition-all mt-0.5 ${
-                  props.autoSplitTallStrips
-                    ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-400"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-500"
-                }`}>
-                  <input
-                    type="checkbox"
-                    checked={props.autoSplitTallStrips}
-                    onChange={(e) => props.setAutoSplitTallStrips(e.target.checked)}
-                    className="sr-only"
-                  />
-                  <div className={`h-4 w-4 rounded-full border flex items-center justify-center transition-all ${
-                    props.autoSplitTallStrips ? "border-indigo-400 bg-indigo-500" : "border-neutral-700 bg-neutral-900"
-                  }`}>
-                    {props.autoSplitTallStrips && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
-                  </div>
-                </div>
 
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">
-                      Auto-Split Tall Webtoon Strips
-                    </span>
-                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold uppercase ${
-                      props.autoSplitTallStrips
-                        ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
-                        : "bg-neutral-850 text-neutral-500"
-                    }`}>
-                      {props.autoSplitTallStrips ? "ACTIVE" : "DISABLED"}
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-neutral-400 font-sans leading-relaxed">
-                    Automatically detects vertical white/black gutters to slice long multi-scene webtoon strips into standalone panels.
-                  </p>
-                </div>
-              </div>
-
-              {/* Custom Toggle Switch */}
-              <button
-                type="button"
-                onClick={() => props.setAutoSplitTallStrips(!props.autoSplitTallStrips)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  props.autoSplitTallStrips ? "bg-indigo-600" : "bg-neutral-800"
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                    props.autoSplitTallStrips ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </label>
-          </div>
 
           {/* Section 3: Live Image Edge Complexity Analysis */}
           {firstImageUrl && (
