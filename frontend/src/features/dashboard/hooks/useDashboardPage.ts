@@ -10,6 +10,7 @@ export interface Project {
   created_at: string;
   status: string;
   panels_count: number;
+  imported_assets_count?: number;
   series_slug?: string;
   chapter_slug?: string;
   author?: string;
