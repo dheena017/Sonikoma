@@ -621,8 +621,8 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     const match = path.match(
       /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
     );
-    const series = match ? match[1] : params.get("series");
-    const chapter = match ? match[2] : params.get("chapter");
+    const series = match && match[1] !== "null" ? match[1] : (params.get("series") && params.get("series") !== "null" ? params.get("series") : null);
+    const chapter = match && match[2] !== "null" ? match[2] : (params.get("chapter") && params.get("chapter") !== "null" ? params.get("chapter") : null);
     if (series && chapter) {
       const target = `/workspace/editor/series/${series}/chapters/${chapter}`;
       if ((window as any).navigateTo) {
@@ -632,8 +632,14 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
         window.dispatchEvent(new Event("popstate"));
       }
     } else {
-      window.history.pushState({}, "");
-      window.dispatchEvent(new Event("popstate"));
+      const projId = params.get("id") || appLogic.projectId;
+      const target = projId ? `/workspace/editor?id=${projId}` : "/dashboard";
+      if ((window as any).navigateTo) {
+        (window as any).navigateTo(target);
+      } else {
+        window.history.pushState({}, "", target);
+        window.dispatchEvent(new Event("popstate"));
+      }
     }
   };
 

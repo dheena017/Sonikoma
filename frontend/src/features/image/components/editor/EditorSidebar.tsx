@@ -240,7 +240,11 @@ const EditorSidebar = ({
                         }
 
                         if (item.id === "image-editor") {
-                          const target = `/workspace/editor/series/${seriesSlug || ""}/chapters/${chapterSlug || ""}/image-editor?idx=${editingImageIdx ?? 0}`;
+                          const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
+                          const projId = projectId || new URLSearchParams(window.location.search).get("id") || "";
+                          const target = hasValidSlugs
+                            ? `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${editingImageIdx ?? 0}`
+                            : `/workspace/editor/image-editor?id=${projId}&idx=${editingImageIdx ?? 0}`;
                           if (navigateTo) {
                             navigateTo(target);
                           } else {

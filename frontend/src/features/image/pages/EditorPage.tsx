@@ -317,7 +317,11 @@ const EditorPage: React.FC<EditorPageProps> = ({
         }
 
         const idx = useImageEditorStore.getState().editingImageIdx ?? appLogic.editingImageIdx ?? 0;
-        const target = `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${idx}`;
+        const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
+        const projId = appLogic.projectId || new URLSearchParams(window.location.search).get("id") || "";
+        const target = hasValidSlugs
+          ? `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${idx}`
+          : `/workspace/editor/image-editor?id=${projId}&idx=${idx}`;
         navigateTo(target);
       } else {
         setCurrentSection(detail);

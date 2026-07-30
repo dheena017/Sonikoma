@@ -189,7 +189,13 @@ export function useAppRouter({
           localStorage.getItem("active_chapter_slug") || chapterSlug;
         let target = "/dashboard";
 
-        if (activeProjId && activeSeriesSlug && activeChapterSlug) {
+        const hasValidSlugs =
+          activeSeriesSlug &&
+          activeChapterSlug &&
+          activeSeriesSlug !== "null" &&
+          activeChapterSlug !== "null";
+
+        if (hasValidSlugs) {
           if (path.startsWith("/editor/editor")) {
             const params = new URLSearchParams(window.location.search);
             const idx = params.get("idx") || "0";
@@ -198,7 +204,13 @@ export function useAppRouter({
             target = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
           }
         } else if (activeProjId) {
-          target = `/workspace?id=${activeProjId}`;
+          if (path.includes("image-editor")) {
+            const params = new URLSearchParams(window.location.search);
+            const idx = params.get("idx") || "0";
+            target = `/workspace/editor/image-editor?id=${activeProjId}&idx=${idx}`;
+          } else {
+            target = `/workspace/editor?id=${activeProjId}`;
+          }
         }
 
         window.history.replaceState({}, "", target);
