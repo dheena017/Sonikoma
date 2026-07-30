@@ -151,50 +151,64 @@ const EditorMiniSidebarInner = ({
     );
   }
 
-  const menuItems: SidebarMenuItem[] = [
+  const menuGroups: Array<{ label: string; items: SidebarMenuItem[] }> = [
     {
-      id: "monitor",
-      label: "Video Monitor",
-      icon: Film,
+      label: "Views",
+      items: [
+        {
+          id: "monitor",
+          label: "Video Monitor",
+          icon: Film,
+        },
+        {
+          id: "assets",
+          label: "Imported Assets",
+          icon: Layout,
+          badge: scrapedCount > 0 ? scrapedCount : undefined,
+        },
+        {
+          id: "timeline",
+          label: "Storyboard Timeline",
+          icon: Layers,
+          badge: panelsCount > 0 ? panelsCount : undefined,
+        },
+      ],
     },
     {
-      id: "assets",
-      label: "Imported Assets",
-      icon: Layout,
-      badge: scrapedCount > 0 ? scrapedCount : undefined,
+      label: "Tools",
+      items: [
+        {
+          id: "production",
+          label: "Export & Publish",
+          icon: Download,
+        },
+        {
+          id: "autocrop",
+          label: "Auto-Crop Panels",
+          icon: Scissors,
+          isProcessing: isBatchCropping,
+        },
+        {
+          id: "image-editor",
+          label: "Image Editor",
+          icon: Edit2,
+        },
+      ],
     },
     {
-      id: "timeline",
-      label: "Storyboard Timeline",
-      icon: Layers,
-      badge: panelsCount > 0 ? panelsCount : undefined,
-    },
-    {
-      id: "production",
-      label: "Export & Publish",
-      icon: Download,
-    },
-    {
-      id: "autocrop",
-      label: "Auto-Crop Panels",
-      icon: Scissors,
-      isProcessing: isBatchCropping,
-    },
-    // Added Image Editor Tool
-    {
-      id: "image-editor",
-      label: "Image Editor",
-      icon: Edit2,
-    },
-    {
-      id: "settings",
-      label: "Video Settings",
-      icon: Settings,
-    },
-    {
-      id: "audio-settings",
-      label: "Audio Settings",
-      icon: Mic,
+      label: "Config",
+      items: [
+        {
+          id: "settings",
+          label: "Video Settings",
+          icon: Settings,
+        },
+        {
+          id: "audio-settings",
+          label: "Audio Settings",
+          icon: Mic,
+        },
+      ],
     },
   ];
 
@@ -347,9 +361,25 @@ const EditorMiniSidebarInner = ({
         }`}
     >
       {/* Scrollable Tools Area */}
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
-        {menuItems.map((item) => (
-          <SidebarItem key={item.id} item={item} />
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
+        {menuGroups.map((group, gi) => (
+          <div key={group.label} className="w-full flex flex-col items-center">
+            {/* Section divider + label (not before first group) */}
+            {gi > 0 && (
+              <div className="w-full flex flex-col items-center my-2 px-3">
+                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full" />
+                <span className="mt-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-neutral-600 font-mono select-none">
+                  {group.label}
+                </span>
+              </div>
+            )}
+            {/* Items in the group */}
+            <div className="w-full flex flex-col items-center space-y-0.5">
+              {group.items.map((item) => (
+                <SidebarItem key={item.id} item={item} />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
