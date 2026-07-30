@@ -360,7 +360,7 @@ export default function ProfileProjectsTab({
       ["processing", "pending"].includes((p.status || "").toLowerCase())
     ).length;
     const totalPanels = projects.reduce(
-      (sum, p) => sum + (p.panels_count || 0),
+      (sum, p) => sum + (p.panels_count || p.imported_assets_count || 0),
       0
     );
     return { total, completed, processing, totalPanels };
@@ -740,7 +740,7 @@ export default function ProfileProjectsTab({
 
                           <div className="flex items-center gap-3">
                             <span className="text-[10px] text-neutral-500 font-bold">
-                              {chapter.panels_count || 0} panels
+                              {chapter.panels_count || chapter.imported_assets_count || 0} panels
                             </span>
                             <button
                               onClick={async () => {

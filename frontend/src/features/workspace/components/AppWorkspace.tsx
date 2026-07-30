@@ -90,6 +90,7 @@ interface AppWorkspaceProps {
 }
 
 interface StoredProject {
+  imported_assets_count: number;
   project_id: string;
   url?: string;
   series_slug?: string | null;
@@ -427,7 +428,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
             new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
           );
           setRecentProjects(sorted);
-          const totalPanels  = sorted.reduce((acc: number, p: any) => acc + (p.panels_count || 0), 0);
+          const totalPanels  = sorted.reduce((acc: number, p: any) => acc + (p.panels_count || p.imported_assets_count || 0), 0);
           const completed    = sorted.filter((p: any) => (p.status || "").toLowerCase() === "completed").length;
           setStats({ totalProjects: sorted.length, totalPanels, completedProjects: completed });
         }
@@ -688,11 +689,14 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                   )}
                 </div>
 
-                {matchingProject.panels_count !== undefined && matchingProject.panels_count > 0 && (
+                {((matchingProject.panels_count ?? 0) > 0 || (matchingProject.imported_assets_count ?? 0) > 0) && (
                   <div className="space-y-1 border-t border-neutral-800/30 pt-3">
                     <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Structure</span>
                     <p className="text-xs font-medium text-neutral-350">
-                      {matchingProject.panels_count} panels compiled
+                      {matchingProject.panels_count || matchingProject.imported_assets_count} panels compiled
+                      {matchingProject.imported_assets_count && matchingProject.panels_count && matchingProject.panels_count !== matchingProject.imported_assets_count
+                        ? ` (${matchingProject.imported_assets_count} imported assets)`
+                        : ''}
                     </p>
                   </div>
                 )}
@@ -1063,6 +1067,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                     created_at: project.created_at || "",
                     status: project.status || "ready",
                     panels_count: project.panels_count ?? 0,
+                    imported_assets_count: project.imported_assets_count,
                     series_slug: project.series_slug || undefined,
                     chapter_slug: project.chapter_slug || undefined,
                     genre: project.genre || undefined,

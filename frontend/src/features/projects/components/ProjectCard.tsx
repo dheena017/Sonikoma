@@ -260,11 +260,33 @@ export default function ProjectCard({
         <div className="flex items-center justify-between pt-2 mt-auto border-t border-neutral-800/60">
           <div className="flex items-center gap-3">
             {/* Panels count */}
-            <div className="flex items-center gap-1 text-[10px] text-neutral-500">
-              <Scissors className="h-3 w-3" />
-              <span className="font-semibold text-neutral-400">{project.panels_count ?? 0}</span>
-              <span>panels</span>
-            </div>
+            {(() => {
+              const timelineCount = project.panels_count ?? 0;
+              const importedCount = project.imported_assets_count ?? 0;
+              const displayCount = timelineCount || importedCount || 0;
+              const hasDiff = timelineCount > 0 && importedCount > 0 && timelineCount !== importedCount;
+
+              return (
+                <div
+                  className="flex items-center gap-1 text-[10px] text-neutral-500"
+                  title={
+                    hasDiff
+                      ? `Storyboard Timeline: ${timelineCount} panels | Imported Assets: ${importedCount} assets`
+                      : `${displayCount} panels`
+                  }
+                >
+                  <Scissors className="h-3 w-3 text-purple-400/80" />
+                  <span className="font-semibold text-neutral-300">{displayCount}</span>
+                  <span>
+                    {hasDiff
+                      ? `panels (${importedCount} imported)`
+                      : importedCount > 0 && timelineCount === 0
+                      ? "imported panels"
+                      : "panels"}
+                  </span>
+                </div>
+              );
+            })()}
             {/* Time ago */}
             <div className="flex items-center gap-1 text-[10px] text-neutral-600">
               <Clock className="h-3 w-3" />

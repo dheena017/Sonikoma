@@ -167,8 +167,13 @@ export default function ProjectsTable({
                 </td>
                 <td className="p-4 text-right">
                   <div className="font-bold text-white">
-                    {project.panels_count || 0}
+                    {project.panels_count || project.imported_assets_count || 0}
                   </div>
+                  {project.imported_assets_count && project.panels_count && project.panels_count !== project.imported_assets_count ? (
+                    <div className="text-[10px] text-neutral-500 font-normal">
+                      {project.imported_assets_count} imported
+                    </div>
+                  ) : null}
                 </td>
                 <td className="p-4 relative">
                   <button

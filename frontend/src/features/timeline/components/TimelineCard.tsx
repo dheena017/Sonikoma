@@ -16,6 +16,7 @@ interface TimelineCardProps {
   setActivePreviewTab: (tab: "video" | "timeline") => void;
   setPlaybackTime: (time: number) => void;
   analyzingPanelId: number | null;
+  isAnalyzingAll?: boolean;
   handleShiftPanel: (idx: number, dir: "left" | "right") => void;
   panelsLength: number;
   handleModifySpeechText: (id: number, val: string) => void;
@@ -217,6 +218,7 @@ const TimelineCard = ({
   setActivePreviewTab,
   setPlaybackTime,
   analyzingPanelId,
+  isAnalyzingAll,
   handleShiftPanel,
   panelsLength,
   handleModifySpeechText,
@@ -776,14 +778,14 @@ const TimelineCard = ({
           }}
         />
 
-        {(panel.isAnalyzing || analyzingPanelId === panel.id) && (
-          <div className="absolute inset-0 bg-purple-950/40 backdrop-blur-[1px] flex flex-col items-center justify-center p-2 text-center animate-pulse z-10">
+        {(panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll) && (
+          <div className="absolute inset-0 bg-purple-950/50 backdrop-blur-[1px] flex flex-col items-center justify-center p-2 text-center animate-pulse z-10">
             <Sparkles
               className="h-5 w-5 text-purple-400 animate-spin"
               style={{ animationDuration: "3s" }}
             />
             <span className="text-[9px] font-mono font-bold text-purple-300 mt-1 uppercase tracking-wider">
-              Loading...
+              {isAnalyzingAll ? "Analyzing Sequence..." : "Analyzing..."}
             </span>
             <div className="scanner-line" />
           </div>
@@ -1330,6 +1332,7 @@ export default React.memo(TimelineCard, (prevProps, nextProps) => {
     prevProps.currentPanelIndex === nextProps.currentPanelIndex &&
     prevProps.activePreviewTab === nextProps.activePreviewTab &&
     prevProps.analyzingPanelId === nextProps.analyzingPanelId &&
+    prevProps.isAnalyzingAll === nextProps.isAnalyzingAll &&
     prevProps.isSelected === nextProps.isSelected &&
     prevProps.isDragging === nextProps.isDragging &&
     prevProps.isDragOver === nextProps.isDragOver &&

@@ -843,15 +843,33 @@ const StoryboardTimeline = React.memo(
         className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 transition-all pb-24 relative"
       >
         {isAnalyzingAll && (
-          <div className="absolute inset-0 z-[60] bg-black/65 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-200">
-            <div className="relative flex items-center justify-center">
-              <div className="w-12 h-12 rounded-full border-4 border-indigo-500/30 border-t-indigo-500 animate-spin"></div>
-              <Sparkles className="w-5 h-5 text-indigo-400 absolute animate-pulse" />
+          <div className="bg-indigo-950/70 border border-indigo-500/40 rounded-xl px-4 py-3 flex items-center justify-between gap-3 animate-in fade-in duration-200 shadow-lg shadow-indigo-950/40 my-2">
+            <div className="flex items-center gap-3">
+              <div className="relative flex items-center justify-center shrink-0">
+                <div className="w-6 h-6 rounded-full border-2 border-indigo-400/30 border-t-indigo-400 animate-spin" />
+                <Sparkles className="w-3 h-3 text-indigo-300 absolute animate-pulse" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white tracking-wide flex items-center gap-2">
+                  Generating Narrative Sequence
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">
+                    AI Active
+                  </span>
+                </h4>
+                <p className="text-[11px] text-indigo-200/80 mt-0.5">
+                  AI is composing story narrative and synthesizing TTS voiceover for sequence cards...
+                </p>
+              </div>
             </div>
-            <div className="text-center px-4">
-              <h4 className="text-sm font-bold text-white tracking-wide">Generating Narrative Sequence</h4>
-              <p className="text-xs text-neutral-400 mt-1">AI is composing story narrative and synthesizing TTS voiceover...</p>
-            </div>
+            {handleCancelAnalysis && (
+              <button
+                type="button"
+                onClick={handleCancelAnalysis}
+                className="text-[10px] font-bold text-neutral-400 hover:text-white bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-750 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
+              >
+                Cancel
+              </button>
+            )}
           </div>
         )}
         <TimelineHeader
@@ -1108,6 +1126,11 @@ const StoryboardTimeline = React.memo(
                                 {grpPanels.length} PANELS
                               </span>
                             </div>
+                            {isAnalyzingAll && (
+                              <div className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-500 text-[10px] font-bold font-mono tracking-wide animate-pulse">
+                                ANALYZING ALL...
+                              </div>
+                            )}
                           </div>
 
                           {/* Episode Horizontal Timeline Grid */}
@@ -1129,6 +1152,7 @@ const StoryboardTimeline = React.memo(
                                   setActivePreviewTab={setActivePreviewTab}
                                   setPlaybackTime={setPlaybackTime}
                                   analyzingPanelId={analyzingPanelId}
+                                  isAnalyzingAll={isAnalyzingAll}
                                   handleShiftPanel={handleShiftPanel}
                                   panelsLength={panels.length}
                                   handleModifySpeechText={handleModifySpeechText}
@@ -1183,6 +1207,7 @@ const StoryboardTimeline = React.memo(
                           setActivePreviewTab={setActivePreviewTab}
                           setPlaybackTime={setPlaybackTime}
                           analyzingPanelId={analyzingPanelId}
+                          isAnalyzingAll={isAnalyzingAll}
                           handleShiftPanel={handleShiftPanel}
                           panelsLength={panels.length}
                           handleModifySpeechText={handleModifySpeechText}

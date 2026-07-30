@@ -105,6 +105,41 @@ def insert_project(data: Dict[str, Any]) -> None:
         conn.close()
 
 
+def _enrich_project_item(item: Dict[str, Any], conn: Any) -> Dict[str, Any]:
+    _parse_audio_settings(item)
+    
+    # Check panels table count if c.panels_count is 0 or missing
+    if item.get("panels_count") is None or item.get("panels_count") == 0:
+        try:
+            cnt_row = conn.execute("SELECT COUNT(*) FROM panels WHERE chapter_id = ?", (item["project_id"],)).fetchone()
+            if cnt_row and cnt_row[0] > 0:
+                item["panels_count"] = cnt_row[0]
+            else:
+                item["panels_count"] = item.get("panels_count") or 0
+        except Exception:
+            item["panels_count"] = item.get("panels_count") or 0
+
+    # Check imported_assets_count from audio_settings or scrape_sessions
+    imported_count = 0
+    audio_set = item.get("audio_settings")
+    if isinstance(audio_set, dict) and audio_set.get("scraped_images") and isinstance(audio_set["scraped_images"], list):
+        imported_count = len(audio_set["scraped_images"])
+    
+    if not imported_count and item.get("url"):
+        try:
+            sess_row = conn.execute(
+                "SELECT panel_count FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
+                (item["url"],)
+            ).fetchone()
+            if sess_row and sess_row[0]:
+                imported_count = sess_row[0]
+        except Exception:
+            pass
+
+    item["imported_assets_count"] = imported_count
+    return item
+
+
 def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     """Get all projects ordered by most recent first."""
     conn = get_db_connection()
@@ -130,7 +165,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                 JOIN series s ON c.series_id = s.id
                 ORDER BY c.created_at DESC
             """).fetchall()
-        return [_parse_audio_settings(dict(r)) for r in rows]
+        return [_enrich_project_item(dict(r), conn) for r in rows]
     finally:
         conn.close()
 
@@ -148,7 +183,7 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
             JOIN series s ON c.series_id = s.id
             WHERE c.id = ?
         """, (project_id,)).fetchone()
-        return _parse_audio_settings(dict(row)) if row else None
+        return _enrich_project_item(dict(row), conn) if row else None
     finally:
         conn.close()
 
@@ -166,7 +201,7 @@ def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
             JOIN series s ON c.series_id = s.id
             WHERE c.slug = ?
         """, (chapter_slug,)).fetchone()
-        return _parse_audio_settings(dict(row)) if row else None
+        return _enrich_project_item(dict(row), conn) if row else None
     finally:
         conn.close()
 

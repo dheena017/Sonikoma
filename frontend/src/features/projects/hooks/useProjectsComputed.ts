@@ -24,7 +24,7 @@ export function useProjectsComputed(
       (p) => p.status?.toLowerCase() === "completed"
     ).length;
     const totalPanels = projects.reduce(
-      (acc, p) => acc + (p.panels_count || 0),
+      (acc, p) => acc + (p.panels_count || p.imported_assets_count || 0),
       0
     );
     return { totalProjects, completedProjects, totalPanels };
@@ -67,8 +67,11 @@ export function useProjectsComputed(
         return (
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         );
-      if (sortBy === "Most Panels")
-        return (b.panels_count || 0) - (a.panels_count || 0);
+      if (sortBy === "Most Panels") {
+        const countA = a.panels_count || a.imported_assets_count || 0;
+        const countB = b.panels_count || b.imported_assets_count || 0;
+        return countB - countA;
+      }
       if (sortBy === "A-Z") return (a.title || "").localeCompare(b.title || "");
       return 0;
     });

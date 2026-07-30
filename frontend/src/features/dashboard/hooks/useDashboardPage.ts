@@ -295,7 +295,7 @@ export default function useDashboardPage() {
   );
 
   const totalPanels = useMemo(
-    () => projects.reduce((acc, p) => acc + (p.panels_count || 0), 0),
+    () => projects.reduce((acc, p) => acc + (p.panels_count || p.imported_assets_count || 0), 0),
     [projects]
   );
 
@@ -305,7 +305,7 @@ export default function useDashboardPage() {
         prev.map((t) => (t.id === 1 ? { ...t, completed: true } : t))
       );
     }
-    const hasAnalyzed = projects.some((p) => p.panels_count > 0);
+    const hasAnalyzed = projects.some((p) => (p.panels_count || p.imported_assets_count || 0) > 0);
     if (hasAnalyzed) {
       setOnboardingTasks((prev) =>
         prev.map((t) => (t.id === 2 ? { ...t, completed: true } : t))

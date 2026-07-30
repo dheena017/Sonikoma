@@ -1232,7 +1232,7 @@ export default function ProfilePage({
     (p) => p.status === "pending" || p.status === "processing"
   );
   const queueSeconds = queueProjects.reduce(
-    (sum, p) => sum + (p.panels_count || 0) * 4.5,
+    (sum, p) => sum + (p.panels_count || p.imported_assets_count || 0) * 4.5,
     0
   );
   const queueMinutes = queueSeconds / 60;
@@ -1248,7 +1248,7 @@ export default function ProfilePage({
       : "No active compilation jobs";
 
   const totalPanels = localProjects.reduce(
-    (sum, p) => sum + (p.panels_count || 0),
+    (sum, p) => sum + (p.panels_count || p.imported_assets_count || 0),
     0
   );
   const avgPanels =
