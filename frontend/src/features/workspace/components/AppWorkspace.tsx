@@ -962,30 +962,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
 
 
 
-        {/* LOADING CONTEXT BRIDGE */}
-        {isScraping && (
-          <div className="bg-black/40 border border-white/5 rounded-3xl p-8 backdrop-blur-md flex flex-col items-center gap-4 text-center">
-            <div className="flex gap-2">
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-1.5 w-1.5 rounded-full bg-purple-500 animate-bounce"
-                  style={{ animationDelay: `${i * 150}ms` }}
-                />
-              ))}
-            </div>
-            <p className="text-sm font-bold text-neutral-300">
-              Launching Pro Editor for{" "}
-              <span className="text-purple-400">
-                "{seriesTitle || "New Series"}"
-              </span>
-              ...
-            </p>
-            <p className="text-xs text-neutral-500 max-w-sm">
-              Initializing the vision pipeline. Scraping and optimizing your assets for the workspace.
-            </p>
-          </div>
-        )}
+
 
         {/* ── RECENT PROJECTS ── */}
         <div className="w-full space-y-4">

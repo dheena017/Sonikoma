@@ -6,6 +6,7 @@ import { ImageEditorHeader } from "@/features/image/components/editor/Tools/Imag
 import ImageEditorCanvasContainer from "@/features/image/components/editor/Tools/ImageEditor/ImageEditorCanvasContainer";
 import ImageEditorSidebar from "@/features/image/components/editor/Tools/ImageEditor/ImageEditorSidebar";
 import { ImageEditorLayout } from "@/features/image/components/editor/Tools/ImageEditor/ImageEditorLayout";
+import { ImageEditorEmptyState } from "@/features/image/components/editor/Tools/ImageEditor/ImageEditorEmptyState";
 
 interface ImageEditorPageProps {
   appLogic: ReturnType<typeof useAppLogic>;
@@ -112,10 +113,17 @@ const ImageEditorPage = React.memo(({
   // Empty State if no images exist in the project yet
   if (!appLogic.scrapedImages || appLogic.scrapedImages.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center bg-[#0B0F19] text-neutral-400 font-mono text-sm">
-        <p>No images available to edit.</p>
-        <p className="text-xs text-neutral-600 mt-2">Please import assets first.</p>
-      </div>
+      <ImageEditorEmptyState
+        onImagesUploaded={(urls) => {
+          appLogic.setScrapedImages(urls);
+          setEditingImageIdx(0);
+        }}
+        onLoadSample={(dataUrl) => {
+          appLogic.setScrapedImages([dataUrl]);
+          setEditingImageIdx(0);
+        }}
+        navigateTo={navigateTo}
+      />
     );
   }
 

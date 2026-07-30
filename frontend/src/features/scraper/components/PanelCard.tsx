@@ -243,7 +243,9 @@ function PanelCard({
       onClick={handleClick}
       className={[
         "group relative w-[260px] sm:w-[280px] shrink-0 rounded-2xl border p-4 space-y-4 transition-all duration-300 ease-out text-center cursor-pointer select-none",
-        isSelected
+        isProcessing
+          ? "border-2 border-purple-500 bg-purple-950/20 shadow-[0_0_24px_rgba(168,85,247,0.5)] ring-1 ring-purple-500/40 scale-[1.02]"
+          : isSelected
           ? "border-purple-500 bg-purple-950/15 shadow-[0_10px_30px_-5px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/20 scale-[1.02]"
           : "border-neutral-800/60 bg-neutral-950 hover:border-purple-500/50 hover:shadow-[0_15px_35px_-8px_rgba(168,85,247,0.15)] hover:scale-[1.03] hover:-translate-y-1.5",
       ].join(" ")}

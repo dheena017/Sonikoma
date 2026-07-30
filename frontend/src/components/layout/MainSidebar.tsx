@@ -298,8 +298,13 @@ const SidebarInner = ({
 
         {/* NAVIGATION MENUS */}
         <div className="space-y-6 overflow-y-auto flex-grow min-h-0 scrollbar-thin custom-sidebar-scrollbar pr-1">
-          {menuItems.map((group) => (
+          {menuItems.map((group, groupIdx) => (
             <div key={group.group} className="space-y-2">
+              {groupIdx > 0 && (
+                <div className="w-full flex flex-col pt-2">
+                  <div className="w-8 h-[1px] bg-neutral-800 rounded-full mb-2 ml-2" />
+                </div>
+              )}
               <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">
                 {group.group}
               </h4>
@@ -360,6 +365,9 @@ const SidebarInner = ({
 
           {/* Creative Suite Navigation */}
           <div className="space-y-2">
+            <div className="w-full flex flex-col pt-2">
+              <div className="w-8 h-[1px] bg-neutral-800 rounded-full mb-2 ml-2" />
+            </div>
             <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">
               Creative Tools
             </h4>

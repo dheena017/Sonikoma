@@ -225,15 +225,13 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
             key={group.name}
             className="w-full flex flex-col items-center pb-2"
           >
-            {/* Section divider + label (not before first group) */}
-            {groupIdx > 0 && (
-              <div className="w-full flex flex-col items-center my-2 px-3">
-                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full" />
-                <span className="mt-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-neutral-600 font-mono select-none">
-                  {group.name}
-                </span>
-              </div>
-            )}
+            {/* Section divider (only between groups) + label for every group */}
+            <div className="w-full flex flex-col items-center" style={{ marginTop: groupIdx > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
+              {groupIdx > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-purple-400/80 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
+                {group.name}
+              </span>
+            </div>
 
             {group.items.map((item) => (
               <SidebarItem key={item.id} item={item} />

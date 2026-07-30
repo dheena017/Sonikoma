@@ -46,7 +46,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
   const [previewQuality, setPreviewQuality] = React.useState<"draft" | "high">(
     "high"
   );
-  const [isInitializing, setIsInitializing] = React.useState(true);
 
   const [activeTab, setActiveTab] = React.useState(() => {
     return new URLSearchParams(window.location.search).get("tab") || "";
@@ -240,13 +239,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
     };
   }, [fetchWithInterceptor]);
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsInitializing(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
 
   const handleSave = () => {
     onRequestProjectConfirmation();
@@ -343,14 +335,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
       setCurrentSection("assets");
     }
   }, [currentSection]);
-
-  const skeletonLoader = (
-    <div className="flex-1 flex flex-col items-center justify-center min-h-[400px] space-y-4 animate-pulse">
-      <div className="w-12 h-12 bg-neutral-800 rounded-full" />
-      <div className="h-4 w-48 bg-neutral-800 rounded" />
-      <div className="h-3 w-32 bg-neutral-900 rounded" />
-    </div>
-  );
 
   const FinalProductionPanel: React.FC = () => {
     const hasEnoughCredits = userCredits === null || userCredits >= 20;
@@ -507,13 +491,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
       locationSearch={window.location.search}
     >
       <main className="flex-1 w-full relative bg-neutral-950 min-w-0">
-        {isInitializing && scrapedImages.length === 0 ? (
-          <div className="w-full h-full flex flex-col items-center justify-center">
-            {skeletonLoader}
-          </div>
-        ) : (
-          <>
-            {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
+        <>
+          {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
             <div
               className={`relative z-10 bg-[#070709] min-h-screen min-w-0 ${
                 activeTab === "settings" || activeTab === "audio-settings"
@@ -920,7 +899,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
               )}
             </div>
           </>
-        )}
       </main>
     </LayoutEditorPage>
   );

@@ -106,15 +106,13 @@ const EditorMiniSidebarInner = ({
         <div className="flex-1 w-full flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-4">
           {cropToolGroups.map((group, gi) => (
             <div key={group.label} className="w-full flex flex-col items-center">
-              {/* Section divider + label (not before first group) */}
-              {gi > 0 && (
-                <div className="w-full flex flex-col items-center my-2 px-3">
-                  <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full" />
-                  <span className="mt-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-neutral-600 font-mono select-none">
-                    {group.label}
-                  </span>
-                </div>
-              )}
+              {/* Section divider (only between groups) + label for every group */}
+              <div className="w-full flex flex-col items-center" style={{ marginTop: gi > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
+                {gi > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+                <span className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
+                  {group.label}
+                </span>
+              </div>
               <div className="w-full flex flex-col items-center space-y-0.5">
                 {group.tools.map((tool) => {
                   const isActive = activeTool === tool.key;
@@ -387,15 +385,13 @@ const EditorMiniSidebarInner = ({
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {menuGroups.map((group, gi) => (
           <div key={group.label} className="w-full flex flex-col items-center">
-            {/* Section divider + label (not before first group) */}
-            {gi > 0 && (
-              <div className="w-full flex flex-col items-center my-2 px-3">
-                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full" />
-                <span className="mt-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-neutral-600 font-mono select-none">
-                  {group.label}
-                </span>
-              </div>
-            )}
+            {/* Section divider (only between groups) + label for every group */}
+            <div className="w-full flex flex-col items-center" style={{ marginTop: gi > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
+              {gi > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
+                {group.label}
+              </span>
+            </div>
             {/* Items in the group */}
             <div className="w-full flex flex-col items-center space-y-0.5">
               {group.items.map((item) => (

@@ -11,6 +11,7 @@ import {
   ChevronRight,
   LayoutGrid,
   Rows,
+  Loader2,
 } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -28,32 +29,8 @@ import LiveScraperDeckEmptyState from "@/features/scraper/components/LiveScraper
 import { parseWebtoonUrl, getSourceName, getProxiedImageUrl } from "@/utils";
 import { updateSelection } from "@/utils/selection";
 import { EpisodeRatingDisplay } from "@/features/scraper/components/EpisodeRatingDisplay";
+import { ExtractionSkeletonCard } from "@/shared/ui/loading/ExtractionSkeletonCard";
 
-function ExtractingPanelSkeleton({ index, isScroll }: { index: number; isScroll?: boolean }) {
-  return (
-    <div
-      key={`loading-skeleton-${index}`}
-      className={`relative group overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/80 p-3 sm:p-4 space-y-3 cursor-wait select-none transition-all duration-300 ${
-        isScroll ? "w-[240px] sm:w-[270px] shrink-0" : "w-full"
-      }`}
-    >
-      {/* Header Info */}
-      <div className="flex items-center justify-between px-1">
-        <span className="text-[10px] font-mono font-semibold text-neutral-400">
-          FRAME #{String(index).padStart(2, "0")}
-        </span>
-      </div>
-
-      {/* Main Aspect Ratio Container */}
-      <div className="relative aspect-[3/4] w-full rounded-xl bg-neutral-900/70 border border-white/5 flex flex-col items-center justify-center p-4 gap-2">
-        <RefreshCw className="h-5 w-5 text-neutral-400 animate-spin" />
-        <span className="text-[11px] font-mono text-neutral-300 font-medium">
-          Extracting...
-        </span>
-      </div>
-    </div>
-  );
-}
 
 export function formatDisplayEpisodeLabel(label: string): string {
   if (!label) return "Episode";
@@ -1092,10 +1069,10 @@ const LiveScraperDeck = React.memo(
                        );
                      })}
 
-                     {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
-                       <ExtractingPanelSkeleton key={`loading-skeleton-${num}`} index={num} isScroll={true} />
-                     ))}
-                   </HorizontalScrollContainer>
+                      {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
+                        <ExtractionSkeletonCard key={`loading-skeleton-${num}`} index={num} isScroll={true} />
+                      ))}
+                    </HorizontalScrollContainer>
                  ) : (
                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-1.5 px-1 w-full">
                      {scrapedImages.map((imgUrl, idx) => {
@@ -1130,17 +1107,17 @@ const LiveScraperDeck = React.memo(
                            onCardClick={handleCardClick}
                            onCardDoubleClick={handleCardDoubleClick}
                          />
-                       );
-                     })}
+                        );
+                      })}
 
-                     {isScraping && (
-                       <ExtractingPanelSkeleton
-                         key={`loading-skeleton-${scrapedImages.length + 1}`}
-                         index={scrapedImages.length + 1}
-                         isScroll={false}
-                       />
-                     )}
-                   </div>
+                      {isScraping && (
+                        <ExtractionSkeletonCard
+                          key={`loading-skeleton-${scrapedImages.length + 1}`}
+                          index={scrapedImages.length + 1}
+                          isScroll={false}
+                        />
+                      )}
+                    </div>
                  );
               })()}
             </div>

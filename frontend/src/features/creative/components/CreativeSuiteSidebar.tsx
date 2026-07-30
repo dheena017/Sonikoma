@@ -181,8 +181,13 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
 
       {/* Navigation Groups */}
       <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {groups.map((group) => (
+        {groups.map((group, groupIdx) => (
           <div key={group.name} className="space-y-2.5">
+            {groupIdx > 0 && (
+              <div className="w-full flex flex-col pt-1">
+                <div className="w-8 h-[1px] bg-neutral-800 rounded-full mb-2 ml-3" />
+              </div>
+            )}
             <h4 className="px-3 text-[9px] font-black text-purple-400/50 uppercase tracking-[0.25em] font-mono">
               {group.name}
             </h4>

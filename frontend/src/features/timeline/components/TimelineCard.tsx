@@ -4,6 +4,7 @@ import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 import { generateTts } from "@/api";
 import { useImageEditorStore } from "@/features/image/hooks/useImageEditorState";
+import { PanelAnalyzingOverlay } from "@/shared/ui/loading/PanelAnalyzingOverlay";
 
 let autoPlayHintShown = false;
 
@@ -746,6 +747,8 @@ const TimelineCard = ({
           ? "opacity-35 border-dashed border-purple-500/50 bg-neutral-900/20 scale-98"
           : isDragOver
           ? "bg-neutral-900 border-purple-400 scale-102 ring-2 ring-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+          : (panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll)
+          ? "border-2 border-purple-500 bg-purple-950/20 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.01]"
           : isCurrent && isSelected
           ? "bg-purple-950/40 border-purple-400 ring-2 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)]"
           : isCurrent
@@ -779,16 +782,7 @@ const TimelineCard = ({
         />
 
         {(panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll) && (
-          <div className="absolute inset-0 bg-purple-950/50 backdrop-blur-[1px] flex flex-col items-center justify-center p-2 text-center animate-pulse z-10">
-            <Sparkles
-              className="h-5 w-5 text-purple-400 animate-spin"
-              style={{ animationDuration: "3s" }}
-            />
-            <span className="text-[9px] font-mono font-bold text-purple-300 mt-1 uppercase tracking-wider">
-              {isAnalyzingAll ? "Analyzing Sequence..." : "Analyzing..."}
-            </span>
-            <div className="scanner-line" />
-          </div>
+          <PanelAnalyzingOverlay isAnalyzingAll={isAnalyzingAll} />
         )}
 
         {/* Selection indicator overlay when selected */}

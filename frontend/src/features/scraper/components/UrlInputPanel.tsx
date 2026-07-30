@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Image as ImageIcon, Layout, Book, Zap, MoreVertical } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Layout, Book, Zap, MoreVertical, Loader2 } from "lucide-react";
 import { useAIModels } from "@/features/ai/hooks/useAIModels";
 import { NotificationType } from "@/features/notification";
 import { extractWebtoonUrl, parseWebtoonUrl, isKnownSite, addCustomSite, getProxiedImageUrl } from "@/utils/url";
@@ -710,7 +710,10 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-xs sm:text-sm font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
               >
                 {isScraping ? (
-                  "Initializing..."
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-purple-200" />
+                    <span>Extracting...</span>
+                  </>
                 ) : (
                   <>
                     <ImageIcon className="h-4 w-4" /> Import Images

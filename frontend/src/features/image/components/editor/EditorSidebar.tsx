@@ -193,8 +193,13 @@ const EditorSidebar = ({
 
       {/* Navigation Groups */}
       <div className="flex-1 overflow-y-auto py-6 px-3 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        {menuGroups.map((group) => (
+        {menuGroups.map((group, groupIdx) => (
           <div key={group.title} className="space-y-2">
+            {!isCollapsed && groupIdx > 0 && (
+              <div className="w-full flex flex-col pt-1">
+                <div className="w-8 h-[1px] bg-neutral-800 rounded-full mb-2 ml-4" />
+              </div>
+            )}
             {!isCollapsed && (
               <h3 className="px-4 text-[9px] font-black text-purple-400/40 uppercase tracking-[0.2em] font-mono mb-1">
                 {group.title}

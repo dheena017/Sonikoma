@@ -6,8 +6,11 @@ import {
   RotateCw,
   FlipHorizontal,
   Undo2,
-  Loader2,
 } from "lucide-react";
+import {
+  PanelProcessingOverlay,
+  getPanelProcessingLabel,
+} from "@/shared/ui/loading/PanelProcessingOverlay";
 
 interface PanelCardThumbnailProps {
   imgUrl: string;
@@ -47,15 +50,6 @@ const getScrapedImageStatus = (url: string) => {
   return null;
 };
 
-const processingLabel = (
-  isBatchCropping: boolean,
-  bubbleCroppingImgUrl: string | null,
-  imgUrl: string
-): string => {
-  if (isBatchCropping) return "Auto-Cropping";
-  if (bubbleCroppingImgUrl === imgUrl) return "Cleaning Bubbles";
-  return "Processing";
-};
 
 export function PanelCardThumbnail({
   imgUrl,
@@ -70,7 +64,6 @@ export function PanelCardThumbnail({
   handleUndo,
   onCheckboxClick,
 }: PanelCardThumbnailProps) {
-  const label = processingLabel(isBatchCropping, bubbleCroppingImgUrl, imgUrl);
   const status = getScrapedImageStatus(imgUrl);
 
   const [hasError, setHasError] = React.useState(false);
@@ -147,23 +140,12 @@ export function PanelCardThumbnail({
       )}
 
 
-      {/* Shimmer overlay while processing */}
+      {/* Processing overlay — imported from shared/ui/loading */}
       {isProcessing && (
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-neutral-950/90 backdrop-blur-md select-none animate-in fade-in duration-200"
-          id={`loading_overlay_${idx}`}
-        >
-          <div className="relative mb-2.5">
-            <div className="absolute inset-0 rounded-full bg-purple-500/20 animate-ping" />
-            <Loader2 className="relative h-6 w-6 text-purple-400 animate-spin drop-shadow-[0_0_8px_rgba(168,85,247,0.7)]" />
-          </div>
-          <span className="text-[10px] font-mono font-extrabold tracking-widest text-purple-300 uppercase">
-            {label}
-          </span>
-          <span className="text-[8px] text-neutral-500 mt-1 font-mono uppercase tracking-wider font-bold">
-            Please wait…
-          </span>
-        </div>
+        <PanelProcessingOverlay
+          label={getPanelProcessingLabel(isBatchCropping, bubbleCroppingImgUrl, imgUrl)}
+          overlayId={`loading_overlay_${idx}`}
+        />
       )}
 
       {/* Index badge — glassmorphic purple gradient when selected, dark when not */}
