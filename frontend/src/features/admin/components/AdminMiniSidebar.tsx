@@ -179,9 +179,14 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             key={group.name}
             className="w-full flex flex-col items-center pb-2"
           >
-            {/* Soft, premium gradient dot separator between groups */}
+            {/* Section divider + label (not before first group) */}
             {groupIdx > 0 && (
-              <div className="w-1 h-1 rounded-full bg-violet-900/50 shadow-[0_0_4px_rgba(139,92,246,0.3)] my-2" />
+              <div className="w-full flex flex-col items-center my-2 px-3">
+                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full" />
+                <span className="mt-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-neutral-600 font-mono select-none">
+                  {group.name}
+                </span>
+              </div>
             )}
 
             {group.items.map((item) => (
