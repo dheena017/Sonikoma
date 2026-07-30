@@ -69,7 +69,8 @@ export function useSingleImageEdits({
 
       const croppedUrl = data.url;
 
-      // Add directly to Timeline only
+      // Replace original image with cropped image in asset list & add to Timeline
+      setScrapedImages((prev) => prev.map((img) => (img === originalUrl ? croppedUrl : img)));
       addPanelsToStoryboard([croppedUrl]);
 
       setConsoleLogs((prev) => [
@@ -120,6 +121,7 @@ export function useSingleImageEdits({
   }, [
     editingImageIdx,
     scrapedImages,
+    setScrapedImages,
     setConsoleLogs,
     editCropTop,
     editCropBottom,
@@ -180,7 +182,18 @@ export function useSingleImageEdits({
           }
         );
 
-        // Add all cropped urls directly to Timeline
+        // Replace original image with all new cropped cut URLs in asset list & add to Timeline
+        setScrapedImages((prev) => {
+          const copy: string[] = [];
+          prev.forEach((img) => {
+            if (img === originalUrl) {
+              copy.push(...croppedUrls);
+            } else {
+              copy.push(img);
+            }
+          });
+          return copy;
+        });
         addPanelsToStoryboard(croppedUrls);
 
         setConsoleLogs((prev) => [
@@ -216,6 +229,7 @@ export function useSingleImageEdits({
     [
       editingImageIdx,
       scrapedImages,
+      setScrapedImages,
       setConsoleLogs,
       fetchWithInterceptor,
       addPanelsToStoryboard,

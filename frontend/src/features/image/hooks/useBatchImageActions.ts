@@ -498,8 +498,26 @@ export function useBatchImageActions({
 
     setScrapedImages((prev) => {
       if (isStitchedCombined && finalTargetImages[0] && newSlicedUrlsMap[finalTargetImages[0]]) {
-        return newSlicedUrlsMap[finalTargetImages[0]];
+        // Multi-select stitch path: replace the selected source images (targetImages)
+        // in-place with the new cropped panels. All other images stay untouched.
+        const selectedSet = new Set(targetImages);
+        let injected = false;
+        const copy: string[] = [];
+        prev.forEach((img) => {
+          if (selectedSet.has(img)) {
+            // Insert the panels only once, at the position of the first selected image
+            if (!injected) {
+              copy.push(...newSlicedUrlsMap[finalTargetImages[0]]);
+              injected = true;
+            }
+            // Skip the remaining selected images (they're replaced by panels)
+          } else {
+            copy.push(img);
+          }
+        });
+        return copy;
       }
+      // Single image path: replace each cropped image with its panel slices
       const copy: string[] = [];
       prev.forEach((img) => {
         if (newSlicedUrlsMap[img]) {
