@@ -18,6 +18,7 @@ interface LayoutEditorPageProps {
   subtitle?: string;
   onSave: () => void;
   isSaving: boolean;
+  isDirty?: boolean;
   isFocusMode: boolean;
   setIsFocusMode: React.Dispatch<React.SetStateAction<boolean>>;
   navigateTo?: (path: string) => void;
@@ -51,6 +52,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   subtitle,
   onSave,
   isSaving,
+  isDirty,
   isFocusMode,
   setIsFocusMode,
   navigateTo,
@@ -142,6 +144,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           onBackToApp={onBackToApp}
           onSave={onSave}
           isSaving={isSaving}
+          isDirty={isDirty}
           isFocusMode={isFocusMode}
           setIsFocusMode={setIsFocusMode}
           onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}

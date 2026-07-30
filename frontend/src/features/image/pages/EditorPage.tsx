@@ -487,6 +487,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       }
       onSave={handleSave}
       isSaving={isSaving}
+      isDirty={appLogic.isDirty}
       isFocusMode={isFocusMode}
       setIsFocusMode={setIsFocusMode}
       navigateTo={navigateTo}

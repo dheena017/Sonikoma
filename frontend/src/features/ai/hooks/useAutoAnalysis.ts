@@ -276,7 +276,10 @@ export function useAutoAnalysis({
         `[GUI] Added ${imgUrls.length} frame(s) to timeline.`,
         ...prev,
       ]);
-      addNotification(`Added ${imgUrls.length} panel(s) to timeline.`, "info");
+      addNotification(
+        `Added ${imgUrls.length} panel(s) to timeline. Unsaved changes — click "Save Project" to save.`,
+        "warning"
+      );
 
       // Developer console visibility
       console.log(

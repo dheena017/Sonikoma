@@ -69,8 +69,8 @@ export function useSceneModifier({
       ? `Duration updated to ${newDuration}s to match text length.`
       : `Duration kept at ${newDuration}s.`;
     addNotification?.(
-      `Panel #${panelId} dialogue updated. ${durationMsg}`,
-      "info"
+      `Panel #${panelId} dialogue updated. ${durationMsg} Unsaved changes — click "Save Project" to save.`,
+      "warning"
     );
     audioFeedback?.playTick();
   };
@@ -95,8 +95,8 @@ export function useSceneModifier({
       ]);
     }
     addNotification?.(
-      `Panel #${panelId} motion updated to ${motionVal}.`,
-      "info"
+      `Panel #${panelId} motion updated to ${motionVal}. Unsaved changes — click "Save Project" to save.`,
+      "warning"
     );
     audioFeedback?.playTick();
   };
@@ -122,7 +122,7 @@ export function useSceneModifier({
         ...prev,
       ]);
     }
-    addNotification?.(`Panel #${panelId} duration set to ${durVal}s.`, "info");
+    addNotification?.(`Panel #${panelId} duration set to ${durVal}s. Unsaved changes — click "Save Project" to save.`, "warning");
     audioFeedback?.playTick();
   };
 

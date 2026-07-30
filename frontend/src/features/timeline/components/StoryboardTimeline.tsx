@@ -208,7 +208,7 @@ const StoryboardTimeline = React.memo(
         setCurrentPanelIndex(currentPanelIndex + 1);
       }
 
-      addNotification?.("Reordered timeline cards successfully!", "success");
+      addNotification?.("Reordered timeline cards. Unsaved changes — click 'Save Project' to save.", "warning");
       setDraggedIndex(null);
       setDragOverIndex(null);
     };
@@ -406,13 +406,9 @@ const StoryboardTimeline = React.memo(
       setPanels(remainingPanels);
       clearSelection();
       addNotification?.(
-        `Deleted ${selectedPanelIds.size} selected panels`,
-        "info"
+        `Deleted ${selectedPanelIds.size} selected panel(s). Unsaved changes — click "Save Project" to save.`,
+        "warning"
       );
-      if (saveProject) {
-        addNotification?.("Saving timeline changes...", "info");
-        await saveProject(remainingPanels);
-      }
     };
 
     const handleDeleteSelected = () => {
