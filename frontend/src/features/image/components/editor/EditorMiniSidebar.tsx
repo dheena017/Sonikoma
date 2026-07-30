@@ -78,13 +78,23 @@ const EditorMiniSidebarInner = ({
   const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
 
   if (isEditing) {
-    const cropTools = [
-      { key: "adjust", label: "Adjust", icon: Sparkles },
-      { key: "edit", label: "Edit", icon: Edit2 },
-      { key: "draw", label: "Draw", icon: Brush },
-      { key: "slice", label: "Cut", icon: Scissors },
-      { key: "crop", label: "Edit", icon: Crop },
-      { key: "merge", label: "Merge", icon: Link2 },
+    const cropToolGroups = [
+      {
+        label: "Adjust",
+        tools: [
+          { key: "adjust", label: "Adjust", icon: Sparkles },
+          { key: "edit",   label: "Edit",   icon: Edit2  },
+          { key: "draw",   label: "Draw",   icon: Brush  },
+        ],
+      },
+      {
+        label: "Cut",
+        tools: [
+          { key: "slice", label: "Cut",   icon: Scissors },
+          { key: "crop",  label: "Crop",  icon: Crop     },
+          { key: "merge", label: "Merge", icon: Link2    },
+        ],
+      },
     ] as const;
 
     return (
@@ -93,59 +103,72 @@ const EditorMiniSidebarInner = ({
         className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
           }`}
       >
-        <div className="flex-1 w-full flex flex-col items-center space-y-4 pt-4">
-          {cropTools.map((tool) => {
-            const isActive = activeTool === tool.key;
-            const Icon = tool.icon;
-            const isHovered = hoveredTool === tool.key;
+        <div className="flex-1 w-full flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-4">
+          {cropToolGroups.map((group, gi) => (
+            <div key={group.label} className="w-full flex flex-col items-center">
+              {/* Section divider + label (not before first group) */}
+              {gi > 0 && (
+                <div className="w-full flex flex-col items-center my-2 px-3">
+                  <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full" />
+                  <span className="mt-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-neutral-600 font-mono select-none">
+                    {group.label}
+                  </span>
+                </div>
+              )}
+              <div className="w-full flex flex-col items-center space-y-0.5">
+                {group.tools.map((tool) => {
+                  const isActive = activeTool === tool.key;
+                  const Icon = tool.icon;
+                  const isHovered = hoveredTool === tool.key;
 
-            return (
-              <div key={tool.key} className="relative group w-full flex justify-center py-1">
-                {/* Active Pill */}
-                <div
-                  className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
-                      ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
-                      : "h-0 bg-transparent opacity-0"
-                    }`}
-                />
+                  return (
+                    <div key={tool.key} className="relative group w-full flex justify-center py-1">
+                      {/* Active Pill */}
+                      <div
+                        className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
+                            ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
+                            : "h-0 bg-transparent opacity-0"
+                          }`}
+                      />
 
-                <button
-                  onClick={() => {
-                    setActiveTool(tool.key);
-                  }}
-                  onMouseEnter={(e) => {
-                    setHoveredRect(e.currentTarget.getBoundingClientRect());
-                    setHoveredTool(tool.key);
-                  }}
-                  onMouseLeave={() => setHoveredTool(null)}
-                  className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
-                >
-                  {/* Icon pill */}
-                  <div
-                    className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
-                        ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                        : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
-                      }`}
-                  >
-                    <Icon
-                      className={`w-5 h-5 transition-colors duration-300 ${isActive
-                          ? "text-purple-400"
-                          : "text-neutral-400 group-hover:text-purple-300"
-                        }`}
-                    />
-                  </div>
+                      <button
+                        onClick={() => { setActiveTool(tool.key); }}
+                        onMouseEnter={(e) => {
+                          setHoveredRect(e.currentTarget.getBoundingClientRect());
+                          setHoveredTool(tool.key);
+                        }}
+                        onMouseLeave={() => setHoveredTool(null)}
+                        className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
+                      >
+                        {/* Icon pill */}
+                        <div
+                          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
+                              ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                              : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+                            }`}
+                        >
+                          <Icon
+                            className={`w-5 h-5 transition-colors duration-300 ${isActive
+                                ? "text-purple-400"
+                                : "text-neutral-400 group-hover:text-purple-300"
+                              }`}
+                          />
+                        </div>
 
-                  {/* Crop Slices Count Badge */}
-                  {tool.key === "crop" && slicesCount > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-br from-purple-500 to-purple-700 text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
-                      {slicesCount}
-                    </span>
-                  )}
-                </button>
-                <TooltipPortal text={tool.label} visible={isHovered} anchorRect={hoveredRect} />
+                        {/* Crop Slices Count Badge */}
+                        {tool.key === "crop" && slicesCount > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-br from-purple-500 to-purple-700 text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
+                            {slicesCount}
+                          </span>
+                        )}
+                      </button>
+                      <TooltipPortal text={tool.label} visible={isHovered} anchorRect={hoveredRect} />
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </aside>
     );
