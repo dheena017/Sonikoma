@@ -14,6 +14,8 @@ import { Sliders, X, Mic } from "lucide-react";
 import { useImageEditorStore } from "@/features/image/hooks/useImageEditorState";
 import { resolveWorkspaceReturnPath } from "@/utils/workspaceNavigation";
 import { Rnd } from "react-rnd";
+import AutoCropLoadingOverlay from "@/shared/ui/loading/AutoCropLoadingOverlay";
+
 
 
 interface EditorPageProps {
@@ -491,8 +493,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       locationSearch={window.location.search}
     >
       <main className="flex-1 w-full relative bg-neutral-950 min-w-0">
-        <>
-          {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
+        {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
             <div
               className={`relative z-10 bg-[#070709] min-h-screen min-w-0 ${
                 activeTab === "settings" || activeTab === "audio-settings"
@@ -898,7 +899,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 </>
               )}
             </div>
-          </>
       </main>
     </LayoutEditorPage>
   );

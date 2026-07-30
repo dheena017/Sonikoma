@@ -29,7 +29,7 @@ import LiveScraperDeckEmptyState from "@/features/scraper/components/LiveScraper
 import { parseWebtoonUrl, getSourceName, getProxiedImageUrl } from "@/utils";
 import { updateSelection } from "@/utils/selection";
 import { EpisodeRatingDisplay } from "@/features/scraper/components/EpisodeRatingDisplay";
-import { ExtractionSkeletonCard } from "@/shared/ui/loading/ExtractionSkeletonCard";
+import { ExtractionSkeletonCard, ImportImagesLoadingOverlay } from "@/shared/ui/loading";
 
 
 export function formatDisplayEpisodeLabel(label: string): string {
@@ -583,6 +583,7 @@ const LiveScraperDeck = React.memo(
     };
 
     const showEmptyState = !isScraping && scrapedImages.length === 0;
+    const showImportLoading = isScraping && scrapedImages.length === 0;
 
     return (
       <>
@@ -682,6 +683,8 @@ const LiveScraperDeck = React.memo(
 
           {showEmptyState ? (
             <LiveScraperDeckEmptyState />
+          ) : showImportLoading ? (
+            <ImportImagesLoadingOverlay />
           ) : (
             <div className="space-y-4">
 
