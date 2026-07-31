@@ -111,10 +111,11 @@ if __name__ == "__main__":
         },
     }
 
+    port = int(os.environ.get("PORT", os.environ.get("BACKEND_PORT", 10000)))
     run_args = {
         "app": "main:app",
-        "host": os.getenv("HOST", "0.0.0.0"),
-        "port": BACKEND_PORT,
+        "host": "0.0.0.0",
+        "port": port,
         "log_level": "info",
         "log_config": custom_log_config,
         "use_colors": not IS_PRODUCTION,

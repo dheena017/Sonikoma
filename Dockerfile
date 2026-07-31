@@ -48,12 +48,10 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 # Set production environment variables
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
-ENV BACKEND_PORT=5173
-ENV FRONTEND_PORT=3000
-ENV PORT=5173
+ENV PORT=10000
 
-EXPOSE 5173 3000
+EXPOSE 10000
 
-# Launch FastAPI computational engine from backend/app
+# Launch FastAPI computational engine directly with uvicorn bound to 0.0.0.0:$PORT
 WORKDIR /app/backend/app
-CMD ["python", "main.py"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}"]
