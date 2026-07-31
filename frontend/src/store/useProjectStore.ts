@@ -21,6 +21,7 @@ export interface ProjectMetadata {
 export interface ActiveProjectData {
   project: ProjectMetadata;
   panels: any[];
+  scrapedImages?: string[];
 }
 
 export interface ProjectStoreState {

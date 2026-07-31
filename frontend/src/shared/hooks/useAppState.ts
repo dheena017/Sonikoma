@@ -807,11 +807,21 @@ export function useAppState() {
       const currentActiveId = currentActiveProject?.project?.project_id;
       const currentChapterSlug = currentActiveProject?.project?.chapter_slug;
 
-      if (
+      const isSameProject =
         lookupId === currentActiveId ||
-        (currentChapterSlug && lookupId === currentChapterSlug)
-      )
+        (currentChapterSlug && lookupId === currentChapterSlug);
+
+      if (isSameProject) {
+        if (
+          currentActiveProject?.scrapedImages &&
+          currentActiveProject.scrapedImages.length > 0
+        ) {
+          setScrapedImages((prev) =>
+            prev.length === 0 ? currentActiveProject.scrapedImages! : prev
+          );
+        }
         return;
+      }
 
       if (lookupId.startsWith("temp_")) {
         useProjectStore.getState().setActiveProject({
@@ -823,10 +833,12 @@ export function useAppState() {
             chapter_slug: null,
           },
           panels: [],
+          scrapedImages: [],
         });
         localStorage.setItem("active_project_id", lookupId);
         localStorage.removeItem("active_series_slug");
         localStorage.removeItem("active_chapter_slug");
+        setScrapedImages([]);
         return;
       }
 
@@ -956,6 +968,24 @@ export function useAppState() {
             };
           }) : [];
 
+          // Populate scraped images list: prefer saved raw scraped_images, fallback to panel images
+          const savedScrapedImages = (Array.isArray(data.scraped_images) && data.scraped_images.length > 0)
+            ? data.scraped_images
+            : loadedSettings.scraped_images;
+          let proxiedScraped: string[] = [];
+          if (Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0) {
+            proxiedScraped = savedScrapedImages.map((img: string) =>
+              img && img.startsWith("http") && !api.isApiUrl(img)
+                ? api.getProxyImageUrl(img)
+                : img
+            );
+          } else {
+            proxiedScraped = mappedPanels
+              .map((p: any) => p.image_url)
+              .filter(Boolean);
+          }
+          setScrapedImages(proxiedScraped);
+
           // Save directly to global Zustand store in a single transaction
           useProjectStore.getState().setActiveProject({
             project: {
@@ -964,25 +994,8 @@ export function useAppState() {
               chapterTitle: loadedChapterTitle,
             },
             panels: mappedPanels,
+            scrapedImages: proxiedScraped,
           });
-
-          // Populate scraped images list: prefer saved raw scraped_images, fallback to panel images
-          const savedScrapedImages = (Array.isArray(data.scraped_images) && data.scraped_images.length > 0)
-            ? data.scraped_images
-            : loadedSettings.scraped_images;
-          if (Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0) {
-            const proxiedScraped = savedScrapedImages.map((img: string) =>
-              img && img.startsWith("http") && !api.isApiUrl(img)
-                ? api.getProxyImageUrl(img)
-                : img
-            );
-            setScrapedImages(proxiedScraped);
-          } else {
-            const panelImages = mappedPanels
-              .map((p: any) => p.image_url)
-              .filter(Boolean);
-            setScrapedImages(panelImages);
-          }
           addNotification(
             `Loaded project "${
               data.project.title || "Untitled"
@@ -1038,6 +1051,16 @@ export function useAppState() {
     handlePopState();
     return () => window.removeEventListener("popstate", handlePopState);
   }, [isAuthenticated, addNotification, getToken, fetchWithInterceptor]);
+
+  useEffect(() => {
+    if (
+      scrapedImages.length === 0 &&
+      activeProjectData?.scrapedImages &&
+      activeProjectData.scrapedImages.length > 0
+    ) {
+      setScrapedImages(activeProjectData.scrapedImages);
+    }
+  }, [activeProjectData, scrapedImages.length]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {

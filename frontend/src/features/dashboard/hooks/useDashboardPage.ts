@@ -186,12 +186,21 @@ export default function useDashboardPage() {
       const res = await fetch(`/api/projects/${project.project_id}`, { headers });
       if (res.ok) {
         const data = await res.json();
-        if (data.success && data.project) {
+          const loadedSettings = data.project.audio_settings || {};
+          const savedScrapedImages =
+            Array.isArray(data.scraped_images) && data.scraped_images.length > 0
+              ? data.scraped_images
+              : loadedSettings.scraped_images;
+          const scrapedImages =
+            Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0
+              ? savedScrapedImages
+              : (data.panels || []).map((p: any) => p.image_url).filter(Boolean);
+
           useProjectStore.getState().setActiveProject({
             project: data.project,
             panels: data.panels || [],
+            scrapedImages,
           });
-        }
       }
     } catch (err) {
       console.error("Failed to pre-fetch project data on dashboard click:", err);
