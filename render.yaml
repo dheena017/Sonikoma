@@ -1,0 +1,20 @@
+# Render Web Service deployment configuration for Sonikoma
+services:
+  - type: web
+    name: sonikoma-api
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend/app && uvicorn main:app --host 0.0.0.0 --port ${PORT:-5173}
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_ENV
+        value: production
+      - key: BACKEND_PORT
+        value: 5173
+      - key: FRONTEND_PORT
+        value: 3000
+      - key: PORT
+        value: 5173

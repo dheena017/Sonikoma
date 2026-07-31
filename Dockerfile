@@ -48,9 +48,11 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 # Set production environment variables
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
+ENV BACKEND_PORT=5173
+ENV FRONTEND_PORT=3000
 ENV PORT=5173
 
-EXPOSE 5173
+EXPOSE 5173 3000
 
 # Launch FastAPI computational engine from backend/app
 WORKDIR /app/backend/app

@@ -19,57 +19,30 @@ if os.path.exists(dotenv_path):
 else:
     load_dotenv()
 
-# 1. FRONTEND_PORT (strictly required)
-FRONTEND_PORT_STR = os.getenv("FRONTEND_PORT")
-if not FRONTEND_PORT_STR:
-    raise RuntimeError(
-        "Configuration Error: FRONTEND_PORT environment variable is missing from the environment/dotenv!\n"
-        "Please define FRONTEND_PORT in your .env file."
-    )
+# 1. FRONTEND_PORT (default to 3000 if missing)
+FRONTEND_PORT_STR = os.getenv("FRONTEND_PORT", "3000")
 try:
     FRONTEND_PORT = int(FRONTEND_PORT_STR)
 except ValueError:
-    raise RuntimeError(
-        f"Configuration Error: FRONTEND_PORT must be a valid integer, got '{FRONTEND_PORT_STR}'"
-    )
+    FRONTEND_PORT = 3000
 
-# 2. BACKEND_PORT (strictly required)
-BACKEND_PORT_STR = os.getenv("BACKEND_PORT") or os.getenv("PORT")
-if not BACKEND_PORT_STR:
-    raise RuntimeError(
-        "Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!\n"
-        "Please define BACKEND_PORT or PORT in your .env file."
-    )
+# 2. BACKEND_PORT / PORT (Chose from .env BACKEND_PORT or cloud PORT)
+BACKEND_PORT_STR = os.getenv("BACKEND_PORT") or os.getenv("PORT") or "5173"
 try:
     BACKEND_PORT = int(BACKEND_PORT_STR)
 except ValueError:
-    raise RuntimeError(
-        f"Configuration Error: BACKEND_PORT/PORT must be a valid integer, got '{BACKEND_PORT_STR}'"
-    )
+    BACKEND_PORT = 5173
 
-# 3. APP_URL (strictly required)
-APP_URL = os.getenv("APP_URL")
-if not APP_URL:
-    raise RuntimeError(
-        "Configuration Error: APP_URL environment variable is missing!\n"
-        "Please define APP_URL (e.g., http://localhost:3000) in your .env file."
-    )
+# 3. APP_URL
+APP_URL = os.getenv("APP_URL") or "http://localhost:3000"
 
-# 4. JWT_SECRET_KEY (strictly required)
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-if not JWT_SECRET_KEY:
-    raise RuntimeError(
-        "Configuration Error: JWT_SECRET_KEY environment variable is missing!\n"
-        "Please define a secure random JWT_SECRET_KEY in your .env file."
-    )
+# 4. JWT_SECRET_KEY
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY") or "sonikoma-default-jwt-secret-key-change-in-production"
 
-# 5. GEMINI_API_KEY (strictly required)
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+# 5. GEMINI_API_KEY
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 if not GEMINI_API_KEY:
-    raise RuntimeError(
-        "Configuration Error: GEMINI_API_KEY environment variable is missing!\n"
-        "Please define GEMINI_API_KEY in your .env file."
-    )
+    logger.warning("GEMINI_API_KEY is not defined. AI generative features may be limited.")
 
 # 6. Optional keys and settings
 HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")

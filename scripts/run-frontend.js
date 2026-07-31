@@ -54,49 +54,17 @@ const logger = {
 // Initialize dotenv from parent .env file
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-const backendPortStr = process.env.BACKEND_PORT || process.env.PORT;
-if (!backendPortStr) {
-  logger.error("Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!");
-  logger.error("Please configure them in your .env file.");
-  process.exit(1);
-}
-const port = parseInt(backendPortStr, 10);
-if (isNaN(port)) {
-  logger.error(`Configuration Error: BACKEND_PORT/PORT must be a valid integer, got "${backendPortStr}"`);
-  process.exit(1);
-}
+const backendPortStr = process.env.BACKEND_PORT || process.env.PORT || "5173";
+const port = parseInt(backendPortStr, 10) || 5173;
 
-const frontendPortStr = process.env.FRONTEND_PORT;
-if (!frontendPortStr) {
-  logger.error("Configuration Error: FRONTEND_PORT environment variable is missing!");
-  logger.error("Please configure it in your .env file.");
-  process.exit(1);
-}
-const frontendPort = parseInt(frontendPortStr, 10);
-if (isNaN(frontendPort)) {
-  logger.error(`Configuration Error: FRONTEND_PORT must be a valid integer, got "${frontendPortStr}"`);
-  process.exit(1);
-}
+const frontendPortStr = process.env.FRONTEND_PORT || "3000";
+const frontendPort = parseInt(frontendPortStr, 10) || 3000;
 
-const appUrl = process.env.APP_URL;
-if (!appUrl) {
-  logger.error("Configuration Error: APP_URL environment variable is missing!");
-  logger.error("Please configure it in your .env file.");
-  process.exit(1);
-}
-
-const jwtSecretKey = process.env.JWT_SECRET_KEY;
-if (!jwtSecretKey) {
-  logger.error("Configuration Error: JWT_SECRET_KEY environment variable is missing!");
-  logger.error("Please configure it in your .env file.");
-  process.exit(1);
-}
-
-const geminiApiKey = process.env.GEMINI_API_KEY;
+const appUrl = process.env.APP_URL || `http://localhost:${frontendPort}`;
+const jwtSecretKey = process.env.JWT_SECRET_KEY || "sonikoma-default-jwt-secret-key-change-in-production";
+const geminiApiKey = process.env.GEMINI_API_KEY || "";
 if (!geminiApiKey) {
-  logger.error("Configuration Error: GEMINI_API_KEY environment variable is missing!");
-  logger.error("Please configure it in your .env file.");
-  process.exit(1);
+  logger.warn("GEMINI_API_KEY is not defined. AI generative features may be limited.");
 }
 
 const url = `http://127.0.0.1:${port}/api/health`;

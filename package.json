@@ -9,7 +9,7 @@
     "frontend:dev": "npm run frontend",
     "backend": "node scripts/run-backend.js",
     "python": "npm run backend",
-    "python:prod": "cd backend/app && cross-env NODE_ENV=production ..\\..\\.venv\\Scripts\\python.exe main.py",
+    "python:prod": "cd backend/app && uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}",
     "frontend": "node scripts/run-frontend.js --only-frontend",
     "build:frontend": "cd frontend && npm install && npm run build",
     "build": "npm run build:frontend",
