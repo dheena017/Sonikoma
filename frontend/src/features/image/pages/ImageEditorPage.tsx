@@ -170,7 +170,7 @@ const ImageEditorPage = React.memo(({
       <div className="flex-1 flex flex-row overflow-hidden w-full relative">
         {/* Left Tools Sidebar */}
         <aside
-          className={`h-full bg-[#121826] border-r border-gray-800/40 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`h-full bg-[#0d0e15] border-r border-white/10 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             isToolsPanelOpen ? "w-[360px] lg:w-[420px] opacity-100" : "w-0 opacity-0 border-none"
           }`}
         >
