@@ -41,7 +41,6 @@ export default function CanvasFabricLayer({
 
       canvasEl.current.width = img.width;
       canvasEl.current.height = img.height;
-      containerRef.current.style.aspectRatio = `${img.width / img.height}`;
 
       if (fabricCanvas.current) {
         fabricCanvas.current.dispose();
@@ -53,15 +52,6 @@ export default function CanvasFabricLayer({
         height: img.height,
         backgroundColor: "transparent",
       });
-
-      fabric.Image.fromURL(imgUrl, { crossOrigin: "anonymous" }).then(
-        (fabImg) => {
-          if (fabricCanvas.current === fCanvas) {
-            fCanvas.backgroundImage = fabImg;
-            fCanvas.renderAll();
-          }
-        }
-      );
 
       fabricCanvas.current = fCanvas;
 
@@ -127,13 +117,18 @@ export default function CanvasFabricLayer({
   useEffect(() => {
     if (!isActive) return;
 
-    const handleSaveRequest = () => {
+    const handleSaveRequest = async () => {
       if (fabricCanvas.current) {
+        const fabImg = await fabric.Image.fromURL(imgUrl, { crossOrigin: "anonymous" });
+        fabricCanvas.current.backgroundImage = fabImg;
+        fabricCanvas.current.renderAll();
         const dataUrl = fabricCanvas.current.toDataURL({
           format: "jpeg",
           quality: 1,
           multiplier: 1,
         });
+        fabricCanvas.current.backgroundImage = null;
+        fabricCanvas.current.renderAll();
         window.dispatchEvent(
           new CustomEvent("FABRIC_SAVE_COMPLETE", { detail: { dataUrl } })
         );
@@ -143,14 +138,8 @@ export default function CanvasFabricLayer({
     const handleClearRequest = () => {
       if (fabricCanvas.current) {
         fabricCanvas.current.clear();
-        fabric.Image.fromURL(imgUrl, { crossOrigin: "anonymous" }).then(
-          (fabImg) => {
-            if (fabricCanvas.current) {
-              fabricCanvas.current.backgroundImage = fabImg;
-              fabricCanvas.current.renderAll();
-            }
-          }
-        );
+        fabricCanvas.current.backgroundImage = null;
+        fabricCanvas.current.renderAll();
       }
     };
 

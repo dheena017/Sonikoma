@@ -28,12 +28,12 @@ interface CropCanvasProps {
   handleDeleteSlice: (id: string, e: React.MouseEvent) => void;
   handleRemoveSplitLine: (yVal: number) => void;
   dragType:
-    | "draw"
-    | "move"
-    | "split"
-    | "drag-split-line"
-    | `resize-${string}`
-    | null;
+  | "draw"
+  | "move"
+  | "split"
+  | "drag-split-line"
+  | `resize-${string}`
+  | null;
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
   handleSelectAndDragSlice: (
     slice: Slice,
@@ -308,9 +308,8 @@ export default function CropCanvas({
   return (
     <div
       ref={scrollParentRef}
-      className={`relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black ${
-        zoom > 1 ? "overflow-auto" : "overflow-hidden"
-      } flex-1 h-0 flex items-center justify-center select-none transition-colors`}
+      className={`relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black ${zoom > 1 ? "overflow-auto" : "overflow-hidden"
+        } flex-1 h-0 flex items-center justify-center select-none transition-colors`}
       style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
     >
       <div
@@ -378,9 +377,8 @@ export default function CropCanvas({
             if (isManualBrushActive) return;
             handleEnd();
           }}
-          className={`relative inline-flex flex-col ${
-            activeTab === "crop" ? "cursor-crosshair" : ""
-          }`}
+          className={`relative inline-flex flex-col ${activeTab === "crop" ? "cursor-crosshair" : ""
+            }`}
           style={{
             userSelect: "none",
             touchAction: "none",
@@ -399,12 +397,11 @@ export default function CropCanvas({
             src={imgUrl}
             alt="Preview"
             onLoad={handleImageLoad}
-            className="pointer-events-none select-none block"
+            className="pointer-events-none select-none block w-full h-full object-contain max-h-full max-w-full mx-auto"
             style={{
               maxWidth: "100%",
               maxHeight: "100%",
-              width: "auto",
-              height: "auto",
+              objectFit: "contain",
             }}
             draggable={false}
           />
@@ -479,11 +476,10 @@ export default function CropCanvas({
                       handleSelectAndDragSlice(slice, e.clientX, e.clientY);
                     }
                   }}
-                  className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
-                    isSelected
+                  className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${isSelected
                       ? "border-purple-400 bg-purple-500/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]"
                       : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
-                  }`}
+                    }`}
                   style={{
                     top: `${slice.cropTop}%`,
                     bottom: `${slice.cropBottom}%`,
@@ -493,11 +489,10 @@ export default function CropCanvas({
                 >
                   <div className="p-1">
                     <span
-                      className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${
-                        isSelected
+                      className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${isSelected
                           ? "bg-purple-950 text-purple-300 border border-purple-500/30"
                           : "bg-purple-950/90 text-purple-300"
-                      }`}
+                        }`}
                     >
                       Cut #{index + 1}
                     </span>
