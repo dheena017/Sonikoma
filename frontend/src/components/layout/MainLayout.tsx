@@ -549,7 +549,9 @@ export default function MainLayout(props: MainLayoutProps) {
           )}
 
           {/* Children Page Views */}
-          {children}
+          <div className="w-full flex-1 flex flex-col px-4 sm:px-6 md:px-8">
+            {children}
+          </div>
         </div>
       </div>
 

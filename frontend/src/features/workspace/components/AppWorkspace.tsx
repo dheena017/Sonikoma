@@ -552,7 +552,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
       id="main_workspace"
       className="flex-1 w-full px-4 sm:px-6 py-8 md:py-12 flex flex-col gap-12 items-center justify-start min-h-[80vh]"
     >
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <div className="w-full space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
         {/* RESUME CARD (Optimized UX with Thumbnail) */}
         {matchingProject && (
           <div className="group bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border border-purple-500/30 rounded-[32px] p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all hover:border-purple-400/50">
@@ -1035,7 +1035,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {displayedProjects.map((project) => {
                   const projectCardItem: Project = {
                     project_id: project.project_id,
