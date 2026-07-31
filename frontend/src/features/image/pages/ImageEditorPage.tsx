@@ -174,7 +174,7 @@ const ImageEditorPage = React.memo(({
             isToolsPanelOpen ? "w-[360px] lg:w-[420px] opacity-100" : "w-0 opacity-0 border-none"
           }`}
         >
-          <div className="w-[360px] lg:w-[420px] h-full overflow-y-auto custom-scrollbar p-5">
+          <div className="w-[360px] lg:w-[420px] h-full flex flex-col min-h-0 overflow-hidden">
               <ImageEditorSidebar
               setActiveTab={setActiveTool}
               slices={editorProps.slices}
