@@ -1,0 +1,1 @@
+"""Image API routes module."""

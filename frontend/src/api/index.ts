@@ -1,18 +1,17 @@
-export * from "./auth";
-export * from "./projects";
-export * from "./image";
-export * from "./ai";
-export * from "./scraper";
-export * from "./video";
-export * from "./system";
-export * from "./admin";
-export * from "./skills";
-export * from "./export";
-export * from "./analytics";
-export * from "./fetchWithInterceptor";
+// Main API Client & Endpoint Barrel Exporter
+export * from "./client/request";
+export * from "./client/fetchWithInterceptor";
+export * from "./types";
 
-export const fetchBlob = async (url: string, headers?: HeadersInit) => {
-  const res = await fetch(url, { headers });
-  if (!res.ok) throw new Error(`Failed to fetch asset: ${url}`);
-  return res.blob();
-};
+// Domain Endpoints
+export * from "./endpoints/admin";
+export * from "./endpoints/ai";
+export * from "./endpoints/analytics";
+export * from "./endpoints/auth";
+export * from "./endpoints/export";
+export * from "./endpoints/image";
+export * from "./endpoints/projects";
+export * from "./endpoints/scraper";
+export * from "./endpoints/skills";
+export * from "./endpoints/system";
+export * from "./endpoints/video";

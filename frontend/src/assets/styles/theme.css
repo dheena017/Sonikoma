@@ -1,0 +1,37 @@
+/* ===============================
+   Theme Variables & Base Settings
+   =============================== */
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom color extensions to map non-standard values (e.g. neutral-850) */
+  --color-neutral-150: #ededed;
+  --color-neutral-250: #dcdcdc;
+  --color-neutral-305: #d4d4d8;
+  --color-neutral-350: #b5b5b5;
+  --color-neutral-450: #8a8a8a;
+  --color-neutral-750: #333333;
+  --color-neutral-805: #141416;
+  --color-neutral-850: #1f1f1f;
+  --color-neutral-855: #1a1a1f;
+  --color-neutral-925: #0f0f0f;
+  --color-neutral-955: #060608;
+
+  --color-rose-250: #fecdd3;
+  --color-rose-350: #fb7185;
+}
+
+body {
+  background-color: #09090b;
+  color: #fafafa;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  color-scheme: dark;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root[data-mode="light"] {
+  color-scheme: light;
+}

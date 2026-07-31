@@ -1,0 +1,440 @@
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  Film,
+  Activity,
+  Terminal,
+  Sliders,
+  Scissors,
+  Brain,
+  Keyboard,
+  Sparkles,
+  X,
+  LayoutDashboard,
+  Layout,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Bell,
+  Shield,
+  FolderOpen,
+  Award,
+  Menu,
+  Zap,
+  Database,
+} from "lucide-react";
+
+import { useThemeMode } from "@/shared/hooks/useThemeMode";
+import { GeneratedPanel } from "@/types";
+import { Notification } from "@/features/notification";
+
+interface SidebarProps {
+  isProcessing: boolean;
+  panels: GeneratedPanel[];
+  scrapedImages: string[];
+  totalCalculatedDuration: number;
+  currentPath: string;
+  editingImageIdx: number | null;
+  lastEditorPath: string;
+  isBatchCropping: boolean;
+  isCleaningBubbles: boolean;
+  isOpen: boolean;
+  onClose: () => void;
+  projectId?: string | null;
+  isDirty?: boolean;
+  navigateTo?: (path: string) => void;
+  notifications?: Notification[];
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
+}
+
+const SidebarInner = ({
+  isProcessing,
+  panels,
+  scrapedImages,
+  totalCalculatedDuration,
+  currentPath,
+  editingImageIdx,
+  lastEditorPath,
+  isBatchCropping,
+  isCleaningBubbles,
+  isOpen,
+  onClose,
+  projectId = null,
+  isDirty = false,
+  navigateTo: routerNavigateTo,
+  notifications = [],
+  seriesSlug = null,
+  chapterSlug = null,
+}: SidebarProps) => {
+  const { themeMode } = useThemeMode();
+  const chapterPathMatch = currentPath.match(
+    /\/series\/[^\/]+\/chapters\/([^\/]+)/
+  );
+  const isWorkspace = currentPath === "/workspace";
+  const isDashboardOverview = currentPath === "/dashboard";
+  const isAdminDashboardPath =
+    currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard";
+  const isAdminPath =
+    currentPath.startsWith("/admin/") && currentPath !== "/admin/";
+  const isSettings = currentPath === "/settings";
+  const isAutoCrop = currentPath === "/auto-crop";
+  const isEditor =
+    currentPath.startsWith("/editor") ||
+    currentPath.startsWith("/workspace/editor");
+  const isLogs = currentPath === "/logs";
+  const isStatus = currentPath === "/status";
+  const isShortcuts = currentPath === "/shortcuts";
+  const isAIModels = currentPath === "/ai-models";
+  const isProjects = currentPath === "/projects";
+
+  const activeProjectId = useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("id") || params.get("project_id") || projectId;
+  }, [currentPath, projectId]);
+
+
+
+  const navigateTo = async (path: string) => {
+    if (routerNavigateTo) {
+      routerNavigateTo(path);
+    } else {
+      if (isDirty) {
+        const confirm = (window as any).confirmAsync || window.confirm;
+        const confirmed = await (window as any).confirmAsync(
+          "You have unsaved changes. Are you sure you want to navigate away? Your changes will be lost."
+        );
+        if (!confirmed) {
+          return;
+        }
+      }
+      window.history.pushState({}, "", path);
+      window.dispatchEvent(new Event("popstate"));
+    }
+    onClose(); // Close mobile drawer when navigating
+  };
+
+  const handleNavigateToWorkspace = () => {
+    const activeProjId = activeProjectId || projectId;
+    const activeSeriesSlug =
+      localStorage.getItem("active_series_slug") || seriesSlug;
+    const activeChapterSlug =
+      localStorage.getItem("active_chapter_slug") || chapterSlug;
+
+    if (activeProjId) {
+      if (activeSeriesSlug && activeChapterSlug) {
+        navigateTo(
+          `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
+        );
+      } else if (activeProjId.startsWith("temp_")) {
+        navigateTo(`/workspace/editor?id=${activeProjId}`);
+      } else {
+        navigateTo(`/workspace?id=${activeProjId}`);
+      }
+    } else {
+      navigateTo("/workspace");
+    }
+  };
+
+  const handleNavigateToDashboardOverview = () => {
+    navigateTo("/dashboard");
+  };
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const menuItems = [
+    {
+      group: "Main Workspace",
+      items: [
+        {
+          label: "Dashboard",
+          icon: LayoutDashboard,
+          active: isDashboardOverview,
+          onClick: handleNavigateToDashboardOverview,
+          enabled: true,
+        },
+        {
+          label: "Workspace",
+          icon: Layout,
+          active: isWorkspace,
+          onClick: handleNavigateToWorkspace,
+          enabled: true,
+        },
+        {
+          label: "Projects",
+          icon: FolderOpen,
+          active: isProjects,
+          onClick: () => navigateTo("/projects"),
+          enabled: true,
+        },
+        {
+          label: "WEBTOON Scraper",
+          icon: Zap,
+          active: currentPath === "/episode-scraper",
+          onClick: () => navigateTo("/episode-scraper"),
+          enabled: true,
+        },
+      ],
+    },
+
+    {
+      group: "Diagnostics & Controls",
+      items: [
+        {
+          label: "Logs",
+          icon: Terminal,
+          active: isLogs,
+          onClick: () => navigateTo("/logs"),
+          enabled: true,
+        },
+        {
+          label: "Status",
+          icon: Activity,
+          active: isStatus,
+          onClick: () => navigateTo("/status"),
+          enabled: true,
+        },
+        {
+          label: "AI Models",
+          icon: Award,
+          active: isAIModels,
+          onClick: () => navigateTo("/ai-models"),
+          enabled: true,
+        },
+        {
+          label: "Model Training",
+          icon: Database,
+          active: currentPath === "/model-training",
+          onClick: () => navigateTo("/model-training"),
+          enabled: true,
+        },
+        {
+          label: "Keys",
+          icon: Keyboard,
+          active: isShortcuts,
+          onClick: () => navigateTo("/shortcuts"),
+          enabled: true,
+        },
+        {
+          label: "Settings",
+          icon: Sliders,
+          active: isSettings,
+          onClick: () => navigateTo("/settings"),
+          enabled: true,
+        },
+      ],
+    },
+    {
+      group: "Account & Alerts",
+      items: [
+        {
+          label: "Notifications",
+          icon: Bell,
+          active: currentPath === "/notifications",
+          onClick: () => navigateTo("/notifications"),
+          enabled: true,
+          badge: unreadCount > 0 ? unreadCount : undefined,
+        },
+        {
+          label: "Profile",
+          icon: Sparkles,
+          active: currentPath === "/profile",
+          onClick: () => navigateTo("/profile"),
+          enabled: true,
+        },
+        {
+          label: "Admin Dashboard",
+          icon: Shield,
+          active: isAdminDashboardPath || isAdminPath,
+          onClick: () => navigateTo("/admin"),
+          enabled: true,
+        },
+      ],
+    },
+  ];
+
+  const isCreativeSuitePath =
+    currentPath === "/creative-suite" || currentPath.startsWith("/creative-suite/") || currentPath.startsWith("/ai-") || currentPath === "/panel-assistant" || currentPath === "/youtube";
+
+  const sidebarContent = (
+    <div className="flex h-full flex-col justify-between p-5 space-y-6">
+      {/* BRANDING LOGO */}
+      <div className="space-y-6 flex flex-col flex-grow min-h-0">
+        <div className="flex items-center justify-between">
+          <div
+            className="flex items-center gap-3 cursor-pointer select-none hover:opacity-90 transition-opacity"
+            onClick={handleNavigateToDashboardOverview}
+          >
+            <img
+              src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+              }}
+              className="h-14 w-14 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover"
+              style={{
+                background: themeMode === "light" ? "#ffffff" : "#000000",
+              }}
+              alt="Sonikoma Logo"
+            />
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-base tracking-tight text-white font-sans">
+                  Sonikoma
+                </span>
+              </div>
+              <p className="text-[10px] text-neutral-400 font-mono">
+                Vision Pipeline Suite
+              </p>
+            </div>
+          </div>
+
+          {/* Close / toggle button for drawer */}
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
+          >
+            {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
+
+        {/* NAVIGATION MENUS */}
+        <div className="space-y-6 overflow-y-auto flex-grow min-h-0 scrollbar-thin custom-sidebar-scrollbar pr-1">
+          {menuItems.map((group, groupIdx) => (
+            <div key={group.group} className="space-y-2">
+              {groupIdx > 0 && (
+                <div className="w-full flex flex-col pt-2">
+                  <div className="w-8 h-[1px] bg-neutral-800 rounded-full mb-2 ml-2" />
+                </div>
+              )}
+              <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">
+                {group.group}
+              </h4>
+              <ul className="space-y-1">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <li key={item.label}>
+                      <button
+                        onClick={item.onClick}
+                        disabled={!item.enabled}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold font-mono transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
+                          item.active
+                            ? "text-white bg-purple-950/20 border border-purple-900/60 shadow-inner"
+                            : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
+                        } ${
+                          (item as any).isProcessing
+                            ? "ring-1 ring-purple-500/50 shadow-[0_0_8px_rgba(168,85,247,0.2)]"
+                            : ""
+                        }`}
+                        title={
+                          !item.enabled ? (item as any).disabledTip : item.label
+                        }
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Icon
+                            className={`h-4 w-4 ${
+                              item.active
+                                ? "text-purple-400"
+                                : "text-neutral-500 group-hover:text-neutral-300"
+                            }`}
+                          />
+                          <span>{item.label}</span>
+                        </div>
+                        {(item as any).badge && (
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-bold ${
+                              item.label === "Notifications" && !item.active
+                                ? "bg-purple-600 text-white shadow-sm shadow-purple-900/50"
+                                : item.active
+                                ? "bg-purple-900 text-purple-200"
+                                : "bg-black/55 text-neutral-400"
+                            }`}
+                          >
+                            {(item as any).badge}
+                          </span>
+                        )}
+                        {(item as any).isProcessing && (
+                          <span className="absolute right-3 top-3.5 h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping" />
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+
+          {/* Creative Suite Navigation */}
+          <div className="space-y-2">
+            <div className="w-full flex flex-col pt-2">
+              <div className="w-8 h-[1px] bg-neutral-800 rounded-full mb-2 ml-2" />
+            </div>
+            <h4 className="text-[9px] font-bold text-neutral-500 uppercase tracking-widest font-mono pl-2">
+              Creative Tools
+            </h4>
+            <div className="space-y-1">
+              <button
+                onClick={() => navigateTo("/creative-suite")}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold font-mono transition-all duration-200 cursor-pointer text-left border ${
+                  isCreativeSuitePath
+                    ? "text-purple-300 bg-purple-950/10 border-purple-900/40 shadow-inner"
+                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border-transparent"
+                }`}
+                title="Open Creative Suite"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Sparkles
+                    className={`h-4 w-4 ${
+                      isCreativeSuitePath
+                        ? "text-purple-400"
+                        : "text-neutral-500 group-hover:text-neutral-300"
+                    }`}
+                  />
+                  <span>Creative Suite</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* BOTTOM STATUS CARD */}
+      <div className="space-y-4 pt-4 border-t border-neutral-900">
+        {/* Total calculated output metadata */}
+        {panels.length > 0 && (
+          <div className="px-3 py-2 rounded-xl bg-neutral-900/30 text-neutral-400 text-[10px] font-mono flex items-center justify-between border border-neutral-900/40">
+            <span>Video Duration:</span>
+            <span className="font-bold text-neutral-200">
+              {totalCalculatedDuration.toFixed(1)}s
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Drawer backdrop (visible on both mobile and desktop when open) */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-40 transition-opacity animate-fade-in"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
+      <aside
+        className={`fixed top-0 bottom-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/95 border-r border-neutral-900 z-50 transition-all duration-300 ease-out transform overflow-hidden ${
+          isOpen
+            ? "translate-x-0 shadow-2xl shadow-black/60 lg:shadow-none lg:border-r"
+            : "-translate-x-full"
+        }`}
+      >
+        {sidebarContent}
+      </aside>
+    </>
+  );
+};
+
+const Sidebar = React.memo(SidebarInner);
+export default Sidebar;

@@ -1,74 +1,123 @@
 <div align="center">
 
-# 🎬 Sonikoma — Webtoon to Video
+<img src="./public/logo-dark.png" alt="Sonikoma Logo" width="220" />
 
-**Transform webtoon & manhwa comics into cinematic MP4 videos with AI-powered speech bubble removal, TTS voiceovers, and pan/zoom animations.**
+# 🎬 Sonikoma — Webtoon to Video AI Platform
 
-[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
-[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://python.org)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
-[![SQLite](https://img.shields.io/badge/Database-SQLite-003B57?logo=sqlite&logoColor=white)](https://sqlite.org)
-[![Gemini](https://img.shields.io/badge/AI-Gemini%202.5-4285F4?logo=google&logoColor=white)](https://aistudio.google.com)
+**Transform webtoon & manhwa comics into animated MP4 videos with AI-powered panel extraction, speech bubble erasing, TTS voiceover synthesis, and cinematic camera pan/zoom animations.**
+
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.4-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Gemini](https://img.shields.io/badge/AI-Gemini%202.5-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com)
 
 </div>
 
 ---
 
-## ✨ Features
+## 🎨 Theme Support & Brand Identity
 
-- 🖼️ **Panel Scraper** — Fetches webtoon/manhwa panels from any Webtoon series URL
-- 🫧 **AI Bubble Removal** — Removes speech bubbles using Gemini vision + OpenCV inpainting with advanced mode, manual brush, presets & history
-- 🗣️ **TTS Voiceover** — Generates synced dialogue audio using Microsoft Edge TTS
-- 🎬 **Video Compiler** — Renders animated MP4 with pan/zoom effects via MoviePy
-- ✂️ **Crop Editor** — Advanced fully-modular editor: manual/auto-crop, horizontal splitter, frame merging/stitching, style filters, enhancements, undo/redo
-- 🔀 **Merge Panel** — Vertical/horizontal multi-panel stitching with configurable gap, alignment, and direction
-- 🗄️ **Local Database** — SQLite stores all projects and panels (no cloud required)
-- 🤖 **Multi-AI** — Supports Gemini 2.5 Flash, Gemini 2.0 Pro, Llama 3, Mistral 7B
-- 📟 **Real-Time Shell Logs** — ANSI-colored SSE/polling log stream piped from the backend terminal directly into the UI
-- 📊 **Live Metrics** — `/api/metrics` endpoint reports uptime, memory, request stats, rate limits, and cache state
-- 🛡️ **Security Middleware** — Rate limiting, request timeouts, CSP headers, request IDs, and CORS baked into the server
+Sonikoma features dynamic dual-mode theme support (Dark / Light) built with Tailwind CSS & custom CSS design tokens:
+
+| Dark Mode (Default) | Light Mode |
+| :---: | :---: |
+| <img src="./public/logo-dark.png" width="240" alt="Sonikoma Dark Logo" /> | <img src="./public/logo-light.png" width="240" alt="Sonikoma Light Logo" /> |
+| Modern Sleek Dark (`#09090b`) | Pristine Clean Light (`#f4f4f5`) |
 
 ---
 
-## 📁 Project Structure
+## 📸 Application Interface Previews
 
-For a visual flowchart and detailed descriptions of each directory (including frontend component groupings, backend routers, services, and script boundaries), please see the dedicated reference:
+### 1. Interactive Studio & AI Panel Editor
+![Sonikoma AI Storyboard & Video Editor](./public/editor-preview.png)
 
-👉 **[Sonikoma Project Structure & Folder Guidelines](./docs/architecture/project_structure.md)**
+### 2. Creator Dashboard & Project Analytics
+![Sonikoma Creator Dashboard & Analytics](./public/dashboard-preview.png)
 
 ---
 
-## 🚀 Quick Start
+## ✨ Features & Capabilities
+
+- 🖼️ **Webtoon Panel Scraper** — Automatically fetches, parses, and slices webtoon/manhwa panels from any webtoon series URL.
+- 🫧 **AI Speech Bubble Eraser** — Removes speech bubbles seamlessly using Gemini Vision AI + OpenCV inpainting. Includes manual brush refinement, presets, and undo/redo history.
+- 🗣️ **TTS Voiceover & Dramatizer** — Synthesizes natural voice narration and multi-character dialogue audio via Microsoft Edge TTS.
+- 🎬 **Cinematic Video Compiler** — Renders high-definition MP4 videos with dynamic camera pan/zoom motion effects via MoviePy.
+- ✂️ **Advanced Crop & Stitch Editor** — Fully modular editor featuring manual/auto crop, horizontal panel splitting, multi-frame stitching, and style filters.
+- 🔀 **Multi-Panel Stitcher** — Vertical and horizontal multi-panel layout canvas with customizable spacing, borders, and alignment.
+- 🤖 **Multi-AI Engine Integration** — Powered by Google Gemini 2.5 Flash, Gemini 2.0 Pro, Llama 3 70B, and Mistral 7B.
+- 📟 **Real-Time Terminal Streaming** — Live ANSI-colored SSE terminal log stream piped from the Python computational engine directly into the frontend console.
+- 🛡️ **Enterprise Security & Reliability** — Rate limiting, CORS policies, JWT authentication, request timeout controls, and zero-downtime health monitoring.
+
+---
+
+## 🏛️ Enterprise Architecture (`src/`)
+
+The application follows a scalable **Feature-First Architecture** designed for high maintainability:
+
+```
+frontend/src/
+├── app/                        # App entry point, global providers & AppRouter.tsx
+├── api/                        # Pure HTTP API Layer (client/ & endpoints/)
+├── assets/                     # Organized static assets & CSS design system (theme.css, player.css, pills.css)
+├── shared/                     # Reusable cross-feature UI controls (Modal, Tooltip) & shared hooks
+├── features/                   # 29 Self-Contained Domain Modules
+│   ├── auth/                   # Login, Register, Forgot Password & Auth Hooks
+│   ├── dashboard/              # Workspace Dashboard & Project Management
+│   ├── image/                  # Crop Canvas, Speech Bubble Cleaner & Image Tools
+│   ├── video/                  # CinemaPlayer & Motion Video Compilation
+│   ├── workspace/              # Interactive Webtoon Compiler Studio
+│   ├── ai/                     # AI Model Hub & Training Diagnostics
+│   ├── analytics/              # Analytics & Token Usage Monitor
+│   ├── scraper/                # Webtoon Chapter Scraper & Deck Manager
+│   ├── terminal/               # Real-Time Shell Logs & System Console
+│   └── ...                     # (20+ additional feature modules)
+├── services/                   # Business logic orchestration
+├── store/                      # Zustand global state management (useProjectStore)
+├── types/                      # Global enterprise models (models.ts, logs.ts, api.ts)
+└── utils/                      # Modular application utilities (url, filter, logger, audio)
+```
+
+---
+
+## 🚀 Quick Start Guide
 
 ### Prerequisites
 
-| Tool    | Version | Download                         |
-| ------- | ------- | -------------------------------- |
-| Node.js | 20+     | https://nodejs.org               |
-| Python  | 3.11+   | https://python.org               |
-| ffmpeg  | any     | https://ffmpeg.org/download.html |
+| Component | Minimum Version | Download Link |
+| :--- | :--- | :--- |
+| **Node.js** | 20.x or higher | [nodejs.org](https://nodejs.org/) |
+| **Python** | 3.11.x or higher | [python.org](https://www.python.org/) |
+| **FFmpeg** | Latest stable | [ffmpeg.org](https://ffmpeg.org/download.html) |
 
-> **Windows ffmpeg install:** `winget install ffmpeg`  
-> **macOS:** `brew install ffmpeg`  
-> **Linux:** `sudo apt install ffmpeg`
+> 💡 **FFmpeg Installation**:
+> - **Windows**: `winget install ffmpeg`
+> - **macOS**: `brew install ffmpeg`
+> - **Linux**: `sudo apt install ffmpeg`
 
 ---
 
 ### 1️⃣ Clone & Install Node Dependencies
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/your-org/sonikoma.git
 cd sonikoma
 npm install
 ```
 
-### 2️⃣ Install Python Dependencies
+### 2️⃣ Install Python Backend Dependencies
 
 ```bash
-pip install -r requirements.txt
-```
+# Create and activate a virtual environment
+python -m venv .venv
+.venv\Scripts\activate      # Windows
+source .venv/bin/activate    # macOS / Linux
 
-> ⚠️ First install downloads ~2GB (PyTorch + EasyOCR models). Subsequent runs are instant.
+# Install backend dependencies
+pip install -r backend/requirements.txt
+```
 
 ### 3️⃣ Configure Environment Variables
 
@@ -77,90 +126,55 @@ copy .env.example .env        # Windows
 cp .env.example .env          # macOS / Linux
 ```
 
-Then open `.env` and fill in your keys:
+Open `.env` and configure your API keys:
 
 ```env
-# REQUIRED — get free at https://aistudio.google.com/app/apikey
-GEMINI_API_KEY="AIza..."
+# REQUIRED — Google Gemini API Key (https://aistudio.google.com/app/apikey)
+GEMINI_API_KEY="AIzaSy..."
 
-# OPTIONAL — get at https://huggingface.co/settings/tokens
+# OPTIONAL — HuggingFace API Token (https://huggingface.co/settings/tokens)
 HUGGINGFACE_API_KEY="hf_..."
 ```
 
-### 4️⃣ Start the App
+### 4️⃣ Launch Development Application
 
 ```bash
-npm run start
+npm run dev
 ```
 
-The ports are strictly validated on startup from the `.env` file (`FRONTEND_PORT`, `BACKEND_PORT`, and `APP_URL`). By default, the frontend app opens at **http://localhost:3000** (defined by `FRONTEND_PORT` and `APP_URL`) while the backend API listens on **http://localhost:5173** (defined by `BACKEND_PORT`).
+- **Frontend Application**: [http://localhost:3000](http://localhost:3000)
+- **FastAPI Computational Backend**: [http://localhost:5173](http://localhost:5173)
 
 ---
 
-## 🌐 API Reference
+## 🤖 Supported AI Models
 
-The server exposes detailed endpoints for authentication, metrics, image transformations, speech bubble removal, and MoviePy audio/video compile routines. View the complete API reference in:
-
-👉 **[Sonikoma API Reference & Routes](./docs/architecture/api_reference.md)**
-
----
-
-## 🗄️ Local Database
-
-The application utilizes a zero-config local SQLite instance managed via `better-sqlite3`. Check the tables structure and database guidelines in:
-
-👉 **[Local Database Architecture](./docs/architecture/database.md)**
+| Model Name | Provider | Primary Use Case |
+| :--- | :--- | :--- |
+| **Gemini 2.5 Flash** | Google AI | Default — Fast, multimodal vision & panel detection |
+| **Gemini 2.0 Pro** | Google AI | High-precision text synthesis & prompt analysis |
+| **Llama 3 70B** | HuggingFace | Open-source privacy-focused script generation |
+| **Mistral 7B** | HuggingFace | Lightweight open-source model inference |
 
 ---
 
-## 🛠️ NPM Scripts
+## 🛠️ Verification & Build Commands
 
-A variety of npm scripts are configured to control dev daemons, production compilations, type validations, and Docker images. Read the complete guide:
+```bash
+# Run TypeScript compilation check across all 400+ files
+npm run typecheck
 
-👉 **[NPM Scripts Reference](./docs/architecture/npm_scripts.md)**
+# Build minified production bundle with Vite code-splitting
+npm run build
 
----
-
-## 🤖 AI Models Supported
-
-| Model            | Provider    | Use                           |
-| ---------------- | ----------- | ----------------------------- |
-| Gemini 2.5 Flash | Google      | Default — fast, multimodal    |
-| Gemini 2.0 Pro   | Google      | High quality generation       |
-| Llama 3 70B      | HuggingFace | Open source, privacy-friendly |
-| Mistral 7B       | HuggingFace | Lightweight open source       |
-
----
-
-## 🐍 Python Services
-
-| File                 | Library                 | Purpose                           |
-| -------------------- | ----------------------- | --------------------------------- |
-| `cleaner.py`         | OpenCV, Pillow, EasyOCR | Speech bubble detection + removal |
-| `bubble_detector.py` | OpenCV, NumPy           | Bubble detection core logic       |
-| `audio.py`           | edge-tts, pydub         | TTS voice synthesis               |
-| `ocr.py`             | OpenCV, Pillow, NumPy   | Panel OCR + cropping processor    |
-| `video.py`           | MoviePy, NumPy          | MP4 animation + audio compilation |
-| `detect_panels.py`   | OpenCV                  | Panel boundary detection          |
-| `cvUtils.py`         | OpenCV                  | Shared OpenCV utility functions   |
-
----
-
-## 🔐 Environment Variables
-
-Key credentials, database routes, rate limits, and server execution variables are managed in `.env`. See the full variable table and security rules:
-
-👉 **[Environment Variables Configuration](./docs/architecture/environment_variables.md)**
-
----
-
-## 📜 For AI Agents
-
-Read **[RULES.md](./RULES.md)** before making any changes.  
-It contains the full project structure, coding rules, API patterns, and session changelog that all AI assistants must follow.
+# Run Python FastAPI computational backend
+npm run backend
+```
 
 ---
 
 <div align="center">
-Built with ❤️ using React, Express, Python, OpenCV, MoviePy & Gemini AI
+
+Built with ❤️ using React 19, TypeScript, Python 3.11, FastAPI, OpenCV, MoviePy & Google Gemini AI
+
 </div>

@@ -1,0 +1,32 @@
+[project]
+name = "health-checker-suite"
+version = "0.1.0"
+description = "A reusable shared framework used by multiple health checkers"
+authors = [{name = "Author Name"}]
+dependencies = [
+    "pydantic>=2.0.0",
+    "rich>=13.0.0",
+    "typer>=0.9.0",
+    "jinja2>=3.1.0",
+    "networkx>=3.0",
+    "pyyaml>=6.0",
+]
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["common*", "python_backend_health_checker*", "react_frontend_health_checker*"]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]

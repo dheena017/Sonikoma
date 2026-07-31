@@ -1,0 +1,1570 @@
+div.h-10.w-10.rounded-xl, div.h-11.w-11.rounded-xl,
+div.h-10.w-10.rounded-2xl, div.h-11.w-11.rounded-2xl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background-color 200ms ease, border-color 200ms ease,
+              box-shadow 200ms ease, transform 200ms ease;
+}
+
+/* ── Icon-only action buttons: subtle lift on hover ─────────── */
+button.bg-neutral-900.rounded-xl,
+button.bg-neutral-800.rounded-xl {
+  transition: background-color 150ms ease, border-color 150ms ease,
+              color 150ms ease, transform 150ms ease;
+}
+button.bg-neutral-900.rounded-xl:hover,
+button.bg-neutral-800.rounded-xl:hover { transform: scale(1.05); }
+button.bg-neutral-900.rounded-xl:active,
+button.bg-neutral-800.rounded-xl:active { transform: scale(0.95); }
+
+select,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="color"]
+  ),
+textarea {
+  border-color: #27272a;
+}
+
+body {
+  background-color: #09090b;
+  color: #fafafa;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  color-scheme: dark;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =========================================================
+   LIGHT MODE — DEEP COVERAGE
+   Covers every dark pattern found across all components.
+   Applied when <html data-mode="light">.
+   ========================================================= */
+:root[data-mode="light"] {
+  color-scheme: light;
+}
+
+/* ── Global smooth transition on theme change ────────────── */
+/* Applied to ALL elements in BOTH modes so switching produces a
+   uniform colour crossfade, not just one-directional styling.   */
+[data-mode="light"] *,
+[data-mode="dark"] * {
+  transition-property: background-color, border-color, color, box-shadow, fill,
+    stroke, opacity;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Buttons & links get the full interactive set too */
+[data-mode="light"] button,
+[data-mode="dark"] button,
+[data-mode="light"] a,
+[data-mode="dark"] a {
+  transition-property: background-color, border-color, color, opacity, transform,
+    box-shadow;
+  transition-duration: 150ms;
+}
+/* Don't apply transition to animation-heavy elements */
+[data-mode="light"] [class*="animate-"],
+[data-mode="dark"] [class*="animate-"] {
+  transition: none;
+}
+
+/* ── Body & App root ─────────────────────────────────────── */
+[data-mode="light"] body {
+  background-color: #f4f4f5;
+  color: #18181b;
+  color-scheme: light;
+}
+[data-mode="light"] #app_root {
+  background-color: #f4f4f5;
+  color: #18181b;
+}
+[data-mode="light"] .min-h-screen {
+  background-color: #f4f4f5;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+[data-mode="light"] #header_pane {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-bottom-color: #e4e4e7 !important;
+  backdrop-filter: blur(12px);
+}
+
+/* ── Sidebar / aside ─────────────────────────────────────── */
+[data-mode="light"] #sidebar_pane,
+[data-mode="light"] aside {
+  background-color: #ffffff !important;
+  border-right-color: #e4e4e7 !important;
+}
+
+/* ── Neutral backgrounds (Tailwind scale) ─────────────────── */
+[data-mode="light"] .bg-neutral-950,
+[data-mode="light"] .bg-neutral-925 {
+  background-color: #ffffff !important;
+}
+[data-mode="light"] .bg-neutral-900 {
+  background-color: #f9f9fb !important;
+}
+[data-mode="light"] .bg-neutral-850 {
+  background-color: #ebebef !important;
+}
+[data-mode="light"] .bg-neutral-850\/90,
+[data-mode="light"] .bg-neutral-850\/80,
+[data-mode="light"] .bg-neutral-850\/60,
+[data-mode="light"] .bg-neutral-850\/40 {
+  background-color: rgba(235, 235, 239, 0.95) !important;
+}
+[data-mode="light"] .bg-neutral-800 {
+  background-color: #e0e0e6 !important;
+}
+[data-mode="light"] .bg-neutral-800\/90,
+[data-mode="light"] .bg-neutral-800\/80,
+[data-mode="light"] .bg-neutral-800\/60,
+[data-mode="light"] .bg-neutral-800\/40 {
+  background-color: rgba(224, 224, 230, 0.95) !important;
+}
+[data-mode="light"] .bg-neutral-750 {
+  background-color: #d4d4d8 !important;
+}
+
+/* ── Neutral background opacity variants ─────────────────── */
+[data-mode="light"] .bg-neutral-950,
+[data-mode="light"] .bg-neutral-955,
+[data-mode="light"] .bg-neutral-955\/40,
+[data-mode="light"] .bg-neutral-950\/95,
+[data-mode="light"] .bg-neutral-950\/90,
+[data-mode="light"] .bg-neutral-950\/85,
+[data-mode="light"] .bg-neutral-950\/80,
+[data-mode="light"] .bg-neutral-950\/75,
+[data-mode="light"] .bg-neutral-950\/60,
+[data-mode="light"] .bg-neutral-950\/50,
+[data-mode="light"] .bg-neutral-950\/40,
+[data-mode="light"] .bg-neutral-950\/30,
+[data-mode="light"] .bg-neutral-950\/20,
+[data-mode="light"] .bg-neutral-950\/10 {
+  background-color: rgba(248, 248, 250, 0.97) !important;
+}
+[data-mode="light"] .bg-neutral-900\/95,
+[data-mode="light"] .bg-neutral-900\/80,
+[data-mode="light"] .bg-neutral-900\/60,
+[data-mode="light"] .bg-neutral-900\/50,
+[data-mode="light"] .bg-neutral-900\/40,
+[data-mode="light"] .bg-neutral-900\/30 {
+  background-color: rgba(249, 249, 251, 0.9) !important;
+}
+[data-mode="light"] .bg-neutral-900\/20 {
+  background-color: rgba(249, 249, 251, 0.6) !important;
+}
+
+/* ── Zinc backgrounds ─────────────────────────────────────── */
+[data-mode="light"] .bg-zinc-950,
+[data-mode="light"] .bg-zinc-900 {
+  background-color: #f9f9fb !important;
+}
+[data-mode="light"] .bg-zinc-800 {
+  background-color: #e0e0e6 !important;
+}
+[data-mode="light"] .bg-zinc-700 {
+  background-color: #d4d4d8 !important;
+}
+
+/* ── Hardcoded near-black hex backgrounds ─────────────────
+   Every distinct dark hex found across components:          */
+[data-mode="light"] .bg-\[\#040406\],
+[data-mode="light"] .bg-\[\#050507\],
+[data-mode="light"] .bg-\[\#070709\],
+[data-mode="light"] .bg-\[\#09090b\],
+[data-mode="light"] .bg-\[\#060608\],
+[data-mode="light"] .bg-\[\#08080c\],
+[data-mode="light"] .bg-\[\#0a0a0b\],
+[data-mode="light"] .bg-\[\#0a0a0e\],
+[data-mode="light"] .bg-\[\#0a0a0e\]\/90,
+[data-mode="light"] .bg-\[\#0a0a0e\]\/80,
+[data-mode="light"] .bg-\[\#0a0a0e\]\/60,
+[data-mode="light"] .bg-\[\#0a0a0e\]\/50,
+[data-mode="light"] .bg-\[\#0a0a0f\],
+[data-mode="light"] .bg-\[\#0a0a0f\]\/50,
+[data-mode="light"] .bg-\[\#0b0b0e\],
+[data-mode="light"] .bg-\[\#0c0c0e\],
+[data-mode="light"] .bg-\[\#0c0c0e\]\/30,
+[data-mode="light"] .bg-\[\#0c0c10\],
+[data-mode="light"] .bg-\[\#0c0c14\],
+[data-mode="light"] .bg-\[\#0d0d0f\],
+[data-mode="light"] .bg-\[\#0d0d10\],
+[data-mode="light"] .bg-\[\#0e0e13\],
+[data-mode="light"] .bg-\[\#0f0f13\],
+[data-mode="light"] .bg-\[\#111113\],
+[data-mode="light"] .bg-\[\#111115\],
+[data-mode="light"] .bg-\[\#111116\],
+[data-mode="light"] .bg-\[\#111116\]\/85,
+[data-mode="light"] .bg-\[\#111116\]\/80,
+[data-mode="light"] .bg-\[\#111116\]\/60,
+[data-mode="light"] .bg-\[\#121217\],
+[data-mode="light"] .bg-\[\#141416\] {
+  background-color: #f9f9fb !important;
+}
+
+/* ── Black / opacity backgrounds ─────────────────────────── */
+[data-mode="light"] .bg-black {
+  background-color: #e8e8ec !important;
+}
+[data-mode="light"] .bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+[data-mode="light"] .bg-black\/30 {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .bg-black\/40 {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .bg-black\/50,
+[data-mode="light"] .bg-black\/55 {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.25) !important;
+}
+[data-mode="light"] .bg-black\/70,
+[data-mode="light"] .bg-black\/80 {
+  background-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ── White opacity backgrounds → surface tints ───────────── */
+[data-mode="light"] .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+[data-mode="light"] .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── Text: white & neutral scale ─────────────────────────── */
+[data-mode="light"] .text-white,
+[data-mode="light"] .text-neutral-50,
+[data-mode="light"] .text-neutral-100 {
+  color: #18181b !important;
+}
+[data-mode="light"] .text-neutral-150,
+[data-mode="light"] .text-neutral-200,
+[data-mode="light"] .text-neutral-205 {
+  color: #27272a !important;
+}
+[data-mode="light"] .text-neutral-250,
+[data-mode="light"] .text-neutral-300 {
+  color: #3f3f46 !important;
+}
+[data-mode="light"] .text-neutral-350,
+[data-mode="light"] .text-neutral-400,
+[data-mode="light"] .text-neutral-450,
+[data-mode="light"] .text-neutral-455 {
+  color: #52525b !important;
+}
+[data-mode="light"] .text-purple-455 {
+  color: #6d28d9 !important;
+}
+[data-mode="light"] .text-purple-400 {
+  color: #7c3aed !important;
+}
+[data-mode="light"] .text-purple-300 {
+  color: #6d28d9 !important;
+}
+[data-mode="light"] .text-indigo-400 {
+  color: #4f46e5 !important;
+}
+[data-mode="light"] .text-violet-400 {
+  color: #7c3aed !important;
+}
+[data-mode="light"] .text-cyan-400 {
+  color: #0891b2 !important;
+}
+[data-mode="light"] .text-amber-400 {
+  color: #d97706 !important;
+}
+[data-mode="light"] .text-yellow-400 {
+  color: #ca8a04 !important;
+}
+[data-mode="light"] .text-red-400 {
+  color: #dc2626 !important;
+}
+[data-mode="light"] .text-rose-455,
+[data-mode="light"] .text-rose-400 {
+  color: #e11d48 !important;
+}
+[data-mode="light"] .text-emerald-455,
+[data-mode="light"] .text-emerald-400 {
+  color: #059669 !important;
+}
+[data-mode="light"] .text-green-400 {
+  color: #16a34a !important;
+}
+[data-mode="light"] .text-neutral-500 {
+  color: #71717a !important;
+}
+[data-mode="light"] .text-neutral-600 {
+  color: #a1a1aa !important;
+}
+/* Hardcoded light-gray text used in terminals/logs */
+[data-mode="light"] .text-\[\#dcdcdc\],
+[data-mode="light"] .text-\[\#ededed\] {
+  color: #3f3f46 !important;
+}
+
+/* ── Borders: neutral scale ───────────────────────────────── */
+[data-mode="light"] .border-neutral-950 {
+  border-color: #e4e4e7 !important;
+}
+[data-mode="light"] .border-neutral-900 {
+  border-color: #e4e4e7 !important;
+}
+[data-mode="light"] .border-neutral-850,
+[data-mode="light"] .border-neutral-855 {
+  border-color: #d4d4d8 !important;
+}
+[data-mode="light"] .border-neutral-800 {
+  border-color: #c8c8cf !important;
+}
+[data-mode="light"] .border-neutral-750 {
+  border-color: #b4b4be !important;
+}
+[data-mode="light"] .border-neutral-750\/30 {
+  border-color: rgba(180, 180, 190, 0.5) !important;
+}
+[data-mode="light"] .border-neutral-700 {
+  border-color: #a1a1aa !important;
+}
+
+/* ── Borders: neutral opacity variants ───────────────────── */
+[data-mode="light"] .border-neutral-900\/60,
+[data-mode="light"] .border-neutral-900\/40 {
+  border-color: rgba(228, 228, 231, 0.9) !important;
+}
+[data-mode="light"] .border-neutral-850\/60 {
+  border-color: rgba(212, 212, 216, 0.9) !important;
+}
+[data-mode="light"] .border-neutral-800\/80,
+[data-mode="light"] .border-neutral-800\/60,
+[data-mode="light"] .border-neutral-800\/40 {
+  border-color: rgba(200, 200, 207, 0.9) !important;
+}
+
+/* ── Borders: white opacity (used heavily in profile/detail pages) */
+[data-mode="light"] .border-white\/5,
+[data-mode="light"] .border-white\/8 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .border-white\/15,
+[data-mode="light"] .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ── Borders: zinc ────────────────────────────────────────── */
+[data-mode="light"] .border-zinc-800,
+[data-mode="light"] .border-zinc-700 {
+  border-color: #d4d4d8 !important;
+}
+
+/* ── Divide ───────────────────────────────────────────────── */
+[data-mode="light"] .divide-neutral-900 > * + * {
+  border-color: #e4e4e7 !important;
+}
+[data-mode="light"] .divide-neutral-800 > * + * {
+  border-color: #d4d4d8 !important;
+}
+
+/* ── Inputs / selects / textareas ─────────────────────────── */
+[data-mode="light"]
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="color"]
+  ),
+[data-mode="light"] select,
+[data-mode="light"] textarea {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+  border-color: #d4d4d8 !important;
+}
+[data-mode="light"] input::placeholder,
+[data-mode="light"] textarea::placeholder {
+  color: #a1a1aa !important;
+}
+/* Range / slider track */
+[data-mode="light"] input[type="range"] {
+  background-color: #e0e0e6 !important;
+}
+
+/* ── Hover Overrides in Light Mode ────────────────────────── */
+[data-mode="light"] .hover\:bg-neutral-950:hover,
+[data-mode="light"] .hover\:bg-neutral-955:hover {
+  background-color: #e4e4e7 !important;
+}
+[data-mode="light"] .hover\:bg-neutral-900:hover {
+  background-color: #ebebef !important;
+}
+[data-mode="light"] .hover\:bg-neutral-850:hover {
+  background-color: #d4d4d8 !important;
+}
+[data-mode="light"] .hover\:bg-neutral-800:hover {
+  background-color: #c8c8cf !important;
+}
+[data-mode="light"] .hover\:bg-neutral-700:hover {
+  background-color: #b4b4be !important;
+}
+[data-mode="light"] .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+[data-mode="light"] .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .hover\:bg-white\/20:hover {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+}
+[data-mode="light"] .hover\:bg-black\/60:hover {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+[data-mode="light"] .hover\:bg-black\/80:hover {
+  background-color: rgba(0, 0, 0, 0.25) !important;
+}
+[data-mode="light"] .hover\:text-white:hover,
+[data-mode="light"] .hover\:text-neutral-50:hover,
+[data-mode="light"] .hover\:text-neutral-100:hover {
+  color: #18181b !important;
+}
+[data-mode="light"] .hover\:text-neutral-200:hover,
+[data-mode="light"] .hover\:text-neutral-300:hover,
+[data-mode="light"] .hover\:text-neutral-400:hover {
+  color: #27272a !important;
+}
+
+/* ── Scrollbars ───────────────────────────────────────────── */
+[data-mode="light"] .scrollbar-thin::-webkit-scrollbar,
+[data-mode="light"] .custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+  background: transparent;
+}
+[data-mode="light"] .scrollbar-thin::-webkit-scrollbar-track,
+[data-mode="light"] .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+[data-mode="light"] .scrollbar-thin::-webkit-scrollbar-thumb,
+[data-mode="light"] .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c4c4cc;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+[data-mode="light"] .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+[data-mode="light"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+
+/* ── Shadows ──────────────────────────────────────────────── */
+[data-mode="light"] .shadow-inner {
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05) !important;
+}
+[data-mode="light"] .shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07) !important;
+}
+
+/* ── Rings ────────────────────────────────────────────────── */
+[data-mode="light"] .ring-neutral-900,
+[data-mode="light"] .ring-neutral-800 {
+  --tw-ring-color: #e4e4e7 !important;
+}
+
+/* ── Terminal / log output ────────────────────────────────── */
+[data-mode="light"] .font-mono.text-\[\#dcdcdc\],
+[data-mode="light"] code,
+[data-mode="light"] pre {
+  background-color: #f0f0f4 !important;
+  color: #27272a !important;
+}
+
+/* ── Backdrop overlays ────────────────────────────────────── */
+[data-mode="light"] .backdrop-blur-md,
+[data-mode="light"] .backdrop-blur-xl {
+  backdrop-filter: blur(12px);
+}
+
+/* ── Page-level containers (full-page dark wraps) ─────────── */
+/* Covers min-h-screen wrappers in ProfilePage, SeriesDetailsPage,
+   SeriesDetailsPage, ProjectsPage, DashboardPage, etc. */
+[data-mode="light"] .min-h-screen.bg-\[\#070709\],
+[data-mode="light"] .min-h-screen.bg-neutral-950 {
+  background-color: #f4f4f5 !important;
+}
+
+/* ── bg-black/* opacity overlays ──────────────────────────── */
+/* These are heavily used in the projects toolbar, sort bar, etc. */
+[data-mode="light"] .bg-black\/5 {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+[data-mode="light"] .bg-black\/10 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+[data-mode="light"] .bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+[data-mode="light"] .bg-black\/30 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+[data-mode="light"] .bg-black\/35 {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+[data-mode="light"] .bg-black\/40 {
+  background-color: rgba(248, 248, 250, 0.95) !important;
+}
+[data-mode="light"] .bg-black\/50 {
+  background-color: rgba(248, 248, 250, 0.9) !important;
+}
+[data-mode="light"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ── bg-white/* used in guide/card buttons ────────────────── */
+[data-mode="light"] .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+[data-mode="light"] .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+[data-mode="light"] .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+[data-mode="light"] .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* ── border-white/* — invisible on white; use light gray instead  */
+[data-mode="light"] .border-white\/5,
+[data-mode="light"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+[data-mode="light"] .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+[data-mode="light"] .border-white\/30 {
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+[data-mode="light"] .divide-white\/10 > * + * {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── Sidebar active item: purple-950 family ───────────────── */
+/* Active nav pill uses bg-purple-950/20 which is very dark on white */
+[data-mode="light"] .bg-purple-950\/20 {
+  background-color: rgba(168, 85, 247, 0.08) !important;
+}
+[data-mode="light"] .bg-purple-950\/15 {
+  background-color: rgba(168, 85, 247, 0.06) !important;
+}
+[data-mode="light"] .bg-purple-950\/10 {
+  background-color: rgba(168, 85, 247, 0.05) !important;
+}
+[data-mode="light"] .bg-purple-950\/5 {
+  background-color: rgba(168, 85, 247, 0.03) !important;
+}
+[data-mode="light"] .bg-purple-950\/25 {
+  background-color: rgba(168, 85, 247, 0.08) !important;
+}
+[data-mode="light"] .bg-purple-950\/30 {
+  background-color: rgba(168, 85, 247, 0.09) !important;
+}
+[data-mode="light"] .bg-purple-950\/40 {
+  background-color: rgba(168, 85, 247, 0.1) !important;
+}
+[data-mode="light"] .bg-purple-950\/50 {
+  background-color: rgba(168, 85, 247, 0.12) !important;
+}
+[data-mode="light"] .bg-purple-950\/60 {
+  background-color: rgba(168, 85, 247, 0.14) !important;
+}
+[data-mode="light"] .bg-purple-950\/70 {
+  background-color: rgba(168, 85, 247, 0.16) !important;
+}
+[data-mode="light"] .bg-purple-950\/80 {
+  background-color: rgba(168, 85, 247, 0.18) !important;
+}
+[data-mode="light"] .bg-purple-950\/85 {
+  background-color: rgba(168, 85, 247, 0.2) !important;
+}
+/* Solid purple-950 badge (sidebar tag) → very light purple tint */
+[data-mode="light"] .bg-purple-950 {
+  background-color: rgba(168, 85, 247, 0.1) !important;
+}
+
+/* ── Purple borders that match the above tints ────────────── */
+[data-mode="light"] .border-purple-900\/60 {
+  border-color: rgba(168, 85, 247, 0.25) !important;
+}
+[data-mode="light"] .border-purple-900\/40 {
+  border-color: rgba(168, 85, 247, 0.18) !important;
+}
+[data-mode="light"] .border-purple-900\/30 {
+  border-color: rgba(168, 85, 247, 0.15) !important;
+}
+[data-mode="light"] .border-purple-950 {
+  border-color: rgba(168, 85, 247, 0.2) !important;
+}
+
+/* ── Other dark-family purple text that needs lightening ──── */
+[data-mode="light"] .text-purple-300 {
+  color: #7c3aed !important;
+}
+[data-mode="light"] .text-purple-400 {
+  color: #9333ea !important;
+}
+
+/* ── Additional hex families ──────────────────────────────── */
+/* #0d0d12 used by profile projects toolbar */
+[data-mode="light"] .bg-\[\#0d0d12\] {
+  background-color: #f4f4f5 !important;
+}
+[data-mode="light"] .bg-\[\#0d0d12\]\/75 {
+  background-color: rgba(248, 248, 250, 0.95) !important;
+}
+[data-mode="light"] .bg-\[\#0d0d12\]\/50 {
+  background-color: rgba(248, 248, 250, 0.9) !important;
+}
+[data-mode="light"] .hover\:bg-\[\#121217\]\/50:hover {
+  background-color: rgba(244, 244, 245, 0.9) !important;
+}
+
+/* ── Explicit hex bg overrides (all opacity variants) ──────
+   CSS attribute selectors can't match Tailwind's escaped
+   bracket classes reliably. Each variant must be explicit.  */
+
+/* #070709 family */
+[data-mode="light"] .bg-\[\#070709\] {
+  background-color: #f4f4f5 !important;
+}
+
+/* #09090b family */
+[data-mode="light"] .bg-\[\#09090b\] {
+  background-color: #f4f4f5 !important;
+}
+
+/* #060608 family */
+[data-mode="light"] .bg-\[\#060608\] {
+  background-color: #f4f4f5 !important;
+}
+
+/* #08080c family */
+[data-mode="light"] .bg-\[\#08080c\] {
+  background-color: #f4f4f5 !important;
+}
+[data-mode="light"] .bg-\[\#08080c\]\/95 {
+  background-color: rgba(244, 244, 245, 0.95) !important;
+}
+
+/* #0a0a0b / #0a0a0f family */
+[data-mode="light"] .bg-\[\#0a0a0b\] {
+  background-color: #f4f4f5 !important;
+}
+[data-mode="light"] .bg-\[\#0a0a0f\] {
+  background-color: #f4f4f5 !important;
+}
+[data-mode="light"] .bg-\[\#0a0a0f\]\/80 {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* #0b0b0e family — most common (DashboardPage, ProjectsPage, SeriesDetailsPage) */
+[data-mode="light"] .bg-\[\#0b0b0e\] {
+  background-color: #ffffff !important;
+}
+[data-mode="light"] .bg-\[\#0b0b0e\]\/80 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+[data-mode="light"] .bg-\[\#0b0b0e\]\/75 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+[data-mode="light"] .bg-\[\#0b0b0e\]\/60 {
+  background-color: rgba(249, 249, 251, 0.9) !important;
+}
+[data-mode="light"] .bg-\[\#0b0b0e\]\/50 {
+  background-color: rgba(249, 249, 251, 0.85) !important;
+}
+[data-mode="light"] .bg-\[\#0b0b0e\]\/40 {
+  background-color: rgba(249, 249, 251, 0.8) !important;
+}
+
+/* #0c0c0e family */
+[data-mode="light"] .bg-\[\#0c0c0e\] {
+  background-color: #ffffff !important;
+}
+[data-mode="light"] .bg-\[\#0c0c0e\]\/40 {
+  background-color: rgba(249, 249, 251, 0.8) !important;
+}
+[data-mode="light"] .bg-\[\#0c0c0e\]\/30 {
+  background-color: rgba(249, 249, 251, 0.7) !important;
+}
+
+/* #0c0c10 family — used in SeriesDetailsPage, SeriesDetailsPage */
+[data-mode="light"] .bg-\[\#0c0c10\] {
+  background-color: #ffffff !important;
+}
+[data-mode="light"] .bg-\[\#0c0c10\]\/80 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* #0d0d0f / #0d0d10 family */
+[data-mode="light"] .bg-\[\#0d0d0f\] {
+  background-color: #f9f9fb !important;
+}
+[data-mode="light"] .bg-\[\#0d0d10\] {
+  background-color: #f9f9fb !important;
+}
+[data-mode="light"] .bg-\[\#0d0d10\]\/40 {
+  background-color: rgba(249, 249, 251, 0.8) !important;
+}
+[data-mode="light"] .bg-\[\#0d0d10\]\/20 {
+  background-color: rgba(249, 249, 251, 0.6) !important;
+}
+
+/* #0e0e13 family */
+[data-mode="light"] .bg-\[\#0e0e13\] {
+  background-color: #f4f4f5 !important;
+}
+
+/* #0f0f13 family — used extensively in profile pages */
+[data-mode="light"] .bg-\[\#0f0f13\] {
+  background-color: #ffffff !important;
+}
+[data-mode="light"] .bg-\[\#0f0f13\]\/40 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+[data-mode="light"] .bg-\[\#0f0f13\]\/30 {
+  background-color: rgba(249, 249, 251, 0.9) !important;
+}
+
+/* #111113 / #121217 / #141416 family */
+[data-mode="light"] .bg-\[\#111113\] {
+  background-color: #f4f4f5 !important;
+}
+[data-mode="light"] .bg-\[\#121217\] {
+  background-color: #f4f4f5 !important;
+}
+[data-mode="light"] .bg-\[\#121217\]\/50 {
+  background-color: rgba(244, 244, 245, 0.8) !important;
+}
+[data-mode="light"] .bg-\[\#141416\] {
+  background-color: #f4f4f5 !important;
+}
+
+/* ── Theme-change overlay (injected by useThemeMode hook) ──── */
+/* The hook creates this element programmatically; these styles
+   ensure it renders beautifully with GPU acceleration.          */
+#theme-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  will-change: opacity;
+  transform: translateZ(0); /* force GPU layer */
+}
+
+/* When switching themes, temporarily lock element transitions so
+   the overlay is the ONLY thing animating (cleaner visual).
+   The hook removes this attribute after the overlay fades out.  */
+[data-theme-switching="true"] *,
+[data-theme-switching="true"] *::before,
+[data-theme-switching="true"] *::after {
+  transition-duration: 0ms !important;
+}
+
+/* ── FloatingSelectionBar (portal → document.body) ──────────
+   The bar renders at fixed bottom-0 with bg-neutral-950/90.
+   The portal sits outside the [data-mode] tree so we target
+   the <html> ancestor to ensure light-mode class applies.     */
+[data-mode="light"] .fixed.bottom-0.left-0.right-0 > div {
+  background-color: rgba(255, 255, 255, 0.97) !important;
+  border-top-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ── Modal / dialog surfaces inside portals ──────────────── */
+/* AutoCropModal & BubbleCleanerModal render in a portal;
+   target the modal backdrop and inner card surfaces.          */
+[data-mode="light"] .fixed.inset-0:not(#theme-transition-overlay) {
+  background-color: rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Hover states for neutral-900 action buttons */
+[data-mode="light"] .hover\:bg-neutral-750:hover {
+  background-color: #d4d4d8 !important;
+}
+[data-mode="light"] .hover\:bg-neutral-800:hover {
+  background-color: #e8e8ec !important;
+}
+[data-mode="light"] .hover\:bg-neutral-900:hover {
+  background-color: #f0f0f4 !important;
+}
+[data-mode="light"] .hover\:bg-neutral-950:hover {
+  background-color: #f9f9fb !important;
+}
+[data-mode="light"] .hover\:bg-neutral-900\/30:hover {
+  background-color: rgba(
+    244,
+    244,
+    245,
+    0.8
+  ) !important; /* light grey for log hover */
+}
+
+/* ── bg-neutral-955 (custom very-dark token) ─────────────── */
+[data-mode="light"] .bg-neutral-955,
+[data-mode="light"] .bg-neutral-955\/60,
+[data-mode="light"] .bg-neutral-955\/40,
+[data-mode="light"] .bg-neutral-955\/20 {
+  background-color: #f4f4f5 !important;
+}
+[data-mode="light"] .hover\:bg-neutral-955\/60:hover {
+  background-color: #ebebef !important;
+}
+
+/* ── Notification toast colour families ─────────────────────
+   Toasts use bg-{color}-950/90 which is near-black in light mode.
+   Map each to a pale tinted surface so they're still recognisable
+   but readable on a white screen.                              */
+
+/* Info / blue */
+[data-mode="light"] .bg-blue-950,
+[data-mode="light"] .bg-blue-950\/90,
+[data-mode="light"] .bg-blue-950\/80,
+[data-mode="light"] .bg-blue-950\/70,
+[data-mode="light"] .bg-blue-950\/60,
+[data-mode="light"] .bg-blue-950\/40 {
+  background-color: rgba(239, 246, 255, 0.98) !important; /* blue-50 */
+}
+[data-mode="light"] .border-blue-800 {
+  border-color: #93c5fd !important;
+}
+[data-mode="light"] .text-blue-100 {
+  color: #1e3a5f !important;
+}
+[data-mode="light"] .text-blue-400 {
+  color: #2563eb !important;
+}
+
+/* Success / emerald */
+[data-mode="light"] .bg-emerald-950,
+[data-mode="light"] .bg-emerald-950\/90,
+[data-mode="light"] .bg-emerald-950\/80,
+[data-mode="light"] .bg-emerald-950\/70,
+[data-mode="light"] .bg-emerald-950\/60,
+[data-mode="light"] .bg-emerald-950\/40 {
+  background-color: rgba(236, 253, 245, 0.98) !important; /* emerald-50 */
+}
+[data-mode="light"] .border-emerald-800 {
+  border-color: #6ee7b7 !important;
+}
+[data-mode="light"] .text-emerald-100 {
+  color: #064e3b !important;
+}
+[data-mode="light"] .text-emerald-400 {
+  color: #059669 !important;
+}
+
+/* Warning / amber */
+[data-mode="light"] .bg-amber-950,
+[data-mode="light"] .bg-amber-950\/90,
+[data-mode="light"] .bg-amber-950\/95,
+[data-mode="light"] .bg-amber-950\/80,
+[data-mode="light"] .bg-amber-950\/70,
+[data-mode="light"] .bg-amber-950\/60,
+[data-mode="light"] .bg-amber-950\/40 {
+  background-color: rgba(255, 251, 235, 0.98) !important; /* amber-50 */
+}
+[data-mode="light"] .border-amber-800,
+[data-mode="light"] .border-amber-500\/85 {
+  border-color: #fcd34d !important;
+}
+[data-mode="light"] .text-amber-100 {
+  color: #451a03 !important;
+}
+[data-mode="light"] .text-amber-200 {
+  color: #6d2800 !important;
+}
+[data-mode="light"] .text-amber-400 {
+  color: #d97706 !important;
+}
+
+/* Error / rose */
+[data-mode="light"] .bg-rose-950,
+[data-mode="light"] .bg-rose-950\/90,
+[data-mode="light"] .bg-rose-950\/80,
+[data-mode="light"] .bg-rose-950\/70 {
+  background-color: rgba(255, 241, 242, 0.98) !important; /* rose-50 */
+}
+[data-mode="light"] .border-rose-800 {
+  border-color: #fca5a5 !important;
+}
+[data-mode="light"] .text-rose-100 {
+  color: #4c0519 !important;
+}
+[data-mode="light"] .text-rose-400 {
+  color: #e11d48 !important;
+}
+
+/* Pipeline failure / red */
+[data-mode="light"] .bg-red-950,
+[data-mode="light"] .bg-red-950\/95,
+[data-mode="light"] .bg-red-950\/90,
+[data-mode="light"] .bg-red-950\/80 {
+  background-color: rgba(254, 242, 242, 0.98) !important; /* red-50 */
+}
+[data-mode="light"] .border-red-500 {
+  border-color: #fca5a5 !important;
+}
+[data-mode="light"] .text-red-100 {
+  color: #450a0a !important;
+}
+[data-mode="light"] .text-red-400 {
+  color: #dc2626 !important;
+}
+
+/* ── Panel Assistant specific overrides (Purple/Rose action buttons) ── */
+[data-mode="light"] .bg-purple-950\/40 {
+  background-color: rgba(243, 232, 255, 0.9) !important; /* purple-100 */
+}
+[data-mode="light"] .border-purple-800\/40 {
+  border-color: #d8b4fe !important;
+}
+[data-mode="light"] .hover\:bg-purple-900\/60:hover {
+  background-color: rgba(233, 213, 255, 0.9) !important;
+}
+[data-mode="light"] .hover\:border-purple-600:hover {
+  border-color: #c084fc !important;
+}
+[data-mode="light"] .text-purple-300 {
+  color: #7e22ce !important; /* purple-700 */
+}
+
+/* Stop analyzing button (rose) */
+[data-mode="light"] .bg-rose-600\/20 {
+  background-color: rgba(255, 228, 230, 0.9) !important; /* rose-100 */
+}
+[data-mode="light"] .border-rose-500\/50 {
+  border-color: #fca5a5 !important;
+}
+[data-mode="light"] .hover\:bg-rose-600\/40:hover {
+  background-color: rgba(254, 205, 211, 0.9) !important;
+}
+[data-mode="light"] .hover\:border-rose-400:hover {
+  border-color: #fb7185 !important;
+}
+[data-mode="light"] .text-rose-300 {
+  color: #be123c !important; /* rose-700 */
+}
+
+/* ── Metadata container inline-style rgba(0,0,0,0.4) override ──
+   The UrlInputPanel metadata section uses an inline style for bg.
+   We use a direct CSS rule to force the parent container to be    
+   light, relying on specificity.                                 */
+[data-mode="light"] #dynamic_input_box .border.rounded-2xl {
+  background-color: rgba(248, 248, 250, 0.96) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* =================================================================
+   COMPREHENSIVE LIGHT MODE COVERAGE — Full-site pass
+   Covers every remaining text, button, badge, border, and bg token
+   that was still rendering dark-on-dark in light mode.
+   ================================================================= */
+
+/* ── bg-neutral scale (remaining stops) ──────────────────────── */
+[data-mode="light"] .bg-neutral-900,
+[data-mode="light"] .bg-neutral-900\/40,
+[data-mode="light"] .bg-neutral-900\/50,
+[data-mode="light"] .bg-neutral-900\/60,
+[data-mode="light"] .bg-neutral-900\/70,
+[data-mode="light"] .bg-neutral-900\/80,
+[data-mode="light"] .bg-neutral-900\/90 {
+  background-color: #f0f0f4 !important;
+}
+[data-mode="light"] .bg-neutral-800,
+[data-mode="light"] .bg-neutral-800\/40,
+[data-mode="light"] .bg-neutral-800\/50,
+[data-mode="light"] .bg-neutral-800\/60,
+[data-mode="light"] .bg-neutral-800\/80 {
+  background-color: #e4e4e7 !important;
+}
+[data-mode="light"] .bg-neutral-950,
+[data-mode="light"] .bg-neutral-950\/40,
+[data-mode="light"] .bg-neutral-950\/50,
+[data-mode="light"] .bg-neutral-950\/60,
+[data-mode="light"] .bg-neutral-950\/70,
+[data-mode="light"] .bg-neutral-950\/80,
+[data-mode="light"] .bg-neutral-950\/90 {
+  background-color: #ffffff !important;
+}
+
+/* ── Custom hex backgrounds used in cards and pages (e.g. project list) ── */
+[data-mode="light"] .bg-neutral-955,
+[data-mode="light"] .bg-\[\#070709\],
+[data-mode="light"] .bg-\[\#0a0a0f\]\/50,
+[data-mode="light"] .bg-\[\#0b0b0e\],
+[data-mode="light"] .bg-\[\#0b0b0e\]\/50,
+[data-mode="light"] .bg-\[\#0b0b0e\]\/80,
+[data-mode="light"] .bg-\[\#0c0c0e\]\/30,
+[data-mode="light"] .bg-\[\#0c0c0e\]\/40,
+[data-mode="light"] .bg-\[\#0d0d12\]\/75,
+[data-mode="light"] .bg-\[\#0f0f13\],
+[data-mode="light"] .bg-\[\#0f0f13\]\/40,
+[data-mode="light"] .bg-\[\#111115\],
+[data-mode="light"] .bg-\[\#111116\]\/60,
+[data-mode="light"] .bg-\[\#111116\]\/80,
+[data-mode="light"] .bg-\[\#16161b\] {
+  background-color: #ffffff !important;
+}
+
+[data-mode="light"] .from-\[\#111115\] {
+  --tw-gradient-from: #ffffff !important;
+}
+[data-mode="light"] .via-\[\#111115\]\/50 {
+  --tw-gradient-via: rgba(255, 255, 255, 0.5) !important;
+}
+[data-mode="light"] .to-transparent {
+  --tw-gradient-to: rgba(255, 255, 255, 0) !important;
+}
+
+
+/* ── White bg (solid) ────────────────────────────────────────── */
+[data-mode="light"] .bg-white {
+  background-color: #ffffff !important;
+}
+
+/* ── bg-white opacity variants (15–80) ───────────────────────── */
+[data-mode="light"] .bg-white\/15 {
+  background-color: rgba(0, 0, 0, 0.07) !important;
+}
+[data-mode="light"] .bg-white\/20 {
+  background-color: rgba(0, 0, 0, 0.09) !important;
+}
+[data-mode="light"] .bg-white\/25 {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .bg-white\/30 {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+[data-mode="light"] .bg-white\/40 {
+  background-color: rgba(255,255,255,0.9) !important;
+}
+[data-mode="light"] .bg-white\/50 {
+  background-color: rgba(255,255,255,0.95) !important;
+}
+[data-mode="light"] .bg-white\/60,
+[data-mode="light"] .bg-white\/70,
+[data-mode="light"] .bg-white\/80,
+[data-mode="light"] .bg-white\/90 {
+  background-color: #ffffff !important;
+}
+
+/* ── border-white remaining opacity variants ─────────────────── */
+[data-mode="light"] .border-white\/25,
+[data-mode="light"] .border-white\/30 {
+  border-color: rgba(0, 0, 0, 0.14) !important;
+}
+[data-mode="light"] .border-white\/40,
+[data-mode="light"] .border-white\/50 {
+  border-color: rgba(0, 0, 0, 0.18) !important;
+}
+
+/* ── text-neutral missing stops ──────────────────────────────── */
+[data-mode="light"] .text-neutral-700 {
+  color: #a1a1aa !important;
+}
+[data-mode="light"] .text-neutral-800 {
+  color: #71717a !important;
+}
+[data-mode="light"] .text-neutral-900 {
+  color: #52525b !important;
+}
+[data-mode="light"] .text-neutral-950 {
+  color: #27272a !important;
+}
+
+/* ── Extended color text families ────────────────────────────── */
+[data-mode="light"] .text-sky-400 {
+  color: #0284c7 !important;
+}
+[data-mode="light"] .text-sky-300 {
+  color: #0369a1 !important;
+}
+[data-mode="light"] .text-blue-300 {
+  color: #1d4ed8 !important;
+}
+[data-mode="light"] .text-indigo-300 {
+  color: #4338ca !important;
+}
+[data-mode="light"] .text-violet-300 {
+  color: #6d28d9 !important;
+}
+[data-mode="light"] .text-fuchsia-400 {
+  color: #a21caf !important;
+}
+[data-mode="light"] .text-pink-400 {
+  color: #be185d !important;
+}
+[data-mode="light"] .text-orange-400 {
+  color: #c2410c !important;
+}
+[data-mode="light"] .text-teal-400 {
+  color: #0f766e !important;
+}
+[data-mode="light"] .text-lime-400 {
+  color: #4d7c0f !important;
+}
+[data-mode="light"] .text-yellow-300 {
+  color: #a16207 !important;
+}
+[data-mode="light"] .text-emerald-300 {
+  color: #047857 !important;
+}
+[data-mode="light"] .text-rose-300 {
+  color: #be123c !important;
+}
+[data-mode="light"] .text-red-300 {
+  color: #b91c1c !important;
+}
+
+/* ── Gradient overlay fixes ──────────────────────────────────── */
+/* from-neutral-950 / from-black used in fade-to-transparent overlays */
+[data-mode="light"] .from-neutral-950 {
+  --tw-gradient-from: #ffffff !important;
+}
+[data-mode="light"] .from-black {
+  --tw-gradient-from: rgba(0,0,0,0.12) !important;
+}
+[data-mode="light"] .via-neutral-950 {
+  --tw-gradient-via: rgba(255,255,255,0.7) !important;
+}
+[data-mode="light"] .to-neutral-950 {
+  --tw-gradient-to: #ffffff !important;
+}
+
+/* ── Violet badge/icon families (admin sidebar) ──────────────── */
+[data-mode="light"] .bg-violet-950\/20,
+[data-mode="light"] .bg-violet-950\/15,
+[data-mode="light"] .bg-violet-950\/10 {
+  background-color: rgba(109, 40, 217, 0.07) !important;
+}
+[data-mode="light"] .border-violet-900\/20,
+[data-mode="light"] .border-violet-900\/10 {
+  border-color: rgba(109, 40, 217, 0.15) !important;
+}
+[data-mode="light"] .text-violet-400 {
+  color: #6d28d9 !important;
+}
+[data-mode="light"] .bg-violet-500\/10 {
+  background-color: rgba(109, 40, 217, 0.08) !important;
+}
+[data-mode="light"] .border-violet-500\/20 {
+  border-color: rgba(109, 40, 217, 0.2) !important;
+}
+
+/* ── Sky / indigo / fuchsia badge backgrounds ────────────────── */
+[data-mode="light"] .bg-sky-950\/40,
+[data-mode="light"] .bg-sky-950\/30,
+[data-mode="light"] .bg-sky-950\/20 {
+  background-color: rgba(224, 242, 254, 0.9) !important;
+}
+[data-mode="light"] .bg-indigo-950\/40,
+[data-mode="light"] .bg-indigo-950\/30 {
+  background-color: rgba(238, 242, 255, 0.9) !important;
+}
+[data-mode="light"] .bg-fuchsia-950\/40,
+[data-mode="light"] .bg-fuchsia-950\/30 {
+  background-color: rgba(253, 244, 255, 0.9) !important;
+}
+[data-mode="light"] .bg-violet-950\/40,
+[data-mode="light"] .bg-violet-950\/30 {
+  background-color: rgba(245, 243, 255, 0.9) !important;
+}
+[data-mode="light"] .border-sky-800\/40,
+[data-mode="light"] .border-sky-800\/30 {
+  border-color: #7dd3fc !important;
+}
+[data-mode="light"] .border-indigo-800\/40 {
+  border-color: #a5b4fc !important;
+}
+
+/* ── Button: solid neutral-900 (icon buttons, small actions) ─── */
+[data-mode="light"] button.bg-neutral-900,
+[data-mode="light"] .btn-neutral {
+  background-color: #f0f0f4 !important;
+  color: #18181b !important;
+  border-color: #d4d4d8 !important;
+}
+
+/* ── Tooltip/popover surfaces ────────────────────────────────── */
+[data-mode="light"] .bg-neutral-900.border.border-white\/10,
+[data-mode="light"] .bg-neutral-900.text-white.text-xs,
+[data-mode="light"] [class*="tooltip"] {
+  background-color: #ffffff !important;
+  color: #18181b !important;
+  border-color: #e4e4e7 !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+}
+
+/* ── Kbd elements ────────────────────────────────────────────── */
+[data-mode="light"] kbd {
+  background-color: #e4e4e7 !important;
+  color: #3f3f46 !important;
+  border-color: #d4d4d8 !important;
+}
+
+/* ── Focus rings ─────────────────────────────────────────────── */
+[data-mode="light"] .focus\:border-purple-500:focus {
+  border-color: #9333ea !important;
+}
+[data-mode="light"] .focus\:border-neutral-700:focus {
+  border-color: #a1a1aa !important;
+}
+
+/* ── Hover border colors ─────────────────────────────────────── */
+[data-mode="light"] .hover\:border-neutral-700:hover {
+  border-color: #a1a1aa !important;
+}
+[data-mode="light"] .hover\:border-neutral-600:hover {
+  border-color: #b4b4be !important;
+}
+[data-mode="light"] .hover\:border-white\/20:hover {
+  border-color: rgba(0,0,0,0.12) !important;
+}
+[data-mode="light"] .hover\:border-white\/30:hover {
+  border-color: rgba(0,0,0,0.15) !important;
+}
+
+/* ── Text on solid colored buttons (keep white for contrast) ──── */
+/* Purple/violet/indigo/rose/emerald filled buttons keep white text */
+[data-mode="light"] .bg-purple-600 .text-white,
+[data-mode="light"] .bg-purple-500 .text-white,
+[data-mode="light"] .bg-violet-600 .text-white,
+[data-mode="light"] .bg-indigo-600 .text-white,
+[data-mode="light"] .bg-rose-600 .text-white,
+[data-mode="light"] .bg-emerald-600 .text-white,
+[data-mode="light"] .bg-gradient-to-r .text-white {
+  color: #ffffff !important;
+}
+
+/* Inline text-white inside colored gradient buttons stays white */
+[data-mode="light"] [class*="from-purple"] .text-white,
+[data-mode="light"] [class*="from-violet"] .text-white,
+[data-mode="light"] [class*="from-indigo"] .text-white {
+  color: #ffffff !important;
+}
+
+/* ── Live scraper / progress banner ─────────────────────────── */
+[data-mode="light"] .bg-purple-800\/30 {
+  background-color: rgba(168, 85, 247, 0.1) !important;
+}
+[data-mode="light"] .border-purple-800\/30 {
+  border-color: rgba(168, 85, 247, 0.2) !important;
+}
+[data-mode="light"] .border-purple-500\/15 {
+  border-color: rgba(168, 85, 247, 0.18) !important;
+}
+[data-mode="light"] .border-purple-500\/50 {
+  border-color: rgba(168, 85, 247, 0.4) !important;
+}
+
+/* ── Emerald/amber/red status badge backgrounds ──────────────── */
+[data-mode="light"] .bg-emerald-950\/20 {
+  background-color: rgba(209, 250, 229, 0.8) !important;
+}
+[data-mode="light"] .bg-red-950\/20,
+[data-mode="light"] .bg-rose-950\/20 {
+  background-color: rgba(255, 228, 230, 0.8) !important;
+}
+[data-mode="light"] .bg-amber-950\/20 {
+  background-color: rgba(254, 243, 199, 0.8) !important;
+}
+[data-mode="light"] .border-emerald-500\/20 {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+[data-mode="light"] .border-red-500\/20,
+[data-mode="light"] .border-rose-500\/20 {
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+[data-mode="light"] .border-amber-500\/20 {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Custom scrollbars */
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(63, 63, 70, 0.5) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(63, 63, 70, 0.5);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+
+.scrollbar-thin:hover,
+.scrollbar-thin:focus-within,
+.scrollbar-thin:active {
+  scrollbar-color: rgba(63, 63, 70, 0.7) transparent;
+}
+
+.scrollbar-thin:hover::-webkit-scrollbar,
+.scrollbar-thin:focus-within::-webkit-scrollbar,
+.scrollbar-thin:active::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin:hover::-webkit-scrollbar-thumb,
+.scrollbar-thin:focus-within::-webkit-scrollbar-thumb,
+.scrollbar-thin:active::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+}
+
+.scrollbar-thin:hover::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin:focus-within::-webkit-scrollbar-thumb:hover,
+.scrollbar-thin:active::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom scrollbar: thin, always visible */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(63, 63, 70, 0.45) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(63, 63, 70, 0.45);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb,
+.custom-scrollbar:focus-within::-webkit-scrollbar-thumb,
+.custom-scrollbar:active::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 120, 0.65);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 120, 0.75);
+}
+
+/* Mini sidebar scrollbar is completely hidden */
+.mini-sidebar-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+.mini-sidebar-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+  }
+}
+
+.glow-btn-pulse {
+  animation: pulse-glow 3s infinite;
+}
+
+@keyframes scan-laser {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+.scanner-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(168, 85, 247),
+    transparent
+  );
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+  animation: scan-laser 2.5s ease-in-out infinite;
+  z-index: 20;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Page transitions, custom theme variables, and scrollable nav ribbon CSS */
+@keyframes page-entry {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-entry 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.nav-scroll-ribbon {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-scroll-ribbon::-webkit-scrollbar {
+  display: none;
+}
+
+/* Visual Theme Customizations */
+:root {
+  --theme-primary: 139, 92, 246; /* purple-500 default */
+  --theme-glow: rgba(139, 92, 246, 0.2);
+}
+
+[data-theme="obsidian"] {
+  --theme-primary: 168, 85, 247; /* purple-500 */
+  --theme-glow: rgba(168, 85, 247, 0.22);
+}
+
+[data-theme="cyberpunk"] {
+  --theme-primary: 6, 182, 212; /* cyan-500 */
+  --theme-glow: rgba(6, 182, 212, 0.25);
+}
+
+[data-theme="slate"] {
+  --theme-primary: 161, 161, 170; /* zinc-400 */
+  --theme-glow: rgba(161, 161, 170, 0.15);
+}
+
+[data-theme="indigo"] {
+  --theme-primary: 99, 102, 241; /* indigo-500 */
+  --theme-glow: rgba(99, 102, 241, 0.25);
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes infinite-scroll {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(150%);
+  }
+}
+
+.animate-infinite-scroll {
+  animation: infinite-scroll 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.animate-shimmer-sweep {
+  animation: shimmer-sweep 2.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Thin Scrollbar for Sidebar/Mini-Sidebar */
+.custom-sidebar-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-sidebar-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-sidebar-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.2); /* Soft purple thumb */
+  border-radius: 9999px;
+}
+.custom-sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.4); /* Brighter purple thumb on hover */
+}
+.custom-sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.2) transparent;
+}

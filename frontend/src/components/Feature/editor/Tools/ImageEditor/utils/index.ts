@@ -1,1 +1,0 @@
-export { detectHorizontalGutters } from "./gutterScanner";

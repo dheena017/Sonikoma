@@ -32,8 +32,10 @@ function formatLog(level, filename, message) {
   const timestamp = `${COLORS.GREY}${getTimestamp()}${COLORS.RESET}`;
   const tag = `${COLORS.MAGENTA}[BACKEND]${COLORS.RESET}`;
   const levelColor = COLORS.LEVELS[level] || COLORS.LEVELS.INFO;
-  const levelStr = `${levelColor}[${level}]${COLORS.RESET}`;
-  const fileStr = `${COLORS.BLUE}[${filename}]${COLORS.RESET}`;
+  const levelPadded = level.padEnd(7, " ");
+  const levelStr = `${levelColor}[${levelPadded}]${COLORS.RESET}`;
+  const filePadded = `[${filename}]`.padEnd(20, " ");
+  const fileStr = `${COLORS.BLUE}${filePadded}${COLORS.RESET}`;
   return `${timestamp} ${tag} ${levelStr} ${fileStr} ${message}`;
 }
 
@@ -47,11 +49,6 @@ const logger = {
   error: (msg, ...args) =>
     console.error(formatLog("ERROR", "run-backend.js", msg), ...args),
 };
-
-// Overwrite npm startup lines with formatted logs
-process.stdout.write("\x1b[A\x1b[2K\x1b[A\x1b[2K\x1b[A\x1b[2K\r");
-logger.info("sonikoma@0.0.0 backend");
-logger.info("node scripts/run-backend.js");
 
 // Initialize dotenv from parent .env file
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
@@ -104,18 +101,28 @@ if (!geminiApiKey) {
 const pythonPath = process.platform === "win32"
   ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
   : "python3";
-const backendDir = path.resolve(__dirname, "../backend/python");
+const backendDir = path.resolve(__dirname, "../backend/app");
+const projectRootDir = path.resolve(__dirname, "../");
+const pythonImportRoot = projectRootDir;
+const pythonPathEnv = [backendDir, projectRootDir].join(path.delimiter);
 
 let pyProcess = null;
+let isExiting = false;
 let isRestarting = false;
 
 function handleBackendExit(proc, code) {
   if (proc !== pyProcess) return; // Ignore old killed processes
-  if (code !== 0 && code !== null) {
+  if (isExiting) {
+    printBackendShutdownBanner();
+    logger.success(`👋 Backend server stopped cleanly.`);
+    process.exit(0);
+  } else if (code !== 0 && code !== null && code !== 3) {
     logger.error(`Backend process exited unexpectedly with code ${code}`);
     process.exit(code);
   } else {
-    logger.info(`Backend process exited cleanly.`);
+    isExiting = true;
+    printBackendShutdownBanner();
+    logger.success(`👋 Backend server stopped cleanly.`);
     process.exit(0);
   }
 }
@@ -123,11 +130,8 @@ function handleBackendExit(proc, code) {
 async function restartBackend(changedFile) {
   if (isRestarting) return;
   isRestarting = true;
-  logger.warn(
-    `🔄 Detected change in backend Python files (${
-      changedFile || "unknown"
-    }). Restarting backend process...`
-  );
+  const formattedPath = changedFile ? changedFile.replace(/\\/g, "/") : "code";
+  logger.info(`🔄 Reloading backend (${formattedPath})...`);
 
   const oldProcess = pyProcess;
   if (oldProcess) {
@@ -146,7 +150,12 @@ async function restartBackend(changedFile) {
   pyProcess = spawn(pythonPath, ["main.py"], {
     cwd: backendDir,
     stdio: "inherit",
-    env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
+    env: {
+      ...process.env,
+      PYTHONIOENCODING: "utf-8",
+      FORCE_COLOR: "1",
+      PYTHONPATH: pythonPathEnv,
+    },
   });
 
   const currentProcess = pyProcess;
@@ -159,7 +168,6 @@ async function restartBackend(changedFile) {
     handleBackendExit(currentProcess, code);
   });
 
-  logger.info(`Waiting for backend to re-initialize...`);
   setTimeout(checkHealth, 500);
   isRestarting = false;
 }
@@ -224,7 +232,12 @@ async function init() {
   pyProcess = spawn(pythonPath, ["main.py"], {
     cwd: backendDir,
     stdio: "inherit",
-    env: { ...process.env, PYTHONIOENCODING: "utf-8", FORCE_COLOR: "1" },
+    env: {
+      ...process.env,
+      PYTHONIOENCODING: "utf-8",
+      FORCE_COLOR: "1",
+      PYTHONPATH: pythonPathEnv,
+    },
   });
 
   const initialProcess = pyProcess;
@@ -306,22 +319,70 @@ fs.watch(backendDir, { recursive: true }, (eventType, filename) => {
   }
 });
 
-// Clean up and wait for backend to close to prevent output collision in terminal on Ctrl+C
-let isExiting = false;
-function handleSignal(signal) {
-  if (isExiting) return;
-  isExiting = true;
-  logger.info(`Received ${signal}, stopping backend process...`);
-  if (pyProcess && !pyProcess.killed && pyProcess.exitCode === null) {
-    pyProcess.on("exit", () => {
-      process.exit(0);
-    });
-    pyProcess.kill("SIGINT");
-    setTimeout(() => process.exit(0), 3000);
-  } else {
-    process.exit(0);
+function printBackendShutdownBanner() {
+  const CLR_BORDER  = "\x1b[38;5;39m";    // Bright Cyan border
+  const CLR_TITLE   = "\x1b[1;31m";       // Bold Red
+  const CLR_TEXT    = "\x1b[1;37m";       // Bold White
+  const CLR_MUTED   = "\x1b[90m";         // Muted Grey
+  const CLR_RESET   = "\x1b[0m";
+
+  const INNER_WIDTH = 76;
+
+  function stripAnsi(text) {
+    return text.replace(/\x1b\[[0-9;]*[mK]/g, "");
   }
+
+  function formatLine(content) {
+    const cleanLen = stripAnsi(content).length;
+    const pad = " ".repeat(Math.max(0, INNER_WIDTH - cleanLen));
+    return `${CLR_BORDER}│${CLR_RESET} ${content}${pad} ${CLR_BORDER}│${CLR_RESET}`;
+  }
+
+  const lineTitle  = formatLine(`🛑 ${CLR_TITLE}SONIKOMA COMPUTE ENGINE${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_TEXT}Server Shutdown Complete${CLR_RESET}`);
+  const lineP1     = formatLine(`● Backend process terminated cleanly.`);
+  const lineP2     = formatLine(`● All SQLite database connections & background tasks released.`);
+  const lineP3     = formatLine(`● Have a great session! 👋`);
+
+  const topBorder = `${CLR_BORDER}┌` + "─".repeat(INNER_WIDTH + 2) + `┐${CLR_RESET}`;
+  const midBorder = `${CLR_BORDER}├` + "─".repeat(INNER_WIDTH + 2) + `┤${CLR_RESET}`;
+  const botBorder = `${CLR_BORDER}└` + "─".repeat(INNER_WIDTH + 2) + `┘${CLR_RESET}`;
+
+  const banner = `${topBorder}
+${lineTitle}
+${midBorder}
+${lineP1}
+${lineP2}
+${lineP3}
+${botBorder}`;
+
+  console.log(banner);
 }
 
-process.on("SIGINT", () => handleSignal("SIGINT"));
-process.on("SIGTERM", () => handleSignal("SIGTERM"));
+function handleBackendShutdown() {
+  if (isExiting) return;
+  isExiting = true;
+  printBackendShutdownBanner();
+  logger.success(`👋 Backend server stopped cleanly.`);
+  if (pyProcess && !pyProcess.killed && pyProcess.exitCode === null) {
+    try {
+      if (process.platform === "win32") {
+        spawn("taskkill", ["/F", "/T", "/PID", pyProcess.pid.toString()]);
+      } else {
+        pyProcess.kill("SIGINT");
+      }
+    } catch (e) {}
+    pyProcess = null;
+  }
+  process.exit(0);
+}
+
+process.on("SIGINT", () => handleBackendShutdown());
+process.on("SIGTERM", () => handleBackendShutdown());
+process.on("exit", () => {
+  if (!isExiting) {
+    isExiting = true;
+    try {
+      printBackendShutdownBanner();
+    } catch (e) {}
+  }
+});
