@@ -86,10 +86,10 @@ export default function ProjectCard({
   return (
     <div
       onClick={() => onOpenProject(project)}
-      className={`group relative bg-[#0e0e12] border rounded-2xl cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-purple-950/30 flex flex-col h-full ${
+      className={`group relative bg-[#0e0e12]/90 border rounded-2xl backdrop-blur-sm cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-purple-950/30 flex flex-col h-full ${
         isSelected
           ? "border-purple-500 shadow-lg shadow-purple-900/20 ring-1 ring-purple-500/60"
-          : "border-neutral-800/80 hover:border-purple-500/40"
+          : "border-white/10 hover:border-purple-500/40"
       }`}
     >
       {/* Selection checkbox */}
@@ -107,7 +107,7 @@ export default function ProjectCard({
       )}
 
       {/* ─── Thumbnail ─────────────────────────────────── */}
-      <div className="relative h-36 w-full bg-neutral-900 overflow-hidden flex-shrink-0 rounded-t-2xl">
+      <div className="relative aspect-[16/9] w-full bg-neutral-900 overflow-hidden flex-shrink-0 rounded-t-2xl">
         {project.cover_image ? (
           <>
             <img
@@ -118,9 +118,9 @@ export default function ProjectCard({
               }`}
             />
             {/* Bottom fade into card */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e12] via-[#0e0e12]/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e12] via-[#0e0e12]/40 to-transparent" />
             {/* Subtle side vignette */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
           </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-neutral-900 to-neutral-950">
