@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./public/logo-dark.png" alt="Sonikoma Logo" width="220" />
+<img src="frontend\dist\logo-dark.png" alt="Sonikoma Logo" width="220" />
 
 # 🎬 Sonikoma — Webtoon to Video AI Platform
 
