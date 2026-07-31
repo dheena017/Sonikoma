@@ -9,15 +9,12 @@ import yaml
 import numpy as np
 import cv2
 
+import importlib.util
+
 logger = logging.getLogger("sonikoma.providers.vision.yolo")
 
-try:
-    from ultralytics import YOLO
-    from huggingface_hub import hf_hub_download
-    has_yolo_dependencies = True
-except ImportError:
-    has_yolo_dependencies = False
-    logger.warning("ultralytics or huggingface_hub is not installed. YOLO segmentation will be disabled.")
+def check_yolo_dependencies() -> bool:
+    return importlib.util.find_spec("ultralytics") is not None and importlib.util.find_spec("huggingface_hub") is not None
 
 _yolo_model = None
 
@@ -36,7 +33,14 @@ def get_yolo_model():
     if _yolo_model is not None:
         return _yolo_model
 
-    if not has_yolo_dependencies:
+    if not check_yolo_dependencies():
+        return None
+
+    try:
+        from ultralytics import YOLO
+        from huggingface_hub import hf_hub_download
+    except ImportError:
+        logger.warning("ultralytics or huggingface_hub is not installed. YOLO segmentation will be disabled.")
         return None
 
     # Priority 0: Custom locally fine-tuned model (if exists)

@@ -9,28 +9,28 @@ import os
 import logging
 from typing import Any, Optional
 
+import importlib.util
+
 logger = logging.getLogger("sonikoma.providers.vision.yolo")
-
-try:
-    from ultralytics import YOLO
-    from huggingface_hub import hf_hub_download
-    YOLO_AVAILABLE = True
-except ImportError:
-    YOLO_AVAILABLE = False
-
 
 class YOLOProvider:
     """Wrapper provider to interact with YOLO models."""
 
     @staticmethod
     def is_available() -> bool:
-        return YOLO_AVAILABLE
+        return importlib.util.find_spec("ultralytics") is not None and importlib.util.find_spec("huggingface_hub") is not None
 
     @staticmethod
     def load_model(model_path_or_hub_id: str, filename: Optional[str] = None) -> Any:
         """Loads a YOLO model from a local file path or downloads it from HuggingFace."""
-        if not YOLO_AVAILABLE:
+        if not YOLOProvider.is_available():
             raise RuntimeError("ultralytics or huggingface_hub is not installed.")
+
+        try:
+            from ultralytics import YOLO
+            from huggingface_hub import hf_hub_download
+        except ImportError:
+            raise RuntimeError("Failed to import ultralytics or huggingface_hub.")
 
         # If it is a HuggingFace repository identifier
         if "/" in model_path_or_hub_id and not os.path.exists(model_path_or_hub_id):

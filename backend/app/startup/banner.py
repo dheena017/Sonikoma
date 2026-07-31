@@ -12,11 +12,12 @@ import re
 from .bootstrap import IS_PRODUCTION, API_VERSION
 from core.settings import BACKEND_PORT, APP_URL, RATE_LIMIT_RPM, MAX_PROXY_MB
 
+import importlib.util
+
 def _check_pkg(mod_name: str) -> bool:
     try:
-        __import__(mod_name)
-        return True
-    except ImportError:
+        return importlib.util.find_spec(mod_name) is not None
+    except (ImportError, ValueError, AttributeError):
         return False
 
 def _get_ram_info() -> str:
@@ -37,14 +38,9 @@ def _get_venv_name() -> str:
         return ".venv"
 
 def _get_pytorch_status(CLR_SUCCESS, CLR_ALERT, CLR_RESET) -> str:
-    try:
-        import torch
-        if torch.cuda.is_available():
-            device_name = torch.cuda.get_device_name(0)
-            return f"{CLR_SUCCESS}PyTorch (CUDA: {device_name}) ✔{CLR_RESET}"
+    if importlib.util.find_spec("torch") is not None:
         return f"{CLR_SUCCESS}PyTorch (CPU) ✔{CLR_RESET}"
-    except ImportError:
-        return f"{CLR_ALERT}PyTorch ✖{CLR_RESET}"
+    return f"{CLR_ALERT}PyTorch ✖{CLR_RESET}"
 
 def _strip_ansi(text: str) -> str:
     return re.sub(r'\x1b\[[0-9;]*[mK]', '', text)

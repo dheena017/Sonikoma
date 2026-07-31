@@ -7,6 +7,13 @@ import time
 import warnings
 from dotenv import load_dotenv
 
+# Limit PyTorch / OpenBLAS thread allocations to keep memory under 512MB on Render
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("VECLIB_MAXIMUM_THREADS", "1")
+os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
+
 # Force UTF-8 encoding on standard streams to support beautiful Unicode console outputs on all systems
 for stream in (sys.stdout, sys.stderr):
     reconfigure = getattr(stream, "reconfigure", None)

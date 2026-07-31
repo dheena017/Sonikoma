@@ -26,14 +26,10 @@ from typing import List, Dict, Any, Optional, Tuple, TypedDict
 
 logger = logging.getLogger("sonikoma.services.image.ocr")
 
-# ── Optional dependencies ────────────────────────────────────────────────────
-try:
-    import easyocr
-    import numpy as np
-    from PIL import Image
-    _HAS_EASYOCR = True
-except ImportError:
-    _HAS_EASYOCR = False
+import importlib.util
+
+def _has_easyocr() -> bool:
+    return importlib.util.find_spec("easyocr") is not None
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 _DEFAULT_CONFIDENCE_THRESHOLD: float = 0.20   # lower than 0.3 to capture stylised comic fonts
@@ -63,9 +59,14 @@ def _load_ocr_reader(langs: List[str] = ["en"]) -> Optional[Any]:
     Subsequent calls with different languages are ignored (same reader returned).
     """
     global _ocr_reader
-    if _ocr_reader is None and _HAS_EASYOCR:
-        logger.info(f"[OCR] Initialising EasyOCR reader — languages: {langs}")
-        _ocr_reader = easyocr.Reader(langs, gpu=False)
+    if _ocr_reader is None and _has_easyocr():
+        try:
+            import easyocr
+            logger.info(f"[OCR] Initialising EasyOCR reader — languages: {langs}")
+            _ocr_reader = easyocr.Reader(langs, gpu=False)
+        except Exception as e:
+            logger.warning(f"[OCR] Failed to initialize EasyOCR: {e}")
+            return None
     return _ocr_reader
 
 

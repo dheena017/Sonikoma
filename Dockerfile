@@ -50,6 +50,13 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=10000
 
+# Limit PyTorch / OpenBLAS thread allocations to keep memory under 512MB
+ENV OMP_NUM_THREADS=1
+ENV MKL_NUM_THREADS=1
+ENV OPENBLAS_NUM_THREADS=1
+ENV VECLIB_MAXIMUM_THREADS=1
+ENV NUMEXPR_NUM_THREADS=1
+
 EXPOSE 10000
 
 # Launch FastAPI computational engine directly with uvicorn bound to 0.0.0.0:$PORT
