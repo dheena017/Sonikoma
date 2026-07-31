@@ -461,6 +461,10 @@ function ImageEditorSidebar({
             setFillColor={setFillColor}
             textBgColor={textBgColor || "#ffffff"}
             setTextBgColor={setTextBgColor || (() => { })}
+            activeStoryboardPanel={activeStoryboardPanel}
+            setPanels={setPanels}
+            addNotification={addNotification}
+            fetchWithInterceptor={fetchWithInterceptor}
           />
         )}
 
