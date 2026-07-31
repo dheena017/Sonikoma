@@ -34,29 +34,39 @@ def register_routers(app: FastAPI):
     app.mount("/training_data", StaticFiles(directory=training_data_dir), name="training_data")
 
     # Static Frontend Serving (Production Only)
-    dist_path = os.path.join(PROJECT_ROOT, "dist")
-    if IS_PRODUCTION:
-        if os.path.exists(dist_path):
-            logger.info(f"Mounting static files directory: {dist_path}")
-            app.mount("/", StaticFiles(directory=dist_path, html=True), name="static")
-        else:
-            logger.warning(f"Production mode active but dist folder not found at: {dist_path}")
+    possible_dist_paths = [
+        os.path.join(PROJECT_ROOT, "frontend", "dist"),
+        os.path.join(PROJECT_ROOT, "dist"),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist")),
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "dist")),
+    ]
+    dist_path = next((p for p in possible_dist_paths if os.path.exists(p)), None)
 
-    # Root redirect (matches Express server behaviour)
+    if IS_PRODUCTION and dist_path:
+        logger.info(f"Mounting static frontend directory: {dist_path}")
+        assets_dir = os.path.join(dist_path, "assets")
+        if os.path.exists(assets_dir):
+            app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+    elif IS_PRODUCTION:
+        logger.info("[INFO] Static dist folder not found. Running in API-only mode.")
+
+    # Root redirect (matches Express server behaviour & Render health check)
     @app.get("/", include_in_schema=False)
     async def root_redirect():
+        if dist_path and os.path.exists(os.path.join(dist_path, "index.html")):
+            return FileResponse(os.path.join(dist_path, "index.html"))
         return RedirectResponse(url="/api/health")
 
     # SPA Fallback Route for client-side routing
     @app.get("/{fallback_path:path}", include_in_schema=False)
     async def spa_fallback(fallback_path: str):
-        if IS_PRODUCTION and os.path.exists(os.path.join(dist_path, "index.html")):
+        if dist_path and os.path.exists(os.path.join(dist_path, "index.html")):
             return FileResponse(os.path.join(dist_path, "index.html"))
         return JSONResponse(
             status_code=404,
             content={
                 "success": False,
                 "error": f"Route not found: {fallback_path}",
-                "hint": "Ensure the API prefix is correct (/api/...) or check health check."
+                "hint": "Ensure the API prefix is correct (/api/...) or check health check at /api/health."
             }
         )

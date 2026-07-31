@@ -20,18 +20,13 @@ else:
     load_dotenv()
 
 # 1. FRONTEND_PORT (default to 3000 if missing)
-FRONTEND_PORT_STR = os.getenv("FRONTEND_PORT", "3000")
-try:
-    FRONTEND_PORT = int(FRONTEND_PORT_STR)
-except ValueError:
-    FRONTEND_PORT = 3000
+FRONTEND_PORT = int(os.getenv("FRONTEND_PORT", "3000"))
 
-# 2. BACKEND_PORT / PORT (Chose from .env BACKEND_PORT or cloud PORT)
-BACKEND_PORT_STR = os.getenv("BACKEND_PORT") or os.getenv("PORT") or "5173"
-try:
-    BACKEND_PORT = int(BACKEND_PORT_STR)
-except ValueError:
-    BACKEND_PORT = 5173
+# 2. BACKEND_PORT / PORT (Prioritize dynamic PORT provided by Render, fallback to BACKEND_PORT or 5173)
+BACKEND_PORT = int(os.getenv("PORT") or os.getenv("BACKEND_PORT") or "5173")
+
+# 3. HOST (Must be 0.0.0.0 in Docker/Render environments)
+HOST = os.getenv("HOST", "0.0.0.0")
 
 # 3. APP_URL
 APP_URL = os.getenv("APP_URL") or "http://localhost:3000"

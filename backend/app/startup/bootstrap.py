@@ -8,11 +8,14 @@ import warnings
 from dotenv import load_dotenv
 
 # Force UTF-8 encoding on standard streams to support beautiful Unicode console outputs on all systems
-try:
-    sys.stdout.reconfigure(encoding='utf-8')
-    sys.stderr.reconfigure(encoding='utf-8')
-except Exception:
-    pass
+for stream in (sys.stdout, sys.stderr):
+    reconfigure = getattr(stream, "reconfigure", None)
+    if callable(reconfigure):
+        try:
+            reconfigure(encoding='utf-8')
+        except Exception:
+            pass
+
 
 if sys.platform == "win32":
     try:
@@ -43,10 +46,12 @@ warnings.filterwarnings("ignore", category=UserWarning, module="pkg_resources")
 warnings.filterwarnings("ignore", category=UserWarning, module="moviepy")
 warnings.filterwarnings("ignore", category=UserWarning, message=".*pin_memory.*")
 
-# Fix Windows asyncio subprocess NotImplementedError
+# Fix Windows asyncio subprocess NotImplementedError (Proactor is default since Python 3.8; set_event_loop_policy is deprecated in Python 3.14+)
 if sys.platform == "win32":
     import asyncio
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    if sys.version_info < (3, 8):
+        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
 
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -57,6 +62,6 @@ os.makedirs(tempfile.tempdir, exist_ok=True)
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, '.env'))
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, 'backend', '.env'))
 
-IS_PRODUCTION = os.getenv('NODE_ENV') == 'production'
+IS_PRODUCTION = os.getenv('NODE_ENV') == 'production' or os.getenv('ENV') == 'production' or os.getenv('RENDER') is not None
 API_VERSION  = os.getenv('API_VERSION', '1.0.0')
 SERVER_START = time.time()

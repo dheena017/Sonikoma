@@ -111,11 +111,16 @@ if __name__ == "__main__":
         },
     }
 
-    port = int(os.environ.get("PORT", os.environ.get("BACKEND_PORT", 10000)))
+    ENV = os.environ.get("NODE_ENV", os.environ.get("ENV", "development"))
+    PORT = int(os.environ.get("PORT", os.environ.get("BACKEND_PORT", 5173)))
+    HOST = os.environ.get("HOST", "0.0.0.0")
+
+    print(f"🚀 Running in {ENV} mode on {HOST}:{PORT}")
+
     run_args = {
         "app": "main:app",
-        "host": "0.0.0.0",
-        "port": port,
+        "host": HOST,
+        "port": PORT,
         "log_level": "info",
         "log_config": custom_log_config,
         "use_colors": not IS_PRODUCTION,
