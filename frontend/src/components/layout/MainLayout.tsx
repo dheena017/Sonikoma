@@ -368,7 +368,7 @@ export default function MainLayout(props: MainLayoutProps) {
       <div
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between transition-all duration-300 ${
-          showAutoCropModal || showBubbleModal
+          showAutoCropModal || showBubbleModal || isImageEditorPage
             ? "overflow-hidden"
             : !isAnyAdmin
             ? "lg:overflow-y-auto"
@@ -549,7 +549,13 @@ export default function MainLayout(props: MainLayoutProps) {
           )}
 
           {/* Children Page Views */}
-          <div className="w-full flex-1 flex flex-col px-4 sm:px-6 md:px-8 pb-12 md:pb-16">
+          <div
+            className={`w-full flex-1 flex flex-col ${
+              isImageEditorPage || isProEditorPage
+                ? "p-0"
+                : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16"
+            }`}
+          >
             {children}
           </div>
         </div>

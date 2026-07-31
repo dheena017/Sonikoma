@@ -11,7 +11,7 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
   header
 }) => {
   return (
-    <div className="w-full h-screen max-h-screen bg-[#0B0F19] text-white flex flex-col overflow-hidden relative">
+    <div className="w-screen h-screen m-0 p-0 overflow-hidden bg-[#0d0e15] flex flex-col relative">
       {/* Top Header */}
       {header}
 

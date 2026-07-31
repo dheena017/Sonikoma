@@ -580,7 +580,8 @@ export default function AppRouter(props: AppRouterProps) {
       currentPath === "/image-editor/" ||
       currentPath.startsWith("/image-editor/") ||
       currentPath.endsWith("/image-editor") ||
-      currentPath.endsWith("/image-editor/");
+      currentPath.endsWith("/image-editor/") ||
+      currentPath.includes("/image-editor");
 
     const isWorkspacePath =
       currentPath === "/workspace" ||
