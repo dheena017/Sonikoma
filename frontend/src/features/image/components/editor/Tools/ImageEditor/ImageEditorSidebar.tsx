@@ -44,6 +44,8 @@ interface ImageEditorSidebarProps {
   handleModifyDuration: any;
   handleModifyMotionType: any;
   handleModifySpeechText: any;
+  handleModifyNarrative?: any;
+  handleModifyVisualDescription?: any;
   handleModifySfx: any;
   handleModifyCropPadding: any;
   setScrapedImages: any;
@@ -155,6 +157,8 @@ function ImageEditorSidebar({
   handleModifyDuration,
   handleModifyMotionType,
   handleModifySpeechText,
+  handleModifyNarrative,
+  handleModifyVisualDescription,
   handleModifySfx,
   handleModifyCropPadding,
   setScrapedImages,
@@ -491,9 +495,15 @@ function ImageEditorSidebar({
             handleModifyDuration={handleModifyDuration}
             handleModifyMotionType={handleModifyMotionType}
             handleModifySpeechText={handleModifySpeechText}
+            handleModifyNarrative={handleModifyNarrative}
+            handleModifyVisualDescription={handleModifyVisualDescription}
             handleModifySfx={handleModifySfx}
             handleModifyCropPadding={handleModifyCropPadding}
             setPanels={setPanels}
+            editingImageIdx={editingImageIdx}
+            totalImages={scrapedImages?.length || 1}
+            addNotification={addNotification}
+            fetchWithInterceptor={fetchWithInterceptor}
           />
         )}
 

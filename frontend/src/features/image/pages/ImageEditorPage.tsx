@@ -200,16 +200,18 @@ const ImageEditorPage = React.memo(({
               activeStoryboardPanel={
                 appLogic.panels?.find((p: any) => p.image_url === appLogic.scrapedImages[editingImageIdx!]) || null
               }
-              handleModifyBrightness={() => {}}
-              handleModifyContrast={() => {}}
-              handleModifySaturation={() => {}}
-              handleModifyFilterPreset={() => {}}
-              handleModifyGrayscale={() => {}}
-              handleModifyDuration={() => {}}
-              handleModifyMotionType={() => {}}
-              handleModifySpeechText={() => {}}
-              handleModifySfx={() => {}}
-              handleModifyCropPadding={() => {}}
+              handleModifyBrightness={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, brightness: val } : p))}
+              handleModifyContrast={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, contrast: val } : p))}
+              handleModifySaturation={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, saturation: val } : p))}
+              handleModifyFilterPreset={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, filter_preset: val } : p))}
+              handleModifyGrayscale={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, grayscale: val } : p))}
+              handleModifyDuration={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, duration: val } : p))}
+              handleModifyMotionType={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, motion_type: val } : p))}
+              handleModifySpeechText={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, speech_text: val } : p))}
+              handleModifyNarrative={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, narrative: val } : p))}
+              handleModifyVisualDescription={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, visual_description: val } : p))}
+              handleModifySfx={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, sfx: val } : p))}
+              handleModifyCropPadding={(panelId, val) => appLogic.setPanels?.((prev: any[]) => prev.map((p) => p.id === panelId ? { ...p, crop_padding: val } : p))}
               setScrapedImages={appLogic.setScrapedImages}
               setPanels={appLogic.setPanels}
               addNotification={appLogic.addNotification}
