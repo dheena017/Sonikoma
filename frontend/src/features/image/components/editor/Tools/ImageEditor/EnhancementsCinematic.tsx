@@ -36,12 +36,10 @@ export function EnhancementsCinematic({
         <div className="relative">
           <select
             value={activeStoryboardPanel?.motion_type ?? ""}
-            disabled={!activeStoryboardPanel}
             onChange={(e) =>
-              activeStoryboardPanel &&
-              handleModifyMotionType(activeStoryboardPanel.id, e.target.value)
+              handleModifyMotionType(activeStoryboardPanel?.id ?? 0, e.target.value)
             }
-            className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-purple-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-white/15 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-purple-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-white/15"
           >
             <option value="">None</option>
             <option value="static">Static (No Motion)</option>
@@ -65,10 +63,8 @@ export function EnhancementsCinematic({
         max={10}
         step={0.5}
         unit={activeStoryboardPanel?.duration === 0 ? " (AI Decides)" : "s"}
-        disabled={!activeStoryboardPanel}
         onChange={(val) =>
-          activeStoryboardPanel &&
-          handleModifyDuration(activeStoryboardPanel.id, val)
+          handleModifyDuration(activeStoryboardPanel?.id ?? 0, val)
         }
       />
 
@@ -80,24 +76,22 @@ export function EnhancementsCinematic({
         max={40}
         step={1}
         unit="px"
-        disabled={!activeStoryboardPanel}
         onChange={(val) =>
-          activeStoryboardPanel &&
-          handleModifyCropPadding(activeStoryboardPanel.id, val)
+          handleModifyCropPadding(activeStoryboardPanel?.id ?? 0, val)
         }
       />
 
       {/* Parallax Intensity */}
-      {activeStoryboardPanel?.layers && setPanels && (
+      {setPanels && (
         <SliderRow
           label="Parallax 3D Intensity"
-          value={activeStoryboardPanel.layers.parallax_intensity ?? 30}
+          value={activeStoryboardPanel?.layers?.parallax_intensity ?? 30}
           min={0}
           max={100}
           step={5}
           unit="%"
-          disabled={!activeStoryboardPanel}
           onChange={(val) => {
+            if (!activeStoryboardPanel) return;
             setPanels((prev) =>
               prev.map((p) =>
                 p.id === activeStoryboardPanel.id

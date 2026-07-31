@@ -15,7 +15,7 @@ export function EnhancementsAudio({
   setPanels,
 }: EnhancementsAudioProps) {
   const handleToggleShake = () => {
-    if (!activeStoryboardPanel || !setPanels) return;
+    if (!setPanels || !activeStoryboardPanel) return;
     setPanels((prev) =>
       prev.map((p) =>
         p.id === activeStoryboardPanel.id
@@ -46,12 +46,10 @@ export function EnhancementsAudio({
         </label>
         <textarea
           value={activeStoryboardPanel?.speech_text || ""}
-          disabled={!activeStoryboardPanel}
           onChange={(e) =>
-            activeStoryboardPanel &&
-            handleModifySpeechText(activeStoryboardPanel.id, e.target.value)
+            handleModifySpeechText(activeStoryboardPanel?.id ?? 0, e.target.value)
           }
-          className="w-full h-16 bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 disabled:opacity-40 disabled:cursor-not-allowed resize-none"
+          className="w-full h-16 bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
           placeholder=""
         />
       </div>
@@ -65,12 +63,10 @@ export function EnhancementsAudio({
           <input
             type="text"
             value={activeStoryboardPanel?.sfx || ""}
-            disabled={!activeStoryboardPanel}
             onChange={(e) =>
-              activeStoryboardPanel &&
-              handleModifySfx(activeStoryboardPanel.id, e.target.value)
+              handleModifySfx(activeStoryboardPanel?.id ?? 0, e.target.value)
             }
-            className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl pl-7 pr-2.5 py-1.5 text-[10px] font-mono focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl pl-7 pr-2.5 py-1.5 text-[10px] font-mono focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15"
             placeholder=""
           />
           <Volume2 className="absolute left-2.5 h-3 w-3 text-neutral-500 pointer-events-none" />
@@ -91,7 +87,6 @@ export function EnhancementsAudio({
             </div>
             <button
               onClick={handleToggleShake}
-              disabled={!activeStoryboardPanel}
               className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 outline-none cursor-pointer ${
                 activeStoryboardPanel?.audio_reactive_shake
                   ? "bg-purple-600"

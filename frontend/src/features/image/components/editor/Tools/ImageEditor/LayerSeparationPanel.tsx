@@ -48,19 +48,11 @@ export default function LayerSeparationPanel({
     }
   };
 
-  if (!activeStoryboardPanel) {
-    return (
-      <div className="bg-purple-950/20 border border-purple-800/30 rounded-xl p-3 text-[10px] text-purple-300 font-sans leading-relaxed flex items-start gap-2 shadow-inner">
-        <span className="text-xs leading-none">💡</span>
-        <p>
-          <strong>Note:</strong> Insert this frame panel into the storyboard
-          to run AI Layer Separation and Dialogue Audio Sync.
-        </p>
-      </div>
-    );
-  }
-
   const handleSeparateLayers = async () => {
+    if (!activeStoryboardPanel?.id) {
+      addNotification("No active panel selected for layer separation.", "warning");
+      return;
+    }
     setIsProcessingLayers(true);
     addNotification("Starting AI layer separation...", "info");
 
@@ -102,7 +94,7 @@ export default function LayerSeparationPanel({
   };
 
   const handleAlignDialogue = async () => {
-    if (!activeStoryboardPanel.audio_url) {
+    if (!activeStoryboardPanel?.audio_url) {
       addNotification("Generate or set an audio file for this panel first.", "warning");
       return;
     }
@@ -152,8 +144,8 @@ export default function LayerSeparationPanel({
     }
   };
 
-  const hasLayers = !!activeStoryboardPanel.layers;
-  const hasSyncMap = !!activeStoryboardPanel.syncMap;
+  const hasLayers = !!activeStoryboardPanel?.layers;
+  const hasSyncMap = !!activeStoryboardPanel?.syncMap;
 
   return (
     <div className="space-y-4">
@@ -192,15 +184,13 @@ export default function LayerSeparationPanel({
         {/* Dialogue Alignment Trigger */}
         <button
           onClick={handleAlignDialogue}
-          disabled={isAligning || !activeStoryboardPanel.audio_url}
-          className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-2 border transition-all ${
-            !activeStoryboardPanel.audio_url
-              ? "bg-neutral-900/40 text-neutral-500 border-neutral-800/40 cursor-not-allowed"
-              : isAligning
+          disabled={isAligning}
+          className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+            isAligning
               ? "bg-emerald-900/10 text-emerald-400 border-emerald-800/20 cursor-not-allowed"
               : hasSyncMap
-              ? "bg-emerald-950/40 text-emerald-300 border-emerald-850 hover:bg-emerald-900/30 cursor-pointer"
-              : "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500/20 shadow-md shadow-emerald-900/20 cursor-pointer"
+              ? "bg-emerald-950/40 text-emerald-300 border-emerald-850 hover:bg-emerald-900/30"
+              : "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500/20 shadow-md shadow-emerald-900/20"
           }`}
         >
           {isAligning ? (

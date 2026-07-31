@@ -98,10 +98,8 @@ export function EnhancementsColors({
         value={activeStoryboardPanel?.brightness ?? 100}
         min={50}
         max={180}
-        disabled={!activeStoryboardPanel}
         onChange={(val) =>
-          activeStoryboardPanel &&
-          handleModifyBrightness(activeStoryboardPanel.id, val)
+          handleModifyBrightness(activeStoryboardPanel?.id ?? 0, val)
         }
       />
       <SliderRow
@@ -109,10 +107,8 @@ export function EnhancementsColors({
         value={activeStoryboardPanel?.contrast ?? 100}
         min={50}
         max={180}
-        disabled={!activeStoryboardPanel}
         onChange={(val) =>
-          activeStoryboardPanel &&
-          handleModifyContrast(activeStoryboardPanel.id, val)
+          handleModifyContrast(activeStoryboardPanel?.id ?? 0, val)
         }
       />
       <SliderRow
@@ -120,10 +116,8 @@ export function EnhancementsColors({
         value={activeStoryboardPanel?.saturation ?? 100}
         min={50}
         max={180}
-        disabled={!activeStoryboardPanel}
         onChange={(val) =>
-          activeStoryboardPanel &&
-          handleModifySaturation(activeStoryboardPanel.id, val)
+          handleModifySaturation(activeStoryboardPanel?.id ?? 0, val)
         }
       />
     </div>
