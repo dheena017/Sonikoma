@@ -88,8 +88,10 @@ export default function CanvasFabricLayer({
         width: img.width,
         height: img.height,
         backgroundColor: "transparent",
+        enableRetinaScaling: true,
       });
 
+      fCanvas.setDimensions({ width: "100%", height: "100%" }, { cssOnly: true });
       fabricCanvas.current = fCanvas;
 
       // Setup initial brush
@@ -102,19 +104,25 @@ export default function CanvasFabricLayer({
         const pencil = new fabric.PencilBrush(fCanvas);
         pencil.width = brushSizeRef.current;
         if (brushActionRef.current === "erase") {
-          pencil.color = "rgba(255,255,255,1)";
+          (pencil as any).globalCompositeOperation = "destination-out";
+          pencil.color = "rgba(0,0,0,1)";
         } else if (brushActionRef.current === "highlighter") {
+          (pencil as any).globalCompositeOperation = "source-over";
           pencil.color = fillColorRef.current.startsWith("#")
             ? `${fillColorRef.current}80`
             : fillColorRef.current;
         } else if (brushActionRef.current === "blur") {
+          (pencil as any).globalCompositeOperation = "source-over";
           pencil.color = "rgba(30,30,36,0.85)";
           pencil.width = brushSizeRef.current * 1.5;
         } else {
+          (pencil as any).globalCompositeOperation = "source-over";
           pencil.color = fillColorRef.current;
         }
         fCanvas.freeDrawingBrush = pencil;
       }
+
+      fCanvas.calcOffset();
 
       fCanvas.on("mouse:down", (options) => {
         if (fCanvas.isDrawingMode) return;
@@ -239,21 +247,54 @@ export default function CanvasFabricLayer({
     };
   }, [isActive, imgUrl]);
 
+  // Recalibrate offsets dynamically on window/container resize
+  useEffect(() => {
+    if (!isActive) return;
+
+    const updateOffset = () => {
+      if (fabricCanvas.current) {
+        fabricCanvas.current.calcOffset();
+      }
+    };
+
+    window.addEventListener("resize", updateOffset);
+    window.addEventListener("scroll", updateOffset, true);
+
+    const observer = new ResizeObserver(() => {
+      updateOffset();
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateOffset);
+      window.removeEventListener("scroll", updateOffset, true);
+      observer.disconnect();
+    };
+  }, [isActive]);
+
   useEffect(() => {
     if (fabricCanvas.current && isActive) {
       const isFreeDraw = ["paint", "highlighter", "spray", "blur", "erase"].includes(brushAction);
       fabricCanvas.current.isDrawingMode = isFreeDraw;
 
       if (isFreeDraw && fabricCanvas.current.freeDrawingBrush) {
-        fabricCanvas.current.freeDrawingBrush.width = brushSize;
+        const brush = fabricCanvas.current.freeDrawingBrush as any;
+        brush.width = brushSize;
         if (brushAction === "erase") {
-          fabricCanvas.current.freeDrawingBrush.color = "white";
+          brush.globalCompositeOperation = "destination-out";
+          brush.color = "rgba(0,0,0,1)";
         } else if (brushAction === "highlighter") {
-          fabricCanvas.current.freeDrawingBrush.color = fillColor.startsWith("#") ? `${fillColor}80` : fillColor;
+          brush.globalCompositeOperation = "source-over";
+          brush.color = fillColor.startsWith("#") ? `${fillColor}80` : fillColor;
         } else if (brushAction === "blur") {
-          fabricCanvas.current.freeDrawingBrush.color = "rgba(30,30,36,0.85)";
+          brush.globalCompositeOperation = "source-over";
+          brush.color = "rgba(30,30,36,0.85)";
         } else {
-          fabricCanvas.current.freeDrawingBrush.color = fillColor;
+          brush.globalCompositeOperation = "source-over";
+          brush.color = fillColor;
         }
       }
 
@@ -340,9 +381,25 @@ export default function CanvasFabricLayer({
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 z-40 pointer-events-auto"
-      style={{ width: "100%", height: "100%" }}
+      className="absolute inset-0 z-40 pointer-events-auto overflow-hidden"
+      style={{ width: "100%", height: "100%", touchAction: "none" }}
     >
+      <style>{`
+        .canvas-container {
+          width: 100% !important;
+          height: 100% !important;
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+        }
+        .lower-canvas, .upper-canvas {
+          width: 100% !important;
+          height: 100% !important;
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+        }
+      `}</style>
       <canvas ref={canvasEl} style={{ width: "100%", height: "100%" }} />
     </div>
   );
