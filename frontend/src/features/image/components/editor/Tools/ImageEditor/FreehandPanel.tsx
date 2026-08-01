@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import * as api from "@/api";
 import {
   Pen,
   Eraser,
@@ -115,23 +116,41 @@ export default function FreehandPanel({
   };
 
   const handleAiBubbleClean = async () => {
-    if (!activeStoryboardPanel) {
+    if (!activeStoryboardPanel?.image_url) {
       addNotification?.("No active panel selected for AI Speech Bubble Clean.", "warning");
       return;
     }
+
     setIsAiCleaning(true);
     addNotification?.("Running AI Speech Bubble Removal & Inpainting...", "info");
+
     try {
-      if (fetchWithInterceptor && activeStoryboardPanel.id) {
-        await fetchWithInterceptor(`/api/image/clean-panel/${activeStoryboardPanel.id}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            url: activeStoryboardPanel.image_url,
-            method: "auto",
-          }),
-        }).catch(() => {});
+      const data = await api.removeSpeechBubbles(fetchWithInterceptor, {
+        url: activeStoryboardPanel.image_url,
+        method: "auto",
+      });
+
+      if (!data?.success || !data?.url) {
+        throw new Error(data?.message || "AI inpaint did not return an updated image.");
       }
+
+      setPanels?.((prev) =>
+        prev.map((panel) =>
+          panel.id === activeStoryboardPanel.id
+            ? {
+                ...panel,
+                image_url: data.url,
+                layers: panel.layers
+                  ? {
+                      ...panel.layers,
+                      background_url: data.url,
+                    }
+                  : panel.layers,
+              }
+            : panel
+        )
+      );
+
       addNotification?.("AI Inpainting complete!", "success");
     } catch (err: any) {
       addNotification?.(`AI Inpaint Error: ${err.message}`, "error");

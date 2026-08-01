@@ -36,7 +36,14 @@ async def debug_yolo(body: RemoveBubblesRequest):
 @router.post("/remove-speech-bubbles", summary="Clean speech bubbles from a panel and reconstruct underlay")
 async def remove_speech_bubbles(body: RemoveBubblesRequest):
     try:
-        result = await bubble_cleaning_service(body.url, body.confidence)
+        confidence: float = (
+            body.confidence
+            if body.confidence is not None
+            else body.sensitivity
+            if body.sensitivity is not None
+            else 0.0
+        )
+        result = await bubble_cleaning_service(body.url, confidence)
         return result
     except Exception as e:
         logger.error(f"[Bubble API] Error removing speech bubbles: {e}", exc_info=True)
@@ -46,7 +53,14 @@ async def remove_speech_bubbles(body: RemoveBubblesRequest):
 @router.post("/remove-speech-bubbles-batch", summary="Batch clean speech bubbles from multiple panels concurrently")
 async def remove_speech_bubbles_batch(body: RemoveBubblesBatchRequest):
     try:
-        result = await bubble_cleaning_batch_service(body.urls, body.confidence)
+        confidence: float = (
+            body.confidence
+            if body.confidence is not None
+            else body.sensitivity
+            if body.sensitivity is not None
+            else 0.0
+        )
+        result = await bubble_cleaning_batch_service(body.urls, confidence)
         return result
     except Exception as e:
         logger.error(f"[Bubble Batch API] Error in bubble batch clean: {e}", exc_info=True)

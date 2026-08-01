@@ -36,6 +36,24 @@ export default function CanvasFabricLayer({
   const startPointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const isMouseDownRef = useRef<boolean>(false);
 
+  const applyTextEditorAttributes = (fCanvas: fabric.Canvas) => {
+    const upperCanvas = fCanvas.upperCanvasEl;
+    if (upperCanvas) {
+      upperCanvas.setAttribute("autocomplete", "off");
+      upperCanvas.setAttribute("autocorrect", "off");
+      upperCanvas.setAttribute("autocapitalize", "off");
+      upperCanvas.setAttribute("spellcheck", "false");
+    }
+
+    const editor = upperCanvas?.parentElement?.querySelector("textarea");
+    if (editor) {
+      editor.setAttribute("autocomplete", "off");
+      editor.setAttribute("autocorrect", "off");
+      editor.setAttribute("autocapitalize", "off");
+      editor.setAttribute("spellcheck", "false");
+    }
+  };
+
   const brushActionRef = useRef(brushAction);
   const brushSizeRef = useRef(brushSize);
   const fillColorRef = useRef(fillColor);
@@ -92,6 +110,7 @@ export default function CanvasFabricLayer({
       });
 
       fCanvas.setDimensions({ width: "100%", height: "100%" }, { cssOnly: true });
+      applyTextEditorAttributes(fCanvas);
       fabricCanvas.current = fCanvas;
 
       // Setup initial brush
@@ -126,6 +145,8 @@ export default function CanvasFabricLayer({
 
       fCanvas.on("mouse:down", (options) => {
         if (fCanvas.isDrawingMode) return;
+        if (isMouseDownRef.current && activeShapeRef.current) return;
+
         const pointer = fCanvas.getScenePoint(options.e);
         startPointerRef.current = pointer;
         isMouseDownRef.current = true;
@@ -142,7 +163,7 @@ export default function CanvasFabricLayer({
 
         if (currentAction === "text") {
           if (options.target && options.target.type === "textbox") return;
-          const text = new fabric.Textbox("Type here", {
+          const text = new fabric.Textbox("", {
             left: pointer.x,
             top: pointer.y,
             fontSize: currentSize,
@@ -162,6 +183,7 @@ export default function CanvasFabricLayer({
           fCanvas.setActiveObject(text);
           text.enterEditing();
           text.selectAll();
+          applyTextEditorAttributes(fCanvas);
           return;
         }
 
@@ -291,7 +313,9 @@ export default function CanvasFabricLayer({
           brush.color = fillColor.startsWith("#") ? `${fillColor}80` : fillColor;
         } else if (brushAction === "blur") {
           brush.globalCompositeOperation = "source-over";
-          brush.color = "rgba(30,30,36,0.85)";
+          brush.color = "rgba(0,0,0,0.78)";
+          brush.shadowBlur = Math.max(brushSize * 2.2, 8);
+          brush.shadowColor = "rgba(0,0,0,0.7)";
         } else {
           brush.globalCompositeOperation = "source-over";
           brush.color = fillColor;
@@ -347,7 +371,7 @@ export default function CanvasFabricLayer({
               multiplier: 1,
             });
 
-            fabricCanvas.current.backgroundImage = null;
+            fabricCanvas.current.backgroundImage = undefined;
             fabricCanvas.current.renderAll();
 
             window.dispatchEvent(
@@ -363,7 +387,7 @@ export default function CanvasFabricLayer({
     const handleClearRequest = () => {
       if (fabricCanvas.current) {
         fabricCanvas.current.clear();
-        fabricCanvas.current.backgroundImage = null;
+        fabricCanvas.current.backgroundImage = undefined;
         fabricCanvas.current.renderAll();
       }
     };

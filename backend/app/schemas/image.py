@@ -69,6 +69,7 @@ class RemoveBubblesRequest(BaseModel):
     url: str
     method: Optional[str] = "auto"
     sensitivity: Optional[float] = 50.0
+    confidence: Optional[float] = None
     dilation: Optional[int] = -1
     inpaint_radius: Optional[int] = 3
     detection_style: Optional[str] = "all"
@@ -82,6 +83,7 @@ class RemoveBubblesBatchRequest(BaseModel):
     urls: List[str]
     method: Optional[str] = "auto"
     sensitivity: Optional[float] = 50.0
+    confidence: Optional[float] = None
     dilation: Optional[int] = -1
     inpaint_radius: Optional[int] = 3
     detection_style: Optional[str] = "all"
