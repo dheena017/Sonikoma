@@ -343,7 +343,7 @@ export default function CanvasFabricLayer({
 
             const dataUrl = fabricCanvas.current.toDataURL({
               format: "png",
-              quality: 1,
+              quality: 0.92,
               multiplier: 1,
             });
 

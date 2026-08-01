@@ -274,6 +274,20 @@ export function getSourceIcon(urlStr: string) {
 
 export function getProxiedImageUrl(url?: string, referer?: string): string {
   if (!url) return "";
+  if (url.startsWith("data:") || url.startsWith("blob:")) {
+    return url;
+  }
+  if (url.includes("/api/proxy-image?url=data") || url.includes("/api/proxy-image?url=blob")) {
+    try {
+      const match = url.match(/url=([^&]+)/);
+      if (match && match[1]) {
+        const unwrap = decodeURIComponent(match[1]);
+        if (unwrap.startsWith("data:") || unwrap.startsWith("blob:")) {
+          return unwrap;
+        }
+      }
+    } catch (e) {}
+  }
   try {
     const decoded = decodeURIComponent(url);
     if (

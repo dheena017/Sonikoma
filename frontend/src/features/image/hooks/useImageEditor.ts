@@ -269,24 +269,50 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
       const dataUrl = customEv.detail?.dataUrl;
       if (!dataUrl) return;
 
-      if (editingImageIdx !== null && setScrapedImages) {
-        const oldUrl = scrapedImages[editingImageIdx];
+      if (!setScrapedImages) {
+        addNotification("No active image list available to apply drawing.", "warning");
+        return;
+      }
 
+      let targetIdx = editingImageIdx;
+      if ((targetIdx === null || targetIdx < 0) && state.imageUrl && scrapedImages?.length > 0) {
+        const foundIdx = scrapedImages.findIndex((img) => img === state.imageUrl);
+        if (foundIdx !== -1) targetIdx = foundIdx;
+      }
+
+      if (targetIdx !== null && targetIdx >= 0 && scrapedImages && targetIdx < scrapedImages.length) {
+        const oldUrl = scrapedImages[targetIdx];
+
+        // 1. Update image in Imported Images deck (scrapedImages)
         setScrapedImages((prev) => {
           const next = [...prev];
-          if (editingImageIdx >= 0 && editingImageIdx < next.length) {
-            next[editingImageIdx] = dataUrl;
+          if (targetIdx !== null && targetIdx >= 0 && targetIdx < next.length) {
+            next[targetIdx] = dataUrl;
           }
           return next;
         });
 
+        // 2. Update selection list if oldUrl was selected
+        if (appLogic.setSelectedScraped && oldUrl) {
+          appLogic.setSelectedScraped((prev) =>
+            prev.map((url) => (url === oldUrl ? dataUrl : url))
+          );
+        }
+
+        // 3. Update timeline storyboard panels in-place
         if (setPanels && oldUrl) {
           setPanels((prevPanels) =>
             prevPanels.map((p) => (p.image_url === oldUrl ? { ...p, image_url: dataUrl } : p))
           );
         }
 
-        addNotification("Drawing saved & applied to image successfully!", "success");
+        // 4. Update window globals for scrape image origins
+        const origins: Record<string, string> = (window as any).__scrapeImageOrigins || {};
+        if (oldUrl && origins[oldUrl]) {
+          origins[dataUrl] = origins[oldUrl];
+        }
+
+        addNotification("Drawing saved & applied to Imported Images successfully!", "success");
         if (appLogic.audioFeedback?.playTick) {
           appLogic.audioFeedback.playTick();
         }
@@ -302,7 +328,16 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     return () => {
       window.removeEventListener("FABRIC_SAVE_COMPLETE", handleFabricSaveComplete);
     };
-  }, [editingImageIdx, scrapedImages, setScrapedImages, setPanels, addNotification, appLogic.audioFeedback]);
+  }, [
+    editingImageIdx,
+    state.imageUrl,
+    scrapedImages,
+    setScrapedImages,
+    appLogic.setSelectedScraped,
+    setPanels,
+    addNotification,
+    appLogic.audioFeedback,
+  ]);
 
   // Handle resetting and loading states when the active image changes
   useEffect(() => {

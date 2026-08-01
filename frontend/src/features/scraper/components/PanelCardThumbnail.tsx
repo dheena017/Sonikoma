@@ -69,6 +69,10 @@ export function PanelCardThumbnail({
   const [hasError, setHasError] = React.useState(false);
   const [retryKey, setRetryKey] = React.useState(0);
 
+  React.useEffect(() => {
+    setHasError(false);
+  }, [imgUrl]);
+
   const handleRetry = (e: React.MouseEvent) => {
     e.stopPropagation();
     setHasError(false);
@@ -99,7 +103,7 @@ export function PanelCardThumbnail({
         </div>
       ) : (
         <img
-          key={retryKey}
+          key={`${imgUrl}-${retryKey}`}
           src={resolvedImgSrc}
           alt={`Panel #${idx + 1}`}
 
@@ -108,27 +112,26 @@ export function PanelCardThumbnail({
               ? "opacity-20 scale-95 blur-[3px]"
               : "group-hover:scale-108 group-hover:rotate-[0.5deg]"
           }`}
-          loading="lazy"
           decoding="async"
           draggable={false}
           onError={(e) => {
             const img = e.currentTarget;
+            const currentSrc = img.src;
+
+            // Never proxy local data or blob URIs
+            if (!currentSrc || currentSrc.startsWith("data:") || currentSrc.startsWith("blob:")) {
+              setHasError(true);
+              return;
+            }
+
             if (img.dataset.retried) {
               setHasError(true);
               return;
             }
             img.dataset.retried = "1";
 
-            const currentSrc = img.src;
-
-            // If already using the proxy, don't wrap again.
-            if (currentSrc.includes("/api/proxy-image")) {
-              setHasError(true);
-              return;
-            }
-
-            // If this is an internal/API path, retrying won't help—mark error.
-            if (currentSrc.includes("/api/")) {
+            // If already using the proxy or internal API path, don't wrap again
+            if (currentSrc.includes("/api/proxy-image") || currentSrc.includes("/api/")) {
               setHasError(true);
               return;
             }
