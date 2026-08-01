@@ -22,7 +22,7 @@ from core.config import call_gemini_with_retry
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
 import services.image.utils.image_utils as img_utils
-from core.cache import stitched_cache
+from core.cache import stitched_cache, edit_history
 from media.audio.audio import generate_panel_audio
 
 logger = logging.getLogger("sonikoma.services.ai.facade")
@@ -297,7 +297,7 @@ async def facade_analyze_image(
         "inputTokens": getattr(skill, "last_input_tokens", 0),
         "outputTokens": getattr(skill, "last_output_tokens", 0)
     }
-def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]]) -> None:
+def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]], source_url: Optional[str] = None) -> None:
     """
     Crop each detected panel from the image buffer directly in memory (server-side).
 
@@ -367,8 +367,11 @@ def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]]) ->
             cropped_bytes = out.getvalue()
 
             cache_key = f"panel_crop_{ts}_{idx + 1}"
+            cached_url = f"/api/image/cached/{cache_key}"
             stitched_cache.set(cache_key, {"data": cropped_bytes, "content_type": "image/jpeg"})
-            panel["croppedUrl"] = f"/api/image/cached/{cache_key}"
+            if source_url:
+                edit_history.set(cached_url, source_url)
+            panel["croppedUrl"] = cached_url
 
         except Exception as exc:
             logger.warning(f"[_crop_panels_server_side] Error cropping panel {idx+1}: {exc}")
@@ -438,7 +441,7 @@ async def facade_smart_crop(
             if len(cv_panels) > 0:
                 # Crop all panels server-side in one pass (image[y:y+h, x:x+w])
                 # so the frontend gets croppedUrl on each panel and skips extra API calls
-                await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels)
+                await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels, url)
                 logger.info(f"[Panel Detection Debug JSON] Returning {len(cv_panels)} panels JSON (sample first 3: {json.dumps(cv_panels[:3])})")
                 return {
                     "success": True,
@@ -513,7 +516,7 @@ async def facade_smart_crop(
                 padding_px=padding_px
             )
             # Crop all panels server-side before returning
-            await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels)
+            await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels, url)
             return {
                 "success": True,
                 "total_panels": len(cv_panels),
@@ -581,7 +584,7 @@ async def facade_smart_crop(
         key=lambda b: (b.get("y", 0), b.get("x", 0))
     )
     # Crop all AI-detected panels server-side before returning
-    await asyncio.to_thread(_crop_panels_server_side, img_buffer, sorted_final_panels)
+    await asyncio.to_thread(_crop_panels_server_side, img_buffer, sorted_final_panels, url)
     return {
         "success": True,
         "total_panels": len(sorted_final_panels),

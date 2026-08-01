@@ -35,3 +35,33 @@ def test_package_level_import():
     assert hasattr(pkg_utils, "stitch_images_together")
 
 
+def test_panel_crop_cache_records_original_url():
+    import io
+    from PIL import Image
+    from core.cache import edit_history, stitched_cache
+    from services.ai.facade import _crop_panels_server_side
+
+    edit_history.clear()
+    stitched_cache.clear()
+
+    img = Image.new("RGB", (200, 200), color="white")
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG")
+
+    panels = [{
+        "x": 0,
+        "y": 0,
+        "width": 100,
+        "height": 100,
+        "cropTop": 0,
+        "cropBottom": 50,
+        "cropLeft": 0,
+        "cropRight": 50,
+    }]
+
+    _crop_panels_server_side(buf.getvalue(), panels, source_url="https://example.com/source.jpg")
+
+    assert panels[0].get("croppedUrl")
+    assert edit_history.get(panels[0]["croppedUrl"]) == "https://example.com/source.jpg"
+
+
