@@ -432,9 +432,9 @@ export function useBatchImageActions({
                     : `[Auto Cropper] ${serverCroppedCount}/${sortedPanels.length} panels pre-cropped server-side, ${sortedPanels.length - serverCroppedCount} need edit API fallback`,
                   ...prev,
                 ]);
-                const croppedUrls = await Promise.all(
-                  sortedPanels.map(async (box: any) => {
-                    if (box.croppedUrl) return box.croppedUrl;
+                const croppedResults = await Promise.all(
+                  sortedPanels.map(async (box: any, boxIdx: number) => {
+                    if (box.croppedUrl) return { orderIndex: boxIdx, url: box.croppedUrl };
                     const cropData = await api.submitImageEdits(fetchWithInterceptor, {
                       url: url,
                       cropTop: box.cropTop,
@@ -446,9 +446,14 @@ export function useBatchImageActions({
                       sensitivity: cropSensitivity,
                       backgroundColorMode: cropBackgroundMode,
                     });
-                    return cropData.url;
+                    return { orderIndex: boxIdx, url: cropData.url };
                   })
                 );
+
+                const croppedUrls = croppedResults
+                  .sort((a, b) => a.orderIndex - b.orderIndex)
+                  .map((res) => res.url);
+
                 newSlicedUrlsMap[url] = croppedUrls;
               } else {
                 newSlicedUrlsMap[url] = [url];
