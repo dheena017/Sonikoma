@@ -270,6 +270,8 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
       if (!dataUrl) return;
 
       if (editingImageIdx !== null && setScrapedImages) {
+        const oldUrl = scrapedImages[editingImageIdx];
+
         setScrapedImages((prev) => {
           const next = [...prev];
           if (editingImageIdx >= 0 && editingImageIdx < next.length) {
@@ -278,7 +280,12 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
           return next;
         });
 
-        addPanelsToStoryboard([dataUrl]);
+        if (setPanels && oldUrl) {
+          setPanels((prevPanels) =>
+            prevPanels.map((p) => (p.image_url === oldUrl ? { ...p, image_url: dataUrl } : p))
+          );
+        }
+
         addNotification("Drawing saved & applied to image successfully!", "success");
         if (appLogic.audioFeedback?.playTick) {
           appLogic.audioFeedback.playTick();
@@ -295,7 +302,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     return () => {
       window.removeEventListener("FABRIC_SAVE_COMPLETE", handleFabricSaveComplete);
     };
-  }, [editingImageIdx, setScrapedImages, addPanelsToStoryboard, addNotification, appLogic.audioFeedback]);
+  }, [editingImageIdx, scrapedImages, setScrapedImages, setPanels, addNotification, appLogic.audioFeedback]);
 
   // Handle resetting and loading states when the active image changes
   useEffect(() => {

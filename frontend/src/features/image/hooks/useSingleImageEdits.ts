@@ -22,6 +22,7 @@ interface UseSingleImageEditsProps {
     currentScrapedList?: string[],
     shouldScroll?: boolean
   ) => void;
+  setPanels?: React.Dispatch<React.SetStateAction<any[]>>;
   audioFeedback?: any;
 }
 
@@ -39,6 +40,7 @@ export function useSingleImageEdits({
   editCropRight,
   editAutoTrim,
   addPanelsToStoryboard,
+  setPanels,
   audioFeedback,
 }: UseSingleImageEditsProps) {
   const [mergingIndices, setMergingIndices] = useState<number[]>([]);
@@ -69,14 +71,18 @@ export function useSingleImageEdits({
 
       const croppedUrl = data.url;
 
-      // Replace original image with cropped image in asset list & add to Timeline
+      // Replace original image with cropped image in asset list & update panel in Timeline in-place
       setScrapedImages((prev) => prev.map((img) => (img === originalUrl ? croppedUrl : img)));
-      addPanelsToStoryboard([croppedUrl]);
+      if (setPanels) {
+        setPanels((prevPanels) =>
+          prevPanels.map((p) => (p.image_url === originalUrl ? { ...p, image_url: croppedUrl } : p))
+        );
+      }
 
       setConsoleLogs((prev) => [
         `[Image Editor] [SUCCESS] Successfully edited Frame #${
           editingImageIdx + 1
-        } and added to Timeline!`,
+        }!`,
         `[Image Editor]   - Sent (Original): ${originalUrl.substring(
           0,
           60
@@ -90,13 +96,13 @@ export function useSingleImageEdits({
       console.log(
         `[Image Editor] Cropped Frame #${
           editingImageIdx + 1
-        } and added to Timeline:`,
+        }:`,
         { original: originalUrl, cropped: croppedUrl }
       );
       addNotification(
         `Frame #${
           editingImageIdx + 1
-        } cropped and added to Timeline successfully!`,
+        } cropped successfully!`,
         "success"
       );
       audioFeedback?.playTick();
@@ -129,7 +135,7 @@ export function useSingleImageEdits({
     editCropRight,
     editAutoTrim,
     fetchWithInterceptor,
-    addPanelsToStoryboard,
+    setPanels,
     addNotification,
     audioFeedback,
   ]);

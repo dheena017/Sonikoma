@@ -225,6 +225,7 @@ export function usePipelineActions({
     editCropRight,
     editAutoTrim,
     addPanelsToStoryboard,
+    setPanels,
     audioFeedback: state.audioFeedback,
   });
 
