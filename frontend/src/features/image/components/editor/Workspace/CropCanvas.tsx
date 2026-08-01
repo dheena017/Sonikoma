@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Trash2 } from "lucide-react";
 import { Slice } from "@/features/image/components/editor/shared";
-import { ImageTool } from "@/features/image/hooks/useImageEditorState";
+import { ImageTool, useImageEditorStore } from "@/features/image/hooks/useImageEditorState";
 import CanvasBrushLayer from "@/features/image/components/editor/Workspace/CanvasBrushLayer";
 import CanvasBubbleBoxes from "@/features/image/components/editor/Workspace/CanvasBubbleBoxes";
 import CanvasSplitLines from "@/features/image/components/editor/Workspace/CanvasSplitLines";
@@ -129,6 +129,12 @@ export default function CropCanvas({
   setSelectedSliceId,
   aspectRatio = 0,
 }: CropCanvasProps) {
+  const selectedFocalPoint = useImageEditorStore((state) => state.selectedFocalPoint);
+  const showSafeZones = useImageEditorStore((state) => state.showSafeZones);
+  const lineSharpen = useImageEditorStore((state) => state.lineSharpen);
+  const mangaContrast = useImageEditorStore((state) => state.mangaContrast);
+  const popColorBoost = useImageEditorStore((state) => state.popColorBoost);
+
   // Track mouse position for dynamic cursor
   const [hoverPct, setHoverPct] = useState<{ x: number; y: number } | null>(
     null
@@ -290,6 +296,26 @@ export default function CropCanvas({
 
   const handleCanvasMouseUp = () => setIsDrawing(false);
 
+  const focalPointPositions = useMemo(() => ({
+    TL: { top: "10%", left: "10%" },
+    TC: { top: "10%", left: "50%" },
+    TR: { top: "10%", left: "90%" },
+    ML: { top: "50%", left: "10%" },
+    MC: { top: "50%", left: "50%" },
+    MR: { top: "50%", left: "90%" },
+    BL: { top: "90%", left: "10%" },
+    BC: { top: "90%", left: "50%" },
+    BR: { top: "90%", left: "90%" },
+  }), [selectedFocalPoint]);
+
+  const previewFilter = useMemo(() => {
+    const filters: string[] = [];
+    if (lineSharpen) filters.push("contrast(1.07) saturate(1.08)");
+    if (mangaContrast) filters.push("brightness(1.02)");
+    if (popColorBoost) filters.push("saturate(1.25)");
+    return filters.length > 0 ? filters.join(" ") : "none";
+  }, [lineSharpen, mangaContrast, popColorBoost]);
+
   // Hardened Global Event Listeners for Drag Robustness
   useEffect(() => {
     const handleGlobalUp = () => {
@@ -392,6 +418,42 @@ export default function CropCanvas({
             aspectRatio: naturalAspect || undefined,
           }}
         >
+          {showSafeZones && activeTab === "edit" && (
+            <div className="absolute inset-0 pointer-events-none z-30">
+              <div className="absolute inset-[12.5%] border border-cyan-400/60 rounded-[28px] bg-cyan-500/[0.04] shadow-[0_0_30px_rgba(34,211,238,0.12)]" />
+              <div className="absolute inset-[12.5%] border border-dashed border-cyan-300/40 rounded-[28px]" />
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/10 px-2 py-1 text-[8px] font-mono uppercase tracking-[0.2em] text-cyan-200 border border-cyan-400/30">
+                Safe Zone
+              </div>
+            </div>
+          )}
+
+          {activeTab === "edit" && (
+            <div className="absolute inset-0 pointer-events-none z-35">
+              <div
+                className="absolute -translate-x-1/2 -translate-y-1/2 h-6 w-6 rounded-full border border-violet-300/80 bg-violet-400/20 shadow-[0_0_20px_rgba(167,139,250,0.45)]"
+                style={{
+                  left: focalPointPositions[selectedFocalPoint].left,
+                  top: focalPointPositions[selectedFocalPoint].top,
+                }}
+              />
+              <div
+                className="absolute left-1/2 top-1/2 h-px w-[18%] -translate-x-1/2 -translate-y-1/2 bg-violet-200/60"
+                style={{
+                  left: focalPointPositions[selectedFocalPoint].left,
+                  top: focalPointPositions[selectedFocalPoint].top,
+                }}
+              />
+              <div
+                className="absolute left-1/2 top-1/2 h-[18%] w-px -translate-x-1/2 -translate-y-1/2 bg-violet-200/60"
+                style={{
+                  left: focalPointPositions[selectedFocalPoint].left,
+                  top: focalPointPositions[selectedFocalPoint].top,
+                }}
+              />
+            </div>
+          )}
+
           <img
             ref={imgRef}
             src={imgUrl}
@@ -402,6 +464,7 @@ export default function CropCanvas({
               maxWidth: "100%",
               maxHeight: "100%",
               objectFit: "contain",
+              filter: previewFilter,
             }}
             draggable={false}
           />
@@ -447,7 +510,7 @@ export default function CropCanvas({
             setShowSplitPosition={setShowSplitPosition}
           />
 
-          {activeTab === "crop" && (
+          {(activeTab === "crop" || activeTab === "edit") && (
             <CanvasCropSelection
               editCropTop={editCropTop}
               editCropBottom={editCropBottom}

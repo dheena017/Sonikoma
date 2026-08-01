@@ -17,6 +17,16 @@ interface ImageEditorGlobalState {
   setSlicesCount: (count: number) => void;
   playerSettings: PlayerSettings;
   setPlayerSettings: (settings: Partial<PlayerSettings>) => void;
+  selectedFocalPoint: "TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR";
+  setSelectedFocalPoint: (point: "TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR") => void;
+  showSafeZones: boolean;
+  setShowSafeZones: (value: boolean) => void;
+  lineSharpen: boolean;
+  setLineSharpen: (value: boolean) => void;
+  mangaContrast: boolean;
+  setMangaContrast: (value: boolean) => void;
+  popColorBoost: boolean;
+  setPopColorBoost: (value: boolean) => void;
 }
 
 
@@ -70,6 +80,16 @@ export const useImageEditorStore = create<ImageEditorGlobalState & {
   },
   slicesCount: 0,
   setSlicesCount: (count) => set({ slicesCount: count }),
+  selectedFocalPoint: "MC",
+  setSelectedFocalPoint: (point) => set({ selectedFocalPoint: point }),
+  showSafeZones: true,
+  setShowSafeZones: (value) => set({ showSafeZones: value }),
+  lineSharpen: true,
+  setLineSharpen: (value) => set({ lineSharpen: value }),
+  mangaContrast: true,
+  setMangaContrast: (value) => set({ mangaContrast: value }),
+  popColorBoost: false,
+  setPopColorBoost: (value) => set({ popColorBoost: value }),
 
   editingImageIdx: null,
   setEditingImageIdx: (idx) => set({ editingImageIdx: idx }),
