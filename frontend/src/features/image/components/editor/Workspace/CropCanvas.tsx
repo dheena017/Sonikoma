@@ -76,6 +76,8 @@ interface CropCanvasProps {
   setEditCropLeft: (val: number) => void;
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
+  panelFilter?: string;
+  panelParallaxIntensity?: number;
   aspectRatio?: number;
 }
 
@@ -127,6 +129,8 @@ export default function CropCanvas({
   setEditCropLeft,
   setEditCropRight,
   setSelectedSliceId,
+  panelFilter = "none",
+  panelParallaxIntensity = 30,
   aspectRatio = 0,
 }: CropCanvasProps) {
   // Track mouse position for dynamic cursor
@@ -402,6 +406,10 @@ export default function CropCanvas({
               maxWidth: "100%",
               maxHeight: "100%",
               objectFit: "contain",
+              filter: panelFilter,
+              transform: `scale(${1 + panelParallaxIntensity / 1000})`,
+              transformOrigin: "center",
+              transition: "filter 120ms linear, transform 120ms linear",
             }}
             draggable={false}
           />

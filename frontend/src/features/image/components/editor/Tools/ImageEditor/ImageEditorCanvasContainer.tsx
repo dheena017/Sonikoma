@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Move, RefreshCw, Layers } from "lucide-react";
 import { CropCanvas, CanvasMultiLayer } from "@/features/image/components/editor/Workspace";
 import { GeneratedPanel } from "@/types";
 import { ImageTool } from "@/features/image/hooks/useImageEditorState";
+import { getPanelFilterStyle } from "@/utils";
 
 interface ImageEditorCanvasContainerProps {
   activeStoryboardPanel?: GeneratedPanel | null;
@@ -104,6 +105,12 @@ export default function ImageEditorCanvasContainer({
   activeTab,
   aspectRatio,
 }: ImageEditorCanvasContainerProps) {
+  const liveFilterStyle = useMemo(
+    () => getPanelFilterStyle(activeStoryboardPanel as GeneratedPanel),
+    [activeStoryboardPanel]
+  );
+  const parallaxIntensity = activeStoryboardPanel?.layers?.parallax_intensity ?? 30;
+
   // Safe handlers that only allow crop drawing when in the correct tabs
   const safeHandleStart = (clientX: number, clientY: number) => {
     if (!["slice", "crop"].includes(activeTab)) return;
@@ -214,6 +221,8 @@ export default function ImageEditorCanvasContainer({
           setEditCropRight={setEditCropRight}
           setSelectedSliceId={setSelectedSliceId}
           activeTab={activeTab}
+          panelFilter={liveFilterStyle}
+          panelParallaxIntensity={parallaxIntensity}
           aspectRatio={
             aspectRatio === "9:16" ? 9 / 16 : aspectRatio === "16:9" ? 16 / 9 : 0
           }

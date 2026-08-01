@@ -103,6 +103,7 @@ const ImageEditorPage = React.memo(({
     );
   }, [
     editorProps.imageUrl, editingImageIdx, editorProps.activeTab, appLogic.scrapedImages,
+    activeStoryboardPanel,
     editorProps.slices, editorProps.selectedSliceId, editorProps.showSplitPosition,
     editorProps.splitPosition, editorProps.splitLines, editorProps.zoom, editorProps.editMode,
     editorProps.detectedBubbles, editorProps.selectedBubbleIdx, editorProps.brushSize,
