@@ -58,6 +58,7 @@ async def scrape_images_from_url(
     url: str,
     source: Optional[str] = None,
     cookies: Optional[Dict[str, str]] = None,
+    headers: Optional[Dict[str, str]] = None,
     bypass_cache: bool = False,
     limit: Optional[int] = None,
     proxy_images: bool = True,
@@ -134,13 +135,17 @@ async def scrape_images_from_url(
     base_domain = f"{parsed_domain.scheme}://{parsed_domain.netloc}/"
     referer = "https://www.webcomicsapp.com/" if source == 'webcomicsapp' else base_domain
 
-    fetch_headers = {
+    default_headers = {
         "User-Agent": USER_AGENTS[0],
         "Referer": referer,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
         "Accept-Language": "en-US,en;q=0.9",
         "Cache-Control": "no-cache",
         "Pragma": "no-cache"
+    }
+    fetch_headers = {
+        **default_headers,
+        **(headers or {})
     }
 
     merged_cookies = {

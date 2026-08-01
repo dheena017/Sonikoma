@@ -31,6 +31,8 @@ logger = logging.getLogger("sonikoma.services.scraper.scraper_service")
 async def scrape_and_initialize_project(
     url: str,
     source: Optional[str] = None,
+    cookies: Optional[Dict[str, str]] = None,
+    headers: Optional[Dict[str, str]] = None,
     bypass_cache: bool = False,
     smart_slice: bool = False,
     scrape_only: bool = False,
@@ -68,6 +70,8 @@ async def scrape_and_initialize_project(
     proxied_urls = await scrape_images_from_url(
         normalized_url,
         source,
+        cookies=cookies,
+        headers=headers,
         bypass_cache=bypass_cache,
         limit=limit,
         proxy_images=proxy_images,

@@ -9,7 +9,7 @@ parses authorization tokens, and delegates logic to scraper services.
 import logging
 import asyncio
 import jwt
-from typing import Optional
+from typing import Dict, Optional
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import Response
 
@@ -58,6 +58,24 @@ scraper_router = APIRouter()
 router = scraper_router
 
 
+def parse_cookie_string(cookie_string: Optional[str]) -> Optional[Dict[str, str]]:
+    if not cookie_string:
+        return None
+
+    cookies: Dict[str, str] = {}
+    for pair in cookie_string.split(";"):
+        if not pair:
+            continue
+        parts = pair.split("=", 1)
+        if len(parts) != 2:
+            continue
+        name, value = parts[0].strip(), parts[1].strip()
+        if name:
+            cookies[name] = value
+
+    return cookies if cookies else None
+
+
 def get_optional_user_id(request: Request) -> Optional[str]:
     """Decodes optional bearer authorization token to extract sub (user_id)."""
     auth_header = request.headers.get("Authorization")
@@ -80,7 +98,9 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
         result = await scrape_and_initialize_project(
             url=body.url,
             source=body.source,
-            bypass_cache=body.bypass_cache or False,
+            cookies=parse_cookie_string(body.cookies) if getattr(body, "cookies", None) else None,
+            headers=body.headers,
+            bypass_cache=False if body.force_refresh else (body.bypass_cache or False),
             smart_slice=body.smart_slice if body.smart_slice is not None else True,
             scrape_only=getattr(body, "scrape_only", False),
             project_id=body.project_id,
@@ -174,7 +194,7 @@ async def scrape_episodes_paginated(request: Request, body: ScrapeEpisodesReques
 
 
 @router.post("/batch-scrape-series", summary="Batch scrape multiple WEBTOON series")
-async def batch_scrape(request: Request, body: BatchScrapeSeriesRequest):
+async def batch_scrape_series_route(request: Request, body: BatchScrapeSeriesRequest):
     try:
         if not body.series or len(body.series) == 0:
             raise HTTPException(status_code=400, detail="'series' list cannot be empty")

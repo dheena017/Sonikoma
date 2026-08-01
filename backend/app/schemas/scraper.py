@@ -11,6 +11,9 @@ from typing import List, Dict, Any, Optional
 class ScrapeImagesRequest(BaseModel):
     url: str
     source: Optional[str] = None
+    cookies: Optional[str] = None
+    headers: Optional[Dict[str, str]] = None
+    force_refresh: Optional[bool] = True
     bypass_cache: Optional[bool] = True
     smart_slice: Optional[bool] = True
     title: Optional[str] = None
