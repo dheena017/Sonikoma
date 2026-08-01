@@ -24,6 +24,9 @@ interface ScraperControlsProps
     | "handleCleanBubblesSelected"
     | "handleBatchMergeSelected"
     | "isBatchMerging"
+    | "seriesTitle"
+    | "chapterNumber"
+    | "targetUrl"
   > {
   addPanelsToStoryboard: (
     urls: string[],
@@ -60,6 +63,9 @@ export default function ScraperControls({
   audioFeedback,
   addPanelsToStoryboard,
   fetchWithInterceptor,
+  seriesTitle,
+  chapterNumber,
+  targetUrl,
 }: ScraperControlsProps) {
   // ── Quick Selection Filters ──────────────────────────────────────────────
 
@@ -154,6 +160,9 @@ export default function ScraperControls({
     fetchWithInterceptor,
     addNotification,
     audioFeedback,
+    seriesTitle,
+    chapterNumber,
+    targetUrl,
   });
 
   // ─────────────────────────────────────────────────────────────────────────

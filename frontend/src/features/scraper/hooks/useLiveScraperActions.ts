@@ -16,6 +16,9 @@ interface UseLiveScraperActionsProps {
   fetchWithInterceptor?: typeof fetch;
   addNotification?: (message: string, type: any) => void;
   audioFeedback?: any;
+  seriesTitle?: string;
+  chapterNumber?: string;
+  targetUrl?: string;
 }
 
 export function useLiveScraperActions({
@@ -28,18 +31,25 @@ export function useLiveScraperActions({
   fetchWithInterceptor,
   addNotification,
   audioFeedback,
+  seriesTitle,
+  chapterNumber,
+  targetUrl,
 }: UseLiveScraperActionsProps) {
   const [isZipping, setIsZipping] = useState(false);
   const activeFetch = fetchWithInterceptor || fetch;
 
   const handleDownloadZip = async () => {
-    const toDownload =
+    const rawToDownload =
       selectedScraped.length > 0 ? selectedScraped : scrapedImages;
 
-    if (toDownload.length === 0) {
+    if (rawToDownload.length === 0) {
       addNotification?.("No images to download.", "warning");
       return;
     }
+
+    const toDownload = [...rawToDownload].sort(
+      (a, b) => scrapedImages.indexOf(a) - scrapedImages.indexOf(b)
+    );
 
     console.log(`[GUI] Starting ZIP download for ${toDownload.length} images`);
     addNotification?.(
@@ -49,13 +59,17 @@ export function useLiveScraperActions({
     setIsZipping(true);
 
     try {
-      const blobContent = await buildZipBlobFromUrls(toDownload, activeFetch);
-      saveAs(blobContent, "webtoon_frames.zip");
+      const { blob, zipFilename } = await buildZipBlobFromUrls(
+        toDownload,
+        activeFetch,
+        { seriesTitle, chapterNumber, targetUrl }
+      );
+      saveAs(blob, zipFilename);
       setConsoleLogs((prev) => [
-        `[GUI] Successfully generated zip for ${toDownload.length} images`,
+        `[GUI] Successfully generated zip for ${toDownload.length} images (${zipFilename})`,
         ...prev,
       ]);
-      addNotification?.("ZIP archive downloaded successfully!", "success");
+      addNotification?.(`ZIP archive (${zipFilename}) downloaded successfully!`, "success");
     } catch (err: any) {
       console.error("Zip generation failed:", err);
       addNotification?.(
