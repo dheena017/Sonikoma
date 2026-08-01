@@ -262,6 +262,41 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     activeImageUrlRef.current = state.imageUrl;
   }, [state.imageUrl]);
 
+  // Handle saving & applying freehand drawings from Fabric canvas
+  useEffect(() => {
+    const handleFabricSaveComplete = (e: Event) => {
+      const customEv = e as CustomEvent<{ dataUrl: string }>;
+      const dataUrl = customEv.detail?.dataUrl;
+      if (!dataUrl) return;
+
+      if (editingImageIdx !== null && setScrapedImages) {
+        setScrapedImages((prev) => {
+          const next = [...prev];
+          if (editingImageIdx >= 0 && editingImageIdx < next.length) {
+            next[editingImageIdx] = dataUrl;
+          }
+          return next;
+        });
+
+        addPanelsToStoryboard([dataUrl]);
+        addNotification("Drawing saved & applied to image successfully!", "success");
+        if (appLogic.audioFeedback?.playTick) {
+          appLogic.audioFeedback.playTick();
+        }
+
+        // Clear fabric drawing objects after applying
+        window.dispatchEvent(new Event("FABRIC_CLEAR_REQUEST"));
+      } else {
+        addNotification("No active panel selected to apply drawing.", "warning");
+      }
+    };
+
+    window.addEventListener("FABRIC_SAVE_COMPLETE", handleFabricSaveComplete);
+    return () => {
+      window.removeEventListener("FABRIC_SAVE_COMPLETE", handleFabricSaveComplete);
+    };
+  }, [editingImageIdx, setScrapedImages, addPanelsToStoryboard, addNotification, appLogic.audioFeedback]);
+
   // Handle resetting and loading states when the active image changes
   useEffect(() => {
     if (state.imageUrl) {

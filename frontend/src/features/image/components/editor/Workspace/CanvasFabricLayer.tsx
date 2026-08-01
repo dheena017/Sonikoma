@@ -36,6 +36,28 @@ export default function CanvasFabricLayer({
   const startPointerRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const isMouseDownRef = useRef<boolean>(false);
 
+  const brushActionRef = useRef(brushAction);
+  const brushSizeRef = useRef(brushSize);
+  const fillColorRef = useRef(fillColor);
+  const textBgColorRef = useRef(textBgColor);
+  const opacityRef = useRef(opacity);
+  const fontFamilyRef = useRef(fontFamily);
+  const textStrokeColorRef = useRef(textStrokeColor);
+  const textAlignRef = useRef(textAlign);
+  const isFilledRef = useRef(isFilled);
+
+  useEffect(() => {
+    brushActionRef.current = brushAction;
+    brushSizeRef.current = brushSize;
+    fillColorRef.current = fillColor;
+    textBgColorRef.current = textBgColor;
+    opacityRef.current = opacity;
+    fontFamilyRef.current = fontFamily;
+    textStrokeColorRef.current = textStrokeColor;
+    textAlignRef.current = textAlign;
+    isFilledRef.current = isFilled;
+  }, [brushAction, brushSize, fillColor, textBgColor, opacity, fontFamily, textStrokeColor, textAlign, isFilled]);
+
   useEffect(() => {
     if (!isActive) {
       if (fabricCanvas.current) {
@@ -59,7 +81,7 @@ export default function CanvasFabricLayer({
         fabricCanvas.current.dispose();
       }
 
-      const isFreeDrawMode = ["paint", "highlighter", "spray", "blur", "erase"].includes(brushAction);
+      const isFreeDrawMode = ["paint", "highlighter", "spray", "blur", "erase"].includes(brushActionRef.current);
 
       const fCanvas = new fabric.Canvas(canvasEl.current, {
         isDrawingMode: isFreeDrawMode,
@@ -70,26 +92,26 @@ export default function CanvasFabricLayer({
 
       fabricCanvas.current = fCanvas;
 
-      // Setup brush
-      if (brushAction === "spray") {
+      // Setup initial brush
+      if (brushActionRef.current === "spray") {
         const spray = new fabric.CircleBrush(fCanvas);
-        spray.width = brushSize * 2;
-        spray.color = fillColor;
+        spray.width = brushSizeRef.current * 2;
+        spray.color = fillColorRef.current;
         fCanvas.freeDrawingBrush = spray;
       } else {
         const pencil = new fabric.PencilBrush(fCanvas);
-        pencil.width = brushSize;
-        if (brushAction === "erase") {
+        pencil.width = brushSizeRef.current;
+        if (brushActionRef.current === "erase") {
           pencil.color = "rgba(255,255,255,1)";
-        } else if (brushAction === "highlighter") {
-          pencil.color = fillColor.startsWith("#")
-            ? `${fillColor}80`
-            : fillColor;
-        } else if (brushAction === "blur") {
+        } else if (brushActionRef.current === "highlighter") {
+          pencil.color = fillColorRef.current.startsWith("#")
+            ? `${fillColorRef.current}80`
+            : fillColorRef.current;
+        } else if (brushActionRef.current === "blur") {
           pencil.color = "rgba(30,30,36,0.85)";
-          pencil.width = brushSize * 1.5;
+          pencil.width = brushSizeRef.current * 1.5;
         } else {
-          pencil.color = fillColor;
+          pencil.color = fillColorRef.current;
         }
         fCanvas.freeDrawingBrush = pencil;
       }
@@ -100,19 +122,29 @@ export default function CanvasFabricLayer({
         startPointerRef.current = pointer;
         isMouseDownRef.current = true;
 
-        if (brushAction === "text") {
+        const currentAction = brushActionRef.current;
+        const currentSize = brushSizeRef.current;
+        const currentFill = fillColorRef.current;
+        const currentTextBg = textBgColorRef.current;
+        const currentFont = fontFamilyRef.current;
+        const currentStroke = textStrokeColorRef.current;
+        const currentAlign = textAlignRef.current;
+        const currentOpacity = opacityRef.current;
+        const currentFilled = isFilledRef.current;
+
+        if (currentAction === "text") {
           if (options.target && options.target.type === "textbox") return;
           const text = new fabric.Textbox("Type here", {
             left: pointer.x,
             top: pointer.y,
-            fontSize: brushSize,
-            fontFamily: fontFamily || "Comic Sans MS",
-            fill: fillColor,
-            stroke: textStrokeColor || undefined,
-            strokeWidth: textStrokeColor ? 1 : 0,
-            backgroundColor: textBgColor || "transparent",
-            textAlign: textAlign || "center",
-            opacity: opacity / 100,
+            fontSize: currentSize,
+            fontFamily: currentFont || "Comic Sans MS",
+            fill: currentFill,
+            stroke: currentStroke || undefined,
+            strokeWidth: currentStroke ? 1 : 0,
+            backgroundColor: currentTextBg || "transparent",
+            textAlign: currentAlign || "center",
+            opacity: currentOpacity / 100,
             editable: true,
             padding: 6,
             cornerStyle: "circle",
@@ -125,45 +157,45 @@ export default function CanvasFabricLayer({
           return;
         }
 
-        if (brushAction === "line") {
+        if (currentAction === "line") {
           const line = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-            stroke: fillColor,
-            strokeWidth: brushSize,
-            opacity: opacity / 100,
+            stroke: currentFill,
+            strokeWidth: currentSize,
+            opacity: currentOpacity / 100,
           });
           activeShapeRef.current = line;
           fCanvas.add(line);
-        } else if (brushAction === "rect") {
+        } else if (currentAction === "rect") {
           const rect = new fabric.Rect({
             left: pointer.x,
             top: pointer.y,
             width: 0,
             height: 0,
-            fill: isFilled ? fillColor : "transparent",
-            stroke: fillColor,
-            strokeWidth: brushSize,
-            opacity: opacity / 100,
+            fill: currentFilled ? currentFill : "transparent",
+            stroke: currentFill,
+            strokeWidth: currentSize,
+            opacity: currentOpacity / 100,
           });
           activeShapeRef.current = rect;
           fCanvas.add(rect);
-        } else if (brushAction === "circle") {
+        } else if (currentAction === "circle") {
           const circle = new fabric.Ellipse({
             left: pointer.x,
             top: pointer.y,
             rx: 0,
             ry: 0,
-            fill: isFilled ? fillColor : "transparent",
-            stroke: fillColor,
-            strokeWidth: brushSize,
-            opacity: opacity / 100,
+            fill: currentFilled ? currentFill : "transparent",
+            stroke: currentFill,
+            strokeWidth: currentSize,
+            opacity: currentOpacity / 100,
           });
           activeShapeRef.current = circle;
           fCanvas.add(circle);
-        } else if (brushAction === "arrow") {
+        } else if (currentAction === "arrow") {
           const line = new fabric.Line([pointer.x, pointer.y, pointer.x, pointer.y], {
-            stroke: fillColor,
-            strokeWidth: brushSize,
-            opacity: opacity / 100,
+            stroke: currentFill,
+            strokeWidth: currentSize,
+            opacity: currentOpacity / 100,
           });
           activeShapeRef.current = line;
           fCanvas.add(line);
@@ -205,7 +237,7 @@ export default function CanvasFabricLayer({
         fabricCanvas.current = null;
       }
     };
-  }, [isActive, imgUrl, brushAction]);
+  }, [isActive, imgUrl]);
 
   useEffect(() => {
     if (fabricCanvas.current && isActive) {
@@ -247,19 +279,43 @@ export default function CanvasFabricLayer({
 
     const handleSaveRequest = async () => {
       if (fabricCanvas.current) {
-        const fabImg = await fabric.Image.fromURL(imgUrl, { crossOrigin: "anonymous" });
-        fabricCanvas.current.backgroundImage = fabImg;
-        fabricCanvas.current.renderAll();
-        const dataUrl = fabricCanvas.current.toDataURL({
-          format: "jpeg",
-          quality: 1,
-          multiplier: 1,
-        });
-        fabricCanvas.current.backgroundImage = null;
-        fabricCanvas.current.renderAll();
-        window.dispatchEvent(
-          new CustomEvent("FABRIC_SAVE_COMPLETE", { detail: { dataUrl } })
-        );
+        try {
+          const srcToLoad = (imgUrl.startsWith("http://") || imgUrl.startsWith("https://"))
+            ? `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`
+            : imgUrl;
+
+          const fabImg = await fabric.Image.fromURL(srcToLoad, { crossOrigin: "anonymous" });
+          if (fabImg && fabricCanvas.current) {
+            const canvasWidth = fabricCanvas.current.width || 1;
+            const canvasHeight = fabricCanvas.current.height || 1;
+            fabImg.set({
+              scaleX: canvasWidth / (fabImg.width || 1),
+              scaleY: canvasHeight / (fabImg.height || 1),
+              left: 0,
+              top: 0,
+              originX: "left",
+              originY: "top",
+            });
+
+            fabricCanvas.current.backgroundImage = fabImg;
+            fabricCanvas.current.renderAll();
+
+            const dataUrl = fabricCanvas.current.toDataURL({
+              format: "png",
+              quality: 1,
+              multiplier: 1,
+            });
+
+            fabricCanvas.current.backgroundImage = null;
+            fabricCanvas.current.renderAll();
+
+            window.dispatchEvent(
+              new CustomEvent("FABRIC_SAVE_COMPLETE", { detail: { dataUrl } })
+            );
+          }
+        } catch (err) {
+          console.error("[Fabric Layer] Error exporting saved drawing:", err);
+        }
       }
     };
 
