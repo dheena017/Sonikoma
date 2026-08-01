@@ -278,8 +278,14 @@ export function useBatchImageActions({
   ]);
 
   const handleAutoCropSelected = useCallback(async () => {
-    // Fall back to all images when nothing is explicitly selected
-    const targetImages = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    // Fall back to all images when nothing is explicitly selected.
+    // When there is a selection, preserve the deck/timeline order from scrapedImages
+    // instead of selection-click order so batch auto-crop keeps frame sequence stable.
+    const selectedSet = new Set(selectedScraped);
+    const targetImages =
+      selectedScraped.length > 0
+        ? scrapedImages.filter((img) => selectedSet.has(img))
+        : scrapedImages;
     if (targetImages.length === 0) {
       addNotification(
         "No images available to crop — scrape some images first.",
