@@ -212,6 +212,8 @@ export function usePipelineActions({
     handleSaveMultipleCuts,
     handleStitchWithNext,
   } = useSingleImageEdits({
+    panels,
+    setPanels,
     editingImageIdx,
     scrapedImages,
     setScrapedImages,

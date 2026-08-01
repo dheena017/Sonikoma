@@ -5,6 +5,8 @@ import { processWithConcurrency } from "@/utils/batchUtils";
 import * as api from "@/api/index";
 
 interface UseSingleImageEditsProps {
+  panels: any[];
+  setPanels: React.Dispatch<React.SetStateAction<any[]>>;
   editingImageIdx: number | null;
   scrapedImages: string[];
   setScrapedImages: React.Dispatch<React.SetStateAction<string[]>>;
@@ -26,6 +28,8 @@ interface UseSingleImageEditsProps {
 }
 
 export function useSingleImageEdits({
+  panels,
+  setPanels,
   editingImageIdx,
   scrapedImages,
   setScrapedImages,
@@ -69,14 +73,30 @@ export function useSingleImageEdits({
 
       const croppedUrl = data.url;
 
-      // Replace original image with cropped image in asset list & add to Timeline
-      setScrapedImages((prev) => prev.map((img) => (img === originalUrl ? croppedUrl : img)));
-      addPanelsToStoryboard([croppedUrl]);
+      // Replace current image with cropped image in asset list
+      setScrapedImages((prev) =>
+        prev.map((img, idx) => (idx === editingImageIdx ? croppedUrl : img))
+      );
+
+      // Update existing panel in-place when editing an existing timeline panel.
+      // Fallback to appending a new panel only when no matching panel exists.
+      const panelToUpdate = panels.find((panel) => panel.image_url === originalUrl);
+      if (panelToUpdate) {
+        setPanels((prev) =>
+          prev.map((panel) =>
+            panel.id === panelToUpdate.id
+              ? { ...panel, image_url: croppedUrl }
+              : panel
+          )
+        );
+      } else {
+        addPanelsToStoryboard([croppedUrl]);
+      }
 
       setConsoleLogs((prev) => [
         `[Image Editor] [SUCCESS] Successfully edited Frame #${
           editingImageIdx + 1
-        } and added to Timeline!`,
+        } and updated the active panel/image.`,
         `[Image Editor]   - Sent (Original): ${originalUrl.substring(
           0,
           60
@@ -87,16 +107,12 @@ export function useSingleImageEdits({
         )}...`,
         ...prev,
       ]);
-      console.log(
-        `[Image Editor] Cropped Frame #${
-          editingImageIdx + 1
-        } and added to Timeline:`,
-        { original: originalUrl, cropped: croppedUrl }
-      );
+      console.log(`[Image Editor] Cropped Frame #${editingImageIdx + 1}:`, {
+        original: originalUrl,
+        cropped: croppedUrl,
+      });
       addNotification(
-        `Frame #${
-          editingImageIdx + 1
-        } cropped and added to Timeline successfully!`,
+        `Frame #${editingImageIdx + 1} updated successfully!`,
         "success"
       );
       audioFeedback?.playTick();
@@ -227,6 +243,8 @@ export function useSingleImageEdits({
       }
     },
     [
+      panels,
+      setPanels,
       editingImageIdx,
       scrapedImages,
       setScrapedImages,
