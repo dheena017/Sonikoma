@@ -121,8 +121,8 @@ export interface MainLayoutProps {
   setCropCloseKernelSize: (val: number) => void;
   activeAutoCropTab: string;
   setActiveAutoCropTab: (val: string) => void;
-  selectedScraped: any[];
-  setSelectedScraped: (val: any[]) => void;
+  selectedScraped: string[];
+  setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs: (val: any) => void;
   addNotification: any;
   cropGuidance: string;

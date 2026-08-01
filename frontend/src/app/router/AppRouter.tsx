@@ -1,5 +1,6 @@
 import React from "react";
 import { Sliders, ArrowLeft } from "lucide-react";
+import { GeneratedPanel } from "@/types";
 
 // --- Custom Logic Hooks ---
 import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
@@ -100,8 +101,8 @@ export interface AppRouterProps {
   setVideoUrl: (url: string) => void;
   consoleLogs: any[];
   setConsoleLogs: (logs: any) => void;
-  selectedScraped: any[];
-  setSelectedScraped: (selected: any[]) => void;
+  selectedScraped: string[];
+  setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
   activePreviewTab: any;
   setActivePreviewTab: any;
   setEditCropTop: (val: number) => void;
@@ -203,7 +204,7 @@ export interface AppRouterProps {
   showScrapeConfirmModal: boolean;
   setShowScrapeConfirmModal: (show: boolean) => void;
   audioFeedback: any;
-  setPanels: (panels: any[]) => void;
+  setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   narrationVolume: number;
   setNarrationVolume: (vol: number) => void;
   bgmVolume: number;
@@ -1019,14 +1020,14 @@ export default function AppRouter(props: AppRouterProps) {
 
       {/* PAGE VIEW 1.5: Dashboard Overview */}
       {isDashboardOverviewPath && (
-        <div className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out] overflow-y-auto">
+        <div className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]">
           <DashboardPage />
         </div>
       )}
 
       {/* PAGE VIEW 1.75: Projects Overview */}
       {isProjectsPath && (
-        <div className="page-transition w-full flex-1 flex flex-col overflow-y-auto">
+        <div className="page-transition w-full flex-1 flex flex-col">
           <ProjectsPage />
         </div>
       )}
