@@ -6,7 +6,7 @@ import DashboardProjectSection from "@/features/dashboard/components/DashboardPr
 import DashboardActivityFeed from "@/features/dashboard/components/DashboardActivityFeed";
 import DashboardAIPipeline from "@/features/dashboard/components/DashboardAIPipeline";
 import DashboardSidebar from "@/features/dashboard/components/DashboardSidebar";
-import useDashboardPage from "@/features/dashboard/hooks/useDashboardPage";
+import useDashboardPage, { Project } from "@/features/dashboard/hooks/useDashboardPage";
 
 export default function DashboardPage() {
   const {
@@ -29,12 +29,14 @@ export default function DashboardPage() {
     handleRetry,
     handleNewSeries,
     handleOpenProject,
+    handleOpenCreativeSuite,
     handleDeleteProject,
     handleExport,
     handleRename,
     toggleMenu,
     saveProjectName,
   } = useDashboardPage();
+
 
   return (
     <div className="w-full min-h-full bg-[#070709] text-neutral-100 flex flex-col pt-5 animate-fade-in relative z-10 pb-20">
@@ -75,6 +77,7 @@ export default function DashboardPage() {
             onOpenProject={handleOpenProject}
             onRename={handleRename}
             onExport={handleExport}
+            onOpenCreativeSuite={handleOpenCreativeSuite}
             onDelete={handleDeleteProject}
             onToggleMenu={toggleMenu}
             onSaveRename={saveProjectName}

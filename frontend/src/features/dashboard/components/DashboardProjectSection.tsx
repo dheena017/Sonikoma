@@ -18,6 +18,7 @@ interface DashboardProjectSectionProps {
   onOpenProject: (project: Project) => void;
   onRename: (e: React.MouseEvent, project: Project) => void;
   onExport: (e: React.MouseEvent, project: Project) => void;
+  onOpenCreativeSuite?: (e: React.MouseEvent, project: Project) => void;
   onDelete: (e: React.MouseEvent, projectId: string) => void;
   onToggleMenu: (e: React.MouseEvent, projectId: string) => void;
   onSaveRename: (projectId: string, newName: string) => void;
@@ -37,6 +38,7 @@ export default function DashboardProjectSection({
   onOpenProject,
   onRename,
   onExport,
+  onOpenCreativeSuite,
   onDelete,
   onToggleMenu,
   onSaveRename,
@@ -112,6 +114,7 @@ export default function DashboardProjectSection({
               onOpenProject={onOpenProject}
               onRename={(e, projectItem) => onRename(e, projectItem)}
               onExport={(e, projectItem) => onExport(e, projectItem)}
+              onOpenCreativeSuite={onOpenCreativeSuite}
               onCopyLink={(e, projectItem) => {
                 e.stopPropagation();
                 const link = `${window.location.origin}/workspace?id=${projectItem.project_id}`;

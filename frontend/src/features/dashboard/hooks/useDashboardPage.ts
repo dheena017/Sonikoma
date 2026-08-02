@@ -220,6 +220,49 @@ export default function useDashboardPage() {
     }
   }, []);
 
+  const handleOpenCreativeSuite = useCallback(async (e: React.MouseEvent, project: Project) => {
+    e.stopPropagation();
+    try {
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token") ||
+        "";
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      const res = await fetch(`/api/projects/${project.project_id}`, { headers });
+      if (res.ok) {
+        const data = await res.json();
+        const loadedSettings = data.project.audio_settings || {};
+        const savedScrapedImages =
+          Array.isArray(data.scraped_images) && data.scraped_images.length > 0
+            ? data.scraped_images
+            : loadedSettings.scraped_images;
+        const scrapedImages =
+          Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0
+            ? savedScrapedImages
+            : (data.panels || []).map((p: any) => p.image_url).filter(Boolean);
+
+        useProjectStore.getState().setActiveProject({
+          project: data.project,
+          panels: data.panels || [],
+          scrapedImages,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load project for Creative Suite:", err);
+    }
+
+    const nav = (window as any).navigateTo;
+    if (typeof nav === "function") {
+      nav("/creative-suite");
+    } else {
+      window.history.pushState({}, "", "/creative-suite");
+      window.dispatchEvent(new Event("popstate"));
+    }
+  }, []);
+
   const handleDeleteProject = useCallback(
     async (e: React.MouseEvent, projectId: string) => {
       e.stopPropagation();
@@ -348,6 +391,7 @@ export default function useDashboardPage() {
     handleRetry,
     handleNewSeries,
     handleOpenProject,
+    handleOpenCreativeSuite,
     handleDeleteProject,
     handleExport,
     handleRename,
