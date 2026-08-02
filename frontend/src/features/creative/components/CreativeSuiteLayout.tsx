@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Sparkles, ArrowLeft } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Sparkles, ArrowLeft, Square } from "lucide-react";
 import CreativeSuiteHeader from "@/features/creative/components/CreativeSuiteHeader";
 import CreativeSuiteMiniSidebar from "@/features/creative/components/CreativeSuiteMiniSidebar";
 import CreativeSuiteSidebar from "@/features/creative/components/CreativeSuiteSidebar";
@@ -37,6 +37,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   hideSidebarAndHeader = false,
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeSkillRequests, setActiveSkillRequests] = useState(0);
   const activeProjectData = useProjectStore((state) => state.activeProjectData);
   const activePanels = activeProjectData?.panels ?? panels ?? [];
 
@@ -60,6 +61,19 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
     currentPath === "/creative-suite-dashboard" ||
     !requiresPanels;
   const shouldShowFallbackUI = !hasActiveProject && !allowWithoutActiveProject;
+
+  useEffect(() => {
+    const updateActiveSkillRequests = () => {
+      setActiveSkillRequests(window.__sonikomaActiveSkillRequestCount?.() ?? 0);
+    };
+
+    updateActiveSkillRequests();
+    window.addEventListener("sonikoma-skill-request-count", updateActiveSkillRequests);
+
+    return () => {
+      window.removeEventListener("sonikoma-skill-request-count", updateActiveSkillRequests);
+    };
+  }, []);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
@@ -154,13 +168,24 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
             </p>
           </div>
 
-          <button
-            onClick={() => navigateTo("/dashboard")}
-            className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md self-start sm:self-center active:scale-95"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Main App
-          </button>
+          <div className="flex items-center gap-2 self-start sm:self-center">
+            {activeSkillRequests > 0 && (
+              <button
+                onClick={() => window.__sonikomaAbortAllSkillRequests?.()}
+                className="flex items-center gap-1.5 px-3 py-2 bg-rose-600/90 hover:bg-rose-500 text-white border border-rose-500/70 rounded-xl text-[11px] font-mono transition-all cursor-pointer font-bold shadow-md active:scale-95"
+              >
+                <Square className="h-3.5 w-3.5" />
+                Stop generation
+              </button>
+            )}
+            <button
+              onClick={() => navigateTo("/dashboard")}
+              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md active:scale-95"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Main App
+            </button>
+          </div>
         </div>
         {shouldShowFallbackUI ? <FallbackUI /> : children}
       </div>
@@ -237,13 +262,24 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
                 </p>
               </div>
 
-              <button
-                onClick={() => navigateTo("/dashboard")}
-                className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md self-start sm:self-center active:scale-95"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                Main App
-              </button>
+              <div className="flex items-center gap-2 self-start sm:self-center">
+                {activeSkillRequests > 0 && (
+                  <button
+                    onClick={() => window.__sonikomaAbortAllSkillRequests?.()}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-rose-600/90 hover:bg-rose-500 text-white border border-rose-500/70 rounded-xl text-[11px] font-mono transition-all cursor-pointer font-bold shadow-md active:scale-95"
+                  >
+                    <Square className="h-3.5 w-3.5" />
+                    Stop generation
+                  </button>
+                )}
+                <button
+                  onClick={() => navigateTo("/dashboard")}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md active:scale-95"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Main App
+                </button>
+              </div>
             </div>
             {shouldShowFallbackUI ? <FallbackUI /> : children}
           </div>
