@@ -162,57 +162,6 @@ const StoryboardTimeline = React.memo(
       [setSelectedPanelIds]
     );
 
-    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-    const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-
-    const handleDragStart = (e: React.DragEvent, idx: number) => {
-      setDraggedIndex(idx);
-      e.dataTransfer.effectAllowed = "move";
-      e.dataTransfer.setData("text/plain", idx.toString());
-    };
-
-    const handleDragOver = (e: React.DragEvent, idx: number) => {
-      e.preventDefault();
-      if (draggedIndex === null || draggedIndex === idx) return;
-      setDragOverIndex(idx);
-    };
-
-    const handleDragEnd = () => {
-      setDraggedIndex(null);
-      setDragOverIndex(null);
-    };
-
-    const handleDrop = (e: React.DragEvent, targetIdx: number) => {
-      e.preventDefault();
-      if (draggedIndex === null || draggedIndex === targetIdx) return;
-
-      setPanels((prev) => {
-        const nextPanels = [...prev];
-        const [draggedItem] = nextPanels.splice(draggedIndex, 1);
-        nextPanels.splice(targetIdx, 0, draggedItem);
-        return nextPanels;
-      });
-
-      // Adjust active currentPanelIndex to follow the dragged card
-      if (currentPanelIndex === draggedIndex) {
-        setCurrentPanelIndex(targetIdx);
-      } else if (
-        currentPanelIndex > draggedIndex &&
-        currentPanelIndex <= targetIdx
-      ) {
-        setCurrentPanelIndex(currentPanelIndex - 1);
-      } else if (
-        currentPanelIndex < draggedIndex &&
-        currentPanelIndex >= targetIdx
-      ) {
-        setCurrentPanelIndex(currentPanelIndex + 1);
-      }
-
-      addNotification?.("Reordered timeline cards. Unsaved changes — click 'Save Project' to save.", "warning");
-      setDraggedIndex(null);
-      setDragOverIndex(null);
-    };
-
     const [isBatchCropping, setIsBatchCropping] = useState(false);
     const [isCleaningBubbles, setIsCleaningBubbles] = useState(false);
     const [isBatchMerging, setIsBatchMerging] = useState(false);
@@ -272,7 +221,7 @@ const StoryboardTimeline = React.memo(
                   panel_id: panel.id,
                   text: panel.speech_text,
                   dialogue_list: [panel.speech_text],
-                  target_duration: panel.duration > 0 ? panel.duration : 4.5,
+                  target_duration: panel.duration && panel.duration > 0 ? panel.duration : undefined,
                   voice: voiceActor || undefined,
                   speech_rate: speechRate,
                   speech_pitch: speechPitch,
@@ -328,7 +277,7 @@ const StoryboardTimeline = React.memo(
                           // Preserve AI-decided motion; only default if completely unset
                           motion_type: p.motion_type && p.motion_type.trim().length > 0
                             ? p.motion_type
-                            : "zoom_in",
+                            : "",
                           // Sync timing to actual audio length
                           duration: audioDuration > 0 ? audioDuration : p.duration,
                           audio_url: audioUrl || p.audio_url,
@@ -739,7 +688,7 @@ const StoryboardTimeline = React.memo(
               .filter(Boolean)
               .join(" | "),
             duration: sortedSelectedPanels.reduce(
-              (sum, p) => sum + (p.duration || 4.5),
+              (sum, p) => sum + (p.duration ?? 0),
               0
             ),
           };
@@ -1166,12 +1115,6 @@ const StoryboardTimeline = React.memo(
                                   playStoryboardAudio={playStoryboardAudio}
                                   autoPlayAudio={autoPlayAudio}
                                   addNotification={addNotification}
-                                  onDragStart={handleDragStart}
-                                  onDragOver={handleDragOver}
-                                  onDragEnd={handleDragEnd}
-                                  onDrop={handleDrop}
-                                  isDragging={draggedIndex === globalIdx}
-                                  isDragOver={dragOverIndex === globalIdx}
                                   setPanels={setPanels}
                                   fetchWithInterceptor={fetchWithInterceptor}
                                   voiceActor={voiceActor}
@@ -1221,12 +1164,6 @@ const StoryboardTimeline = React.memo(
                           playStoryboardAudio={playStoryboardAudio}
                           autoPlayAudio={autoPlayAudio}
                           addNotification={addNotification}
-                          onDragStart={handleDragStart}
-                          onDragOver={handleDragOver}
-                          onDragEnd={handleDragEnd}
-                          onDrop={handleDrop}
-                          isDragging={draggedIndex === idx}
-                          isDragOver={dragOverIndex === idx}
                           setPanels={setPanels}
                           fetchWithInterceptor={fetchWithInterceptor}
                           voiceActor={voiceActor}

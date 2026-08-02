@@ -35,12 +35,6 @@ interface TimelineCardProps {
   playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
   autoPlayAudio?: boolean;
   addNotification?: (message: string, type: any) => void;
-  onDragStart?: (e: React.DragEvent, index: number) => void;
-  onDragOver?: (e: React.DragEvent, index: number) => void;
-  onDragEnd?: (e: React.DragEvent) => void;
-  onDrop?: (e: React.DragEvent, index: number) => void;
-  isDragging?: boolean;
-  isDragOver?: boolean;
   setPanels?: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   fetchWithInterceptor?: any;
   voiceActor?: string;
@@ -235,14 +229,8 @@ const TimelineCard = ({
   onPanelClick,
   onPanelDoubleClick,
   playStoryboardAudio,
-  onDragStart,
-  onDragOver,
-  onDragEnd,
-  onDrop,
   autoPlayAudio,
   addNotification,
-  isDragging,
-  isDragOver,
   setPanels,
   fetchWithInterceptor,
   voiceActor,
@@ -656,25 +644,6 @@ const TimelineCard = ({
     }
   };
 
-  const handleDragStartLocal = (e: React.DragEvent) => {
-    const target = e.target as HTMLElement;
-    // Prevent dragging if interacting with inputs, textareas, selectors or buttons
-    if (
-      target.tagName.toLowerCase() === "textarea" ||
-      target.tagName.toLowerCase() === "input" ||
-      target.tagName.toLowerCase() === "select" ||
-      target.tagName.toLowerCase() === "option" ||
-      target.tagName.toLowerCase() === "button" ||
-      target.closest(".no-drag")
-    ) {
-      e.preventDefault();
-      return;
-    }
-    if (onDragStart) {
-      onDragStart(e, idx);
-    }
-  };
-
   const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
@@ -724,17 +693,8 @@ const TimelineCard = ({
 
   return (
     <div
-      draggable={true}
-      onDragStart={handleDragStartLocal}
-      onDragOver={(e) => onDragOver && onDragOver(e, idx)}
-      onDragEnd={onDragEnd}
-      onDrop={(e) => onDrop && onDrop(e, idx)}
       className={`w-[220px] sm:w-[260px] shrink-0 rounded-xl border p-3 space-y-2.5 transition-all duration-200 ${
-        isDragging
-          ? "opacity-35 border-dashed border-purple-500/50 bg-neutral-900/20 scale-98"
-          : isDragOver
-          ? "bg-neutral-900 border-purple-400 scale-102 ring-2 ring-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
-          : (panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll)
+        (panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll)
           ? "border-2 border-purple-500 bg-purple-950/20 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.01]"
           : isCurrent && isSelected
           ? "bg-purple-950/40 border-purple-400 ring-2 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)]"
@@ -743,7 +703,7 @@ const TimelineCard = ({
           : isSelected
           ? "bg-purple-950/30 border-purple-500 ring-2 ring-purple-500/70 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
           : "bg-neutral-950 border-neutral-800 hover:border-neutral-700"
-      } cursor-grab active:cursor-grabbing`}
+      }`}
     >
       {/* Image Thumbnail */}
       <div
@@ -1315,8 +1275,6 @@ export default React.memo(TimelineCard, (prevProps, nextProps) => {
     prevProps.analyzingPanelId === nextProps.analyzingPanelId &&
     prevProps.isAnalyzingAll === nextProps.isAnalyzingAll &&
     prevProps.isSelected === nextProps.isSelected &&
-    prevProps.isDragging === nextProps.isDragging &&
-    prevProps.isDragOver === nextProps.isDragOver &&
     prevProps.panelsLength === nextProps.panelsLength
   );
 });
