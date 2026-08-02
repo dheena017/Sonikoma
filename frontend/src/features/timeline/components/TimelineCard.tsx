@@ -570,11 +570,11 @@ const TimelineCard = ({
 
       // 2. Generate Audio TTS
       addNotification?.("Step 2/3: Generating speech audio...", "info");
-      const ttsRes = await generateTts(fetchWithInterceptor, {
+        const ttsRes = await generateTts(fetchWithInterceptor, {
         panel_id: panel.id,
         text: panel.speech_text,
         dialogue_list: [panel.speech_text],
-        target_duration: panel.duration > 0 ? panel.duration : 4.5,
+        target_duration: panel.duration && panel.duration > 0 ? panel.duration : undefined,
         voice: voiceActor || undefined,
         speech_rate: speechRate,
         speech_pitch: speechPitch,
@@ -635,7 +635,7 @@ const TimelineCard = ({
                   // Preserve AI-decided motion; only default if completely unset
                   motion_type: p.motion_type && p.motion_type.trim().length > 0
                     ? p.motion_type
-                    : "zoom_in",
+                    : "",
                   // Sync timing to actual audio length
                   duration: audioDuration > 0 ? audioDuration : p.duration,
                   audio_url: audioUrl || p.audio_url,
@@ -917,7 +917,7 @@ const TimelineCard = ({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.speech_text}
           onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
-          placeholder=""
+          placeholder="Enter dialogue or subtitle text..."
           className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
@@ -995,7 +995,7 @@ const TimelineCard = ({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.narrative || ""}
           onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
-          placeholder=""
+          placeholder="Enter narrative text for scene description or voiceover..."
           className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
@@ -1014,7 +1014,7 @@ const TimelineCard = ({
           disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
           value={panel.sfx || ""}
           onChange={(e) => handleModifySFX(panel.id, e.target.value)}
-          placeholder=""
+          placeholder="e.g. door slam, footsteps, thunder..."
           className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg px-2.5 py-1.5 text-neutral-100 outline-none focus:border-purple-500 font-mono transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
@@ -1035,7 +1035,7 @@ const TimelineCard = ({
           onChange={(e) =>
             handleModifyVisualDescription(panel.id, e.target.value)
           }
-          placeholder=""
+          placeholder="Describe the visual scene for composition, lighting, or atmosphere..."
           className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
@@ -1086,7 +1086,7 @@ const TimelineCard = ({
                 handleModifyDuration(panel.id, 0);
               }
             }}
-            placeholder="0.0"
+            placeholder="e.g. 4.5"
             className="bg-neutral-800 text-[11px] text-white rounded-lg border border-neutral-700 hover:border-purple-500/50 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 p-1.5 w-full outline-none text-center font-mono no-drag transition-colors"
           />
         </div>
