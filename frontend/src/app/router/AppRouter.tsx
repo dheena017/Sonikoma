@@ -86,19 +86,19 @@ export interface AppRouterProps {
   setVoiceActor: (actor: string) => void;
   setMusicTheme: (theme: string) => void;
   setAspectRatio: any;
-  setFrameRate: (rate: number) => void;
+  setFrameRate: (rate: number | null) => void;
   addNotification: any;
   voiceActor: string;
   musicTheme: string;
   aspectRatio: string;
-  frameRate: number;
+  frameRate: number | null;
   isWorkspaceDirty: boolean;
   appLogic: any;
   saveProject: any;
   saveStatus: "idle" | "saving" | "saved" | "error";
   isDirty: boolean;
-  videoUrl: string;
-  setVideoUrl: (url: string) => void;
+  videoUrl: string | null;
+  setVideoUrl: (url: string | null) => void;
   consoleLogs: any[];
   setConsoleLogs: (logs: any) => void;
   selectedScraped: string[];
@@ -690,7 +690,6 @@ export default function AppRouter(props: AppRouterProps) {
     isSeriesDetailsPath,
     isCreativeSuitePath,
     isCreativeSuiteDashboardPath,
-    editorRouteMatch,
     isImageEditorPage,
   } = pathFlags;
 
@@ -708,16 +707,16 @@ export default function AppRouter(props: AppRouterProps) {
   );
 
   const isProEditorPage =
-    (Boolean(editorRouteMatch) ||
+    (Boolean(pathFlags.editorRouteMatch) ||
       currentPath === "/editor" ||
       currentPath === "/editor/" ||
       currentPath === "/workspace/editor" ||
       currentPath === "/workspace/editor/" ||
       currentPath.startsWith("/workspace/editor/")) &&
-    !isImageEditorPage;
+    !pathFlags.isImageEditorPage;
 
-  const editorSeriesSlug = editorRouteMatch?.[1] || seriesSlugState || null;
-  const editorChapterSlug = editorRouteMatch?.[2] || chapterSlugState || null;
+  const editorSeriesSlug = pathFlags.editorRouteMatch?.[1] || seriesSlugState || null;
+  const editorChapterSlug = pathFlags.editorRouteMatch?.[2] || chapterSlugState || null;
 
   const detailsProjectId = React.useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -1072,7 +1071,6 @@ export default function AppRouter(props: AppRouterProps) {
             setMusicTheme={setMusicTheme}
             aspectRatio={aspectRatio as any}
             setAspectRatio={setAspectRatio}
-            frameRate={frameRate}
             setFrameRate={setFrameRate}
             activeTheme={activeTheme as any}
             setActiveTheme={setActiveTheme}
@@ -1090,8 +1088,7 @@ export default function AppRouter(props: AppRouterProps) {
             backgroundStyle={backgroundStyle as any}
             setBackgroundStyle={setBackgroundStyle as any}
             subtitlesStyle={subtitlesStyle as any}
-            setSubtitlesStyle={setSubtitlesStyle as any}
-          />
+            setSubtitlesStyle={setSubtitlesStyle as any} frameRate={0}          />
         </div>
       )}
 
@@ -1458,6 +1455,7 @@ export default function AppRouter(props: AppRouterProps) {
         !isAdminDashboardPath &&
         !isSeriesDetailsPath &&
         !isEpisodeScraperPath &&
+        !isCreativeSuitePath &&
         !isCreativeSuiteDashboardPath && (
           <PageNotFound onNavigateHome={() => navigateTo("/")} />
         )}

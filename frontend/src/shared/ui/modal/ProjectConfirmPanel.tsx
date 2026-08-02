@@ -735,7 +735,7 @@ export default function ProjectConfirmPanel({
 
         </div>
 
-{/* Premium Footer Actions */}
+        {/* Premium Footer Actions */}
         <div className="px-6 py-5 bg-neutral-900/80 backdrop-blur-xl border-t border-neutral-850 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0">
           <button
             type="button"
@@ -748,7 +748,7 @@ export default function ProjectConfirmPanel({
           <button
             type="button"
             onClick={() => handleConfirm(false)}
-            disabled={!seriesTitle.trim() || !chapterNumber.trim() || isSaving}
+            disabled={!seriesTitle.trim() || isSaving}
             className="px-5 py-3 sm:py-2.5 bg-neutral-800/60 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-700/60 hover:border-neutral-600 rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSaving ? (
@@ -764,7 +764,6 @@ export default function ProjectConfirmPanel({
             )}
           </button>
 
-          {/* Generate All button removed per request */}
         </div>
       </div>
     </div>,

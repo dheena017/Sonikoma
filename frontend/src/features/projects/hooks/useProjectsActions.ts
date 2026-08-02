@@ -1,10 +1,12 @@
 import { useCallback } from "react";
 import type { MouseEvent } from "react";
 import type { Project } from "@/features/projects/hooks/ProjectTypes";
+import { useProjectStore } from "@/store/useProjectStore";
 
 export interface UseProjectsActionsHandlers {
   handleNewSeries: () => void;
   handleOpenProject: (project: Project) => void;
+  handleOpenCreativeSuite: (e: MouseEvent, project: Project) => Promise<void>;
   handleExport: (e: MouseEvent, project: Project) => void;
   handleRename: (
     e: MouseEvent,
@@ -39,6 +41,56 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
       (window as any).navigateTo?.(`/workspace/editor?id=${project.project_id}`);
     }
   }, []);
+
+  const handleOpenCreativeSuite = useCallback(
+    async (e: MouseEvent, project: Project) => {
+      e.stopPropagation();
+      try {
+        const token =
+          localStorage.getItem("sonikoma_token") ||
+          sessionStorage.getItem("sonikoma_token") ||
+          "";
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(`/api/projects/${project.project_id}`, {
+          headers,
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const loadedSettings = data.project?.audio_settings || {};
+          const savedScrapedImages =
+            Array.isArray(data.scraped_images) && data.scraped_images.length > 0
+              ? data.scraped_images
+              : loadedSettings.scraped_images;
+          const scrapedImages =
+            Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0
+              ? savedScrapedImages
+              : (data.panels || []).map((p: any) => p.image_url).filter(Boolean);
+
+          useProjectStore.getState().setActiveProject({
+            project: data.project,
+            panels: data.panels || [],
+            scrapedImages,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load project for Creative Suite", err);
+      }
+
+      const nav = (window as any).navigateTo;
+      if (typeof nav === "function") {
+        nav("/creative-suite");
+      } else {
+        window.history.pushState({}, "", "/creative-suite");
+        window.dispatchEvent(new Event("popstate"));
+      }
+    },
+    []
+  );
 
   const handleExport = useCallback((e: MouseEvent, project: Project) => {
     e.stopPropagation();
@@ -184,6 +236,7 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
   return {
     handleNewSeries,
     handleOpenProject,
+    handleOpenCreativeSuite,
     handleExport,
     handleRename,
     handleOpenDetails,

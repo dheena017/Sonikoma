@@ -115,10 +115,17 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
 
     elif provider == "openai":
         import requests
+        from requests.exceptions import RequestException
+
         headers = {"Authorization": f"Bearer {api_key}"}
-        models_res = requests.get("https://api.openai.com/v1/models", headers=headers)
+        try:
+            models_res = requests.get("https://api.openai.com/v1/models", headers=headers, timeout=10)
+        except RequestException as exc:
+            logger.error(f"Failed to fetch OpenAI models: {exc}")
+            return {"success": False, "error": f"Failed to connect to OpenAI: {exc}", "status_code": 503}
+
         if models_res.status_code != 200:
-            return {"success": False, "error": f"OpenAI Authorization Failed: {models_res.text}"}
+            return {"success": False, "error": f"OpenAI Authorization Failed: {models_res.text}", "status_code": 400}
         models = models_res.json().get("data", [])
         result_list = []
         for m in models:
@@ -127,7 +134,7 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
                 "name": model_id,
                 "fullName": model_id,
                 "displayName": model_id,
-                "description": f"OpenAI model owned by {m.get('owned_by', 'N/A')}.",
+                "description": f"OpenAI model owned by {m.get('owned_by', 'N/A')}",
                 "inputTokenLimit": None,
                 "outputTokenLimit": None,
                 "supportedActions": ["chat"] if "gpt" in model_id or "o1" in model_id else []
@@ -136,10 +143,17 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
 
     elif provider == "anthropic":
         import requests
+        from requests.exceptions import RequestException
+
         headers = {"x-api-key": api_key, "anthropic-version": "2023-06-01"}
-        models_res = requests.get("https://api.anthropic.com/v1/models", headers=headers)
+        try:
+            models_res = requests.get("https://api.anthropic.com/v1/models", headers=headers, timeout=10)
+        except RequestException as exc:
+            logger.error(f"Failed to fetch Anthropic models: {exc}")
+            return {"success": False, "error": f"Failed to connect to Anthropic: {exc}", "status_code": 503}
+
         if models_res.status_code != 200:
-            return {"success": False, "error": f"Anthropic Authorization Failed: {models_res.text}"}
+            return {"success": False, "error": f"Anthropic Authorization Failed: {models_res.text}", "status_code": 400}
         models = models_res.json().get("data", [])
         result_list = []
         for m in models:
@@ -148,7 +162,7 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
                 "name": model_id,
                 "fullName": model_id,
                 "displayName": m.get("display_name") or model_id,
-                "description": f"Anthropic model created at {m.get('created_at', 'N/A')}.",
+                "description": f"Anthropic model created at {m.get('created_at', 'N/A')}",
                 "inputTokenLimit": None,
                 "outputTokenLimit": None,
                 "supportedActions": ["chat"]
@@ -157,15 +171,27 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
 
     elif provider == "huggingface":
         import requests
+        from requests.exceptions import RequestException
+
         headers = {"Authorization": f"Bearer {api_key}"}
-        auth_res = requests.get("https://huggingface.co/api/whoami-v2", headers=headers)
+        try:
+            auth_res = requests.get("https://huggingface.co/api/whoami-v2", headers=headers, timeout=10)
+        except RequestException as exc:
+            logger.error(f"Failed to authenticate with Hugging Face Hub: {exc}")
+            return {"success": False, "error": f"Failed to connect to Hugging Face: {exc}", "status_code": 503}
+
         if auth_res.status_code != 200:
-            return {"success": False, "error": f"Hugging Face Authorization Failed: {auth_res.text}"}
+            return {"success": False, "error": f"Hugging Face Authorization Failed: {auth_res.text}", "status_code": 400}
 
         params = {"limit": 150, "sort": "downloads", "direction": -1}
-        models_res = requests.get("https://huggingface.co/api/models", params=params, headers=headers)
+        try:
+            models_res = requests.get("https://huggingface.co/api/models", params=params, headers=headers, timeout=10)
+        except RequestException as exc:
+            logger.error(f"Failed to fetch Hugging Face models: {exc}")
+            return {"success": False, "error": f"Failed to connect to Hugging Face: {exc}", "status_code": 503}
+
         if models_res.status_code != 200:
-            return {"success": False, "error": f"Failed to fetch models from Hugging Face Hub: {models_res.text}"}
+            return {"success": False, "error": f"Failed to fetch models from Hugging Face Hub: {models_res.text}", "status_code": 400}
 
         models = models_res.json()
         result_list = []
@@ -177,7 +203,7 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
                 "name": m.get("id", ""),
                 "fullName": m.get("id", ""),
                 "displayName": m.get("id", ""),
-                "description": f"Hugging Face repository model. Library: {m.get('library_name','N/A')}.",
+                "description": f"Hugging Face repository model. Library: {m.get('library_name','N/A')}",
                 "inputTokenLimit": None,
                 "outputTokenLimit": None,
                 "supportedActions": [pipeline_tag] if pipeline_tag else []

@@ -131,7 +131,7 @@ export function useCompileActions({
     try {
       abortControllerRef.current = new AbortController();
       console.log("[API] Analyzing image for panel", panelId);
-      const data = await api.analyzeImage(
+      const data = await api.analyzeSingleImage(
         activeFetch,
         {
           url: imageUrl,
@@ -150,14 +150,24 @@ export function useCompileActions({
               ? {
                   ...p,
                   speech_text: data.analysis.speech_text || p.speech_text,
+                  dialogueSubtitleText: data.analysis.speech_text || p.speech_text,
                   sfx: data.analysis.sfx || p.sfx,
+                  soundEffectSfx: data.analysis.sfx || p.sfx,
                   // Always use System duration if it's a valid positive number
                   duration: aiDuration > 0 ? aiDuration : p.duration,
+                  timingSec: aiDuration > 0 ? aiDuration : p.duration,
                   // Always use System motion if it returned a valid value
                   motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                  camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
                   visual_description:
                     data.analysis.visual_description || p.visual_description,
+                  visual_scene_description:
+                    data.analysis.visual_description || p.visual_description,
                   audio_url: data.audio_url || p.audio_url,
+                  narrative:
+                    data.narrative || data.analysis?.narrative || p.narrative,
+                  narrative_audio_url:
+                    data.narrative_audio_url || data.analysis?.narrative_audio_url || p.narrative_audio_url,
                   isAnalyzing: false,
                 }
               : p
@@ -246,39 +256,52 @@ export function useCompileActions({
       const targetPanels = panels.filter((p) => selectedIds.includes(p.id));
       abortControllerRef.current = new AbortController();
 
-      const imageUrls = targetPanels.map((p) => p.image_url);
-
-      const data = await api.analyzeSequence(
+      const data = await api.analyzeSelectedPanels(
         activeFetch,
         {
-          urls: imageUrls,
+          panels: targetPanels.map((p) => ({ id: p.id, url: p.image_url })),
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
-          speech_rate: speechRate,
-          speech_pitch: speechPitch,
         },
         { signal: abortControllerRef.current.signal }
       );
 
       if (data.success && data.results) {
+        const resultsById = new Map<number, any>();
+        data.results.forEach((r: any) => {
+          if (typeof r.id === "number") {
+            resultsById.set(r.id, r);
+          }
+        });
+
         setPanels((prev) =>
           prev.map((p) => {
             if (!selectedIds.includes(p.id)) return p;
 
-            const result = data.results.find((r: any) => r.url === p.image_url);
+            const result = resultsById.get(p.id);
             if (result && result.analysis) {
               const aiDuration = Number(result.analysis.duration);
               const aiMotion = String(result.analysis.motion_type || "").trim();
               return {
                 ...p,
                 speech_text: result.analysis.speech_text || p.speech_text,
+                dialogueSubtitleText: result.analysis.speech_text || p.speech_text,
                 sfx: result.analysis.sfx || p.sfx,
+                soundEffectSfx: result.analysis.sfx || p.sfx,
                 duration: aiDuration > 0 ? aiDuration : p.duration,
+                timingSec: aiDuration > 0 ? aiDuration : p.duration,
                 motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
                 visual_description:
                   result.analysis.visual_description || p.visual_description,
+                visual_scene_description:
+                  result.analysis.visual_description || p.visual_description,
                 audio_url: result.audio_url || p.audio_url,
+                narrative:
+                  result.narrative || result.narrativeText || result.analysis?.narrative || result.analysis?.narrativeText || p.narrative,
+                narrative_audio_url:
+                  result.narrative_audio_url || result.analysis?.narrative_audio_url || p.narrative_audio_url,
                 isAnalyzing: false,
               };
             }
@@ -288,68 +311,9 @@ export function useCompileActions({
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Sequence Analysis] Context-aware storyboard script generated for ${imageUrls.length} frames!`,
+            `[Sequence Analysis] Context-aware storyboard script generated for ${targetPanels.length} frames!`,
             ...prev,
           ]);
-        }
-
-        // Chained Step B: Immediately pipe visual descriptions into narrative generation workflow
-        if (!abortSignalRef.current.aborted) {
-          const visualDescriptions = data.results.map(
-            (r: any) => r.analysis?.visual_description || "An illustration panel."
-          );
-
-          if (addNotification) {
-            addNotification(
-              "Generating Narrative... (Phase 1 & 2)",
-              "info"
-            );
-          }
-          if (setConsoleLogs) {
-            setConsoleLogs((prev) => [
-              `[Narrative Generation] Extracting visual descriptions and initiating narrative pipeline...`,
-              ...prev,
-            ]);
-          }
-
-          const narratorVoice = localStorage.getItem("ai_comic_narrator_voice") || "Sultry Narrative Tone (Female)";
-
-          const narrativeRes = await api.analyzeNarrativeSequence(
-            activeFetch,
-            {
-              visual_descriptions: visualDescriptions,
-              model: activeModel,
-              voice: narratorVoice,
-            },
-            { signal: abortControllerRef.current.signal }
-          );
-
-          if (narrativeRes.success && narrativeRes.results) {
-            setPanels((prev) =>
-              prev.map((p) => {
-                if (!selectedIds.includes(p.id)) return p;
-                const idxInSelection = selectedIds.indexOf(p.id);
-                const navResult = narrativeRes.results[idxInSelection];
-                if (navResult) {
-                  return {
-                    ...p,
-                    narrative: navResult.narrative,
-                    narrative_audio_url: navResult.narrative_audio_url,
-                  };
-                }
-                return p;
-              })
-            );
-
-            if (setConsoleLogs) {
-              setConsoleLogs((prev) => [
-                `[Narrative Generation] Successfully generated ${narrativeRes.results.length} narrative voiceovers and audio files!`,
-                ...prev,
-              ]);
-            }
-          } else {
-            console.warn("[Narrative Generation] Failed:", narrativeRes.error);
-          }
         }
       } else {
         throw new Error(
@@ -418,15 +382,13 @@ export function useCompileActions({
       const imageUrls = panels.map((p) => p.image_url);
 
       // Phase 1: Context-aware multimodal panel/sequence analysis
-      const data = await api.analyzeSequence(
+      const data = await api.analyzeAllPanels(
         activeFetch,
         {
-          urls: imageUrls,
+          panels: panels.map((p) => ({ id: p.id, url: p.image_url })),
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
-          speech_rate: speechRate,
-          speech_pitch: speechPitch,
         },
         { signal: abortControllerRef.current.signal }
       );
@@ -434,22 +396,39 @@ export function useCompileActions({
       if (abortSignalRef.current.aborted) return;
 
       if (data.success && data.results) {
+        const resultsById = new Map<number, any>();
+        data.results.forEach((r: any) => {
+          if (typeof r.id === "number") {
+            resultsById.set(r.id, r);
+          }
+        });
+
         // Map of results to panels state
         setPanels((prev) =>
           prev.map((p) => {
-            const result = data.results.find((r: any) => r.url === p.image_url);
+            const result = resultsById.get(p.id);
             if (result && result.analysis) {
               const aiDuration = Number(result.analysis.duration);
               const aiMotion = String(result.analysis.motion_type || "").trim();
               return {
                 ...p,
                 speech_text: result.analysis.speech_text || p.speech_text,
+                dialogueSubtitleText: result.analysis.speech_text || p.speech_text,
                 sfx: result.analysis.sfx || p.sfx,
+                soundEffectSfx: result.analysis.sfx || p.sfx,
                 duration: aiDuration > 0 ? aiDuration : p.duration,
+                timingSec: aiDuration > 0 ? aiDuration : p.duration,
                 motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
                 visual_description:
                   result.analysis.visual_description || p.visual_description,
+                visual_scene_description:
+                  result.analysis.visual_description || p.visual_description,
                 audio_url: result.audio_url || p.audio_url,
+                narrative:
+                  result.narrative || result.narrativeText || result.analysis?.narrative || result.analysis?.narrativeText || p.narrative,
+                narrative_audio_url:
+                  result.narrative_audio_url || result.analysis?.narrative_audio_url || p.narrative_audio_url,
               };
             }
             return p;
@@ -463,61 +442,11 @@ export function useCompileActions({
           ]);
         }
 
-        // Phase 2 & 3: Storyteller Narratives & Voiceovers
-        if (!abortSignalRef.current.aborted) {
-          const visualDescriptions = data.results.map(
-            (r: any) => r.analysis?.visual_description || "An illustration panel."
-          );
-
-          if (addNotification) {
-            addNotification("Writing Narratives & Synthesizing Voiceovers... (Phase 2 & 3)", "info");
-          }
-          if (setConsoleLogs) {
-            setConsoleLogs((prev) => [
-              `[Narrative Generation] Extracting visual descriptions and initiating storytelling narrative pipeline...`,
-              ...prev,
-            ]);
-          }
-
-          const narratorVoice = localStorage.getItem("ai_comic_narrator_voice") || "Sultry Narrative Tone (Female)";
-
-          const narrativeRes = await api.analyzeNarrativeSequence(
-            activeFetch,
-            {
-              visual_descriptions: visualDescriptions,
-              model: activeModel,
-              voice: narratorVoice,
-            },
-            { signal: abortControllerRef.current.signal }
-          );
-
-          if (abortSignalRef.current.aborted) return;
-
-          if (narrativeRes.success && narrativeRes.results) {
-            setPanels((prev) =>
-              prev.map((p, idx) => {
-                const navResult = narrativeRes.results[idx];
-                if (navResult) {
-                  return {
-                    ...p,
-                    narrative: navResult.narrative,
-                    narrative_audio_url: navResult.narrative_audio_url,
-                    isAnalyzing: false,
-                  };
-                }
-                return { ...p, isAnalyzing: false };
-              })
-            );
-
-            if (setConsoleLogs) {
-              setConsoleLogs((prev) => [
-                `[Narrative Generation] Successfully generated ${narrativeRes.results.length} narrative voiceovers and audio files!`,
-                ...prev,
-              ]);
-            }
-          } else {
-            throw new Error(narrativeRes.error || "Failed to generate narratives.");
-          }
+        if (setConsoleLogs) {
+          setConsoleLogs((prev) => [
+            `[Sequence Analysis] Narrative and TTS generation completed for all panels in a single request!`,
+            ...prev,
+          ]);
         }
       } else {
         throw new Error(

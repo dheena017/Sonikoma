@@ -150,6 +150,23 @@ def init_postgres(conn) -> None:
             )
             conn.commit()
 
+        # narrative column on panels
+        try:
+            row_panel_col = conn.execute(
+                "SELECT EXISTS ("
+                "  SELECT FROM information_schema.columns"
+                "  WHERE table_schema = 'public'"
+                "    AND table_name = 'panels'"
+                "    AND column_name = 'narrative'"
+                ") as exists"
+            ).fetchone()
+            if not row_panel_col or not row_panel_col.get("exists"):
+                logger.info("[Database] Migration: adding 'narrative' column to 'panels' table...")
+                conn.execute("ALTER TABLE panels ADD COLUMN narrative TEXT")
+                conn.commit()
+        except Exception:
+            pass
+
     except Exception as e:
         logger.error(f"[Database] Error checking PostgreSQL schema: {e}")
     finally:
@@ -218,6 +235,8 @@ def init_sqlite(conn) -> None:
                         "added 'total_tokens_used' to 'chapters'")
         _run_safe_alter(cursor, conn, "ALTER TABLE chapters ADD COLUMN audio_settings TEXT",
                         "added 'audio_settings' to 'chapters'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE panels ADD COLUMN narrative TEXT",
+                        "added 'narrative' to 'panels'")
         _run_safe_alter(cursor, conn,
                         "ALTER TABLE users ADD COLUMN is_locked INTEGER NOT NULL DEFAULT 0",
                         "added 'is_locked' to 'users'")

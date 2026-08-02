@@ -7,33 +7,60 @@ It delegates persistence to the repository layer and ensures no data access logi
 
 import os
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional, Protocol, cast
 
+from core.settings import NODE_ENV
 from database.transaction import unwrap_proxy_url
 
 logger = logging.getLogger("sonikoma.services.project")
 
 
-class ProjectService:
-    def __init__(self, repo=None):
-        self.repo = repo or self._default_repo()
+class ProjectRepositoryProtocol(Protocol):
+    def get_project(self, project_id: str) -> Any: ...
+    def get_project_by_slug(self, project_id: str) -> Any: ...
+    def insert_project(self, project: Any) -> None: ...
+    def insert_panels(self, project_id: str, panels: Any) -> None: ...
+    def update_project(self, project_id: str, updates: dict[str, Any]) -> None: ...
+    def update_project_full(self, project_id: str, updates: dict[str, Any], db_panels: Any) -> None: ...
+    def increment_project_tokens(self, project_id: str, tokens: int) -> None: ...
 
-    def _default_repo(self):
+
+class ProjectService:
+    def __init__(self, repo: Optional[ProjectRepositoryProtocol] = None):
+        self.repo: ProjectRepositoryProtocol = repo or self._default_repo()
+
+    def _default_repo(self) -> ProjectRepositoryProtocol:
         from repositories.project import (
             get_project,
             get_project_by_slug,
             insert_project,
+            insert_panels,
+            update_project,
+            update_project_full,
+            increment_project_tokens,
         )
 
-        return type(
-            "_ProjectRepositoryAdapter",
-            (),
-            {
-                "get_project": staticmethod(get_project),
-                "get_project_by_slug": staticmethod(get_project_by_slug),
-                "insert_project": staticmethod(insert_project),
-            },
-        )()
+        return cast(
+            ProjectRepositoryProtocol,
+            type(
+                "_ProjectRepositoryAdapter",
+                (),
+                {
+                    "get_project": staticmethod(get_project),
+                    "get_project_by_slug": staticmethod(get_project_by_slug),
+                    "insert_project": staticmethod(insert_project),
+                    "insert_panels": staticmethod(insert_panels),
+                    "update_project": staticmethod(update_project),
+                    "update_project_full": staticmethod(update_project_full),
+                    "increment_project_tokens": staticmethod(increment_project_tokens),
+                },
+            )(),
+        )
+
+    def _get_panel_field(self, panel: Any, field: str, default: Any = None) -> Any:
+        if isinstance(panel, dict):
+            return panel.get(field, default)
+        return getattr(panel, field, default)
 
     def create_project(self, body: Any, current_user_id: str) -> Dict[str, Any]:
         existing = self.repo.get_project(body.project_id)
@@ -74,23 +101,24 @@ class ProjectService:
         db_panels = []
         for panel in panels:
             payload = {
-                "image_url": unwrap_proxy_url(panel.image_url),
-                "speech_text": panel.speech_text,
-                "sfx": panel.sfx,
-                "duration": panel.duration,
-                "motion_type": panel.motion_type,
-                "visual_description": panel.visual_description,
-                "brightness": panel.brightness,
-                "contrast": panel.contrast,
-                "saturation": panel.saturation,
-                "grayscale": panel.grayscale,
-                "filter_preset": panel.filter_preset,
-                "bubble_method": panel.bubble_method,
-                "bubble_sensitivity": panel.bubble_sensitivity,
-                "bubble_dilation": panel.bubble_dilation,
-                "inpaint_radius": panel.inpaint_radius,
-                "detection_style": panel.detection_style,
-                "original_url": unwrap_proxy_url(panel.original_image_url),
+                "image_url": unwrap_proxy_url(self._get_panel_field(panel, "image_url", "")),
+                "speech_text": self._get_panel_field(panel, "speech_text", ""),
+                "sfx": self._get_panel_field(panel, "sfx", ""),
+                "duration": self._get_panel_field(panel, "duration", 4.5),
+                "motion_type": self._get_panel_field(panel, "motion_type", "zoom_in"),
+                "visual_description": self._get_panel_field(panel, "visual_description", None),
+                "narrative": self._get_panel_field(panel, "narrative", None),
+                "brightness": self._get_panel_field(panel, "brightness", None),
+                "contrast": self._get_panel_field(panel, "contrast", None),
+                "saturation": self._get_panel_field(panel, "saturation", None),
+                "grayscale": self._get_panel_field(panel, "grayscale", False),
+                "filter_preset": self._get_panel_field(panel, "filter_preset", None),
+                "bubble_method": self._get_panel_field(panel, "bubble_method", None),
+                "bubble_sensitivity": self._get_panel_field(panel, "bubble_sensitivity", None),
+                "bubble_dilation": self._get_panel_field(panel, "bubble_dilation", None),
+                "inpaint_radius": self._get_panel_field(panel, "inpaint_radius", None),
+                "detection_style": self._get_panel_field(panel, "detection_style", None),
+                "original_url": unwrap_proxy_url(self._get_panel_field(panel, "original_image_url", None)),
             }
             db_panels.append(payload)
 
@@ -166,23 +194,24 @@ class ProjectService:
             db_panels = []
             for panel in body.panels:
                 payload = {
-                    "image_url": unwrap_proxy_url(panel.image_url),
-                    "speech_text": panel.speech_text,
-                    "sfx": panel.sfx,
-                    "duration": panel.duration,
-                    "motion_type": panel.motion_type,
-                    "visual_description": panel.visual_description,
-                    "brightness": panel.brightness,
-                    "contrast": panel.contrast,
-                    "saturation": panel.saturation,
-                    "grayscale": panel.grayscale,
-                    "filter_preset": panel.filter_preset,
-                    "bubble_method": panel.bubble_method,
-                    "bubble_sensitivity": panel.bubble_sensitivity,
-                    "bubble_dilation": panel.bubble_dilation,
-                    "inpaint_radius": panel.inpaint_radius,
-                    "detection_style": panel.detection_style,
-                    "original_url": unwrap_proxy_url(panel.original_image_url),
+                    "image_url": unwrap_proxy_url(self._get_panel_field(panel, "image_url", "")),
+                    "speech_text": self._get_panel_field(panel, "speech_text", ""),
+                    "sfx": self._get_panel_field(panel, "sfx", ""),
+                    "duration": self._get_panel_field(panel, "duration", 4.5),
+                    "motion_type": self._get_panel_field(panel, "motion_type", "zoom_in"),
+                    "visual_description": self._get_panel_field(panel, "visual_description", None),
+                    "narrative": self._get_panel_field(panel, "narrative", None),
+                    "brightness": self._get_panel_field(panel, "brightness", None),
+                    "contrast": self._get_panel_field(panel, "contrast", None),
+                    "saturation": self._get_panel_field(panel, "saturation", None),
+                    "grayscale": self._get_panel_field(panel, "grayscale", False),
+                    "filter_preset": self._get_panel_field(panel, "filter_preset", None),
+                    "bubble_method": self._get_panel_field(panel, "bubble_method", None),
+                    "bubble_sensitivity": self._get_panel_field(panel, "bubble_sensitivity", None),
+                    "bubble_dilation": self._get_panel_field(panel, "bubble_dilation", None),
+                    "inpaint_radius": self._get_panel_field(panel, "inpaint_radius", None),
+                    "detection_style": self._get_panel_field(panel, "detection_style", None),
+                    "original_url": unwrap_proxy_url(self._get_panel_field(panel, "original_image_url", None)),
                 }
                 db_panels.append(payload)
 
@@ -195,6 +224,16 @@ class ProjectService:
         }
 
     def sync_project_to_supabase(self, project_id: str, body: Any, current_user_id: str) -> None:
+        if body is None:
+            return
+
+        if NODE_ENV != "production":
+            logger.debug(
+                f"Supabase sync skipped because NODE_ENV={NODE_ENV}. "
+                "Set NODE_ENV=production to enable Supabase sync."
+            )
+            return
+
         try:
             from database.supabase import supabase
             if supabase:

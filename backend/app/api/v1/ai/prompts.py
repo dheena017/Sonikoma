@@ -33,7 +33,8 @@ async def api_list_models(
 
     result = await facade_list_models(provider=provider, api_key=api_key)
     if not result.get("success"):
-        raise HTTPException(status_code=400, detail=result.get("error"))
+        status_code = result.get("status_code", 400)
+        raise HTTPException(status_code=status_code, detail=result.get("error"))
     return result
 
 

@@ -17,7 +17,7 @@ import sqlite3
 import logging
 import urllib.parse
 from contextlib import contextmanager
-from typing import Iterator
+from typing import Any, Iterator, Optional
 
 logger = logging.getLogger("sonikoma.database.transaction")
 
@@ -36,7 +36,7 @@ def create_slug(title: str) -> str:
     return slug.strip("-")
 
 
-def generate_unique_slug(title: str, table: str, conn: sqlite3.Connection) -> str:
+def generate_unique_slug(title: str, table: str, conn: Any) -> str:
     """Generate a unique slug, appending an integer counter when needed."""
     base_slug = create_slug(title)
     if not base_slug:
@@ -96,7 +96,7 @@ def managed_transaction(conn) -> Iterator:
 # ── URL helpers ───────────────────────────────────────────────────────────
 
 
-def unwrap_proxy_url(url_str: str) -> str:
+def unwrap_proxy_url(url_str: Optional[str]) -> str:
     """Recursively unwrap nested /api/proxy-image redirect URLs."""
     if not url_str:
         return ""

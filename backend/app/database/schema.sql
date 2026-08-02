@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS panels (
   duration         REAL    NOT NULL DEFAULT 4.5,
   motion_type      TEXT    NOT NULL DEFAULT 'zoom_in',
   visual_description TEXT,
+  narrative        TEXT,
   brightness       REAL,
   contrast         REAL,
   saturation       REAL,

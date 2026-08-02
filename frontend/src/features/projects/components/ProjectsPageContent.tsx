@@ -34,6 +34,7 @@ export default function ProjectsPageContent() {
       handleCopyLink={page.handleCopyLink}
       handleDeleteSingle={page.handleDeleteSingle}
       handleBulkDelete={page.handleBulkDelete}
+      handleOpenCreativeSuite={page.handleOpenCreativeSuite}
       toggleSelection={page.toggleSelection}
       toggleMenu={page.toggleMenu}
       toggleSelectAll={page.toggleSelectAll}

@@ -64,8 +64,21 @@ class PostgresConnectionWrapper:
     def commit(self):
         self.conn.commit()
 
+    def rollback(self):
+        self.conn.rollback()
+
     def close(self):
         self.conn.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            self.conn.rollback()
+        else:
+            self.conn.commit()
+        return False
 
 def _create_db_connection():
     if config.is_postgres:

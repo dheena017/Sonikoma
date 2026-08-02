@@ -122,7 +122,7 @@ async def merge_images(body: StitchImagesRequest):
 
 @router.get("/cached/{cache_id}", summary="Retrieve stitched cached panel image")
 async def get_cached_stitch(request: Request, cache_id: str = Path(...)):
-    from services.image.stitch_cache_service import retrieve_cached_stitch_service
+    from services.image.stitch_cache_service import retrieve_cached_stitch_service, StitchedResourceNotFound
     try:
         referer = request.headers.get("referer") if request else None
         content_bytes, media_type = await retrieve_cached_stitch_service(cache_id, referer)
@@ -131,6 +131,9 @@ async def get_cached_stitch(request: Request, cache_id: str = Path(...)):
             media_type=media_type,
             headers={"Cache-Control": "public, max-age=86400"}
         )
+    except StitchedResourceNotFound as e:
+        logger.info(f"[Stitch Cache API] Missing/expired cache for '{cache_id}': {e}")
+        raise HTTPException(status_code=410, detail=str(e))
     except Exception as e:
         logger.error(f"[Stitch Cache API] Error retrieving cache: {e}", exc_info=True)
         raise HTTPException(status_code=404, detail=str(e))

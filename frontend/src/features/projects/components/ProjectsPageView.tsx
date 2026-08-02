@@ -31,6 +31,7 @@ export interface ProjectsPageViewProps {
   setViewMode: (value: ViewMode) => void;
   handleNewSeries: () => void;
   handleOpenProject: (project: Project) => void;
+  handleOpenCreativeSuite: (e: React.MouseEvent, project: Project) => void;
   handleExport: (e: React.MouseEvent, project: Project) => void;
   handleRename: (e: React.MouseEvent, project: Project) => void;
   handleOpenDetails: (e: React.MouseEvent, project: Project) => void;
@@ -66,6 +67,7 @@ export default function ProjectsPageView({
   setViewMode,
   handleNewSeries,
   handleOpenProject,
+  handleOpenCreativeSuite,
   handleExport,
   handleRename,
   handleOpenDetails,
@@ -118,6 +120,7 @@ export default function ProjectsPageView({
           toggleSelection={toggleSelection}
           toggleSelectAll={toggleSelectAll}
           onOpenProject={handleOpenProject}
+          onOpenCreativeSuite={handleOpenCreativeSuite}
           onOpenDetails={handleOpenDetails}
           onRename={handleRename}
           onExport={handleExport}

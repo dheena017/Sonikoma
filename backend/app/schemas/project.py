@@ -29,6 +29,7 @@ class PanelSaveItem(BaseModel):
     duration: Optional[float] = Field(0.0)
     motion_type: Optional[str] = Field("")
     visual_description: Optional[str] = Field(None)
+    narrative: Optional[str] = Field(None, description="Narrative text for the panel")
     brightness: Optional[float] = Field(None)
     contrast: Optional[float] = Field(None)
     saturation: Optional[float] = Field(None)

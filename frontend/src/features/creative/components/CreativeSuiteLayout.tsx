@@ -40,6 +40,27 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   const activeProjectData = useProjectStore((state) => state.activeProjectData);
   const activePanels = activeProjectData?.panels ?? panels ?? [];
 
+  const panelRequiredPaths = [
+    "/ai-optimizer",
+    "/panel-assistant",
+    "/ai-audio-lab",
+    "/ai-voice",
+    "/ai-translation",
+  ];
+  const requiresPanels = panelRequiredPaths.some(
+    (path) =>
+      currentPath === path ||
+      currentPath.startsWith(path + "?") ||
+      currentPath.startsWith(path + "/")
+  );
+  const hasActiveProject = Boolean(activeProjectData);
+  const allowWithoutActiveProject =
+    currentPath === "/creative-suite" ||
+    currentPath === "/creative-suite/" ||
+    currentPath === "/creative-suite-dashboard" ||
+    !requiresPanels;
+  const shouldShowFallbackUI = !hasActiveProject && !allowWithoutActiveProject;
+
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
 
@@ -58,14 +79,14 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
         </h3>
         
         <p className="text-sm text-neutral-400 leading-relaxed font-sans mb-6">
-          To use the Creative Suite tools (such as the Video Optimizer, Sound Lab, and Voice Studio), you must select and open a project from your dashboard first.
+          To use the Creative Suite tools (such as the Video Optimizer, Sound Lab, and Voice Studio), you must select and open a project from the Projects page first.
         </p>
         
         <button
-          onClick={() => navigateTo("/dashboard")}
+          onClick={() => navigateTo("/projects")}
           className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold font-mono tracking-wider uppercase transition-all active:scale-[0.98] shadow-lg shadow-purple-950/30 cursor-pointer border border-transparent"
         >
-          Go to Dashboard
+          Choose Project
         </button>
       </div>
     </div>
@@ -141,7 +162,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
             Main App
           </button>
         </div>
-        {activeProjectData ? children : <FallbackUI />}
+        {shouldShowFallbackUI ? <FallbackUI /> : children}
       </div>
     );
   }
@@ -224,7 +245,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
                 Main App
               </button>
             </div>
-            {activeProjectData ? children : <FallbackUI />}
+            {shouldShowFallbackUI ? <FallbackUI /> : children}
           </div>
         </main>
 

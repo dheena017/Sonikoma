@@ -2,6 +2,7 @@ import { LogEntry, normalizeLog } from "@/types/logs";
 import React, { useState, useCallback, useMemo } from "react";
 import { NotificationType } from "@/features/notification";
 import { processWithConcurrency } from "@/utils/batchUtils";
+import { getProxiedImageUrl } from "@/utils/url";
 import * as api from "@/api/index";
 
 interface UseSingleImageEditsProps {
@@ -70,12 +71,20 @@ export function useSingleImageEdits({
       });
 
       const croppedUrl = data.url;
+      const proxiedOriginalUrl = getProxiedImageUrl(originalUrl);
 
       // Replace original image with cropped image in asset list & update panel in Timeline in-place
       setScrapedImages((prev) => prev.map((img) => (img === originalUrl ? croppedUrl : img)));
       if (setPanels) {
         setPanels((prevPanels) =>
-          prevPanels.map((p) => (p.image_url === originalUrl ? { ...p, image_url: croppedUrl } : p))
+          prevPanels.map((p) => {
+            const matchesUrl =
+              p.image_url === originalUrl ||
+              p.image_url === proxiedOriginalUrl ||
+              p.original_url === originalUrl ||
+              p.original_url === proxiedOriginalUrl;
+            return matchesUrl ? { ...p, image_url: croppedUrl } : p;
+          })
         );
       }
 

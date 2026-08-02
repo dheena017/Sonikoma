@@ -718,19 +718,6 @@ const TimelineCard = ({
         } else {
           onToggleSelect();
         }
-        if (playStoryboardAudio) {
-          // Delay voice synthesis slightly so the UI state change and outline render instantly
-          setTimeout(() => {
-            playStoryboardAudio(idx);
-            if (!autoPlayAudio && !autoPlayHintShown) {
-              autoPlayHintShown = true;
-              addNotification?.(
-                "Auto-play is off. Enable Auto-play TTS Audios in settings to hear this panel automatically.",
-                "info"
-              );
-            }
-          }, 50);
-        }
       }, 250);
     };
   };

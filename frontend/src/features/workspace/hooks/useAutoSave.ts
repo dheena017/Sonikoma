@@ -110,6 +110,7 @@ export function useAutoSave(state: AutoSaveState) {
         image_url: p.image_url,
         original_url: p.original_url || null,
         speech_text: p.speech_text || "",
+        narrative: p.narrative || "",
         sfx: p.sfx || "",
         duration: p.duration || 4.5,
         motion_type: p.motion_type || "zoom_in",
@@ -364,6 +365,7 @@ export function useAutoSave(state: AutoSaveState) {
             image_url: p.image_url,
             original_url: p.original_url || null,
             speech_text: p.speech_text || "",
+            narrative: p.narrative || "",
             sfx: p.sfx || "",
             duration: p.duration || 4.5,
             motion_type: p.motion_type || "zoom_in",
@@ -451,6 +453,7 @@ export function useAutoSave(state: AutoSaveState) {
         }
         const detailMsg = [
           `Project ID: ${targetProjectId}`,
+          `Saved fields: title, genre, chapter number, chapter title, author, cover image, synopsis, status, audio settings, panels, scraped images`,
           `Series Title: ${state.seriesTitle || "Untitled"}`,
           `Chapter: ${
             state.chapterNumber ? `Chapter ${state.chapterNumber}` : "N/A"

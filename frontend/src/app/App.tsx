@@ -641,14 +641,15 @@ export default function App() {
           if (details.aiTasks.generateScript && currentPanels.length > 0) {
             try {
               addNotification("Running script extraction...", "info");
-              const seq = await api.analyzeSequence(fetchWithInterceptor, {
-                urls: currentPanels.map((p: any) => p.image_url),
+              const seq = await api.analyzeAllPanels(fetchWithInterceptor, {
+                panels: currentPanels.map((p: any) => ({ id: p.id, url: p.image_url })),
                 model: selectedModel,
                 narrationStyle,
+                voice: voiceActor,
               });
               if (seq.success && seq.results) {
-                const updated = currentPanels.map((p: any, i: number) => {
-                  const res = seq.results[i];
+                const updated = currentPanels.map((p: any) => {
+                  const res = seq.results.find((r: any) => r.id === p.id);
                   return res && res.analysis
                     ? {
                         ...p,
@@ -835,7 +836,6 @@ export default function App() {
       checkAuth={checkAuth}
       scrapedImages={scrapedImages}
       panels={panels}
-      editingImageIdx={editingImageIdx}
       setEditingImageIdx={setEditingImageIdx}
       setShowAutoCropModal={setShowAutoCropModal}
       setShowBubbleModal={setShowBubbleModal}
@@ -845,7 +845,6 @@ export default function App() {
       setVoiceActor={setVoiceActor}
       setMusicTheme={setMusicTheme}
       setAspectRatio={setAspectRatio}
-      setFrameRate={setFrameRate}
       addNotification={addNotification}
       voiceActor={voiceActor}
       musicTheme={musicTheme}
@@ -877,11 +876,9 @@ export default function App() {
       playStoryboardAudio={playStoryboardAudio}
       isCleaningBubbles={isCleaningBubbles}
       cleanProgress={cleanProgress}
-      bubbleCroppingImgUrl={bubbleCroppingImgUrl}
       showAutoCropModal={showAutoCropModal}
       isBatchCropping={isBatchCropping}
       batchProgress={batchProgress}
-      croppingImgUrl={croppingImgUrl}
       resetWorkspace={resetWorkspace}
       handleAutoCropSelected={handleAutoCropSelected}
       handleCleanBubblesSelected={handleCleanBubblesSelected}
@@ -1024,7 +1021,8 @@ export default function App() {
       registerProjectDetailsSaveHandler={registerProjectDetailsSaveHandler}
       projectDetailsSaveRef={projectDetailsSaveRef}
       saveStatus={saveStatus}
-      isDirty={isDirty}
-    />
+      isDirty={isDirty} editingImageIdx={0} setFrameRate={function (rate: number | null): void {
+        throw new Error("Function not implemented.");
+      } } bubbleCroppingImgUrl={""} croppingImgUrl={""}    />
   );
 }

@@ -31,6 +31,7 @@ interface ProjectCardProps {
   onOpenDetails?: (e: React.MouseEvent, project: ProjectCardItem) => void;
   onDelete?: (e: React.MouseEvent, projectId: string) => void;
   onCopyLink?: (e: React.MouseEvent, project: ProjectCardItem) => void;
+  onOpenCreativeSuite?: (e: React.MouseEvent, project: ProjectCardItem) => void;
   isSelected?: boolean;
   onToggleSelect?: (e: React.MouseEvent, projectId: string) => void;
   showSelection?: boolean;
@@ -62,6 +63,7 @@ export default function ProjectCard({
   onOpenDetails,
   onDelete,
   onCopyLink,
+  onOpenCreativeSuite,
   isSelected = false,
   onToggleSelect,
   showSelection = false,
@@ -258,46 +260,61 @@ export default function ProjectCard({
 
         {/* ─── Footer ───────────────────────────────────── */}
         <div className="flex items-center justify-between pt-2 mt-auto border-t border-neutral-800/60">
-          <div className="flex items-center gap-3">
-            {/* Panels count */}
-            {(() => {
-              const timelineCount = project.panels_count ?? 0;
-              const importedCount = project.imported_assets_count ?? 0;
-              const displayCount = timelineCount || importedCount || 0;
-              const hasDiff = timelineCount > 0 && importedCount > 0 && timelineCount !== importedCount;
+          <div className="flex items-center justify-between gap-3 w-full">
+            <div className="flex items-center gap-3">
+              {/* Panels count */}
+              {(() => {
+                const timelineCount = project.panels_count ?? 0;
+                const importedCount = project.imported_assets_count ?? 0;
+                const displayCount = timelineCount || importedCount || 0;
+                const hasDiff = timelineCount > 0 && importedCount > 0 && timelineCount !== importedCount;
 
-              return (
-                <div
-                  className="flex items-center gap-1 text-[10px] text-neutral-500"
-                  title={
-                    hasDiff
-                      ? `Storyboard Timeline: ${timelineCount} panels | Imported Assets: ${importedCount} assets`
-                      : `${displayCount} panels`
-                  }
-                >
-                  <Scissors className="h-3 w-3 text-purple-400/80" />
-                  <span className="font-semibold text-neutral-300">{displayCount}</span>
-                  <span>
-                    {hasDiff
-                      ? `panels (${importedCount} imported)`
-                      : importedCount > 0 && timelineCount === 0
-                      ? "imported panels"
-                      : "panels"}
-                  </span>
-                </div>
-              );
-            })()}
-            {/* Time ago */}
-            <div className="flex items-center gap-1 text-[10px] text-neutral-600">
-              <Clock className="h-3 w-3" />
-              <span>{timeAgo(project.created_at)}</span>
+                return (
+                  <div
+                    className="flex items-center gap-1 text-[10px] text-neutral-500"
+                    title={
+                      hasDiff
+                        ? `Storyboard Timeline: ${timelineCount} panels | Imported Assets: ${importedCount} assets`
+                        : `${displayCount} panels`
+                    }
+                  >
+                    <Scissors className="h-3 w-3 text-purple-400/80" />
+                    <span className="font-semibold text-neutral-300">{displayCount}</span>
+                    <span>
+                      {hasDiff
+                        ? `panels (${importedCount} imported)`
+                        : importedCount > 0 && timelineCount === 0
+                        ? "imported panels"
+                        : "panels"}
+                    </span>
+                  </div>
+                );
+              })()}
+              {/* Time ago */}
+              <div className="flex items-center gap-1 text-[10px] text-neutral-600">
+                <Clock className="h-3 w-3" />
+                <span>{timeAgo(project.created_at)}</span>
+              </div>
             </div>
-          </div>
 
-          {/* Resume arrow */}
-          <div className="flex items-center gap-1.5 text-[10px] font-semibold text-purple-400 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
-            Resume
-            <ArrowRight className="w-3 h-3" />
+            <div className="flex items-center gap-2">
+              {onOpenCreativeSuite && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenCreativeSuite(e, project);
+                  }}
+                  className="px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-200 hover:bg-purple-500/20 transition-all active:scale-95"
+                >
+                  Creative
+                </button>
+              )}
+              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-purple-400 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
+                Resume
+                <ArrowRight className="w-3 h-3" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

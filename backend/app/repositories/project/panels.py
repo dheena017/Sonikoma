@@ -47,10 +47,10 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                 conn.execute("""
                     INSERT INTO panels (
                         chapter_id, panel_index, image_url, original_url, speech_text, sfx,
-                        duration, motion_type, visual_description, brightness, contrast, saturation,
+                        duration, motion_type, visual_description, narrative, brightness, contrast, saturation,
                         grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
                         inpaint_radius, detection_style
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     project_id,
                     i,
@@ -61,6 +61,7 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                     p.get('duration') if p.get('duration') is not None else 4.5,
                     p.get('motion_type') or "zoom_in",
                     visual_description or None,
+                    p.get('narrative') or None,
                     p.get('brightness'),
                     p.get('contrast'),
                     p.get('saturation'),

@@ -65,3 +65,25 @@ def test_panel_crop_cache_records_original_url():
     assert edit_history.get(panels[0]["croppedUrl"]) == "https://example.com/source.jpg"
 
 
+def test_edit_history_persists_string_values_on_warm_up(tmp_path):
+    from core.cache import edit_history
+
+    # Clear any existing cache and ensure a clean disk cache directory.
+    edit_history.clear()
+    edit_history.disk_dir = str(tmp_path / "editHistory")
+
+    # Persist a string-only value and simulate a restart.
+    cache_key = "/api/image/cached/panel_crop_123_1"
+    original_url = "https://example.com/source.jpg"
+    edit_history.set(cache_key, original_url)
+
+    # Build a new CacheStore instance to simulate process restart and warm-up.
+    from core.cache import CacheStore
+    restarted_cache = CacheStore(name="editHistory", default_ttl_sec=None, max_size=200, persistent=True)
+    restarted_cache.disk_dir = edit_history.disk_dir
+    loaded = restarted_cache.warm_up()
+
+    assert loaded == 1
+    assert restarted_cache.get(cache_key) == original_url
+
+

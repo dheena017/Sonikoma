@@ -11,6 +11,7 @@ import json
 import tempfile
 import shutil
 from typing import Dict, Any, Optional, TypeVar, Generic
+from urllib.parse import quote, unquote
 
 T = TypeVar('T')
 
@@ -44,36 +45,81 @@ class CacheStore(Generic[T]):
         else:
             self.disk_dir = os.path.join(tempfile.gettempdir(), "sonikoma_disk_cache", name)
 
+    def _disk_safe_key(self, key: str) -> str:
+        return quote(key, safe='')
+
     def _write_to_disk(self, key: str, value: Any) -> None:
         try:
             os.makedirs(self.disk_dir, exist_ok=True)
+            safe_key = self._disk_safe_key(key)
+            bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
+            json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
+
             if isinstance(value, bytes):
-                with open(os.path.join(self.disk_dir, f"{key}.bin"), "wb") as f:
+                with open(bin_path, "wb") as f:
                     f.write(value)
+                if os.path.exists(json_path):
+                    os.remove(json_path)
             elif isinstance(value, dict) and "data" in value and isinstance(value["data"], bytes):
-                # Save image bytes
-                with open(os.path.join(self.disk_dir, f"{key}.bin"), "wb") as f:
+                with open(bin_path, "wb") as f:
                     f.write(value["data"])
-                # Save metadata (content_type, etc.) separately
                 meta = {k: v for k, v in value.items() if k != "data"}
-                with open(os.path.join(self.disk_dir, f"{key}.json"), "w", encoding="utf-8") as f:
+                with open(json_path, "w", encoding="utf-8") as f:
                     json.dump(meta, f)
+            else:
+                with open(json_path, "w", encoding="utf-8") as f:
+                    json.dump(value, f)
+                if os.path.exists(bin_path):
+                    os.remove(bin_path)
         except Exception:
             pass
 
+    def _legacy_disk_paths(self, key: str) -> tuple[str, str]:
+        stripped = key.lstrip("/")
+        if stripped:
+            legacy_base = os.path.join(self.disk_dir, *stripped.split("/"))
+        else:
+            legacy_base = self.disk_dir
+        return f"{legacy_base}.bin", f"{legacy_base}.json"
+
     def _read_from_disk(self, key: str) -> Optional[Any]:
         try:
-            bin_path = os.path.join(self.disk_dir, f"{key}.bin")
-            json_path = os.path.join(self.disk_dir, f"{key}.json")
+            safe_key = self._disk_safe_key(key)
+            bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
+            json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
+
+            if os.path.exists(json_path):
+                with open(json_path, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                if os.path.exists(bin_path):
+                    with open(bin_path, "rb") as f:
+                        data = f.read()
+                    if isinstance(meta, dict):
+                        meta["data"] = data
+                        return meta
+                    return {"data": data, "meta": meta}
+                return meta
+
             if os.path.exists(bin_path):
                 with open(bin_path, "rb") as f:
-                    data = f.read()
-                if os.path.exists(json_path):
-                    with open(json_path, "r", encoding="utf-8") as f:
-                        meta = json.load(f)
-                    meta["data"] = data
-                    return meta
-                return data
+                    return f.read()
+
+            legacy_bin_path, legacy_json_path = self._legacy_disk_paths(key)
+            if os.path.exists(legacy_json_path):
+                with open(legacy_json_path, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                if os.path.exists(legacy_bin_path):
+                    with open(legacy_bin_path, "rb") as f:
+                        data = f.read()
+                    if isinstance(meta, dict):
+                        meta["data"] = data
+                        return meta
+                    return {"data": data, "meta": meta}
+                return meta
+
+            if os.path.exists(legacy_bin_path):
+                with open(legacy_bin_path, "rb") as f:
+                    return f.read()
         except Exception:
             pass
         return None
@@ -89,9 +135,16 @@ class CacheStore(Generic[T]):
         if not os.path.exists(self.disk_dir):
             return 0
         try:
-            for fname in os.listdir(self.disk_dir):
-                if fname.endswith(".bin"):
-                    key = fname[:-4]  # strip .bin extension
+            for root, _, files in os.walk(self.disk_dir):
+                for fname in files:
+                    if not (fname.endswith(".bin") or fname.endswith(".json")):
+                        continue
+                    rel_path = os.path.relpath(os.path.join(root, fname), self.disk_dir)
+                    if rel_path.endswith(".bin"):
+                        safe_key = rel_path[:-4]
+                    else:
+                        safe_key = rel_path[:-5]
+                    key = unquote(safe_key.replace(os.path.sep, "/"))
                     if key not in self.store:
                         val = self._read_from_disk(key)
                         if val is not None:
@@ -130,13 +183,19 @@ class CacheStore(Generic[T]):
         # Check TTL expiration
         if entry.expires_at is not None and time.time() > entry.expires_at:
             self.store.pop(key, None)
+            safe_key = self._disk_safe_key(key)
+            legacy_bin_path, legacy_json_path = self._legacy_disk_paths(key)
             try:
-                bin_path = os.path.join(self.disk_dir, f"{key}.bin")
-                json_path = os.path.join(self.disk_dir, f"{key}.json")
+                bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
+                json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
                 if os.path.exists(bin_path):
                     os.remove(bin_path)
                 if os.path.exists(json_path):
                     os.remove(json_path)
+                if os.path.exists(legacy_bin_path):
+                    os.remove(legacy_bin_path)
+                if os.path.exists(legacy_json_path):
+                    os.remove(legacy_json_path)
             except Exception:
                 pass
             self.evictions += 1
@@ -151,14 +210,22 @@ class CacheStore(Generic[T]):
 
     def delete(self, key: str) -> bool:
         on_disk = False
+        safe_key = self._disk_safe_key(key)
+        legacy_bin_path, legacy_json_path = self._legacy_disk_paths(key)
         try:
-            bin_path = os.path.join(self.disk_dir, f"{key}.bin")
-            json_path = os.path.join(self.disk_dir, f"{key}.json")
+            bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
+            json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
             if os.path.exists(bin_path):
                 os.remove(bin_path)
                 on_disk = True
             if os.path.exists(json_path):
                 os.remove(json_path)
+                on_disk = True
+            if os.path.exists(legacy_bin_path):
+                os.remove(legacy_bin_path)
+                on_disk = True
+            if os.path.exists(legacy_json_path):
+                os.remove(legacy_json_path)
                 on_disk = True
         except Exception:
             pass
@@ -189,9 +256,10 @@ class CacheStore(Generic[T]):
         ]
         for k in expired_keys:
             self.store.pop(k, None)
+            safe_key = self._disk_safe_key(k)
             try:
-                bin_path = os.path.join(self.disk_dir, f"{k}.bin")
-                json_path = os.path.join(self.disk_dir, f"{k}.json")
+                bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
+                json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
                 if os.path.exists(bin_path):
                     os.remove(bin_path)
                 if os.path.exists(json_path):

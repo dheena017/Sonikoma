@@ -15,7 +15,6 @@ from api.dependencies.auth import get_current_user
 
 from services.user.credit_service import get_available_credits, record_credit_transaction
 from schemas.ai import (
-    AnalyzeNarrativeSequenceRequest,
     GenerateSequenceNarrativeRequest,
     SFXAudioRequest,
     BGMVibeRequest,
@@ -34,33 +33,6 @@ from services.ai.facade import facade_analyze_narrative_sequence
 
 logger = logging.getLogger("sonikoma.api.ai.narration")
 router = APIRouter()
-
-
-@router.post("/narratives/analyze-sequence", summary="Generate chronological narrative/voiceovers and synthesize TTS")
-async def analyze_narrative_sequence(
-    body: AnalyzeNarrativeSequenceRequest,
-    user_api_key: dict = Depends(get_user_gemini_key),
-    current_user: dict = Depends(get_current_user)
-):
-    if not body.visual_descriptions:
-        raise HTTPException(status_code=400, detail="Visual descriptions list cannot be empty")
-
-    COST = min(50, len(body.visual_descriptions) * 3)
-    if get_available_credits(current_user["user_id"]) < COST:
-        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
-
-    try:
-        result = await facade_analyze_narrative_sequence(
-            visual_descriptions=body.visual_descriptions,
-            model=body.model,
-            voice=body.voice,
-            user_keys=user_api_key
-        )
-        record_credit_transaction(current_user["user_id"], -COST, "analyze_narrative_sequence")
-        return result
-    except Exception as e:
-        logger.error(f"[Narrative Sequence] Failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/generate-sequence-narrative", summary="Generate narrative texts and audios from visual descriptions")

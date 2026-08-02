@@ -11,13 +11,13 @@ Provides:
 
 import sqlite3
 import logging
-from typing import Optional
+from typing import Any, Optional
 
 logger = logging.getLogger("sonikoma.database.health")
 
 
 def ensure_user_exists(
-    conn: sqlite3.Connection,
+    conn: Any,
     user_id: Optional[str],
     fallback_username: Optional[str] = None,
 ) -> str:

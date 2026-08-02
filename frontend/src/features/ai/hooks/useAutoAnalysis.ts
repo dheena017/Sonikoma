@@ -14,6 +14,7 @@ interface UseAutoAnalysisProps {
   fetchWithInterceptor: any;
   setActivePreviewTab: (tab: "video" | "timeline") => void;
   narrationStyle?: string;
+  voiceActor?: string;
   setAccumulatedTokens?: React.Dispatch<React.SetStateAction<number>>;
   audioFeedback?: any;
 }
@@ -28,6 +29,7 @@ export function useAutoAnalysis({
   fetchWithInterceptor,
   setActivePreviewTab,
   narrationStyle = "long",
+  voiceActor,
   setAccumulatedTokens,
   audioFeedback,
 }: UseAutoAnalysisProps) {
@@ -135,19 +137,18 @@ export function useAutoAnalysis({
       );
 
       try {
-        const data = await api.analyzeSequence(fetchWithInterceptor, {
-          urls: imageUrls,
+        const data = await api.analyzeSelectedPanels(fetchWithInterceptor, {
+          panels: panelIds.map((id, idx) => ({ id, url: imageUrls[idx] })),
           model: selectedModel,
           narrationStyle,
+          voice: voiceActor,
         });
 
         if (data.success && data.results) {
-          // Map results back to the respective panels
           setPanels((prev) =>
             prev.map((p) => {
-              const idx = panelIds.indexOf(p.id);
-              if (idx !== -1 && data.results[idx]) {
-                const result = data.results[idx];
+              const result = data.results.find((r: any) => r.id === p.id);
+              if (result && result.analysis) {
                 return {
                   ...p,
                   speech_text: result.analysis.speech_text || p.speech_text,
@@ -156,7 +157,7 @@ export function useAutoAnalysis({
                   motion_type: result.analysis.motion_type || p.motion_type,
                   visual_description:
                     result.analysis.visual_description || p.visual_description,
-                  audio_url: result.audio_url || p.audio_url, // Bind the generated audio!
+                  audio_url: result.audio_url || p.audio_url,
                   isAnalyzing: false,
                 };
               }
@@ -209,6 +210,7 @@ export function useAutoAnalysis({
       setConsoleLogs,
       selectedModel,
       narrationStyle,
+      voiceActor,
     ]
   );
 
@@ -260,7 +262,7 @@ export function useAutoAnalysis({
         return {
           id: baseId + loopIdx,
           image_url: imgUrl,
-          original_url: originalUrl,
+          original_url: originalUrl ?? undefined,
           speech_text: "",
           sfx: "",
           duration: 4.5,

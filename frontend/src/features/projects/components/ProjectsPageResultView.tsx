@@ -17,6 +17,7 @@ interface ProjectsPageResultViewProps {
   toggleSelection: (e: React.MouseEvent, projectId: string) => void;
   toggleSelectAll: () => void;
   onOpenProject: (project: Project) => void;
+  onOpenCreativeSuite: (e: React.MouseEvent, project: Project) => void;
   onOpenDetails: (e: React.MouseEvent, project: Project) => void;
   onRename: (e: React.MouseEvent, project: Project) => void;
   onExport: (e: React.MouseEvent, project: Project) => void;
@@ -40,6 +41,7 @@ export default function ProjectsPageResultView({
   toggleSelection,
   toggleSelectAll,
   onOpenProject,
+  onOpenCreativeSuite,
   onOpenDetails,
   onRename,
   onExport,
@@ -120,6 +122,7 @@ export default function ProjectsPageResultView({
                 key={project.project_id}
                 project={project}
                 onOpenProject={onOpenProject}
+                onOpenCreativeSuite={(e, projectItem) => onOpenCreativeSuite(e, projectItem)}
                 onRename={(e, projectItem) => onRename(e, projectItem)}
                 onExport={(e, projectItem) => onExport(e, projectItem)}
                 onOpenDetails={(e, projectItem) =>

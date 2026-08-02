@@ -9,7 +9,7 @@ Project (flat chapters) CRUD operations and cached assets cleanup.
 import os
 import json
 import logging
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional, cast
 
 from database.engine import get_db_connection
 from database.session import uuid_hex
@@ -165,7 +165,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                 JOIN series s ON c.series_id = s.id
                 ORDER BY c.created_at DESC
             """).fetchall()
-        return [_enrich_project_item(dict(r), conn) for r in rows]
+        return [_enrich_project_item(cast(Dict[str, Any], dict(r)), conn) for r in rows]
     finally:
         conn.close()
 
@@ -318,8 +318,9 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                 rows = conn.execute('SELECT image_url, audio_url FROM panels WHERE chapter_id = ?', (project_id,)).fetchall()
                 old_urls = set()
                 for r in rows:
-                    if r['image_url']: old_urls.add(r['image_url'])
-                    if r['audio_url']: old_urls.add(r['audio_url'])
+                    row_dict = cast(Dict[str, Any], dict(r))
+                    if row_dict['image_url']: old_urls.add(row_dict['image_url'])
+                    if row_dict['audio_url']: old_urls.add(row_dict['audio_url'])
 
                 # Delete existing panels for this chapter
                 conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
@@ -332,10 +333,10 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                     conn.execute("""
                         INSERT INTO panels (
                             chapter_id, panel_index, image_url, original_url, speech_text, sfx,
-                            duration, motion_type, visual_description, brightness, contrast, saturation,
+                            duration, motion_type, visual_description, narrative, brightness, contrast, saturation,
                             grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
                             inpaint_radius, detection_style, audio_url, smart_crop, crop_padding, is_sanitized
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """, (
                         project_id,
                         i,
@@ -346,6 +347,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                         p.get('duration') if p.get('duration') is not None else 4.5,
                         p.get('motion_type') or "zoom_in",
                         visual_description or None,
+                        p.get('narrative') or None,
                         p.get('brightness'),
                         p.get('contrast'),
                         p.get('saturation'),
@@ -385,8 +387,9 @@ def delete_project(project_id: str) -> None:
         rows = conn.execute('SELECT image_url, audio_url FROM panels WHERE chapter_id = ?', (project_id,)).fetchall()
         panel_urls = []
         for r in rows:
-            if r['image_url']: panel_urls.append(r['image_url'])
-            if r['audio_url']: panel_urls.append(r['audio_url'])
+            row_dict = cast(Dict[str, Any], dict(r))
+            if row_dict['image_url']: panel_urls.append(row_dict['image_url'])
+            if row_dict['audio_url']: panel_urls.append(row_dict['audio_url'])
 
         chap = conn.execute('SELECT video_url FROM chapters WHERE id = ?', (project_id,)).fetchone()
 

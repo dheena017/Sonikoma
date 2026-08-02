@@ -34,6 +34,7 @@ export interface ProjectsPageState {
   clearSelection: () => void;
   handleNewSeries: () => void;
   handleOpenProject: (project: Project) => void;
+  handleOpenCreativeSuite: (e: MouseEvent, project: Project) => Promise<void>;
   handleExport: (e: MouseEvent, project: Project) => void;
   handleRename: (e: MouseEvent, project: Project) => void;
   handleOpenDetails: (e: MouseEvent, project: Project) => void;
@@ -67,6 +68,14 @@ export default function useProjectsPage(): ProjectsPageState {
   const handleExport = useCallback(
     (e: MouseEvent, project: Project) => {
       actionsState.handleExport(e, project);
+      menuState.closeMenu();
+    },
+    [actionsState, menuState]
+  );
+
+  const handleOpenCreativeSuite = useCallback(
+    async (e: MouseEvent, project: Project) => {
+      await actionsState.handleOpenCreativeSuite(e, project);
       menuState.closeMenu();
     },
     [actionsState, menuState]
@@ -157,6 +166,7 @@ export default function useProjectsPage(): ProjectsPageState {
     clearSelection: selectionState.clearSelection,
     handleNewSeries: actionsState.handleNewSeries,
     handleOpenProject: actionsState.handleOpenProject,
+    handleOpenCreativeSuite,
     handleExport,
     handleRename,
     handleOpenDetails,

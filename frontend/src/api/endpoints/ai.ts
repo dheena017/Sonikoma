@@ -14,12 +14,12 @@ export const analyzeImage = async (
   });
 };
 
-export const analyzeNarrativeSequence = async (
+export const analyzeSingleImage = async (
   fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/narratives/analyze-sequence", {
+  return apiRequest(fetchWithInterceptor, "/api/analyze-single-image", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -33,6 +33,45 @@ export const analyzeSequence = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   return apiRequest(fetchWithInterceptor, "/api/analyze-sequence", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+export const analyzePanels = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/analyze-panels", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+export const analyzeSelectedPanels = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/analyze-selected-panels", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+export const analyzeAllPanels = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/analyze-all-panels", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

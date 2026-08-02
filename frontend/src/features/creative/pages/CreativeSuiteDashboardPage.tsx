@@ -372,14 +372,14 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
                   📁
                 </div>
                 <p className="text-xs text-neutral-500 leading-normal">
-                  No active project loaded in cache. Open a storyboard project
-                  from the main app workspace to unlock full Creative features.
+                  No active project is selected. Choose a project from the Projects
+                  page to unlock full Creative features.
                 </p>
                 <button
-                  onClick={() => navigateTo("/workspace")}
+                  onClick={() => navigateTo("/projects")}
                   className="mt-4 px-4 py-2 border border-purple-550/30 rounded-xl text-[10px] font-mono font-bold text-purple-400 hover:bg-purple-500/5 transition-all active:scale-95 cursor-pointer"
                 >
-                  Browse Projects
+                  Choose Project
                 </button>
               </div>
             )}

@@ -74,35 +74,7 @@ export default function LoadingPage({
         overflow: "hidden",
       }}
     >
-      {/* Background Ambient Glows */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20%",
-          left: "30%",
-          width: "350px",
-          height: "350px",
-          borderRadius: "50%",
-          background: isLight ? "rgba(168, 85, 247, 0.05)" : "rgba(168, 85, 247, 0.08)",
-          filter: "blur(80px)",
-          pointerEvents: "none",
-          animation: "lp-float-bg 8s infinite alternate ease-in-out",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20%",
-          right: "30%",
-          width: "350px",
-          height: "350px",
-          borderRadius: "50%",
-          background: isLight ? "rgba(6, 182, 212, 0.05)" : "rgba(6, 182, 212, 0.08)",
-          filter: "blur(80px)",
-          pointerEvents: "none",
-          animation: "lp-float-bg 8s infinite alternate-reverse ease-in-out",
-        }}
-      />
+      {/* Ambient glows removed to avoid light-colored halo in header */}
 
       {/* Glass Card Container */}
       <div
@@ -140,7 +112,7 @@ export default function LoadingPage({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 8px 24px rgba(168,85,247,0.3)",
+              boxShadow: "none",
             }}
           >
             <img

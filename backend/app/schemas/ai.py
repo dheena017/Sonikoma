@@ -5,7 +5,7 @@ Pydantic request/response schemas for ai.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, root_validator
 from typing import List, Dict, Any, Optional
 
 class AnalyzeImageRequest(BaseModel):
@@ -23,7 +23,26 @@ class AnalyzeBatchRequest(BaseModel):
 
 
 class AnalyzeSequenceRequest(BaseModel):
-    urls: List[str]
+    urls: Optional[List[str]] = None
+    visual_descriptions: Optional[List[str]] = None
+    model: Optional[str] = "gemini-2.5-flash"
+    narrationStyle: Optional[str] = "long"
+    voice: Optional[str] = "en-US-GuyNeural"
+
+    @root_validator(pre=True)
+    def require_urls_or_visual_descriptions(cls, values):
+        if not values.get("urls") and not values.get("visual_descriptions"):
+            raise ValueError("Either 'urls' or 'visual_descriptions' is required.")
+        return values
+
+
+class AnalyzePanelItem(BaseModel):
+    id: int
+    url: str
+
+
+class AnalyzePanelSequenceRequest(BaseModel):
+    panels: List[AnalyzePanelItem]
     model: Optional[str] = "gemini-2.5-flash"
     narrationStyle: Optional[str] = "long"
     voice: Optional[str] = "en-US-GuyNeural"

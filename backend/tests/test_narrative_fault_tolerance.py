@@ -17,7 +17,9 @@ from fastapi.testclient import TestClient
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
+from api.v1.ai.image import router as ai_image_router
 from api.v1.ai.narration import router as ai_router
+from api.v1.ai._deps import get_user_gemini_key
 from api.dependencies.auth import get_current_user
 
 
@@ -25,6 +27,7 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
     def setUp(self):
         self.app = FastAPI()
         self.app.include_router(ai_router)
+        self.app.include_router(ai_image_router)
 
         mock_user = {
             "id": "test_user_123",
@@ -37,7 +40,11 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
         async def override_user():
             return mock_user
 
+        def override_user_keys():
+            return {"gemini": "test-gemini-key"}
+
         self.app.dependency_overrides[get_current_user] = override_user
+        self.app.dependency_overrides[get_user_gemini_key] = override_user_keys
 
         self.client = TestClient(self.app)
 
@@ -88,13 +95,74 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
             "voice": "en-US-GuyNeural"
         }
 
-        response = self.client.post("/narratives/analyze-sequence", json=payload)
+        response = self.client.post("/analyze-sequence", json=payload)
         self.assertEqual(response.status_code, 200)
 
         data = response.json()
         self.assertTrue(data.get("success", False))
         results = data.get("results") or data.get("narratives") or []
         self.assertEqual(len(results), 5)
+
+    @patch("api.v1.ai.image.get_available_credits")
+    @patch("api.v1.ai.image.record_credit_transaction")
+    @patch("services.ai.skills.base.call_gemini_with_retry")
+    @patch("services.ai.facade.generate_panel_audio")
+    @patch("services.image.ocr.extract_dialogue_from_panel")
+    @patch("services.image.utils.image_utils.compute_brightness")
+    @patch("services.image.utils.image_utils.resolve_image_to_buffer")
+    @patch("google.genai.Client")
+    def test_image_analyze_sequence_returns_parallel_results(
+        self,
+        mock_client_class,
+        mock_resolve_buffer,
+        mock_compute_brightness,
+        mock_extract_dialogue,
+        mock_generate_audio,
+        mock_gemini_retry,
+        mock_record_credits,
+        mock_get_credits
+    ):
+        mock_get_credits.return_value = 100
+        mock_resolve_buffer.return_value = {"data": b"fake-image-bytes"}
+        mock_compute_brightness.return_value = 120
+        mock_extract_dialogue.return_value = ["Panel dialogue text."]
+
+        mock_response = MagicMock()
+        mock_response.text = json.dumps({
+            "speech_text": "Test narration.",
+            "sfx": "",
+            "visual_description": "A test panel.",
+            "motion_type": "zoom_in",
+            "duration": 5
+        })
+        mock_gemini_retry.return_value = mock_response
+
+        async def side_effect_generate_audio(dialogue_list, target_duration, output_path, voice, force_duration):
+            with open(output_path, "wb") as f:
+                f.write(b"dummy mp3")
+            return output_path, float(target_duration or 5)
+
+        mock_generate_audio.side_effect = side_effect_generate_audio
+
+        payload = {
+            "urls": [
+                "http://example.com/panel1.png",
+                "http://example.com/panel2.png",
+                "http://example.com/panel3.png"
+            ],
+            "model": "gemini-2.5-flash",
+            "voice": "en-US-GuyNeural"
+        }
+
+        response = self.client.post("/analyze-sequence", json=payload)
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data.get("success", False))
+        results = data.get("results", [])
+        self.assertEqual(len(results), 3)
+        self.assertTrue(all(item.get("success", False) for item in results))
+        self.assertEqual(mock_record_credits.call_count, 1)
 
 
 if __name__ == "__main__":

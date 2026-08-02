@@ -9,6 +9,7 @@ generation, inpainting, upscaling, and style transfer routes.
 import asyncio
 import logging
 import tempfile
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -21,6 +22,7 @@ from schemas.ai import (
     AnalyzeImageRequest,
     AnalyzeBatchRequest,
     AnalyzeSequenceRequest,
+    AnalyzePanelSequenceRequest,
     SmartCropRequest,
     SmartCropBatchRequest,
     GenerateAIRequest,
@@ -29,7 +31,11 @@ from schemas.ai import (
     StyleTransferRequest,
     BatchGenerateRequest,
 )
-from services.ai.facade import facade_analyze_image, facade_smart_crop
+from services.ai.facade import (
+    facade_analyze_image,
+    facade_analyze_narrative_sequence,
+    facade_smart_crop,
+)
 
 logger = logging.getLogger("sonikoma.api.ai.image")
 
@@ -52,21 +58,63 @@ def _get_sd_engine():
     return stable_diffusion
 
 
+async def _attach_narratives_to_results(
+    results: list,
+    model: Optional[str],
+    voice: Optional[str],
+    user_keys: dict,
+):
+    if not results:
+        return results
 
-@router.post("/analyze-image", summary="Generate narration script and SFX for a single panel")
+    visual_descriptions = [
+        (item.get("analysis", {}) or {}).get("visual_description") or "An illustration panel."
+        for item in results
+    ]
+
+    try:
+        narrative_result = await facade_analyze_narrative_sequence(
+            visual_descriptions=visual_descriptions,
+            model=model,
+            voice=voice,
+            user_keys=user_keys,
+        )
+        if narrative_result.get("success") and narrative_result.get("results"):
+            for idx, narrative_item in enumerate(narrative_result["results"]):
+                if idx >= len(results):
+                    break
+                narrative_text = narrative_item.get("narrative")
+                results[idx]["narrative"] = narrative_text
+                results[idx]["narrativeText"] = narrative_text
+                results[idx]["narrative_audio_url"] = narrative_item.get("narrative_audio_url")
+                if results[idx].get("analysis") is not None:
+                    results[idx]["analysis"]["narrativeText"] = narrative_text
+    except Exception as e:
+        logger.exception("[AI Analysis] Narrative generation failed. Returning panel analysis without narrative.")
+
+    return results
+
+
+
+@router.post("/analyze-image", summary="Analyze a single storyboard panel and generate dialogue, SFX, scene description, motion, timing, and narrative")
+@router.post("/analyze-single-image", summary="Analyze a single storyboard panel and generate dialogue, SFX, scene description, motion, timing, and narrative")
 async def analyze_image(
     body: AnalyzeImageRequest,
     user_api_key: dict = Depends(get_user_gemini_key),
     current_user: dict = Depends(get_current_user)
 ):
-    COST = 5
+    COST = 8
     if get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     try:
         result = await facade_analyze_image(
-            url=body.url, model=body.model, voice=body.voice,
-            narration_style=body.narrationStyle, user_keys=user_api_key
+            url=body.url,
+            model=body.model,
+            voice=body.voice,
+            narration_style=body.narrationStyle,
+            user_keys=user_api_key,
         )
+        result = (await _attach_narratives_to_results([result], body.model, body.voice, user_api_key))[0]
         record_credit_transaction(current_user["user_id"], -COST, "analyze_image")
         return result
     except Exception as e:
@@ -101,26 +149,101 @@ async def analyze_batch(
     return {"success": True, "total": len(results), "results": results}
 
 
-@router.post("/analyze-sequence", summary="Analyze multiple panels together for context-aware narrative")
+@router.post("/analyze-sequence", summary="Analyze multiple panels together for context-aware narrative and audio")
 async def analyze_sequence(
     body: AnalyzeSequenceRequest,
     user_api_key: dict = Depends(get_user_gemini_key),
     current_user: dict = Depends(get_current_user)
 ):
+    if body.visual_descriptions:
+        if not body.visual_descriptions:
+            raise HTTPException(status_code=400, detail="visual_descriptions list cannot be empty")
+        COST = min(50, len(body.visual_descriptions) * 5)
+        if get_available_credits(current_user["user_id"]) < COST:
+            raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+        try:
+            results = await facade_analyze_narrative_sequence(
+                visual_descriptions=body.visual_descriptions,
+                model=body.model,
+                voice=body.voice,
+                user_keys=user_api_key,
+            )
+            if results.get("success") and results.get("results"):
+                record_credit_transaction(current_user["user_id"], -COST, "analyze_sequence")
+            return results
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
     if not body.urls:
         raise HTTPException(status_code=400, detail="Urls list cannot be empty")
-    COST = min(50, len(body.urls) * 5)
+    COST = min(50, len(body.urls) * 8)
     if get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
-    try:
-        results = []
-        for url in body.urls:
-            res = await facade_analyze_image(url, body.model, body.voice, body.narrationStyle, user_api_key)
-            results.append({"url": url, **res})
+    semaphore = asyncio.Semaphore(4)
+    results = []
+
+    async def analyze_url(url: str) -> dict:
+        async with semaphore:
+            try:
+                res = await facade_analyze_image(
+                    url=url,
+                    model=body.model,
+                    voice=body.voice,
+                    narration_style=body.narrationStyle,
+                    user_keys=user_api_key,
+                )
+                return {"url": url, **res}
+            except Exception as e:
+                return {"url": url, "success": False, "error": str(e)}
+
+    results = await asyncio.gather(*(analyze_url(url) for url in body.urls))
+    results = await _attach_narratives_to_results(results, body.model, body.voice, user_api_key)
+    if any(item.get("success") for item in results):
         record_credit_transaction(current_user["user_id"], -COST, "analyze_sequence")
-        return {"success": True, "results": results}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {"success": True, "results": results}
+
+
+@router.post("/analyze-panels", summary="Analyze multiple storyboard panels in a single batch request")
+@router.post("/analyze-selected-panels", summary="Analyze selected storyboard panels and generate dialogue, SFX, scene description, motion, timing, and narrative")
+@router.post("/analyze-all-panels", summary="Analyze all storyboard panels and generate dialogue, SFX, scene description, motion, timing, and narrative")
+async def analyze_panels(
+    body: AnalyzePanelSequenceRequest,
+    user_api_key: dict = Depends(get_user_gemini_key),
+    current_user: dict = Depends(get_current_user)
+):
+    if not body.panels:
+        raise HTTPException(status_code=400, detail="Panels list cannot be empty")
+
+    COST = min(50, len(body.panels) * 8)
+    if get_available_credits(current_user["user_id"]) < COST:
+        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
+
+    semaphore = asyncio.Semaphore(4)
+
+    async def analyze_panel(panel):
+        async with semaphore:
+            try:
+                res = await facade_analyze_image(
+                    url=panel.url,
+                    model=body.model,
+                    voice=body.voice,
+                    narration_style=body.narrationStyle,
+                    user_keys=user_api_key,
+                )
+                return {"id": panel.id, "url": panel.url, **res}
+            except Exception as e:
+                return {
+                    "id": panel.id,
+                    "url": panel.url,
+                    "success": False,
+                    "error": str(e),
+                }
+
+    results = await asyncio.gather(*(analyze_panel(panel) for panel in body.panels))
+    results = await _attach_narratives_to_results(results, body.model, body.voice, user_api_key)
+    if any(item.get("success") for item in results):
+        record_credit_transaction(current_user["user_id"], -COST, "analyze_panels")
+    return {"success": True, "results": results}
 
 
 @router.post("/ai-smart-crop", summary="Crop panels automatically using local CV or Gemini")

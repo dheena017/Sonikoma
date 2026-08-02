@@ -1,4 +1,3 @@
-from services.project.project_service import ProjectService, sync_project_to_supabase, get_series_details, delete_temp_file
 """
 api/v1/projects/router.py
 ─────────────────────────────────────────────────────────────────────────────
@@ -29,19 +28,20 @@ from repositories.project import (
     get_project_by_slug,
     get_panels,
     insert_project,
-    insert_panels,
-    update_project,
     increment_project_tokens,
-    update_project_full,
     delete_panels,
     delete_project,
     get_token_logs,
 )
 from repositories.user import write_audit_log
+from services.project.project_service import (
+    ProjectService,
+    get_series_details,
+    sync_project_to_supabase,
+    delete_temp_file,
+)
 from database.engine import get_db_connection
-from database.transaction import unwrap_proxy_url
 from api.v1.projects._helpers import wrap_proxy_url
-from api.v1.projects.update import _build_panel_dicts
 from api.v1.projects.files import _detect
 
 logger = logging.getLogger("sonikoma.routes.projects.router")
@@ -90,8 +90,10 @@ async def get_public_project(project_id: str = Path(..., description="Project ID
                 p["image_url"] = wrap_proxy_url(p["image_url"])
         scraped_images = []
         audio_set = project.get("audio_settings") or {}
-        if isinstance(audio_set, dict) and audio_set.get("scraped_images"):
-            scraped_images = [wrap_proxy_url(img) for img in audio_set.get("scraped_images") if img]
+        if isinstance(audio_set, dict):
+            scraped_images_raw = audio_set.get("scraped_images")
+            if isinstance(scraped_images_raw, list):
+                scraped_images = [wrap_proxy_url(img) for img in scraped_images_raw if img]
         elif project.get("url"):
             try:
                 from repositories.scraper import get_latest_scrape_session
@@ -169,18 +171,22 @@ async def save_project_panels(
             project = get_project_by_slug(projectId)
             if project:
                 projectId = project["project_id"]
-        if not project:
-            raise HTTPException(status_code=404, detail="Project not found.")
-        if project.get("user_id") != current_user["user_id"]:
-            raise HTTPException(status_code=403, detail="Access denied.")
+        try:
+            result = project_service.save_project_panels(
+                projectId,
+                body.panels,
+                current_user["user_id"],
+                audit_logger=write_audit_log,
+                request_client=request.client.host if request.client else "127.0.0.1",
+            )
+        except ValueError as exc:
+            logger.warning(f"[Database] Cannot save panels, project {projectId} not found.")
+            raise HTTPException(status_code=404, detail="Project not found.") from exc
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail="Access denied.") from exc
 
-        db_panels = _build_panel_dicts(body.panels, include_original=False)
-        insert_panels(projectId, db_panels)
-        update_project(projectId, {"panels_count": len(body.panels)})
-        ip_addr = request.client.host if request.client else "127.0.0.1"
-        write_audit_log(current_user["user_id"], "Saved Storyboard Panels", ip_addr, "Success")
         logger.info(f"[Database] Saved {len(body.panels)} panels for project: {projectId}")
-        return {"success": True, "saved": len(body.panels)}
+        return result
     except HTTPException:
         raise
     except Exception as e:
@@ -228,49 +234,12 @@ async def update_project_details(
             if project:
                 projectId = project["project_id"]
 
-        if not project:
-            insert_project({
-                "project_id": projectId,
-                "url": body.url or "",
-                "title": body.title or "Untitled Project",
-                "genre": body.genre or "general",
-                "episode": body.episode or "",
-                "status": "pending",
-                "panels_count": len(body.panels) if body.panels else 0,
-                "video_url": None,
-                "user_id": current_user["user_id"],
-                "author": body.author or "",
-                "cover_image": body.cover_image or "",
-                "synopsis": body.synopsis or "",
-            })
-            project = {"user_id": current_user["user_id"]}
+        try:
+            result = project_service.update_project_details(projectId, body, current_user["user_id"])
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail="Access denied.") from exc
 
-        if project.get("user_id") != current_user["user_id"]:
-            raise HTTPException(status_code=403, detail="Access denied.")
-
-        field_map = {
-            "title": body.title, "genre": body.genre, "episode": body.episode,
-            "author": body.author, "synopsis": body.synopsis,
-            "video_url": body.video_url, "status": body.status,
-            "audio_settings": body.audio_settings,
-        }
-        updates = {k: v for k, v in field_map.items() if v is not None}
-        if body.cover_image is not None:
-            updates["cover_image"] = unwrap_proxy_url(body.cover_image)
-
-        db_panels = (
-            _build_panel_dicts(body.panels, include_original=True)
-            if body.panels is not None
-            else None
-        )
-        update_project_full(projectId, updates, db_panels)
-
-        updated = get_project(projectId)
-        return {
-            "success": True,
-            "series_slug": updated.get("series_slug") if updated else None,
-            "chapter_slug": updated.get("chapter_slug") if updated else None,
-        }
+        return result
     except HTTPException:
         raise
     except Exception as e:
@@ -369,8 +338,10 @@ async def get_single_project(
                 p["image_url"] = wrap_proxy_url(p["image_url"])
         scraped_images = []
         audio_set = project.get("audio_settings") or {}
-        if isinstance(audio_set, dict) and audio_set.get("scraped_images"):
-            scraped_images = [wrap_proxy_url(img) for img in audio_set.get("scraped_images") if img]
+        if isinstance(audio_set, dict):
+            scraped_images_raw = audio_set.get("scraped_images")
+            if isinstance(scraped_images_raw, list):
+                scraped_images = [wrap_proxy_url(img) for img in scraped_images_raw if img]
         elif project.get("url"):
             try:
                 from repositories.scraper import get_latest_scrape_session

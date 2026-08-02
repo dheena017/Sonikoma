@@ -11,6 +11,7 @@ import logging
 import httpx
 import json
 from urllib.parse import urlparse, parse_qs
+from typing import Tuple
 
 from core.cache import stitched_cache, edit_history
 # I am mocking the imports that were inside the function
@@ -23,7 +24,18 @@ logger = logging.getLogger("sonikoma.services.image.stitch_cache")
 from database.engine import get_db_connection
 from repositories.project.panels import get_panel_original_url, get_edit_history
 
-async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = None):
+class StitchedResourceNotFound(Exception):
+    """Raised when a stitched resource cannot be located or has expired."""
+
+
+async def _db_fetchone(sql: str, params: tuple = ()):  # helper to run DB queries off the event loop
+    def _run():
+        conn = get_db_connection()
+        return conn.execute(sql, params).fetchone()
+    return await asyncio.to_thread(_run)
+
+
+async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = None) -> Tuple[bytes, str]:
     cached = stitched_cache.get(cache_id)
     if cached:
         return cached["data"], cached["content_type"]
@@ -68,38 +80,35 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = No
                         if len(path_parts) >= 4 and path_parts[0] == "series":
                             series_slug = path_parts[1]
                             chapter_slug = path_parts[3]
-                            conn = get_db_connection()
-                            session_row = conn.execute(
+                            session_row = await _db_fetchone(
                                 "SELECT url FROM scrape_sessions WHERE url LIKE ? AND url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
-                                (f"%{series_slug}%", f"%{chapter_slug.replace('chapter-', 'episode-')}%")
-                            ).fetchone()
+                                (f"%{series_slug}%", f"%{chapter_slug.replace('chapter-', 'episode-')}%"),
+                            )
                             if session_row:
                                 webtoon_url = session_row["url"]
 
                 if not webtoon_url:
-                    conn = get_db_connection()
-                    latest_session = conn.execute(
+                    latest_session = await _db_fetchone(
                         "SELECT url FROM scrape_sessions ORDER BY scraped_at DESC LIMIT 1"
-                    ).fetchone()
+                    )
                     if latest_session:
                         webtoon_url = latest_session["url"]
 
-                if webtoon_url:
-                    conn = get_db_connection()
-                    session_row = conn.execute(
-                        "SELECT image_urls FROM scrape_sessions WHERE url = ? AND image_urls LIKE '%http%' ORDER BY scraped_at ASC LIMIT 1",
-                        (webtoon_url,)
-                    ).fetchone()
-                    if not session_row:
-                        session_row = conn.execute(
-                            "SELECT image_urls FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
+                    if webtoon_url:
+                        session_row = await _db_fetchone(
+                            "SELECT image_urls FROM scrape_sessions WHERE url = ? AND image_urls LIKE '%http%' ORDER BY scraped_at ASC LIMIT 1",
                             (webtoon_url,)
-                        ).fetchone()
-                    if session_row:
-                        urls = json.loads(session_row["image_urls"])
-                        if 0 <= index < len(urls):
-                            original_url = unwrap_proxy_url(urls[index])
-                            logger.info(f"[Cache Fallback] Resolved cache_id '{cache_id}' index {index} to original_url: {original_url}")
+                        )
+                        if not session_row:
+                            session_row = await _db_fetchone(
+                                "SELECT image_urls FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
+                                (webtoon_url,)
+                            )
+                        if session_row:
+                            urls = json.loads(session_row["image_urls"])
+                            if 0 <= index < len(urls):
+                                original_url = unwrap_proxy_url(urls[index])
+                                logger.info(f"[Cache Fallback] Resolved cache_id '{cache_id}' index {index} to original_url: {original_url}")
             except Exception as fe:
                 logger.warning(f"[Cache Fallback] Scraper session lookup failed: {fe}")
 
@@ -125,24 +134,22 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = No
                             webtoon_url = session_row["url"]
 
             if not webtoon_url:
-                conn = get_db_connection()
-                latest_session = conn.execute(
+                latest_session = await _db_fetchone(
                     "SELECT url FROM scrape_sessions ORDER BY scraped_at DESC LIMIT 1"
-                ).fetchone()
+                )
                 if latest_session:
                     webtoon_url = latest_session["url"]
 
             if webtoon_url:
-                conn = get_db_connection()
-                session_row = conn.execute(
+                session_row = await _db_fetchone(
                     "SELECT image_urls FROM scrape_sessions WHERE url = ? AND image_urls LIKE '%http%' ORDER BY scraped_at ASC LIMIT 1",
                     (webtoon_url,)
-                ).fetchone()
+                )
                 if not session_row:
-                    session_row = conn.execute(
+                    session_row = await _db_fetchone(
                         "SELECT image_urls FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
                         (webtoon_url,)
-                    ).fetchone()
+                    )
                 if session_row:
                     urls = json.loads(session_row["image_urls"])
                     unwrapped_urls = [unwrap_proxy_url(u) for u in urls if u]
@@ -182,4 +189,4 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = No
         except Exception as refetch_err:
             logger.warning(f"[Cache] Re-fetch failed for {cache_id}: {refetch_err}")
 
-    raise Exception("Stitched resource expired or not found.")
+    raise StitchedResourceNotFound("Stitched resource expired or not found.")
