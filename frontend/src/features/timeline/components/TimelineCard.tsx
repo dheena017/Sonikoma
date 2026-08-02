@@ -713,6 +713,8 @@ const TimelineCard = ({
         <img
           src={panel.image_url}
           alt={`Panel ${panel.id}`}
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()}
           className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
           style={{ filter: getPanelFilterStyle(panel) }}
           onError={(e) => {
