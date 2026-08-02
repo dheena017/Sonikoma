@@ -55,7 +55,7 @@ export default function CinemaPlayer({
   const totalDuration = videoUrl && videoDuration > 0
     ? videoDuration
     : panels.length > 0
-    ? panels.reduce((acc, p) => acc + (p.duration || 4.5), 0)
+    ? panels.reduce((acc, p) => acc + (p.duration ?? 0), 0)
     : 0;
 
   // Define Chapters dynamically from scraped episode groups or scene panels
@@ -74,8 +74,8 @@ export default function CinemaPlayer({
         const count = grp.count || 0;
         const endIdx = Math.min(startIdx + count, panels.length);
 
-        const startTime = panels.slice(0, startIdx).reduce((acc, p) => acc + (p.duration || 4.5), 0);
-        const episodeDuration = panels.slice(startIdx, endIdx).reduce((acc, p) => acc + (p.duration || 4.5), 0);
+        const startTime = panels.slice(0, startIdx).reduce((acc, p) => acc + (p.duration ?? 0), 0);
+        const episodeDuration = panels.slice(startIdx, endIdx).reduce((acc, p) => acc + (p.duration ?? 0), 0);
         const endTime = startTime + episodeDuration;
 
         return {
@@ -97,7 +97,7 @@ export default function CinemaPlayer({
 
     for (let i = 0; i < panels.length; i += sceneChunkSize) {
       const chunk = panels.slice(i, i + sceneChunkSize);
-      const chunkDuration = chunk.reduce((acc, p) => acc + (p.duration || 4.5), 0);
+      const chunkDuration = chunk.reduce((acc, p) => acc + (p.duration ?? 0), 0);
       const sceneNum = Math.floor(i / sceneChunkSize) + 1;
 
       result.push({
@@ -298,7 +298,7 @@ export default function CinemaPlayer({
   useEffect(() => {
     if (currentPanelIndex !== undefined && panels && panels.length > 0) {
       const targetIdx = Math.min(Math.max(0, currentPanelIndex), panels.length - 1);
-      const targetTime = panels.slice(0, targetIdx).reduce((acc, p) => acc + (p.duration || 4.5), 0);
+      const targetTime = panels.slice(0, targetIdx).reduce((acc, p) => acc + (p.duration ?? 0), 0);
       setCurrentTime(targetTime);
       if (videoRef.current) {
         videoRef.current.currentTime = targetTime;
@@ -454,7 +454,7 @@ export default function CinemaPlayer({
       if (panels.length === 0) return null;
       let accumulatedTime = 0;
       for (const panel of panels) {
-        const duration = panel.duration || 4.5;
+        const duration = panel.duration ?? 0;
         if (time >= accumulatedTime && time < accumulatedTime + duration) {
           return panel;
         }
@@ -470,7 +470,7 @@ export default function CinemaPlayer({
       if (panels.length === 0) return 0;
       let accumulatedTime = 0;
       for (let i = 0; i < panels.length; i++) {
-        const duration = panels[i].duration || 4.5;
+        const duration = panels[i].duration ?? 0;
         if (time >= accumulatedTime && time < accumulatedTime + duration) {
           return i + 1;
         }

@@ -12,7 +12,7 @@ export function useBulkOperations({
 }: UseBulkOperationsProps) {
   const [showBulkOps, setShowBulkOps] = useState<boolean>(false);
   const [bulkDuration, setBulkDuration] = useState<number>(4.0);
-  const [bulkMotion, setBulkMotion] = useState<string>("zoom_in");
+  const [bulkMotion, setBulkMotion] = useState<string>("");
   const [bulkPreset, setBulkPreset] = useState<string>("none");
 
   const handleBulkSetDuration = () => {

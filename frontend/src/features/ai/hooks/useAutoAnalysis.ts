@@ -53,14 +53,20 @@ export function useAutoAnalysis({
             prev.map((p) =>
               p.id === panelId
                 ? {
-                    ...p,
-                    speech_text: data.analysis.speech_text || p.speech_text,
-                    sfx: data.analysis.sfx || p.sfx,
-                    duration: Number(data.analysis.duration) || p.duration,
-                    motion_type: data.analysis.motion_type || p.motion_type,
-                    visual_description:
-                      data.analysis.visual_description || p.visual_description,
-                    isAnalyzing: false,
+                        ...p,
+                        speech_text: data.analysis.speech_text || p.speech_text,
+                        sfx: data.analysis.sfx || p.sfx,
+                        duration:
+                          data.analysis.duration !== undefined
+                            ? Number(data.analysis.duration)
+                            : p.duration,
+                        motion_type:
+                          data.analysis.motion_type !== undefined
+                            ? data.analysis.motion_type
+                            : p.motion_type,
+                        visual_description:
+                          data.analysis.visual_description || p.visual_description,
+                        isAnalyzing: false,
                   }
                 : p
             )
@@ -153,8 +159,14 @@ export function useAutoAnalysis({
                   ...p,
                   speech_text: result.analysis.speech_text || p.speech_text,
                   sfx: result.analysis.sfx || p.sfx,
-                  duration: Number(result.analysis.duration) || p.duration,
-                  motion_type: result.analysis.motion_type || p.motion_type,
+                  duration:
+                    result.analysis.duration !== undefined
+                      ? Number(result.analysis.duration)
+                      : p.duration,
+                  motion_type:
+                    result.analysis.motion_type !== undefined
+                      ? result.analysis.motion_type
+                      : p.motion_type,
                   visual_description:
                     result.analysis.visual_description || p.visual_description,
                   audio_url: result.audio_url || p.audio_url,
@@ -265,8 +277,8 @@ export function useAutoAnalysis({
           original_url: originalUrl ?? undefined,
           speech_text: "",
           sfx: "",
-          duration: 4.5,
-          motion_type: "zoom_in",
+          duration: 0,
+          motion_type: "",
           isAnalyzing: false,
           episode_label: targetEpLabel,
         };

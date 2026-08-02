@@ -689,7 +689,8 @@ export default function App() {
                   project_id: projectId || undefined,
                   panel_id: p.id,
                   dialogue_list: [p.speech_text],
-                  target_duration: 4.5,
+                  target_duration:
+                    p.duration && p.duration > 0 ? p.duration : undefined,
                   voice: voiceActor || undefined,
                   return_base64: true,
                   speech_rate: appLogic.speechRate,

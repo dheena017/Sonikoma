@@ -419,7 +419,7 @@ export function useYouTubePublisher({
 
     if (!localPreviewUrl && panels.length > 0) {
       const totalDuration = panels.reduce(
-        (acc, p) => acc + (p.duration || 4.5),
+        (acc, p) => acc + (p.duration ?? 0),
         0
       );
       setVideoDuration(totalDuration);
@@ -852,7 +852,7 @@ export function useYouTubePublisher({
       const timeStr = `${minutes.toString().padStart(2, "0")}:${seconds
         .toString()
         .padStart(2, "0")}`;
-      currentTime += panel.duration || 4.5;
+      currentTime += panel.duration ?? 0;
 
       const panelSpeech = panel.speech_text
         ? panel.speech_text.slice(0, 30).trim() +

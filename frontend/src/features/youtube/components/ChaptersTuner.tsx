@@ -28,7 +28,7 @@ export default function ChaptersTuner({
     const items: ChapterItem[] = [{ time: "00:00", title: "Introduction" }];
 
     panels.forEach((panel, idx) => {
-      currentTime += panel.duration || 4.5;
+      currentTime += panel.duration ?? 0;
       const minutes = Math.floor(currentTime / 60);
       const seconds = Math.floor(currentTime % 60);
       const timeStr = `${minutes.toString().padStart(2, "0")}:${seconds

@@ -74,7 +74,7 @@ const AIOptimizerPage = React.memo(
         const timestamp = `${minutes.toString().padStart(2, "0")}:${seconds
           .toString()
           .padStart(2, "0")}`;
-        currentAccumulator += p.duration || 4.5;
+        currentAccumulator += p.duration ?? 0;
         return `${timestamp} - Panel ${idx + 1}: ${
           p.speech_text || "(Silent)"
         }`;
