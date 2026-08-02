@@ -88,10 +88,10 @@ export default function ProjectCard({
   return (
     <div
       onClick={() => onOpenProject(project)}
-      className={`group relative bg-[#0e0e12]/90 border rounded-2xl backdrop-blur-sm cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-purple-950/30 flex flex-col h-full ${
+      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0c0c12] via-[#10101a] to-[#12121f] shadow-xl shadow-purple-950/10 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-950/40 flex flex-col h-full ${
         isSelected
-          ? "border-purple-500 shadow-lg shadow-purple-900/20 ring-1 ring-purple-500/60"
-          : "border-white/10 hover:border-purple-500/40"
+          ? "border-purple-500/50 shadow-purple-900/30 ring-1 ring-purple-500/50"
+          : "hover:border-purple-500/40"
       }`}
     >
       {/* Selection checkbox */}
@@ -109,25 +109,27 @@ export default function ProjectCard({
       )}
 
       {/* ─── Thumbnail ─────────────────────────────────── */}
-      <div className="relative aspect-[16/9] w-full bg-neutral-900 overflow-hidden flex-shrink-0 rounded-t-2xl">
+      <div className="relative aspect-[16/9] w-full bg-neutral-900 overflow-hidden flex-shrink-0 rounded-t-3xl border-b border-white/10">
         {project.cover_image ? (
           <>
             <img
               src={getProxiedImageUrl(project.cover_image, project.url)}
               alt={project.title}
-              className={`w-full h-full object-cover transition-transform duration-700 ${
-                isSelected ? "scale-105 opacity-75" : "group-hover:scale-105"
+              className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
+                isSelected ? "scale-105 opacity-80" : "group-hover:scale-105"
               }`}
             />
             {/* Bottom fade into card */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e12] via-[#0e0e12]/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent" />
             {/* Subtle side vignette */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/25 via-transparent to-black/25" />
+            {/* Soft glow overlay */}
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.12),_transparent_40%)]" />
           </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-neutral-900 to-neutral-950">
-            <FolderOpen className="w-10 h-10 text-neutral-700" />
-            <span className="text-[10px] text-neutral-600 font-mono">No Cover</span>
+            <FolderOpen className="w-12 h-12 text-neutral-600" />
+            <span className="text-[11px] text-neutral-500 font-semibold uppercase tracking-[0.2em]">No Cover</span>
           </div>
         )}
 
@@ -139,16 +141,16 @@ export default function ProjectCard({
         </div>
 
         {/* Top badges row */}
-        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
+        <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
           {/* Status badge */}
-          <div className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded-md border backdrop-blur-md ${statusColor}`}>
+          <div className={`px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] rounded-full border backdrop-blur-md ${statusColor}`}>
             {project.status || "Draft"}
           </div>
 
           {/* 3-dot menu */}
           <button
             onClick={(e) => onToggleMenu?.(e, project.project_id)}
-            className="w-7 h-7 rounded-lg bg-black/50 hover:bg-black/70 text-neutral-400 hover:text-white border border-white/10 transition-all flex items-center justify-center cursor-pointer active:scale-90"
+            className="w-8 h-8 rounded-full bg-black/45 hover:bg-black/65 text-neutral-300 hover:text-white border border-white/10 transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg shadow-black/20"
           >
             <MoreVertical className="w-3.5 h-3.5" />
           </button>
@@ -259,9 +261,9 @@ export default function ProjectCard({
         )}
 
         {/* ─── Footer ───────────────────────────────────── */}
-        <div className="flex items-center justify-between pt-2 mt-auto border-t border-neutral-800/60">
+        <div className="flex items-center justify-between pt-3 mt-auto border-t border-neutral-800/50">
           <div className="flex items-center justify-between gap-3 w-full">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 text-[10px] text-neutral-400">
               {/* Panels count */}
               {(() => {
                 const timelineCount = project.panels_count ?? 0;
@@ -305,15 +307,22 @@ export default function ProjectCard({
                     e.stopPropagation();
                     onOpenCreativeSuite(e, project);
                   }}
-                  className="px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-[10px] font-semibold uppercase tracking-[0.2em] text-purple-200 hover:bg-purple-500/20 transition-all active:scale-95"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full border border-purple-500/20 bg-purple-500/10 text-[10px] font-semibold uppercase tracking-[0.22em] text-purple-200 hover:bg-purple-500/20 active:scale-95 transition-all opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 shadow-sm shadow-purple-500/10"
                 >
                   Creative
                 </button>
               )}
-              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-purple-400 opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenProject(project);
+                }}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full border border-purple-500/20 bg-purple-500/10 text-[10px] font-semibold uppercase tracking-[0.22em] text-purple-200 hover:bg-purple-500/20 active:scale-95 transition-all opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 shadow-sm shadow-purple-500/10"
+              >
                 Resume
                 <ArrowRight className="w-3 h-3" />
-              </div>
+              </button>
             </div>
           </div>
         </div>
