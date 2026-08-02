@@ -1080,7 +1080,7 @@ const StoryboardTimeline = React.memo(
 
                           {/* Episode Horizontal Timeline Grid */}
                           <div
-                            className={`w-full max-w-full flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin px-1 ${
+                            className={`w-full max-w-full flex items-start gap-3 sm:gap-4 overflow-x-auto scrollbar-thin px-1 ${
                               selectedCount > 0 ? "pb-2" : "pb-4"
                             }`}
                           >
@@ -1131,7 +1131,7 @@ const StoryboardTimeline = React.memo(
 
                   return (
                     <div
-                      className={`w-full max-w-full flex gap-3 sm:gap-4 overflow-x-auto scrollbar-thin px-2 md:px-4 ${
+                      className={`w-full max-w-full flex items-start gap-3 sm:gap-4 overflow-x-auto scrollbar-thin px-2 md:px-4 ${
                         selectedCount > 0 ? "pb-2" : "pb-4"
                       }`}
                     >

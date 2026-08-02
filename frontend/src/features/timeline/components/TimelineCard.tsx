@@ -693,29 +693,29 @@ const TimelineCard = ({
 
   return (
     <div
-      className={`w-[220px] sm:w-[260px] shrink-0 rounded-xl border p-3 space-y-2.5 transition-all duration-200 ${
+      className={`w-[220px] sm:w-[260px] shrink-0 rounded-3xl border overflow-hidden transition-all duration-200 bg-neutral-950/95 shadow-[0_20px_60px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 hover:shadow-[0_25px_80px_rgba(131,63,248,0.18)] ${
         (panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll)
-          ? "border-2 border-purple-500 bg-purple-950/20 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.01]"
+          ? "border-2 border-purple-500/80 bg-purple-950/20 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.01]"
           : isCurrent && isSelected
           ? "bg-purple-950/40 border-purple-400 ring-2 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)]"
           : isCurrent
-          ? "bg-neutral-800/80 border-purple-500 shadow-lg"
+          ? "bg-neutral-800/95 border-purple-500 shadow-lg"
           : isSelected
-          ? "bg-purple-950/30 border-purple-500 ring-2 ring-purple-500/70 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
-          : "bg-neutral-950 border-neutral-800 hover:border-neutral-700"
+          ? "bg-purple-950/35 border-purple-500 ring-2 ring-purple-500/70 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
+          : "border-neutral-800 hover:border-neutral-700"
       }`}
     >
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className="relative h-28 sm:h-32 rounded-lg overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800 flex items-center justify-center group"
+        className="relative h-28 sm:h-32 rounded-t-3xl overflow-hidden cursor-pointer select-none bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 border-b border-neutral-800 shadow-inner flex items-center justify-center group"
       >
         <img
           src={panel.image_url}
           alt={`Panel ${panel.id}`}
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
-          className="w-full h-full object-contain object-center group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
           style={{ filter: getPanelFilterStyle(panel) }}
           onError={(e) => {
             const img = e.currentTarget;
@@ -729,6 +729,7 @@ const TimelineCard = ({
             }
           }}
         />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
         {(panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll) && (
           <PanelAnalyzingOverlay isAnalyzingAll={isAnalyzingAll} />
@@ -805,12 +806,13 @@ const TimelineCard = ({
         )}
       </div>
 
-      {/* Dialogue/Subtitle Text OCR Editable Input */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
-            Dialogue/Subtitle Text
-          </label>
+      <div className="p-4 space-y-3">
+        {/* Dialogue/Subtitle Text OCR Editable Input */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
+              Dialogue/Subtitle Text
+            </label>
           <div className="flex items-center gap-1 shrink-0">
             {(panel.isAnalyzing || analyzingPanelId === panel.id) && (
               <span className="text-[9px] font-mono font-bold text-purple-400 animate-pulse flex items-center gap-0.5 mr-1">
@@ -824,12 +826,12 @@ const TimelineCard = ({
                 e.stopPropagation();
                 handleToggleDialogueAudio();
               }}
-              className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer border shadow-sm ${
+              className={`px-3 py-1 rounded-2xl text-[10px] font-sans font-semibold flex items-center gap-2 transition-all cursor-pointer border shadow-sm outline-none focus:ring-2 focus:ring-purple-500/20 ${
                 isDialoguePlaying && !isDialoguePaused
-                  ? "bg-amber-950/40 border-amber-500/40 text-amber-300 hover:bg-amber-900/60"
+                  ? "bg-amber-950/50 border-amber-500/40 text-amber-200 hover:bg-amber-900/75"
                   : isDialoguePaused
-                  ? "bg-purple-950/40 border-purple-500/40 text-purple-300 hover:bg-purple-900/60"
-                  : "bg-indigo-950/40 border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 hover:text-indigo-200"
+                  ? "bg-purple-950/50 border-purple-500/40 text-purple-200 hover:bg-purple-900/75"
+                  : "bg-indigo-950/50 border-indigo-500/30 text-indigo-200 hover:bg-indigo-900/75 hover:text-indigo-100"
               }`}
               title={
                 isDialoguePlaying && !isDialoguePaused
@@ -865,7 +867,7 @@ const TimelineCard = ({
                   e.stopPropagation();
                   stopDialogueAudio();
                 }}
-                className="px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/60 shadow-sm"
+                className="px-3 py-1 rounded-2xl text-[10px] font-sans font-semibold flex items-center gap-1 transition-all cursor-pointer bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 shadow-sm outline-none focus:ring-2 focus:ring-rose-400/25"
                 title="Stop Dialogue"
               >
                 <Square className="w-2.5 h-2.5 fill-current" />
@@ -880,10 +882,10 @@ const TimelineCard = ({
           value={panel.speech_text}
           onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
           placeholder="Enter dialogue or subtitle text..."
-          className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-2xl p-3 text-neutral-100 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/15 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
-              : ""
+              : "hover:border-neutral-700"
           }`}
         />
       </div>
@@ -902,12 +904,12 @@ const TimelineCard = ({
                 e.stopPropagation();
                 handleToggleNarrativeAudio();
               }}
-              className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer border shadow-sm ${
+              className={`px-3 py-1 rounded-2xl text-[10px] font-sans font-semibold flex items-center gap-2 transition-all cursor-pointer border shadow-sm outline-none focus:ring-2 focus:ring-purple-500/20 ${
                 isNarrativePlaying && !isNarrativePaused
-                  ? "bg-amber-950/40 border-amber-500/40 text-amber-300 hover:bg-amber-900/60"
+                  ? "bg-amber-950/50 border-amber-500/40 text-amber-200 hover:bg-amber-900/75"
                   : isNarrativePaused
-                  ? "bg-purple-950/40 border-purple-500/40 text-purple-300 hover:bg-purple-900/60"
-                  : "bg-indigo-950/40 border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 hover:text-indigo-200"
+                  ? "bg-purple-950/50 border-purple-500/40 text-purple-200 hover:bg-purple-900/75"
+                  : "bg-indigo-950/50 border-indigo-500/30 text-indigo-200 hover:bg-indigo-900/75 hover:text-indigo-100"
               }`}
               title={
                 isNarrativePlaying && !isNarrativePaused
@@ -958,17 +960,17 @@ const TimelineCard = ({
           value={panel.narrative || ""}
           onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
           placeholder="Enter narrative text for scene description or voiceover..."
-          className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all no-drag ${
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-2xl p-3 text-neutral-100 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/15 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
-              : ""
+              : "hover:border-neutral-700"
           }`}
         />
       </div>
 
       {/* Sound Effect (SFX) Editable Input */}
       <div className="space-y-1.5">
-        <label className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider block">
+        <label className="text-[9px] font-sans text-neutral-500 uppercase tracking-[0.25em] block">
           Sound Effect (SFX)
         </label>
         <input
@@ -977,10 +979,10 @@ const TimelineCard = ({
           value={panel.sfx || ""}
           onChange={(e) => handleModifySFX(panel.id, e.target.value)}
           placeholder="e.g. door slam, footsteps, thunder..."
-          className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg px-2.5 py-1.5 text-neutral-100 outline-none focus:border-purple-500 font-mono transition-all no-drag ${
+          className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-2xl px-3 py-2 text-neutral-100 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 font-sans transition-all no-drag ${
             panel.isAnalyzing || analyzingPanelId === panel.id
               ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
-              : ""
+              : "hover:border-neutral-700"
           }`}
         />
       </div>
@@ -1076,10 +1078,10 @@ const TimelineCard = ({
               );
               handleAnalyzePanel(panel.id, panel.image_url);
             }}
-            className={`w-full py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-950/40 border-purple-800/40 hover:bg-purple-900/60 text-purple-300 hover:border-purple-600 ${
+            className={`w-full py-1.5 rounded-2xl border text-[10px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all bg-gradient-to-r from-neutral-900 to-neutral-950 border-purple-800/40 hover:from-purple-950 hover:to-neutral-900 text-purple-200 hover:text-purple-100 shadow-sm shadow-black/20 ${
               analyzingPanelId !== null && analyzingPanelId !== panel.id
                 ? "opacity-50 cursor-not-allowed"
-                : ""
+                : "hover:border-purple-600"
             }`}
           >
             <Sparkles className="h-3 w-3 text-purple-400 animate-pulse" />
@@ -1265,6 +1267,7 @@ const TimelineCard = ({
         </span>
       </div>
     </div>
+  </div>
   );
 };
 
