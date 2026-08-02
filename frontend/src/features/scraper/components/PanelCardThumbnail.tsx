@@ -82,9 +82,9 @@ export function PanelCardThumbnail({
   const resolvedImgSrc = getProxiedImageUrl(imgUrl);
 
   return (
-    <div className="relative h-56 sm:h-64 rounded-2xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
+    <div className="relative h-56 sm:h-64 rounded-[1.5rem] overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent z-10 pointer-events-none" />
 
       {hasError ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-950/90 backdrop-blur-md rounded-2xl p-4 text-center z-20 animate-in fade-in duration-200">
