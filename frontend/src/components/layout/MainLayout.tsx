@@ -367,12 +367,10 @@ export default function MainLayout(props: MainLayoutProps) {
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-scroll-container"
-        className={`flex-grow flex-1 flex flex-col min-h-screen lg:max-h-screen justify-between transition-all duration-300 ${
+        className={`flex-grow flex-1 flex flex-col min-h-screen justify-between transition-all duration-300 ${
           showAutoCropModal || showBubbleModal || isImageEditorPage
             ? "overflow-hidden"
-            : !isAnyAdmin
-            ? "lg:overflow-y-auto"
-            : "overflow-y-auto"
+            : ""
         } ${!isAnyAdmin && isSidebarOpen ? "overflow-hidden" : ""}`}
       >
         {/* Top Header */}
