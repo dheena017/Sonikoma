@@ -319,70 +319,84 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
         <div className="space-y-6">
           
           {/* Active Workspace / Project */}
-          <div className="bg-[#0b0b0f] border border-neutral-900 rounded-2xl p-6 shadow-md text-left">
-            <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono mb-4 flex items-center gap-1.5">
-              <Tv className="w-4 h-4" /> Active Timeline
-            </h3>
+          <div className="relative bg-[#0b0b0f] border border-neutral-900 rounded-2xl p-6 shadow-md text-left overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-600 to-purple-400 opacity-90" />
+            <div className="relative z-10">
+              <div className="flex items-start justify-between mb-4">
+                <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+                  <Tv className="w-4 h-4" /> Active Timeline
+                </h3>
+                <span className="text-[10px] font-mono font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-white px-2 py-1 rounded-full shadow-sm">
+                  Active
+                </span>
+              </div>
 
-            {projectIdVal ? (
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  {seriesCoverImageVal ? (
-                    <img
-                      src={seriesCoverImageVal}
-                      className="w-16 h-20 rounded-xl object-cover border border-neutral-800"
-                      alt={seriesTitleVal || "Project"}
-                    />
-                  ) : (
-                    <div className="w-16 h-20 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-600 text-xs font-bold font-mono">
-                      Cover
-                    </div>
-                  )}
+              {projectIdVal ? (
+                <div className="space-y-4">
+                  <div className="flex gap-4 items-start">
+                    {seriesCoverImageVal ? (
+                      <div className="w-16 h-20 rounded-xl overflow-hidden border border-neutral-800 shadow-inner" style={{boxShadow: 'inset 0 0 24px rgba(0,0,0,0.35)'}}>
+                        <img
+                          src={seriesCoverImageVal}
+                          className="w-full h-full object-cover"
+                          alt={seriesTitleVal || "Project"}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-16 h-20 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-600 text-xs font-bold font-mono">
+                        Cover
+                      </div>
+                    )}
 
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-white truncate">
-                      {seriesTitleVal || "Untitled Series"}
-                    </h4>
-                    <p className="text-xs text-purple-400 truncate mt-0.5">
-                      {chapterTitleVal || "Untitled Chapter"}
-                    </p>
-                    <div className="text-[10px] text-neutral-500 font-mono mt-2">
-                      Panels Count:{" "}
-                      <span className="font-bold text-neutral-300">
-                        {totalPanelsCount}
-                      </span>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-lg font-extrabold text-white truncate">
+                        {seriesTitleVal || "Untitled Series"}
+                      </h4>
+                      <p className="text-sm text-purple-300 truncate mt-0.5">
+                        {chapterTitleVal || "Untitled Chapter"}
+                      </p>
+
+                      <div className="mt-3 flex items-center gap-2">
+                        <div className="text-[11px] text-neutral-400 font-mono bg-neutral-900/50 px-2 py-1 rounded-full inline-flex items-center gap-2">
+                          <span className="text-neutral-300 font-bold">{totalPanelsCount}</span>
+                          <span className="text-neutral-500">panels</span>
+                        </div>
+                        <div className="text-[11px] text-neutral-500 font-mono">
+                          <span className="inline-block px-2 py-1 rounded border border-neutral-850 text-[10px]">Updated recently</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <button
-                  onClick={() => {
-                    const seriesSlug = activeProject?.series_slug || localStorage.getItem("active_series_slug") || "active";
-                    const chapterSlug = activeProject?.chapter_slug || localStorage.getItem("active_chapter_slug") || "active";
-                    navigateTo(`/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
-                  }}
-                  className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold font-mono tracking-wider uppercase transition-all flex items-center justify-center gap-2 active:scale-95 shadow-md shadow-purple-950/20 cursor-pointer"
-                >
-                  <Play className="w-3.5 h-3.5 fill-white" /> Resume Editing
-                </button>
-              </div>
-            ) : (
-              <div className="py-6 text-center">
-                <div className="w-12 h-12 rounded-full bg-neutral-900 border border-neutral-850 flex items-center justify-center mx-auto text-neutral-600 mb-3">
-                  📁
+                  <button
+                    onClick={() => {
+                      const seriesSlug = activeProject?.series_slug || localStorage.getItem("active_series_slug") || "active";
+                      const chapterSlug = activeProject?.chapter_slug || localStorage.getItem("active_chapter_slug") || "active";
+                      navigateTo(`/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
+                    }}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white text-sm font-bold font-mono tracking-wider transition-transform transform-gpu hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-3 shadow-lg"
+                  >
+                    <Play className="w-4 h-4 fill-white" /> <span>Resume Editing</span>
+                  </button>
                 </div>
-                <p className="text-xs text-neutral-500 leading-normal">
-                  No active project is selected. Choose a project from the Projects
-                  page to unlock full Creative features.
-                </p>
-                <button
-                  onClick={() => navigateTo("/projects")}
-                  className="mt-4 px-4 py-2 border border-purple-550/30 rounded-xl text-[10px] font-mono font-bold text-purple-400 hover:bg-purple-500/5 transition-all active:scale-95 cursor-pointer"
-                >
-                  Choose Project
-                </button>
-              </div>
-            )}
+              ) : (
+                <div className="py-6 text-center">
+                  <div className="w-12 h-12 rounded-full bg-neutral-900 border border-neutral-850 flex items-center justify-center mx-auto text-neutral-600 mb-3">
+                    📁
+                  </div>
+                  <p className="text-xs text-neutral-500 leading-normal">
+                    No active project is selected. Choose a project from the Projects
+                    page to unlock full Creative features.
+                  </p>
+                  <button
+                    onClick={() => navigateTo("/projects")}
+                    className="mt-4 px-4 py-2 border border-purple-550/30 rounded-xl text-[10px] font-mono font-bold text-purple-400 hover:bg-purple-500/5 transition-all active:scale-95 cursor-pointer"
+                  >
+                    Choose Project
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Activity Logs */}
