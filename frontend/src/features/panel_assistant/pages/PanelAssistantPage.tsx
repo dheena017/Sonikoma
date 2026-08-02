@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Sparkles, Sliders, ArrowLeft, RefreshCw } from "lucide-react";
+import { Sparkles, BookOpenText, Mic2, Wand2, Gauge } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 
 import PanelTranslationTool from "@/features/panel_assistant/components/PanelTranslationTool";
@@ -25,6 +25,35 @@ const PanelAssistantPage = React.memo(
     const [activeTab, setActiveTab] = useState<
       "translation" | "audio" | "creative" | "pacing"
     >("translation");
+
+    const tabs = [
+      {
+        id: "translation" as const,
+        label: "Translation",
+        description: "Translate and scrub dialogue",
+        icon: BookOpenText,
+      },
+      {
+        id: "audio" as const,
+        label: "Audio & TTS",
+        description: "Shape sound and voice direction",
+        icon: Mic2,
+      },
+      {
+        id: "creative" as const,
+        label: "Creative Prompts",
+        description: "Compose image and subtitle prompts",
+        icon: Wand2,
+      },
+      {
+        id: "pacing" as const,
+        label: "Pacing & Shake",
+        description: "Tune timing and motion effects",
+        icon: Gauge,
+      },
+    ];
+
+    const activeTabMeta = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
 
     // Sync index from URL query param if present
     useEffect(() => {
@@ -108,8 +137,8 @@ const PanelAssistantPage = React.memo(
         {/* DUAL COLUMN PANEL PREVIEW & ACTIVE TAB CONTAINER */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
           {/* Left pane: Active Panel Card preview */}
-          <div className="md:col-span-4 bg-neutral-950/45 border border-neutral-800 p-4 rounded-2xl space-y-4">
-            <div className="h-44 sm:h-48 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-900 flex items-center justify-center">
+          <div className="md:col-span-4 rounded-3xl border border-neutral-800 bg-gradient-to-br from-neutral-950/90 via-neutral-900/80 to-purple-950/25 p-4 space-y-4 shadow-[0_20px_45px_rgba(0,0,0,0.28)]">
+            <div className="h-44 sm:h-48 rounded-2xl overflow-hidden border border-neutral-800/90 bg-gradient-to-br from-neutral-900 via-neutral-950 to-purple-950/30 flex items-center justify-center">
               <img
                 src={activePanel.image_url}
                 alt=""
@@ -125,7 +154,7 @@ const PanelAssistantPage = React.memo(
                 onChange={(e) => handleUpdateDialogue(e.target.value)}
                 rows={2}
                 placeholder="(Silent panel script)"
-                className="w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none"
+                className="w-full bg-neutral-950/70 border border-neutral-800/80 text-[11px] rounded-xl p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none"
               />
             </div>
             <div className="space-y-1">
@@ -137,71 +166,108 @@ const PanelAssistantPage = React.memo(
                 onChange={(e) => handleUpdateNarrative(e.target.value)}
                 rows={2}
                 placeholder="(No narrative voiceover text generated yet)"
-                className="w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none"
+                className="w-full bg-neutral-950/70 border border-neutral-800/80 text-[11px] rounded-xl p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none"
               />
             </div>
           </div>
 
           {/* Right pane: Tool Tab Selector & Form views */}
-          <div className="md:col-span-8 bg-neutral-950/45 border border-neutral-800 p-5 rounded-2xl space-y-4">
-            <div className="flex border-b border-neutral-800 font-mono text-[10px] overflow-x-auto scrollbar-none">
-              <button
-                onClick={() => setActiveTab("translation")}
-                className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
-                  activeTab === "translation"
-                    ? "border-purple-500 text-white"
-                    : "border-transparent text-neutral-400 hover:text-white"
-                }`}
-              >
-                Translation
-              </button>
-              <button
-                onClick={() => setActiveTab("audio")}
-                className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
-                  activeTab === "audio"
-                    ? "border-purple-500 text-white"
-                    : "border-transparent text-neutral-400 hover:text-white"
-                }`}
-              >
-                Audio & TTS
-              </button>
-              <button
-                onClick={() => setActiveTab("creative")}
-                className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
-                  activeTab === "creative"
-                    ? "border-purple-500 text-white"
-                    : "border-transparent text-neutral-400 hover:text-white"
-                }`}
-              >
-                Creative Prompts
-              </button>
-              <button
-                onClick={() => setActiveTab("pacing")}
-                className={`px-3 py-1.5 font-bold transition-all border-b-2 cursor-pointer ${
-                  activeTab === "pacing"
-                    ? "border-purple-500 text-white"
-                    : "border-transparent text-neutral-400 hover:text-white"
-                }`}
-              >
-                Pacing & Shake
-              </button>
-            </div>
+          <div className="md:col-span-8 rounded-3xl border border-neutral-800 bg-gradient-to-br from-neutral-950/90 via-neutral-900/80 to-purple-950/25 p-4 space-y-4 shadow-[0_20px_45px_rgba(0,0,0,0.28)]">
+            <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-4">
+              <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/60 p-3">
+                <div className="mb-3 px-1">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-neutral-500">
+                    Studio tools
+                  </p>
+                  <h3 className="mt-1 text-sm font-semibold text-white">
+                    Shape each panel
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
 
-            <div className="pt-2">
-              {activeTab === "translation" && (
-                <PanelTranslationTool
-                  panel={activePanel}
-                  onUpdateDialogue={handleUpdateDialogue}
-                  addNotification={addNotification}
-                />
-              )}
-              {activeTab === "audio" && <PanelAudioTool panel={activePanel} />}
-              {activeTab === "creative" && (
-                <PanelCreativeTool panel={activePanel} />
-              )}
-              {activeTab === "pacing" && (
-                <PanelPacingTool panel={activePanel} />
-              )}
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`w-full rounded-xl border px-3 py-2.5 text-left transition-all ${
+                          isActive
+                            ? "border-purple-500/60 bg-purple-500/15 text-white shadow-[0_0_0_1px_rgba(167,139,250,0.2)]"
+                            : "border-neutral-800/80 bg-neutral-900/70 text-neutral-400 hover:border-neutral-700 hover:text-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Icon
+                            className={`h-4 w-4 ${
+                              isActive ? "text-purple-300" : "text-neutral-500"
+                            }`}
+                          />
+                          <span className="text-[11px] font-semibold">
+                            {tab.label}
+                          </span>
+                        </div>
+                        <p className="mt-1.5 text-[10px] leading-relaxed text-neutral-500">
+                          {tab.description}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-800 pb-4">
+                  <div>
+                    <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-neutral-500">
+                      Active workflow
+                    </p>
+                    <h4 className="text-sm font-semibold text-white">
+                      {activeTabMeta.label}
+                    </h4>
+                    <p className="mt-1 text-xs text-neutral-400">
+                      {activeTabMeta.description}
+                    </p>
+                  </div>
+                  <div className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-[10px] font-mono font-semibold uppercase tracking-[0.2em] text-purple-300">
+                    Panel {activePanel.id}
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <div className={activeTab === "translation" ? "block" : "hidden"}>
+                    <PanelTranslationTool
+                      panel={activePanel}
+                      panels={panels}
+                      setPanels={setPanels}
+                      onUpdateDialogue={handleUpdateDialogue}
+                      addNotification={addNotification}
+                    />
+                  </div>
+                  <div className={activeTab === "audio" ? "block" : "hidden"}>
+                    <PanelAudioTool
+                      panel={activePanel}
+                      panels={panels}
+                      addNotification={addNotification}
+                    />
+                  </div>
+                  <div className={activeTab === "creative" ? "block" : "hidden"}>
+                    <PanelCreativeTool
+                      panel={activePanel}
+                      panels={panels}
+                      addNotification={addNotification}
+                    />
+                  </div>
+                  <div className={activeTab === "pacing" ? "block" : "hidden"}>
+                    <PanelPacingTool
+                      panel={activePanel}
+                      panels={panels}
+                      addNotification={addNotification}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
