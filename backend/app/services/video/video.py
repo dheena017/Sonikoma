@@ -7,14 +7,41 @@ import logging
 import numpy as np
 from PIL import Image, ImageFilter
 from typing import List, Dict, Any
-try:
-    from moviepy import ImageClip, CompositeVideoClip, AudioFileClip, concatenate_videoclips
-except ImportError:
-    from moviepy.editor import ImageClip, CompositeVideoClip, AudioFileClip, concatenate_videoclips
+from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 from media.audio.audio import generate_panel_audio
 from services.image.utils.image_utils import resolve_image_to_buffer
 
 logger = logging.getLogger("sonikoma.services.video")
+
+
+def build_panel_frame_image(
+    background_image: Image.Image,
+    foreground_image: Image.Image,
+    target_width: int = 1920,
+    target_height: int = 1080,
+) -> Image.Image:
+    """Create a single RGB frame that combines a blurred background with a centered foreground."""
+    target_width = max(1, target_width)
+    target_height = max(1, target_height)
+
+    bg_img = background_image.resize((target_width, target_height), Image.Resampling.LANCZOS)
+    bg_img = bg_img.filter(ImageFilter.GaussianBlur(30))
+
+    img_w, img_h = foreground_image.size
+    img_w = max(1, img_w)
+    img_h = max(1, img_h)
+
+    scale = min(target_width / img_w, target_height / img_h)
+    new_w = max(1, int(img_w * scale))
+    new_h = max(1, int(img_h * scale))
+    fg_img = foreground_image.resize((new_w, new_h), Image.Resampling.LANCZOS)
+
+    frame = bg_img.copy()
+    offset_x = max(0, (target_width - new_w) // 2)
+    offset_y = max(0, (target_height - new_h) // 2)
+    frame.paste(fg_img, (offset_x, offset_y))
+    return frame.convert("RGB")
+
 
 async def compile_video_from_panels(
     project_id: str,
@@ -113,23 +140,13 @@ async def compile_video_from_panels(
         # 3. Process images with PIL
         try:
             with Image.open(io.BytesIO(image_bytes)).convert("RGB") as img:
-                img_w, img_h = img.size
-
-                # Protect against division-by-zero on malformed sizes
-                img_w = max(1, img_w)
-                img_h = max(1, img_h)
-
-                # Create blurred background
-                with img.resize((target_width, target_height), Image.Resampling.LANCZOS) as bg_img:
-                    with bg_img.filter(ImageFilter.GaussianBlur(30)) as bg_img_blurred:
-                        bg_array = np.array(bg_img_blurred)
-
-                # Create foreground image maintaining aspect ratio
-                scale = min(target_width / img_w, target_height / img_h)
-                new_w = max(1, int(img_w * scale))
-                new_h = max(1, int(img_h * scale))
-                with img.resize((new_w, new_h), Image.Resampling.LANCZOS) as fg_img:
-                    fg_array = np.array(fg_img)
+                composite_frame = build_panel_frame_image(
+                    background_image=img,
+                    foreground_image=img,
+                    target_width=target_width,
+                    target_height=target_height,
+                )
+                frame_array = np.array(composite_frame, dtype=np.uint8)
 
         except Exception as e:
             logger.error(f"Failed to process PIL images for panel {idx + 1}: {e}")
@@ -137,14 +154,10 @@ async def compile_video_from_panels(
 
         # 4. Create MoviePy Clips
         try:
-            bg_clip = ImageClip(bg_array).set_duration(duration)
-            fg_clip = ImageClip(fg_array).set_duration(duration).set_position("center")
-
-            composite_clip = CompositeVideoClip([bg_clip, fg_clip], size=(target_width, target_height))
+            composite_clip = ImageClip(frame_array).set_duration(duration)
 
             if has_audio:
                 audio_clip = AudioFileClip(audio_path)
-                # Ensure audio and video match perfectly
                 audio_clip = audio_clip.set_duration(duration)
                 composite_clip = composite_clip.set_audio(audio_clip)
 
@@ -161,7 +174,7 @@ async def compile_video_from_panels(
 
     # 5. Concatenate and Render
     try:
-        final_video = concatenate_videoclips(clips, method="compose")
+        final_video = concatenate_videoclips(clips, method="chain")
 
         def render_video():
             final_video.write_videofile(
