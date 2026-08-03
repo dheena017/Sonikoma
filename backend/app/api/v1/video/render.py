@@ -36,10 +36,8 @@ async def render_video(
     job_queue = get_job_queue()
     video_id = str(uuid.uuid4())[:8]
     
-    # Register job in the queue
-    job_queue.create_job("video_render")
-    # Store custom mapping so status retrieval matches generated job ID or video_id
-    job_queue.update_status(video_id, "pending", progress=0.0)
+    # Register the job using the same ID we return to the client.
+    job_queue.create_job("video_render", job_id=video_id)
 
     # Deduct credits
     new_balance = record_credit_transaction(current_user["user_id"], -COST, "video_render")

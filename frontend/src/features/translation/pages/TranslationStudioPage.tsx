@@ -69,8 +69,35 @@ const TranslationStudioPage = React.memo(
     };
 
     return (
-      <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in">
-
+      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+        {/* PAGE HERO HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1b172b] pb-5">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-[#181229] border border-purple-500/30 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/50">
+              <Globe className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                  CONTEXT &amp; SCRIPT
+                </span>
+                <span className="text-xs text-neutral-400 font-mono">• {panels.length} panels for localization</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                Translation Studio
+              </h1>
+              <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                Bulk AI script scrubbing, webtoon dialogue cleanup, language localization, and subtitle synchronization.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 self-start md:self-center">
+            <div className="px-3.5 py-1.5 rounded-full bg-[#12101d] border border-[#231e38] text-neutral-300 text-xs font-mono flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span>Multi-Language Ready</span>
+            </div>
+          </div>
+        </div>
 
         {/* Bulk Scrubber */}
         <BulkScrubberControl

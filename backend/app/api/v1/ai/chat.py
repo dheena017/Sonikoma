@@ -83,7 +83,19 @@ async def get_thumbnail_visual(body: ThumbnailVisualRequest, user_api_key: dict 
 
 @router.post("/skills/generate-thumbnail")
 async def generate_thumbnail_variation(body: GenerateThumbnailRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    return {"success": True, "url": "/api/image/cached/default"}
+    panel_descriptions = "\n".join(
+        f"Panel {i + 1}: {p.get('visual_description', 'No description')}"
+        for i, p in enumerate(body.panels)
+    )
+    return await run_md_skill(
+        "thumbnail_auto_composition",
+        body.model,
+        api_key=user_api_key,
+        title=body.title,
+        genre=body.genre,
+        total_panels=len(body.panels),
+        panel_descriptions=panel_descriptions,
+    )
 
 
 @router.post("/skills/intro-hook")

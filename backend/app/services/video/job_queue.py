@@ -20,9 +20,14 @@ class VideoJobQueueManager:
     def __init__(self):
         self.jobs: Dict[str, Dict[str, Any]] = {}
 
-    def create_job(self, task_name: str) -> str:
-        """Create a new job record and return its unique job_id."""
-        job_id = str(uuid.uuid4())
+    def create_job(self, task_name: str, job_id: Optional[str] = None) -> str:
+        """Create a new job record and return its unique job_id.
+
+        If the caller already has an external job identifier, it can be used
+        to keep the queue entry keyed consistently across components.
+        """
+        if job_id is None:
+            job_id = str(uuid.uuid4())
         self.jobs[job_id] = {
             "job_id": job_id,
             "task_name": task_name,

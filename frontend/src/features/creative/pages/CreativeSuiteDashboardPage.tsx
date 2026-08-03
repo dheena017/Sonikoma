@@ -1,28 +1,16 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
-import {
-  Sparkles,
-  Film,
-  Scissors,
-  Users,
-  Globe,
-  Music,
-  MessageSquare,
-  Mic,
-  BarChart3,
-  Youtube,
-  Play,
-  ArrowRight,
-  Clock,
-  CheckCircle2,
-  Lock,
-  Tv,
-} from "lucide-react";
+import { Sparkles, Film, Scissors, Users, Globe, Music, Mic, BarChart3, Youtube } from "lucide-react";
+import CreativeSuiteDashboardStats from "@/features/creative/components/CreativeSuiteDashboardStats";
+import CreativeSuiteDashboardTools from "@/features/creative/components/CreativeSuiteDashboardTools";
+import CreativeSuiteDashboardActiveProject from "@/features/creative/components/CreativeSuiteDashboardActiveProject";
+import CreativeSuiteDashboardActivityLog from "@/features/creative/components/CreativeSuiteDashboardActivityLog";
 
 interface CreativeSuiteDashboardPageProps {
   user?: any;
   navigateTo: (path: string) => void;
   panels?: any[];
+  setPanels?: (panels: any[]) => void;
   projectId?: string | null;
   seriesTitle?: string | null;
   chapterTitle?: string | null;
@@ -34,6 +22,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   user,
   navigateTo,
   panels = [],
+  setPanels,
   projectId = null,
   seriesTitle = null,
   chapterTitle = null,
@@ -41,13 +30,34 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   addNotification = () => {},
 }) => {
   const activeProjectData = useProjectStore((state) => state.activeProjectData);
+  const clearActiveProject = useProjectStore((state) => state.clearActiveProject);
   const activeProject = activeProjectData?.project || null;
   const activePanels = activeProjectData?.panels || panels || [];
 
-  const projectIdVal = activeProject?.project_id ?? projectId;
-  const seriesTitleVal = activeProject?.title ?? seriesTitle;
-  const seriesCoverImageVal = activeProject?.cover_image ?? seriesCoverImage;
-  const chapterTitleVal = activeProject?.episode ? (activeProject.episode.split(" - ").slice(1).join(" - ") || "") : chapterTitle;
+  const exitActiveProject = useCallback(() => {
+    if (typeof window !== "undefined") {
+      const confirmed = window.confirm(
+        "Exit the active project? This will clear the current Creative Suite session and return you to Projects."
+      );
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    clearActiveProject();
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("active_project_id");
+      localStorage.removeItem("active_series_slug");
+      localStorage.removeItem("active_chapter_slug");
+    }
+
+    if (typeof setPanels === "function") {
+      setPanels([]);
+    }
+
+    addNotification?.("Exited the active project.", "success");
+    navigateTo("/projects");
+  }, [addNotification, clearActiveProject, navigateTo, setPanels]);
 
   // Stats calculations
   const totalPanelsCount = activePanels.length;
@@ -195,234 +205,55 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   ];
 
   return (
-    <div className="space-y-6 text-left">
+    <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)] text-left">
       
       {/* Welcome Hero Panel */}
-      <div className="relative overflow-hidden rounded-3xl border border-purple-900/30 bg-[#0e0e14]/60 p-8 shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl border border-[#231d38] bg-[#0d0b17] p-7 shadow-xl">
         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
           <Sparkles className="w-36 h-36 text-purple-400" />
         </div>
         
         <div className="relative z-10 max-w-xl">
-          <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-[10px] text-purple-400 font-bold uppercase tracking-wider rounded-full font-mono mb-4 inline-block">
+          <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-[10px] text-purple-300 font-bold uppercase tracking-wider rounded-full font-mono mb-3 inline-block">
             CREATOR STUDIO HUB
           </span>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white mt-1">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
             Welcome to the{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">
               Creative Suite
             </span>
           </h1>
-          <p className="text-neutral-400 mt-2 text-sm leading-relaxed font-sans">
+          <p className="text-neutral-400 mt-2 text-xs leading-relaxed font-mono">
             Fine-tune visual boundaries, compose orchestral backings, cast AI narrators, translate speech dialogues, and evaluate engagement ratings in a single location.
           </p>
         </div>
       </div>
 
       {/* Statistics Ribbon */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statsRibbon.map((stat, idx) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={idx}
-              className="bg-[#0b0b0f] border border-neutral-900 rounded-2xl p-5 hover:bg-[#0e0e14] transition-all duration-300"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <div className={`p-2 rounded-xl border ${stat.color}`}>
-                  <Icon className="w-4 h-4" />
-                </div>
-                <span className="text-[10px] text-neutral-500 font-mono">
-                  Telemetry
-                </span>
-              </div>
-              <div className="text-2xl font-black text-white">{stat.value}</div>
-              <div className="text-[10px] font-bold text-neutral-400 font-mono uppercase tracking-wide mt-1">
-                {stat.label}
-              </div>
-              <p className="text-[10px] text-neutral-500 font-medium mt-0.5">
-                {stat.desc}
-              </p>
-            </div>
-          );
-        })}
-      </div>
+      <CreativeSuiteDashboardStats stats={statsRibbon} />
 
       {/* Main Grid: Launcher and Project Status */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Launcher Grid */}
         <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-sm font-black text-purple-400 uppercase tracking-widest font-mono pl-1">
+          <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono pl-1">
             Creative AI Tools Launcher
           </h3>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {tools.map((tool) => {
-              const Icon = tool.icon;
-              const isLocked = tool.requiresPanels && activePanels.length === 0;
-
-              return (
-                <div
-                  key={tool.id}
-                  onClick={() => navigateTo(tool.path)}
-                  className={`bg-[#0b0b0f] border border-neutral-900 rounded-2xl p-5 hover:bg-[#0e0e14]/80 hover:border-purple-500/30 transition-all duration-300 cursor-pointer flex flex-col justify-between group relative shadow-md ${
-                    isLocked ? "opacity-75 hover:border-rose-900/30" : ""
-                  }`}
-                >
-                  <div>
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="p-2.5 bg-neutral-900 border border-neutral-850 rounded-xl text-neutral-400 group-hover:text-purple-400 group-hover:border-purple-500/20 transition-all">
-                        <Icon className="w-4.5 h-4.5" />
-                      </div>
-                      
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] font-mono font-bold bg-neutral-900 px-2 py-0.5 rounded text-neutral-500 uppercase">
-                          {tool.badge}
-                        </span>
-                        
-                        {isLocked && (
-                          <span className="text-[9px] font-mono font-bold bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/10 flex items-center gap-1">
-                            <Lock className="w-2.5 h-2.5" /> LCK
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <h4 className="text-sm font-extrabold text-neutral-200 group-hover:text-white transition-colors">
-                      {tool.label}
-                    </h4>
-                    <p className="text-[11px] text-neutral-500 mt-1 leading-relaxed">
-                      {tool.desc}
-                    </p>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-neutral-900 flex justify-end">
-                    <button
-                      className={`text-[10px] font-bold font-mono tracking-wider uppercase flex items-center gap-1 transition-all ${
-                        isLocked
-                          ? "text-neutral-600 group-hover:text-rose-400"
-                          : "text-purple-400 group-hover:text-purple-300 group-hover:translate-x-1"
-                      }`}
-                    >
-                      <span>{isLocked ? "Open Locker" : "Launch"}</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <CreativeSuiteDashboardTools
+            tools={tools}
+            activePanelsCount={activePanels.length}
+            navigateTo={navigateTo}
+          />
         </div>
 
-        {/* Side Panel: Project status and Activity Logs */}
         <div className="space-y-6">
-          
-          {/* Active Workspace / Project */}
-          <div className="relative bg-[#0b0b0f] border border-neutral-900 rounded-2xl p-6 shadow-md text-left overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-600 to-purple-400 opacity-90" />
-            <div className="relative z-10">
-              <div className="flex items-start justify-between mb-4">
-                <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
-                  <Tv className="w-4 h-4" /> Active Timeline
-                </h3>
-                <span className="text-[10px] font-mono font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-white px-2 py-1 rounded-full shadow-sm">
-                  Active
-                </span>
-              </div>
-
-              {projectIdVal ? (
-                <div className="space-y-4">
-                  <div className="flex gap-4 items-start">
-                    {seriesCoverImageVal ? (
-                      <div className="w-16 h-20 rounded-xl overflow-hidden border border-neutral-800 shadow-inner" style={{boxShadow: 'inset 0 0 24px rgba(0,0,0,0.35)'}}>
-                        <img
-                          src={seriesCoverImageVal}
-                          className="w-full h-full object-cover"
-                          alt={seriesTitleVal || "Project"}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-16 h-20 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-600 text-xs font-bold font-mono">
-                        Cover
-                      </div>
-                    )}
-
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-lg font-extrabold text-white truncate">
-                        {seriesTitleVal || "Untitled Series"}
-                      </h4>
-                      <p className="text-sm text-purple-300 truncate mt-0.5">
-                        {chapterTitleVal || "Untitled Chapter"}
-                      </p>
-
-                      <div className="mt-3 flex items-center gap-2">
-                        <div className="text-[11px] text-neutral-400 font-mono bg-neutral-900/50 px-2 py-1 rounded-full inline-flex items-center gap-2">
-                          <span className="text-neutral-300 font-bold">{totalPanelsCount}</span>
-                          <span className="text-neutral-500">panels</span>
-                        </div>
-                        <div className="text-[11px] text-neutral-500 font-mono">
-                          <span className="inline-block px-2 py-1 rounded border border-neutral-850 text-[10px]">Updated recently</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      const seriesSlug = activeProject?.series_slug || localStorage.getItem("active_series_slug") || "active";
-                      const chapterSlug = activeProject?.chapter_slug || localStorage.getItem("active_chapter_slug") || "active";
-                      navigateTo(`/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
-                    }}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white text-sm font-bold font-mono tracking-wider transition-transform transform-gpu hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-3 shadow-lg"
-                  >
-                    <Play className="w-4 h-4 fill-white" /> <span>Resume Editing</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="py-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-neutral-900 border border-neutral-850 flex items-center justify-center mx-auto text-neutral-600 mb-3">
-                    📁
-                  </div>
-                  <p className="text-xs text-neutral-500 leading-normal">
-                    No active project is selected. Choose a project from the Projects
-                    page to unlock full Creative features.
-                  </p>
-                  <button
-                    onClick={() => navigateTo("/projects")}
-                    className="mt-4 px-4 py-2 border border-purple-550/30 rounded-xl text-[10px] font-mono font-bold text-purple-400 hover:bg-purple-500/5 transition-all active:scale-95 cursor-pointer"
-                  >
-                    Choose Project
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Activity Logs */}
-          <div className="bg-[#0b0b0f] border border-neutral-900 rounded-2xl p-6 shadow-md text-left">
-            <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono mb-4 flex items-center gap-1.5">
-              <Clock className="w-4 h-4" /> Creative Logs
-            </h3>
-
-            <div className="space-y-4">
-              {recentActivities.map((act, idx) => (
-                <div key={idx} className="flex gap-3 text-xs leading-normal">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-neutral-300 font-medium text-[11px]">
-                      {act.text}
-                    </p>
-                    <span className="text-[9px] text-neutral-550 font-mono mt-0.5 block">
-                      {act.time}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <CreativeSuiteDashboardActiveProject
+            activeProject={activeProject}
+            activePanelsCount={activePanels.length}
+            exitActiveProject={exitActiveProject}
+            navigateTo={navigateTo}
+          />
+          <CreativeSuiteDashboardActivityLog activities={recentActivities} />
         </div>
-
       </div>
     </div>
   );

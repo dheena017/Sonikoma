@@ -22,7 +22,7 @@ logger = logging.getLogger("sonikoma.services.video.video_service")
 # Resolve the output directory relative to the project root so rendered videos
 # are served by the /videos static mount in main.py.
 _PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..")
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
 )
 _VIDEO_OUTPUT_DIR = os.path.join(_PROJECT_ROOT, "data", "media")
 

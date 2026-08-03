@@ -1205,7 +1205,7 @@ export default function AppRouter(props: AppRouterProps) {
           panels={panels}
         >
           {isCreativeSuiteDashboardPath ? (
-            <CreativeSuiteDashboardPage navigateTo={navigateTo} />
+            <CreativeSuiteDashboardPage navigateTo={navigateTo} panels={panels} setPanels={setPanels} />
           ) : isOptimizerPath ? (
             <AIOptimizerPage
               panels={panels}

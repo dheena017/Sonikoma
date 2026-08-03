@@ -135,13 +135,13 @@ export default function ShortsScriptTab({
             Manhwa Panels ({panels.length})
           </h5>
           {panels.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2 max-h-[350px] overflow-y-auto pr-1 scrollbar-thin">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[380px] overflow-y-auto pr-1 scrollbar-thin">
               {panels.map((panel, idx) => (
                 <div
                   key={panel.id || idx}
-                  className="bg-neutral-950/60 border border-neutral-850 rounded-lg p-2 flex flex-col space-y-1.5 hover:border-neutral-700 transition-colors"
+                  className="bg-neutral-950/80 border border-neutral-850 rounded-3xl p-2 flex flex-col space-y-2 hover:border-neutral-700 transition-colors shadow-sm"
                 >
-                  <div className="relative aspect-[3/4] rounded overflow-hidden bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+                  <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 shadow-inner flex items-center justify-center">
                     {panel.image_url ? (
                       <img
                         src={panel.image_url}

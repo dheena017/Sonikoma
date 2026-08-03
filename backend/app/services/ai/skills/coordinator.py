@@ -117,12 +117,17 @@ async def execute_provider_call(
     start_time = time.monotonic()
     
     if provider == "gemini":
-        if "gemini-3.5" in clean_model_id.lower():
-            if "pro" in clean_model_id.lower():
+        model_lower = clean_model_id.lower()
+        if "gemini-3.5" in model_lower:
+            if "pro" in model_lower:
                 clean_model_id = "gemini-2.5-pro"
             else:
                 clean_model_id = "gemini-2.5-flash"
             logger.debug(f"[coordinator.py] Translated gemini-3.5 model selection in '{skill.name}' to: {clean_model_id}")
+        elif "gemini-1.5" in model_lower:
+            clean_model_id = "gemini-2.5-flash"
+        elif "gemini-2.0" in model_lower:
+            clean_model_id = "gemini-2.0-flash"
 
         key_to_use = resolve_api_key("gemini", api_key, user_keys)
         if not ai_initialized and not key_to_use:
@@ -152,8 +157,7 @@ async def execute_provider_call(
             "gemini-2.5-flash",
             "gemini-2.5-flash-lite",
             "gemini-2.0-flash",
-            "gemini-2.0-flash-lite",
-            "gemini-1.5-flash"
+            "gemini-2.0-flash-lite"
         ]
         models_to_try = []
         for m in fallback_candidates:
@@ -179,7 +183,15 @@ async def execute_provider_call(
                 continue
 
         if not response:
-            raise last_exc or RuntimeError(f"All Gemini fallback models failed for skill '{skill.name}'.")
+            fallback_payload = FallbackCoordinator.get_programmatic_fallback(skill.name, **kwargs)
+            fallback_payload.setdefault("success", False)
+            fallback_payload.setdefault("source", "fallback:error")
+            fallback_payload["error"] = str(last_exc or RuntimeError(f"All Gemini fallback models failed for skill '{skill.name}'."))
+            raw_text = json.dumps(fallback_payload)
+            skill.last_input_tokens = 0
+            skill.last_output_tokens = 0
+            skill.logger.log_execution(skill.name, int((time.monotonic() - start_time) * 1000), False, kwargs, fallback_payload, 0, 0)
+            return raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
         raw_text = response.text or "{}"
