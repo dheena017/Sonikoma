@@ -100,33 +100,19 @@ const PanelAssistantPage = React.memo(
           </div>
         </div>
 
-        {/* FILMSTRIP THUMBNAIL TRACK */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest font-bold">
-              STORYBOARD TIMELINE ({safePanels.length} FRAMES)
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => scrollFilmstrip("left")}
-                className="p-1 rounded-lg border border-[#1f1b2e] bg-[#0c0a15] hover:bg-[#161224] text-neutral-400 hover:text-white transition-all cursor-pointer"
-                title="Scroll Left"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
-              <button
-                onClick={() => scrollFilmstrip("right")}
-                className="p-1 rounded-lg border border-[#1f1b2e] bg-[#0c0a15] hover:bg-[#161224] text-neutral-400 hover:text-white transition-all cursor-pointer"
-                title="Scroll Right"
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
+        {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
+        <div className="relative flex items-center gap-4 bg-[#0d0b16] border border-[#1f1b2e] rounded-2xl p-3 shadow-md">
+          <button
+            onClick={() => scrollFilmstrip("left")}
+            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
+            title="Scroll left"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
 
           <div
             ref={filmstripRef}
-            className="flex items-center gap-3 overflow-x-auto py-2 scrollbar-thin scrollbar-thumb-purple-900/50 scrollbar-track-transparent"
+            className="flex items-center gap-3.5 overflow-x-auto py-1.5 scrollbar-none flex-1 scroll-smooth px-1"
           >
             {safePanels.map((p, idx) => {
               const isSel = idx === selectedIdx;
@@ -134,9 +120,9 @@ const PanelAssistantPage = React.memo(
                 <button
                   key={p?.id || idx}
                   onClick={() => setSelectedIdx(idx)}
-                  className={`relative flex-shrink-0 w-24 h-28 rounded-xl overflow-hidden border transition-all cursor-pointer group ${
+                  className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-[#06050a] flex items-center justify-center ${
                     isSel
-                      ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105"
+                      ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105 bg-[#171329]"
                       : "border-[#1e1a2e] opacity-60 hover:opacity-100 hover:border-purple-500/50"
                   }`}
                 >
@@ -144,20 +130,28 @@ const PanelAssistantPage = React.memo(
                     <img
                       src={p.image_url}
                       alt={`Frame ${idx + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
                   ) : (
                     <div className="w-full h-full bg-[#0c0a15] flex items-center justify-center text-[10px] text-neutral-600 font-mono">
                       Panel #{idx + 1}
                     </div>
                   )}
-                  <div className="absolute top-1 left-1 bg-black/80 text-[8px] font-mono font-bold text-white px-1.5 py-0.5 rounded border border-white/10">
+                  <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-neutral-300 border border-neutral-800">
                     #{idx + 1}
                   </div>
                 </button>
               );
             })}
           </div>
+
+          <button
+            onClick={() => scrollFilmstrip("right")}
+            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
+            title="Scroll right"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
 
         {/* TWO-COLUMN STUDIO WORKSPACE GRID (4 : 8) */}

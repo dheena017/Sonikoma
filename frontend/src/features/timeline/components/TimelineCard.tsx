@@ -708,14 +708,14 @@ const TimelineCard = ({
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className="relative h-28 sm:h-32 rounded-t-3xl overflow-hidden cursor-pointer select-none bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 border-b border-neutral-800 shadow-inner flex items-center justify-center group"
+        className="relative h-48 sm:h-56 rounded-t-3xl overflow-hidden cursor-pointer select-none bg-gradient-to-br from-neutral-950 via-[#07050d] to-neutral-950 border-b border-neutral-800 shadow-inner flex items-center justify-center p-1.5 group"
       >
         <img
           src={panel.image_url}
           alt={`Panel ${panel.id}`}
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-contain object-center group-hover:scale-[1.03] transition-transform duration-300 rounded-2xl"
           style={{ filter: getPanelFilterStyle(panel) }}
           onError={(e) => {
             const img = e.currentTarget;

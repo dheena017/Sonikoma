@@ -201,10 +201,10 @@ const AIOptimizerPage = React.memo(
         </div>
 
         {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
-        <div className="relative flex items-center bg-[#0d0b16] border border-[#1f1b2e] rounded-2xl p-2.5 shadow-md">
+        <div className="relative flex items-center gap-4 bg-[#0d0b16] border border-[#1f1b2e] rounded-2xl p-3 shadow-md">
           <button
             onClick={() => scrollFilmstrip("left")}
-            className="p-2 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-2 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
             title="Scroll left"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -212,7 +212,7 @@ const AIOptimizerPage = React.memo(
 
           <div
             ref={filmstripRef}
-            className="flex gap-3 overflow-x-auto py-1 scrollbar-none flex-1 scroll-smooth"
+            className="flex gap-3.5 overflow-x-auto py-1.5 scrollbar-none flex-1 scroll-smooth px-1"
           >
             {panels.map((panel, idx) => (
               <button
@@ -242,7 +242,7 @@ const AIOptimizerPage = React.memo(
 
           <button
             onClick={() => scrollFilmstrip("right")}
-            className="p-2 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-2 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
             title="Scroll right"
           >
             <ChevronRight className="w-4 h-4" />
