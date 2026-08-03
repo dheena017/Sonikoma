@@ -268,6 +268,8 @@ export default function MainLayout(props: MainLayoutProps) {
       !currentPath.endsWith("/details") &&
       !currentPath.startsWith("/workspace/editor/"));
 
+  const isAdminRestricted = isAnyAdmin && (!user || user.creator_role !== "admin");
+
   return (
     <div
       id="app_root"
@@ -276,7 +278,7 @@ export default function MainLayout(props: MainLayoutProps) {
       }`}
     >
       {/* --- Page Navigation Sidebar --- */}
-      {isAnyAdmin ? (
+      {isAdminRestricted ? null : isAnyAdmin ? (
         <>
           <AdminSidebar
             currentPath={currentPath}
@@ -440,8 +442,8 @@ export default function MainLayout(props: MainLayoutProps) {
         )}
 
         <div
-          className={`${!isSidebarOpen && !isImageEditorPage ? "lg:pl-20" : ""} ${
-            !isSidebarOpen && !isProEditorPage && !isImageEditorPage
+          className={`${!isSidebarOpen && !isImageEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${
+            !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isAdminRestricted
               ? "pt-[59px] min-h-[calc(100vh-59px)]"
               : "min-h-screen"
           } flex-grow flex-1 flex flex-col transition-all duration-300`}
