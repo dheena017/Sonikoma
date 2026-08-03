@@ -177,11 +177,11 @@ async def proxy_image(
         client_etag = request.headers.get("if-none-match")
         if client_etag == cached["etag"]:
             elapsed = int((time.time() - start_time) * 1000)
-            logger.info(f"[Proxy] 304 CACHE HIT | {fetch_url[:55]} ({elapsed}ms)")
+            logger.debug(f"[Proxy] 304 CACHE HIT | {fetch_url[:55]} ({elapsed}ms)")
             return Response(status_code=304)
 
         elapsed = int((time.time() - start_time) * 1000)
-        logger.info(f"[Proxy] 200 CACHE HIT | {fetch_url[:55]} ({cached['size'] / 1024:.1f}KB) ({elapsed}ms)")
+        logger.debug(f"[Proxy] 200 CACHE HIT | {fetch_url[:55]} ({cached['size'] / 1024:.1f}KB) ({elapsed}ms)")
 
         return Response(
             content=cached["data"],
@@ -334,7 +334,7 @@ async def proxy_image(
         })
 
         elapsed = int((time.time() - start_time) * 1000)
-        logger.info(f"[Proxy] 200 FETCH | {fetch_url[:55]} ({len(buffer) / 1024:.1f}KB) ({elapsed}ms)")
+        logger.debug(f"[Proxy] 200 FETCH | {fetch_url[:55]} ({len(buffer) / 1024:.1f}KB) ({elapsed}ms)")
 
         return Response(
             content=buffer,

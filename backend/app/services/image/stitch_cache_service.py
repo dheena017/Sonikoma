@@ -112,7 +112,7 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = No
             except Exception as fe:
                 logger.warning(f"[Cache Fallback] Scraper session lookup failed: {fe}")
 
-    if not original_url and re.match(r'^stitched_\d+_full(?:_\d+)?$', cache_id):
+    if not original_url and (re.match(r'^(?:stitched|webtoon)_(?:ep_\d+|full|\d+)_full(?:_\d+)?$', cache_id) or cache_id.startswith("webtoon_")):
         try:
             webtoon_url = None
             if referer:

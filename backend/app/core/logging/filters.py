@@ -25,6 +25,12 @@ class EndpointFilter(logging.Filter):
         "/status",
         "/api/auth/credits",
         "auth/credits",
+        "/api/proxy-image",
+        "/proxy-image",
+        "/api/proxy/image",
+        "/proxy/image",
+        "/api/image/cached",
+        "/image/cached",
         "/favicon.ico",
         "OPTIONS /",
     )

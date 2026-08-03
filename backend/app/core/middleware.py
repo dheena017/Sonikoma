@@ -194,8 +194,8 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = f"{elapsed_ms}ms"
     response.headers["X-API-Version"]  = API_VERSION
 
-    # Avoid logging SSE/logs polling endpoint spam
-    if not any(path in request.url.path for path in ["/system-logs", "/api/metrics", "/api/health", "auth/credits", "credits"]):
+    # Avoid logging high-frequency image proxy/cached & SSE polling endpoint spam
+    if not any(path in request.url.path for path in ["/system-logs", "/api/metrics", "/api/health", "auth/credits", "credits", "/proxy-image", "/proxy/image", "/image/cached"]):
         method_colors = {
             "GET": "\x1b[32m",
             "POST": "\x1b[33m",

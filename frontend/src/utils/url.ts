@@ -311,7 +311,10 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
       return url;
     }
   }
-  if (url.startsWith("http") && !url.startsWith("/api/")) {
+  if (url.includes("/api/")) {
+    return url;
+  }
+  if (url.startsWith("http") && !url.includes("/api/")) {
     let proxied = `/api/proxy-image?url=${encodeURIComponent(url)}`;
     if (referer) {
       proxied += `&referer=${encodeURIComponent(referer)}`;
