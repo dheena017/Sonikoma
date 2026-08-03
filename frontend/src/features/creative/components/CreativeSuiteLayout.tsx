@@ -46,7 +46,6 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
     "/panel-assistant",
     "/ai-audio-lab",
     "/ai-voice",
-    "/ai-translation",
   ];
   const requiresPanels = panelRequiredPaths.some(
     (path) =>
@@ -125,7 +124,6 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       "/ai-audio-lab": "Sound Design Lab",
       "/ai-voice": "Voice Studio",
       "/ai-characters": "Character Database",
-      "/ai-translation": "Translation Studio",
       "/youtube": "YouTube Publisher",
     };
 

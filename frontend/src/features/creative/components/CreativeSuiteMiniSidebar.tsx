@@ -89,13 +89,6 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
           path: "/ai-characters",
           requiresPanels: false,
         },
-        {
-          id: "translation",
-          label: "Translation Studio",
-          icon: Globe,
-          path: "/ai-translation",
-          requiresPanels: true,
-        },
       ],
     },
     {

@@ -144,15 +144,6 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       badge: "Context",
     },
     {
-      id: "translation",
-      label: "Translation Studio",
-      desc: "Translate panel text dialogues into multiple target languages.",
-      icon: Globe,
-      path: "/ai-translation",
-      requiresPanels: true,
-      badge: "Context",
-    },
-    {
       id: "youtube",
       label: "YouTube Publisher",
       desc: "Push completed video exports to YouTube Shorts or channel feed.",

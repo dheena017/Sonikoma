@@ -34,7 +34,6 @@ const AIModelsPage = React.lazy(() => import("@/features/ai/pages/AIModelsPage")
 const ModelTrainingPage = React.lazy(() => import("@/features/training/pages/ModelTrainingPage"));
 const YouTubePage = React.lazy(() => import("@/features/youtube/pages/YouTubePage"));
 const VoiceStudioPage = React.lazy(() => import("@/features/voice/pages/VoiceStudioPage"));
-const TranslationStudioPage = React.lazy(() => import("@/features/translation/pages/TranslationStudioPage"));
 const AIOptimizerPage = React.lazy(() => import("@/features/optimizer/pages/AIOptimizerPage"));
 const PanelAssistantPage = React.lazy(() => import("@/features/panel_assistant/pages/PanelAssistantPage"));
 const ProfilePage = React.lazy(() => import("@/features/profile/pages/ProfilePage"));
@@ -615,7 +614,6 @@ export default function AppRouter(props: AppRouterProps) {
       isOptimizerPath: currentPath === "/ai-optimizer",
       isPanelAssistantPath: currentPath.startsWith("/panel-assistant"),
       isCharacterPath: currentPath === "/ai-characters",
-      isTranslationPath: currentPath === "/ai-translation",
       isAudioLabPath: currentPath === "/ai-audio-lab",
       isVoicePath: currentPath === "/ai-voice",
       isYouTubePath: currentPath === "/youtube",
@@ -643,7 +641,6 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/ai-optimizer" ||
         currentPath === "/panel-assistant" ||
         currentPath === "/ai-characters" ||
-        currentPath === "/ai-translation" ||
         currentPath === "/ai-audio-lab" ||
         currentPath === "/ai-thumbnails" ||
         currentPath === "/ai-voice" ||
@@ -1223,13 +1220,6 @@ export default function AppRouter(props: AppRouterProps) {
               panels={panels}
               characters={appLogic.characters}
               setCharacters={appLogic.setCharacters}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
-          ) : isTranslationPath ? (
-            <TranslationStudioPage
-              panels={panels}
-              setPanels={setPanels}
               onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />

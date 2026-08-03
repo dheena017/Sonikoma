@@ -5,6 +5,9 @@ import {
   Sliders,
   Key,
   FileText,
+  Youtube,
+  Tags,
+  BookOpenText,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 
@@ -39,16 +42,31 @@ interface YouTubePageProps {
 
 const YouTubePage = React.memo(
   ({
-    panels,
+    panels = [],
     videoUrl,
     scrapedTitle = "",
     scrapedGenre = "",
     onNavigateHome,
     addNotification,
   }: YouTubePageProps) => {
+    const safePanels = Array.isArray(panels) ? panels : [];
     const [activeTab, setActiveTab] = useState<
-      "details" | "settings" | "integrations"
+      "details" | "chapters_tags" | "comic_subtitles" | "settings" | "integrations"
     >("details");
+
+    if (safePanels.length === 0) {
+      return (
+        <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
+          <Youtube className="h-10 w-10 text-neutral-600 mb-3" />
+          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
+            No Panels Available
+          </h3>
+          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
+            Please import a series or add panels to your storyboard timeline to start publishing to YouTube.
+          </p>
+        </div>
+      );
+    }
 
     // Leverage custom logic hook
     const {
@@ -174,7 +192,7 @@ const YouTubePage = React.memo(
       handleAppendTunedChapters,
       handleThumbnailSelect,
     } = useYouTubePublisher({
-      panels,
+      panels: safePanels,
       videoUrl,
       scrapedTitle,
       scrapedGenre,
@@ -182,17 +200,17 @@ const YouTubePage = React.memo(
     });
 
     return (
-      <div className="flex-grow w-full space-y-4 animate-fade-in animate-duration-300 rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
         {/* PAGE HERO HEADER */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1b172b] pb-5">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-[#1a0f14] border border-red-500/30 rounded-2xl text-red-400 shadow-lg shadow-red-950/30">
-              <Sparkles className="h-6 w-6 text-red-400 animate-pulse" />
+              <Youtube className="h-6 w-6 text-red-400 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-red-500/10 text-red-300 border border-red-500/20">
-                  DISTRIBUTION
+                  DISTRIBUTION • PUBLISHER
                 </span>
                 <span className="text-xs text-neutral-400 font-mono">• SEO Audit Score: {seoScore}/100</span>
               </div>
@@ -200,10 +218,11 @@ const YouTubePage = React.memo(
                 YouTube Publisher
               </h1>
               <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Automated metadata optimization, chapter compilation, SEO auditing, and direct YouTube channel publishing.
+                Direct YouTube channel publishing, automated metadata optimization, chapter compilation, and SEO auditing.
               </p>
             </div>
           </div>
+
           <div className="flex items-center gap-3 self-start md:self-center">
             <div className="px-3.5 py-1.5 rounded-full bg-[#12101d] border border-[#231e38] text-neutral-300 text-xs font-mono flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${isPublishing ? "bg-amber-400 animate-ping" : "bg-emerald-400 animate-pulse"}`} />
@@ -212,21 +231,64 @@ const YouTubePage = React.memo(
           </div>
         </div>
 
-        {/* Outer 2-Column Grid aligned exactly at the same top-level axis */}
+        {/* TWO-COLUMN DIRECT PUBLISHER WORKSPACE GRID (5 : 7) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-          {/* LEFT COLUMN: Metadata Config Form & Navigation Tabs */}
-          <div className="lg:col-span-7 space-y-4">
+          {/* COLUMN 1 (LEFT - 5 COLS): STICKY VIDEO MONITOR */}
+          <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-4 self-start">
+            {/* Video Monitor & Publish Execution */}
+            <PublishMonitor
+              activeVideoUrl={activeVideoUrl}
+              videoUrl={videoUrl}
+              selectedFile={selectedFile}
+              selectedThumbnail={selectedThumbnail}
+              thumbnailPreviewUrl={thumbnailPreviewUrl}
+              videoDuration={videoDuration}
+              videoAspectRatio={videoAspectRatio}
+              isShort={isShort}
+              privacy={privacy}
+              publishLogs={publishLogs}
+              isPublishing={isPublishing}
+              youtubeUrl={youtubeUrl}
+              title={title}
+              onClearSelectedFile={handleClearSelectedFile}
+              onClearThumbnail={handleClearThumbnail}
+              onFileChange={handleFileChange}
+              onThumbnailChange={handleThumbnailChange}
+              onThumbnailSelect={handleThumbnailSelect}
+              onPublish={handlePublish}
+              isScheduled={isScheduled}
+              setIsScheduled={setIsScheduled}
+              scheduleDate={scheduleDate}
+              setScheduleDate={setScheduleDate}
+              scheduleTime={scheduleTime}
+              setScheduleTime={setScheduleTime}
+            />
+          </div>
+
+          {/* COLUMN 2 (RIGHT - 7 COLS): METADATA & CONFIGURATION CANVAS */}
+          <div className="lg:col-span-7 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-5 sm:p-6 shadow-xl flex flex-col space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1b172b] pb-3">
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
+                  DIRECT VIDEO PUBLISHER
+                </p>
+                <h4 className="text-base font-bold text-white mt-0.5 flex items-center gap-2">
+                  <Youtube className="w-4 h-4 text-red-400" /> YouTube Video Metadata & Details
+                </h4>
+              </div>
+            </div>
+
             {/* Real-time SEO Auditor Score Banner */}
             <SeoAuditor seoScore={seoScore} seoChecks={seoChecks} />
 
-            {/* Premium Flex-Based Equal-Height Segmented Tab Controller */}
-            <div className="grid grid-cols-3 bg-neutral-900/80 p-1 rounded-xl border border-neutral-800 shadow-inner">
+            {/* Segmented 5-Tab Navigation Controller */}
+            <div className="grid grid-cols-2 sm:grid-cols-5 bg-neutral-900/80 p-1 rounded-xl border border-neutral-800 shadow-inner gap-1">
               <button
                 onClick={() => setActiveTab("details")}
-                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
                   activeTab === "details"
-                    ? "bg-purple-600 text-white shadow-md shadow-purple-950/40"
+                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
                 }`}
               >
@@ -235,10 +297,34 @@ const YouTubePage = React.memo(
               </button>
 
               <button
+                onClick={() => setActiveTab("chapters_tags")}
+                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
+                  activeTab === "chapters_tags"
+                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
+                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
+                }`}
+              >
+                <Tags className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Chapters &amp; Tags</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("comic_subtitles")}
+                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
+                  activeTab === "comic_subtitles"
+                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
+                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
+                }`}
+              >
+                <BookOpenText className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Comic &amp; Captions</span>
+              </button>
+
+              <button
                 onClick={() => setActiveTab("settings")}
-                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
                   activeTab === "settings"
-                    ? "bg-purple-600 text-white shadow-md shadow-purple-950/40"
+                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
                 }`}
               >
@@ -248,9 +334,9 @@ const YouTubePage = React.memo(
 
               <button
                 onClick={() => setActiveTab("integrations")}
-                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
+                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
                   activeTab === "integrations"
-                    ? "bg-purple-600 text-white shadow-md shadow-purple-950/40"
+                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
                 }`}
               >
@@ -259,27 +345,28 @@ const YouTubePage = React.memo(
               </button>
             </div>
 
-            {/* Tab Content Container */}
-            <div className="bg-neutral-900/30 backdrop-blur-md border border-neutral-800 rounded-2xl p-5 shadow-xl relative min-h-[400px] transition-all duration-300">
+            {/* Tab Body Content */}
+            <div className="space-y-4">
+              {/* TAB 1: DETAILS (Title & Description) */}
               {activeTab === "details" && (
                 <div className="space-y-4 animate-fade-in animate-duration-300">
                   <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
                     <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
-                      Video Details
+                      Title &amp; Video Description
                     </h3>
                     <button
                       onClick={handleGenerateMetadata}
                       disabled={isAiGenerating || isPublishing}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-950/20 border border-purple-900/40 text-purple-400 hover:text-purple-300 hover:bg-purple-900/20 text-xs font-mono font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-98 shadow-sm"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/20 border border-red-900/40 text-red-400 hover:text-red-300 hover:bg-red-900/20 text-xs font-mono font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-98 shadow-sm"
                     >
                       {isAiGenerating ? (
                         <>
-                          <Loader2 className="h-3 w-3 animate-spin text-purple-400" />
+                          <Loader2 className="h-3 w-3 animate-spin text-red-400" />
                           <span>Generating...</span>
                         </>
                       ) : (
                         <>
-                          <Sparkles className="h-3 w-3 animate-pulse text-purple-400" />
+                          <Sparkles className="h-3 w-3 animate-pulse text-red-400" />
                           <span>Generate with AI</span>
                         </>
                       )}
@@ -287,7 +374,6 @@ const YouTubePage = React.memo(
                   </div>
 
                   <div className="space-y-4">
-                    {/* Title field with Clickbait Power Words & Title Optimizer suggestions */}
                     <TitleOptimizer
                       title={title}
                       setTitle={setTitle}
@@ -296,26 +382,59 @@ const YouTubePage = React.memo(
                       onInjectPowerWord={handleInjectPowerWord}
                     />
 
-                    {/* Description field sub-component */}
                     <DescriptionEditor
                       description={description}
                       setDescription={setDescription}
-                      panels={panels}
+                      panels={safePanels}
                       onApplyPresetTemplate={handleApplyPresetTemplate}
                       onCompileChapters={handleCompileChapters}
                       onInsertDisclaimer={handleInsertDisclaimer}
                       onInsertSocials={handleInsertSocials}
                       onInsertMusicCredit={handleInsertMusicCredit}
                     />
+                  </div>
+                </div>
+              )}
 
-                    {/* Playlist selection */}
-                    <PlaylistSelector
-                      playlist={playlist}
-                      setPlaylist={setPlaylist}
-                      hasCustomCredentials={hasCustomCredentials}
+              {/* TAB 2: CHAPTERS & TAGS (Chapters Tuner & Tag Chip Manager) */}
+              {activeTab === "chapters_tags" && (
+                <div className="space-y-4 animate-fade-in animate-duration-300">
+                  <div className="border-b border-neutral-800 pb-2">
+                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
+                      Chapters Timestamps &amp; SEO Tags
+                    </h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <ChaptersTuner
+                      panels={safePanels}
+                      onInsertChapters={handleAppendTunedChapters}
+                      addNotification={addNotification}
                     />
 
-                    {/* Webtoon Source Metadata */}
+                    <TagManager
+                      tags={tags}
+                      tagInput={tagInput}
+                      setTagInput={setTagInput}
+                      onAddTag={handleAddTag}
+                      onRemoveTag={handleRemoveTag}
+                      onAddSuggestedTag={handleAddSuggestedTag}
+                      suggestedTags={suggestedTags}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: COMIC & CAPTIONS (Webtoon Credits, Playlist, Subtitles) */}
+              {activeTab === "comic_subtitles" && (
+                <div className="space-y-4 animate-fade-in animate-duration-300">
+                  <div className="border-b border-neutral-800 pb-2">
+                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
+                      Webtoon Metadata, Playlist &amp; Subtitles
+                    </h3>
+                  </div>
+
+                  <div className="space-y-4">
                     <WebtoonMetadata
                       authorName={authorName}
                       setAuthorName={setAuthorName}
@@ -332,45 +451,32 @@ const YouTubePage = React.memo(
                       chapterValidationError={chapterValidationError}
                     />
 
-                    {/* Subtitle / Caption Tracks */}
+                    <PlaylistSelector
+                      playlist={playlist}
+                      setPlaylist={setPlaylist}
+                      hasCustomCredentials={hasCustomCredentials}
+                    />
+
                     <SubtitleConfig
                       subtitlesType={subtitlesType}
                       setSubtitlesType={setSubtitlesType}
                       subtitlesLanguage={subtitlesLanguage}
                       setSubtitlesLanguage={setSubtitlesLanguage}
                     />
-
-                    {/* Chapters timeline offset tuner */}
-                    <ChaptersTuner
-                      panels={panels}
-                      onInsertChapters={handleAppendTunedChapters}
-                      addNotification={addNotification}
-                    />
-
-                    {/* Tag chip manager sub-component */}
-                    <TagManager
-                      tags={tags}
-                      tagInput={tagInput}
-                      setTagInput={setTagInput}
-                      onAddTag={handleAddTag}
-                      onRemoveTag={handleRemoveTag}
-                      onAddSuggestedTag={handleAddSuggestedTag}
-                      suggestedTags={suggestedTags}
-                    />
                   </div>
                 </div>
               )}
 
+              {/* TAB 4: SETTINGS (Category, Privacy, Shorts, Self Rating, Advanced) */}
               {activeTab === "settings" && (
                 <div className="space-y-4 animate-fade-in animate-duration-300">
                   <div className="border-b border-neutral-800 pb-2">
                     <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
-                      Publish & Audience Settings
+                      Publish &amp; Audience Settings
                     </h3>
                   </div>
 
                   <div className="space-y-4">
-                    {/* Category and Privacy Selectors */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <label className="text-xs font-mono text-neutral-400 font-bold block">
@@ -379,13 +485,13 @@ const YouTubePage = React.memo(
                         <select
                           value={category}
                           onChange={(e) => setCategory(e.target.value)}
-                          className="w-full bg-neutral-950/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer shadow-inner"
+                          className="w-full bg-neutral-950/40 border border-neutral-900 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer shadow-inner"
                         >
-                          <option value="1" className="bg-neutral-950">Film & Animation</option>
+                          <option value="1" className="bg-neutral-950">Film &amp; Animation</option>
                           <option value="24" className="bg-neutral-950">Entertainment</option>
                           <option value="20" className="bg-neutral-950">Gaming</option>
                           <option value="23" className="bg-neutral-950">Comedy</option>
-                          <option value="22" className="bg-neutral-950">People & Blogs</option>
+                          <option value="22" className="bg-neutral-950">People &amp; Blogs</option>
                           <option value="27" className="bg-neutral-950">Education</option>
                         </select>
                       </div>
@@ -397,7 +503,7 @@ const YouTubePage = React.memo(
                         <select
                           value={privacy}
                           onChange={(e) => setPrivacy(e.target.value)}
-                          className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer shadow-inner"
+                          className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer shadow-inner"
                         >
                           <option value="unlisted" className="bg-neutral-950">
                             Unlisted (Review First)
@@ -410,7 +516,6 @@ const YouTubePage = React.memo(
                       </div>
                     </div>
 
-                    {/* Shorts Toggle */}
                     <div className="flex items-center justify-between p-4 bg-neutral-950/20 backdrop-blur-sm rounded-xl border border-neutral-900 transition-all hover:border-neutral-800">
                       <div className="space-y-0.5 pr-4">
                         <div className="text-xs font-bold text-white flex items-center gap-1.5 font-mono">
@@ -420,8 +525,7 @@ const YouTubePage = React.memo(
                           </span>
                         </div>
                         <p className="text-[10px] text-neutral-500 leading-relaxed font-sans">
-                          Optimize video format description and hashtag
-                          indicators suited for vertical mobile feeds.
+                          Optimize video format description and hashtag indicators suited for vertical mobile feeds.
                         </p>
                       </div>
                       <button
@@ -438,7 +542,6 @@ const YouTubePage = React.memo(
                       </button>
                     </div>
 
-                    {/* Monetization Self-Rating Checklist */}
                     <SelfRatingForm
                       ratings={ratings}
                       setRatings={setRatings}
@@ -446,7 +549,6 @@ const YouTubePage = React.memo(
                       setShowSelfRating={setShowSelfRating}
                     />
 
-                    {/* Advanced Settings Accordion */}
                     <AdvancedSettings
                       madeForKids={madeForKids}
                       setMadeForKids={setMadeForKids}
@@ -479,16 +581,16 @@ const YouTubePage = React.memo(
                 </div>
               )}
 
+              {/* TAB 5: KEYS (Profiles, OAuth Credentials, Socials) */}
               {activeTab === "integrations" && (
                 <div className="space-y-4 animate-fade-in animate-duration-300">
                   <div className="border-b border-neutral-800 pb-2">
                     <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
-                      Profiles, Keys & Integrations
+                      Profiles, Keys &amp; Integrations
                     </h3>
                   </div>
 
                   <div className="space-y-4">
-                    {/* Profile Manager defaults saver */}
                     <ProfileManager
                       currentProfileName={currentProfileName}
                       profiles={profiles}
@@ -498,7 +600,6 @@ const YouTubePage = React.memo(
                       addNotification={addNotification}
                     />
 
-                    {/* Custom Credentials Configuration Module */}
                     <CredentialsConfig
                       hasCustomCredentials={hasCustomCredentials}
                       customClientId={customClientId}
@@ -509,7 +610,6 @@ const YouTubePage = React.memo(
                       onDeleteCredentials={handleDeleteCredentials}
                     />
 
-                    {/* Custom Channel & Socials Link presets */}
                     <SocialsCustomizer
                       channelLink={channelLink}
                       setChannelLink={setChannelLink}
@@ -524,40 +624,11 @@ const YouTubePage = React.memo(
                 </div>
               )}
             </div>
-          </div>
 
-          {/* RIGHT COLUMN: Video Monitor, Custom Thumbnail Upload & Upload History (Top-Level Axis Sticky) */}
-          <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-4 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto pr-1 scrollbar-thin">
-            <PublishMonitor
-              activeVideoUrl={activeVideoUrl}
-              videoUrl={videoUrl}
-              selectedFile={selectedFile}
-              selectedThumbnail={selectedThumbnail}
-              thumbnailPreviewUrl={thumbnailPreviewUrl}
-              videoDuration={videoDuration}
-              videoAspectRatio={videoAspectRatio}
-              isShort={isShort}
-              privacy={privacy}
-              publishLogs={publishLogs}
-              isPublishing={isPublishing}
-              youtubeUrl={youtubeUrl}
-              title={title}
-              onClearSelectedFile={handleClearSelectedFile}
-              onClearThumbnail={handleClearThumbnail}
-              onFileChange={handleFileChange}
-              onThumbnailChange={handleThumbnailChange}
-              onThumbnailSelect={handleThumbnailSelect}
-              onPublish={handlePublish}
-              isScheduled={isScheduled}
-              setIsScheduled={setIsScheduled}
-              scheduleDate={scheduleDate}
-              setScheduleDate={setScheduleDate}
-              scheduleTime={scheduleTime}
-              setScheduleTime={setScheduleTime}
-            />
-
-            {/* Database History List */}
-            <UploadHistory history={uploadHistory} />
+            {/* Database Upload History */}
+            <div className="pt-4 border-t border-[#1b172b]">
+              <UploadHistory history={uploadHistory} />
+            </div>
           </div>
         </div>
       </div>
