@@ -166,7 +166,7 @@ const PanelAssistantPage = React.memo(
               {activePanel?.image_url ? (
                 <img
                   src={activePanel.image_url}
-                  alt={`Panel #${activePanel.id || selectedIdx + 1}`}
+                  alt={`Panel #${selectedIdx + 1}`}
                   className="max-h-full max-w-full object-contain rounded"
                 />
               ) : (
@@ -176,7 +176,7 @@ const PanelAssistantPage = React.memo(
                 </div>
               )}
               <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-md">
-                PANEL #{activePanel?.id || selectedIdx + 1}
+                PANEL #{selectedIdx + 1}
               </div>
             </div>
 
