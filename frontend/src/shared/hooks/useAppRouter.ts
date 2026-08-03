@@ -237,7 +237,6 @@ export function useAppRouter({
             path === "/ai-optimizer" ||
             path === "/panel-assistant" ||
             path === "/ai-characters" ||
-            path === "/ai-audio-lab" ||
             path === "/model-training" ||
             path === "/ai-voice" ||
             path === "/youtube" ||
@@ -306,7 +305,6 @@ export function useAppRouter({
         path === "/ai-optimizer" ||
         path === "/panel-assistant" ||
         path === "/ai-characters" ||
-        path === "/ai-audio-lab" ||
         path === "/ai-thumbnails" ||
         path === "/ai-voice" ||
         path === "/ai-analytics" ||

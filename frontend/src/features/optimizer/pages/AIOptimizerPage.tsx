@@ -18,6 +18,7 @@ import {
   Image,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
+import { cleanDialogueDisplay } from "@/utils";
 
 import SeoOptimizationTab from "@/features/optimizer/components/SeoOptimizationTab";
 import ShortsScriptTab from "@/features/optimizer/components/ShortsScriptTab";
@@ -279,8 +280,15 @@ const AIOptimizerPage = React.memo(
                 ACTIVE DIALOGUE
               </span>
               <div className="w-full bg-[#07060c] border border-[#1e1a2e] text-xs rounded-xl p-2.5 text-neutral-200 font-sans leading-relaxed min-h-[50px]">
-                {activePanel.speech_text ? (
-                  <p>{activePanel.speech_text}</p>
+                {cleanDialogueDisplay(activePanel.speech_text).speech ? (
+                  <div className="space-y-1">
+                    {cleanDialogueDisplay(activePanel.speech_text).tone && (
+                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                        Tone: {cleanDialogueDisplay(activePanel.speech_text).tone}
+                      </span>
+                    )}
+                    <p>{cleanDialogueDisplay(activePanel.speech_text).speech}</p>
+                  </div>
                 ) : (
                   <p className="text-neutral-500 italic text-[11px]">(Silent panel — no dialogue)</p>
                 )}

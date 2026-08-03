@@ -11,10 +11,15 @@ import {
   Play,
   Square,
   Volume2,
+  Headphones,
+  Music2,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
+import { cleanDialogueDisplay } from "@/utils";
 import ScriptDramatizerForm from "@/features/voice/components/ScriptDramatizerForm";
 import VoiceSettingsPanel from "@/features/voice/components/VoiceSettingsPanel";
+import AmbientSoundPicker from "@/features/audio/components/AmbientSoundPicker";
+import SfxOverlayMixer from "@/features/audio/components/SfxOverlayMixer";
 
 interface VoiceStudioPageProps {
   panels: GeneratedPanel[];
@@ -22,6 +27,7 @@ interface VoiceStudioPageProps {
   onNavigateHome: () => void;
   addNotification?: (msg: string, type: any) => void;
   scrapedGenre?: string;
+  setMusicTheme?: (val: string) => void;
 }
 
 const VoiceStudioPage = React.memo(
@@ -31,9 +37,10 @@ const VoiceStudioPage = React.memo(
     onNavigateHome,
     addNotification,
     scrapedGenre,
+    setMusicTheme,
   }: VoiceStudioPageProps) => {
     const [selectedIdx, setSelectedIdx] = useState(0);
-    const [activeTab, setActiveTab] = useState<"dramatize" | "cast">("dramatize");
+    const [activeTab, setActiveTab] = useState<"dramatize" | "cast" | "sound">("dramatize");
     const [selectedModel, setSelectedModel] = useState<string>(
       () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
     );
@@ -63,6 +70,7 @@ const VoiceStudioPage = React.memo(
 
     const safePanels = panels || [];
     const activePanel = safePanels[selectedIdx] || safePanels[0];
+    const parsedSpeech = cleanDialogueDisplay(activePanel?.speech_text);
 
     const handlePlaySpeechAudio = () => {
       if (isPlayingSpeech) {
@@ -76,15 +84,15 @@ const VoiceStudioPage = React.memo(
         speechAudioRef.current = audio;
         audio.onended = () => setIsPlayingSpeech(false);
         audio.play().then(() => setIsPlayingSpeech(true)).catch(() => {
-          if (activePanel?.speech_text && typeof window !== "undefined" && "speechSynthesis" in window) {
-            const utter = new SpeechSynthesisUtterance(activePanel.speech_text);
+          if (parsedSpeech.speech && typeof window !== "undefined" && "speechSynthesis" in window) {
+            const utter = new SpeechSynthesisUtterance(parsedSpeech.speech);
             utter.onend = () => setIsPlayingSpeech(false);
             window.speechSynthesis.speak(utter);
             setIsPlayingSpeech(true);
           }
         });
-      } else if (activePanel?.speech_text && typeof window !== "undefined" && "speechSynthesis" in window) {
-        const utter = new SpeechSynthesisUtterance(activePanel.speech_text);
+      } else if (parsedSpeech.speech && typeof window !== "undefined" && "speechSynthesis" in window) {
+        const utter = new SpeechSynthesisUtterance(parsedSpeech.speech);
         utter.onend = () => setIsPlayingSpeech(false);
         window.speechSynthesis.speak(utter);
         setIsPlayingSpeech(true);
@@ -294,8 +302,15 @@ const VoiceStudioPage = React.memo(
                 )}
               </div>
               <div className="p-3.5 bg-[#06050a] border border-[#1d182e] rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[60px]">
-                {activePanel?.speech_text ? (
-                  <p>{activePanel.speech_text}</p>
+                {parsedSpeech.speech ? (
+                  <div className="space-y-1.5">
+                    {parsedSpeech.tone && (
+                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                        Tone: {parsedSpeech.tone}
+                      </span>
+                    )}
+                    <p className="text-xs text-neutral-200 font-sans leading-relaxed">{parsedSpeech.speech}</p>
+                  </div>
                 ) : (
                   <span className="text-neutral-600 italic">No speech text recorded for this panel.</span>
                 )}
@@ -376,6 +391,17 @@ const VoiceStudioPage = React.memo(
                 <Users className="w-3.5 h-3.5" />
                 <span>✦ Voice Casting Match</span>
               </button>
+              <button
+                onClick={() => setActiveTab("sound")}
+                className={`px-5 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+                  activeTab === "sound"
+                    ? "border-purple-500 text-purple-300 bg-purple-500/10"
+                    : "border-transparent text-neutral-400 hover:text-white"
+                }`}
+              >
+                <Headphones className="w-3.5 h-3.5" />
+                <span>✦ Sound Design & BGM</span>
+              </button>
             </div>
 
             {/* ACTIVE WORKFLOW TAB */}
@@ -395,6 +421,17 @@ const VoiceStudioPage = React.memo(
                   setPanels={setPanels}
                   addNotification={addNotification}
                 />
+              )}
+              {activeTab === "sound" && (
+                <div className="space-y-6 animate-fade-in">
+                  <AmbientSoundPicker
+                    onSelectMusicTheme={(theme) => {
+                      if (setMusicTheme) setMusicTheme(theme);
+                      addNotification?.(`Applied soundtrack theme: "${theme}"`, "success");
+                    }}
+                  />
+                  <SfxOverlayMixer panels={panels} />
+                </div>
               )}
             </div>
           </div>

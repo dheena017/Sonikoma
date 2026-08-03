@@ -39,7 +39,6 @@ const PanelAssistantPage = React.lazy(() => import("@/features/panel_assistant/p
 const ProfilePage = React.lazy(() => import("@/features/profile/pages/ProfilePage"));
 const SettingsAccountPage = React.lazy(() => import("@/features/settings/pages/SettingsAccountPage"));
 const CharacterProfilePage = React.lazy(() => import("@/features/characters/pages/CharacterProfilePage"));
-const AudioLabPage = React.lazy(() => import("@/features/audio/pages/AudioLabPage"));
 const AudioSettingsPage = React.lazy(() => import("@/features/audio/pages/AudioSettingsPage"));
 const NotificationsPage = React.lazy(() => import("@/features/notification/pages/NotificationsPage"));
 const CreativeSuiteDashboardPage = React.lazy(() => import("@/features/creative/pages/CreativeSuiteDashboardPage"));
@@ -614,7 +613,6 @@ export default function AppRouter(props: AppRouterProps) {
       isOptimizerPath: currentPath === "/ai-optimizer",
       isPanelAssistantPath: currentPath.startsWith("/panel-assistant"),
       isCharacterPath: currentPath === "/ai-characters",
-      isAudioLabPath: currentPath === "/ai-audio-lab",
       isVoicePath: currentPath === "/ai-voice",
       isYouTubePath: currentPath === "/youtube",
       isProfilePath: currentPath === "/profile",
@@ -641,7 +639,6 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/ai-optimizer" ||
         currentPath === "/panel-assistant" ||
         currentPath === "/ai-characters" ||
-        currentPath === "/ai-audio-lab" ||
         currentPath === "/ai-thumbnails" ||
         currentPath === "/ai-voice" ||
         currentPath === "/ai-analytics" ||
@@ -670,7 +667,6 @@ export default function AppRouter(props: AppRouterProps) {
     isOptimizerPath,
     isPanelAssistantPath,
     isCharacterPath,
-    isAudioLabPath,
     isVoicePath,
     isYouTubePath,
     isProfilePath,
@@ -1222,13 +1218,6 @@ export default function AppRouter(props: AppRouterProps) {
               onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />
-          ) : isAudioLabPath ? (
-            <AudioLabPage
-              panels={panels}
-              setMusicTheme={setMusicTheme}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
           ) : isVoicePath ? (
             <VoiceStudioPage
               panels={panels}
@@ -1236,6 +1225,7 @@ export default function AppRouter(props: AppRouterProps) {
               onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
               scrapedGenre={scrapedGenre}
+              setMusicTheme={setMusicTheme}
             />
           ) : isYouTubePath ? (
             <YouTubePage
@@ -1413,7 +1403,6 @@ export default function AppRouter(props: AppRouterProps) {
         !isOptimizerPath &&
         !isPanelAssistantPath &&
         !isCharacterPath &&
-        !isAudioLabPath &&
         !isVoicePath &&
         !isYouTubePath &&
         !isProfilePath &&

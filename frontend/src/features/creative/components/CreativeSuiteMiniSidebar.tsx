@@ -64,15 +64,8 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
       name: "Audio",
       items: [
         {
-          id: "audio-lab",
-          label: "Sound Design Lab",
-          icon: Music,
-          path: "/ai-audio-lab",
-          requiresPanels: true,
-        },
-        {
           id: "voice",
-          label: "Voice Studio",
+          label: "Voice & Sound Studio",
           icon: Mic,
           path: "/ai-voice",
           requiresPanels: true,

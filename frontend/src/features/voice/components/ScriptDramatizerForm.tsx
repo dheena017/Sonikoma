@@ -2,7 +2,7 @@ import * as api from "@/api";
 import React, { useState, useEffect } from "react";
 import { Sparkles, Copy, Check, Wand2, RefreshCw, RotateCcw, Play, Square, BookmarkCheck } from "lucide-react";
 import { GeneratedPanel } from "@/types";
-import { fetchWithAuth } from "@/utils";
+import { cleanDialogueDisplay, fetchWithAuth } from "@/utils";
 
 interface ScriptDramatizerFormProps {
   panels: GeneratedPanel[];
@@ -35,12 +35,10 @@ export default function ScriptDramatizerForm({
 
   const extractRawLines = () => {
     return panels.length > 0
-      ? panels.map((p) => p.speech_text || "").filter(Boolean)
-      : [
-          "Who are you? Stay away from me!",
-          "I am the sovereign of the dark realm.",
-          "This ends here. Prepare to vanish!",
-        ];
+      ? panels
+          .map((p) => cleanDialogueDisplay(p.speech_text).speech)
+          .filter(Boolean)
+      : [];
   };
 
   const [rawLines, setRawLines] = useState<string[]>(extractRawLines);
@@ -125,7 +123,7 @@ export default function ScriptDramatizerForm({
       })
     );
 
-    addNotification?.(`Applied line to Panel #${targetId}!`, "success");
+    addNotification?.(`Applied line to Panel #${lineIdx + 1}!`, "success");
   };
 
   const handlePreviewLineTTS = (text: string, idx: number) => {
@@ -194,7 +192,7 @@ export default function ScriptDramatizerForm({
 
       {/* 2-COLUMN BALANCED INPUT & OUTPUT LAYOUT */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-        
+
         {/* LEFT COLUMN (5 COLS): GENRE + CONTEXT + RAW DIALOGUE INPUTS */}
         <div className="xl:col-span-5 space-y-4 bg-[#07060c] border border-[#1d182e] p-4 rounded-xl shadow-inner">
           <div className="space-y-1.5">
@@ -263,7 +261,7 @@ export default function ScriptDramatizerForm({
                       </span>
                       {panels[idx] && (
                         <span className="text-[8px] font-mono text-neutral-400 bg-neutral-900 px-1.5 py-0.5 rounded border border-neutral-800">
-                          Panel #{panels[idx].id || idx + 1}
+                          Panel #{idx + 1}
                         </span>
                       )}
                     </div>
@@ -328,11 +326,10 @@ export default function ScriptDramatizerForm({
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => handlePreviewLineTTS(resLine, idx)}
-                          className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                            playingIdx === idx
+                          className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${playingIdx === idx
                               ? "bg-purple-600 text-white animate-pulse"
                               : "bg-[#181329] text-purple-300 border border-purple-500/30 hover:text-white"
-                          }`}
+                            }`}
                         >
                           {playingIdx === idx ? <Square className="w-2.5 h-2.5 fill-current" /> : <Play className="w-2.5 h-2.5 fill-current" />}
                           <span>{playingIdx === idx ? "Stop" : "Listen"}</span>
@@ -344,7 +341,7 @@ export default function ScriptDramatizerForm({
                             title="Apply to panel timeline"
                           >
                             <BookmarkCheck className="w-2.5 h-2.5" />
-                            <span>Panel #{panels[idx].id || idx + 1}</span>
+                            <span>Panel #{idx + 1}</span>
                           </button>
                         )}
                         <button

@@ -82,15 +82,8 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
       name: "Audio Production",
       items: [
         {
-          id: "audio-lab",
-          label: "Sound Design Lab",
-          icon: Music,
-          path: "/ai-audio-lab",
-          requiresPanels: true,
-        },
-        {
           id: "voice",
-          label: "Voice Studio",
+          label: "Voice & Sound Studio",
           icon: Mic,
           path: "/ai-voice",
           requiresPanels: true,

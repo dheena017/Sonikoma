@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Sparkles, BookOpenText, ChevronLeft, ChevronRight, Languages } from "lucide-react";
 import { GeneratedPanel } from "@/types";
+import { cleanDialogueDisplay } from "@/utils";
 
 import PanelTranslationTool from "@/features/panel_assistant/components/PanelTranslationTool";
 
@@ -185,7 +186,16 @@ const PanelAssistantPage = React.memo(
                 SPEECH & DIALOGUE
               </span>
               <div className="p-3.5 bg-[#06050a] border border-[#1d182e] rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
-                {activePanel?.speech_text || (
+                {cleanDialogueDisplay(activePanel?.speech_text).speech ? (
+                  <div className="space-y-1.5">
+                    {cleanDialogueDisplay(activePanel?.speech_text).tone && (
+                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                        Tone: {cleanDialogueDisplay(activePanel?.speech_text).tone}
+                      </span>
+                    )}
+                    <p>{cleanDialogueDisplay(activePanel?.speech_text).speech}</p>
+                  </div>
+                ) : (
                   <span className="text-neutral-600 italic">No speech text recorded for this panel.</span>
                 )}
               </div>

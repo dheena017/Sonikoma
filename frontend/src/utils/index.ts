@@ -7,3 +7,4 @@ export * from "./selection";
 export * from "./supabase";
 export * from "./url";
 export * from "./workspaceNavigation";
+export * from "./textUtils";

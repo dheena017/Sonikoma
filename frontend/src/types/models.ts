@@ -198,6 +198,8 @@ export interface GeneratedPanel {
   bgm_track?: string;
   audio_reactive_shake?: boolean;
   episode_label?: string;
+  character_name?: string;
+  speaker_name?: string;
 }
 
 export interface CharacterBio {

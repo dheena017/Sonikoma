@@ -463,14 +463,9 @@ const HeaderInner = ({
     },
 
     {
-      name: "Audio Design Lab",
-      path: "/ai-audio-lab",
-      desc: "Overlay SFX, composition themes, and voice actors",
-    },
-    {
-      name: "Voice Studio",
+      name: "Voice & Sound Studio",
       path: "/ai-voice",
-      desc: "Configure TTS and preview voice characters",
+      desc: "Configure TTS voice actors, sound effects overlay, BGM loops and script dramatization",
     },
     {
       name: "System Log Viewer",

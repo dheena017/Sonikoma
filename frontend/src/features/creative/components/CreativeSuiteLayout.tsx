@@ -44,7 +44,6 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   const panelRequiredPaths = [
     "/ai-optimizer",
     "/panel-assistant",
-    "/ai-audio-lab",
     "/ai-voice",
   ];
   const requiresPanels = panelRequiredPaths.some(
@@ -121,8 +120,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       "/panel-assistant": "Panel Assistant",
       "/ai-thumbnails": "Thumbnail Studio",
       "/ai-analytics": "CTR Predictor",
-      "/ai-audio-lab": "Sound Design Lab",
-      "/ai-voice": "Voice Studio",
+      "/ai-voice": "Voice & Sound Studio",
       "/ai-characters": "Character Database",
       "/youtube": "YouTube Publisher",
     };

@@ -47,20 +47,18 @@ export default function VoiceSettingsPanel({
 }: VoiceSettingsPanelProps) {
   const panelNumber = selectedIdx + 1;
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState("Shadow Sovereign");
-  const [dialogue, setDialogue] = useState(
-    activePanel?.speech_text || "Arise. The darkness answers only to me."
+  const [name, setName] = useState(
+    activePanel?.character_name || activePanel?.speaker_name || ""
   );
-  const [visual, setVisual] = useState(
-    activePanel?.visual_description || "Tall male with glowing violet eyes, clad in midnight black armor radiating shadows."
-  );
+  const [dialogue, setDialogue] = useState(activePanel?.speech_text || "");
+  const [visual, setVisual] = useState(activePanel?.visual_description || "");
   const [castData, setCastData] = useState<CastResult | null>(null);
 
   const [voices, setVoices] = useState<VoiceOption[]>(DEFAULT_VOICES);
   const [selectedVoice, setSelectedVoice] = useState("en-US-GuyNeural");
   const [filterCategory, setFilterCategory] = useState<string>("All");
 
-  const [testScript, setTestScript] = useState(dialogue);
+  const [testScript, setTestScript] = useState(activePanel?.speech_text || "");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -68,13 +66,10 @@ export default function VoiceSettingsPanel({
   // Sync state when activePanel changes
   useEffect(() => {
     if (activePanel) {
-      if (activePanel.speech_text) {
-        setDialogue(activePanel.speech_text);
-        setTestScript(activePanel.speech_text);
-      }
-      if (activePanel.visual_description) {
-        setVisual(activePanel.visual_description);
-      }
+      setName(activePanel.character_name || activePanel.speaker_name || "");
+      setDialogue(activePanel.speech_text || "");
+      setTestScript(activePanel.speech_text || "");
+      setVisual(activePanel.visual_description || "");
     }
   }, [activePanel]);
 
@@ -181,9 +176,8 @@ export default function VoiceSettingsPanel({
       });
 
       if (json.success && json.audio_base64) {
-        const audioSrc = `data:${json.mime_type || "audio/mpeg"};base64,${
-          json.audio_base64
-        }`;
+        const audioSrc = `data:${json.mime_type || "audio/mpeg"};base64,${json.audio_base64
+          }`;
         if (audioRef.current) {
           audioRef.current.pause();
         }
@@ -363,11 +357,10 @@ export default function VoiceSettingsPanel({
                 <button
                   key={cat}
                   onClick={() => setFilterCategory(cat)}
-                  className={`px-2.5 py-1 rounded-lg text-[9px] font-bold transition-all border cursor-pointer whitespace-nowrap ${
-                    filterCategory === cat
+                  className={`px-2.5 py-1 rounded-lg text-[9px] font-bold transition-all border cursor-pointer whitespace-nowrap ${filterCategory === cat
                       ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
                       : "bg-[#07060c] text-neutral-400 border-[#1d182e] hover:text-white"
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>
