@@ -215,18 +215,14 @@ export function PanelCardThumbnail({
         </div>
       </div>
 
-      {/* Hover hint label overlay */}
-      <div className="absolute inset-x-0 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20">
-        <div className="bg-gradient-to-t from-neutral-950 via-neutral-950/85 to-transparent text-[9px] text-purple-300 font-mono text-center pb-2 pt-5 font-bold tracking-wide">
-          Click select · 2x Click editor · Shift range
-        </div>
-      </div>
+      {/* Persistent bottom shadow fade — gives depth to the dock area */}
+      <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none z-20" />
 
       {/* Floating Quick-action Dock (hover) */}
       {!isProcessing && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="absolute bottom-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out flex gap-1 bg-neutral-950 border border-neutral-800 px-2 py-1 rounded-2xl z-30 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+          className="absolute bottom-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out flex gap-1 bg-neutral-950/95 border border-neutral-700/80 px-2 py-1 rounded-2xl z-30 shadow-[0_8px_32px_rgba(0,0,0,0.7)] backdrop-blur-xl"
         >
           <button
             onClick={handleRotateClockwise}
