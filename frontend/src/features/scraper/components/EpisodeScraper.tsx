@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { createTempProjectId } from "@/utils/workspaceNavigation";
 import { createPortal } from "react-dom";
 import {
   Search,
@@ -39,6 +40,7 @@ import type { Episode } from "@/features/scraper/components/EpisodeTypes";
 import { isKnownSite, addCustomSite, getProxiedImageUrl } from "@/utils/url";
 
 interface SeriesMetadata {
+  seriesSlug?: string;
   title: string;
   author: string;
   genre: string;
@@ -383,9 +385,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       return;
     }
 
-    const temporaryProjectId = `temp_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(2, 10)}`;
+    const temporaryProjectId = createTempProjectId(seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput);
     localStorage.setItem("auto_import_url", episode.url);
     const nav = (window as any).navigateTo;
     if (nav) {
@@ -497,9 +497,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       return;
     }
 
-    const temporaryProjectId = `temp_${Date.now()}_${Math.random()
-      .toString(36)
-      .substring(2, 10)}`;
+    const temporaryProjectId = createTempProjectId(seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput);
 
     localStorage.setItem("auto_import_batch", JSON.stringify(finalEpisodes));
     localStorage.setItem("auto_import_url", finalEpisodes[0].url);

@@ -1,4 +1,5 @@
 import React from "react";
+import { createTempProjectId } from "@/utils/workspaceNavigation";
 
 interface UseAppRouterProps {
   scrapedImages: string[];
@@ -359,19 +360,30 @@ export function useAppRouter({
           setEditingImageIdx(null);
           return;
         }
-
-        // Redirect /editor?importUrl=... to /workspace/editor?id=temp_...
+// Redirect /editor?importUrl=... to /workspace/editor?id=temp_...
         if (params.has("importUrl") && !params.has("id")) {
           const importUrl = params.get("importUrl");
           if (importUrl) {
             localStorage.setItem("auto_import_url", importUrl);
           }
-          const temporaryProjectId = `temp_${Date.now()}_${Math.random()
-            .toString(36)
-            .substring(2, 10)}`;
+          const temporaryProjectId = createTempProjectId();
           const newUrl = `/workspace/editor?id=${temporaryProjectId}`;
           window.history.replaceState({}, "", newUrl);
           setCurrentPath("/workspace/editor");
+          return;
+        }
+
+        // Upgrade temp_ URLs to clean series/chapter routes if slugs exist in storage
+        const activeSeriesSlug = localStorage.getItem("active_series_slug");
+        const activeChapterSlug = localStorage.getItem("active_chapter_slug");
+        if (
+          params.get("id")?.startsWith("temp_") &&
+          activeSeriesSlug &&
+          activeChapterSlug
+        ) {
+          const cleanPath = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+          window.history.replaceState({}, "", cleanPath);
+          setCurrentPath(cleanPath);
           return;
         }
 
