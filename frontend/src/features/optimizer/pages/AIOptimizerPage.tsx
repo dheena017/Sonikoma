@@ -3,7 +3,6 @@ import {
   Sliders,
   Search,
   Film,
-  Radio,
   Sparkles,
   ChevronLeft,
   ChevronRight,
@@ -24,7 +23,6 @@ import SeoOptimizationTab from "@/features/optimizer/components/SeoOptimizationT
 import ShortsScriptTab from "@/features/optimizer/components/ShortsScriptTab";
 import SoundOutroTab from "@/features/optimizer/components/SoundOutroTab";
 import AdPlacementTab from "@/features/optimizer/components/AdPlacementTab";
-import SeriesHookTab from "@/features/optimizer/components/SeriesHookTab";
 import ThumbnailStudioTab from "@/features/optimizer/components/ThumbnailStudioTab";
 
 interface AIOptimizerPageProps {
@@ -60,7 +58,7 @@ const AIOptimizerPage = React.memo(
     }
 
     const [selectedIdx, setSelectedIdx] = useState(0);
-    const [activeTab, setActiveTab] = useState<"seo" | "shorts" | "sound" | "ads" | "hook" | "thumbnails">("seo");
+    const [activeTab, setActiveTab] = useState<"seo" | "thumbnails" | "shorts" | "sound" | "ads">("seo");
 
     const [selectedModel, setSelectedModel] = useState<string>(
       () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
@@ -146,12 +144,6 @@ const AIOptimizerPage = React.memo(
         label: "Ad Placements",
         description: "Sponsor slot timing & scripts",
         icon: Megaphone,
-      },
-      {
-        id: "hook" as const,
-        label: "Series Intros",
-        description: "Opening teasers & cliffhangers",
-        icon: Radio,
       },
     ];
 
@@ -454,16 +446,6 @@ const AIOptimizerPage = React.memo(
               <div className={activeTab === "ads" ? "block" : "hidden"}>
                 <AdPlacementTab
                   compiledScript={compiledScript}
-                  videoUrl={videoUrl}
-                  panels={panels}
-                  addNotification={addNotification}
-                />
-              </div>
-              <div className={activeTab === "hook" ? "block" : "hidden"}>
-                <SeriesHookTab
-                  title={title}
-                  genre={genre}
-                  storyboardSummary={storyboardSummary}
                   videoUrl={videoUrl}
                   panels={panels}
                   addNotification={addNotification}
