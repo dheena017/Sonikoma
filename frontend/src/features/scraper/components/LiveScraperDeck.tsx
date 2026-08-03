@@ -154,7 +154,7 @@ export const HorizontalScrollContainer: React.FC<{
       {/* Horizontal Scroll Container Track */}
       <div
         ref={scrollRef}
-        className={`w-full max-w-full flex gap-4 overflow-x-auto pb-4 pt-1.5 scrollbar-thin scroll-smooth px-1 select-none ${className}`}
+        className={`w-full max-w-full flex gap-4 overflow-x-auto pb-4 pt-3.5 scrollbar-thin scroll-smooth px-1 select-none ${className}`}
       >
         {children}
       </div>
@@ -770,7 +770,7 @@ const LiveScraperDeck = React.memo(
                         </div>
 
                         {/* Episodes Scroll List - Hidden Scrollbars */}
-                        <div className="space-y-1.5 max-h-[55vh] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                        <div className="space-y-1.5 max-h-[55vh] overflow-y-auto overflow-x-hidden p-1 pt-2 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                           {/* All Episodes Button */}
                           {(() => {
                             const totalScrapedFrames = episodeGroups.length > 0
@@ -780,6 +780,7 @@ const LiveScraperDeck = React.memo(
                             return (
                               <button
                                 type="button"
+                                title={`Show all episodes — ${totalScrapedFrames} frames total`}
                                 onClick={() => setSelectedEpisodeIdx("all")}
                                 className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
                                   selectedEpisodeIdx === "all"
@@ -815,6 +816,7 @@ const LiveScraperDeck = React.memo(
                               <div key={`ep-wrapper-${originalIdx}`} className="relative group/ep">
                                 <button
                                   type="button"
+                                  title={`${formatDisplayEpisodeLabel(grp.episodeLabel)} — ${grp.count} frames · ${durationStr}`}
                                   onClick={() => setSelectedEpisodeIdx(originalIdx)}
                                   onMouseEnter={() => setHoveredEpisodeIdx(originalIdx)}
                                   onMouseLeave={() => setHoveredEpisodeIdx(null)}
@@ -992,7 +994,7 @@ const LiveScraperDeck = React.memo(
                                    })}
                                  </HorizontalScrollContainer>
                                ) : (
-                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-1.5 px-1 w-full">
+                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-3.5 px-1 w-full">
                                    {grpImages.map((imgUrl, localIdx) => {
                                      const globalIdx = grp.startIndex + localIdx;
                                      const isSelected = selectedScraped.includes(imgUrl);
@@ -1079,7 +1081,7 @@ const LiveScraperDeck = React.memo(
                       ))}
                     </HorizontalScrollContainer>
                  ) : (
-                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-1.5 px-1 w-full">
+                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-3.5 px-1 w-full">
                      {scrapedImages.map((imgUrl, idx) => {
                        const isSelected = selectedScraped.includes(imgUrl);
                        const proxiedUrl = imgUrl?.startsWith("/api/")

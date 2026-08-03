@@ -215,14 +215,12 @@ export function PanelCardThumbnail({
         </div>
       </div>
 
-      {/* Shift-select hint on hover when not selected */}
-      {!isSelected && (
-        <div className="absolute inset-x-0 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20">
-          <div className="bg-gradient-to-t from-neutral-950 via-neutral-950/80 to-transparent text-[8px] text-neutral-400 font-mono text-center pb-2 pt-4">
-            Click · Shift+Click range
-          </div>
+      {/* Hover hint label overlay */}
+      <div className="absolute inset-x-0 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20">
+        <div className="bg-gradient-to-t from-neutral-950 via-neutral-950/85 to-transparent text-[9px] text-purple-300 font-mono text-center pb-2 pt-5 font-bold tracking-wide">
+          Click select · 2x Click editor · Shift range
         </div>
-      )}
+      </div>
 
       {/* Floating Quick-action Dock (hover) */}
       {!isProcessing && (

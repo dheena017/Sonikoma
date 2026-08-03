@@ -30,6 +30,7 @@ export function PanelCardControls({
       {/* Insert to Storyboard */}
       <button
         type="button"
+        title="Add this panel to your video timeline"
         onClick={() => {
           console.log(
             `[PanelCardControls] Adding image #${idx + 1} to timeline`
@@ -46,6 +47,7 @@ export function PanelCardControls({
       {!isLast && (
         <button
           type="button"
+          title="Stitch and merge this frame vertically with the next frame"
           onClick={() => {
             console.log(
               `[PanelCardControls] Merging image #${idx + 1} with next`

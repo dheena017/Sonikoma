@@ -383,13 +383,14 @@ const EditorPage: React.FC<EditorPageProps> = ({
               <span className="text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
                 Batch Render Episodes
               </span>
-              <div className="space-y-1 max-h-48 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <div className="space-y-1 max-h-48 overflow-y-auto overflow-x-hidden p-1 pt-2 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {getSortedEpisodeGroups(episodeGroups).map(({ grp, originalIdx }) => {
                   const isSelected = selectedExportTarget === `ep-${originalIdx}`;
                   return (
                     <button
                       key={originalIdx}
                       type="button"
+                      title={`Render ${formatDisplayEpisodeLabel(grp.episodeLabel)} — ${grp.count} frames`}
                       onClick={() => setSelectedExportTarget(`ep-${originalIdx}`)}
                       className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-mono transition-all text-left border cursor-pointer ${
                         isSelected
@@ -718,13 +719,14 @@ const EditorPage: React.FC<EditorPageProps> = ({
                               Episode Replays
                             </span>
                             {((window as any).__scrapeEpisodeGroups as Array<any> || []).length > 0 ? (
-                              <div className="space-y-1 max-h-48 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                              <div className="space-y-1 max-h-48 overflow-y-auto overflow-x-hidden p-1 pt-2 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                                 {getSortedEpisodeGroups(
                                   ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || []
                                 ).map(({ grp, originalIdx }) => (
                                   <button
                                     key={originalIdx}
                                     type="button"
+                                    title={`Jump to ${formatDisplayEpisodeLabel(grp.episodeLabel)} — starts at panel ${grp.startIndex + 1} · ${grp.count} frames`}
                                     onClick={() => {
                                       if (grp.startIndex !== undefined) {
                                         setCurrentPanelIndex(grp.startIndex);
