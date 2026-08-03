@@ -28,10 +28,15 @@ router = APIRouter()
 
 def _load_google_secrets() -> tuple[str, str | None]:
     """
-    Locate and parse client_secrets.json. Returns (client_id, client_secret).
-    client_secret may be None when only client_id is needed (login initiation).
-    Raises HTTPException(400) if the file is missing or unparseable.
+    Locate Google OAuth credentials from env vars (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET)
+    or client_secrets.json. Returns (client_id, client_secret).
+    Raises HTTPException(400) if credentials are not configured.
     """
+    env_client_id = os.getenv("GOOGLE_CLIENT_ID")
+    env_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+    if env_client_id:
+        return env_client_id, env_client_secret
+
     base_dir = os.path.dirname(__file__)
     project_root = os.path.abspath(os.path.join(base_dir, "..", "..", "..", "..", ".."))
 
@@ -45,9 +50,10 @@ def _load_google_secrets() -> tuple[str, str | None]:
     client_secrets_file = next((p for p in candidates if os.path.exists(p)), None)
 
     if not client_secrets_file:
+        logger.warning("Google OAuth attempt failed: Neither GOOGLE_CLIENT_ID env var nor client_secrets.json found.")
         raise HTTPException(
             status_code=400,
-            detail="Google login is not configured on the server. Please add 'client_secrets.json' to the project root.",
+            detail="Google OAuth is not configured on the server. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env or add 'client_secrets.json' to the backend directory.",
         )
 
     try:
@@ -58,6 +64,7 @@ def _load_google_secrets() -> tuple[str, str | None]:
         client_secret = secrets_data[key].get("client_secret")
         return client_id, client_secret
     except Exception as e:
+        logger.error(f"Failed to parse client_secrets.json: {e}")
         raise HTTPException(status_code=400, detail=f"Failed to parse client_secrets.json: {e}")
 
 
