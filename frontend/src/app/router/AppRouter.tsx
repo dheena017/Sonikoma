@@ -670,7 +670,6 @@ export default function AppRouter(props: AppRouterProps) {
     isOptimizerPath,
     isPanelAssistantPath,
     isCharacterPath,
-    isTranslationPath,
     isAudioLabPath,
     isVoicePath,
     isYouTubePath,
@@ -1414,7 +1413,6 @@ export default function AppRouter(props: AppRouterProps) {
         !isOptimizerPath &&
         !isPanelAssistantPath &&
         !isCharacterPath &&
-        !isTranslationPath &&
         !isAudioLabPath &&
         !isVoicePath &&
         !isYouTubePath &&
