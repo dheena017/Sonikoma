@@ -10,14 +10,14 @@ from typing import List, Dict, Any, Optional
 
 class AnalyzeImageRequest(BaseModel):
     url: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
     voice: Optional[str] = "en-US-GuyNeural"
 
 
 class AnalyzeBatchRequest(BaseModel):
     urls: List[str]
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
     voice: Optional[str] = "en-US-GuyNeural"
 
@@ -25,7 +25,7 @@ class AnalyzeBatchRequest(BaseModel):
 class AnalyzeSequenceRequest(BaseModel):
     urls: Optional[List[str]] = None
     visual_descriptions: Optional[List[str]] = None
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
     voice: Optional[str] = "en-US-GuyNeural"
 
@@ -43,14 +43,14 @@ class AnalyzePanelItem(BaseModel):
 
 class AnalyzePanelSequenceRequest(BaseModel):
     panels: List[AnalyzePanelItem]
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
     voice: Optional[str] = "en-US-GuyNeural"
 
 
 class AnalyzeNarrativeSequenceRequest(BaseModel):
     visual_descriptions: List[str]
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     voice: Optional[str] = "en-US-GuyNeural"
 
 
@@ -68,7 +68,7 @@ class TestModelLatencyRequest(BaseModel):
 
 class SmartCropRequest(BaseModel):
     url: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     strategy: Optional[str] = "ai"
     sensitivity: Optional[float] = 30.0
     backgroundColorMode: Optional[str] = "auto"
@@ -90,7 +90,7 @@ class SmartCropRequest(BaseModel):
 
 class SmartCropBatchRequest(BaseModel):
     urls: List[str]
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     strategy: Optional[str] = "ai"
     sensitivity: Optional[float] = 30.0
     backgroundColorMode: Optional[str] = "auto"
@@ -114,158 +114,158 @@ class DramatizeRequest(BaseModel):
     raw_ocr_text: List[str]
     genre: str
     scene_context: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class SFXAudioRequest(BaseModel):
     visual_description: str
     sfx_tag: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class ThumbnailRequest(BaseModel):
     title: str
     genre: str
     plot_point: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class TranslationRequest(BaseModel):
     text: str
     target_lang: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class SEORequest(BaseModel):
     title: str
     genre: str
     storyboard_summary: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class VoiceCastingRequest(BaseModel):
     character_name: str
     dialogue_sample: str
     visual_description: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class ThumbnailLayoutRequest(BaseModel):
     thumbnail_concept: str
     main_character: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class SeriesIntroHookRequest(BaseModel):
     title: str
     premise_summary: str
     genre: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class CharacterBioRequest(BaseModel):
     dialogue: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class NarrativePacingRequest(BaseModel):
     visual_description: str
     speech_text: str
     sfx: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class BGMVibeRequest(BaseModel):
     narrative_mood: str
     action_scale: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class ShortsScriptRequest(BaseModel):
     storyboard_summary: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class TitleABRequest(BaseModel):
     title: str
     key_climax_event: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class SFXOverlayRequest(BaseModel):
     visual_description: str
     speech_text: str
     sfx: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class CameraShakeRequest(BaseModel):
     visual_description: str
     sfx: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class SceneCompositionRequest(BaseModel):
     visual_description: str
     speech_text: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class SubtitleStylerRequest(BaseModel):
     visual_description: str
     speech_text: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class GenerateThumbnailRequest(BaseModel):
     title: str
     genre: str
     panels: List[Dict[str, Any]]
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class YouTubeChapterRequest(BaseModel):
     compiled_script: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class MidrollPlacementRequest(BaseModel):
     compiled_script: str
     max_ads: Optional[int] = 3
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class ShortsHookRequest(BaseModel):
     title: str
     key_event: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class CharacterEmotionRequest(BaseModel):
     visual_description: str
     speech_text: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class TransitionSpeedRequest(BaseModel):
     visual_description: str
     speech_text: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class ThumbnailVisualRequest(BaseModel):
     thumbnail_concept: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class CopyrightScrubRequest(BaseModel):
     text: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class CopyrightScrubBatchRequest(BaseModel):
     texts: List[str]
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
 
 
 class PanelDescriptionItem(BaseModel):
@@ -275,13 +275,13 @@ class PanelDescriptionItem(BaseModel):
 
 class GenerateSequenceNarrativeRequest(BaseModel):
     panels: List[PanelDescriptionItem]
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     voice: Optional[str] = "en-US-GuyNeural"
 
 
 class EnhancePromptRequest(BaseModel):
     prompt: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     apiKey: Optional[str] = None
 
 

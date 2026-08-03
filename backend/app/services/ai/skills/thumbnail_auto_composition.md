@@ -1,7 +1,6 @@
 ---
 name: thumbnail_auto_composition
 description: Generate a structured recipe for automatically composing a YouTube thumbnail from storyboard panels.
-model: gemini-2.5-flash
 response_schema: ThumbnailCompositionRecipeModel
 ---
 

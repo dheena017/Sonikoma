@@ -37,7 +37,7 @@ export default function SeriesHookTab({
       const hookJson = await api.runShortsHookSkill(fetchWithAuth, {
         title: title || "Solo Leveling Recap",
         key_event: "Hero unlocks S-Rank hidden power and stands alone against the boss",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
 
       if (hookJson.success && hookJson.result) {

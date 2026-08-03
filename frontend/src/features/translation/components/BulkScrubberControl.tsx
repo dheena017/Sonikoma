@@ -53,7 +53,7 @@ export default function BulkScrubberControl({
             const json = await api.runCopyrightScrubBatchSkill(fetchWithAuth, {
               texts: panelsToScrub.map((p) => p.speech_text),
               model:
-                localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+                localStorage.getItem("ai_comic_model") || undefined,
             });
             if (json.success && json.results) {
               const mappedResults = [];

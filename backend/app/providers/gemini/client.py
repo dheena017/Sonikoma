@@ -45,14 +45,6 @@ class GeminiProvider:
         max_attempts: int = 5
     ) -> Any:
         """Executes a model generation call wrapped in the standard exponential backoff retrier."""
-        # Translate gemini-3.5 selections to gemini-2.5-pro or gemini-2.5-flash
-        model_lower = model.lower()
-        if "gemini-3.5" in model_lower:
-            if "pro" in model_lower:
-                model = "gemini-2.5-pro"
-            else:
-                model = "gemini-2.5-flash"
-            logger.info(f"[GeminiProvider] Translated gemini-3.5 selection to: {model}")
 
         return await call_gemini_with_retry(
             lambda: client.models.generate_content(

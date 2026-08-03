@@ -96,3 +96,18 @@ except ValueError:
 
 # YOLO Models directory setup
 MODELS_DIR = os.path.join(PROJECT_ROOT, "data", "models")
+
+# ── AI Model Configuration ─────────────────────────────────────────────────────
+# Primary model used when no model is specified by the caller.
+# Override via GEMINI_MODEL_PRIMARY in .env
+GEMINI_MODEL_PRIMARY: str = os.getenv("GEMINI_MODEL_PRIMARY", "gemini-2.5-flash")
+
+# Ordered fallback chain used when the primary or caller-supplied model hits a quota limit.
+# Comma-separated list. Override via GEMINI_FALLBACK_MODELS in .env
+# Example: GEMINI_FALLBACK_MODELS=gemini-2.5-flash,gemini-2.5-flash-lite,gemini-2.0-flash,gemini-2.0-flash-lite
+_fallback_env = os.getenv("GEMINI_FALLBACK_MODELS", "")
+GEMINI_FALLBACK_MODELS: list = (
+    [m.strip() for m in _fallback_env.split(",") if m.strip()]
+    if _fallback_env
+    else ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
+)

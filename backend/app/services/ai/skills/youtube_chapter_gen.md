@@ -1,7 +1,6 @@
 ---
 name: youtube_chapter_gen
 description: Create timestamp timeline markers for YouTube player chapters based on storyboard milestones.
-model: gemini-2.5-flash
 response_schema: YouTubeChapterModel
 ---
 

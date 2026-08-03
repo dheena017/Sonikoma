@@ -1,7 +1,6 @@
 ---
 name: video_seo_metadata
 description: Generate high-ranking YouTube SEO Titles, tags, description, and chapters.
-model: gemini-2.5-flash
 response_schema: VideoSEOMetadataModel
 ---
 

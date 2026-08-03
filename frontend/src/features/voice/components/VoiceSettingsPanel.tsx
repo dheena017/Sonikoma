@@ -109,7 +109,7 @@ export default function VoiceSettingsPanel({
         character_name: name,
         dialogue_sample: dialogue,
         visual_description: visual,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setCastData(json.result);

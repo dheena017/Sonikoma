@@ -28,7 +28,7 @@ export default function ThumbnailLayoutForm({
         thumbnail_concept:
           conceptPrompt || "Tense combat close-up illustration",
         main_character: character,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setLayout(json.result);

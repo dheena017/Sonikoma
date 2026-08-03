@@ -15,6 +15,8 @@ from core.config import ai_initialized, call_gemini_with_retry, genai_client
 from google.genai import types
 from services.ai.skills.utils import resolve_api_key
 
+from core.settings import GEMINI_FALLBACK_MODELS
+
 logger = logging.getLogger("sonikoma.skills.coordinator")
 
 
@@ -205,18 +207,6 @@ async def execute_provider_call(
     start_time = time.monotonic()
     
     if provider == "gemini":
-        model_lower = clean_model_id.lower()
-        if "gemini-3.5" in model_lower:
-            if "pro" in model_lower:
-                clean_model_id = "gemini-2.5-pro"
-            else:
-                clean_model_id = "gemini-2.5-flash"
-            logger.debug(f"[coordinator.py] Translated gemini-3.5 model selection in '{skill.name}' to: {clean_model_id}")
-        elif "gemini-1.5" in model_lower:
-            clean_model_id = "gemini-2.5-flash"
-        elif "gemini-2.0" in model_lower:
-            clean_model_id = "gemini-2.0-flash"
-
         key_to_use = resolve_api_key("gemini", api_key, user_keys)
         if not ai_initialized and not key_to_use:
             raise RuntimeError("Gemini is not initialized and no API key was provided.")
@@ -240,13 +230,7 @@ async def execute_provider_call(
         if not client_to_use:
             raise RuntimeError("Gemini client is not initialized and no API key was provided.")
 
-        fallback_candidates = [
-            clean_model_id,
-            "gemini-2.5-flash",
-            "gemini-2.5-flash-lite",
-            "gemini-2.0-flash",
-            "gemini-2.0-flash-lite"
-        ]
+        fallback_candidates = [clean_model_id] + GEMINI_FALLBACK_MODELS
         models_to_try = []
         for m in fallback_candidates:
             if m and m not in models_to_try:

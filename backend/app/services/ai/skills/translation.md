@@ -1,7 +1,6 @@
 ---
 name: translation
 description: Translate comic scripts and narration to a target language.
-model: gemini-2.5-flash
 response_schema: TranslationModel
 ---
 

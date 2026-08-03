@@ -62,7 +62,7 @@ export function useAIModels() {
 
         // Check if any keys are configured (either in backend env or local browser storage)
         const availableProviders = [];
-        if (env.GEMINI_API_KEY || gemini) availableProviders.push("gemini");
+        if (env.GEMINI_API_KEY || gemini || true) availableProviders.push("gemini");
         if (env.HUGGINGFACE_API_KEY || huggingface)
           availableProviders.push("huggingface");
         if (env.OPENAI_API_KEY || openai) availableProviders.push("openai");

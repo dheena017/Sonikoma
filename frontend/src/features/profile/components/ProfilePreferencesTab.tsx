@@ -27,6 +27,7 @@ import {
   Square,
   ZapOff,
 } from "lucide-react";
+import ModelSelect from "@/features/ai/components/ModelSelect";
 
 interface ProfilePreferencesTabProps {
   notifications: {
@@ -703,21 +704,13 @@ export default function ProfilePreferencesTab({
                     </div>
                   </div>
                   <div className="w-full">
-                    <select
+                    <ModelSelect
+                      showIcon={false}
+                      className="w-full"
+                      selectClassName={`w-full bg-black/50 border border-white/10 text-white text-xs font-medium rounded-lg px-3 py-2.5 focus:outline-none ${tc.focusBorder}`}
                       value={ai.defaultModel}
-                      onChange={(e) =>
-                        handleSelect(setAi, "defaultModel", e.target.value)
-                      }
-                      className={`w-full bg-black/50 border border-white/10 text-white text-xs font-medium rounded-lg px-3 py-2.5 focus:outline-none ${tc.focusBorder}`}
-                    >
-                      <option value="gemini-1.5-flash">
-                        Gemini 1.5 Flash (Fast)
-                      </option>
-                      <option value="gemini-1.5-pro">
-                        Gemini 1.5 Pro (Quality)
-                      </option>
-                      <option value="gpt-4o">GPT-4o</option>
-                    </select>
+                      onChange={(val) => handleSelect(setAi, "defaultModel", val)}
+                    />
                   </div>
                 </div>
 

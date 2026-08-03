@@ -1,7 +1,6 @@
 ---
 name: sfx_overlay_scheduler
 description: Coordinate sound mixes by overlaying background environment elements and transient effects.
-model: gemini-2.5-flash
 response_schema: SFXOverlayModel
 ---
 

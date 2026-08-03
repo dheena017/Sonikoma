@@ -620,7 +620,7 @@ const AIModelsPage = React.memo(
       setSkillOutput(null);
 
       const modelToUse =
-        playgroundModel || globalSelectedModel || "gemini-2.5-flash";
+        playgroundModel || globalSelectedModel || (models.length > 0 ? models[0].id : "");
       let provider = "gemini";
       if (modelToUse.includes("gpt") || modelToUse.includes("o1")) {
         provider = "openai";
@@ -739,7 +739,7 @@ const AIModelsPage = React.memo(
       setVerificationResult((prev) => ({ ...prev, [provider]: null }));
 
       // Choose default test model based on provider
-      let testModel = "gemini-2.5-flash";
+      let testModel = models.length > 0 ? models[0].id : "";
       if (provider === "openai") testModel = "gpt-4o-mini";
       if (provider === "anthropic") testModel = "claude-3-5-haiku-20241022";
       if (provider === "huggingface")
@@ -798,7 +798,7 @@ const AIModelsPage = React.memo(
       const enhanceModel =
         playgroundProvider === "gemini" && playgroundModel
           ? playgroundModel
-          : "gemini-2.5-flash";
+          : (models.length > 0 ? models[0].id : "");
 
       try {
         const data = await api.enhancePrompt(

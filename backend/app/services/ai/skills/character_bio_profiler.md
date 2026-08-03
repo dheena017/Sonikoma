@@ -1,7 +1,6 @@
 ---
 name: character_bio_profiler
 description: Analyze visual character attributes to compile dynamic character databases.
-model: gemini-2.5-flash
 response_schema: CharacterBioModel
 ---
 

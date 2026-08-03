@@ -184,16 +184,15 @@ async def run_ai_connection_tests():
     results = []
 
     if gemini_key and ai_initialized:
-        gemini_models = [
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
-            "gemini-2.0-flash",
-            "gemini-2.0-flash-lite",
-            "gemini-3.1-flash-lite",
-            "gemini-3.5-flash",
-            "gemini-flash-latest",
-            "gemini-pro-latest"
-        ]
+        from services.ai.facade import facade_list_models
+        from core.settings import GEMINI_FALLBACK_MODELS
+        
+        list_res = await facade_list_models("gemini", gemini_key)
+        if list_res.get("success") and list_res.get("models"):
+            gemini_models = [m["name"] for m in list_res["models"]]
+        else:
+            gemini_models = GEMINI_FALLBACK_MODELS
+
         for idx, model in enumerate(gemini_models):
             res = await test_single_gemini(model)
             results.append(res)

@@ -1,7 +1,6 @@
 ---
 name: character_emotion_class
 description: Evaluate character visual expressions to classify active emotional state.
-model: gemini-2.5-flash
 response_schema: CharacterEmotionModel
 ---
 

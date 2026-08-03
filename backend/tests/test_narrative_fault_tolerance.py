@@ -48,8 +48,8 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
 
         self.client = TestClient(self.app)
 
-    @patch("api.v1.ai.narration.get_available_credits")
-    @patch("api.v1.ai.narration.record_credit_transaction")
+    @patch("api.v1.ai.image.get_available_credits")
+    @patch("api.v1.ai.image.record_credit_transaction")
     @patch("services.ai.facade.call_gemini_with_retry")
     @patch("services.ai.facade.generate_panel_audio")
     @patch("google.genai.Client")

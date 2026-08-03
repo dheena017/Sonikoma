@@ -5,8 +5,10 @@ Global constants for the Sonikoma computational engine.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+from core.settings import GEMINI_FALLBACK_MODELS
+
 VALID_MOTIONS = ['zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down']
-MODEL_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
+MODEL_FALLBACKS = GEMINI_FALLBACK_MODELS
 LOW_BALANCE_THRESHOLD = 20
 
 # Supported image formats

@@ -116,7 +116,7 @@ export default function AmbientSoundPicker({
       const json = await api.runBgmVibeSkill(fetchWithAuth, {
         narrative_mood: mood,
         action_scale: actionScale,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setVibe(json.result);

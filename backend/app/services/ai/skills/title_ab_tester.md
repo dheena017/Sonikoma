@@ -1,7 +1,6 @@
 ---
 name: title_ab_tester
 description: Formulate 3 contrasting title variations targeting distinct viewer psychological categories.
-model: gemini-2.5-flash
 response_schema: TitleABModel
 ---
 

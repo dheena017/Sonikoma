@@ -16,9 +16,11 @@ from fastapi import Header, HTTPException
 from api.dependencies.auth import clean_api_key
 from services.ai.skills.registry import registry
 
+from core.settings import GEMINI_FALLBACK_MODELS
+
 logger = logging.getLogger("sonikoma.api.ai")
 
-MODEL_FALLBACKS = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest']
+MODEL_FALLBACKS = GEMINI_FALLBACK_MODELS
 
 
 def get_user_gemini_key(

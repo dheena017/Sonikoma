@@ -16,7 +16,7 @@ export function useAutoCropPresets(props: AutoCropSharedProps) {
     const defaults: CustomCropPreset = {
       name: "Custom Slot",
       useLocalCV: true,
-      cropModel: "gemini-2.5-flash",
+      cropModel: "",
       autoSplitTallStrips: true,
       cropSensitivity: 30,
       cropPaddingPx: 10,

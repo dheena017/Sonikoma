@@ -103,7 +103,7 @@ const HeaderInner = ({
   backendStatus,
   narrationStyle = "long",
   setNarrationStyle,
-  selectedModel = "gemini-2.5-flash",
+  selectedModel = "",
   setSelectedModel,
   volume = 0.8,
   setVolume,

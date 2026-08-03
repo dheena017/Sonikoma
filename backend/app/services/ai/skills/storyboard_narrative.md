@@ -1,7 +1,6 @@
 ---
 name: storyboard_narrative
 description: Generate chronological narration script and camera motion directions.
-model: gemini-2.5-flash
 response_schema: StoryboardModel
 ---
 

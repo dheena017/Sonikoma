@@ -1,7 +1,6 @@
 ---
 name: shorts_script_adapter
 description: Convert standard storyboard chapters into ultra-compressed 55-second vertical Shorts script.
-model: gemini-2.5-flash
 response_schema: ShortsScriptModel
 ---
 

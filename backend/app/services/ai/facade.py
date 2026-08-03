@@ -19,6 +19,7 @@ from typing import List, Optional, Dict, Any
 from PIL import Image
 
 from core.config import call_gemini_with_retry
+from core.settings import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
 import services.image.utils.image_utils as img_utils
@@ -231,7 +232,7 @@ async def facade_analyze_image(
     except Exception:
         pass
 
-    target_model = model or "gemini-2.5-flash"
+    target_model = model or GEMINI_MODEL_PRIMARY
     tone_hint = ""
     if brightness is not None:
         if brightness < 80:
@@ -487,8 +488,8 @@ async def facade_smart_crop(
                     pass
 
     # 2. Otherwise execute AI detection with skill (with automatic free model fallback on quota limit)
-    requested_model = model or "gemini-2.5-flash"
-    fallback_models = [requested_model, "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
+    requested_model = model or GEMINI_MODEL_PRIMARY
+    fallback_models = [requested_model] + GEMINI_FALLBACK_MODELS
     models_to_try = []
     for m in fallback_models:
         if m not in models_to_try:
@@ -633,7 +634,7 @@ async def facade_analyze_narrative_sequence(
     from google.genai import types
     from services.ai.skills.base import extract_json
 
-    target_model = model or "gemini-2.5-flash"
+    target_model = model or GEMINI_MODEL_PRIMARY
     gemini_key = resolve_api_key("gemini", user_keys=user_keys)
     client = genai.Client(api_key=gemini_key)
 
@@ -643,14 +644,7 @@ async def facade_analyze_narrative_sequence(
         f"{len(visual_descriptions)} narrative voiceover sentences for these visual scenes:\n{scenes_prompt}"
     )
 
-    fallback_candidates = [
-        target_model,
-        "gemini-2.5-flash",
-        "gemini-2.5-flash-lite",
-        "gemini-2.0-flash",
-        "gemini-2.0-flash-lite",
-        "gemini-1.5-flash"
-    ]
+    fallback_candidates = [target_model] + GEMINI_FALLBACK_MODELS
     models_to_try = []
     for m in fallback_candidates:
         _, clean_m = get_provider_and_model(m)
@@ -730,15 +724,8 @@ async def facade_enhance_prompt(
     from google import genai
 
     client = genai.Client(api_key=api_key)
-    target_model = model or "gemini-2.5-flash"
-    fallback_candidates = [
-        target_model,
-        "gemini-2.5-flash",
-        "gemini-2.5-flash-lite",
-        "gemini-2.0-flash",
-        "gemini-2.0-flash-lite",
-        "gemini-1.5-flash"
-    ]
+    target_model = model or GEMINI_MODEL_PRIMARY
+    fallback_candidates = [target_model] + GEMINI_FALLBACK_MODELS
     models_to_try = []
     for m in fallback_candidates:
         _, clean_m = get_provider_and_model(m)

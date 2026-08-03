@@ -1,7 +1,6 @@
 ---
 name: midroll_placement_ref
 description: Identify high-suspense timestamps to locate ad midrolls for revenue maximization.
-model: gemini-2.5-flash
 response_schema: MidrollPlacementModel
 ---
 

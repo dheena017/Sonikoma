@@ -1,7 +1,6 @@
 ---
 name: subtitle_styler
 description: Choose subtitle visual fonts, coloring, and styling parameters based on genre.
-model: gemini-2.5-flash
 response_schema: SubtitleStylerModel
 ---
 

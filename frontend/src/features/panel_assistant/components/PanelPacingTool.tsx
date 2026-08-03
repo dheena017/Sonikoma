@@ -49,7 +49,7 @@ export default function PanelPacingTool({ panel, panels, addNotification }: Pane
           panel.visual_description || "Detailed drawing panel",
         speech_text: panel.speech_text || "",
         sfx: panel.sfx || "",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setPacingData(json.result);
@@ -68,7 +68,7 @@ export default function PanelPacingTool({ panel, panels, addNotification }: Pane
         visual_description:
           panel.visual_description || "Detailed drawing panel",
         speech_text: panel.speech_text || "",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setTransitionData(json.result);
@@ -87,7 +87,7 @@ export default function PanelPacingTool({ panel, panels, addNotification }: Pane
         visual_description:
           panel.visual_description || "Action close-up illustration",
         sfx: panel.sfx || "[Impact]",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setShakeData(json.result);
@@ -110,7 +110,7 @@ export default function PanelPacingTool({ panel, panels, addNotification }: Pane
               visual_description: panelItem.visual_description || "Detailed drawing panel",
               speech_text: panelItem.speech_text || "",
               sfx: panelItem.sfx || "",
-              model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+              model: localStorage.getItem("ai_comic_model") || undefined,
             });
           } catch (error) {
             console.error(error);
@@ -137,7 +137,7 @@ export default function PanelPacingTool({ panel, panels, addNotification }: Pane
             await api.runTransitionSpeedSkill(fetchWithAuth, {
               visual_description: panelItem.visual_description || "Detailed drawing panel",
               speech_text: panelItem.speech_text || "",
-              model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+              model: localStorage.getItem("ai_comic_model") || undefined,
             });
           } catch (error) {
             console.error(error);
@@ -165,7 +165,7 @@ export default function PanelPacingTool({ panel, panels, addNotification }: Pane
               visual_description:
                 panelItem.visual_description || "Action close-up illustration",
               sfx: panelItem.sfx || "[Impact]",
-              model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+              model: localStorage.getItem("ai_comic_model") || undefined,
             });
           } catch (error) {
             console.error(error);

@@ -31,7 +31,7 @@ export default function TitleOptimizer({
       const json = await api.runTitleAbSkill(fetchWithAuth, {
         title: cleanBase,
         key_climax_event: `High impact ${scrapedGenre || "Action"} webtoon climax scene`,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result?.suggested_alternatives) {
         const aiTitles = json.result.suggested_alternatives.map((a: any) => a.title);

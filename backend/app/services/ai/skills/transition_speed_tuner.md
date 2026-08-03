@@ -1,7 +1,6 @@
 ---
 name: transition_speed_tuner
 description: Configure rendering transition times in frames based on dialogue pace and actions.
-model: gemini-2.5-flash
 response_schema: TransitionSpeedModel
 ---
 

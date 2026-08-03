@@ -34,7 +34,7 @@ export default function ThumbnailGenerator({
         title: title || "Solo Leveling",
         genre: genre || "Fantasy",
         plot_point: plotPoint,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setConcept(json.result);

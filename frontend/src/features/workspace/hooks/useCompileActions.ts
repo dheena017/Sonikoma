@@ -106,7 +106,7 @@ export function useCompileActions({
     setPanels((prev) =>
       prev.map((p) => (p.id === panelId ? { ...p, isAnalyzing: true } : p))
     );
-    const activeModel = selectedModel || "gemini-2.5-flash";
+    const activeModel = selectedModel;
     const originalPanel = panels.find((p) => p.id === panelId);
     const originalText = originalPanel ? originalPanel.speech_text : "";
     const originalMotion = originalPanel ? originalPanel.motion_type : "";
@@ -252,7 +252,7 @@ export function useCompileActions({
     );
 
     try {
-      const activeModel = selectedModel || "gemini-2.5-flash";
+      const activeModel = selectedModel;
       const targetPanels = panels.filter((p) => selectedIds.includes(p.id));
       abortControllerRef.current = new AbortController();
 
@@ -376,7 +376,7 @@ export function useCompileActions({
     setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: true })));
 
     try {
-      const activeModel = selectedModel || "gemini-2.5-flash";
+      const activeModel = selectedModel;
       abortControllerRef.current = new AbortController();
 
       const imageUrls = panels.map((p) => p.image_url);

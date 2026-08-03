@@ -1,7 +1,6 @@
 ---
 name: smart_crop
 description: Detect high-precision narrative panel boundaries in Webtoon, Manga, Comic, and Manhwa images. Segment every distinct panel without omitting or over-merging.
-model: gemini-2.5-flash
 response_schema: CropList
 ---
 

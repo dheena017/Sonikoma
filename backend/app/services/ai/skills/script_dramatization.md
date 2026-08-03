@@ -1,7 +1,6 @@
 ---
 name: script_dramatization
 description: Transform raw dialogue extracted via OCR into high-retention cinematic narration.
-model: gemini-2.5-flash
 response_schema: DramatizedScriptModel
 ---
 

@@ -200,7 +200,7 @@ export function usePanelDetection({
           minAreaPct: settings?.minAreaPct ?? 0.15,
           mergeThreshold: settings?.mergeThreshold ?? 20,
           strategy: settings?.strategy ?? "local-cv",
-          model: settings?.model ?? "gemini-2.5-flash",
+          model: settings?.model || undefined,
           cannyLow: settings?.cannyLow ?? 20,
           cannyHigh: settings?.cannyHigh ?? 100,
           closeKernelSize: settings?.closeKernelSize ?? 15,

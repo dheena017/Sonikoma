@@ -1,7 +1,6 @@
 ---
 name: narrative_pace_controller
 description: Suggest pacing settings, zoom transitions speeds and pause flags for rendering.
-model: gemini-2.5-flash
 response_schema: NarrativePacingModel
 ---
 

@@ -172,7 +172,7 @@ export default function AutoCropModal({
     setMinPanelAreaPct(2);
     setOverlapMergeThreshold(20);
     setUseLocalCV(true);
-    setCropModel("gemini-2.5-flash");
+    setCropModel("");
     setCropMinHeightPx(60);
     setCropCannyLow(20);
     setCropCannyHigh(100);

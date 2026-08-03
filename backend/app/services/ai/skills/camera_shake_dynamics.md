@@ -1,7 +1,6 @@
 ---
 name: camera_shake_dynamics
 description: Suggest exact mathematical shake coefficients for rendering engine filters based on action scale.
-model: gemini-2.5-flash
 response_schema: CameraShakeModel
 ---
 

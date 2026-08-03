@@ -1,7 +1,6 @@
 ---
 name: copyright_scrubber
 description: Scan dialogue transcripts and scripts to filter and sanitize community guideline violations.
-model: gemini-2.5-flash
 response_schema: CopyrightScrubModel
 ---
 

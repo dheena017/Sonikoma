@@ -26,7 +26,7 @@ export default function ThumbnailCompositionGuide({
       const json = await api.runThumbnailVisualSkill(fetchWithAuth, {
         thumbnail_concept:
           conceptPrompt || "Tense combat close-up illustration",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setData(json.result);

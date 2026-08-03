@@ -25,6 +25,7 @@ import ShortsScriptTab from "@/features/optimizer/components/ShortsScriptTab";
 import SoundOutroTab from "@/features/optimizer/components/SoundOutroTab";
 import AdPlacementTab from "@/features/optimizer/components/AdPlacementTab";
 import ThumbnailStudioTab from "@/features/optimizer/components/ThumbnailStudioTab";
+import ModelSelect from "@/features/ai/components/ModelSelect";
 
 interface AIOptimizerPageProps {
   panels: GeneratedPanel[];
@@ -62,7 +63,7 @@ const AIOptimizerPage = React.memo(
     const [activeTab, setActiveTab] = useState<"seo" | "thumbnails" | "shorts" | "sound" | "ads">("seo");
 
     const [selectedModel, setSelectedModel] = useState<string>(
-      () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
+      () => localStorage.getItem("ai_comic_model") || ""
     );
     const [copiedAll, setCopiedAll] = useState(false);
 
@@ -176,19 +177,7 @@ const AIOptimizerPage = React.memo(
 
           <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
             {/* Inline AI Model Switcher */}
-            <div className="flex items-center gap-2 bg-[#12101d] border border-[#231e38] rounded-xl px-3 py-1.5">
-              <Cpu className="w-3.5 h-3.5 text-purple-400" />
-              <select
-                value={selectedModel}
-                onChange={(e) => handleModelChange(e.target.value)}
-                className="bg-transparent text-xs font-mono text-white outline-none cursor-pointer"
-              >
-                <option value="gemini-2.5-flash" className="bg-[#09080e] text-white">Gemini 2.5 Flash (Default)</option>
-                <option value="gemini-2.5-flash-lite" className="bg-[#09080e] text-white">Gemini 2.5 Flash-Lite (Fast)</option>
-                <option value="gemini-2.0-flash" className="bg-[#09080e] text-white">Gemini 2.0 Flash</option>
-                <option value="gemini-2.5-pro" className="bg-[#09080e] text-white">Gemini 2.5 Pro (High Quality)</option>
-              </select>
-            </div>
+            <ModelSelect value={selectedModel} onChange={handleModelChange} />
 
             {/* Quick Copy YouTube Package Button */}
             <button

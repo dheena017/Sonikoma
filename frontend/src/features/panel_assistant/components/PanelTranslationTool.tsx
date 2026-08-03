@@ -40,7 +40,7 @@ export default function PanelTranslationTool({
       const json = await api.runTranslateSkill(fetchWithAuth, {
         text: panel.speech_text,
         target_lang: lang,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setTranslationResult(json.result.translated_text);
@@ -62,7 +62,7 @@ export default function PanelTranslationTool({
             const json = await api.runTranslateSkill(fetchWithAuth, {
               text: panelItem.speech_text,
               target_lang: lang,
-              model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+              model: localStorage.getItem("ai_comic_model") || undefined,
             });
             if (json.success && json.result) {
               return { ...panelItem, speech_text: json.result.translated_text };
@@ -93,7 +93,7 @@ export default function PanelTranslationTool({
     try {
       const json = await api.runCopyrightScrubSkill(fetchWithAuth, {
         text: panel.speech_text,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setScrubResult(json.result);

@@ -35,7 +35,7 @@ export default function SoundOutroTab({
       const bgmJson = await api.runBgmVibeSkill(fetchWithAuth, {
         narrative_mood: "tense action battle climax",
         action_scale: "high",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
 
       if (bgmJson.success && bgmJson.result) {

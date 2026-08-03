@@ -212,13 +212,15 @@ async def batch_scrape_series_route(request: Request, body: BatchScrapeSeriesReq
         raise HTTPException(status_code=500, detail=str(e))
 
 
+from core.settings import GEMINI_MODEL_PRIMARY
+
 @router.post("/generate", summary="Generate storyboard and narrative scripts")
 async def generate_storyboard(request: Request, body: GenerateStoryboardRequest, user_keys: dict = Depends(get_all_user_keys)):
     try:
         user_id = get_optional_user_id(request)
         result = await generate_storyboard_and_video(
             url=body.url,
-            model=body.model or "gemini-2.5-flash",
+            model=body.model or GEMINI_MODEL_PRIMARY,
             narration_style=body.narrationStyle or "long",
             bypass_cache=body.bypass_cache if body.bypass_cache is not None else True,
             panels=body.panels,
@@ -245,7 +247,7 @@ async def generate_storyboard_only(request: Request, body: GenerateStoryboardOnl
         result = await generate_storyboard_only_service(
             url=body.url,
             project_id=body.project_id,
-            model=body.model or "gemini-2.5-flash",
+            model=body.model or GEMINI_MODEL_PRIMARY,
             narration_style=body.narrationStyle or "long",
             user_id=user_id,
             user_keys=user_keys,

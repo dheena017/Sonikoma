@@ -69,7 +69,7 @@ export default function TitleABValidator({
       const json = await api.runTitleAbSkill(fetchWithAuth, {
         title: title.trim(),
         key_climax_event: event.trim() || "High-stakes climax battle and plot twist",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setResults(json.result);

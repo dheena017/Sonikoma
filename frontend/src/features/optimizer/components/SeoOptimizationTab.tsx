@@ -43,7 +43,7 @@ export default function SeoOptimizationTab({
         title: title || "My Webtoon Recap",
         genre: genre || "Action",
         storyboard_summary: storyboardSummary || "The story summary details go here.",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
 
       if (json.success && json.result) {

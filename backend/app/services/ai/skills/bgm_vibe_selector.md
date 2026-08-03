@@ -1,7 +1,6 @@
 ---
 name: bgm_vibe_selector
 description: Match panel emotion profile to music database vibe keywords.
-model: gemini-2.5-flash
 response_schema: BGMVibeModel
 ---
 

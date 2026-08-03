@@ -56,7 +56,7 @@ export default function ScriptDramatizerForm({
         raw_ocr_text: rawLines,
         genre,
         scene_context: context,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result && json.result.dramatized_scripts) {
         setResults(json.result.dramatized_scripts);

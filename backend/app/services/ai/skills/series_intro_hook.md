@@ -1,7 +1,6 @@
 ---
 name: series_intro_hook
 description: Generate high-engagement introductory video hook summarizing the manhwa premise.
-model: gemini-2.5-flash
 response_schema: SeriesIntroHookModel
 ---
 

@@ -40,7 +40,7 @@ export default function ShortsScriptTab({
     try {
       const scriptJson = await api.runShortsScriptSkill(fetchWithAuth, {
         storyboard_summary: `${storyboardSummary}\nTarget Duration: ${targetDuration}`,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
 
       if (scriptJson.success && scriptJson.result) {
@@ -50,7 +50,7 @@ export default function ShortsScriptTab({
       const hookJson = await api.runShortsHookSkill(fetchWithAuth, {
         title: title || "Solo Leveling Recap",
         key_event: "Hero unlocks shadow extraction system",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
 
       if (hookJson.success && hookJson.result) {

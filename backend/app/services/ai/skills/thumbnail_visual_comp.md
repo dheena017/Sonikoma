@@ -1,7 +1,6 @@
 ---
 name: thumbnail_visual_comp
 description: Compile visual layering templates and alignment guidelines for thumbnails.
-model: gemini-2.5-flash
 response_schema: ThumbnailVisualModel
 ---
 

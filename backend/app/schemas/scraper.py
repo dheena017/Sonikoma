@@ -33,7 +33,7 @@ class ScrapeImagesRequest(BaseModel):
 class GenerateStoryboardOnlyRequest(BaseModel):
     url: str
     project_id: str
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
     title: Optional[str] = None
     episode: Optional[str] = None
@@ -48,7 +48,7 @@ class GenerateStoryboardRequest(BaseModel):
     episode_id: Optional[str] = None
     panels: Optional[List[Dict[str, Any]]] = None
     custom_background_video: Optional[str] = None
-    model: Optional[str] = "gemini-2.5-flash"
+    model: Optional[str] = None
     bypass_cache: Optional[bool] = True
     narrationStyle: Optional[str] = "long"
     title: Optional[str] = None

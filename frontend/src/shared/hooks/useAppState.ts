@@ -197,7 +197,7 @@ export function useAppState() {
   } | null>(null);
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
   const [cropModel, setCropModel] = useState<string>(
-    () => localStorage.getItem("ai_crop_model") || "gemini-2.5-flash"
+    () => localStorage.getItem("ai_crop_model") || ""
   );
   const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(
     () => parseInt(localStorage.getItem("ai_crop_min_height") || "60", 10)
@@ -325,7 +325,7 @@ export function useAppState() {
       "9:16"
   );
   const [selectedModel, setSelectedModel] = useState<string>(
-    () => localStorage.getItem("ai_comic_model") || AI_MODELS[0].id
+    () => localStorage.getItem("ai_comic_model") || ""
   );
   const [selectedSource, setSelectedSource] = useState<string>(
     () => localStorage.getItem("ai_comic_source") || "webtoons"

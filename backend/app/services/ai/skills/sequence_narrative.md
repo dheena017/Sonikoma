@@ -1,7 +1,6 @@
 ---
 name: sequence_narrative
 description: Generates a chronological narrative script for a sequence of panels based on their visual descriptions.
-model: gemini-2.5-flash
 response_schema: SequenceNarrativeModel
 ---
 

@@ -1,7 +1,6 @@
 ---
 name: voice_casting
 description: Analyze character personality and dialouge to select suitable voice parameters.
-model: gemini-2.5-flash
 response_schema: VoiceCastingModel
 ---
 

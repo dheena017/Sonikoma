@@ -38,7 +38,7 @@ export default function PanelAudioTool({ panel, panels, addNotification }: Panel
       const json = await api.runSfxAudioSkill(fetchWithAuth, {
         visual_description: panel.visual_description || "Action scene panel",
         sfx_tag: panel.sfx || "[Action]",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setSfxData(json.result);
@@ -58,7 +58,7 @@ export default function PanelAudioTool({ panel, panels, addNotification }: Panel
         dialogue_sample: panel.speech_text || "Stop right there!",
         visual_description:
           panel.visual_description || "Action scene character close-up",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setVoiceData(json.result);
@@ -80,7 +80,7 @@ export default function PanelAudioTool({ panel, panels, addNotification }: Panel
             await api.runSfxAudioSkill(fetchWithAuth, {
               visual_description: panelItem.visual_description || "Action scene panel",
               sfx_tag: panelItem.sfx || "[Action]",
-              model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+              model: localStorage.getItem("ai_comic_model") || undefined,
             });
           } catch (error) {
             console.error(error);
@@ -109,7 +109,7 @@ export default function PanelAudioTool({ panel, panels, addNotification }: Panel
               dialogue_sample: panelItem.speech_text || "Stop right there!",
               visual_description:
                 panelItem.visual_description || "Action scene character close-up",
-              model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+              model: localStorage.getItem("ai_comic_model") || undefined,
             });
           } catch (error) {
             console.error(error);

@@ -21,6 +21,8 @@ import VoiceSettingsPanel from "@/features/voice/components/VoiceSettingsPanel";
 import AmbientSoundPicker from "@/features/audio/components/AmbientSoundPicker";
 import SfxOverlayMixer from "@/features/audio/components/SfxOverlayMixer";
 
+import ModelSelect from "@/features/ai/components/ModelSelect";
+
 interface VoiceStudioPageProps {
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
@@ -42,7 +44,7 @@ const VoiceStudioPage = React.memo(
     const [selectedIdx, setSelectedIdx] = useState(0);
     const [activeTab, setActiveTab] = useState<"dramatize" | "cast" | "sound">("dramatize");
     const [selectedModel, setSelectedModel] = useState<string>(
-      () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
+      () => localStorage.getItem("ai_comic_model") || ""
     );
 
     const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
@@ -179,19 +181,7 @@ const VoiceStudioPage = React.memo(
 
           <div className="flex items-center gap-3 self-start md:self-center">
             {/* Inline AI Model Switcher */}
-            <div className="flex items-center gap-2 bg-[#12101d] border border-[#231e38] rounded-xl px-3 py-1.5">
-              <Cpu className="w-3.5 h-3.5 text-purple-400" />
-              <select
-                value={selectedModel}
-                onChange={(e) => handleModelChange(e.target.value)}
-                className="bg-transparent text-xs font-mono text-white outline-none cursor-pointer"
-              >
-                <option value="gemini-2.5-flash" className="bg-[#09080e] text-white">Gemini 2.5 Flash (Default)</option>
-                <option value="gemini-2.5-flash-lite" className="bg-[#09080e] text-white">Gemini 2.5 Flash-Lite (Fast)</option>
-                <option value="gemini-2.0-flash" className="bg-[#09080e] text-white">Gemini 2.0 Flash</option>
-                <option value="gemini-2.5-pro" className="bg-[#09080e] text-white">Gemini 2.5 Pro (High Quality)</option>
-              </select>
-            </div>
+            <ModelSelect value={selectedModel} onChange={handleModelChange} />
 
             <div className="px-3.5 py-1.5 rounded-full bg-[#12101d] border border-[#231e38] text-neutral-300 text-xs font-mono flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />

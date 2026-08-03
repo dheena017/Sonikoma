@@ -88,10 +88,12 @@ def resolve_api_key(provider: str, user_api_key: Any = None, user_keys: Optional
         return os.getenv("GEMINI_API_KEY")
 
 
+from core.settings import GEMINI_MODEL_PRIMARY
+
 def get_provider_and_model(model_name: str) -> tuple[str, str]:
     """Helper to detect provider (gemini, openai, anthropic, huggingface) from model name."""
     if not model_name:
-        return "gemini", "gemini-2.5-flash"
+        return "gemini", GEMINI_MODEL_PRIMARY
     m_lower = model_name.lower()
 
     if m_lower.startswith("openai/"):

@@ -1,7 +1,6 @@
 ---
 name: panel_analysis
 description: Generate narration script and cinematic metadata for a single panel.
-model: gemini-2.5-flash
 response_schema: GeminiAnalysisModel
 ---
 

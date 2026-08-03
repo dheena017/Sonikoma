@@ -204,7 +204,7 @@ export async function generateSeoMetadata(
       title: title || "My Webtoon Recap",
       genre: genre || "Action/Fantasy",
       storyboard_summary: summaryText,
-      model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      model: localStorage.getItem("ai_comic_model") || undefined,
     }),
   });
 

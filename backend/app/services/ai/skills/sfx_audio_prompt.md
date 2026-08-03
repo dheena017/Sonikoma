@@ -1,7 +1,6 @@
 ---
 name: sfx_audio_prompt
 description: Generate descriptive prompt phrases for audio sound effect generators.
-model: gemini-2.5-flash
 response_schema: SFXAudioPromptModel
 ---
 

@@ -33,7 +33,7 @@ export default function CharacterAutoDetector({
       for (const dial of testInputs) {
         const json = await api.runCharacterBioSkill(fetchWithAuth, {
           dialogue: dial,
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || undefined,
         });
         if (json.success && json.result) {
           results.push(json.result);

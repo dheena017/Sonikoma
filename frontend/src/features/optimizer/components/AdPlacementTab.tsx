@@ -31,7 +31,7 @@ export default function AdPlacementTab({
       const json = await api.runMidrollsSkill(fetchWithAuth, {
         compiled_script: compiledScript || "00:00 - Story Intro",
         max_ads: 3,
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
 
       if (json.success && json.result && json.result.placements) {

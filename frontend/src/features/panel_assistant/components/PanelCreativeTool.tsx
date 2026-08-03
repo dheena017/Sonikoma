@@ -41,7 +41,7 @@ export default function PanelCreativeTool({ panel, panels, addNotification }: Pa
         visual_description:
           panel.visual_description || "Detailed drawing panel",
         speech_text: panel.speech_text || "",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setPromptData(json.result);
@@ -59,7 +59,7 @@ export default function PanelCreativeTool({ panel, panels, addNotification }: Pa
       const json = await api.runSubtitleStylerSkill(fetchWithAuth, {
         visual_description: panel.visual_description || "Action scene panel",
         speech_text: panel.speech_text || "Stop right there!",
-        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+        model: localStorage.getItem("ai_comic_model") || undefined,
       });
       if (json.success && json.result) {
         setSubtitleData(json.result);
@@ -82,7 +82,7 @@ export default function PanelCreativeTool({ panel, panels, addNotification }: Pa
               visual_description:
                 panelItem.visual_description || "Detailed drawing panel",
               speech_text: panelItem.speech_text || "",
-              model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+              model: localStorage.getItem("ai_comic_model") || undefined,
             });
           } catch (error) {
             console.error(error);
@@ -109,7 +109,7 @@ export default function PanelCreativeTool({ panel, panels, addNotification }: Pa
             await api.runSubtitleStylerSkill(fetchWithAuth, {
               visual_description: panelItem.visual_description || "Action scene panel",
               speech_text: panelItem.speech_text || "Stop right there!",
-              model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+              model: localStorage.getItem("ai_comic_model") || undefined,
             });
           } catch (error) {
             console.error(error);

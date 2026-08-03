@@ -242,10 +242,10 @@ export const AutoCropEngineSelector = React.memo(function AutoCropEngineSelector
 
   const modelCards = aiModels
     .filter((m) => m.provider === "Google" && m.id.includes("gemini"))
-    .map((model) => ({
+    .map((model, idx) => ({
       id: model.id,
       name: model.name,
-      badge: model.id === "gemini-2.5-flash" ? "⚡ FREE AI (DEFAULT)" : model.type === "free" ? "⚡ FREE AI" : "🧠 Deep Visual",
+      badge: idx === 0 ? "⚡ DEFAULT AI" : model.type === "free" ? "⚡ FREE AI" : "🧠 Deep Visual",
       desc:
         model.type === "free"
           ? "Free tier model. Fast visual panel detection. Rapid processing times."

@@ -18,6 +18,7 @@ import {
   MessageSquare,
   Sparkle,
 } from "lucide-react";
+import ModelSelect from "@/features/ai/components/ModelSelect";
 
 interface AdvancedSettingsProps {
   voiceActor: string;
@@ -131,7 +132,7 @@ const AdvancedSettings = React.memo(
     setCropPaddingPx,
     cropFocusMode = "standard",
     setCropFocusMode,
-    cropModel = "gemini-2.5-flash",
+    cropModel = "",
     setCropModel,
 
     // Speech Bubble Props (with local fallback if unpassed)
@@ -802,15 +803,13 @@ const AdvancedSettings = React.memo(
                   <Sparkle className="h-3.5 w-3.5 text-purple-400" />
                   AI Segmentation Backend Vision Engine
                 </label>
-                <select
+                <ModelSelect
+                  showIcon={false}
+                  className="w-full"
+                  selectClassName="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none font-mono"
                   value={localCropModel}
-                  onChange={(e) => handleCropModelChange(e.target.value)}
-                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none font-mono"
-                >
-                  <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite (Cloud AI)</option>
-                  <option value="gemini-2.0-pro-exp">Gemini 2.0 Pro Experimental (High-precision)</option>
-                  <option value="local-opencv">Local OpenCV (Sub-second Edge Detection)</option>
-                </select>
+                  onChange={handleCropModelChange}
+                />
               </div>
             </div>
           </div>

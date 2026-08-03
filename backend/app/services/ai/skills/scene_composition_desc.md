@@ -1,7 +1,6 @@
 ---
 name: scene_composition_desc
 description: Generate structured visual scene description for generative video synthesis prompting.
-model: gemini-2.5-flash
 response_schema: SceneCompositionModel
 ---
 

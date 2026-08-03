@@ -98,7 +98,7 @@ export function AutoCropEngineComparison({
           minAreaPct: 0.15,
           mergeThreshold: overlapMerge,
           strategy: "balanced",
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+          model: localStorage.getItem("ai_comic_model") || undefined,
           cannyLow,
           cannyHigh,
           closeKernelSize: closeKernel,

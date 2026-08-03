@@ -1,7 +1,6 @@
 ---
 name: thumbnail_layout
 description: Layout layering instructions for thumbnail artists/graphics templates.
-model: gemini-2.5-flash
 response_schema: ThumbnailLayoutModel
 ---
 
