@@ -75,19 +75,34 @@ async def compile_video_from_panels(
             normalized_panels.append(dict(p))
     panels = normalized_panels
 
-    os.makedirs(output_dir, exist_ok=True)
-    temp_dir = tempfile.gettempdir()
+    # Resolve data root directory (c:\Users\dheen\project\Sonikoma\data)
+    backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    project_root = os.path.abspath(os.path.join(backend_root, ".."))
+    data_dir = os.path.join(project_root, "data")
+    temp_dir = os.path.join(data_dir, "temp")
+    media_dir = os.path.join(data_dir, "media")
 
-    output_filename = f"compiled_{project_id}_{uuid.uuid4().hex[:8]}.mp4"
+    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(temp_dir, exist_ok=True)
+    os.makedirs(media_dir, exist_ok=True)
+
+    # Derive structured output filename (series_title_ep_1_panel_X...)
+    first_panel = panels[0] if panels else {}
+    series_slug = (first_panel.get("series_title") or first_panel.get("series_slug") or "series").lower()
+    series_slug = "".join(c if c.isalnum() else "_" for c in series_slug).strip("_") or "series"
+    ep_num = first_panel.get("episode_num") or first_panel.get("chapter_num") or "1"
+
+    output_filename = f"{series_slug}_ep{ep_num}_compiled_{uuid.uuid4().hex[:8]}.mp4"
     output_path = os.path.join(output_dir, output_filename)
 
     clips = []
     audio_files_to_cleanup = []
 
-    logger.info(f"[Video Compiler] Starting compilation for project {project_id} with {len(panels)} panels.")
+    logger.info(f"[Video Compiler] Starting compilation for project {project_id} ({series_slug} EP #{ep_num}) with {len(panels)} panels.")
 
     for idx, panel in enumerate(panels):
-        logger.info(f"[Video Compiler] Processing panel {idx + 1}/{len(panels)}")
+        panel_id = panel.get("id") or (idx + 1)
+        logger.info(f"[Video Compiler] Processing panel {idx + 1}/{len(panels)} (ID: {panel_id})")
 
         image_url = panel.get("image_url")
         if not image_url:
@@ -101,8 +116,8 @@ async def compile_video_from_panels(
 
         speech_text = panel.get("speech_text", "").strip()
 
-        # 1. Generate Audio first to get precise duration
-        audio_path = os.path.join(temp_dir, f"audio_{uuid.uuid4().hex[:8]}.mp3")
+        # 1. Generate Audio first to get precise duration into data/temp
+        audio_path = os.path.join(temp_dir, f"{series_slug}_ep{ep_num}_p{panel_id}_audio_{uuid.uuid4().hex[:6]}.mp3")
         actual_duration = suggested_duration
         has_audio = False
 
@@ -172,11 +187,12 @@ async def compile_video_from_panels(
 
     logger.info(f"[Video Compiler] Concatenating {len(clips)} clips...")
 
-    # 5. Concatenate and Render
+    # 5. Concatenate and Render into data/media directory
     try:
         final_video = concatenate_videoclips(clips, method="chain")
 
         def render_video():
+            temp_mpy_sound = os.path.join(temp_dir, f"temp_mpy_{uuid.uuid4().hex[:8]}_snd.m4a")
             final_video.write_videofile(
                 output_path,
                 fps=24,
@@ -185,7 +201,9 @@ async def compile_video_from_panels(
                 threads=4,
                 preset="ultrafast",
                 logger=None,
-                bitrate="10000k"
+                bitrate="10000k",
+                temp_audiofile=temp_mpy_sound,
+                remove_temp=True
             )
 
         await asyncio.to_thread(render_video)

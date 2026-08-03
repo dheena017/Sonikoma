@@ -18,15 +18,19 @@ export default function CharacterAutoDetector({
   const handleScan = async () => {
     setLoading(true);
     try {
-      // Pick dialogues that contain names or descriptive settings
-      const testDialogues = panels
-        .map((p) => p.speech_text)
-        .filter((text) => text && text.trim().length > 10)
-        .slice(0, 3);
+      // Pick dialogues or visual descriptions from panels
+      let testInputs = panels
+        .map((p) => (p.speech_text && p.speech_text.trim().length > 5 ? p.speech_text : p.visual_description))
+        .filter((text): text is string => Boolean(text && text.trim().length > 3))
+        .slice(0, 4);
+
+      if (testInputs.length === 0) {
+        testInputs = ["Main protagonist in action scene", "Mysterious rival antagonist"];
+      }
 
       const results: CharacterBio[] = [];
 
-      for (const dial of testDialogues) {
+      for (const dial of testInputs) {
         const json = await api.runCharacterBioSkill(fetchWithAuth, {
           dialogue: dial,
           model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",

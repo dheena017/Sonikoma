@@ -21,6 +21,7 @@ interface PanelCardProps
   /** The original raw URL (matching scrapedImages entries) used for callbacks & selection state */
   rawImgUrl: string;
   idx: number;
+  displayIdx?: number;
   isSelected: boolean;
   isBatchCropping: boolean;
   croppingImgUrl: string | null;
@@ -44,6 +45,7 @@ function PanelCard({
   imgUrl,
   rawImgUrl,
   idx,
+  displayIdx,
   isSelected,
   isBatchCropping,
   croppingImgUrl,
@@ -274,6 +276,7 @@ function PanelCard({
       <PanelCardThumbnail
         imgUrl={imgUrl}
         idx={idx}
+        displayIdx={displayIdx}
         isSelected={isSelected}
         isProcessing={isProcessing}
         isBatchCropping={isBatchCropping}

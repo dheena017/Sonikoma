@@ -15,6 +15,7 @@ import {
 interface PanelCardThumbnailProps {
   imgUrl: string;
   idx: number;
+  displayIdx?: number;
   isSelected: boolean;
   isProcessing: boolean;
   isBatchCropping: boolean;
@@ -54,6 +55,7 @@ const getScrapedImageStatus = (url: string) => {
 export function PanelCardThumbnail({
   imgUrl,
   idx,
+  displayIdx,
   isSelected,
   isProcessing,
   isBatchCropping,
@@ -81,6 +83,8 @@ export function PanelCardThumbnail({
 
   const resolvedImgSrc = getProxiedImageUrl(imgUrl);
 
+  const resolvedDisplayIdx = displayIdx ?? idx;
+
   return (
     <div className="relative h-56 sm:h-64 rounded-[1.5rem] overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
@@ -105,7 +109,7 @@ export function PanelCardThumbnail({
         <img
           key={`${imgUrl}-${retryKey}`}
           src={resolvedImgSrc}
-          alt={`Panel #${idx + 1}`}
+          alt={`Panel #${resolvedDisplayIdx + 1}`}
 
           className={`w-full h-full object-contain transition-all duration-500 ease-out ${
             isProcessing
@@ -160,7 +164,7 @@ export function PanelCardThumbnail({
             : "bg-neutral-900 border-neutral-700 text-purple-400 shadow-inner",
         ].join(" ")}
       >
-        #{idx + 1}
+        #{resolvedDisplayIdx + 1}
       </div>
 
       {/* Operation status badge */}

@@ -32,10 +32,8 @@ const DashboardPage = React.lazy(() => import("@/features/dashboard/pages/Dashbo
 const ImageEditorPage = React.lazy(() => import("@/features/image/pages/ImageEditorPage"));
 const AIModelsPage = React.lazy(() => import("@/features/ai/pages/AIModelsPage"));
 const ModelTrainingPage = React.lazy(() => import("@/features/training/pages/ModelTrainingPage"));
-const CTRAnalyticsPage = React.lazy(() => import("@/features/analytics/pages/CTRAnalyticsPage"));
 const YouTubePage = React.lazy(() => import("@/features/youtube/pages/YouTubePage"));
 const VoiceStudioPage = React.lazy(() => import("@/features/voice/pages/VoiceStudioPage"));
-const ThumbnailStudioPage = React.lazy(() => import("@/features/thumbnails/pages/ThumbnailStudioPage"));
 const TranslationStudioPage = React.lazy(() => import("@/features/translation/pages/TranslationStudioPage"));
 const AIOptimizerPage = React.lazy(() => import("@/features/optimizer/pages/AIOptimizerPage"));
 const PanelAssistantPage = React.lazy(() => import("@/features/panel_assistant/pages/PanelAssistantPage"));
@@ -619,9 +617,7 @@ export default function AppRouter(props: AppRouterProps) {
       isCharacterPath: currentPath === "/ai-characters",
       isTranslationPath: currentPath === "/ai-translation",
       isAudioLabPath: currentPath === "/ai-audio-lab",
-      isThumbnailPath: currentPath === "/ai-thumbnails",
       isVoicePath: currentPath === "/ai-voice",
-      isAnalyticsPath: currentPath === "/ai-analytics",
       isYouTubePath: currentPath === "/youtube",
       isProfilePath: currentPath === "/profile",
       isNotificationsPath: currentPath === "/notifications",
@@ -639,6 +635,7 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/creative-suite" ||
         currentPath === "/creative-suite/" ||
         currentPath === "/creative-suite-dashboard",
+      isCreativeSuiteSettingsPath: false,
       isCreativeSuitePath:
         currentPath === "/creative-suite" ||
         currentPath === "/creative-suite/" ||
@@ -678,9 +675,7 @@ export default function AppRouter(props: AppRouterProps) {
     isCharacterPath,
     isTranslationPath,
     isAudioLabPath,
-    isThumbnailPath,
     isVoicePath,
-    isAnalyticsPath,
     isYouTubePath,
     isProfilePath,
     isNotificationsPath,
@@ -690,6 +685,7 @@ export default function AppRouter(props: AppRouterProps) {
     isSeriesDetailsPath,
     isCreativeSuitePath,
     isCreativeSuiteDashboardPath,
+    isCreativeSuiteSettingsPath,
     isImageEditorPage,
   } = pathFlags;
 
@@ -1244,14 +1240,6 @@ export default function AppRouter(props: AppRouterProps) {
               onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />
-          ) : isThumbnailPath ? (
-            <ThumbnailStudioPage
-              panels={panels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-              scrapedTitle={seriesTitle}
-              scrapedGenre={scrapedGenre}
-            />
           ) : isVoicePath ? (
             <VoiceStudioPage
               panels={panels}
@@ -1259,13 +1247,6 @@ export default function AppRouter(props: AppRouterProps) {
               onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
               scrapedGenre={scrapedGenre}
-            />
-          ) : isAnalyticsPath ? (
-            <CTRAnalyticsPage
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-              scrapedTitle={seriesTitle}
-              panels={panels}
             />
           ) : isYouTubePath ? (
             <YouTubePage
@@ -1445,9 +1426,7 @@ export default function AppRouter(props: AppRouterProps) {
         !isCharacterPath &&
         !isTranslationPath &&
         !isAudioLabPath &&
-        !isThumbnailPath &&
         !isVoicePath &&
-        !isAnalyticsPath &&
         !isYouTubePath &&
         !isProfilePath &&
         !isNotificationsPath &&

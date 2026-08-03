@@ -67,8 +67,8 @@ export default function TitleABValidator({
     setLoading(true);
     try {
       const json = await api.runTitleAbSkill(fetchWithAuth, {
-        title,
-        key_climax_event: event,
+        title: title.trim(),
+        key_climax_event: event.trim() || "High-stakes climax battle and plot twist",
         model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
       });
       if (json.success && json.result) {
@@ -104,7 +104,7 @@ export default function TitleABValidator({
         </div>
         <button
           onClick={handleValidate}
-          disabled={loading || !title || !event}
+          disabled={loading || !title.trim()}
           className="px-3.5 py-1.5 bg-purple-650 hover:bg-purple-550 text-white rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 flex items-center gap-1.5 cursor-pointer"
         >
           {loading ? "Evaluating..." : "✦ Validate Title"}

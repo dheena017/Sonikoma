@@ -13,6 +13,7 @@ import {
   Youtube,
   ArrowLeft,
   X,
+  Settings,
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 
@@ -70,24 +71,10 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
         },
         {
           id: "assistant",
-          label: "Panel Assistant",
-          icon: Scissors,
+          label: "Translation Studio",
+          icon: Globe,
           path: "/panel-assistant",
           requiresPanels: true,
-        },
-        {
-          id: "thumbnails",
-          label: "Thumbnail Studio",
-          icon: Sparkles,
-          path: "/ai-thumbnails",
-          requiresPanels: false,
-        },
-        {
-          id: "analytics",
-          label: "CTR Predictor",
-          icon: BarChart3,
-          path: "/ai-analytics",
-          requiresPanels: false,
         },
       ],
     },

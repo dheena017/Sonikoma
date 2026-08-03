@@ -473,11 +473,6 @@ const HeaderInner = ({
       desc: "Configure TTS and preview voice characters",
     },
     {
-      name: "CTR Analytics & Title Predictor",
-      path: "/ai-analytics",
-      desc: "A/B validate thumbnails, CTR, and retention",
-    },
-    {
       name: "System Log Viewer",
       path: "/logs",
       desc: "Real-time backend worker processes and logs",

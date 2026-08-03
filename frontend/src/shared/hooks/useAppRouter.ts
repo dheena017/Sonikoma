@@ -239,10 +239,8 @@ export function useAppRouter({
             path === "/ai-characters" ||
             path === "/ai-translation" ||
             path === "/ai-audio-lab" ||
-            path === "/ai-thumbnails" ||
             path === "/model-training" ||
             path === "/ai-voice" ||
-            path === "/ai-analytics" ||
             path === "/youtube" ||
             path === "/profile" ||
             path === "/notifications" ||

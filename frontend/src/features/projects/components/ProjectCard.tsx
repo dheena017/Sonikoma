@@ -261,69 +261,68 @@ export default function ProjectCard({
         )}
 
         {/* ─── Footer ───────────────────────────────────── */}
-        <div className="flex items-center justify-between pt-3 mt-auto border-t border-neutral-800/50">
-          <div className="flex items-center justify-between gap-3 w-full">
-            <div className="flex items-center gap-3 text-[10px] text-neutral-400">
-              {/* Panels count */}
-              {(() => {
-                const timelineCount = project.panels_count ?? 0;
-                const importedCount = project.imported_assets_count ?? 0;
-                const displayCount = timelineCount || importedCount || 0;
-                const hasDiff = timelineCount > 0 && importedCount > 0 && timelineCount !== importedCount;
+        <div className="pt-3 mt-auto border-t border-neutral-800/60 space-y-2.5">
+          {/* Metadata Row: Panels Count + Time Ago */}
+          <div className="flex items-center justify-between text-[10px]">
+            {(() => {
+              const timelineCount = project.panels_count ?? 0;
+              const importedCount = project.imported_assets_count ?? 0;
+              const displayCount = timelineCount || importedCount || 0;
+              const hasDiff = timelineCount > 0 && importedCount > 0 && timelineCount !== importedCount;
 
-                return (
-                  <div
-                    className="flex items-center gap-1 text-[10px] text-neutral-500"
-                    title={
-                      hasDiff
-                        ? `Storyboard Timeline: ${timelineCount} panels | Imported Assets: ${importedCount} assets`
-                        : `${displayCount} panels`
-                    }
-                  >
-                    <Scissors className="h-3 w-3 text-purple-400/80" />
-                    <span className="font-semibold text-neutral-300">{displayCount}</span>
-                    <span>
-                      {hasDiff
-                        ? `panels (${importedCount} imported)`
-                        : importedCount > 0 && timelineCount === 0
-                        ? "imported panels"
-                        : "panels"}
-                    </span>
-                  </div>
-                );
-              })()}
-              {/* Time ago */}
-              <div className="flex items-center gap-1 text-[10px] text-neutral-600">
-                <Clock className="h-3 w-3" />
-                <span>{timeAgo(project.created_at)}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              {onOpenCreativeSuite && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenCreativeSuite(e, project);
-                  }}
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full border border-purple-500/20 bg-purple-500/10 text-[10px] font-semibold uppercase tracking-[0.22em] text-purple-200 hover:bg-purple-500/20 active:scale-95 transition-all opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 shadow-sm shadow-purple-500/10"
+              return (
+                <div
+                  className="flex items-center gap-1.5 text-neutral-400 font-mono truncate"
+                  title={
+                    hasDiff
+                      ? `Timeline: ${timelineCount} panels | Imported: ${importedCount} assets`
+                      : `${displayCount} panels`
+                  }
                 >
-                  Creative
-                </button>
-              )}
+                  <Scissors className="h-3 w-3 text-purple-400 shrink-0" />
+                  <span className="font-bold text-neutral-200">{displayCount} panels</span>
+                  {importedCount > 0 && (
+                    <span className="text-[9px] text-neutral-500 font-normal">
+                      ({importedCount} imp)
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
+
+            <div className="flex items-center gap-1 text-[10px] text-neutral-500 font-mono shrink-0">
+              <Clock className="h-3 w-3" />
+              <span>{timeAgo(project.created_at)}</span>
+            </div>
+          </div>
+
+          {/* Action Buttons Grid */}
+          <div className="grid grid-cols-2 gap-2 w-full pt-1">
+            {onOpenCreativeSuite && (
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onOpenProject(project);
+                  onOpenCreativeSuite(e, project);
                 }}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full border border-purple-500/20 bg-purple-500/10 text-[10px] font-semibold uppercase tracking-[0.22em] text-purple-200 hover:bg-purple-500/20 active:scale-95 transition-all opacity-0 translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 shadow-sm shadow-purple-500/10"
+                className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl border border-purple-500/30 bg-purple-500/15 hover:bg-purple-500/30 text-[10px] font-bold uppercase tracking-wider text-purple-200 transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
               >
-                Resume
-                <ArrowRight className="w-3 h-3" />
+                ✦ Creative
               </button>
-            </div>
+            )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenProject(project);
+              }}
+              className={`w-full inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl border border-purple-500/40 bg-purple-600/25 hover:bg-purple-600/40 text-[10px] font-bold uppercase tracking-wider text-white transition-all cursor-pointer shadow-sm active:scale-95 shrink-0 ${
+                !onOpenCreativeSuite ? "col-span-2" : ""
+              }`}
+            >
+              <span>Resume</span>
+              <ArrowRight className="w-3 h-3 text-purple-300" />
+            </button>
           </div>
         </div>
       </div>

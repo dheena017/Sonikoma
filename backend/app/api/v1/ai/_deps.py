@@ -46,11 +46,18 @@ async def run_md_skill(skill_name: str, model: str, api_key: Any = None, **kwarg
         user_keys = api_key if isinstance(api_key, dict) else None
         single_key = api_key if isinstance(api_key, str) else None
         raw_text = await skill.execute(model=model, api_key=single_key, user_keys=user_keys, **kwargs)
+        
+        try:
+            parsed = json.loads(raw_text) if isinstance(raw_text, str) else raw_text
+        except Exception:
+            parsed = {"raw_output": raw_text}
+
         return {
             "success": True,
-            "result": json.loads(raw_text),
+            "result": parsed,
             "inputTokens": getattr(skill, "last_input_tokens", 0),
             "outputTokens": getattr(skill, "last_output_tokens", 0)
         }
     except Exception as e:
+        logger.error(f"[run_md_skill Error] skill '{skill_name}' failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
-import { Sparkles, Film, Scissors, Users, Globe, Music, Mic, BarChart3, Youtube } from "lucide-react";
+import { Sparkles, Film, Scissors, Users, Globe, Music, Mic, BarChart3, Youtube, Settings } from "lucide-react";
 import CreativeSuiteDashboardStats from "@/features/creative/components/CreativeSuiteDashboardStats";
 import CreativeSuiteDashboardTools from "@/features/creative/components/CreativeSuiteDashboardTools";
 import CreativeSuiteDashboardActiveProject from "@/features/creative/components/CreativeSuiteDashboardActiveProject";
@@ -109,30 +109,12 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
     },
     {
       id: "assistant",
-      label: "Panel Assistant",
-      desc: "Direct layout splitter, bubble remover, and image crop adjuster.",
-      icon: Scissors,
+      label: "Translation Studio",
+      desc: "Multi-language dialogue and narrative translator per panel frame.",
+      icon: Globe,
       path: "/panel-assistant",
       requiresPanels: true,
       badge: "Visual",
-    },
-    {
-      id: "thumbnails",
-      label: "Thumbnail Studio",
-      desc: "Create and rate custom high-performing preview thumbnails.",
-      icon: Sparkles,
-      path: "/ai-thumbnails",
-      requiresPanels: false,
-      badge: "Marketing",
-    },
-    {
-      id: "analytics",
-      label: "CTR Predictor",
-      desc: "Visual heatmap analyzer and engagement metric scoring.",
-      icon: BarChart3,
-      path: "/ai-analytics",
-      requiresPanels: false,
-      badge: "Marketing",
     },
     {
       id: "audio-lab",

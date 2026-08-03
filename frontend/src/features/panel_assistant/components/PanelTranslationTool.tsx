@@ -89,7 +89,7 @@ export default function PanelTranslationTool({
   };
 
   const handleScrub = async () => {
-    setScrububbing(true);
+    setScrubbing(true);
     try {
       const json = await api.runCopyrightScrubSkill(fetchWithAuth, {
         text: panel.speech_text,
@@ -101,12 +101,8 @@ export default function PanelTranslationTool({
     } catch (e) {
       console.error(e);
     } finally {
-      setScrububbing(false);
+      setScrubbing(false);
     }
-  };
-
-  const setScrububbing = (val: boolean) => {
-    setScrubbing(val);
   };
 
   return (

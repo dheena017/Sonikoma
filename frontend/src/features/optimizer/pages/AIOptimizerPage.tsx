@@ -7,10 +7,16 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
-  BarChart2,
   Scissors,
   Music2,
   Megaphone,
+  Video,
+  AlertTriangle,
+  Copy,
+  Check,
+  Cpu,
+  Flame,
+  Image,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 
@@ -18,6 +24,8 @@ import SeoOptimizationTab from "@/features/optimizer/components/SeoOptimizationT
 import ShortsScriptTab from "@/features/optimizer/components/ShortsScriptTab";
 import SoundOutroTab from "@/features/optimizer/components/SoundOutroTab";
 import AdPlacementTab from "@/features/optimizer/components/AdPlacementTab";
+import SeriesHookTab from "@/features/optimizer/components/SeriesHookTab";
+import ThumbnailStudioTab from "@/features/optimizer/components/ThumbnailStudioTab";
 
 interface AIOptimizerPageProps {
   panels: GeneratedPanel[];
@@ -52,9 +60,12 @@ const AIOptimizerPage = React.memo(
     }
 
     const [selectedIdx, setSelectedIdx] = useState(0);
-    const [activeTab, setActiveTab] = useState<
-      "seo" | "shorts" | "sound" | "ads"
-    >("seo");
+    const [activeTab, setActiveTab] = useState<"seo" | "shorts" | "sound" | "ads" | "hook" | "thumbnails">("seo");
+
+    const [selectedModel, setSelectedModel] = useState<string>(
+      () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
+    );
+    const [copiedAll, setCopiedAll] = useState(false);
 
     const filmstripRef = useRef<HTMLDivElement>(null);
 
@@ -65,6 +76,12 @@ const AIOptimizerPage = React.memo(
       }
     };
 
+    const handleModelChange = (model: string) => {
+      setSelectedModel(model);
+      localStorage.setItem("ai_comic_model", model);
+      addNotification?.(`Switched AI Model to ${model}`, "info");
+    };
+
     // Compile overall storyboard details for prompts
     const title = scrapedTitle || "Overpowered S-Rank Recap";
     const genre = scrapedGenre || "Fantasy Action";
@@ -72,9 +89,7 @@ const AIOptimizerPage = React.memo(
     const storyboardSummary = panels
       .map(
         (p, idx) =>
-          `Panel ${idx + 1}: Dialogue: "${
-            p.speech_text || "Silent scene"
-          }" | Visual action: ${p.visual_description || "No visual details"}`
+          `Panel ${idx + 1}: Dialogue: "${p.speech_text || "Silent scene"}" | Visual action: ${p.visual_description || "No visual details"}`
       )
       .join("\n");
 
@@ -84,25 +99,35 @@ const AIOptimizerPage = React.memo(
       .map((p, idx) => {
         const minutes = Math.floor(currentAccumulator / 60);
         const seconds = Math.floor(currentAccumulator % 60);
-        const timestamp = `${minutes.toString().padStart(2, "0")}:${seconds
-          .toString()
-          .padStart(2, "0")}`;
+        const timestamp = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
         currentAccumulator += p.duration ?? 0;
-        return `${timestamp} - Panel ${idx + 1}: ${
-          p.speech_text || "(Silent)"
-        }`;
+        return `${timestamp} - Panel ${idx + 1}: ${p.speech_text || "(Silent)"}`;
       })
       .join("\n");
 
+    const handleCopyAllPackage = () => {
+      const pkg = `=== YOUTUBE VIDEO PACKAGE ===\nTITLE: ${title}\nGENRE: ${genre}\n\nTIMESTAMPS:\n${compiledScript}\n\nSTORYBOARD SUMMARY:\n${storyboardSummary}`;
+      navigator.clipboard.writeText(pkg);
+      setCopiedAll(true);
+      addNotification?.("Copied YouTube Video Package to clipboard!", "success");
+      setTimeout(() => setCopiedAll(false), 2000);
+    };
+
     const activePanel = panels[selectedIdx];
 
-    // Studio tools definition for center column
+    // Studio tools definition
     const tools = [
       {
         id: "seo" as const,
         label: "SEO & Chapters",
-        description: "Optimize metadata and timestamps",
+        description: "Optimize metadata & timestamps",
         icon: Search,
+      },
+      {
+        id: "thumbnails" as const,
+        label: "Thumbnail Studio",
+        description: "16:9 clickbait composition recipes",
+        icon: Image,
       },
       {
         id: "shorts" as const,
@@ -113,14 +138,20 @@ const AIOptimizerPage = React.memo(
       {
         id: "sound" as const,
         label: "Sound & Vibes",
-        description: "Outro cues and audio direction",
+        description: "Outro cues & audio direction",
         icon: Music2,
       },
       {
         id: "ads" as const,
         label: "Ad Placements",
-        description: "Sponsor slot timing and scripts",
+        description: "Sponsor slot timing & scripts",
         icon: Megaphone,
+      },
+      {
+        id: "hook" as const,
+        label: "Series Intros",
+        description: "Opening teasers & cliffhangers",
+        icon: Radio,
       },
     ];
 
@@ -128,9 +159,8 @@ const AIOptimizerPage = React.memo(
 
     return (
       <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
-
         {/* PAGE HERO HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1b172b] pb-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#1b172b] pb-5">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-[#181229] border border-purple-500/30 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/50">
               <Sliders className="h-6 w-6" />
@@ -150,16 +180,36 @@ const AIOptimizerPage = React.memo(
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 self-start md:self-center">
-            <div className="px-3.5 py-1.5 rounded-full bg-[#12101d] border border-[#231e38] text-neutral-300 text-xs font-mono flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Panel {selectedIdx + 1} of {panels.length}</span>
+
+          <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
+            {/* Inline AI Model Switcher */}
+            <div className="flex items-center gap-2 bg-[#12101d] border border-[#231e38] rounded-xl px-3 py-1.5">
+              <Cpu className="w-3.5 h-3.5 text-purple-400" />
+              <select
+                value={selectedModel}
+                onChange={(e) => handleModelChange(e.target.value)}
+                className="bg-transparent text-xs font-mono text-white outline-none cursor-pointer"
+              >
+                <option value="gemini-2.5-flash" className="bg-[#09080e] text-white">Gemini 2.5 Flash (Default)</option>
+                <option value="gemini-2.5-flash-lite" className="bg-[#09080e] text-white">Gemini 2.5 Flash-Lite (Fast)</option>
+                <option value="gemini-2.0-flash" className="bg-[#09080e] text-white">Gemini 2.0 Flash</option>
+                <option value="gemini-2.5-pro" className="bg-[#09080e] text-white">Gemini 2.5 Pro (High Quality)</option>
+              </select>
             </div>
+
+            {/* Quick Copy YouTube Package Button */}
+            <button
+              onClick={handleCopyAllPackage}
+              className="px-3.5 py-2 bg-[#171329] hover:bg-[#201a38] text-purple-300 hover:text-white rounded-xl border border-purple-500/30 text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+            >
+              {copiedAll ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-purple-400" />}
+              <span>{copiedAll ? "Copied Package!" : "Copy Package"}</span>
+            </button>
           </div>
         </div>
 
-        {/* HORIZONTAL PANEL FILMSTRIP CAROUSEL */}
-        <div className="relative flex items-center bg-[#0d0b16] border border-[#1f1b2e] rounded-2xl p-2.5">
+        {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
+        <div className="relative flex items-center bg-[#0d0b16] border border-[#1f1b2e] rounded-2xl p-2.5 shadow-md">
           <button
             onClick={() => scrollFilmstrip("left")}
             className="p-2 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-2 shadow-md"
@@ -174,7 +224,7 @@ const AIOptimizerPage = React.memo(
           >
             {panels.map((panel, idx) => (
               <button
-                key={panel.id}
+                key={panel.id ?? idx}
                 onClick={() => setSelectedIdx(idx)}
                 className={`w-20 shrink-0 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer relative flex items-center justify-center bg-[#06050a] ${
                   selectedIdx === idx
@@ -185,14 +235,14 @@ const AIOptimizerPage = React.memo(
                 {panel.image_url ? (
                   <img
                     src={panel.image_url}
-                    alt=""
+                    alt={`Panel ${idx + 1}`}
                     className="w-full h-full object-contain"
                   />
                 ) : (
                   <Film className="w-5 h-5 text-neutral-600" />
                 )}
                 <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-neutral-300 border border-neutral-800">
-                  #{panel.id}
+                  #{idx + 1}
                 </div>
               </button>
             ))}
@@ -207,13 +257,13 @@ const AIOptimizerPage = React.memo(
           </button>
         </div>
 
-        {/* THREE-COLUMN STUDIO WORKSPACE */}
+        {/* THREE-COLUMN BALANCED WORKSPACE GRID (3 : 3 : 6) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
-          {/* LEFT COLUMN: Panel Preview + Dialogue + Narrative */}
-          <div className="lg:col-span-4 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 space-y-4 shadow-xl">
+          {/* COLUMN 1 (LEFT - 3 COLS): ACTIVE PANEL DETAILS & TEXT */}
+          <div className="lg:col-span-3 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 space-y-4 shadow-xl">
             {/* Panel Image */}
-            <div className="h-52 sm:h-60 rounded-xl overflow-hidden border border-[#221d33] bg-[#06050a] flex items-center justify-center p-2 relative">
+            <div className="h-48 sm:h-56 rounded-xl overflow-hidden border border-[#221d33] bg-[#06050a] flex items-center justify-center p-2 relative shadow-inner">
               {activePanel.image_url ? (
                 <img
                   src={activePanel.image_url}
@@ -222,161 +272,206 @@ const AIOptimizerPage = React.memo(
                 />
               ) : (
                 <div className="flex flex-col items-center gap-2 text-neutral-600">
-                  <Film className="w-10 h-10" />
+                  <Film className="w-8 h-8" />
                   <span className="text-[10px] font-mono">No image rendered</span>
                 </div>
               )}
-              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold text-purple-300 border border-purple-500/20">
-                PANEL #{activePanel.id}
+              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-md">
+                PANEL #{activePanel.id || selectedIdx + 1}
               </div>
             </div>
 
             {/* Active Dialogue */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
                 ACTIVE DIALOGUE
               </span>
-              <div className="w-full bg-[#07060c] border border-[#1e1a2e] text-xs rounded-xl p-3 text-neutral-200 font-sans leading-relaxed min-h-[56px]">
+              <div className="w-full bg-[#07060c] border border-[#1e1a2e] text-xs rounded-xl p-2.5 text-neutral-200 font-sans leading-relaxed min-h-[50px]">
                 {activePanel.speech_text ? (
                   <p>{activePanel.speech_text}</p>
                 ) : (
-                  <p className="text-neutral-500 italic">(Silent panel — no dialogue)</p>
+                  <p className="text-neutral-500 italic text-[11px]">(Silent panel — no dialogue)</p>
                 )}
               </div>
             </div>
 
             {/* Narrative / Visual Description */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
                 NARRATIVE TEXT
               </span>
-              <div className="w-full bg-[#07060c] border border-[#1e1a2e] text-xs rounded-xl p-3 text-neutral-200 font-sans leading-relaxed min-h-[56px]">
+              <div className="w-full bg-[#07060c] border border-[#1e1a2e] text-xs rounded-xl p-2.5 text-neutral-200 font-sans leading-relaxed min-h-[50px]">
                 {activePanel.visual_description ? (
                   <p>{activePanel.visual_description}</p>
                 ) : (
-                  <p className="text-neutral-500 italic">(No visual description available)</p>
+                  <p className="text-neutral-500 italic text-[11px]">(No visual description available)</p>
                 )}
               </div>
             </div>
 
-            {/* Panel timing info */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-[#07060c] border border-[#1e1a2e] rounded-xl p-2.5 text-center">
-                <p className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">Duration</p>
-                <p className="text-sm font-black text-white mt-0.5">{(activePanel.duration ?? 3.0).toFixed(1)}s</p>
+            {/* Panel Metrics Pills */}
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#1b172b]">
+              <div className="bg-[#07060c] border border-[#1e1a2e] rounded-xl p-2 text-center">
+                <p className="text-[9px] font-mono text-neutral-500 uppercase">Duration</p>
+                <p className="text-xs font-black text-white mt-0.5">{(activePanel.duration ?? 3.0).toFixed(1)}s</p>
               </div>
-              <div className="bg-[#07060c] border border-[#1e1a2e] rounded-xl p-2.5 text-center">
-                <p className="text-[9px] font-mono text-neutral-500 uppercase tracking-widest">Frame</p>
-                <p className="text-sm font-black text-white mt-0.5">{selectedIdx + 1}/{panels.length}</p>
+              <div className="bg-[#07060c] border border-[#1e1a2e] rounded-xl p-2 text-center">
+                <p className="text-[9px] font-mono text-neutral-500 uppercase">Frame</p>
+                <p className="text-xs font-black text-white mt-0.5">{selectedIdx + 1}/{panels.length}</p>
               </div>
             </div>
           </div>
 
-          {/* RIGHT SECTION: Tools Menu + Workflow Canvas */}
-          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-12 gap-5">
+          {/* COLUMN 2 (CENTER - 3 COLS): STUDIO TOOLS & FULL VIDEO PREVIEW */}
+          <div className="lg:col-span-3 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 space-y-4 shadow-xl">
+            <div>
+              <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
+                STUDIO TOOLS
+              </p>
+              <h3 className="mt-0.5 text-sm font-bold text-white">
+                Optimize video
+              </h3>
+            </div>
 
-            {/* CENTER COLUMN: Vertical Studio Tool Menu */}
-            <div className="md:col-span-4 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 shadow-xl">
-              <div className="mb-3 px-1">
+            <div className="space-y-2">
+              {tools.map((tool) => {
+                const Icon = tool.icon;
+                const isActive = activeTab === tool.id;
+                return (
+                  <button
+                    key={tool.id}
+                    onClick={() => setActiveTab(tool.id)}
+                    className={`w-full rounded-xl border px-3 py-2.5 text-left transition-all cursor-pointer ${
+                      isActive
+                        ? "border-2 border-purple-500/80 bg-purple-500/15 text-white shadow-[0_0_12px_rgba(168,85,247,0.25)]"
+                        : "border-[#1c182b] bg-[#07060c] text-neutral-400 hover:border-neutral-700 hover:text-white"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className={`h-4 w-4 ${isActive ? "text-purple-300" : "text-neutral-500"}`} />
+                      <span className="text-xs font-bold">{tool.label}</span>
+                    </div>
+                    <p className="mt-0.5 text-[10px] leading-relaxed text-neutral-400 font-mono">
+                      {tool.description}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Video Preview Card in Center Column */}
+            <div className="pt-2 border-t border-[#1b172b] space-y-2">
+              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold flex items-center gap-1.5">
+                <Video className="w-3.5 h-3.5 text-purple-400" /> FULL VIDEO PREVIEW
+              </span>
+              {videoUrl ? (
+                <div className="relative rounded-xl overflow-hidden border border-[#221d33] bg-[#06050a] shadow-inner aspect-video flex items-center justify-center">
+                  <video
+                    src={
+                      videoUrl.startsWith("http://") ||
+                      videoUrl.startsWith("https://") ||
+                      videoUrl.startsWith("blob:")
+                        ? videoUrl
+                        : `${(import.meta.env.VITE_API_URL || "http://localhost:8000").replace(/\/+$/, "")}${
+                            videoUrl.startsWith("/") ? videoUrl : `/${videoUrl}`
+                          }`
+                    }
+                    controls
+                    preload="metadata"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="border border-dashed border-[#1e1a2e] rounded-xl p-3 text-center bg-[#07060c] flex flex-col items-center justify-center space-y-1">
+                  <AlertTriangle className="h-4 w-4 text-amber-500/80" />
+                  <p className="text-[10px] text-neutral-400 font-mono">No video preview</p>
+                  <p className="text-[9px] text-neutral-500 font-sans">Compile video on Dashboard to view playback</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* COLUMN 3 (RIGHT - 6 COLS / 50% WIDTH): EXPANSIVE ACTIVE WORKFLOW CANVAS */}
+          <div className="lg:col-span-6 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-5 shadow-xl flex flex-col min-h-[460px]">
+            {/* Workflow header */}
+            <div className="flex items-center justify-between gap-3 border-b border-[#1b172b] pb-3 mb-4">
+              <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
-                  STUDIO TOOLS
+                  ACTIVE WORKFLOW
                 </p>
-                <h3 className="mt-0.5 text-sm font-bold text-white">
-                  Optimize video
-                </h3>
+                <h4 className="text-sm font-bold text-white mt-0.5">
+                  {activeToolMeta.label}
+                </h4>
+                <p className="mt-0.5 text-xs text-neutral-400 font-mono">
+                  {activeToolMeta.description}
+                </p>
               </div>
-              <div className="space-y-2">
-                {tools.map((tool) => {
-                  const Icon = tool.icon;
-                  const isActive = activeTab === tool.id;
-                  return (
-                    <button
-                      key={tool.id}
-                      onClick={() => setActiveTab(tool.id)}
-                      className={`w-full rounded-xl border px-3 py-3 text-left transition-all cursor-pointer ${
-                        isActive
-                          ? "border-2 border-purple-500/80 bg-purple-500/15 text-white shadow-[0_0_12px_rgba(168,85,247,0.25)]"
-                          : "border-[#1c182b] bg-[#07060c] text-neutral-400 hover:border-neutral-700 hover:text-white"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon
-                          className={`h-4 w-4 ${
-                            isActive ? "text-purple-300" : "text-neutral-500"
-                          }`}
-                        />
-                        <span className="text-xs font-bold">{tool.label}</span>
-                      </div>
-                      <p className="mt-1 text-[10px] leading-relaxed text-neutral-400 font-mono">
-                        {tool.description}
-                      </p>
-                    </button>
-                  );
-                })}
+              <div className="rounded-full border border-purple-500/30 bg-purple-500/10 px-2.5 py-1 text-[9px] font-mono font-bold uppercase tracking-widest text-purple-300">
+                AI ASSISTED
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Dynamic Active Workflow Canvas */}
-            <div className="md:col-span-8 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 shadow-xl flex flex-col min-h-[420px]">
-              {/* Workflow header */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1b172b] pb-3 mb-4">
-                <div>
-                  <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
-                    ACTIVE WORKFLOW
-                  </p>
-                  <h4 className="text-sm font-bold text-white mt-0.5">
-                    {activeToolMeta.label}
-                  </h4>
-                  <p className="mt-0.5 text-xs text-neutral-400">
-                    {activeToolMeta.description}
-                  </p>
-                </div>
-                <div className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-purple-300">
-                  AI ASSISTED
-                </div>
+            {/* Dynamic workflow tool content */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              <div className={activeTab === "seo" ? "block" : "hidden"}>
+                <SeoOptimizationTab
+                  title={title}
+                  genre={genre}
+                  storyboardSummary={storyboardSummary}
+                  videoUrl={videoUrl}
+                  panels={panels}
+                  addNotification={addNotification}
+                />
               </div>
-
-              {/* Dynamic tool content */}
-              <div className="flex-1 overflow-y-auto">
-                <div className={activeTab === "seo" ? "block" : "hidden"}>
-                  <SeoOptimizationTab
-                    title={title}
-                    genre={genre}
-                    storyboardSummary={storyboardSummary}
-                    videoUrl={videoUrl}
-                    panels={panels}
-                    addNotification={addNotification}
-                  />
-                </div>
-                <div className={activeTab === "shorts" ? "block" : "hidden"}>
-                  <ShortsScriptTab
-                    title={title}
-                    storyboardSummary={storyboardSummary}
-                    videoUrl={videoUrl}
-                    panels={panels}
-                    addNotification={addNotification}
-                  />
-                </div>
-                <div className={activeTab === "sound" ? "block" : "hidden"}>
-                  <SoundOutroTab
-                    title={title}
-                    storyboardSummary={storyboardSummary}
-                    videoUrl={videoUrl}
-                    panels={panels}
-                    addNotification={addNotification}
-                  />
-                </div>
-                <div className={activeTab === "ads" ? "block" : "hidden"}>
-                  <AdPlacementTab
-                    compiledScript={compiledScript}
-                    videoUrl={videoUrl}
-                    panels={panels}
-                    addNotification={addNotification}
-                  />
-                </div>
+              <div className={activeTab === "thumbnails" ? "block" : "hidden"}>
+                <ThumbnailStudioTab
+                  title={title}
+                  genre={genre}
+                  storyboardSummary={storyboardSummary}
+                  videoUrl={videoUrl}
+                  panels={panels}
+                  addNotification={addNotification}
+                />
+              </div>
+              <div className={activeTab === "shorts" ? "block" : "hidden"}>
+                <ShortsScriptTab
+                  title={title}
+                  storyboardSummary={storyboardSummary}
+                  videoUrl={videoUrl}
+                  panels={panels}
+                  addNotification={addNotification}
+                />
+              </div>
+              <div className={activeTab === "sound" ? "block" : "hidden"}>
+                <SoundOutroTab
+                  title={title}
+                  storyboardSummary={storyboardSummary}
+                  videoUrl={videoUrl}
+                  panels={panels}
+                  addNotification={addNotification}
+                />
+              </div>
+              <div className={activeTab === "ads" ? "block" : "hidden"}>
+                <AdPlacementTab
+                  compiledScript={compiledScript}
+                  videoUrl={videoUrl}
+                  panels={panels}
+                  addNotification={addNotification}
+                />
+              </div>
+              <div className={activeTab === "hook" ? "block" : "hidden"}>
+                <SeriesHookTab
+                  title={title}
+                  genre={genre}
+                  storyboardSummary={storyboardSummary}
+                  videoUrl={videoUrl}
+                  panels={panels}
+                  addNotification={addNotification}
+                />
               </div>
             </div>
           </div>
+
         </div>
       </div>
     );

@@ -116,6 +116,24 @@ export const fetchWithAuth = async (
     headers.set("Authorization", `Bearer ${token}`);
   }
 
+  // Automatically attach BYOK custom user keys from local storage
+  const geminiKey = localStorage.getItem("user_gemini_key");
+  if (geminiKey && !headers.has("X-User-Gemini-Key")) {
+    headers.set("X-User-Gemini-Key", geminiKey);
+  }
+  const openaiKey = localStorage.getItem("user_openai_key");
+  if (openaiKey && !headers.has("X-User-OpenAI-Key")) {
+    headers.set("X-User-OpenAI-Key", openaiKey);
+  }
+  const anthropicKey = localStorage.getItem("user_anthropic_key");
+  if (anthropicKey && !headers.has("X-User-Anthropic-Key")) {
+    headers.set("X-User-Anthropic-Key", anthropicKey);
+  }
+  const hfKey = localStorage.getItem("user_huggingface_key");
+  if (hfKey && !headers.has("X-User-HuggingFace-Key")) {
+    headers.set("X-User-HuggingFace-Key", hfKey);
+  }
+
   const responsePromise = fetch(input, {
     ...init,
     headers,

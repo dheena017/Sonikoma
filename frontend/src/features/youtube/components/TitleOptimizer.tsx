@@ -1,5 +1,7 @@
+import * as api from "@/api";
+import { fetchWithAuth } from "@/utils";
 import React, { useState, useEffect } from "react";
-import { Sparkles, HelpCircle } from "lucide-react";
+import { Sparkles, HelpCircle, Loader2 } from "lucide-react";
 
 interface TitleOptimizerProps {
   title: string;
@@ -17,26 +19,45 @@ export default function TitleOptimizer({
   onInjectPowerWord,
 }: TitleOptimizerProps) {
   const [variants, setVariants] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Generate Clickbait title variants based on active title or scraped Title
-  const handleGenerateVariants = () => {
-    const base = title.trim() || scrapedTitle || "This Webtoon MC";
-
-    // Clean brackets/recap tag from base to avoid doubling
+  // Generate Clickbait title variants using AI skill
+  const handleGenerateVariants = async () => {
+    const base = title.trim() || scrapedTitle || "Overpowered Webtoon Hero";
     const cleanBase = base.replace(/\[.*?\]/g, "").trim();
 
-    const option1 = `Reborn as ${cleanBase}, I Unlocked a Cheat System!`;
-    const option2 = `He Was F-Rank, Until He Became the Ultimate ${
-      scrapedGenre || "OP"
-    } King!`;
-    const option3 = `I Spent 10,000 Years Leveling Up ${cleanBase}...!`;
-
-    setVariants([option1, option2, option3]);
+    setLoading(true);
+    try {
+      const json = await api.runTitleAbSkill(fetchWithAuth, {
+        title: cleanBase,
+        key_climax_event: `High impact ${scrapedGenre || "Action"} webtoon climax scene`,
+        model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
+      });
+      if (json.success && json.result?.suggested_alternatives) {
+        const aiTitles = json.result.suggested_alternatives.map((a: any) => a.title);
+        setVariants(aiTitles);
+      } else {
+        // Fallback options
+        setVariants([
+          `Reborn as ${cleanBase}, I Unlocked a Cheat System!`,
+          `He Was F-Rank, Until He Became the Ultimate ${scrapedGenre || "OP"} King!`,
+          `I Spent 10,000 Years Leveling Up ${cleanBase}...!`,
+        ]);
+      }
+    } catch {
+      setVariants([
+        `Reborn as ${cleanBase}, I Unlocked a Cheat System!`,
+        `He Was F-Rank, Until He Became the Ultimate ${scrapedGenre || "OP"} King!`,
+        `I Spent 10,000 Years Leveling Up ${cleanBase}...!`,
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     handleGenerateVariants();
-  }, [title, scrapedTitle, scrapedGenre]);
+  }, [scrapedTitle, scrapedGenre]);
 
   const isShortOverOptimal = title.length > 70;
   const isShortTooLong = title.length > 100;
@@ -118,9 +139,11 @@ export default function TitleOptimizer({
           </span>
           <button
             onClick={handleGenerateVariants}
-            className="text-[9px] text-purple-400 hover:text-purple-305 flex items-center gap-1 cursor-pointer bg-purple-950/20 px-2.5 py-0.5 rounded-lg border border-purple-900/30 hover:bg-purple-900/10 transition-all duration-200"
+            disabled={loading}
+            className="text-[9px] text-purple-400 hover:text-purple-300 flex items-center gap-1 cursor-pointer bg-purple-950/20 px-2.5 py-0.5 rounded-lg border border-purple-900/30 hover:bg-purple-900/10 transition-all duration-200 disabled:opacity-40"
           >
-            Re-Roll
+            {loading ? <Loader2 className="w-3 h-3 animate-spin text-purple-400" /> : <Sparkles className="w-3 h-3 text-purple-400" />}
+            {loading ? "Generating..." : "Re-Roll"}
           </button>
         </div>
 

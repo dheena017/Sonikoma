@@ -9,6 +9,7 @@ Exposes modularized schemas, utils, and fallbacks.
 import os
 import re
 import time
+import json
 import logging
 import asyncio
 from typing import Any, Optional, Type
@@ -191,7 +192,6 @@ class BaseAISkill:
                 elapsed_ms = int((time.monotonic() - start_time) * 1000)
                 raw_text = response.text or "{}"
 
-                import json
                 try:
                     parsed_json = json.loads(raw_text)
                 except Exception:
@@ -209,7 +209,6 @@ class BaseAISkill:
             elif provider == "openai":
                 import requests
                 import base64
-                import json
 
                 key_to_use = resolve_api_key("openai", api_key, user_keys)
                 if not key_to_use:
@@ -298,7 +297,6 @@ class BaseAISkill:
             elif provider == "anthropic":
                 import requests
                 import base64
-                import json
 
                 key_to_use = resolve_api_key("anthropic", api_key, user_keys)
                 if not key_to_use:
@@ -387,7 +385,6 @@ class BaseAISkill:
 
             elif provider == "huggingface":
                 import requests
-                import json
 
                 key_to_use = resolve_api_key("huggingface", api_key, user_keys)
                 if not key_to_use:
@@ -446,4 +443,4 @@ class BaseAISkill:
             fallback = FallbackCoordinator.get_programmatic_fallback(self.name, **kwargs)
             self.logger.log_execution(self.name, elapsed_ms, False, kwargs, fallback)
 
-            raise last_exception
+            return json.dumps(fallback)

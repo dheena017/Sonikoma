@@ -100,6 +100,94 @@ class FallbackCoordinator:
                 ]
             }
 
+        elif skill_name == "video_seo_metadata":
+            title = kwargs.get("title", "Webtoon Story Recap")
+            genre = kwargs.get("genre", "Fantasy Action")
+            return {
+                "youtube_title": f"He Was F-Rank, Until He Unlocked {title}! [{genre} RECAP]",
+                "youtube_description": f"Full recap of {title}. Watch the ultimate battle unfold step by step!",
+                "tags": [genre.lower(), "webtoon recap", "op mc", "manhwa recap", "anime recap"],
+                "timestamps": ["00:00 - Introduction & Awakening", "01:30 - The Climax Battle", "03:45 - Ending Hook"]
+            }
+        elif skill_name == "thumbnail_auto_composition":
+            title = kwargs.get("title", "Webtoon Hero")
+            return {
+                "overlay_text": f"HE UNLOCKED THIS?!",
+                "layout_archetype": "split_contrast",
+                "background_type": "dark_radial_burst",
+                "text_color": "#FFD700",
+                "focal_assets": [
+                    {"panel_index": 0, "description": f"Protagonist from {title}", "style_effect": "glow_outline"}
+                ],
+                "background_panel_index": 0
+            }
+        elif skill_name == "title_ab_tester":
+            title = kwargs.get("title", "My Webtoon Story")
+            return {
+                "original_score": 7.2,
+                "suggested_alternatives": [
+                    {
+                        "title": f"Reborn as {title}, I Unlocked a Cheat System!",
+                        "ctr_score": 9.4,
+                        "clickbait_level": "High",
+                        "reasoning": "Strong power-fantasy hook for anime/webtoon audience."
+                    },
+                    {
+                        "title": f"He Was Weakest F-Rank Until THIS Happened... ({title})",
+                        "ctr_score": 8.9,
+                        "clickbait_level": "Medium-High",
+                        "reasoning": "High curiosity trigger with cliffhanger phrasing."
+                    }
+                ]
+            }
+        elif skill_name == "shorts_script_adapter":
+            return {
+                "voiceover_script": "He thought he was just another F-rank hunter... until the system chose HIM!",
+                "on_screen_captions": ["F-RANK AWAKENING", "POWER LEVEL 9999+"],
+                "estimated_duration_sec": 45
+            }
+        elif skill_name == "sfx_audio_prompt":
+            return {
+                "audio_prompt": "Cinematic low-frequency impact boom with sharp energy distortion pulse",
+                "suggested_volume": 0.85
+            }
+        elif skill_name == "bgm_vibe_selector":
+            return {
+                "music_genre": "Dark Cyberpunk Synthwave",
+                "bpm": 128,
+                "mood_keywords": ["intense", "suspenseful", "power-fantasy"],
+                "suggested_tracks": ["Midnight Cyber Drive", "Obsidian Awakening"]
+            }
+        elif skill_name == "voice_casting":
+            return {
+                "gender": "male",
+                "suggested_age": "20s",
+                "voice_tone": "confident antihero with deep resonance",
+                "speech_tempo": 1.1,
+                "accent": "neutral english"
+            }
+        elif skill_name == "character_bio_profiler":
+            return {
+                "name": "Shadow Sovereign",
+                "estimated_age": "19-22",
+                "power_description": "Monarch shadow extraction and domain expansion",
+                "clothing_color": "#8B5CF6 (Purple/Black)",
+                "active_role": "Protagonist"
+            }
+        elif skill_name == "script_dramatization":
+            return {
+                "dramatized_scripts": [
+                    "Stop right there! You have no idea what power you're messing with!",
+                    "I am the sovereign of the dark realm, and your time has expired."
+                ]
+            }
+        elif skill_name == "sequence_narrative":
+            return {
+                "panels": [
+                    {"id": 1, "narrative": "The hero stands alone at the edge of the abyss, feeling the surge of ancient power."}
+                ]
+            }
+
         return {"success": False, "source": "fallback:error"}
 
 

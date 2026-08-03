@@ -129,9 +129,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
     { label: "AI Character DB", path: "/ai-characters", keyword: "characters profile sheet database prompts reference" },
     { label: "AI Translation Studio", path: "/ai-translation", keyword: "translation language subtitles dialogue script" },
     { label: "AI Sound Design Lab", path: "/ai-audio-lab", keyword: "sound design audio lab music themes soundtrack sfx" },
-    { label: "AI Thumbnail Studio", path: "/ai-thumbnails", keyword: "thumbnails extraction titles overlay templates" },
     { label: "AI Voice Casting", path: "/ai-voice", keyword: "voice synthesis narrator casting speed pitch" },
-    { label: "CTR Performance Predictor", path: "/ai-analytics", keyword: "ctr analytics heatmap visual scores predictions" },
     { label: "YouTube Publisher Studio", path: "/youtube", keyword: "youtube upload publish export draft title" },
   ];
 

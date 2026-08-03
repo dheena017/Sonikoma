@@ -1,30 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Sparkles, BookOpenText, Mic2, Wand2, Gauge, ChevronLeft, ChevronRight } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Sparkles, BookOpenText, ChevronLeft, ChevronRight, Languages } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 
 import PanelTranslationTool from "@/features/panel_assistant/components/PanelTranslationTool";
-import PanelAudioTool from "@/features/panel_assistant/components/PanelAudioTool";
-import PanelCreativeTool from "@/features/panel_assistant/components/PanelCreativeTool";
-import PanelPacingTool from "@/features/panel_assistant/components/PanelPacingTool";
 
 interface PanelAssistantPageProps {
-  panels: GeneratedPanel[];
-  setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
-  onNavigateHome: () => void;
+  panels?: GeneratedPanel[];
+  setPanels?: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
+  onNavigateHome?: () => void;
   addNotification?: (msg: string, type: any) => void;
 }
 
 const PanelAssistantPage = React.memo(
   ({
-    panels,
-    setPanels,
-    onNavigateHome,
+    panels = [],
+    setPanels = () => {},
+    onNavigateHome = () => {},
     addNotification,
   }: PanelAssistantPageProps) => {
+    const safePanels = Array.isArray(panels) ? panels : [];
     const [selectedIdx, setSelectedIdx] = useState(0);
-    const [activeTab, setActiveTab] = useState<
-      "translation" | "audio" | "creative" | "pacing"
-    >("translation");
 
     const filmstripRef = useRef<HTMLDivElement>(null);
 
@@ -35,48 +30,19 @@ const PanelAssistantPage = React.memo(
       }
     };
 
-    const tabs = [
-      {
-        id: "translation" as const,
-        label: "Translation",
-        description: "Translate and scrub dialogue",
-        icon: BookOpenText,
-      },
-      {
-        id: "audio" as const,
-        label: "Audio & TTS",
-        description: "Shape sound and voice direction",
-        icon: Mic2,
-      },
-      {
-        id: "creative" as const,
-        label: "Creative Prompts",
-        description: "Compose image and subtitle prompts",
-        icon: Wand2,
-      },
-      {
-        id: "pacing" as const,
-        label: "Pacing & Shake",
-        description: "Tune timing and motion effects",
-        icon: Gauge,
-      },
-    ];
-
-    const activeTabMeta = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
-
     // Sync index from URL query param if present
     useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       const idxVal = params.get("idx");
       if (idxVal !== null) {
-        const parsed = parseInt(idxVal);
-        if (!isNaN(parsed) && parsed >= 0 && parsed < panels.length) {
+        const parsed = parseInt(idxVal, 10);
+        if (!isNaN(parsed) && parsed >= 0 && parsed < safePanels.length) {
           setSelectedIdx(parsed);
         }
       }
-    }, [panels.length]);
+    }, [safePanels.length]);
 
-    if (panels.length === 0) {
+    if (safePanels.length === 0) {
       return (
         <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
           <Sparkles className="h-10 w-10 text-neutral-600 mb-3" />
@@ -90,22 +56,16 @@ const PanelAssistantPage = React.memo(
       );
     }
 
-    const activePanel = panels[selectedIdx];
+    const activePanel = safePanels[selectedIdx] || ({} as GeneratedPanel);
 
     const handleUpdateDialogue = (val: string) => {
-      setPanels((prev) =>
-        prev.map((p, idx) =>
-          idx === selectedIdx ? { ...p, speech_text: val } : p
-        )
-      );
-    };
-
-    const handleUpdateNarrative = (val: string) => {
-      setPanels((prev) =>
-        prev.map((p, idx) =>
-          idx === selectedIdx ? { ...p, narrative: val, narrative_audio_url: undefined } : p
-        )
-      );
+      if (typeof setPanels === "function") {
+        setPanels((prev) =>
+          (prev || []).map((p, idx) =>
+            idx === selectedIdx ? { ...p, speech_text: val } : p
+          )
+        );
+      }
     };
 
     return (
@@ -114,219 +74,159 @@ const PanelAssistantPage = React.memo(
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1b172b] pb-5">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-[#181229] border border-purple-500/30 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/50">
-              <Sparkles className="h-6 w-6 animate-pulse" />
+              <Languages className="h-6 w-6 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                  VISUAL STUDIO
+                  VISUAL STUDIO • TRANSLATION
                 </span>
-                <span className="text-xs text-neutral-400 font-mono">• Selected Panel #{activePanel.id}</span>
+                <span className="text-xs text-purple-400 font-mono">• Panel #{selectedIdx + 1} Selected</span>
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                Panel Assistant
+                Translation Studio
               </h1>
               <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Direct panel dialogue translation, TTS speech synthesis, prompt engineering, and frame pacing.
+                Multi-language dialogue translator and narrative editor per comic panel frame.
               </p>
             </div>
           </div>
+
           <div className="flex items-center gap-3 self-start md:self-center">
             <div className="px-3.5 py-1.5 rounded-full bg-[#12101d] border border-[#231e38] text-neutral-300 text-xs font-mono flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-              <span>Panel {selectedIdx + 1} of {panels.length}</span>
+              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+              <span>Total Panels: {safePanels.length}</span>
             </div>
           </div>
         </div>
 
-        {/* PANEL HORIZONTAL RIBBON SELECTOR WITH ARROWS */}
-        <div className="relative flex items-center bg-[#0d0b16] border border-[#1f1b2e] rounded-2xl p-2.5">
-          <button
-            onClick={() => scrollFilmstrip("left")}
-            className="p-2 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-2 shadow-md"
-            title="Scroll left"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
+        {/* FILMSTRIP THUMBNAIL TRACK */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest font-bold">
+              STORYBOARD TIMELINE ({safePanels.length} FRAMES)
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => scrollFilmstrip("left")}
+                className="p-1 rounded-lg border border-[#1f1b2e] bg-[#0c0a15] hover:bg-[#161224] text-neutral-400 hover:text-white transition-all cursor-pointer"
+                title="Scroll Left"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => scrollFilmstrip("right")}
+                className="p-1 rounded-lg border border-[#1f1b2e] bg-[#0c0a15] hover:bg-[#161224] text-neutral-400 hover:text-white transition-all cursor-pointer"
+                title="Scroll Right"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
 
           <div
             ref={filmstripRef}
-            className="flex gap-3 overflow-x-auto py-1 scrollbar-none flex-1 scroll-smooth"
+            className="flex items-center gap-3 overflow-x-auto py-2 scrollbar-thin scrollbar-thumb-purple-900/50 scrollbar-track-transparent"
           >
-            {panels.map((panel, idx) => (
-              <button
-                key={panel.id}
-                onClick={() => {
-                  setSelectedIdx(idx);
-                  window.history.replaceState(
-                    {},
-                    "",
-                    `/panel-assistant?idx=${idx}`
-                  );
-                }}
-                className={`w-20 shrink-0 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer relative flex items-center justify-center bg-[#06050a] ${
-                  selectedIdx === idx
-                    ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.35)] scale-105 bg-[#171329]"
-                    : "border-[#1e1930] opacity-50 hover:opacity-100 hover:border-purple-500/40"
-                }`}
-              >
-                <img
-                  src={panel.image_url}
-                  alt=""
-                  className="w-full h-full object-contain"
-                />
-                <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-neutral-300 border border-neutral-800">
-                  #{panel.id}
-                </div>
-              </button>
-            ))}
+            {safePanels.map((p, idx) => {
+              const isSel = idx === selectedIdx;
+              return (
+                <button
+                  key={p?.id || idx}
+                  onClick={() => setSelectedIdx(idx)}
+                  className={`relative flex-shrink-0 w-24 h-28 rounded-xl overflow-hidden border transition-all cursor-pointer group ${
+                    isSel
+                      ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105"
+                      : "border-[#1e1a2e] opacity-60 hover:opacity-100 hover:border-purple-500/50"
+                  }`}
+                >
+                  {p?.image_url ? (
+                    <img
+                      src={p.image_url}
+                      alt={`Frame ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#0c0a15] flex items-center justify-center text-[10px] text-neutral-600 font-mono">
+                      Panel #{idx + 1}
+                    </div>
+                  )}
+                  <div className="absolute top-1 left-1 bg-black/80 text-[8px] font-mono font-bold text-white px-1.5 py-0.5 rounded border border-white/10">
+                    #{idx + 1}
+                  </div>
+                </button>
+              );
+            })}
           </div>
-
-          <button
-            onClick={() => scrollFilmstrip("right")}
-            className="p-2 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-2 shadow-md"
-            title="Scroll right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
         </div>
 
-        {/* DUAL / TRIPLE COLUMN STUDIO CONTAINER */}
+        {/* TWO-COLUMN STUDIO WORKSPACE GRID (4 : 8) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          {/* Left Column: Panel Preview & Inputs */}
-          <div className="lg:col-span-4 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 space-y-4 shadow-xl">
-            <div className="h-52 sm:h-60 rounded-xl overflow-hidden border border-[#221d33] bg-[#06050a] flex items-center justify-center p-2 relative">
-              <img
-                src={activePanel.image_url}
-                alt=""
-                className="max-h-full max-w-full object-contain rounded"
-              />
+
+          {/* COLUMN 1 (LEFT - 4 COLS / 33% WIDTH): ACTIVE PANEL DETAILS */}
+          <div className="lg:col-span-4 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-5 space-y-4 shadow-xl">
+            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
+              FRAME PREVIEW
+            </span>
+            <div className="h-56 sm:h-64 rounded-xl overflow-hidden border border-[#221d33] bg-[#06050a] flex items-center justify-center p-2 relative shadow-inner">
+              {activePanel?.image_url ? (
+                <img
+                  src={activePanel.image_url}
+                  alt={`Panel #${activePanel.id || selectedIdx + 1}`}
+                  className="max-h-full max-w-full object-contain rounded"
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-neutral-600">
+                  <Sparkles className="w-8 h-8" />
+                  <span className="text-[10px] font-mono">No image rendered</span>
+                </div>
+              )}
+              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-md">
+                PANEL #{activePanel?.id || selectedIdx + 1}
+              </div>
             </div>
+
             <div className="space-y-1.5">
               <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
-                ACTIVE DIALOGUE
+                SPEECH & DIALOGUE
               </span>
-              <textarea
-                value={activePanel.speech_text || ""}
-                onChange={(e) => handleUpdateDialogue(e.target.value)}
-                rows={3}
-                placeholder="(Silent panel script)"
-                className="w-full bg-[#07060c] border border-[#1e1a2e] text-xs rounded-xl p-3 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none leading-relaxed"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
-                NARRATIVE TEXT
-              </span>
-              <textarea
-                value={activePanel.narrative || ""}
-                onChange={(e) => handleUpdateNarrative(e.target.value)}
-                rows={3}
-                placeholder="(No narrative voiceover text generated yet)"
-                className="w-full bg-[#07060c] border border-[#1e1a2e] text-xs rounded-xl p-3 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none leading-relaxed"
-              />
+              <div className="p-3.5 bg-[#06050a] border border-[#1d182e] rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
+                {activePanel?.speech_text || (
+                  <span className="text-neutral-600 italic">No speech text recorded for this panel.</span>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Right Column Grid: Studio Tools & Active Workflow */}
-          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-12 gap-5">
-            {/* Middle Pane: Studio Tools */}
-            <div className="md:col-span-4 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 shadow-xl">
-              <div className="mb-3 px-1">
+          {/* COLUMN 2 (RIGHT - 8 COLS / 67% WIDTH): TRANSLATION WORKFLOW CANVAS */}
+          <div className="lg:col-span-8 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-6 shadow-xl flex flex-col min-h-[480px]">
+            <div className="flex items-center justify-between gap-3 border-b border-[#1b172b] pb-3 mb-4">
+              <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
-                  STUDIO TOOLS
+                  ACTIVE WORKFLOW
                 </p>
-                <h3 className="mt-0.5 text-sm font-bold text-white">
-                  Shape each panel
-                </h3>
+                <h4 className="text-base font-bold text-white mt-0.5 flex items-center gap-2">
+                  <BookOpenText className="w-4 h-4 text-purple-400" /> Translation & Localization Studio
+                </h4>
+                <p className="mt-0.5 text-xs text-neutral-400 font-mono">
+                  Translate dialogue and narrative text to target languages with 1-click batch processing.
+                </p>
               </div>
-              <div className="space-y-2">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
-
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full rounded-xl border px-3 py-3 text-left transition-all cursor-pointer ${
-                        isActive
-                          ? "border-2 border-purple-500/80 bg-purple-500/15 text-white shadow-[0_0_12px_rgba(168,85,247,0.25)]"
-                          : "border-[#1c182b] bg-[#07060c] text-neutral-400 hover:border-neutral-700 hover:text-white"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon
-                          className={`h-4 w-4 ${
-                            isActive ? "text-purple-300" : "text-neutral-500"
-                          }`}
-                        />
-                        <span className="text-xs font-bold">
-                          {tab.label}
-                        </span>
-                      </div>
-                      <p className="mt-1 text-[10px] leading-relaxed text-neutral-400 font-mono">
-                        {tab.description}
-                      </p>
-                    </button>
-                  );
-                })}
+              <div className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-[9px] font-mono font-bold uppercase tracking-widest text-purple-300">
+                PANEL #{selectedIdx + 1}
               </div>
             </div>
 
-            {/* Right Pane: Active Workflow Canvas */}
-            <div className="md:col-span-8 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 shadow-xl flex flex-col">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1b172b] pb-3 mb-4">
-                <div>
-                  <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
-                    ACTIVE WORKFLOW
-                  </p>
-                  <h4 className="text-sm font-bold text-white">
-                    {activeTabMeta.label}
-                  </h4>
-                  <p className="mt-0.5 text-xs text-neutral-400">
-                    {activeTabMeta.description}
-                  </p>
-                </div>
-                <div className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-purple-300">
-                  PANEL {activePanel.id}
-                </div>
-              </div>
-
-              <div className="flex-1">
-                <div className={activeTab === "translation" ? "block" : "hidden"}>
-                  <PanelTranslationTool
-                    panel={activePanel}
-                    panels={panels}
-                    setPanels={setPanels}
-                    onUpdateDialogue={handleUpdateDialogue}
-                    addNotification={addNotification}
-                  />
-                </div>
-                <div className={activeTab === "audio" ? "block" : "hidden"}>
-                  <PanelAudioTool
-                    panel={activePanel}
-                    panels={panels}
-                    addNotification={addNotification}
-                  />
-                </div>
-                <div className={activeTab === "creative" ? "block" : "hidden"}>
-                  <PanelCreativeTool
-                    panel={activePanel}
-                    panels={panels}
-                    addNotification={addNotification}
-                  />
-                </div>
-                <div className={activeTab === "pacing" ? "block" : "hidden"}>
-                  <PanelPacingTool
-                    panel={activePanel}
-                    panels={panels}
-                    addNotification={addNotification}
-                  />
-                </div>
-              </div>
+            <div className="flex-1 overflow-y-auto">
+              <PanelTranslationTool
+                panel={activePanel}
+                panels={safePanels}
+                onUpdateDialogue={handleUpdateDialogue}
+                addNotification={addNotification}
+              />
             </div>
           </div>
+
         </div>
       </div>
     );
@@ -334,4 +234,3 @@ const PanelAssistantPage = React.memo(
 );
 
 export default PanelAssistantPage;
-
