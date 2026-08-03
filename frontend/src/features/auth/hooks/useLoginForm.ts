@@ -30,7 +30,11 @@ export default function useLoginForm(props: LoginFormProps) {
 
 
   React.useEffect(() => {
-    // No auto-fill: credentials must be entered by the user
+    const params = new URLSearchParams(window.location.search);
+    const urlError = params.get("error");
+    if (urlError) {
+      setError(urlError);
+    }
   }, []);
 
   React.useEffect(() => {

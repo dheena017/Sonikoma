@@ -68,13 +68,34 @@ def _load_google_secrets() -> tuple[str, str | None]:
         raise HTTPException(status_code=400, detail=f"Failed to parse client_secrets.json: {e}")
 
 
+def _get_redirect_uri(request: Request) -> str:
+    """
+    Determine the OAuth redirect URI.
+    Checks GOOGLE_REDIRECT_URI env var first, then APP_URL, then request headers.
+    """
+    env_uri = os.getenv("GOOGLE_REDIRECT_URI")
+    if env_uri:
+        return env_uri
+
+    if APP_URL:
+        base = APP_URL.rstrip("/")
+        return f"{base}/api/auth/google/callback"
+
+    host = request.headers.get("host", "localhost:3000")
+    scheme = "https" if request.url.scheme == "https" else "http"
+    return f"{scheme}://{host}/api/auth/google/callback"
+
+
 @router.get("/login", summary="Initiate Google OAuth2 authentication flow")
 async def google_login(request: Request):
-    client_id, _ = _load_google_secrets()
+    try:
+        client_id, _ = _load_google_secrets()
+    except HTTPException as exc:
+        error_msg = urllib.parse.quote(str(exc.detail))
+        return RedirectResponse(f"{APP_URL}/login?error={error_msg}")
 
-    host = request.headers.get("host", "localhost:8000")
-    scheme = "https" if request.url.scheme == "https" else "http"
-    redirect_uri = f"{scheme}://{host}/api/auth/google/callback"
+    redirect_uri = _get_redirect_uri(request)
+    logger.info(f"Initiating Google OAuth flow with redirect_uri: {redirect_uri}")
 
     scopes = [
         "openid",
@@ -103,10 +124,7 @@ async def google_callback(request: Request):
         raise HTTPException(status_code=400, detail="Missing authorization code")
 
     client_id, client_secret = _load_google_secrets()
-
-    host = request.headers.get("host", "localhost:8000")
-    scheme = "https" if request.url.scheme == "https" else "http"
-    redirect_uri = f"{scheme}://{host}/api/auth/google/callback"
+    redirect_uri = _get_redirect_uri(request)
 
     token_payload = {
         "code": code,
