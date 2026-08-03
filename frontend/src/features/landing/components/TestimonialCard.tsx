@@ -1,4 +1,5 @@
 import React from "react";
+import { Star } from "lucide-react";
 
 interface TestimonialCardProps {
   quote: string;
@@ -7,6 +8,8 @@ interface TestimonialCardProps {
   rating: number;
   role: string;
   avatar: string;
+  stats?: string;
+  themeMode?: "dark" | "light";
 }
 
 export function TestimonialCard({
@@ -16,27 +19,79 @@ export function TestimonialCard({
   rating,
   role,
   avatar,
+  stats,
+  themeMode = "dark",
 }: TestimonialCardProps) {
+  const isLight = themeMode === "light";
+
   return (
-    <div className="p-8 rounded-[32px] bg-neutral-900/40 border border-white/5 hover:border-white/10 hover:bg-neutral-800/40 transition-all flex flex-col justify-between space-y-6">
-      <p className="text-neutral-300 text-sm leading-relaxed italic">
-        "{quote}"
-      </p>
-      <div className="flex items-center gap-4 border-t border-white/5 pt-4">
+    <div
+      className={`p-8 rounded-[32px] border transition-all duration-300 flex flex-col justify-between space-y-6 ${
+        isLight
+          ? "bg-white border-slate-200 shadow-lg shadow-slate-200/40 hover:border-purple-300 hover:shadow-purple-200/50"
+          : "bg-neutral-900/40 border-white/10 hover:border-purple-500/40 hover:bg-neutral-900/80 shadow-xl shadow-black/20"
+      }`}
+    >
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star
+                key={i}
+                className={`w-4 h-4 ${
+                  i < Math.round(rating)
+                    ? "fill-amber-400 text-amber-400"
+                    : isLight
+                    ? "text-slate-200"
+                    : "text-neutral-700"
+                }`}
+              />
+            ))}
+          </div>
+          {stats && (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-purple-500/10 text-purple-500 border border-purple-500/20">
+              {stats}
+            </span>
+          )}
+        </div>
+
+        <p className={`text-sm leading-relaxed italic font-medium transition-colors ${
+          isLight ? "text-slate-700" : "text-neutral-300"
+        }`}>
+          "{quote}"
+        </p>
+      </div>
+
+      <div className={`flex items-center gap-4 border-t pt-4 transition-colors ${
+        isLight ? "border-slate-100" : "border-white/5"
+      }`}>
         <img
           src={avatar}
           alt={author}
-          className="w-12 h-12 rounded-2xl object-cover bg-neutral-800 border border-white/10"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(author)}`;
+          }}
+          className="w-12 h-12 rounded-2xl object-cover bg-purple-600/10 border border-purple-500/20 shrink-0"
         />
-        <div className="space-y-1">
-          <h4 className="font-bold text-sm">{author}</h4>
+        <div className="space-y-0.5 overflow-hidden">
+          <h4 className={`font-bold text-sm truncate transition-colors ${
+            isLight ? "text-slate-900" : "text-white"
+          }`}>
+            {author}
+          </h4>
           <div className="flex items-center gap-2">
-            <p className="text-neutral-500 text-xs">{handle}</p>
-            <p className="text-yellow-400 text-xs font-mono">
-              {"⭐".repeat(Math.round(rating))}
+            <p className={`text-xs transition-colors ${
+              isLight ? "text-purple-600 font-semibold" : "text-purple-400"
+            }`}>
+              {handle}
+            </p>
+            <span className={isLight ? "text-slate-300" : "text-neutral-700"}>•</span>
+            <p className={`text-xs truncate transition-colors ${
+              isLight ? "text-slate-500" : "text-neutral-500"
+            }`}>
+              {role}
             </p>
           </div>
-          <p className="text-neutral-600 text-xs">{role}</p>
         </div>
       </div>
     </div>
