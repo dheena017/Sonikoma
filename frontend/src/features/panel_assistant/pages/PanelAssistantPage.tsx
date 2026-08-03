@@ -190,6 +190,17 @@ const PanelAssistantPage = React.memo(
                 )}
               </div>
             </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
+                NARRATIVE TEXT
+              </span>
+              <div className="p-3.5 bg-[#06050a] border border-[#1d182e] rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
+                {activePanel?.visual_description || (
+                  <span className="text-neutral-600 italic">No narrative text recorded for this panel.</span>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* COLUMN 2 (RIGHT - 8 COLS / 67% WIDTH): TRANSLATION WORKFLOW CANVAS */}
