@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sparkles, Image, RefreshCw, Lightbulb, Layers, LayoutGrid, CheckCircle2 } from "lucide-react";
+import { Sparkles, Image, RefreshCw, Lightbulb, Layers, LayoutGrid } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import ThumbnailGenerator from "@/features/thumbnails/components/ThumbnailGenerator";
 import ThumbnailLayoutForm from "@/features/thumbnails/components/ThumbnailLayoutForm";
@@ -23,46 +23,8 @@ export default function ThumbnailStudioTab({
   addNotification,
 }: ThumbnailStudioTabProps) {
   const [activeSubTab, setActiveSubTab] = useState<"ai" | "concept" | "layout" | "guide">("ai");
-  const [recipes, setRecipes] = useState<any[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [conceptPrompt, setConceptPrompt] = useState("");
-
-  const handleGenerateVariation = async () => {
-    if (panels.length === 0) {
-      addNotification?.("No storyboard panels found to analyze.", "error");
-      return;
-    }
-    setIsGenerating(true);
-    try {
-      const res = await fetch("/api/skills/generate-thumbnail", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title || "Solo Leveling Recap",
-          genre: genre || "Action",
-          panels: panels.map((p) => ({
-            visual_description: p.visual_description,
-            image_url: p.image_url,
-          })),
-          model: localStorage.getItem("ai_comic_model") || "gemini-2.5-flash",
-        }),
-      });
-      const data = await res.json();
-
-      if (!data.success) {
-        addNotification?.(data.error || "Thumbnail generation failed.", "error");
-        return;
-      }
-
-      const recipe = data.data || data;
-      setRecipes((prev) => [{ ...recipe, _ts: Date.now() }, ...prev].slice(0, 4));
-      addNotification?.("Thumbnail composition recipe generated!", "success");
-    } catch (e) {
-      addNotification?.("Failed to generate thumbnail recipe.", "error");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const subTools = [
     { id: "ai" as const, label: "AI Auto Composer", icon: Sparkles },
@@ -85,14 +47,9 @@ export default function ThumbnailStudioTab({
             </h4>
           </div>
 
-          <button
-            onClick={handleGenerateVariation}
-            disabled={isGenerating}
-            className="px-4 py-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-pink-950/50 hover:shadow-pink-600/30 active:scale-95 shrink-0"
-          >
-            {isGenerating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            <span>{isGenerating ? "Composing..." : "✦ Generate Thumbnail Recipe"}</span>
-          </button>
+          <span className="text-[10px] font-mono text-purple-300 bg-purple-500/10 border border-purple-500/30 px-3 py-1 rounded-full font-bold">
+            16:9 Clickbait Generator
+          </span>
         </div>
         <p className="text-[10px] text-neutral-400 font-mono">
           Extract key focal assets, draft high-CTR text overlays, and generate 16:9 clickbait composition recipes.
@@ -125,11 +82,9 @@ export default function ThumbnailStudioTab({
       <div className="space-y-4 pt-1">
         {activeSubTab === "ai" && (
           <ThumbnailGenerator
-            recipes={recipes}
             title={title}
             genre={genre}
-            panels={panels}
-            addNotification={addNotification}
+            onGeneratedConcept={(concept) => setConceptPrompt(concept)}
           />
         )}
 
@@ -158,11 +113,11 @@ export default function ThumbnailStudioTab({
         )}
 
         {activeSubTab === "layout" && (
-          <ThumbnailLayoutForm addNotification={addNotification} />
+          <ThumbnailLayoutForm conceptPrompt={conceptPrompt} />
         )}
 
         {activeSubTab === "guide" && (
-          <ThumbnailCompositionGuide />
+          <ThumbnailCompositionGuide conceptPrompt={conceptPrompt} />
         )}
       </div>
     </div>
