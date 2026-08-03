@@ -24,6 +24,20 @@ const CharacterProfilePage = React.memo(
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCharIdx, setEditingCharIdx] = useState<number | null>(null);
 
+    if (panels.length === 0) {
+      return (
+        <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
+          <UserCheck className="h-10 w-10 text-neutral-600 mb-3" />
+          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
+            No Panels Available
+          </h3>
+          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
+            Please import a series or add panels to your storyboard timeline to start scanning character profiles.
+          </p>
+        </div>
+      );
+    }
+
     const handleDetected = (newChars: CharacterBio[]) => {
       // Deduplicate and append
       setCharacters((prev) => {
@@ -126,14 +140,13 @@ const CharacterProfilePage = React.memo(
 
         {/* Characters List Grid */}
         {characters.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-4 border border-dashed border-neutral-800 rounded-2xl bg-neutral-900/20">
+          <div className="flex flex-col items-center justify-center py-16 px-4 border border-dashed border-neutral-800/80 rounded-2xl bg-neutral-950/40">
             <UserCheck className="h-10 w-10 text-neutral-600 mb-3" />
-            <h3 className="text-neutral-400 font-mono text-sm font-semibold mb-1">
-              No characters detected
+            <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
+              No Characters Detected
             </h3>
-            <p className="text-neutral-500 text-xs text-center max-w-sm">
-              Click the "Scan dialogues" button above to automatically scan the
-              current storyboard and build profiles for each character.
+            <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
+              Click the "Scan dialogues" button above to automatically scan the current storyboard and build profiles for each character.
             </p>
           </div>
         ) : (
