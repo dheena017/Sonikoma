@@ -118,12 +118,12 @@ export const PlayerBottomControls: React.FC<PlayerBottomControlsProps> = ({
         {/* FLOATING PRECISE SEEKING POPUP CONTAINER */}
         {hoverProgress.isHovering && (
           <div
-            className="absolute bottom-6 flex flex-col items-center z-45 transition-all duration-75 pointer-events-none"
+            className="absolute bottom-6 flex flex-col items-center z-45 transition-all duration-75 pointer-events-none w-[150px]"
             style={{
-              left: `calc(${hoverProgress.percent * 100}% - 75px)`,
+              left: `clamp(0px, calc(${hoverProgress.percent * 100}% - 75px), calc(100% - 150px))`,
             }}
           >
-            <div className="bg-neutral-900 border border-neutral-800/80 rounded-2xl p-1.5 shadow-2xl backdrop-blur-md flex flex-col gap-1 w-[150px] overflow-hidden">
+            <div className="bg-neutral-900 border border-neutral-800/80 rounded-2xl p-1.5 shadow-2xl backdrop-blur-md flex flex-col gap-1 w-full overflow-hidden">
               <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-neutral-950 flex items-center justify-center">
                 {activePanelForHover ? (
                   activePanelForHover.layers ? (
@@ -171,7 +171,12 @@ export const PlayerBottomControls: React.FC<PlayerBottomControlsProps> = ({
                 )}
               </div>
             </div>
-            <div className="w-2.5 h-2.5 bg-neutral-900 border-r border-b border-neutral-800/80 rotate-45 -mt-1 shadow-md" />
+            <div
+              className="w-2.5 h-2.5 bg-neutral-900 border-r border-b border-neutral-800/80 -mt-1 shadow-md relative z-10"
+              style={{
+                transform: `translateX(clamp(-63px, calc(${hoverProgress.percent * 100}% - clamp(75px, ${hoverProgress.percent * 100}%, calc(100% - 75px))), 63px)) rotate(45deg)`,
+              }}
+            />
           </div>
         )}
 
