@@ -52,7 +52,7 @@ async def test_merge_images_service():
     res = await merge_images_service(urls=urls, layout="vertical")
     assert res.get("success") is True
     assert "url" in res
-    assert "/api/image/cached/merged_" in res["url"]
+    assert "/api/image/cached/stitch_" in res["url"]
 
 if __name__ == "__main__":
     try:

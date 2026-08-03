@@ -122,9 +122,9 @@ async def apply_image_edits_service(
     except Exception as e:
         logger.error(f"Image edit failed: {e}", exc_info=True)
 
-    unique_id = f"merged_{int(time.time() * 1000)}_edited"
+    unique_id = f"edit_{int(time.time() * 1000)}"
     try:
-        filename = f"edited_{uuid.uuid4().hex[:8]}.jpeg"
+        filename = f"edit_{int(time.time() * 1000)}_{uuid.uuid4().hex[:6]}.jpeg"
         supabase_url = await asyncio.to_thread(
             upload_to_supabase_bucket,
             img_buffer,

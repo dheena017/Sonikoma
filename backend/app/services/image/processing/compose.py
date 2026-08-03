@@ -45,7 +45,8 @@ async def merge_images_service(
     if not merged_bytes:
         raise ValueError("Image merge failed.")
 
-    unique_id = f"merged_{int(time.time() * 1000)}_merged"
+    panel_count = len(urls)
+    unique_id = f"stitch_{int(time.time() * 1000)}_{panel_count}p"
     cached_url = f"/api/image/cached/{unique_id}"
 
     try:
@@ -56,7 +57,7 @@ async def merge_images_service(
 
     supabase_url = None
     try:
-        filename = f"merged_{uuid.uuid4().hex[:8]}.png"
+        filename = f"stitch_{int(time.time() * 1000)}_{uuid.uuid4().hex[:6]}.png"
         supabase_url = await asyncio.wait_for(
             asyncio.to_thread(
                 upload_to_supabase_bucket,
