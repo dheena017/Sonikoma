@@ -461,9 +461,10 @@ const AdminDashboardPage = React.memo(
     const activeJobsCount = stats.activeJobs || 0;
 
     // Developer bypass screen if unauthorized
-    if (!isAuthenticated || (user && user.creator_role !== "admin")) {
+    const isUserAdmin = user?.creator_role === "admin" || user?.role === "admin";
+    if (!isAuthenticated || (user && !isUserAdmin)) {
       return (
-        <div className="min-h-screen bg-[#050507] flex flex-col items-center justify-center p-6 selection:bg-rose-500/30">
+        <div className="h-screen max-h-screen w-full bg-[#050507] flex flex-col items-center justify-center p-6 overflow-hidden selection:bg-rose-500/30">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-900/20 via-[#050507] to-[#050507] pointer-events-none" />
           <div className="relative z-10 max-w-md w-full bg-[#0a0a0e]/80 backdrop-blur-xl border border-rose-900/30 p-8 rounded-3xl shadow-2xl shadow-rose-900/20 text-center">
             <div className="w-20 h-20 bg-rose-500/10 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-rose-500/20">

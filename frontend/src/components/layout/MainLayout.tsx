@@ -445,7 +445,7 @@ export default function MainLayout(props: MainLayoutProps) {
           className={`${!isSidebarOpen && !isImageEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${
             !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isAdminRestricted
               ? "pt-[59px] min-h-[calc(100vh-59px)]"
-              : "min-h-screen"
+              : "h-screen max-h-screen overflow-hidden"
           } flex-grow flex-1 flex flex-col transition-all duration-300`}
         >
           {/* Impersonation Banner */}
