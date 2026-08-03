@@ -8,6 +8,9 @@ import {
   Cpu,
   Wand2,
   Users,
+  Play,
+  Square,
+  Volume2,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import ScriptDramatizerForm from "@/features/voice/components/ScriptDramatizerForm";
@@ -35,7 +38,28 @@ const VoiceStudioPage = React.memo(
       () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
     );
 
+    const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
+    const [isPlayingNarrative, setIsPlayingNarrative] = useState(false);
+    const speechAudioRef = useRef<HTMLAudioElement | null>(null);
+    const narrativeAudioRef = useRef<HTMLAudioElement | null>(null);
+
     const filmstripRef = useRef<HTMLDivElement>(null);
+
+    const stopAllAudio = () => {
+      if (speechAudioRef.current) {
+        speechAudioRef.current.pause();
+        speechAudioRef.current = null;
+      }
+      if (narrativeAudioRef.current) {
+        narrativeAudioRef.current.pause();
+        narrativeAudioRef.current = null;
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      setIsPlayingSpeech(false);
+      setIsPlayingNarrative(false);
+    };
 
     const scrollFilmstrip = (direction: "left" | "right") => {
       if (filmstripRef.current) {
