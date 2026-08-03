@@ -392,7 +392,8 @@ def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]], so
             cropped.save(out, format="JPEG", quality=90)
             cropped_bytes = out.getvalue()
 
-            cache_key = f"panel_crop_{ts}_{idx + 1}"
+            panel_num = f"{idx + 1:02d}" if len(panels) >= 10 else f"{idx + 1}"
+            cache_key = f"panel_crop_panel_{panel_num}"
             cached_url = f"/api/image/cached/{cache_key}"
             stitched_cache.set(cache_key, {"data": cropped_bytes, "content_type": "image/jpeg"})
             if source_url:
@@ -468,7 +469,7 @@ async def facade_smart_crop(
                 # Crop all panels server-side in one pass (image[y:y+h, x:x+w])
                 # so the frontend gets croppedUrl on each panel and skips extra API calls
                 await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels, url)
-                logger.info(f"[Panel Detection Debug JSON] Returning {len(cv_panels)} panels JSON (sample first 3: {json.dumps(cv_panels[:3])})")
+                logger.info(f"[Panel Detection] Successfully returned {len(cv_panels)} detected panels.")
                 return {
                     "success": True,
                     "total_panels": len(cv_panels),
