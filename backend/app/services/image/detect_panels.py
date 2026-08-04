@@ -227,7 +227,7 @@ def run_cv_detection(
     else:
         scale_factor = max(0.5, min(2.0, (img_area / ref_area) ** 0.5))
 
-    scaled_min_height_px = max(15, min(120, int(min_height_px * scale_factor)))
+    scaled_min_height_px = max(20, min(max(40, min_height_px), int(min_height_px * scale_factor)))
     scaled_min_width_pct = max(0.05, min(0.25, min_width_pct * (0.5 + 0.5 * scale_factor)))
     scaled_close_kernel = max(3, min(40, int(close_kernel_size * scale_factor)))
 
@@ -844,7 +844,7 @@ def run_cv_detection(
                 dl = abs(panel.get("cropLeft", 0.0) - existing.get("cropLeft", 0.0))
                 dr = abs(panel.get("cropRight", 0.0) - existing.get("cropRight", 0.0))
                 
-                effective_dedup_thresh = max(dedup_overlap_thresh, 0.88) if (auto_split and is_tall_strip) else dedup_overlap_thresh
+                effective_dedup_thresh = max(dedup_overlap_thresh, 0.95) if (auto_split and is_tall_strip) else dedup_overlap_thresh
                 if iou_min > effective_dedup_thresh or (dt < dedup_crop_tolerance and db < dedup_crop_tolerance and dl < dedup_crop_tolerance and dr < dedup_crop_tolerance):
                     is_dup = True
                     break

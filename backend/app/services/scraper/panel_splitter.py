@@ -65,14 +65,77 @@ def split_vertical_strip_into_panels(
                 var = sum((v - avg) ** 2 for v in row_vals) / len(row_vals)
                 row_variances.append(var)
 
-        # Detect horizontal gutter boundaries
-        split_points = [0]
-        for y in range(min_panel_height, height - min_panel_height):
-            if row_variances[y] < gutter_threshold:
-                if y - split_points[-1] >= min_panel_height:
-                    split_points.append(y)
+        # Calculate row means for dual-color check
+        try:
+            if img_np is not None and img_np.size > 0:
+                if img_np.ndim == 3:
+                    row_means = np.mean(np.mean(img_np, axis=2), axis=1).tolist()
+                else:
+                    row_means = np.mean(img_np, axis=1).tolist()
+            else:
+                row_means = []
+        except Exception:
+            row_means = []
+            if 'pixels' in locals():
+                for y in range(height):
+                    row_vals = []
+                    for x in range(0, width, step):
+                        px = pixels[x, y]
+                        if isinstance(px, (tuple, list)):
+                            row_vals.append(float(px[0]))
+                        elif isinstance(px, (int, float)):
+                            row_vals.append(float(px))
+                    if not row_vals:
+                        row_means.append(0.0)
+                    else:
+                        row_means.append(sum(row_vals) / len(row_vals))
 
-        split_points.append(height)
+        # Detect consecutive continuous gutter blocks
+        min_panel_height = max(40, min_panel_height) # ensure it doesn't swallow everything if left default
+        if height <= min_panel_height:
+            return [image_bytes]
+
+        is_gutter_row = []
+        for y in range(height):
+            mean = row_means[y] if y < len(row_means) else 0.0
+            var = row_variances[y] if y < len(row_variances) else 0.0
+
+            # Check for explicitly white or black flat rows
+            if (mean >= 240 and var < 12.0) or (mean <= 15 and var < 12.0):
+                is_gutter_row.append(True)
+            else:
+                is_gutter_row.append(False)
+
+        cut_points = []
+        in_gutter = False
+        g_start = 0
+        min_gutter_h = 10
+
+        for y in range(height):
+            if is_gutter_row[y] and not in_gutter:
+                in_gutter = True
+                g_start = y
+            elif not is_gutter_row[y] and in_gutter:
+                in_gutter = False
+                g_end = y
+                if g_end - g_start >= min_gutter_h:
+                    cut_points.append((g_start + g_end) // 2)
+
+        if in_gutter:
+            g_end = height
+            if g_end - g_start >= min_gutter_h:
+                cut_points.append((g_start + g_end) // 2)
+
+        # Merge close cuts to form valid panels
+        split_points = [0]
+        for cut in cut_points:
+            if cut - split_points[-1] >= min_panel_height:
+                split_points.append(cut)
+
+        if height - split_points[-1] >= min_panel_height:
+            split_points.append(height)
+        else:
+            split_points[-1] = height
 
         panels = []
         for i in range(len(split_points) - 1):

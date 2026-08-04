@@ -159,33 +159,23 @@ def _detect_panels_webtoon(
 
     row_stds = np.std(gray_center, axis=1)
 
-    # Compute gradient-aware or static background pixel counts per row
-    if top_median is not None and bottom_median is not None and abs(top_median - bottom_median) > 5.0:
-        y_indices = np.arange(h, dtype=float)
-        local_bgs = top_median + (bottom_median - top_median) * (y_indices / float(max(1, h - 1)))
-        bg_tolerance = max(12.0, min(30.0, sensitivity * 0.7))
-        abs_diffs = np.abs(gray_center.astype(float) - local_bgs[:, np.newaxis])
-        bg_pixel_count = np.sum(abs_diffs <= bg_tolerance, axis=1)
-    elif median_bg is not None:
-        bg_tolerance = max(12.0, min(30.0, sensitivity * 0.7))
-        bg_pixel_count = np.sum(np.abs(gray_center.astype(float) - median_bg) <= bg_tolerance, axis=1)
-    elif is_white_bg:
-        bg_pixel_count = np.sum(gray_center > threshold_val, axis=1)
-    else:
-        bg_pixel_count = np.sum(gray_center < threshold_val, axis=1)
+    # Compute dual solid-color gutter rows (white or black)
+    row_means = np.mean(gray_center, axis=1)
 
-    bg_ratio = bg_pixel_count / float(max(1, w_center))
+    is_white_gutter = (row_means >= 240) & (row_stds < 12.0)
+    is_black_gutter = (row_means <= 15) & (row_stds < 12.0)
 
-    # Gutter rows: High background ratio OR flat row variance with sufficient background fraction
-    is_gutter_row = (bg_ratio >= gutter_bg_ratio) | ((row_stds < gutter_std_thresh) & (bg_ratio >= gutter_flat_bg_ratio))
+    # Gutter rows: explicitly white or black
+    is_gutter_row = is_white_gutter | is_black_gutter
     is_content_row = ~is_gutter_row
 
-    # Speech Bubble & OCR Protection (protect bubbles from being cut, without bridging gutters)
+    # Anchor Integration: Protect YOLO detected regions and OCR boxes from being sliced.
+    # We treat any provided OCR or YOLO box as guaranteed content.
     if ocr_boxes:
-        bubble_pad = max(2, int(w * 0.005))
+        content_pad = max(2, int(w * 0.005))
         for box in ocr_boxes:
-            by1 = max(0, int(box.get("y", 0)) - bubble_pad)
-            by2 = min(h, int(box.get("y", 0) + box.get("h", 0)) + bubble_pad)
+            by1 = max(0, int(box.get("y", 0)) - content_pad)
+            by2 = min(h, int(box.get("y", 0) + box.get("h", 0)) + content_pad)
             if by2 > by1:
                 is_content_row[by1:by2] = True
 
