@@ -360,17 +360,6 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             Define your project parameters and Manhwa, Manga, or Webcomic source link to begin.
           </p>
         </div>
-
-        <button
-          type="button"
-          onClick={() => handleAiAutoSetup()}
-          disabled={isAiSetupRunning || !targetUrl.trim()}
-          className="px-4 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-bold transition-all shadow-lg shadow-purple-900/30 active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer self-start md:self-auto shrink-0 border border-purple-400/30"
-          title="Use AI to automatically extract series title, chapter number, genre, author, and cover image from any Manhwa or Manga URL"
-        >
-          <Sparkles className={`h-4 w-4 text-amber-300 ${isAiSetupRunning ? 'animate-spin' : ''}`} />
-          {isAiSetupRunning ? "AI Extracting & Setting Up..." : "✨ AI Auto-Setup"}
-        </button>
       </div>
 
       {/* 2. Series Metadata */}
@@ -561,18 +550,6 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               )}
             </button>
           </div>
-
-          {inputMode === "url" && targetUrl.trim() && (
-            <button
-              type="button"
-              onClick={() => handleAiAutoSetup()}
-              disabled={isAiSetupRunning}
-              className="text-[10px] font-bold text-purple-300 hover:text-purple-200 flex items-center gap-1.5 bg-purple-950/60 hover:bg-purple-900/70 border border-purple-700/50 px-3 py-1 rounded-lg transition-all cursor-pointer shadow-sm active:scale-95"
-            >
-              <Sparkles className={`w-3 h-3 text-amber-300 ${isAiSetupRunning ? 'animate-spin' : ''}`} />
-              {isAiSetupRunning ? "Extracting..." : "Auto-Fill Setup with AI"}
-            </button>
-          )}
         </div>
 
         {inputMode === "upload" ? (
