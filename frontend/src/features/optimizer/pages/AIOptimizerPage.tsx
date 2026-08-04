@@ -401,7 +401,7 @@ const AIOptimizerPage = React.memo(
             </div>
 
             {/* Dynamic workflow tool content */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="flex-1">
               <div className={activeTab === "seo" ? "block" : "hidden"}>
                 <SeoOptimizationTab
                   title={title}

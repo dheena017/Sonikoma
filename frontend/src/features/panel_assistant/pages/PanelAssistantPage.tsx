@@ -232,7 +232,7 @@ const PanelAssistantPage = React.memo(
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1">
               <PanelTranslationTool
                 panel={activePanel}
                 panels={safePanels}

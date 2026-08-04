@@ -163,7 +163,7 @@ export default function TokenUsageDashboard({
             <h4 className="text-xs font-bold text-neutral-400 uppercase mb-3 border-b border-neutral-800 pb-2">
               Recent Activity
             </h4>
-            <div className="overflow-hidden rounded-lg border border-neutral-850">
+            <div className="overflow-x-auto rounded-lg border border-neutral-850">
               <table className="w-full text-left border-collapse text-[10px] font-mono">
                 <thead>
                   <tr className="bg-neutral-900 border-b border-neutral-850 text-neutral-500 uppercase">

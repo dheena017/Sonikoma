@@ -273,9 +273,8 @@ export default function MainLayout(props: MainLayoutProps) {
   return (
     <div
       id="app_root"
-      className={`min-h-screen bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${
-        isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
-      }`}
+      className={`min-h-screen max-w-full bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
+        }`}
     >
       {/* --- Page Navigation Sidebar --- */}
       {isAdminRestricted ? null : isAnyAdmin ? (
@@ -369,11 +368,10 @@ export default function MainLayout(props: MainLayoutProps) {
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-scroll-container"
-        className={`flex-grow flex-1 flex flex-col min-h-screen justify-between transition-all duration-300 ${
-          showAutoCropModal || showBubbleModal
+        className={`flex-grow flex-1 flex flex-col min-h-screen max-w-full justify-between transition-all duration-300 ${showAutoCropModal || showBubbleModal
             ? "overflow-hidden"
             : ""
-        }`}
+          }`}
       >
         {/* Top Header */}
         {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && !isImageEditorPage && (
@@ -442,13 +440,12 @@ export default function MainLayout(props: MainLayoutProps) {
         )}
 
         <div
-          className={`${!isSidebarOpen && !isImageEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${
-            isImageEditorPage
+          className={`${!isSidebarOpen && !isImageEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage
               ? "h-screen max-h-screen overflow-hidden"
               : isProEditorPage
-              ? "min-h-screen"
-              : "pt-[59px] min-h-[calc(100vh-59px)]"
-          } flex-grow flex-1 flex flex-col transition-all duration-300`}
+                ? "min-h-screen"
+                : "pt-[59px] min-h-[calc(100vh-59px)]"
+            } flex-grow flex-1 flex flex-col transition-all duration-300`}
         >
           {/* Impersonation Banner */}
           {localStorage.getItem("sonikoma_admin_token") && (
@@ -495,11 +492,10 @@ export default function MainLayout(props: MainLayoutProps) {
                   <button
                     onClick={startBackend}
                     disabled={isStartingBackend}
-                    className={`px-3 py-1 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border shadow-sm cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                      isStartingBackend
+                    className={`px-3 py-1 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border shadow-sm cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${isStartingBackend
                         ? "bg-amber-950/60 border-amber-700/40 text-amber-200 cursor-not-allowed"
                         : "bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-200 border-emerald-700/40"
-                    }`}
+                      }`}
                   >
                     {isStartingBackend ? (
                       <>
@@ -552,11 +548,10 @@ export default function MainLayout(props: MainLayoutProps) {
 
           {/* Children Page Views */}
           <div
-            className={`w-full flex-1 flex flex-col ${
-              isImageEditorPage || isProEditorPage
+            className={`w-full flex-1 flex flex-col ${isImageEditorPage || isProEditorPage
                 ? "p-0"
                 : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16"
-            }`}
+              }`}
           >
             {children}
           </div>
@@ -685,11 +680,10 @@ export default function MainLayout(props: MainLayoutProps) {
 
         <button
           onClick={() => setIsTerminalOpen(!isTerminalOpen)}
-          className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-95 cursor-pointer border ${
-            isTerminalOpen
+          className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-95 cursor-pointer border ${isTerminalOpen
               ? "bg-rose-600 border-rose-500 text-white rotate-90"
               : "bg-purple-600 border-purple-500 text-white hover:bg-purple-500"
-          }`}
+            }`}
           title={isTerminalOpen ? "Close Terminal" : "Open System Terminal"}
         >
           {isTerminalOpen ? (
