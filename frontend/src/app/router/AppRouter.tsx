@@ -744,22 +744,13 @@ export default function AppRouter(props: AppRouterProps) {
   const [isTerminalOpen, setIsTerminalOpen] = React.useState(false);
 
   React.useEffect(() => {
-    const container = document.getElementById("main-scroll-container");
-    if (isSidebarOpen) {
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
-      if (container) container.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-      if (container) container.style.overflow = "";
-    }
     return () => {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
+      const container = document.getElementById("main-scroll-container");
       if (container) container.style.overflow = "";
     };
-  }, [isSidebarOpen]);
+  }, []);
 
   const headerOnSave = React.useCallback(() => {
     if (isChapterDetailsPath) {

@@ -37,6 +37,7 @@ import UrlInputPanel from "@/features/scraper/components/UrlInputPanel";
 import ProjectConfirmPanel from "@/shared/ui/modal/ProjectConfirmPanel";
 import ProjectCard from "@/features/projects/components/ProjectCard";
 import type { Project } from "@/features/projects/hooks/ProjectTypes";
+import { useProjectStore } from "@/store/useProjectStore";
 
 interface AppWorkspaceProps {
   [key: string]: any;
@@ -547,6 +548,53 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     ) || null;
   }, [recentProjects, targetUrl]);
 
+  const handleUploadLocalImages = (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+    const fileArray = Array.from(files).filter((file) => file.type.startsWith("image/"));
+    if (fileArray.length === 0) {
+      addNotification("Please select valid image files (PNG, JPG, WEBP, GIF, SVG).", "error");
+      return;
+    }
+
+    const imageUrls = fileArray.map((file) => URL.createObjectURL(file));
+
+    const currentStore = useProjectStore.getState();
+    let activeProj = currentStore.activeProjectData;
+    let pid = activeProj?.project?.project_id;
+    if (!pid) {
+      pid = `proj_upload_${Date.now()}`;
+      activeProj = {
+        project: {
+          project_id: pid,
+          title: seriesTitle.trim() || "Custom Image Project",
+          url: "local_upload",
+          created_at: new Date().toISOString(),
+        },
+        panels: [],
+      };
+    }
+
+    const existingScraped = activeProj?.scrapedImages || [];
+    const updatedScraped = [...existingScraped, ...imageUrls];
+
+    currentStore.setActiveProject({
+      project: activeProj.project,
+      panels: activeProj?.panels || [],
+      scrapedImages: updatedScraped,
+    });
+
+    addNotification(`Successfully imported ${fileArray.length} image(s) to Imported Assets!`, "success");
+
+    const nav = navigateTo || (window as any).navigateTo;
+    const targetPath = `/workspace/editor?id=${pid}`;
+    if (typeof nav === "function") {
+      nav(targetPath);
+    } else {
+      window.history.pushState({}, "", targetPath);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
+
   return (
     <main
       id="main_workspace"
@@ -911,6 +959,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
             setCropSensitivity={setCropSensitivity}
             autoSplitTallStrips={autoSplitTallStrips}
             setAutoSplitTallStrips={setAutoSplitTallStrips}
+            onUploadImages={handleUploadLocalImages}
             onOpenEpisodeScraper={(url) => {
               const nav = navigateTo || (window as any).navigateTo;
               const path = `/episode-scraper?url=${encodeURIComponent(url)}`;

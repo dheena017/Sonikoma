@@ -370,10 +370,10 @@ export default function MainLayout(props: MainLayoutProps) {
       <div
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen justify-between transition-all duration-300 ${
-          showAutoCropModal || showBubbleModal || isImageEditorPage
+          showAutoCropModal || showBubbleModal
             ? "overflow-hidden"
             : ""
-        } ${!isAnyAdmin && isSidebarOpen ? "overflow-hidden" : ""}`}
+        }`}
       >
         {/* Top Header */}
         {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && !isImageEditorPage && (
@@ -443,9 +443,11 @@ export default function MainLayout(props: MainLayoutProps) {
 
         <div
           className={`${!isSidebarOpen && !isImageEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${
-            !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isAdminRestricted
-              ? "pt-[59px] min-h-[calc(100vh-59px)]"
-              : "h-screen max-h-screen overflow-hidden"
+            isImageEditorPage
+              ? "h-screen max-h-screen overflow-hidden"
+              : isProEditorPage
+              ? "min-h-screen"
+              : "pt-[59px] min-h-[calc(100vh-59px)]"
           } flex-grow flex-1 flex flex-col transition-all duration-300`}
         >
           {/* Impersonation Banner */}

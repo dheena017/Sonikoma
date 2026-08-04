@@ -72,21 +72,12 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
 }) => {
   const isSidebarOpen = !isSidebarCollapsed && !isFocusMode;
 
-  // PREMIUM SCROLL LOCK: Prevent the background page from scrolling when the sidebar overlay is open
+  // Ensure background page remains scrollable
   useEffect(() => {
-    const mainScroll = document.getElementById("main-scroll-container");
-    if (isSidebarOpen) {
-      document.body.style.overflow = "hidden";
-      if (mainScroll) mainScroll.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-      if (mainScroll) mainScroll.style.overflow = "";
-    }
     return () => {
       document.body.style.overflow = "";
-      if (mainScroll) mainScroll.style.overflow = "";
     };
-  }, [isSidebarOpen]);
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-[#050507] text-white selection:bg-purple-500/30">

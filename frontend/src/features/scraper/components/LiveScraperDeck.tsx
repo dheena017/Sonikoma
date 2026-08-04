@@ -154,7 +154,7 @@ export const HorizontalScrollContainer: React.FC<{
       {/* Horizontal Scroll Container Track */}
       <div
         ref={scrollRef}
-        className={`w-full max-w-full flex gap-4 overflow-x-auto pb-4 pt-3.5 scrollbar-thin scroll-smooth px-1 select-none ${className}`}
+        className={`w-full max-w-full flex gap-4 overflow-x-auto pb-4 pt-3.5 scrollbar-thin scrollbar-thumb-purple-600/50 scrollbar-track-neutral-900/60 scroll-smooth px-1 select-none ${className}`}
       >
         {children}
       </div>
