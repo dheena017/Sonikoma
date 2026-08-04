@@ -72,6 +72,14 @@ async def scrape_images_from_url(
     if not fetch_url:
         return []
 
+    # Check if local_upload or dummy non-HTTP string
+    if fetch_url.lower() in ("local_upload", "local", "upload") or (
+        not fetch_url.startswith(("http://", "https://", "file://", "data:image/"))
+        and not os.path.exists(fetch_url)
+    ):
+        logger.info(f"[Scraper] Bypassing web scraper for local/dummy URL: {fetch_url}")
+        return []
+
     # Check if data URL image
     if fetch_url.startswith("data:image/"):
         logger.info("[Scraper] Direct Data URL image detected")

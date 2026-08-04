@@ -176,8 +176,10 @@ async def scrape_and_initialize_project(
         "synopsis": parsed.get("synopsis"),
     }
 
+    is_local_dummy = normalized_url.lower() in ("local_upload", "local", "upload") or not normalized_url.startswith(("http://", "https://", "file://", "data:image/"))
+
     response_payload = {
-        "success": bool(final_images),
+        "success": bool(final_images) or is_local_dummy,
         "project_id": resolved_project_id,
         "series_slug": proj.get("series_slug") if proj else None,
         "chapter_slug": proj.get("chapter_slug") if proj else None,

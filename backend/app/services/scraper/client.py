@@ -159,11 +159,22 @@ async def try_fetch_with_playwright(
 
             if cookies:
                 parsed = urlparse(url)
-                playwright_cookies = [
-                    {"name": k, "value": v, "domain": parsed.netloc, "path": "/"}
-                    for k, v in cookies.items()
-                ]
-                await context.add_cookies(playwright_cookies)
+                netloc = parsed.netloc or ""
+                playwright_cookies = []
+                for k, v in cookies.items():
+                    c_dict = {"name": k, "value": str(v), "path": "/"}
+                    if netloc:
+                        c_dict["domain"] = netloc
+                    elif url and url.startswith(("http://", "https://")):
+                        c_dict["url"] = url
+                    if "domain" in c_dict or "url" in c_dict:
+                        playwright_cookies.append(c_dict)
+
+                if playwright_cookies:
+                    try:
+                        await context.add_cookies(playwright_cookies)
+                    except Exception as c_err:
+                        logger.warning(f"[Scraper] Failed to set Playwright cookies: {c_err}")
 
             page = await context.new_page()
             await page.set_viewport_size({"width": 1280, "height": 1080})
