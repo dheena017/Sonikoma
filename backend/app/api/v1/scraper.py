@@ -95,6 +95,10 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
         raise HTTPException(status_code=400, detail="Target Webtoon URL is required and cannot be empty.")
     try:
         user_id = get_optional_user_id(request)
+        logger.debug(
+            f"[Scraper Route] /scrape-images request: url={body.url!r}, user_id={user_id}, "
+            f"bypass_cache={body.bypass_cache}, limit={body.limit}, project_id={body.project_id}"
+        )
         result = await scrape_and_initialize_project(
             url=body.url,
             source=body.source,

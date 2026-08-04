@@ -4,7 +4,7 @@ backend/app/startup/logging.py
 import sys
 import logging
 import re
-from .bootstrap import IS_PRODUCTION
+from .bootstrap import IS_PRODUCTION, LOG_LEVEL
 
 try:
     import colorama
@@ -349,7 +349,7 @@ except (ModuleNotFoundError, ImportError):
         if console_handler not in root_logger.handlers:
             root_logger.addHandler(console_handler)
 
-root_logger.setLevel(logging.INFO)
+root_logger.setLevel(LOG_LEVEL)
 logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
 logging.getLogger("huggingface_hub.utils").setLevel(logging.ERROR)
 logging.getLogger("huggingface_hub.utils._http").setLevel(logging.ERROR)

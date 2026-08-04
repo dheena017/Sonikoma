@@ -245,6 +245,8 @@ async def proxy_image(
             except Exception:
                 pass
 
+        logger.debug(f"[Proxy] Fetching remote image: {fetch_url[:70]} | referer_candidates={referer_candidates}")
+
         # 4. Common manhua/manga reader origins
         for popular in ["https://www.topmanhua.fan/", "https://topmanhua.fan/", "https://manhwatop.com/", "https://manhuato.com/"]:
             _add_ref(popular)

@@ -1,8 +1,7 @@
-"""
-Panel box utilities moved into services.image.utils
-"""
-
+import logging
 from typing import List, Dict, Tuple, Any
+
+logger = logging.getLogger("sonikoma.services.image.panel_box_utils")
 
 
 def adjust_to_aspect_ratio(
@@ -25,6 +24,7 @@ def adjust_to_aspect_ratio(
     except Exception:
         return x, y, w_box, h_box
 
+    orig_x, orig_y, orig_w, orig_h = x, y, w_box, h_box
     curr_ratio = float(w_box) / float(h_box) if h_box > 0 else 1.0
     
     if curr_ratio < target_ratio:
@@ -54,6 +54,7 @@ def adjust_to_aspect_ratio(
         h_box = new_h
         y = new_y
         
+    logger.debug(f"[AutoCrop Aspect] Adjusted to '{aspect_ratio_str}': ({orig_x},{orig_y},{orig_w}x{orig_h}) -> ({x},{y},{w_box}x{h_box})")
     return x, y, w_box, h_box
 
 
@@ -63,6 +64,7 @@ def merge_overlapping_boxes(
     if not boxes:
         return boxes
     
+    initial_count = len(boxes)
     boxes = sorted(boxes, key=lambda b: (b.get("y", 0), b.get("x", 0)))
     
     merged = True
@@ -129,6 +131,7 @@ def merge_overlapping_boxes(
                     })
                     if box_b.get("yolo_boosted"):
                         merged_dict["yolo_boosted"] = True
+                    logger.debug(f"[AutoCrop Merge] Merging box ({box_a['x']},{box_a['y']}) with ({box_b['x']},{box_b['y']}) -> IoU={iou:.2f}, overlap_ratio={overlap_min_ratio:.2f}")
                     box_a = merged_dict
                     skip_indices.add(j)
                     merged = True
@@ -139,6 +142,7 @@ def merge_overlapping_boxes(
         if not merged:
             break
             
+    logger.debug(f"[AutoCrop Merge] Input boxes: {initial_count} -> Merged output boxes: {len(boxes)}")
     return boxes
 
 

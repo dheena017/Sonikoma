@@ -167,6 +167,11 @@ async def scrape_images_from_url(
         merged_cookies.update(cookies)
 
     logger.info(f"[Scraper] Commencing scrape for url: {fetch_url}")
+    logger.debug(
+        f"[Scraper] Config: bypass_cache={bypass_cache}, limit={limit}, "
+        f"proxy_images={proxy_images}, filter_banners={filter_banners}, "
+        f"cookies_count={len(merged_cookies)}, headers_count={len(fetch_headers)}"
+    )
     html = await try_fetch_url_resilient(fetch_url, fetch_headers, cookies=merged_cookies)
 
     if not html:

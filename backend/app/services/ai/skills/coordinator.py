@@ -12,7 +12,10 @@ import asyncio
 from typing import Any, Optional
 
 from core.config import ai_initialized, call_gemini_with_retry, genai_client
-from google.genai import types
+try:
+    from google.genai import types
+except Exception:
+    types = None
 from services.ai.skills.utils import resolve_api_key
 
 from core.settings import GEMINI_FALLBACK_MODELS

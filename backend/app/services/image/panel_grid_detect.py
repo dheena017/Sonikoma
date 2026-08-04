@@ -5,8 +5,11 @@ Grid layout panel detection strategies using OpenCV contours or PIL projection p
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import logging
 import numpy as np
 from typing import List, Dict, Tuple, Any
+
+logger = logging.getLogger("sonikoma.services.image.panel_grid_detect")
 
 
 def _detect_panels_grid_cv(
@@ -28,6 +31,11 @@ def _detect_panels_grid_cv(
     Applies bounding box filtering with min_panel_area and discards thin strip artifacts.
     """
     import cv2
+    logger.debug(
+        f"[Grid Detect CV] Starting OpenCV contour detection: gray_shape={gray.shape}, "
+        f"is_white_bg={is_white_bg}, threshold_val={threshold_val}, canny=({canny_low},{canny_high}), "
+        f"kernel={close_kernel_size}, high_sensitivity={high_sensitivity}"
+    )
     if high_sensitivity:
         # Use adaptive thresholding for highly stylized/sensitive pages
         thresh = cv2.adaptiveThreshold(
@@ -80,6 +88,7 @@ def _detect_panels_grid_cv(
 
             raw_boxes.append({"x": x_box, "y": y_box, "w": w_box, "h": h_box})
             
+    logger.debug(f"[Grid Detect CV] Extracted {len(contours) if contours else 0} contours -> {len(raw_boxes)} candidate panel boxes.")
     return raw_boxes
 
 
@@ -97,6 +106,7 @@ def _detect_panels_grid_pil(
     Filters bounding boxes by min_panel_area threshold and discards thin horizontal/vertical strip artifacts.
     """
     h, w = gray_arr.shape
+    logger.debug(f"[Grid Detect PIL] Starting projection profile search: shape={w}x{h}, is_white_bg={is_white_bg}")
     img_area = float(w * h)
     effective_min_area = min(min_panel_area, max(500.0, img_area * 0.01))
     row_means = np.mean(gray_arr, axis=1)

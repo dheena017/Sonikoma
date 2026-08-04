@@ -44,6 +44,49 @@ from services.image.utils.panel_image_utils import (
 logger = logging.getLogger("sonikoma.services.detect_panels")
 
 
+def _sort_panels_reading_order(panels: List[Dict[str, Any]], reading_order: str = "ltr") -> List[Dict[str, Any]]:
+    """
+    Sorts comic & webtoon panels into true 2D visual reading order.
+    Groups panels into horizontal visual rows (with adaptive height tolerance),
+    then sorts each row left-to-right (LTR) or right-to-left (RTL).
+    Top-to-bottom row sequence is strictly preserved.
+    """
+    if not panels:
+        return panels
+
+    sorted_by_y = sorted(panels, key=lambda b: (b.get("y", 0), b.get("x", 0)))
+    
+    rows: List[List[Dict[str, Any]]] = []
+    for panel in sorted_by_y:
+        py = panel.get("y", 0)
+        ph = panel.get("height", 0)
+        
+        placed = False
+        for row in rows:
+            row_y_min = min(p.get("y", 0) for p in row)
+            row_y_max = max(p.get("y", 0) for p in row)
+            row_avg_h = sum(p.get("height", 0) for p in row) / float(len(row))
+            
+            row_tolerance = max(30.0, row_avg_h * 0.40)
+            
+            if abs(py - row_y_min) <= row_tolerance or abs(py - row_y_max) <= row_tolerance:
+                row.append(panel)
+                placed = True
+                break
+                
+        if not placed:
+            rows.append([panel])
+            
+    is_rtl = reading_order.lower() == "rtl"
+    ordered_panels: List[Dict[str, Any]] = []
+    
+    for row in rows:
+        sorted_row = sorted(row, key=lambda b: -b.get("x", 0) if is_rtl else b.get("x", 0))
+        ordered_panels.extend(sorted_row)
+        
+    return ordered_panels
+
+
 def run_cv_detection(
     # ── Required ──────────────────────────────────────────────────────────────
     image_path: str,
@@ -416,8 +459,18 @@ def run_cv_detection(
     # It mirrors gray_arr so we always slice them in sync.
     color_arr: Optional[np.ndarray] = img if (has_cv and img is not None) else None
 
-    w, h = orig_w, orig_h
-    if crop_w > 0 and crop_h > 0 and (crop_w < orig_w or crop_h < orig_h):
+    bg_res = _detect_bg_color_and_threshold(gray_arr, bg_mode, sensitivity, color_arr=color_arr)
+    is_white_bg, threshold_val, median_bg, bg_std, top_median, bottom_median, bg_color_rgb = bg_res
+    is_tall_strip = (orig_h / max(1, orig_w) > tall_strip_ratio)
+
+    # For Webtoon mode, do not crop top/bottom global margins so Panel 1 starts at y=0
+    if auto_split and is_tall_strip:
+        crop_y = 0
+        crop_h = orig_h
+        gray_arr_processed = gray_arr
+        color_arr_processed = color_arr
+        w, h = orig_w, orig_h
+    elif crop_w > 0 and crop_h > 0 and (crop_w < orig_w or crop_h < orig_h):
         logger.info(f"[Panel Detection] Trimming global solid margins: x={crop_x}, y={crop_y}, w={crop_w}, h={crop_h}")
         gray_arr_processed = gray_arr[crop_y : crop_y + crop_h, crop_x : crop_x + crop_w]
         color_arr_processed = (
@@ -425,7 +478,13 @@ def run_cv_detection(
             if color_arr is not None else None
         )
         w, h = crop_w, crop_h
+    else:
+        gray_arr_processed = gray_arr
+        color_arr_processed = color_arr
+        w, h = orig_w, orig_h
 
+
+    if crop_x > 0 or crop_y > 0:
         shifted_ocr_boxes = []
         for box in ocr_boxes:
             shifted_ocr_boxes.append({
@@ -435,20 +494,6 @@ def run_cv_detection(
                 "h": box["h"]
             })
         ocr_boxes = shifted_ocr_boxes
-    else:
-        gray_arr_processed = gray_arr
-        color_arr_processed = color_arr
-
-    bg_res = _detect_bg_color_and_threshold(gray_arr_processed, bg_mode, sensitivity, color_arr=color_arr_processed)
-    is_white_bg, threshold_val, median_bg, bg_std, top_median, bottom_median, bg_color_rgb = bg_res
-    is_tall_strip = (h / max(1, w) > tall_strip_ratio)
-
-    # For Webtoon mode, ensure crop_y = 0 so Panel 1 starts at y=0 (top of strip)
-    if auto_split and is_tall_strip:
-        crop_y = 0
-        crop_h = orig_h
-        gray_arr_processed = gray_arr
-        w, h = orig_w, orig_h
 
     passes = [False, True]
     raw_boxes: List[Dict[str, Any]] = []
@@ -456,7 +501,7 @@ def run_cv_detection(
 
     for high_sensitivity in passes:
         if auto_split and is_tall_strip:
-            webtoon_min_h = max(scaled_min_height_px, 150)
+            webtoon_min_h = scaled_min_height_px
             logger.info(f"[Panel Detection] Running Enhanced Webtoon Slicing strategy (min_height={webtoon_min_h}px, high_sensitivity={high_sensitivity})")
             raw_boxes = _detect_panels_webtoon(
                 gray_arr_processed, is_white_bg, threshold_val, webtoon_min_h,
@@ -551,25 +596,37 @@ def run_cv_detection(
 
         if len(merged_boxes) > 0:
             has_irregular = False
-            # For Grid mode: check aspect ratio irregularity to trigger high-sensitivity retry
-            if not (auto_split and is_tall_strip):
-                for box in merged_boxes:
-                    aspect = float(box["w"]) / float(box["h"]) if box["h"] > 0 else 1.0
-                    if aspect > irregular_aspect_high or aspect < irregular_aspect_low:
-                        has_irregular = True
-                        break
-            # For Webtoon mode: check if the result is a single full-frame (detection failed)
-            else:
-                is_webtoon_full_frame = (
-                    len(merged_boxes) == 1 and
-                    merged_boxes[0]["w"] >= int(w * 0.95) and
-                    merged_boxes[0]["h"] >= int(h * 0.95)
-                )
-                if is_webtoon_full_frame and not high_sensitivity:
-                    has_irregular = True
-                    logger.info("[Panel Detection] Webtoon single full-frame detected on Pass 1; retrying with high sensitivity.")
 
-            if not has_irregular:
+            # Universal Full-Frame check across all modes
+            is_full_frame = (
+                len(merged_boxes) == 1 and
+                merged_boxes[0]["w"] >= int(w * 0.90) and
+                merged_boxes[0]["h"] >= int(h * 0.90)
+            )
+
+            # For Grid mode: check full-frame or aspect ratio irregularity to trigger high-sensitivity retry
+            if not (auto_split and is_tall_strip):
+                if is_full_frame and not high_sensitivity:
+                    has_irregular = True
+                    logger.info("[Panel Detection] Grid single full-frame detected on Pass 1; retrying with high sensitivity.")
+                else:
+                    for box in merged_boxes:
+                        aspect = float(box["w"]) / float(box["h"]) if box["h"] > 0 else 1.0
+                        if aspect > irregular_aspect_high or aspect < irregular_aspect_low:
+                            has_irregular = True
+                            break
+            # For Webtoon mode: check full-frame or under-sliced long strip to trigger high-sensitivity retry
+            else:
+                is_webtoon_under_sliced = (
+                    len(merged_boxes) <= 3 and
+                    any(b["h"] >= int(h * 0.40) for b in merged_boxes) and
+                    h >= int(w * 3.0)
+                )
+                if (is_full_frame or is_webtoon_under_sliced) and not high_sensitivity:
+                    has_irregular = True
+                    logger.info("[Panel Detection] Webtoon strip full-frame or under-sliced on Pass 1; retrying with high sensitivity.")
+
+            if not has_irregular or high_sensitivity:
                 break
             else:
                 logger.info(f"[Panel Detection] Panels need retry (high_sensitivity={high_sensitivity}); re-running with high sensitivity fallback.")
@@ -644,6 +701,10 @@ def run_cv_detection(
 
     final_panels = []
     logger.info(f"[Panel Detection] Found {len(merged_boxes)} panels after merging and filtering.")
+    logger.debug(
+        f"[Panel Detection] Pipeline summary: orig_size=({orig_w}x{orig_h}), cropped_size=({w}x{h}), "
+        f"raw_boxes={len(raw_boxes)}, filtered_boxes={len(filtered_boxes)}, final_merged={len(merged_boxes)}"
+    )
     
     orig_area = max(1, orig_w * orig_h)
     
@@ -745,20 +806,8 @@ def run_cv_detection(
             "isHeader": is_header,
         })
         
-    # Sort according to requested reading order (LTR Western vs RTL Manga).
-    # Use pixel y (top-to-bottom) as primary key, then pixel x (left-to-right / right-to-left).
-    # Avoid the old 4%-cropTop row-band grouping which reorders panels incorrectly on
-    # tall stitched strips (one band ≈ 2,400 px on a 60,000 px image).
-    if reading_order.lower() == "rtl":
-        sorted_panels = sorted(
-            final_panels,
-            key=lambda b: (b.get("y", 0), -b.get("x", 0))
-        )
-    else:
-        sorted_panels = sorted(
-            final_panels,
-            key=lambda b: (b.get("y", 0), b.get("x", 0))
-        )
+    # Sort according to requested reading order (LTR Western vs RTL Manga) using visual 2D row grouping
+    sorted_panels = _sort_panels_reading_order(final_panels, reading_order=reading_order)
     
     unique_panels = []
     for panel in sorted_panels:
@@ -795,8 +844,8 @@ def run_cv_detection(
                 dl = abs(panel.get("cropLeft", 0.0) - existing.get("cropLeft", 0.0))
                 dr = abs(panel.get("cropRight", 0.0) - existing.get("cropRight", 0.0))
                 
-                # Only treat as duplicate if 2D overlap exceeds threshold OR all 4 crop corners match
-                if iou_min > dedup_overlap_thresh or (dt < dedup_crop_tolerance and db < dedup_crop_tolerance and dl < dedup_crop_tolerance and dr < dedup_crop_tolerance):
+                effective_dedup_thresh = max(dedup_overlap_thresh, 0.88) if (auto_split and is_tall_strip) else dedup_overlap_thresh
+                if iou_min > effective_dedup_thresh or (dt < dedup_crop_tolerance and db < dedup_crop_tolerance and dl < dedup_crop_tolerance and dr < dedup_crop_tolerance):
                     is_dup = True
                     break
                 

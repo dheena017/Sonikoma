@@ -85,7 +85,13 @@ def crop_auto_borders(
             left_bg = np.median(left_strip.reshape(-1, 3), axis=0) if left_std < max_border_std else None
             right_bg = np.median(right_strip.reshape(-1, 3), axis=0) if right_std < max_border_std else None
 
+            logger.debug(
+                f"[AutoCrop Borders] Evaluating ({w}x{h}), tighter={tighter}, pad={crop_padding}, "
+                f"border_stds=(top={top_std:.1f}, bot={bottom_std:.1f}, left={left_std:.1f}, right={right_std:.1f})"
+            )
+
             if top_bg is None and bottom_bg is None and left_bg is None and right_bg is None:
+                logger.debug(f"[AutoCrop Borders] No uniform solid borders detected on image edges ({w}x{h}); keeping original.")
                 return {"data": img_data, "content_type": content_type}
 
             y_min, y_max = 0, h
@@ -140,6 +146,7 @@ def crop_auto_borders(
 
             if (x_max - x_min) >= 30 and (y_max - y_min) >= 30:
                 if x_min > 0 or y_min > 0 or x_max < w or y_max < h:
+                    logger.debug(f"[AutoCrop Borders] Cropped margins: ({w}x{h}) -> crop_box=({x_min},{y_min},{x_max-x_min}x{y_max-y_min})")
                     cropped_img = img.crop((x_min, y_min, x_max, y_max))
                     out = io.BytesIO()
                     cropped_img.save(out, format=orig_format, quality=95)

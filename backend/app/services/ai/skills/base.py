@@ -17,7 +17,10 @@ from pydantic import BaseModel
 
 from core.config import ai_initialized, call_gemini_with_retry, genai_client
 from core.settings import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
-from google.genai import types
+try:
+    from google.genai import types
+except Exception:
+    types = None
 
 # Import schemas and map
 from services.ai.skills.schemas import (

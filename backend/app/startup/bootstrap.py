@@ -49,6 +49,8 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 
+import logging
+
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 import tempfile
 tempfile.tempdir = os.path.join(PROJECT_ROOT, 'data', 'temp')
@@ -58,5 +60,11 @@ load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, '.env'))
 load_dotenv(dotenv_path=os.path.join(PROJECT_ROOT, 'backend', '.env'))
 
 IS_PRODUCTION = os.getenv('NODE_ENV') == 'production'
+LOG_LEVEL_ENV = os.getenv('LOG_LEVEL', '').upper()
+if LOG_LEVEL_ENV and hasattr(logging, LOG_LEVEL_ENV):
+    LOG_LEVEL = getattr(logging, LOG_LEVEL_ENV)
+else:
+    LOG_LEVEL = logging.DEBUG if not IS_PRODUCTION else logging.INFO
+
 API_VERSION  = os.getenv('API_VERSION', '1.0.0')
 SERVER_START = time.time()

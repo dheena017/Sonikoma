@@ -34,8 +34,8 @@ try:
         genai_client = genai.Client(api_key=api_key)
         ai_initialized = True
         logger.debug("Gemini GenAI client successfully configured server-side.")
-except ImportError:
-    logger.error("Failed to import google-genai package.")
+except Exception as e:
+    logger.warning(f"google.genai client initialization skipped: {e}")
 
 # ── HuggingFace ───────────────────────────────────────────────────────────────
 hf_client = None

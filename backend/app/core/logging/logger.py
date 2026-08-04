@@ -52,7 +52,7 @@ logging.Logger.success = success  # type: ignore[attr-defined]
 
 def setup_logging():
     """Initializes the global logging configuration."""
-    from startup.bootstrap import IS_PRODUCTION
+    from startup.bootstrap import IS_PRODUCTION, LOG_LEVEL
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
     console_handler.addFilter(EndpointFilter())
@@ -72,7 +72,7 @@ def setup_logging():
         root_logger.addHandler(ui_handler)
 
     root_logger.addHandler(console_handler)
-    root_logger.setLevel(logging.INFO)
+    root_logger.setLevel(LOG_LEVEL)
     
     # Set logger levels for noisy libraries
     logging.getLogger("uvicorn.access").addFilter(EndpointFilter())

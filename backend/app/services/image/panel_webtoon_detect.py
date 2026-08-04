@@ -27,23 +27,23 @@ def _detect_bg_color_and_threshold(
     Supports gradient baselines across tall strips and multi-channel color matching.
     """
     h, w = gray_arr.shape
-    inset_y = max(1, min(15, int(h * 0.005)))
-    inset_x = max(1, min(15, int(w * 0.01)))
+    band_y = max(1, min(20, int(h * 0.005)))
+    band_x = max(1, min(20, int(w * 0.01)))
 
-    top_edge = gray_arr[inset_y, :]
-    bottom_edge = gray_arr[-inset_y - 1, :]
-    left_edge = gray_arr[:, inset_x]
-    right_edge = gray_arr[:, -inset_x - 1]
+    top_edge = gray_arr[:band_y, :]
+    bottom_edge = gray_arr[-band_y:, :]
+    left_edge = gray_arr[:, :band_x]
+    right_edge = gray_arr[:, -band_x:]
 
     top_median = float(np.median(top_edge))
     bottom_median = float(np.median(bottom_edge))
 
-    edge_samples = np.concatenate([top_edge, bottom_edge, left_edge, right_edge])
+    edge_samples = np.concatenate([top_edge.ravel(), bottom_edge.ravel(), left_edge.ravel(), right_edge.ravel()])
     median_bg = float(np.median(edge_samples))
     bg_std = float(np.std(edge_samples))
 
     if bg_mode == "auto":
-        is_white_bg = bool(median_bg > 127.0)
+        is_white_bg = (median_bg > 127.0)
     else:
         is_white_bg = bg_mode == "white"
         median_bg = 255.0 if is_white_bg else 0.0
@@ -68,6 +68,11 @@ def _detect_bg_color_and_threshold(
         except Exception:
             pass
 
+    logger.debug(
+        f"[Panel Webtoon Detect] BG Detection: is_white_bg={is_white_bg}, "
+        f"threshold_val={threshold_val}, median_bg={median_bg:.1f}, bg_std={bg_std:.1f}, "
+        f"top_median={top_median:.1f}, bottom_median={bottom_median:.1f}, bg_color_rgb={bg_color_rgb}"
+    )
     return is_white_bg, threshold_val, median_bg, bg_std, top_median, bottom_median, bg_color_rgb
 
 
@@ -139,6 +144,10 @@ def _detect_panels_webtoon(
     Speech Bubble Protection, horizontal X-margin trimming, and multi-column panel splitting.
     """
     h, w = gray_arr.shape
+    logger.debug(
+        f"[Panel Webtoon Detect] Slicing {w}x{h} strip (min_height_px={min_height_px}, "
+        f"gutter_bg_ratio={gutter_bg_ratio:.2f}, high_sensitivity={high_sensitivity})"
+    )
     margin = max(4, min(60, int(w * 0.08)))
     gray_center = gray_arr[:, margin:-margin] if w > margin * 2 else gray_arr
     w_center = gray_center.shape[1]
@@ -173,9 +182,10 @@ def _detect_panels_webtoon(
 
     # Speech Bubble & OCR Protection (protect bubbles from being cut, without bridging gutters)
     if ocr_boxes:
+        bubble_pad = max(2, int(w * 0.005))
         for box in ocr_boxes:
-            by1 = max(0, int(box.get("y", 0)) - 3)
-            by2 = min(h, int(box.get("y", 0) + box.get("h", 0)) + 3)
+            by1 = max(0, int(box.get("y", 0)) - bubble_pad)
+            by2 = min(h, int(box.get("y", 0) + box.get("h", 0)) + bubble_pad)
             if by2 > by1:
                 is_content_row[by1:by2] = True
 
@@ -281,11 +291,42 @@ def _detect_panels_webtoon(
                     final_x = col_x1 + left_pad
                     final_w = max(10, right_pad - left_pad)
 
+            # 3. Y-axis margin trimming to tighten top/bottom gutter whitespace
+            final_y = start_y
+            final_h = slice_h
+            if slice_h > 40:
+                row_stds = np.std(sub_slice, axis=1)
+                if is_white_bg:
+                    row_bg_ratio = np.sum(sub_slice > threshold_val, axis=1) / float(max(1, col_w))
+                else:
+                    row_bg_ratio = np.sum(sub_slice < threshold_val, axis=1) / float(max(1, col_w))
+
+                content_rows = (row_bg_ratio < 0.975) | (row_stds > 2.5)
+                if ocr_boxes:
+                    for box in ocr_boxes:
+                        bx = int(box.get("x", 0))
+                        by = int(box.get("y", 0))
+                        bw_b = int(box.get("w", 0))
+                        bh_b = int(box.get("h", 0))
+                        if not (bx + bw_b < col_x1 or bx > col_x2):
+                            by1_rel = max(0, by - start_y)
+                            by2_rel = min(slice_h, (by + bh_b) - start_y)
+                            if by2_rel > by1_rel:
+                                content_rows[by1_rel:by2_rel] = True
+
+                if np.any(content_rows):
+                    valid_y_indices = np.where(content_rows)[0]
+                    dynamic_pad = max(2, int(w * 0.005))
+                    top_pad = max(0, valid_y_indices[0] - dynamic_pad)
+                    bot_pad = min(slice_h, valid_y_indices[-1] + dynamic_pad)
+                    final_y = start_y + top_pad
+                    final_h = max(15, bot_pad - top_pad)
+
             raw_boxes.append({
                 "x": final_x,
-                "y": start_y,
+                "y": final_y,
                 "w": final_w,
-                "h": slice_h
+                "h": final_h
             })
 
     return raw_boxes

@@ -2,8 +2,11 @@
 Moved panel utilities into services.image.utils
 """
 
+import logging
 import numpy as np
 from typing import List, Dict, Tuple, Optional, Any
+
+logger = logging.getLogger("sonikoma.services.image.panel_image_utils")
 
 
 def trim_solid_borders(
@@ -81,6 +84,8 @@ def trim_solid_borders(
         new_y2 = min(y2, max(trim_y2, y2 - max_trim_y))
 
         if (new_x2 - new_x1) >= 15 and (new_y2 - new_y1) >= 15:
+            if new_x1 != x1 or new_y1 != y1 or (new_x2 - new_x1) != (x2 - x1) or (new_y2 - new_y1) != (y2 - y1):
+                logger.debug(f"[AutoCrop Trim] Border trim: ({x1},{y1},{x2-x1}x{y2-y1}) -> ({new_x1},{new_y1},{new_x2-new_x1}x{new_y2-new_y1})")
             return new_x1, new_y1, new_x2 - new_x1, new_y2 - new_y1
 
     return x1, y1, x2 - x1, y2 - y1
@@ -109,37 +114,51 @@ def _filter_solid_noise(
 
         # Reject full-frame outer bounding boxes (>= 98% width AND >= 98% height or >= 96% area)
         if bw >= w_img * 0.98 and bh >= h_img * 0.98:
+            logger.debug(f"[AutoCrop Filter] Rejected full-frame box: x={bx}, y={by}, w={bw}, h={bh}")
             continue
         if area >= (img_area * 0.96):
+            logger.debug(f"[AutoCrop Filter] Rejected near-total area box: x={bx}, y={by}, w={bw}, h={bh}")
             continue
 
         # Enforce minimum area threshold suitable for comic panels (e.g. min_panel_area = 5000)
         if area < effective_min_area:
+            logger.debug(f"[AutoCrop Filter] Rejected small area box ({area:.0f} < {effective_min_area:.0f}): x={bx}, y={by}, w={bw}, h={bh}")
             continue
 
-        # Discard thin horizontal/vertical strip artifacts
+        # Discard thin horizontal/vertical strip artifacts (allow tall webtoon panels when auto_split=True)
         aspect = float(bw) / float(bh) if bh > 0 else 1.0
-        if aspect > max_aspect_ratio or aspect < min_aspect_ratio or bw < 30 or bh < 30:
+        effective_min_aspect = min(min_aspect_ratio, float(w_img) / float(max(1, h_img))) if auto_split else min_aspect_ratio
+        if aspect > max_aspect_ratio or aspect < effective_min_aspect or bw < 30 or bh < 30:
+            logger.debug(f"[AutoCrop Filter] Rejected extreme aspect/small dimension box (aspect={aspect:.2f}): x={bx}, y={by}, w={bw}, h={bh}")
             continue
 
         if auto_split:
             if bh < height_limit:
+                logger.debug(f"[AutoCrop Filter] Rejected height below limit ({bh} < {height_limit}): x={bx}, y={by}")
                 continue
         else:
             if bw < min_w or bh < height_limit:
+                logger.debug(f"[AutoCrop Filter] Rejected dimension below limits (w={bw}<{min_w:.0f} or h={bh}<{height_limit}): x={bx}, y={by}")
                 continue
 
         try:
             box_slice = gray_arr[by:by+bh, bx:bx+bw]
-            if np.std(box_slice) < noise_std_thresh:
+            slice_std = float(np.std(box_slice))
+            if slice_std < noise_std_thresh:
+                logger.debug(f"[AutoCrop Filter] Rejected solid color noise (std={slice_std:.2f} < {noise_std_thresh}): x={bx}, y={by}")
                 continue
             row_stds = np.std(box_slice, axis=1)
             flat_rows = np.sum(row_stds < 3.0)
-            if float(flat_rows) / float(max(1, bh)) > flat_row_ratio:
+            flat_ratio = float(flat_rows) / float(max(1, bh))
+            effective_flat_ratio = 0.98 if auto_split else flat_row_ratio
+            if flat_ratio > effective_flat_ratio:
+                logger.debug(f"[AutoCrop Filter] Rejected high flat-row ratio box (ratio={flat_ratio:.2f} > {effective_flat_ratio}): x={bx}, y={by}")
                 continue
         except Exception:
             pass
 
         filtered_boxes.append(box)
+
+    logger.debug(f"[AutoCrop Filter] Input raw boxes: {len(raw_boxes)} -> Filtered valid boxes: {len(filtered_boxes)}")
     return filtered_boxes
 
