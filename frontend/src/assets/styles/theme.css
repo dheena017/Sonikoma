@@ -22,6 +22,32 @@
   --color-rose-350: #fb7185;
 }
 
+/* Visual Theme Customizations */
+:root {
+  --theme-primary: 139, 92, 246; /* purple-500 default */
+  --theme-glow: rgba(139, 92, 246, 0.2);
+}
+
+[data-theme="obsidian"] {
+  --theme-primary: 168, 85, 247; /* purple-500 */
+  --theme-glow: rgba(168, 85, 247, 0.22);
+}
+
+[data-theme="cyberpunk"] {
+  --theme-primary: 6, 182, 212; /* cyan-500 */
+  --theme-glow: rgba(6, 182, 212, 0.25);
+}
+
+[data-theme="slate"] {
+  --theme-primary: 161, 161, 170; /* zinc-400 */
+  --theme-glow: rgba(161, 161, 170, 0.15);
+}
+
+[data-theme="indigo"] {
+  --theme-primary: 99, 102, 241; /* indigo-500 */
+  --theme-glow: rgba(99, 102, 241, 0.25);
+}
+
 body {
   background-color: #09090b;
   color: #fafafa;
@@ -34,4 +60,21 @@ body {
 
 :root[data-mode="light"] {
   color-scheme: light;
+}
+
+/* Theme-change overlay (injected by useThemeMode hook) */
+#theme-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  will-change: opacity;
+  transform: translateZ(0); /* force GPU layer */
+}
+
+/* Lock element transitions during theme switch */
+[data-theme-switching="true"] *,
+[data-theme-switching="true"] *::before,
+[data-theme-switching="true"] *::after {
+  transition-duration: 0ms !important;
 }
