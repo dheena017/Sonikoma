@@ -32,7 +32,15 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   const activeProjectData = useProjectStore((state) => state.activeProjectData);
   const clearActiveProject = useProjectStore((state) => state.clearActiveProject);
   const activeProject = activeProjectData?.project || null;
-  const activePanels = activeProjectData?.panels || panels || [];
+  const activePanels = useMemo(() => {
+    if (activeProjectData?.panels && activeProjectData.panels.length > 0) {
+      return activeProjectData.panels;
+    }
+    if (Array.isArray(panels) && panels.length > 0) {
+      return panels;
+    }
+    return [];
+  }, [activeProjectData?.panels, panels]);
 
   const exitActiveProject = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -212,6 +220,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
         <div className="space-y-6">
           <CreativeSuiteDashboardActiveProject
             activeProject={activeProject}
+            panels={activePanels}
             activePanelsCount={activePanels.length}
             exitActiveProject={exitActiveProject}
             navigateTo={navigateTo}

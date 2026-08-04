@@ -1,8 +1,9 @@
 import React from "react";
-import { LogOut, Play, Tv } from "lucide-react";
+import { LogOut, Play, Tv, Film, Sparkles } from "lucide-react";
 
 interface CreativeSuiteDashboardActiveProjectProps {
   activeProject: any | null;
+  panels?: any[];
   activePanelsCount: number;
   exitActiveProject: () => void;
   navigateTo: (path: string) => void;
@@ -10,6 +11,7 @@ interface CreativeSuiteDashboardActiveProjectProps {
 
 const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActiveProjectProps> = ({
   activeProject,
+  panels = [],
   activePanelsCount,
   exitActiveProject,
   navigateTo,
@@ -29,6 +31,8 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
     activeProject?.synopsis ||
     activeProject?.description ||
     "No synopsis is available for this project yet.";
+
+  const safePanels = panels || [];
 
   return (
     <div className="relative bg-neutral-900/60 border border-neutral-850 rounded-2xl p-6 shadow-md text-left overflow-hidden">
@@ -103,6 +107,67 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
 
             <div className="mt-3 rounded-2xl bg-neutral-950 border border-neutral-850 p-3 text-[11px] text-neutral-300 leading-relaxed min-h-[72px]">
               {synopsisText}
+            </div>
+
+            {/* ACTIVE TIMELINE PANELS FILMSTRIP */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest flex items-center gap-1.5">
+                  <Film className="w-3.5 h-3.5 text-purple-400" /> Active Panel Frames ({safePanels.length})
+                </span>
+                {safePanels.length > 0 && (
+                  <span className="text-[9px] font-mono text-neutral-400">
+                    Scroll →
+                  </span>
+                )}
+              </div>
+
+              {safePanels.length > 0 ? (
+                <div className="flex gap-2.5 overflow-x-auto pb-2 pt-1 scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent">
+                  {safePanels.map((p, idx) => {
+                    const imgUrl = p?.image_url || p?.url || p?.src || p?.image || p?.image_path || null;
+                    return (
+                      <div
+                        key={p?.id || idx}
+                        onClick={() => {
+                          const seriesSlug = activeProject?.series_slug || localStorage.getItem("active_series_slug") || "active";
+                          const chapterSlug = activeProject?.chapter_slug || localStorage.getItem("active_chapter_slug") || "active";
+                          navigateTo(`/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}?panel=${idx + 1}`);
+                        }}
+                        className="relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-950 hover:border-purple-500/60 transition-all cursor-pointer group shadow-md"
+                        title={`Panel #${idx + 1}: ${p?.speech_text || p?.visual_description || 'Frame'}`}
+                      >
+                        {imgUrl ? (
+                          <img
+                            src={imgUrl}
+                            alt={`Frame ${idx + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center p-1 text-center bg-neutral-950 text-neutral-500">
+                            <Sparkles className="w-4 h-4 text-purple-400/50 mb-1" />
+                            <span className="text-[9px] font-mono">Frame #{idx + 1}</span>
+                          </div>
+                        )}
+                        <div className="absolute top-1 left-1 bg-black/80 backdrop-blur-xs px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-sm">
+                          #{idx + 1}
+                        </div>
+                        {p?.duration && (
+                          <div className="absolute bottom-1 right-1 bg-black/85 px-1 py-0.5 rounded text-[7px] font-mono text-neutral-300 border border-neutral-800">
+                            {p.duration}s
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-3 bg-neutral-950 border border-neutral-850 rounded-xl text-center">
+                  <p className="text-[11px] text-neutral-400 font-mono">
+                    No storyboard panels found in active timeline.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">
