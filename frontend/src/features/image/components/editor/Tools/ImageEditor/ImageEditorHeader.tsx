@@ -163,6 +163,44 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           </span>
         </div>
 
+        {/* User Profile (moved to left) */}
+        {user && (
+          <button
+            onClick={() => navigateTo && navigateTo("/profile")}
+            className="flex items-center gap-2 px-2 py-1 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer overflow-hidden max-w-[120px] h-[34px]"
+            title="View Profile"
+          >
+            <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
+              {user.avatar_url &&
+              !user.avatar_url.startsWith("linear-gradient") ? (
+                <div className="w-full h-full relative">
+                  <img
+                    src={user.avatar_url}
+                    alt="Profile"
+                    className="w-full h-full object-cover relative z-10"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none">
+                    {(user.full_name || "U").charAt(0).toUpperCase()}
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none"
+                  style={user.avatar_url ? { background: user.avatar_url } : {}}
+                >
+                  {(user.full_name || "U").charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <span className="text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">
+              {user.full_name?.split(" ")[0] || "User"}
+            </span>
+          </button>
+        )}
+
         <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-purple-400 bg-purple-900/30 rounded-full border border-purple-700/50">
           IMAGE EDITOR
         </span>
@@ -280,43 +318,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           )}
         </div>
 
-        {/* User Profile */}
-        {user && (
-          <button
-            onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-2 px-1.5 py-1 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer overflow-hidden max-w-[120px] h-[34px]"
-            title="View Profile"
-          >
-            <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
-              {user.avatar_url &&
-              !user.avatar_url.startsWith("linear-gradient") ? (
-                <div className="w-full h-full relative">
-                  <img
-                    src={user.avatar_url}
-                    alt="Profile"
-                    className="w-full h-full object-cover relative z-10"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none">
-                    {(user.full_name || "U").charAt(0).toUpperCase()}
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none"
-                  style={user.avatar_url ? { background: user.avatar_url } : {}}
-                >
-                  {(user.full_name || "U").charAt(0).toUpperCase()}
-                </div>
-              )}
-            </div>
-            <span className="text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">
-              {user.full_name?.split(" ")[0] || "User"}
-            </span>
-          </button>
-        )}
+
 
         <div className="w-px h-6 bg-gray-800 mx-2"></div>
 

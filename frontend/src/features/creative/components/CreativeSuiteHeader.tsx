@@ -142,7 +142,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
       id="creative_header_pane"
       className="fixed top-0 left-0 w-full h-16 border-b border-neutral-900 bg-[#050507]/80 backdrop-blur-md z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 selection:bg-purple-650"
     >
-      {/* Left side: Hamburger and Brand */}
+      {/* Left side: Hamburger, Brand, and Creator profile badge */}
       <div className="flex items-center gap-3 shrink-0 h-full">
         <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
           <button
@@ -164,6 +164,14 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
             Creative Suite
           </span>
+        </div>
+
+        {/* User profile identifier (Creative Suite badge) moved to left */}
+        <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-850 px-3 py-1 rounded-full select-none cursor-pointer ml-1" onClick={() => navigateTo("/profile")}>
+          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-[10px] text-white font-extrabold uppercase shadow shadow-purple-900/30">
+            C
+          </div>
+          <span className="text-xs text-neutral-300 font-bold hidden sm:inline">creator</span>
         </div>
       </div>
 
@@ -379,13 +387,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           <Sliders className="h-4 w-4" />
         </button>
 
-        {/* User profile identifier (Creative Suite badge) */}
-        <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-850 px-3 py-1 rounded-full select-none cursor-pointer" onClick={() => navigateTo("/profile")}>
-          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-[10px] text-white font-extrabold uppercase shadow shadow-purple-900/30">
-            C
-          </div>
-          <span className="text-xs text-neutral-300 font-bold hidden sm:inline">creator</span>
-        </div>
+
       </div>
     </header>
   );

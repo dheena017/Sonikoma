@@ -513,7 +513,7 @@ const HeaderInner = ({
       id="header_pane"
       className="fixed top-0 left-0 w-full h-16 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4"
     >
-      {/* Left side: Hamburger and Brand */}
+      {/* Left side: Hamburger, Brand, and User Profile */}
       <div className="flex items-center gap-3 shrink-0 h-full">
         {/* NEW: Wrapper added here to perfectly match the 80px (w-20) width of the mini sidebar */}
         <div className="w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
@@ -546,6 +546,42 @@ const HeaderInner = ({
             Sonikoma
           </span>
         </div>
+
+        {/* User Profile (moved to left) */}
+        <button
+          onClick={() => navigateTo("/profile")}
+          className="flex items-center gap-2 px-2 py-1 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer overflow-hidden max-w-[120px] h-[34px] ml-1"
+          title="View Profile"
+        >
+          <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
+            {user?.avatar_url &&
+            !user.avatar_url.startsWith("linear-gradient") ? (
+              <div className="w-full h-full relative">
+                <img
+                  src={user.avatar_url}
+                  alt="Profile"
+                  className="w-full h-full object-cover relative z-10"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none">
+                  {(user.full_name || "U").charAt(0).toUpperCase()}
+                </div>
+              </div>
+            ) : (
+              <div
+                className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none"
+                style={user?.avatar_url ? { background: user.avatar_url } : {}}
+              >
+                {(user?.full_name || "U").charAt(0).toUpperCase()}
+              </div>
+            )}
+          </div>
+          <span className="text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">
+            {user?.full_name?.split(" ")[0] || "User"}
+          </span>
+        </button>
       </div>
 
       {/* Center Side: Quick Search / Command Bar */}
@@ -1281,41 +1317,7 @@ const HeaderInner = ({
           )}
         </div>
 
-        {/* User Profile */}
-        <button
-          onClick={() => navigateTo("/profile")}
-          className="flex items-center gap-2 px-1.5 py-1 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer overflow-hidden max-w-[120px] h-[34px]"
-          title="View Profile"
-        >
-          <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
-            {user?.avatar_url &&
-            !user.avatar_url.startsWith("linear-gradient") ? (
-              <div className="w-full h-full relative">
-                <img
-                  src={user.avatar_url}
-                  alt="Profile"
-                  className="w-full h-full object-cover relative z-10"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none">
-                  {(user.full_name || "U").charAt(0).toUpperCase()}
-                </div>
-              </div>
-            ) : (
-              <div
-                className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none"
-                style={user?.avatar_url ? { background: user.avatar_url } : {}}
-              >
-                {(user?.full_name || "U").charAt(0).toUpperCase()}
-              </div>
-            )}
-          </div>
-          <span className="text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">
-            {user?.full_name?.split(" ")[0] || "User"}
-          </span>
-        </button>
+
       </div>
     </header>
   );
