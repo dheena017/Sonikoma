@@ -548,7 +548,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
     ) || null;
   }, [recentProjects, targetUrl]);
 
-  const handleUploadLocalImages = (files: FileList | File[]) => {
+  const handleUploadLocalImages = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
     const fileArray = Array.from(files).filter((file) => file.type.startsWith("image/"));
     if (fileArray.length === 0) {
@@ -556,7 +556,16 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
       return;
     }
 
-    const imageUrls = fileArray.map((file) => URL.createObjectURL(file));
+    const readFileAsDataUrl = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    };
+
+    const imageUrls = await Promise.all(fileArray.map((file) => readFileAsDataUrl(file)));
 
     const currentStore = useProjectStore.getState();
     let activeProj = currentStore.activeProjectData;

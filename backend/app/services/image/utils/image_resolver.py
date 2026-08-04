@@ -147,6 +147,10 @@ async def resolve_url_to_buffer(
         mime = mime_match.group(1) if mime_match else "application/octet-stream"
         return {"data": buf, "content_type": mime, "contentType": mime}
 
+    if working_url.startswith('blob:'):
+        logger.warning(f"[ImageResolver] Cannot fetch browser-memory blob URL '{working_url[:60]}' from backend server.")
+        raise ValueError(f"Browser-local blob URL cannot be fetched by server. Ensure image is uploaded or converted to base64 data: URL.")
+
     # 4. Support local file:// URLs
     if working_url.startswith('file://'):
         from urllib.parse import unquote

@@ -132,8 +132,8 @@ async def proxy_image(
         else:
             break
 
-    if fetch_url.startswith("data:") or "data:image/svg" in fetch_url:
-        raise HTTPException(status_code=400, detail="Data URLs are not supported by the image proxy")
+    if fetch_url.startswith("data:") or fetch_url.startswith("blob:") or "data:image/svg" in fetch_url:
+        raise HTTPException(status_code=400, detail="Data and Blob URLs are browser-local and not supported by the server image proxy")
 
     tighter = request.query_params.get("tighter") == "true"
     crop_padding_str = request.query_params.get("crop_padding")

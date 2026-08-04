@@ -1,6 +1,7 @@
 import React from "react";
 import PanelCard from "@/features/scraper/components/PanelCard";
 import { HorizontalScrollContainer } from "@/features/scraper/components/LiveScraperDeck";
+import { getProxiedImageUrl } from "@/utils/url";
 
 interface LiveScraperGridProps {
   scrapedImages: string[];
@@ -61,10 +62,7 @@ export default function LiveScraperGrid({
       {scrapedImages.map((imgUrl, idx) => {
         // selectedScraped stores raw URLs — compare directly
         const isSelected = selectedScraped.includes(imgUrl);
-        // Internal /api/ URLs (e.g. /api/image/cached/...) must NOT be wrapped in proxy
-        const proxiedUrl = imgUrl?.startsWith("/api/")
-          ? imgUrl
-          : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+        const proxiedUrl = getProxiedImageUrl(imgUrl);
         return (
           <PanelCard
             key={`${imgUrl}-${idx}`}

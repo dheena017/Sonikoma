@@ -55,6 +55,17 @@ function timeAgo(dateStr?: string | null): string {
   return new Date(dateStr).toLocaleDateString();
 }
 
+function formatEpisodeLabel(ep: any): string {
+  if (ep === undefined || ep === null) return "";
+  const str = String(ep).trim();
+  if (!str) return "";
+  const numMatch = str.match(/\d+/);
+  if (numMatch) {
+    return `CH ${numMatch[0]}`;
+  }
+  return str;
+}
+
 export default function ProjectCard({
   project,
   onOpenProject,
@@ -80,7 +91,7 @@ export default function ProjectCard({
   const titleText = project.title || "Untitled Series";
   const statusColor =
     project.status?.toLowerCase() === "completed"
-      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-emerald-950/20"
       : project.status?.toLowerCase() === "processing"
       ? "bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse"
       : "bg-neutral-800/80 text-neutral-400 border-neutral-700/50";
@@ -109,7 +120,7 @@ export default function ProjectCard({
       )}
 
       {/* ─── Thumbnail ─────────────────────────────────── */}
-      <div className="relative aspect-[16/9] w-full bg-neutral-900 overflow-hidden flex-shrink-0 rounded-t-3xl border-b border-white/10">
+      <div className="relative aspect-[16/9.5] w-full bg-neutral-950 overflow-hidden flex-shrink-0 rounded-t-3xl">
         {project.cover_image ? (
           <>
             <img
@@ -119,23 +130,23 @@ export default function ProjectCard({
                 isSelected ? "scale-105 opacity-80" : "group-hover:scale-105"
               }`}
             />
-            {/* Bottom fade into card */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent" />
+            {/* Bottom fade into card body */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c12] via-[#0c0c12]/40 to-transparent" />
             {/* Subtle side vignette */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/25 via-transparent to-black/25" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
             {/* Soft glow overlay */}
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(139,92,246,0.12),_transparent_40%)]" />
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.15),_transparent_45%)]" />
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-neutral-900 to-neutral-950">
-            <FolderOpen className="w-12 h-12 text-neutral-600" />
-            <span className="text-[11px] text-neutral-500 font-semibold uppercase tracking-[0.2em]">No Cover</span>
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/20 via-neutral-900 to-neutral-950">
+            <FolderOpen className="w-10 h-10 text-purple-500/40" />
+            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">No Cover</span>
           </div>
         )}
 
         {/* Hover play overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/10 backdrop-blur-[1px] z-10">
-          <div className="h-11 w-11 rounded-full bg-purple-600/90 flex items-center justify-center shadow-xl shadow-purple-900/60 scale-75 group-hover:scale-100 transition-transform duration-300 border border-purple-400/30">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/20 backdrop-blur-[2px] z-10">
+          <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-purple-900/60 scale-75 group-hover:scale-100 transition-transform duration-300 border border-purple-400/40">
             <Play className="h-5 w-5 text-white fill-white ml-0.5" />
           </div>
         </div>
@@ -143,34 +154,32 @@ export default function ProjectCard({
         {/* Top badges row */}
         <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
           {/* Status badge */}
-          <div className={`px-3 py-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] rounded-full border backdrop-blur-md ${statusColor}`}>
+          <div className={`px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] rounded-full border backdrop-blur-md shadow-md ${statusColor}`}>
             {project.status || "Draft"}
           </div>
 
           {/* 3-dot menu */}
           <button
             onClick={(e) => onToggleMenu?.(e, project.project_id)}
-            className="w-8 h-8 rounded-full bg-black/45 hover:bg-black/65 text-neutral-300 hover:text-white border border-white/10 transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg shadow-black/20"
+            className="w-7 h-7 rounded-full bg-black/60 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
           >
             <MoreVertical className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Bottom thumbnail badges (Episode label on left & Panel count on right) */}
+        {/* Bottom thumbnail badges */}
         <div className="absolute bottom-2.5 inset-x-2.5 z-10 flex items-center justify-between pointer-events-none">
           {project.episode !== undefined && project.episode !== null ? (
-            <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1.5">
+            <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1.5 font-mono">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-              <span>{typeof project.episode === 'number' ? `EP ${project.episode}` : project.episode}</span>
+              <span>{formatEpisodeLabel(project.episode)}</span>
             </div>
           ) : <div />}
 
-          {((project.panels_count ?? 0) > 0 || (project.imported_assets_count ?? 0) > 0) && (
-            <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-bold text-purple-200 tracking-wider shadow-lg flex items-center gap-1.5">
-              <Scissors className="w-3 h-3 text-purple-400" />
-              <span>{project.panels_count || project.imported_assets_count} panels</span>
-            </div>
-          )}
+          <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-bold text-purple-300 tracking-wider shadow-lg flex items-center gap-1.5 font-mono">
+            <Clock className="w-3 h-3 text-purple-400" />
+            <span>{timeAgo(project.created_at)}</span>
+          </div>
         </div>
 
       </div>
