@@ -156,11 +156,11 @@ const VoiceStudioPage = React.memo(
     }
 
     return (
-      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
         {/* PAGE HERO HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1b172b] pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-850 pb-5">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#181229] border border-purple-500/30 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/50">
+            <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/30">
               <Mic className="h-6 w-6" />
             </div>
             <div>
@@ -183,7 +183,7 @@ const VoiceStudioPage = React.memo(
             {/* Inline AI Model Switcher */}
             <ModelSelect value={selectedModel} onChange={handleModelChange} />
 
-            <div className="px-3.5 py-1.5 rounded-full bg-[#12101d] border border-[#231e38] text-neutral-300 text-xs font-mono flex items-center gap-2">
+            <div className="px-3.5 py-1.5 rounded-full bg-neutral-950 border border-neutral-850 text-neutral-300 text-xs font-mono flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
               <span>Genre: {scrapedGenre || "Fantasy Action"}</span>
             </div>
@@ -191,10 +191,10 @@ const VoiceStudioPage = React.memo(
         </div>
 
         {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
-        <div className="relative flex items-center gap-4 bg-[#0d0b16] border border-[#1f1b2e] rounded-2xl p-3 shadow-md">
+        <div className="relative flex items-center gap-4 bg-neutral-950 border border-neutral-850 rounded-2xl p-3 shadow-md">
           <button
             onClick={() => scrollFilmstrip("left")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
             title="Scroll left"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -210,10 +210,10 @@ const VoiceStudioPage = React.memo(
                 <button
                   key={p?.id || idx}
                   onClick={() => setSelectedIdx(idx)}
-                  className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-[#06050a] flex items-center justify-center ${
+                  className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-black/60 flex items-center justify-center ${
                     isSel
-                      ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105 bg-[#171329]"
-                      : "border-[#1e1a2e] opacity-60 hover:opacity-100 hover:border-purple-500/50"
+                      ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105 bg-purple-500/10"
+                      : "border-neutral-850 opacity-60 hover:opacity-100 hover:border-purple-500/50"
                   }`}
                 >
                   {p?.image_url ? (
@@ -223,7 +223,7 @@ const VoiceStudioPage = React.memo(
                       className="w-full h-full object-contain"
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#0c0a15] flex items-center justify-center text-[10px] text-neutral-600 font-mono">
+                    <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-[10px] text-neutral-600 font-mono">
                       Panel #{idx + 1}
                     </div>
                   )}
@@ -237,7 +237,7 @@ const VoiceStudioPage = React.memo(
 
           <button
             onClick={() => scrollFilmstrip("right")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
             title="Scroll right"
           >
             <ChevronRight className="w-4 h-4" />
@@ -247,13 +247,13 @@ const VoiceStudioPage = React.memo(
         {/* TWO-COLUMN STUDIO WORKSPACE GRID (4 : 8) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           {/* COLUMN 1 (LEFT - 4 COLS / 33% WIDTH): ACTIVE PANEL DETAILS */}
-          <div className="lg:col-span-4 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-5 space-y-4 shadow-xl">
+          <div className="lg:col-span-4 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 space-y-4 shadow-xl">
             <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
               FRAME PREVIEW
             </span>
 
             {/* Frame Image Container */}
-            <div className="h-56 sm:h-64 rounded-xl overflow-hidden border border-[#221d33] bg-[#06050a] flex items-center justify-center p-2 relative shadow-inner">
+            <div className="h-56 sm:h-64 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 flex items-center justify-center p-2 relative shadow-inner">
               {activePanel?.image_url ? (
                 <img
                   src={activePanel.image_url}
@@ -283,7 +283,7 @@ const VoiceStudioPage = React.memo(
                     className={`px-2.5 py-0.5 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
                       isPlayingSpeech
                         ? "bg-purple-600 text-white border-purple-400 shadow-md shadow-purple-900/50 animate-pulse"
-                        : "bg-[#181329] text-purple-300 border-purple-500/30 hover:bg-[#221c3b] hover:text-white"
+                        : "bg-neutral-900 text-purple-300 border-purple-500/30 hover:bg-neutral-850 hover:text-white"
                     }`}
                   >
                     {isPlayingSpeech ? <Square className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
@@ -291,7 +291,7 @@ const VoiceStudioPage = React.memo(
                   </button>
                 )}
               </div>
-              <div className="p-3.5 bg-[#06050a] border border-[#1d182e] rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[60px]">
+              <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[60px]">
                 {parsedSpeech.speech ? (
                   <div className="space-y-1.5">
                     {parsedSpeech.tone && (
@@ -319,7 +319,7 @@ const VoiceStudioPage = React.memo(
                     className={`px-2.5 py-0.5 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
                       isPlayingNarrative
                         ? "bg-purple-600 text-white border-purple-400 shadow-md shadow-purple-900/50 animate-pulse"
-                        : "bg-[#181329] text-purple-300 border-purple-500/30 hover:bg-[#221c3b] hover:text-white"
+                        : "bg-neutral-900 text-purple-300 border-purple-500/30 hover:bg-neutral-850 hover:text-white"
                     }`}
                   >
                     {isPlayingNarrative ? <Square className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
@@ -327,7 +327,7 @@ const VoiceStudioPage = React.memo(
                   </button>
                 )}
               </div>
-              <div className="p-3.5 bg-[#06050a] border border-[#1d182e] rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[60px]">
+              <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[60px]">
                 {activePanel?.visual_description ? (
                   <p>{activePanel.visual_description}</p>
                 ) : (
@@ -337,16 +337,16 @@ const VoiceStudioPage = React.memo(
             </div>
 
             {/* Panel Metrics Pills */}
-            <div className="grid grid-cols-3 gap-2 pt-1 border-t border-[#1b172b]">
-              <div className="bg-[#06050a] border border-[#1d182e] rounded-xl p-2 text-center">
+            <div className="grid grid-cols-3 gap-2 pt-1 border-t border-neutral-850">
+              <div className="bg-neutral-950 border border-neutral-850 rounded-xl p-2 text-center">
                 <p className="text-[9px] font-mono text-neutral-500 uppercase">Duration</p>
                 <p className="text-xs font-black text-white mt-0.5">{(activePanel?.duration ?? 3.0).toFixed(1)}s</p>
               </div>
-              <div className="bg-[#06050a] border border-[#1d182e] rounded-xl p-2 text-center">
+              <div className="bg-neutral-950 border border-neutral-850 rounded-xl p-2 text-center">
                 <p className="text-[9px] font-mono text-neutral-500 uppercase">Frame</p>
                 <p className="text-xs font-black text-white mt-0.5">{selectedIdx + 1}/{safePanels.length}</p>
               </div>
-              <div className="bg-[#06050a] border border-[#1d182e] rounded-xl p-2 text-center">
+              <div className="bg-neutral-950 border border-neutral-850 rounded-xl p-2 text-center">
                 <p className="text-[9px] font-mono text-neutral-500 uppercase">Audio Track</p>
                 <p className={`text-xs font-black mt-0.5 ${activePanel?.audio_url || activePanel?.speech_audio_url ? "text-emerald-400" : "text-purple-300"}`}>
                   {activePanel?.audio_url || activePanel?.speech_audio_url ? "TTS Ready" : "TTS Ready"}
@@ -356,9 +356,9 @@ const VoiceStudioPage = React.memo(
           </div>
 
           {/* COLUMN 2 (RIGHT - 8 COLS / 67% WIDTH): VOICE WORKFLOW CANVAS */}
-          <div className="lg:col-span-8 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-5 shadow-xl flex flex-col min-h-[480px]">
+          <div className="lg:col-span-8 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 shadow-xl flex flex-col min-h-[480px]">
             {/* TABS SELECTOR HEADER */}
-            <div className="flex border-b border-[#1b172b] mb-5 overflow-x-auto scrollbar-none font-mono">
+            <div className="flex border-b border-neutral-850 mb-5 overflow-x-auto scrollbar-none font-mono">
               <button
                 onClick={() => setActiveTab("dramatize")}
                 className={`px-5 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap flex items-center gap-2 ${

@@ -154,7 +154,7 @@ export default function ScriptDramatizerForm({
   return (
     <div className="space-y-5">
       {/* HEADER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1b172b] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-850 pb-4">
         <div className="flex items-center gap-2.5">
           <span className="p-2 bg-purple-500/10 border border-purple-500/30 rounded-xl text-purple-400">
             <Wand2 className="h-4 w-4" />
@@ -172,7 +172,7 @@ export default function ScriptDramatizerForm({
         <div className="flex items-center gap-2">
           <button
             onClick={handleSyncTimeline}
-            className="px-3 py-2 bg-[#181329] hover:bg-[#221b3b] text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-3 py-2 bg-neutral-900 hover:bg-neutral-850 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer"
             title="Sync raw dialogue lines from current storyboard panels"
           >
             <RotateCcw className="w-3.5 h-3.5 text-purple-400" />
@@ -194,7 +194,7 @@ export default function ScriptDramatizerForm({
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
 
         {/* LEFT COLUMN (5 COLS): GENRE + CONTEXT + RAW DIALOGUE INPUTS */}
-        <div className="xl:col-span-5 space-y-4 bg-[#07060c] border border-[#1d182e] p-4 rounded-xl shadow-inner">
+        <div className="xl:col-span-5 space-y-4 bg-neutral-950 border border-neutral-800 p-4 rounded-xl shadow-inner">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-[10px] font-mono text-purple-300 uppercase tracking-widest block font-bold">
@@ -207,7 +207,7 @@ export default function ScriptDramatizerForm({
                     key={g}
                     type="button"
                     onClick={() => setGenre(g)}
-                    className="px-1.5 py-0.5 rounded text-[8px] font-mono bg-[#141026] text-purple-300 border border-purple-500/20 hover:border-purple-400"
+                    className="px-1.5 py-0.5 rounded text-[8px] font-mono bg-neutral-900 text-purple-300 border border-purple-500/20 hover:border-purple-400"
                   >
                     {g}
                   </button>
@@ -218,7 +218,7 @@ export default function ScriptDramatizerForm({
               type="text"
               value={genre}
               onChange={(e) => setGenre(e.target.value)}
-              className="w-full bg-[#0c0a15] border border-[#241f38] text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
+              className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
             />
           </div>
 
@@ -230,7 +230,7 @@ export default function ScriptDramatizerForm({
               rows={2}
               value={context}
               onChange={(e) => setContext(e.target.value)}
-              className="w-full bg-[#0c0a15] border border-[#241f38] text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans leading-relaxed resize-y"
+              className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans leading-relaxed resize-y"
             />
           </div>
 
@@ -252,7 +252,7 @@ export default function ScriptDramatizerForm({
               {rawLines.map((line, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#0c0a15] border border-[#241f38] focus-within:border-purple-500/60 rounded-xl p-3 space-y-1.5 transition-all shadow-sm"
+                  className="bg-neutral-900 border border-neutral-800 focus-within:border-purple-500/60 rounded-xl p-3 space-y-1.5 transition-all shadow-sm"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
@@ -260,7 +260,7 @@ export default function ScriptDramatizerForm({
                         LINE #{idx + 1}
                       </span>
                       {panels[idx] && (
-                        <span className="text-[8px] font-mono text-neutral-400 bg-neutral-900 px-1.5 py-0.5 rounded border border-neutral-800">
+                        <span className="text-[8px] font-mono text-neutral-400 bg-neutral-950 px-1.5 py-0.5 rounded border border-neutral-800">
                           Panel #{idx + 1}
                         </span>
                       )}
@@ -290,7 +290,7 @@ export default function ScriptDramatizerForm({
                       setRawLines(copy);
                     }}
                     placeholder={`Type speech dialogue line #${idx + 1}...`}
-                    className="w-full bg-[#06050a] border border-[#1a1628] text-xs rounded-lg p-2 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans leading-relaxed resize-none"
+                    className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans leading-relaxed resize-none"
                   />
                 </div>
               ))}
@@ -311,13 +311,13 @@ export default function ScriptDramatizerForm({
             )}
           </div>
 
-          <div className="bg-[#07060c] p-4 rounded-xl border border-[#1d182e] min-h-[360px] flex flex-col justify-between shadow-inner">
+          <div className="bg-neutral-950 p-4 rounded-xl border border-neutral-800 min-h-[360px] flex flex-col justify-between shadow-inner">
             {results.length > 0 ? (
               <div className="space-y-3 overflow-y-auto max-h-80 pr-1 scrollbar-thin scrollbar-thumb-purple-900/50">
                 {results.map((resLine, idx) => (
                   <div
                     key={idx}
-                    className="group relative bg-[#0c0a15] p-3 rounded-xl border border-[#241f38] hover:border-purple-500/40 transition-all space-y-2"
+                    className="group relative bg-neutral-900 p-3 rounded-xl border border-neutral-800 hover:border-purple-500/40 transition-all space-y-2"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-[9px] font-mono text-purple-400 font-bold">
@@ -328,7 +328,7 @@ export default function ScriptDramatizerForm({
                           onClick={() => handlePreviewLineTTS(resLine, idx)}
                           className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${playingIdx === idx
                               ? "bg-purple-600 text-white animate-pulse"
-                              : "bg-[#181329] text-purple-300 border border-purple-500/30 hover:text-white"
+                              : "bg-neutral-950 text-purple-300 border border-purple-500/30 hover:text-white"
                             }`}
                         >
                           {playingIdx === idx ? <Square className="w-2.5 h-2.5 fill-current" /> : <Play className="w-2.5 h-2.5 fill-current" />}

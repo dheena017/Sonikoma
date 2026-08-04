@@ -96,7 +96,7 @@ export default function SeoOptimizationTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-[#0c0a15] p-4 sm:p-5 rounded-2xl border border-[#1f1b2e] hover:border-purple-500/40 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-purple-500/40 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-purple-500/10 border border-purple-500/30 rounded-lg text-purple-400">
@@ -130,7 +130,7 @@ export default function SeoOptimizationTab({
       )}
 
       {loading && (
-        <div className="bg-[#0c0a15] border border-[#1f1b2e] rounded-2xl p-10 text-center animate-pulse space-y-3 shadow-xl">
+        <div className="bg-neutral-900/60 border border-neutral-850 rounded-2xl p-10 text-center animate-pulse space-y-3 shadow-xl">
           <Sparkles className="h-8 w-8 text-purple-400 animate-spin mx-auto" />
           <p className="text-xs font-mono text-purple-300">
             Analyzing narrative beats & building YouTube algorithm SEO metadata...
@@ -142,9 +142,9 @@ export default function SeoOptimizationTab({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
 
           {/* 1. VIRAL TITLE CARD WITH 3 VARIANTS */}
-          <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
             <div>
-              <div className="flex justify-between items-center border-b border-[#1b172b] pb-2.5">
+              <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4 text-pink-400" />
                   <span className="text-[10px] font-mono font-bold text-pink-300 uppercase tracking-widest">
@@ -152,12 +152,12 @@ export default function SeoOptimizationTab({
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-mono text-neutral-400 bg-[#07060c] px-2 py-0.5 rounded border border-[#1e1a2e]">
+                  <span className="text-[9px] font-mono text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-850">
                     {currentTitle.length}/100 Chars
                   </span>
                   <button
                     onClick={() => copyToClipboard(currentTitle, "title")}
-                    className="p-1.5 hover:bg-[#19142b] text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-[#241f38]"
+                    className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                     title="Copy Active Title"
                   >
                     {copiedField === "title" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -175,7 +175,7 @@ export default function SeoOptimizationTab({
                       className={`text-[9px] font-mono px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                         selectedTitleIdx === vIdx
                           ? "bg-purple-500/20 border-purple-500/60 text-purple-200 font-bold"
-                          : "bg-[#07060c] border-[#1e1a2e] text-neutral-400 hover:text-white"
+                          : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                       }`}
                     >
                       Option {vIdx + 1}
@@ -184,7 +184,7 @@ export default function SeoOptimizationTab({
                 </div>
               )}
 
-              <div className="mt-3 bg-[#06050a] border border-[#1d182e] rounded-xl p-3.5">
+              <div className="mt-3 bg-neutral-950 border border-neutral-800 rounded-xl p-3.5">
                 <input
                   type="text"
                   value={currentTitle}
@@ -209,9 +209,9 @@ export default function SeoOptimizationTab({
           </div>
 
           {/* 2. INTERACTIVE SEARCH TAGS CARD */}
-          <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
             <div>
-              <div className="flex justify-between items-center border-b border-[#1b172b] pb-2.5">
+              <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
                 <div className="flex items-center gap-2">
                   <Hash className="w-4 h-4 text-purple-400" />
                   <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest">
@@ -219,12 +219,12 @@ export default function SeoOptimizationTab({
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-mono text-neutral-400 bg-[#07060c] px-2 py-0.5 rounded border border-[#1e1a2e]">
+                  <span className="text-[9px] font-mono text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-850">
                     {data.tags.length} Tags
                   </span>
                   <button
                     onClick={() => copyToClipboard(data.tags.join(", "), "tags")}
-                    className="p-1.5 hover:bg-[#19142b] text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-[#241f38]"
+                    className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                     title="Copy All Tags"
                   >
                     {copiedField === "tags" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -232,11 +232,11 @@ export default function SeoOptimizationTab({
                 </div>
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-1.5 bg-[#06050a] border border-[#1d182e] rounded-xl p-3.5 min-h-[58px] items-center">
+              <div className="mt-3 flex flex-wrap gap-1.5 bg-neutral-950 border border-neutral-800 rounded-xl p-3.5 min-h-[58px] items-center">
                 {data.tags.map((tag, idx) => (
                   <div
                     key={idx}
-                    className="group text-[10px] font-mono bg-[#141024] hover:bg-purple-950/60 text-purple-200 px-2.5 py-1 rounded-lg border border-[#26203d] flex items-center gap-1.5 transition-all"
+                    className="group text-[10px] font-mono bg-neutral-900 hover:bg-purple-950/60 text-purple-200 px-2.5 py-1 rounded-lg border border-neutral-800 flex items-center gap-1.5 transition-all"
                   >
                     <span>#{tag}</span>
                     <button
@@ -258,7 +258,7 @@ export default function SeoOptimizationTab({
                       onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
                       placeholder="tag_name"
                       autoFocus
-                      className="bg-[#09080e] border border-purple-500/50 text-[10px] font-mono text-white px-2 py-1 rounded-lg outline-none w-24"
+                      className="bg-neutral-900 border border-purple-500/50 text-[10px] font-mono text-white px-2 py-1 rounded-lg outline-none w-24"
                     />
                     <button
                       onClick={handleAddTag}
@@ -270,7 +270,7 @@ export default function SeoOptimizationTab({
                 ) : (
                   <button
                     onClick={() => setShowTagAdd(true)}
-                    className="text-[9px] font-mono text-purple-400 hover:text-white bg-[#0a0814] px-2 py-1 rounded-lg border border-purple-500/20 hover:border-purple-500/50 flex items-center gap-1 cursor-pointer transition-all"
+                    className="text-[9px] font-mono text-purple-400 hover:text-white bg-neutral-900 px-2 py-1 rounded-lg border border-purple-500/20 hover:border-purple-500/50 flex items-center gap-1 cursor-pointer transition-all"
                   >
                     <Plus className="w-3 h-3" /> Add Tag
                   </button>
@@ -283,8 +283,8 @@ export default function SeoOptimizationTab({
           </div>
 
           {/* 3. CHAPTERS & TIMESTAMPS CARD */}
-          <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
-            <div className="flex justify-between items-center border-b border-[#1b172b] pb-2.5">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
+            <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-cyan-400" />
                 <span className="text-[10px] font-mono font-bold text-cyan-300 uppercase tracking-widest">
@@ -292,12 +292,12 @@ export default function SeoOptimizationTab({
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-mono text-neutral-400 bg-[#07060c] px-2 py-0.5 rounded border border-[#1e1a2e]">
+                <span className="text-[9px] font-mono text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-850">
                   {data.timestamps.length} Chapters
                 </span>
                 <button
                   onClick={() => copyToClipboard(data.timestamps.join("\n"), "timestamps")}
-                  className="p-1.5 hover:bg-[#19142b] text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-[#241f38]"
+                  className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                   title="Copy Timestamps"
                 >
                   {copiedField === "timestamps" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -308,13 +308,13 @@ export default function SeoOptimizationTab({
               value={data.timestamps.join("\n")}
               onChange={(e) => setData({ ...data, timestamps: e.target.value.split("\n") })}
               rows={4}
-              className="w-full text-[11px] font-mono text-cyan-100 bg-[#06050a] p-4 rounded-xl border border-[#1d182e] leading-relaxed shadow-inner outline-none focus:border-cyan-500/50 resize-none"
+              className="w-full text-[11px] font-mono text-cyan-100 bg-neutral-950 p-4 rounded-xl border border-neutral-800 leading-relaxed shadow-inner outline-none focus:border-cyan-500/50 resize-none"
             />
           </div>
 
           {/* 4. EDITABLE DESCRIPTION CARD */}
-          <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
-            <div className="flex justify-between items-center border-b border-[#1b172b] pb-2.5">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
+            <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-purple-400" />
                 <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest">
@@ -322,12 +322,12 @@ export default function SeoOptimizationTab({
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] font-mono text-neutral-400 bg-[#07060c] px-2 py-0.5 rounded border border-[#1e1a2e]">
+                <span className="text-[9px] font-mono text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-850">
                   {data.youtube_description.length}/5000 Chars
                 </span>
                 <button
                   onClick={() => copyToClipboard(data.youtube_description, "description")}
-                  className="p-1.5 hover:bg-[#19142b] text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-[#241f38]"
+                  className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                   title="Copy Description"
                 >
                   {copiedField === "description" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -338,7 +338,7 @@ export default function SeoOptimizationTab({
               value={data.youtube_description}
               onChange={(e) => setData({ ...data, youtube_description: e.target.value })}
               rows={6}
-              className="w-full text-[11px] font-sans text-neutral-200 bg-[#06050a] p-4 rounded-xl leading-relaxed border border-[#1d182e] shadow-inner outline-none focus:border-purple-500/50 resize-y"
+              className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-4 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-purple-500/50 resize-y"
             />
           </div>
 

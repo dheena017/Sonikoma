@@ -169,10 +169,10 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   ];
 
   return (
-    <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)] text-left">
+    <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl text-left">
       
       {/* Welcome Hero Panel */}
-      <div className="relative overflow-hidden rounded-2xl border border-[#231d38] bg-[#0d0b17] p-7 shadow-xl">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-purple-900/20 via-neutral-900/90 to-neutral-950 p-7 shadow-xl">
         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
           <Sparkles className="w-36 h-36 text-purple-400" />
         </div>

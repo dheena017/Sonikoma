@@ -75,7 +75,7 @@ export default function ShortsScriptTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-[#0c0a15] p-4 rounded-2xl border border-[#1f1b2e] hover:border-purple-500/40 transition-all space-y-2 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-850 hover:border-purple-500/40 transition-all space-y-2 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-purple-500/10 border border-purple-500/30 rounded-lg text-purple-400 shrink-0">
@@ -88,7 +88,7 @@ export default function ShortsScriptTab({
 
           <div className="flex items-center gap-2.5 flex-wrap">
             {/* Target Duration Selector */}
-            <div className="flex items-center gap-1 bg-[#07060c] border border-[#1e1a2e] p-1 rounded-xl">
+            <div className="flex items-center gap-1 bg-neutral-950 border border-neutral-850 p-1 rounded-xl">
               <Clock className="w-3.5 h-3.5 text-purple-400 ml-1" />
               {(["30s", "60s", "90s"] as const).map((dur) => (
                 <button
@@ -121,7 +121,7 @@ export default function ShortsScriptTab({
       </div>
 
       {loading && (
-        <div className="bg-[#0c0a15] border border-[#1f1b2e] rounded-2xl p-8 text-center animate-pulse space-y-2 shadow-xl">
+        <div className="bg-neutral-900/60 border border-neutral-850 rounded-2xl p-8 text-center animate-pulse space-y-2 shadow-xl">
           <Sparkles className="h-7 w-7 text-purple-400 animate-spin mx-auto" />
           <p className="text-xs font-mono text-purple-300">
             Adapting storyboard into viral {targetDuration} short-form script...
@@ -132,8 +132,8 @@ export default function ShortsScriptTab({
       {(shortsData || hookData) && !loading && (
         <div className="space-y-4 animate-fade-in">
           {hookData && (
-            <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
-              <div className="flex justify-between items-center border-b border-[#1b172b] pb-2">
+            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
+              <div className="flex justify-between items-center border-b border-neutral-850 pb-2">
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4 text-pink-400" />
                   <span className="text-[10px] font-mono font-bold text-pink-300 uppercase tracking-widest">
@@ -142,19 +142,19 @@ export default function ShortsScriptTab({
                 </div>
                 <button
                   onClick={() => copyToClipboard(hookData.hook_sentence, "hook")}
-                  className="p-1.5 hover:bg-[#19142b] text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-[#241f38]"
+                  className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                 >
                   {copiedField === "hook" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                 </button>
               </div>
-              <div className="bg-[#06050a] border border-[#1d182e] rounded-xl p-3 space-y-2">
+              <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-3 space-y-2">
                 <input
                   type="text"
                   value={hookData.hook_sentence}
                   onChange={(e) => setHookData({ ...hookData, hook_sentence: e.target.value })}
                   className="w-full bg-transparent text-xs font-sans text-white font-bold outline-none leading-relaxed"
                 />
-                <div className="text-[9px] font-mono text-purple-300 bg-[#141024] px-2 py-0.5 rounded border border-[#26203d] inline-block">
+                <div className="text-[9px] font-mono text-purple-300 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800 inline-block">
                   Trigger: {hookData.psychological_trigger}
                 </div>
               </div>
@@ -163,8 +163,8 @@ export default function ShortsScriptTab({
 
           {shortsData && (
             <>
-              <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
-                <div className="flex justify-between items-center border-b border-[#1b172b] pb-2">
+              <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
+                <div className="flex justify-between items-center border-b border-neutral-850 pb-2">
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-purple-400" />
                     <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest">
@@ -173,7 +173,7 @@ export default function ShortsScriptTab({
                   </div>
                   <button
                     onClick={() => copyToClipboard(shortsData.voiceover_script, "voiceover")}
-                    className="p-1.5 hover:bg-[#19142b] text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-[#241f38]"
+                    className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                   >
                     {copiedField === "voiceover" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                   </button>
@@ -182,19 +182,19 @@ export default function ShortsScriptTab({
                   value={shortsData.voiceover_script}
                   onChange={(e) => setShortsData({ ...shortsData, voiceover_script: e.target.value })}
                   rows={5}
-                  className="w-full text-[11px] font-sans text-neutral-200 bg-[#06050a] p-3 rounded-xl leading-relaxed border border-[#1d182e] shadow-inner outline-none focus:border-purple-500/50 resize-y"
+                  className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-3 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-purple-500/50 resize-y"
                 />
               </div>
 
               {shortsData.visual_milestones && (
-                <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
-                  <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest block border-b border-[#1b172b] pb-2">
+                <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
+                  <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest block border-b border-neutral-850 pb-2">
                     Visual Milestones & Frame Pacing
                   </span>
                   <ul className="space-y-2 text-xs text-neutral-300 font-sans pt-1">
                     {shortsData.visual_milestones.map((m, idx) => (
-                      <li key={idx} className="flex items-center gap-2.5 bg-[#06050a] p-2.5 rounded-xl border border-[#1d182e]">
-                        <span className="text-purple-400 font-mono font-bold text-xs bg-[#141024] px-2 py-0.5 rounded border border-[#26203d]">
+                      <li key={idx} className="flex items-center gap-2.5 bg-neutral-950 p-2.5 rounded-xl border border-neutral-800">
+                        <span className="text-purple-400 font-mono font-bold text-xs bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
                           #{idx + 1}
                         </span>
                         <input

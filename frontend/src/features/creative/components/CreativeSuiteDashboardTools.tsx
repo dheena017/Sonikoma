@@ -33,18 +33,18 @@ const CreativeSuiteDashboardTools: React.FC<CreativeSuiteDashboardToolsProps> = 
           <div
             key={tool.id}
             onClick={() => navigateTo(tool.path)}
-            className={`bg-[#0c0a15] border border-[#1f1b2e] rounded-2xl p-5 hover:bg-[#120f21] hover:border-purple-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group relative shadow-md ${
+            className={`bg-neutral-900/60 border border-neutral-850 rounded-2xl p-5 hover:bg-neutral-850 hover:border-purple-500/50 transition-all duration-300 cursor-pointer flex flex-col justify-between group relative shadow-md ${
               isLocked ? "opacity-75 hover:border-rose-900/40" : ""
             }`}
           >
             <div>
               <div className="flex justify-between items-start mb-3">
-                <div className="p-2.5 bg-[#151124] border border-[#25203b] rounded-xl text-neutral-400 group-hover:text-purple-300 group-hover:border-purple-500/30 transition-all">
+                <div className="p-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-neutral-400 group-hover:text-purple-300 group-hover:border-purple-500/30 transition-all">
                   <Icon className="w-4.5 h-4.5" />
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] font-mono font-bold bg-[#141122] px-2 py-0.5 rounded text-neutral-400 uppercase border border-[#241f38]">
+                  <span className="text-[9px] font-mono font-bold bg-neutral-950 px-2 py-0.5 rounded text-neutral-400 uppercase border border-neutral-800">
                     {tool.badge}
                   </span>
 
@@ -64,7 +64,7 @@ const CreativeSuiteDashboardTools: React.FC<CreativeSuiteDashboardToolsProps> = 
               </p>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-[#1b172b] flex justify-end">
+            <div className="mt-4 pt-3 border-t border-neutral-850 flex justify-end">
               <button
                 className={`text-[10px] font-bold font-mono tracking-wider uppercase flex items-center gap-1 transition-all ${
                   isLocked

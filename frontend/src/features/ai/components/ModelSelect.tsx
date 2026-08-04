@@ -15,7 +15,7 @@ interface ModelSelectProps {
 export const ModelSelect: React.FC<ModelSelectProps> = ({
   value,
   onChange,
-  className = "flex items-center gap-2 bg-[#12101d] border border-[#231e38] rounded-xl px-3 py-1.5",
+  className = "flex items-center gap-2 bg-neutral-950 border border-neutral-850 rounded-xl px-3 py-1.5",
   selectClassName = "bg-transparent text-xs font-mono text-white outline-none cursor-pointer",
   showIcon = true,
   filterProvider,

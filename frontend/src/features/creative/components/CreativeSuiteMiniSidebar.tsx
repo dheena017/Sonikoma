@@ -190,7 +190,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
   };
 
   return (
-    <aside className="fixed top-[59px] bottom-0 left-0 w-20 bg-[#050507] border-r border-neutral-900 hidden lg:flex flex-col items-center py-4 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.3)] select-none">
+    <aside className="fixed top-[59px] bottom-0 left-0 w-20 bg-[#070709] border-r border-neutral-900 hidden lg:flex flex-col items-center py-4 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.3)] select-none">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div

@@ -31,7 +31,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
     "No synopsis is available for this project yet.";
 
   return (
-    <div className="relative bg-[#0c0a15] border border-[#1f1b2e] rounded-2xl p-6 shadow-md text-left overflow-hidden">
+    <div className="relative bg-neutral-900/60 border border-neutral-850 rounded-2xl p-6 shadow-md text-left overflow-hidden">
       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-600 to-purple-400 opacity-90" />
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
@@ -47,7 +47,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
           <div className="space-y-4">
             <div className="flex gap-4 items-start">
               {seriesCoverImageVal ? (
-                <div className="w-16 h-20 rounded-xl overflow-hidden border border-[#231e38] shadow-inner">
+                <div className="w-16 h-20 rounded-xl overflow-hidden border border-neutral-800 shadow-inner">
                   <img
                     src={seriesCoverImageVal}
                     className="w-full h-full object-cover"
@@ -55,7 +55,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
                   />
                 </div>
               ) : (
-                <div className="w-16 h-20 rounded-xl bg-[#141122] border border-[#241f38] flex items-center justify-center text-neutral-500 text-xs font-bold font-mono">
+                <div className="w-16 h-20 rounded-xl bg-neutral-950 border border-neutral-850 flex items-center justify-center text-neutral-500 text-xs font-bold font-mono">
                   Cover
                 </div>
               )}
@@ -75,11 +75,11 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
                 </p>
 
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  <div className="text-[10px] text-neutral-400 font-mono bg-[#141122] border border-[#241f38] px-2.5 py-1 rounded-full inline-flex items-center gap-2">
+                  <div className="text-[10px] text-neutral-400 font-mono bg-neutral-950 border border-neutral-850 px-2.5 py-1 rounded-full inline-flex items-center gap-2">
                     <span className="text-purple-300 font-bold">{activePanelsCount}</span>
                     <span className="text-neutral-400">panels</span>
                   </div>
-                  <div className="text-[10px] text-neutral-400 font-mono bg-[#141122] border border-[#241f38] px-2.5 py-1 rounded-full inline-flex items-center gap-2">
+                  <div className="text-[10px] text-neutral-400 font-mono bg-neutral-950 border border-neutral-850 px-2.5 py-1 rounded-full inline-flex items-center gap-2">
                     <span className="text-purple-300 font-bold">{authorLabel}</span>
                   </div>
                 </div>
@@ -87,13 +87,13 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
             </div>
 
             <div className="grid gap-2 sm:grid-cols-2">
-              <div className="text-[10px] font-mono text-neutral-400 bg-[#141122] border border-[#241f38] px-3 py-2 rounded-2xl">
+              <div className="text-[10px] font-mono text-neutral-400 bg-neutral-950 border border-neutral-850 px-3 py-2 rounded-2xl">
                 <div className="text-[9px] uppercase tracking-[0.24em] text-neutral-500 mb-1">
                   Genre
                 </div>
                 <div className="text-[11px] font-bold text-white">{genreLabel}</div>
               </div>
-              <div className="text-[10px] font-mono text-neutral-400 bg-[#141122] border border-[#241f38] px-3 py-2 rounded-2xl">
+              <div className="text-[10px] font-mono text-neutral-400 bg-neutral-950 border border-neutral-850 px-3 py-2 rounded-2xl">
                 <div className="text-[9px] uppercase tracking-[0.24em] text-neutral-500 mb-1">
                   Project ID
                 </div>
@@ -101,7 +101,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
               </div>
             </div>
 
-            <div className="mt-3 rounded-2xl bg-[#141122] border border-[#241f38] p-3 text-[11px] text-neutral-300 leading-relaxed min-h-[72px]">
+            <div className="mt-3 rounded-2xl bg-neutral-950 border border-neutral-850 p-3 text-[11px] text-neutral-300 leading-relaxed min-h-[72px]">
               {synopsisText}
             </div>
 
@@ -119,7 +119,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
 
               <button
                 onClick={exitActiveProject}
-                className="w-full py-3 rounded-xl border border-[#3c2d6d] bg-[#120f21] hover:border-rose-400 hover:bg-rose-500/10 text-rose-300 text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl border border-neutral-800 bg-neutral-900 hover:border-rose-400 hover:bg-rose-500/10 text-rose-300 text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 Exit Active Project
@@ -128,7 +128,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
           </div>
         ) : (
           <div className="py-6 text-center">
-            <div className="w-12 h-12 rounded-full bg-[#141122] border border-[#241f38] flex items-center justify-center mx-auto text-neutral-500 mb-3">
+            <div className="w-12 h-12 rounded-full bg-neutral-950 border border-neutral-850 flex items-center justify-center mx-auto text-neutral-500 mb-3">
               📁
             </div>
             <p className="text-xs text-neutral-400 font-mono leading-normal">

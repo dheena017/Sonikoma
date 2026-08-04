@@ -15,7 +15,7 @@ const CreativeSuiteDashboardActivityLog: React.FC<CreativeSuiteDashboardActivity
   activities,
 }) => {
   return (
-    <div className="bg-[#0c0a15] border border-[#1f1b2e] rounded-2xl p-6 shadow-md text-left">
+    <div className="bg-neutral-900/60 border border-neutral-850 rounded-2xl p-6 shadow-md text-left">
       <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono mb-4 flex items-center gap-1.5">
         <Clock className="w-4 h-4" /> Creative Logs
       </h3>

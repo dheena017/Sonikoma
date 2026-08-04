@@ -32,12 +32,12 @@ const CreativeSuiteDashboardQuickActions: React.FC<CreativeSuiteDashboardQuickAc
             disabled={action.disabled}
             className={`group relative rounded-2xl border p-4 text-left transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 ${
               action.disabled
-                ? "border-[#1f1b2e] bg-[#0c0a15] text-neutral-500 cursor-not-allowed"
-                : "border-[#2f2644] bg-[#120f1f] hover:border-purple-500/40 hover:bg-[#180f2f]"
+                ? "border-neutral-850 bg-neutral-950 text-neutral-500 cursor-not-allowed"
+                : "border-neutral-800 bg-neutral-900/60 hover:border-purple-500/40 hover:bg-neutral-850"
             }`}
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="rounded-2xl bg-[#1d1737] p-3 text-purple-300">
+              <div className="rounded-2xl bg-purple-500/10 border border-purple-500/20 p-3 text-purple-300">
                 <Icon className="w-4 h-4" />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-neutral-500">

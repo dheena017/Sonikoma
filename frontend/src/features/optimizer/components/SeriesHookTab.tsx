@@ -65,7 +65,7 @@ export default function SeriesHookTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-[#0c0a15] p-4 sm:p-5 rounded-2xl border border-[#1f1b2e] hover:border-purple-500/40 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-purple-500/40 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-purple-500/10 border border-purple-500/30 rounded-lg text-purple-400">
@@ -90,7 +90,7 @@ export default function SeriesHookTab({
       </div>
 
       {loading && (
-        <div className="bg-[#0c0a15] border border-[#1f1b2e] rounded-2xl p-10 text-center animate-pulse space-y-3 shadow-xl">
+        <div className="bg-neutral-900/60 border border-neutral-850 rounded-2xl p-10 text-center animate-pulse space-y-3 shadow-xl">
           <Radio className="h-8 w-8 text-purple-400 animate-spin mx-auto" />
           <p className="text-xs font-mono text-purple-300">
             Crafting dramatic episode intro teasers & cliffhanger hooks...
@@ -101,8 +101,8 @@ export default function SeriesHookTab({
       {data && !loading && (
         <div className="space-y-4 animate-fade-in">
           {/* INTRO TEASER */}
-          <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg">
-            <div className="flex justify-between items-center border-b border-[#1b172b] pb-2.5">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg">
+            <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
               <div className="flex items-center gap-2">
                 <Flame className="w-4 h-4 text-pink-400" />
                 <span className="text-[10px] font-mono font-bold text-pink-300 uppercase tracking-widest">
@@ -111,19 +111,19 @@ export default function SeriesHookTab({
               </div>
               <button
                 onClick={() => copyToClipboard(data.intro_teaser, "intro")}
-                className="p-1.5 hover:bg-[#19142b] text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-[#241f38]"
+                className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
               >
                 {copiedField === "intro" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
               </button>
             </div>
-            <p className="text-xs font-sans text-white font-bold leading-relaxed bg-[#06050a] p-3.5 rounded-xl border border-[#1d182e]">
+            <p className="text-xs font-sans text-white font-bold leading-relaxed bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
               "{data.intro_teaser}"
             </p>
           </div>
 
           {/* CLIFFHANGER OUTRO */}
-          <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg">
-            <div className="flex justify-between items-center border-b border-[#1b172b] pb-2.5">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg">
+            <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-purple-400" />
                 <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest">
@@ -132,19 +132,19 @@ export default function SeriesHookTab({
               </div>
               <button
                 onClick={() => copyToClipboard(data.cliffhanger_outro, "outro")}
-                className="p-1.5 hover:bg-[#19142b] text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-[#241f38]"
+                className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
               >
                 {copiedField === "outro" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
               </button>
             </div>
-            <p className="text-xs font-sans text-neutral-200 leading-relaxed bg-[#06050a] p-3.5 rounded-xl border border-[#1d182e]">
+            <p className="text-xs font-sans text-neutral-200 leading-relaxed bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
               {data.cliffhanger_outro}
             </p>
           </div>
 
           {/* CTA TRIGGER */}
-          <div className="bg-[#0c0a15] border border-[#1f1b2e] hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg">
-            <div className="flex justify-between items-center border-b border-[#1b172b] pb-2.5">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg">
+            <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
               <div className="flex items-center gap-2">
                 <ThumbsUp className="w-4 h-4 text-emerald-400" />
                 <span className="text-[10px] font-mono font-bold text-emerald-300 uppercase tracking-widest">
@@ -153,12 +153,12 @@ export default function SeriesHookTab({
               </div>
               <button
                 onClick={() => copyToClipboard(data.cta_trigger, "cta")}
-                className="p-1.5 hover:bg-[#19142b] text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-[#241f38]"
+                className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
               >
                 {copiedField === "cta" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
               </button>
             </div>
-            <p className="text-xs font-sans text-emerald-200 leading-relaxed bg-[#06050a] p-3.5 rounded-xl border border-[#1d182e]">
+            <p className="text-xs font-sans text-emerald-200 leading-relaxed bg-neutral-950 p-3.5 rounded-xl border border-neutral-800">
               {data.cta_trigger}
             </p>
           </div>

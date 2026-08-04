@@ -200,11 +200,11 @@ const YouTubePage = React.memo(
     });
 
     return (
-      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
         {/* PAGE HERO HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1b172b] pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-850 pb-5">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#1a0f14] border border-red-500/30 rounded-2xl text-red-400 shadow-lg shadow-red-950/30">
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 shadow-lg shadow-red-950/30">
               <Youtube className="h-6 w-6 text-red-400 animate-pulse" />
             </div>
             <div>
@@ -224,7 +224,7 @@ const YouTubePage = React.memo(
           </div>
 
           <div className="flex items-center gap-3 self-start md:self-center">
-            <div className="px-3.5 py-1.5 rounded-full bg-[#12101d] border border-[#231e38] text-neutral-300 text-xs font-mono flex items-center gap-2">
+            <div className="px-3.5 py-1.5 rounded-full bg-neutral-950 border border-neutral-850 text-neutral-300 text-xs font-mono flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${isPublishing ? "bg-amber-400 animate-ping" : "bg-emerald-400 animate-pulse"}`} />
               <span>{isPublishing ? "Publishing Active" : "Publisher Ready"}</span>
             </div>
@@ -267,8 +267,8 @@ const YouTubePage = React.memo(
           </div>
 
           {/* COLUMN 2 (RIGHT - 7 COLS): METADATA & CONFIGURATION CANVAS */}
-          <div className="lg:col-span-7 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-5 sm:p-6 shadow-xl flex flex-col space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1b172b] pb-3">
+          <div className="lg:col-span-7 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 sm:p-6 shadow-xl flex flex-col space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-850 pb-3">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
                   DIRECT VIDEO PUBLISHER
@@ -626,7 +626,7 @@ const YouTubePage = React.memo(
             </div>
 
             {/* Database Upload History */}
-            <div className="pt-4 border-t border-[#1b172b]">
+            <div className="pt-4 border-t border-neutral-850">
               <UploadHistory history={uploadHistory} />
             </div>
           </div>

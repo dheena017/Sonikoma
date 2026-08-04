@@ -78,7 +78,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
 
   const FallbackUI = () => (
     <div className="flex-grow flex flex-col items-center justify-center py-16 px-4 text-center">
-      <div className="bg-[#0b0b0f] border border-neutral-900/60 rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+      <div className="bg-[#0b0b0e] border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-500/5 rounded-full blur-2xl pointer-events-none" />
 
@@ -189,7 +189,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-[#050507] text-white flex flex-col selection:bg-purple-500/30">
+    <div className="min-h-screen bg-[#070709] text-white flex flex-col selection:bg-purple-500/30">
       <CreativeSuiteHeader
         currentPath={currentPath}
         navigateTo={navigateTo}
@@ -281,7 +281,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
           </div>
         </main>
 
-        <footer className="py-6 px-8 border-t border-purple-900/10 text-center bg-[#0a0a0e]/40 mt-auto">
+        <footer className="py-6 px-8 border-t border-neutral-900 text-center bg-[#070709]/40 mt-auto">
           <p className="text-[10px] text-neutral-600 font-black uppercase tracking-[0.3em] font-mono">
             Sonikoma Creative Suite &bull; AI Powered Storyboard Pipeline
           </p>

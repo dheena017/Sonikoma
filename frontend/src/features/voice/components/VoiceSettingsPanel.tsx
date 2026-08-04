@@ -233,7 +233,7 @@ export default function VoiceSettingsPanel({
   return (
     <div className="space-y-5">
       {/* HEADER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1b172b] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-850 pb-4">
         <div className="flex items-center gap-2.5">
           <span className="p-2 bg-purple-500/10 border border-purple-500/30 rounded-xl text-purple-400">
             <Users className="h-4 w-4" />
@@ -261,7 +261,7 @@ export default function VoiceSettingsPanel({
           {activePanel && (
             <button
               onClick={handleAssignVoice}
-              className="px-3 py-2 bg-[#181329] hover:bg-[#221b3b] text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-2 bg-neutral-900 hover:bg-neutral-850 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer"
               title="Assign selected voice to active panel"
             >
               <BookmarkCheck className="w-3.5 h-3.5 text-purple-400" />
@@ -283,7 +283,7 @@ export default function VoiceSettingsPanel({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Jinwoo / Shadow Sovereign"
-              className="w-full bg-[#07060c] border border-[#1d182e] text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
+              className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
             />
           </div>
           <div className="space-y-1.5">
@@ -295,7 +295,7 @@ export default function VoiceSettingsPanel({
               value={dialogue}
               onChange={(e) => setDialogue(e.target.value)}
               placeholder="e.g. Prepare to perish."
-              className="w-full bg-[#07060c] border border-[#1d182e] text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
+              className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
             />
           </div>
         </div>
@@ -309,13 +309,13 @@ export default function VoiceSettingsPanel({
             value={visual}
             onChange={(e) => setVisual(e.target.value)}
             placeholder="Describe character's gender, style, aura, look..."
-            className="w-full bg-[#07060c] border border-[#1d182e] text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium leading-relaxed"
+            className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium leading-relaxed"
           />
         </div>
 
         {/* AI RECOMMENDED CAST RESULT BANNER */}
         {castData && !loading && (
-          <div className="bg-[#120e24] p-4 rounded-xl border border-purple-500/40 space-y-2.5 animate-fade-in shadow-lg">
+          <div className="bg-purple-950/20 p-4 rounded-xl border border-purple-500/40 space-y-2.5 animate-fade-in shadow-lg">
             <div className="flex justify-between items-center border-b border-purple-900/40 pb-2">
               <span className="text-[10px] font-mono text-purple-300 uppercase font-bold tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-purple-400" /> AI Recommended Voice Actor Match
@@ -342,7 +342,7 @@ export default function VoiceSettingsPanel({
         )}
 
         {/* LIVE VOICE TESTER & CATEGORY FILTER */}
-        <div className="border-t border-[#1b172b] pt-4 space-y-4">
+        <div className="border-t border-neutral-850 pt-4 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Sparkles className="h-3.5 w-3.5 text-purple-400" />
@@ -359,7 +359,7 @@ export default function VoiceSettingsPanel({
                   onClick={() => setFilterCategory(cat)}
                   className={`px-2.5 py-1 rounded-lg text-[9px] font-bold transition-all border cursor-pointer whitespace-nowrap ${filterCategory === cat
                       ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
-                      : "bg-[#07060c] text-neutral-400 border-[#1d182e] hover:text-white"
+                      : "bg-neutral-950 text-neutral-400 border-neutral-800 hover:text-white"
                     }`}
                 >
                   {cat}
@@ -376,13 +376,13 @@ export default function VoiceSettingsPanel({
               <select
                 value={selectedVoice}
                 onChange={(e) => setSelectedVoice(e.target.value)}
-                className="w-full bg-[#07060c] border border-[#1d182e] text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans cursor-pointer"
+                className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans cursor-pointer"
               >
                 {filteredVoices.map((v) => (
                   <option
                     key={v.code}
                     value={v.code}
-                    className="bg-[#09080e] text-white"
+                    className="bg-neutral-950 text-white"
                   >
                     {v.label}
                   </option>
@@ -400,7 +400,7 @@ export default function VoiceSettingsPanel({
                   value={testScript}
                   onChange={(e) => setTestScript(e.target.value)}
                   placeholder="Type preview dialogue..."
-                  className="w-full bg-[#07060c] border border-[#1d182e] text-xs rounded-xl p-2.5 pr-24 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
+                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 pr-24 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
                 />
                 <button
                   onClick={handlePreviewToggle}

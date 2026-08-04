@@ -70,11 +70,11 @@ const PanelAssistantPage = React.memo(
     };
 
     return (
-      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
         {/* PAGE HERO HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1b172b] pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-850 pb-5">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#181229] border border-purple-500/30 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/50">
+            <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/30">
               <Languages className="h-6 w-6 animate-pulse" />
             </div>
             <div>
@@ -94,7 +94,7 @@ const PanelAssistantPage = React.memo(
           </div>
 
           <div className="flex items-center gap-3 self-start md:self-center">
-            <div className="px-3.5 py-1.5 rounded-full bg-[#12101d] border border-[#231e38] text-neutral-300 text-xs font-mono flex items-center gap-2">
+            <div className="px-3.5 py-1.5 rounded-full bg-neutral-950 border border-neutral-850 text-neutral-300 text-xs font-mono flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
               <span>Total Panels: {safePanels.length}</span>
             </div>
@@ -102,10 +102,10 @@ const PanelAssistantPage = React.memo(
         </div>
 
         {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
-        <div className="relative flex items-center gap-4 bg-[#0d0b16] border border-[#1f1b2e] rounded-2xl p-3 shadow-md">
+        <div className="relative flex items-center gap-4 bg-neutral-950 border border-neutral-850 rounded-2xl p-3 shadow-md">
           <button
             onClick={() => scrollFilmstrip("left")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
             title="Scroll left"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -121,10 +121,10 @@ const PanelAssistantPage = React.memo(
                 <button
                   key={p?.id || idx}
                   onClick={() => setSelectedIdx(idx)}
-                  className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-[#06050a] flex items-center justify-center ${
+                  className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-black/60 flex items-center justify-center ${
                     isSel
-                      ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105 bg-[#171329]"
-                      : "border-[#1e1a2e] opacity-60 hover:opacity-100 hover:border-purple-500/50"
+                      ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105 bg-purple-500/10"
+                      : "border-neutral-850 opacity-60 hover:opacity-100 hover:border-purple-500/50"
                   }`}
                 >
                   {p?.image_url ? (
@@ -134,7 +134,7 @@ const PanelAssistantPage = React.memo(
                       className="w-full h-full object-contain"
                     />
                   ) : (
-                    <div className="w-full h-full bg-[#0c0a15] flex items-center justify-center text-[10px] text-neutral-600 font-mono">
+                    <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-[10px] text-neutral-600 font-mono">
                       Panel #{idx + 1}
                     </div>
                   )}
@@ -148,7 +148,7 @@ const PanelAssistantPage = React.memo(
 
           <button
             onClick={() => scrollFilmstrip("right")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
             title="Scroll right"
           >
             <ChevronRight className="w-4 h-4" />
@@ -159,11 +159,11 @@ const PanelAssistantPage = React.memo(
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
           {/* COLUMN 1 (LEFT - 4 COLS / 33% WIDTH): ACTIVE PANEL DETAILS */}
-          <div className="lg:col-span-4 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-5 space-y-4 shadow-xl">
+          <div className="lg:col-span-4 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 space-y-4 shadow-xl">
             <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
               FRAME PREVIEW
             </span>
-            <div className="h-56 sm:h-64 rounded-xl overflow-hidden border border-[#221d33] bg-[#06050a] flex items-center justify-center p-2 relative shadow-inner">
+            <div className="h-56 sm:h-64 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 flex items-center justify-center p-2 relative shadow-inner">
               {activePanel?.image_url ? (
                 <img
                   src={activePanel.image_url}
@@ -185,7 +185,7 @@ const PanelAssistantPage = React.memo(
               <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
                 SPEECH & DIALOGUE
               </span>
-              <div className="p-3.5 bg-[#06050a] border border-[#1d182e] rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
+              <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
                 {cleanDialogueDisplay(activePanel?.speech_text).speech ? (
                   <div className="space-y-1.5">
                     {cleanDialogueDisplay(activePanel?.speech_text).tone && (
@@ -205,7 +205,7 @@ const PanelAssistantPage = React.memo(
               <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
                 NARRATIVE TEXT
               </span>
-              <div className="p-3.5 bg-[#06050a] border border-[#1d182e] rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
+              <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
                 {activePanel?.visual_description || (
                   <span className="text-neutral-600 italic">No narrative text recorded for this panel.</span>
                 )}
@@ -214,8 +214,8 @@ const PanelAssistantPage = React.memo(
           </div>
 
           {/* COLUMN 2 (RIGHT - 8 COLS / 67% WIDTH): TRANSLATION WORKFLOW CANVAS */}
-          <div className="lg:col-span-8 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-6 shadow-xl flex flex-col min-h-[480px]">
-            <div className="flex items-center justify-between gap-3 border-b border-[#1b172b] pb-3 mb-4">
+          <div className="lg:col-span-8 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-6 shadow-xl flex flex-col min-h-[480px]">
+            <div className="flex items-center justify-between gap-3 border-b border-neutral-850 pb-3 mb-4">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
                   ACTIVE WORKFLOW

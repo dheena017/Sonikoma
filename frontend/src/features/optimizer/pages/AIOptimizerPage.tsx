@@ -152,11 +152,11 @@ const AIOptimizerPage = React.memo(
     const activeToolMeta = tools.find((t) => t.id === activeTab) ?? tools[0];
 
     return (
-      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-[#1f1b2e] bg-[#09080e] p-5 sm:p-7 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
         {/* PAGE HERO HEADER */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#1b172b] pb-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-neutral-850 pb-5">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#181229] border border-purple-500/30 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/50">
+            <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/30">
               <Sliders className="h-6 w-6" />
             </div>
             <div>
@@ -182,7 +182,7 @@ const AIOptimizerPage = React.memo(
             {/* Quick Copy YouTube Package Button */}
             <button
               onClick={handleCopyAllPackage}
-              className="px-3.5 py-2 bg-[#171329] hover:bg-[#201a38] text-purple-300 hover:text-white rounded-xl border border-purple-500/30 text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-850 text-purple-300 hover:text-white rounded-xl border border-purple-500/30 text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
             >
               {copiedAll ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-purple-400" />}
               <span>{copiedAll ? "Copied Package!" : "Copy Package"}</span>
@@ -191,10 +191,10 @@ const AIOptimizerPage = React.memo(
         </div>
 
         {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
-        <div className="relative flex items-center gap-4 bg-[#0d0b16] border border-[#1f1b2e] rounded-2xl p-3 shadow-md">
+        <div className="relative flex items-center gap-4 bg-neutral-950 border border-neutral-850 rounded-2xl p-3 shadow-md">
           <button
             onClick={() => scrollFilmstrip("left")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
             title="Scroll left"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -208,10 +208,10 @@ const AIOptimizerPage = React.memo(
               <button
                 key={panel.id ?? idx}
                 onClick={() => setSelectedIdx(idx)}
-                className={`w-20 shrink-0 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer relative flex items-center justify-center bg-[#06050a] ${
+                className={`w-20 shrink-0 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer relative flex items-center justify-center bg-black/60 ${
                   selectedIdx === idx
-                    ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.35)] scale-105 bg-[#171329]"
-                    : "border-[#1e1930] opacity-50 hover:opacity-100 hover:border-purple-500/40"
+                    ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.35)] scale-105 bg-purple-500/10"
+                    : "border-neutral-850 opacity-50 hover:opacity-100 hover:border-purple-500/40"
                 }`}
               >
                 {panel.image_url ? (
@@ -232,7 +232,7 @@ const AIOptimizerPage = React.memo(
 
           <button
             onClick={() => scrollFilmstrip("right")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-[#151224] border border-[#25203b] hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
             title="Scroll right"
           >
             <ChevronRight className="w-4 h-4" />
@@ -243,9 +243,9 @@ const AIOptimizerPage = React.memo(
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
           {/* COLUMN 1 (LEFT - 3 COLS): ACTIVE PANEL DETAILS & TEXT */}
-          <div className="lg:col-span-3 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 space-y-4 shadow-xl">
+          <div className="lg:col-span-3 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-4 space-y-4 shadow-xl">
             {/* Panel Image */}
-            <div className="h-48 sm:h-56 rounded-xl overflow-hidden border border-[#221d33] bg-[#06050a] flex items-center justify-center p-2 relative shadow-inner">
+            <div className="h-48 sm:h-56 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 flex items-center justify-center p-2 relative shadow-inner">
               {activePanel.image_url ? (
                 <img
                   src={activePanel.image_url}
@@ -268,7 +268,7 @@ const AIOptimizerPage = React.memo(
               <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
                 ACTIVE DIALOGUE
               </span>
-              <div className="w-full bg-[#07060c] border border-[#1e1a2e] text-xs rounded-xl p-2.5 text-neutral-200 font-sans leading-relaxed min-h-[50px]">
+              <div className="w-full bg-neutral-950 border border-neutral-850 text-xs rounded-xl p-2.5 text-neutral-200 font-sans leading-relaxed min-h-[50px]">
                 {cleanDialogueDisplay(activePanel.speech_text).speech ? (
                   <div className="space-y-1">
                     {cleanDialogueDisplay(activePanel.speech_text).tone && (
@@ -289,7 +289,7 @@ const AIOptimizerPage = React.memo(
               <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
                 NARRATIVE TEXT
               </span>
-              <div className="w-full bg-[#07060c] border border-[#1e1a2e] text-xs rounded-xl p-2.5 text-neutral-200 font-sans leading-relaxed min-h-[50px]">
+              <div className="w-full bg-neutral-950 border border-neutral-850 text-xs rounded-xl p-2.5 text-neutral-200 font-sans leading-relaxed min-h-[50px]">
                 {activePanel.visual_description ? (
                   <p>{activePanel.visual_description}</p>
                 ) : (
@@ -299,12 +299,12 @@ const AIOptimizerPage = React.memo(
             </div>
 
             {/* Panel Metrics Pills */}
-            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-[#1b172b]">
-              <div className="bg-[#07060c] border border-[#1e1a2e] rounded-xl p-2 text-center">
+            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-850">
+              <div className="bg-neutral-950 border border-neutral-850 rounded-xl p-2 text-center">
                 <p className="text-[9px] font-mono text-neutral-500 uppercase">Duration</p>
                 <p className="text-xs font-black text-white mt-0.5">{(activePanel.duration ?? 3.0).toFixed(1)}s</p>
               </div>
-              <div className="bg-[#07060c] border border-[#1e1a2e] rounded-xl p-2 text-center">
+              <div className="bg-neutral-950 border border-neutral-850 rounded-xl p-2 text-center">
                 <p className="text-[9px] font-mono text-neutral-500 uppercase">Frame</p>
                 <p className="text-xs font-black text-white mt-0.5">{selectedIdx + 1}/{panels.length}</p>
               </div>
@@ -312,7 +312,7 @@ const AIOptimizerPage = React.memo(
           </div>
 
           {/* COLUMN 2 (CENTER - 3 COLS): STUDIO TOOLS & FULL VIDEO PREVIEW */}
-          <div className="lg:col-span-3 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-4 space-y-4 shadow-xl">
+          <div className="lg:col-span-3 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-4 space-y-4 shadow-xl">
             <div>
               <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
                 STUDIO TOOLS
@@ -333,7 +333,7 @@ const AIOptimizerPage = React.memo(
                     className={`w-full rounded-xl border px-3 py-2.5 text-left transition-all cursor-pointer ${
                       isActive
                         ? "border-2 border-purple-500/80 bg-purple-500/15 text-white shadow-[0_0_12px_rgba(168,85,247,0.25)]"
-                        : "border-[#1c182b] bg-[#07060c] text-neutral-400 hover:border-neutral-700 hover:text-white"
+                        : "border-neutral-800 bg-neutral-950 text-neutral-400 hover:border-neutral-700 hover:text-white"
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -349,12 +349,12 @@ const AIOptimizerPage = React.memo(
             </div>
 
             {/* Video Preview Card in Center Column */}
-            <div className="pt-2 border-t border-[#1b172b] space-y-2">
+            <div className="pt-2 border-t border-neutral-850 space-y-2">
               <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold flex items-center gap-1.5">
                 <Video className="w-3.5 h-3.5 text-purple-400" /> FULL VIDEO PREVIEW
               </span>
               {videoUrl ? (
-                <div className="relative rounded-xl overflow-hidden border border-[#221d33] bg-[#06050a] shadow-inner aspect-video flex items-center justify-center">
+                <div className="relative rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 shadow-inner aspect-video flex items-center justify-center">
                   <video
                     src={
                       videoUrl.startsWith("http://") ||
@@ -371,7 +371,7 @@ const AIOptimizerPage = React.memo(
                   />
                 </div>
               ) : (
-                <div className="border border-dashed border-[#1e1a2e] rounded-xl p-3 text-center bg-[#07060c] flex flex-col items-center justify-center space-y-1">
+                <div className="border border-dashed border-neutral-850 rounded-xl p-3 text-center bg-neutral-950 flex flex-col items-center justify-center space-y-1">
                   <AlertTriangle className="h-4 w-4 text-amber-500/80" />
                   <p className="text-[10px] text-neutral-400 font-mono">No video preview</p>
                   <p className="text-[9px] text-neutral-500 font-sans">Compile video on Dashboard to view playback</p>
@@ -381,9 +381,9 @@ const AIOptimizerPage = React.memo(
           </div>
 
           {/* COLUMN 3 (RIGHT - 6 COLS / 50% WIDTH): EXPANSIVE ACTIVE WORKFLOW CANVAS */}
-          <div className="lg:col-span-6 rounded-2xl border border-[#1f1b2e] bg-[#0c0a15] p-5 shadow-xl flex flex-col min-h-[460px]">
+          <div className="lg:col-span-6 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 shadow-xl flex flex-col min-h-[460px]">
             {/* Workflow header */}
-            <div className="flex items-center justify-between gap-3 border-b border-[#1b172b] pb-3 mb-4">
+            <div className="flex items-center justify-between gap-3 border-b border-neutral-850 pb-3 mb-4">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
                   ACTIVE WORKFLOW
