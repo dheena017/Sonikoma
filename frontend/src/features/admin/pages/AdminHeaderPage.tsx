@@ -129,7 +129,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
       id="header_pane"
       className="fixed top-0 left-0 w-full h-16 border-b border-neutral-900 bg-neutral-955/80 backdrop-blur-md z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4"
     >
-      {/* Left side: Hamburger and Brand */}
+      {/* Left side: Hamburger, Brand, and Admin Profile badge */}
       <div className="flex items-center gap-3 shrink-0 h-full">
         <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
           <button
@@ -156,6 +156,14 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
             Sonikoma
           </span>
+        </div>
+
+        {/* User profile identifier (Admin badge) moved to left */}
+        <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-850 px-3 py-1 rounded-full select-none cursor-pointer ml-1" onClick={() => navigateTo("/admin/settings")}>
+          <div className="w-5 h-5 rounded-full bg-violet-600 flex items-center justify-center text-[10px] text-white font-extrabold uppercase shadow shadow-violet-600/30">
+            A
+          </div>
+          <span className="text-xs text-neutral-300 font-bold hidden sm:inline">admin</span>
         </div>
       </div>
 
@@ -355,13 +363,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           <Settings className="h-4 w-4" />
         </button>
 
-        {/* User profile identifier (Admin badge) */}
-        <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-850 px-3 py-1 rounded-full select-none cursor-pointer" onClick={() => navigateTo("/admin/settings")}>
-          <div className="w-5 h-5 rounded-full bg-violet-600 flex items-center justify-center text-[10px] text-white font-extrabold uppercase shadow shadow-violet-600/30">
-            A
-          </div>
-          <span className="text-xs text-neutral-300 font-bold hidden sm:inline">admin</span>
-        </div>
+
 
 
 
