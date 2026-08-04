@@ -156,14 +156,22 @@ export default function ProjectCard({
           </button>
         </div>
 
-        {/* Episode badge */}
-        {project.episode !== undefined && project.episode !== null && (
-          <div className="absolute bottom-2.5 left-2.5 z-10">
-            <div className="px-2 py-0.5 bg-black/70 backdrop-blur-md border border-white/10 rounded-md text-[9px] font-bold text-white tracking-wider">
-              EP {project.episode}
+        {/* Bottom thumbnail badges (Episode label on left & Panel count on right) */}
+        <div className="absolute bottom-2.5 inset-x-2.5 z-10 flex items-center justify-between pointer-events-none">
+          {project.episode !== undefined && project.episode !== null ? (
+            <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+              <span>{typeof project.episode === 'number' ? `EP ${project.episode}` : project.episode}</span>
             </div>
-          </div>
-        )}
+          ) : <div />}
+
+          {((project.panels_count ?? 0) > 0 || (project.imported_assets_count ?? 0) > 0) && (
+            <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-bold text-purple-200 tracking-wider shadow-lg flex items-center gap-1.5">
+              <Scissors className="w-3 h-3 text-purple-400" />
+              <span>{project.panels_count || project.imported_assets_count} panels</span>
+            </div>
+          )}
+        </div>
 
       </div>
 
