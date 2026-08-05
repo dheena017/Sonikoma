@@ -1,25 +1,12 @@
 """
-Service layer for orchestrating audio generation.
-
-Coordinates between the business logic and the Text-To-Speech (TTS) engine layer
-to convert narrative and dialogue scripts into physical audio assets.
+backend/app/services/audio/audio_service.py
+─────────────────────────────────────────────────────────────────────────────
+Backward-compatibility proxy.
+Re-exports audio, TTS, and transcription services.
+─────────────────────────────────────────────────────────────────────────────
 """
 
-from .tts_impl import sanitize_text_for_tts, generate_segment_with_retry, generate_panel_audio
-from .transcription_impl import generate_srt, generate_vtt, extract_words_with_timestamps, generate_json_transcript, batch_transcribe
-from .processing_impl import detect_silence, segment_by_energy, extract_summary_stats, save_audio_segment
-
-__all__ = [
-    'sanitize_text_for_tts',
-    'generate_segment_with_retry',
-    'generate_panel_audio',
-    'generate_srt',
-    'generate_vtt',
-    'extract_words_with_timestamps',
-    'generate_json_transcript',
-    'batch_transcribe',
-    'detect_silence',
-    'segment_by_energy',
-    'extract_summary_stats',
-    'save_audio_segment'
-]
+from services.audio.tts_engine import *
+from services.audio.speech_transcriber import *
+from services.audio.audio_processor import *
+from services.audio.dialogue_aligner import *

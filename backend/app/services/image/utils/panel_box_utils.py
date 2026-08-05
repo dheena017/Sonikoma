@@ -350,7 +350,7 @@ def merge_overlapping_boxes(
                 iou = inter_area / union_area if union_area > 0 else 0.0
                 overlap_min_ratio = inter_area / min_area if min_area > 0 else 0.0
 
-                h_overlap_ratio = x_overlap_val / w_min if w_min > 0 else 0.0
+                x_overlap_ratio = x_overlap_val / w_min if w_min > 0 else 0.0
                 y_dist = max(0, y1_b - y2_a) if y1_b >= y2_a else max(0, y1_a - y2_b)
                 
                 y_overlap_ratio = y_overlap_val / float(h_min) if h_min > 0 else 0.0
@@ -367,7 +367,7 @@ def merge_overlapping_boxes(
 
                 is_bubble_pair = _is_detected_bubble_pair(
                     box_a, box_b, h_a, h_b, w_a, w_b, x1_a, x1_b,
-                    h_overlap_ratio, y_dist, sep_between
+                    x_overlap_ratio, y_dist, sep_between
                 )
                 
                 features = MergeFeatures(
@@ -394,13 +394,13 @@ def merge_overlapping_boxes(
                 elif iou >= 0.65 or overlap_min_ratio >= 0.80:
                     should_merge = True
                     reason_str = "high_iou_or_overlap"
-                elif y_overlap_ratio >= 0.50 and h_overlap_ratio >= 0.50:
+                elif y_overlap_ratio >= 0.50 and x_overlap_ratio >= 0.50:
                     should_merge = True
                     reason_str = "high_y_h_overlap"
-                elif is_bubble_pair and h_overlap_ratio >= 0.35 and y_dist <= 30:
+                elif is_bubble_pair and x_overlap_ratio >= 0.35 and y_dist <= 30:
                     should_merge = True
                     reason_str = "bubble_pair_y_dist"
-                elif merge_threshold > 0 and h_overlap_ratio > 0 and y_dist <= merge_threshold:
+                elif merge_threshold > 0 and x_overlap_ratio > 0 and y_dist <= merge_threshold:
                     ev_merge, ev_reason, ev_score = eval_merge_candidate_pair(box_a, box_b, features)
                     should_merge = ev_merge
                     reason_str = ev_reason
@@ -416,18 +416,20 @@ def merge_overlapping_boxes(
                     y1_a = min(y1_a, y1_b)
                     x2_a = max(x2_a, x2_b)
                     y2_a = max(y2_a, y2_b)
-                    
-                    merged_lineage = lineage_a + lineage_b
-                    merged_dict = dict(box_a)
-                    merged_dict.update({
-                        "x": x1_a,
-                        "y": y1_a,
-                        "w": x2_a - x1_a,
-                        "h": y2_a - y1_a,
-                        "lineage": merged_lineage,
-                        "merge_reason": reason_str
-                    })
-            break
+                    lineage_a = lineage_a + lineage_b
+
+                    box_a["x"] = x1_a
+                    box_a["y"] = y1_a
+                    box_a["w"] = x2_a - x1_a
+                    box_a["h"] = y2_a - y1_a
+                    box_a["lineage"] = lineage_a
+                    box_a["merge_reason"] = reason_str
+                    skip_indices.add(j)
+                    merged = True
+
+            new_boxes.append(box_a)
+
+        boxes = new_boxes
             
     avg_soft_score = float(np.mean(soft_scores)) if soft_scores else 0.0
     logger.info(

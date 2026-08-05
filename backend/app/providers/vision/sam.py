@@ -9,11 +9,10 @@ try:
     from rembg import remove as rembg_remove
     from rembg import new_session
     has_rembg = True
-except ImportError:
+except (Exception, BaseException, SystemExit):
     has_rembg = False
     logger.warning(
-        "rembg is not installed. Character segmentation will return a blank layer. "
-        "To enable character segmentation, install rembg: `pip install rembg`"
+        "rembg/onnxruntime is not installed. Character segmentation will return a blank layer."
     )
 
 # Initialize a global rembg session for U-2-Net model to prevent reloading it per request
