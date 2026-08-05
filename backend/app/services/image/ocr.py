@@ -27,6 +27,9 @@ from typing import List, Dict, Any, Optional, Tuple, TypedDict
 logger = logging.getLogger("sonikoma.services.image.ocr")
 
 # ── Optional dependencies ────────────────────────────────────────────────────
+easyocr: Any = None
+np: Any = None
+Image: Any = None
 try:
     import easyocr
     import numpy as np

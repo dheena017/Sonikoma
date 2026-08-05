@@ -287,6 +287,11 @@ export function useBatchImageActions({
       );
       return;
     }
+
+    // Reset stale panel state, window cache, and selection
+    setPanels([]);
+    (window as any).__lastDetectedPanels = [];
+    
     console.log(
       `[Auto Cropper] Starting batch auto-crop on ${targetImages.length} images`,
       targetImages

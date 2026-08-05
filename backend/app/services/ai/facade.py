@@ -23,6 +23,7 @@ from core.settings import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
 import services.image.utils.image_utils as img_utils
+from services.image.utils.panel_box_utils import PanelBounds
 from core.cache import stitched_cache, edit_history
 from media.audio.audio import generate_panel_audio
 
@@ -328,14 +329,8 @@ def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]], so
     """
     Crop each detected panel from the image buffer directly in memory (server-side).
 
-    For every panel that has x / y / width / height pixel coordinates, this function:
-      1. Crops the region image[y : y+height,  x : x+width]  (exact PIL equivalent)
-      2. Converts to JPEG and stores the bytes in stitched_cache
-      3. Writes the '/api/image/cached/{key}' URL into panel['croppedUrl']
-
-    The frontend's useBatchImageActions.ts already checks:
-        if (box.croppedUrl) return box.croppedUrl;
-    so it will skip the N separate /api/image/edit round-trips when this field is set.
+    All panel coordinates are parsed into canonical immutable PanelBounds objects before crop execution.
+    Bounds are validated against image dimensions with detailed diagnostic logging for any clamped bounds.
     """
     try:
         full_img = Image.open(io.BytesIO(img_buffer))
@@ -349,37 +344,43 @@ def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]], so
     ts = int(time.time() * 1000)
     for idx, panel in enumerate(panels):
         try:
-            if "x" in panel and "y" in panel and "width" in panel and "height" in panel:
-                x = int(panel["x"])
-                y = int(panel["y"])
-                w = int(panel["width"])
-                h = int(panel["height"])
+            bounds: Optional[PanelBounds] = None
 
-                x1 = max(0, min(img_w - 1, x))
-                y1 = max(0, min(img_h - 1, y))
-                x2 = max(x1 + 1, min(img_w, x + w))
-                y2 = max(y1 + 1, min(img_h, y + h))
+            if "x" in panel and "y" in panel and "width" in panel and "height" in panel:
+                bounds = PanelBounds.from_pixels(
+                    x=panel["x"], y=panel["y"], width=panel["width"], height=panel["height"], space="panel_dict"
+                )
             elif "cropTop" in panel and "cropBottom" in panel and "cropLeft" in panel and "cropRight" in panel:
                 c_top = float(panel.get("cropTop", 0.0))
                 c_bot = float(panel.get("cropBottom", 0.0))
                 c_left = float(panel.get("cropLeft", 0.0))
                 c_right = float(panel.get("cropRight", 0.0))
 
-                y1 = max(0, min(img_h - 1, round((c_top / 100.0) * img_h)))
-                bot_px = max(0, min(img_h - 1, round((c_bot / 100.0) * img_h)))
-                x1 = max(0, min(img_w - 1, round((c_left / 100.0) * img_w)))
-                right_px = max(0, min(img_w - 1, round((c_right / 100.0) * img_w)))
+                # Normalize whether cropBottom / cropRight are absolute Y2/X2 percentages vs bottom/right insets
+                if c_bot > c_top and c_bot > 50.0:
+                    bounds = PanelBounds.from_absolute_percent(c_top, c_bot, c_left, c_right, img_w, img_h, space="ai_absolute")
+                else:
+                    bounds = PanelBounds.from_inset_percent(c_top, c_bot, c_left, c_right, img_w, img_h, space="frontend_css")
 
-                x2 = max(x1 + 1, img_w - right_px)
-                y2 = max(y1 + 1, img_h - bot_px)
-            else:
+            if bounds is None:
                 continue
 
-            if (x2 - x1) < 5 or (y2 - y1) < 5:
-                logger.debug(f"[_crop_panels_server_side] Skipping panel {idx+1}: too small ({x2-x1}x{y2-y1})")
+            # Non-silent validation & diagnostic clamping
+            if not bounds.is_valid(img_w, img_h):
+                clamped_bounds = bounds.clamp(img_w, img_h)
+                logger.warning(
+                    f"[_crop_panels_server_side] Panel #{idx+1} requested bounds "
+                    f"(x={bounds.x}, y={bounds.y}, w={bounds.width}, h={bounds.height}) "
+                    f"in space '{bounds.coordinate_space}' exceed canvas ({img_w}x{img_h}). "
+                    f"Clamped to -> (x={clamped_bounds.x}, y={clamped_bounds.y}, w={clamped_bounds.width}, h={clamped_bounds.height})"
+                )
+                bounds = clamped_bounds
+
+            if bounds.width < 5 or bounds.height < 5:
+                logger.debug(f"[_crop_panels_server_side] Skipping panel #{idx+1}: bounds too small ({bounds.width}x{bounds.height})")
                 continue
 
-            cropped = full_img.crop((x1, y1, x2, y2))
+            cropped = full_img.crop((bounds.x, bounds.y, bounds.x2, bounds.y2))
 
             # Ensure RGB (no alpha) for JPEG output
             if cropped.mode == "RGBA":
@@ -393,8 +394,11 @@ def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]], so
             cropped.save(out, format="JPEG", quality=90)
             cropped_bytes = out.getvalue()
 
+            import hashlib
+            img_hash = hashlib.md5(source_url.encode()).hexdigest()[:8] if source_url else "img"
             panel_num = f"{idx + 1:02d}" if len(panels) >= 10 else f"{idx + 1}"
-            cache_key = f"panel_crop_panel_{panel_num}"
+            geom_hash = hashlib.md5(f"{bounds.x}_{bounds.y}_{bounds.width}_{bounds.height}".encode()).hexdigest()[:8]
+            cache_key = f"panel_crop_{img_hash}_{geom_hash}_{panel_num}"
             cached_url = f"/api/image/cached/{cache_key}"
             stitched_cache.set(cache_key, {"data": cropped_bytes, "content_type": "image/jpeg"})
             if source_url:
@@ -429,9 +433,13 @@ async def facade_smart_crop(
     auto_split: bool = True,
     use_yolo: bool = True,
     guidance_instructions: Optional[str] = None,
-    focus_mode: Optional[str] = None
+    focus_mode: Optional[str] = None,
+    job_id: Optional[str] = None
 ) -> Dict[str, Any]:
     """Uses LLM or local OpenCV panel detection based on strategy & configuration."""
+    job_id = job_id or f"job_{uuid.uuid4().hex[:8]}"
+    logger.info(f"[{job_id}] Starting facade_smart_crop for URL: {url[:60]}... (strategy={strategy})")
+
     resolved = await img_utils.resolve_image_to_buffer(url)
     img_buffer = resolved["data"]
 
@@ -464,13 +472,14 @@ async def facade_smart_crop(
                 close_kernel_size=close_kernel_size,
                 auto_split=auto_split,
                 padding_px=padding_px,
-                use_yolo=use_yolo
+                use_yolo=use_yolo,
+                job_id=job_id
             )
             if len(cv_panels) > 0:
                 # Crop all panels server-side in one pass (image[y:y+h, x:x+w])
                 # so the frontend gets croppedUrl on each panel and skips extra API calls
                 await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels, url)
-                logger.info(f"[Panel Detection] Successfully returned {len(cv_panels)} detected panels.")
+                logger.info(f"[{job_id}] Successfully returned {len(cv_panels)} detected panels.")
                 return {
                     "success": True,
                     "total_panels": len(cv_panels),
@@ -479,6 +488,7 @@ async def facade_smart_crop(
                     "panels": cv_panels,
                     "provider": "opencv_webtoon" if is_tall_strip else "opencv",
                     "isTallStrip": is_tall_strip,
+                    "job_id": job_id,
                 }
         finally:
             if tmp_in_path and os.path.exists(tmp_in_path):
@@ -572,37 +582,34 @@ async def facade_smart_crop(
     safe_w = max(1, w_img)
 
     for p in panels_raw:
-        ymin = int(round((p.get("cropTop", 0) / 100.0) * safe_h))
-        ymax = int(round((p.get("cropBottom", 100) / 100.0) * safe_h))
-        xmin = int(round((p.get("cropLeft", 0) / 100.0) * safe_w))
-        xmax = int(round((p.get("cropRight", 100) / 100.0) * safe_w))
+        top_val = float(p.get("cropTop", 0.0))
+        bot_val = float(p.get("cropBottom", 100.0))
+        left_val = float(p.get("cropLeft", 0.0))
+        right_val = float(p.get("cropRight", 100.0))
 
-        xmin = max(0, min(safe_w, xmin))
-        xmax = max(0, min(safe_w, xmax))
-        ymin = max(0, min(safe_h, ymin))
-        ymax = max(0, min(safe_h, ymax))
+        if bot_val > top_val and bot_val > 50.0:
+            pb = PanelBounds.from_absolute_percent(top_val, bot_val, left_val, right_val, safe_w, safe_h, space="ai_absolute")
+        else:
+            pb = PanelBounds.from_inset_percent(top_val, bot_val, left_val, right_val, safe_w, safe_h, space="ai_inset")
 
-        w_box = max(1, xmax - xmin)
-        h_box = max(1, ymax - ymin)
+        pb = pb.clamp(safe_w, safe_h)
 
         from services.image.utils.panel_box_utils import adjust_to_aspect_ratio
-        x, y, w_box, h_box = adjust_to_aspect_ratio(xmin, ymin, w_box, h_box, safe_w, safe_h, aspect_ratio)
+        x, y, w_box, h_box = adjust_to_aspect_ratio(pb.x, pb.y, pb.width, pb.height, safe_w, safe_h, aspect_ratio)
 
-        crop_top = (y / safe_h) * 100.0
-        crop_bottom = ((safe_h - (y + h_box)) / safe_h) * 100.0
-        crop_left = (x / safe_w) * 100.0
-        crop_right = ((safe_w - (x + w_box)) / safe_w) * 100.0
+        final_pb = PanelBounds.from_pixels(x, y, w_box, h_box, space="smart_crop_final").clamp(safe_w, safe_h)
+        insets = final_pb.to_inset_percentages(safe_w, safe_h)
 
         final_panels.append({
-            "x": int(x),
-            "y": int(y),
-            "width": int(w_box),
-            "height": int(h_box),
-            "cropTop": round(max(0.0, min(100.0, crop_top)), 2),
-            "cropBottom": round(max(0.0, min(100.0, crop_bottom)), 2),
-            "cropLeft": round(max(0.0, min(100.0, crop_left)), 2),
-            "cropRight": round(max(0.0, min(100.0, crop_right)), 2),
-            "area": int(w_box * h_box)
+            "x": int(final_pb.x),
+            "y": int(final_pb.y),
+            "width": int(final_pb.width),
+            "height": int(final_pb.height),
+            "cropTop": float(insets["cropTop"]),
+            "cropBottom": float(insets["cropBottom"]),
+            "cropLeft": float(insets["cropLeft"]),
+            "cropRight": float(insets["cropRight"]),
+            "area": int(final_pb.area)
         })
 
     # Sort strictly top-to-bottom (by pixel y), then left-to-right (by pixel x).

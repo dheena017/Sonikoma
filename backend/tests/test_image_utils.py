@@ -87,3 +87,87 @@ def test_edit_history_persists_string_values_on_warm_up(tmp_path):
     assert restarted_cache.get(cache_key) == original_url
 
 
+def test_merge_hard_blocker_evaluations():
+    from services.image.utils.panel_box_utils import MergeFeatures, eval_merge_candidate_pair
+
+    box_a = {"x": 50, "y": 100, "w": 700, "h": 300}
+    box_b = {"x": 50, "y": 410, "w": 700, "h": 300}
+
+    # Test Hard Blocker 1: Separator Present -> Immediate Reject
+    f1 = MergeFeatures(y_distance=10.0, width_similarity=1.0, background_similarity=1.0, separator_present=True)
+    merged1, reason1, score1 = eval_merge_candidate_pair(box_a, box_b, f1)
+    assert merged1 is False
+    assert "hard_blocker_separator" in reason1
+
+    # Test Hard Blocker 2: Max Height Exceeded -> Immediate Reject
+    f2 = MergeFeatures(y_distance=10.0, width_similarity=1.0, background_similarity=1.0, max_height_exceeded=True)
+    merged2, reason2, score2 = eval_merge_candidate_pair(box_a, box_b, f2)
+    assert merged2 is False
+    assert "hard_blocker_max_height" in reason2
+
+    # Test Hard Blocker 3: OCR Boundary Conflict -> Immediate Reject
+    f3 = MergeFeatures(y_distance=10.0, width_similarity=1.0, background_similarity=1.0, ocr_boundary_conflict=True)
+    merged3, reason3, score3 = eval_merge_candidate_pair(box_a, box_b, f3)
+    assert merged3 is False
+    assert "hard_blocker_ocr" in reason3
+
+    # Test Soft Vote Pass (Hard Blockers PASS)
+    f4 = MergeFeatures(y_distance=10.0, width_similarity=1.0, background_similarity=1.0)
+    merged4, reason4, score4 = eval_merge_candidate_pair(box_a, box_b, f4)
+    assert merged4 is True
+    assert score4 >= 0.65
+    assert "soft_vote_passed" in reason4
+
+
+def test_merge_separator_blocks_distance_merge():
+    from services.image.utils.panel_box_utils import merge_overlapping_boxes
+
+    boxes = [
+        {"x": 50, "y": 100, "w": 700, "h": 300},
+        {"x": 50, "y": 420, "w": 700, "h": 300},
+    ]
+
+    merged = merge_overlapping_boxes(
+        boxes,
+        800,
+        5000,
+        merge_threshold=50,
+        separator_bands=[410],
+        gutter_ranges=[(400, 420)],
+    )
+
+    assert len(merged) == 2
+
+
+def test_merge_height_blocker_applies_before_overlap_shortcuts():
+    from services.image.utils.panel_box_utils import merge_overlapping_boxes
+
+    boxes = [
+        {"x": 50, "y": 1000, "w": 700, "h": 4000},
+        {"x": 55, "y": 1100, "w": 690, "h": 3950},
+    ]
+
+    merged = merge_overlapping_boxes(boxes, 800, 10000, merge_threshold=50)
+
+    assert len(merged) == 2
+
+
+def test_bubble_merge_requires_detected_bubble_marker():
+    from services.image.utils.panel_box_utils import merge_overlapping_boxes
+
+    boxes_without_marker = [
+        {"x": 200, "y": 100, "w": 300, "h": 120},
+        {"x": 200, "y": 245, "w": 300, "h": 400},
+    ]
+    unmerged = merge_overlapping_boxes(boxes_without_marker, 800, 2000, merge_threshold=0)
+    assert len(unmerged) == 2
+
+    boxes_with_marker = [
+        {"x": 200, "y": 100, "w": 300, "h": 120, "bubble_candidate": True},
+        {"x": 200, "y": 245, "w": 300, "h": 400},
+    ]
+    merged = merge_overlapping_boxes(boxes_with_marker, 800, 2000, merge_threshold=0)
+    assert len(merged) == 1
+
+
+

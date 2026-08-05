@@ -120,7 +120,7 @@ async def scrape_and_initialize_project(
                 stitched_bytes = await asyncio.to_thread(
                     img_utils.stitch_images_together, [item["data"] for item in resolved_buffers_data], layout="vertical"
                 )
-                ep_match = re.search(r'(?:episode[_-]?no[=_-]|episode[_-]|ep[_-])(\d+)', target_url, re.IGNORECASE)
+                ep_match = re.search(r'(?:episode[_-]?no[=_-]|episode[_-]|ep[_-])(\d+)', normalized_url, re.IGNORECASE)
                 ep_label = f"ep_{ep_match.group(1)}" if ep_match else "full"
                 uid = f"webtoon_{ep_label}_full"
                 stitched_url = f"/api/image/cached/{uid}"

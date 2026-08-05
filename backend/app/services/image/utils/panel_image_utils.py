@@ -143,15 +143,19 @@ def _filter_solid_noise(
 
         try:
             box_slice = gray_arr[by:by+bh, bx:bx+bw]
+            # Check for text strokes / line transitions
+            box_diffs = np.abs(np.diff(box_slice.astype(float), axis=1))
+            has_text_strokes = (np.sum(box_diffs > 15.0) >= 4)
+
             slice_std = float(np.std(box_slice))
-            if slice_std < noise_std_thresh:
+            if slice_std < noise_std_thresh and not has_text_strokes:
                 logger.debug(f"[AutoCrop Filter] Rejected solid color noise (std={slice_std:.2f} < {noise_std_thresh}): x={bx}, y={by}")
                 continue
             row_stds = np.std(box_slice, axis=1)
             flat_rows = np.sum(row_stds < 3.0)
             flat_ratio = float(flat_rows) / float(max(1, bh))
             effective_flat_ratio = 0.98 if auto_split else flat_row_ratio
-            if flat_ratio > effective_flat_ratio:
+            if flat_ratio > effective_flat_ratio and not has_text_strokes:
                 logger.debug(f"[AutoCrop Filter] Rejected high flat-row ratio box (ratio={flat_ratio:.2f} > {effective_flat_ratio}): x={bx}, y={by}")
                 continue
         except Exception:

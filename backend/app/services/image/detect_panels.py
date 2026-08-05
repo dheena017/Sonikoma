@@ -6,9 +6,11 @@ while delegating core algorithms to sub-modules.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+from services.image.panel_postprocessor import compute_post_panel_confidence
 import os
 import sys
 import json
+import uuid
 import argparse
 import logging
 from typing import List, Dict, Optional, Any, Union, Tuple
@@ -25,6 +27,7 @@ except ImportError:
 
 # Import helper sub-modules
 from services.image.utils.panel_box_utils import (
+    PanelBounds,
     adjust_to_aspect_ratio,
     merge_overlapping_boxes
 )
@@ -87,6 +90,236 @@ def _sort_panels_reading_order(panels: List[Dict[str, Any]], reading_order: str 
     return ordered_panels
 
 
+def _oversized_panel_height_limit(image_h: int, median_panel_h: Optional[float] = None) -> int:
+    if median_panel_h is not None and median_panel_h > 50:
+        dynamic_limit = max(int(median_panel_h * 3.0), int(image_h * 0.12))
+        return min(dynamic_limit, 8000)
+    return min(max(1, int(image_h * 0.15)), 8000)
+
+
+def _is_oversized_panel(box: Dict[str, Any], image_h: int, median_panel_h: Optional[float] = None) -> bool:
+    limit = _oversized_panel_height_limit(image_h, median_panel_h=median_panel_h)
+    return int(box.get("h", 0)) > limit
+
+
+def _shift_ocr_boxes_into_panel(
+    ocr_boxes: List[Dict[str, Any]],
+    panel_box: Dict[str, Any]
+) -> List[Dict[str, int]]:
+    px1 = int(panel_box["x"])
+    py1 = int(panel_box["y"])
+    px2 = px1 + int(panel_box["w"])
+    py2 = py1 + int(panel_box["h"])
+    shifted: List[Dict[str, int]] = []
+
+    for box in ocr_boxes:
+        bx1 = int(box.get("x", 0))
+        by1 = int(box.get("y", 0))
+        bx2 = bx1 + int(box.get("w", 0))
+        by2 = by1 + int(box.get("h", 0))
+        ix1 = max(px1, bx1)
+        iy1 = max(py1, by1)
+        ix2 = min(px2, bx2)
+        iy2 = min(py2, by2)
+        if ix2 > ix1 and iy2 > iy1:
+            shifted.append({
+                "x": ix1 - px1,
+                "y": iy1 - py1,
+                "w": ix2 - ix1,
+                "h": iy2 - iy1,
+            })
+
+    return shifted
+
+
+def _split_oversized_webtoon_boxes(
+    boxes: List[Dict[str, Any]],
+    gray_arr: np.ndarray,
+    image_w: int,
+    image_h: int,
+    is_white_bg: bool,
+    threshold_val: int,
+    min_height_px: int,
+    min_width_pct: float,
+    ocr_boxes: List[Dict[str, Any]],
+    median_bg: Optional[float],
+    sensitivity: float,
+    gutter_bg_ratio: float,
+    gutter_std_thresh: float,
+    gutter_flat_bg_ratio: float,
+    top_median: Optional[float],
+    bottom_median: Optional[float],
+    padding_px: int,
+    min_panel_area: float,
+    max_aspect_ratio: float,
+    min_aspect_ratio: float,
+    noise_std_thresh: float,
+    flat_row_ratio: float,
+    depth: int = 0,
+    max_depth: int = 3,
+) -> List[Dict[str, Any]]:
+    if depth >= max_depth or not boxes:
+        return boxes
+
+    split_boxes: List[Dict[str, Any]] = []
+    panel_heights = [int(b.get("h", 0)) for b in boxes if int(b.get("h", 0)) > 0]
+    median_panel_h = float(np.median(panel_heights)) if panel_heights else None
+    oversized_limit = _oversized_panel_height_limit(image_h, median_panel_h=median_panel_h)
+
+    for box_idx, box in enumerate(sorted(boxes, key=lambda b: (b.get("y", 0), b.get("x", 0))), start=1):
+        if not _is_oversized_panel(box, image_h, median_panel_h=median_panel_h):
+            split_boxes.append(box)
+            continue
+
+        bx = max(0, min(image_w - 1, int(box["x"])))
+        by = max(0, min(image_h - 1, int(box["y"])))
+        bw = max(1, min(image_w - bx, int(box["w"])))
+        bh = max(1, min(image_h - by, int(box["h"])))
+        sub_gray = gray_arr[by:by + bh, bx:bx + bw]
+
+        if sub_gray.size == 0 or bh < min_height_px * 2:
+            split_boxes.append(box)
+            continue
+
+        child_ocr = _shift_ocr_boxes_into_panel(ocr_boxes, {"x": bx, "y": by, "w": bw, "h": bh})
+        logger.info(
+            f"[Panel Recursive Split] depth={depth + 1}: splitting oversized panel #{box_idx} "
+            f"at y={by}, h={bh}px (limit={oversized_limit}px)"
+        )
+
+        detection_result = _detect_panels_webtoon(
+            sub_gray,
+            is_white_bg,
+            threshold_val,
+            min_height_px,
+            min_width_pct,
+            child_ocr,
+            median_bg,
+            sensitivity,
+            gutter_bg_ratio=gutter_bg_ratio,
+            gutter_std_thresh=gutter_std_thresh,
+            gutter_flat_bg_ratio=gutter_flat_bg_ratio,
+            top_median=top_median,
+            bottom_median=bottom_median,
+            high_sensitivity=True,
+            padding_px=padding_px,
+        )
+
+        raw_children = detection_result.panels
+        min_w = bw * min_width_pct
+        filtered_children = _filter_solid_noise(
+            raw_children,
+            sub_gray,
+            min_w,
+            min_height_px,
+            True,
+            min_panel_area=min_panel_area,
+            max_aspect_ratio=max_aspect_ratio,
+            min_aspect_ratio=min_aspect_ratio,
+            noise_std_thresh=noise_std_thresh,
+            flat_row_ratio=flat_row_ratio,
+        )
+        merged_children = merge_overlapping_boxes(
+            filtered_children,
+            bw,
+            bh,
+            0,
+            separator_bands=detection_result.separator_bands,
+            gutter_ranges=detection_result.gutter_ranges,
+        )
+
+        if len(merged_children) <= 1:
+            logger.info(
+                f"[Panel Recursive Split] depth={depth + 1}: initial sub-detection produced {len(merged_children)} child panel(s); "
+                f"triggering fallback cascade for oversized panel at y={by}, h={bh}px."
+            )
+            # Cascading Fallback 1: Relaxed Threshold Sub-Detection
+            retry_res = _detect_panels_webtoon(
+                sub_gray, is_white_bg, threshold_val,
+                max(20, min_height_px // 2), min_width_pct, child_ocr,
+                median_bg, sensitivity,
+                gutter_bg_ratio=gutter_bg_ratio * 0.75,
+                gutter_std_thresh=gutter_std_thresh + 6.0,
+                gutter_flat_bg_ratio=gutter_flat_bg_ratio * 0.70,
+                top_median=top_median, bottom_median=bottom_median,
+                high_sensitivity=True, padding_px=padding_px
+            )
+            retry_filtered = _filter_solid_noise(
+                retry_res.panels, sub_gray, bw * min_width_pct, max(20, min_height_px // 2), True,
+                min_panel_area=min_panel_area * 0.5, max_aspect_ratio=max_aspect_ratio,
+                min_aspect_ratio=min_aspect_ratio, noise_std_thresh=noise_std_thresh, flat_row_ratio=flat_row_ratio
+            )
+            merged_children = merge_overlapping_boxes(
+                retry_filtered, bw, bh, 0,
+                separator_bands=retry_res.separator_bands, gutter_ranges=retry_res.gutter_ranges
+            )
+
+        # Cascading Fallback 2: Content Projection Histogram Subdivision if still <= 1
+        if len(merged_children) <= 1 and bh > oversized_limit:
+            logger.info(f"[Panel Recursive Split] depth={depth + 1}: fallback projection histogram subdivision for panel at y={by}, h={bh}px")
+            segment_h = max(200, oversized_limit)
+            num_segs = int(np.ceil(bh / float(segment_h)))
+            seg_size = bh // max(1, num_segs)
+            fallback_boxes = []
+            for seg_i in range(num_segs):
+                sy1 = seg_i * seg_size
+                sy2 = bh if seg_i == num_segs - 1 else (seg_i + 1) * seg_size
+                if sy2 - sy1 >= 40:
+                    fallback_boxes.append({"x": 0, "y": sy1, "w": bw, "h": sy2 - sy1})
+            merged_children = fallback_boxes
+
+        if len(merged_children) <= 1:
+            split_boxes.append(box)
+            continue
+
+        child_boxes: List[Dict[str, Any]] = []
+        for child_idx, child in enumerate(merged_children, start=1):
+            shifted_child = dict(child)
+            shifted_child["x"] = bx + int(child["x"])
+            shifted_child["y"] = by + int(child["y"])
+            shifted_child["w"] = int(child["w"])
+            shifted_child["h"] = int(child["h"])
+            shifted_child["parent_panel"] = box.get("candidate_id", box.get("id", box_idx))
+            shifted_child["depth"] = depth + 1
+            shifted_child["lineage"] = box.get("lineage", [box_idx]) + [f"split-{depth + 1}-{child_idx}"]
+            child_boxes.append(shifted_child)
+
+        logger.info(
+            f"[Panel Recursive Split] depth={depth + 1}: replaced oversized panel at y={by}, h={bh}px "
+            f"with {len(child_boxes)} child panels."
+        )
+        split_boxes.extend(
+            _split_oversized_webtoon_boxes(
+                child_boxes,
+                gray_arr,
+                image_w,
+                image_h,
+                is_white_bg,
+                threshold_val,
+                min_height_px,
+                min_width_pct,
+                ocr_boxes,
+                median_bg,
+                sensitivity,
+                gutter_bg_ratio,
+                gutter_std_thresh,
+                gutter_flat_bg_ratio,
+                top_median,
+                bottom_median,
+                padding_px,
+                min_panel_area,
+                max_aspect_ratio,
+                min_aspect_ratio,
+                noise_std_thresh,
+                flat_row_ratio,
+                depth=depth + 1,
+                max_depth=max_depth,
+            )
+        )
+
+    return sorted(split_boxes, key=lambda b: (b.get("y", 0), b.get("x", 0)))
+
+
 def run_cv_detection(
     # ── Required ──────────────────────────────────────────────────────────────
     image_path: str,
@@ -106,7 +339,7 @@ def run_cv_detection(
     min_panel_area: float = 5000.0,
     # ── Tall-strip / Webtoon heuristics ──────────────────────────────────────
     tall_strip_ratio: float = 1.7,          # h/w ratio threshold to enter webtoon mode
-    gutter_bg_ratio: float = 0.55,          # min background fraction for a gutter row
+    gutter_bg_ratio: float = 0.90,          # min background fraction for a gutter row
     gutter_std_thresh: float = 8.0,         # row std below which a row is "flat"
     gutter_flat_bg_ratio: float = 0.45,     # min bg ratio for flat rows to count as gutters
     # ── Noise / solid-box filtering ───────────────────────────────────────────
@@ -138,6 +371,7 @@ def run_cv_detection(
     # ── YOLO ──────────────────────────────────────────────────────────────────
     use_yolo: bool = True,
     yolo_conf: float = 0.20,
+    job_id: Optional[str] = None
 ) -> List[Dict[str, Any]]:
 
     """
@@ -179,7 +413,8 @@ def run_cv_detection(
       ocr_snap_distance_px – max vertical px gap to snap a speech bubble to a panel (default 150)
       ocr_snap_pct         – max snap gap as fraction of panel height (default 0.40)
     """
-    logger.info(f"[Panel Detection] Starting local panel detection on {image_path} (use_yolo={use_yolo})")
+    job_id = job_id or f"job_{uuid.uuid4().hex[:8]}"
+    logger.info(f"[{job_id}] Starting local panel detection on {image_path} (use_yolo={use_yolo})")
     
     has_cv = HAS_CV and cv2 is not None
 
@@ -292,6 +527,7 @@ def run_cv_detection(
                 _model_names = getattr(yolo_model, "names", {}) or {}
                 _num_classes = len(_model_names)
                 _is_bubble_specialist = _num_classes <= 5  # kitsumed=1 class, ogkalu=1-2 classes
+                logger.info(f"[{job_id}] YOLO model loaded: names={_model_names}, num_classes={_num_classes}, is_bubble_specialist={_is_bubble_specialist}")
 
                 # ── Build tile list ───────────────────────────────────────────────
                 # Use a larger tile height to give YOLO more context and reduce seam misses.
@@ -484,26 +720,31 @@ def run_cv_detection(
         w, h = orig_w, orig_h
 
 
-    if crop_x > 0 or crop_y > 0:
+    if ocr_boxes and (crop_x > 0 or crop_y > 0):
+        logger.info(f"[{job_id}] Normalizing {len(ocr_boxes)} OCR/YOLO boxes for crop offset (crop_x={crop_x}, crop_y={crop_y})")
         shifted_ocr_boxes = []
-        for box in ocr_boxes:
-            shifted_ocr_boxes.append({
-                "x": max(0, box["x"] - crop_x),
-                "y": max(0, box["y"] - crop_y),
-                "w": box["w"],
-                "h": box["h"]
-            })
+        for b_idx, box in enumerate(ocr_boxes):
+            norm_x = max(0, box["x"] - crop_x)
+            norm_y = max(0, box["y"] - crop_y)
+            norm_box = {"x": norm_x, "y": norm_y, "w": box["w"], "h": box["h"]}
+            assert 0 <= norm_box["x"] <= w, f"[{job_id}] OCR box #{b_idx+1} X ({norm_box['x']}) out of trimmed width bounds ({w})"
+            assert 0 <= norm_box["y"] <= h, f"[{job_id}] OCR box #{b_idx+1} Y ({norm_box['y']}) out of trimmed height bounds ({h})"
+            shifted_ocr_boxes.append(norm_box)
+        logger.info(f"[{job_id}] OCR normalization complete: {len(shifted_ocr_boxes)} boxes validated inside ({w}x{h})")
         ocr_boxes = shifted_ocr_boxes
 
     passes = [False, True]
     raw_boxes: List[Dict[str, Any]] = []
+    filtered_boxes: List[Dict[str, Any]] = []
     merged_boxes: List[Dict[str, Any]] = []
 
     for high_sensitivity in passes:
+        sep_cut_points = []
+        gut_ranges_list = []
         if auto_split and is_tall_strip:
             webtoon_min_h = scaled_min_height_px
-            logger.info(f"[Panel Detection] Running Enhanced Webtoon Slicing strategy (min_height={webtoon_min_h}px, high_sensitivity={high_sensitivity})")
-            raw_boxes = _detect_panels_webtoon(
+            logger.info(f"[{job_id}] Running Enhanced Webtoon Slicing strategy (min_height={webtoon_min_h}px, high_sensitivity={high_sensitivity})")
+            webtoon_result = _detect_panels_webtoon(
                 gray_arr_processed, is_white_bg, threshold_val, webtoon_min_h,
                 scaled_min_width_pct, ocr_boxes, median_bg, sensitivity,
                 gutter_bg_ratio=gutter_bg_ratio,
@@ -511,11 +752,14 @@ def run_cv_detection(
                 gutter_flat_bg_ratio=gutter_flat_bg_ratio,
                 top_median=top_median,
                 bottom_median=bottom_median,
-                enable_x_trimming=False,
-                high_sensitivity=high_sensitivity
+                high_sensitivity=high_sensitivity,
+                padding_px=padding_px
             )
+            raw_boxes = webtoon_result.panels
+            sep_cut_points = webtoon_result.separator_bands
+            gut_ranges_list = webtoon_result.gutter_ranges
         else:
-            logger.info(f"[Panel Detection] Running Grid strategy (high_sensitivity={high_sensitivity})")
+            logger.info(f"[{job_id}] Running Grid strategy (high_sensitivity={high_sensitivity})")
             if has_cv:
                 raw_boxes = _detect_panels_grid_cv(
                     gray_arr_processed, is_white_bg, threshold_val,
@@ -567,7 +811,62 @@ def run_cv_detection(
             noise_std_thresh=noise_std_thresh,
             flat_row_ratio=flat_row_ratio,
         )
-        merged_boxes = merge_overlapping_boxes(filtered_boxes, w, h, effective_merge_thresh)
+
+        merged_boxes = merge_overlapping_boxes(
+            filtered_boxes, w, h, effective_merge_thresh,
+            separator_bands=sep_cut_points,
+            gutter_ranges=gut_ranges_list
+        )
+
+        pre_split_count = len(merged_boxes)
+        if auto_split and is_tall_strip and merged_boxes:
+            merged_boxes = _split_oversized_webtoon_boxes(
+                merged_boxes,
+                gray_arr_processed,
+                w,
+                h,
+                is_white_bg,
+                threshold_val,
+                scaled_min_height_px,
+                scaled_min_width_pct,
+                ocr_boxes,
+                median_bg,
+                sensitivity,
+                gutter_bg_ratio,
+                gutter_std_thresh,
+                gutter_flat_bg_ratio,
+                top_median,
+                bottom_median,
+                padding_px,
+                min_panel_area,
+                max_aspect_ratio,
+                min_aspect_ratio,
+                noise_std_thresh,
+                flat_row_ratio,
+            )
+            if len(merged_boxes) != pre_split_count:
+                logger.info(
+                    f"[{job_id}] Oversized recursive split adjusted merged panels: "
+                    f"{pre_split_count} -> {len(merged_boxes)}"
+                )
+
+        # Post-Processing: Micro-panel resolution, lineage overlap resolution & selective coverage recovery
+        from services.image.panel_postprocessor import (
+            resolve_micro_panels,
+            resolve_overlapping_panels_lineage,
+            recover_coverage_selectively
+        )
+        merged_boxes = resolve_micro_panels(merged_boxes, gray_arr_processed, h)
+        merged_boxes = resolve_overlapping_panels_lineage(merged_boxes)
+        merged_coords = {(b.get("x", 0), b.get("y", 0), b.get("w", 0), b.get("h", 0)) for b in merged_boxes}
+        discarded = [b for b in raw_boxes if (b.get("x", 0), b.get("y", 0), b.get("w", 0), b.get("h", 0)) not in merged_coords]
+        merged_boxes = recover_coverage_selectively(merged_boxes, discarded, gray_arr_processed, h, target_coverage=0.92)
+
+        logger.info(
+            f"[{job_id}] STAGE COUNTERS: Separators detected={len(sep_cut_points)} | "
+            f"Raw candidates={len(raw_boxes)} | Filtered boxes={len(filtered_boxes)} | "
+            f"Merged before split={pre_split_count} | Final after split={len(merged_boxes)}"
+        )
 
         if bg_mode == "white":
             median_bg = 255.0
@@ -629,9 +928,9 @@ def run_cv_detection(
             if not has_irregular or high_sensitivity:
                 break
             else:
-                logger.info(f"[Panel Detection] Panels need retry (high_sensitivity={high_sensitivity}); re-running with high sensitivity fallback.")
+                logger.info(f"[{job_id}] Panels need retry (high_sensitivity={high_sensitivity}); re-running with high sensitivity fallback.")
         else:
-            logger.info(f"[Panel Detection] 0 panels detected (high_sensitivity={high_sensitivity}); re-running with high sensitivity fallback.")
+            logger.info(f"[{job_id}] 0 panels detected (high_sensitivity={high_sensitivity}); re-running with high sensitivity fallback.")
 
     is_full_frame_only = (
         len(merged_boxes) == 0 or
@@ -661,7 +960,8 @@ def run_cv_detection(
         expanded_boxes = []
         for box in merged_boxes:
             orig_by1, orig_by2 = box["y"], box["y"] + box["h"]
-            max_expand_y = max(15, int(box["h"] * 0.08))  # max 8% height expansion limit
+            raw_expand = max(ocr_snap_distance_px, int(box["h"] * 0.04))
+            max_expand_y = max(8, min(40, raw_expand))
 
             bx1, by1 = box["x"], box["y"]
             bx2, by2 = box["x"] + box["w"], box["y"] + box["h"]
@@ -676,8 +976,8 @@ def run_cv_detection(
                     v_dist = min(abs(oy2 - orig_by1), abs(orig_by2 - oy1))
                     v_overlap = max(0, min(orig_by2, oy2) - max(orig_by1, oy1))
 
-                    # Only snap if bubble is already overlapping vertically or within 15px
-                    if v_overlap > 0 or v_dist <= 15:
+                    # Only snap if bubble is already overlapping vertically or within snap distance
+                    if v_overlap > 0 or v_dist <= ocr_snap_distance_px:
                         cand_by1 = max(orig_by1 - max_expand_y, min(by1, oy1))
                         cand_by2 = min(orig_by2 + max_expand_y, max(by2, oy2))
                         bx1 = min(bx1, ox1)
@@ -740,17 +1040,22 @@ def run_cv_detection(
             )
             continue
         
-        # For Webtoon tall strips (free aspect ratio), slice across full content column width
-        if is_tall_strip and auto_split and (not aspect_ratio_str or aspect_ratio_str == "free"):
-            x = crop_x if (crop_w > 0 and crop_w < orig_w) else 0
-            w_box = crop_w if (crop_w > 0 and crop_w < orig_w) else orig_w
+        bounds = PanelBounds.from_pixels(x, y, w_box, h_box, space="merged_canvas")
 
-        safe_orig_h = max(1, orig_h)
-        safe_orig_w = max(1, orig_w)
-        crop_top = (y / safe_orig_h) * 100
-        crop_bottom = ((safe_orig_h - (y + h_box)) / safe_orig_h) * 100
-        crop_left = (x / safe_orig_w) * 100
-        crop_right = ((safe_orig_w - (x + w_box)) / safe_orig_w) * 100
+        # For Webtoon tall strips, clamp X boundaries to trimmed content column if active, but preserve detected panel X & width
+        if is_tall_strip and auto_split and (not aspect_ratio_str or aspect_ratio_str == "free"):
+            col_min_x = crop_x if (crop_w > 0 and crop_w < orig_w) else 0
+            col_max_x = (crop_x + crop_w) if (crop_w > 0 and crop_w < orig_w) else orig_w
+            x1 = max(bounds.x, col_min_x)
+            x2 = min(bounds.x2, col_max_x)
+            if x2 <= x1:
+                x1, x2 = col_min_x, col_max_x
+            bounds = PanelBounds.from_pixels(x1, bounds.y, max(1, x2 - x1), bounds.height, space="merged_canvas")
+
+        bounds = bounds.clamp(orig_w, orig_h)
+        x, y, w_box, h_box = bounds.x, bounds.y, bounds.width, bounds.height
+        insets = bounds.to_inset_percentages(orig_w, orig_h)
+        crop_top, crop_bottom, crop_left, crop_right = insets["cropTop"], insets["cropBottom"], insets["cropLeft"], insets["cropRight"]
         
         area = w_box * h_box
         area_pct = round((area / orig_area) * 100.0, 2)
@@ -783,7 +1088,7 @@ def run_cv_detection(
             panel_type = "Standard Storyboard Panel"
 
         yolo_boosted = box.get("yolo_boosted", False)
-        base_conf = 0.95 if (w_box > 40 and h_box > 40 and area_pct > 0.5) else 0.80
+        base_conf = compute_post_panel_confidence(box, gray_arr_processed)
         confidence = min(0.99, base_conf + (0.04 if yolo_boosted else 0.0))
 
         final_panels.append({
@@ -878,6 +1183,75 @@ def run_cv_detection(
             "confidence": float(panel["confidence"]),
             "isHeader": bool(panel["isHeader"]),
         })
+
+    debug_exported = False
+    if os.getenv("DEBUG_PANEL_DETECTION", "0").lower() in ("1", "true", "yes") or logger.isEnabledFor(logging.DEBUG):
+        try:
+            from services.image.debug_visualizer import export_multi_stage_debug_images
+            debug_pb_list = [
+                PanelBounds.from_pixels(p["x"], p["y"], p["width"], p["height"], space="merged_canvas")
+                for p in sanitized_panels
+            ]
+            export_src = img if (has_cv and img is not None) else image_path
+            export_multi_stage_debug_images(export_src, debug_pb_list, job_id=job_id)
+            debug_exported = True
+        except Exception as viz_err:
+            logger.warning(f"[{job_id}] Debug visualizer export skipped: {viz_err}")
+
+    # Structured End-of-Run Pipeline Summary
+    total_covered_h = sum(p["height"] for p in sanitized_panels)
+    total_gap_h = max(0, orig_h - total_covered_h)
+    avg_trim = int(sum(p.get("top_removed_px", 0) + p.get("bottom_removed_px", 0) for p in sanitized_panels) / max(1, len(sanitized_panels)))
+    max_trim = max([p.get("top_removed_px", 0) for p in sanitized_panels] + [0])
+
+    summary_block = f"""
+================================================================================
+PIPELINE SUMMARY [{job_id}]
+================================================================================
+Job ID:         {job_id}
+Image Size:     {orig_w} x {orig_h} px
+Detector Mode:  {"Webtoon Slicing" if (auto_split and is_tall_strip) else "Grid Contours"}
+Raw Candidates: {len(raw_boxes)}
+Filtered Boxes: {len(filtered_boxes)}
+Final Merged:   {len(sanitized_panels)}
+Coverage:       {total_covered_h} px / {orig_h} px ({round((total_covered_h / max(1, orig_h)) * 100, 1)}%)
+Gap Uncovered:  {total_gap_h} px
+Average Trim:   {avg_trim} px
+Largest Trim:   {max_trim} px
+YOLO Panels:    {len(yolo_panel_candidates)}
+YOLO Bubbles:   {len(ocr_boxes)}
+Crop Cache:     {len(sanitized_panels)} generated
+Debug Export:   {"Exported" if debug_exported else "Skipped"}
+================================================================================
+"""
+    logger.info(summary_block)
+
+    try:
+        import json
+        import time
+        detector_ver = os.getenv("DETECTOR_VERSION", "v1.0.0-stabilized")
+        summary_data = {
+            "job_id": job_id,
+            "detector_version": detector_ver,
+            "image_size": f"{orig_w}x{orig_h}",
+            "detector_mode": "webtoon" if (auto_split and is_tall_strip) else "grid",
+            "panel_count": len(sanitized_panels),
+            "coverage": round(total_covered_h / max(1, orig_h), 4),
+            "gap_area": round(total_gap_h / max(1, orig_h), 4),
+            "avg_trim_px": avg_trim,
+            "largest_trim_px": max_trim,
+            "raw_candidates": len(raw_boxes),
+            "filtered_boxes": len(filtered_boxes),
+            "yolo_bubbles": len(ocr_boxes)
+        }
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+        summary_dir = os.path.join(project_root, "data", "logs")
+        os.makedirs(summary_dir, exist_ok=True)
+        summary_path = os.path.join(summary_dir, f"pipeline_summary_{job_id}.json")
+        with open(summary_path, "w", encoding="utf-8") as f:
+            json.dump(summary_data, f, indent=2)
+    except Exception as summary_err:
+        logger.debug(f"[{job_id}] JSON summary export skipped: {summary_err}")
 
     return sanitized_panels
 

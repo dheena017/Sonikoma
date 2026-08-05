@@ -1,4 +1,5 @@
 import os
+import os
 import sys
 import tempfile
 import numpy as np
@@ -225,6 +226,147 @@ def test_yolo_class_filtering_speech_bubble_vs_panel():
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
+
+
+def test_webtoon_speech_bubble_at_top_edge_includes_bubble():
+    """
+    Case 1 Regression Test:
+    Speech bubble is at the very top of the panel (y=0..150) above character artwork (y=200..600).
+    Verifies the detector includes the speech bubble and starts the panel near y=0 rather than y=200.
+    """
+    width = 800
+    height = 900
+    img = Image.new("RGB", (width, height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    # Speech bubble at top (y=20..140): white bubble with black outline & text lines
+    draw.ellipse([200, 20, 600, 140], outline=(0, 0, 0), fill=(255, 255, 255), width=3)
+    draw.line([250, 60, 550, 60], fill=(0, 0, 0), width=3)  # text line 1
+    draw.line([280, 90, 520, 90], fill=(0, 0, 0), width=3)  # text line 2
+
+    # Character artwork below (y=200..650)
+    draw.rectangle([100, 200, 700, 650], outline=(0, 0, 0), fill=(100, 150, 200), width=4)
+
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+        img.save(tmp.name)
+        tmp_path = tmp.name
+
+    try:
+        panels = run_cv_detection(
+            image_path=tmp_path,
+            sensitivity=30.0,
+            bg_mode="white",
+            min_width_pct=0.15,
+            min_height_px=60,
+            merge_threshold=20,
+            aspect_ratio_str="free",
+            auto_split=True,
+            padding_px=0,
+            use_yolo=False
+        )
+
+        assert len(panels) >= 1, f"Expected panel to be detected, got {len(panels)}"
+        top_panel = panels[0]
+        assert top_panel["y"] <= 30, f"Panel start y={top_panel['y']} excluded speech bubble at top! Should start <= 30."
+        assert top_panel["height"] >= 550, f"Panel height {top_panel['height']} does not cover speech bubble and artwork!"
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+
+def test_webtoon_speech_bubble_separated_by_whitespace_unified():
+    """
+    Case 2 Regression Test:
+    Speech bubble (y=50..150) separated by 100px white space from character artwork (y=250..650).
+    Verifies white space + speech bubble + artwork are unified into ONE single comic panel.
+    """
+    width = 800
+    height = 800
+    img = Image.new("RGB", (width, height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    # Speech bubble (y=50..150)
+    draw.ellipse([250, 50, 550, 150], outline=(0, 0, 0), fill=(255, 255, 255), width=3)
+    draw.line([280, 95, 520, 95], fill=(0, 0, 0), width=3)
+
+    # White space from y=150 to y=250
+
+    # Character artwork (y=250..650)
+    draw.rectangle([100, 250, 700, 650], outline=(0, 0, 0), fill=(180, 120, 90), width=4)
+
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+        img.save(tmp.name)
+        tmp_path = tmp.name
+
+    try:
+        panels = run_cv_detection(
+            image_path=tmp_path,
+            sensitivity=30.0,
+            bg_mode="white",
+            min_width_pct=0.15,
+            min_height_px=60,
+            merge_threshold=20,
+            aspect_ratio_str="free",
+            auto_split=True,
+            padding_px=0,
+            use_yolo=False
+        )
+
+        assert len(panels) == 1, f"Expected 1 unified panel combining speech bubble and artwork, got {len(panels)}: {panels}"
+        p = panels[0]
+        assert p["y"] <= 60, f"Panel start y={p['y']} chopped off speech bubble! Expected <= 60."
+        assert p["y"] + p["height"] >= 630, f"Panel bottom y={p['y'] + p['height']} chopped off artwork! Expected >= 630."
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+
+def test_webtoon_two_panels_separated_by_large_white_gutter():
+    """
+    Case 3 Regression Test:
+    Panel A (y=50..350) and Panel B (y=600..900) separated by a 250px white gutter.
+    Verifies that a true large gutter separates Panel A and Panel B into TWO distinct panels.
+    """
+    width = 800
+    height = 1000
+    img = Image.new("RGB", (width, height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+
+    # Panel A (y=50..350)
+    draw.rectangle([100, 50, 700, 350], outline=(0, 0, 0), fill=(120, 180, 120), width=4)
+
+    # White gutter (y=350..600) -> 250px pure white gutter
+
+    # Panel B (y=600..900)
+    draw.rectangle([100, 600, 700, 900], outline=(0, 0, 0), fill=(200, 140, 140), width=4)
+
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+        img.save(tmp.name)
+        tmp_path = tmp.name
+
+    try:
+        panels = run_cv_detection(
+            image_path=tmp_path,
+            sensitivity=30.0,
+            bg_mode="white",
+            min_width_pct=0.15,
+            min_height_px=60,
+            merge_threshold=20,
+            aspect_ratio_str="free",
+            auto_split=True,
+            padding_px=0,
+            use_yolo=False
+        )
+
+        assert len(panels) == 2, f"Expected 2 distinct panels separated by white gutter, got {len(panels)}: {panels}"
+        # Panel A check
+        assert panels[0]["y"] <= 60 and panels[0]["height"] >= 250
+        # Panel B check
+        assert panels[1]["y"] >= 550 and panels[1]["height"] >= 250
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
 
 
 

@@ -48,7 +48,7 @@ from services.scraper.cache import (
 
 logger = logging.getLogger("sonikoma.services.scraper")
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 
 # Global metadata store for current scraped sessions
 scraped_metadata_cache: Dict[str, Dict[str, str]] = {}
