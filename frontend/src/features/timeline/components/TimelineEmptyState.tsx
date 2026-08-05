@@ -1,9 +1,14 @@
 import React from "react";
+import { Layers, Plus, Sparkles } from "lucide-react";
 
 interface TimelineEmptyStateProps {
   hasScrapedImages: boolean;
 }
 
+/**
+ * State-of-the-art Empty State for StoryboardTimeline displayed when no panels are added to the timeline.
+ * Styled with sleek dark glass layout, gradient icon badge, and clear actionable cues.
+ */
 export default function TimelineEmptyState({
   hasScrapedImages,
 }: TimelineEmptyStateProps) {
@@ -11,27 +16,28 @@ export default function TimelineEmptyState({
     return (
       <div
         id="panels_timeline_section_empty"
-        className="bg-neutral-900/30 rounded-2xl border border-purple-500/20 border-dashed p-10 text-center space-y-4 w-full"
+        className="relative w-full flex flex-col items-center justify-center p-8 sm:p-10 my-2 rounded-2xl bg-neutral-950/80 border border-neutral-850 shadow-2xl backdrop-blur-xl text-center space-y-4 animate-in fade-in duration-300"
       >
-        <div className="icon-pill icon-pill--purple mx-auto animate-pulse h-12 w-12 text-xl font-mono">
-          ✦
+        <div className="relative p-0.5 rounded-2xl bg-gradient-to-br from-purple-500/80 via-cyan-500/80 to-purple-600/80 shadow-md">
+          <div className="w-12 h-12 rounded-[14px] bg-neutral-950 flex items-center justify-center">
+            <Layers className="w-6 h-6 text-purple-400" />
+          </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-bold text-neutral-200 font-sans">
+
+        <div className="space-y-1.5 max-w-md">
+          <h3 className="text-sm font-mono font-bold text-neutral-100 uppercase tracking-wider">
             No Scenes in Timeline Yet
+          </h3>
+          <p className="text-xs text-neutral-400 font-sans leading-relaxed font-medium">
+            Panels are loaded in the deck below! Select frame cards and click{" "}
+            <span className="text-purple-300 font-semibold font-mono">Insert Selected</span>, or click{" "}
+            <span className="text-cyan-300 font-semibold font-mono">+ Add to Timeline</span> on any panel to start building your video sequence.
           </p>
-          <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
-            Images are loaded in the deck below! Select frame items and click{" "}
-            <span className="text-purple-300 font-semibold font-mono">
-              Insert Selected
-            </span>
-            , or click{" "}
-            <span className="text-purple-300 font-semibold font-mono font-sans">
-              + Add to Timeline
-            </span>{" "}
-            on any individual panel card in the deck to build your video
-            timeline.
-          </p>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-mono text-purple-300">
+          <Plus className="w-3.5 h-3.5 text-purple-400" />
+          <span>Click '+ Add to Timeline' on any deck panel below</span>
         </div>
       </div>
     );
@@ -40,19 +46,20 @@ export default function TimelineEmptyState({
   return (
     <div
       id="panels_timeline_section_empty"
-      className="bg-neutral-900/30 rounded-2xl border border-neutral-800/60 border-dashed p-8 text-center space-y-4"
+      className="relative w-full flex flex-col items-center justify-center p-8 sm:p-10 my-2 rounded-2xl bg-neutral-950/80 border border-neutral-850 shadow-2xl backdrop-blur-xl text-center space-y-4 animate-in fade-in duration-300"
     >
-      <div className="icon-pill mx-auto h-12 w-12 text-lg font-mono">
-        #
+      <div className="relative p-0.5 rounded-2xl bg-gradient-to-br from-purple-500/80 via-cyan-500/80 to-purple-600/80 shadow-md">
+        <div className="w-12 h-12 rounded-[14px] bg-neutral-950 flex items-center justify-center">
+          <Sparkles className="w-6 h-6 text-purple-400" />
+        </div>
       </div>
-      <div className="space-y-1">
-        <p className="text-sm font-bold text-neutral-300 font-sans">
-          Timeline Deck Awaiting Link
-        </p>
-        <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
-          Once a valid Webtoon viewer URL is pasted, the continuous canvas strip
-          will automatically import images. You can then insert, order, and edit
-          them into editable scenes here.
+
+      <div className="space-y-1.5 max-w-md">
+        <h3 className="text-sm font-mono font-bold text-neutral-100 uppercase tracking-wider">
+          Storyboard Deck Awaiting URL
+        </h3>
+        <p className="text-xs text-neutral-400 font-sans leading-relaxed font-medium">
+          Enter a valid Webtoon viewer URL in the input above. Sonikoma will automatically extract and parse high-resolution panel images for your project.
         </p>
       </div>
     </div>

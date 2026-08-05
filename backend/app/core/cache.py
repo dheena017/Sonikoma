@@ -31,7 +31,8 @@ class CacheEntry(Generic[T]):
 
 class CacheStore(Generic[T]):
     def __init__(self, name: str, default_ttl_sec: Optional[float] = None,
-                 max_size: int = 200, persistent: bool = False):
+                 max_size: int = 200, persistent: bool = False,
+                 write_to_disk: Optional[bool] = None):
         self.name = name
         self.default_ttl_sec = default_ttl_sec
         self.max_size = max_size
@@ -39,6 +40,9 @@ class CacheStore(Generic[T]):
         self.hits = 0
         self.misses = 0
         self.evictions = 0
+        self.persistent = persistent
+        # If write_to_disk is explicitly set, use it; otherwise default to True only if persistent
+        self.write_to_disk = write_to_disk if write_to_disk is not None else persistent
         # persistent=True uses the stable project dir; False uses the OS temp dir
         if persistent:
             self.disk_dir = os.path.join(PERSISTENT_CACHE_DIR, name)
@@ -49,6 +53,8 @@ class CacheStore(Generic[T]):
         return quote(key, safe='')
 
     def _write_to_disk(self, key: str, value: Any) -> None:
+        if not self.write_to_disk:
+            return
         try:
             os.makedirs(self.disk_dir, exist_ok=True)
             safe_key = self._disk_safe_key(key)
@@ -83,6 +89,8 @@ class CacheStore(Generic[T]):
         return f"{legacy_base}.bin", f"{legacy_base}.json"
 
     def _read_from_disk(self, key: str) -> Optional[Any]:
+        if not self.write_to_disk:
+            return None
         try:
             safe_key = self._disk_safe_key(key)
             bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
@@ -132,7 +140,7 @@ class CacheStore(Generic[T]):
         Returns the number of entries loaded.
         """
         loaded = 0
-        if not os.path.exists(self.disk_dir):
+        if not self.write_to_disk or not os.path.exists(self.disk_dir):
             return 0
         try:
             for root, _, files in os.walk(self.disk_dir):
@@ -165,39 +173,42 @@ class CacheStore(Generic[T]):
         ttl = ttl_sec if ttl_sec is not None else self.default_ttl_sec
         expires_at = time.time() + ttl if ttl is not None else None
         self.store[key] = CacheEntry(value, expires_at)
-        self._write_to_disk(key, value)
+        if self.write_to_disk:
+            self._write_to_disk(key, value)
 
     def get(self, key: str) -> Optional[T]:
         entry = self.store.get(key)
         if not entry:
-            disk_val = self._read_from_disk(key)
-            if disk_val is not None:
-                ttl = self.default_ttl_sec
-                expires_at = time.time() + ttl if ttl is not None else None
-                self.store[key] = CacheEntry(disk_val, expires_at)
-                self.hits += 1
-                return disk_val
+            if self.write_to_disk:
+                disk_val = self._read_from_disk(key)
+                if disk_val is not None:
+                    ttl = self.default_ttl_sec
+                    expires_at = time.time() + ttl if ttl is not None else None
+                    self.store[key] = CacheEntry(disk_val, expires_at)
+                    self.hits += 1
+                    return disk_val
             self.misses += 1
             return None
 
         # Check TTL expiration
         if entry.expires_at is not None and time.time() > entry.expires_at:
             self.store.pop(key, None)
-            safe_key = self._disk_safe_key(key)
-            legacy_bin_path, legacy_json_path = self._legacy_disk_paths(key)
-            try:
-                bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
-                json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
-                if os.path.exists(bin_path):
-                    os.remove(bin_path)
-                if os.path.exists(json_path):
-                    os.remove(json_path)
-                if os.path.exists(legacy_bin_path):
-                    os.remove(legacy_bin_path)
-                if os.path.exists(legacy_json_path):
-                    os.remove(legacy_json_path)
-            except Exception:
-                pass
+            if self.write_to_disk:
+                safe_key = self._disk_safe_key(key)
+                legacy_bin_path, legacy_json_path = self._legacy_disk_paths(key)
+                try:
+                    bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
+                    json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
+                    if os.path.exists(bin_path):
+                        os.remove(bin_path)
+                    if os.path.exists(json_path):
+                        os.remove(json_path)
+                    if os.path.exists(legacy_bin_path):
+                        os.remove(legacy_bin_path)
+                    if os.path.exists(legacy_json_path):
+                        os.remove(legacy_json_path)
+                except Exception:
+                    pass
             self.evictions += 1
             self.misses += 1
             return None
@@ -210,25 +221,26 @@ class CacheStore(Generic[T]):
 
     def delete(self, key: str) -> bool:
         on_disk = False
-        safe_key = self._disk_safe_key(key)
-        legacy_bin_path, legacy_json_path = self._legacy_disk_paths(key)
-        try:
-            bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
-            json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
-            if os.path.exists(bin_path):
-                os.remove(bin_path)
-                on_disk = True
-            if os.path.exists(json_path):
-                os.remove(json_path)
-                on_disk = True
-            if os.path.exists(legacy_bin_path):
-                os.remove(legacy_bin_path)
-                on_disk = True
-            if os.path.exists(legacy_json_path):
-                os.remove(legacy_json_path)
-                on_disk = True
-        except Exception:
-            pass
+        if self.write_to_disk:
+            safe_key = self._disk_safe_key(key)
+            legacy_bin_path, legacy_json_path = self._legacy_disk_paths(key)
+            try:
+                bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
+                json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
+                if os.path.exists(bin_path):
+                    os.remove(bin_path)
+                    on_disk = True
+                if os.path.exists(json_path):
+                    os.remove(json_path)
+                    on_disk = True
+                if os.path.exists(legacy_bin_path):
+                    os.remove(legacy_bin_path)
+                    on_disk = True
+                if os.path.exists(legacy_json_path):
+                    os.remove(legacy_json_path)
+                    on_disk = True
+            except Exception:
+                pass
 
         if key in self.store:
             self.store.pop(key)
@@ -237,11 +249,12 @@ class CacheStore(Generic[T]):
 
     def clear(self) -> None:
         self.store.clear()
-        try:
-            if os.path.exists(self.disk_dir):
-                shutil.rmtree(self.disk_dir, ignore_errors=True)
-        except Exception:
-            pass
+        if self.write_to_disk:
+            try:
+                if os.path.exists(self.disk_dir):
+                    shutil.rmtree(self.disk_dir, ignore_errors=True)
+            except Exception:
+                pass
 
     @property
     def size(self) -> int:
@@ -256,16 +269,17 @@ class CacheStore(Generic[T]):
         ]
         for k in expired_keys:
             self.store.pop(k, None)
-            safe_key = self._disk_safe_key(k)
-            try:
-                bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
-                json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
-                if os.path.exists(bin_path):
-                    os.remove(bin_path)
-                if os.path.exists(json_path):
-                    os.remove(json_path)
-            except Exception:
-                pass
+            if self.write_to_disk:
+                safe_key = self._disk_safe_key(k)
+                try:
+                    bin_path = os.path.join(self.disk_dir, f"{safe_key}.bin")
+                    json_path = os.path.join(self.disk_dir, f"{safe_key}.json")
+                    if os.path.exists(bin_path):
+                        os.remove(bin_path)
+                    if os.path.exists(json_path):
+                        os.remove(json_path)
+                except Exception:
+                    pass
             self.evictions += 1
             purged += 1
         return purged
@@ -289,23 +303,31 @@ class CacheStore(Generic[T]):
 # Merged/stitched image cache — persistent=True so disk files survive server restarts.
 # Stored at: data/image_cache/stitchedCache/
 stitched_cache = CacheStore[Dict[str, Any]](
-    name='stitchedCache', default_ttl_sec=None, max_size=2000, persistent=True
+    name='stitchedCache', default_ttl_sec=None, max_size=2000, persistent=True, write_to_disk=True
 )
 
 # Per-panel edit history — persistent so original source URLs survive restarts
 edit_history = CacheStore[str](
-    name='editHistory', default_ttl_sec=None, max_size=2000, persistent=True
+    name='editHistory', default_ttl_sec=None, max_size=2000, persistent=True, write_to_disk=True
 )
 
-# Generated ZIP file cache — expires after 20 min; temp dir is fine
+# Generated ZIP file cache — RAM-only; expires after 20 min
 zip_cache = CacheStore[bytes](
-    name='zipFiles', default_ttl_sec=20 * 60, max_size=50
+    name='zipFiles', default_ttl_sec=20 * 60, max_size=50, persistent=False, write_to_disk=False
 )
 
-# Proxy image cache — expires after 30 min; temp dir is fine
+# Proxy image cache — RAM-only; expires after 30 min (never saved to disk)
 proxy_cache = CacheStore[Dict[str, Any]](
-    name='proxyImages', default_ttl_sec=30 * 60, max_size=300
+    name='proxyImages', default_ttl_sec=30 * 60, max_size=300, persistent=False, write_to_disk=False
 )
+
+# Cleanup legacy disk cache directories for non-persistent proxy images if present
+try:
+    _legacy_proxy_disk_dir = os.path.join(tempfile.gettempdir(), "sonikoma_disk_cache", "proxyImages")
+    if os.path.exists(_legacy_proxy_disk_dir):
+        shutil.rmtree(_legacy_proxy_disk_dir, ignore_errors=True)
+except Exception:
+    pass
 
 
 def get_all_cache_stats() -> Dict[str, Any]:

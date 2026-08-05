@@ -440,11 +440,13 @@ export default function MainLayout(props: MainLayoutProps) {
         )}
 
         <div
-          className={`${!isSidebarOpen && !isImageEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage
+          className={`${!isSidebarOpen && !isImageEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage || (isAnyAdmin && isAdminRestricted)
               ? "h-screen max-h-screen overflow-hidden"
-              : isProEditorPage
-                ? "min-h-screen"
-                : "pt-[59px] min-h-[calc(100vh-59px)]"
+              : isAnyAdmin
+                ? "min-h-screen overflow-x-hidden"
+                : isProEditorPage
+                  ? "min-h-screen"
+                  : "pt-[59px] min-h-[calc(100vh-59px)]"
             } flex-grow flex-1 flex flex-col transition-all duration-300`}
         >
           {/* Impersonation Banner */}

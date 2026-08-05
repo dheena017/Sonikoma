@@ -88,6 +88,46 @@ def test_webtoon_strip_panel_detection_count_and_crop():
             os.remove(tmp_path)
 
 
+def create_single_tall_panel_image(width=800, height=3000):
+    """Creates a tall single-panel test image without any intentional gutter separators."""
+    img = Image.new("RGB", (width, height), color=(255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([20, 20, width - 20, height - 20], outline=(0, 0, 0), fill=(210, 210, 240), width=5)
+    draw.ellipse([100, 100, 300, 300], fill=(80, 120, 180))
+    draw.rectangle([400, 350, 680, 620], outline=(20, 50, 90), width=4)
+    return img
+
+
+def test_tall_strip_without_gutters_stays_single_panel():
+    """Tests that a tall single panel image is not incorrectly split into multiple panel crops."""
+    img = create_single_tall_panel_image(width=800, height=3000)
+
+    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+        img.save(tmp.name)
+        tmp_path = tmp.name
+
+    try:
+        panels = run_cv_detection(
+            image_path=tmp_path,
+            sensitivity=30.0,
+            bg_mode="auto",
+            min_width_pct=0.15,
+            min_height_px=60,
+            merge_threshold=20,
+            aspect_ratio_str="free",
+            auto_split=True,
+            padding_px=10,
+            use_yolo=False
+        )
+
+        assert len(panels) == 1, f"Expected a single panel for a tall non-gutter image, but found {len(panels)}"
+        panel = panels[0]
+        assert panel["height"] >= 2800, f"Expected the single panel to cover most of the tall image, got height {panel['height']}"
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+
 def test_grid_panel_detection_morphological_closing_and_area_filtering():
     """
     Tests grid layout panel detection with OpenCV morphological closing and min_panel_area filtering:

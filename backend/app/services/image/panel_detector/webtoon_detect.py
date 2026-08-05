@@ -308,7 +308,12 @@ def detect_vertical_strip_panels(
     )
 
     sep_threshold = 0.50 if high_sensitivity else 0.70
-    is_gutter_row = (separator_score >= sep_threshold) & (stroke_counts < 1)
+    is_gutter_row = (
+        (separator_score >= sep_threshold) &
+        (stroke_counts < 1) &
+        (bg_ratio >= effective_gutter_bg_ratio) &
+        (edge_density <= 0.12)
+    )
     is_content_row = ~is_gutter_row
 
     if ocr_boxes:
@@ -352,7 +357,7 @@ def detect_vertical_strip_panels(
     
     in_gutter = False
     g_start = 0
-    min_gutter_h = max(8, min(25, int(w * 0.02)))
+    min_gutter_h = max(16, min(40, int(w * 0.03)))
 
     for i in range(h):
         if is_gutter_row[i] and not in_gutter:
@@ -363,18 +368,42 @@ def detect_vertical_strip_panels(
             g_end = i
             gh = g_end - g_start
             if gh >= min_gutter_h:
-                cut_y = (g_start + g_end) // 2
-                cut_points.append(cut_y)
-                gutter_heights.append(gh)
-                gutter_ranges_list.append((g_start, g_end))
+                avg_bg_ratio = float(np.mean(bg_ratio[g_start:g_end]))
+                avg_std = float(np.mean(row_stds[g_start:g_end]))
+                if avg_bg_ratio >= effective_gutter_bg_ratio and avg_std <= gutter_std_thresh * 1.25:
+                    above_idx = max(0, g_start - 1)
+                    below_idx = min(h - 1, g_end)
+                    adjacent_content = (
+                        (not is_gutter_row[above_idx]) or
+                        (not is_gutter_row[below_idx]) or
+                        (row_stds[above_idx] > gutter_std_thresh * 0.6) or
+                        (row_stds[below_idx] > gutter_std_thresh * 0.6)
+                    )
+                    if adjacent_content:
+                        cut_y = (g_start + g_end) // 2
+                        cut_points.append(cut_y)
+                        gutter_heights.append(gh)
+                        gutter_ranges_list.append((g_start, g_end))
     if in_gutter:
         g_end = h
         gh = g_end - g_start
         if gh >= min_gutter_h:
-            cut_y = (g_start + g_end) // 2
-            cut_points.append(cut_y)
-            gutter_heights.append(gh)
-            gutter_ranges_list.append((g_start, g_end))
+            avg_bg_ratio = float(np.mean(bg_ratio[g_start:g_end]))
+            avg_std = float(np.mean(row_stds[g_start:g_end]))
+            if avg_bg_ratio >= effective_gutter_bg_ratio and avg_std <= gutter_std_thresh * 1.25:
+                above_idx = max(0, g_start - 1)
+                below_idx = min(h - 1, g_end - 1)
+                adjacent_content = (
+                    (not is_gutter_row[above_idx]) or
+                    (not is_gutter_row[below_idx]) or
+                    (row_stds[above_idx] > gutter_std_thresh * 0.6) or
+                    (row_stds[below_idx] > gutter_std_thresh * 0.6)
+                )
+                if adjacent_content:
+                    cut_y = (g_start + g_end) // 2
+                    cut_points.append(cut_y)
+                    gutter_heights.append(gh)
+                    gutter_ranges_list.append((g_start, g_end))
 
     avg_sep_h = float(np.mean(gutter_heights)) if gutter_heights else 0.0
     max_sep_h = int(np.max(gutter_heights)) if gutter_heights else 0

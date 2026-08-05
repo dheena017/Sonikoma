@@ -1416,13 +1416,13 @@ export default function ProfilePage({
         {/* PROFILE WORKSPACE HORIZONTAL TABS */}
         <div className="space-y-6">
           {/* HORIZONTAL TAB BAR */}
-          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none snap-x snap-mandatory">
+          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-thin snap-x snap-mandatory">
             <button
               onClick={() => setActiveTab("analytics")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
                 activeTab === "analytics"
-                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
+                  : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
               }`}
             >
               <BarChart3 className="w-4 h-4" />
@@ -1430,10 +1430,10 @@ export default function ProfilePage({
             </button>
             <button
               onClick={() => setActiveTab("account")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
                 activeTab === "account"
-                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
+                  : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
               }`}
             >
               <User className="w-4 h-4" />
@@ -1441,10 +1441,10 @@ export default function ProfilePage({
             </button>
             <button
               onClick={() => setActiveTab("security")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
                 activeTab === "security"
-                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
+                  : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
               }`}
             >
               <Shield className="w-4 h-4" />
@@ -1452,10 +1452,10 @@ export default function ProfilePage({
             </button>
             <button
               onClick={() => setActiveTab("preferences")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
                 activeTab === "preferences"
-                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
+                  : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
               }`}
             >
               <Settings className="w-4 h-4" />
@@ -1463,24 +1463,24 @@ export default function ProfilePage({
             </button>
             <button
               onClick={() => setActiveTab("billing")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
                 activeTab === "billing"
-                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
+                  : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
               }`}
             >
               <CreditCard className="w-4 h-4" />
               Billing & Credits
-              <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold font-sans ml-1">
+              <span className="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold font-mono ml-1">
                 Active
               </span>
             </button>
             <button
               onClick={() => setActiveTab("api")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
                 activeTab === "api"
-                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
+                  : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
               }`}
             >
               <Key className="w-4 h-4" />
@@ -1488,10 +1488,10 @@ export default function ProfilePage({
             </button>
             <button
               onClick={() => setActiveTab("stats")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
                 activeTab === "stats"
-                  ? "bg-purple-600/10 border border-purple-500/20 text-purple-400"
-                  : "bg-neutral-900/40 border border-white/5 text-neutral-400 hover:text-white hover:bg-white/5"
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
+                  : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
               }`}
             >
               <Activity className="w-4 h-4" />

@@ -26,14 +26,27 @@ const CharacterProfilePage = React.memo(
 
     if (panels.length === 0) {
       return (
-        <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
-          <UserCheck className="h-10 w-10 text-neutral-600 mb-3" />
-          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
-            No Panels Available
-          </h3>
-          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
-            Please import a series or add panels to your storyboard timeline to start scanning character profiles.
-          </p>
+        <div className="relative w-full flex flex-col items-center justify-center p-8 sm:p-12 my-6 rounded-2xl bg-neutral-950/80 border border-neutral-850 shadow-2xl backdrop-blur-xl text-center space-y-5 animate-in fade-in duration-300 min-h-[380px]">
+          <div className="relative p-0.5 rounded-2xl bg-gradient-to-br from-purple-500/80 via-cyan-500/80 to-purple-600/80 shadow-md">
+            <div className="w-14 h-14 rounded-[14px] bg-neutral-950 flex items-center justify-center">
+              <UserCheck className="w-7 h-7 text-purple-400" />
+            </div>
+          </div>
+          <div className="space-y-1.5 max-w-sm">
+            <h3 className="text-sm font-mono font-bold text-neutral-100 uppercase tracking-wider">
+              No Panels Available for Detection
+            </h3>
+            <p className="text-xs text-neutral-400 font-sans leading-relaxed font-medium">
+              Please import a Webtoon series or add panels to your storyboard timeline to start scanning character profiles automatically.
+            </p>
+          </div>
+          <button
+            onClick={onNavigateHome}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-lg shadow-purple-950/40 active:scale-95"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Return to Dashboard</span>
+          </button>
         </div>
       );
     }

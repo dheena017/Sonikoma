@@ -86,18 +86,15 @@ async def scrape_and_initialize_project(
         if not parsed.get("synopsis"): parsed["synopsis"] = metadata.get("description") or metadata.get("synopsis")
 
     final_images = proxied_urls
-    cache_hit = False
 
     if not scrape_only:
-        cache_key = f"stitched_full_{normalized_url}"
-        if not bypass_cache:
-            cached_data = stitched_cache.get(cache_key)
-            if cached_data and isinstance(cached_data, dict) and "url" in cached_data:
-                final_images = [cached_data["url"]]
-                cache_hit = True
-
+        # NOTE:
+        # Never reuse previously stitched images on URL entry.
+        # The stitched image is a derived processing artifact and may be incomplete if a
+        # previous scrape missed panels or failed during stitching.
+        # Always regenerate the stitched image from the latest resolved panels.
         resolved_buffers_data = []
-        if not cache_hit and proxied_urls:
+        if proxied_urls:
             async with httpx.AsyncClient(follow_redirects=True, timeout=60.0) as client:
                 sem = asyncio.Semaphore(15)
                 async def fetch_item(u):
@@ -112,7 +109,7 @@ async def scrape_and_initialize_project(
                             "content_type": res.get("contentType", "image/png")
                         })
 
-        if not cache_hit and len(resolved_buffers_data) > 1 and not smart_slice:
+        if len(resolved_buffers_data) > 1 and not smart_slice:
             try:
                 stitched_bytes = await asyncio.to_thread(
                     img_utils.stitch_images_together, [item["data"] for item in resolved_buffers_data], layout="vertical"
@@ -122,7 +119,6 @@ async def scrape_and_initialize_project(
                 uid = f"webtoon_{ep_label}_full"
                 stitched_url = f"/api/image/cached/{uid}"
                 stitched_cache.set(uid, {"data": stitched_bytes, "content_type": "image/png"})
-                stitched_cache.set(cache_key, {"url": stitched_url})
                 edit_history.set(stitched_url, proxied_urls[0])
                 try:
                     save_edit_history(stitched_url, proxied_urls[0])
@@ -132,7 +128,7 @@ async def scrape_and_initialize_project(
             except Exception as e:
                 logger.warning(f"[Scraper Service] Stitching failed: {e}")
                 final_images = proxied_urls
-        elif not cache_hit and smart_slice and resolved_buffers_data:
+        elif smart_slice and resolved_buffers_data:
             final_images = proxied_urls
 
     resolved_project_id = project_id or f"temp_{generate_project_id()}"

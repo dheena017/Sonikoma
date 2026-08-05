@@ -61,26 +61,27 @@ export default function AutoCropLoadingOverlay({
       />
 
       {/* Main Container Card */}
-      <div className="relative z-10 w-full max-w-3xl mx-auto flex flex-col gap-5 p-6 bg-neutral-950/90 border-2 border-purple-500/60 rounded-3xl shadow-[0_0_50px_rgba(168,85,247,0.35)] ring-1 ring-purple-500/30 backdrop-blur-md">
+      <div className="relative z-10 w-full max-w-3xl mx-auto flex flex-col gap-5 p-6 sm:p-8 bg-neutral-950/90 border border-neutral-850 rounded-2xl shadow-2xl backdrop-blur-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-purple-500/20 pb-4">
+        <div className="flex items-center justify-between border-b border-neutral-850 pb-4">
           <div className="flex items-center gap-3.5">
-            {/* Pulsing purple icon */}
-            <div className="relative flex items-center justify-center h-11 w-11 rounded-2xl bg-purple-950/80 border-2 border-purple-500/80 shadow-[0_0_20px_rgba(168,85,247,0.5)]">
-              <Scissors className="h-5 w-5 text-purple-300" />
-              <span className="absolute inset-0 rounded-2xl animate-ping opacity-30 border-2 border-purple-400" />
+            {/* Gradient icon badge */}
+            <div className="relative p-0.5 rounded-xl bg-gradient-to-br from-purple-500 via-cyan-500 to-purple-600 shadow-md">
+              <div className="flex items-center justify-center h-10 w-10 rounded-[10px] bg-neutral-950">
+                <Scissors className="h-5 w-5 text-purple-400" />
+              </div>
             </div>
             <div>
               <div className="flex items-center gap-2.5">
-                <h2 className="text-sm font-black text-white uppercase tracking-[0.18em] font-mono">
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
                   Auto-Cropping Panels
                 </h2>
-                <span className="text-[9px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 uppercase tracking-wider shadow-[0_0_10px_rgba(168,85,247,0.3)]">
+                <span className="text-[9px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-purple-950/90 text-purple-300 border border-purple-800/60 uppercase tracking-wider">
                   AI Active
                 </span>
               </div>
-              <p className="text-[11px] text-purple-200/70 font-mono mt-0.5">
-                Detecting panel boundaries &amp; isolating frames…
+              <p className="text-xs text-neutral-400 font-sans mt-0.5">
+                Detecting panel boundaries &amp; isolating frames...
               </p>
             </div>
           </div>
@@ -88,7 +89,7 @@ export default function AutoCropLoadingOverlay({
           {onCancel && (
             <button
               onClick={onCancel}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 text-[11px] font-bold text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-850 border border-purple-500/30 hover:border-purple-500/60 rounded-xl transition-all cursor-pointer active:scale-95 shadow-md"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 rounded-xl transition-all cursor-pointer active:scale-95"
             >
               <X className="h-3.5 w-3.5" />
               Cancel
@@ -99,18 +100,18 @@ export default function AutoCropLoadingOverlay({
         {/* Live Progress Bar */}
         <div className="space-y-2">
           <div className="flex justify-between items-center px-0.5">
-            <span className="text-[10px] font-mono text-purple-300/80 uppercase tracking-wider font-bold">
+            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider font-bold">
               Processing Batch
             </span>
             {hasProgress && (
-              <span className="text-[11px] font-black font-mono text-purple-300">
+              <span className="text-[11px] font-bold font-mono text-cyan-400">
                 {clampedProgress.toFixed(0)}%
               </span>
             )}
           </div>
-          <div className="h-2 w-full bg-neutral-900 rounded-full overflow-hidden border border-purple-500/30 shadow-inner">
+          <div className="h-2 w-full bg-neutral-900 rounded-full overflow-hidden border border-neutral-850 shadow-inner">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-500 transition-all duration-500 shadow-[0_0_15px_rgba(168,85,247,0.7)]"
+              className="h-full rounded-full bg-gradient-to-r from-purple-500 via-cyan-400 to-purple-500 transition-all duration-300"
               style={{
                 width: hasProgress ? `${clampedProgress}%` : "100%",
                 animation: hasProgress ? "none" : "acl-indeterminate 1.8s ease-in-out infinite",

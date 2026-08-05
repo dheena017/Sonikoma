@@ -325,7 +325,8 @@ async def scrape_images_from_url(
         lower = img.lower()
         if any(pat in lower for pat in UNWANTED_PATTERNS):
             continue
-        if filter_banners and any(b_pat in lower for b_pat in banner_patterns) and not any(k in lower for k in ['page', 'panel', 'episode', 'chapter']):
+        panel_keywords = ['page', 'panel', 'episode', 'chapter', 'ep_', 'ch_', 'img', 'pic', 'read', 'upload', 'manga', 'manhwa', 'comic', 'content']
+        if filter_banners and any(b_pat in lower for b_pat in banner_patterns) and not any(k in lower for k in panel_keywords) and not re.search(r'\d{1,4}\.(?:jpg|png|webp|jpeg)', lower):
             continue
         filtered_images.append(img)
 
@@ -334,6 +335,11 @@ async def scrape_images_from_url(
         if cov_img and cov_img.startswith(("http://", "https://")):
             logger.info(f"[Scraper] Fallback to metadata cover/page image: {cov_img}")
             filtered_images.append(cov_img)
+
+    # Prioritize episode chapter panels over series covers if episode images exist
+    ep_panels = [img for img in filtered_images if 'episode/' in img.lower() or 'chapter/' in img.lower()]
+    if ep_panels and len(ep_panels) >= 1:
+        filtered_images = ep_panels + [img for img in filtered_images if img not in ep_panels]
 
     if limit and limit > 0:
         filtered_images = filtered_images[:limit]
@@ -348,7 +354,12 @@ async def scrape_images_from_url(
     if not proxy_images:
         return filtered_images
 
-    return [f"/api/proxy-image?url={quote(img)}&referer={quote(fetch_url)}" for img in filtered_images]
+    def _wrap_proxy(img_url: str) -> str:
+        if not img_url or img_url.startswith("/api/proxy-image") or "/api/proxy-image" in img_url or img_url.startswith("data:image/"):
+            return img_url
+        return f"/api/proxy-image?url={quote(img_url)}&referer={quote(fetch_url)}"
+
+    return [_wrap_proxy(img) for img in filtered_images]
 
 
 def normalize_series_url(url: str) -> str:

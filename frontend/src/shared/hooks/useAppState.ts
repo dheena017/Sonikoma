@@ -674,21 +674,9 @@ export function useAppState() {
 
       const token = getToken();
 
-      const startTime = Date.now();
       const finishAuth = () => {
-        if (!showDelay) {
-          setAuthLoading(false);
-          setIsInitializing(false);
-          return;
-        }
-
-        const elapsedTime = Date.now() - startTime;
-        const remainingTime = Math.max(0, 2500 - elapsedTime);
-
-        setTimeout(() => {
-          setAuthLoading(false);
-          setIsInitializing(false);
-        }, remainingTime);
+        setAuthLoading(false);
+        setIsInitializing(false);
       };
 
       if (!token) {

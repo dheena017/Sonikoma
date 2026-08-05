@@ -205,9 +205,11 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
                 _to_str(img.get('src'))
             )
             if src:
-                if ' ' in src and not src.startswith(('http://', 'https://')):
-                    src = src.split()[0]
-                if 'bg_transparency' in src or src.endswith('1x1.gif') or src.endswith('spacer.gif') or 'blank.gif' in src or 'avatar' in src.lower():
+                if ',' in src:
+                    src = src.split(',')[0].strip()
+                if ' ' in src:
+                    src = src.split()[0].strip()
+                if 'bg_transparency' in src or src.endswith('1x1.gif') or src.endswith('spacer.gif') or 'blank.gif' in src:
                     continue
                 abs_src = urljoin(base_url, src)
                 if abs_src not in target_list:

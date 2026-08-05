@@ -1076,9 +1076,12 @@ const LiveScraperDeck = React.memo(
                        );
                      })}
 
-                      {isScraping && [1, 2, 3, 4, 5, 6].map((num) => (
-                        <ExtractionSkeletonCard key={`loading-skeleton-${num}`} index={num} isScroll={true} />
-                      ))}
+                      {isScraping && scrapedImages.length > 0 && (
+                        <div className="shrink-0 flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 w-[140px] text-center gap-2 text-neutral-500">
+                          <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+                          <span className="text-[10px] font-mono uppercase tracking-wider font-medium">Extracting...</span>
+                        </div>
+                      )}
                     </HorizontalScrollContainer>
                  ) : (
                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-3.5 px-1 w-full">
@@ -1117,14 +1120,13 @@ const LiveScraperDeck = React.memo(
                         );
                       })}
 
-                      {isScraping && (
-                        <ExtractionSkeletonCard
-                          key={`loading-skeleton-${scrapedImages.length + 1}`}
-                          index={scrapedImages.length + 1}
-                          isScroll={false}
-                        />
-                      )}
-                    </div>
+                     {isScraping && scrapedImages.length > 0 && (
+                       <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 min-h-[200px] text-center gap-2 text-neutral-500">
+                         <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
+                         <span className="text-[10px] font-mono uppercase tracking-wider font-medium">Extracting panel...</span>
+                       </div>
+                     )}
+                   </div>
                  );
               })()}
             </div>
