@@ -3,7 +3,7 @@ import VideoEditorHeader from "@/features/editor_video/components/VideoEditorHea
 import VideoEditorMiniSidebar from "@/features/editor_video/components/VideoEditorMiniSidebar";
 import VideoEditorSidebar from "@/features/editor_video/components/VideoEditorSidebar";
 import VideoMediaBin from "@/features/editor_video/components/VideoMediaBin";
-import VideoPreviewCanvas from "@/features/editor_video/components/VideoPreviewCanvas";
+import AdaptationPlayer from "@/features/media_video/components/AdaptationPlayer";
 import VideoPropertyInspector from "@/features/editor_video/components/VideoPropertyInspector";
 import VideoMultiTrackTimeline from "@/features/editor_video/components/VideoMultiTrackTimeline";
 
@@ -36,27 +36,31 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   const panels = appLogic?.panels ?? [];
   const scrapedImages = appLogic?.scrapedImages ?? [];
   const videoUrl = appLogic?.videoUrl ?? null;
-  const seriesTitle = appLogic?.seriesTitle;
-  const chapterTitle = appLogic?.chapterTitle;
-  const chapterNumber = appLogic?.chapterNumber;
+  const setVideoUrl = appLogic?.setVideoUrl ?? (() => {});
+  const seriesTitle = appLogic?.seriesTitle ?? "";
+  const chapterTitle = appLogic?.chapterTitle ?? "";
+  const chapterNumber = appLogic?.chapterNumber ?? "";
+  const targetUrl = appLogic?.targetUrl ?? "";
   const isDirty = appLogic?.isDirty ?? false;
   const isSaving = appLogic?.isSaving ?? false;
   const isRendering = appLogic?.isRendering ?? false;
   const renderProgress = appLogic?.renderProgress ?? 0;
+  const progressStatus = appLogic?.progressStatus ?? null;
+  const hasEnoughCredits = appLogic?.hasEnoughCredits ?? true;
   const userCredits = appLogic?.userCredits ?? null;
+  const addNotification = appLogic?.addNotification ?? (() => {});
 
   // Playback
   const currentPanelIndex = appLogic?.currentPanelIndex ?? 0;
-  const setCurrentPanelIndex = appLogic?.setCurrentPanelIndex;
-  const storyboardPlaying = appLogic?.storyboardPlaying ?? false;
-  const toggleStoryboardPlayback = appLogic?.toggleStoryboardPlayback;
+  const setCurrentPanelIndex = appLogic?.setCurrentPanelIndex ?? (() => {});
+  const [activePreviewTab, setActivePreviewTab] = useState("video");
 
   // Audio / Video properties
   const aspectRatio = appLogic?.aspectRatio ?? "16:9";
   const setAspectRatio = appLogic?.setAspectRatio;
   const volume = appLogic?.volume ?? 80;
   const setVolume = appLogic?.setVolume;
-  const voiceActor = appLogic?.voiceActor;
+  const voiceActor = appLogic?.voiceActor ?? "";
   const setVoiceActor = appLogic?.setVoiceActor;
   const musicTheme = appLogic?.musicTheme ?? "Synthwave Neon";
   const setMusicTheme = appLogic?.setMusicTheme;
@@ -151,16 +155,30 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               />
             )}
 
-            {/* Center: Video Preview Canvas */}
-            <VideoPreviewCanvas
+            {/* Center: Adaptation Player (full) */}
+            <AdaptationPlayer
               panels={panels}
               videoUrl={videoUrl}
+              setVideoUrl={setVideoUrl}
               currentPanelIndex={currentPanelIndex}
               setCurrentPanelIndex={setCurrentPanelIndex}
-              storyboardPlaying={storyboardPlaying}
-              toggleStoryboardPlayback={toggleStoryboardPlayback}
-              aspectRatio={aspectRatio}
-              setAspectRatio={setAspectRatio}
+              activePreviewTab={activePreviewTab}
+              setActivePreviewTab={setActivePreviewTab}
+              musicTheme={musicTheme}
+              voiceActor={voiceActor}
+              navigateTo={navigateTo ?? (() => {})}
+              seriesTitle={seriesTitle}
+              chapterNumber={chapterNumber}
+              chapterTitle={chapterTitle}
+              targetUrl={targetUrl}
+              isRendering={isRendering}
+              renderProgress={renderProgress}
+              handleRenderFinalVideo={handleExport}
+              progressStatus={progressStatus}
+              hasEnoughCredits={hasEnoughCredits}
+              addNotification={addNotification}
+              onOpenVideoEditor={() => {}}
+              variant="embedded"
             />
 
             {/* Right: Property Inspector */}

@@ -26,6 +26,8 @@ interface AdaptationPlayerProps {
   hasEnoughCredits: boolean;
   addNotification: (...args: any[]) => void;
   onOpenVideoEditor: () => void;
+  /** 'floating' = EditorPage overlay (default), 'embedded' = inside VideoEditorPage */
+  variant?: "floating" | "embedded";
 }
 
 const AdaptationPlayer: React.FC<AdaptationPlayerProps> = ({
@@ -49,9 +51,16 @@ const AdaptationPlayer: React.FC<AdaptationPlayerProps> = ({
   hasEnoughCredits,
   addNotification,
   onOpenVideoEditor,
+  variant = "floating",
 }) => {
   return (
-    <div id="section-monitor" className="w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4 scroll-mt-24">
+    <div
+      id="section-monitor"
+      className={variant === "embedded"
+        ? "flex flex-col h-full w-full min-h-0 overflow-hidden"
+        : "w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4 scroll-mt-24"
+      }
+    >
       {/* Adaptation Player Header */}
       <AdaptationPlayerHeader
         videoUrl={videoUrl}
@@ -68,6 +77,7 @@ const AdaptationPlayer: React.FC<AdaptationPlayerProps> = ({
         progressStatus={progressStatus}
         hasEnoughCredits={hasEnoughCredits}
         onOpenVideoEditor={onOpenVideoEditor}
+        variant={variant}
       />
 
       {/* Video Monitor Split Layout with Internal Left Sidebar */}

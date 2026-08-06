@@ -101,9 +101,8 @@ const EditorSidebar = ({
       items: [
         {
           id: "video-editor",
-          label: "Video Studio Pro",
+          label: "Video Studio",
           icon: Film,
-          badge: "Pro",
           type: "tool",
         },
         {

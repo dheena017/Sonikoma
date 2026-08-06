@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Maximize2,
   ChevronDown,
-  X,
   Film,
   Sliders,
 } from "lucide-react";
@@ -83,12 +82,15 @@ const VideoPreviewCanvas: React.FC<VideoPreviewCanvasProps> = ({
     <div className="flex-1 bg-[#09090e] border-r border-neutral-800/80 flex flex-col h-full min-w-0 select-none overflow-hidden">
       {/* Top Monitor Header */}
       <div className="h-10 px-4 border-b border-neutral-800/70 flex items-center justify-between shrink-0 bg-[#0b0b10]">
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-neutral-300">
-            {videoUrl ? "Compiled MP4 Preview" : "Live Storyboard Monitor"}
+        <div className="flex items-center gap-2.5">
+          <h2 className="font-mono text-xs font-black uppercase tracking-[0.2em] text-white">
+            VIDEO PREVIEW
+          </h2>
+          <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">
+            LIVE
           </span>
           {panels.length > 0 && (
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-neutral-300 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800 cursor-pointer">
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-neutral-300 bg-neutral-900/80 px-2 py-0.5 rounded border border-neutral-800 cursor-pointer ml-1">
               <span>Scene {currentPanelIndex + 1} / {panels.length}</span>
               <ChevronDown className="h-3 w-3 text-neutral-500" />
             </div>
@@ -100,9 +102,6 @@ const VideoPreviewCanvas: React.FC<VideoPreviewCanvasProps> = ({
               MP4 Live
             </span>
           )}
-          <button className="text-neutral-500 hover:text-white p-1 rounded transition-colors cursor-pointer">
-            <X className="h-4 w-4" />
-          </button>
         </div>
       </div>
 

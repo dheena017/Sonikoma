@@ -23,6 +23,7 @@ interface AdaptationPlayerHeaderProps {
   progressStatus: any;
   hasEnoughCredits: boolean;
   onOpenVideoEditor: () => void;
+  variant?: "floating" | "embedded";
 }
 
 const AdaptationPlayerHeader: React.FC<AdaptationPlayerHeaderProps> = ({
@@ -40,6 +41,7 @@ const AdaptationPlayerHeader: React.FC<AdaptationPlayerHeaderProps> = ({
   progressStatus,
   hasEnoughCredits,
   onOpenVideoEditor,
+  variant = "floating",
 }) => {
   const [selectedExportTarget, setSelectedExportTarget] = React.useState<string>("master");
 
@@ -54,15 +56,17 @@ const AdaptationPlayerHeader: React.FC<AdaptationPlayerHeaderProps> = ({
           LIVE
         </span>
 
-        <button
-          type="button"
-          onClick={onOpenVideoEditor}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-purple-600/30 to-indigo-600/30 hover:from-purple-600/50 hover:to-indigo-600/50 border border-purple-500/40 text-purple-200 text-xs font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)] ml-2"
-          title="Open Full Professional Video Studio"
-        >
-          <Film className="h-3.5 w-3.5 text-purple-400" />
-          <span>Launch Pro Video Studio</span>
-        </button>
+        {variant !== "embedded" && (
+          <button
+            type="button"
+            onClick={onOpenVideoEditor}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-purple-600/30 to-indigo-600/30 hover:from-purple-600/50 hover:to-indigo-600/50 border border-purple-500/40 text-purple-200 text-xs font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)] ml-2"
+            title="Open Video Studio"
+          >
+            <Film className="h-3.5 w-3.5 text-purple-400" />
+            <span>Launch Video Studio</span>
+          </button>
+        )}
       </div>
 
       {/* Centre: metadata + export pills */}
@@ -156,16 +160,18 @@ const AdaptationPlayerHeader: React.FC<AdaptationPlayerHeaderProps> = ({
       </div>
 
       {/* Right: Hide Player */}
-      <button
-        type="button"
-        onClick={() => {
-          useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
-        }}
-        className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold font-mono active:scale-95 shrink-0"
-      >
-        <X className="h-3.5 w-3.5" />
-        Hide Player
-      </button>
+      {variant !== "embedded" && (
+        <button
+          type="button"
+          onClick={() => {
+            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+          }}
+          className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold font-mono active:scale-95 shrink-0"
+        >
+          <X className="h-3.5 w-3.5" />
+          Hide Player
+        </button>
+      )}
     </div>
   );
 };

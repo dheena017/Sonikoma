@@ -198,9 +198,8 @@ const EditorMiniSidebarInner = ({
       items: [
         {
           id: "video-editor",
-          label: "Video Studio Pro",
+          label: "Video Studio",
           icon: Film,
-          badge: "Pro",
         },
         {
           id: "ai-automation",
