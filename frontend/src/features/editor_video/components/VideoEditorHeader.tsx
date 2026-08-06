@@ -169,14 +169,9 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           </div>
 
           {/* Project title selector */}
-          <div className="flex items-center gap-2 ml-1 bg-[#121218] border border-neutral-800 px-3 py-1 rounded-lg text-xs font-semibold text-neutral-200 cursor-pointer hover:border-neutral-700 transition-all max-w-[220px] truncate">
+          <div className="flex items-center gap-2 ml-1 bg-[#121218] border border-neutral-800 px-3 py-1 rounded-lg text-xs font-semibold text-neutral-200 cursor-pointer hover:border-neutral-700 transition-all max-w-[240px] truncate">
             <span className="text-neutral-400 font-normal shrink-0">Project:</span>
-            <span className="truncate">{displayTitle}</span>
-            {chapterNumber && (
-              <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded font-mono shrink-0">
-                Ch.{chapterNumber}
-              </span>
-            )}
+            <span className="font-semibold text-white truncate">{displayTitle}</span>
             <ChevronDown className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
           </div>
 
@@ -187,19 +182,19 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             title={isDirty ? "Unsaved changes — click to save" : "Project saved"}
           >
             {isSaving ? (
-              <span className="text-purple-400 flex items-center gap-1">
+              <span className="text-purple-400 flex items-center gap-1 font-semibold">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 <span>Saving...</span>
               </span>
             ) : isDirty ? (
-              <span className="text-amber-400 flex items-center gap-1 hover:underline">
+              <span className="text-amber-400 flex items-center gap-1 font-semibold hover:underline">
                 <Cloud className="h-3.5 w-3.5" />
-                <span>Save*</span>
+                <span>Not saved</span>
               </span>
             ) : (
               <span className="text-emerald-400 flex items-center gap-1 font-semibold">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Saved</span>
+                <span>Saved</span>
               </span>
             )}
           </button>
@@ -316,16 +311,16 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             <button
               onClick={() => setShowNotifications((v) => !v)}
               title="Notifications"
-              className="relative p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer flex items-center justify-center"
+              className="relative w-9 h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-white hover:bg-neutral-700/80 transition-all cursor-pointer flex items-center justify-center shadow-sm"
             >
               {notificationsMuted ? (
-                <BellOff className="h-3.5 w-3.5" />
+                <BellOff className="h-4 w-4" />
               ) : (
-                <Bell className="h-3.5 w-3.5" />
+                <Bell className="h-4 w-4" />
               )}
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-purple-600 text-white text-[9px] font-bold">
-                  {unreadCount}
+                <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center h-4 min-w-[18px] px-1 rounded-full bg-[#ff3555] text-white text-[9px] font-extrabold border-2 border-[#09090e] shadow-sm">
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
             </button>
