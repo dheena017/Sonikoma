@@ -109,9 +109,8 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
 }) => {
   return (
     <div
-      className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-12 pb-6 px-6 z-30 transition-all duration-300 ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-      }`}
+      className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-12 pb-6 px-6 z-30 transition-all duration-300 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
     >
       {/* PROGRESS SCRUBBER ROW WITH HOVER TIMELINE MARKS & CHIPS */}
       <div className="relative group/scrub mb-4">
@@ -297,11 +296,10 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
               setIsLooping(!isLooping);
               if (addNotification) addNotification(isLooping ? "Loop Playback Disabled" : "Loop Playback Enabled", "info");
             }}
-            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
-              isLooping
+            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${isLooping
                 ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
-            }`}
+              }`}
             title="Loop Playback (L)"
           >
             <RotateCcw className="h-4 w-4" />
@@ -312,11 +310,10 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
               setShowSubtitles(!showSubtitles);
               if (addNotification) addNotification(showSubtitles ? "Subtitles Disabled" : "Subtitles Enabled", "info");
             }}
-            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
-              showSubtitles
+            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${showSubtitles
                 ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
-            }`}
+              }`}
             title="Toggle Subtitles"
           >
             <Subtitles className="h-4 w-4" />
@@ -335,11 +332,10 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
               setShowSettings(!showSettings);
               setShowChaptersMenu(false);
             }}
-            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
-              showSettings
+            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${showSettings
                 ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
-            }`}
+              }`}
             title="Playback Settings"
           >
             <Settings className="h-4 w-4" />
@@ -348,11 +344,10 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
           {variant !== "floating" && (
             <button
               onClick={() => setIsTheaterMode(!isTheaterMode)}
-              className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
-                isTheaterMode
+              className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${isTheaterMode
                   ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
                   : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
-              }`}
+                }`}
               title="Toggle Theater Mode (T)"
             >
               <Sliders className="h-4 w-4" />

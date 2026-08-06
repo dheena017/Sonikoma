@@ -289,7 +289,7 @@ export default function VideoPreviewCinemaPlayer({
   );
 
   // Auto-close overlay timers
-  const [controlsVisible, setControlsVisible] = useState(variant === "floating" ? false : true);
+  const [controlsVisible, setControlsVisible] = useState(false);
   const lastActiveRef = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -308,13 +308,6 @@ export default function VideoPreviewCinemaPlayer({
   }, [currentPanelIndex, panels]);
 
   useEffect(() => {
-    if (variant === "floating") return;
-
-    const handleMouseMove = () => {
-      setControlsVisible(true);
-      lastActiveRef.current = Date.now();
-    };
-
     const interval = setInterval(() => {
       if (Date.now() - lastActiveRef.current > 3000 && isPlaying) {
         setControlsVisible(false);
@@ -323,12 +316,10 @@ export default function VideoPreviewCinemaPlayer({
       }
     }, 1000);
 
-    window.addEventListener("mousemove", handleMouseMove);
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
       clearInterval(interval);
     };
-  }, [isPlaying, variant]);
+  }, [isPlaying]);
 
   const togglePlay = () => {
     unlockAudioContext();
@@ -855,16 +846,17 @@ export default function VideoPreviewCinemaPlayer({
     <div
       ref={containerRef}
       onMouseEnter={() => {
-        if (variant === "floating") {
-          setControlsVisible(true);
-        }
+        setControlsVisible(true);
+        lastActiveRef.current = Date.now();
+      }}
+      onMouseMove={() => {
+        setControlsVisible(true);
+        lastActiveRef.current = Date.now();
       }}
       onMouseLeave={() => {
-        if (variant === "floating") {
-          setControlsVisible(false);
-          setShowSettings(false);
-          setShowChaptersMenu(false);
-        }
+        setControlsVisible(false);
+        setShowSettings(false);
+        setShowChaptersMenu(false);
       }}
       className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${
         variant === "floating" || variant === "embedded"

@@ -24,7 +24,24 @@ export interface VideoPreviewHeaderProps {
   onToggleSidebar?: () => void;
 }
 
-const getPreviewDisplayLabel = (videoUrl: string | null) => {
+const getPreviewDisplayLabel = (
+  videoUrl: string | null,
+  seriesTitle?: string,
+  chapterTitle?: string,
+  chapterNumber?: string | number
+) => {
+  if (seriesTitle && seriesTitle.trim()) {
+    if (chapterTitle && chapterTitle.trim()) {
+      return `${seriesTitle} · ${chapterTitle}`.toUpperCase();
+    }
+    if (chapterNumber) {
+      return `${seriesTitle} · EPISODE ${chapterNumber}`.toUpperCase();
+    }
+    return seriesTitle.toUpperCase();
+  }
+  if (chapterTitle && chapterTitle.trim()) {
+    return chapterTitle.toUpperCase();
+  }
   if (!videoUrl) return "VIDEO PREVIEW PLAYER";
   const sanitizedUrl = videoUrl.split("?")[0];
   const fileName = sanitizedUrl.split("/").filter(Boolean).pop() ?? "";
@@ -51,7 +68,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   isSidebarOpen = true,
   onToggleSidebar,
 }) => {
-  const previewLabel = getPreviewDisplayLabel(videoUrl);
+  const previewLabel = getPreviewDisplayLabel(videoUrl, seriesTitle, chapterTitle, chapterNumber);
   const isFloating = variant !== "embedded";
 
   return (
@@ -80,9 +97,12 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         {/* Divider */}
         <div className="w-px h-4 bg-neutral-800" />
 
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.9)]" />
-          <h3 className="font-black text-[11px] text-white uppercase tracking-widest font-mono">
+        <div className="flex items-center gap-2 max-w-[280px] xl:max-w-[360px]">
+          <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.9)] shrink-0" />
+          <h3
+            className="font-black text-[11px] text-white uppercase tracking-widest font-mono truncate"
+            title={previewLabel}
+          >
             {previewLabel}
           </h3>
         </div>
