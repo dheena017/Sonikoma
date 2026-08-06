@@ -5,7 +5,7 @@ import * as api from "@/api";
 import Header from "@/components/layout/MainHeader";
 import Sidebar from "@/components/layout/MainSidebar";
 import ProjectConfirmPanel from "@/shared/ui/modal/ProjectConfirmPanel";
-import { useImageEditorStore } from "@/features/image/hooks/useImageEditorState";
+import { useImageEditorStore } from "@/features/editor/hooks/useEditorState";
 import AutoCropModal from "@/features/processing/components/AutoCropModal";
 import NotificationStack from "@/features/notification/components/NotificationStack";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";

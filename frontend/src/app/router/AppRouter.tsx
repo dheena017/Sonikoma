@@ -7,7 +7,7 @@ import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
 
 // --- Layout & Main Workspace Components ---
 import AppWorkspace from "@/features/workspace/components/AppWorkspace";
-import EditorPage from "@/features/image/pages/EditorPage";
+import EditorPage from "@/features/editor/pages/EditorPage";
 import PageNotFound from "@/components/feedback/PageNotFound";
 import AdvancedSettings from "@/features/video/components/AdvancedSettings";
 import StatusPage from "@/features/status/pages/StatusPage";
@@ -29,7 +29,7 @@ import CreativeSuiteLayout from "@/features/creative/components/CreativeSuiteLay
 
 // --- Lazy Loaded Heavy Feature Pages (Phase 9 Performance Code-Splitting) ---
 const DashboardPage = React.lazy(() => import("@/features/dashboard/pages/DashboardPage"));
-const ImageEditorPage = React.lazy(() => import("@/features/image/pages/ImageEditorPage"));
+const ImageEditorPage = React.lazy(() => import("@/features/image_editor/pages/ImageEditorPage"));
 const AIModelsPage = React.lazy(() => import("@/features/ai/pages/AIModelsPage"));
 const ModelTrainingPage = React.lazy(() => import("@/features/training/pages/ModelTrainingPage"));
 const YouTubePage = React.lazy(() => import("@/features/youtube/pages/YouTubePage"));

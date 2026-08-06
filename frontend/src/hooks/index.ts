@@ -2,7 +2,14 @@
 // Exports shared cross-feature hooks and localized domain hooks
 
 export * from "@/shared/hooks";
-export * from "@/features/image/hooks";
+export * from "@/features/editor/hooks";
+export {
+  useCropEditorStore,
+  useCropEditorState,
+  useImageEditorState,
+  useImageEditor,
+  useImageTransform,
+} from "@/features/image_editor/hooks";
 export * from "@/features/workspace/hooks";
 export * from "@/features/ai/hooks";
 export * from "@/features/video/hooks";

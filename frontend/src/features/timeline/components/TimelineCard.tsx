@@ -3,7 +3,7 @@ import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers, Pl
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 import { generateTts } from "@/api";
-import { useImageEditorStore } from "@/features/image/hooks/useImageEditorState";
+import { useImageEditorStore } from "@/features/editor/hooks/useEditorState";
 import { PanelAnalyzingOverlay } from "@/shared/ui/loading/PanelAnalyzingOverlay";
 
 let autoPlayHintShown = false;

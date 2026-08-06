@@ -3,8 +3,8 @@ import { GeneratedPanel } from "@/types";
 import { NotificationType } from "@/features/notification";
 import { useAutoAnalysis } from "@/features/ai/hooks/useAutoAnalysis";
 import { useVideoGeneration } from "@/features/video/hooks/useVideoGeneration";
-import { useBatchImageActions } from "@/features/image/hooks/useBatchImageActions";
-import { useSingleImageEdits } from "@/features/image/hooks/useSingleImageEdits";
+import { useBatchImageActions } from "@/features/editor/hooks/useBatchImageActions";
+import { useSingleImageEdits } from "@/features/editor/hooks/useSingleImageEdits";
 import { useAppState } from "@/shared/hooks/useAppState";
 
 interface UsePipelineActionsProps {

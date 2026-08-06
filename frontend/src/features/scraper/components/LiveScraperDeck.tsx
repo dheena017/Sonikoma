@@ -23,7 +23,7 @@ import PanelCard from "@/features/scraper/components/PanelCard";
 import {
   FloatingSelectionBar,
   ScraperSelectionToolbar,
-} from "@/features/image/components/editor/select";
+} from "@/features/editor/components/select";
 import LiveScraperDeckEmptyState from "@/features/scraper/components/LiveScraperDeckEmptyState";
 
 import { parseWebtoonUrl, getSourceName, getProxiedImageUrl } from "@/utils";

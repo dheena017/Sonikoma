@@ -1,0 +1,427 @@
+import React, { useState } from "react";
+import {
+  Layout,
+  Scissors,
+  Film,
+  Layers,
+  Brain,
+  Download,
+  Settings,
+  ExternalLink,
+  ArrowLeft,
+  Sparkles,
+  Edit2,
+  Brush,
+  Crop,
+  Link2,
+  Mic,
+  type LucideIcon,
+} from "lucide-react";
+import TooltipPortal from "@/shared/ui/common/TooltipPortal";
+import { resolveWorkspaceReturnPath } from "@/utils/workspaceNavigation";
+import { useImageEditorStore } from "@/features/editor/hooks/useEditorState";
+
+interface EditorMiniSidebarProps {
+  isCollapsed: boolean;
+  setIsCollapsed: (v: boolean) => void;
+  currentSection: string;
+  setCurrentSection: (section: string) => void;
+  onBackToApp?: () => void;
+  scrapedCount: number;
+  panelsCount: number;
+  isBatchCropping: boolean;
+  isCleaningBubbles: boolean;
+  navigateTo?: (path: string) => void;
+  projectId?: string | null;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
+  settingsPath?: string;
+  topOffsetPx?: number;
+  locationSearch?: string;
+}
+
+interface SidebarMenuItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  badge?: string | number;
+  isProcessing?: boolean;
+}
+
+const EditorMiniSidebarInner = ({
+  isCollapsed,
+  setIsCollapsed,
+  currentSection,
+  setCurrentSection,
+  onBackToApp,
+  scrapedCount,
+  panelsCount,
+  isBatchCropping,
+  isCleaningBubbles,
+  navigateTo,
+  projectId,
+  seriesSlug,
+  chapterSlug,
+  settingsPath = "/settings",
+  topOffsetPx = 59,
+  locationSearch,
+}: EditorMiniSidebarProps) => {
+  const params = new URLSearchParams(locationSearch || window.location.search);
+  const isEditing = (window.location.pathname.startsWith("/editor") || window.location.pathname.startsWith("/image-editor")) && params.get("idx") !== null;
+
+  const activeTool = useImageEditorStore((state) => state.activeTool);
+  const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
+  const slicesCount = useImageEditorStore((state) => state.slicesCount);
+  const editingImageIdx = useImageEditorStore((state) => state.editingImageIdx);
+
+  const [hoveredTool, setHoveredTool] = useState<string | null>(null);
+  const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
+
+  if (isEditing) {
+    const cropToolGroups = [
+      {
+        label: "Adjust",
+        tools: [
+          { key: "adjust", label: "Adjust", icon: Sparkles },
+          { key: "edit",   label: "Edit",   icon: Edit2  },
+          { key: "draw",   label: "Draw",   icon: Brush  },
+        ],
+      },
+      {
+        label: "Cut",
+        tools: [
+          { key: "slice", label: "Cut",   icon: Scissors },
+          { key: "crop",  label: "Crop",  icon: Crop     },
+          { key: "merge", label: "Merge", icon: Link2    },
+        ],
+      },
+    ] as const;
+
+    return (
+      <aside
+        style={{ top: `${topOffsetPx}px` }}
+        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
+          }`}
+      >
+        <div className="flex-1 w-full flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-4">
+          {cropToolGroups.map((group, gi) => (
+            <div key={group.label} className="w-full flex flex-col items-center">
+              {/* Section divider (only between groups) + label for every group */}
+              <div className="w-full flex flex-col items-center" style={{ marginTop: gi > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
+                {gi > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+                <span className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
+                  {group.label}
+                </span>
+              </div>
+              <div className="w-full flex flex-col items-center space-y-0.5">
+                {group.tools.map((tool) => {
+                  const isActive = activeTool === tool.key;
+                  const Icon = tool.icon;
+                  const isHovered = hoveredTool === tool.key;
+
+                  return (
+                    <div key={tool.key} className="relative group w-full flex justify-center py-1">
+                      {/* Active Pill */}
+                      <div
+                        className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
+                            ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
+                            : "h-0 bg-transparent opacity-0"
+                          }`}
+                      />
+
+                      <button
+                        onClick={() => { setActiveTool(tool.key); }}
+                        onMouseEnter={(e) => {
+                          setHoveredRect(e.currentTarget.getBoundingClientRect());
+                          setHoveredTool(tool.key);
+                        }}
+                        onMouseLeave={() => setHoveredTool(null)}
+                        className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
+                      >
+                        {/* Icon pill */}
+                        <div
+                          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
+                              ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                              : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+                            }`}
+                        >
+                          <Icon
+                            className={`w-5 h-5 transition-colors duration-300 ${isActive
+                                ? "text-purple-400"
+                                : "text-neutral-400 group-hover:text-purple-300"
+                              }`}
+                          />
+                        </div>
+
+                        {/* Crop Slices Count Badge */}
+                        {tool.key === "crop" && slicesCount > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-br from-purple-500 to-purple-700 text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
+                            {slicesCount}
+                          </span>
+                        )}
+                      </button>
+                      <TooltipPortal text={tool.label} visible={isHovered} anchorRect={hoveredRect} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
+    );
+  }
+
+  const menuGroups: Array<{ label: string; items: SidebarMenuItem[] }> = [
+    {
+      label: "Views",
+      items: [
+        {
+          id: "monitor",
+          label: "Video Monitor",
+          icon: Film,
+        },
+        {
+          id: "assets",
+          label: "Imported Assets",
+          icon: Layout,
+          badge: scrapedCount > 0 ? scrapedCount : undefined,
+        },
+        {
+          id: "timeline",
+          label: "Storyboard Timeline",
+          icon: Layers,
+          badge: panelsCount > 0 ? panelsCount : undefined,
+        },
+      ],
+    },
+    {
+      label: "Tools",
+      items: [
+        {
+          id: "production",
+          label: "Export & Publish",
+          icon: Download,
+        },
+        {
+          id: "autocrop",
+          label: "Auto-Crop Panels",
+          icon: Scissors,
+          isProcessing: isBatchCropping,
+        },
+        {
+          id: "image-editor",
+          label: "Image Editor",
+          icon: Edit2,
+        },
+      ],
+    },
+    {
+      label: "Config",
+      items: [
+        {
+          id: "settings",
+          label: "Video Settings",
+          icon: Settings,
+        },
+        {
+          id: "audio-settings",
+          label: "Audio Settings",
+          icon: Mic,
+        },
+      ],
+    },
+  ];
+
+  const handleReturnToWorkspace = () => {
+    if (onBackToApp) {
+      onBackToApp();
+      return;
+    }
+    const path = resolveWorkspaceReturnPath({
+      projectId,
+      searchParams: window.location.search,
+    });
+
+    if (navigateTo) {
+      navigateTo(path);
+    } else {
+      window.history.pushState({}, "", path);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
+
+  const SidebarItem: React.FC<{ item: SidebarMenuItem }> = ({ item }) => {
+    const [hover, setHover] = useState(false);
+    const [rect, setRect] = useState<DOMRect | null>(null);
+
+    const params = new URLSearchParams(locationSearch || window.location.search);
+    const activeTab = params.get("tab");
+    const isActive =
+      item.id === "settings" || item.id === "audio-settings"
+        ? activeTab === item.id
+        : !activeTab && currentSection === item.id;
+
+    const Icon = item.icon;
+
+    return (
+      <div className="relative group w-full flex justify-center py-0.5">
+        {/* Active Pill */}
+        <div
+          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
+              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
+              : "h-0 bg-transparent opacity-0"
+            }`}
+        />
+
+        <button
+          onClick={() => {
+            // Remove ?tab query param if navigating to a different section
+            if (item.id !== "settings" && item.id !== "audio-settings") {
+              const p = new URLSearchParams(window.location.search);
+              if (p.has("tab")) {
+                p.delete("tab");
+                const searchStr = p.toString();
+                const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""}`;
+                if (navigateTo) {
+                  navigateTo(newPath);
+                } else {
+                  window.history.pushState({}, "", newPath);
+                  window.dispatchEvent(new Event("popstate"));
+                }
+              }
+            }
+
+            if (item.id === "image-editor") {
+              const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
+              const projId = projectId || new URLSearchParams(window.location.search).get("id") || "";
+              const target = hasValidSlugs
+                ? `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${editingImageIdx ?? 0}`
+                : `/workspace/editor/image-editor?id=${projId}&idx=${editingImageIdx ?? 0}`;
+              if (navigateTo) {
+                navigateTo(target);
+              } else {
+                window.history.pushState({}, "", target);
+                window.dispatchEvent(new Event("popstate"));
+              }
+            } else if (item.id === "autocrop" || item.id === "bubbles") {
+              setCurrentSection(item.id);
+            } else if (item.id === "settings" || item.id === "audio-settings") {
+              const p = new URLSearchParams(window.location.search);
+              p.set("tab", item.id);
+              const newPath = `${window.location.pathname}?${p.toString()}`;
+              if (navigateTo) {
+                navigateTo(newPath);
+              } else {
+                window.history.pushState({}, "", newPath);
+                window.dispatchEvent(new Event("popstate"));
+              }
+            } else {
+              if (item.id === "monitor") {
+                useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: true });
+              }
+              setCurrentSection(item.id);
+              const el = document.getElementById(`section-${item.id}`);
+              if (el) el.scrollIntoView({ behavior: "smooth" });
+            }
+          }}
+          onMouseEnter={(e) => {
+            setRect(e.currentTarget.getBoundingClientRect());
+            setHover(true);
+          }}
+          onMouseLeave={() => setHover(false)}
+          className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
+        >
+          {/* Icon pill */}
+          <div
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
+                ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+              }`}
+          >
+            <Icon
+              className={`w-5 h-5 transition-colors duration-300 ${isActive
+                  ? "text-purple-400"
+                  : "text-neutral-400 group-hover:text-purple-300"
+                }`}
+            />
+          </div>
+
+          {/* Notification Badge */}
+          {item.badge !== undefined && (
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-br from-purple-500 to-purple-700 text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
+              {item.badge}
+            </span>
+          )}
+
+          {/* Processing Ping */}
+          {item.isProcessing && (
+            <>
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-purple-400 animate-ping z-20 opacity-75" />
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-purple-500 z-20 shadow-[0_0_6px_rgba(168,85,247,1)]" />
+            </>
+          )}
+        </button>
+        <TooltipPortal text={item.label} visible={hover} anchorRect={rect} />
+      </div>
+    );
+  };
+
+  const episodeGroups =
+    ((window as any).__scrapeEpisodeGroups as Array<{
+      episodeLabel: string;
+      startIndex: number;
+      count: number;
+    }>) || [];
+
+  return (
+    // Premium Glassmorphism Container
+    <aside
+      style={{ top: `${topOffsetPx}px` }}
+      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
+        }`}
+    >
+      {/* Scrollable Tools Area */}
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
+        {menuGroups.map((group, gi) => (
+          <div key={group.label} className="w-full flex flex-col items-center">
+            {/* Section divider (only between groups) + label for every group */}
+            <div className="w-full flex flex-col items-center" style={{ marginTop: gi > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
+              {gi > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
+                {group.label}
+              </span>
+            </div>
+            {/* Items in the group */}
+            <div className="w-full flex flex-col items-center space-y-0.5">
+              {group.items.map((item) => (
+                <SidebarItem key={item.id} item={item} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom Action Footer - Return to Workspace */}
+      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800/60 relative">
+        <div className="relative group w-full flex justify-center">
+          <button
+            onClick={handleReturnToWorkspace}
+            className="w-11 h-11 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all duration-300 shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 outline-none focus:outline-none flex items-center justify-center"
+          >
+            <ExternalLink className="w-5 h-5 shrink-0" strokeWidth={2.5} />
+          </button>
+
+          {/* Hover Tooltip for the Return Button */}
+          <div className="absolute left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 -translate-x-2 group-hover:translate-x-0 bg-neutral-900 border border-white/10 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-2xl font-medium tracking-wide">
+            Return to Workspace
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+// Wrapping in React.memo prevents the sidebar from re-rendering unless its specific props change
+const EditorMiniSidebar = React.memo(EditorMiniSidebarInner);
+export default EditorMiniSidebar;

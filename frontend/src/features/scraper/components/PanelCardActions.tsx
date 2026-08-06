@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { Trash2, X, Edit2 } from "lucide-react";
 import { NotificationType } from "@/features/notification";
-import { useImageEditorStore } from "@/features/image/hooks/useImageEditorState";
+import { useImageEditorStore } from "@/features/editor/hooks/useEditorState";
 
 interface PanelCardActionsProps {
   idx: number;

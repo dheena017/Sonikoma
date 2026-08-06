@@ -1,6 +1,6 @@
 import React from "react";
 import { ScraperDeckProps } from "@/features/scraper/components/types";
-import { ScraperSelectionToolbar } from "@/features/image/components/editor/select";
+import { ScraperSelectionToolbar } from "@/features/editor/components/select";
 import { ScraperActionButtons } from "@/features/scraper/components/ScraperActionButtons";
 import { useLiveScraperActions } from "@/features/scraper/hooks";
 

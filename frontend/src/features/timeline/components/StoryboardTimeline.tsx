@@ -11,7 +11,7 @@ import TimelineEmptyState from "@/features/timeline/components/TimelineEmptyStat
 import TimelineHeader from "@/features/timeline/components/TimelineHeader";
 import TimelineBulkOps from "@/features/timeline/components/TimelineBulkOps";
 import TimelineCard from "@/features/timeline/components/TimelineCard";
-import { TimelineSelectionBar } from "@/features/image/components/editor/select";
+import { TimelineSelectionBar } from "@/features/editor/components/select";
 import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/scraper/components/LiveScraperDeck";
 
 interface StoryboardTimelineProps {
