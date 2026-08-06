@@ -20,7 +20,7 @@ export default function DeleteConfirmModal({
   cancelText = "Cancel",
 }: DeleteConfirmModalProps) {
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" data-modal="true">
       <div
         className="absolute inset-0 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
         onClick={onCancel}

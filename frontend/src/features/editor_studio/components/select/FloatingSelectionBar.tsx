@@ -81,6 +81,8 @@ interface FloatingSelectionBarProps {
   setShowBubbleModal?: (show: boolean) => void;
   showAutoCropModal?: boolean;
   showBubbleModal?: boolean;
+  isModalOpen?: boolean;
+  hideBar?: boolean;
 
   // Timeline panels data
   panels?: any[];
@@ -697,6 +699,7 @@ export function FloatingSelectionBar({
   const [busyLocal, setBusyLocal] = React.useState(false);
   const [barHeight, setBarHeight] = React.useState(0);
   const barRef = React.useRef<HTMLDivElement>(null);
+  const [hasDomModal, setHasDomModal] = React.useState(false);
 
   React.useEffect(() => {
     if (!barRef.current) return;
@@ -775,7 +778,24 @@ export function FloatingSelectionBar({
     };
   }, [isTimeline]);
 
-  const isModalOpen = Boolean(showAutoCropModal || showBubbleModal);
+  // Detect any modal/confirmation panel open in DOM via data-modal="true"
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const checkModal = () => {
+      const hasModal = !!document.querySelector('[data-modal="true"]');
+      setHasDomModal(hasModal);
+    };
+
+    checkModal();
+
+    const observer = new MutationObserver(checkModal);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-modal"] });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const isModalOpen = Boolean(showAutoCropModal || showBubbleModal || hasDomModal);
   const visible = ((totalCount > 0 && selectedCount > 0) || isAnyBusy) && !isModalOpen;
 
   const zIndexClass = isTimeline ? "z-[9998]" : "z-[9999]";

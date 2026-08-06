@@ -1,5 +1,5 @@
-import "./utils/authFetch.ts"; // Global fetch interceptor — auto-attaches JWT to all /api calls
-import "./utils/logger.ts";
+import "@/shared/utils/authFetch"; // Global fetch interceptor — auto-attaches JWT to all /api calls
+import "@/shared/utils/logger";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "@/app/App";
