@@ -53,15 +53,17 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
   onOpenVideoEditor,
   variant = "floating",
 }) => {
+  const isEmbedded = variant === "embedded";
+
   return (
     <div
       id="section-monitor"
-      className={variant === "embedded"
+      className={isEmbedded
         ? "flex flex-col h-full w-full min-h-0 overflow-hidden"
-        : "w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4 scroll-mt-24"
+        : "w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/70 backdrop-blur-lg rounded-2xl border border-neutral-800/90 p-4 sm:p-5 space-y-4 mb-4 scroll-mt-24 shadow-2xl"
       }
     >
-      {/* Video Preview Header */}
+      {/* Header — always shown (contains Download/Export/Publish controls) */}
       <VideoPreviewHeader
         videoUrl={videoUrl}
         musicTheme={musicTheme}
@@ -80,12 +82,12 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
         variant={variant}
       />
 
-      {/* Video Monitor Split Layout with Internal Left Sidebar */}
-      <div className={variant === "embedded"
-        ? "flex flex-col lg:flex-row flex-1 min-h-0 w-full overflow-hidden"
-        : "flex flex-col lg:flex-row gap-6 w-full items-start"
+      {/* Monitor layout: left sidebar + right video */}
+      <div className={isEmbedded
+        ? "flex flex-row flex-1 min-h-0 w-full overflow-hidden"
+        : "flex flex-col lg:flex-row gap-5 w-full items-start"
       }>
-        {/* IN-PANEL LEFT SIDEBAR */}
+        {/* LEFT: Sidebar */}
         <VideoPreviewSidebar
           panels={panels}
           activePreviewTab={activePreviewTab}
@@ -93,10 +95,10 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
           setCurrentPanelIndex={setCurrentPanelIndex}
         />
 
-        {/* RIGHT: Video Player */}
-        <div className={variant === "embedded"
+        {/* RIGHT: Cinema Player */}
+        <div className={isEmbedded
           ? "flex-1 h-full min-h-0 min-w-0 overflow-hidden relative bg-black"
-          : "flex-1 w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black min-w-0"
+          : "flex-1 w-full aspect-video rounded-2xl overflow-hidden border border-neutral-800/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative bg-black min-w-0"
         }>
           <VideoPreviewCinemaPlayer
             panels={panels}
@@ -106,7 +108,7 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
             chapterSlug={null}
             navigateTo={() => { }}
             addNotification={addNotification}
-            variant="floating"
+            variant={isEmbedded ? "embedded" : "floating"}
             onCloseFloating={() => {
               useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
             }}

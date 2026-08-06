@@ -29,7 +29,7 @@ interface PlayerPageProps {
   chapterSlug: string | null;
   navigateTo: (path: string) => void;
   addNotification?: (msg: string, type: any) => void;
-  variant?: "floating" | "theater";
+  variant?: "floating" | "theater" | "embedded";
   onCloseFloating?: () => void;
 }
 
@@ -867,7 +867,7 @@ export default function VideoPreviewCinemaPlayer({
         }
       }}
       className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${
-        variant === "floating"
+        variant === "floating" || variant === "embedded"
           ? "w-full h-full rounded-xl"
           : isTheaterMode
           ? "w-full h-[85vh] lg:h-[90vh]"
@@ -1092,12 +1092,13 @@ export default function VideoPreviewCinemaPlayer({
       </div>
 
       {/* SUB-COMPONENT: Top Bar Overlay */}
-      {variant !== "floating" && (
+      {variant !== "floating" && variant !== "embedded" && (
         <VideoPreviewTopBar
           visible={controlsVisible}
           activeChapter={activeChapter}
           panelCounterText={panelCounterText}
           onClose={handleClose}
+          videoUrl={videoUrl}
         />
       )}
 

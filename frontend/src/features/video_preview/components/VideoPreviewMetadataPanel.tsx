@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Download, Youtube, Loader2, ExternalLink, Music, Mic } from "lucide-react";
+import { Download, Youtube, Loader2, ExternalLink, Music, Mic, Film } from "lucide-react";
 import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
 
 export interface VideoPreviewMetadataPanelProps {
@@ -17,11 +17,9 @@ export interface VideoPreviewMetadataPanelProps {
 /** Derive a short codec label from the video URL extension. */
 function deriveCodec(url: string | null): string {
   if (!url) return "H.264";
-  const lower = url.toLowerCase();
-  if (lower.endsWith(".webm")) return "VP9";
-  if (lower.endsWith(".ogg") || lower.endsWith(".ogv")) return "Theora";
-  if (lower.endsWith(".av1")) return "AV1";
-  return "H.264"; // default for .mp4 / .m4v / etc.
+  if (url.includes(".webm")) return "VP9";
+  if (url.includes(".mov")) return "ProRes";
+  return "H.264";
 }
 
 const VideoPreviewMetadataPanel = React.memo(
@@ -35,9 +33,9 @@ const VideoPreviewMetadataPanel = React.memo(
     chapterTitle,
     targetUrl,
   }: VideoPreviewMetadataPanelProps) => {
-    const [isPublishing, setIsPublishing] = useState(false);
-    const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
-    const [publishMessage, setPublishMessage] = useState<string | null>(null);
+    const [isPublishing] = useState(false);
+    const [youtubeUrl] = useState<string | null>(null);
+    const [publishMessage] = useState<string | null>(null);
 
     const handlePublishYouTube = () => {
       if (navigateTo) {
@@ -48,7 +46,6 @@ const VideoPreviewMetadataPanel = React.memo(
       }
     };
 
-    // Build download filename dynamically from whatever context is available
     const { formattedPrefix } = resolveDownloadNaming({
       seriesTitle: seriesTitle || undefined,
       chapterNumber: chapterNumber != null ? String(chapterNumber) : undefined,
@@ -60,84 +57,79 @@ const VideoPreviewMetadataPanel = React.memo(
     const downloadFilename = `${formattedPrefix}_CinemaMaster.mp4`;
 
     return (
-      <div className="flex items-center flex-wrap md:flex-nowrap gap-3">
-        {/* Specs */}
-        <div className="hidden lg:flex items-center gap-2">
+      <div className="flex items-center flex-wrap gap-2">
+        {/* Track Specs Badges */}
+        <div className="flex items-center gap-2 flex-wrap">
           {musicTheme && (
             <div
-              className="bg-neutral-950/40 border border-neutral-800/80 px-2 py-1 rounded-lg flex items-center gap-1.5 max-w-[150px] xl:max-w-[200px]"
+              className="h-7 px-2.5 rounded-lg bg-neutral-900/80 border border-purple-500/25 flex items-center gap-1.5 text-neutral-300 hover:text-white transition-colors max-w-[170px] xl:max-w-[210px]"
               title={`Soundtrack: ${musicTheme}`}
             >
-              <Music className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-              <span className="text-[10px] text-neutral-300 truncate font-mono">
-                {musicTheme}
-              </span>
+              <Music className="h-3 w-3 text-purple-400 shrink-0" />
+              <span className="text-[11px] font-medium font-mono truncate">{musicTheme}</span>
             </div>
           )}
 
           {voiceActor && (
             <div
-              className="bg-neutral-950/40 border border-neutral-800/80 px-2 py-1 rounded-lg flex items-center gap-1.5 max-w-[150px] xl:max-w-[200px]"
-              title={`Active Speaker: ${voiceActor}`}
+              className="h-7 px-2.5 rounded-lg bg-neutral-900/80 border border-purple-500/25 flex items-center gap-1.5 text-neutral-300 hover:text-white transition-colors max-w-[170px] xl:max-w-[210px]"
+              title={`Active Voice: ${voiceActor}`}
             >
-              <Mic className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-              <span className="text-[10px] text-neutral-300 truncate font-mono">
-                {voiceActor}
-              </span>
+              <Mic className="h-3 w-3 text-indigo-400 shrink-0" />
+              <span className="text-[11px] font-medium font-mono truncate">{voiceActor}</span>
             </div>
           )}
 
-          <div className="bg-neutral-950/40 border border-neutral-800/80 px-2 py-1 rounded-lg flex items-center gap-1">
-            <span className="text-[10px] text-neutral-500 font-sans">Codec:</span>
-            <span className="text-[10px] text-neutral-300 font-mono font-semibold">{codec}</span>
+          <div
+            className="h-7 px-2.5 rounded-lg bg-neutral-900/80 border border-neutral-800 flex items-center gap-1 text-[11px] font-mono text-neutral-400"
+            title="Video Compression Codec"
+          >
+            <span className="text-neutral-500 font-sans text-[10px] uppercase font-bold">Codec</span>
+            <span className="text-neutral-200 font-semibold">{codec}</span>
           </div>
         </div>
 
-        {/* Separator between specs and actions */}
-        {videoUrl && (
-          <div className="hidden lg:block w-px h-4 bg-neutral-800" />
-        )}
+        {/* Separator */}
+        {videoUrl && <div className="hidden sm:block w-px h-4 bg-neutral-800 mx-0.5" />}
 
-        {/* Compiled Output Link */}
+        {/* Compiled Output URL Link */}
         {videoUrl && (
           <a
             href={videoUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-emerald-400 hover:text-emerald-300 font-mono text-[10px] bg-emerald-950/20 border border-emerald-900/35 px-2 py-1 rounded-lg flex items-center gap-1.5 hover:bg-emerald-950/40 hover:border-emerald-800/50 transition-all truncate max-w-[140px] xl:max-w-[200px] font-bold"
-            title={`Compiled Output URL: ${videoUrl}`}
+            className="h-7 px-2.5 rounded-lg bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-800/40 text-emerald-300 text-[11px] font-mono font-medium flex items-center gap-1.5 transition-all truncate max-w-[150px] xl:max-w-[220px]"
+            title={`Compiled Video URL: ${videoUrl}`}
           >
-            <ExternalLink className="h-3 w-3 text-emerald-500 shrink-0" />
+            <ExternalLink className="h-3 w-3 text-emerald-400 shrink-0" />
             <span className="truncate">{videoUrl}</span>
           </a>
         )}
 
-        {/* Action Buttons */}
+        {/* Action Buttons: Download & YouTube */}
         {videoUrl && (
           <div className="flex items-center gap-2">
-            {/* Download Button */}
             <a
               href={videoUrl}
               download={downloadFilename}
               target="_blank"
               rel="noreferrer"
-              className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] xl:text-[11px] font-bold font-sans transition-all cursor-pointer select-none active:scale-95 shadow-sm"
-              title={`Download: ${downloadFilename}`}
+              className="h-7 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 active:scale-95 border border-neutral-700 text-neutral-200 text-[11px] font-bold font-sans flex items-center gap-1.5 transition-all cursor-pointer shadow-sm select-none"
+              title={`Download MP4: ${downloadFilename}`}
             >
-              <Download className="h-3.5 w-3.5" />
+              <Download className="h-3.5 w-3.5 text-neutral-300" />
               <span>Download MP4</span>
             </a>
 
-            {/* YouTube Publish */}
             {!youtubeUrl ? (
               <button
                 type="button"
                 onClick={handlePublishYouTube}
                 disabled={isPublishing}
-                className={`text-white px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] xl:text-[11px] font-bold font-sans transition-all select-none border border-red-500/30 shadow-sm ${
+                className={`h-7 px-3 rounded-lg flex items-center gap-1.5 text-[11px] font-bold font-sans transition-all select-none border border-red-500/30 shadow-sm ${
                   isPublishing
-                    ? "bg-neutral-800 border-neutral-700 cursor-not-allowed opacity-70"
-                    : "bg-[#FF0000] hover:bg-[#CC0000] cursor-pointer active:scale-95 shadow-red-950/20"
+                    ? "bg-neutral-800 border-neutral-700 cursor-not-allowed opacity-70 text-neutral-400"
+                    : "bg-[#FF0000] hover:bg-[#CC0000] text-white cursor-pointer active:scale-95 shadow-red-950/30"
                 }`}
               >
                 {isPublishing ? (
@@ -157,7 +149,7 @@ const VideoPreviewMetadataPanel = React.memo(
                 href={youtubeUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-green-600 hover:bg-green-500 text-white border border-green-500/50 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] xl:text-[11px] font-bold font-sans transition-all cursor-pointer select-none active:scale-95 shadow-sm shadow-green-950/20"
+                className="h-7 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-500/50 flex items-center gap-1.5 text-[11px] font-bold font-sans transition-all cursor-pointer select-none active:scale-95 shadow-sm"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 <span>View on YouTube</span>
@@ -177,3 +169,4 @@ const VideoPreviewMetadataPanel = React.memo(
 
 export default VideoPreviewMetadataPanel;
 export { VideoPreviewMetadataPanel };
+

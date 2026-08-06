@@ -61,7 +61,7 @@ export interface VideoPreviewBottomControlsProps {
   showSubtitles: boolean;
   setShowSubtitles: (val: boolean) => void;
   togglePictureInPicture: () => void;
-  variant?: "floating" | "theater";
+  variant?: "floating" | "theater" | "embedded";
   isTheaterMode: boolean;
   setIsTheaterMode: (val: boolean) => void;
   toggleFullscreen: () => void;
@@ -186,7 +186,7 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
           onClick={handleProgressBarInteraction}
           onMouseMove={handleProgressBarMouseMove}
           onMouseLeave={handleProgressBarMouseLeave}
-          className="relative h-1 bg-neutral-700 rounded-full cursor-pointer transition-all duration-200 flex items-center group/scrub"
+          className="relative h-1.5 group-hover/scrub:h-2 bg-neutral-800/90 rounded-full cursor-pointer transition-all duration-200 flex items-center"
         >
           {chapters.map((chapter, idx) => {
             if (idx === 0) return null;
@@ -194,59 +194,59 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
             return (
               <div
                 key={idx}
-                className="absolute top-0 bottom-0 w-0.5 bg-black/60 z-20"
+                className="absolute top-0 bottom-0 w-0.5 bg-black/80 z-20"
                 style={{ left: `${markerPercent}%` }}
               />
             );
           })}
 
           <div
-            className="absolute top-0 left-0 h-full bg-purple-600 rounded-full z-10"
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full z-10"
             style={{ width: `${totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0}%` }}
           />
 
           <div
-            className="absolute top-1/2 -translate-y-1/2 h-0 w-0 bg-purple-600 rounded-full opacity-0 group-hover/scrub:opacity-100 group-hover/scrub:h-3.5 group-hover/scrub:w-3.5 pointer-events-none transition-all duration-200 z-30"
+            className="absolute top-1/2 -translate-y-1/2 h-0 w-0 bg-white rounded-full opacity-0 group-hover/scrub:opacity-100 group-hover/scrub:h-3.5 group-hover/scrub:w-3.5 pointer-events-none transition-all duration-200 z-30"
             style={{
               left: `calc(${totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0}% - 7px)`,
-              boxShadow: "0 0 0 2px rgba(255,255,255,0.06), 0 0 16px rgba(168,85,247,0.25)",
+              boxShadow: "0 0 0 2px rgba(168,85,247,0.4), 0 0 16px rgba(168,85,247,0.8)",
             }}
           />
         </div>
       </div>
 
       {/* BUTTON CONTROLS LINE */}
-      <div className="flex items-center justify-between gap-4 px-4 py-2">
+      <div className="flex items-center justify-between gap-4 px-2 py-1">
         {/* LEFT COMMANDS */}
-        <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={handleSkipBackward}
-            className="h-8 w-8 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+            className="h-8 w-8 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
             title="Skip backward 10s"
           >
-            <SkipBack className="h-4.5 w-4.5" />
+            <SkipBack className="h-4 w-4" />
           </button>
 
           <button
             onClick={togglePlay}
-            className="h-10 w-10 rounded-full bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-md shadow-purple-950/20"
+            className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
           >
             {isPlaying ? <Pause className="h-4 w-4 fill-white" /> : <Play className="h-4 w-4 fill-white translate-x-px" />}
           </button>
 
           <button
             onClick={handleSkipForward}
-            className="h-8 w-8 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+            className="h-8 w-8 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer"
             title="Skip forward 10s"
           >
-            <SkipForward className="h-4.5 w-4.5" />
+            <SkipForward className="h-4 w-4" />
           </button>
 
           {/* VOLUME BUTTON & SLIDER */}
           <div className="flex items-center gap-2 group/volume">
             <button
               onClick={() => setIsMuted(!isMuted)}
-              className="h-8 w-8 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+              className="h-8 w-8 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
             >
               {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </button>
@@ -269,8 +269,8 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
           </div>
 
           {/* TIMERS INDICATORS */}
-          <div className="flex items-center gap-3">
-            <span className="text-xs font-mono text-neutral-300 tabular-nums select-none">
+          <div className="flex items-center gap-2 px-1">
+            <span className="text-xs font-mono font-medium text-neutral-200 tabular-nums select-none">
               {formatTime(currentTime)} <span className="text-neutral-600">/</span> {formatTime(totalDuration)}
             </span>
           </div>
@@ -282,7 +282,7 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
                 setShowChaptersMenu(!showChaptersMenu);
                 setShowSettings(false);
               }}
-              className="flex items-center gap-1 px-3 py-1.5 bg-neutral-900/60 hover:bg-neutral-850 rounded-xl border border-white/5 hover:border-white/10 text-[10px] font-mono text-neutral-300 transition-all cursor-pointer"
+              className="flex items-center gap-1 px-3 py-1.5 bg-neutral-900/80 hover:bg-neutral-800 rounded-xl border border-white/10 text-[11px] font-mono text-neutral-300 transition-all cursor-pointer"
             >
               <span className="font-bold text-purple-400 capitalize">{activeChapter.title}</span>
               <ChevronRight className="h-3 w-3 shrink-0" />
@@ -291,20 +291,20 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
         </div>
 
         {/* RIGHT COMMANDS */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => {
               setIsLooping(!isLooping);
               if (addNotification) addNotification(isLooping ? "Loop Playback Disabled" : "Loop Playback Enabled", "info");
             }}
-            className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               isLooping
-                ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
-                : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
+                ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
+                : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Loop Playback (L)"
           >
-            <RotateCcw className="h-4.5 w-4.5" />
+            <RotateCcw className="h-4 w-4" />
           </button>
 
           <button
@@ -312,22 +312,22 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
               setShowSubtitles(!showSubtitles);
               if (addNotification) addNotification(showSubtitles ? "Subtitles Disabled" : "Subtitles Enabled", "info");
             }}
-            className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               showSubtitles
-                ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
-                : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
+                ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
+                : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Toggle Subtitles"
           >
-            <Subtitles className="h-4.5 w-4.5" />
+            <Subtitles className="h-4 w-4" />
           </button>
 
           <button
             onClick={togglePictureInPicture}
-            className="h-9 w-9 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+            className="h-8 w-8 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-white/10 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
             title="Picture-in-Picture Mode (P)"
           >
-            <Tv className="h-4.5 w-4.5" />
+            <Tv className="h-4 w-4" />
           </button>
 
           <button
@@ -335,36 +335,36 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
               setShowSettings(!showSettings);
               setShowChaptersMenu(false);
             }}
-            className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               showSettings
-                ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
-                : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
+                ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
+                : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Playback Settings"
           >
-            <Settings className="h-4.5 w-4.5" />
+            <Settings className="h-4 w-4" />
           </button>
 
           {variant !== "floating" && (
             <button
               onClick={() => setIsTheaterMode(!isTheaterMode)}
-              className={`h-9 w-9 rounded-full flex items-center justify-center transition-all cursor-pointer border ${
+              className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
                 isTheaterMode
-                  ? "bg-purple-900/25 border-purple-800/40 text-purple-400 hover:text-purple-300"
-                  : "hover:bg-neutral-800 text-neutral-400 hover:text-white border-transparent"
+                  ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
+                  : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
               }`}
               title="Toggle Theater Mode (T)"
             >
-              <Sliders className="h-4.5 w-4.5" />
+              <Sliders className="h-4 w-4" />
             </button>
           )}
 
           <button
             onClick={toggleFullscreen}
-            className="h-9 w-9 rounded-full hover:bg-neutral-800 border border-transparent hover:border-white/5 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
+            className="h-8 w-8 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-white/10 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
             title="Toggle Fullscreen (F)"
           >
-            {isFullscreen ? <Minimize2 className="h-4.5 w-4.5" /> : <Maximize2 className="h-4.5 w-4.5" />}
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
         </div>
       </div>

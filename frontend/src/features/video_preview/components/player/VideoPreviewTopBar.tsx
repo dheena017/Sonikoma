@@ -12,14 +12,28 @@ export interface VideoPreviewTopBarProps {
   activeChapter: Chapter;
   panelCounterText: string;
   onClose: () => void;
+  videoUrl?: string | null;
 }
+
+const getPreviewDisplayLabel = (videoUrl: string | null) => {
+  if (!videoUrl) return "VIDEO PREVIEW PLAYER";
+
+  const sanitizedUrl = videoUrl.split("?")[0];
+  const fileName = sanitizedUrl.split("/").filter(Boolean).pop() ?? "";
+  const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+
+  return nameWithoutExt || "VIDEO PREVIEW PLAYER";
+};
 
 export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
   visible,
   activeChapter,
   panelCounterText,
   onClose,
+  videoUrl,
 }) => {
+  const previewLabel = getPreviewDisplayLabel(videoUrl ?? null);
+
   return (
     <div
       className={`absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between px-6 z-30 transition-all duration-300 ${
@@ -32,7 +46,7 @@ export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
         </div>
         <div>
           <span className="text-[10px] font-mono text-purple-400 uppercase font-black tracking-widest block">
-            Video Preview Player
+            {previewLabel}
           </span>
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-neutral-200">

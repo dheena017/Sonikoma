@@ -15,6 +15,7 @@ import {
   Film,
 } from "lucide-react";
 import VideoCustomizeLayoutModal from "./VideoCustomizeLayoutModal";
+import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import { Notification } from "@/features/app_notification";
 import { getUserCreditsPayload } from "@/api/endpoints/auth";
@@ -86,6 +87,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
   // ── Local state ────────────────────────────────────────────────────────────
   const [showCustomizeLayout, setShowCustomizeLayout] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [credits, setCredits] = useState<number | null>(
     userCredits !== undefined && userCredits !== null ? userCredits : null
@@ -343,7 +345,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           {/* Save Project */}
           <button
             type="button"
-            onClick={onSave}
+            onClick={() => setShowSaveModal(true)}
             disabled={isSaving}
             title={isSaving ? "Saving..." : isDirty ? "Unsaved changes — click to Save" : "Save Project"}
             className={`hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-bold text-white transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -395,6 +397,27 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
       <VideoCustomizeLayoutModal
         isOpen={showCustomizeLayout}
         onClose={() => setShowCustomizeLayout(false)}
+      />
+
+      {/* Project Confirm Modal — triggered by Save button */}
+      <ProjectConfirmModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        initialDetails={{
+          seriesTitle: seriesTitle ?? "",
+          chapterNumber: chapterNumber ?? "",
+          chapterTitle: chapterTitle ?? "",
+          scrapedGenre: "",
+          seriesAuthor: "",
+          seriesCoverImage: "",
+          seriesSynopsis: "",
+          status: "Draft",
+        }}
+        onConfirm={async (_details, _shouldGenerate) => {
+          onSave?.();
+          setShowSaveModal(false);
+          return true;
+        }}
       />
     </>
   );
