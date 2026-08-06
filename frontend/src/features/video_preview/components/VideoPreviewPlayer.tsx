@@ -81,7 +81,10 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
       />
 
       {/* Video Monitor Split Layout with Internal Left Sidebar */}
-      <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+      <div className={variant === "embedded"
+        ? "flex flex-col lg:flex-row flex-1 min-h-0 w-full overflow-hidden"
+        : "flex flex-col lg:flex-row gap-6 w-full items-start"
+      }>
         {/* IN-PANEL LEFT SIDEBAR */}
         <VideoPreviewSidebar
           panels={panels}
@@ -91,7 +94,10 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
         />
 
         {/* RIGHT: Video Player */}
-        <div className="flex-1 w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black min-w-0">
+        <div className={variant === "embedded"
+          ? "flex-1 h-full min-h-0 min-w-0 overflow-hidden relative bg-black"
+          : "flex-1 w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black min-w-0"
+        }>
           <VideoPreviewCinemaPlayer
             panels={panels}
             videoUrl={activePreviewTab === "video" ? videoUrl : null}

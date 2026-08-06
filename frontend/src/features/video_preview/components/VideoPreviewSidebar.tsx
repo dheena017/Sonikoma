@@ -18,7 +18,7 @@ const VideoPreviewSidebar: React.FC<VideoPreviewSidebarProps> = ({
   setCurrentPanelIndex,
 }) => {
   return (
-    <aside className="w-full lg:w-56 bg-neutral-955 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-xl self-start">
+    <aside className="w-full lg:w-56 bg-neutral-955 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-xl self-stretch overflow-y-auto">
       <div className="flex items-center justify-between border-b border-neutral-850 pb-2.5">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
