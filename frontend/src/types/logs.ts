@@ -10,15 +10,15 @@ export type LogLevel =
 
 export interface LogEntry {
   id?: number;
-  timestamp: string; // HH:MM:SS
+  timestamp: string;
   message: string;
   level: LogLevel;
   module: string;
-  details?: string;
+  details?: string | null;
   correlation_id?: string;
   user_id?: string;
-  snapshot?: any; // JSON object or string
-  created_at?: string; // ISO String for historical
+  snapshot?: any;
+  created_at?: string;
 }
 
 /**

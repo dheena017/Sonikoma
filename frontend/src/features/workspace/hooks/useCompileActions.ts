@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { GeneratedPanel } from "@/types";
 import { processWithConcurrency, chunkArray } from "@/shared/utils/batchUtils";
 import * as api from "@/api/index";
+import { saveAs } from "file-saver";
+import { buildZipBlobFromUrls } from "@/features/workspace_scraper/hooks/useLiveScraperZip";
 
 interface UseCompileActionsProps {
   panels: GeneratedPanel[];
@@ -66,34 +68,42 @@ export function useCompileActions({
     );
     try {
       const urls = panels.map((p) => p.image_url);
-      console.log(
-        "[API] Requesting image ZIP download with",
-        urls.length,
-        "image URLs"
+      const { blob, zipFilename } = await buildZipBlobFromUrls(
+        urls,
+        activeFetch,
+        { targetUrl }
       );
-      const data = await api.downloadZip(activeFetch, { urls, url: targetUrl });
-      if (data.success && data.downloadUrl) {
-        const link = document.createElement("a");
-        link.href = data.downloadUrl;
-        link.download = data.filename || "comic_panels_archive.zip";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        console.log("[Timeline] ZIP archive download triggered successfully");
-        if (addNotification) {
-          addNotification("ZIP archive downloaded successfully!", "success");
-          audioFeedback?.playSuccess();
-        }
-      } else {
-        throw new Error(data.error || "Failed to package ZIP archive.");
+      saveAs(blob, zipFilename);
+      console.log(`[Timeline] ZIP archive download triggered successfully (${zipFilename})`);
+      if (addNotification) {
+        addNotification(`ZIP archive (${zipFilename}) downloaded successfully!`, "success");
+        audioFeedback?.playSuccess();
       }
     } catch (err: any) {
-      console.error("[Timeline] ZIP download failed:", err);
-      if (addNotification) {
-        addNotification(
-          err.message || "Failed to compile ZIP archive.",
-          "error"
-        );
+      console.error("[Timeline] Client ZIP generation failed, falling back to API:", err);
+      try {
+        const urls = panels.map((p) => p.image_url);
+        const data = await api.downloadZip(activeFetch, { urls, url: targetUrl });
+        if (data.success && data.downloadUrl) {
+          const link = document.createElement("a");
+          link.href = data.downloadUrl;
+          link.download = data.filename || "comic_panels_archive.zip";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          addNotification?.("ZIP archive downloaded successfully!", "success");
+          audioFeedback?.playSuccess();
+        } else {
+          throw new Error(data.error || "Failed to package ZIP archive.");
+        }
+      } catch (fallbackErr: any) {
+        console.error("[Timeline] ZIP download failed completely:", fallbackErr);
+        if (addNotification) {
+          addNotification(
+            fallbackErr.message || "Failed to compile ZIP archive.",
+            "error"
+          );
+        }
       }
     } finally {
       setIsZipping(false);

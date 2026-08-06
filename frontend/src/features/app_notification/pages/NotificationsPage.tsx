@@ -78,7 +78,7 @@ const NotificationsPage = React.memo(
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `logs-export-${new Date().toISOString().split("T")[0]}.json`;
+      a.download = `Sonikoma_Notifications_Export_${new Date().toISOString().split("T")[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
     };

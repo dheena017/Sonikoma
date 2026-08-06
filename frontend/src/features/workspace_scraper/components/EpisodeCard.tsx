@@ -103,7 +103,8 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `episode_${(episode.number || 'ep').replace(/\s+/g, "_")}_metadata.json`;
+    const safeEp = (episode.number || 'ep').replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
+    link.download = `Episode_${safeEp}_metadata.json`;
     link.click();
     URL.revokeObjectURL(url);
     setIsMenuOpen(false);

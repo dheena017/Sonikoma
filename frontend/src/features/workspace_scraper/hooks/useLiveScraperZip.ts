@@ -1,43 +1,30 @@
 import JSZip from "jszip";
 import { processWithConcurrency } from "@/shared/utils/batchUtils";
 import { parseWebtoonUrl } from "@/shared/utils/url";
+import {
+  resolveDownloadNaming,
+  generateMetadataText,
+  generateMetadataReadme,
+  makeSafeFilename,
+} from "@/shared/utils/downloadNaming";
 
-export function makeSafeFilename(name: string): string {
-  if (!name) return "";
-  const cleaned = name.replace(/[^\w\s-]/g, "");
-  const replaced = cleaned.replace(/[-\s]+/g, "_");
-  return replaced.replace(/^_+|_+$/g, "");
-}
+export { makeSafeFilename };
 
 export interface ZipNamingOptions {
   seriesTitle?: string;
   chapterNumber?: string;
+  chapterTitle?: string;
   targetUrl?: string;
+  sourceSite?: string;
 }
 
 export function resolveSeriesAndChapter(options?: ZipNamingOptions): {
   seriesName: string;
   chapterNum: string;
+  sourceSite: string;
+  formattedPrefix: string;
 } {
-  let seriesName = options?.seriesTitle?.trim() || "";
-  let chapterNum = options?.chapterNumber?.trim() || "";
-
-  if ((!seriesName || !chapterNum) && options?.targetUrl) {
-    try {
-      const parsed = parseWebtoonUrl(options.targetUrl);
-      if (!seriesName && parsed.title) {
-        seriesName = parsed.title.trim();
-      }
-      if (!chapterNum && parsed.chapterNumber) {
-        chapterNum = parsed.chapterNumber.trim();
-      }
-    } catch (e) {}
-  }
-
-  const safeSeries = makeSafeFilename(seriesName) || "Webtoon";
-  const safeChapter = makeSafeFilename(chapterNum) || "1";
-
-  return { seriesName: safeSeries, chapterNum: safeChapter };
+  return resolveDownloadNaming(options);
 }
 
 export async function buildZipBlobFromUrls(
@@ -46,10 +33,29 @@ export async function buildZipBlobFromUrls(
   options?: ZipNamingOptions
 ): Promise<{ blob: Blob; zipFilename: string }> {
   const zip = new JSZip();
-  const { seriesName, chapterNum } = resolveSeriesAndChapter(options);
+  const { seriesName, chapterNum, sourceSite, formattedPrefix } =
+    resolveDownloadNaming(options);
 
-  const folderName = `${seriesName}_Ch_${chapterNum}`;
+  const folderName = `${formattedPrefix}_panels`;
   const folder = zip.folder(folderName) || zip;
+
+  // Add Metadata TXT and README Markdown files into the ZIP archive
+  const metadataInfo = {
+    seriesTitle: options?.seriesTitle || seriesName,
+    chapterNumber: options?.chapterNumber || chapterNum,
+    chapterTitle: options?.chapterTitle,
+    targetUrl: options?.targetUrl,
+    sourceSite: options?.sourceSite || sourceSite,
+    totalPanels: urls.length,
+    extractedAt: new Date().toISOString(),
+    panelUrls: urls,
+  };
+
+  const metadataText = generateMetadataText(metadataInfo);
+  const metadataReadme = generateMetadataReadme(metadataInfo);
+
+  folder.file("metadata.txt", metadataText);
+  folder.file("README.md", metadataReadme);
 
   await processWithConcurrency(urls, 8, async (url, index) => {
     try {
@@ -70,7 +76,7 @@ export async function buildZipBlobFromUrls(
         ext = "webp";
       }
 
-      const filename = `${seriesName}_Ch_${chapterNum}_img_${imgNum}.${ext}`;
+      const filename = `${formattedPrefix}_img_${imgNum}.${ext}`;
       folder.file(filename, blob);
     } catch (err) {
       console.error(
@@ -86,3 +92,4 @@ export async function buildZipBlobFromUrls(
 
   return { blob, zipFilename };
 }
+

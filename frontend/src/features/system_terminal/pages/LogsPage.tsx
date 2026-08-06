@@ -102,7 +102,9 @@ const LogsPageInner = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `sonikoma_${viewMode}_logs_${Date.now()}.txt`;
+    const modeStr = (viewMode || "terminal").toUpperCase();
+    const dateStr = new Date().toISOString().split("T")[0];
+    link.download = `Sonikoma_${modeStr}_Logs_${dateStr}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

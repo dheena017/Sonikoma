@@ -141,7 +141,7 @@ export function useTerminalLogs({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `compilation_logs_${getTimestamp().replace(/:/g, "-")}.txt`;
+    link.download = `Sonikoma_Compilation_Logs_${getTimestamp().replace(/:/g, "-")}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

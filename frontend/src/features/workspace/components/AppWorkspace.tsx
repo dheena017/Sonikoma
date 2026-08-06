@@ -34,10 +34,11 @@ import {
   Download,
 } from "lucide-react";
 import UrlInputPanel from "@/features/workspace_scraper/components/UrlInputPanel";
-import ProjectConfirmPanel from "@/shared/ui/modal/ProjectConfirmPanel";
+import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
 import ProjectCard from "@/features/workspace_projects/components/ProjectCard";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 import { useProjectStore } from "@/store/useProjectStore";
+import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
 
 interface AppWorkspaceProps {
   [key: string]: any;
@@ -770,7 +771,7 @@ const AppWorkspaceInner = (props: AppWorkspaceProps) => {
                 <div className="pt-3 border-t border-neutral-800/30 flex flex-col gap-2.5">
                   <a
                     href={matchingProject.video_url}
-                    download={`${matchingProject.title || "webtoon"}_master.mp4`}
+                    download={`${resolveDownloadNaming({ seriesTitle: matchingProject.title, targetUrl: matchingProject.url || matchingProject.video_url }).formattedPrefix}_Master.mp4`}
                     target="_blank"
                     rel="noreferrer"
                     className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer select-none border border-emerald-500/30 shadow-lg shadow-emerald-950/20 font-sans active:scale-95 text-center"

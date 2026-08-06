@@ -226,7 +226,7 @@ const AdminDashboardPage = React.memo(
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `sonikoma_audit_logs_${new Date().toISOString().split("T")[0]}.csv`;
+          a.download = `Sonikoma_Audit_Logs_${new Date().toISOString().split("T")[0]}.csv`;
           a.click();
           if (addNotification) addNotification("Security logs exported as CSV", "success");
         }

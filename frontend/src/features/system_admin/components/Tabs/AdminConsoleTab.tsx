@@ -200,7 +200,7 @@ export function AdminConsoleTab() {
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = `system_logs_${new Date().toISOString()}.txt`;
+              a.download = `Sonikoma_System_Console_Logs_${new Date().toISOString().split("T")[0]}.txt`;
               a.click();
             }}
             className="p-2 bg-neutral-800 text-neutral-400 hover:bg-neutral-700 rounded-lg transition-colors"

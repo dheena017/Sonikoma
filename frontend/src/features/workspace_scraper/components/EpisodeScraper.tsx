@@ -38,6 +38,7 @@ import { AnalyticsDashboard } from "@/features/workspace_scraper/components/Anal
 import { NotificationType } from "@/features/app_notification";
 import type { Episode } from "@/features/workspace_scraper/components/EpisodeTypes";
 import { isKnownSite, addCustomSite, getProxiedImageUrl } from "@/shared/utils/url";
+import { makeSafeFilename } from "@/shared/utils/downloadNaming";
 
 interface SeriesMetadata {
   seriesSlug?: string;
@@ -525,7 +526,9 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${seriesMetadata?.title || 'series'}_episodes.csv`;
+    const safeSeries = makeSafeFilename(seriesMetadata?.title, "Webtoon_Series");
+    const dateStr = new Date().toISOString().split("T")[0];
+    link.download = `${safeSeries}_episodes_${dateStr}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -537,7 +540,9 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${seriesMetadata?.title || 'series'}_episodes.json`;
+    const safeSeries = makeSafeFilename(seriesMetadata?.title, "Webtoon_Series");
+    const dateStr = new Date().toISOString().split("T")[0];
+    link.download = `${safeSeries}_episodes_${dateStr}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };

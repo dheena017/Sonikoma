@@ -147,7 +147,7 @@ const StatusPage = React.memo(
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `sonikoma-syslogs-${Date.now()}.txt`;
+      a.download = `Sonikoma_System_Diagnostics_${new Date().toISOString().split("T")[0]}.txt`;
       a.click();
       URL.revokeObjectURL(url);
     };

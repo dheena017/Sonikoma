@@ -7,7 +7,7 @@ import {
   Notification,
   NotificationType,
 } from "@/features/app_notification";
-import { ErrorPopupDetail } from "@/shared/ui/modal/ErrorPopupModal";
+import { ErrorModalDetail } from "@/shared/ui/modal/ErrorModal";
 import { parseWebtoonUrl } from "@/shared/utils/url";
 import { useAudioFeedback } from "@/features/editor_audio/hooks/useAudioFeedback";
 import { LogEntry, normalizeLog } from "@/types/logs";
@@ -290,7 +290,7 @@ export function useAppState() {
   const [notificationsMuted, setNotificationsMuted] = useState<boolean>(() => {
     return localStorage.getItem("ai_comic_notifications_muted") === "true";
   });
-  const [errorPopup, setErrorPopup] = useState<ErrorPopupDetail | null>(null);
+  const [errorPopup, setErrorPopup] = useState<ErrorModalDetail | null>(null);
 
   // Settings — all useState MUST come before any useCallback/useEffect
   const targetUrl = activeProjectData?.project?.url ?? (() => {

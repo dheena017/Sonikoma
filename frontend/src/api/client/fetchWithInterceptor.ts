@@ -1,4 +1,4 @@
-import type { ErrorPopupDetail } from "@/shared/ui/modal/ErrorPopupModal";
+import type { ErrorModalDetail } from "@/shared/ui/modal/ErrorModal";
 import type { NotificationType } from "@/features/app_notification";
 
 export type AddNotificationFn = (
@@ -13,7 +13,7 @@ export type AddNotificationFn = (
 
 export interface FetchInterceptorHandlers {
   addNotification: AddNotificationFn;
-  setErrorPopup: (detail: ErrorPopupDetail | null) => void;
+  setErrorPopup: (detail: ErrorModalDetail | null) => void;
   onUnauthorized?: () => void;
 }
 

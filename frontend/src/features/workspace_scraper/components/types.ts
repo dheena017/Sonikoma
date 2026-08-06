@@ -1,7 +1,7 @@
 import React from "react";
 import { GeneratedPanel } from "@/types";
 import { NotificationType } from "@/features/app_notification";
-import { ErrorPopupDetail } from "@/shared/ui/modal/ErrorPopupModal";
+import { ErrorModalDetail } from "@/shared/ui/modal/ErrorModal";
 import { LogEntry } from "@/types/logs";
 
 export interface ScraperDeckProps {
@@ -25,7 +25,7 @@ export interface ScraperDeckProps {
   setEditAutoTrim: (val: boolean) => void;
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor?: typeof fetch;
-  setErrorPopup?: (err: ErrorPopupDetail | null) => void;
+  setErrorPopup?: (err: ErrorModalDetail | null) => void;
   addPanelsToStoryboard: (
     urls: string[],
     currentScrapedList?: string[],

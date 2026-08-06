@@ -4,7 +4,7 @@ import * as api from "@/api";
 
 import Header from "@/components/layout/MainHeader";
 import Sidebar from "@/components/layout/MainSidebar";
-import ProjectConfirmPanel from "@/shared/ui/modal/ProjectConfirmPanel";
+import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import AutoCropModal from "@/features/editor_auto_crop/components/AutoCropModal";
 import NotificationStack from "@/features/app_notification/components/NotificationStack";
@@ -652,7 +652,7 @@ export default function MainLayout(props: MainLayoutProps) {
         />
       )}
 
-      <ProjectConfirmPanel
+      <ProjectConfirmModal
         isOpen={showScrapeConfirmModal}
         onClose={() => setShowScrapeConfirmModal(false)}
         onConfirm={handleProjectConfirm}

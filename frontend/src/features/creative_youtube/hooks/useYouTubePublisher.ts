@@ -11,7 +11,7 @@ import {
   fetchDbCredentials,
   saveDbCredentials,
   deleteDbCredentials,
-} from "@/services/youtubePublisherService";
+} from "@/services/youtubePublisher";
 import { PublisherProfile } from "@/features/creative_youtube/components/ProfileManager";
 
 const DEFAULT_PRESETS: PublisherProfile[] = [

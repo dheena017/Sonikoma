@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Download, Youtube, Loader2, ExternalLink, Music, Mic } from "lucide-react";
 import * as api from "@/api/index";
 import { fetchWithAuth } from "@/utils";
+import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
 
 interface OutputMetadataPanelProps {
   musicTheme: string;
@@ -89,9 +90,7 @@ const OutputMetadataPanel = React.memo(
             {/* Download Button */}
             <a
               href={videoUrl}
-              download={`webtoon_cinemamaster_${Math.random()
-                .toString(36)
-                .substring(2, 6)}.mp4`}
+              download={`${resolveDownloadNaming({ seriesTitle: "Webtoon" }).formattedPrefix}_CinemaMaster.mp4`}
               target="_blank"
               rel="noreferrer"
               className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] xl:text-[11px] font-bold font-sans transition-all cursor-pointer select-none active:scale-95 shadow-sm"

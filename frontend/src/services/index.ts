@@ -1,1 +1,1 @@
-export * from "./youtubePublisherService";
+export * from "./youtubePublisher";

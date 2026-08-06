@@ -10,7 +10,7 @@ import {
   Check,
 } from "lucide-react";
 
-export interface ErrorPopupDetail {
+export interface ErrorModalDetail {
   title: string;
   message: string;
   technicalDetails?: string;
@@ -19,15 +19,15 @@ export interface ErrorPopupDetail {
   onRetry?: () => void;
 }
 
-interface ErrorPopupModalProps {
-  error: ErrorPopupDetail | null;
+interface ErrorModalProps {
+  error: ErrorModalDetail | null;
   onClose: () => void;
 }
 
-export default function ErrorPopupModal({
+export default function ErrorModal({
   error,
   onClose,
-}: ErrorPopupModalProps) {
+}: ErrorModalProps) {
   if (!error) return null;
 
   const [expanded, setExpanded] = useState(false);

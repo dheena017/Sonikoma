@@ -30,7 +30,7 @@ import {
   Save,
 } from "lucide-react";
 
-interface ProjectConfirmPanelProps {
+interface ProjectConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (
@@ -76,13 +76,13 @@ interface ProjectConfirmPanelProps {
   };
 }
 
-export default function ProjectConfirmPanel({
+export default function ProjectConfirmModal({
   isOpen,
   onClose,
   onConfirm,
   onAutoExtractCover,
   initialDetails,
-}: ProjectConfirmPanelProps) {
+}: ProjectConfirmModalProps) {
   // Existing State
   const [seriesTitle, setSeriesTitle] = useState("");
   const [chapterNumber, setChapterNumber] = useState("");
