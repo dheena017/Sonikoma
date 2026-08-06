@@ -1,7 +1,6 @@
 import React from "react";
-import { X, Film, Sparkles } from "lucide-react";
+import { X, Film } from "lucide-react";
 import VideoPreviewMetadataPanel from "@/features/video_preview/components/VideoPreviewMetadataPanel";
-import ProcessBar from "@/shared/ui/loading/ProcessBar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 
 export interface VideoPreviewHeaderProps {
@@ -13,11 +12,12 @@ export interface VideoPreviewHeaderProps {
   chapterNumber: string | number;
   chapterTitle: string;
   targetUrl: string;
-  isRendering: boolean;
-  renderProgress: number;
-  handleRenderFinalVideo: () => void;
-  progressStatus: any;
-  hasEnoughCredits: boolean;
+  // kept in interface for compat but no longer rendered here
+  isRendering?: boolean;
+  renderProgress?: number;
+  handleRenderFinalVideo?: () => void;
+  progressStatus?: any;
+  hasEnoughCredits?: boolean;
   onOpenVideoEditor: () => void;
   variant?: "floating" | "embedded";
 }
@@ -39,11 +39,6 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   chapterNumber,
   chapterTitle,
   targetUrl,
-  isRendering,
-  renderProgress,
-  handleRenderFinalVideo,
-  progressStatus,
-  hasEnoughCredits,
   onOpenVideoEditor,
   variant = "floating",
 }) => {
@@ -76,7 +71,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         )}
       </div>
 
-      {/* CENTRE: Metadata badges + action controls */}
+      {/* CENTRE: Metadata badges only */}
       <div className="flex items-center gap-2 flex-1 justify-center flex-wrap px-4">
         <VideoPreviewMetadataPanel
           musicTheme={musicTheme}
@@ -88,34 +83,6 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           chapterTitle={chapterTitle}
           targetUrl={targetUrl}
         />
-
-        {/* Export Button */}
-        {isRendering ? (
-          <div className="min-w-[160px]">
-            <ProcessBar progressStatus={progressStatus} />
-          </div>
-        ) : (
-          <button
-            onClick={handleRenderFinalVideo}
-            disabled={!hasEnoughCredits}
-            className={`relative overflow-hidden h-8 px-4 rounded-lg font-extrabold text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border shrink-0 ${
-              !hasEnoughCredits
-                ? "bg-neutral-900/50 text-neutral-600 cursor-not-allowed border-neutral-800"
-                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-white/10 cursor-pointer shadow-[0_0_16px_rgba(139,92,246,0.4)] hover:shadow-[0_0_24px_rgba(139,92,246,0.6)] active:scale-95"
-            }`}
-          >
-            {isRendering && (
-              <div
-                className="absolute left-0 top-0 bottom-0 bg-white/10 transition-all duration-300"
-                style={{ width: `${renderProgress}%` }}
-              />
-            )}
-            <Sparkles className="relative z-10 h-3.5 w-3.5 text-purple-200 shrink-0" />
-            <span className="relative z-10">
-              {!hasEnoughCredits ? "No Credits" : "Export Video"}
-            </span>
-          </button>
-        )}
       </div>
 
       {/* RIGHT: Close / Hide */}
