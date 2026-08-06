@@ -545,6 +545,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         musicTheme={musicTheme}
                         voiceActor={voiceActor}
                         navigateTo={navigateTo}
+                        seriesTitle={seriesTitle}
+                        chapterNumber={chapterNumber}
+                        chapterTitle={chapterTitle}
+                        targetUrl={targetUrl}
                       />
 
                       {/* Divider */}

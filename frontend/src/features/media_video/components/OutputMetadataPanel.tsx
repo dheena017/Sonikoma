@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { Download, Youtube, Loader2, ExternalLink, Music, Mic } from "lucide-react";
-import * as api from "@/api/index";
-import { fetchWithAuth } from "@/utils";
 import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
 
 interface OutputMetadataPanelProps {
@@ -9,6 +7,21 @@ interface OutputMetadataPanelProps {
   voiceActor: string;
   videoUrl: string | null;
   navigateTo?: (path: string) => void;
+  // Dynamic naming context
+  seriesTitle?: string;
+  chapterNumber?: string;
+  chapterTitle?: string;
+  targetUrl?: string;
+}
+
+/** Derive a short codec label from the video URL extension. */
+function deriveCodec(url: string | null): string {
+  if (!url) return "H.264";
+  const lower = url.toLowerCase();
+  if (lower.endsWith(".webm")) return "VP9";
+  if (lower.endsWith(".ogg") || lower.endsWith(".ogv")) return "Theora";
+  if (lower.endsWith(".av1")) return "AV1";
+  return "H.264"; // default for .mp4 / .m4v / etc.
 }
 
 const OutputMetadataPanel = React.memo(
@@ -17,6 +30,10 @@ const OutputMetadataPanel = React.memo(
     voiceActor,
     videoUrl,
     navigateTo,
+    seriesTitle,
+    chapterNumber,
+    chapterTitle,
+    targetUrl,
   }: OutputMetadataPanelProps) => {
     const [isPublishing, setIsPublishing] = useState(false);
     const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
@@ -30,6 +47,17 @@ const OutputMetadataPanel = React.memo(
         window.dispatchEvent(new Event("popstate"));
       }
     };
+
+    // Build download filename dynamically from whatever context is available
+    const { formattedPrefix } = resolveDownloadNaming({
+      seriesTitle: seriesTitle || undefined,
+      chapterNumber: chapterNumber || undefined,
+      chapterTitle: chapterTitle || undefined,
+      targetUrl: targetUrl || undefined,
+    });
+
+    const codec = deriveCodec(videoUrl);
+    const downloadFilename = `${formattedPrefix}_CinemaMaster.mp4`;
 
     return (
       <div className="flex items-center flex-wrap md:flex-nowrap gap-3">
@@ -61,11 +89,11 @@ const OutputMetadataPanel = React.memo(
 
           <div className="bg-neutral-950/40 border border-neutral-800/80 px-2 py-1 rounded-lg flex items-center gap-1">
             <span className="text-[10px] text-neutral-500 font-sans">Codec:</span>
-            <span className="text-[10px] text-neutral-300 font-mono font-semibold">H.264</span>
+            <span className="text-[10px] text-neutral-300 font-mono font-semibold">{codec}</span>
           </div>
         </div>
 
-        {/* Separator between specs and actions (only if specs show and actions exist) */}
+        {/* Separator between specs and actions */}
         {videoUrl && (
           <div className="hidden lg:block w-px h-4 bg-neutral-800" />
         )}
@@ -90,10 +118,11 @@ const OutputMetadataPanel = React.memo(
             {/* Download Button */}
             <a
               href={videoUrl}
-              download={`${resolveDownloadNaming({ seriesTitle: "Webtoon" }).formattedPrefix}_CinemaMaster.mp4`}
+              download={downloadFilename}
               target="_blank"
               rel="noreferrer"
               className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] xl:text-[11px] font-bold font-sans transition-all cursor-pointer select-none active:scale-95 shadow-sm"
+              title={`Download: ${downloadFilename}`}
             >
               <Download className="h-3.5 w-3.5" />
               <span>Download MP4</span>
@@ -102,6 +131,7 @@ const OutputMetadataPanel = React.memo(
             {/* YouTube Publish */}
             {!youtubeUrl ? (
               <button
+                type="button"
                 onClick={handlePublishYouTube}
                 disabled={isPublishing}
                 className={`text-white px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-[10px] xl:text-[11px] font-bold font-sans transition-all select-none border border-red-500/30 shadow-sm ${

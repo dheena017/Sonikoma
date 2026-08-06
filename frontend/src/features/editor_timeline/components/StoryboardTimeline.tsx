@@ -1183,7 +1183,7 @@ const StoryboardTimeline = React.memo(
         {/* Delete Panels Confirmation Modal */}
         {showDeleteConfirm &&
           createPortal(
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" data-modal="true">
               <div
                 className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
                 onClick={() => setShowDeleteConfirm(false)}
@@ -1208,6 +1208,7 @@ const StoryboardTimeline = React.memo(
                     </div>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setShowDeleteConfirm(false)}
                     className="text-neutral-400 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
                   >
@@ -1227,12 +1228,14 @@ const StoryboardTimeline = React.memo(
                 {/* Footer */}
                 <div className="px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
                   <button
+                    type="button"
                     onClick={() => setShowDeleteConfirm(false)}
                     className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
                   >
                     Cancel
                   </button>
                   <button
+                    type="button"
                     onClick={async () => {
                       setShowDeleteConfirm(false);
                       await executeDeleteSelected();
