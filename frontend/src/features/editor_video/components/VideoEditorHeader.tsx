@@ -3,7 +3,6 @@ import {
   Cloud,
   ChevronDown,
   Sparkles,
-  Video,
   Loader2,
   CheckCircle2,
   Bell,
@@ -156,9 +155,14 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
           {/* Brand */}
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]">
-              <Video className="h-4 w-4" />
-            </div>
+            <img
+              src="/logo-dark.png"
+              alt="Sonikoma Logo"
+              className="h-8 w-8 rounded-xl object-cover shadow-[0_0_12px_rgba(168,85,247,0.4)] border border-white/10 shrink-0"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo-light.png";
+              }}
+            />
             <span className="font-bold text-sm text-white tracking-wide font-mono hidden sm:inline">
               Sonikoma Studio
             </span>
