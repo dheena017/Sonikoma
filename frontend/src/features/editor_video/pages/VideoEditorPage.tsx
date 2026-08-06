@@ -3,7 +3,7 @@ import VideoEditorHeader from "@/features/editor_video/components/VideoEditorHea
 import VideoEditorMiniSidebar from "@/features/editor_video/components/VideoEditorMiniSidebar";
 import VideoEditorSidebar from "@/features/editor_video/components/VideoEditorSidebar";
 import VideoMediaBin from "@/features/editor_video/components/VideoMediaBin";
-import AdaptationPlayer from "@/features/media_video/components/AdaptationPlayer";
+import AdaptationPlayer from "@/features/video_preview/components/AdaptationPlayer";
 import VideoPropertyInspector from "@/features/editor_video/components/VideoPropertyInspector";
 import VideoMultiTrackTimeline from "@/features/editor_video/components/VideoMultiTrackTimeline";
 

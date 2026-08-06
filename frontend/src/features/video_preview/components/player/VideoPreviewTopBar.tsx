@@ -7,14 +7,14 @@ interface Chapter {
   endTime: number;
 }
 
-interface PlayerTopBarProps {
+export interface VideoPreviewTopBarProps {
   visible: boolean;
   activeChapter: Chapter;
   panelCounterText: string;
   onClose: () => void;
 }
 
-export const PlayerTopBar: React.FC<PlayerTopBarProps> = ({
+export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
   visible,
   activeChapter,
   panelCounterText,
@@ -32,7 +32,7 @@ export const PlayerTopBar: React.FC<PlayerTopBarProps> = ({
         </div>
         <div>
           <span className="text-[10px] font-mono text-purple-400 uppercase font-black tracking-widest block">
-            Adaptation Player
+            Video Preview Player
           </span>
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-neutral-200">

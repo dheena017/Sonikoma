@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import ModelSelect from "@/features/ai_core/components/ModelSelect";
 
-interface AdvancedSettingsProps {
+export interface VideoPreviewAdvancedSettingsProps {
   voiceActor: string;
   setVoiceActor: (val: string) => void;
   musicTheme: string;
@@ -96,7 +96,7 @@ interface WorkspacePreset {
   bubbleDetectionStyle?: string;
 }
 
-const AdvancedSettings = React.memo(
+const VideoPreviewAdvancedSettings = React.memo(
   ({
     voiceActor,
     setVoiceActor,
@@ -1068,4 +1068,5 @@ const AdvancedSettings = React.memo(
   }
 );
 
-export default AdvancedSettings;
+export default VideoPreviewAdvancedSettings;
+export { VideoPreviewAdvancedSettings };

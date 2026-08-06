@@ -1,7 +1,7 @@
 import React from "react";
 import { X } from "lucide-react";
 
-interface PlayerSettingsMenuProps {
+export interface VideoPreviewSettingsMenuProps {
   show: boolean;
   onClose: () => void;
   isLooping: boolean;
@@ -19,7 +19,7 @@ interface PlayerSettingsMenuProps {
   baseSpeedRef: React.MutableRefObject<number>;
 }
 
-export const PlayerSettingsMenu: React.FC<PlayerSettingsMenuProps> = ({
+export const VideoPreviewSettingsMenu: React.FC<VideoPreviewSettingsMenuProps> = ({
   show,
   onClose,
   isLooping,

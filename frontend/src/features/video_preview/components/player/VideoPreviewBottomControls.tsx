@@ -30,7 +30,7 @@ interface HoverProgress {
   isHovering: boolean;
 }
 
-interface PlayerBottomControlsProps {
+export interface VideoPreviewBottomControlsProps {
   visible: boolean;
   progressBarRef: React.RefObject<HTMLDivElement>;
   handleProgressBarInteraction: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -69,7 +69,7 @@ interface PlayerBottomControlsProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export const PlayerBottomControls: React.FC<PlayerBottomControlsProps> = ({
+export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProps> = ({
   visible,
   progressBarRef,
   handleProgressBarInteraction,

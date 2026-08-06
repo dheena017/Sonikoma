@@ -7,12 +7,12 @@ import {
   Tv,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
-import { PlayerHudHelp } from "./player/PlayerHudHelp";
-import { PlayerSettingsMenu } from "./player/PlayerSettingsMenu";
-import { PlayerChaptersMenu } from "./player/PlayerChaptersMenu";
-import { PlayerTopBar } from "./player/PlayerTopBar";
-import { PlayerBottomControls } from "./player/PlayerBottomControls";
-import PanelQuickActionOverlay from "./PanelQuickActionOverlay";
+import { VideoPreviewHudHelp } from "./player/VideoPreviewHudHelp";
+import { VideoPreviewSettingsMenu } from "./player/VideoPreviewSettingsMenu";
+import { VideoPreviewChaptersMenu } from "./player/VideoPreviewChaptersMenu";
+import { VideoPreviewTopBar } from "./player/VideoPreviewTopBar";
+import { VideoPreviewBottomControls } from "./player/VideoPreviewBottomControls";
+import VideoPreviewQuickActionOverlay from "./VideoPreviewQuickActionOverlay";
 import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/workspace_scraper/components/LiveScraperDeck";
 import {
   startAmbientBackgroundMusic,
@@ -39,7 +39,7 @@ interface Chapter {
   endTime: number;
 }
 
-export default function CinemaPlayer({
+export default function VideoPreviewCinemaPlayer({
   panels = [],
   videoUrl,
   currentPanelIndex,
@@ -1175,3 +1175,5 @@ export default function CinemaPlayer({
     </div>
   );
 }
+
+export { VideoPreviewCinemaPlayer };

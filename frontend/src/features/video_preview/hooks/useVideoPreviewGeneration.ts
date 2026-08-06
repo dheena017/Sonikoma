@@ -4,7 +4,7 @@ import { GeneratedPanel } from "@/types";
 import { NotificationType } from "@/features/app_notification";
 import * as api from "@/api/index";
 
-interface UseVideoGenerationProps {
+export interface UseVideoPreviewGenerationProps {
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   setConsoleLogs: React.Dispatch<React.SetStateAction<any[]>>;
@@ -51,7 +51,7 @@ interface UseVideoGenerationProps {
   speechPitch: number;
 }
 
-export function useVideoGeneration({
+export function useVideoPreviewGeneration({
   panels,
   setPanels,
   setConsoleLogs,

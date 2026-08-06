@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Download, Youtube, Loader2, ExternalLink, Music, Mic } from "lucide-react";
 import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
 
-interface OutputMetadataPanelProps {
+export interface VideoPreviewMetadataPanelProps {
   musicTheme: string;
   voiceActor: string;
   videoUrl: string | null;
@@ -24,7 +24,7 @@ function deriveCodec(url: string | null): string {
   return "H.264"; // default for .mp4 / .m4v / etc.
 }
 
-const OutputMetadataPanel = React.memo(
+const VideoPreviewMetadataPanel = React.memo(
   ({
     musicTheme,
     voiceActor,
@@ -175,4 +175,5 @@ const OutputMetadataPanel = React.memo(
   }
 );
 
-export default OutputMetadataPanel;
+export default VideoPreviewMetadataPanel;
+export { VideoPreviewMetadataPanel };

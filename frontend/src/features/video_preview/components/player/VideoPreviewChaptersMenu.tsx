@@ -6,7 +6,7 @@ interface Chapter {
   endTime: number;
 }
 
-interface PlayerChaptersMenuProps {
+export interface VideoPreviewChaptersMenuProps {
   show: boolean;
   chapters: Chapter[];
   activeChapter: Chapter;
@@ -14,7 +14,7 @@ interface PlayerChaptersMenuProps {
   formatTime: (sec: number) => string;
 }
 
-export const PlayerChaptersMenu: React.FC<PlayerChaptersMenuProps> = ({
+export const VideoPreviewChaptersMenu: React.FC<VideoPreviewChaptersMenuProps> = ({
   show,
   chapters,
   activeChapter,

@@ -1,10 +1,10 @@
 import React from "react";
 import LiveScraperDeck from "@/features/workspace_scraper/components/LiveScraperDeck";
 import StoryboardTimeline from "@/features/editor_timeline/components/StoryboardTimeline";
-import AdaptationPlayer from "@/features/media_video/components/AdaptationPlayer";
+import AdaptationPlayer from "@/features/video_preview/components/AdaptationPlayer";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
 import ImageEditorPage from "@/features/editor_image/pages/ImageEditorPage";
-import AdvancedSettings from "@/features/media_video/components/AdvancedSettings";
+import AdvancedSettings from "@/features/video_preview/components/AdvancedSettings";
 import AudioSettingsPage from "@/features/editor_audio/pages/AudioSettingsPage";
 import VideoEditorPage from "@/features/editor_video/pages/VideoEditorPage";
 import { useBackendHealth } from "@/shared/hooks/useBackendHealth";

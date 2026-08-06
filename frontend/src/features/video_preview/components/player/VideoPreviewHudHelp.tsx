@@ -1,11 +1,11 @@
 import React from "react";
 import { Sliders } from "lucide-react";
 
-interface PlayerHudHelpProps {
+export interface VideoPreviewHudHelpProps {
   show: boolean;
 }
 
-export const PlayerHudHelp: React.FC<PlayerHudHelpProps> = ({ show }) => {
+export const VideoPreviewHudHelp: React.FC<VideoPreviewHudHelpProps> = ({ show }) => {
   if (!show) return null;
 
   return (

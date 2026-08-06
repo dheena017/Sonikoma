@@ -1,13 +1,13 @@
 import React from "react";
-import CinemaPlayer from "@/features/media_video/components/CinemaPlayer";
-import AdaptationPlayerHeader from "@/features/media_video/components/AdaptationPlayerHeader";
-import AdaptationPlayerSidebar from "@/features/media_video/components/AdaptationPlayerSidebar";
+import VideoPreviewCinemaPlayer from "@/features/video_preview/components/VideoPreviewCinemaPlayer";
+import VideoPreviewHeader from "@/features/video_preview/components/VideoPreviewHeader";
+import VideoPreviewSidebar from "@/features/video_preview/components/VideoPreviewSidebar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 
-interface AdaptationPlayerProps {
+export interface VideoPreviewPlayerProps {
   panels: any[];
   videoUrl: string | null;
-  setVideoUrl: (url: string | null) => void;
+  setVideoUrl?: (url: string | null) => void;
   currentPanelIndex: number;
   setCurrentPanelIndex: (idx: number) => void;
   activePreviewTab: string;
@@ -30,7 +30,7 @@ interface AdaptationPlayerProps {
   variant?: "floating" | "embedded";
 }
 
-const AdaptationPlayer: React.FC<AdaptationPlayerProps> = ({
+const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
   panels,
   videoUrl,
   currentPanelIndex,
@@ -61,8 +61,8 @@ const AdaptationPlayer: React.FC<AdaptationPlayerProps> = ({
         : "w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4 scroll-mt-24"
       }
     >
-      {/* Adaptation Player Header */}
-      <AdaptationPlayerHeader
+      {/* Video Preview Header */}
+      <VideoPreviewHeader
         videoUrl={videoUrl}
         musicTheme={musicTheme}
         voiceActor={voiceActor}
@@ -83,7 +83,7 @@ const AdaptationPlayer: React.FC<AdaptationPlayerProps> = ({
       {/* Video Monitor Split Layout with Internal Left Sidebar */}
       <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
         {/* IN-PANEL LEFT SIDEBAR */}
-        <AdaptationPlayerSidebar
+        <VideoPreviewSidebar
           panels={panels}
           activePreviewTab={activePreviewTab}
           setActivePreviewTab={setActivePreviewTab}
@@ -92,7 +92,7 @@ const AdaptationPlayer: React.FC<AdaptationPlayerProps> = ({
 
         {/* RIGHT: Video Player */}
         <div className="flex-1 w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black min-w-0">
-          <CinemaPlayer
+          <VideoPreviewCinemaPlayer
             panels={panels}
             videoUrl={activePreviewTab === "video" ? videoUrl : null}
             currentPanelIndex={currentPanelIndex}
@@ -111,5 +111,5 @@ const AdaptationPlayer: React.FC<AdaptationPlayerProps> = ({
   );
 };
 
-export default React.memo(AdaptationPlayer);
-
+export default React.memo(VideoPreviewPlayer);
+export { VideoPreviewPlayer };

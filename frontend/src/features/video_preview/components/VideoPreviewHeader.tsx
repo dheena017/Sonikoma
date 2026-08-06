@@ -1,6 +1,6 @@
 import React from "react";
 import { X, Film } from "lucide-react";
-import OutputMetadataPanel from "@/features/media_video/components/OutputMetadataPanel";
+import VideoPreviewMetadataPanel from "@/features/video_preview/components/VideoPreviewMetadataPanel";
 import ProcessBar from "@/shared/ui/loading/ProcessBar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import {
@@ -8,7 +8,7 @@ import {
   getSortedEpisodeGroups,
 } from "@/features/workspace_scraper/components/LiveScraperDeck";
 
-interface AdaptationPlayerHeaderProps {
+export interface VideoPreviewHeaderProps {
   videoUrl: string | null;
   musicTheme: string;
   voiceActor: string;
@@ -26,7 +26,7 @@ interface AdaptationPlayerHeaderProps {
   variant?: "floating" | "embedded";
 }
 
-const AdaptationPlayerHeader: React.FC<AdaptationPlayerHeaderProps> = ({
+const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   videoUrl,
   musicTheme,
   voiceActor,
@@ -50,7 +50,7 @@ const AdaptationPlayerHeader: React.FC<AdaptationPlayerHeaderProps> = ({
       {/* Left: title + LIVE badge */}
       <div className="flex items-center gap-2 shrink-0">
         <h3 className="font-bold text-sm text-white uppercase tracking-wider font-sans">
-          ADAPTATION PLAYER
+          VIDEO PREVIEW PLAYER
         </h3>
         <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-mono shrink-0 uppercase tracking-widest font-black">
           LIVE
@@ -71,7 +71,7 @@ const AdaptationPlayerHeader: React.FC<AdaptationPlayerHeaderProps> = ({
 
       {/* Centre: metadata + export pills */}
       <div className="flex items-center gap-2 flex-wrap flex-1 justify-center">
-        <OutputMetadataPanel
+        <VideoPreviewMetadataPanel
           videoUrl={videoUrl}
           musicTheme={musicTheme}
           voiceActor={voiceActor}
@@ -176,4 +176,5 @@ const AdaptationPlayerHeader: React.FC<AdaptationPlayerHeaderProps> = ({
   );
 };
 
-export default React.memo(AdaptationPlayerHeader);
+export default React.memo(VideoPreviewHeader);
+export { VideoPreviewHeader };

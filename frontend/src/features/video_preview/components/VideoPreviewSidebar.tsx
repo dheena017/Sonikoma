@@ -4,14 +4,14 @@ import {
   getSortedEpisodeGroups,
 } from "@/features/workspace_scraper/components/LiveScraperDeck";
 
-interface AdaptationPlayerSidebarProps {
+export interface VideoPreviewSidebarProps {
   panels: any[];
   activePreviewTab: string;
   setActivePreviewTab: ((tab: string) => void) | undefined;
   setCurrentPanelIndex: (idx: number) => void;
 }
 
-const AdaptationPlayerSidebar: React.FC<AdaptationPlayerSidebarProps> = ({
+const VideoPreviewSidebar: React.FC<VideoPreviewSidebarProps> = ({
   panels,
   activePreviewTab,
   setActivePreviewTab,
@@ -97,4 +97,5 @@ const AdaptationPlayerSidebar: React.FC<AdaptationPlayerSidebarProps> = ({
   );
 };
 
-export default React.memo(AdaptationPlayerSidebar);
+export default React.memo(VideoPreviewSidebar);
+export { VideoPreviewSidebar };

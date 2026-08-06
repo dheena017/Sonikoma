@@ -12,7 +12,7 @@ export {
 } from "@/features/editor_image/hooks";
 export * from "@/features/workspace/hooks";
 export * from "@/features/ai_core/hooks";
-export * from "@/features/media_video/hooks";
+export * from "@/features/video_preview/hooks";
 export * from "@/features/editor_audio/hooks";
 export * from "@/features/app_auth/hooks";
 export * from "@/features/workspace_projects/hooks";
