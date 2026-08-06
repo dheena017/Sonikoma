@@ -88,23 +88,45 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
                 clean_name = raw_name.replace("models/", "")
                 lower_name = clean_name.lower()
 
-                supported_actions = getattr(m, "supported_actions", [])
-                if "generateContent" not in supported_actions:
-                    continue
+                # Determine category
+                if "imagen" in lower_name or "banana" in lower_name or "veo" in lower_name:
+                    category = "Multi-modal generative models"
+                elif "tts" in lower_name or "audio" in lower_name or "omni" in lower_name:
+                    category = "Multi-modal generative models"
+                elif "embedding" in lower_name:
+                    category = "Other models"
+                elif "robotics" in lower_name or "gemma" in lower_name or "grounding" in lower_name:
+                    category = "Other models"
+                elif "live" in lower_name:
+                    category = "Live API"
+                else:
+                    category = "Text-out models"
 
-                junk_keywords = [
-                    "embedding", "aqa", "learnlm", "bison", "gecko",
-                    "-001", "-002", "latest", "preview", "-exp", "tts",
-                    "vision", "a4b", "nano", "8b", "test"
-                ]
-                if any(junk in lower_name for junk in junk_keywords):
-                    continue
+                # Define default RPM / TPM / RPD quotas matching Google AI Studio tier specifications
+                if "3.6-flash" in lower_name or "3.6" in lower_name:
+                    rpm, tpm, rpd = "5 / 5", "250K", "20 / 20"
+                elif "3.5-flash" in lower_name:
+                    rpm, tpm, rpd = "5 / 5", "250K", "20 / 20"
+                elif "2.5-flash" in lower_name:
+                    rpm, tpm, rpd = "5 / 5", "250K", "20 / 20"
+                elif "1.5-pro" in lower_name or "2.5-pro" in lower_name or "3.1-pro" in lower_name:
+                    rpm, tpm, rpd = "2 / 5", "1M", "50 / 50"
+                elif "imagen" in lower_name:
+                    rpm, tpm, rpd = "0 / 25", "-", "25 / 25"
+                elif "embedding" in lower_name:
+                    rpm, tpm, rpd = "100 / 100", "30K", "1K / 1K"
+                else:
+                    rpm, tpm, rpd = "5 / 5", "250K", "20 / 20"
 
                 result_list.append({
                     "name": clean_name,
                     "fullName": raw_name,
-                    "displayName": m.display_name or "",
+                    "displayName": m.display_name or clean_name,
                     "description": m.description or "",
+                    "category": category,
+                    "rpm": rpm,
+                    "tpm": tpm,
+                    "rpd": rpd,
                     "inputTokenLimit": getattr(m, "input_token_limit", None),
                     "outputTokenLimit": getattr(m, "output_token_limit", None),
                     "supportedActions": getattr(m, "supported_actions", [])
@@ -114,6 +136,7 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
             return {"success": False, "error": f"Failed to fetch Gemini models: {str(exc)}"}
 
         return {"success": True, "provider": "gemini", "total": len(result_list), "models": result_list}
+
 
     elif provider == "openai":
         import requests

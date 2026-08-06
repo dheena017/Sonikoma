@@ -113,6 +113,14 @@ async def update_profile(body: ProfileUpdate, request: Request, current_user: di
         updates["portfolio_links"] = json.dumps(body.portfolio_links)
     if body.social_connections is not None:
         updates["social_connections"] = json.dumps(body.social_connections)
+    if body.preferences is not None:
+        try:
+            existing_pref_str = current_user.get("preferences") or "{}"
+            existing_prefs = json.loads(existing_pref_str)
+        except Exception:
+            existing_prefs = {}
+        existing_prefs.update(body.preferences)
+        updates["preferences"] = json.dumps(existing_prefs)
 
     ip_addr = request.client.host if request.client else "127.0.0.1"
 
@@ -121,6 +129,46 @@ async def update_profile(body: ProfileUpdate, request: Request, current_user: di
         write_audit_log(current_user["user_id"], "Updated Profile Settings", ip_addr, "Success")
 
     return {"success": True, "message": "Profile updated successfully."}
+
+
+@router.post("/claim-daily-credits")
+async def claim_daily_credits(request: Request, current_user: dict = Depends(get_current_user)):
+    from services.user.credit_service import record_credit_transaction
+    today_str = datetime.datetime.now().strftime("%Y-%m-%d")
+    user_id = current_user["user_id"]
+
+    if current_user.get("last_claimed_date") == today_str:
+        return {"success": False, "message": "Daily bonus already claimed today."}
+
+    pref_str = current_user.get("preferences") or "{}"
+    try:
+        prefs = json.loads(pref_str)
+    except Exception:
+        prefs = {}
+
+    streak = prefs.get("claim_streak", 1) + 1
+    if streak > 7:
+        streak = 1
+    prefs["claim_streak"] = streak
+    
+    bonus_amount = 50 + (streak * 10)
+    new_balance = record_credit_transaction(user_id, bonus_amount, "Daily Login Bonus")
+    
+    update_user(user_id, {
+        "last_claimed_date": today_str,
+        "preferences": json.dumps(prefs)
+    })
+    
+    ip_addr = request.client.host if request.client else "127.0.0.1"
+    write_audit_log(user_id, f"Claimed Daily Bonus (+{bonus_amount} Credits)", ip_addr, "Success")
+
+    return {
+        "success": True,
+        "message": f"Successfully claimed +{bonus_amount} Daily Credits!",
+        "new_balance": new_balance,
+        "streak_days": streak
+    }
+
 
 
 @router.delete("/me")

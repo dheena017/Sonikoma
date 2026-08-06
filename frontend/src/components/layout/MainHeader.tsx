@@ -24,12 +24,15 @@ import {
   Moon,
   Cloud,
   Zap,
+  Cpu,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import NotificationDropdown from "@/features/notification/components/NotificationDropdown";
 import { Notification } from "@/features/notification";
 import { useAIModels } from "@/features/ai/hooks/useAIModels";
-import { getUserCredits, getUserCreditsPayload } from "@/api/endpoints/auth";
+import { getUserCredits, getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
+import HeaderCreditsPopover from "@/features/billing/components/HeaderCreditsPopover";
+
 
 interface HeaderProps {
   isProcessing: boolean;
@@ -136,13 +139,40 @@ const HeaderInner = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showCreditsPopover, setShowCreditsPopover] = useState(false);
   const { models: aiModels } = useAIModels();
 
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const creditsRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   // Credits state — polled from server every 30 s and on mount
-  // Uses getUserCreditsPayload to also receive the low_balance flag.
   const [credits, setCredits] = useState<number | null>(
     user?.credits !== undefined ? user.credits : null
   );
+
+  const handleClaimDailyBonus = async () => {
+    if (!fetchWithInterceptor) return;
+    try {
+      const res = await claimDailyCredits(fetchWithInterceptor);
+      if (res.success && typeof res.new_balance === "number") {
+        setCredits(res.new_balance);
+        if (addNotification) {
+          addNotification(res.message || "Claimed daily bonus!", "success");
+        }
+      } else if (addNotification) {
+        addNotification(res.message || "Failed to claim bonus", "info");
+      }
+    } catch {
+      if (addNotification) {
+        addNotification("Error claiming daily bonus", "error");
+      }
+    }
+  };
+
   // Tracks whether we've already shown the low-balance toast this browser session.
   const sessionWarningFiredRef = useRef(false);
 
@@ -186,11 +216,6 @@ const HeaderInner = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
-  const notificationsRef = useRef<HTMLDivElement>(null);
-  const settingsRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Keyboard shortcut for Command Palette focus (Ctrl/Cmd + K or /)
   useEffect(() => {
@@ -243,6 +268,9 @@ const HeaderInner = ({
       }
       if (statsRef.current && !statsRef.current.contains(target)) {
         setShowStats(false);
+      }
+      if (creditsRef.current && !creditsRef.current.contains(target)) {
+        setShowCreditsPopover(false);
       }
       if (searchRef.current && !searchRef.current.contains(target)) {
         setShowSearchDropdown(false);
@@ -748,6 +776,26 @@ const HeaderInner = ({
           </span>
         </div>
 
+        {/* 🤖 AI Model Selector Pill */}
+        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-850 text-[10px] font-mono select-none hover:border-purple-500/40 transition-all">
+          <Cpu className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+          <select
+            value={selectedModel}
+            onChange={(e) => setSelectedModel?.(e.target.value)}
+            className="bg-transparent text-neutral-200 text-[10px] font-bold font-mono focus:outline-none cursor-pointer pr-1"
+            title="Active AI Model"
+          >
+            <option value="gemini-2.0-flash" className="bg-neutral-900 text-white">⚡ Gemini 2.0 Flash</option>
+            <option value="gemini-1.5-pro" className="bg-neutral-900 text-white">🧠 Gemini 1.5 Pro</option>
+            <option value="gemini-1.5-flash" className="bg-neutral-900 text-white">⚡ Gemini 1.5 Flash</option>
+          </select>
+          {user?.preferences?.api_keys?.gemini ? (
+            <span className="text-[9px] px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 font-sans font-bold" title="Using custom user Google API key">BYOK</span>
+          ) : (
+            <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-sans font-bold" title="Using system Google API key">DEFAULT</span>
+          )}
+        </div>
+
         {/* 🧼 Speech Bubble Cleaning Processing Pill */}
         {isCleaningBubbles && (
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-950/80 border border-purple-500/50 text-[10px] font-bold font-sans text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.25)] animate-pulse select-none">
@@ -772,21 +820,44 @@ const HeaderInner = ({
           </div>
         )}
 
-        {/* ⚡ Credits Pill */}
+        {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (
-          <button
-            onClick={() => navigateTo("/profile?tab=billing")}
-            title="Your credit balance — click to top up"
-            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
-              credits < 20
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
-                : "bg-neutral-900 border-neutral-850 text-purple-400 hover:border-purple-500/40 hover:bg-purple-500/5"
-            }`}
-          >
-            <Zap className="h-3.5 w-3.5 shrink-0" />
-            {credits.toLocaleString()}
-          </button>
+          <div className="relative" ref={creditsRef}>
+            <button
+              onClick={() => {
+                setShowCreditsPopover(!showCreditsPopover);
+                setShowNotifications(false);
+                setShowSettings(false);
+                setShowStats(false);
+              }}
+              title="Your credit balance & daily rewards — click to view"
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+                credits < 20
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
+                  : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
+              }`}
+            >
+              <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
+              {credits.toLocaleString()}
+            </button>
+
+            {showCreditsPopover && (
+              <div className="absolute right-0 top-full mt-2 z-50">
+                <HeaderCreditsPopover
+                  credits={credits}
+                  hasClaimedToday={user?.has_claimed_today}
+                  streakDays={user?.streak_days || 1}
+                  onClaimDaily={handleClaimDailyBonus}
+                  onNavigateToBilling={() => {
+                    setShowCreditsPopover(false);
+                    navigateTo("/profile?tab=billing");
+                  }}
+                />
+              </div>
+            )}
+          </div>
         )}
+
 
         {/* Save Action Button */}
         {onSave && (

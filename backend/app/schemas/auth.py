@@ -57,6 +57,8 @@ class ProfileUpdate(BaseModel):
     language: Optional[str] = None
     portfolio_links: Optional[list[str]] = None
     social_connections: Optional[dict[str, bool]] = None
+    preferences: Optional[dict] = None
+
 
 
 class PasswordUpdate(BaseModel):

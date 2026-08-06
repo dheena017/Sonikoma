@@ -66,6 +66,7 @@ async def scrape_and_initialize_project(
             parsed[key] = val
 
     logger.info(f"[Scraper Service] Processing scrape request: {normalized_url}")
+    cache_hit = bool(not bypass_cache and get_latest_scrape_session(normalized_url))
     proxied_urls = await scrape_images_from_url(
         normalized_url,
         source,
@@ -76,6 +77,7 @@ async def scrape_and_initialize_project(
         proxy_images=proxy_images,
         filter_banners=filter_banners
     )
+
 
     metadata = scraped_metadata_cache.get(normalized_url, {})
     if metadata:

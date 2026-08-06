@@ -301,8 +301,25 @@ const AIModelsPage = React.memo(
         }
       }
       checkSavedCredentials();
+
+      // Sync custom Gemini API key to user backend profile
+      try {
+        await api.updateProfile(activeFetch, {
+          preferences: {
+            api_keys: {
+              gemini: geminiKey.trim(),
+              openai: openAiKey.trim(),
+              anthropic: anthropicKey.trim(),
+              huggingface: huggingFaceKey.trim(),
+            },
+          },
+        });
+      } catch (e) {
+        console.warn("Failed to sync API keys to user profile:", e);
+      }
+
       addNotification(
-        `Saved ${savedCount} credentials successfully! Configuration reloaded.`,
+        `Saved ${savedCount} credentials successfully! Configuration synced to profile.`,
         "success"
       );
       // Reload model list for currently selected provider
@@ -330,9 +347,26 @@ const AIModelsPage = React.memo(
       localStorage.removeItem("user_huggingface_key");
 
       checkSavedCredentials();
+
+      try {
+        await api.updateProfile(activeFetch, {
+          preferences: {
+            api_keys: {
+              gemini: "",
+              openai: "",
+              anthropic: "",
+              huggingface: "",
+            },
+          },
+        });
+      } catch (e) {
+        console.warn("Failed to clear API keys from user profile:", e);
+      }
+
       addNotification("Cleared all local API keys.", "info");
       fetchModels(selectedProvider);
     };
+
 
     const handleSaveParameters = () => {
       localStorage.setItem("ai_config_temperature", String(temperature));

@@ -62,15 +62,30 @@ def clean_api_key(key: Optional[str]) -> Optional[str]:
 
 
 def get_all_user_keys(
+    request: Request,
     x_user_gemini_key: str = Header(None, alias="X-User-Gemini-Key"),
     x_user_openai_key: str = Header(None, alias="X-User-OpenAI-Key"),
     x_user_anthropic_key: str = Header(None, alias="X-User-Anthropic-Key"),
     x_user_huggingface_key: str = Header(None, alias="X-User-HuggingFace-Key"),
 ):
-    """Extract and sanitize all user-provided API keys from request headers."""
+    """Extract and sanitize all user-provided API keys from headers, user preferences DB, or env vars."""
+    import json
+    user_db_keys = {}
+    try:
+        auth_header = request.headers.get("Authorization")
+        if auth_header:
+            token = auth_header.partition(" ")[2] if auth_header.lower().startswith("bearer ") else auth_header
+            user = auth_service.authenticate_token(token)
+            if user and user.get("preferences"):
+                prefs = json.loads(user["preferences"])
+                user_db_keys = prefs.get("api_keys", {})
+    except Exception:
+        pass
+
     return {
-        "gemini": clean_api_key(x_user_gemini_key) or clean_api_key(os.getenv("GEMINI_API_KEY")),
-        "openai": clean_api_key(x_user_openai_key) or clean_api_key(os.getenv("OPENAI_API_KEY")),
-        "anthropic": clean_api_key(x_user_anthropic_key) or clean_api_key(os.getenv("ANTHROPIC_API_KEY")),
-        "huggingface": clean_api_key(x_user_huggingface_key) or clean_api_key(os.getenv("HUGGINGFACE_API_KEY")),
+        "gemini": clean_api_key(x_user_gemini_key) or clean_api_key(user_db_keys.get("gemini")) or clean_api_key(os.getenv("GEMINI_API_KEY")),
+        "openai": clean_api_key(x_user_openai_key) or clean_api_key(user_db_keys.get("openai")) or clean_api_key(os.getenv("OPENAI_API_KEY")),
+        "anthropic": clean_api_key(x_user_anthropic_key) or clean_api_key(user_db_keys.get("anthropic")) or clean_api_key(os.getenv("ANTHROPIC_API_KEY")),
+        "huggingface": clean_api_key(x_user_huggingface_key) or clean_api_key(user_db_keys.get("huggingface")) or clean_api_key(os.getenv("HUGGINGFACE_API_KEY")),
     }
+

@@ -285,3 +285,12 @@ export const getTransactions = async (
     return [];
   }
 };
+
+export const claimDailyCredits = async (
+  fetchWithInterceptor: FetchClient
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/auth/claim-daily-credits", {
+    method: "POST",
+  });
+};
+

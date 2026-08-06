@@ -154,21 +154,24 @@ export default function ModelRegistryExplorer({
 
         {/* Models Table */}
         {!loadingModels && !modelsError && models.length > 0 && (
-          <div className="overflow-x-auto border border-neutral-900 rounded-2xl max-h-[400px] overflow-y-auto scrollbar-thin">
+          <div className="overflow-x-auto border border-neutral-900 rounded-2xl max-h-[480px] overflow-y-auto scrollbar-thin">
             <table className="w-full text-left font-mono text-xs border-collapse">
               <thead>
                 <tr className="bg-neutral-900 border-b border-neutral-880 text-neutral-450 font-bold uppercase text-[9px] tracking-wider sticky top-0 z-[5]">
-                  <th className="p-4">Model Name</th>
-                  <th className="p-4">Model Identifier</th>
-                  <th className="p-4">Tier / Pricing</th>
-                  <th className="p-4">Token Limits</th>
-                  <th className="p-4 text-right">Actions</th>
+                  <th className="p-3">Model</th>
+                  <th className="p-3">Category</th>
+                  <th className="p-3 text-center">RPM</th>
+                  <th className="p-3 text-center">TPM</th>
+                  <th className="p-3 text-center">RPD</th>
+                  <th className="p-3">Tier & Limits</th>
+                  <th className="p-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {models
                   .filter((m) =>
-                    m.name.toLowerCase().includes(filterQuery.toLowerCase())
+                    m.name.toLowerCase().includes(filterQuery.toLowerCase()) ||
+                    (m.category && m.category.toLowerCase().includes(filterQuery.toLowerCase()))
                   )
                   .filter((m) => {
                     if (!showFreeOnly) return true;
@@ -206,41 +209,43 @@ export default function ModelRegistryExplorer({
                     return (
                       <tr
                         key={idx}
-                        className={`border-b border-neutral-900/60 hover:bg-neutral-900/20 transition-all ${
-                          isCurrentlyActive ? "bg-purple-950/5" : ""
+                        className={`border-b border-neutral-900/60 hover:bg-neutral-900/40 transition-all ${
+                          isCurrentlyActive ? "bg-purple-950/15 border-purple-500/30" : ""
                         }`}
                       >
-                        <td
-                          className="p-4 font-bold text-white max-w-[200px] truncate"
-                          title={m.displayName || m.name}
-                        >
-                          {m.displayName || m.name}
+                        <td className="p-3">
+                          <div className="font-bold text-white max-w-[180px] truncate" title={m.displayName || m.name}>
+                            {m.displayName || m.name}
+                          </div>
+                          <div className="text-[9px] text-neutral-500 font-mono truncate max-w-[180px]">
+                            {m.name}
+                          </div>
                         </td>
-                        <td
-                          className="p-4 text-[10px] text-neutral-400 select-all max-w-[250px] truncate"
-                          title={m.fullName || m.name}
-                        >
-                          {m.name}
+                        <td className="p-3 text-[10px] text-neutral-300 font-sans">
+                          {m.category || (m.name.includes("image") || m.name.includes("banana") ? "Multi-modal generative models" : "Text-out models")}
                         </td>
-                        <td className="p-4">
-                          <span
-                            className={`px-2 py-0.5 rounded-full border text-[9px] font-bold ${pricingBadge.className}`}
-                          >
-                            {pricingBadge.text}
-                          </span>
+                        <td className="p-3 text-center font-mono text-[10px] text-emerald-400 font-bold">
+                          {m.rpm || "5 / 5"}
                         </td>
-                        <td className="p-4 text-neutral-400 text-[10px]">
-                          {m.inputTokenLimit ? (
-                            <span>
-                              In: {m.inputTokenLimit.toLocaleString()} | Out:{" "}
-                              {m.outputTokenLimit?.toLocaleString() || "N/A"}
+                        <td className="p-3 text-center font-mono text-[10px] text-purple-300 font-bold">
+                          {m.tpm || "250K"}
+                        </td>
+                        <td className="p-3 text-center font-mono text-[10px] text-amber-400 font-bold">
+                          {m.rpd || "20 / 20"}
+                        </td>
+                        <td className="p-3">
+                          <div className="flex flex-col gap-1">
+                            <span
+                              className={`px-2 py-0.5 rounded-full border text-[8px] font-bold w-fit ${pricingBadge.className}`}
+                            >
+                              {pricingBadge.text}
                             </span>
-                          ) : (
-                            <span className="text-neutral-600">
-                              Dynamic limit
+                            <span className="text-[9px] text-neutral-400 font-mono">
+                              {m.inputTokenLimit ? `${(m.inputTokenLimit / 1000).toFixed(0)}k tokens` : "Dynamic"}
                             </span>
-                          )}
+                          </div>
                         </td>
+
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
                             <button
