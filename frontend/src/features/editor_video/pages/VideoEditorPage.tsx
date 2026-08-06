@@ -140,22 +140,22 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
           navigateTo={navigateTo}
         />
 
-        {/* Studio Content Column (3-Panel Top Row + Timeline Bottom) */}
-        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-          {/* ── Upper 3-Panel Row ────────────────────────────────────────────── */}
-          <div className="flex-1 flex min-h-0 w-full overflow-hidden">
-            {/* Left: Asset Media Bin */}
-            {layoutConfig.mediaBin && (
-              <VideoMediaBin
-                scrapedImages={scrapedImages}
-                panels={panels}
-                currentPanelIndex={currentPanelIndex}
-                setCurrentPanelIndex={setCurrentPanelIndex}
-                musicTheme={musicTheme}
-                voiceActor={voiceActor}
-              />
-            )}
+        {/* Left: Asset Media Bin (Full height top-to-bottom on left side) */}
+        {layoutConfig.mediaBin && (
+          <VideoMediaBin
+            scrapedImages={scrapedImages}
+            panels={panels}
+            currentPanelIndex={currentPanelIndex}
+            setCurrentPanelIndex={setCurrentPanelIndex}
+            musicTheme={musicTheme}
+            voiceActor={voiceActor}
+          />
+        )}
 
+        {/* Studio Content Column (Preview Player Top + Timeline Bottom) */}
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+          {/* ── Upper Row: Preview Player + Right Inspector ───────────────── */}
+          <div className="flex-1 flex min-h-0 w-full overflow-hidden">
             {/* Center: Adaptation Player (full) */}
             <VideoPreviewPlayer
               panels={panels}
