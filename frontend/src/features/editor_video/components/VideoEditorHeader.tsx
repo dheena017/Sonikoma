@@ -1,26 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Undo,
-  Redo,
   Cloud,
   ChevronDown,
   Sparkles,
-  ArrowLeft,
   Video,
   Loader2,
   CheckCircle2,
-  LayoutGrid,
   Bell,
   BellOff,
-  Share2,
   Wifi,
   WifiOff,
-  Layers,
   Zap,
-  Focus,
-  Monitor,
   Save,
-  Clock,
   Menu,
 } from "lucide-react";
 import VideoCustomizeLayoutModal from "./VideoCustomizeLayoutModal";
@@ -150,9 +141,9 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
     <>
       <header className="h-16 w-full bg-[#09090e]/90 backdrop-blur-md border-b border-neutral-800/80 pr-6 flex items-center justify-between z-30 shrink-0 select-none">
 
-        {/* ── LEFT: Menu Toggle | Back | Brand | Project title | Save status ── */}
+        {/* ── LEFT: Menu Toggle | Brand | Project title | Save status ── */}
         <div className="flex items-center gap-3 shrink-0 h-full">
-          {/* Hamburger toggle pill matched to 80px w-20 mini sidebar */}
+          {/* Hamburger toggle */}
           <div className="w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-800/80 h-full mr-2">
             <button
               onClick={onToggleSidebar}
@@ -163,30 +154,18 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           </div>
 
-          {/* Back */}
-          <button
-            onClick={onBackToApp}
-            className="p-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 text-xs font-medium cursor-pointer"
-            title="Return to Storyboard"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back to Manga</span>
-          </button>
-
-          <div className="h-4 w-px bg-neutral-800 hidden sm:block" />
-
           {/* Brand */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 via-purple-500 to-indigo-500 flex items-center justify-center text-white shadow-[0_0_14px_rgba(168,85,247,0.4)]">
+            <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]">
               <Video className="h-4 w-4" />
             </div>
-            <span className="font-black text-sm text-white tracking-wider font-mono hidden sm:inline">
+            <span className="font-bold text-sm text-white tracking-wide font-mono hidden sm:inline">
               Sonikoma Studio
             </span>
           </div>
 
           {/* Project title selector */}
-          <div className="flex items-center gap-2 ml-1 bg-neutral-900/80 border border-neutral-800 px-3 py-1 rounded-lg text-xs font-semibold text-neutral-200 cursor-pointer hover:border-neutral-700 transition-all max-w-[220px] truncate">
+          <div className="flex items-center gap-2 ml-1 bg-[#121218] border border-neutral-800 px-3 py-1 rounded-lg text-xs font-semibold text-neutral-200 cursor-pointer hover:border-neutral-700 transition-all max-w-[220px] truncate">
             <span className="text-neutral-400 font-normal shrink-0">Project:</span>
             <span className="truncate">{displayTitle}</span>
             {chapterNumber && (
@@ -200,7 +179,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           {/* Save status inline */}
           <button
             onClick={onSave}
-            className="flex items-center gap-1.5 text-[11px] font-mono transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 text-xs font-medium transition-colors cursor-pointer ml-1"
             title={isDirty ? "Unsaved changes — click to save" : "Project saved"}
           >
             {isSaving ? (
@@ -214,7 +193,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                 <span>Save*</span>
               </span>
             ) : (
-              <span className="text-emerald-400/90 flex items-center gap-1">
+              <span className="text-emerald-400 flex items-center gap-1 font-semibold">
                 <CheckCircle2 className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Saved</span>
               </span>
@@ -222,63 +201,26 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           </button>
         </div>
 
-        {/* ── CENTER: Status chips + Undo/Redo + Zoom ── */}
-        <div className="hidden md:flex items-center gap-2">
-          {/* Backend status */}
+        {/* ── CENTER: Backend Status Chip ── */}
+        <div className="hidden md:flex items-center justify-center">
           <div
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
               backendOnline
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                : "bg-red-500/10 border-red-500/20 text-red-400"
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                : "bg-red-500/10 border-red-500/30 text-red-400"
             }`}
           >
             {backendOnline ? (
-              <Wifi className="h-2.5 w-2.5" />
+              <Wifi className="h-3 w-3" />
             ) : (
-              <WifiOff className="h-2.5 w-2.5" />
+              <WifiOff className="h-3 w-3" />
             )}
-            {backendOnline ? "Online" : "Offline"}
-          </div>
-
-          {/* Panel count */}
-          {panelsCount > 0 && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-purple-500/20 bg-purple-500/10 text-[9px] font-black uppercase tracking-widest text-purple-400">
-              <Layers className="h-2.5 w-2.5" />
-              {panelsCount} panels
-            </div>
-          )}
-
-          {/* Ctrl+S hint */}
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold text-neutral-600">
-            <Clock className="h-2.5 w-2.5" />
-            <span className="hidden lg:inline">Ctrl+S</span>
-          </div>
-
-          {/* Undo / Redo */}
-          <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-lg p-0.5 ml-1">
-            <button
-              className="p-1.5 text-neutral-400 hover:text-white rounded-md hover:bg-neutral-800 transition-colors cursor-pointer"
-              title="Undo (Ctrl+Z)"
-            >
-              <Undo className="h-3.5 w-3.5" />
-            </button>
-            <button
-              className="p-1.5 text-neutral-400 hover:text-white rounded-md hover:bg-neutral-800 transition-colors cursor-pointer"
-              title="Redo (Ctrl+Y)"
-            >
-              <Redo className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          {/* Zoom control */}
-          <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 px-2.5 py-1 rounded-lg text-xs font-mono text-neutral-300 cursor-pointer hover:border-neutral-700">
-            <span>100%</span>
-            <ChevronDown className="h-3 w-3 text-neutral-400" />
+            <span>{backendOnline ? "ONLINE" : "OFFLINE"}</span>
           </div>
         </div>
 
-        {/* ── RIGHT: Credits | Layout | Focus | Monitor | Notifications | Share | Save | Export | Avatar ── */}
-        <div className="flex items-center gap-2">
+        {/* ── RIGHT: Credits | 4 Panel Control Icons | Notifications | Save | Export | Avatar ── */}
+        <div className="flex items-center gap-2.5">
 
           {/* Credits pill */}
           {credits !== null && (
@@ -296,14 +238,14 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           )}
 
-          {/* ── 4 Panel Control Buttons ── */}
-          <div className="hidden lg:flex items-center gap-1 p-1 bg-neutral-900/90 border border-neutral-800 rounded-xl shadow-inner">
+          {/* ── 4 Panel Control Buttons (matches screenshot) ── */}
+          <div className="hidden lg:flex items-center gap-1 p-1 bg-[#121218] border border-neutral-800/90 rounded-xl">
 
             {/* Button 1: Open Customize Layout Modal */}
             <button
               type="button"
               onClick={() => setShowCustomizeLayout(true)}
-              className="p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800/80"
+              className="p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               title="Customize Layout"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2">
@@ -319,14 +261,14 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               onClick={() => onTogglePanel?.("mediaBin")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center ${
                 layoutConfig?.mediaBin
-                  ? "bg-neutral-700/80 text-white shadow-sm ring-1 ring-neutral-500/40"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/80"
+                  ? "bg-neutral-800 text-white border border-neutral-700/60 shadow-sm"
+                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
               title={layoutConfig?.mediaBin ? "Hide Media Bin (Left Panel)" : "Show Media Bin (Left Panel)"}
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2">
                 <rect x="3" y="4" width="18" height="16" rx="2" />
-                <path d="M3 4h8v16H3z" className="fill-current opacity-70" />
+                <rect x="3" y="4" width="8" height="16" rx="1" className="fill-current stroke-none" />
               </svg>
             </button>
 
@@ -336,14 +278,14 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               onClick={() => onTogglePanel?.("timeline")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center ${
                 layoutConfig?.timeline
-                  ? "bg-neutral-700/80 text-white shadow-sm ring-1 ring-neutral-500/40"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/80"
+                  ? "bg-neutral-800 text-white border border-neutral-700/60 shadow-sm"
+                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
               title={layoutConfig?.timeline ? "Hide Timeline (Bottom Panel)" : "Show Timeline (Bottom Panel)"}
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2">
                 <rect x="3" y="4" width="18" height="16" rx="2" />
-                <line x1="3" y1="14" x2="21" y2="14" />
+                <rect x="3" y="12" width="18" height="8" rx="1" className="fill-current stroke-none" />
               </svg>
             </button>
 
@@ -353,51 +295,17 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               onClick={() => onTogglePanel?.("rightInspector")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center ${
                 layoutConfig?.rightInspector
-                  ? "bg-neutral-700/80 text-white shadow-sm ring-1 ring-neutral-500/40"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/80"
+                  ? "bg-neutral-800 text-white border border-neutral-700/60 shadow-sm"
+                  : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
               title={layoutConfig?.rightInspector ? "Hide Property Inspector (Right Panel)" : "Show Property Inspector (Right Panel)"}
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2">
                 <rect x="3" y="4" width="18" height="16" rx="2" />
-                <path d="M13 4h8v16h-8z" className="fill-current opacity-70" />
+                <rect x="13" y="4" width="8" height="16" rx="1" className="fill-current stroke-none" />
               </svg>
             </button>
           </div>
-
-          {/* Layout customizer modal button */}
-          <button
-            type="button"
-            onClick={() => setShowCustomizeLayout(true)}
-            title="Customize Layout Preferences"
-            className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-purple-300 hover:border-purple-500/30 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium"
-          >
-            <LayoutGrid className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Layout</span>
-          </button>
-
-          {/* Focus mode */}
-          <button
-            type="button"
-            onClick={() => setIsFocusMode((v) => !v)}
-            title={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
-            className={`p-1.5 rounded-lg border text-xs transition-all active:scale-95 cursor-pointer flex items-center justify-center ${
-              isFocusMode
-                ? "border-purple-500/50 bg-purple-500/10 text-purple-300"
-                : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
-            }`}
-          >
-            <Focus className="h-3.5 w-3.5" />
-          </button>
-
-          {/* Player / Monitor toggle */}
-          <button
-            type="button"
-            title="Toggle Preview Monitor"
-            className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer flex items-center justify-center"
-          >
-            <Monitor className="h-3.5 w-3.5" />
-          </button>
 
           {/* Notifications */}
           <div className="relative" ref={notificationsRef}>
@@ -431,16 +339,6 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               />
             )}
           </div>
-
-          {/* Share */}
-          <button
-            type="button"
-            title="Share project link"
-            className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium"
-          >
-            <Share2 className="h-3.5 w-3.5" />
-            <span className="hidden lg:inline">Share</span>
-          </button>
 
           {/* Save Project */}
           <button

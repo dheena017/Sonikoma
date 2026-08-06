@@ -13,9 +13,6 @@ import {
   Circle,
   FileText,
   Layers,
-  Sparkles,
-  Box,
-  Wand2,
 } from "lucide-react";
 
 interface VideoMediaBinProps {
@@ -27,16 +24,6 @@ interface VideoMediaBinProps {
   voiceActor?: string;
 }
 
-const topTabs = [
-  { id: "media", label: "Media", icon: Video },
-  { id: "audio", label: "Audio", icon: Music },
-  { id: "text", label: "Text", icon: FileText },
-  { id: "transitions", label: "Transitions", icon: Layers },
-  { id: "effects", label: "Effects", icon: Sparkles },
-  { id: "elements", label: "Elements", icon: Box },
-  { id: "ai-tools", label: "AI Tools", icon: Wand2 },
-];
-
 const VideoMediaBin: React.FC<VideoMediaBinProps> = ({
   scrapedImages = [],
   panels = [],
@@ -45,7 +32,6 @@ const VideoMediaBin: React.FC<VideoMediaBinProps> = ({
   musicTheme = "Synthwave Neon",
   voiceActor = "Kokoro Voice",
 }) => {
-  const [activeTab, setActiveTab] = useState("media");
   const [activeFolder, setActiveFolder] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -71,27 +57,6 @@ const VideoMediaBin: React.FC<VideoMediaBinProps> = ({
 
   return (
     <div className="w-72 sm:w-80 lg:w-[360px] bg-[#0c0c12] border-r border-neutral-800/80 flex flex-col h-full shrink-0 select-none overflow-hidden min-w-[280px]">
-      {/* Top category tabs */}
-      <div className="flex items-center gap-1 p-2 border-b border-neutral-800/70 overflow-x-auto [scrollbar-width:none]">
-        {topTabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                isActive
-                  ? "bg-purple-600/30 text-purple-300 border border-purple-500/40"
-                  : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-              }`}
-            >
-              <Icon className="h-3.5 w-3.5" />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
 
       {/* Header controls: Title dropdown, search, import & record */}
       <div className="p-3 border-b border-neutral-800/70 space-y-2.5">
