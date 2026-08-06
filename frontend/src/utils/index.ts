@@ -1,10 +1,2 @@
-export * from "./audio";
-export * from "./authFetch";
-export * from "./batchUtils";
-export * from "./filter";
-export * from "./logger";
-export * from "./selection";
-export * from "./supabase";
-export * from "./url";
-export * from "./workspaceNavigation";
-export * from "./textUtils";
+// Re-export shared utilities from canonical shared/utils module
+export * from "@/shared/utils";

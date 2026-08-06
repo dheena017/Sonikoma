@@ -19,6 +19,39 @@
 
 const _originalFetch = window.fetch.bind(window);
 
+const activeSkillAbortControllers = new Set<AbortController>();
+
+function notifySkillRequestState() {
+  const count = activeSkillAbortControllers.size;
+  window.dispatchEvent(
+    new CustomEvent("sonikoma-skill-request-count", { detail: count })
+  );
+}
+
+function shouldTrackSkillRequest(input: RequestInfo | URL): boolean {
+  const url =
+    typeof input === "string"
+      ? input
+      : input instanceof URL
+        ? input.toString()
+        : input.url;
+  return url.includes("/api/skills/");
+}
+
+function createTrackedAbortController(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): AbortController | null {
+  if (!shouldTrackSkillRequest(input) || init?.signal) {
+    return null;
+  }
+
+  const controller = new AbortController();
+  activeSkillAbortControllers.add(controller);
+  notifySkillRequestState();
+  return controller;
+}
+
 function getToken(): string | null {
   return (
     localStorage.getItem("sonikoma_token") ||
@@ -45,22 +78,30 @@ window.fetch = async (
   init?: RequestInit
 ): Promise<Response> => {
   const token = getToken();
+  const trackedAbortController = createTrackedAbortController(input, init);
+  const headers = new Headers(init?.headers);
 
   // Only inject for /api requests and when a token exists
   if (token && isApiRequest(input)) {
-    const headers = new Headers(init?.headers);
-
     // Never override an explicit Authorization header
     if (!headers.has("Authorization")) {
       headers.set("Authorization", `Bearer ${token}`);
     }
-
-    return _originalFetch(input, { ...init, headers });
   }
 
-  return _originalFetch(input, init);
-};
+  const responsePromise = _originalFetch(input, {
+    ...init,
+    headers,
+    signal: trackedAbortController?.signal ?? init?.signal,
+  });
 
+  return responsePromise.finally(() => {
+    if (trackedAbortController) {
+      activeSkillAbortControllers.delete(trackedAbortController);
+      notifySkillRequestState();
+    }
+  });
+};
 
 export const fetchWithAuth = async (
   input: RequestInfo | URL,
@@ -69,11 +110,13 @@ export const fetchWithAuth = async (
   const token =
     localStorage.getItem("sonikoma_token") ||
     sessionStorage.getItem("sonikoma_token");
+  const trackedAbortController = createTrackedAbortController(input, init);
   const headers = new Headers(init?.headers);
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
+  // Automatically attach BYOK custom user keys from local storage
   const geminiKey = localStorage.getItem("user_gemini_key");
   if (geminiKey && !headers.has("X-User-Gemini-Key")) {
     headers.set("X-User-Gemini-Key", geminiKey);
@@ -91,5 +134,31 @@ export const fetchWithAuth = async (
     headers.set("X-User-HuggingFace-Key", hfKey);
   }
 
-  return fetch(input, { ...init, headers });
+  const responsePromise = fetch(input, {
+    ...init,
+    headers,
+    signal: trackedAbortController?.signal ?? init?.signal,
+  });
+
+  return responsePromise.finally(() => {
+    if (trackedAbortController) {
+      activeSkillAbortControllers.delete(trackedAbortController);
+      notifySkillRequestState();
+    }
+  });
 };
+
+declare global {
+  interface Window {
+    __sonikomaAbortAllSkillRequests?: () => void;
+    __sonikomaActiveSkillRequestCount?: () => number;
+  }
+}
+
+window.__sonikomaAbortAllSkillRequests = () => {
+  activeSkillAbortControllers.forEach((controller) => controller.abort());
+  activeSkillAbortControllers.clear();
+  notifySkillRequestState();
+};
+
+window.__sonikomaActiveSkillRequestCount = () => activeSkillAbortControllers.size;

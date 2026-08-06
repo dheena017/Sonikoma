@@ -69,7 +69,7 @@ export function parseWebtoonUrl(urlStr: string) {
     }
 
     let genre = "general";
-    let title = "Webtoon Comic";
+    let title = "Manhwa Series";
     let chapterNumber = epVal || "1";
     let chapterTitle = "";
 
@@ -80,12 +80,12 @@ export function parseWebtoonUrl(urlStr: string) {
           raw
         );
       if (isOriginalUuid) {
-        return getSourceName(urlStr) + " Comic";
+        return getSourceName(urlStr) + " Series";
       }
       let cleaned = raw.replace(/^\d+[-_]/, "");
       const isPureNum = /^\d+$/.test(cleaned);
       if (isPureNum) {
-        return getSourceName(urlStr) + " Comic";
+        return getSourceName(urlStr) + " Series";
       }
       const replaced = cleaned.replace(/-/g, " ");
       // Strip 8-character hex suffix commonly appended to Webtoon series slugs
@@ -184,6 +184,46 @@ export function parseWebtoonUrl(urlStr: string) {
   }
 }
 
+export const KNOWN_DOMAINS: string[] = [];
+
+const CUSTOM_SITES_KEY = "sonikoma_custom_sites";
+
+export function getCustomSites(): string[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_SITES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addCustomSite(hostname: string): void {
+  const sites = getCustomSites();
+  const clean = hostname.replace(/^www\./, "").toLowerCase();
+  if (!sites.includes(clean)) {
+    sites.unshift(clean);
+    localStorage.setItem(CUSTOM_SITES_KEY, JSON.stringify(sites.slice(0, 100)));
+  }
+}
+
+export function isKnownSite(urlStr: string): boolean {
+  if (!urlStr || !urlStr.trim()) return false;
+  try {
+    const cleaned = urlStr.trim();
+    const urlObj = new URL(
+      cleaned.startsWith("http") ? cleaned : "https://" + cleaned
+    );
+    const host = urlObj.hostname.toLowerCase();
+    if (host && host.includes(".")) {
+      addCustomSite(host);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export function getSourceName(urlStr: string): string {
   try {
     if (!urlStr) return "Custom Source";
@@ -248,12 +288,28 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
       }
     } catch (e) {}
   }
-  if (url.includes("/api/proxy-image") || url.includes("/api/proxy/image")) {
-    if (referer && !url.includes("referer=")) {
-      const sep = url.includes("?") ? "&" : "?";
-      return `${url}${sep}referer=${encodeURIComponent(referer)}`;
+  try {
+    const decoded = decodeURIComponent(url);
+    if (
+      url.includes("/api/proxy-image") ||
+      url.includes("/api/proxy/image") ||
+      decoded.includes("/api/proxy-image") ||
+      decoded.includes("/api/proxy/image")
+    ) {
+      if (referer && !url.includes("referer=") && !decoded.includes("referer=")) {
+        const sep = url.includes("?") ? "&" : "?";
+        return `${url}${sep}referer=${encodeURIComponent(referer)}`;
+      }
+      return url;
     }
-    return url;
+  } catch {
+    if (url.includes("/api/proxy-image") || url.includes("/api/proxy/image")) {
+      if (referer && !url.includes("referer=")) {
+        const sep = url.includes("?") ? "&" : "?";
+        return `${url}${sep}referer=${encodeURIComponent(referer)}`;
+      }
+      return url;
+    }
   }
   if (url.includes("/api/")) {
     return url;

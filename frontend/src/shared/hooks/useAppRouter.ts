@@ -1,5 +1,5 @@
 import React from "react";
-import { createTempProjectId } from "@/utils/workspaceNavigation";
+import { createTempProjectId } from "@/shared/utils/workspaceNavigation";
 
 interface UseAppRouterProps {
   scrapedImages: string[];

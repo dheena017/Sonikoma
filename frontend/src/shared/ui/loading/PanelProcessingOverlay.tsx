@@ -20,7 +20,7 @@ export function PanelProcessingOverlay({ label, overlayId }: PanelProcessingOver
 
   return (
     <div
-      className="absolute inset-0 z-20 bg-neutral-950/85 backdrop-blur-[3px] flex flex-col items-center justify-center p-2 text-center rounded-xl select-none animate-in fade-in duration-200 border border-neutral-800 shadow-xl"
+      className="absolute inset-0 z-20 bg-neutral-955/85 backdrop-blur-[3px] flex flex-col items-center justify-center p-2 text-center rounded-xl select-none animate-in fade-in duration-200 border border-neutral-800 shadow-xl"
       id={overlayId}
     >
       {/* Icon wrapper */}

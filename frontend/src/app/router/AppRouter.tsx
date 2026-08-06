@@ -7,44 +7,42 @@ import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
 
 // --- Layout & Main Workspace Components ---
 import AppWorkspace from "@/features/workspace/components/AppWorkspace";
-import EditorPage from "@/features/editor/pages/EditorPage";
+import EditorPage from "@/features/editor_studio/pages/EditorPage";
 import PageNotFound from "@/components/feedback/PageNotFound";
-import AdvancedSettings from "@/features/video/components/AdvancedSettings";
-import StatusPage from "@/features/status/pages/StatusPage";
-import ShortcutsPage from "@/features/shortcuts/pages/ShortcutsPage";
+import AdvancedSettings from "@/features/media_video/components/AdvancedSettings";
+import StatusPage from "@/features/system_status/pages/StatusPage";
+import ShortcutsPage from "@/features/app_shortcuts/pages/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
-import AutoCropModal from "@/features/processing/components/AutoCropModal";
+import AutoCropModal from "@/features/editor_auto_crop/components/AutoCropModal";
 
 // --- Authentication & Landing Views ---
-import LandingPage from "@/features/landing/pages/LandingPage";
-import LoginPage from "@/features/auth/pages/LoginPage";
-import RegisterPage from "@/features/auth/pages/RegisterPage";
-import ForgotPasswordPage from "@/features/auth/pages/ForgotPasswordPage";
+import LandingPage from "@/features/app_landing/pages/LandingPage";
+import LoginPage from "@/features/app_auth/pages/LoginPage";
+import RegisterPage from "@/features/app_auth/pages/RegisterPage";
+import ForgotPasswordPage from "@/features/app_auth/pages/ForgotPasswordPage";
 import LoadingPage from "@/components/feedback/LoadingPage";
-import DisplayPage from "@/features/display/pages/DisplayPage";
-import ProjectsPage from "@/features/projects/pages/ProjectsPage";
-import SeriesDetailsPage from "@/features/series/pages/SeriesDetailsPage";
-import CreativeSuiteLayout from "@/features/creative/components/CreativeSuiteLayout";
+import ProjectsPage from "@/features/workspace_projects/pages/ProjectsPage";
+import SeriesDetailsPage from "@/features/workspace_series/pages/SeriesDetailsPage";
+import CreativeSuiteLayout from "@/features/creative_suite/components/CreativeSuiteLayout";
 
 // --- Lazy Loaded Heavy Feature Pages (Phase 9 Performance Code-Splitting) ---
-const DashboardPage = React.lazy(() => import("@/features/dashboard/pages/DashboardPage"));
-const ImageEditorPage = React.lazy(() => import("@/features/image_editor/pages/ImageEditorPage"));
-const AIModelsPage = React.lazy(() => import("@/features/ai/pages/AIModelsPage"));
-const ModelTrainingPage = React.lazy(() => import("@/features/training/pages/ModelTrainingPage"));
-const YouTubePage = React.lazy(() => import("@/features/youtube/pages/YouTubePage"));
-const VoiceStudioPage = React.lazy(() => import("@/features/voice/pages/VoiceStudioPage"));
-const AIOptimizerPage = React.lazy(() => import("@/features/optimizer/pages/AIOptimizerPage"));
-const PanelAssistantPage = React.lazy(() => import("@/features/panel_assistant/pages/PanelAssistantPage"));
-const ProfilePage = React.lazy(() => import("@/features/profile/pages/ProfilePage"));
-const SettingsAccountPage = React.lazy(() => import("@/features/settings/pages/SettingsAccountPage"));
-const CharacterProfilePage = React.lazy(() => import("@/features/characters/pages/CharacterProfilePage"));
-const AudioSettingsPage = React.lazy(() => import("@/features/audio/pages/AudioSettingsPage"));
-const NotificationsPage = React.lazy(() => import("@/features/notification/pages/NotificationsPage"));
-const CreativeSuiteDashboardPage = React.lazy(() => import("@/features/creative/pages/CreativeSuiteDashboardPage"));
-const EpisodeScraperPage = React.lazy(() => import("@/features/scraper/pages/EpisodeScraperPage").then(m => ({ default: m.EpisodeScraperPage })));
-const AdminPage = React.lazy(() => import("@/features/admin/pages/AdminPage"));
-const AdminDashboardPage = React.lazy(() => import("@/features/admin/pages/AdminDashboardPage"));
+const DashboardPage = React.lazy(() => import("@/features/app_dashboard/pages/DashboardPage"));
+const ImageEditorPage = React.lazy(() => import("@/features/editor_image/pages/ImageEditorPage"));
+const AIModelsPage = React.lazy(() => import("@/features/ai_core/pages/AIModelsPage"));
+const ModelTrainingPage = React.lazy(() => import("@/features/ai_training/pages/ModelTrainingPage"));
+const YouTubePage = React.lazy(() => import("@/features/creative_youtube/pages/YouTubePage"));
+const VoiceStudioPage = React.lazy(() => import("@/features/creative_voice/pages/VoiceStudioPage"));
+const AIOptimizerPage = React.lazy(() => import("@/features/creative_optimizer/pages/AIOptimizerPage"));
+const PanelAssistantPage = React.lazy(() => import("@/features/creative_panel_assistant/pages/PanelAssistantPage"));
+const ProfilePage = React.lazy(() => import("@/features/user_profile/pages/ProfilePage"));
+const SettingsAccountPage = React.lazy(() => import("@/features/user_settings/pages/SettingsAccountPage"));
+const AudioSettingsPage = React.lazy(() => import("@/features/editor_audio/pages/AudioSettingsPage"));
+const NotificationsPage = React.lazy(() => import("@/features/app_notification/pages/NotificationsPage"));
+const CreativeSuiteDashboardPage = React.lazy(() => import("@/features/creative_suite/pages/CreativeSuiteDashboardPage"));
+const EpisodeScraperPage = React.lazy(() => import("@/features/workspace_scraper/pages/EpisodeScraperPage").then(m => ({ default: m.EpisodeScraperPage })));
+const AdminPage = React.lazy(() => import("@/features/system_admin/pages/AdminPage"));
+const AdminDashboardPage = React.lazy(() => import("@/features/system_admin/pages/AdminDashboardPage"));
 
 import MainLayout from "@/components/layout/MainLayout";
 
@@ -543,12 +541,6 @@ export default function AppRouter(props: AppRouterProps) {
         onNavigateHome={() => navigateTo("/")}
       />
     );
-  }
-
-  // --- Guard: Public Display Page ---
-  if (currentPath.startsWith("/display/")) {
-    const displayProjectId = currentPath.split("/")[2] || "";
-    return <DisplayPage projectId={displayProjectId} />;
   }
 
   // --- Guard: Protected Route Redirect ---
@@ -1198,14 +1190,6 @@ export default function AppRouter(props: AppRouterProps) {
             <PanelAssistantPage
               panels={panels}
               setPanels={setPanels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
-          ) : isCharacterPath ? (
-            <CharacterProfilePage
-              panels={panels}
-              characters={appLogic.characters}
-              setCharacters={appLogic.setCharacters}
               onNavigateHome={handleNavigateHome}
               addNotification={addNotification}
             />

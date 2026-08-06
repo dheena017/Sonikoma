@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 interface PanelAnalyzingOverlayProps {
   /** True when running a full-sequence batch analysis */
@@ -7,10 +7,10 @@ interface PanelAnalyzingOverlayProps {
 }
 
 /**
- * Full-bleed overlay shown on top of a Timeline panel thumbnail while
- * the AI is analyzing it (single panel or full sequence analysis).
- * Styled with sleek dark glass and clean typography.
- */
+  * Full-bleed overlay shown on top of a Timeline panel thumbnail while
+  * the AI is analyzing it (single panel or full sequence analysis).
+  * Styled with sleek dark glass and clean typography.
+  */
 export function PanelAnalyzingOverlay({ isAnalyzingAll = false }: PanelAnalyzingOverlayProps) {
   return (
     <div className="absolute inset-0 bg-neutral-955/85 backdrop-blur-[3px] flex flex-col items-center justify-center p-2 text-center z-10 rounded-xl select-none border border-neutral-800 shadow-xl">

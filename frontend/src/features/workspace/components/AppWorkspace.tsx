@@ -33,10 +33,10 @@ import {
   Loader,
   Download,
 } from "lucide-react";
-import UrlInputPanel from "@/features/scraper/components/UrlInputPanel";
+import UrlInputPanel from "@/features/workspace_scraper/components/UrlInputPanel";
 import ProjectConfirmPanel from "@/shared/ui/modal/ProjectConfirmPanel";
-import ProjectCard from "@/features/projects/components/ProjectCard";
-import type { Project } from "@/features/projects/hooks/ProjectTypes";
+import ProjectCard from "@/features/workspace_projects/components/ProjectCard";
+import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 import { useProjectStore } from "@/store/useProjectStore";
 
 interface AppWorkspaceProps {

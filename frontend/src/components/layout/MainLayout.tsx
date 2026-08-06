@@ -5,17 +5,17 @@ import * as api from "@/api";
 import Header from "@/components/layout/MainHeader";
 import Sidebar from "@/components/layout/MainSidebar";
 import ProjectConfirmPanel from "@/shared/ui/modal/ProjectConfirmPanel";
-import { useImageEditorStore } from "@/features/editor/hooks/useEditorState";
-import AutoCropModal from "@/features/processing/components/AutoCropModal";
-import NotificationStack from "@/features/notification/components/NotificationStack";
+import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
+import AutoCropModal from "@/features/editor_auto_crop/components/AutoCropModal";
+import NotificationStack from "@/features/app_notification/components/NotificationStack";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
-import TerminalLogs from "@/features/terminal/components/TerminalLogs";
-import AdminSidebar from "@/features/admin/components/AdminSidebar";
-import AdminMiniSidebar from "@/features/admin/components/AdminMiniSidebar";
+import TerminalLogs from "@/features/system_terminal/components/TerminalLogs";
+import AdminSidebar from "@/features/system_admin/components/AdminSidebar";
+import AdminMiniSidebar from "@/features/system_admin/components/AdminMiniSidebar";
 import MiniSidebar from "@/components/layout/MainMiniSidebar";
-import CreativeSuiteHeader from "@/features/creative/components/CreativeSuiteHeader";
-import CreativeSuiteSidebar from "@/features/creative/components/CreativeSuiteSidebar";
-import CreativeSuiteMiniSidebar from "@/features/creative/components/CreativeSuiteMiniSidebar";
+import CreativeSuiteHeader from "@/features/creative_suite/components/CreativeSuiteHeader";
+import CreativeSuiteSidebar from "@/features/creative_suite/components/CreativeSuiteSidebar";
+import CreativeSuiteMiniSidebar from "@/features/creative_suite/components/CreativeSuiteMiniSidebar";
 
 export interface MainLayoutProps {
   children: React.ReactNode;
@@ -369,8 +369,8 @@ export default function MainLayout(props: MainLayoutProps) {
       <div
         id="main-scroll-container"
         className={`flex-grow flex-1 flex flex-col min-h-screen max-w-full justify-between transition-all duration-300 ${showAutoCropModal || showBubbleModal
-            ? "overflow-hidden"
-            : ""
+          ? "overflow-hidden"
+          : ""
           }`}
       >
         {/* Top Header */}
@@ -441,12 +441,12 @@ export default function MainLayout(props: MainLayoutProps) {
 
         <div
           className={`${!isSidebarOpen && !isImageEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage || (isAnyAdmin && isAdminRestricted)
-              ? "h-screen max-h-screen overflow-hidden"
-              : isAnyAdmin
-                ? "min-h-screen overflow-x-hidden"
-                : isProEditorPage
-                  ? "min-h-screen"
-                  : "pt-[59px] min-h-[calc(100vh-59px)]"
+            ? "h-screen max-h-screen overflow-hidden"
+            : isAnyAdmin
+              ? "min-h-screen overflow-x-hidden"
+              : isProEditorPage
+                ? "min-h-screen"
+                : "pt-[59px] min-h-[calc(100vh-59px)]"
             } flex-grow flex-1 flex flex-col transition-all duration-300`}
         >
           {/* Impersonation Banner */}
@@ -495,8 +495,8 @@ export default function MainLayout(props: MainLayoutProps) {
                     onClick={startBackend}
                     disabled={isStartingBackend}
                     className={`px-3 py-1 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border shadow-sm cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${isStartingBackend
-                        ? "bg-amber-950/60 border-amber-700/40 text-amber-200 cursor-not-allowed"
-                        : "bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-200 border-emerald-700/40"
+                      ? "bg-amber-950/60 border-amber-700/40 text-amber-200 cursor-not-allowed"
+                      : "bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-200 border-emerald-700/40"
                       }`}
                   >
                     {isStartingBackend ? (
@@ -551,8 +551,8 @@ export default function MainLayout(props: MainLayoutProps) {
           {/* Children Page Views */}
           <div
             className={`w-full flex-1 flex flex-col ${isImageEditorPage || isProEditorPage
-                ? "p-0"
-                : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16"
+              ? "p-0"
+              : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16"
               }`}
           >
             {children}
@@ -683,8 +683,8 @@ export default function MainLayout(props: MainLayoutProps) {
         <button
           onClick={() => setIsTerminalOpen(!isTerminalOpen)}
           className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-95 cursor-pointer border ${isTerminalOpen
-              ? "bg-rose-600 border-rose-500 text-white rotate-90"
-              : "bg-purple-600 border-purple-500 text-white hover:bg-purple-500"
+            ? "bg-rose-600 border-rose-500 text-white rotate-90"
+            : "bg-purple-600 border-purple-500 text-white hover:bg-purple-500"
             }`}
           title={isTerminalOpen ? "Close Terminal" : "Open System Terminal"}
         >

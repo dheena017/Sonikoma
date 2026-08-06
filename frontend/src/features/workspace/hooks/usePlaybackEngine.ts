@@ -5,7 +5,7 @@ import {
   startAmbientBackgroundMusic,
   stopAmbientBackgroundMusic,
   playComicSoundEffect,
-} from "@/utils/audio";
+} from "@/shared/utils/audio";
 
 let cachedVoices: SpeechSynthesisVoice[] = [];
 if (typeof window !== "undefined" && window.speechSynthesis) {

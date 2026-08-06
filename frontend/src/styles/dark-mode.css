@@ -1,0 +1,95 @@
+/* =========================================================
+   DARK MODE — DEEP COVERAGE
+   Covers dark pattern tokens across all components.
+   Applied when <html data-mode="dark"> or default.
+   ========================================================= */
+:root[data-mode="dark"] {
+  color-scheme: dark;
+}
+
+/* ── Body & App root ─────────────────────────────────────── */
+[data-mode="dark"] body {
+  background-color: #070709;
+  color: #f4f4f5;
+  color-scheme: dark;
+}
+[data-mode="dark"] #app_root {
+  background-color: #070709;
+  color: #f4f4f5;
+}
+[data-mode="dark"] .min-h-screen {
+  background-color: #070709;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+[data-mode="dark"] #header_pane {
+  background-color: rgba(10, 10, 14, 0.92) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px);
+}
+
+/* ── Sidebar / aside ─────────────────────────────────────── */
+[data-mode="dark"] #sidebar_pane,
+[data-mode="dark"] aside {
+  background-color: #0b0b0e !important;
+  border-right-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ── Neutral backgrounds (Tailwind scale) ─────────────────── */
+[data-mode="dark"] .bg-neutral-950,
+[data-mode="dark"] .bg-neutral-925 {
+  background-color: #070709 !important;
+}
+[data-mode="dark"] .bg-neutral-900 {
+  background-color: #0b0b0e !important;
+}
+[data-mode="dark"] .bg-neutral-850 {
+  background-color: #121217 !important;
+}
+[data-mode="dark"] .bg-neutral-800 {
+  background-color: #181820 !important;
+}
+
+/* ── Inputs / selects / textareas ─────────────────────────── */
+[data-mode="dark"]
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="color"]
+  ),
+[data-mode="dark"] select,
+[data-mode="dark"] textarea {
+  background-color: #0b0b0e !important;
+  color: #f4f4f5 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+[data-mode="dark"] input::placeholder,
+[data-mode="dark"] textarea::placeholder {
+  color: #71717a !important;
+}
+
+/* ── Scrollbars in Dark Mode ─────────────────────────────── */
+[data-mode="dark"] .scrollbar-thin::-webkit-scrollbar,
+[data-mode="dark"] .custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: transparent;
+}
+[data-mode="dark"] .scrollbar-thin::-webkit-scrollbar-track,
+[data-mode="dark"] .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+[data-mode="dark"] .scrollbar-thin::-webkit-scrollbar-thumb,
+[data-mode="dark"] .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+[data-mode="dark"] .scrollbar-thin::-webkit-scrollbar-thumb:hover,
+[data-mode="dark"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Terminal / log output ────────────────────────────────── */
+[data-mode="dark"] code,
+[data-mode="dark"] pre {
+  background-color: #050507 !important;
+  color: #dcdcdc !important;
+}

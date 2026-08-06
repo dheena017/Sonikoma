@@ -6,10 +6,10 @@ import * as api from "@/api";
 import {
   Notification,
   NotificationType,
-} from "@/features/notification";
+} from "@/features/app_notification";
 import { ErrorPopupDetail } from "@/shared/ui/modal/ErrorPopupModal";
-import { parseWebtoonUrl } from "@/utils/url";
-import { useAudioFeedback } from "@/features/audio/hooks/useAudioFeedback";
+import { parseWebtoonUrl } from "@/shared/utils/url";
+import { useAudioFeedback } from "@/features/editor_audio/hooks/useAudioFeedback";
 import { LogEntry, normalizeLog } from "@/types/logs";
 import { useProjectStore } from "@/store/useProjectStore";
 

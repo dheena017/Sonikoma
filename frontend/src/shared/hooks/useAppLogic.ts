@@ -5,7 +5,7 @@ import { useProjectStore } from "@/store/useProjectStore";
 import { usePlaybackEngine } from "@/features/workspace/hooks/usePlaybackEngine";
 import { usePipelineActions } from "@/features/workspace/hooks/usePipelineActions";
 import { parseWebtoonUrl } from "@/utils";
-import { extractWebtoonUrl, convertToViewerUrl } from "@/utils/url";
+import { extractWebtoonUrl, convertToViewerUrl } from "@/shared/utils/url";
 
 export function useAppLogic() {
   const state = useAppState();

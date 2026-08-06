@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { GeneratedPanel } from "@/types";
-import { NotificationType } from "@/features/notification";
-import { useAutoAnalysis } from "@/features/ai/hooks/useAutoAnalysis";
-import { useVideoGeneration } from "@/features/video/hooks/useVideoGeneration";
-import { useBatchImageActions } from "@/features/editor/hooks/useBatchImageActions";
-import { useSingleImageEdits } from "@/features/editor/hooks/useSingleImageEdits";
+import { NotificationType } from "@/features/app_notification";
+import { useAutoAnalysis } from "@/features/ai_core/hooks/useAutoAnalysis";
+import { useVideoGeneration } from "@/features/media_video/hooks/useVideoGeneration";
+import { useBatchImageActions } from "@/features/editor_studio/hooks/useBatchImageActions";
+import { useSingleImageEdits } from "@/features/editor_studio/hooks/useSingleImageEdits";
 import { useAppState } from "@/shared/hooks/useAppState";
 
 interface UsePipelineActionsProps {

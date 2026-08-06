@@ -1,7 +1,7 @@
 import { normalizeLog } from "@/types/logs";
 import React, { useState } from "react";
 import { GeneratedPanel } from "@/types";
-import { processWithConcurrency, chunkArray } from "@/utils/batchUtils";
+import { processWithConcurrency, chunkArray } from "@/shared/utils/batchUtils";
 import * as api from "@/api/index";
 
 interface UseCompileActionsProps {

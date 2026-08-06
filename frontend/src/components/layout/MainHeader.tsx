@@ -27,11 +27,11 @@ import {
   Cpu,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
-import NotificationDropdown from "@/features/notification/components/NotificationDropdown";
-import { Notification } from "@/features/notification";
-import { useAIModels } from "@/features/ai/hooks/useAIModels";
+import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
+import { Notification } from "@/features/app_notification";
+import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import { getUserCredits, getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
-import HeaderCreditsPopover from "@/features/billing/components/HeaderCreditsPopover";
+import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 
 
 interface HeaderProps {
