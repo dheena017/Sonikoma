@@ -137,6 +137,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
           activeNav={activeNav}
           setActiveNav={setActiveNav}
           onBackToApp={handleReturn}
+          navigateTo={navigateTo}
         />
 
         {/* Studio Content Column (3-Panel Top Row + Timeline Bottom) */}
@@ -207,6 +208,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               currentPanelIndex={currentPanelIndex}
               setCurrentPanelIndex={setCurrentPanelIndex}
               musicTheme={musicTheme}
+              voiceActor={voiceActor}
             />
           )}
         </div>
