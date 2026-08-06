@@ -1,8 +1,7 @@
-export * from "./AdvancedSettings";
-export * from "./CinemaPlayer";
-export * from "./OutputMetadataPanel";
-export * from "./AdaptationPlayer";
-export * from "./AdaptationPlayerHeader";
-export * from "./AdaptationPlayerSidebar";
-
-
+export * from "./VideoPreviewAdvancedSettings";
+export * from "./VideoPreviewCinemaPlayer";
+export * from "./VideoPreviewMetadataPanel";
+export * from "./VideoPreviewPlayer";
+export * from "./VideoPreviewHeader";
+export * from "./VideoPreviewSidebar";
+export * from "./VideoPreviewQuickActionOverlay";

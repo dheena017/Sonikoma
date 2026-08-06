@@ -87,7 +87,7 @@ export function useVideoPreviewGeneration({
   bgmVolume,
   speechRate,
   speechPitch,
-}: UseVideoGenerationProps) {
+}: UseVideoPreviewGenerationProps) {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [progressStatus, setProgressStatus] = useState<string>("");
   const [reprocessingPanelId, setReprocessingPanelId] = useState<number | null>(

@@ -1,10 +1,10 @@
 import React from "react";
 import LiveScraperDeck from "@/features/workspace_scraper/components/LiveScraperDeck";
 import StoryboardTimeline from "@/features/editor_timeline/components/StoryboardTimeline";
-import AdaptationPlayer from "@/features/video_preview/components/AdaptationPlayer";
+import VideoPreviewPlayer from "@/features/video_preview/components/VideoPreviewPlayer";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
 import ImageEditorPage from "@/features/editor_image/pages/ImageEditorPage";
-import AdvancedSettings from "@/features/video_preview/components/AdvancedSettings";
+import VideoPreviewAdvancedSettings from "@/features/video_preview/components/VideoPreviewAdvancedSettings";
 import AudioSettingsPage from "@/features/editor_audio/pages/AudioSettingsPage";
 import VideoEditorPage from "@/features/editor_video/pages/VideoEditorPage";
 import { useBackendHealth } from "@/shared/hooks/useBackendHealth";
@@ -14,6 +14,7 @@ import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorSta
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
 import { Rnd } from "react-rnd";
 import AutoCropOverlay from "@/shared/ui/loading/AutoCropOverlay";
+import AdvancedSettings from "@/features/creative_youtube/components/AdvancedSettings";
 
 
 
@@ -428,9 +429,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 </button>
               </div>
 
-              {/* Render AdvancedSettings */}
+              {/* Render VideoPreviewAdvancedSettings */}
               <div className="pt-2">
-                <AdvancedSettings
+                <VideoPreviewAdvancedSettings
                   voiceActor={voiceActor}
                   setVoiceActor={appLogic.setVoiceActor}
                   musicTheme={musicTheme}
@@ -535,9 +536,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
             </div>
           ) : (
             <>
-              {/* TOP: AdaptationPlayer */}
+              {/* TOP: Video Preview Player */}
               {playerSettings.isPlayerOpen && (
-                <AdaptationPlayer
+                <VideoPreviewPlayer
                   panels={panels}
                   videoUrl={videoUrl}
                   setVideoUrl={setVideoUrl}

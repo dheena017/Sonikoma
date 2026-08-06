@@ -34,7 +34,7 @@ const VideoPreviewMetadataPanel = React.memo(
     chapterNumber,
     chapterTitle,
     targetUrl,
-  }: OutputMetadataPanelProps) => {
+  }: VideoPreviewMetadataPanelProps) => {
     const [isPublishing, setIsPublishing] = useState(false);
     const [youtubeUrl, setYoutubeUrl] = useState<string | null>(null);
     const [publishMessage, setPublishMessage] = useState<string | null>(null);

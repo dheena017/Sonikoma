@@ -144,7 +144,7 @@ const VideoPreviewAdvancedSettings = React.memo(
     setBubbleEraseMethod,
     bubbleDetectionStyle = "hybrid",
     setBubbleDetectionStyle,
-  }: AdvancedSettingsProps) => {
+  }: VideoPreviewAdvancedSettingsProps) => {
     const [presetName, setPresetName] = React.useState("");
 
     // Dynamic Voices Loader

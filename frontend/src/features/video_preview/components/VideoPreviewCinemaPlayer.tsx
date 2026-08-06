@@ -890,7 +890,7 @@ export default function VideoPreviewCinemaPlayer({
       />
 
       {/* SUB-COMPONENT: Keyboard HUD Shortcuts */}
-      <PlayerHudHelp show={showHudHelp} />
+      <VideoPreviewHudHelp show={showHudHelp} />
 
       {/* FAST-FORWARD 2X BADGE */}
       {isFastForwarding && (
@@ -1093,7 +1093,7 @@ export default function VideoPreviewCinemaPlayer({
 
       {/* SUB-COMPONENT: Top Bar Overlay */}
       {variant !== "floating" && (
-        <PlayerTopBar
+        <VideoPreviewTopBar
           visible={controlsVisible}
           activeChapter={activeChapter}
           panelCounterText={panelCounterText}
@@ -1102,7 +1102,7 @@ export default function VideoPreviewCinemaPlayer({
       )}
 
       {/* SUB-COMPONENT: Floating Chapters Menu */}
-      <PlayerChaptersMenu
+      <VideoPreviewChaptersMenu
         show={showChaptersMenu && controlsVisible}
         chapters={chapters}
         activeChapter={activeChapter}
@@ -1115,7 +1115,7 @@ export default function VideoPreviewCinemaPlayer({
       />
 
       {/* SUB-COMPONENT: Settings Menu */}
-      <PlayerSettingsMenu
+      <VideoPreviewSettingsMenu
         show={showSettings && controlsVisible}
         onClose={() => setShowSettings(false)}
         isLooping={isLooping}
@@ -1134,7 +1134,7 @@ export default function VideoPreviewCinemaPlayer({
       />
 
       {/* SUB-COMPONENT: Bottom Controls Bar */}
-      <PlayerBottomControls
+      <VideoPreviewBottomControls
         visible={controlsVisible}
         progressBarRef={progressBarRef}
         handleProgressBarInteraction={handleProgressBarInteraction}
