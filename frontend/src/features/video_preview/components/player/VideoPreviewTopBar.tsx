@@ -45,7 +45,11 @@ export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
           <Monitor className="h-3.5 w-3.5 text-purple-400" />
         </div>
         <div>
-          <span className="text-[10px] font-mono text-purple-400 uppercase font-black tracking-widest block">
+          <span
+            title={videoUrl ?? undefined}
+            aria-label={videoUrl ?? undefined}
+            className="text-[10px] font-mono text-purple-400 uppercase font-black tracking-widest block"
+          >
             {previewLabel}
           </span>
           <div className="flex items-center gap-2">

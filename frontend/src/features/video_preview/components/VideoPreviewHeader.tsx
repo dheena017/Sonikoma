@@ -1,12 +1,8 @@
 import React from "react";
-import { X, Film } from "lucide-react";
+import { X, Film, Sparkles } from "lucide-react";
 import VideoPreviewMetadataPanel from "@/features/video_preview/components/VideoPreviewMetadataPanel";
 import ProcessBar from "@/shared/ui/loading/ProcessBar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
-import {
-  formatDisplayEpisodeLabel,
-  getSortedEpisodeGroups,
-} from "@/features/workspace_scraper/components/LiveScraperDeck";
 
 export interface VideoPreviewHeaderProps {
   videoUrl: string | null;
@@ -28,11 +24,9 @@ export interface VideoPreviewHeaderProps {
 
 const getPreviewDisplayLabel = (videoUrl: string | null) => {
   if (!videoUrl) return "VIDEO PREVIEW PLAYER";
-
   const sanitizedUrl = videoUrl.split("?")[0];
   const fileName = sanitizedUrl.split("/").filter(Boolean).pop() ?? "";
   const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
-
   return (nameWithoutExt.replace(/[_-]+/g, " ").trim() || "VIDEO PREVIEW PLAYER").toUpperCase();
 };
 
@@ -56,12 +50,15 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   const previewLabel = getPreviewDisplayLabel(videoUrl);
 
   return (
-    <div className="flex items-center justify-between border-b border-neutral-800/80 pb-3.5 flex-wrap gap-3">
-      {/* Left: Title & Launch Studio Button */}
-      <div className="flex items-center gap-2.5 shrink-0">
+    <div className="relative flex items-center justify-between px-4 h-12 shrink-0 bg-[#09090e]/95 backdrop-blur-md border-b border-neutral-800/80 overflow-hidden select-none">
+      {/* Top gradient accent line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
+
+      {/* LEFT: Title + Launch button */}
+      <div className="flex items-center gap-3 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-          <h3 className="font-extrabold text-sm text-white uppercase tracking-wider font-sans">
+          <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.9)]" />
+          <h3 className="font-black text-[11px] text-white uppercase tracking-widest font-mono">
             {previewLabel}
           </h3>
         </div>
@@ -70,17 +67,17 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           <button
             type="button"
             onClick={onOpenVideoEditor}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-purple-600/25 to-indigo-600/25 hover:from-purple-600/40 hover:to-indigo-600/40 border border-purple-500/40 text-purple-200 text-xs font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)] ml-1"
+            className="flex items-center gap-1.5 px-2.5 h-7 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 text-purple-300 text-[10px] font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)]"
             title="Open Video Studio"
           >
-            <Film className="h-3.5 w-3.5 text-purple-400" />
-            <span>Launch Video Studio</span>
+            <Film className="h-3 w-3 text-purple-400" />
+            <span>Video Studio</span>
           </button>
         )}
       </div>
 
-      {/* Centre: Metadata Specs & Action Controls */}
-      <div className="flex items-center gap-2.5 flex-wrap flex-1 justify-center">
+      {/* CENTRE: Metadata badges + action controls */}
+      <div className="flex items-center gap-2 flex-1 justify-center flex-wrap px-4">
         <VideoPreviewMetadataPanel
           musicTheme={musicTheme}
           voiceActor={voiceActor}
@@ -92,7 +89,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           targetUrl={targetUrl}
         />
 
-        {/* Primary Export Render Button */}
+        {/* Export Button */}
         {isRendering ? (
           <div className="min-w-[160px]">
             <ProcessBar progressStatus={progressStatus} />
@@ -101,10 +98,10 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           <button
             onClick={handleRenderFinalVideo}
             disabled={!hasEnoughCredits}
-            className={`relative overflow-hidden h-7 px-3.5 rounded-lg font-extrabold text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border shrink-0 ${
+            className={`relative overflow-hidden h-8 px-4 rounded-lg font-extrabold text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border shrink-0 ${
               !hasEnoughCredits
                 ? "bg-neutral-900/50 text-neutral-600 cursor-not-allowed border-neutral-800"
-                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-white/10 cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.35)] hover:shadow-[0_0_22px_rgba(139,92,246,0.55)] active:scale-95"
+                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-white/10 cursor-pointer shadow-[0_0_16px_rgba(139,92,246,0.4)] hover:shadow-[0_0_24px_rgba(139,92,246,0.6)] active:scale-95"
             }`}
           >
             {isRendering && (
@@ -113,24 +110,25 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
                 style={{ width: `${renderProgress}%` }}
               />
             )}
+            <Sparkles className="relative z-10 h-3.5 w-3.5 text-purple-200 shrink-0" />
             <span className="relative z-10">
-              {!hasEnoughCredits ? "⚠️ No Credits" : "🎬 Export Video"}
+              {!hasEnoughCredits ? "No Credits" : "Export Video"}
             </span>
           </button>
         )}
       </div>
 
-      {/* Right: Hide Player */}
+      {/* RIGHT: Close / Hide */}
       {variant !== "embedded" && (
         <button
           type="button"
           onClick={() => {
             useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
           }}
-          className="h-7 px-2.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold font-mono active:scale-95 shrink-0"
+          className="h-7 w-7 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all flex items-center justify-center cursor-pointer active:scale-95 shrink-0"
+          title="Hide Preview Player"
         >
           <X className="h-3.5 w-3.5" />
-          <span>Hide</span>
         </button>
       )}
     </div>
