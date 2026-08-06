@@ -100,10 +100,10 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         {/* Divider */}
         <div className="w-px h-4 bg-neutral-800" />
 
-        <div className="flex items-center gap-2 max-w-[280px] xl:max-w-[360px]">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-[160px] sm:max-w-[240px] xl:max-w-[340px]">
           <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.9)] shrink-0" />
           <h3
-            className="font-black text-[11px] text-white uppercase tracking-widest font-mono truncate"
+            className="font-black text-[10px] sm:text-[11px] text-white uppercase tracking-widest font-mono truncate"
             title={previewLabel}
           >
             {previewLabel}
@@ -114,7 +114,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           <button
             type="button"
             onClick={onOpenVideoEditor}
-            className="flex items-center gap-1.5 px-2.5 h-7 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 text-purple-300 text-[10px] font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)]"
+            className="hidden md:flex items-center gap-1.5 px-2.5 h-7 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 text-purple-300 text-[10px] font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)]"
             title="Open Video Studio"
           >
             <Film className="h-3 w-3 text-purple-400" />
@@ -123,8 +123,12 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         )}
       </div>
 
-      {/* CENTRE: Metadata badges */}
-      <div className="flex items-center gap-2 flex-1 justify-center flex-wrap px-4 min-w-0">
+      {/* CENTRE: Flex spacer */}
+      <div className="flex-1 min-w-0" />
+
+      {/* RIGHT: 3-Dots Options Menu | Export (floating only) | Close */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* 3-Dots Options Menu & Metadata Panel */}
         <VideoPreviewMetadataPanel
           musicTheme={musicTheme}
           voiceActor={voiceActor}
@@ -135,10 +139,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           chapterTitle={chapterTitle}
           targetUrl={targetUrl}
         />
-      </div>
 
-      {/* RIGHT: Export (floating only) + Close */}
-      <div className="flex items-center gap-2 shrink-0">
         {/* Export Video — only shown in floating panel (EditorPage) */}
         {isFloating && handleRenderFinalVideo && (
           <>
