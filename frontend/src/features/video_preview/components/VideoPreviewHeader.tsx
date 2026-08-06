@@ -30,18 +30,21 @@ const getPreviewDisplayLabel = (
   chapterTitle?: string,
   chapterNumber?: string | number
 ) => {
+  const parts: string[] = [];
   if (seriesTitle && seriesTitle.trim()) {
-    if (chapterTitle && chapterTitle.trim()) {
-      return `${seriesTitle} · ${chapterTitle}`.toUpperCase();
-    }
-    if (chapterNumber) {
-      return `${seriesTitle} · EPISODE ${chapterNumber}`.toUpperCase();
-    }
-    return seriesTitle.toUpperCase();
+    parts.push(seriesTitle.trim());
   }
   if (chapterTitle && chapterTitle.trim()) {
-    return chapterTitle.toUpperCase();
+    const cleanChapter = chapterTitle.trim().replace(/^episode\s+episode/i, "Episode");
+    parts.push(cleanChapter);
+  } else if (chapterNumber) {
+    parts.push(`Episode ${chapterNumber}`);
   }
+
+  if (parts.length > 0) {
+    return parts.join(" · ").toUpperCase();
+  }
+
   if (!videoUrl) return "VIDEO PREVIEW PLAYER";
   const sanitizedUrl = videoUrl.split("?")[0];
   const fileName = sanitizedUrl.split("/").filter(Boolean).pop() ?? "";
