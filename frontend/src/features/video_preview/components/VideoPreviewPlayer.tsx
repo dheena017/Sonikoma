@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import VideoPreviewCinemaPlayer from "@/features/video_preview/components/VideoPreviewCinemaPlayer";
 import VideoPreviewHeader from "@/features/video_preview/components/VideoPreviewHeader";
 import VideoPreviewSidebar from "@/features/video_preview/components/VideoPreviewSidebar";
@@ -55,6 +55,9 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
 }) => {
   const isEmbedded = variant === "embedded";
 
+  // ── Sidebar toggle state ──────────────────────────────────────────────────
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   return (
     <div
       id="section-monitor"
@@ -63,7 +66,7 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
         : "w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/70 backdrop-blur-lg rounded-2xl border border-neutral-800/90 p-4 sm:p-5 space-y-4 mb-4 scroll-mt-24 shadow-2xl"
       }
     >
-      {/* Header — always shown (contains Download/Export/Publish controls) */}
+      {/* Header */}
       <VideoPreviewHeader
         videoUrl={videoUrl}
         musicTheme={musicTheme}
@@ -80,6 +83,8 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
         hasEnoughCredits={hasEnoughCredits}
         onOpenVideoEditor={onOpenVideoEditor}
         variant={variant}
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={() => setIsSidebarOpen((v) => !v)}
       />
 
       {/* Monitor layout: left sidebar + right video */}
@@ -87,13 +92,25 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
         ? "flex flex-row flex-1 min-h-0 w-full overflow-hidden"
         : "flex flex-col lg:flex-row gap-5 w-full items-start"
       }>
-        {/* LEFT: Sidebar */}
-        <VideoPreviewSidebar
-          panels={panels}
-          activePreviewTab={activePreviewTab}
-          setActivePreviewTab={setActivePreviewTab}
-          setCurrentPanelIndex={setCurrentPanelIndex}
-        />
+        {/* LEFT: Playback Monitor Sidebar — animated slide */}
+        <div
+          className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
+            isEmbedded
+              ? isSidebarOpen
+                ? "w-56 opacity-100"
+                : "w-0 opacity-0"
+              : isSidebarOpen
+                ? "w-full lg:w-60 opacity-100"
+                : "w-0 opacity-0 lg:w-0"
+          }`}
+        >
+          <VideoPreviewSidebar
+            panels={panels}
+            activePreviewTab={activePreviewTab}
+            setActivePreviewTab={setActivePreviewTab}
+            setCurrentPanelIndex={setCurrentPanelIndex}
+          />
+        </div>
 
         {/* RIGHT: Cinema Player */}
         <div className={isEmbedded

@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Film, Sparkles, Loader2 } from "lucide-react";
+import { X, Film, Sparkles, Loader2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import VideoPreviewMetadataPanel from "@/features/video_preview/components/VideoPreviewMetadataPanel";
 import ProcessBar from "@/shared/ui/loading/ProcessBar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
@@ -20,6 +20,8 @@ export interface VideoPreviewHeaderProps {
   hasEnoughCredits?: boolean;
   onOpenVideoEditor: () => void;
   variant?: "floating" | "embedded";
+  isSidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
 }
 
 const getPreviewDisplayLabel = (videoUrl: string | null) => {
@@ -46,6 +48,8 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   hasEnoughCredits = true,
   onOpenVideoEditor,
   variant = "floating",
+  isSidebarOpen = true,
+  onToggleSidebar,
 }) => {
   const previewLabel = getPreviewDisplayLabel(videoUrl);
   const isFloating = variant !== "embedded";
@@ -55,8 +59,27 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
       {/* Top gradient accent line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
 
-      {/* LEFT: Title + Launch button */}
-      <div className="flex items-center gap-3 shrink-0">
+      {/* LEFT: Sidebar Toggle + Title + Launch button */}
+      <div className="flex items-center gap-2.5 shrink-0">
+        {/* Sidebar Toggle Button */}
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          title={isSidebarOpen ? "Hide Playback Monitor" : "Show Playback Monitor"}
+          className={`h-7 w-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
+            isSidebarOpen
+              ? "bg-purple-500/15 border-purple-500/40 text-purple-300 hover:bg-purple-500/25"
+              : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-white hover:border-neutral-700"
+          }`}
+        >
+          {isSidebarOpen
+            ? <PanelLeftClose className="h-3.5 w-3.5" />
+            : <PanelLeftOpen className="h-3.5 w-3.5" />}
+        </button>
+
+        {/* Divider */}
+        <div className="w-px h-4 bg-neutral-800" />
+
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.9)]" />
           <h3 className="font-black text-[11px] text-white uppercase tracking-widest font-mono">
