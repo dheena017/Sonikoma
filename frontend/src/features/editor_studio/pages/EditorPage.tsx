@@ -1,13 +1,12 @@
 import React from "react";
-import LiveScraperDeck, { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/workspace_scraper/components/LiveScraperDeck";
+import LiveScraperDeck from "@/features/workspace_scraper/components/LiveScraperDeck";
 import StoryboardTimeline from "@/features/editor_timeline/components/StoryboardTimeline";
-import CinemaPlayer from "@/features/media_video/components/CinemaPlayer";
-import OutputMetadataPanel from "@/features/media_video/components/OutputMetadataPanel";
+import AdaptationPlayer from "@/features/media_video/components/AdaptationPlayer";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
 import ImageEditorPage from "@/features/editor_image/pages/ImageEditorPage";
 import AdvancedSettings from "@/features/media_video/components/AdvancedSettings";
 import AudioSettingsPage from "@/features/editor_audio/pages/AudioSettingsPage";
-import ProcessBar from "@/shared/ui/loading/ProcessBar";
+import VideoEditorPage from "@/features/editor_video/pages/VideoEditorPage";
 import { useBackendHealth } from "@/shared/hooks/useBackendHealth";
 import { getUserCredits } from "@/api/endpoints/auth";
 import { Sliders, X, Mic } from "lucide-react";
@@ -338,9 +337,22 @@ const EditorPage: React.FC<EditorPageProps> = ({
     }
   }, [currentSection]);
 
-  // Hoisted export target state (used in Adaptation Player)
-  const [selectedExportTarget, setSelectedExportTarget] = React.useState<string>("master");
   const hasEnoughCredits = userCredits === null || userCredits >= 20;
+
+  if (currentSection === "video-editor" || activeTab === "video-editor") {
+    return (
+      <VideoEditorPage
+        appLogic={appLogic}
+        navigateTo={navigateTo}
+        onBackToApp={() => setCurrentSection("timeline")}
+        projectTitle={
+          seriesTitle && chapterTitle
+            ? `${seriesTitle} · ${chapterTitle}`
+            : "Cyberpunk Story"
+        }
+      />
+    );
+  }
 
   return (
     <LayoutEditorPage
@@ -523,220 +535,31 @@ const EditorPage: React.FC<EditorPageProps> = ({
             </div>
           ) : (
             <>
-              {/* TOP: Inline CinemaPlayer */}
+              {/* TOP: AdaptationPlayer */}
               {playerSettings.isPlayerOpen && (
-                <div id="section-monitor" className="w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 mb-4 scroll-mt-24">
-                  {/* Header */}
-                  <div className="flex items-center justify-between border-b border-neutral-800 pb-3 flex-wrap gap-3">
-                    {/* Left: title + LIVE badge */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <h3 className="font-bold text-sm text-white uppercase tracking-wider font-sans">
-                        ADAPTATION PLAYER
-                      </h3>
-                      <span className="text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-mono shrink-0 uppercase tracking-widest font-black">
-                        LIVE
-                      </span>
-                    </div>
-
-                    {/* Centre: metadata + export pills */}
-                    <div className="flex items-center gap-2 flex-wrap flex-1 justify-center">
-                      <OutputMetadataPanel
-                        videoUrl={videoUrl}
-                        musicTheme={musicTheme}
-                        voiceActor={voiceActor}
-                        navigateTo={navigateTo}
-                        seriesTitle={seriesTitle}
-                        chapterNumber={chapterNumber}
-                        chapterTitle={chapterTitle}
-                        targetUrl={targetUrl}
-                      />
-
-                      {/* Divider */}
-                      <span className="h-4 w-px bg-white/10 hidden sm:block" />
-
-                      {/* Export label */}
-                      <div className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest font-mono">Export</span>
-                      </div>
-
-                      {/* Export target pills */}
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedExportTarget("master")}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${
-                            selectedExportTarget === "master"
-                              ? "bg-purple-600/20 border-purple-500/50 text-purple-200 shadow-[0_0_8px_rgba(168,85,247,0.2)]"
-                              : "bg-neutral-900/50 border-neutral-800 text-neutral-500 hover:text-neutral-300 hover:border-neutral-700"
-                          }`}
-                        >
-                          Full Master
-                          <span className={`text-[8px] px-1 py-0.5 rounded border font-mono ${
-                            selectedExportTarget === "master"
-                              ? "bg-emerald-500/10 border-emerald-600/30 text-emerald-400"
-                              : "bg-neutral-800 border-neutral-700 text-neutral-500"
-                          }`}>1080p</span>
-                        </button>
-
-                        {(((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || []).length > 0 &&
-                          getSortedEpisodeGroups(
-                            ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || []
-                          ).map(({ grp, originalIdx }) => (
-                            <button
-                              key={originalIdx}
-                              type="button"
-                              onClick={() => setSelectedExportTarget(`ep-${originalIdx}`)}
-                              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${
-                                selectedExportTarget === `ep-${originalIdx}`
-                                  ? "bg-purple-600/20 border-purple-500/50 text-purple-200"
-                                  : "bg-neutral-900/50 border-neutral-800 text-neutral-500 hover:text-neutral-300 hover:border-neutral-700"
-                              }`}
-                            >
-                              <span className="truncate max-w-[72px]">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
-                              <span className="text-[8px] text-purple-400/70">{grp.count}f</span>
-                            </button>
-                          ))
-                        }
-                      </div>
-
-                      {/* Export button (compact) */}
-                      {isRendering ? (
-                        <div className="min-w-[160px]">
-                          <ProcessBar progressStatus={progressStatus} />
-                        </div>
-                      ) : (
-                        <button
-                          onClick={handleRenderFinalVideo}
-                          disabled={!hasEnoughCredits}
-                          className={`relative overflow-hidden px-4 py-1.5 rounded-lg font-black text-[10px] uppercase tracking-[0.15em] transition-all flex items-center gap-1.5 border shrink-0 ${
-                            !hasEnoughCredits
-                              ? "bg-neutral-900/50 text-neutral-600 cursor-not-allowed border-neutral-800"
-                              : "bg-gradient-to-r from-purple-600/90 to-indigo-600/90 hover:from-purple-500 hover:to-indigo-500 text-white border-white/10 cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.3)] hover:shadow-[0_0_22px_rgba(139,92,246,0.5)]"
-                          }`}
-                        >
-                          {isRendering && (
-                            <div
-                              className="absolute left-0 top-0 bottom-0 bg-white/10 transition-all duration-300"
-                              style={{ width: `${renderProgress}%` }}
-                            />
-                          )}
-                          <span className="relative z-10">
-                            {!hasEnoughCredits ? "⚠️ No Credits" : "🎬 Export"}
-                          </span>
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Right: Hide Player */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
-                      }}
-                      className="p-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer text-[10px] font-bold font-mono active:scale-95 shrink-0"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                      Hide Player
-                    </button>
-                  </div>
-
-                  {/* Video Monitor Split Layout with Internal Left Sidebar */}
-                  <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
-                    {/* IN-PANEL LEFT SIDEBAR: MONITOR PRESETS & EPISODES */}
-                    <aside className="w-full lg:w-56 bg-neutral-955 border border-neutral-850 rounded-2xl p-4 shrink-0 space-y-3 shadow-xl self-start">
-                      <div className="flex items-center justify-between border-b border-neutral-850 pb-2.5">
-                        <div className="flex items-center gap-2">
-                          <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                          <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
-                            Playback Monitor
-                          </h4>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5 font-mono text-xs">
-                        <button
-                          type="button"
-                          onClick={() => setActivePreviewTab?.("timeline")}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${activePreviewTab === "timeline"
-                              ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                              : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
-                            }`}
-                        >
-                          <span>Storyboard Live</span>
-                          <span className="text-[9px] px-1.5 py-0.5 bg-neutral-950 text-purple-300 rounded border border-purple-900/40">
-                            {panels.length}p
-                          </span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setActivePreviewTab?.("video")}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${activePreviewTab === "video"
-                              ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                              : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
-                            }`}
-                        >
-                          <span>Compiled Video</span>
-                          <span className="text-[9px] px-1.5 py-0.5 bg-neutral-950 text-emerald-400 rounded border border-emerald-900/40">
-                            MP4
-                          </span>
-                        </button>
-                      </div>
-
-                      {/* Episode Playback Selectors */}
-                      <div className="pt-2 border-t border-neutral-850 space-y-2">
-                        <span className="text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
-                          Episode Replays
-                        </span>
-                        {((window as any).__scrapeEpisodeGroups as Array<any> || []).length > 0 ? (
-                          <div className="space-y-1 max-h-48 overflow-y-auto overflow-x-hidden p-1 pt-2 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                            {getSortedEpisodeGroups(
-                              ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || []
-                            ).map(({ grp, originalIdx }) => (
-                              <button
-                                key={originalIdx}
-                                type="button"
-                                title={`Jump to ${formatDisplayEpisodeLabel(grp.episodeLabel)} — starts at panel ${grp.startIndex + 1} · ${grp.count} frames`}
-                                onClick={() => {
-                                  if (grp.startIndex !== undefined) {
-                                    setCurrentPanelIndex(grp.startIndex);
-                                  }
-                                }}
-                                className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-neutral-900/50 hover:bg-purple-900/30 text-[11px] font-mono text-purple-200 hover:text-white transition-all text-left border border-neutral-850 hover:border-purple-500/40 cursor-pointer"
-                              >
-                                <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
-                                <span className="text-[9px] text-neutral-400 font-normal">{grp.count}f</span>
-                              </button>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="p-2.5 rounded-xl bg-neutral-900/40 border border-neutral-850 text-center space-y-1">
-                            <p className="text-[10px] font-mono text-neutral-400 font-semibold">Single Episode Active</p>
-                            <p className="text-[9px] font-mono text-neutral-600">No multi-episode batch found</p>
-                          </div>
-                        )}
-                      </div>
-                    </aside>
-
-                    {/* RIGHT: Video Player */}
-                    <div className="flex-1 w-full aspect-video rounded-xl overflow-hidden border border-neutral-800 shadow-2xl relative bg-black min-w-0">
-                      <CinemaPlayer
-                        panels={panels}
-                        videoUrl={activePreviewTab === "video" ? videoUrl : null}
-                        currentPanelIndex={currentPanelIndex}
-                        seriesSlug={null}
-                        chapterSlug={null}
-                        navigateTo={() => { }}
-                        addNotification={addNotification}
-                        variant="floating"
-                        onCloseFloating={() => {
-                          useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
+                <AdaptationPlayer
+                  panels={panels}
+                  videoUrl={videoUrl}
+                  setVideoUrl={setVideoUrl}
+                  currentPanelIndex={currentPanelIndex}
+                  setCurrentPanelIndex={setCurrentPanelIndex}
+                  activePreviewTab={activePreviewTab}
+                  setActivePreviewTab={setActivePreviewTab}
+                  musicTheme={musicTheme}
+                  voiceActor={voiceActor}
+                  navigateTo={navigateTo}
+                  seriesTitle={seriesTitle}
+                  chapterNumber={chapterNumber}
+                  chapterTitle={chapterTitle}
+                  targetUrl={targetUrl}
+                  isRendering={isRendering}
+                  renderProgress={renderProgress}
+                  handleRenderFinalVideo={handleRenderFinalVideo}
+                  progressStatus={progressStatus}
+                  hasEnoughCredits={hasEnoughCredits}
+                  addNotification={addNotification}
+                  onOpenVideoEditor={() => setCurrentSection("video-editor")}
+                />
               )}
 
 

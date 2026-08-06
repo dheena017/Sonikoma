@@ -9,7 +9,7 @@ interface OutputMetadataPanelProps {
   navigateTo?: (path: string) => void;
   // Dynamic naming context
   seriesTitle?: string;
-  chapterNumber?: string;
+  chapterNumber?: string | number;
   chapterTitle?: string;
   targetUrl?: string;
 }
@@ -51,7 +51,7 @@ const OutputMetadataPanel = React.memo(
     // Build download filename dynamically from whatever context is available
     const { formattedPrefix } = resolveDownloadNaming({
       seriesTitle: seriesTitle || undefined,
-      chapterNumber: chapterNumber || undefined,
+      chapterNumber: chapterNumber != null ? String(chapterNumber) : undefined,
       chapterTitle: chapterTitle || undefined,
       targetUrl: targetUrl || undefined,
     });

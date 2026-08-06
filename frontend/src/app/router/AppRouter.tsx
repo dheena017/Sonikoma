@@ -43,6 +43,7 @@ const CreativeSuiteDashboardPage = React.lazy(() => import("@/features/creative_
 const EpisodeScraperPage = React.lazy(() => import("@/features/workspace_scraper/pages/EpisodeScraperPage").then(m => ({ default: m.EpisodeScraperPage })));
 const AdminPage = React.lazy(() => import("@/features/system_admin/pages/AdminPage"));
 const AdminDashboardPage = React.lazy(() => import("@/features/system_admin/pages/AdminDashboardPage"));
+const VideoEditorPage = React.lazy(() => import("@/features/editor_video/pages/VideoEditorPage"));
 
 import MainLayout from "@/components/layout/MainLayout";
 
@@ -637,6 +638,10 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/youtube",
       editorRouteMatch,
       isImageEditorPage,
+      isVideoEditorPath:
+        currentPath === "/video-editor" ||
+        currentPath === "/video-editor/" ||
+        currentPath.startsWith("/video-editor/"),
     };
   }, [currentPath]);
 
@@ -671,6 +676,7 @@ export default function AppRouter(props: AppRouterProps) {
     isCreativeSuiteDashboardPath,
     isCreativeSuiteSettingsPath,
     isImageEditorPage,
+    isVideoEditorPath,
   } = pathFlags;
 
   const isAnyAdmin = isAdminPath || isAdminDashboardPath;
@@ -1362,6 +1368,17 @@ export default function AppRouter(props: AppRouterProps) {
         />
       )}
 
+      {/* PAGE VIEW 23: Video Editor Studio */}
+      {isVideoEditorPath && (
+        <React.Suspense fallback={<div className="flex-1 flex items-center justify-center bg-[#050507] text-neutral-400 text-sm">Loading Video Editor...</div>}>
+          <VideoEditorPage
+            appLogic={memoizedAppLogic}
+            navigateTo={navigateTo}
+            onBackToApp={handleNavigateHome}
+          />
+        </React.Suspense>
+      )}
+
       {/* FALLBACK VIEW: 404 Route Not Found */}
       {!isWorkspacePath &&
         !isDashboardOverviewPath &&
@@ -1387,7 +1404,8 @@ export default function AppRouter(props: AppRouterProps) {
         !isSeriesDetailsPath &&
         !isEpisodeScraperPath &&
         !isCreativeSuitePath &&
-        !isCreativeSuiteDashboardPath && (
+        !isCreativeSuiteDashboardPath &&
+        !isVideoEditorPath && (
           <PageNotFound onNavigateHome={() => navigateTo("/")} />
         )}
     </MainLayout>

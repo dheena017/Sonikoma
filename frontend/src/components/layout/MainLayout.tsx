@@ -440,7 +440,7 @@ export default function MainLayout(props: MainLayoutProps) {
         )}
 
         <div
-          className={`${!isSidebarOpen && !isImageEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage || (isAnyAdmin && isAdminRestricted)
+          className={`${!isSidebarOpen && !isImageEditorPage && !isProEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage || (isAnyAdmin && isAdminRestricted)
             ? "h-screen max-h-screen overflow-hidden"
             : isAnyAdmin
               ? "min-h-screen overflow-x-hidden"

@@ -12,6 +12,7 @@ import { PlayerSettingsMenu } from "./player/PlayerSettingsMenu";
 import { PlayerChaptersMenu } from "./player/PlayerChaptersMenu";
 import { PlayerTopBar } from "./player/PlayerTopBar";
 import { PlayerBottomControls } from "./player/PlayerBottomControls";
+import PanelQuickActionOverlay from "./PanelQuickActionOverlay";
 import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/workspace_scraper/components/LiveScraperDeck";
 import {
   startAmbientBackgroundMusic,
@@ -980,7 +981,7 @@ export default function CinemaPlayer({
               style={{ width: "auto", height: "auto" }}
               playsInline
             />
-          ) : activePanelNow ? (
+          ) : activePanelNow && (activePanelNow.image_url || (activePanelNow as any).img_url || (activePanelNow as any).panel_url || (activePanelNow as any).src || activePanelNow.layers?.background_url) ? (
             <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950">
               {activePanelNow.layers ? (
                 <div className="relative w-full h-full flex items-center justify-center">
@@ -1034,7 +1035,7 @@ export default function CinemaPlayer({
               ) : (
                 <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                   <img
-                    src={activePanelNow.image_url}
+                    src={activePanelNow.image_url || (activePanelNow as any).img_url || (activePanelNow as any).panel_url || (activePanelNow as any).src}
                     className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
                     style={{
                       width: "auto",

@@ -5,10 +5,8 @@ import {
   Film,
   Layers,
   Brain,
-  Download,
   Settings,
   ExternalLink,
-  ArrowLeft,
   Sparkles,
   Edit2,
   Brush,
@@ -199,9 +197,15 @@ const EditorMiniSidebarInner = ({
       label: "Tools",
       items: [
         {
-          id: "production",
-          label: "Export & Publish",
-          icon: Download,
+          id: "video-editor",
+          label: "Video Studio Pro",
+          icon: Film,
+          badge: "Pro",
+        },
+        {
+          id: "ai-automation",
+          label: "AI Automation Suite",
+          icon: Brain,
         },
         {
           id: "autocrop",
@@ -217,7 +221,7 @@ const EditorMiniSidebarInner = ({
       ],
     },
     {
-      label: "Config",
+      label: "Preferences",
       items: [
         {
           id: "settings",

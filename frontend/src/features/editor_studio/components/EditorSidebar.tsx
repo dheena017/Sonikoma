@@ -6,10 +6,8 @@ import {
   Film,
   Layers,
   Brain,
-  Download,
   Settings,
   ExternalLink,
-  ArrowLeft,
   X,
   Edit2,
   Mic,
@@ -96,17 +94,24 @@ const EditorSidebar = ({
           badge: panelsCount > 0 ? panelsCount : undefined,
           type: "section",
         },
-        {
-          id: "production",
-          label: "Export & Publish",
-          icon: Download,
-          type: "section",
-        },
       ],
     },
     {
-      title: "AI Automation Suite",
+      title: "Tools",
       items: [
+        {
+          id: "video-editor",
+          label: "Video Studio Pro",
+          icon: Film,
+          badge: "Pro",
+          type: "tool",
+        },
+        {
+          id: "ai-automation",
+          label: "AI Automation Suite",
+          icon: Brain,
+          type: "tool",
+        },
         {
           id: "autocrop",
           label: "Auto-Crop Panels",
