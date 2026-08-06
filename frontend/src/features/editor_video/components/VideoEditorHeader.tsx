@@ -12,6 +12,7 @@ import {
   Zap,
   Save,
   Menu,
+  Film,
 } from "lucide-react";
 import VideoCustomizeLayoutModal from "./VideoCustomizeLayoutModal";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
@@ -364,10 +365,10 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           <button
             onClick={onExport}
             disabled={isRendering}
-            className={`relative overflow-hidden px-4 h-8 rounded-lg font-bold text-xs tracking-wide transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border border-purple-400/20 ${
+            className={`relative overflow-hidden px-4 h-8 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 border shrink-0 ${
               isRendering
-                ? "bg-purple-900/60 text-purple-200 cursor-wait"
-                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-[0_0_16px_rgba(168,85,247,0.35)]"
+                ? "bg-purple-900/60 text-purple-200 cursor-wait border-purple-500/30"
+                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-white/10 cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
             }`}
           >
             {isRendering ? (
@@ -377,8 +378,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               </>
             ) : (
               <>
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>Export Video</span>
+                <Film className="h-3.5 w-3.5 text-purple-200" />
+                <span>EXPORT</span>
               </>
             )}
           </button>
