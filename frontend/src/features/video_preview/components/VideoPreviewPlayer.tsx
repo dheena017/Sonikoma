@@ -56,7 +56,7 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
   const isEmbedded = variant === "embedded";
 
   // ── Sidebar toggle state ──────────────────────────────────────────────────
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div
