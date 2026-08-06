@@ -51,7 +51,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   const isFloating = variant !== "embedded";
 
   return (
-    <div className="relative flex items-center justify-between px-4 h-12 shrink-0 bg-[#09090e]/95 backdrop-blur-md border-b border-neutral-800/80 overflow-hidden select-none">
+    <div className="relative flex items-center justify-between px-4 h-12 shrink-0 bg-[#09090e]/95 backdrop-blur-md border-b border-neutral-800/80 select-none">
       {/* Top gradient accent line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
 
