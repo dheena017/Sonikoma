@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import VideoEditorHeader from "@/features/editor_video/components/VideoEditorHeader";
-import VideoEditorMiniSidebar from "@/features/editor_video/components/VideoEditorMiniSidebar";
 import VideoEditorSidebar from "@/features/editor_video/components/VideoEditorSidebar";
-import VideoMediaBin from "@/features/editor_video/components/VideoMediaBin";
 import VideoPreviewPlayer from "@/features/video_preview/components/VideoPreviewPlayer";
-import VideoPropertyInspector from "@/features/editor_video/components/VideoPropertyInspector";
 import VideoMultiTrackTimeline from "@/features/editor_video/components/VideoMultiTrackTimeline";
+import { WorkspacePanel } from "@/features/editor_video/components/WorkspacePanel";
+import { InspectorPanel } from "@/features/editor_video/components/InspectorPanel";
 
 interface VideoEditorPageProps {
   appLogic?: any;
@@ -132,24 +131,11 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
 
       {/* ── Main Workspace Row ───────────────────────────────────────────────── */}
       <div className="flex-1 flex min-h-0 relative">
-        {/* Far-Left Vertical Icon Mini Sidebar Nav */}
-        <VideoEditorMiniSidebar
-          activeNav={activeNav}
-          setActiveNav={setActiveNav}
-          onBackToApp={handleReturn}
-          navigateTo={navigateTo}
-        />
-
-        {/* Left: Asset Media Bin (Full height top-to-bottom on left side) */}
+        {/* Left: Workspace Panel (MiniSidebar + active workspace) */}
         {layoutConfig.mediaBin && (
-          <VideoMediaBin
-            scrapedImages={scrapedImages}
-            panels={panels}
-            currentPanelIndex={currentPanelIndex}
-            setCurrentPanelIndex={setCurrentPanelIndex}
-            musicTheme={musicTheme}
-            voiceActor={voiceActor}
-          />
+          <div className="h-full shrink-0 flex" style={{ width: 340 }}>
+            <WorkspacePanel defaultWorkspace="media" onBackToApp={handleReturn} />
+          </div>
         )}
 
         {/* Studio Content Column (Preview Player Top + Timeline Bottom) */}
@@ -182,22 +168,11 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               variant="embedded"
             />
 
-            {/* Right: Property Inspector */}
+            {/* Right: Inspector Panel */}
             {layoutConfig.rightInspector && (
-              <VideoPropertyInspector
-                voiceActor={voiceActor}
-                setVoiceActor={setVoiceActor}
-                musicTheme={musicTheme}
-                setMusicTheme={setMusicTheme}
-                aspectRatio={aspectRatio}
-                setAspectRatio={setAspectRatio}
-                frameRate={frameRate}
-                setFrameRate={setFrameRate}
-                volume={volume}
-                setVolume={setVolume}
-                cropSensitivity={cropSensitivity}
-                setCropSensitivity={setCropSensitivity}
-              />
+              <div className="h-full shrink-0 overflow-hidden" style={{ width: 240 }}>
+                <InspectorPanel />
+              </div>
             )}
           </div>
 
