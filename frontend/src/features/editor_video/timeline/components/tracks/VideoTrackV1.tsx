@@ -46,9 +46,13 @@ const VideoTrackV1: React.FC<VideoTrackV1Props> = ({
         <div className="flex items-center gap-1 h-full">
           {panels.map((panel: any, idx: number) => {
             const imgUrl =
-              panel.img_url ||
+              panel.thumbnail ||
               panel.image_url ||
+              panel.img_url ||
               panel.panel_url ||
+              panel.imageUrl ||
+              panel.url ||
+              panel.original_url ||
               panel.src ||
               `https://placehold.co/100x160/1a1a24/a855f7?text=${idx + 1}`;
             const isActive = idx === currentPanelIndex;

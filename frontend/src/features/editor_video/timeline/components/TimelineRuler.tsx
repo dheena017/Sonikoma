@@ -1,7 +1,8 @@
 // ─── TimelineRuler ────────────────────────────────────────────────────────────
 // Canonical location: timeline/components/TimelineRuler.tsx
 
-import React, { useMemo } from "react";
+import React, { forwardRef, useMemo } from "react";
+import { Clock } from "lucide-react";
 
 interface TimelineRulerProps {
   totalDuration: number;
@@ -11,41 +12,68 @@ interface TimelineRulerProps {
 function buildTicks(totalDuration: number): { ticks: number[]; interval: number } {
   const interval = totalDuration <= 15 ? 1 : totalDuration <= 60 ? 5 : 10;
   const ticks: number[] = [];
-  for (let t = 0; t <= totalDuration + interval; t += interval) ticks.push(t);
+  if (totalDuration <= 0) {
+    return { ticks: [0], interval };
+  }
+
+  for (let t = 0; t <= totalDuration; t += interval) {
+    ticks.push(t);
+  }
+
+  const lastTick = ticks[ticks.length - 1];
+  if (lastTick < totalDuration) {
+    ticks.push(totalDuration);
+  }
+
   return { ticks, interval };
 }
 
-const TimelineRuler: React.FC<TimelineRulerProps> = ({ totalDuration, onScrubStart }) => {
-  const { ticks, interval } = useMemo(() => buildTicks(totalDuration), [totalDuration]);
+const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
+  ({ totalDuration, onScrubStart }, ref) => {
+    const { ticks, interval } = useMemo(() => buildTicks(totalDuration), [totalDuration]);
 
-  return (
-    <div
-      onMouseDown={(e) => onScrubStart?.(e)}
-      className="h-7 flex shrink-0 bg-[#0d0d12] border-b border-white/[0.05] cursor-pointer select-none group/ruler"
-    >
-      {/* Spacer aligned with the track labels column */}
-      <div className="w-28 shrink-0 border-r border-white/[0.05]" />
-
-      <div className="flex-1 relative overflow-hidden">
-        {ticks.map((t) => {
-          const pct = totalDuration <= 0 ? 0 : (t / totalDuration) * 100;
-          const isMinor = interval >= 5 ? t % interval !== 0 : false;
-          return (
-            <div
-              key={t}
-              className="absolute bottom-0 flex flex-col items-center"
-              style={{ left: `${pct}%` }}
-            >
-              <span className="text-[9px] font-mono text-neutral-500 mb-0.5 -translate-x-1/2 whitespace-nowrap select-none group-hover/ruler:text-purple-300 transition-colors">
-                {t === 0 ? "0s" : `${t}s`}
-              </span>
-              <div className={`w-px ${isMinor ? "h-1.5 bg-white/10" : "h-2.5 bg-white/20"}`} />
+    return (
+      <div
+        ref={ref}
+        onMouseDown={(e) => onScrubStart?.(e)}
+        className="h-8 flex shrink-0 bg-[#0d0d12] border-b border-white/[0.05] cursor-pointer select-none group/ruler"
+      >
+        {/* Spacer aligned with the track labels column */}
+        <div className="w-28 shrink-0 border-r border-white/[0.05] bg-[#0d0d12] flex items-center justify-center px-3">
+          <div className="flex items-center gap-2">
+            <Clock className="h-3.5 w-3.5 text-purple-300" />
+            <div>
+              <div className="text-[10px] font-semibold text-white">Timeline</div>
+              <div className="text-[9px] text-neutral-500">{totalDuration.toFixed(1)}s</div>
             </div>
-          );
-        })}
+          </div>
+        </div>
+
+        <div className="flex-1 relative overflow-hidden pt-1 timeline-ruler-track">
+          {ticks.map((t) => {
+            const pct = totalDuration <= 0 ? 0 : (t / totalDuration) * 100;
+            const isMinor = interval >= 5 ? t % interval !== 0 : false;
+            const isFirst = t === 0;
+            const isLast = t === totalDuration;
+            const translateX = isFirst ? "0%" : isLast ? "-100%" : "-50%";
+
+            return (
+              <div
+                key={t}
+                className="absolute top-0 flex flex-col items-center"
+                style={{ left: `${pct}%`, transform: `translateX(${translateX})` }}
+              >
+                <span className="text-[9px] font-mono text-neutral-400 mb-1 whitespace-nowrap select-none group-hover/ruler:text-purple-300 transition-colors">
+                  {t === 0 ? "0s" : `${t}s`}
+                </span>
+                <div className={`w-px ${isMinor ? "h-1.5 bg-white/10" : "h-2.5 bg-white/20"}`} />
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
 
 export default React.memo(TimelineRuler);

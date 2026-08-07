@@ -4,7 +4,7 @@
 //
 // All state lives in useTimelineState, and visual sections are modularized.
 
-import React from "react";
+import React, { useRef } from "react";
 import { TimelineProps } from "./types";
 import { useTimelineState } from "./useTimelineState";
 import { useAIPacing } from "./hooks/useAIPacing";
@@ -64,19 +64,26 @@ const Timeline: React.FC<TimelineProps> = ({
     onToggleMute: () => s.toggleMute(id),
   });
 
+  const rulerRef = useRef<HTMLDivElement | null>(null);
+
   // ── Playhead Scrubbing & Dragging ─────────────────────────────────────────────
   const handlePlayheadScrubStart = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!s.trackAreaRef.current) return;
+    if (!rulerRef.current) return;
 
     const calculateAndSeek = (clientX: number) => {
-      if (!s.trackAreaRef.current) return;
-      const rect = s.trackAreaRef.current.getBoundingClientRect();
-      const rulerLeft = rect.left + 112; // 112px is 7rem track label column width
-      const rulerWidth = Math.max(1, rect.width - 112);
-      const relativeX = clientX - rulerLeft;
-      const pct = Math.max(0, Math.min(1, relativeX / rulerWidth));
-      const targetPanelIdx = Math.min(totalPanels - 1, Math.max(0, Math.floor(pct * totalPanels)));
+      if (!rulerRef.current) return;
+      const rail = rulerRef.current.querySelector<HTMLDivElement>(".timeline-ruler-track");
+      if (!rail) return;
+
+      const rect = rail.getBoundingClientRect();
+      const relativeX = clientX - rect.left;
+      const pct = Math.max(0, Math.min(1, relativeX / Math.max(1, rect.width)));
+      const rawIndex = pct * totalPanels;
+      const targetPanelIdx = Math.min(
+        totalPanels - 1,
+        Math.max(0, Math.round(rawIndex - 0.5))
+      );
       setCurrentPanelIndex?.(targetPanelIdx);
     };
 
@@ -125,86 +132,96 @@ const Timeline: React.FC<TimelineProps> = ({
       <div className="flex-1 flex flex-col overflow-hidden min-h-0 relative" ref={s.trackAreaRef}>
 
         <TimelinePlayhead playheadPercent={playheadPct} onScrubStart={handlePlayheadScrubStart} />
-        <TimelineRuler    totalDuration={totalDuration} onScrubStart={handlePlayheadScrubStart} />
+        <TimelineRuler    totalDuration={totalDuration} onScrubStart={handlePlayheadScrubStart} ref={rulerRef} />
 
-        <div className="flex-1 overflow-y-auto [scrollbar-width:none]">
+        {/* ── Track Scroll Area: vertical + horizontal scrollbars ─────── */}
+        <div
+          className="timeline-scroll-area flex-1 overflow-auto min-h-0"
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: "#6d28d9 #0d0d14",
+          }}
+        >
+          {/* Inner wrapper — wide enough to scroll horizontally */}
+          <div className="min-w-[max(100%,800px)] min-h-full relative">
 
-          {/* V3 — Overlay / Captions (conditional) */}
-          {!s.hiddenTracks["V3"] && s.captionsVisible && (
-            <VideoTrackV3
-              panels={displayPanels}
-              totalPanels={totalPanels}
-              selectedClip={s.selectedClip}
-              {...trackControls("V3")}
-              {...clipCbs}
-            />
-          )}
+            {/* V3 — Overlay / Captions (conditional) */}
+            {!s.hiddenTracks["V3"] && s.captionsVisible && (
+              <VideoTrackV3
+                panels={displayPanels}
+                totalPanels={totalPanels}
+                selectedClip={s.selectedClip}
+                {...trackControls("V3")}
+                {...clipCbs}
+              />
+            )}
 
-          {/* V2 — Effects */}
-          {!s.hiddenTracks["V2"] && (
-            <VideoTrackV2
-              panels={displayPanels}
-              totalPanels={totalPanels}
-              selectedClip={s.selectedClip}
-              {...trackControls("V2")}
-              {...clipCbs}
-            />
-          )}
+            {/* V2 — Effects */}
+            {!s.hiddenTracks["V2"] && (
+              <VideoTrackV2
+                panels={displayPanels}
+                totalPanels={totalPanels}
+                selectedClip={s.selectedClip}
+                {...trackControls("V2")}
+                {...clipCbs}
+              />
+            )}
 
-          {/* V1 — Main Video */}
-          {!s.hiddenTracks["V1"] && (
-            <VideoTrackV1
-              panels={displayPanels}
-              currentPanelIndex={currentPanelIndex}
-              selectedClip={s.selectedClip}
-              getClipDuration={s.getClipDuration}
-              onDurationChange={s.updateClipDuration}
-              keyframesVisible={s.keyframesState.keyframeRowsVisible}
-              keyframesByClip={s.keyframesState.keyframes}
-              selectedKeyframeId={s.keyframesState.selectedKeyframeId}
-              onSelectKeyframe={s.keyframesState.selectKeyframe}
-              onCycleEasing={s.keyframesState.cycleEasing}
-              onAddKeyframe={(clipKey, t) => s.keyframesState.addKeyframe(clipKey, t, "scale", 1.0)}
-              {...trackControls("V1")}
-              {...clipCbs}
-            />
-          )}
+            {/* V1 — Main Video */}
+            {!s.hiddenTracks["V1"] && (
+              <VideoTrackV1
+                panels={displayPanels}
+                currentPanelIndex={currentPanelIndex}
+                selectedClip={s.selectedClip}
+                getClipDuration={s.getClipDuration}
+                onDurationChange={s.updateClipDuration}
+                keyframesVisible={s.keyframesState.keyframeRowsVisible}
+                keyframesByClip={s.keyframesState.keyframes}
+                selectedKeyframeId={s.keyframesState.selectedKeyframeId}
+                onSelectKeyframe={s.keyframesState.selectKeyframe}
+                onCycleEasing={s.keyframesState.cycleEasing}
+                onAddKeyframe={(clipKey, t) => s.keyframesState.addKeyframe(clipKey, t, "scale", 1.0)}
+                {...trackControls("V1")}
+                {...clipCbs}
+              />
+            )}
 
-          {/* A1 — Music */}
-          {!s.hiddenTracks["A1"] && (
-            <AudioTrackA1
-              musicTheme={musicTheme}
-              totalDuration={totalDuration}
-              selectedClip={s.selectedClip}
-              {...trackControls("A1")}
-              {...clipCbs}
-            />
-          )}
+            {/* A1 — Music */}
+            {!s.hiddenTracks["A1"] && (
+              <AudioTrackA1
+                musicTheme={musicTheme}
+                totalDuration={totalDuration}
+                selectedClip={s.selectedClip}
+                {...trackControls("A1")}
+                {...clipCbs}
+              />
+            )}
 
-          {/* A2 — SFX */}
-          {!s.hiddenTracks["A2"] && (
-            <AudioTrackA2
-              panels={displayPanels}
-              totalPanels={totalPanels}
-              selectedClip={s.selectedClip}
-              {...trackControls("A2")}
-              {...clipCbs}
-            />
-          )}
+            {/* A2 — SFX */}
+            {!s.hiddenTracks["A2"] && (
+              <AudioTrackA2
+                panels={displayPanels}
+                totalPanels={totalPanels}
+                selectedClip={s.selectedClip}
+                {...trackControls("A2")}
+                {...clipCbs}
+              />
+            )}
 
-          {/* A3 — Voiceover */}
-          {!s.hiddenTracks["A3"] && (
-            <AudioTrackA3
-              panels={displayPanels}
-              totalPanels={totalPanels}
-              voiceActor={voiceActor}
-              selectedClip={s.selectedClip}
-              {...trackControls("A3")}
-              {...clipCbs}
-            />
-          )}
+            {/* A3 — Voiceover */}
+            {!s.hiddenTracks["A3"] && (
+              <AudioTrackA3
+                panels={displayPanels}
+                totalPanels={totalPanels}
+                voiceActor={voiceActor}
+                selectedClip={s.selectedClip}
+                {...trackControls("A3")}
+                {...clipCbs}
+              />
+            )}
 
-          <AddTrackRow onOpenMediaPicker={s.openMediaPicker} />
+            <AddTrackRow onOpenMediaPicker={s.openMediaPicker} />
+          </div>
         </div>
       </div>
 

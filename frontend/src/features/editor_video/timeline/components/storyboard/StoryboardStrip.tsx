@@ -30,7 +30,15 @@ const StoryboardStrip: React.FC<StoryboardStripProps> = ({
         {total > 3 && <ChapterMarker title="Ch. 1 - Arrival" leftPct={40} />}
 
         {panels.map((panel, idx) => {
-          const imgUrl = panel.img_url || panel.image_url || panel.src || `https://placehold.co/80x50/1a1a24/a855f7?text=${idx + 1}`;
+          const imgUrl =
+            panel.thumbnail ||
+            panel.image_url ||
+            panel.img_url ||
+            panel.imageUrl ||
+            panel.url ||
+            panel.original_url ||
+            panel.src ||
+            `https://placehold.co/80x50/1a1a24/a855f7?text=${idx + 1}`;
           const isActive = idx === currentPanelIndex;
 
           return (
