@@ -40,8 +40,8 @@ const NAV_GROUPS: { name: string; items: NavItem[] }[] = [
   {
     name: "Primary",
     items: [
-      { id: "media",      label: "Media",      Icon: Image },
       { id: "story",      label: "Story",      Icon: BookOpen },
+      { id: "media",      label: "Media",      Icon: Image },
       { id: "characters", label: "Characters", Icon: Users },
       { id: "ai",         label: "AI Studio",  Icon: Wand2 },
       { id: "text",       label: "Text",       Icon: Type },
