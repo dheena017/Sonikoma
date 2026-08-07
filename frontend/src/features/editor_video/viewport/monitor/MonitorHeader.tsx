@@ -1,6 +1,6 @@
 import React from "react";
 import { X, Film, Sparkles, Loader2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import VideoPreviewMetadataPanel from "@/features/video_preview/components/VideoPreviewMetadataPanel";
+import VideoPreviewMetadataPanel from "./MetadataPanel";
 import ProcessBar from "@/shared/ui/loading/ProcessBar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 
@@ -35,7 +35,9 @@ const getPreviewDisplayLabel = (
     parts.push(seriesTitle.trim());
   }
   if (chapterTitle && chapterTitle.trim()) {
-    const cleanChapter = chapterTitle.trim().replace(/^episode\s+episode/i, "Episode");
+    let cleanChapter = chapterTitle.trim();
+    // Normalize repeated "Episode Episode" strings
+    cleanChapter = cleanChapter.replace(/^(episode\s+)+/i, "Episode ");
     parts.push(cleanChapter);
   } else if (chapterNumber) {
     parts.push(`Episode ${chapterNumber}`);
@@ -140,7 +142,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           targetUrl={targetUrl}
         />
 
-        {/* Export Video — only shown in floating panel (EditorPage) */}
+        {/* Export Video ΓÇö only shown in floating panel (EditorPage) */}
         {isFloating && handleRenderFinalVideo && (
           <>
             {isRendering ? (
@@ -174,7 +176,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           </>
         )}
 
-        {/* Hide / Close — only in floating mode */}
+        {/* Hide / Close ΓÇö only in floating mode */}
         {isFloating && (
           <button
             type="button"

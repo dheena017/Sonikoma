@@ -1,21 +1,15 @@
 import React from "react";
 import LiveScraperDeck from "@/features/workspace_scraper/components/LiveScraperDeck";
 import StoryboardTimeline from "@/features/editor_timeline/components/StoryboardTimeline";
-import VideoPreviewPlayer from "@/features/video_preview/components/VideoPreviewPlayer";
+import EditorViewport from "@/features/editor_video/viewport/EditorViewport";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
-import ImageEditorPage from "@/features/editor_image/pages/ImageEditorPage";
-import VideoPreviewAdvancedSettings from "@/features/video_preview/components/VideoPreviewAdvancedSettings";
+import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
 import AudioSettingsPage from "@/features/editor_audio/pages/AudioSettingsPage";
 import VideoEditorPage from "@/features/editor_video/pages/VideoEditorPage";
 import { useBackendHealth } from "@/shared/hooks/useBackendHealth";
 import { getUserCredits } from "@/api/endpoints/auth";
-import { Sliders, X, Mic } from "lucide-react";
+import { Sliders, X, Mic, Tv, Eye } from "lucide-react";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
-import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
-import { Rnd } from "react-rnd";
-import AutoCropOverlay from "@/shared/ui/loading/AutoCropOverlay";
-import AdvancedSettings from "@/features/creative_youtube/components/AdvancedSettings";
-
 
 
 interface EditorPageProps {
@@ -536,9 +530,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
             </div>
           ) : (
             <>
-              {/* TOP: Video Preview Player */}
-              {playerSettings.isPlayerOpen && (
-                <VideoPreviewPlayer
+              {/* TOP: Video Preview Player / Viewport Monitor */}
+              {playerSettings.isPlayerOpen ? (
+                <EditorViewport
                   panels={panels}
                   videoUrl={videoUrl}
                   setVideoUrl={setVideoUrl}
@@ -561,6 +555,29 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   addNotification={addNotification}
                   onOpenVideoEditor={() => setCurrentSection("video-editor")}
                 />
+              ) : (
+                <div className="w-full max-w-[1600px] ml-0 mr-0 mb-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: true });
+                    }}
+                    className="w-full h-11 px-4 rounded-2xl bg-neutral-900/80 hover:bg-neutral-800/90 border border-purple-500/30 hover:border-purple-500/60 text-purple-300 hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-lg"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-6 w-6 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 group-hover:scale-105 transition-transform">
+                        <Tv className="h-3.5 w-3.5" />
+                      </div>
+                      <span className="text-xs font-bold font-mono tracking-wide uppercase">
+                        Show Program Monitor Viewport
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-purple-400/80 group-hover:text-purple-300">
+                      <Eye className="h-3.5 w-3.5" />
+                      <span>Expand Monitor</span>
+                    </div>
+                  </button>
+                </div>
               )}
 
 

@@ -5,14 +5,19 @@ import {
   Sliders,
   RotateCcw,
   Tv,
+  Film,
+  Sparkles,
+  Wand2,
+  Layers,
+  Video,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
-import { VideoPreviewHudHelp } from "./player/VideoPreviewHudHelp";
-import { VideoPreviewSettingsMenu } from "./player/VideoPreviewSettingsMenu";
-import { VideoPreviewChaptersMenu } from "./player/VideoPreviewChaptersMenu";
-import { VideoPreviewTopBar } from "./player/VideoPreviewTopBar";
-import { VideoPreviewBottomControls } from "./player/VideoPreviewBottomControls";
-import VideoPreviewQuickActionOverlay from "./VideoPreviewQuickActionOverlay";
+import { VideoPreviewHudHelp } from "../player/HudHelp";
+import { VideoPreviewSettingsMenu } from "../player/SettingsMenu";
+import { VideoPreviewChaptersMenu } from "../player/ChaptersMenu";
+import { VideoPreviewTopBar } from "../player/TopBar";
+import { VideoPreviewBottomControls } from "../player/BottomControls";
+import VideoPreviewQuickActionOverlay from "../overlays/QuickActionOverlay";
 import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/workspace_scraper/components/LiveScraperDeck";
 import {
   startAmbientBackgroundMusic,
@@ -56,7 +61,7 @@ export default function VideoPreviewCinemaPlayer({
   const totalDuration = videoUrl && videoDuration > 0
     ? videoDuration
     : panels.length > 0
-    ? panels.reduce((acc, p) => acc + (p.duration ?? 0), 0)
+    ? panels.reduce((acc, p) => acc + (p.duration || (p as any).duration_sec || 3.0), 0)
     : 0;
 
   // Define Chapters dynamically from scraped episode groups or scene panels
@@ -443,26 +448,26 @@ export default function VideoPreviewCinemaPlayer({
 
   const getPanelAtTime = React.useCallback(
     (time: number): GeneratedPanel | null => {
-      if (panels.length === 0) return null;
+      if (!panels || panels.length === 0) return null;
       let accumulatedTime = 0;
       for (const panel of panels) {
-        const duration = panel.duration ?? 0;
+        const duration = panel.duration || (panel as any).duration_sec || 3.0;
         if (time >= accumulatedTime && time < accumulatedTime + duration) {
           return panel;
         }
         accumulatedTime += duration;
       }
-      return panels[panels.length - 1];
+      return panels[panels.length - 1] || null;
     },
     [panels]
   );
 
   const getPanelIndexAtTime = React.useCallback(
     (time: number): number => {
-      if (panels.length === 0) return 0;
+      if (!panels || panels.length === 0) return 0;
       let accumulatedTime = 0;
       for (let i = 0; i < panels.length; i++) {
-        const duration = panels[i].duration ?? 0;
+        const duration = panels[i].duration || (panels[i] as any).duration_sec || 3.0;
         if (time >= accumulatedTime && time < accumulatedTime + duration) {
           return i + 1;
         }
@@ -474,7 +479,17 @@ export default function VideoPreviewCinemaPlayer({
   );
 
   const activePanelForHover = getPanelAtTime(hoverProgress.time);
-  const activePanelNow = getPanelAtTime(currentTime);
+  const activePanelNow = getPanelAtTime(currentTime) || panels[currentPanelIndex ?? 0] || panels[0] || null;
+  const activePanelImg = activePanelNow
+    ? activePanelNow.image_url ||
+      (activePanelNow as any).imageUrl ||
+      (activePanelNow as any).img_url ||
+      (activePanelNow as any).panel_url ||
+      (activePanelNow as any).src ||
+      (activePanelNow as any).url ||
+      activePanelNow.layers?.background_url ||
+      null
+    : null;
 
   // BGM Background Music Engine for Adaptation Player
   useEffect(() => {
@@ -973,7 +988,7 @@ export default function VideoPreviewCinemaPlayer({
               style={{ width: "auto", height: "auto" }}
               playsInline
             />
-          ) : activePanelNow && (activePanelNow.image_url || (activePanelNow as any).img_url || (activePanelNow as any).panel_url || (activePanelNow as any).src || activePanelNow.layers?.background_url) ? (
+          ) : activePanelNow && activePanelImg ? (
             <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950">
               {activePanelNow.layers ? (
                 <div className="relative w-full h-full flex items-center justify-center">
@@ -1027,7 +1042,16 @@ export default function VideoPreviewCinemaPlayer({
               ) : (
                 <div className="absolute inset-0 w-full h-full flex items-center justify-center">
                   <img
-                    src={activePanelNow.image_url || (activePanelNow as any).img_url || (activePanelNow as any).panel_url || (activePanelNow as any).src}
+                    src={activePanelImg}
+                    onError={(e) => {
+                      const img = e.currentTarget;
+                      if (img.dataset.retried) return;
+                      img.dataset.retried = "1";
+                      const src = img.src;
+                      if (src && !src.includes("/api/proxy-image") && !src.includes("/api/image/")) {
+                        img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+                      }
+                    }}
                     className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
                     style={{
                       width: "auto",
@@ -1037,28 +1061,51 @@ export default function VideoPreviewCinemaPlayer({
                         : "scale(1)",
                       transition: "transform 100ms linear",
                     }}
-                    alt="Current Panel"
+                    alt={`Panel ${activePanelNow.id || ""}`}
                   />
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center text-center px-4">
-              <div className="relative w-64 h-36 bg-neutral-900/50 border border-neutral-800 rounded-2xl flex flex-col items-center justify-center mb-6 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/10 to-transparent animate-pulse" />
-                <div className="h-10 w-10 rounded-full bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-3">
-                  <Sliders className="h-5 w-5 text-purple-400 animate-pulse" />
+            <div className="relative flex flex-col items-center justify-center text-center px-6 py-8 max-w-md my-auto select-none">
+              {/* Ambient Glowing Background Radial */}
+              <div className="absolute -inset-6 bg-gradient-to-r from-purple-600/25 via-indigo-600/15 to-cyan-600/20 rounded-3xl blur-3xl opacity-75 animate-pulse pointer-events-none" />
+
+              {/* Card Container */}
+              <div className="relative w-full bg-neutral-900/70 backdrop-blur-2xl border border-purple-500/25 rounded-3xl p-7 shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col items-center space-y-4 overflow-hidden">
+                {/* Gradient Top Accent Bar */}
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500" />
+
+                {/* Animated Glowing Icon Badge */}
+                <div className="relative pt-1">
+                  <div className="absolute -inset-3 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl blur-lg opacity-40 animate-pulse" />
+                  <div className="relative h-14 w-14 rounded-2xl bg-neutral-950/90 border border-purple-500/40 flex items-center justify-center text-purple-300 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+                    <Film className="h-7 w-7 text-purple-300 animate-pulse" />
+                  </div>
                 </div>
-                <span className="text-[11px] font-mono text-neutral-400 font-bold uppercase tracking-wider">
-                  Simulated Cinematic Track
-                </span>
+
+                {/* Live Mode Pill Badge */}
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 font-mono text-[10px] font-black uppercase tracking-widest shadow-sm">
+                  <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping" />
+                  <span>Adaptation Program Monitor</span>
+                </div>
+
+                {/* Title & Description */}
+                <div className="space-y-1.5">
+                  <h2 className="text-xl sm:text-2xl font-black font-sans text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-indigo-200 tracking-tight">
+                    Cinema Studio Ready
+                  </h2>
+                  <p className="text-xs text-neutral-400 max-w-xs leading-relaxed font-mono">
+                    Select any panel on the timeline below to stream interactive cuts, voice narration, and motion effects live.
+                  </p>
+                </div>
+
+                {/* Footer Hint */}
+                <div className="w-full pt-3 flex items-center justify-center gap-2 text-[10px] font-mono text-neutral-500 border-t border-neutral-800/80">
+                  <Sparkles className="h-3 w-3 text-purple-400" />
+                  <span className="text-purple-300/90 font-semibold">Live playback ready · {panels.length} panel cuts available</span>
+                </div>
               </div>
-              <h2 className="text-xl font-black font-sans text-neutral-100 tracking-tight mb-2">
-                Adaptation Cinema Studio
-              </h2>
-              <p className="text-xs text-neutral-500 max-w-sm leading-relaxed font-mono">
-                No direct MP4 compilation was found. Seamlessly playing back interactive storyboard timeline cuts and speech assets live.
-              </p>
             </div>
           )}
         </div>

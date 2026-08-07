@@ -109,7 +109,7 @@ const VideoPreviewSidebar: React.FC<VideoPreviewSidebarProps> = ({
               <button
                 key={originalIdx}
                 type="button"
-                title={`Jump to ${formatDisplayEpisodeLabel(grp.episodeLabel)} — panel ${grp.startIndex + 1} · ${grp.count} frames`}
+                title={`Jump to ${formatDisplayEpisodeLabel(grp.episodeLabel)} ΓÇö panel ${grp.startIndex + 1} ┬╖ ${grp.count} frames`}
                 onClick={() => {
                   if (grp.startIndex !== undefined) setCurrentPanelIndex(grp.startIndex);
                 }}

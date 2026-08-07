@@ -9,7 +9,7 @@ import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
 import AppWorkspace from "@/features/workspace/components/AppWorkspace";
 import EditorPage from "@/features/editor_studio/pages/EditorPage";
 import PageNotFound from "@/components/feedback/PageNotFound";
-import VideoPreviewAdvancedSettings from "@/features/video_preview/components/VideoPreviewAdvancedSettings";
+import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
 import StatusPage from "@/features/system_status/pages/StatusPage";
 import ShortcutsPage from "@/features/app_shortcuts/pages/ShortcutsPage";
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import VideoPreviewCinemaPlayer from "@/features/video_preview/components/VideoPreviewCinemaPlayer";
-import VideoPreviewHeader from "@/features/video_preview/components/VideoPreviewHeader";
-import VideoPreviewSidebar from "@/features/video_preview/components/VideoPreviewSidebar";
+import VideoPreviewCinemaPlayer from "./monitor/PlaybackMonitor";
+import VideoPreviewHeader from "./monitor/MonitorHeader";
+import VideoPreviewSidebar from "./monitor/MonitorSidebar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 
 export interface VideoPreviewPlayerProps {
@@ -55,7 +55,7 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
 }) => {
   const isEmbedded = variant === "embedded";
 
-  // ── Sidebar toggle state ──────────────────────────────────────────────────
+  // ΓöÇΓöÇ Sidebar toggle state ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
@@ -92,7 +92,7 @@ const VideoPreviewPlayer: React.FC<VideoPreviewPlayerProps> = ({
         ? "flex flex-row flex-1 min-h-0 w-full overflow-hidden"
         : "flex flex-col lg:flex-row gap-5 w-full items-start"
       }>
-        {/* LEFT: Playback Monitor Sidebar — animated slide */}
+        {/* LEFT: Playback Monitor Sidebar ΓÇö animated slide */}
         <div
           className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
             isEmbedded

@@ -226,7 +226,7 @@ export function useVideoPreviewGeneration({
     setIsProcessing(true);
     setProgressStatus("Contacting pipeline orchestration...");
     addNotification(
-      "Pipeline initiated — generating video with " + selectedModel + "...",
+      "Pipeline initiated ΓÇö generating video with " + selectedModel + "...",
       "info"
     );
     setConsoleLogs([
@@ -553,3 +553,6 @@ export function useVideoPreviewGeneration({
     ]
   );
 }
+
+// Subsystem canonical alias
+export { useVideoPreviewGeneration as useViewportGeneration };

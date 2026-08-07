@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { GeneratedPanel } from "@/types";
 import { NotificationType } from "@/features/app_notification";
 import { useAutoAnalysis } from "@/features/ai_core/hooks/useAutoAnalysis";
-import { useVideoPreviewGeneration } from "@/features/video_preview/hooks/useVideoPreviewGeneration";
+import { useViewportGeneration as useVideoPreviewGeneration } from "@/features/editor_video/viewport/hooks";
 import { useBatchImageActions } from "@/features/editor_studio/hooks/useBatchImageActions";
 import { useSingleImageEdits } from "@/features/editor_studio/hooks/useSingleImageEdits";
 import { useAppState } from "@/shared/hooks/useAppState";

@@ -324,7 +324,7 @@ const VideoPreviewMetadataPanel = React.memo(
 
     return (
       <>
-        {/* ⋯ More Options 3-Dots Button */}
+        {/* Γï» More Options 3-Dots Button */}
         <button
           ref={btnRef}
           type="button"
@@ -345,7 +345,7 @@ const VideoPreviewMetadataPanel = React.memo(
           <MoreHorizontal className="h-3.5 w-3.5" />
         </button>
 
-        {/* Portal dropdown — rendered on document.body */}
+        {/* Portal dropdown ΓÇö rendered on document.body */}
         {dropdownPortal}
       </>
     );

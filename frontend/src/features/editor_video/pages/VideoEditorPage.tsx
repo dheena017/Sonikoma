@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import VideoEditorHeader from "@/features/editor_video/components/VideoEditorHeader";
-import VideoEditorSidebar from "@/features/editor_video/components/VideoEditorSidebar";
-import VideoPreviewPlayer from "@/features/video_preview/components/VideoPreviewPlayer";
-import VideoMultiTrackTimeline from "@/features/editor_video/components/VideoMultiTrackTimeline";
-import { WorkspacePanel } from "@/features/editor_video/components/WorkspacePanel";
-import { InspectorPanel } from "@/features/editor_video/components/InspectorPanel";
+// ── Subsystem imports (new architecture) ─────────────────────────────────────
+import VideoEditorHeader from "@/features/editor_video/shell/VideoEditorHeader";
+import VideoEditorSidebar from "@/features/editor_video/shell/VideoEditorSidebar";
+import { WorkspacePanel } from "@/features/editor_video/shell/WorkspacePanel";
+import { EditorViewport } from "@/features/editor_video/viewport/EditorViewport";
+import { Timeline } from "@/features/editor_video/timeline/Timeline";
+import { InspectorPanel } from "@/features/editor_video/inspector/InspectorPanel";
 
 interface VideoEditorPageProps {
   appLogic?: any;
@@ -143,7 +144,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
           {/* ── Upper Row: Preview Player + Right Inspector ───────────────── */}
           <div className="flex-1 flex min-h-0 w-full overflow-hidden">
             {/* Center: Adaptation Player (full) */}
-            <VideoPreviewPlayer
+            <EditorViewport
               panels={panels}
               videoUrl={videoUrl}
               setVideoUrl={setVideoUrl}
@@ -178,7 +179,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
 
           {/* ── Bottom Multi-Track NLE Timeline ─────────────────────────────── */}
           {layoutConfig.timeline && (
-            <VideoMultiTrackTimeline
+            <Timeline
               panels={panels}
               currentPanelIndex={currentPanelIndex}
               setCurrentPanelIndex={setCurrentPanelIndex}
