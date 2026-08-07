@@ -94,29 +94,55 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
   onSelectTab,
 }) => {
   const tabsRef = React.useRef<HTMLDivElement>(null);
+  const [showLeft, setShowLeft] = React.useState(false);
+  const [showRight, setShowRight] = React.useState(true);
+
+  const checkScroll = () => {
+    if (tabsRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsRef.current;
+      setShowLeft(scrollLeft > 5);
+      setShowRight(scrollLeft + clientWidth < scrollWidth - 5);
+    }
+  };
+
+  React.useEffect(() => {
+    checkScroll();
+    const el = tabsRef.current;
+    if (el) {
+      el.addEventListener("scroll", checkScroll);
+      window.addEventListener("resize", checkScroll);
+      return () => {
+        el.removeEventListener("scroll", checkScroll);
+        window.removeEventListener("resize", checkScroll);
+      };
+    }
+  }, [tabs]);
 
   const scrollTabs = (direction: "left" | "right") => {
     if (tabsRef.current) {
-      const amount = direction === "left" ? -120 : 120;
+      const amount = direction === "left" ? -140 : 140;
       tabsRef.current.scrollBy({ left: amount, behavior: "smooth" });
     }
   };
 
   return (
-    <div className="relative group/tabs shrink-0 bg-neutral-950/60 backdrop-blur-md border-b border-purple-900/25 flex items-center">
+    <div className="shrink-0 bg-[#0a0814]/95 backdrop-blur-md border-b border-purple-900/30 flex items-center px-2 py-1.5 min-w-0 gap-1 overflow-hidden">
       {/* Scroll Left Button */}
-      <button
-        onClick={() => scrollTabs("left")}
-        title="Scroll left"
-        className="absolute left-0 z-10 h-full px-1 bg-gradient-to-r from-neutral-950 via-neutral-950/90 to-transparent text-neutral-400 hover:text-white transition-opacity cursor-pointer opacity-0 group-hover/tabs:opacity-100 flex items-center justify-center"
-      >
-        <ChevronLeft className="h-3.5 w-3.5" />
-      </button>
+      {showLeft && (
+        <button
+          onClick={() => scrollTabs("left")}
+          title="Scroll left"
+          className="shrink-0 h-6 w-6 rounded-full bg-neutral-900/90 border border-purple-500/40 text-purple-300 hover:text-white hover:bg-purple-600 hover:border-purple-400 hover:shadow-[0_0_10px_rgba(168,85,247,0.6)] transition-all cursor-pointer flex items-center justify-center active:scale-90 shadow-md"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </button>
+      )}
 
-      {/* Tabs Container */}
+      {/* Tabs Container (flex-1 min-w-0 handles tab overflow within bounds) */}
       <div
         ref={tabsRef}
-        className="px-3 py-2 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden w-full"
+        onScroll={checkScroll}
+        className="flex-1 min-w-0 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden scroll-smooth py-0.5"
       >
         {tabs.map((tab) => {
           const isActive = activeTab.toLowerCase() === tab.toLowerCase();
@@ -124,26 +150,31 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
             <button
               key={tab}
               onClick={() => onSelectTab(tab)}
-              className={`relative px-3 py-1.5 rounded-xl text-[10px] font-mono font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 ${
+              className={`relative px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 flex items-center gap-1.5 ${
                 isActive
-                  ? "bg-purple-600/35 text-purple-200 border border-purple-500/70 shadow-[0_0_12px_rgba(168,85,247,0.35),inset_0_1px_0_rgba(255,255,255,0.15)]"
-                  : "text-neutral-400 border border-neutral-800/80 hover:text-white hover:bg-white/5 hover:border-neutral-700"
+                  ? "bg-gradient-to-r from-purple-600/50 to-indigo-600/50 text-white border border-purple-400/80 shadow-[0_0_14px_rgba(168,85,247,0.5)]"
+                  : "bg-neutral-900/50 text-neutral-400 border border-neutral-800/80 hover:text-white hover:bg-white/10 hover:border-neutral-700"
               }`}
             >
-              {tab}
+              {isActive && (
+                <span className="h-1.5 w-1.5 rounded-full bg-purple-300 shadow-[0_0_6px_rgba(216,180,254,1)] animate-pulse" />
+              )}
+              <span>{tab}</span>
             </button>
           );
         })}
       </div>
 
       {/* Scroll Right Button (">" arrow icon) */}
-      <button
-        onClick={() => scrollTabs("right")}
-        title="Scroll right"
-        className="absolute right-0 z-10 h-full px-1.5 bg-gradient-to-l from-neutral-950 via-neutral-950/90 to-transparent text-neutral-300 hover:text-purple-300 transition-all cursor-pointer flex items-center justify-center shadow-md hover:scale-110"
-      >
-        <ChevronRight className="h-4 w-4 drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
-      </button>
+      {showRight && (
+        <button
+          onClick={() => scrollTabs("right")}
+          title="Scroll right"
+          className="shrink-0 h-6 w-6 rounded-full bg-neutral-900/90 border border-purple-500/40 text-purple-300 hover:text-white hover:bg-purple-600 hover:border-purple-400 hover:shadow-[0_0_10px_rgba(168,85,247,0.6)] transition-all cursor-pointer flex items-center justify-center active:scale-90 shadow-md"
+        >
+          <ChevronRight className="h-3.5 w-3.5 drop-shadow-[0_0_4px_rgba(168,85,247,0.8)]" />
+        </button>
+      )}
     </div>
   );
 };

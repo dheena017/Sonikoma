@@ -74,9 +74,8 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
 
       {/* Dynamic Registered Workspace Container */}
       <div
-        className="flex-1 overflow-y-auto overflow-x-hidden"
+        className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0c0a18]/98"
         style={{
-          background: "rgba(12,10,24,0.98)",
           width: config.defaultWidth ? config.defaultWidth - 64 : undefined,
         }}
       >
