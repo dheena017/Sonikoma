@@ -35,30 +35,30 @@ interface NavItem {
   Icon: React.ElementType;
 }
 
-// ─── Navigation Groups (ordered per user spec) ────────────────────────────────
+// ─── Navigation Groups: PRIMARY → SECONDARY → UTILITY ─────────────────────────
 const NAV_GROUPS: { name: string; items: NavItem[] }[] = [
   {
-    name: "Comic",
+    name: "Primary",
     items: [
       { id: "media",      label: "Media",      Icon: Image },
-      { id: "characters", label: "Characters", Icon: Users },
       { id: "story",      label: "Story",      Icon: BookOpen },
-      { id: "elements",   label: "Elements",   Icon: Shapes },
+      { id: "characters", label: "Characters", Icon: Users },
+      { id: "ai",         label: "AI Studio",  Icon: Wand2 },
       { id: "text",       label: "Text",       Icon: Type },
     ],
   },
   {
-    name: "Studio",
+    name: "Secondary",
     items: [
-      { id: "audio",     label: "Audio",     Icon: Music },
-      { id: "ai",        label: "AI Studio", Icon: Wand2 },
-      { id: "templates", label: "Templates", Icon: LayoutTemplate },
+      { id: "elements",   label: "Elements",   Icon: Shapes },
+      { id: "audio",      label: "Audio",      Icon: Music },
+      { id: "templates",  label: "Templates",  Icon: LayoutTemplate },
+      { id: "resources",  label: "Resources",  Icon: Package },
     ],
   },
   {
-    name: "Assets",
+    name: "Utility",
     items: [
-      { id: "resources",   label: "Resources",   Icon: Package },
       { id: "marketplace", label: "Marketplace", Icon: ShoppingBag },
       { id: "apps",        label: "Apps",        Icon: AppWindow },
     ],
