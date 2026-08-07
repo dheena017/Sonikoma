@@ -23,24 +23,29 @@ export const CharactersWorkspaceHeader: React.FC<CharactersWorkspaceHeaderProps>
 }) => {
   return (
     <div className="shrink-0">
-      {/* Title row */}
-      <div className="px-3.5 py-2.5 border-b border-purple-900/30 bg-neutral-950/80 backdrop-blur-md flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="h-6 w-6 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center shadow-[0_0_10px_rgba(99,102,241,0.3)]">
-            <Users className="h-3.5 w-3.5 text-indigo-400" />
+      <div className="px-4 py-3 border-b border-purple-900/20 bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-10 w-10 rounded-3xl bg-indigo-500/12 border border-indigo-500/25 flex items-center justify-center shadow-[0_0_18px_rgba(99,102,241,0.18)]">
+            <Users className="h-4.5 w-4.5 text-indigo-300" />
           </div>
-          <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">Characters Roster</h2>
+          <div className="min-w-0 space-y-0.5">
+            <h2 className="text-[11px] font-black text-white uppercase tracking-[0.28em] font-mono truncate">Characters Roster</h2>
+            <p className="text-[10px] text-neutral-300 font-mono truncate max-w-xs">
+              Manage your cast, expressions, and pose presets.
+            </p>
+          </div>
         </div>
         <button
           onClick={onAddCharacter}
-          className="text-[9px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/30 hover:bg-purple-500/20 transition-colors cursor-pointer flex items-center gap-1"
+          className="inline-flex items-center gap-2 rounded-full bg-pink-500/12 px-3 py-1 text-[9px] font-semibold text-pink-100 border border-pink-500/25 shadow-sm transition hover:bg-pink-500/15"
         >
-          <Plus className="h-2.5 w-2.5" /> Cast ({characterCount})
+          <Plus className="h-3.5 w-3.5 text-pink-200" />
+          Cast ({characterCount})
         </button>
       </div>
-      {/* Tabs row */}
-      <WorkspaceLayoutTabs tabs={tabs} activeTab={activeTab} onSelectTab={onSelectTab} />
-      {/* Search row */}
+      <div className="px-3.5 pt-3 pb-2">
+        <WorkspaceLayoutTabs tabs={tabs} activeTab={activeTab} onSelectTab={onSelectTab} />
+      </div>
       <WorkspaceLayoutSearch value={searchQuery} onChange={onSearchChange} placeholder="Search characters..." />
     </div>
   );

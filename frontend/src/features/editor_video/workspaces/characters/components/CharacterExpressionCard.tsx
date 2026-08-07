@@ -9,10 +9,10 @@ export const CharacterExpressionCard: React.FC<CharacterExpressionCardProps> = (
   return (
     <div
       onClick={onApply}
-      className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500 flex flex-col items-center gap-1 cursor-pointer transition-all shadow-sm"
+      className="p-3 rounded-[1.5rem] bg-[#07060f] border border-white/5 hover:border-purple-500/30 flex flex-col items-center gap-3 cursor-pointer transition-all shadow-[0_14px_30px_rgba(0,0,0,0.18)] hover:shadow-[0_18px_40px_rgba(168,85,247,0.2)]"
     >
-      <img src={expression.img} alt={expression.name} className="w-16 h-16 rounded-lg object-cover" />
-      <span className="text-[9px] font-bold text-center text-white">{expression.name}</span>
+      <img src={expression.img} alt={expression.name} className="w-16 h-16 rounded-2xl object-cover" />
+      <span className="text-[10px] font-semibold text-white text-center">{expression.name}</span>
     </div>
   );
 };

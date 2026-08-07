@@ -12,11 +12,13 @@ interface FeedbackToast {
 interface WorkspacePanelProps {
   defaultWorkspace?: WorkspaceId;
   onBackToApp?: () => void;
+  showContent?: boolean;
 }
 
 export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   defaultWorkspace = "story",
   onBackToApp,
+  showContent = true,
 }) => {
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>(defaultWorkspace);
   const [toasts, setToasts] = useState<FeedbackToast[]>([]);

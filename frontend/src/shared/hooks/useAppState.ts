@@ -124,7 +124,7 @@ export function useAppState() {
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
   const [activePreviewTab, setActivePreviewTab] = useState<
     "video" | "timeline"
-  >("video");
+  >("timeline");
 
   // Image editing/cropping states
   const [editingImageIdx, setEditingImageIdx] = useState<number | null>(null);

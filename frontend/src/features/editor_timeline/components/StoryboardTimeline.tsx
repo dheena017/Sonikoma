@@ -144,12 +144,13 @@ const StoryboardTimeline = React.memo(
           );
           setLastSelectedIndex(idx);
         } else {
-          // Single-click (no modifiers) does NOT select/deselect the panel or change selected items.
-          // It strictly sets/updates lastSelectedIndex.
+          // Single-click (no modifiers): jump the monitor to this panel in Storyboard Live view
           setLastSelectedIndex(idx);
+          setCurrentPanelIndex(idx);
+          setActivePreviewTab("timeline");
         }
       },
-      [lastSelectedIndex, panels, setSelectedPanelIds]
+      [lastSelectedIndex, panels, setSelectedPanelIds, setCurrentPanelIndex, setActivePreviewTab]
     );
 
     const handlePanelDoubleClick = useCallback(

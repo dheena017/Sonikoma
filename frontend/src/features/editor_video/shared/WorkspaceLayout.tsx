@@ -152,8 +152,8 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
               onClick={() => onSelectTab(tab)}
               className={`relative px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 flex items-center gap-1.5 ${
                 isActive
-                  ? "bg-gradient-to-r from-purple-600/50 to-indigo-600/50 text-white border border-purple-400/80 shadow-[0_0_14px_rgba(168,85,247,0.5)]"
-                  : "bg-neutral-900/50 text-neutral-400 border border-neutral-800/80 hover:text-white hover:bg-white/10 hover:border-neutral-700"
+                ? "bg-gradient-to-r from-purple-600/60 to-indigo-600/60 text-white border border-purple-400/80 shadow-[0_0_16px_rgba(168,85,247,0.6)]"
+                  : "bg-neutral-900/60 text-neutral-300 border border-neutral-800/80 hover:text-white hover:bg-white/10 hover:border-purple-500/30"
               }`}
             >
               {isActive && (
@@ -185,30 +185,32 @@ interface SearchProps {
   onChange: (val: string) => void;
   placeholder?: string;
   onFilterClick?: () => void;
+  className?: string;
 }
 export const WorkspaceLayoutSearch: React.FC<SearchProps> = ({
   value,
   onChange,
   placeholder = "Search assets...",
   onFilterClick,
+  className = "",
 }) => {
   return (
-    <div className="px-3 py-2 bg-neutral-950/70 border-b border-purple-900/25 flex items-center gap-2 shrink-0">
+    <div className={`px-3 py-2 bg-[#110d22]/95 border-b border-purple-900/20 flex items-center gap-2 shrink-0 ${className}`}>
       <div className="flex-1 relative">
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-[#120f24]/90 border border-neutral-800/90 focus:border-purple-500/80 focus:shadow-[0_0_14px_rgba(168,85,247,0.3)] text-[11px] text-white rounded-2xl pl-8 pr-3 py-1.5 outline-none transition-all placeholder:text-neutral-500 font-mono tracking-tight"
+          className="w-full bg-transparent border border-neutral-800/90 focus:border-purple-500/80 focus:shadow-[0_0_16px_rgba(168,85,247,0.24)] text-[11px] text-white rounded-full pl-9 pr-3 py-2 outline-none transition-all placeholder:text-neutral-500 font-mono tracking-tight"
         />
-        <Search className="h-3.5 w-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+        <Search className="h-3.5 w-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
       </div>
       {onFilterClick && (
         <button
           onClick={onFilterClick}
           title="Filter options"
-          className="p-1.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-purple-500/50 transition-colors cursor-pointer shrink-0"
+          className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-purple-500/50 transition-colors cursor-pointer shrink-0"
         >
           <Filter className="h-3.5 w-3.5" />
         </button>

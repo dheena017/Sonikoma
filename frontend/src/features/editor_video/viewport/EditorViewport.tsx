@@ -1,5 +1,6 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import PlaybackMonitor from "./monitor/PlaybackMonitor";
+import BlankViewport from "./BlankViewport";
 import { VideoPreviewHeader as MonitorHeader } from "./monitor/MonitorHeader";
 import { VideoPreviewSidebar as MonitorSidebar } from "./monitor/MonitorSidebar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
@@ -27,6 +28,12 @@ export interface EditorViewportProps {
   addNotification: (...args: any[]) => void;
   onOpenVideoEditor?: () => void;
   variant?: "floating" | "embedded";
+  allowEditorTab?: boolean;
+  zoomLevel?: number;
+  onZoomLevelChange?: (zoom: number) => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onZoomReset?: () => void;
 }
 
 /**
@@ -56,6 +63,11 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
   addNotification,
   onOpenVideoEditor,
   variant = "embedded",
+  allowEditorTab = false,
+  zoomLevel,
+  onZoomIn,
+  onZoomOut,
+  onZoomReset,
 }) => {
   const isEmbedded = variant === "embedded";
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -83,62 +95,47 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
         handleRenderFinalVideo={handleRenderFinalVideo}
         progressStatus={progressStatus}
         hasEnoughCredits={hasEnoughCredits}
-        onOpenVideoEditor={onOpenVideoEditor}
+        onOpenVideoEditor={onOpenVideoEditor ?? (() => {})}
         variant={variant}
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen((v) => !v)}
+        activePreviewTab={activePreviewTab}
+        setActivePreviewTab={setActivePreviewTab}
+        panelsCount={panels?.length || 0}
+        allowEditorTab={allowEditorTab}
+        zoomLevel={zoomLevel}
+        onZoomIn={onZoomIn}
+        onZoomOut={onZoomOut}
+        onZoomReset={onZoomReset}
       />
 
+      {/* RIGHT: Cinema Player or Blank Viewport */}
       <div
         className={
           isEmbedded
-            ? "flex flex-row flex-1 min-h-0 w-full overflow-hidden"
-            : "flex flex-col lg:flex-row gap-5 w-full items-start"
+            ? "flex-1 h-full min-h-0 min-w-0 overflow-hidden relative bg-[#09090f]"
+            : "flex-1 w-full aspect-video rounded-2xl overflow-hidden border border-neutral-800/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative bg-[#09090f] min-w-0"
         }
       >
-        {/* LEFT: Monitor Sidebar */}
-        <div
-          className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 ${
-            isEmbedded
-              ? isSidebarOpen
-                ? "w-56 opacity-100"
-                : "w-0 opacity-0"
-              : isSidebarOpen
-              ? "w-full lg:w-60 opacity-100"
-              : "w-0 opacity-0 lg:w-0"
-          }`}
-        >
-          <MonitorSidebar
-            panels={panels}
-            activePreviewTab={activePreviewTab}
-            setActivePreviewTab={setActivePreviewTab}
-            setCurrentPanelIndex={setCurrentPanelIndex}
-          />
+          {activePreviewTab === "editor" ? (
+            <BlankViewport panels={panels} currentPanelIndex={currentPanelIndex} />
+          ) : (
+            <PlaybackMonitor
+              panels={panels}
+              videoUrl={activePreviewTab === "video" ? videoUrl : null}
+              mode={activePreviewTab}
+              currentPanelIndex={currentPanelIndex}
+              seriesSlug={null}
+              chapterSlug={null}
+              navigateTo={() => {}}
+              addNotification={addNotification}
+              variant={isEmbedded ? "embedded" : "floating"}
+              onCloseFloating={() => {
+                useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+              }}
+            />
+          )}
         </div>
-
-        {/* RIGHT: Cinema Player */}
-        <div
-          className={
-            isEmbedded
-              ? "flex-1 h-full min-h-0 min-w-0 overflow-hidden relative bg-black"
-              : "flex-1 w-full aspect-video rounded-2xl overflow-hidden border border-neutral-800/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative bg-black min-w-0"
-          }
-        >
-          <PlaybackMonitor
-            panels={panels}
-            videoUrl={activePreviewTab === "video" ? videoUrl : null}
-            currentPanelIndex={currentPanelIndex}
-            seriesSlug={null}
-            chapterSlug={null}
-            navigateTo={() => {}}
-            addNotification={addNotification}
-            variant={isEmbedded ? "embedded" : "floating"}
-            onCloseFloating={() => {
-              useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
-            }}
-          />
-        </div>
-      </div>
     </div>
   );
 };

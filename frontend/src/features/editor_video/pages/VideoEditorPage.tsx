@@ -27,6 +27,15 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
     rightInspector: true,
     timeline: true,
   });
+  const [viewportZoom, setViewportZoom] = useState(100);
+
+  const handleZoomLevelChange = (nextZoom: number) => {
+    setViewportZoom(Math.min(300, Math.max(20, nextZoom)));
+  };
+
+  const handleZoomIn = () => setViewportZoom((prev) => Math.min(300, prev + 10));
+  const handleZoomOut = () => setViewportZoom((prev) => Math.max(20, prev - 10));
+  const handleZoomReset = () => setViewportZoom(100);
 
   const handleTogglePanel = (panel: "mediaBin" | "rightInspector" | "timeline") => {
     setLayoutConfig((prev) => ({ ...prev, [panel]: !prev[panel] }));
@@ -53,7 +62,13 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   // Playback
   const currentPanelIndex = appLogic?.currentPanelIndex ?? 0;
   const setCurrentPanelIndex = appLogic?.setCurrentPanelIndex ?? (() => {});
-  const [activePreviewTab, setActivePreviewTab] = useState("video");
+  const [activePreviewTab, setActivePreviewTab] = useState("editor");
+  const handleSetActivePreviewTab = (tab: string) => {
+    setActivePreviewTab(tab);
+    if (tab === "timeline") {
+      setLayoutConfig((prev) => ({ ...prev, timeline: true }));
+    }
+  };
 
   // Audio / Video properties
   const aspectRatio = appLogic?.aspectRatio ?? "16:9";
@@ -133,11 +148,9 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
       {/* ── Main Workspace Row ───────────────────────────────────────────────── */}
       <div className="flex-1 flex min-h-0 relative">
         {/* Left: Workspace Panel (MiniSidebar + active workspace) */}
-        {layoutConfig.mediaBin && (
-          <div className="h-full shrink-0 flex" style={{ width: 380 }}>
-            <WorkspacePanel defaultWorkspace="story" onBackToApp={handleReturn} />
-          </div>
-        )}
+        <div className="h-full flex" style={{ width: layoutConfig.mediaBin ? 380 : 96 }}>
+          <WorkspacePanel defaultWorkspace="story" onBackToApp={handleReturn} showContent={layoutConfig.mediaBin} />
+        </div>
 
         {/* Studio Content Column (Preview Player Top + Timeline Bottom) */}
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
@@ -151,7 +164,8 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               currentPanelIndex={currentPanelIndex}
               setCurrentPanelIndex={setCurrentPanelIndex}
               activePreviewTab={activePreviewTab}
-              setActivePreviewTab={setActivePreviewTab}
+              setActivePreviewTab={handleSetActivePreviewTab}
+              allowEditorTab={true}
               musicTheme={musicTheme}
               voiceActor={voiceActor}
               navigateTo={navigateTo ?? (() => {})}
@@ -167,6 +181,11 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               addNotification={addNotification}
               onOpenVideoEditor={() => {}}
               variant="embedded"
+              zoomLevel={viewportZoom}
+              onZoomLevelChange={handleZoomLevelChange}
+              onZoomIn={handleZoomIn}
+              onZoomOut={handleZoomOut}
+              onZoomReset={handleZoomReset}
             />
 
             {/* Right: Inspector Panel */}

@@ -16,14 +16,14 @@ export const StorySceneCard: React.FC<StorySceneCardProps> = ({
   return (
     <div
       onClick={onSelectScene}
-      className="p-3 rounded-xl bg-neutral-900/90 border border-neutral-800 hover:border-purple-500/60 cursor-pointer transition-all space-y-2 group shadow-sm"
+      className="p-3 rounded-[1.75rem] bg-[#07060f] border border-white/5 hover:border-purple-500/30 cursor-pointer transition-all space-y-2 group shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:shadow-[0_18px_48px_rgba(168,85,247,0.22)]"
     >
       <div className="flex items-center justify-between border-b border-neutral-800/80 pb-1.5">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-mono font-bold text-purple-300 bg-purple-500/20 px-1.5 py-0.5 rounded border border-purple-500/30">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[10px] font-mono font-semibold text-purple-200 bg-purple-500/12 px-2 py-0.5 rounded-full border border-purple-500/20 shrink-0">
             Scene #{scene.sceneNumber}
           </span>
-          <span className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
+          <span className="text-xs font-semibold text-white group-hover:text-purple-100 transition-colors truncate">
             {scene.title}
           </span>
         </div>
@@ -50,7 +50,7 @@ export const StorySceneCard: React.FC<StorySceneCardProps> = ({
         </span>
         <button
           onClick={onJumpToScene}
-          className="px-2 py-0.5 rounded bg-neutral-800 hover:bg-purple-600 text-neutral-300 hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+          className="px-3 py-1 rounded-2xl bg-neutral-800/75 hover:bg-purple-600 text-neutral-300 hover:text-white transition-all flex items-center gap-1 cursor-pointer"
         >
           <Play className="h-2.5 w-2.5" /> Jump to Scene
         </button>

@@ -1,5 +1,5 @@
 import React from "react";
-import { X, Film, Sparkles, Loader2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { X, Film, Sparkles, Loader2, PanelLeftClose, PanelLeftOpen, Layout, Video } from "lucide-react";
 import VideoPreviewMetadataPanel from "./MetadataPanel";
 import ProcessBar from "@/shared/ui/loading/ProcessBar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
@@ -18,10 +18,18 @@ export interface VideoPreviewHeaderProps {
   handleRenderFinalVideo?: () => void;
   progressStatus?: any;
   hasEnoughCredits?: boolean;
-  onOpenVideoEditor: () => void;
+  onOpenVideoEditor?: () => void;
   variant?: "floating" | "embedded";
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
+  activePreviewTab?: string;
+  setActivePreviewTab?: (tab: string) => void;
+  panelsCount?: number;
+  allowEditorTab?: boolean;
+  zoomLevel?: number;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onZoomReset?: () => void;
 }
 
 const getPreviewDisplayLabel = (
@@ -72,12 +80,20 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   variant = "floating",
   isSidebarOpen = true,
   onToggleSidebar,
+  activePreviewTab = "timeline",
+  setActivePreviewTab,
+  panelsCount = 0,
+  allowEditorTab = false,
+  zoomLevel,
+  onZoomIn,
+  onZoomOut,
+  onZoomReset,
 }) => {
   const previewLabel = getPreviewDisplayLabel(videoUrl, seriesTitle, chapterTitle, chapterNumber);
   const isFloating = variant !== "embedded";
 
   return (
-    <div className="relative flex items-center justify-between px-4 h-12 shrink-0 bg-[#09090e]/95 backdrop-blur-md border-b border-neutral-800/80 select-none">
+    <div className="relative flex items-center justify-between px-4 h-12 shrink-0 bg-[#09090e]/95 backdrop-blur-md border-b border-neutral-800/80 select-none gap-3">
       {/* Top gradient accent line */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
 
@@ -102,7 +118,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         {/* Divider */}
         <div className="w-px h-4 bg-neutral-800" />
 
-        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-[160px] sm:max-w-[240px] xl:max-w-[340px]">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-[160px] sm:max-w-[220px] xl:max-w-[300px]">
           <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.9)] shrink-0" />
           <h3
             className="font-black text-[10px] sm:text-[11px] text-white uppercase tracking-widest font-mono truncate"
@@ -112,7 +128,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           </h3>
         </div>
 
-        {isFloating && (
+        {isFloating && onOpenVideoEditor && (
           <button
             type="button"
             onClick={onOpenVideoEditor}
@@ -125,8 +141,76 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         )}
       </div>
 
-      {/* CENTRE: Flex spacer */}
-      <div className="flex-1 min-w-0" />
+      {/* CENTER: Contextual View Mode Tabs */}
+      <div className="flex items-center gap-1.5 bg-neutral-950/80 p-1 rounded-xl border border-neutral-800/80 shrink-0">
+        {!allowEditorTab && (
+          <button
+            type="button"
+            onClick={() => setActivePreviewTab?.("timeline")}
+            className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${
+              activePreviewTab === "timeline"
+                ? "bg-purple-600/30 border-purple-500/60 text-white shadow-[0_0_10px_rgba(168,85,247,0.2)]"
+                : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
+            }`}
+          >
+            <Layout className={`h-3 w-3 ${activePreviewTab === "timeline" ? "text-purple-400" : "text-neutral-500"}`} />
+            <span>Storyboard Live</span>
+            {panelsCount > 0 && (
+              <span className={`text-[8px] px-1 py-0.2 rounded font-black border ${
+                activePreviewTab === "timeline"
+                  ? "bg-purple-500/30 text-purple-200 border-purple-500/40"
+                  : "bg-neutral-900 text-neutral-500 border-neutral-800"
+              }`}>
+                {panelsCount}p
+              </span>
+            )}
+          </button>
+        )}
+
+        {/* Video Editor Live (shown in full Video Editor page) */}
+        {allowEditorTab && (
+          <button
+            type="button"
+            onClick={() => setActivePreviewTab?.("editor")}
+            className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${
+              activePreviewTab === "editor"
+                ? "bg-indigo-600/30 border-indigo-500/60 text-white shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+                : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
+            }`}
+          >
+            <Sparkles className={`h-3 w-3 ${activePreviewTab === "editor" ? "text-indigo-400" : "text-neutral-500"}`} />
+            <span>Video Editor Live</span>
+            <span className={`text-[8px] px-1 py-0.2 rounded font-black border ${
+              activePreviewTab === "editor"
+                ? "bg-indigo-500/25 text-indigo-200 border-indigo-500/40"
+                : "bg-neutral-900 text-neutral-500 border-neutral-800"
+            }`}>
+              CANVAS
+            </span>
+          </button>
+        )}
+
+        {/* Final Video — shown on BOTH pages always */}
+        <button
+          type="button"
+          onClick={() => setActivePreviewTab?.("video")}
+          className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${
+            activePreviewTab === "video"
+              ? "bg-emerald-600/25 border-emerald-500/50 text-white shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+              : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
+          }`}
+        >
+          <Video className={`h-3 w-3 ${activePreviewTab === "video" ? "text-emerald-400" : "text-neutral-500"}`} />
+          <span>Final Video</span>
+          <span className={`text-[8px] px-1 py-0.2 rounded font-black border ${
+            activePreviewTab === "video"
+              ? "bg-emerald-500/25 text-emerald-200 border-emerald-500/40"
+              : "bg-neutral-900 text-neutral-500 border-neutral-800"
+          }`}>
+            MP4
+          </span>
+        </button>
+      </div>
 
       {/* RIGHT: 3-Dots Options Menu | Export (floating only) | Close */}
       <div className="flex items-center gap-2 shrink-0">
@@ -142,8 +226,9 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           targetUrl={targetUrl}
         />
 
-        {/* Export Video ΓÇö only shown in floating panel (EditorPage) */}
-        {isFloating && handleRenderFinalVideo && (
+
+        {/* Export Video Button */}
+        {handleRenderFinalVideo && (
           <>
             {isRendering ? (
               /* Inline progress bar while rendering */

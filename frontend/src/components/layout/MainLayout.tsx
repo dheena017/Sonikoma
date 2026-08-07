@@ -25,6 +25,7 @@ export interface MainLayoutProps {
   isCreativeSuitePath: boolean;
   isImageEditorPage: boolean;
   isProEditorPage: boolean;
+  isVideoEditorPage: boolean;
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
   isTerminalOpen: boolean;

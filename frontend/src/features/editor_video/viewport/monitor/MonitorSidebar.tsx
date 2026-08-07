@@ -1,5 +1,5 @@
 import React from "react";
-import { Layout, Video, Layers, Film, Sparkles } from "lucide-react";
+import { Layers, Film, Sparkles } from "lucide-react";
 import {
   formatDisplayEpisodeLabel,
   getSortedEpisodeGroups,
@@ -36,55 +36,6 @@ const VideoPreviewSidebar: React.FC<VideoPreviewSidebarProps> = ({
         </span>
       </div>
 
-      {/* View Mode Tabs */}
-      <div className="px-3 py-3 space-y-1.5 shrink-0 border-b border-neutral-800/80">
-        {/* Storyboard Live */}
-        <button
-          type="button"
-          onClick={() => setActivePreviewTab?.("timeline")}
-          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold font-mono transition-all text-left cursor-pointer border ${
-            activePreviewTab === "timeline"
-              ? "bg-gradient-to-r from-purple-600/25 to-indigo-600/15 border-purple-500/50 text-white shadow-[0_0_12px_rgba(168,85,247,0.2),inset_0_0_12px_rgba(168,85,247,0.05)]"
-              : "bg-neutral-950/50 border-neutral-800/60 text-neutral-500 hover:text-neutral-200 hover:border-neutral-700 hover:bg-neutral-900/50"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Layout className={`h-3.5 w-3.5 ${activePreviewTab === "timeline" ? "text-purple-400" : "text-neutral-600"}`} />
-            <span>Storyboard Live</span>
-          </div>
-          <span className={`text-[9px] px-2 py-0.5 rounded-md border font-black ${
-            activePreviewTab === "timeline"
-              ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
-              : "bg-neutral-950 text-neutral-600 border-neutral-800"
-          }`}>
-            {panels.length}p
-          </span>
-        </button>
-
-        {/* Compiled Video */}
-        <button
-          type="button"
-          onClick={() => setActivePreviewTab?.("video")}
-          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold font-mono transition-all text-left cursor-pointer border ${
-            activePreviewTab === "video"
-              ? "bg-gradient-to-r from-emerald-600/20 to-teal-600/10 border-emerald-500/40 text-white shadow-[0_0_12px_rgba(16,185,129,0.15),inset_0_0_12px_rgba(16,185,129,0.04)]"
-              : "bg-neutral-950/50 border-neutral-800/60 text-neutral-500 hover:text-neutral-200 hover:border-neutral-700 hover:bg-neutral-900/50"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <Video className={`h-3.5 w-3.5 ${activePreviewTab === "video" ? "text-emerald-400" : "text-neutral-600"}`} />
-            <span>Compiled Video</span>
-          </div>
-          <span className={`text-[9px] px-2 py-0.5 rounded-md border font-black ${
-            activePreviewTab === "video"
-              ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-              : "bg-neutral-950 text-neutral-600 border-neutral-800"
-          }`}>
-            MP4
-          </span>
-        </button>
-      </div>
-
       {/* Episode Replays */}
       <div className="flex-1 overflow-hidden flex flex-col min-h-0 px-3 py-3 space-y-2">
         {/* Section Label */}
@@ -111,7 +62,10 @@ const VideoPreviewSidebar: React.FC<VideoPreviewSidebarProps> = ({
                 type="button"
                 title={`Jump to ${formatDisplayEpisodeLabel(grp.episodeLabel)} ΓÇö panel ${grp.startIndex + 1} ┬╖ ${grp.count} frames`}
                 onClick={() => {
-                  if (grp.startIndex !== undefined) setCurrentPanelIndex(grp.startIndex);
+                  if (grp.startIndex !== undefined) {
+                    setCurrentPanelIndex(grp.startIndex);
+                    setActivePreviewTab?.("timeline");
+                  }
                 }}
                 className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-neutral-950/40 hover:bg-purple-900/20 text-[11px] font-mono text-neutral-400 hover:text-white transition-all text-left border border-neutral-800/70 hover:border-purple-500/40 cursor-pointer active:scale-[0.98]"
               >

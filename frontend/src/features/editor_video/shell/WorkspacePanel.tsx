@@ -12,11 +12,13 @@ interface FeedbackToast {
 interface WorkspacePanelProps {
   defaultWorkspace?: WorkspaceId;
   onBackToApp?: () => void;
+  showContent?: boolean;
 }
 
 export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   defaultWorkspace = "story",
   onBackToApp,
+  showContent = true,
 }) => {
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>(defaultWorkspace);
   const [toasts, setToasts] = useState<FeedbackToast[]>([]);
@@ -69,18 +71,20 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
         onBackToApp={onBackToApp}
       />
 
-      <div
-        className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0c0a18]/98"
-        style={{
-          width: config.defaultWidth ? config.defaultWidth - 64 : undefined,
-        }}
-      >
-        <ActiveWorkspaceComponent
-          onTriggerFeedback={(msg) => {
-            editorEventBus.publish("MEDIA_ADDED", { assetId: "ast-" + Date.now(), title: msg, type: "generic" });
+      {showContent && (
+        <div
+          className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0a0814]/95 border-r border-purple-900/20 shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]"
+          style={{
+            width: config.defaultWidth ? config.defaultWidth - 64 : undefined,
           }}
-        />
-      </div>
+        >
+          <ActiveWorkspaceComponent
+            onTriggerFeedback={(msg) => {
+              editorEventBus.publish("MEDIA_ADDED", { assetId: "ast-" + Date.now(), title: msg, type: "generic" });
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };

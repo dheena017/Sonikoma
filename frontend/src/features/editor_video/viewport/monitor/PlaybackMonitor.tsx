@@ -36,6 +36,7 @@ interface PlayerPageProps {
   addNotification?: (msg: string, type: any) => void;
   variant?: "floating" | "theater" | "embedded";
   onCloseFloating?: () => void;
+  mode?: "timeline" | "video" | "editor" | string;
 }
 
 interface Chapter {
@@ -54,6 +55,7 @@ export default function VideoPreviewCinemaPlayer({
   addNotification,
   variant = "theater",
   onCloseFloating,
+  mode = "timeline",
 }: PlayerPageProps) {
   // Calculate total duration strictly from loaded video or panel track durations
   const isMock = !videoUrl && panels.length === 0;
@@ -967,29 +969,55 @@ export default function VideoPreviewCinemaPlayer({
       )}
 
       {/* MAIN SCREEN CANVAS */}
-      <div className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden">
-        <div className="relative w-full h-full flex items-center justify-center bg-[#060608]">
-          {videoUrl && !videoHasError ? (
-            <video
-              ref={videoRef}
-              src={getQualityVideoUrl(videoUrl, videoQuality) || undefined}
-              onLoadedMetadata={(e) => setVideoDuration(e.currentTarget.duration)}
-              onError={(e) => {
-                const vid = e.currentTarget;
-                if (videoUrl && vid.src !== videoUrl && !vid.dataset.masterFallback) {
-                  vid.dataset.masterFallback = "1";
-                  vid.src = videoUrl;
-                  return;
-                }
-                console.warn("[CinemaPlayer] Video failed to load, falling back to simulated mode.");
-                setVideoHasError(true);
-              }}
-              className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950"
-              style={{ width: "auto", height: "auto" }}
-              playsInline
-            />
-          ) : activePanelNow && activePanelImg ? (
-            <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950">
+      <div className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden bg-[#09090f] p-4">
+        {/* Workspace dot grid pattern */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#a855f7_1px,transparent_1px)] [background-size:16px_16px]" />
+
+        <div className="relative w-full h-full flex items-center justify-center bg-[#14141f] border border-purple-500/35 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] overflow-hidden">
+          {mode === "video" ? (
+            videoUrl && !videoHasError ? (
+              <video
+                ref={videoRef}
+                src={getQualityVideoUrl(videoUrl, videoQuality) || undefined}
+                onLoadedMetadata={(e) => setVideoDuration(e.currentTarget.duration)}
+                onError={(e) => {
+                  const vid = e.currentTarget;
+                  if (videoUrl && vid.src !== videoUrl && !vid.dataset.masterFallback) {
+                    vid.dataset.masterFallback = "1";
+                    vid.src = videoUrl;
+                    return;
+                  }
+                  console.warn("[CinemaPlayer] Video failed to load, falling back to simulated mode.");
+                  setVideoHasError(true);
+                }}
+                className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950"
+                style={{ width: "auto", height: "auto" }}
+                playsInline
+              />
+            ) : (
+              <div className="relative flex flex-col items-center justify-center text-center px-6 py-8 max-w-md my-auto select-none">
+                <div className="absolute -inset-6 bg-gradient-to-r from-emerald-600/20 via-teal-600/15 to-cyan-600/15 rounded-3xl blur-3xl opacity-75 animate-pulse pointer-events-none" />
+                <div className="relative w-full bg-neutral-900/80 backdrop-blur-2xl border border-emerald-500/30 rounded-3xl p-7 shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col items-center space-y-4 overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+                  <div className="relative pt-1">
+                    <div className="relative h-14 w-14 rounded-2xl bg-neutral-950/90 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                      <Video className="h-7 w-7 text-emerald-400" />
+                    </div>
+                  </div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-black uppercase tracking-widest">
+                    <span>Compiled MP4 Stream</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <h2 className="text-xl font-black text-white">No Compiled Video Yet</h2>
+                    <p className="text-xs text-neutral-400 max-w-xs leading-relaxed font-mono">
+                      Export your storyboard cut sequence to generate the final rendered MP4 video file.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )
+          ) : activePanelNow && (activePanelImg || activePanelNow.layers?.background_url) ? (
+            <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-purple-500/35 rounded-2xl shadow-2xl bg-[#14141f]">
               {activePanelNow.layers ? (
                 <div className="relative w-full h-full flex items-center justify-center">
                   <div className="absolute inset-0 w-full h-full flex items-center justify-center">

@@ -11,22 +11,22 @@ export const CharacterRosterCard: React.FC<CharacterRosterCardProps> = ({ charac
   return (
     <div
       onClick={onSelect}
-      className="p-2.5 rounded-xl bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/60 cursor-pointer transition-all flex items-center justify-between group shadow-sm"
+      className="p-3 rounded-[1.75rem] bg-[#07060f] border border-white/5 hover:border-purple-500/30 cursor-pointer transition-all flex items-center justify-between gap-3 group shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:shadow-[0_18px_48px_rgba(168,85,247,0.22)]"
     >
       <div className="flex items-center gap-3">
         <img
           src={character.avatar}
           alt={character.name}
-          className="w-10 h-10 rounded-full object-cover border border-purple-500/40"
+          className="w-12 h-12 rounded-full object-cover border border-purple-500/40"
         />
-        <div>
-          <div className="flex items-center gap-1.5">
-            <h4 className="text-xs font-bold text-white group-hover:text-purple-300">{character.name}</h4>
-            <span className="text-[8px] font-mono bg-purple-500/20 text-purple-300 px-1 rounded border border-purple-500/30">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <h4 className="text-sm font-semibold text-white group-hover:text-purple-100 truncate">{character.name}</h4>
+            <span className="text-[9px] font-semibold font-mono bg-purple-500/12 text-purple-200 px-2 py-0.5 rounded-full border border-purple-500/20 shrink-0">
               {character.role}
             </span>
           </div>
-          <p className="text-[10px] text-neutral-400 flex items-center gap-1">
+          <p className="text-[10px] text-neutral-400 flex items-center gap-1 mt-1">
             <Mic className="h-3 w-3 text-purple-400" />
             <span>{character.voiceActor}</span>
           </p>

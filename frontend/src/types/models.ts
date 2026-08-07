@@ -43,6 +43,7 @@ export interface PanelSyncMap {
 }
 
 export interface GeneratedPanel {
+  prompt: string;
   id: number;
   image_url: string;
   original_url?: string;
