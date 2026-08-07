@@ -1,30 +1,8 @@
-import React, { useState, useCallback } from "react";
-import { MiniSidebar, WorkspaceId } from "./MiniSidebar";
-import { MediaWorkspace } from "../workspaces/media/MediaWorkspace";
-import { CharactersWorkspace } from "../workspaces/characters/CharactersWorkspace";
-import { StoryWorkspace } from "../workspaces/story/StoryWorkspace";
-import { ElementsWorkspace } from "../workspaces/elements/ElementsWorkspace";
-import { TextWorkspace } from "../workspaces/text/TextWorkspace";
-import { AudioWorkspace } from "../workspaces/audio/AudioWorkspace";
-import { AiWorkspace } from "../workspaces/ai/AiWorkspace";
-import { TemplatesWorkspace } from "../workspaces/templates/TemplatesWorkspace";
-import { ResourcesWorkspace } from "../workspaces/resources/ResourcesWorkspace";
-import { MarketplaceWorkspace } from "../workspaces/marketplace/MarketplaceWorkspace";
-import { AppsWorkspace } from "../workspaces/apps/AppsWorkspace";
-
-const WORKSPACE_MAP: Record<WorkspaceId, React.ElementType<{ onTriggerFeedback: (msg: string) => void }>> = {
-  media:       MediaWorkspace,
-  characters:  CharactersWorkspace,
-  story:       StoryWorkspace,
-  elements:    ElementsWorkspace,
-  text:        TextWorkspace,
-  audio:       AudioWorkspace,
-  ai:          AiWorkspace,
-  templates:   TemplatesWorkspace,
-  resources:   ResourcesWorkspace,
-  marketplace: MarketplaceWorkspace,
-  apps:        AppsWorkspace,
-};
+import React, { useState, useCallback, useEffect } from "react";
+import { MiniSidebar } from "./MiniSidebar";
+import { WorkspaceId } from "../types/workspace.types";
+import { WORKSPACE_REGISTRY } from "../registry/workspaceRegistry";
+import { editorEventBus, useEditorEvent } from "../events/editorEventBus";
 
 interface FeedbackToast {
   id: number;
@@ -36,7 +14,10 @@ interface WorkspacePanelProps {
   onBackToApp?: () => void;
 }
 
-export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({ defaultWorkspace = "media", onBackToApp }) => {
+export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
+  defaultWorkspace = "story",
+  onBackToApp,
+}) => {
   const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>(defaultWorkspace);
   const [toasts, setToasts] = useState<FeedbackToast[]>([]);
 
@@ -46,7 +27,29 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({ defaultWorkspace
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 2800);
   }, []);
 
-  const ActiveWorkspaceComponent = WORKSPACE_MAP[activeWorkspace];
+  // ─── Subscribe to Event Bus Pipeline ─────────────────────────────────────
+  useEditorEvent("MEDIA_ADDED", (data) => {
+    triggerFeedback(`[EventBus] Media Added: "${data.title}" -> Timeline & Preview refreshed`);
+  });
+
+  useEditorEvent("TIMELINE_UPDATED", (data) => {
+    triggerFeedback(`[EventBus] Timeline Sync -> History saved (${data.clipsCount ?? 1} clips)`);
+  });
+
+  useEditorEvent("INSPECTOR_REFRESH", (data) => {
+    triggerFeedback(`[EventBus] Inspector Refresh -> Selected: ${data.layerName ?? "Layer"}`);
+  });
+
+  useEditorEvent("SCENE_CHANGED", (data) => {
+    triggerFeedback(`[EventBus] Scene Changed -> Scene #${data.sceneNumber}: ${data.title}`);
+  });
+
+  useEditorEvent("AI_TASK_TRIGGERED", (data) => {
+    triggerFeedback(`[EventBus] AI Task Started -> ${data.toolName}`);
+  });
+
+  const config = WORKSPACE_REGISTRY[activeWorkspace] || WORKSPACE_REGISTRY["story"];
+  const ActiveWorkspaceComponent = config.component;
 
   return (
     <div className="flex h-full overflow-hidden relative">
@@ -62,16 +65,27 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({ defaultWorkspace
         ))}
       </div>
 
-      {/* Mini Sidebar */}
+      {/* Mini Sidebar Nav */}
       <MiniSidebar
         activeWorkspace={activeWorkspace}
         onSelectWorkspace={setActiveWorkspace}
         onBackToApp={onBackToApp}
       />
 
-      {/* Workspace Content */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden" style={{ background: "rgba(12,10,24,0.98)" }}>
-        <ActiveWorkspaceComponent onTriggerFeedback={triggerFeedback} />
+      {/* Dynamic Registered Workspace Container */}
+      <div
+        className="flex-1 overflow-y-auto overflow-x-hidden"
+        style={{
+          background: "rgba(12,10,24,0.98)",
+          width: config.defaultWidth ? config.defaultWidth - 64 : undefined,
+        }}
+      >
+        <ActiveWorkspaceComponent
+          onTriggerFeedback={(msg) => {
+            // Also publish to event bus
+            editorEventBus.publish("MEDIA_ADDED", { assetId: "ast-" + Date.now(), title: msg, type: "generic" });
+          }}
+        />
       </div>
     </div>
   );

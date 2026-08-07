@@ -1,7 +1,9 @@
 export type WorkspaceId =
+  | "favorites"
+  | "recent"
+  | "story"
   | "media"
   | "characters"
-  | "story"
   | "elements"
   | "text"
   | "audio"
@@ -103,7 +105,7 @@ export interface TemplateProject {
 export interface ResourceItem {
   id: string;
   title: string;
-  category: "fonts" | "logos" | "colors" | "watermarks" | "intro" | "outro";
+  category: "fonts" | "logos" | "colors" | "watermarks" | "brushes" | "luts" | "overlays" | "intro" | "outro";
   detail: string;
   badge?: string;
   hex?: string;

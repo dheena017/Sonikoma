@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
 import { MEDIA_SUB_TABS, MOCK_MEDIA_ASSETS } from "../../data/mediaData";
-import { UploadCloud, FolderKanban, Play, Star } from "lucide-react";
+import { MediaWorkspaceHeader } from "./components/MediaWorkspaceHeader";
+import { MediaAiToolbar } from "./components/MediaAiToolbar";
+import { MediaUploadZone } from "./components/MediaUploadZone";
+import { MediaAssetCard } from "./components/MediaAssetCard";
 
 interface MediaWorkspaceProps {
   onTriggerFeedback: (msg: string) => void;
@@ -27,41 +30,30 @@ export const MediaWorkspace: React.FC<MediaWorkspaceProps> = ({
 
   return (
     <WorkspaceLayout>
-      <WorkspaceLayout.Header title="Media Workspace" />
-      <WorkspaceLayout.Tabs tabs={MEDIA_SUB_TABS} activeTab={activeTab} onSelectTab={setActiveTab} />
-      <WorkspaceLayout.Search value={searchQuery} onChange={setSearchQuery} placeholder="Search media assets, panels, stock..." />
-      <WorkspaceLayout.Content>
-        {/* Upload dropzone */}
-        <div
-          onClick={() => onTriggerFeedback("File browser opened!")}
-          className="rounded-2xl border-2 border-dashed border-neutral-700 hover:border-purple-500/70 bg-neutral-900/40 p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all space-y-2"
-        >
-          <UploadCloud className="h-6 w-6 text-purple-400" />
-          <p className="text-xs font-bold text-white">Upload MP4 · PNG · MP3</p>
-          <span className="text-[9px] text-neutral-400 font-mono">Drag &amp; drop or click to browse</span>
-        </div>
+      {/* Dedicated Separated Header — contains Tabs + Search inside */}
+      <MediaWorkspaceHeader
+        onUpload={() => onTriggerFeedback("File upload browser opened!")}
+        tabs={MEDIA_SUB_TABS}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
-        {/* Media Grid */}
+      {/* Contextual AI Action Bar Component */}
+      <MediaAiToolbar onTriggerFeedback={onTriggerFeedback} />
+      <WorkspaceLayout.Content>
+        {/* Upload dropzone Component */}
+        <MediaUploadZone onOpenBrowser={() => onTriggerFeedback("File browser opened!")} />
+
+        {/* Media Grid Component List */}
         <div className="grid grid-cols-2 gap-2 pt-2">
           {filteredAssets.map((asset) => (
-            <div
+            <MediaAssetCard
               key={asset.id}
-              onClick={() => onTriggerFeedback(`Added "${asset.title}" to project`)}
-              className="relative rounded-xl overflow-hidden border border-neutral-800 bg-neutral-900 h-28 cursor-pointer group hover:border-purple-500/60 transition-all flex flex-col justify-between p-2"
-            >
-              <img src={asset.url} alt={asset.title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-              <div className="relative z-10 flex justify-between items-center">
-                <span className="text-[8px] font-mono font-bold bg-black/80 text-white px-1.5 py-0.5 rounded backdrop-blur-sm border border-white/10">
-                  {asset.badge}
-                </span>
-                <Star className="h-3 w-3 text-neutral-400 hover:text-amber-400" />
-              </div>
-              <div className="relative z-10">
-                <p className="text-[10px] font-bold text-white truncate drop-shadow">{asset.title}</p>
-                {asset.duration && <span className="text-[8px] text-neutral-300 font-mono">{asset.duration}</span>}
-              </div>
-            </div>
+              asset={asset}
+              onSelect={() => onTriggerFeedback(`Added "${asset.title}" to project`)}
+            />
           ))}
         </div>
       </WorkspaceLayout.Content>

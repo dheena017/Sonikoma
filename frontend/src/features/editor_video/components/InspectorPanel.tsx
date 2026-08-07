@@ -14,6 +14,7 @@ import {
   EyeOff,
   RotateCcw,
   Film,
+  Sliders,
 } from "lucide-react";
 
 // ──────────────────────────────────────────────────────────────
@@ -35,18 +36,20 @@ const Section: React.FC<{ section: InspectorSection }> = ({ section }) => {
   const { Icon } = section;
 
   return (
-    <div className="border-b border-neutral-800/60">
+    <div className="border-b border-purple-900/20">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-3 py-2 hover:bg-neutral-800/30 transition-colors cursor-pointer"
+        className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/5 transition-colors cursor-pointer"
       >
-        <div className="flex items-center gap-1.5">
-          <Icon className="h-3.5 w-3.5 text-neutral-400" />
-          <span className="text-[10px] font-mono font-bold text-neutral-300 uppercase tracking-wider">{section.label}</span>
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-5 rounded-lg bg-purple-900/40 border border-purple-500/30 flex items-center justify-center">
+            <Icon className="h-3 w-3 text-purple-400" />
+          </div>
+          <span className="text-[10px] font-mono font-bold text-neutral-200 uppercase tracking-widest">{section.label}</span>
         </div>
-        {open ? <ChevronUp className="h-3 w-3 text-neutral-500" /> : <ChevronDown className="h-3 w-3 text-neutral-500" />}
+        {open ? <ChevronUp className="h-3 w-3 text-neutral-400" /> : <ChevronDown className="h-3 w-3 text-neutral-500" />}
       </button>
-      {open && <div className="px-3 pb-3 space-y-2">{section.children}</div>}
+      {open && <div className="px-3 pb-3 pt-1 space-y-2.5">{section.children}</div>}
     </div>
   );
 };
@@ -66,7 +69,7 @@ const NumberField: React.FC<{ label: string; value: number; min?: number; max?: 
         min={min} max={max} step={step}
         value={val}
         onChange={(e) => setVal(Number(e.target.value))}
-        className="w-16 bg-neutral-900 border border-neutral-700 rounded-lg text-right text-[10px] text-white font-mono px-1.5 py-0.5 focus:outline-none focus:border-purple-500"
+        className="w-16 bg-neutral-900/90 border border-neutral-800 focus:border-purple-500/80 rounded-lg text-right text-[10px] text-purple-300 font-mono px-2 py-0.5 outline-none transition-all shadow-inner"
       />
     </div>
   );
@@ -78,9 +81,9 @@ const SliderField: React.FC<{ label: string; value: number; min?: number; max?: 
   const [val, setVal] = useState(value);
   return (
     <div className="space-y-1">
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <span className="text-[9px] font-mono text-neutral-400">{label}</span>
-        <span className="text-[9px] font-mono text-white font-bold">{val}%</span>
+        <span className="text-[9px] font-mono text-purple-300 font-bold">{val}%</span>
       </div>
       <input
         type="range" min={min} max={max} value={val}
@@ -96,12 +99,12 @@ const ColorField: React.FC<{ label: string; value: string }> = ({ label, value }
   return (
     <div className="flex items-center justify-between">
       <span className="text-[9px] font-mono text-neutral-400">{label}</span>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         <input type="color" value={val} onChange={(e) => setVal(e.target.value)}
-          className="h-5 w-5 rounded cursor-pointer border-0 bg-transparent p-0"
+          className="h-5 w-5 rounded-md cursor-pointer border border-neutral-700 bg-transparent p-0 overflow-hidden"
           style={{ WebkitAppearance: "none" }}
         />
-        <span className="text-[9px] font-mono text-neutral-400">{val.toUpperCase()}</span>
+        <span className="text-[9px] font-mono text-neutral-300 font-bold uppercase">{val}</span>
       </div>
     </div>
   );
@@ -114,7 +117,7 @@ const SelectField: React.FC<{ label: string; options: string[]; value: string }>
       <span className="text-[9px] font-mono text-neutral-400 shrink-0">{label}</span>
       <select
         value={val} onChange={(e) => setVal(e.target.value)}
-        className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg text-[9px] font-mono text-white px-1.5 py-0.5 focus:outline-none focus:border-purple-500 cursor-pointer"
+        className="flex-1 bg-neutral-900/90 border border-neutral-800 rounded-lg text-[9px] font-mono text-purple-200 px-2 py-1 outline-none focus:border-purple-500 cursor-pointer"
       >
         {options.map((o) => <option key={o}>{o}</option>)}
       </select>
@@ -156,7 +159,7 @@ export const InspectorPanel: React.FC = () => {
         <>
           <SliderField label="Opacity" value={100} />
           <SelectField label="Blend Mode" options={["Normal", "Multiply", "Screen", "Overlay", "Soft Light", "Difference"]} value="Normal" />
-          <ColorField label="Tint Color" value="#ffffff" />
+          <ColorField label="Tint Color" value="#a855f7" />
           <SliderField label="Brightness" value={100} />
           <SliderField label="Contrast" value={100} />
           <SliderField label="Saturation" value={100} />
@@ -217,11 +220,11 @@ export const InspectorPanel: React.FC = () => {
         <>
           <div className="space-y-1">
             {["Background", "Panel 01", "Character A", "FX Overlay", "Dialogue"].map((layer, i) => (
-              <div key={layer} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-neutral-800/50 cursor-pointer">
-                <Eye className="h-3 w-3 text-neutral-400 hover:text-white" />
+              <div key={layer} className="flex items-center gap-2 p-1.5 rounded-lg bg-neutral-900/60 border border-neutral-800/80 hover:border-purple-500/50 cursor-pointer transition-all">
+                <Eye className="h-3 w-3 text-purple-400 hover:text-white" />
                 <Lock className="h-3 w-3 text-neutral-600 hover:text-white" />
                 <span className="text-[10px] text-white font-mono flex-1">{layer}</span>
-                <span className="text-[8px] text-neutral-500 font-mono">L{i + 1}</span>
+                <span className="text-[8px] text-purple-300 font-mono bg-purple-500/20 px-1 rounded">L{i + 1}</span>
               </div>
             ))}
           </div>
@@ -232,28 +235,30 @@ export const InspectorPanel: React.FC = () => {
 
   return (
     <div
-      className="h-full flex flex-col overflow-hidden"
-      style={{ background: "rgba(10,8,20,0.97)", borderLeft: "1px solid rgba(139,92,246,0.1)" }}
+      className="h-full flex flex-col overflow-hidden bg-gradient-to-b from-[#0c0a1a] via-[#090714] to-[#05040a] text-white select-none backdrop-blur-2xl border-l border-purple-900/20"
     >
       {/* Inspector Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-neutral-800/60 shrink-0">
-        <span className="text-[10px] font-mono font-bold text-neutral-300 uppercase tracking-widest">Inspector</span>
+      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-purple-900/20 bg-neutral-950/70 backdrop-blur-md shrink-0">
+        <div className="flex items-center gap-2">
+          <Sliders className="h-3.5 w-3.5 text-purple-400" />
+          <span className="text-xs font-mono font-bold text-white uppercase tracking-widest">Inspector</span>
+        </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setLocked((v) => !v)}
             title={locked ? "Unlock" : "Lock"}
-            className="p-1 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
           >
-            <Lock className={`h-3 w-3 ${locked ? "text-amber-400" : "text-neutral-500"}`} />
+            <Lock className={`h-3.5 w-3.5 ${locked ? "text-amber-400" : "text-neutral-500"}`} />
           </button>
-          <button title="Reset All" className="p-1 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer">
-            <RotateCcw className="h-3 w-3 text-neutral-500" />
+          <button title="Reset All" className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+            <RotateCcw className="h-3.5 w-3.5 text-neutral-500 hover:text-white" />
           </button>
           <button
             onClick={() => setVisible((v) => !v)}
-            className="p-1 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
           >
-            {visible ? <Eye className="h-3 w-3 text-neutral-500" /> : <EyeOff className="h-3 w-3 text-neutral-500" />}
+            {visible ? <Eye className="h-3.5 w-3.5 text-purple-400" /> : <EyeOff className="h-3.5 w-3.5 text-neutral-500" />}
           </button>
         </div>
       </div>
@@ -261,14 +266,14 @@ export const InspectorPanel: React.FC = () => {
       {/* No selection empty state */}
       {!visible && (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center p-4">
-          <ZoomIn className="h-6 w-6 text-neutral-600" />
-          <p className="text-[10px] font-mono text-neutral-500">Select a layer<br />to inspect its properties</p>
+          <ZoomIn className="h-6 w-6 text-purple-400/50 animate-pulse" />
+          <p className="text-[10px] font-mono text-neutral-400">Select a layer on timeline<br />to inspect properties</p>
         </div>
       )}
 
       {/* Sections */}
       {visible && (
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto [scrollbar-width:none]">
           {sections.map((s) => (
             <Section key={s.id} section={s} />
           ))}

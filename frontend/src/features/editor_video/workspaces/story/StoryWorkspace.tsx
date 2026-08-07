@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
 import { STORY_SUB_TABS, MOCK_STORY_SCENES } from "../../data/storyData";
-import { BookOpen, FileText, Scan, Clock, Sparkles } from "lucide-react";
+import { BookOpen, FileText, Scan } from "lucide-react";
+import { StoryWorkspaceHeader } from "./components/StoryWorkspaceHeader";
+import { StoryPipelineBreadcrumb } from "./components/StoryPipelineBreadcrumb";
+import { StoryAiToolbar } from "./components/StoryAiToolbar";
+import { StorySceneCard } from "./components/StorySceneCard";
 
 interface StoryWorkspaceProps {
   onTriggerFeedback: (msg: string) => void;
@@ -13,47 +17,65 @@ export const StoryWorkspace: React.FC<StoryWorkspaceProps> = ({
   const [activeTab, setActiveTab] = useState("Scenes");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const pipelineSteps = [
+    { label: "Project", active: true },
+    { label: "Story", active: true },
+    { label: "Scenes", active: activeTab === "Scenes" || activeTab === "Storyboard" },
+    { label: "Panels", active: activeTab === "Storyboard" },
+    { label: "Timeline", active: activeTab === "Timeline" },
+    { label: "Video", active: false },
+  ];
+
   return (
     <WorkspaceLayout>
-      <WorkspaceLayout.Header title="Story Workspace" />
-      <WorkspaceLayout.Tabs tabs={STORY_SUB_TABS} activeTab={activeTab} onSelectTab={setActiveTab} />
-      <WorkspaceLayout.Search value={searchQuery} onChange={setSearchQuery} placeholder="Search script, scenes, dialogue lines..." />
+      {/* Dedicated Separated Header — contains Tabs + Search inside */}
+      <StoryWorkspaceHeader
+        tabs={STORY_SUB_TABS}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+
+      {/* Visual Narrative Pipeline Breadcrumb Component */}
+      <StoryPipelineBreadcrumb steps={pipelineSteps} />
+
+      {/* Contextual AI Action Bar Component */}
+      <StoryAiToolbar onTriggerFeedback={onTriggerFeedback} />
+      
       <WorkspaceLayout.Content>
-        {/* Scenes / Breakdown View */}
+        {/* Scenes / Storyboard / Script View */}
         {(activeTab === "Scenes" || activeTab === "Storyboard" || activeTab === "Script") && (
           <div className="space-y-3">
+            {/* Header Action Bar */}
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">Scene Script Sequence</span>
+              <div className="flex items-center gap-1.5">
+                <BookOpen className="h-3.5 w-3.5 text-purple-400" />
+                <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                  {activeTab === "Script" ? "Full Narrative Script" : "Scene Sequence Breakdown"}
+                </span>
+              </div>
               <button
-                onClick={() => onTriggerFeedback("OCR Speech Extractor scanning page...")}
-                className="px-2 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer"
+                onClick={() => onTriggerFeedback("AI Vision scanning pages & building scene breakdown...")}
+                className="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shadow-[0_0_10px_rgba(168,85,247,0.4)]"
               >
                 <Scan className="h-3 w-3" />
-                <span>Run OCR Scan</span>
+                <span>Auto-Parse Story</span>
               </button>
             </div>
+
+            {/* Scenes List using StorySceneCard Component */}
             <div className="space-y-2">
               {MOCK_STORY_SCENES.map((scene) => (
-                <div
+                <StorySceneCard
                   key={scene.id}
-                  onClick={() => onTriggerFeedback(`Opened Scene #${scene.sceneNumber}: ${scene.title}`)}
-                  className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/60 cursor-pointer transition-all space-y-2 group"
-                >
-                  <div className="flex items-center justify-between border-b border-neutral-800 pb-1.5">
-                    <span className="text-[10px] font-mono font-bold text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20">
-                      Scene #{scene.sceneNumber}
-                    </span>
-                    <span className="text-[9px] font-mono text-neutral-400 flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {scene.duration} • {scene.panelCount} Panels
-                    </span>
-                  </div>
-                  <h4 className="text-xs font-bold text-white group-hover:text-purple-300">{scene.title}</h4>
-                  <div className="space-y-1 text-[10px]">
-                    <p className="text-neutral-300 font-mono italic">“{scene.dialogue}”</p>
-                    <p className="text-neutral-400 leading-tight">{scene.narration}</p>
-                  </div>
-                </div>
+                  scene={scene}
+                  onSelectScene={() => onTriggerFeedback(`Selected Scene #${scene.sceneNumber}: ${scene.title}`)}
+                  onJumpToScene={(e) => {
+                    e.stopPropagation();
+                    onTriggerFeedback(`Jumped timeline playhead to Scene #${scene.sceneNumber}`);
+                  }}
+                />
               ))}
             </div>
           </div>
@@ -61,20 +83,27 @@ export const StoryWorkspace: React.FC<StoryWorkspaceProps> = ({
 
         {/* Other Story Subtabs */}
         {["Timeline", "Narration", "Dialogue", "Notes"].includes(activeTab) && (
-          <div className="p-4 rounded-xl bg-neutral-900/60 border border-neutral-800 text-center space-y-2">
-            <FileText className="h-6 w-6 text-purple-400 mx-auto" />
-            <h4 className="text-xs font-bold text-white">{activeTab} Editor Active</h4>
-            <p className="text-[10px] text-neutral-400">Edit panel text, narration monologues, and scene timing details.</p>
+          <div className="p-4 rounded-xl bg-neutral-900/60 border border-neutral-800 text-center space-y-3">
+            <div className="h-10 w-10 rounded-xl bg-purple-900/40 border border-purple-500/30 flex items-center justify-center mx-auto">
+              <FileText className="h-5 w-5 text-purple-400" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-white">{activeTab} Manager</h4>
+              <p className="text-[10px] text-neutral-400 mt-1">
+                Refine story flow, narration voiceovers, dialogue captions, and director notes.
+              </p>
+            </div>
             <button
-              onClick={() => onTriggerFeedback(`Updated ${activeTab}`)}
-              className="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-xs font-mono font-bold"
+              onClick={() => onTriggerFeedback(`Updated ${activeTab} details`)}
+              className="px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-mono font-bold transition-all shadow-[0_0_10px_rgba(168,85,247,0.3)]"
             >
-              Save {activeTab} Edits
+              Save {activeTab} Changes
             </button>
           </div>
         )}
       </WorkspaceLayout.Content>
-      <WorkspaceLayout.Footer text="Sonikoma Script & Narration Engine" />
+      
+      <WorkspaceLayout.Footer text="Sonikoma Narrative Engine — Story Drives Everything" />
     </WorkspaceLayout>
   );
 };

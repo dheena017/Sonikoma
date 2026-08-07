@@ -1,5 +1,5 @@
-import React from "react";
-import { Search, Filter, Maximize2, X, Check, Play, Pause } from "lucide-react";
+import React, { useState } from "react";
+import { Search, Filter, Maximize2, X, Check, Play, Pause, Star, Sparkles, ChevronRight, ChevronLeft } from "lucide-react";
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
@@ -13,7 +13,7 @@ export const WorkspaceLayoutRoot: React.FC<WorkspaceLayoutProps> = ({
 }) => {
   return (
     <div
-      className={`h-full w-full flex flex-col bg-[#0c0c12] text-white select-none overflow-hidden ${className}`}
+      className={`h-full w-full flex flex-col bg-gradient-to-b from-[#0e0c1a] via-[#0a0814] to-[#06050c] text-white select-none overflow-hidden backdrop-blur-2xl ${className}`}
     >
       {children}
     </div>
@@ -26,33 +26,55 @@ interface HeaderProps {
   isExpanded?: boolean;
   onToggleExpand?: () => void;
   onClose?: () => void;
+  onToggleFavorite?: (starred: boolean) => void;
 }
 export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
   title,
   isExpanded,
   onToggleExpand,
   onClose,
+  onToggleFavorite,
 }) => {
+  const [isStarred, setIsStarred] = useState(false);
+
   return (
-    <div className="p-3 border-b border-neutral-800/70 bg-[#09090f] flex items-center justify-between shrink-0">
-      <h2 className="text-sm font-bold text-white tracking-tight">{title}</h2>
-      <div className="flex items-center gap-1.5">
+    <div className="px-3.5 py-2.5 border-b border-purple-900/20 bg-neutral-950/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-sm">
+      <div className="flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+        <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">{title}</h2>
+        <button
+          onClick={() => {
+            const next = !isStarred;
+            setIsStarred(next);
+            if (onToggleFavorite) onToggleFavorite(next);
+          }}
+          title={isStarred ? "Remove from Favorites" : "Add to Favorites"}
+          className="p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+        >
+          <Star
+            className={`h-3.5 w-3.5 transition-all ${
+              isStarred ? "text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" : "text-neutral-500 hover:text-amber-300"
+            }`}
+          />
+        </button>
+      </div>
+      <div className="flex items-center gap-1">
         {onToggleExpand && (
           <button
             onClick={onToggleExpand}
             title={isExpanded ? "Collapse panel" : "Expand panel"}
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
-            <Maximize2 className="h-4 w-4" />
+            <Maximize2 className="h-3.5 w-3.5" />
           </button>
         )}
         {onClose && (
           <button
             onClick={onClose}
             title="Close"
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
@@ -71,25 +93,57 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
   activeTab,
   onSelectTab,
 }) => {
+  const tabsRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollTabs = (direction: "left" | "right") => {
+    if (tabsRef.current) {
+      const amount = direction === "left" ? -120 : 120;
+      tabsRef.current.scrollBy({ left: amount, behavior: "smooth" });
+    }
+  };
+
   return (
-    <div className="px-3 border-b border-neutral-800/70 flex items-center gap-4 overflow-x-auto [scrollbar-width:none] shrink-0 bg-[#09090f] text-xs font-semibold">
-      {tabs.map((tab) => {
-        const isActive = activeTab.toLowerCase() === tab.toLowerCase();
-        return (
-          <button
-            key={tab}
-            onClick={() => onSelectTab(tab)}
-            className={`py-2 relative transition-all whitespace-nowrap cursor-pointer ${
-              isActive ? "text-white font-bold" : "text-neutral-400 hover:text-neutral-200"
-            }`}
-          >
-            <span>{tab}</span>
-            {isActive && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-purple-500 rounded-full animate-fade-in" />
-            )}
-          </button>
-        );
-      })}
+    <div className="relative group/tabs shrink-0 bg-neutral-950/60 backdrop-blur-md border-b border-purple-900/25 flex items-center">
+      {/* Scroll Left Button */}
+      <button
+        onClick={() => scrollTabs("left")}
+        title="Scroll left"
+        className="absolute left-0 z-10 h-full px-1 bg-gradient-to-r from-neutral-950 via-neutral-950/90 to-transparent text-neutral-400 hover:text-white transition-opacity cursor-pointer opacity-0 group-hover/tabs:opacity-100 flex items-center justify-center"
+      >
+        <ChevronLeft className="h-3.5 w-3.5" />
+      </button>
+
+      {/* Tabs Container */}
+      <div
+        ref={tabsRef}
+        className="px-3 py-2 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden w-full"
+      >
+        {tabs.map((tab) => {
+          const isActive = activeTab.toLowerCase() === tab.toLowerCase();
+          return (
+            <button
+              key={tab}
+              onClick={() => onSelectTab(tab)}
+              className={`relative px-3 py-1.5 rounded-xl text-[10px] font-mono font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 ${
+                isActive
+                  ? "bg-purple-600/35 text-purple-200 border border-purple-500/70 shadow-[0_0_12px_rgba(168,85,247,0.35),inset_0_1px_0_rgba(255,255,255,0.15)]"
+                  : "text-neutral-400 border border-neutral-800/80 hover:text-white hover:bg-white/5 hover:border-neutral-700"
+              }`}
+            >
+              {tab}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Scroll Right Button (">" arrow icon) */}
+      <button
+        onClick={() => scrollTabs("right")}
+        title="Scroll right"
+        className="absolute right-0 z-10 h-full px-1.5 bg-gradient-to-l from-neutral-950 via-neutral-950/90 to-transparent text-neutral-300 hover:text-purple-300 transition-all cursor-pointer flex items-center justify-center shadow-md hover:scale-110"
+      >
+        <ChevronRight className="h-4 w-4 drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+      </button>
     </div>
   );
 };
@@ -104,28 +158,28 @@ interface SearchProps {
 export const WorkspaceLayoutSearch: React.FC<SearchProps> = ({
   value,
   onChange,
-  placeholder = "Search...",
+  placeholder = "Search assets...",
   onFilterClick,
 }) => {
   return (
-    <div className="p-3 bg-[#09090f] border-b border-neutral-800/60 flex items-center gap-2 shrink-0">
+    <div className="px-3 py-2 bg-neutral-950/70 border-b border-purple-900/25 flex items-center gap-2 shrink-0">
       <div className="flex-1 relative">
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-neutral-900 border border-neutral-800 text-xs text-white rounded-full pl-9 pr-3 py-2 outline-none focus:border-purple-500 transition-all placeholder:text-neutral-500"
+          className="w-full bg-[#120f24]/90 border border-neutral-800/90 focus:border-purple-500/80 focus:shadow-[0_0_14px_rgba(168,85,247,0.3)] text-[11px] text-white rounded-2xl pl-8 pr-3 py-1.5 outline-none transition-all placeholder:text-neutral-500 font-mono tracking-tight"
         />
-        <Search className="h-4 w-4 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+        <Search className="h-3.5 w-3.5 text-neutral-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
       </div>
       {onFilterClick && (
         <button
           onClick={onFilterClick}
           title="Filter options"
-          className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-purple-500/50 transition-colors cursor-pointer shrink-0"
+          className="p-1.5 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-purple-500/50 transition-colors cursor-pointer shrink-0"
         >
-          <Filter className="h-4 w-4" />
+          <Filter className="h-3.5 w-3.5" />
         </button>
       )}
     </div>
@@ -146,19 +200,20 @@ export const WorkspaceLayoutPromptBox: React.FC<PromptBoxProps> = ({
   placeholder = "Describe prompt...",
 }) => {
   return (
-    <div className="p-3 bg-purple-950/20 border-b border-purple-900/30 flex flex-col gap-2 shrink-0">
+    <div className="p-3 bg-gradient-to-br from-purple-950/30 via-indigo-950/20 to-black/40 border-b border-purple-900/40 flex flex-col gap-2 shrink-0">
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={2}
-        className="w-full bg-neutral-900 border border-neutral-800 text-xs text-white rounded-xl p-2.5 outline-none focus:border-purple-500 transition-all resize-none"
+        className="w-full bg-neutral-900/90 border border-neutral-800 text-xs text-white rounded-xl p-2.5 outline-none focus:border-purple-500 transition-all resize-none font-mono shadow-inner"
       />
       <button
         onClick={onSubmit}
-        className="w-full py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-mono font-bold border border-purple-400/40 shadow transition-all cursor-pointer"
+        className="w-full py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-mono font-bold border border-purple-400/40 shadow-[0_4px_14px_rgba(168,85,247,0.35)] transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
       >
-        Generate AI Output
+        <Sparkles className="h-3.5 w-3.5 text-purple-200" />
+        <span>Generate AI Output</span>
       </button>
     </div>
   );
@@ -169,7 +224,7 @@ export const WorkspaceLayoutContent: React.FC<{ children: React.ReactNode }> = (
   children,
 }) => {
   return (
-    <div className="flex-1 min-h-0 relative overflow-y-auto p-3 space-y-4 [scrollbar-width:none]">
+    <div className="flex-1 min-h-0 relative overflow-y-auto p-3 space-y-3 [scrollbar-width:none]">
       {children}
     </div>
   );
@@ -180,7 +235,7 @@ export const WorkspaceLayoutFooter: React.FC<{ text?: string }> = ({
   text = "Powered by Sonikoma Comic Studio Engine",
 }) => {
   return (
-    <div className="p-2 border-t border-neutral-800/60 bg-[#09090f] text-center text-[10px] text-neutral-500 shrink-0 font-sans">
+    <div className="p-2 border-t border-purple-900/20 bg-neutral-950/80 text-center text-[9px] text-neutral-500 shrink-0 font-mono tracking-wide">
       <span>{text}</span>
     </div>
   );

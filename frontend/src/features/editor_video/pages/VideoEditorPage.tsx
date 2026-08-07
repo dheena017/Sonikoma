@@ -133,8 +133,8 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
       <div className="flex-1 flex min-h-0 relative">
         {/* Left: Workspace Panel (MiniSidebar + active workspace) */}
         {layoutConfig.mediaBin && (
-          <div className="h-full shrink-0 flex" style={{ width: 340 }}>
-            <WorkspacePanel defaultWorkspace="media" onBackToApp={handleReturn} />
+          <div className="h-full shrink-0 flex" style={{ width: 380 }}>
+            <WorkspacePanel defaultWorkspace="story" onBackToApp={handleReturn} />
           </div>
         )}
 
