@@ -66,7 +66,7 @@ def test_panel_bounds_absolute_percentages():
 
 def test_export_multi_stage_debug_images(tmp_path):
     from PIL import Image
-    from services.image.debug_visualizer import export_multi_stage_debug_images
+    from services.image.panel_detection.debug_visualizer import export_multi_stage_debug_images
 
     # Create dummy image
     img = Image.new("RGB", (400, 800), color=(255, 255, 255))
