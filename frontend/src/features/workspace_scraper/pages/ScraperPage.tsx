@@ -31,7 +31,6 @@ import WorkspaceStatsBar from "@/features/workspace_scraper/components/Workspace
 import DirectToolsLaunchpad from "@/features/workspace_scraper/components/DirectToolsLaunchpad";
 import RecentProjectsSection from "@/features/workspace_scraper/components/RecentProjectsSection";
 import CreatorGuideSection from "@/features/workspace_scraper/components/CreatorGuideSection";
-import { EpisodeScraper } from "@/features/workspace_scraper/episode-scraper/components/EpisodeScraper";
 import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 import { useProjectStore } from "@/store/useProjectStore";
@@ -158,27 +157,6 @@ const KEYBOARD_SHORTCUTS = [
 export type AppWorkspaceProps = ScraperPageProps;
 
 const ScraperPageInner = (props: ScraperPageProps) => {
-  const [showEpisodeScraper, setShowEpisodeScraper] = useState(false);
-
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const paramUrl = params.get("url");
-      const stored = localStorage.getItem("episode_scraper_url");
-      if (paramUrl || stored) {
-        setShowEpisodeScraper(true);
-        // if query param present, remove it from URL to clean up
-        if (paramUrl) {
-          params.delete("url");
-          const newSearch = params.toString();
-          const newUrl = window.location.pathname + (newSearch ? "?" + newSearch : "");
-          window.history.replaceState(null, "", newUrl);
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
-  }, []);
   const [recentProjects, setRecentProjects] = useState<StoredProject[]>([]);
   const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -684,37 +662,9 @@ const ScraperPageInner = (props: ScraperPageProps) => {
                 window.history.pushState({}, "", targetPath);
                 window.dispatchEvent(new Event("popstate"));
               }
-              setShowEpisodeScraper(true);
             }}
           />
         </div>
-
-        {showEpisodeScraper && (
-          <div className="w-full mt-6">
-            <EpisodeScraper
-              addNotification={addNotification}
-              fetchWithInterceptor={(window as any).fetch}
-              isStandalone={false}
-              onEpisodeSelect={(episode) => {
-                const temporaryProjectId = `temp_${Date.now()}_${Math.random()
-                  .toString(36)
-                  .substring(2, 10)}`;
-                localStorage.setItem("auto_import_url", episode.url);
-                navigateTo?.(`/scraper/editor?id=${temporaryProjectId}`);
-              }}
-              onMultipleEpisodesSelect={(episodes) => {
-                if (episodes.length > 0) {
-                  const temporaryProjectId = `temp_${Date.now()}_${Math.random()
-                    .toString(36)
-                    .substring(2, 10)}`;
-                  localStorage.setItem("auto_import_batch", JSON.stringify(episodes));
-                  localStorage.setItem("auto_import_url", episodes[0].url);
-                  navigateTo?.(`/scraper/editor?id=${temporaryProjectId}`);
-                }
-              }}
-            />
-          </div>
-        )}
 
         {/* 2. SAMPLE PRESETS SELECTOR */}
         <div className="w-full bg-[#111116]/60 border border-neutral-800/80 rounded-3xl p-6 backdrop-blur-md space-y-4">
