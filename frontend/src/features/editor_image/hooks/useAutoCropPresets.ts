@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import {
   CustomCropPreset,
   AutoCropSharedProps,
-} from "@/features/workspace_scraper/components/tabTypes";
+} from "@/features/editor_imported_images/components/tabTypes";
 import { useConfigHistory } from "@/shared/hooks/useConfigHistory";
 
 export function useAutoCropPresets(props: AutoCropSharedProps) {

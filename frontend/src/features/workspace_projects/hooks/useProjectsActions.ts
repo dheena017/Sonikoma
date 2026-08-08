@@ -29,16 +29,16 @@ export interface UseProjectsActionsHandlers {
 
 export function useProjectsActions(): UseProjectsActionsHandlers {
   const handleNewSeries = useCallback(() => {
-    (window as any).navigateTo?.("/workspace");
+    (window as any).navigateTo?.("/scraper");
   }, []);
 
   const handleOpenProject = useCallback((project: Project) => {
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
       );
     } else {
-      (window as any).navigateTo?.(`/workspace/editor?id=${project.project_id}`);
+      (window as any).navigateTo?.(`/scraper/editor?id=${project.project_id}`);
     }
   }, []);
 
@@ -96,11 +96,11 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
     e.stopPropagation();
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
       );
     } else {
       (window as any).navigateTo?.(
-        `/workspace/editor?id=${project.project_id}`
+        `/scraper/editor?id=${project.project_id}`
       );
     }
   }, []);
@@ -117,10 +117,10 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
     e.stopPropagation();
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
       );
     } else {
-      (window as any).navigateTo?.(`/workspace/editor?id=${project.project_id}`);
+      (window as any).navigateTo?.(`/scraper/editor?id=${project.project_id}`);
     }
   }, []);
 
@@ -128,8 +128,8 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
     e.stopPropagation();
     const url =
       project.series_slug && project.chapter_slug
-        ? `${window.location.origin}/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
-        : `${window.location.origin}/workspace?id=${project.project_id}`;
+        ? `${window.location.origin}/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        : `${window.location.origin}/scraper?id=${project.project_id}`;
     navigator.clipboard.writeText(url);
     (window as any).alertAsync?.(
       "Link copied to clipboard!",

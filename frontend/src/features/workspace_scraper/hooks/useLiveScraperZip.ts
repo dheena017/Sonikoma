@@ -80,7 +80,7 @@ export async function buildZipBlobFromUrls(
       folder.file(filename, blob);
     } catch (err) {
       console.error(
-        "[useLiveScraperZip] Failed to add image to ZIP:",
+        "[useChapterScraperZip] Failed to add image to ZIP:",
         url,
         err
       );

@@ -1,0 +1,237 @@
+import React from "react";
+import { Book, Loader2, ImageIcon, Zap, MoreVertical } from "lucide-react";
+import { parseWebtoonUrl, extractWebtoonUrl } from "@/shared/utils/url";
+import { FavoritesManager } from "@/features/workspace_scraper/episode-scraper/utils/FavoritesManager";
+
+export interface ScraperInputToolbarProps {
+  targetUrl: string;
+  setTargetUrl: (url: string) => void;
+  isScraping?: boolean;
+  isProcessing?: boolean;
+  handleScrape?: () => void;
+  resetWorkspace?: () => void;
+  onOpenEpisodeScraper?: (url: string) => void;
+  actionSlot?: React.ReactNode;
+  setSeriesTitle?: (title: string) => void;
+  setScrapedGenre?: (genre: string) => void;
+  setChapterNumber?: (num: string) => void;
+  setChapterTitle?: (title: string) => void;
+}
+
+export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
+  targetUrl,
+  setTargetUrl,
+  isScraping = false,
+  isProcessing = false,
+  handleScrape,
+  resetWorkspace,
+  onOpenEpisodeScraper,
+  actionSlot,
+  setSeriesTitle,
+  setScrapedGenre,
+  setChapterNumber,
+  setChapterTitle,
+}) => {
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [openSuggestionMenuIdx, setOpenSuggestionMenuIdx] = React.useState<number | null>(null);
+  const [suggestions, setSuggestions] = React.useState<any[]>([]);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    try {
+      const bookmarks = FavoritesManager.getBookmarks();
+      const reads = FavoritesManager.getReadEpisodes();
+      const entered = FavoritesManager.getEnteredUrls();
+      const merged = [...entered, ...bookmarks, ...reads];
+      const uniqueUrls = Array.from(new Set(merged));
+      let suggestionsData = uniqueUrls.map((url) => {
+        const parsed = parseWebtoonUrl(url);
+        return {
+          url: url,
+          title: parsed.episode || parsed.title || "Webtoon Episode",
+          genre: parsed.genre || "general",
+        };
+      });
+
+      if (targetUrl && targetUrl.trim()) {
+        const searchVal = targetUrl.trim().toLowerCase();
+        suggestionsData = suggestionsData.filter(
+          (item) =>
+            item.url.toLowerCase().includes(searchVal) ||
+            item.title.toLowerCase().includes(searchVal)
+        );
+      }
+
+      setSuggestions(suggestionsData.slice(0, 8));
+    } catch (e) {
+      console.warn("Failed to load autocomplete suggestions:", e);
+    }
+  }, [showSuggestions, targetUrl]);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData?.getData("text") || "";
+    const url = pasted.trim();
+    if (url) {
+      const normalized = extractWebtoonUrl(url);
+      if (normalized !== targetUrl && resetWorkspace) {
+        resetWorkspace();
+      }
+      setTargetUrl(normalized);
+    }
+  };
+
+  const handleOpenEpisodeScraperClick = (url: string) => {
+    FavoritesManager.addEnteredUrl(url);
+    localStorage.setItem("episode_scraper_url", url);
+    if (onOpenEpisodeScraper) {
+      onOpenEpisodeScraper(url);
+    } else {
+      const nav = (window as any).navigateTo;
+      const targetPath = `/scraper/episode-scraper?url=${encodeURIComponent(url)}`;
+      if (typeof nav === "function") {
+        nav(targetPath);
+      } else {
+        window.history.pushState({}, "", targetPath);
+        window.dispatchEvent(new Event("popstate"));
+      }
+    }
+  };
+
+  // "Scrape Episode" now navigates to Episode Scraper to show all episodes first
+  const handleImportClick = () => {
+    if (!targetUrl.trim()) return;
+    handleOpenEpisodeScraperClick(targetUrl.trim());
+  };
+
+  return (
+    <div className="flex flex-col sm:flex-row gap-4">
+      <div className="relative group flex-grow z-30" ref={containerRef}>
+        <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-500" />
+        <input
+          id="target_url_input"
+          type="url"
+          autoComplete="off"
+          value={targetUrl}
+          onFocus={() => setShowSuggestions(true)}
+          onChange={(e) => {
+            setTargetUrl(e.target.value);
+            setShowSuggestions(true);
+          }}
+          onPaste={handlePaste}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
+              handleImportClick();
+            }
+          }}
+          placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic reader URL..."
+          className="relative w-full bg-neutral-950 border border-neutral-800 rounded-2xl px-6 py-4 text-sm text-neutral-200 outline-none placeholder:text-neutral-700 focus:border-purple-500 transition-all shadow-inner"
+        />
+
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute left-0 right-0 top-full mt-2 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="px-3 py-2 border-b border-neutral-800/80 bg-neutral-950/40">
+              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                Recent & Bookmarked Episodes
+              </span>
+            </div>
+            <div className="max-h-60 overflow-y-auto divide-y divide-neutral-800/50">
+              {suggestions.map((series, idx) => {
+                const parsed = parseWebtoonUrl(series.url);
+                const seriesTitleText = parsed.title || series.title || "Webtoon Series";
+                const chapterText =
+                  parsed.chapterTitle ||
+                  (parsed.chapterNumber ? `Chapter ${parsed.chapterNumber}` : "Chapter 1");
+
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => {
+                      if (series.url) {
+                        setTargetUrl(series.url);
+                        if (setSeriesTitle) setSeriesTitle(parsed.title);
+                        if (setScrapedGenre) setScrapedGenre(parsed.genre);
+                        if (setChapterNumber) setChapterNumber(parsed.chapterNumber);
+                        if (setChapterTitle && parsed.chapterTitle) setChapterTitle(parsed.chapterTitle);
+                      }
+                      setShowSuggestions(false);
+                    }}
+                    className="w-full px-4 py-2.5 hover:bg-neutral-800/60 flex items-center justify-between gap-3 transition-colors cursor-pointer group relative"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-9 h-9 bg-neutral-850 rounded-lg flex items-center justify-center border border-neutral-800 flex-shrink-0">
+                        <Book className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <div className="flex-grow min-w-0">
+                        <p className="text-xs font-bold text-neutral-200 truncate leading-snug">
+                          {seriesTitleText}
+                        </p>
+                        <p className="text-[10px] text-neutral-400 truncate mt-0.5">
+                          {chapterText}
+                        </p>
+                        <p className="text-[9px] text-neutral-600 font-mono truncate mt-0.5 select-all">
+                          {series.url}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded border bg-neutral-800/80 text-neutral-400 border-neutral-700/50">
+                        DRAFT
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenSuggestionMenuIdx(openSuggestionMenuIdx === idx ? null : idx);
+                        }}
+                        className="w-7 h-7 rounded-lg bg-black/40 hover:bg-black/70 text-neutral-400 hover:text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                      >
+                        <MoreVertical className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {actionSlot || (
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={handleImportClick}
+            disabled={!targetUrl.trim()}
+            className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-xs sm:text-sm font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+            title="Navigate to Episode Scraper to browse and select an episode"
+          >
+            <Zap className="h-4 w-4" />
+            <span>Scrape Episode</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleOpenEpisodeScraperClick(targetUrl.trim())}
+            disabled={!targetUrl.trim()}
+            className="relative px-5 py-3.5 bg-neutral-950 hover:bg-neutral-900 border border-purple-500/30 hover:border-purple-500/60 rounded-2xl text-xs sm:text-sm font-bold text-purple-300 hover:text-purple-200 transition-all shadow-lg active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer"
+            title="Browse all episodes of this series in the Episode Scraper"
+          >
+            <ImageIcon className="h-4 w-4 text-purple-400" />
+            Browse All Episodes
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};

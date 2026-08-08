@@ -166,9 +166,9 @@ export default function useDashboardPage() {
   const handleNewSeries = useCallback(() => {
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") {
-      nav("/workspace");
+      nav("/scraper");
     } else {
-      window.history.pushState({}, "", "/workspace");
+      window.history.pushState({}, "", "/scraper");
       window.dispatchEvent(new Event("popstate"));
     }
   }, []);

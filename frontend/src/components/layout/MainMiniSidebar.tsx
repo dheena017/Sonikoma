@@ -38,12 +38,12 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 }) => {
   const isDashboardOverview =
     currentPath === "/" || currentPath === "/dashboard";
-  const isWorkspace = currentPath.startsWith("/workspace");
+  const isWorkspace = currentPath.startsWith("/scraper");
   const isProjects = currentPath.startsWith("/projects");
   const isAutoCrop = currentPath.startsWith("/auto-crop");
   const isEditor =
     currentPath.startsWith("/editor") ||
-    currentPath.startsWith("/workspace/editor");
+    currentPath.startsWith("/scraper/editor");
 
   const isLogs = currentPath.startsWith("/logs");
   const isStatus = currentPath.startsWith("/status");
@@ -56,7 +56,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     currentPath === "/editor" ||
     currentPath === "/editor/" ||
     currentPath.startsWith("/editor/") ||
-    currentPath.startsWith("/workspace/editor");
+    currentPath.startsWith("/scraper/editor");
 
   const handleNavigateToWorkspace = () => {
     const activeProjId = projectId || localStorage.getItem("active_project_id");
@@ -68,15 +68,15 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     if (activeProjId) {
       if (activeSeriesSlug && activeChapterSlug) {
         navigateTo(
-          `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
+          `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
         );
       } else if (activeProjId.startsWith("temp_")) {
-        navigateTo(`/workspace/editor?id=${activeProjId}`);
+        navigateTo(`/scraper/editor?id=${activeProjId}`);
       } else {
-        navigateTo(`/workspace?id=${activeProjId}`);
+        navigateTo(`/scraper?id=${activeProjId}`);
       }
     } else {
-      navigateTo("/workspace");
+      navigateTo("/scraper");
     }
   };
 
@@ -101,12 +101,6 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           icon: FolderOpen,
           active: isProjects,
           onClick: () => navigateTo("/projects"),
-        },
-        {
-          label: "WEBTOON Scraper",
-          icon: Zap,
-          active: currentPath === "/episode-scraper",
-          onClick: () => navigateTo("/episode-scraper"),
         },
       ],
     },
@@ -274,7 +268,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     // Premium Glassmorphism Container
     <aside
       className={`fixed ${
-        isProEditorPage ? "top-12" : "top-[59px]"
+        isProEditorPage ? "top-12" : "top-16"
       } bottom-0 left-0 w-20 shrink-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.3)] hidden lg:flex flex-col items-center py-4 z-40`}
     >
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 mini-sidebar-scrollbar pt-2">
@@ -302,7 +296,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800/60">
         <div className="relative group w-full flex justify-center">
           <button
-            onClick={() => navigateTo("/workspace")}
+            onClick={() => navigateTo("/scraper")}
             onMouseEnter={(e) => {
               setCreativeRect(e.currentTarget.getBoundingClientRect());
               setCreativeHover(true);

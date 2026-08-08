@@ -264,10 +264,10 @@ export default function MainLayout(props: MainLayoutProps) {
   } = props;
 
   const isWorkspacePath =
-    currentPath === "/workspace" ||
+    currentPath === "/scraper" ||
     (currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/) !== null &&
       !currentPath.endsWith("/details") &&
-      !currentPath.startsWith("/workspace/editor/"));
+      !currentPath.startsWith("/scraper/editor/"));
 
   const isAdminRestricted = isAnyAdmin && (!user || user.creator_role !== "admin");
 
@@ -447,7 +447,7 @@ export default function MainLayout(props: MainLayoutProps) {
               ? "min-h-screen overflow-x-hidden"
               : isProEditorPage
                 ? "min-h-screen"
-                : "pt-[59px] min-h-[calc(100vh-59px)]"
+                : "pt-16 min-h-[calc(100vh-64px)]"
             } flex-grow flex-1 flex flex-col transition-all duration-300`}
         >
           {/* Impersonation Banner */}

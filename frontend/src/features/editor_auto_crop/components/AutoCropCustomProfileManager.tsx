@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Settings, Save, RefreshCw } from "lucide-react";
 import SectionTitle from "@/features/editor_image/components/SectionTitle";
-import { CustomCropPreset } from "@/features/workspace_scraper/components/tabTypes";
+import { CustomCropPreset } from "@/features/editor_imported_images/components/tabTypes";
 
 interface Props {
   customPresets: Record<string, CustomCropPreset>;

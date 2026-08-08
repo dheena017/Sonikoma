@@ -21,7 +21,7 @@ interface UseLiveScraperActionsProps {
   targetUrl?: string;
 }
 
-export function useLiveScraperActions({
+export function useChapterScraperActions({
   scrapedImages,
   selectedScraped,
   setSelectedScraped,
@@ -123,3 +123,6 @@ export function useLiveScraperActions({
     handleAddToStoryboard,
   };
 }
+
+// Backwards compatibility: re-export under the old name until callers are migrated
+export { useChapterScraperActions as useLiveScraperActions };

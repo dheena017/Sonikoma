@@ -142,7 +142,7 @@ export const ImageEditorEmptyState: React.FC<ImageEditorEmptyStateProps> = ({
 
           {/* Return to Workspace Button */}
           <button
-            onClick={() => handleNavigate("/workspace")}
+            onClick={() => handleNavigate("/scraper")}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer pt-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" />

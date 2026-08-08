@@ -1,7 +1,7 @@
 import React from "react";
 import { Image, Layers, Sparkles, Zap, ShieldCheck, Cpu } from "lucide-react";
 import { useAutoCropPresets } from "@/features/editor_image/hooks/useAutoCropPresets";
-import { AutoCropSharedProps } from "@/features/workspace_scraper/components/tabTypes";
+import { AutoCropSharedProps } from "@/features/editor_imported_images/components/tabTypes";
 import { AutoCropPresetGrid } from "./AutoCropPresetGrid";
 import { AutoCropEngineSelectorV2 } from "./AutoCropEngineSelectorV2";
 import { AutoCropContextWrapper } from "./AutoCropContextWrapper";

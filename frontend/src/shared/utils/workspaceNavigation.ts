@@ -62,14 +62,14 @@ export function resolveWorkspaceReturnPath(
     null;
 
   if (activeSeriesSlug && activeChapterSlug) {
-    return `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+    return `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
   }
 
   if (activeProjectId) {
     return activeProjectId.startsWith("temp_")
-      ? `/workspace/editor?id=${activeProjectId}`
-      : `/workspace?id=${activeProjectId}`;
+      ? `/scraper/editor?id=${activeProjectId}`
+      : `/scraper?id=${activeProjectId}`;
   }
 
-  return "/workspace";
+  return "/scraper";
 }

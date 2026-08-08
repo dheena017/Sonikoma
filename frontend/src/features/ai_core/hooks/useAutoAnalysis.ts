@@ -275,6 +275,7 @@ export function useAutoAnalysis({
           id: baseId + loopIdx,
           image_url: imgUrl,
           original_url: originalUrl ?? undefined,
+          prompt: "",
           speech_text: "",
           sfx: "",
           duration: 0,

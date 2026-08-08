@@ -6,7 +6,7 @@ import { GeneratedPanel } from "@/types";
 import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
 
 // --- Layout & Main Workspace Components ---
-import AppWorkspace from "@/features/workspace/components/AppWorkspace";
+import ScraperPage from "@/features/workspace_scraper/pages/ScraperPage";
 import EditorPage from "@/features/editor_studio/pages/EditorPage";
 import PageNotFound from "@/components/feedback/PageNotFound";
 import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
@@ -23,7 +23,10 @@ import RegisterPage from "@/features/app_auth/pages/RegisterPage";
 import ForgotPasswordPage from "@/features/app_auth/pages/ForgotPasswordPage";
 import LoadingPage from "@/components/feedback/LoadingPage";
 import ProjectsPage from "@/features/workspace_projects/pages/ProjectsPage";
-import SeriesDetailsPage from "@/features/workspace_series/pages/SeriesDetailsPage";
+// workspace_series feature not yet implemented — stub component
+const SeriesDetailsPage: React.FC<{ onNavigateHome: () => void; navigateTo: (path: string) => void; fetchWithInterceptor: typeof fetch }> = ({ navigateTo }) => (
+  <div className="flex items-center justify-center h-full text-neutral-400 p-8">Series details coming soon. <button onClick={() => navigateTo("/")} className="ml-2 underline">Go home</button></div>
+);
 import CreativeSuiteLayout from "@/features/creative_suite/components/CreativeSuiteLayout";
 
 // --- Lazy Loaded Heavy Feature Pages (Phase 9 Performance Code-Splitting) ---
@@ -40,7 +43,7 @@ const SettingsAccountPage = React.lazy(() => import("@/features/user_settings/pa
 const AudioSettingsPage = React.lazy(() => import("@/features/editor_audio/pages/AudioSettingsPage"));
 const NotificationsPage = React.lazy(() => import("@/features/app_notification/pages/NotificationsPage"));
 const CreativeSuiteDashboardPage = React.lazy(() => import("@/features/creative_suite/pages/CreativeSuiteDashboardPage"));
-const EpisodeScraperPage = React.lazy(() => import("@/features/workspace_scraper/pages/EpisodeScraperPage").then(m => ({ default: m.EpisodeScraperPage })));
+const EpisodeScraperPage = React.lazy(() => import("@/features/workspace_scraper/episode-scraper/pages/EpisodeScraperPage").then(m => ({ default: m.EpisodeScraperPage })));
 const AdminPage = React.lazy(() => import("@/features/system_admin/pages/AdminPage"));
 const AdminDashboardPage = React.lazy(() => import("@/features/system_admin/pages/AdminDashboardPage"));
 const VideoEditorPage = React.lazy(() => import("@/features/editor_video/pages/VideoEditorPage"));
@@ -547,8 +550,8 @@ export default function AppRouter(props: AppRouterProps) {
   // --- Guard: Protected Route Redirect ---
   if (
     !isAuthenticated &&
-    currentPath !== "/workspace" &&
-    !currentPath.startsWith("/workspace/editor")
+    currentPath !== "/scraper" &&
+    !currentPath.startsWith("/scraper/editor")
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return <LoadingPage status="Redirecting to Landing Page..." />;
@@ -562,7 +565,7 @@ export default function AppRouter(props: AppRouterProps) {
       /\/series\/[^\/]+\/chapters\/([^\/]+)/
     );
     const editorRouteMatch = currentPath.match(
-      /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
+      /^\/scraper\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
     );
     const isDetailsMode = currentPath.endsWith("/details");
     const isImageEditorPage =
@@ -574,10 +577,10 @@ export default function AppRouter(props: AppRouterProps) {
       currentPath.includes("/image-editor");
 
     const isWorkspacePath =
-      currentPath === "/workspace" ||
+      currentPath === "/scraper" ||
       (chapterPathMatch !== null &&
         !isDetailsMode &&
-        !currentPath.startsWith("/workspace/editor/"));
+        !currentPath.startsWith("/scraper/editor/"));
 
     return {
       chapterPathMatch,
@@ -591,18 +594,18 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/settings/account" ||
         currentPath === "/settings/account/",
       isAutoCropPath: currentPath === "/auto-crop",
-      isEpisodeScraperPath: currentPath === "/episode-scraper",
+      isEpisodeScraperPath: currentPath === "/episode-scraper" || currentPath === "/scraper/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
-        currentPath === "/workspace/editor" ||
-        currentPath === "/workspace/editor/" ||
-        currentPath.startsWith("/workspace/editor/"),
+        currentPath === "/scraper/editor" ||
+        currentPath === "/scraper/editor/" ||
+        currentPath.startsWith("/scraper/editor/"),
       isLogsPath: currentPath === "/logs",
       isStatusPath: currentPath === "/status",
       isAIModelsPath: currentPath === "/ai-models",
       isModelTrainingPath: currentPath === "/model-training",
       isShortcutsPath: currentPath === "/shortcuts",
-      isAudioSettingsPath: currentPath === "/workspace/audio-settings",
+      isAudioSettingsPath: currentPath === "/scraper/audio-settings",
       isOptimizerPath: currentPath === "/ai-optimizer",
       isPanelAssistantPath: currentPath.startsWith("/panel-assistant"),
       isCharacterPath: currentPath === "/ai-characters",
@@ -696,9 +699,9 @@ export default function AppRouter(props: AppRouterProps) {
     (Boolean(pathFlags.editorRouteMatch) ||
       currentPath === "/editor" ||
       currentPath === "/editor/" ||
-      currentPath === "/workspace/editor" ||
-      currentPath === "/workspace/editor/" ||
-      currentPath.startsWith("/workspace/editor/")) &&
+      currentPath === "/scraper/editor" ||
+      currentPath === "/scraper/editor/" ||
+      currentPath.startsWith("/scraper/editor/")) &&
     !pathFlags.isImageEditorPage;
 
   const editorSeriesSlug = pathFlags.editorRouteMatch?.[1] || seriesSlugState || null;
@@ -728,10 +731,10 @@ export default function AppRouter(props: AppRouterProps) {
     if (projectId) {
       if (seriesSlugState && chapterSlugState) {
         navigateTo(
-          `/workspace/editor/series/${seriesSlugState}/chapters/${chapterSlugState}`
+          `/scraper/editor/series/${seriesSlugState}/chapters/${chapterSlugState}`
         );
       } else {
-        navigateTo(`/workspace?id=${projectId}`);
+        navigateTo(`/scraper?id=${projectId}`);
       }
     } else {
       navigateTo("/dashboard");
@@ -760,6 +763,7 @@ export default function AppRouter(props: AppRouterProps) {
 
   return (
     <MainLayout
+      isVideoEditorPage={isVideoEditorPath}
       currentPath={currentPath}
       navigateTo={navigateTo}
       isAnyAdmin={isAnyAdmin}
@@ -876,7 +880,7 @@ export default function AppRouter(props: AppRouterProps) {
         className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
         style={{ display: isWorkspacePath ? "flex" : "none" }}
       >
-        <AppWorkspace
+        <ScraperPage
           isDashboardOnly={isWorkspaceOnly}
           projectId={projectId}
           seriesSlug={seriesSlugState}

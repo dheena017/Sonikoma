@@ -70,7 +70,7 @@ const SidebarInner = ({
   const chapterPathMatch = currentPath.match(
     /\/series\/[^\/]+\/chapters\/([^\/]+)/
   );
-  const isWorkspace = currentPath === "/workspace";
+  const isWorkspace = currentPath === "/scraper";
   const isDashboardOverview = currentPath === "/dashboard";
   const isAdminDashboardPath =
     currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard";
@@ -80,7 +80,7 @@ const SidebarInner = ({
   const isAutoCrop = currentPath === "/auto-crop";
   const isEditor =
     currentPath.startsWith("/editor") ||
-    currentPath.startsWith("/workspace/editor");
+    currentPath.startsWith("/scraper/editor");
   const isLogs = currentPath === "/logs";
   const isStatus = currentPath === "/status";
   const isShortcuts = currentPath === "/shortcuts";
@@ -123,15 +123,15 @@ const SidebarInner = ({
     if (activeProjId) {
       if (activeSeriesSlug && activeChapterSlug) {
         navigateTo(
-          `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
+          `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
         );
       } else if (activeProjId.startsWith("temp_")) {
-        navigateTo(`/workspace/editor?id=${activeProjId}`);
+        navigateTo(`/scraper/editor?id=${activeProjId}`);
       } else {
-        navigateTo(`/workspace?id=${activeProjId}`);
+        navigateTo(`/scraper?id=${activeProjId}`);
       }
     } else {
-      navigateTo("/workspace");
+      navigateTo("/scraper");
     }
   };
 
@@ -166,13 +166,7 @@ const SidebarInner = ({
           onClick: () => navigateTo("/projects"),
           enabled: true,
         },
-        {
-          label: "WEBTOON Scraper",
-          icon: Zap,
-          active: currentPath === "/episode-scraper",
-          onClick: () => navigateTo("/episode-scraper"),
-          enabled: true,
-        },
+        // WEBTOON Scraper entry removed — scraper now opens under workspace/episode-scraper
       ],
     },
 

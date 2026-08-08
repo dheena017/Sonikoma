@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { X, Trash2, Sparkles } from "lucide-react";
 import { GeneratedPanel } from "@/types";
-import { useStoryboardOperations } from "@/features/workspace/hooks/useStoryboardOperations";
+import { useStoryboardOperations } from "@/features/editor_timeline/hooks/useStoryboardOperations";
 import { processWithConcurrency, chunkArray } from "@/shared/utils/batchUtils";
 import * as api from "@/api";
 import { updateSelection } from "@/shared/utils/selection";
@@ -12,7 +12,7 @@ import TimelineHeader from "@/features/editor_timeline/components/TimelineHeader
 import TimelineBulkOps from "@/features/editor_timeline/components/TimelineBulkOps";
 import TimelineCard from "@/features/editor_timeline/components/TimelineCard";
 import { TimelineSelectionBar } from "@/features/editor_studio/components/select";
-import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/workspace_scraper/components/LiveScraperDeck";
+import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/editor_imported_images/components/ImportedImagesDeck";
 
 interface StoryboardTimelineProps {
   panels: GeneratedPanel[];

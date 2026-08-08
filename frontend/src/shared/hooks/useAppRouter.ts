@@ -73,10 +73,10 @@ export function useAppRouter({
     const isEditorRoute =
       path.startsWith("/editor") ||
       path.startsWith("/image-editor") ||
-      path.startsWith("/workspace/editor");
+      path.startsWith("/scraper/editor");
     if (isEditorRoute) {
-      window.history.replaceState({}, document.title, "/workspace");
-      return "/workspace";
+      window.history.replaceState({}, document.title, "/scraper");
+      return "/scraper";
     }
     return path;
   };
@@ -120,11 +120,11 @@ export function useAppRouter({
     const isEditorRoute =
       path.startsWith("/editor") ||
       path.startsWith("/image-editor") ||
-      path.startsWith("/workspace/editor");
+      path.startsWith("/scraper/editor");
     if (isEditorRoute) {
       setEditingImageIdx(null);
-      window.history.replaceState({}, document.title, "/workspace");
-      setCurrentPath("/workspace");
+      window.history.replaceState({}, document.title, "/scraper");
+      setCurrentPath("/scraper");
     }
 
     const params = new URLSearchParams(window.location.search);
@@ -164,7 +164,7 @@ export function useAppRouter({
       setCurrentPath(path);
 
       const isLegacyChapterDetailsPath =
-        path.startsWith("/workspace/editor/series/") &&
+        path.startsWith("/scraper/editor/series/") &&
         path.endsWith("/details");
 
       if (isLegacyChapterDetailsPath) {
@@ -200,17 +200,17 @@ export function useAppRouter({
           if (path.startsWith("/editor/editor")) {
             const params = new URLSearchParams(window.location.search);
             const idx = params.get("idx") || "0";
-            target = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}/image-editor?idx=${idx}`;
+            target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}/image-editor?idx=${idx}`;
           } else {
-            target = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+            target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
           }
         } else if (activeProjId) {
           if (path.includes("image-editor")) {
             const params = new URLSearchParams(window.location.search);
             const idx = params.get("idx") || "0";
-            target = `/workspace/editor/image-editor?id=${activeProjId}&idx=${idx}`;
+            target = `/scraper/editor/image-editor?id=${activeProjId}&idx=${idx}`;
           } else {
-            target = `/workspace/editor?id=${activeProjId}`;
+            target = `/scraper/editor?id=${activeProjId}`;
           }
         }
 
@@ -227,7 +227,7 @@ export function useAppRouter({
             path === "/creative-suite" ||
             path === "/creative-suite/" ||
             path === "/creative-suite-dashboard" ||
-            path === "/workspace" ||
+            path === "/scraper" ||
             path === "/settings" ||
             path === "/settings/account" ||
             path === "/settings/account/" ||
@@ -252,16 +252,16 @@ export function useAppRouter({
             path === "/admin-dashboard" ||
             path.startsWith("/admin/") ||
             path.startsWith("/series/") ||
-            path === "/workspace/editor" ||
-            path === "/workspace/editor/" ||
-            path.startsWith("/workspace/editor/") ||
+            path === "/scraper/editor" ||
+            path === "/scraper/editor/" ||
+            path.startsWith("/scraper/editor/") ||
             path === "/editor" ||
             path === "/editor/" ||
             path.startsWith("/editor/") ||
             path === "/image-editor" ||
             path === "/image-editor/" ||
             path.startsWith("/image-editor/") ||
-            /^\/workspace\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
+            /^\/scraper\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
 
           if (isProtectedRoute) {
             window.history.replaceState({}, "", "/");
@@ -290,7 +290,7 @@ export function useAppRouter({
       const isSeriesPath = path.startsWith("/series/");
       const isChapterDetails = isSeriesPath && path.endsWith("/details");
       const isWorkspacePath =
-        path === "/workspace" || (isSeriesPath && !isChapterDetails);
+        path === "/scraper" || (isSeriesPath && !isChapterDetails);
 
       if (
         path === "/settings" ||
@@ -346,13 +346,13 @@ export function useAppRouter({
         setEditingImageIdx(null);
       } else if (
         path.startsWith("/editor") ||
-        path.startsWith("/workspace/editor") ||
+        path.startsWith("/scraper/editor") ||
         path.startsWith("/image-editor")
       ) {
         const params = new URLSearchParams(window.location.search);
 
         // Skip editor redirects or checks if this is the theater player mode
-        const isTheaterRoute = /^\/workspace\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
+        const isTheaterRoute = /^\/scraper\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
         if (isTheaterRoute) {
           setIsPipMode(false);
           setShowAutoCropModal(false);
@@ -360,16 +360,16 @@ export function useAppRouter({
           setEditingImageIdx(null);
           return;
         }
-// Redirect /editor?importUrl=... to /workspace/editor?id=temp_...
+// Redirect /editor?importUrl=... to /scraper/editor?id=temp_...
         if (params.has("importUrl") && !params.has("id")) {
           const importUrl = params.get("importUrl");
           if (importUrl) {
             localStorage.setItem("auto_import_url", importUrl);
           }
           const temporaryProjectId = createTempProjectId();
-          const newUrl = `/workspace/editor?id=${temporaryProjectId}`;
+          const newUrl = `/scraper/editor?id=${temporaryProjectId}`;
           window.history.replaceState({}, "", newUrl);
-          setCurrentPath("/workspace/editor");
+          setCurrentPath("/scraper/editor");
           return;
         }
 
@@ -381,14 +381,14 @@ export function useAppRouter({
           activeSeriesSlug &&
           activeChapterSlug
         ) {
-          const cleanPath = `/workspace/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+          const cleanPath = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
           window.history.replaceState({}, "", cleanPath);
           setCurrentPath(cleanPath);
           return;
         }
 
         const hasProjId = params.has("id") || params.has("project_id") || (params.has("series") && params.has("chapter"));
-        const hasSlugs = /^\/workspace\/editor\/series\/[^\/]+\/chapters\/[^\/]+(?:\/image-editor)?\/?$/.test(path);
+        const hasSlugs = /^\/scraper\/editor\/series\/[^\/]+\/chapters\/[^\/]+(?:\/image-editor)?\/?$/.test(path);
         if (
           scrapedImagesRef.current.length === 0 &&
           panelsRef.current.length === 0 &&

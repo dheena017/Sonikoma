@@ -771,13 +771,13 @@ export function useAppState() {
 
       const path = window.location.pathname;
       const match = path.match(
-        /(?:\/workspace\/editor)?\/series\/[^\/]+\/chapters\/([^\/]+)/
+        /(?:\/scraper\/editor)?\/series\/[^\/]+\/chapters\/([^\/]+)/
       );
       const chapterSlug = match ? match[1] : (params.get("chapter") || null);
 
       if (!urlProjectId && !chapterSlug) {
-        // If we cleared the state (navigated to clean /workspace), reset workspace
-        if (path === "/workspace") {
+        // If we cleared the state (navigated to clean /scraper), reset workspace
+        if (path === "/scraper") {
           useProjectStore.getState().clearActiveProject();
           localStorage.removeItem("active_project_id");
           localStorage.removeItem("active_series_slug");
@@ -856,7 +856,7 @@ export function useAppState() {
             localStorage.removeItem("active_chapter_slug");
           }
           if (data.project.series_slug && data.project.chapter_slug) {
-            const newPath = `/workspace/editor/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}`;
+            const newPath = `/scraper/editor/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}`;
             if (window.location.pathname !== newPath) {
               window.history.replaceState(null, "", newPath);
             }

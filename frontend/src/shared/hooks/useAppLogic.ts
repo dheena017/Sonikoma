@@ -2,8 +2,8 @@ import { useRef, useEffect, useCallback, useState, useMemo } from "react";
 import { useAppState } from "@/shared/hooks/useAppState";
 import * as api from "@/api/index";
 import { useProjectStore } from "@/store/useProjectStore";
-import { usePlaybackEngine } from "@/features/workspace/hooks/usePlaybackEngine";
-import { usePipelineActions } from "@/features/workspace/hooks/usePipelineActions";
+import { usePlaybackEngine } from "./usePlaybackEngine";
+import { usePipelineActions } from "./usePipelineActions";
 import { parseWebtoonUrl } from "@/utils";
 import { extractWebtoonUrl, convertToViewerUrl } from "@/shared/utils/url";
 
@@ -482,7 +482,7 @@ export function useAppLogic() {
           if (data.project_id) {
             state.setProjectId(data.project_id);
             if (data.series_slug && data.chapter_slug) {
-              const newPath = `/workspace/editor/series/${data.series_slug}/chapters/${data.chapter_slug}`;
+              const newPath = `/scraper/editor/series/${data.series_slug}/chapters/${data.chapter_slug}`;
               if (window.location.pathname !== newPath) {
                 window.history.pushState(null, "", newPath);
               }

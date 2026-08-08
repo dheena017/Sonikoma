@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import * as fabric from "fabric";
 import { PanelLayers, PanelSyncMap, GeneratedPanel } from "@/types";
-import { useDialogueSync } from "@/features/workspace/hooks/useDialogueSync";
+import { useDialogueSync } from "@/shared/hooks/useDialogueSync";
 
 interface CanvasMultiLayerProps {
   layers: PanelLayers;

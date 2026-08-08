@@ -481,7 +481,7 @@ const HeaderInner = ({
     },
     {
       name: "Timeline Editor",
-      path: "/workspace/editor",
+      path: "/scraper/editor",
       desc: "Refine timelines, motion settings, and generation",
     },
     {

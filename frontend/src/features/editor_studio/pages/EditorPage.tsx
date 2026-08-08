@@ -1,5 +1,5 @@
 import React from "react";
-import LiveScraperDeck from "@/features/workspace_scraper/components/LiveScraperDeck";
+import ChapterScraperDeck from "@/features/editor_imported_images/components/ImportedImagesDeck";
 import StoryboardTimeline from "@/features/editor_timeline/components/StoryboardTimeline";
 import EditorViewport from "@/features/editor_video/viewport/EditorViewport";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
@@ -241,7 +241,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
   };
 
   const handleBackToApp = () => {
-    navigateTo("/workspace");
+    navigateTo("/scraper");
   };
 
   // SCROLL RESTORATION: Restore the scroll position when returning from the Image Editor
@@ -653,7 +653,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   </h3>
                 </div>
                 <div className="bg-transparent">
-                  <LiveScraperDeck
+                  <ChapterScraperDeck
                     isDashboardOnly={false}
                     scrapedImages={scrapedImages}
                     isScraping={isScraping}

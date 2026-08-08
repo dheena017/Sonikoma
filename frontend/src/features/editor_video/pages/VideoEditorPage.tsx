@@ -90,7 +90,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
     if (onBackToApp) {
       onBackToApp();
     } else if (navigateTo) {
-      navigateTo("/workspace/editor");
+      navigateTo("/scraper/editor");
     } else {
       window.history.back();
     }

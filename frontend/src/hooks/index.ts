@@ -10,7 +10,6 @@ export {
   useImageEditor,
   useImageTransform,
 } from "@/features/editor_image/hooks";
-export * from "@/features/workspace/hooks";
 export * from "@/features/ai_core/hooks";
 export * from "@/features/editor_video/viewport/hooks";
 export * from "@/features/editor_audio/hooks";

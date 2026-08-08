@@ -12,7 +12,7 @@ import {
   useBackendHealth,
   useThemeMode,
 } from "@/shared/hooks";
-import { useAutoSave } from "@/features/workspace/hooks";
+import { useAutoSave } from "@/shared/hooks/useAutoSave";
 import * as api from "@/api";
 
 // --- Components ---
