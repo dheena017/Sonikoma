@@ -104,26 +104,30 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
     onClearFilters();
   };
 
+  const hasAdvancedFilters = Boolean(
+    minRating > 0 || minLikes > 0 || readStatus !== 'all' || fromDate || toDate || startEpisodeNum || endEpisodeNum
+  );
+
   return (
-    <div className="space-y-3 p-4 bg-gray-900/60 rounded-xl border border-gray-800">
+    <div className="space-y-4 rounded-2xl border border-neutral-800/80 bg-neutral-900/50 p-4 shadow-xl shadow-black/10">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
         <input
           type="text"
           placeholder="Search episodes by title or episode number..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="w-full pl-10 pr-4 py-2 bg-gray-850 border border-gray-750 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all duration-200"
+          className="w-full rounded-xl border border-neutral-800 bg-neutral-955 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-600 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
         />
       </div>
 
-      <div className="flex flex-wrap items-end gap-2">
-        <div className="min-w-[180px] flex-1">
-          <label className="text-xs text-gray-400 block mb-1">Sort By</label>
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="min-w-[220px] flex-1">
+          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-500">Sort By</label>
           <select
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as any)}
-            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500 transition-colors"
+            className="w-full rounded-xl border border-neutral-800 bg-neutral-955 px-3 py-2.5 text-sm text-white transition-colors focus:border-purple-500 focus:outline-none"
           >
             <option value="latest">Latest First</option>
             <option value="oldest">Oldest First</option>
@@ -134,10 +138,10 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
 
         <button
           onClick={onToggleMultiSelectMode}
-          className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+          className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all ${
             isMultiSelectMode
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-              : 'bg-gray-800 text-gray-300 hover:bg-gray-750'
+              ? 'border-purple-500/50 bg-purple-600 text-white shadow-lg shadow-purple-600/30'
+              : 'border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-purple-500/40 hover:text-white'
           }`}
           title="Enable Multi-Select Mode"
         >
@@ -147,14 +151,15 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
 
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
-            showAdvanced || minRating > 0 || minLikes > 0 || readStatus !== 'all' || fromDate || toDate
-              ? 'bg-purple-900/40 text-purple-300 border border-purple-700/50'
-              : 'bg-gray-800 text-gray-300 hover:bg-gray-750 border border-transparent'
+          className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all ${
+            showAdvanced || hasAdvancedFilters
+              ? 'border-purple-500/50 bg-purple-950/50 text-purple-300'
+              : 'border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-purple-500/40 hover:text-white'
           }`}
         >
           <Filter size={16} />
           Advanced Filters
+          {hasAdvancedFilters && <span className="rounded-full bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-200">Active</span>}
         </button>
       </div>
 

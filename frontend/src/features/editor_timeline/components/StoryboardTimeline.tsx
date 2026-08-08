@@ -12,7 +12,7 @@ import TimelineHeader from "@/features/editor_timeline/components/TimelineHeader
 import TimelineBulkOps from "@/features/editor_timeline/components/TimelineBulkOps";
 import TimelineCard from "@/features/editor_timeline/components/TimelineCard";
 import { TimelineSelectionBar } from "@/features/editor_studio/components/select";
-import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/editor_imported_images/components/ImportedImagesDeck";
+import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/editor_imported_images/components/ImportedImagesPanel";
 
 interface StoryboardTimelineProps {
   panels: GeneratedPanel[];

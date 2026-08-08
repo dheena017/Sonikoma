@@ -1,127 +1,99 @@
 import React from "react";
-import { List, BarChart2, Bookmark, Heart, Clock, Dices, Sparkles } from "lucide-react";
+import { List, Bookmark, Clock, Loader } from "lucide-react";
 
 interface EpisodeWorkspaceTabsProps {
-  activeTab: "episodes" | "analytics";
-  setActiveTab: (tab: "episodes" | "analytics") => void;
+  activeTab: "episodes" | "bookmarks" | "recent";
+  setActiveTab: (tab: "episodes" | "bookmarks" | "recent") => void;
   filteredEpisodeCount: number;
-  bookmarksOnly: boolean;
   setBookmarksOnly: (value: boolean) => void;
-  showFavorites: boolean;
   setShowFavorites: (value: boolean) => void;
-  showRecent: boolean;
   setShowRecent: (value: boolean) => void;
-  onRandomEpisode: () => void;
-  onSelectTopN: (n: number) => void;
-  readTimeEstimate: number;
+  isLoading?: boolean;
 }
 
 const EpisodeWorkspaceTabs: React.FC<EpisodeWorkspaceTabsProps> = ({
   activeTab,
   setActiveTab,
   filteredEpisodeCount,
-  bookmarksOnly,
   setBookmarksOnly,
-  showFavorites,
   setShowFavorites,
-  showRecent,
   setShowRecent,
-  onRandomEpisode,
-  onSelectTopN,
-  readTimeEstimate,
+  isLoading = false,
 }) => {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex flex-wrap items-center gap-2 border border-neutral-800 bg-neutral-955 p-1.5 rounded-2xl">
-        <button
-          onClick={() => setActiveTab("episodes")}
-          className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
-            activeTab === "episodes"
-              ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
-              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-          }`}
-        >
-          <List size={14} />
-          Episodes List ({filteredEpisodeCount})
-        </button>
-        <button
-          onClick={() => setActiveTab("analytics")}
-          className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
-            activeTab === "analytics"
-              ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
-              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-          }`}
-        >
-          <BarChart2 size={14} />
-          Analytics &amp; Trends
-        </button>
-      </div>
+  const isEpisodesTabActive = activeTab === "episodes";
 
-      <div className="flex flex-wrap items-center gap-2">
+  return (
+    <div className="grid grid-cols-1 items-center gap-3">
+      <div
+        role="tablist"
+        aria-label="Episode scraper views"
+        className="grid grid-cols-3 items-center gap-1.5 border border-neutral-800 bg-neutral-955 p-1.5 rounded-2xl"
+      >
         <button
+          disabled={isLoading}
+          type="button"
+          role="tab"
+          aria-selected={isEpisodesTabActive}
+          aria-controls="episode-scraper-view"
           onClick={() => {
             setActiveTab("episodes");
-            setBookmarksOnly(!bookmarksOnly);
+            setBookmarksOnly(false);
+            setShowFavorites(false);
+            setShowRecent(false);
           }}
-          className={`px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
-            bookmarksOnly ? "bg-yellow-600 text-white" : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-          }`}
+          className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+            isEpisodesTabActive
+              ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+          } w-full justify-center`}
         >
-          <Bookmark size={12} className={bookmarksOnly ? "fill-current" : ""} />
-          Bookmarks
+          {isLoading ? <Loader size={14} className="animate-spin" /> : <List size={14} />}
+          Episodes List ({isLoading ? 0 : filteredEpisodeCount})
         </button>
         <button
+          disabled={isLoading}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "bookmarks"}
+          aria-controls="episode-scraper-view"
           onClick={() => {
-            setActiveTab("episodes");
-            setShowFavorites(!showFavorites);
+            setActiveTab("bookmarks");
+            setBookmarksOnly(true);
+            setShowFavorites(false);
             setShowRecent(false);
           }}
           className={`px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
-            showFavorites ? "bg-red-500/10 text-red-400 border border-red-500/30" : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-          }`}
+            activeTab === "bookmarks"
+              ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+          } w-full justify-center`}
         >
-          <Heart size={12} />
-          Favorites
+          <Bookmark size={12} className={activeTab === "bookmarks" ? "fill-current" : ""} />
+          Bookmarks
         </button>
         <button
+          disabled={isLoading}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "recent"}
+          aria-controls="episode-scraper-view"
           onClick={() => {
-            setActiveTab("episodes");
-            setShowRecent(!showRecent);
+            setActiveTab("recent");
+            setBookmarksOnly(false);
+            setShowRecent(true);
             setShowFavorites(false);
           }}
           className={`px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
-            showRecent ? "bg-blue-500/10 text-blue-400 border border-blue-500/30" : "text-neutral-400 hover:text-white hover:bg-neutral-900"
-          }`}
+            activeTab === "recent"
+              ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
+              : "text-neutral-400 hover:text-white hover:bg-neutral-900"
+          } w-full justify-center`}
         >
           <Clock size={12} />
           Recent
         </button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          onClick={onRandomEpisode}
-          className="px-3.5 py-2 bg-neutral-900 hover:bg-purple-955 border border-neutral-800 hover:border-purple-500/40 text-purple-300 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
-          title="Randomly pick an episode to preview or import"
-        >
-          <Dices size={14} className="text-purple-400" />
-          Surprise Me!
-        </button>
-
-        <button
-          onClick={() => onSelectTopN(5)}
-          className="px-3 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 rounded-xl text-xs font-mono font-semibold transition-all flex items-center gap-1 cursor-pointer active:scale-95"
-          title="Select Top 5 Episodes"
-        >
-          <Sparkles size={13} className="text-amber-400" />
-          Select Top 5
-        </button>
-
-        <div className="text-[11px] font-mono text-neutral-400 bg-neutral-955 border border-neutral-800 px-3 py-2 rounded-xl flex items-center gap-1.5">
-          <Clock size={12} className="text-neutral-500" />
-          <span>Est. Read: ~{Math.max(1, Math.round(readTimeEstimate))} mins</span>
-        </div>
-      </div>
     </div>
   );
 };

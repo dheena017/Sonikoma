@@ -1,5 +1,5 @@
 import React from "react";
-import ChapterScraperDeck from "@/features/editor_imported_images/components/ImportedImagesDeck";
+import ChapterScraperDeck from "@/features/editor_imported_images/components/ImportedImagesPanel";
 import StoryboardTimeline from "@/features/editor_timeline/components/StoryboardTimeline";
 import EditorViewport from "@/features/editor_video/viewport/EditorViewport";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";

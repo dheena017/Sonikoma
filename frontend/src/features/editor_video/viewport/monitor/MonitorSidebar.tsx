@@ -3,7 +3,7 @@ import { Layers, Film, Sparkles } from "lucide-react";
 import {
   formatDisplayEpisodeLabel,
   getSortedEpisodeGroups,
-} from "@/features/editor_imported_images/components/ImportedImagesDeck";
+} from "@/features/editor_imported_images/components/ImportedImagesPanel";
 
 export interface VideoPreviewSidebarProps {
   panels: any[];

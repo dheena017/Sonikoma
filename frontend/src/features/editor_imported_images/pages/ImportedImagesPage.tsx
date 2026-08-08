@@ -1,5 +1,5 @@
 import React from "react";
-import ChapterScraperDeck from "@/features/editor_imported_images/components/ImportedImagesDeck";
+import ChapterScraperDeck from "@/features/editor_imported_images/components/ImportedImagesPanel";
 import { ChapterScraperDeckProps } from "@/features/editor_imported_images/components/types";
 
 const ImportedImagesPage: React.FC<ChapterScraperDeckProps> = (props) => {

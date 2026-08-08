@@ -737,7 +737,7 @@ const ChapterScraperDeck = React.memo(
                           <div className="flex items-center gap-2">
                             <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
                             <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
-                              Episodes ({episodeGroups.length})
+                              Imported Episodes ({episodeGroups.length})
                             </h4>
                           </div>
                           <button

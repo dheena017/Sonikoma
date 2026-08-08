@@ -1254,12 +1254,20 @@ export default function AppRouter(props: AppRouterProps) {
 
       {/* PAGE VIEW 16.5: Dedicated WEBTOON Episode Scraper Page */}
       {isEpisodeScraperPath && (
-        <EpisodeScraperPage
-          addNotification={addNotification}
-          fetchWithInterceptor={fetchWithInterceptor}
-          navigateTo={navigateTo}
-          lastEditorPath={lastEditorPath}
-        />
+        <React.Suspense
+          fallback={
+            <div className="flex-1 flex items-center justify-center bg-[#050507] text-neutral-400 text-sm">
+              Loading Episode Scraper...
+            </div>
+          }
+        >
+          <EpisodeScraperPage
+            addNotification={addNotification}
+            fetchWithInterceptor={fetchWithInterceptor}
+            navigateTo={navigateTo}
+            lastEditorPath={lastEditorPath}
+          />
+        </React.Suspense>
       )}
 
       {/* PAGE VIEW 17.5: Series Landing Page */}

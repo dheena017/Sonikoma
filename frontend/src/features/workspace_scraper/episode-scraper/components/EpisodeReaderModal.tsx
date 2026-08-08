@@ -13,7 +13,7 @@ interface EpisodePreviewModalProps {
 }
 
 
-export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
+export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
   episode,
   onClose,
   onImport,
@@ -28,6 +28,26 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
   const [autoScrollSpeed, setAutoScrollSpeed] = useState(0); // 0 = off, 1, 2, 3, 5 = pixels per interval
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const mainScrollContainer = document.getElementById("main-scroll-container");
+    const previousRootOverflow = root.style.overflow;
+    const previousOverflow = document.body.style.overflow;
+    const previousMainOverflow = mainScrollContainer?.style.overflow;
+
+    root.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    if (mainScrollContainer) mainScrollContainer.style.overflow = "hidden";
+
+    return () => {
+      root.style.overflow = previousRootOverflow;
+      document.body.style.overflow = previousOverflow;
+      if (mainScrollContainer && previousMainOverflow !== undefined) {
+        mainScrollContainer.style.overflow = previousMainOverflow;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!episode) return;
@@ -235,7 +255,7 @@ export const EpisodePreviewModal: React.FC<EpisodePreviewModalProps> = ({
         <div 
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto bg-neutral-950 flex flex-col items-center justify-start relative scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-neutral-950 p-0"
+          className="min-h-0 flex-1 overflow-y-scroll overflow-x-hidden overscroll-contain bg-neutral-950 flex flex-col items-center justify-start relative scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-neutral-950 p-0"
         >
           {loading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-neutral-950 z-10">

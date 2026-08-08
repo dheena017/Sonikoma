@@ -28,7 +28,7 @@ export const EpisodeGrid: React.FC<EpisodeGridProps> = ({
   if (!episodes || episodes.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-5 w-full">
+    <div className="grid grid-cols-1 gap-5 w-full sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))]">
       {episodes.map((episode) => (
         <EpisodeCard
           key={episode.index || episode.url}

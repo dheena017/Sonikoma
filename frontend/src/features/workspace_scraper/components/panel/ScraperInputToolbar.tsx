@@ -91,7 +91,15 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     }
   };
 
-  const handleOpenEpisodeScraperClick = (url: string) => {
+  const handleImportClick = () => {
+    if (!targetUrl.trim()) return;
+    FavoritesManager.addEnteredUrl(targetUrl.trim());
+    handleScrape?.();
+  };
+
+  const handleOpenEpisodeScraperClick = () => {
+    if (!targetUrl.trim()) return;
+    const url = targetUrl.trim();
     FavoritesManager.addEnteredUrl(url);
     localStorage.setItem("episode_scraper_url", url);
     if (onOpenEpisodeScraper) {
@@ -106,12 +114,6 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         window.dispatchEvent(new Event("popstate"));
       }
     }
-  };
-
-  // "Scrape Episode" now navigates to Episode Scraper to show all episodes first
-  const handleImportClick = () => {
-    if (!targetUrl.trim()) return;
-    handleOpenEpisodeScraperClick(targetUrl.trim());
   };
 
   return (
@@ -212,23 +214,30 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           <button
             type="button"
             onClick={handleImportClick}
-            disabled={!targetUrl.trim()}
+            disabled={isScraping || !targetUrl.trim()}
             className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-xs sm:text-sm font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
-            title="Navigate to Episode Scraper to browse and select an episode"
           >
-            <Zap className="h-4 w-4" />
-            <span>Scrape Episode</span>
+            {isScraping ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin text-purple-200" />
+                <span>Extracting...</span>
+              </>
+            ) : (
+              <>
+                <ImageIcon className="h-4 w-4" /> Import Images
+              </>
+            )}
           </button>
 
           <button
             type="button"
-            onClick={() => handleOpenEpisodeScraperClick(targetUrl.trim())}
+            onClick={handleOpenEpisodeScraperClick}
             disabled={!targetUrl.trim()}
             className="relative px-5 py-3.5 bg-neutral-950 hover:bg-neutral-900 border border-purple-500/30 hover:border-purple-500/60 rounded-2xl text-xs sm:text-sm font-bold text-purple-300 hover:text-purple-200 transition-all shadow-lg active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer"
-            title="Browse all episodes of this series in the Episode Scraper"
+            title="Browse and select specific episodes for this series URL"
           >
-            <ImageIcon className="h-4 w-4 text-purple-400" />
-            Browse All Episodes
+            <Zap className="h-4 w-4 text-purple-400" />
+            Open in Episode Scraper
           </button>
         </div>
       )}

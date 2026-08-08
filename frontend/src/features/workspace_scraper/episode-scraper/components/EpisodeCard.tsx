@@ -17,7 +17,6 @@ import {
   Flame,
   ArrowUpRight,
   Sparkles,
-  Zap,
 } from "lucide-react";
 
 import type { Episode as BaseEpisode } from "../types/EpisodeTypes";
@@ -67,9 +66,13 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
         setIsMenuOpen(false);
       }
     };
+    const handleScroll = () => setIsMenuOpen(false);
+
     document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScroll, true);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScroll, true);
     };
   }, [isMenuOpen]);
 
@@ -153,11 +156,17 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
   const renderTitle = () => {
     const num = (episode.number || "").trim();
-    const title = (episode.title || "").trim();
+    const title = (episode.title || "")
+      .replace(/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}.*$/i, "")
+      .replace(/\blikes?\s*[\d,.]+[KMB]?.*$/i, "")
+      .replace(/#\d+\s*$/, "")
+      .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:–—]?\s*/i, "")
+      .replace(/^[-:–—\s]+|[-:–—\s]+$/g, "")
+      .trim();
 
     if (!title || title.toLowerCase() === num.toLowerCase()) {
       return (
-        <h3 className="text-sm font-bold text-white line-clamp-1 leading-tight flex-1" title={num || title}>
+        <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={num || title}>
           <span className="text-purple-400 font-extrabold font-mono">{num || title}</span>
         </h3>
       );
@@ -165,7 +174,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
     if (!num) {
       return (
-        <h3 className="text-sm font-bold text-white line-clamp-1 leading-tight flex-1" title={title}>
+        <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={title}>
           <span className="text-neutral-100">{title}</span>
         </h3>
       );
@@ -176,7 +185,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
     if (cleanNum === cleanTitle) {
       return (
-        <h3 className="text-sm font-bold text-white line-clamp-1 leading-tight flex-1" title={title}>
+        <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={title}>
           <span className="text-purple-400 font-extrabold font-mono">{title}</span>
         </h3>
       );
@@ -185,7 +194,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
     if (cleanTitle.startsWith(cleanNum)) {
       const remainder = title.slice(num.length).replace(/^[-_:\s•·/\\|]+/, "").trim();
       return (
-        <h3 className="text-sm font-bold text-white line-clamp-1 leading-tight flex-1" title={title}>
+        <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={title}>
           <span className="text-purple-400 font-extrabold font-mono mr-1.5">{num}</span>
           {remainder && <span className="text-neutral-100">{remainder}</span>}
         </h3>
@@ -193,7 +202,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
     }
 
     return (
-      <h3 className="text-sm font-bold text-white line-clamp-1 leading-tight flex-1" title={`${num}: ${title}`}>
+      <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={`${num}: ${title}`}>
         <span className="text-purple-400 font-extrabold mr-1.5 font-mono">{num}</span>
         <span className="text-neutral-100">{title}</span>
       </h3>
@@ -207,7 +216,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`w-full flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0d0d12] border ${
+      className={`w-full min-h-[285px] flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0d0d12] border ${
         isSelected
           ? "border-purple-500 ring-2 ring-purple-500/40 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-neutral-900"
           : "border-neutral-800/80 hover:border-purple-500/50 shadow-xl hover:shadow-2xl hover:shadow-purple-950/20"
@@ -248,38 +257,9 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
         {/* Gradient vignette */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d12] via-[#0d0d12]/30 to-transparent pointer-events-none" />
 
-        {/* Hover Quick Action Buttons (z-30 to sit above all badges) */}
-        {!isMultiSelectMode && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/75 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 z-30">
-            <div className="flex flex-col sm:flex-row items-center gap-2 transform scale-90 group-hover:scale-100 transition-transform duration-300 px-4 w-full justify-center">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClick(episode);
-                }}
-                className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold rounded-xl flex items-center justify-center gap-1.5 shadow-xl shadow-purple-900/40 transition-all active:scale-95 text-xs tracking-wider cursor-pointer"
-              >
-                <Zap size={14} className="text-amber-300" />
-                Import Images
-              </button>
-
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPreviewClick?.(episode);
-                }}
-                className="w-full sm:w-auto px-3.5 py-2 bg-neutral-900/90 hover:bg-neutral-800 border border-white/15 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-lg transition-all active:scale-95 text-xs cursor-pointer"
-              >
-                <Eye size={14} className="text-purple-300" />
-                Preview
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Status badges (Single clean row, fades out on hover) */}
         <div
-          className={`absolute top-2.5 ${isMultiSelectMode ? "left-10" : "left-2.5"} flex items-center gap-1.5 transition-all duration-200 z-10 max-w-[70%] overflow-hidden group-hover:opacity-0 group-hover:pointer-events-none`}
+          className={`absolute top-2.5 ${isMultiSelectMode ? "left-10" : "left-2.5"} flex items-center gap-1.5 z-10 max-w-[70%] overflow-hidden`}
         >
           {episode.isNew && (
             <span className="bg-gradient-to-r from-rose-500 to-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-md border border-rose-400/20 font-mono shrink-0">
@@ -305,7 +285,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
         </div>
 
         {/* Top Right Action Controls */}
-        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-20 group-hover:opacity-0 group-hover:pointer-events-none transition-opacity duration-200">
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-20">
           <button
             onClick={handleBookmarkClick}
             className={`p-1.5 rounded-xl backdrop-blur-md transition-all duration-200 border ${
@@ -328,7 +308,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
         </div>
 
         {episode.duration && (
-          <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 font-mono group-hover:opacity-0 transition-opacity duration-200 z-10">
+          <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 font-mono z-10">
             <Clock size={11} className="text-purple-400" />
             {episode.duration}
           </div>
@@ -429,7 +409,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
                 e.stopPropagation();
                 onPreviewClick?.(episode);
               }}
-              className="px-2.5 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg text-[11px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer"
+              className="min-w-[64px] px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
             >
               <Eye size={12} />
               Read
@@ -439,7 +419,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
                 e.stopPropagation();
                 onClick(episode);
               }}
-              className="px-3 py-1 bg-purple-600/90 hover:bg-purple-500 text-white rounded-lg text-[11px] font-mono font-bold transition-all flex items-center gap-1 shadow-md shadow-purple-950/40 cursor-pointer active:scale-95"
+              className="min-w-[76px] px-4 py-1.5 bg-purple-600/90 hover:bg-purple-500 text-white rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-purple-950/40 cursor-pointer active:scale-95"
             >
               <span>Import</span>
               <ArrowUpRight size={12} />
@@ -452,15 +432,15 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
           <div
             ref={menuRef}
             onClick={(e) => e.stopPropagation()}
-            className="absolute right-4 bottom-12 w-52 bg-neutral-900/95 backdrop-blur-md border border-neutral-800 rounded-2xl shadow-2xl z-30 overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-neutral-200"
+            className="absolute right-2 bottom-14 w-56 max-w-[calc(100%-1rem)] bg-neutral-950/98 backdrop-blur-xl border border-purple-500/25 rounded-2xl shadow-2xl shadow-black/50 z-40 overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-neutral-200"
           >
-            <div className="py-1.5 px-1 space-y-0.5">
+            <div className="p-1.5 space-y-0.5">
               <button
                 onClick={(e) => {
                   handleBookmarkClick(e);
                   setIsMenuOpen(false);
                 }}
-                className="w-full px-3 py-2 text-left text-xs rounded-xl hover:bg-purple-500/10 hover:text-purple-300 flex items-center gap-2.5 transition-all"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all"
               >
                 {isBookmarked ? (
                   <>
@@ -481,7 +461,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
                   if (onMarkReadToggle) onMarkReadToggle(episode.url);
                   setIsMenuOpen(false);
                 }}
-                className="w-full px-3 py-2 text-left text-xs rounded-xl hover:bg-purple-500/10 hover:text-purple-300 flex items-center gap-2.5 transition-all"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all"
               >
                 {isRead ? (
                   <>
@@ -500,7 +480,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
               <button
                 onClick={handleCopyLink}
-                className="w-full px-3 py-2 text-left text-xs rounded-xl hover:bg-purple-500/10 hover:text-purple-300 flex items-center gap-2.5 transition-all font-medium"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all font-medium"
               >
                 {copied ? (
                   <>
@@ -517,7 +497,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
               <button
                 onClick={handleExportSingleJSON}
-                className="w-full px-3 py-2 text-left text-xs rounded-xl hover:bg-purple-500/10 hover:text-purple-300 flex items-center gap-2.5 transition-all"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all"
               >
                 <Download size={14} className="text-neutral-400" />
                 <span>Export Metadata (JSON)</span>

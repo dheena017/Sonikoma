@@ -12,7 +12,6 @@ import {
   Heart,
   Clock,
   ExternalLink,
-  BookOpen,
   BarChart2,
   List,
   Eye,
@@ -21,7 +20,6 @@ import {
   XCircle,
   FileJson,
   RefreshCw,
-  ArrowRight,
   Dices,
   Sparkles,
   Copy,
@@ -31,15 +29,15 @@ import {
 } from "lucide-react";
 import { EpisodeGrid } from "./EpisodeGrid";
 import { EpisodeControls } from "./EpisodeControls";
-import SeriesMetadataCard from "./SeriesMetadataCard";
+import { RecentSeriesCard } from "./RecentSeriesCard";
 import EpisodeWorkspaceTabs from "./EpisodeWorkspaceTabs";
 import { FavoritesManager, FavoritesList, FavoriteSeries, FAVORITES_UPDATED_EVENT } from "../utils/FavoritesManager";
 import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
-import { EpisodePreviewModal } from "./EpisodePreviewModal";
-import { AnalyticsDashboard } from "./AnalyticsDashboard";
+import { EpisodeReaderModal } from "./EpisodeReaderModal";
+import { EpisodeScraperEmptyState } from "./EpisodeScraperEmptyState";
 import { NotificationType } from "@/features/app_notification";
 import type { Episode } from "../types/EpisodeTypes";
-import { isKnownSite, addCustomSite, getProxiedImageUrl } from "@/shared/utils/url";
+import { isKnownSite, addCustomSite } from "@/shared/utils/url";
 import { makeSafeFilename } from "@/shared/utils/downloadNaming";
 
 interface SeriesMetadata {
@@ -105,7 +103,9 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   const [isFavorite, setIsFavorite] = useState(false);
 
   // Expanded tabs & previews
-  const [activeTab, setActiveTab] = useState<"episodes" | "analytics">("episodes");
+  const [activeTab, setActiveTab] = useState<
+    "episodes" | "bookmarks" | "recent"
+  >("episodes");
   const [previewEpisode, setPreviewEpisode] = useState<Episode | null>(null);
 
   // Filters
@@ -140,13 +140,13 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   // Reset "Added" badge whenever URL input changes
   useEffect(() => { setCustomSiteAdded(false); }, [urlInput]);
 
-  // Suggestions listing from favorites/recent
+  // Show recent series on the Recent view and merged suggestions elsewhere.
   useEffect(() => {
     const refreshSuggestions = () => {
       try {
         const recents = FavoritesManager.getRecent();
         const favorites = FavoritesManager.getFavorites();
-        const merged = [...recents, ...favorites];
+        const merged = activeTab === "recent" ? recents : [...recents, ...favorites];
         const uniqueMap = new Map();
         merged.forEach(item => {
           if (item.url) uniqueMap.set(item.url, item);
@@ -167,7 +167,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       window.removeEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesChanged);
       window.removeEventListener('storage', handleFavoritesChanged);
     };
-  }, []);
+  }, [activeTab]);
 
   useEffect(() => {
     if (!showSuggestions) return;
@@ -575,22 +575,6 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     setEndEpisodeNum('');
   };
 
-  const handleRandomEpisode = () => {
-    if (filteredEpisodes.length === 0) return;
-    const randomIndex = Math.floor(Math.random() * filteredEpisodes.length);
-    const randomEp = filteredEpisodes[randomIndex];
-    setPreviewEpisode(randomEp);
-    addNotification(`Randomly picked ${randomEp.number}: "${randomEp.title || 'Untitled'}"!`, "info");
-  };
-
-  const handleSelectTopN = (n: number) => {
-    if (filteredEpisodes.length === 0) return;
-    const topN = filteredEpisodes.slice(0, n).map(e => e.url);
-    setIsMultiSelectMode(true);
-    setSelectedUrls(topN);
-    addNotification(`Selected top ${topN.length} episodes!`, "success");
-  };
-
   const handleCopyAiPrompt = () => {
     if (!seriesMetadata) return;
     const prompt = `Series Title: ${seriesMetadata.title}
@@ -610,6 +594,56 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
     <div className="w-full space-y-6">
       {/* Scraper configuration box removed — moved into workspace header */}
 
+      <form
+        aria-label="Episode scraper input"
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleScrape();
+        }}
+        className="grid grid-cols-1 lg:grid-cols-[1fr_180px_auto] gap-3 p-4 bg-neutral-900/40 border border-neutral-800/80 rounded-2xl"
+      >
+        <label className="relative">
+          <span className="sr-only">Webtoon series or episode URL</span>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={16} />
+          <input
+            type="url"
+            value={urlInput}
+            onChange={(event) => {
+              const nextUrl = event.target.value;
+              setUrlInput(nextUrl);
+              try {
+                const parsedUrl = new URL(nextUrl);
+                const detectedTitleNo = parsedUrl.searchParams.get("title_no");
+                if (detectedTitleNo) setTitleNoInput(detectedTitleNo);
+              } catch {
+              }
+            }}
+            placeholder="Paste a Webtoon series or episode URL"
+            aria-label="Webtoon series or episode URL"
+            className="w-full rounded-xl border border-neutral-800 bg-neutral-955 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-neutral-600 focus:border-purple-500 focus:outline-none"
+          />
+        </label>
+        <label>
+          <span className="sr-only">Series ID</span>
+          <input
+            type="text"
+            value={titleNoInput}
+            onChange={(event) => setTitleNoInput(event.target.value)}
+            placeholder="Series ID"
+            aria-label="Series ID"
+            className="w-full rounded-xl border border-neutral-800 bg-neutral-955 px-3 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:border-purple-500 focus:outline-none"
+          />
+        </label>
+        <button
+          type="submit"
+          disabled={isLoading || (!urlInput.trim() && !titleNoInput.trim())}
+          className="flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isLoading ? <Loader className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+          {isLoading ? "Loading..." : "Load Episodes"}
+        </button>
+      </form>
+
       {/* 2. ERROR DISPLAY */}
       {error && (
         <div className="p-4 bg-red-900/20 border border-red-500/35 rounded-2xl flex items-center gap-3 text-red-400 text-sm animate-in shake duration-300">
@@ -618,39 +652,21 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
         </div>
       )}
 
-      {/* 3. METADATA BRIEF VIEW */}
-      {seriesMetadata && (
-        <SeriesMetadataCard
-          seriesMetadata={seriesMetadata}
-          urlInput={urlInput}
-          isFavorite={isFavorite}
-          onAddToFavorites={handleAddToFavorites}
-          onCopyAiPrompt={handleCopyAiPrompt}
-        />
-      )}
+      <EpisodeWorkspaceTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        filteredEpisodeCount={filteredEpisodes.length}
+        setBookmarksOnly={setBookmarksOnly}
+        setShowFavorites={setShowFavorites}
+        setShowRecent={setShowRecent}
+        isLoading={isLoading}
+      />
 
-      {/* 4. ACTIVE WORKSPACE CONTAINER (EPISODES VS ANALYTICS) */}
-      {episodes.length > 0 ? (
-        <div className="space-y-6">
-          {/* Glassmorphic Tabs Bar & Quick Actions */}
-          <EpisodeWorkspaceTabs
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            filteredEpisodeCount={filteredEpisodes.length}
-            bookmarksOnly={bookmarksOnly}
-            setBookmarksOnly={setBookmarksOnly}
-            showFavorites={showFavorites}
-            setShowFavorites={setShowFavorites}
-            showRecent={showRecent}
-            setShowRecent={setShowRecent}
-            onRandomEpisode={handleRandomEpisode}
-            onSelectTopN={handleSelectTopN}
-            readTimeEstimate={filteredEpisodes.length * 3.5}
-          />
-
+      {/* 3. ACTIVE WORKSPACE CONTAINER (EPISODES VS ANALYTICS) */}
+      {episodes.length > 0 && activeTab !== "recent" ? (
+        <div id="episode-scraper-view" className="space-y-6">
           {/* TAB VIEW 1: EPISODE GRID & CONTROLS */}
-          {activeTab === "episodes" && (
-            <div className="space-y-6">
+          <div className="space-y-6">
               <EpisodeControls
                 onSortChange={setSortBy}
                 onSearchChange={setSearchQuery}
@@ -777,21 +793,52 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                 </div>
               )}
             </div>
-          )}
-
-          {/* TAB VIEW 2: ANALYTICS & TRENDS */}
-          {activeTab === "analytics" && (
-            <div className="bg-neutral-955 border border-neutral-900/60 rounded-3xl p-6">
-              <AnalyticsDashboard episodes={episodes} seriesTitle={seriesMetadata?.title || "Scraped Series"} />
-            </div>
-          )}
-        </div>
+          </div>
       ) : (
         /* RICH EMPTY STATE WORKSPACE DASHBOARD (WHEN NO EPISODES ARE LOADED) */
-        !isLoading && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        isLoading ? (
+          <EpisodeScraperEmptyState urlInput={urlInput} isLoading={true} />
+        ) : (
+          <div id="episode-scraper-view" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {activeTab !== "recent" && (
+              <EpisodeControls
+                onSortChange={setSortBy}
+                onSearchChange={setSearchQuery}
+                onDateRangeChange={(from, to) => {
+                  setFromDate(from);
+                  setToDate(to);
+                }}
+                onToggleFavorites={() => setShowFavorites(!showFavorites)}
+                onToggleRecent={() => setShowRecent(!showRecent)}
+                showFavorites={showFavorites}
+                showRecent={showRecent}
+                minRating={minRating}
+                onMinRatingChange={setMinRating}
+                minLikes={minLikes}
+                onMinLikesChange={setMinLikes}
+                readStatus={readStatusFilter}
+                onReadStatusChange={setReadStatusFilter}
+                bookmarksOnly={bookmarksOnly}
+                onBookmarksOnlyToggle={() => setBookmarksOnly(!bookmarksOnly)}
+                isMultiSelectMode={isMultiSelectMode}
+                onToggleMultiSelectMode={() => {
+                  setIsMultiSelectMode(!isMultiSelectMode);
+                  setSelectedUrls([]);
+                }}
+                startEpisodeNum={startEpisodeNum}
+                onStartEpisodeChange={setStartEpisodeNum}
+                endEpisodeNum={endEpisodeNum}
+                onEndEpisodeChange={setEndEpisodeNum}
+                onClearFilters={handleClearFilters}
+                onExportCSV={handleExportCSV}
+                onExportJSON={handleExportJSON}
+              />
+            )}
+
+            {
+              <>
             {/* DYNAMIC USER RECENT / FAVORITE SERIES (IF ANY EXIST) */}
-            {suggestions.length > 0 ? (
+            {activeTab === "recent" && suggestions.length > 0 ? (
               <div className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md space-y-6">
                 <div className="flex items-center justify-between border-b border-neutral-800/80 pb-4">
                   <div className="flex items-center gap-3">
@@ -799,49 +846,29 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                       <Clock className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-white tracking-wide">Your Recent &amp; Favorite Series</h3>
-                      <p className="text-xs text-neutral-400 font-mono mt-0.5">Click any series below to load episodes instantly</p>
+                      <h3 className="text-base font-bold text-white tracking-wide">
+                        {activeTab === "recent" ? "Recently Browsed Comics & Manhwa" : "Your Recent & Favorite Series"}
+                      </h3>
+                      <p className="text-xs text-neutral-400 font-mono mt-0.5">Click a series card to open its Episodes List</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {suggestions.map((series, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => {
-                        if (series.url) setUrlInput(series.url);
-                        if (series.title_no) setTitleNoInput(series.title_no);
-                        triggerScrape(series.url, series.title_no);
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {suggestions.map((series) => (
+                    <RecentSeriesCard
+                      key={series.title_no}
+                      series={series}
+                      onSelect={(selectedSeries) => {
+                        setActiveTab("episodes");
+                        setBookmarksOnly(false);
+                        setShowFavorites(false);
+                        setShowRecent(false);
+                        if (selectedSeries.url) setUrlInput(selectedSeries.url);
+                        setTitleNoInput(selectedSeries.title_no);
+                        triggerScrape(selectedSeries.url, selectedSeries.title_no);
                       }}
-                      className="group bg-neutral-955 hover:bg-neutral-900 border border-neutral-800 hover:border-purple-500/40 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex items-center gap-4"
-                    >
-                      {series.cover_image ? (
-                        <img
-                          src={getProxiedImageUrl(series.cover_image, series.url || urlInput)}
-                          alt={series.title}
-                          className="w-14 h-18 object-cover rounded-xl border border-neutral-800 flex-shrink-0 group-hover:scale-105 transition-transform"
-                        />
-                      ) : (
-                        <div className="w-14 h-18 bg-purple-950/20 border border-purple-800/30 rounded-xl flex items-center justify-center text-purple-400 flex-shrink-0">
-                          <BookOpen className="w-6 h-6" />
-                        </div>
-                      )}
-                      <div className="flex-grow min-w-0 space-y-1">
-                        {series.genre && (
-                          <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/20 font-mono">
-                            {series.genre}
-                          </span>
-                        )}
-                        <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors line-clamp-1">
-                          {series.title || "Untitled Series"}
-                        </h4>
-                        <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-purple-400">
-                          <span>Load Episodes</span>
-                          <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
-                        </div>
-                      </div>
-                    </div>
+                    />
                   ))}
                 </div>
               </div>
@@ -891,6 +918,8 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                 </div>
               </div>
             )}
+              </>
+            }
           </div>
         )
       )}
@@ -898,7 +927,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
       {/* QUICK PREVIEW LIGHTBOX MODAL (Rendered at Application Root Level via Portal) */}
       {previewEpisode &&
         createPortal(
-          <EpisodePreviewModal
+          <EpisodeReaderModal
             episode={previewEpisode}
             onClose={() => setPreviewEpisode(null)}
             onImport={(ep) => {
