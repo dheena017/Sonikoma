@@ -3,11 +3,11 @@ providers/vision/yolo.py
 ─────────────────────────────────────────────────────────────────────────────
 Proxy re-export module for YOLO vision and speech bubble detection.
 All active implementation code has been moved to:
-  services.image.panel_detector.yolo_speech_bubble_detector
+  services.image.panel_detection.speech_bubble_detector
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from services.image.panel_detector.yolo_speech_bubble_detector import (
+from services.image.panel_detection.speech_bubble_detector import (
     get_yolo_speech_bubble_model,
     segment_speech_bubbles_and_text_balloons,
     get_yolo_character_segmentation_model,

@@ -28,9 +28,11 @@ def decode_escaped_js_string(value: str) -> str:
         return decoded
     except Exception:
         return value
+
 def natural_sort_key(s: str) -> List[Any]:
     """Helper to sort strings containing numbers naturally (e.g. panel_2 before panel_10)."""
     return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
+
 def _fetch_source(source: str) -> Optional[str]:
     """Fetches HTML from a URL or reads a local file path. Returns HTML string."""
     if os.path.exists(source):
@@ -51,6 +53,7 @@ def _fetch_source(source: str) -> Optional[str]:
         except Exception:
             return None
     return None
+
 def _parse_date_string(s: str) -> Optional[datetime]:
     """Normalize human-readable date strings to datetime. Handles "Jul 7, 2026" etc."""
     if not s:

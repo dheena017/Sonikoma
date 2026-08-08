@@ -11,13 +11,9 @@ USER_AGENTS = [
     "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
 ]
 
-# URL substrings that indicate a non-panel image (icons, logos, ads, ui elements, etc.)
-# Used by scraper.py to filter out irrelevant images from scraped pages.
 UNWANTED_PATTERNS = [
     "logo",
     "icon",
-    "banner",
-    "avatar",
     "favicon",
     "sprite",
     "button",
@@ -30,30 +26,17 @@ UNWANTED_PATTERNS = [
     "1x1",
     "spacer",
     "placeholder",
-    "loading",
     "spinner",
-    "background",
     "facebook.com",
     "google-analytics",
     "googletagmanager",
     "/tr?",
     "doubleclick",
     "analytics",
-    "thum_",
-    "thumbnail",
-    "mobile_webtoon",
-    "poster_",
-    "_poster",
-    "cover_",
-    "_cover",
-    "recommend",
-    "author_",
-    "profile_",
-    "creator_note",
-    "creator_info",
-    "author_area",
-    "profile_area",
-    "author_avatar",
-    "user_avatar"
+    "age_all_white",
+    "agerate",
+    "defaultuser",
+    "android-chrome",
+    "apple-touch-icon",
+    "membership-"
 ]
-

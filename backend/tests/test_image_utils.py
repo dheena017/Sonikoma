@@ -26,7 +26,7 @@ def test_img_utils_stitch_images_together():
     assert result_img.size[1] == 200
 
 def test_stitch_cache_service_imports():
-    from services.image.stitch_cache_service import retrieve_cached_stitch_service
+    from services.image.stitching.stitch_cache_service import retrieve_cached_stitch_service
     assert callable(retrieve_cached_stitch_service)
 
 def test_package_level_import():

@@ -15,7 +15,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 
 from schemas.project import DetectPanelsBase64Request
-from services.image.detect_panels import run_cv_detection
+from services.image.panel_detection.panel_detector import run_cv_detection
 
 logger = logging.getLogger("sonikoma.routes.projects.files")
 router = APIRouter()

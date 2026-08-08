@@ -84,6 +84,7 @@ def extract_episode_date_pairs_from_html(html: str) -> List[Tuple[int, Optional[
         results.append((ep, parsed, context))
 
     return results
+
 def compare_two_sources(source_a: str, source_b: str, name_a: str = 'A', name_b: str = 'B') -> Dict[str, Any]:
     """Fetch/Read two HTML sources, extract episodes, and produce comparison dict."""
     html_a = _fetch_source(source_a)
@@ -124,6 +125,7 @@ def compare_two_sources(source_a: str, source_b: str, name_a: str = 'A', name_b:
         'only_in_b': only_in_b,
         'by_date': by_date
     }
+
 def write_csv(rows: List[Dict[str, Any]], outpath: str) -> None:
     keys = ['view', 'episode', 'date', 'raw']
     with open(outpath, 'w', newline='', encoding='utf-8') as f:
@@ -141,7 +143,6 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
     except Exception:
         return []
 
-    # Universal reader container selectors for all Manhwa / Webtoon platforms
     selectors = custom_selectors or [
         '#readerarea', '.readerarea', '#reader-area', '.reader-area-wrap', '.reader-area',
         '#_imageList', '._img_viewer_area', '.viewer_lst', '.wt_viewer', '._imageList',
@@ -173,7 +174,6 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
                 break
 
     if not container and soup.body:
-        # Universal Fallback: Find the container with the highest density of images
         candidates = soup.body.find_all(['div', 'main', 'article', 'section'])
         best_cand = None
         max_imgs = 0
@@ -205,9 +205,11 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
                 _to_str(img.get('src'))
             )
             if src:
-                if ' ' in src and not src.startswith(('http://', 'https://')):
-                    src = src.split()[0]
-                if 'bg_transparency' in src or src.endswith('1x1.gif') or src.endswith('spacer.gif') or 'blank.gif' in src or 'avatar' in src.lower():
+                if ',' in src:
+                    src = src.split(',')[0].strip()
+                if ' ' in src:
+                    src = src.split()[0].strip()
+                if 'bg_transparency' in src or src.endswith('1x1.gif') or src.endswith('spacer.gif') or 'blank.gif' in src:
                     continue
                 abs_src = urljoin(base_url, src)
                 if abs_src not in target_list:
@@ -240,7 +242,6 @@ def parse_with_bs4(html: str, base_url: str, custom_selectors: Optional[List[str
     if container:
         _extract_images_from_root(container, images)
 
-    # Only harvest full document if isolated reader container produced no valid panel images
     if not images:
         soup_copy = BeautifulSoup(str(soup), 'html.parser') if BeautifulSoup is not None else None
         if soup_copy:

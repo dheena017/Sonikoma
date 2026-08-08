@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "app")))
 
-from services.image.detect_panels import run_cv_detection
+from services.image.panel_detection.panel_detector import run_cv_detection
 
 
 def _safe_remove(path: str):

@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "app")))
 
-from services.image.detect_panels import run_cv_detection
+from services.image.panel_detection.panel_detector import run_cv_detection
 from services.image.utils.panel_box_utils import merge_overlapping_boxes
 
 
@@ -134,7 +134,7 @@ def test_grid_panel_detection_morphological_closing_and_area_filtering():
     - Verifies morphological closing bridges panel border line gaps so panel is detected as a unified block.
     - Verifies min_panel_area = 5000 and thin strip filtering discards small artifacts.
     """
-    from services.image.panel_grid_detect import _detect_panels_grid_cv
+    from services.image.panel_detection.grid_detector import _detect_panels_grid_cv
 
     # Create synthetic page with 2 panels (150x150 each, area=22500) and small/thin noise artifacts
     grid = np.ones((500, 500), dtype=np.uint8) * 255
@@ -223,7 +223,7 @@ def test_yolo_class_filtering_speech_bubble_vs_panel():
             ])]
 
     with patch("providers.vision.yolo.get_yolo_model") as mock_get_yolo, \
-         patch("services.image.detect_panels._detect_panels_grid_cv") as mock_grid_cv:
+         patch("services.image.panel_detection.panel_detector._detect_panels_grid_cv") as mock_grid_cv:
         mock_get_yolo.return_value = MockYOLO()
         mock_grid_cv.return_value = []
 

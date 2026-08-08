@@ -30,6 +30,7 @@ def parse_episode_index(title_or_url: str) -> Optional[float]:
         except ValueError:
             pass
     return None
+
 def parse_image_dimensions_from_bytes(data: bytes) -> Optional[Tuple[int, int]]:
     """Parses width and height from the first few bytes of JPEG, PNG, GIF, WebP image data."""
     try:
@@ -77,6 +78,7 @@ def parse_image_dimensions_from_bytes(data: bytes) -> Optional[Tuple[int, int]]:
     except Exception:
         pass
     return None
+
 def extract_metadata(html: str, url: str) -> Dict[str, str]:
     """Extracts Title, Description, Genre, Cover Image, and Author from page headers."""
     metadata = {"title": "", "description": "", "cover_image": "", "author": "", "genre": ""}
@@ -104,7 +106,6 @@ def extract_metadata(html: str, url: str) -> Dict[str, str]:
 
         title_str = metadata["title"]
         if title_str:
-            # Dynamically strip site branding after standard title delimiters (| :: — -)
             parts = re.split(r'\s*[|::—–]\s*|\s+-\s+(?=[A-Z0-9\s]+$)', title_str)
             if parts and parts[0].strip():
                 title_str = parts[0].strip()

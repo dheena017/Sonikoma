@@ -107,7 +107,7 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
     @patch("api.v1.ai.image.record_credit_transaction")
     @patch("services.ai.skills.base.call_gemini_with_retry")
     @patch("services.ai.facade.generate_panel_audio")
-    @patch("services.image.ocr.extract_dialogue_from_panel")
+    @patch("services.image.ocr.ocr_engine.extract_dialogue_from_panel")
     @patch("services.image.utils.image_utils.compute_brightness")
     @patch("services.image.utils.image_utils.resolve_image_to_buffer")
     @patch("google.genai.Client")
