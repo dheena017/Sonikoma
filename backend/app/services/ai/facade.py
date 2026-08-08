@@ -273,7 +273,7 @@ async def facade_analyze_image(
 
     has_dialogue = True
     try:
-        from services.image.ocr import extract_dialogue_from_panel
+        from services.image.ocr.ocr_engine import extract_dialogue_from_panel
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_ocr:
             tmp_ocr.write(img_buffer)
             tmp_ocr_path = tmp_ocr.name
@@ -481,7 +481,7 @@ async def facade_smart_crop(
                 tmp_in.write(img_buffer)
                 tmp_in_path = tmp_in.name
 
-            from services.image.detect_panels import run_cv_detection
+            from services.image.panel_detection.panel_detector import run_cv_detection
             cv_panels = run_cv_detection(
                 image_path=tmp_in_path,
                 sensitivity=sensitivity,
@@ -561,7 +561,7 @@ async def facade_smart_crop(
                 tmp_in.write(img_buffer)
                 tmp_in_path = tmp_in.name
 
-            from services.image.detect_panels import run_cv_detection
+            from services.image.panel_detection.panel_detector import run_cv_detection
             cv_panels = run_cv_detection(
                 image_path=tmp_in_path,
                 sensitivity=sensitivity,

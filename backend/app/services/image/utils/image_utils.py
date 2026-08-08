@@ -5,7 +5,7 @@ from PIL import Image, ImageStat
 import numpy as np
 
 from .image_resolver import resolve_image_to_buffer, resolve_url_to_buffer
-from ..image_stitcher import stitch_images_together, stack_vertical
+from ..stitching.image_stitcher import stitch_images_together, stack_vertical
 from ..processing.image_ops import get_image_meta, fingerprint_image, ImageMeta
 
 logger = logging.getLogger("sonikoma.services.image.utils")

@@ -8,7 +8,7 @@ User Avatar management endpoints.
 import logging
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Request
 from api.dependencies.auth import get_current_user
-from services.image.upload import upload_image_service
+from services.image.upload.image_uploader import upload_image_service
 from repositories.user import update_user, write_audit_log
 
 logger = logging.getLogger("sonikoma.auth.avatar")

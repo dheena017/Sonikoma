@@ -132,7 +132,7 @@ async def resolve_url_to_buffer(
 
             # Fallback to direct cache service retrieval (handles disk/db cache resolution)
             try:
-                from services.image.stitch_cache_service import retrieve_cached_stitch_service
+                from services.image.stitching.stitch_cache_service import retrieve_cached_stitch_service
                 data, content_type = await retrieve_cached_stitch_service(cache_id)
                 if data:
                     return {"data": data, "content_type": content_type, "contentType": content_type}

@@ -23,7 +23,7 @@ from schemas.image import (
     CompositeRequest,
     ImagePathRequest,
 )
-from services.image.image_service import (
+from services.image.processing.image_service import (
     transform_image_service,
     merge_images_service,
     execute_splits_service,
@@ -122,7 +122,7 @@ async def merge_images(body: StitchImagesRequest):
 
 @router.get("/cached/{cache_id}", summary="Retrieve stitched cached panel image")
 async def get_cached_stitch(request: Request, cache_id: str = Path(...)):
-    from services.image.stitch_cache_service import retrieve_cached_stitch_service, StitchedResourceNotFound
+    from services.image.stitching.stitch_cache_service import retrieve_cached_stitch_service, StitchedResourceNotFound
     try:
         referer = request.headers.get("referer") if request else None
         content_bytes, media_type = await retrieve_cached_stitch_service(cache_id, referer)

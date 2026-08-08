@@ -5,7 +5,7 @@ import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "app")))
 
-from services.image.detect_panels import _sort_panels_reading_order
+from services.image.panel_detection.panel_detector import _sort_panels_reading_order
 
 
 def test_sort_panels_reading_order_ltr_staggered():

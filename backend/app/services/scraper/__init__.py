@@ -1,9 +1,20 @@
 """
 backend/app/services/scraper/__init__.py
 ─────────────────────────────────────────────────────────────────────────────
-Backward-compatibility proxy.
-Re-exports scraper package contents from `services.image.scraper`.
+Package entry point exposing primary scraper services and functions.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from services.image.scraper import *
+from services.scraper.scraper_service import (
+    scrape_and_initialize_project,
+    generate_storyboard_only_service,
+    generate_storyboard_and_video,
+)
+from services.scraper.scraper import scrape_images_from_url
+
+__all__ = [
+    "scrape_and_initialize_project",
+    "generate_storyboard_only_service",
+    "generate_storyboard_and_video",
+    "scrape_images_from_url"
+]

@@ -11,11 +11,11 @@ from unittest.mock import patch, MagicMock, AsyncMock
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
 try:
-    from services.image.layer_segmentation import process_layers
+    from services.image.layer_separation.layer_segmentation import process_layers
     from services.audio.dialogue_aligner_impl import align_dialogue_and_extract_peaks
     from services.video.video_service import _render_panel_segment_ffmpeg
 except ImportError:
-    from app.services.image.layer_segmentation import process_layers
+    from app.services.image.layer_separation.layer_segmentation import process_layers
     from app.services.audio.dialogue_aligner_impl import align_dialogue_and_extract_peaks
     from app.services.video.video_service import _render_panel_segment_ffmpeg
 
@@ -54,7 +54,7 @@ class TestLayerPipelineIntegration(unittest.TestCase):
             shutil.rmtree(cls.temp_dir, ignore_errors=True)
 
     @patch.dict(os.environ, {"ENVIRONMENT": "production"})
-    @patch('services.image.layer_segmentation.upload_to_supabase_bucket')
+    @patch('app.services.image.layer_separation.layer_segmentation.upload_to_supabase_bucket')
     @patch('services.audio.transcription_impl.extract_words_with_timestamps')
     @patch('services.audio.dialogue_aligner_impl.get_whisper_engine')
     @patch('subprocess.run')
