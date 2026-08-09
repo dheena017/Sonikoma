@@ -23,6 +23,7 @@ NODE_ENV = os.getenv("NODE_ENV", "development")
 
 # 1. FRONTEND_PORT
 FRONTEND_PORT_STR = os.getenv("FRONTEND_PORT")
+FRONTEND_PORT = 0
 if NODE_ENV == "production":
     if FRONTEND_PORT_STR:
         try:
@@ -34,7 +35,7 @@ if NODE_ENV == "production":
                 "and do not place the URL into FRONTEND_PORT."
             )
     else:
-        FRONTEND_PORT = 3000
+        FRONTEND_PORT = 0
 else:
     if not FRONTEND_PORT_STR:
         raise RuntimeError(

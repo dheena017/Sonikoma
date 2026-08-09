@@ -9,56 +9,47 @@ import fs from "fs";
 export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, path.resolve(__dirname, ".."));
 
+  const isProductionBuild =
+    command === "build" ||
+    mode === "production" ||
+    (env.NODE_ENV || process.env.NODE_ENV) === "production";
+  const isDevServer = command === "serve";
   const isCIOrBuild =
     process.env.CI !== undefined ||
     process.env.NETLIFY !== undefined ||
     process.env.VERCEL !== undefined ||
-    command === "build" ||
-    mode === "production" ||
-    (env.NODE_ENV || process.env.NODE_ENV) === "production";
+    !isDevServer;
 
   const backendPortStr = env.BACKEND_PORT || process.env.BACKEND_PORT || process.env.PORT;
-  if (!backendPortStr) {
-    if (isCIOrBuild) {
-      console.warn("[vite.config] Warning: BACKEND_PORT/PORT is not set. Proxy will be disabled for this build.");
-    } else {
-      throw new Error(
-        "Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!\n" +
-        "Please define BACKEND_PORT or PORT in your .env file."
-      );
-    }
+  if (!backendPortStr && isDevServer) {
+    throw new Error(
+      "Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!\n" +
+      "Please define BACKEND_PORT or PORT in your .env file."
+    );
   }
   const backendPort = backendPortStr ? parseInt(backendPortStr, 10) : 0;
-  if ((isNaN(backendPort) || backendPort <= 0) && !isCIOrBuild) {
+  if ((isNaN(backendPort) || backendPort <= 0) && isDevServer) {
     throw new Error(`Configuration Error: BACKEND_PORT/PORT must be a valid positive integer, got "${backendPortStr}"`);
   }
 
   const frontendPortStr = env.FRONTEND_PORT || process.env.FRONTEND_PORT;
-  if (!frontendPortStr) {
-    if (isCIOrBuild) {
-      console.warn("[vite.config] Warning: FRONTEND_PORT is not set. Dev server port will be assigned by Vite.");
-    } else {
-      throw new Error(
-        "Configuration Error: FRONTEND_PORT environment variable is missing!\n" +
-        "Please define FRONTEND_PORT in your .env file."
-      );
-    }
+  if (!frontendPortStr && isDevServer) {
+    throw new Error(
+      "Configuration Error: FRONTEND_PORT environment variable is missing!\n" +
+      "Please define FRONTEND_PORT in your .env file."
+    );
   }
   const frontendPort = frontendPortStr ? parseInt(frontendPortStr, 10) : 0;
-  if ((isNaN(frontendPort) || frontendPort <= 0) && !isCIOrBuild) {
+  if ((isNaN(frontendPort) || frontendPort <= 0) && isDevServer) {
     throw new Error(`Configuration Error: FRONTEND_PORT must be a valid positive integer, got "${frontendPortStr}"`);
   }
 
   const appUrl = env.APP_URL || process.env.APP_URL;
-  if (!appUrl) {
-    if (isCIOrBuild) {
-      console.warn("[vite.config] Warning: APP_URL is not set.");
-    } else {
-      throw new Error(
-        "Configuration Error: APP_URL environment variable is missing!\n" +
-        "Please define APP_URL in your .env file."
-      );
-    }
+  if (!appUrl && isProductionBuild) {
+    throw new Error(
+      "Configuration Error: APP_URL environment variable is missing!\n" +
+      "Please define APP_URL in your .env file."
+    );
   }
 
   const backendTarget = backendPort > 0 ? `http://127.0.0.1:${backendPort}` : "";
@@ -388,7 +379,7 @@ export default defineConfig(({ mode, command }) => {
       },
     },
     server: {
-      port: frontendPort,
+      port: isDevServer ? frontendPort : undefined,
       hmr: process.env.DISABLE_HMR !== "true"
         ? {
             overlay: true,
