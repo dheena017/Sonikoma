@@ -54,6 +54,8 @@ const logger = {
 // Initialize dotenv from parent .env file
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
+const nodeEnv = (process.env.NODE_ENV || "development").toLowerCase();
+
 const backendPortStr = process.env.BACKEND_PORT || process.env.PORT;
 if (!backendPortStr) {
   logger.error("Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!");
@@ -78,12 +80,7 @@ if (isNaN(frontendPort)) {
   process.exit(1);
 }
 
-const appUrl = process.env.APP_URL;
-if (!appUrl) {
-  logger.error("Configuration Error: APP_URL environment variable is missing!");
-  logger.error("Please configure it in your .env file.");
-  process.exit(1);
-}
+const appUrl = process.env.APP_URL || `http://localhost:${frontendPort}`;
 
 const jwtSecretKey = process.env.JWT_SECRET_KEY;
 if (!jwtSecretKey) {
