@@ -29,9 +29,9 @@ The repository is divided into two main components:
 ### Environment Variables
 Copy `.env.example` to `.env` in the root directory. You must configure at least:
 - `GEMINI_API_KEY`: Required for AI narrative generation and vision tasks.
-- `FRONTEND_PORT` (e.g., 3000)
-- `BACKEND_PORT` (e.g., 8000)
-- `APP_URL` (e.g., http://localhost:3000)
+- `FRONTEND_PORT` (e.g., 3000) — required for local development.
+- `BACKEND_PORT` (e.g., 8000) — required in all environments.
+- `APP_URL` (e.g., http://localhost:3000) — recommended in development and required in production.
 - `JWT_SECRET_KEY`: A secure random string for authentication.
 
 ## 3. Running the Application

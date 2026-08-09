@@ -63,13 +63,18 @@ except ValueError:
         f"Configuration Error: BACKEND_PORT/PORT must be a valid integer, got '{BACKEND_PORT_STR}'"
     )
 
-# 3. APP_URL (strictly required)
+# 3. APP_URL
 APP_URL = os.getenv("APP_URL")
 if not APP_URL:
-    raise RuntimeError(
-        "Configuration Error: APP_URL environment variable is missing!\n"
-        "Please define APP_URL (e.g., http://localhost:3000 or https://sonikoma.vercel.app) in your .env file."
-    )
+    if NODE_ENV == "production":
+        raise RuntimeError(
+            "Configuration Error: APP_URL environment variable is required in production!\n"
+            "Please define APP_URL (e.g., https://sonikoma.vercel.app) in your .env file."
+        )
+    if NODE_ENV == "development":
+        APP_URL = f"http://localhost:{FRONTEND_PORT or 3000}"
+    else:
+        APP_URL = None
 
 NODE_ENV = os.getenv("NODE_ENV", "development")
 

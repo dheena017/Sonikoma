@@ -67,21 +67,6 @@ if (isNaN(port)) {
   process.exit(1);
 }
 
-let frontendPort = 0;
-if (nodeEnv !== "production") {
-  const frontendPortStr = process.env.FRONTEND_PORT;
-  if (!frontendPortStr) {
-    logger.error("Configuration Error: FRONTEND_PORT environment variable is missing!");
-    logger.error("Please configure it in your .env file.");
-    process.exit(1);
-  }
-  frontendPort = parseInt(frontendPortStr, 10);
-  if (isNaN(frontendPort)) {
-    logger.error(`Configuration Error: FRONTEND_PORT must be a valid integer, got "${frontendPortStr}"`);
-    process.exit(1);
-  }
-}
-
 const jwtSecretKey = process.env.JWT_SECRET_KEY;
 if (!jwtSecretKey) {
   logger.error("Configuration Error: JWT_SECRET_KEY environment variable is missing!");
