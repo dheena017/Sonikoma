@@ -117,7 +117,7 @@ if __name__ == "__main__":
         "port": BACKEND_PORT,
         "log_level": "info",
         "log_config": custom_log_config,
-        "use_colors": not IS_PRODUCTION,
+        "use_colors": True,
     }
     # Reload is disabled because reloading is managed externally by the Node runner
     run_args["reload"] = False

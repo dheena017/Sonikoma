@@ -14,6 +14,10 @@ import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
+
+def _should_use_colors() -> bool:
+    return True
+
 try:
     from startup import (
         logger,
@@ -149,15 +153,21 @@ async def lifespan(app: FastAPI):
         except (ModuleNotFoundError, ImportError):
             ui_handler_cls = None
 
+    def _should_use_colors() -> bool:
+        force_color = os.getenv("FORCE_COLOR", "").strip().lower()
+        if force_color and force_color not in ("0", "false", "no"):
+            return True
+        return not IS_PRODUCTION
+
     for name in list(logging.root.manager.loggerDict.keys()):
         l = logging.getLogger(name)
         for h in l.handlers:
-            if ui_handler_cls is None or not isinstance(h, ui_handler_cls):
-                h.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
+            if ui_handler_cls is None or not isinstance(h, _UIStreamLogHandler):
+                h.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))
 
     for h in logging.getLogger().handlers:
-        if ui_handler_cls is None or not isinstance(h, ui_handler_cls):
-            h.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
+        if ui_handler_cls is None or not isinstance(h, _UIStreamLogHandler):
+            h.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))
 
     _print_startup_banner()
 

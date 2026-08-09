@@ -1,10 +1,15 @@
 """
 backend/app/startup/logging.py
 """
+import os
 import sys
 import logging
 import re
 from .bootstrap import IS_PRODUCTION, LOG_LEVEL
+
+
+def _should_use_colors() -> bool:
+    return True
 
 try:
     import colorama
@@ -322,7 +327,7 @@ class ColoredFormatter(logging.Formatter):
 
 
 console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
+console_handler.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))
 
 # Preserve UIStreamLogHandler (attached by log_interceptor at import time).
 # If log_interceptor isn't present (e.g., stripped deployment), fall back to plain console logging.

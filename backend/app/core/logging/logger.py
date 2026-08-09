@@ -18,6 +18,10 @@ from core.logging.handlers import (
     listeners
 )
 
+
+def _should_use_colors() -> bool:
+    return True
+
 # Custom logging level integers (defined here to avoid monkey-patching the
 # logging module, which static analysers like Pylance/mypy don't support).
 TRACE: int = 5
@@ -54,7 +58,7 @@ def setup_logging():
     """Initializes the global logging configuration."""
     from startup.bootstrap import IS_PRODUCTION, LOG_LEVEL
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(ColoredFormatter(use_colors=not IS_PRODUCTION))
+    console_handler.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))
     console_handler.addFilter(EndpointFilter())
 
     root_logger = logging.getLogger()
