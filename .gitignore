@@ -82,3 +82,5 @@ temp_test_combos/
 skills-lock.json
 verify_fix.cjs
 .llm-chat-history/
+
+yolov8n-seg.pt
