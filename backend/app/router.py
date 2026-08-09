@@ -38,12 +38,20 @@ def register_routers(app: FastAPI):
 
     # Static Frontend Serving (Production Only)
     dist_path = os.path.join(PROJECT_ROOT, "dist")
+    repo_root = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
+    frontend_dist_path = os.path.join(repo_root, "frontend", "dist")
     if IS_PRODUCTION:
         if os.path.exists(dist_path):
             logger.info(f"Mounting static files directory: {dist_path}")
             app.mount("/", StaticFiles(directory=dist_path, html=True), name="static")
+        elif os.path.exists(frontend_dist_path):
+            logger.info(f"Mounting static files directory from frontend build: {frontend_dist_path}")
+            app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="static")
         else:
-            logger.warning(f"Production mode active but dist folder not found at: {dist_path}")
+            logger.warning(
+                "Production mode active but no frontend build folder was found. "
+                f"Checked: {dist_path} and {frontend_dist_path}"
+            )
 
     # Root redirect (matches Express server behaviour)
     @app.get("/", include_in_schema=False)
@@ -53,8 +61,16 @@ def register_routers(app: FastAPI):
     # SPA Fallback Route for client-side routing
     @app.get("/{fallback_path:path}", include_in_schema=False)
     async def spa_fallback(fallback_path: str):
-        if IS_PRODUCTION and os.path.exists(os.path.join(dist_path, "index.html")):
-            return FileResponse(os.path.join(dist_path, "index.html"))
+        index_file = None
+        if IS_PRODUCTION:
+            if os.path.exists(os.path.join(dist_path, "index.html")):
+                index_file = os.path.join(dist_path, "index.html")
+            elif os.path.exists(os.path.join(frontend_dist_path, "index.html")):
+                index_file = os.path.join(frontend_dist_path, "index.html")
+
+        if index_file:
+            return FileResponse(index_file)
+
         return JSONResponse(
             status_code=404,
             content={
