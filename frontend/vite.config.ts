@@ -107,6 +107,7 @@ export default defineConfig(({ mode, command }) => {
   };
 
   return {
+    envPrefix: ["VITE_", "SUPABASE_"],
     root: path.resolve(__dirname),
     plugins: [
       react(),

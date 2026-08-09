@@ -100,7 +100,7 @@ def _print_startup_banner():
     hf_key = os.getenv("HUGGINGFACE_API_KEY")
     hf_st = f"{CLR_SUCCESS}HuggingFace ✔{CLR_RESET}" if hf_key else f"{CLR_MUTED}HuggingFace ℹ{CLR_RESET}"
 
-    supabase_url = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
+    supabase_url = os.getenv("SUPABASE_URL")
     supabase_st = f"{CLR_SUCCESS}Supabase ✔{CLR_RESET}" if supabase_url else f"{CLR_MUTED}Supabase ℹ{CLR_RESET}"
 
     openai_key = os.getenv("OPENAI_API_KEY")
