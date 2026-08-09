@@ -8,6 +8,7 @@ Google OAuth2 authentication routes.
 import os
 import uuid
 import json
+import hmac
 import logging
 import urllib.parse
 import requests
@@ -24,6 +25,36 @@ from repositories.user import (
 
 logger = logging.getLogger("sonikoma.auth.oauth")
 router = APIRouter()
+
+OAUTH_STATE_COOKIE_NAME = "google_oauth_state"
+OAUTH_STATE_MAX_AGE = 300  # 5 minutes
+
+
+def _generate_oauth_state() -> str:
+    return uuid.uuid4().hex
+
+
+def _set_oauth_state_cookie(response: RedirectResponse, state: str, secure: bool) -> None:
+    response.set_cookie(
+        OAUTH_STATE_COOKIE_NAME,
+        state,
+        max_age=OAUTH_STATE_MAX_AGE,
+        httponly=True,
+        secure=secure,
+        samesite="lax",
+        path="/",
+    )
+
+
+def _get_oauth_state(request: Request) -> str | None:
+    return request.cookies.get(OAUTH_STATE_COOKIE_NAME)
+
+
+def _delete_oauth_state_cookie(response: RedirectResponse) -> None:
+    response.delete_cookie(
+        OAUTH_STATE_COOKIE_NAME,
+        path="/",
+    )
 
 
 def _load_google_secrets() -> tuple[str, str | None]:
@@ -77,13 +108,21 @@ def _get_redirect_uri(request: Request) -> str:
     if env_uri:
         return env_uri
 
+    # Prefer using the incoming request host/scheme so the redirect URI
+    # matches the origin that received the state cookie. Using APP_URL can
+    # cause a mismatch in development (frontend vs backend ports) which
+    # results in the state cookie not being sent on callback and a 400 error.
+    host = request.headers.get("host")
+    scheme = "https" if request.url.scheme == "https" else "http"
+    if host:
+        return f"{scheme}://{host}/api/auth/google/callback"
+
     if APP_URL:
         base = APP_URL.rstrip("/")
         return f"{base}/api/auth/google/callback"
 
-    host = request.headers.get("host", "localhost:3000")
-    scheme = "https" if request.url.scheme == "https" else "http"
-    return f"{scheme}://{host}/api/auth/google/callback"
+    # Fallback to localhost backend default
+    return f"{scheme}://localhost:5173/api/auth/google/callback"
 
 
 @router.get("/login", summary="Initiate Google OAuth2 authentication flow")
@@ -104,6 +143,7 @@ async def google_login(request: Request):
         "https://www.googleapis.com/auth/youtube.upload",
     ]
 
+    state = _generate_oauth_state()
     params = {
         "client_id": client_id,
         "redirect_uri": redirect_uri,
@@ -111,14 +151,29 @@ async def google_login(request: Request):
         "scope": " ".join(scopes),
         "access_type": "offline",
         "prompt": "consent",
+        "state": state,
     }
 
     auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
-    return RedirectResponse(auth_url)
+    response = RedirectResponse(auth_url)
+    secure_cookie = request.url.scheme == "https"
+    _set_oauth_state_cookie(response, state, secure_cookie)
+    return response
 
 
 @router.get("/callback", summary="Google OAuth2 authentication callback")
 async def google_callback(request: Request):
+    state = request.query_params.get("state")
+    if not state:
+        raise HTTPException(status_code=400, detail="Missing OAuth state parameter")
+
+    cookie_state = _get_oauth_state(request)
+    if not cookie_state:
+        raise HTTPException(status_code=400, detail="Missing OAuth state cookie. Please retry login.")
+
+    if not hmac.compare_digest(state, cookie_state):
+        raise HTTPException(status_code=400, detail="Invalid OAuth state parameter")
+
     code = request.query_params.get("code")
     if not code:
         raise HTTPException(status_code=400, detail="Missing authorization code")
@@ -139,7 +194,16 @@ async def google_callback(request: Request):
         if token_resp.status_code != 200:
             raise HTTPException(status_code=400, detail=f"Google token exchange failed: {token_resp.text}")
 
-        token_data = token_resp.json()
+        try:
+            token_data = token_resp.json()
+        except ValueError:
+            logger.error("Google token response is not valid JSON: %s", token_resp.text)
+            raise HTTPException(status_code=400, detail="Google token response invalid")
+
+        if not isinstance(token_data, dict):
+            logger.error("Google token response unexpected type: %r", token_data)
+            raise HTTPException(status_code=400, detail="Google token response invalid")
+
         google_access_token = token_data.get("access_token")
         if not google_access_token:
             raise HTTPException(status_code=400, detail="Google response did not return an access token")
@@ -151,10 +215,27 @@ async def google_callback(request: Request):
         if resp.status_code != 200:
             raise HTTPException(status_code=400, detail="Failed to fetch userinfo from Google")
 
-        info = resp.json()
+        try:
+            info = resp.json()
+        except ValueError:
+            logger.error("Google userinfo response is not valid JSON: %s", resp.text)
+            raise HTTPException(status_code=400, detail="Google userinfo response invalid")
+
+        if not isinstance(info, dict):
+            logger.error("Google userinfo unexpected type: %r", info)
+            raise HTTPException(status_code=400, detail="Google userinfo response invalid")
+
         email = info.get("email")
         google_id = info.get("sub")
-        name = info.get("name") or email.split("@")[0]
+        # Ensure `name` is always a non-empty string so it can be passed to
+        # repository functions that expect `username: str`.
+        raw_name = info.get("name")
+        if isinstance(raw_name, str) and raw_name.strip():
+            name = raw_name.strip()
+        elif isinstance(email, str) and email:
+            name = email.split("@")[0]
+        else:
+            name = f"user_{uuid.uuid4().hex[:8]}"
         picture = info.get("picture") or f"https://api.dicebear.com/7.x/avataaars/svg?seed={google_id}"
 
         if not email:
@@ -164,21 +245,68 @@ async def google_callback(request: Request):
         if not user:
             user_uuid = f"user_{uuid.uuid4().hex[:8]}"
             password_hash = get_password_hash(f"google_oauth_{uuid.uuid4().hex}")
-            create_user_relational(
+            created = create_user_relational(
                 user_id=user_uuid,
                 username=name,
                 email=email,
                 password_hash=password_hash,
                 preferences="{}",
             )
-            update_user(user_uuid, {"google_id": google_id, "full_name": name, "avatar_url": picture})
+            # ensure the newly created user exists and is fetchable
             user = get_user_by_email(email)
-        elif not user.get("google_id"):
-            update_user(user["user_id"], {"google_id": google_id})
-            user["google_id"] = google_id
+            if not user:
+                logger.error("Failed to create or fetch user after Google OAuth: %s", email)
+                raise HTTPException(status_code=500, detail="Failed to create user account")
+            # attach google fields
+            try:
+                update_user(user_uuid, {"google_id": google_id, "full_name": name, "avatar_url": picture})
+            except Exception:
+                logger.exception("Failed to update user with Google profile info: %s", user_uuid)
+        else:
+            # make sure user is a mapping and has user_id
+            if not isinstance(user, dict) or "user_id" not in user:
+                logger.error("Unexpected user object returned for %s: %r", email, user)
+                raise HTTPException(status_code=500, detail="Invalid user record returned from repository")
+
+            if not user.get("google_id"):
+                try:
+                    update_user(user["user_id"], {"google_id": google_id})
+                    user["google_id"] = google_id
+                except Exception:
+                    logger.exception("Failed to update existing user with google_id: %s", user.get("user_id"))
 
         access_token = create_access_token(data={"sub": user["user_id"]})
-        return RedirectResponse(f"{APP_URL}/?token={access_token}")
+
+        # Set token in a secure HttpOnly cookie instead of exposing it in the URL.
+        redirect_target = APP_URL or "/"
+        resp = RedirectResponse(redirect_target)
+
+        cookie_kwargs = {
+            "key": "access_token",
+            "value": access_token,
+            "httponly": True,
+            "max_age": 3600,
+            "path": "/",
+        }
+
+        if APP_URL:
+            parsed = urllib.parse.urlparse(APP_URL)
+            host = parsed.hostname
+            scheme = parsed.scheme
+            if host and host not in ("localhost", "127.0.0.1"):
+                cookie_kwargs["domain"] = host
+                cookie_kwargs["secure"] = scheme == "https"
+                cookie_kwargs["samesite"] = "none" if scheme == "https" else "lax"
+            else:
+                cookie_kwargs["secure"] = False
+                cookie_kwargs["samesite"] = "lax"
+        else:
+            cookie_kwargs["secure"] = False
+            cookie_kwargs["samesite"] = "lax"
+
+        resp.set_cookie(**cookie_kwargs)
+        _delete_oauth_state_cookie(resp)
+        return resp
     except HTTPException:
         raise
     except Exception as e:

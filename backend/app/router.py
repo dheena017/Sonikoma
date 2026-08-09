@@ -18,12 +18,15 @@ def register_routers(app: FastAPI):
     # Include main API router
     app.include_router(api_router)
 
-    # Serve generated videos
+    # Serve generated videos.
+    # NOTE: /videos is currently exposed publicly as a static mount so the frontend can fetch published output directly.
+    # If you want these assets to require auth, replace this mount with an authenticated proxy route.
     videos_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media"))
     os.makedirs(videos_path, exist_ok=True)
     app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
 
     # Serve locally generated panel layer WebPs (development bypass)
+    # NOTE: /media is also a public static mount today. Keep this public only if all generated media are safe for unauthenticated access.
     local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "local_media"))
     os.makedirs(local_media_dir, exist_ok=True)
     app.mount("/media", StaticFiles(directory=local_media_dir), name="media")

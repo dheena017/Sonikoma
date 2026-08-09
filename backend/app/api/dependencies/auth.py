@@ -28,7 +28,7 @@ async def get_current_user(request: Request, token: Optional[str] = Depends(oaut
             else:
                 token = auth_header
         else:
-            token = request.query_params.get("token")
+            token = request.cookies.get("access_token") or request.query_params.get("token")
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

@@ -14,19 +14,27 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.startup import logger, API_VERSION
-from core.settings import FRONTEND_PORT, BACKEND_PORT
+from core.settings import APP_URL, BACKEND_PORT, FRONTEND_PORT, NODE_ENV
 from api.dependencies.auth import get_current_user
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CORS CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
-ALLOWED_ORIGINS = [
-    f"http://localhost:{FRONTEND_PORT}",
-    f"http://localhost:{BACKEND_PORT}",
-    f"http://127.0.0.1:{FRONTEND_PORT}",
-    f"http://127.0.0.1:{BACKEND_PORT}",
-    os.getenv("APP_URL", f"http://localhost:{FRONTEND_PORT}"),
-]
+ALLOWED_ORIGINS = []
+if NODE_ENV == "production":
+    if APP_URL:
+        ALLOWED_ORIGINS = [APP_URL.rstrip("/")]
+else:
+    ALLOWED_ORIGINS = [
+        f"http://localhost:{FRONTEND_PORT}",
+        f"http://localhost:{BACKEND_PORT}",
+        f"http://127.0.0.1:{FRONTEND_PORT}",
+        f"http://127.0.0.1:{BACKEND_PORT}",
+    ]
+    if APP_URL:
+        app_url_clean = APP_URL.rstrip("/")
+        if app_url_clean not in ALLOWED_ORIGINS:
+            ALLOWED_ORIGINS.append(app_url_clean)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # AUTHORIZATION MIDDLEWARE (3-tier hierarchy)

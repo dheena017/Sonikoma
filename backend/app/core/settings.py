@@ -52,10 +52,20 @@ APP_URL = os.getenv("APP_URL")
 if not APP_URL:
     raise RuntimeError(
         "Configuration Error: APP_URL environment variable is missing!\n"
-        "Please define APP_URL (e.g., http://localhost:3000) in your .env file."
+        "Please define APP_URL (e.g., http://localhost:3000 or https://sonikoma.vercel.app) in your .env file."
     )
 
-# 4. JWT_SECRET_KEY (strictly required)
+NODE_ENV = os.getenv("NODE_ENV", "development")
+
+# 4. GOOGLE_REDIRECT_URI (production recommended)
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
+if NODE_ENV == "production" and not GOOGLE_REDIRECT_URI:
+    raise RuntimeError(
+        "Configuration Error: GOOGLE_REDIRECT_URI environment variable is required in production!\n"
+        "Please define GOOGLE_REDIRECT_URI as the exact public callback URL, e.g. https://sonikoma.vercel.app/api/auth/google/callback."
+    )
+
+# 5. JWT_SECRET_KEY (strictly required)
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 if not JWT_SECRET_KEY:
     raise RuntimeError(
