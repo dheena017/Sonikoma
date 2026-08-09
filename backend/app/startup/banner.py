@@ -136,9 +136,15 @@ def _print_startup_banner():
     line_bind  = _format_line(f"● {CLR_MUTED}Server Bind       :{CLR_RESET} 0.0.0.0:{port}  │  CORS Origin: {app_url}")
     line_runtime = _format_line(f"● {CLR_MUTED}Runtime & OS      :{CLR_RESET} Python v{py_ver} ({venv_name})  │  {os_name}")
     line_hw    = _format_line(f"● {CLR_MUTED}Hardware & ML     :{CLR_RESET} {cpu_cores} CPUs  │  {ram_total} RAM  │  {pytorch_st}")
+    from database import config as db_config
+    if db_config.NODE_ENV == "production":
+        db_status = "Supabase/PostgreSQL"
+    else:
+        db_status = f"SQLite ({db_config.DB_PATH})"
+
     line_limits = _format_line(f"● {CLR_MUTED}Process & Limits  :{CLR_RESET} PID {pid}  │  Rate Limit: {rate_limit} RPM  │  Max Body: {max_proxy} MB")
-    line_db    = _format_line(f"● {CLR_MUTED}Database          :{CLR_RESET} SQLite (data/webtoon_local.db)")
-    
+    line_db    = _format_line(f"● {CLR_MUTED}Database          :{CLR_RESET} {db_status}")
+
     line_web_db= _format_line(f"● {CLR_MUTED}Web & Database    :{CLR_RESET} {pkg_fastapi} │ {pkg_uvicorn} │ {pkg_pydantic} │ {pkg_sql} │ {pkg_jwt}")
     line_ai_dl = _format_line(f"● {CLR_MUTED}AI & Deep Learning:{CLR_RESET} {pkg_torch} │ {pkg_yolo} │ {pkg_rembg} │ {pkg_ocr} │ {pkg_genai}")
     line_media = _format_line(f"● {CLR_MUTED}Media & Audio     :{CLR_RESET} {pkg_cv2} │ {pkg_mpy} │ {pkg_tts} │ {pkg_lbr} │ {pkg_dub}")

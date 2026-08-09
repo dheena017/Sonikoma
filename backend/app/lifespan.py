@@ -65,7 +65,10 @@ async def lifespan(app: FastAPI):
     missing_envs = [env for env in required_envs if not os.getenv(env)]
     if missing_envs:
         print(f"\n\x1b[1;33m[WARNING] Missing Optional Environment Variables: {', '.join(missing_envs)}\x1b[0m")
-        print("\x1b[1;33mSome AI and cloud features may be disabled. Local SQLite will be used if DATABASE_URL is unset.\x1b[0m\n")
+        if os.getenv("NODE_ENV", "development").lower() == "production":
+            print("\x1b[1;31mProduction requires DATABASE_URL and SUPABASE_URL to be set for Supabase connectivity.\x1b[0m\n")
+        else:
+            print("\x1b[1;33mSome AI and cloud features may be disabled. Local SQLite will be used if DATABASE_URL is unset.\x1b[0m\n")
 
     # Filter out noisy system-logs polling/SSE stream logs
     for logger_name in ("uvicorn.access", "uvicorn.error", "uvicorn"):

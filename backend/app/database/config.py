@@ -21,8 +21,23 @@ SCHEMA_PG_PATH = os.path.join(DB_DIR, "schema_postgres.sql")
 # ── Environment flags ─────────────────────────────────────────────────────
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
+NODE_ENV = os.environ.get("NODE_ENV", "development").lower()
+
+if NODE_ENV == "production":
+    if not DATABASE_URL:
+        raise RuntimeError(
+            "Configuration Error: DATABASE_URL must be defined in production. "
+            "Set DATABASE_URL to your Supabase Postgres connection string."
+        )
+    if not (DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://")):
+        raise RuntimeError(
+            "Configuration Error: DATABASE_URL in production must be a PostgreSQL connection string. "
+            "Use a Supabase/Postgres URL such as postgresql://... or postgres://..."
+        )
+
 is_postgres: bool = bool(
-    DATABASE_URL
+    NODE_ENV == "production"
+    and DATABASE_URL
     and (
         DATABASE_URL.startswith("postgresql://")
         or DATABASE_URL.startswith("postgres://")

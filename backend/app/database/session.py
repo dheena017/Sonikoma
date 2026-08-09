@@ -42,6 +42,9 @@ def datetime_now_date() -> str:
 
 def get_database_url() -> str:
     """Return the SQLAlchemy-compatible database URL for the current config."""
+    if config.NODE_ENV == "development":
+        return f"sqlite:///{Path(config.DB_PATH).as_posix()}"
+
     if config.DATABASE_URL:
         if config.DATABASE_URL.startswith("postgres://"):
             return config.DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
@@ -51,7 +54,10 @@ def get_database_url() -> str:
             )
         return config.DATABASE_URL
 
-    return f"sqlite:///{Path(config.DB_PATH).as_posix()}"
+    raise RuntimeError(
+        "Configuration Error: DATABASE_URL is required in non-development environments. "
+        "Please set DATABASE_URL to your Supabase/Postgres connection string."
+    )
 
 
 def _require_sqlalchemy() -> None:
