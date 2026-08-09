@@ -1,4 +1,4 @@
-name: CI
+name: Full Website CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: ["main-development"]
 
 jobs:
-  build-frontend:
+  frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,19 +18,19 @@ jobs:
           node-version: "24"
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: npm ci
 
-      - name: Typecheck
+      - name: Typecheck frontend
         run: npm run typecheck
 
       - name: Lint frontend
         run: npm run lint
 
-      - name: Build Frontend
+      - name: Build frontend
         run: npm run build:frontend
 
-  build-backend:
+  backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --extra-index-url https://download.pytorch.org/whl/cpu torch torchvision torchaudio
-          pip install -r backend/requirements.txt
+          python -m pip install -r backend/requirements.txt
 
       - name: Check backend syntax
         run: python -m py_compile backend/main.py
