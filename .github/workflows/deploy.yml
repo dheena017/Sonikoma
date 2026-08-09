@@ -3,6 +3,8 @@ name: Build and Deploy Website
 on:
   push:
     branches: ["main-development"]
+  pull_request:
+    branches: ["main-development"]
 
 jobs:
   build:
@@ -43,10 +45,20 @@ jobs:
       - name: Check backend syntax
         run: python -m py_compile backend/main.py
 
-      - name: Deploy to Netlify
-        if: ${{ secrets.NETLIFY_AUTH_TOKEN != '' && secrets.NETLIFY_SITE_ID != '' }}
+      - name: Deploy to Vercel
         run: |
-          npx netlify deploy --prod --dir=frontend/dist --site=$NETLIFY_SITE_ID
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_ORG_ID" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "Skipping Vercel deploy because required secrets are missing."
+            exit 0
+          fi
+          cd frontend
+          npm install
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            npx vercel --confirm --token "$VERCEL_TOKEN" --org "$VERCEL_ORG_ID" --project "$VERCEL_PROJECT_ID"
+          else
+            npx vercel --prod --confirm --token "$VERCEL_TOKEN" --org "$VERCEL_ORG_ID" --project "$VERCEL_PROJECT_ID"
+          fi
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
