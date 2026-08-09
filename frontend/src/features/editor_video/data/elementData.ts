@@ -1,0 +1,80 @@
+import { ElementItem } from "../types/workspace.types";
+
+export const ELEMENT_SUB_TABS = [
+  "Speech Bubbles",
+  "Comic Frames",
+  "Manga FX",
+  "Speed Lines",
+  "Panel Borders",
+  "Motion Lines",
+  "Dialogue Boxes",
+  "Screen Tones",
+  "Comic Icons",
+];
+
+export const MOCK_ELEMENTS: ElementItem[] = [
+  {
+    id: "el-1",
+    title: "Shout Action Bubble",
+    category: "speech-bubbles",
+    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80",
+    badge: "Jagged Edge",
+    desc: "Use for loud battle shouts & surprises",
+  },
+  {
+    id: "el-2",
+    title: "Radial Burst Speedlines",
+    category: "speed-lines",
+    img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=300&auto=format&fit=crop&q=80",
+    badge: "Focus Zoom",
+    desc: "Dramatic center zoom focus effect",
+  },
+  {
+    id: "el-3",
+    title: "POW! Impact Burst",
+    category: "manga-fx",
+    img: "https://images.unsplash.com/photo-1563089145-599997674d42?w=300&auto=format&fit=crop&q=80",
+    badge: "Action Onomatopoeia",
+    desc: "High energy punch sound visualizer",
+  },
+  {
+    id: "el-4",
+    title: "Webtoon Diagonal Split Frame",
+    category: "comic-frames",
+    img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=300&auto=format&fit=crop&q=80",
+    badge: "2-Panel Cut",
+    desc: "Diagonal panel separator frame",
+  },
+  {
+    id: "el-5",
+    title: "Paper Halftone Screen Tone",
+    category: "screen-tones",
+    img: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=300&auto=format&fit=crop&q=80",
+    badge: "Dot Texture",
+    desc: "Classic manga shadow screen tone",
+  },
+  {
+    id: "el-6",
+    title: "Ink Splatter Border",
+    category: "panel-borders",
+    img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80",
+    badge: "Grunge Ink",
+    desc: "Raw hand-drawn comic ink outline",
+  },
+  {
+    id: "el-7",
+    title: "Thought Cloud Bubble",
+    category: "speech-bubbles",
+    img: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&auto=format&fit=crop&q=80",
+    badge: "Internal Monologue",
+    desc: "Soft cloud for internal thoughts",
+  },
+  {
+    id: "el-8",
+    title: "Anime Sweat Drop & Anger Vein",
+    category: "comic-icons",
+    emoji: "💢",
+    badge: "Anime Icon",
+    desc: "Expressive emotional manga symbols",
+  },
+];

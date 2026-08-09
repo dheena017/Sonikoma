@@ -30,6 +30,8 @@ backend/data/client_secrets.json
 
 # ── Database & Persistent Media Storage (data/ & backend/data/) ───────────────
 data/
+!frontend/src/features/editor_video/data/
+!frontend/src/features/editor_video/data/**
 backend/data/
 sonikoma-test-*
 sonikoma-credits-test-*

@@ -1,0 +1,73 @@
+import { AppExtension } from "../types/workspace.types";
+
+export const APP_SUB_TABS = [
+  "Cloud",
+  "AI",
+  "Stock",
+  "Social",
+  "Developer",
+  "Automation",
+];
+
+export const MOCK_APP_EXTENSIONS: AppExtension[] = [
+  {
+    id: "app-gdrive",
+    name: "Google Drive",
+    category: "cloud",
+    desc: "Import video clips and manga pages straight from your Google Drive.",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Google_Drive_icon_%282020%29.svg/40px-Google_Drive_icon_%282020%29.svg.png",
+    installed: true,
+    badge: "Cloud Storage",
+    color: "from-blue-900/40 to-green-900/40 border-blue-500/30",
+  },
+  {
+    id: "app-dropbox",
+    name: "Dropbox",
+    category: "cloud",
+    desc: "Direct link to Dropbox cloud folders for instant video asset stream.",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Dropbox_Icon.svg/40px-Dropbox_Icon.svg.png",
+    installed: false,
+    badge: "Cloud Storage",
+    color: "from-blue-900/40 to-sky-900/40 border-sky-500/30",
+  },
+  {
+    id: "app-elevenlabs",
+    name: "ElevenLabs AI Voice",
+    category: "ai",
+    desc: "Hyper-realistic AI character voice cloning & emotion voiceover synthesizer.",
+    icon: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=100&auto=format&fit=crop&q=80",
+    installed: true,
+    badge: "AI TTS",
+    color: "from-purple-900/40 to-indigo-900/40 border-purple-500/30",
+  },
+  {
+    id: "app-giphy",
+    name: "GIPHY Memes & Stickers",
+    category: "social",
+    desc: "Direct pipeline to millions of trending memes, anime GIFs & stickers.",
+    icon: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=100&auto=format&fit=crop&q=80",
+    installed: true,
+    badge: "Memes & GIFs",
+    color: "from-pink-900/40 to-rose-900/40 border-pink-500/30",
+  },
+  {
+    id: "app-unsplash",
+    name: "Unsplash HD Stock",
+    category: "stock",
+    desc: "Millions of high-resolution professional stock photos for video backgrounds.",
+    icon: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=100&auto=format&fit=crop&q=80",
+    installed: false,
+    badge: "Stock Photos",
+    color: "from-neutral-800 to-neutral-900 border-neutral-700",
+  },
+  {
+    id: "app-pexels",
+    name: "Pexels 4K Stock Video",
+    category: "stock",
+    desc: "Free 4K stock video footage and royalty-free B-roll clips.",
+    icon: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=100&auto=format&fit=crop&q=80",
+    installed: true,
+    badge: "Stock Video",
+    color: "from-emerald-900/40 to-teal-900/40 border-emerald-500/30",
+  },
+];

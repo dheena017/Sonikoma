@@ -1,0 +1,77 @@
+import { TextPreset } from "../types/workspace.types";
+
+export const TEXT_SUB_TABS = [
+  "Titles",
+  "Captions",
+  "Speech Bubble",
+  "Narration",
+  "Credits",
+  "Typography",
+  "Animations",
+];
+
+export const MOCK_TEXT_PRESETS: TextPreset[] = [
+  {
+    id: "tp-1",
+    title: "Cinematic Chapter Title",
+    category: "titles",
+    previewText: "CHAPTER 42: THE AWAKENING",
+    fontFamily: "Impact",
+    styleClass: "font-black uppercase tracking-tight text-white drop-shadow-[0_4px_12px_rgba(168,85,247,0.8)]",
+    badge: "Title Overlay",
+  },
+  {
+    id: "tp-2",
+    title: "Manhwa Speech Dialogue",
+    category: "speech-bubble",
+    previewText: "“Prepare yourself, Demon King!”",
+    fontFamily: "Comic Sans MS",
+    styleClass: "font-bold text-neutral-900",
+    badge: "Bubble Lockup",
+  },
+  {
+    id: "tp-3",
+    title: "System Hologram Narration",
+    category: "narration",
+    previewText: "[QUEST COMPLETE: YOU HAVE LEVELLED UP]",
+    fontFamily: "Courier New",
+    styleClass: "font-mono font-bold text-cyan-400 bg-cyan-950/40 p-2 rounded border border-cyan-500/40",
+    badge: "System Box",
+  },
+  {
+    id: "tp-4",
+    title: "Typewriter Auto Subtitle",
+    category: "captions",
+    previewText: "The shadows answered his call instantly...",
+    fontFamily: "Inter",
+    styleClass: "font-medium text-white bg-black/70 px-2 py-1 rounded backdrop-blur-sm",
+    badge: "Auto Caption",
+  },
+  {
+    id: "tp-5",
+    title: "3D Metallic Gold Title",
+    category: "typography",
+    previewText: "SHADOW MONARCH",
+    fontFamily: "Cinzel",
+    styleClass: "font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-600 drop-shadow-md",
+    badge: "Gold Texture",
+  },
+  {
+    id: "tp-6",
+    title: "Kinetic Bounce Motion Title",
+    category: "animations",
+    previewText: "BOOM! UNSTOPPABLE FORCE",
+    fontFamily: "Bebas Neue",
+    styleClass: "font-black text-purple-400 uppercase animate-bounce",
+    badge: "Motion Preset",
+  },
+  {
+    id: "tp-7",
+    title: "Studio End Credits Roll",
+    category: "credits",
+    previewText: "Created by DUBU (REDICE STUDIO) • Sonikoma Video Engine",
+    fontFamily: "DM Sans",
+    styleClass: "font-normal text-xs text-neutral-400 tracking-wider",
+    badge: "Outro Credits",
+  },
+];

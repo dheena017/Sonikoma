@@ -1,0 +1,101 @@
+import { ResourceItem } from "../types/workspace.types";
+
+export const RESOURCE_SUB_TABS = [
+  "Fonts",
+  "Logos",
+  "Colors",
+  "Watermarks",
+  "Brushes",
+  "LUTs",
+  "Overlays",
+  "Intro",
+  "Outro",
+];
+
+export const MOCK_RESOURCES: ResourceItem[] = [
+  {
+    id: "r-1",
+    title: "Cinematic Comic Bold TTF",
+    category: "fonts",
+    detail: "Uploaded Font • Active in Studio",
+    badge: "TTF",
+  },
+  {
+    id: "r-2",
+    title: "Sonikoma Studio Logo Watermark",
+    category: "logos",
+    detail: "PNG Alpha • 1024x1024",
+    badge: "Primary Mark",
+  },
+  {
+    id: "r-3",
+    title: "Cyber Neon Hex Palette",
+    category: "colors",
+    detail: "#a855f7 • #06b6d4 • #f43f5e • #f59e0b",
+    hex: "#a855f7",
+    badge: "5 Swatches",
+  },
+  {
+    id: "r-4",
+    title: "Bottom-Right 30% Watermark Stamp",
+    category: "watermarks",
+    detail: "Corner Overlay Profile",
+    badge: "30% Opacity",
+  },
+  {
+    id: "r-5",
+    title: "G-Pen Manga Ink Brush",
+    category: "brushes",
+    detail: "Pressure Sensitive • Procreate/ABR Preset",
+    badge: "Ink Brush",
+  },
+  {
+    id: "r-6",
+    title: "Screen Tone Halftone Dot Brush",
+    category: "brushes",
+    detail: "60 LPI Dot Pattern Brush",
+    badge: "Screen Tone",
+  },
+  {
+    id: "r-7",
+    title: "Anime Vibrant Color LUT",
+    category: "luts",
+    detail: "3D LUT (.cube) • High Saturation & Contrast",
+    badge: "Color Grade",
+  },
+  {
+    id: "r-8",
+    title: "Dark Fantasy Vintage LUT",
+    category: "luts",
+    detail: "3D LUT (.cube) • Desaturated Cinematic Blue",
+    badge: "Color Grade",
+  },
+  {
+    id: "r-9",
+    title: "Speedline Manga Action Overlay",
+    category: "overlays",
+    detail: "4K Transparent PNG Video Overlay",
+    badge: "4K Overlay",
+  },
+  {
+    id: "r-10",
+    title: "Film Grain & Dust Overlay",
+    category: "overlays",
+    detail: "Retro Analog Texture Overlay Loop",
+    badge: "Loop Overlay",
+  },
+  {
+    id: "r-11",
+    title: "Channel Intro Title Stinger",
+    category: "intro",
+    detail: "0:03 Animated Logo Reveal",
+    badge: "Intro Card",
+  },
+  {
+    id: "r-12",
+    title: "Subscribe & Next Chapter Outro",
+    category: "outro",
+    detail: "0:08 End Screen Card",
+    badge: "Outro Card",
+  },
+];
