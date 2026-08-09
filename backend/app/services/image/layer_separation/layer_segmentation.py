@@ -28,7 +28,7 @@ from services.image.panel_detection.speech_bubble_detector import (
     segment_speech_bubbles_and_text_balloons as segment_text_and_balloons,
     segment_character_foreground as segment_characters,
 )
-from database.storage.supabase_storage import upload_to_supabase_bucket
+from database.supabase.storage import upload_to_supabase_bucket
 from providers.vision.sam import has_rembg, segment_character_u2net
 
 

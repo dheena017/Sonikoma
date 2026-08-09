@@ -21,19 +21,35 @@ else:
 
 NODE_ENV = os.getenv("NODE_ENV", "development")
 
+def _normalize_frontend_host(value: str | None) -> str | None:
+    if not value:
+        return None
+    value = value.strip()
+    if value.startswith("http://") or value.startswith("https://"):
+        return value
+    if "." in value and not value.isdigit():
+        return f"https://{value}"
+    return None
+
 # 1. FRONTEND_PORT
 FRONTEND_PORT_STR = os.getenv("FRONTEND_PORT")
 FRONTEND_PORT = 0
+FRONTEND_HOST_URL = None
 if NODE_ENV == "production":
     if FRONTEND_PORT_STR:
         try:
             FRONTEND_PORT = int(FRONTEND_PORT_STR)
         except ValueError:
-            raise RuntimeError(
-                "Configuration Error: FRONTEND_PORT must be a valid integer when set in production, "
-                f"got '{FRONTEND_PORT_STR}'. If this is the frontend host URL, set it in APP_URL instead "
-                "and do not place the URL into FRONTEND_PORT."
-            )
+            resolved_url = _normalize_frontend_host(FRONTEND_PORT_STR)
+            if resolved_url:
+                FRONTEND_HOST_URL = resolved_url
+                FRONTEND_PORT = 0
+            else:
+                raise RuntimeError(
+                    "Configuration Error: FRONTEND_PORT must be a valid integer when set in production, "
+                    f"got '{FRONTEND_PORT_STR}'. If this is the frontend host URL, set it in APP_URL instead "
+                    "or provide a numeric PORT value for FRONTEND_PORT."
+                )
     else:
         FRONTEND_PORT = 0
 else:

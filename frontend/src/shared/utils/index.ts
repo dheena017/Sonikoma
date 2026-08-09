@@ -4,7 +4,6 @@ export * from "./batchUtils";
 export * from "./filter";
 export * from "./logger";
 export * from "./selection";
-export * from "./supabase";
 export * from "./textUtils";
 export * from "./url";
 export * from "./workspaceNavigation";

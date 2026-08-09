@@ -11,7 +11,7 @@ from typing import List, Dict, Any
 from services.image.processing.panel_cleaner import remove_speech_bubbles
 import services.image.utils.image_utils as img_utils
 from core.cache import stitched_cache, edit_history
-from database.storage.supabase_storage import upload_to_supabase_bucket
+from database.supabase.storage import upload_to_supabase_bucket
 from repositories.project.panels import save_edit_history
 
 logger = logging.getLogger("sonikoma.services.image.detection")

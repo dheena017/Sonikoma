@@ -13,7 +13,7 @@ import logging
 from typing import Optional, Dict, Any
 
 from core.cache import stitched_cache
-from database.storage.supabase_storage import upload_to_supabase_bucket
+from database.supabase.storage import upload_to_supabase_bucket
 
 logger = logging.getLogger("sonikoma.services.image.upload.image_uploader")
 
