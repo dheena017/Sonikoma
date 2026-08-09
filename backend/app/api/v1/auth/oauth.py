@@ -108,20 +108,15 @@ def _get_redirect_uri(request: Request) -> str:
     if env_uri:
         return env_uri
 
-    # Prefer using the incoming request host/scheme so the redirect URI
-    # matches the origin that received the state cookie. Using APP_URL can
-    # cause a mismatch in development (frontend vs backend ports) which
-    # results in the state cookie not being sent on callback and a 400 error.
+    if APP_URL:
+        base = APP_URL.rstrip("/")
+        return f"{base}/api/auth/google/callback"
+
     host = request.headers.get("host")
     scheme = "https" if request.url.scheme == "https" else "http"
     if host:
         return f"{scheme}://{host}/api/auth/google/callback"
 
-    if APP_URL:
-        base = APP_URL.rstrip("/")
-        return f"{base}/api/auth/google/callback"
-
-    # Fallback to localhost backend default
     return f"{scheme}://localhost:5173/api/auth/google/callback"
 
 
