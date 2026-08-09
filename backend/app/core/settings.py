@@ -19,19 +19,32 @@ if os.path.exists(dotenv_path):
 else:
     load_dotenv()
 
-# 1. FRONTEND_PORT (strictly required)
+NODE_ENV = os.getenv("NODE_ENV", "development")
+
+# 1. FRONTEND_PORT
 FRONTEND_PORT_STR = os.getenv("FRONTEND_PORT")
-if not FRONTEND_PORT_STR:
-    raise RuntimeError(
-        "Configuration Error: FRONTEND_PORT environment variable is missing from the environment/dotenv!\n"
-        "Please define FRONTEND_PORT in your .env file."
-    )
-try:
-    FRONTEND_PORT = int(FRONTEND_PORT_STR)
-except ValueError:
-    raise RuntimeError(
-        f"Configuration Error: FRONTEND_PORT must be a valid integer, got '{FRONTEND_PORT_STR}'"
-    )
+if NODE_ENV == "production":
+    if FRONTEND_PORT_STR:
+        try:
+            FRONTEND_PORT = int(FRONTEND_PORT_STR)
+        except ValueError:
+            raise RuntimeError(
+                f"Configuration Error: FRONTEND_PORT must be a valid integer when set in production, got '{FRONTEND_PORT_STR}'"
+            )
+    else:
+        FRONTEND_PORT = 3000
+else:
+    if not FRONTEND_PORT_STR:
+        raise RuntimeError(
+            "Configuration Error: FRONTEND_PORT environment variable is missing from the environment/dotenv!\n"
+            "Please define FRONTEND_PORT in your .env file."
+        )
+    try:
+        FRONTEND_PORT = int(FRONTEND_PORT_STR)
+    except ValueError:
+        raise RuntimeError(
+            f"Configuration Error: FRONTEND_PORT must be a valid integer, got '{FRONTEND_PORT_STR}'"
+        )
 
 # 2. BACKEND_PORT (strictly required)
 BACKEND_PORT_STR = os.getenv("BACKEND_PORT") or os.getenv("PORT")

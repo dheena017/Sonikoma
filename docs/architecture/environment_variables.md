@@ -13,8 +13,8 @@ All configuration variables are defined in the workspace `.env` file (copied fro
 | **`GEMINI_API_KEY`**      |  ✅ Yes  | None          | Google AI Studio API key. Essential for vision panel detection, image descriptions, and OCR. |
 | **`HUGGINGFACE_API_KEY`** | Optional | None          | API token for fallback open-source translation/detection models.                             |
 | **`BACKEND_PORT`**        |  ✅ Yes  | None          | Port the unified FastAPI backend runs on (e.g. `5173`). Secondary fallback is `PORT` (for PaaS environments). |
-| **`FRONTEND_PORT`**       |  ✅ Yes  | None          | Port the React/Vite development server runs on (e.g. `3000`).                                |
-| **`APP_URL`**             |  ✅ Yes  | None          | Public URL of the React/Vite development server (e.g. `http://localhost:3000`).              |
+| **`FRONTEND_PORT`**       |  ✅ Yes  | None          | Port the React/Vite development server runs on (e.g. `3000`). Required for local development; optional in production. |
+| **`APP_URL`**             |  ✅ Yes  | None          | Public URL of the hosted frontend (e.g. `http://localhost:3000` or `https://sonikoma.vercel.app`). Required in production. |
 | **`NODE_ENV`**            | Optional | `development` | Deployment environment state: `development` or `production`.                                 |
 | **`SLOW_REQ_MS`**         | Optional | `3000`        | Alert threshold (in ms) before requests are flagged as slow logs.                            |
 | **`RATE_LIMIT_RPM`**      | Optional | `120`         | Maximum request allocation count per minute per IP address.                                  |
