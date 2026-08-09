@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 export interface ProjectMetadata {
   project_id: string;
@@ -28,10 +29,25 @@ export interface ProjectStoreState {
   activeProjectData: ActiveProjectData | null;
   setActiveProject: (data: ActiveProjectData | null) => void;
   clearActiveProject: () => void;
+  isEpisodeCollapsed: boolean;
+  setIsEpisodeCollapsed: (v: boolean) => void;
 }
 
-export const useProjectStore = create<ProjectStoreState>((set) => ({
-  activeProjectData: null,
-  setActiveProject: (data) => set({ activeProjectData: data }),
-  clearActiveProject: () => set({ activeProjectData: null }),
-}));
+export const useProjectStore = create<ProjectStoreState>()(
+  persist(
+    (set) => ({
+      activeProjectData: null,
+      setActiveProject: (data) => set({ activeProjectData: data }),
+      clearActiveProject: () => set({ activeProjectData: null }),
+      isEpisodeCollapsed: false,
+      setIsEpisodeCollapsed: (v: boolean) => set({ isEpisodeCollapsed: v }),
+    }),
+    {
+      name: "sonikoma-active-project-store",
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({
+        activeProjectData: state.activeProjectData,
+      }),
+    }
+  )
+);

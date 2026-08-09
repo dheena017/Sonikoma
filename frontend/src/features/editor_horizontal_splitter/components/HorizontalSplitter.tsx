@@ -633,7 +633,7 @@ export default function HorizontalSplitter({
             </div>
           </div>
 
-          <div className="max-h-32 overflow-y-auto space-y-1.5 pr-0.5 scrollbar-thin">
+          <div className="max-h-32 overflow-y-auto space-y-1.5 pr-0.5 custom-purple-scrollbar">
             {splitLines.map((y, idx) => (
               <div
                 key={idx}

@@ -137,3 +137,27 @@ html {
   scrollbar-width: thin;
   scrollbar-color: rgba(168, 85, 247, 0.2) transparent;
 }
+
+/* Custom purple scrollbar for the requested thin purple style */
+.custom-purple-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.75) rgba(15, 15, 18, 0.75);
+}
+.custom-purple-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  background: rgba(15, 15, 18, 0.75);
+}
+.custom-purple-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 15, 18, 0.85);
+  border-radius: 9999px;
+}
+.custom-purple-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.75);
+  border-radius: 9999px;
+  border: 1px solid rgba(15, 15, 18, 0.8);
+}
+.custom-purple-scrollbar:hover::-webkit-scrollbar-thumb,
+.custom-purple-scrollbar:focus-within::-webkit-scrollbar-thumb,
+.custom-purple-scrollbar:active::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.95);
+}

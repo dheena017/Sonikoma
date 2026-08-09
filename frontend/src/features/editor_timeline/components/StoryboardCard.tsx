@@ -8,7 +8,7 @@ import { PanelAnalyzingOverlay } from "@/shared/ui/loading/PanelAnalyzingOverlay
 
 let autoPlayHintShown = false;
 
-interface TimelineCardProps {
+interface StoryboardCardProps {
   panel: GeneratedPanel;
   idx: number;
   currentPanelIndex: number;
@@ -204,7 +204,7 @@ const DialogueClipSlider: React.FC<DialogueClipSliderProps> = ({ panel, setPanel
   );
 };
 
-const TimelineCard = ({
+const StoryboardCard = ({
   panel,
   idx,
   currentPanelIndex,
@@ -236,7 +236,7 @@ const TimelineCard = ({
   voiceActor,
   speechRate,
   speechPitch,
-}: TimelineCardProps) => {
+}: StoryboardCardProps) => {
   const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
   const [isMagicProcessing, setIsMagicProcessing] = React.useState(false);
   // Playback state for Narrative
@@ -1266,7 +1266,7 @@ const TimelineCard = ({
   );
 };
 
-export default React.memo(TimelineCard, (prevProps, nextProps) => {
+export default React.memo(StoryboardCard, (prevProps, nextProps) => {
   return (
     prevProps.panel === nextProps.panel &&
     prevProps.idx === nextProps.idx &&

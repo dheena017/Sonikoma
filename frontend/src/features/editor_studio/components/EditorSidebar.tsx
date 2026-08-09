@@ -88,8 +88,8 @@ const EditorSidebar = ({
           type: "section",
         },
         {
-          id: "timeline",
-          label: "Storyboard Timeline",
+          id: "storyboard",
+          label: "Storyboard",
           icon: Layers,
           badge: panelsCount > 0 ? panelsCount : undefined,
           type: "section",

@@ -25,7 +25,7 @@ export default function HorizontalSplitterPreview({
         <span>Output Segments Preview ({resultingSegments.length})</span>
       </div>
 
-      <div className="max-h-32 overflow-y-auto space-y-1.5 pr-0.5 scrollbar-thin">
+      <div className="max-h-32 overflow-y-auto space-y-1.5 pr-0.5 custom-purple-scrollbar">
         {resultingSegments.map((seg) => (
           <div
             key={seg.index}

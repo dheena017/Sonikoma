@@ -1005,7 +1005,7 @@ const VideoPreviewAdvancedSettings = React.memo(
 
                 {/* Profiles lists */}
                 {presets.length > 0 && (
-                  <div className="max-h-20 overflow-y-auto border border-neutral-800 rounded-xl bg-neutral-950/40 p-2 divide-y divide-neutral-800 scrollbar-thin">
+                  <div className="max-h-20 overflow-y-auto border border-neutral-800 rounded-xl bg-neutral-950/40 p-2 divide-y divide-neutral-800 custom-purple-scrollbar">
                     {presets.map((p) => (
                       <div
                         key={p.name}

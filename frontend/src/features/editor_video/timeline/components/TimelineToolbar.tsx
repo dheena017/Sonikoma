@@ -5,7 +5,7 @@ import React from "react";
 import {
   Undo, Redo, Trash2, CopyPlus, Diamond,
   Magnet, LayoutGrid, ChevronRight, SplitSquareHorizontal,
-  Play,
+  Play, Pause,
 } from "lucide-react";
 import RepoRefChip from "./RepoRefChip";
 
@@ -17,12 +17,16 @@ interface TimelineToolbarProps {
   keyframesVisible: boolean;
   selectedDuration: number | null;
   selectedClip: string | null;
+  isPlaying?: boolean;
+  playbackTime?: number;
+  totalDuration?: number;
   onToggleSnap: () => void;
   onToggleCaptions: () => void;
   onToggleKeyframes: () => void;
   onSplit: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onPlay?: () => void;
 }
 
 /** Small reusable button used only within the toolbar. */
@@ -39,11 +43,19 @@ const ToolBtn: React.FC<{
 
 const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   currentPanelIndex, totalPanels, snapEnabled, captionsVisible, keyframesVisible,
-  selectedDuration, selectedClip,
-  onToggleSnap, onToggleCaptions, onToggleKeyframes, onSplit, onDelete, onDuplicate,
-}) => (
-  <div className="h-10 px-3 border-b border-white/[0.05] flex items-center justify-between bg-[#0d0d12] shrink-0">
+  selectedDuration, selectedClip, isPlaying = false, playbackTime = 0, totalDuration = 0,
+  onToggleSnap, onToggleCaptions, onToggleKeyframes, onSplit, onDelete, onDuplicate, onPlay,
+}) => {
+  const progressPercent = totalDuration > 0 ? (playbackTime / totalDuration) * 100 : 0;
 
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="h-10 px-3 border-b border-white/[0.05] flex items-center justify-between bg-[#0d0d12] shrink-0 relative">
     {/* ── Left: action buttons ────────────────────────────────────────────── */}
     <div className="flex items-center gap-0.5">
       {/* Undo / Redo */}
@@ -146,15 +158,38 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
             {selectedDuration.toFixed(1)}s
           </span>
         )}
-        <button title="Preview" className="ml-0.5 p-1 text-neutral-500 hover:text-white hover:bg-white/5 rounded transition-colors cursor-pointer">
-          <Play className="h-3 w-3" />
+        <button
+          title={isPlaying ? "Pause" : "Play"}
+          onClick={onPlay}
+          className={`ml-0.5 p-1 rounded transition-colors cursor-pointer ${
+            isPlaying
+              ? "text-green-400 hover:text-green-300 hover:bg-green-500/10"
+              : "text-neutral-500 hover:text-white hover:bg-white/5"
+          }`}
+        >
+          {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
         </button>
       </div>
 
       <RepoRefChip gitHash="main@a3f9c1" cacheAge="2m ago" />
     </div>
 
+    {/* ── Progress Bar aligned to timeline track ─────────────────────────── */}
+    <div className="absolute bottom-0 left-28 right-0 h-1 bg-black/30">
+      <div
+        className="h-full bg-gradient-to-r from-purple-500 via-purple-400 to-indigo-500 transition-all duration-75 ease-out"
+        style={{ width: `${progressPercent}%` }}
+      />
+    </div>
+
+    {/* ── Playback Time Display ─────────────────────────────────────────── */}
+    {isPlaying && (
+      <div className="absolute bottom-3 left-3 text-[9px] font-mono text-white/70 pointer-events-none">
+        {formatTime(playbackTime)} / {formatTime(totalDuration)}
+      </div>
+    )}
   </div>
-);
+  );
+};
 
 export default React.memo(TimelineToolbar);

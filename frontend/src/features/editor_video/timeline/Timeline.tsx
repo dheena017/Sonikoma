@@ -4,7 +4,7 @@
 //
 // All state lives in useTimelineState, and visual sections are modularized.
 
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { TimelineProps } from "./types";
 import { useTimelineState } from "./useTimelineState";
 import { useAIPacing } from "./hooks/useAIPacing";
@@ -37,12 +37,152 @@ const Timeline: React.FC<TimelineProps> = ({
   const s = useTimelineState(setCurrentPanelIndex);
   const pacing = useAIPacing(panels, s.clipDurations);
 
+  // Playback state
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [timelineTime, setTimelineTime] = useState(0);
+  const currentPanelIndexRef = useRef(currentPanelIndex);
+  const animationFrameRef = useRef<number | null>(null);
+  const [rulerHoverPct, setRulerHoverPct] = useState<number | null>(null);
+  const [trackBounds, setTrackBounds] = useState<{ left: number; width: number } | null>(null);
+
   // Always show at least 1 panel slot — empty array = 1 placeholder panel
   const displayPanels = panels.length > 0 ? panels : [{}];
 
   const totalPanels    = displayPanels.length;
   const totalDuration  = totalPanels * DEFAULT_PANEL_DURATION;
-  const playheadPct    = Math.min(Math.max(((currentPanelIndex + 0.5) / totalPanels) * 100, 2), 98);
+  const playheadPct    = totalDuration > 0 ? Math.min(Math.max((timelineTime / totalDuration) * 100, 0), 100) : 0;
+
+  // Keep ref synced without causing render-loop on animation.
+  useEffect(() => {
+    currentPanelIndexRef.current = currentPanelIndex;
+    if (!isPlaying) {
+      setTimelineTime(currentPanelIndex * DEFAULT_PANEL_DURATION);
+    }
+  }, [currentPanelIndex, isPlaying]);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    let lastTimestamp = performance.now();
+
+    const step = (timestamp: number) => {
+      const delta = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      setTimelineTime((prevTime) => {
+        const nextTime = Math.min(prevTime + delta, totalDuration);
+        const nextPanelIndex = Math.min(totalPanels - 1, Math.floor(nextTime / DEFAULT_PANEL_DURATION));
+
+        if (nextPanelIndex !== currentPanelIndexRef.current) {
+          currentPanelIndexRef.current = nextPanelIndex;
+          setCurrentPanelIndex?.(nextPanelIndex);
+        }
+
+        if (nextTime >= totalDuration) {
+          setIsPlaying(false);
+          return totalDuration;
+        }
+
+        return nextTime;
+      });
+
+      if (animationFrameRef.current !== null) {
+        animationFrameRef.current = requestAnimationFrame(step);
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(step);
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
+  }, [isPlaying, totalDuration, totalPanels, setCurrentPanelIndex]);
+
+  const togglePlayback = () => setIsPlaying((prev) => !prev);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== "Space") return;
+      const target = event.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      event.preventDefault();
+      togglePlayback();
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const seekToPosition = (clientX: number) => {
+    if (!rulerRef.current) return;
+    const rail = rulerRef.current.querySelector<HTMLDivElement>(".timeline-ruler-track");
+    if (!rail) return;
+
+    const rect = rail.getBoundingClientRect();
+    const relativeX = clientX - rect.left;
+    const pct = Math.max(0, Math.min(1, relativeX / Math.max(1, rect.width)));
+    const nextTime = pct * totalDuration;
+    const nextPanelIndex = Math.min(totalPanels - 1, Math.floor(nextTime / DEFAULT_PANEL_DURATION));
+
+    currentPanelIndexRef.current = nextPanelIndex;
+    setCurrentPanelIndex?.(nextPanelIndex);
+    setTimelineTime(nextTime);
+  };
+
+  const getTrackBounds = () => {
+    if (!rulerRef.current || !s.trackAreaRef.current) return null;
+    const track = rulerRef.current.querySelector<HTMLDivElement>(".timeline-ruler-track");
+    if (!track) return null;
+
+    const containerRect = s.trackAreaRef.current.getBoundingClientRect();
+    const trackRect = track.getBoundingClientRect();
+    return {
+      left: trackRect.left - containerRect.left,
+      width: trackRect.width,
+    };
+  };
+
+  const updateTrackBounds = () => {
+    const bounds = getTrackBounds();
+    setTrackBounds(bounds);
+    return bounds;
+  };
+
+  useEffect(() => {
+    updateTrackBounds();
+    window.addEventListener("resize", updateTrackBounds);
+    return () => window.removeEventListener("resize", updateTrackBounds);
+  }, []);
+
+  const handlePlayheadScrubStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsPlaying(false);
+    updateTrackBounds();
+    seekToPosition(e.clientX);
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      seekToPosition(moveEvent.clientX);
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  const handlePlayClick = () => {
+    if (timelineTime >= totalDuration) {
+      setTimelineTime(0);
+      currentPanelIndexRef.current = 0;
+      setCurrentPanelIndex?.(0);
+    }
+    togglePlayback();
+  };
 
   // Selected keyframe for inspector
   const activeClipKeyframes = s.selectedClip ? s.keyframesState.getKeyframesForClip(s.selectedClip) : [];
@@ -66,42 +206,6 @@ const Timeline: React.FC<TimelineProps> = ({
 
   const rulerRef = useRef<HTMLDivElement | null>(null);
 
-  // ── Playhead Scrubbing & Dragging ─────────────────────────────────────────────
-  const handlePlayheadScrubStart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!rulerRef.current) return;
-
-    const calculateAndSeek = (clientX: number) => {
-      if (!rulerRef.current) return;
-      const rail = rulerRef.current.querySelector<HTMLDivElement>(".timeline-ruler-track");
-      if (!rail) return;
-
-      const rect = rail.getBoundingClientRect();
-      const relativeX = clientX - rect.left;
-      const pct = Math.max(0, Math.min(1, relativeX / Math.max(1, rect.width)));
-      const rawIndex = pct * totalPanels;
-      const targetPanelIdx = Math.min(
-        totalPanels - 1,
-        Math.max(0, Math.round(rawIndex - 0.5))
-      );
-      setCurrentPanelIndex?.(targetPanelIdx);
-    };
-
-    calculateAndSeek(e.clientX);
-
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      calculateAndSeek(moveEvent.clientX);
-    };
-
-    const onMouseUp = () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-  };
-
   return (
     <div className="w-full bg-[#111116] border-t border-white/[0.06] flex flex-col shrink-0 select-none h-[280px] z-20 font-sans relative">
 
@@ -114,11 +218,15 @@ const Timeline: React.FC<TimelineProps> = ({
         keyframesVisible={s.keyframesState.keyframeRowsVisible}
         selectedDuration={s.selectedDuration}
         selectedClip={s.selectedClip}
+        isPlaying={isPlaying}
+        playbackTime={timelineTime}
+        totalDuration={totalDuration}
         onToggleSnap={() => s.setSnapEnabled((v) => !v)}
         onToggleCaptions={() => s.setCaptionsVisible((v) => !v)}
         onToggleKeyframes={s.keyframesState.toggleKeyframeRows}
         onSplit={s.handleSplit}
         onDelete={() => {}}
+        onPlay={handlePlayClick}
         onDuplicate={() => {
           if (s.selectedClip) {
             const d = s.getClipDuration(s.selectedClip);
@@ -131,8 +239,31 @@ const Timeline: React.FC<TimelineProps> = ({
       {/* ── Track Workspace ──────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden min-h-0 relative" ref={s.trackAreaRef}>
 
-        <TimelinePlayhead playheadPercent={playheadPct} onScrubStart={handlePlayheadScrubStart} />
-        <TimelineRuler    totalDuration={totalDuration} onScrubStart={handlePlayheadScrubStart} ref={rulerRef} />
+        {trackBounds && rulerHoverPct !== null && (
+          <div
+            className="pointer-events-none absolute top-0 bottom-0 w-px bg-white/20 z-10"
+            style={{ left: `${trackBounds.left + (rulerHoverPct / 100) * trackBounds.width}px` }}
+          />
+        )}
+
+        <TimelinePlayhead
+          playheadPercent={playheadPct}
+          onScrubStart={handlePlayheadScrubStart}
+          trackBounds={trackBounds}
+        />
+        <TimelineRuler
+          totalDuration={totalDuration}
+          onScrubStart={handlePlayheadScrubStart}
+          onHoverPctChange={(pct) => {
+            setRulerHoverPct(pct);
+            if (pct === null) {
+              setTrackBounds(null);
+              return;
+            }
+            updateTrackBounds();
+          }}
+          ref={rulerRef}
+        />
 
         {/* ── Track Scroll Area: vertical + horizontal scrollbars ─────── */}
         <div

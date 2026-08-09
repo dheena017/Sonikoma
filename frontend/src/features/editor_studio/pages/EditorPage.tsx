@@ -1,5 +1,5 @@
 import React from "react";
-import ChapterScraperDeck from "@/features/editor_imported_images/components/ImportedImagesPanel";
+import ChapterScraperDeck from "@/features/editor_imported_images/components/ImportedImagesSidebar";
 import StoryboardTimeline from "@/features/editor_timeline/components/StoryboardTimeline";
 import EditorViewport from "@/features/editor_video/viewport/EditorViewport";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
@@ -37,7 +37,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
   void chapterSlug;
   const playerSettings = useImageEditorStore((state) => state.playerSettings);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
-  const [currentSection, setCurrentSection] = React.useState("timeline");
+  const [currentSection, setCurrentSection] = React.useState("storyboard");
   const [isFocusMode, setIsFocusMode] = React.useState(false);
   const [previewQuality, setPreviewQuality] = React.useState<"draft" | "high">(
     "high"
@@ -339,7 +339,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       <VideoEditorPage
         appLogic={appLogic}
         navigateTo={navigateTo}
-        onBackToApp={() => setCurrentSection("timeline")}
+        onBackToApp={() => setCurrentSection("storyboard")}
         projectTitle={
           seriesTitle && chapterTitle
             ? `${seriesTitle} · ${chapterTitle}`
@@ -391,7 +391,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       locationSearch={window.location.search}
     >
       <main className="flex-1 w-full relative bg-neutral-950 min-w-0">
-        {/* Scrolling Overlay Content (Timeline, Assets, Meta) */}
+        {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
         <div
           className={`relative z-10 bg-[#070709] min-h-screen min-w-0 ${activeTab === "settings" || activeTab === "audio-settings"
               ? "px-4 md:px-8 py-8 flex flex-col gap-8"
@@ -583,14 +583,14 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
 
 
-              {/* MIDDLE: Storyboard Timeline */}
+              {/* MIDDLE: Storyboard Workspace */}
               <div
                 id="section-timeline"
                 className="w-full max-w-[1600px] ml-0 mr-0 space-y-4 scroll-mt-24"
               >
                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
                   <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
-                    Timeline
+                    Storyboard
                   </h3>
                 </div>
                 <StoryboardTimeline

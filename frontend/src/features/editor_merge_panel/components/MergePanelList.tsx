@@ -20,7 +20,7 @@ export default function MergePanelList({
         Frames to be merged ({previewIndices.length} total)
       </span>
       <div
-        className={`space-y-1 max-h-48 overflow-y-auto pr-1 scrollbar-thin flex ${
+        className={`space-y-1 max-h-48 overflow-y-auto pr-1 custom-purple-scrollbar flex ${
           layout === "horizontal"
             ? "flex-row gap-2 overflow-x-auto overflow-y-hidden"
             : "flex-col"

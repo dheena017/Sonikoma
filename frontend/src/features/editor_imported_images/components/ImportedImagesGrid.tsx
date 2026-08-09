@@ -1,6 +1,6 @@
 import React from "react";
 import PanelCard from "./PanelCard";
-import { HorizontalScrollContainer } from "./ImportedImagesPanel";
+import { HorizontalScrollContainer } from "./ImportedImagesSidebar";
 import { getProxiedImageUrl } from "@/shared/utils/url";
 
 interface ChapterScraperGridProps {

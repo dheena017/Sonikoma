@@ -186,8 +186,8 @@ const EditorMiniSidebarInner = ({
           badge: scrapedCount > 0 ? scrapedCount : undefined,
         },
         {
-          id: "timeline",
-          label: "Storyboard Timeline",
+          id: "storyboard",
+          label: "Storyboard",
           icon: Layers,
           badge: panelsCount > 0 ? panelsCount : undefined,
         },

@@ -78,15 +78,13 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
   }, [zoomLevel]);
 
   // Image URLs
-  const DEFAULT_BACKGROUND_IMAGE = "/editor-preview.png";
-
   const bgUrl =
     activePanel?.layers?.background_url ||
     activePanel?.image_url ||
     (activePanel as any)?.imageUrl ||
     (activePanel as any)?.img_url ||
     (activePanel as any)?.src ||
-    DEFAULT_BACKGROUND_IMAGE;
+    null;
 
   const charUrl = activePanel?.layers?.character_url || null;
   const textUrl = activePanel?.layers?.text_url || null;

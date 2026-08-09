@@ -12,8 +12,8 @@ import {
   LayoutGrid,
   Rows,
   Loader2,
+  Save,
 } from "lucide-react";
-import ImportedImagesHeader from "./ImportedImagesHeader";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import * as api from "@/api/index";
@@ -219,6 +219,8 @@ const ChapterScraperDeck = React.memo(
     const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
     const [episodeSortAscending, setEpisodeSortAscending] = useState(true);
     const [hoveredEpisodeIdx, setHoveredEpisodeIdx] = useState<number | null>(null);
+    const isEpisodeCollapsed = useProjectStore((s) => s.isEpisodeCollapsed);
+    const setIsEpisodeCollapsed = useProjectStore((s) => s.setIsEpisodeCollapsed);
     const activeFetch = fetchWithInterceptor || fetch;
 
     useEffect(() => {
@@ -584,9 +586,6 @@ const ChapterScraperDeck = React.memo(
       }
     };
 
-    const isEpisodeCollapsed = useProjectStore((s) => s.isEpisodeCollapsed);
-    const setIsEpisodeCollapsed = useProjectStore((s) => s.setIsEpisodeCollapsed);
-
     const showEmptyState = !isScraping && scrapedImages.length === 0;
     const showImportLoading = isScraping && scrapedImages.length === 0;
 
@@ -596,28 +595,71 @@ const ChapterScraperDeck = React.memo(
           id="scraped_strips_deck"
           className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-4 sm:p-5 lg:p-6 backdrop-blur-md space-y-4 shadow-sm min-w-0 w-full overflow-hidden"
         >
-          <ImportedImagesHeader
-            imagesCount={scrapedImages.length}
-            selectedCount={selectedScraped.length}
-            isZipping={isZipping}
-            isScraping={isScraping}
-            rating={rating}
-            likes={likes}
-            views={views}
-            viewLayout={viewLayout}
-            setViewLayout={setViewLayout}
-            handleDownloadZip={handleDownloadZip}
-            handleDeleteSelected={handleDeleteSelected}
-            handleAddToStoryboard={handleAddToStoryboard}
-            handleSaveAssets={handleSaveAssets}
-            searchQuery={episodeSearchQuery}
-            onSearchQueryChange={setEpisodeSearchQuery}
-            onClearSearch={() => setEpisodeSearchQuery("")}
-            showFilters={false}
-            onToggleFilters={() => {
-              setIsEpisodeCollapsed(!isEpisodeCollapsed);
-            }}
-          />
+          <div className="relative flex flex-col gap-3 rounded-2xl overflow-hidden border border-neutral-800/80 bg-neutral-950/90 shadow-sm">
+            <div className="relative flex items-center justify-between px-4 h-12 shrink-0 bg-[#09090e]/95 backdrop-blur-md border-b border-neutral-800/80 select-none gap-3">
+              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
+              <div className="flex items-center gap-2.5 shrink-0">
+                <button
+                  type="button"
+                  title="Imported Images"
+                  className="h-7 w-7 rounded-lg flex items-center justify-center border border-neutral-800 bg-neutral-900 text-neutral-500 hover:text-white hover:border-neutral-700 transition-all"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </button>
+                <div className="w-px h-4 bg-neutral-800" />
+                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                  <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.9)] shrink-0" />
+                  <h3 className="font-black text-[10px] sm:text-[11px] text-white uppercase tracking-widest font-mono truncate" title="Imported Images">
+                    Imported Images
+                  </h3>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 bg-neutral-950/80 p-1 rounded-xl border border-neutral-800/80 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setViewLayout("scroll")}
+                  title="Horizontal Scroll View"
+                  className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${
+                    viewLayout === "scroll"
+                      ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+                      : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
+                  }`}
+                >
+                  <Rows className="w-3 h-3" />
+                  <span>Scroll</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewLayout("grid")}
+                  title="Grid View"
+                  className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${
+                    viewLayout === "grid"
+                      ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+                      : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
+                  }`}
+                >
+                  <LayoutGrid className="w-3 h-3" />
+                  <span>Grid</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {handleSaveAssets && scrapedImages.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleSaveAssets}
+                    className="relative overflow-hidden h-7 px-3.5 rounded-lg font-black text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-white/10 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
+                  >
+                    <Save className="w-3 h-3 text-purple-200" />
+                    <span>Save</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Panels/summary moved into main header; removed duplicate toolbar here. */}
+          </div>
 
           {showEmptyState ? (
             <ChapterScraperDeckEmptyState />
@@ -667,19 +709,24 @@ const ChapterScraperDeck = React.memo(
 
                   return (
                     <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
-                      {/* IN-PANEL LEFT SIDEBAR: EPISODE NAVIGATOR WITH OPEN/CLOSE CONTROLS */}
+                      {/* IN-PANEL LEFT SIDEBAR: EPISODE NAVIGATOR */}
                         <aside
                           className={`relative bg-neutral-950/90 border border-neutral-850 rounded-2xl shrink-0 space-y-3 shadow-2xl lg:sticky lg:top-24 self-start transition-all duration-200 ${
                             isEpisodeCollapsed ? "w-12 p-2" : "w-full lg:w-56 p-4"
                           }`}
                         >
-                          {/* Header with Sort Direction Toggle */}
-                          <div className="flex items-center justify-between border-b border-neutral-850/80 pb-2.5">
-                            <div className="flex items-center gap-2">
-                              <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
-                              <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono">
-                                Imported Episodes ({episodeGroups.length})
-                              </h4>
+                          <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
+                          <div className="relative flex items-center justify-between gap-3 border-b border-neutral-850/80 pb-3 pt-2.5">
+                            <div className="min-w-0 flex items-center gap-2">
+                              <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.45)] shrink-0" />
+                              <div className="min-w-0">
+                                <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono truncate">
+                                  Imported Episodes
+                                </h4>
+                                <p className="text-[10px] text-neutral-400 font-mono tracking-wide">
+                                  {episodeGroups.length} episode{episodeGroups.length === 1 ? "" : "s"}
+                                </p>
+                              </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <button
@@ -837,20 +884,8 @@ const ChapterScraperDeck = React.memo(
                             ✅ Select All Panels
                           </button>
                         </div>
-                          {/* Collapsed compact view */}
-                          {isEpisodeCollapsed && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <button
-                                type="button"
-                                onClick={() => setIsEpisodeCollapsed(false)}
-                                title="Show Episodes"
-                                aria-label="Show Episodes"
-                                className="h-7 w-7 rounded-lg flex items-center justify-center border border-neutral-800 bg-neutral-900 text-neutral-500 hover:text-white hover:border-neutral-700 transition-all"
-                              >
-                                <ImageIcon className="h-4 w-4" />
-                              </button>
-                            </div>
-                          )}
+
+                          {/* side-edge toggle removed — header now controls collapse */}
 
                         </aside>
 

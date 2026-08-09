@@ -7,9 +7,10 @@ interface TimelinePlayheadProps {
   /** 0–100 percentage position within the scrollable track area. */
   playheadPercent: number;
   onScrubStart?: (e: React.MouseEvent) => void;
+  trackBounds?: { left: number; width: number } | null;
 }
 
-const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({ playheadPercent, onScrubStart }) => {
+const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({ playheadPercent, onScrubStart, trackBounds }) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -24,6 +25,10 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({ playheadPercent, on
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  const left = trackBounds
+    ? trackBounds.left + (playheadPercent / 100) * trackBounds.width
+    : undefined;
+
   return (
     <div
       onMouseDown={handleMouseDown}
@@ -31,7 +36,7 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({ playheadPercent, on
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
       style={{
-        left: `calc(7rem + (100% - 7rem) * ${playheadPercent / 100})`,
+        left: left !== undefined ? `${left}px` : `calc(7rem + (100% - 7rem) * ${playheadPercent / 100})`,
       }}
     >
       {/* Playhead Pin Head — top triangle stays visible inside the timeline container */}

@@ -18,7 +18,7 @@ import { VideoPreviewChaptersMenu } from "../player/ChaptersMenu";
 import { VideoPreviewTopBar } from "../player/TopBar";
 import { VideoPreviewBottomControls } from "../player/BottomControls";
 import VideoPreviewQuickActionOverlay from "../overlays/QuickActionOverlay";
-import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/editor_imported_images/components/ImportedImagesPanel";
+import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/editor_imported_images/components/ImportedImagesSidebar";
 import {
   startAmbientBackgroundMusic,
   stopAmbientBackgroundMusic,

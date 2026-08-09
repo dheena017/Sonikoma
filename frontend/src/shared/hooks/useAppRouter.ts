@@ -69,16 +69,7 @@ export function useAppRouter({
   chapterSlug,
 }: UseAppRouterProps) {
   const getInitialPath = () => {
-    const path = window.location.pathname;
-    const isEditorRoute =
-      path.startsWith("/editor") ||
-      path.startsWith("/image-editor") ||
-      path.startsWith("/scraper/editor");
-    if (isEditorRoute) {
-      window.history.replaceState({}, document.title, "/scraper");
-      return "/scraper";
-    }
-    return path;
+    return window.location.pathname || "/";
   };
 
   const [currentPath, setCurrentPath] = React.useState(getInitialPath);
@@ -115,18 +106,6 @@ export function useAppRouter({
 
   // Sync settings and state URL parameters on load
   React.useEffect(() => {
-    // If reloaded on an editor route, exit editor to main workspace
-    const path = window.location.pathname;
-    const isEditorRoute =
-      path.startsWith("/editor") ||
-      path.startsWith("/image-editor") ||
-      path.startsWith("/scraper/editor");
-    if (isEditorRoute) {
-      setEditingImageIdx(null);
-      window.history.replaceState({}, document.title, "/scraper");
-      setCurrentPath("/scraper");
-    }
-
     const params = new URLSearchParams(window.location.search);
     const urlParam = params.get("url");
     const modelParam = params.get("model");

@@ -1,7 +1,7 @@
 import React from "react";
 import { Sparkles, RefreshCw } from "lucide-react";
 
-interface TimelineBulkOpsProps {
+interface StoryboardBulkOpsProps {
   bulkDuration: number;
   setBulkDuration: (val: number) => void;
   handleBulkSetDuration: () => void;
@@ -18,7 +18,7 @@ interface TimelineBulkOpsProps {
   handleBatchMagicMotion?: () => void;
 }
 
-export default function TimelineBulkOps({
+export default function StoryboardBulkOps({
   bulkDuration,
   setBulkDuration,
   handleBulkSetDuration,
@@ -33,7 +33,7 @@ export default function TimelineBulkOps({
   isBatchMagicProcessing = false,
   batchMagicProgress = null,
   handleBatchMagicMotion = () => {},
-}: TimelineBulkOpsProps) {
+}: StoryboardBulkOpsProps) {
   return (
     <div className="bg-neutral-950/70 p-3 sm:p-4 rounded-xl border border-purple-900/30 grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4 animate-fadeIn">
       {/* Duration */}
@@ -54,7 +54,7 @@ export default function TimelineBulkOps({
           <button
             type="button"
             onClick={() => {
-              console.log("[TimelineBulkOps] Bulk set duration");
+              console.log("[StoryboardBulkOps] Bulk set duration");
               handleBulkSetDuration();
             }}
             className="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold py-1 rounded transition-colors cursor-pointer"
@@ -84,7 +84,7 @@ export default function TimelineBulkOps({
           <button
             type="button"
             onClick={() => {
-              console.log("[TimelineBulkOps] Bulk set motion");
+              console.log("[StoryboardBulkOps] Bulk set motion");
               handleBulkSetMotion();
             }}
             className="bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
@@ -115,7 +115,7 @@ export default function TimelineBulkOps({
           <button
             type="button"
             onClick={() => {
-              console.log("[TimelineBulkOps] Bulk set preset");
+              console.log("[StoryboardBulkOps] Bulk set preset");
               handleBulkSetPreset();
             }}
             className="bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
@@ -161,12 +161,12 @@ export default function TimelineBulkOps({
         <button
           type="button"
           onClick={() => {
-            console.log("[TimelineBulkOps] Clear timeline requested");
+            console.log("[StoryboardBulkOps] Clear storyboard requested");
             handleClearTimeline();
           }}
           className="w-full bg-red-950/40 hover:bg-red-950/60 border border-red-900/40 text-red-400 text-[10px] font-bold py-1.5 rounded transition-colors cursor-pointer"
         >
-          Clear Timeline
+          Clear Storyboard
         </button>
       </div>
     </div>

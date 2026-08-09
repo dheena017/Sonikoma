@@ -1,12 +1,13 @@
 // ─── TimelineRuler ────────────────────────────────────────────────────────────
 // Canonical location: timeline/components/TimelineRuler.tsx
 
-import React, { forwardRef, useMemo } from "react";
+import React, { forwardRef, useMemo, useRef } from "react";
 import { Clock } from "lucide-react";
 
 interface TimelineRulerProps {
   totalDuration: number;
   onScrubStart?: (e: React.MouseEvent) => void;
+  onHoverPctChange?: (pct: number | null) => void;
 }
 
 function buildTicks(totalDuration: number): { ticks: number[]; interval: number } {
@@ -29,13 +30,34 @@ function buildTicks(totalDuration: number): { ticks: number[]; interval: number 
 }
 
 const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
-  ({ totalDuration, onScrubStart }, ref) => {
+  ({ totalDuration, onScrubStart, onHoverPctChange }, ref) => {
     const { ticks, interval } = useMemo(() => buildTicks(totalDuration), [totalDuration]);
+    const [hoverPct, setHoverPct] = React.useState<number | null>(null);
+
+    const trackRef = useRef<HTMLDivElement | null>(null);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+      const track = trackRef.current;
+      if (!track) return;
+      const rect = track.getBoundingClientRect();
+      const relativeX = e.clientX - rect.left;
+      const pct = Math.max(0, Math.min(1, relativeX / Math.max(1, rect.width)));
+      const pct100 = pct * 100;
+      setHoverPct(pct100);
+      onHoverPctChange?.(pct100);
+    };
+
+    const handleMouseLeave = () => {
+      setHoverPct(null);
+      onHoverPctChange?.(null);
+    };
 
     return (
       <div
         ref={ref}
         onMouseDown={(e) => onScrubStart?.(e)}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         className="h-8 flex shrink-0 bg-[#0d0d12] border-b border-white/[0.05] cursor-pointer select-none group/ruler"
       >
         {/* Spacer aligned with the track labels column */}
@@ -49,7 +71,14 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
           </div>
         </div>
 
-        <div className="flex-1 relative overflow-hidden pt-1 timeline-ruler-track">
+        <div ref={trackRef} className="flex-1 relative overflow-hidden pt-1 timeline-ruler-track">
+          {hoverPct !== null && (
+            <div
+              className="pointer-events-none absolute inset-y-0 w-px bg-white/20"
+              style={{ left: `${hoverPct}%` }}
+            />
+          )}
+
           {ticks.map((t) => {
             const pct = totalDuration <= 0 ? 0 : (t / totalDuration) * 100;
             const isMinor = interval >= 5 ? t % interval !== 0 : false;

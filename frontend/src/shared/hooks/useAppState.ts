@@ -812,21 +812,54 @@ export function useAppState() {
       }
 
       if (lookupId.startsWith("temp_")) {
-        useProjectStore.getState().setActiveProject({
-          project: {
-            project_id: lookupId,
-            title: "",
-            url: "",
-            series_slug: null,
-            chapter_slug: null,
-          },
-          panels: [],
-          scrapedImages: [],
-        });
+        const rawPersisted = sessionStorage.getItem("sonikoma-active-project-store");
+        if (rawPersisted) {
+          try {
+            const persisted = JSON.parse(rawPersisted);
+            const persistedActive = persisted?.state?.activeProjectData;
+            const persistedProjectId = persistedActive?.project?.project_id;
+            if (
+              persistedActive &&
+              persistedProjectId === lookupId &&
+              persistedActive.project
+            ) {
+              useProjectStore.getState().setActiveProject(persistedActive);
+              if (Array.isArray(persistedActive.scrapedImages)) {
+                setScrapedImages(persistedActive.scrapedImages);
+              } else {
+                setScrapedImages([]);
+              }
+              localStorage.setItem("active_project_id", lookupId);
+              localStorage.removeItem("active_series_slug");
+              localStorage.removeItem("active_chapter_slug");
+              return;
+            }
+          } catch (e) {
+            console.warn("[AppState] Failed to parse persisted project store", e);
+          }
+        }
+
+        // A temp_ route is a direct URL-backed draft. During a refresh, the app may
+        // reach this branch before the persisted store has hydrated, and the old logic
+        // would overwrite the live workspace with an empty draft object. That causes the
+        // editor context to vanish. Preserve the existing store value and keep the URL
+        // ID alive until a real scrape/import payload can populate it.
+        const alreadyHasActiveProject = Boolean(
+          useProjectStore.getState().activeProjectData?.project?.project_id
+        );
+        if (alreadyHasActiveProject) {
+          const activeProject = useProjectStore.getState().activeProjectData;
+          if (activeProject?.project?.project_id === lookupId) {
+            localStorage.setItem("active_project_id", lookupId);
+            localStorage.removeItem("active_series_slug");
+            localStorage.removeItem("active_chapter_slug");
+            return;
+          }
+        }
+
         localStorage.setItem("active_project_id", lookupId);
         localStorage.removeItem("active_series_slug");
         localStorage.removeItem("active_chapter_slug");
-        setScrapedImages([]);
         return;
       }
 
