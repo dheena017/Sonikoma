@@ -29,7 +29,9 @@ if NODE_ENV == "production":
             FRONTEND_PORT = int(FRONTEND_PORT_STR)
         except ValueError:
             raise RuntimeError(
-                f"Configuration Error: FRONTEND_PORT must be a valid integer when set in production, got '{FRONTEND_PORT_STR}'"
+                "Configuration Error: FRONTEND_PORT must be a valid integer when set in production, "
+                f"got '{FRONTEND_PORT_STR}'. If this is the frontend host URL, set it in APP_URL instead "
+                "and do not place the URL into FRONTEND_PORT."
             )
     else:
         FRONTEND_PORT = 3000
