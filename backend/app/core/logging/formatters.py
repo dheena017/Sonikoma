@@ -257,11 +257,28 @@ class ColoredFormatter(logging.Formatter):
             record.msg = self.colorize_message(record.msg)
 
         if self.use_colors:
-            color = self.COLORS.get(record.levelname, '')
+            color = self.COLORS.get(record.levelname, '\x1b[37m')
             grey = '\x1b[90m'
             magenta = '\x1b[35m'
             blue = '\x1b[94m'
-            log_fmt = f"{grey}%(asctime)s{self.RESET} {magenta}[BACKEND]{self.RESET} [{color}%(levelname)s{self.RESET}] {blue}[%(filename)s]{self.RESET} %(message)s"
+            message_color = '\x1b[37m'
+            if record.levelname == 'ERROR' or record.levelno >= logging.ERROR:
+                message_color = '\x1b[31m'
+            elif record.levelname == 'WARNING':
+                message_color = '\x1b[33m'
+            elif record.levelname == 'SUCCESS':
+                message_color = '\x1b[32m'
+            elif record.levelname == 'NOTICE':
+                message_color = '\x1b[35m'
+            elif record.levelname == 'DEBUG':
+                message_color = '\x1b[37m'
+            elif record.levelname == 'TRACE':
+                message_color = '\x1b[90m'
+            log_fmt = (
+                f"{grey}%(asctime)s{self.RESET} "
+                f"{magenta}[BACKEND]{self.RESET} [{color}%(levelname)s{self.RESET}] "
+                f"{blue}[%(filename)s]{self.RESET} {message_color}%(message)s{self.RESET}"
+            )
         else:
             log_fmt = "%(asctime)s [BACKEND] [%(levelname)s] [%(filename)s] %(message)s"
         formatter = logging.Formatter(log_fmt, datefmt="%H:%M:%S")

@@ -155,9 +155,9 @@ async def lifespan(app: FastAPI):
 
     def _should_use_colors() -> bool:
         force_color = os.getenv("FORCE_COLOR", "").strip().lower()
-        if force_color and force_color not in ("0", "false", "no"):
-            return True
-        return not IS_PRODUCTION
+        if force_color in ("0", "false", "no"):
+            return False
+        return True
 
     for name in list(logging.root.manager.loggerDict.keys()):
         l = logging.getLogger(name)

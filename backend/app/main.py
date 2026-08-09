@@ -78,11 +78,11 @@ if __name__ == "__main__":
         "formatters": {
             "default": {
                 "()": startup.ColoredFormatter,
-                "use_colors": not IS_PRODUCTION,
+                "use_colors": True,
             },
             "access": {
                 "()": startup.ColoredFormatter,
-                "use_colors": not IS_PRODUCTION,
+                "use_colors": True,
             },
         },
         "handlers": {
