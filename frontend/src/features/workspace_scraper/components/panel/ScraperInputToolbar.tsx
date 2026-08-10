@@ -215,7 +215,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             type="button"
             onClick={handleImportClick}
             disabled={isScraping || !targetUrl.trim()}
-            className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-xs sm:text-sm font-bold text-white transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+            className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-xs sm:text-sm font-bold text-white transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
           >
             {isScraping ? (
               <>
@@ -233,7 +233,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             type="button"
             onClick={handleOpenEpisodeScraperClick}
             disabled={!targetUrl.trim()}
-            className="relative px-5 py-3.5 bg-neutral-950 hover:bg-neutral-900 border border-purple-500/30 hover:border-purple-500/60 rounded-2xl text-xs sm:text-sm font-bold text-purple-300 hover:text-purple-200 transition-all shadow-lg active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer"
+            className="relative px-5 py-3.5 bg-neutral-950 hover:bg-neutral-900 border border-purple-500/30 hover:border-purple-500/60 rounded-2xl text-xs sm:text-sm font-bold text-purple-300 hover:text-purple-200 transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer"
             title="Browse and select specific episodes for this series URL"
           >
             <Zap className="h-4 w-4 text-purple-400" />

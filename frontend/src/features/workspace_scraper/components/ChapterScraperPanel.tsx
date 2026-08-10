@@ -95,7 +95,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
   return (
     <div
       id="dynamic_input_box"
-      className="relative z-20 bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md shadow-2xl space-y-8 min-w-0 w-full overflow-visible animate-in fade-in zoom-in-95 duration-500"
+      className="relative z-20 bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md shadow-2xl space-y-8 min-w-0 w-full overflow-visible stagger-container glass-interactive animate-in fade-in zoom-in-95 duration-500"
     >
       {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

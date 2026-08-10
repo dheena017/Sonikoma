@@ -554,12 +554,12 @@ export default function MainLayout(props: MainLayoutProps) {
             <div className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 via-pink-500 to-amber-400 animate-route-bar" />
           </div>
 
-          {/* Children Page Views with Smooth Fade + Scale/Slide-up Transition */}
+          {/* Children Page Views */}
           <div
             key={currentPath}
-            className={`w-full flex-1 flex flex-col page-view-transition ${isImageEditorPage || isProEditorPage
+            className={`w-full flex-1 flex flex-col ${isImageEditorPage || isProEditorPage
               ? "p-0"
-              : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16"
+              : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16 page-view-transition stagger-container"
               }`}
           >
             {children}

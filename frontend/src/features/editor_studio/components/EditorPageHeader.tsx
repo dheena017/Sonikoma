@@ -66,7 +66,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   // Smoothly slide out of view if the mobile/drawer sidebar is open
   const headerVisibilityClass = isSidebarOpen
     ? "-translate-y-full opacity-0 pointer-events-none"
-    : "translate-y-0 opacity-100";
+    : "opacity-100";
 
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
