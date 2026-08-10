@@ -73,6 +73,41 @@
   animation: page-entry 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@keyframes page-view-entry {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.page-view-transition {
+  animation: page-view-entry 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes route-bar-sweep {
+  0% {
+    width: 0%;
+    opacity: 1;
+  }
+  60% {
+    width: 75%;
+    opacity: 1;
+  }
+  100% {
+    width: 100%;
+    opacity: 0;
+  }
+}
+
+.animate-route-bar {
+  animation: route-bar-sweep 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @keyframes slide-down {
   from {
     transform: translateY(-100%);
