@@ -80,13 +80,12 @@
   }
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: none;
   }
 }
 
 .page-view-transition {
-  animation: page-view-entry 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: transform, opacity;
+  animation: page-view-entry 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes route-bar-sweep {

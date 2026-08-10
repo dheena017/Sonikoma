@@ -99,7 +99,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md shadow-2xl shadow-black/40 pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${className || ""
+      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md shadow-2xl shadow-black/40 pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${className || ""
         }`}
       style={style}
     >

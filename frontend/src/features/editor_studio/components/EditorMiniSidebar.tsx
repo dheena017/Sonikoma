@@ -61,7 +61,7 @@ const EditorMiniSidebarInner = ({
   seriesSlug,
   chapterSlug,
   settingsPath = "/settings",
-  topOffsetPx = 59,
+  topOffsetPx = 64,
   locationSearch,
 }: EditorMiniSidebarProps) => {
   const params = new URLSearchParams(locationSearch || window.location.search);
@@ -381,7 +381,7 @@ const EditorMiniSidebarInner = ({
     // Premium Glassmorphism Container
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
+      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[90] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
         }`}
     >
       {/* Scrollable Tools Area */}
