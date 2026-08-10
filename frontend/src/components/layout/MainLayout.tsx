@@ -550,8 +550,8 @@ export default function MainLayout(props: MainLayoutProps) {
           )}
 
           {/* Route Transition Top Progress Flash */}
-          <div key={`route-bar-${currentPath}`} className="fixed top-0 left-0 right-0 h-0.5 z-[9999] pointer-events-none overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-amber-400 animate-route-bar shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+          <div key={`route-bar-${currentPath}`} className="fixed top-0 left-0 right-0 h-[3px] z-[99999] pointer-events-none overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 via-pink-500 to-amber-400 animate-route-bar" />
           </div>
 
           {/* Children Page Views with Smooth Fade + Scale/Slide-up Transition */}

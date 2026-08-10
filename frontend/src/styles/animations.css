@@ -76,35 +76,44 @@
 @keyframes page-view-entry {
   0% {
     opacity: 0;
-    transform: translateY(8px) scale(0.99);
+    filter: blur(4px);
+    transform: translateY(6px) scale(0.992);
+  }
+  60% {
+    opacity: 0.9;
+    filter: blur(1px);
   }
   100% {
     opacity: 1;
+    filter: blur(0px);
     transform: none;
   }
 }
 
 .page-view-transition {
-  animation: page-view-entry 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: page-view-entry 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes route-bar-sweep {
   0% {
     width: 0%;
     opacity: 1;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 0 0 20px rgba(245, 158, 11, 0.6);
   }
-  60% {
-    width: 75%;
+  65% {
+    width: 80%;
     opacity: 1;
+    box-shadow: 0 0 14px rgba(168, 85, 247, 1), 0 0 28px rgba(245, 158, 11, 0.8);
   }
   100% {
     width: 100%;
     opacity: 0;
+    box-shadow: none;
   }
 }
 
 .animate-route-bar {
-  animation: route-bar-sweep 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: route-bar-sweep 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes slide-down {
