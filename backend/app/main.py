@@ -72,6 +72,8 @@ register_routers(app)
 # ENTRYPOINT
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+    log_level_name = os.getenv("LOG_LEVEL", "info" if IS_PRODUCTION else "debug").lower()
+
     custom_log_config = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -95,17 +97,17 @@ if __name__ == "__main__":
         "loggers": {
             "uvicorn": {
                 "handlers": ["default"],
-                "level": "INFO",
+                "level": log_level_name.upper(),
                 "propagate": False,
             },
             "uvicorn.error": {
                 "handlers": ["default"],
-                "level": "INFO",
+                "level": log_level_name.upper(),
                 "propagate": False,
             },
             "uvicorn.access": {
                 "handlers": ["default"],
-                "level": "INFO",
+                "level": log_level_name.upper(),
                 "propagate": False,
             },
         },
@@ -115,7 +117,7 @@ if __name__ == "__main__":
         "app": "main:app",
         "host": os.getenv("HOST", "0.0.0.0"),
         "port": BACKEND_PORT,
-        "log_level": "info",
+        "log_level": log_level_name,
         "log_config": custom_log_config,
         "use_colors": True,
     }
