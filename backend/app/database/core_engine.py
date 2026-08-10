@@ -88,6 +88,8 @@ def _create_db_connection():
                 "Please install it."
             )
         db_url = config.DATABASE_URL
+        if not db_url:
+            raise RuntimeError("DATABASE_URL must be configured when PostgreSQL mode is enabled.")
         if "sslmode=" not in db_url:
             sep = "&" if "?" in db_url else "?"
             db_url = f"{db_url}{sep}sslmode=require"
