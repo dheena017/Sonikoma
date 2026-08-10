@@ -87,7 +87,16 @@ def _create_db_connection():
                 "psycopg2-binary is required for PostgreSQL support. "
                 "Please install it."
             )
-        conn = psycopg2.connect(config.DATABASE_URL, cursor_factory=DictCursor)
+        db_url = config.DATABASE_URL
+        if "sslmode=" not in db_url:
+            sep = "&" if "?" in db_url else "?"
+            db_url = f"{db_url}{sep}sslmode=require"
+        try:
+            conn = psycopg2.connect(db_url, cursor_factory=DictCursor, connect_timeout=15)
+        except Exception as err:
+            # Fallback retry without pooler prefix or direct connection if pooler times out
+            logger.warning(f"[Database] Initial PostgreSQL connection attempt failed: {err}. Retrying...")
+            conn = psycopg2.connect(db_url, cursor_factory=DictCursor, connect_timeout=20)
         return PostgresConnectionWrapper(conn)
 
     conn = sqlite3.connect(config.DB_PATH)

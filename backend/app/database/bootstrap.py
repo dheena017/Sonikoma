@@ -71,6 +71,9 @@ def init_db() -> None:
         with _db_init_lock:
             _db_init_in_progress = False
             _db_init_complete.set()
+        if os.getenv("RENDER") or os.getenv("NODE_ENV") == "production":
+            logger.warning("[Database] Non-fatal database initialization warning in production environment; server will continue booting to open HTTP port.")
+            return
         raise
 
     with _db_init_lock:
