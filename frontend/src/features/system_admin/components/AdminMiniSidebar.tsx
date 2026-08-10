@@ -136,7 +136,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
         <div
           className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 ${
             active
-              ? "h-5 bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.8)] opacity-100"
+              ? "h-5 bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_14px_rgba(168,85,247,0.9)] opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -154,13 +154,13 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
               active
-                ? "bg-violet-500/20 border border-violet-500/40 shadow-[0_0_14px_rgba(139,92,246,0.25)]"
-                : "bg-neutral-800 border border-neutral-700 group-hover:bg-violet-500/10 group-hover:border-violet-500/20"
+                ? "bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.3)] scale-105"
+                : "bg-neutral-800/80 border border-neutral-700/80 group-hover:bg-purple-500/15 group-hover:border-purple-500/30"
             }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-300 ${
-                active ? "text-violet-400" : "text-neutral-400 group-hover:text-violet-300"
+                active ? "text-purple-300" : "text-neutral-400 group-hover:text-purple-300"
               }`}
             />
           </div>
@@ -172,7 +172,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
 
   return (
     // Fixed below the header, hidden scrollbars, premium glassmorphism
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 hidden lg:flex flex-col items-center py-4 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.3)]">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-neutral-950/90 backdrop-blur-2xl border-r border-neutral-800/80 hidden lg:flex flex-col items-center py-4 z-[90] shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div

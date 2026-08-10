@@ -57,7 +57,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         isSidebarOpen={isSidebarOpen}
       />
 
-      <AdminMiniSidebar currentPath={currentPath} navigateTo={navigateTo} />
+      <AdminMiniSidebar currentPath={currentPath} navigateTo={navigateTo} onOpenSidebar={toggleSidebar} />
 
       <AdminSidebar
         currentPath={currentPath}

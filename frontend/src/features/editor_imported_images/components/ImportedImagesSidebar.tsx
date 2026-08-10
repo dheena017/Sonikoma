@@ -871,15 +871,13 @@ const ChapterScraperDeck = React.memo(
                           <button
                             type="button"
                             onClick={() => {
-                              if (selectedEpisodeIdx !== "all" && episodeGroups[selectedEpisodeIdx]) {
-                                const grp = episodeGroups[selectedEpisodeIdx];
-                                const grpImages = scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
-                                setSelectedScraped((prev) => Array.from(new Set([...prev, ...grpImages])));
+                              if (selectedScraped.length === scrapedImages.length) {
+                                setSelectedScraped([]);
                               } else {
                                 setSelectedScraped([...scrapedImages]);
                               }
                             }}
-                            className="w-full px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-850 text-xs font-mono font-bold text-neutral-300 border border-neutral-800 text-center transition-all cursor-pointer truncate"
+                            className="w-full px-3.5 py-2.5 rounded-2xl bg-neutral-900/80 hover:bg-purple-500/10 text-xs font-sans font-bold text-neutral-200 border border-neutral-800 hover:border-purple-500/30 text-center transition-all glass-interactive active:scale-95 cursor-pointer truncate shadow-sm"
                           >
                             ✅ Select All Panels
                           </button>

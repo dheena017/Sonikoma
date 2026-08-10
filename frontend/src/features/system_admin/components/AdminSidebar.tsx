@@ -190,7 +190,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     <div
                       className={`absolute left-2 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                         active
-                          ? "h-5 bg-violet-400 shadow-[0_0_12px_rgba(167,139,250,0.8)] opacity-100"
+                          ? "h-5 bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_14px_rgba(168,85,247,0.9)] opacity-100"
                           : "h-0 bg-transparent opacity-0"
                       }`}
                     />
@@ -202,15 +202,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                       }}
                       className={`w-full flex items-center gap-3.5 px-4 py-2.5 rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
                         active
-                          ? "bg-violet-500/10 text-neutral-100 shadow-[inset_0_0_16px_rgba(139,92,246,0.1)] border border-violet-500/20"
-                          : "text-neutral-500 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
+                          ? "bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 text-white shadow-[0_4px_20px_rgba(168,85,247,0.2)] border border-purple-500/40 font-bold"
+                          : "text-neutral-300 hover:text-white hover:bg-neutral-900/80 border border-transparent hover:border-neutral-800/60"
                       }`}
                     >
                       <item.icon
                         className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${
                           active
-                            ? "text-violet-400"
-                            : "text-neutral-500 group-hover:scale-110 group-hover:text-neutral-400"
+                            ? "text-purple-300"
+                            : "text-neutral-400 group-hover:scale-110 group-hover:text-purple-300"
                         }`}
                       />
                       <span className="text-sm font-bold tracking-wide">
@@ -246,15 +246,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-fade-in"
+          className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 transition-opacity animate-fade-in"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar Drawer */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[320px] z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[320px] bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/80 z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
+          isOpen ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]" : "-translate-x-full"
         }`}
       >
         {sidebarContent}

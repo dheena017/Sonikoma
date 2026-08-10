@@ -134,14 +134,14 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
             </div>
 
             {/* Menu Items */}
-            <div className="space-y-4 overflow-y-auto flex-grow min-h-0 custom-sidebar-scrollbar pr-1">
+            <div className="space-y-4 overflow-y-auto flex-grow min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1">
               {navSections.map((sec, secIdx) => (
                 <div key={sec.group} className="space-y-1.5">
-                  {secIdx > 0 && <div className="w-8 h-[1px] bg-gradient-to-r from-purple-500/40 to-transparent rounded-full mb-1.5 ml-2" />}
-                  <h4 className="text-[8px] font-black text-purple-400/80 uppercase tracking-widest font-mono pl-2">
+                  {secIdx > 0 && <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-3" />}
+                  <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans pl-2">
                     {sec.group}
                   </h4>
-                  <ul className="space-y-1">
+                  <ul className="space-y-1.5">
                     {sec.items.map((item) => {
                       const Icon = item.icon;
                       const isActive = activeNav === item.id;
@@ -156,16 +156,21 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                               }
                               onClose();
                             }}
-                            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold font-mono transition-all duration-200 cursor-pointer text-left ${
+                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group ${
                               isActive
-                                ? "text-purple-200 bg-purple-950/40 border border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.25)]"
-                                : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
+                                ? "text-white bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border border-purple-500/40 shadow-[0_4px_20px_rgba(168,85,247,0.2)] font-bold"
+                                : "text-neutral-300 hover:text-white hover:bg-neutral-900/80 border border-transparent hover:border-neutral-800/60"
                             }`}
                           >
-                            <div className="flex items-center gap-2.5">
+                            {isActive && (
+                              <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                            )}
+                            <div className="flex items-center gap-3">
                               <Icon
-                                className={`h-3.5 w-3.5 ${
-                                  isActive ? "text-purple-400 drop-shadow-[0_0_6px_rgba(192,132,252,0.8)]" : "text-neutral-500"
+                                className={`h-4 w-4 transition-transform duration-200 ${
+                                  isActive
+                                    ? "text-purple-300 scale-110"
+                                    : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-105"
                                 }`}
                               />
                               <span>{item.label}</span>

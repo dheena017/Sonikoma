@@ -299,8 +299,8 @@ const EditorMiniSidebarInner = ({
               const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
               const projId = projectId || new URLSearchParams(window.location.search).get("id") || "";
               const target = hasValidSlugs
-                ? `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${editingImageIdx ?? 0}`
-                : `/workspace/editor/image-editor?id=${projId}&idx=${editingImageIdx ?? 0}`;
+                ? `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${editingImageIdx ?? 0}`
+                : `/scraper/editor/image-editor?id=${projId}&idx=${editingImageIdx ?? 0}`;
               if (navigateTo) {
                 navigateTo(target);
               } else {
@@ -381,7 +381,7 @@ const EditorMiniSidebarInner = ({
     // Premium Glassmorphism Container
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[90] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
+      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950/90 backdrop-blur-2xl border-r border-neutral-800/80 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[90] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.4)] ${isCollapsed ? "w-20" : "w-24"
         }`}
     >
       {/* Scrollable Tools Area */}

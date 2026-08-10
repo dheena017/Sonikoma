@@ -167,16 +167,16 @@ const EditorSidebar = ({
 
   return (
     <aside
-      className={`fixed top-0 bottom-0 left-0 h-screen bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[4px_0_24px_rgba(0,0,0,0.3)] overflow-hidden ${isCollapsed ? "w-20" : "w-[280px]"
+      className={`fixed top-0 bottom-0 left-0 h-screen bg-gradient-to-b from-neutral-950 via-[#0a0712] to-neutral-950 backdrop-blur-2xl border-r border-neutral-800/80 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.8)] overflow-hidden select-none ${isCollapsed ? "w-20" : "w-[280px]"
         }`}
     >
       {/* Top Header / Close Area */}
       <div
-        className={`flex items-center border-b border-white/[0.02] transition-all duration-300 shrink-0 ${isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
+        className={`flex items-center border-b border-neutral-800/60 transition-all duration-300 shrink-0 ${isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
           }`}
       >
         {!isCollapsed && (
-          <span className="text-[10px] font-black text-purple-400/50 uppercase tracking-[0.25em] font-mono ml-2">
+          <span className="text-[10px] font-extrabold text-purple-400 uppercase tracking-[0.2em] font-mono ml-2">
             Workspace
           </span>
         )}
@@ -185,7 +185,7 @@ const EditorSidebar = ({
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
-            className="p-1.5 rounded-lg border border-white/10 bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer active:scale-95"
+            className="w-8 h-8 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
             title="Close sidebar"
           >
             <X className="w-4 h-4" />
@@ -198,12 +198,10 @@ const EditorSidebar = ({
         {menuGroups.map((group, groupIdx) => (
           <div key={group.title} className="space-y-2">
             {!isCollapsed && groupIdx > 0 && (
-              <div className="w-full flex flex-col pt-1">
-                <div className="w-8 h-[1px] bg-neutral-800 rounded-full mb-2 ml-4" />
-              </div>
+              <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-3" />
             )}
             {!isCollapsed && (
-              <h3 className="px-4 text-[9px] font-black text-purple-400/40 uppercase tracking-[0.2em] font-mono mb-1">
+              <h3 className="px-4 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans mb-1">
                 {group.title}
               </h3>
             )}
@@ -222,7 +220,7 @@ const EditorSidebar = ({
                     {/* Premium Floating Active Pill */}
                     <div
                       className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
-                          ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
+                          ? "h-5 bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_14px_rgba(168,85,247,0.9)] opacity-100"
                           : "h-0 bg-transparent opacity-0"
                         }`}
                     />
@@ -249,8 +247,8 @@ const EditorSidebar = ({
                           const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
                           const projId = projectId || new URLSearchParams(window.location.search).get("id") || "";
                           const target = hasValidSlugs
-                            ? `/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${editingImageIdx ?? 0}`
-                            : `/workspace/editor/image-editor?id=${projId}&idx=${editingImageIdx ?? 0}`;
+                            ? `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${editingImageIdx ?? 0}`
+                            : `/scraper/editor/image-editor?id=${projId}&idx=${editingImageIdx ?? 0}`;
                           if (navigateTo) {
                             navigateTo(target);
                           } else {
@@ -281,8 +279,8 @@ const EditorSidebar = ({
                           ? "justify-center p-3"
                           : "justify-between px-4 py-3"
                         } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${isActive
-                          ? "bg-purple-500/10 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.15)] border border-purple-500/20"
-                          : "text-neutral-500 hover:text-white hover:bg-white/5 border border-transparent"
+                          ? "bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 text-white shadow-[0_4px_20px_rgba(168,85,247,0.2)] border border-purple-500/40 font-bold"
+                          : "text-neutral-300 hover:text-white hover:bg-neutral-900/80 border border-transparent hover:border-neutral-800/60"
                         }`}
                       title={isCollapsed ? item.label : undefined}
                     >

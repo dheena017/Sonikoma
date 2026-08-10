@@ -122,7 +122,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             const tempId = `temp_${Date.now()}_${Math.random()
               .toString(36)
               .substring(2, 10)}`;
-            navigateTo(`/workspace/editor?id=${tempId}`);
+            navigateTo(`/scraper/editor?id=${tempId}`);
           },
         },
       ],
@@ -224,7 +224,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         <div
           className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
             item.active
-              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
+              ? "h-5 bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_14px_rgba(168,85,247,0.9)] opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -240,18 +240,18 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
               item.active
-                ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+                ? "bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.3)] scale-105"
+                : "bg-neutral-800/80 border border-neutral-700/80 group-hover:bg-purple-500/15 group-hover:border-purple-500/30"
             }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-300 ${
-                item.active ? "text-purple-400" : "text-neutral-400 group-hover:text-purple-300"
+                item.active ? "text-purple-300" : "text-neutral-400 group-hover:text-purple-300"
               }`}
             />
           </div>
           {item.badge && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-purple-600 text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-sm z-20">
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-r from-purple-500 to-indigo-600 text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-sm z-20">
               {item.badge}
             </span>
           )}
@@ -267,11 +267,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   return (
     // Premium Glassmorphism Container
     <aside
-      className={`fixed ${
-        isProEditorPage ? "top-12" : "top-16"
-      } bottom-0 left-0 w-20 shrink-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 shadow-[4px_0_24px_rgba(0,0,0,0.3)] hidden lg:flex flex-col items-center py-4 z-40`}
+      className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-neutral-950/90 backdrop-blur-2xl border-r border-neutral-800/80 shadow-[4px_0_24px_rgba(0,0,0,0.4)] hidden lg:flex flex-col items-center py-4 z-[90]"
     >
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 mini-sidebar-scrollbar pt-2">
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div
             key={groupIdx}

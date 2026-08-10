@@ -830,7 +830,7 @@ export default function VideoPreviewCinemaPlayer({
 
   const handleClose = () => {
     if (seriesSlug && chapterSlug) {
-      navigateTo(`/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
+      navigateTo(`/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
     } else {
       navigateTo("/dashboard");
     }

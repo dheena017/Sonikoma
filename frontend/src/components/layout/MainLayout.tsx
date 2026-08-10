@@ -353,7 +353,7 @@ export default function MainLayout(props: MainLayoutProps) {
             seriesSlug={seriesSlugState}
             chapterSlug={chapterSlugState}
           />
-          {!isSidebarOpen && !isProEditorPage && (
+          {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && (
             <MiniSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}

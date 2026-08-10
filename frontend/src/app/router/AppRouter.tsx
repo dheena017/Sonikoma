@@ -744,6 +744,15 @@ export default function AppRouter(props: AppRouterProps) {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = React.useState(false);
 
+  // Cleanly redirect legacy /workspace URLs to /scraper
+  React.useEffect(() => {
+    if (currentPath.startsWith("/workspace")) {
+      const newPath = currentPath.replace(/^\/workspace/, "/scraper");
+      const search = window.location.search;
+      navigateTo(`${newPath}${search}`);
+    }
+  }, [currentPath, navigateTo]);
+
   React.useEffect(() => {
     return () => {
       document.body.style.overflow = "";

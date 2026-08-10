@@ -132,7 +132,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
                         onClick={() => {
                           const seriesSlug = activeProject?.series_slug || localStorage.getItem("active_series_slug") || "active";
                           const chapterSlug = activeProject?.chapter_slug || localStorage.getItem("active_chapter_slug") || "active";
-                          navigateTo(`/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}?panel=${idx + 1}`);
+                          navigateTo(`/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}?panel=${idx + 1}`);
                         }}
                         className="relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-950 hover:border-purple-500/60 transition-all cursor-pointer group shadow-md"
                         title={`Panel #${idx + 1}: ${p?.speech_text || p?.visual_description || 'Frame'}`}
@@ -175,7 +175,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
                 onClick={() => {
                   const seriesSlug = activeProject?.series_slug || localStorage.getItem("active_series_slug") || "active";
                   const chapterSlug = activeProject?.chapter_slug || localStorage.getItem("active_chapter_slug") || "active";
-                  navigateTo(`/workspace/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
+                  navigateTo(`/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
                 }}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-purple-950/50 cursor-pointer"
               >

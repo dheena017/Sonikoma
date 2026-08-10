@@ -99,7 +99,7 @@ export default function ProjectCard({
   return (
     <div
       onClick={() => onOpenProject(project)}
-      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0c0c12] via-[#10101a] to-[#12121f] shadow-xl shadow-purple-950/10 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-950/40 flex flex-col h-full ${
+      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0c0c12] via-[#10101a] to-[#12121f] shadow-xl shadow-purple-950/10 cursor-pointer transition-all duration-300 glass-interactive hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-950/40 flex flex-col h-full ${
         isSelected
           ? "border-purple-500/50 shadow-purple-900/30 ring-1 ring-purple-500/50"
           : "hover:border-purple-500/40"

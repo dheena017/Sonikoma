@@ -472,7 +472,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
   const handlePrevImage = () => {
     if (editingImageIdx === null || editingImageIdx <= 0) return;
     const nextIdx = editingImageIdx - 1;
-    const isProjectScoped = window.location.pathname.includes("/workspace/editor/series/");
+    const isProjectScoped = window.location.pathname.includes("/scraper/editor/series/");
     let target = "";
     if (isProjectScoped) {
       target = `${window.location.pathname}?idx=${nextIdx}`;
@@ -488,7 +488,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     if (editingImageIdx === null || editingImageIdx >= scrapedImages.length - 1)
       return;
     const nextIdx = editingImageIdx + 1;
-    const isProjectScoped = window.location.pathname.includes("/workspace/editor/series/");
+    const isProjectScoped = window.location.pathname.includes("/scraper/editor/series/");
     let target = "";
     if (isProjectScoped) {
       target = `${window.location.pathname}?idx=${nextIdx}`;
@@ -698,12 +698,12 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     const params = new URLSearchParams(window.location.search);
     const path = window.location.pathname;
     const match = path.match(
-      /^\/workspace\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
+      /^\/(?:scraper|workspace)\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
     );
     const series = match && match[1] !== "null" ? match[1] : (params.get("series") && params.get("series") !== "null" ? params.get("series") : null);
     const chapter = match && match[2] !== "null" ? match[2] : (params.get("chapter") && params.get("chapter") !== "null" ? params.get("chapter") : null);
     if (series && chapter) {
-      const target = `/workspace/editor/series/${series}/chapters/${chapter}`;
+      const target = `/scraper/editor/series/${series}/chapters/${chapter}`;
       if ((window as any).navigateTo) {
         (window as any).navigateTo(target);
       } else {
@@ -712,7 +712,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
       }
     } else {
       const projId = params.get("id") || appLogic.projectId;
-      const target = projId ? `/workspace/editor?id=${projId}` : "/dashboard";
+      const target = projId ? `/scraper/editor?id=${projId}` : "/dashboard";
       if ((window as any).navigateTo) {
         (window as any).navigateTo(target);
       } else {

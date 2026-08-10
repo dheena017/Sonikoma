@@ -799,10 +799,10 @@ export default function App() {
       if (projectId) {
         if (seriesSlugState && chapterSlugState) {
           navigateTo(
-            `/workspace/editor/series/${seriesSlugState}/chapters/${chapterSlugState}`
+            `/scraper/editor/series/${seriesSlugState}/chapters/${chapterSlugState}`
           );
         } else {
-          navigateTo(`/workspace?id=${projectId}`);
+          navigateTo(`/scraper?id=${projectId}`);
         }
       } else {
         navigateTo("/dashboard");

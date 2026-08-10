@@ -209,8 +209,8 @@ export default function useDashboardPage() {
     const nav = (window as any).navigateTo;
     const target =
       project.series_slug && project.chapter_slug
-        ? `/workspace/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
-        : `/workspace?id=${project.project_id}`;
+        ? `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        : `/scraper?id=${project.project_id}`;
 
     if (typeof nav === "function") {
       nav(target);

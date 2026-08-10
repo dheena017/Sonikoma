@@ -12,7 +12,11 @@ import {
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
-export const ImageEditorMiniSidebar: React.FC = () => {
+interface ImageEditorMiniSidebarProps {
+  onOpenToolsPanel?: () => void;
+}
+
+export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({ onOpenToolsPanel }) => {
   const activeTool = useImageEditorStore((state) => state.activeTool);
   const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
   const slicesCount = useImageEditorStore((state) => state.slicesCount);
@@ -63,13 +67,16 @@ export const ImageEditorMiniSidebar: React.FC = () => {
         <div
           className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 ${
             active
-              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.8)] opacity-100"
+              ? "h-5 bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_14px_rgba(168,85,247,0.9)] opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
 
         <button
-          onClick={() => setActiveTool(item.id)}
+          onClick={() => {
+            setActiveTool(item.id);
+            onOpenToolsPanel?.();
+          }}
           onMouseEnter={(e) => {
             setRect(e.currentTarget.getBoundingClientRect());
             setHover(true);
@@ -81,21 +88,21 @@ export const ImageEditorMiniSidebar: React.FC = () => {
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
               active
-                ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+                ? "bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.3)] scale-105"
+                : "bg-neutral-800/80 border border-neutral-700/80 group-hover:bg-purple-500/15 group-hover:border-purple-500/30"
             }`}
           >
             <Icon
               strokeWidth={active ? 2.5 : 2}
               className={`w-[18px] h-[18px] transition-colors duration-300 ${
-                active ? "text-purple-400" : "text-neutral-400 group-hover:text-purple-300"
+                active ? "text-purple-300" : "text-neutral-400 group-hover:text-purple-300"
               }`}
             />
           </div>
 
           {/* Dynamic Slices Count Badge (Only shows on the edit tool) */}
           {item.id === "crop" && slicesCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-br from-purple-500 to-purple-700 text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-r from-purple-500 to-indigo-600 text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
               {slicesCount}
             </span>
           )}
@@ -106,7 +113,7 @@ export const ImageEditorMiniSidebar: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center py-4 bg-neutral-950">
+    <div className="w-full h-full flex flex-col items-center py-4 bg-neutral-950/90 backdrop-blur-2xl">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div key={group.name} className="w-full flex flex-col items-center pb-2">
