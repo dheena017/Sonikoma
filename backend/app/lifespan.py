@@ -115,18 +115,24 @@ async def lifespan(app: FastAPI):
             except Exception as e2:
                 logger.warning(f"[System] Skill registry initialization failed during startup: {e}")
 
-        # Pre-warm rembg U-2-Net and YOLO segmentation models so the first
-        # /process-layers request does not pay the cold-start model-loading penalty.
-        try:
-            from providers.vision.sam import get_rembg_session
-            from providers.vision.yolo import get_yolo_model
-            logger.debug("[Startup] Pre-warming rembg U-2-Net session...")
-            await asyncio.to_thread(get_rembg_session)
-            logger.debug("[Startup] Pre-warming YOLO manga-segmentation model...")
-            await asyncio.to_thread(get_yolo_model)
-            logger.debug("[Startup] rembg U-2-Net and YOLO models pre-warmed successfully — first request will be fast.")
-        except Exception as e:
-            logger.warning(f"[Startup] Model pre-warm failed (non-critical, will lazy-load on first request): {e}")
+        # Pre-warm rembg U-2-Net and YOLO segmentation models unless disabled or in low-RAM cloud envs (e.g. Render 512MB free tier)
+        skip_prewarm = (
+            os.getenv("SKIP_MODEL_PREWARM", "").lower() in ("1", "true", "yes")
+            or os.getenv("RENDER") is not None
+        )
+        if not skip_prewarm:
+            try:
+                from providers.vision.sam import get_rembg_session
+                from providers.vision.yolo import get_yolo_model
+                logger.debug("[Startup] Pre-warming rembg U-2-Net session...")
+                await asyncio.to_thread(get_rembg_session)
+                logger.debug("[Startup] Pre-warming YOLO manga-segmentation model...")
+                await asyncio.to_thread(get_yolo_model)
+                logger.debug("[Startup] rembg U-2-Net and YOLO models pre-warmed successfully — first request will be fast.")
+            except Exception as e:
+                logger.warning(f"[Startup] Model pre-warm failed (non-critical, will lazy-load on first request): {e}")
+        else:
+            logger.info("[Startup] Skipping AI model pre-warming (models will lazy-load on demand to preserve memory).")
 
         # Start automatic training background monitor service
         try:
