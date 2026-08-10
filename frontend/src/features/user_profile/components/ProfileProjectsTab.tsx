@@ -162,7 +162,7 @@ export default function ProfileProjectsTab({
   const handleBatchDelete = async () => {
     if (selectedIds.length === 0) return;
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await (window as any).confirmAsync(
+    const confirmed = await confirm(
       `Are you sure you want to delete the ${selectedIds.length} selected project(s)?`
     );
     if (confirmed) {
@@ -651,7 +651,7 @@ export default function ProfileProjectsTab({
                           e.stopPropagation();
                           const confirm =
                             (window as any).confirmAsync || window.confirm;
-                          const confirmed = await (window as any).confirmAsync(
+                          const confirmed = await confirm(
                             `Are you sure you want to delete the entire series "${group.title}" and all its chapters?`
                           );
                           if (confirmed) {

@@ -184,7 +184,7 @@ export default function ProfileSecurityTab({
 
   const handleDisable2FA = async () => {
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await (window as any).confirmAsync(
+    const confirmed = await confirm(
       "Are you sure you want to disable Two-Factor Authentication?"
     );
     if (confirmed) {

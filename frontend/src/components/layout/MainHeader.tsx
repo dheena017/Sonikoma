@@ -380,7 +380,7 @@ const HeaderInner = ({
     } else {
       if (isDirty) {
         const confirm = (window as any).confirmAsync || window.confirm;
-        const confirmed = await (window as any).confirmAsync(
+        const confirmed = await confirm(
           "You have unsaved changes. Are you sure you want to navigate away? Your changes will be lost."
         );
         if (!confirmed) {

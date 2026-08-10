@@ -718,7 +718,7 @@ export default function ProfilePage({
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await (window as any).confirmAsync(
+    const confirmed = await confirm(
       "Are you sure you want to terminate this session? You will be logged out on that device."
     );
     if (!confirmed) {
@@ -962,7 +962,7 @@ export default function ProfilePage({
     if (!token) return;
 
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await (window as any).confirmAsync(
+    const confirmed = await confirm(
       "Are you sure you want to delete this API key? Apps using it will immediately lose access."
     );
     if (!confirmed) {
@@ -1188,7 +1188,7 @@ export default function ProfilePage({
 
   const handleDeleteAccount = async () => {
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmed = await (window as any).confirmAsync(
+    const confirmed = await confirm(
       "CRITICAL: Are you absolutely sure you want to permanently delete your account? All projects, assets, and data will be lost forever. This action cannot be undone.",
       "Permanently Delete Account",
       "red"
@@ -1315,7 +1315,7 @@ export default function ProfilePage({
             <button
               onClick={async () => {
                 const confirm = (window as any).confirmAsync || window.confirm;
-                const confirmed = await (window as any).confirmAsync(
+                const confirmed = await confirm(
                   "Are you sure you want to sign out? You will need to log back in to access your projects.",
                   "Sign Out",
                   "red"

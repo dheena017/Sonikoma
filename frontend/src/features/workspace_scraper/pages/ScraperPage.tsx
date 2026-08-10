@@ -171,10 +171,17 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   const [showShortcuts, setShowShortcuts] = useState<boolean>(false);
 
   const handleOpenProject = (project: Project) => {
+    const targetPath = `/scraper?id=${project.project_id}`;
     if (props.navigateTo) {
-      props.navigateTo(`/scraper?id=${project.project_id}`);
+      props.navigateTo(targetPath);
     } else {
-      window.location.href = `/scraper?id=${project.project_id}`;
+      const nav = (window as any).navigateTo;
+      if (typeof nav === "function") {
+        nav(targetPath);
+      } else {
+        window.history.pushState({}, "", targetPath);
+        window.dispatchEvent(new Event("popstate"));
+      }
     }
   };
 

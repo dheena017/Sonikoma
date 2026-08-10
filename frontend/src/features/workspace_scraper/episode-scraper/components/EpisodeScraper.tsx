@@ -405,11 +405,13 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
 
     const temporaryProjectId = createTempProjectId(seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput);
     localStorage.setItem("auto_import_url", episode.url);
+    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
     const nav = (window as any).navigateTo;
-    if (nav) {
-      nav(`/scraper/editor?id=${temporaryProjectId}`);
+    if (typeof nav === "function") {
+      nav(targetPath);
     } else {
-      window.location.assign(`/scraper/editor?id=${temporaryProjectId}`);
+      window.history.pushState({}, "", targetPath);
+      window.dispatchEvent(new Event("popstate"));
     }
   };
 
@@ -519,11 +521,13 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
 
     localStorage.setItem("auto_import_batch", JSON.stringify(finalEpisodes));
     localStorage.setItem("auto_import_url", finalEpisodes[0].url);
+    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
     const nav = (window as any).navigateTo;
-    if (nav) {
-      nav(`/scraper/editor?id=${temporaryProjectId}`);
+    if (typeof nav === "function") {
+      nav(targetPath);
     } else {
-      window.location.assign(`/scraper/editor?id=${temporaryProjectId}`);
+      window.history.pushState({}, "", targetPath);
+      window.dispatchEvent(new Event("popstate"));
     }
   };
 

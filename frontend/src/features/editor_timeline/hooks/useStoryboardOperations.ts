@@ -96,7 +96,7 @@ export function useStoryboardOperations({
 
   const handleClearTimeline = async () => {
     const confirm = (window as any).confirmAsync || window.confirm;
-    const confirmClear = await (window as any).confirmAsync(
+    const confirmClear = await confirm(
       "Are you sure you want to clear the entire timeline?",
       "Clear Timeline",
       "red"
