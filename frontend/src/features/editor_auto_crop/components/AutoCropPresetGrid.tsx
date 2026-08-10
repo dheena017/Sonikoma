@@ -15,8 +15,8 @@ export function AutoCropPresetGrid({
 }: Props) {
   const border = (slot: string) =>
     activeSlot === slot
-      ? "border-emerald-500/80 bg-emerald-950/20 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30"
-      : "border-neutral-800/80 bg-neutral-900/60 hover:border-neutral-700 hover:bg-neutral-900";
+      ? "border-purple-500/80 bg-gradient-to-br from-purple-900/50 to-purple-950/60 text-purple-200 shadow-[0_0_18px_rgba(168,85,247,0.3)] ring-1 ring-purple-500/40 scale-102"
+      : "border-neutral-800/80 bg-neutral-950/70 hover:border-purple-500/30 hover:bg-neutral-900/80 text-neutral-300";
 
   const presets = [
     {

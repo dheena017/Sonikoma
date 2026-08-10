@@ -20,7 +20,7 @@ export function AutoCropCannyControls({
   setCropCloseKernelSize,
 }: Props) {
   return (
-    <div className="p-4.5 bg-neutral-950/40 border border-neutral-800 rounded-2xl space-y-4">
+    <div className="p-5 sm:p-6 bg-neutral-900/60 border border-neutral-800/80 rounded-3xl space-y-4 shadow-xl backdrop-blur-xl hover:border-purple-500/30 transition-all">
       <SectionTitle icon={<Filter className="h-3 w-3" />}>
         Canny Boundary Finders
       </SectionTitle>

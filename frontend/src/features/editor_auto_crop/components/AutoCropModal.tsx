@@ -8,6 +8,9 @@ import {
   Cpu,
   Sliders,
   Layers,
+  Brain,
+  Zap,
+  ArrowLeft,
 } from "lucide-react";
 import AutoCropTabContent from "./AutoCropTabContent";
 
@@ -133,7 +136,7 @@ export default function AutoCropModal({
 
       scrollContainers.forEach((el) => {
         const elem = el as HTMLElement;
-        if (!elem.closest(".fixed.inset-0")) {
+        if (!elem.closest("#auto-crop-container")) {
           originalContainerStyles.push({ elem, overflow: elem.style.overflow });
           elem.style.overflow = "hidden";
         }
@@ -141,8 +144,8 @@ export default function AutoCropModal({
 
       const preventBackgroundScroll = (e: WheelEvent | TouchEvent) => {
         const target = e.target as HTMLElement | null;
-        // If event target is NOT inside the modal container, block scrolling completely
-        if (!target || !target.closest(".fixed.inset-0")) {
+        // If event target is NOT inside the modal/page container, block scrolling completely
+        if (!target || !target.closest("#auto-crop-container")) {
           e.preventDefault();
         }
       };
@@ -196,84 +199,72 @@ export default function AutoCropModal({
   ];
 
   const mainCard = (
-    <div className="bg-neutral-950 border border-neutral-850 overflow-hidden flex flex-col h-full w-full flex-1">
-      {/* Header */}
-      <div className="px-4 py-2.5 sm:px-6 sm:py-3.5 border-b border-neutral-800/80 flex flex-wrap items-center justify-between bg-neutral-950/90 backdrop-blur-md gap-3 shrink-0">
-        {/* Left: Title + Active Strategy Badges & Breakdown */}
-        <div className="flex items-center gap-3.5">
-          <div className="h-9 w-9 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 shadow-md">
-            <Scissors className="h-4.5 w-4.5" />
+    <div className="bg-[#050508] text-neutral-100 flex-1 w-full h-full overflow-y-auto custom-scrollbar flex flex-col p-4 sm:p-6 md:p-8 space-y-6 animate-[fadeIn_0.22s_ease-out]">
+      {/* HEADER SECTION (Matched to AI Model Control Hub Header) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800/80 pb-5 shrink-0">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+            <span
+              className="hover:text-purple-400 cursor-pointer transition-colors"
+              onClick={onClose}
+            >
+              Dashboard
+            </span>
+            <span>&gt;</span>
+            <span className="text-purple-400 font-semibold">Auto Panel Detection Hub</span>
           </div>
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider font-mono">
-                Auto Panel Detection
-              </h3>
-              <span className={`text-[9px] font-mono px-2.5 py-0.5 rounded-full font-bold uppercase ${
-                useLocalCV 
-                  ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-[0_0_8px_rgba(6,182,212,0.15)]" 
-                  : "bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 shadow-[0_0_8px_rgba(99,102,241,0.15)]"
-              }`}>
-                {useLocalCV ? "⚡ LOCAL OPENCV ACTIVE" : `🧠 AI SCANNER (${cropModel.toUpperCase()})`}
-              </span>
-              {aspectRatioLock !== "free" && (
-                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30">
-                  {aspectRatioLock} LOCKED
-                </span>
-              )}
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.35)] flex items-center justify-center shrink-0">
+              <Brain className="h-5 w-5 text-purple-300" />
             </div>
-
-            {/* Integrated Strategy Summary Line */}
-            <div className="flex items-center gap-x-2.5 text-[10px] text-neutral-400 font-mono flex-wrap leading-none">
-              <span>
-                Targeting: <strong className="text-white">{selectedScraped.length || scrapedImages.length}</strong> img{(selectedScraped.length || scrapedImages.length) === 1 ? "" : "s"}
-              </span>
-              <span className="text-neutral-700">•</span>
-              <span>
-                Sens: <strong className="text-white">{sensitivity}%</strong>
-              </span>
-              <span className="text-neutral-700">•</span>
-              <span>
-                Pad: <strong className="text-white">{padding}px</strong>
-              </span>
-              <span className="text-neutral-700">•</span>
-              <span>
-                Split Tall: <strong className="text-white">{autoSplitTallStrips ? "YES" : "NO"}</strong>
-              </span>
-              <span className="text-neutral-700">•</span>
-              <span>
-                Canny: <strong className="text-white">{cropCannyLow}/{cropCannyHigh}</strong>
-              </span>
-            </div>
-          </div>
+            Auto Panel Detection Hub
+          </h2>
+          <p className="text-xs sm:text-sm text-neutral-400 font-mono mt-1">
+            Configure OpenCV contour segmentation, AI vision models, and comic panel auto-crop parameters.
+          </p>
         </div>
 
-        {/* Right: Quick Controls & Close */}
-        <div className="flex items-center justify-end gap-2 sm:gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Active Strategy Status Badge */}
+          <div className="bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 border border-neutral-800/90 px-4 py-2.5 rounded-2xl flex items-center gap-3 font-mono text-xs shadow-md">
+            <div>
+              <span className="text-[9px] text-purple-400 uppercase tracking-wider block font-bold">
+                Active System Strategy
+              </span>
+              <span className="text-white font-bold block mt-0.5">
+                {useLocalCV ? "OPENCV LOCAL ENGINE" : `AI VISION (${cropModel.toUpperCase() || "GEMINI"})`}
+              </span>
+            </div>
+            <span className="bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 text-[9px] font-bold px-2.5 py-1 rounded-xl uppercase flex items-center gap-1 shadow-sm">
+              <Zap className="h-3 w-3 text-emerald-400 fill-emerald-400" /> ACTIVE
+            </span>
+          </div>
+
           <button
             type="button"
             onClick={handleResetAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all text-[10px] font-bold font-mono active:scale-95 cursor-pointer shrink-0"
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl border border-neutral-800 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white transition-all duration-300 text-xs font-mono font-bold active:scale-95 cursor-pointer shrink-0 shadow-sm"
             title="Reset all settings to defaults"
           >
-            <RotateCcw className="h-3 w-3 text-neutral-400" />
-            <span className="hidden sm:inline">Reset Defaults</span>
-            <span className="sm:hidden">Reset</span>
+            <RotateCcw className="h-3.5 w-3.5 text-neutral-400" />
+            <span>Reset</span>
           </button>
+
           <button
+            type="button"
             onClick={onClose}
-            className="text-neutral-400 hover:text-white p-2 rounded-xl hover:bg-neutral-800 transition-colors cursor-pointer shrink-0 bg-neutral-900/80 border border-neutral-800"
-            title="Close modal"
+            className="flex items-center gap-2 px-4.5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-mono transition-all duration-300 shadow-lg shadow-purple-900/40 font-bold cursor-pointer active:scale-95 border border-purple-400/30"
           >
-            <X className="h-4 w-4" />
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Home
           </button>
         </div>
       </div>
 
-      {/* Compact Tabs & Quick Actions Row */}
-      <div className="flex flex-wrap items-center justify-between border-b border-neutral-800/80 bg-neutral-950/40 px-3 sm:px-5 py-1.5 sm:py-2 shrink-0 gap-2">
+      {/* Tabs & Quick Action Controls Bar */}
+      <div className="flex flex-wrap items-center justify-between border border-neutral-800/90 bg-neutral-900/70 backdrop-blur-xl rounded-3xl p-3 shrink-0 gap-3 shadow-lg">
         {/* Left: Tab Buttons */}
-        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -282,10 +273,10 @@ export default function AutoCropModal({
                 console.log(`[AutoCropModal] Switching to tab: ${tab.id}`);
                 setActiveTab(tab.id);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer select-none whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all duration-300 cursor-pointer select-none whitespace-nowrap ${
                 activeTab === tab.id
-                  ? "text-indigo-300 bg-indigo-500/15 border border-indigo-500/30 shadow-[0_0_12px_rgba(99,102,241,0.15)]"
-                  : "text-neutral-400 border border-transparent hover:text-neutral-200 hover:bg-neutral-800/50"
+                  ? "text-purple-200 bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.3)] scale-102"
+                  : "text-neutral-400 border border-transparent hover:text-neutral-200 hover:bg-neutral-800/60"
               }`}
             >
               {tab.icon}
@@ -294,16 +285,16 @@ export default function AutoCropModal({
           ))}
         </div>
 
-        {/* Right: Integrated Quick Actions & Controls */}
+        {/* Right: Quick Controls */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
           {/* Quick Engine Switcher Pills */}
-          <div className="flex items-center bg-neutral-900/90 border border-neutral-800 rounded-lg p-0.5" title="Engine Strategy Mode">
+          <div className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner" title="Engine Strategy Mode">
             <button
               type="button"
               onClick={() => setUseLocalCV(true)}
-              className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 cursor-pointer ${
                 useLocalCV
-                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                  ? "bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-sm"
                   : "text-neutral-500 hover:text-neutral-300"
               }`}
             >
@@ -312,9 +303,9 @@ export default function AutoCropModal({
             <button
               type="button"
               onClick={() => setUseLocalCV(false)}
-              className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 cursor-pointer ${
                 !useLocalCV
-                  ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                  ? "bg-purple-500/25 text-purple-300 border border-purple-500/40 shadow-sm"
                   : "text-neutral-500 hover:text-neutral-300"
               }`}
             >
@@ -323,15 +314,15 @@ export default function AutoCropModal({
           </div>
 
           {/* Background Gutter Mode Pills */}
-          <div className="flex items-center bg-neutral-900/90 border border-neutral-800 rounded-lg p-0.5" title="Background Gutter Mode">
+          <div className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner" title="Background Gutter Mode">
             {(["auto", "white", "black"] as const).map((mode) => (
               <button
                 key={mode}
                 type="button"
                 onClick={() => setBackgroundColorMode(mode)}
-                className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 cursor-pointer ${
                   backgroundColorMode === mode
-                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                    ? "bg-amber-500/25 text-amber-300 border border-amber-500/40 shadow-sm"
                     : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
@@ -341,15 +332,15 @@ export default function AutoCropModal({
           </div>
 
           {/* Aspect Ratio Lock Pills */}
-          <div className="flex items-center bg-neutral-900/90 border border-neutral-800 rounded-lg p-0.5" title="Aspect Ratio Lock Mode">
+          <div className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner" title="Aspect Ratio Lock Mode">
             {(["free", "1:1", "16:9"] as const).map((ratio) => (
               <button
                 key={ratio}
                 type="button"
                 onClick={() => setAspectRatioLock(ratio)}
-                className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 cursor-pointer ${
                   aspectRatioLock === ratio
-                    ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                    ? "bg-purple-500/25 text-purple-300 border border-purple-500/40 shadow-sm"
                     : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
@@ -360,10 +351,10 @@ export default function AutoCropModal({
 
           {/* Auto-Split Strips Indicator */}
           <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-xs font-bold shadow-sm"
             title="Auto-Split is automatically active for all tall webtoon strips"
           >
-            <Layers className="h-3 w-3" />
+            <Layers className="h-3.5 w-3.5" />
             <span>Auto-Split: ACTIVE</span>
           </div>
 
@@ -371,21 +362,21 @@ export default function AutoCropModal({
           <button
             type="button"
             onClick={() => setUseYolo(!useYolo)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl border text-xs font-bold transition-all duration-300 cursor-pointer ${
               useYolo
-                ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.15)]"
-                : "bg-neutral-900/80 border-neutral-800 text-neutral-500 hover:text-neutral-300"
+                ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                : "bg-neutral-900/90 border-neutral-800/90 text-neutral-400 hover:text-neutral-200"
             }`}
             title="Use YOLO AI neural model for deep learning panel candidates & speech bubble protection"
           >
-            <Sparkles className="h-3 w-3 text-cyan-400" />
+            <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
             <span>YOLO AI: {useYolo ? "ON" : "OFF"}</span>
           </button>
         </div>
       </div>
 
-      {/* Scrollable Workspace Workstation Body */}
-      <div className="p-4 sm:p-6 overflow-y-auto flex flex-col flex-1 min-h-0 bg-neutral-950">
+      {/* Main Workspace Content */}
+      <div className="w-full flex flex-col space-y-6">
         <AutoCropTabContent
           activeTab={activeTab}
           useLocalCV={useLocalCV}
@@ -427,14 +418,14 @@ export default function AutoCropModal({
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-3.5 border-t border-neutral-800/80 bg-neutral-950/90 flex items-center justify-between gap-3 shrink-0">
-        <p className="text-[10px] text-neutral-500 font-mono hidden sm:block">
+      <div className="pt-6 pb-2 border-t border-neutral-800/80 flex items-center justify-between gap-4 shrink-0 mt-auto">
+        <p className="text-xs text-neutral-500 font-mono hidden sm:block">
           Settings apply to all current and future auto-crop jobs.
         </p>
-        <div className="flex items-center gap-3 ml-auto">
+        <div className="flex items-center gap-3.5 ml-auto">
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white text-xs font-bold font-sans transition-colors cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 text-xs font-bold font-sans transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -445,7 +436,7 @@ export default function AutoCropModal({
               console.log("[AutoCropModal] Apply clicked");
               onApply();
             }}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold font-sans transition-all cursor-pointer shadow-lg shadow-indigo-900/30 flex items-center gap-2 active:scale-95"
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold font-sans transition-all cursor-pointer shadow-lg shadow-purple-900/40 flex items-center gap-2 active:scale-95"
           >
             <Sparkles className="h-3.5 w-3.5" />
             Apply Settings
@@ -457,7 +448,7 @@ export default function AutoCropModal({
 
   if (isPage) {
     return (
-      <div className="flex-1 w-full h-full min-h-screen flex flex-col animate-[fadeIn_0.22s_ease-out] bg-neutral-950">
+      <div className="flex-1 w-full h-full min-h-screen flex flex-col animate-[fadeIn_0.22s_ease-out] bg-[#050508]">
         <div className="flex-grow flex flex-col min-h-0 w-full">{mainCard}</div>
       </div>
     );
@@ -465,12 +456,11 @@ export default function AutoCropModal({
 
   return (
     <div
+      id="auto-crop-container"
       onWheel={(e) => e.stopPropagation()}
-      className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-2xl flex items-center justify-center p-2 sm:p-4 overflow-hidden transition-all duration-300"
+      className="fixed top-16 left-16 lg:left-20 right-0 bottom-0 z-40 bg-[#050508] flex flex-col overflow-hidden animate-[fadeIn_0.18s_ease-out]"
     >
-      <div className="relative w-full h-full max-w-[96vw] max-h-[92vh] flex flex-col overflow-hidden rounded-2xl md:rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.95)] border border-neutral-800/80 ring-1 ring-white/10 animate-[fadeIn_0.18s_ease-out] bg-neutral-950">
-        {mainCard}
-      </div>
+      {mainCard}
     </div>
   );
 }

@@ -48,7 +48,7 @@ export default function AutoCropTabContent(props: AutoCropTabContentProps) {
   const { activeTab } = props;
 
   return (
-    <div className="flex-1 overflow-y-auto pr-2 space-y-6 relative">
+    <div className="flex-1 pr-1 space-y-6 relative">
       {activeTab === "general" && <AutoCropGeneralTab {...props} />}
       {activeTab === "advanced" && (
         <AutoCropAdvancedTab

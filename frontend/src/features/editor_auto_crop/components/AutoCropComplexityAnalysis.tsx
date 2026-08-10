@@ -87,10 +87,10 @@ export function AutoCropComplexityAnalysis({
   if (!complexity) return null;
 
   return (
-    <div className="p-4 bg-neutral-950/40 border border-neutral-800 rounded-2xl space-y-3">
+    <div className="p-5 sm:p-6 bg-neutral-900/60 border border-neutral-800/80 rounded-3xl space-y-3.5 shadow-xl backdrop-blur-xl hover:border-purple-500/30 transition-all">
       <div className="flex items-center justify-between text-[10px] font-mono">
-        <div className="flex items-center gap-2 text-neutral-500 uppercase font-bold">
-          <Activity className="h-3 w-3" />
+        <div className="flex items-center gap-2 text-neutral-400 uppercase font-bold">
+          <Activity className="h-3.5 w-3.5 text-purple-400" />
           <span>Edge Complexity Analysis</span>
         </div>
         <div className="flex items-center gap-3">
