@@ -11,12 +11,15 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-try:
-    import whisper
-    WHISPER_AVAILABLE = True
-except ImportError:
-    whisper = None
-    WHISPER_AVAILABLE = False
+# Lazy loaded whisper to keep startup RAM under 120MB
+WHISPER_AVAILABLE = True
+
+def _get_whisper_lib():
+    try:
+        import whisper
+        return whisper
+    except ImportError:
+        return None
 
 logger = logging.getLogger("sonikoma.services.whisper_engine")
 
@@ -80,10 +83,11 @@ class WhisperEngine:
     def _load_model(self) -> None:
         """Load Whisper model."""
         logger.info(f"Loading Whisper model: {self.model_name}...")
-        if whisper is None:
+        whisper_lib = _get_whisper_lib()
+        if whisper_lib is None:
             raise RuntimeError("openai-whisper module is not available.")
         try:
-            self.model = whisper.load_model(
+            self.model = whisper_lib.load_model(
                 self.model_name.value,
                 device=self.device
             )

@@ -11,20 +11,29 @@ from dataclasses import dataclass
 from enum import Enum
 import tempfile
 
-try:
-    from diffusers import StableDiffusionPipeline, StableDiffusionInpaintPipeline, StableDiffusionUpscalePipeline
-    import torch
-    from PIL import Image
-    import numpy as np
-    DIFFUSERS_AVAILABLE = True
-except ImportError:
-    StableDiffusionPipeline = None
-    StableDiffusionInpaintPipeline = None
-    StableDiffusionUpscalePipeline = None
-    torch = None
-    Image = None
-    np = None
-    DIFFUSERS_AVAILABLE = False
+# Lazy-loaded imports for diffusers and torch to keep startup RAM lightweight (~120MB)
+DIFFUSERS_AVAILABLE = True
+
+def _load_diffusers_and_torch():
+    try:
+        from diffusers import (
+            StableDiffusionPipeline,
+            StableDiffusionInpaintPipeline,
+            StableDiffusionUpscalePipeline,
+        )
+        import torch
+        from PIL import Image
+        import numpy as np
+        return {
+            "StableDiffusionPipeline": StableDiffusionPipeline,
+            "StableDiffusionInpaintPipeline": StableDiffusionInpaintPipeline,
+            "StableDiffusionUpscalePipeline": StableDiffusionUpscalePipeline,
+            "torch": torch,
+            "Image": Image,
+            "np": np,
+        }
+    except ImportError:
+        return None
 
 logger = logging.getLogger("sonikoma.services.stable_diffusion_engine")
 
@@ -70,8 +79,12 @@ class StableDiffusionEngine:
         if self.pipe is not None:
             return
 
-        if not DIFFUSERS_AVAILABLE or StableDiffusionPipeline is None or torch is None:
+        mods = _load_diffusers_and_torch()
+        if not mods:
             raise RuntimeError("diffusers and torch packages are required. Install with: pip install diffusers torch Pillow")
+
+        StableDiffusionPipeline = mods["StableDiffusionPipeline"]
+        torch = mods["torch"]
 
         logger.info(f"Loading model: {self.model_name.value} on {self.device}...")
 
