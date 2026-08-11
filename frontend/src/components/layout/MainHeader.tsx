@@ -536,10 +536,6 @@ const HeaderInner = ({
         .slice(0, 5)
     : [];
 
-  const profileDisplayName = user?.full_name?.trim() || user?.name || "User";
-  const profileFirstName = profileDisplayName.split(/\s+/)[0] || "User";
-  const profileInitial = profileFirstName.charAt(0).toUpperCase();
-
   return (
     <header
       id="header_pane"
@@ -578,42 +574,6 @@ const HeaderInner = ({
             Sonikoma
           </span>
         </div>
-
-        {/* User Profile (moved to left) */}
-        <button
-          onClick={() => navigateTo("/profile")}
-          className="group flex items-center gap-2 px-2 py-1 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer overflow-hidden max-w-[160px] h-[34px] ml-1"
-          title="View Profile"
-          aria-label={`Open ${profileDisplayName} profile`}
-        >
-          <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
-            {user?.avatar_url && !user.avatar_url.startsWith("linear-gradient") ? (
-              <div className="w-full h-full relative">
-                <img
-                  src={user.avatar_url}
-                  alt=""
-                  className="w-full h-full object-cover relative z-10"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none">
-                  {profileInitial}
-                </div>
-              </div>
-            ) : (
-              <div
-                className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none"
-                style={user?.avatar_url ? { background: user.avatar_url } : {}}
-              >
-                {profileInitial}
-              </div>
-            )}
-          </div>
-          <span className="min-w-0 text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">
-            {profileFirstName}
-          </span>
-        </button>
       </div>
 
       {/* Center Side: Quick Search / Command Bar */}

@@ -134,7 +134,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-4">
             <button
               onClick={onToggleSidebar}
-              className="icon-pill cursor-pointer hover:icon-pill--purple transition-all"
+              className="w-11 h-11 rounded-2xl bg-neutral-900/90 border border-neutral-800/90 flex items-center justify-center text-neutral-300 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
               title="Toggle Navigation Menu"
             >
               <Menu className="h-5 w-5" />
@@ -162,44 +162,6 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             Sonikoma
           </span>
         </div>
-
-        {/* User Profile (moved to left) */}
-        {user && (
-          <button
-            onClick={() => navigateTo && navigateTo("/profile")}
-            className="group flex items-center gap-2 px-2 py-1 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer overflow-hidden max-w-[160px] h-[34px]"
-            title="View Profile"
-            aria-label={`Open ${user.full_name || "User"} profile`}
-          >
-            <div className="w-6 h-6 rounded-lg bg-purple-600/20 flex items-center justify-center overflow-hidden shrink-0 border border-purple-500/30">
-              {user.avatar_url && !user.avatar_url.startsWith("linear-gradient") ? (
-                <div className="w-full h-full relative">
-                  <img
-                    src={user.avatar_url}
-                    alt=""
-                    className="w-full h-full object-cover relative z-10"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none">
-                    {(user.full_name || "User").trim().charAt(0).toUpperCase() || "U"}
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white select-none"
-                  style={user.avatar_url ? { background: user.avatar_url } : {}}
-                >
-                  {(user.full_name || "User").trim().charAt(0).toUpperCase() || "U"}
-                </div>
-              )}
-            </div>
-            <span className="min-w-0 text-[10px] font-bold text-neutral-300 truncate hidden sm:inline">
-              {(user.full_name || "User").trim().split(/\s+/)[0] || "User"}
-            </span>
-          </button>
-        )}
 
         <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-purple-400 bg-purple-900/30 rounded-full border border-purple-700/50">
           IMAGE EDITOR
@@ -336,9 +298,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               window.dispatchEvent(new Event("popstate"));
             }
           }}
-          className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-transparent hover:bg-gray-800 rounded-lg transition flex items-center"
+          className="px-4 py-2 text-xs font-black tracking-widest uppercase text-neutral-300 hover:text-white bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-2xl transition-all cursor-pointer flex items-center active:scale-95 shadow-sm"
         >
-          <X className="w-4 h-4 mr-2" /> Cancel
+          <X className="w-4 h-4 mr-1.5" /> Cancel
         </button>
         
         <button 
@@ -351,9 +313,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               setEditingImageIdx(null);
             }
           }}
-          className="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-500 rounded-lg transition flex items-center shadow-lg shadow-purple-900/20"
+          className="px-5 py-2 text-xs font-black tracking-widest uppercase text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 rounded-2xl transition-all flex items-center shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-purple-400/30 cursor-pointer active:scale-95"
         >
-          <Check className="w-4 h-4 mr-2" /> Apply Changes
+          <Check className="w-4 h-4 mr-1.5 text-purple-200" /> Apply Changes
         </button>
       </div>
     </header>

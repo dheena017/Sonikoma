@@ -130,23 +130,37 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
   const sidebarContent = (
     <div className="flex h-full flex-col bg-neutral-955 backdrop-blur-3xl border-r border-neutral-900 shadow-[8px_0_32px_rgba(0,0,0,0.45)]">
       {/* Sidebar Header */}
-      <div className="h-16 flex items-center justify-between px-6 border-b border-neutral-900/80 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="p-1.5 bg-gradient-to-tr from-purple-550 to-indigo-650 rounded-lg shadow-lg shadow-purple-650/30">
-            <Sparkles className="w-5 h-5 text-white animate-pulse" />
+      <div className="h-16 flex items-center justify-between px-5 border-b border-neutral-900/80 shrink-0">
+        <div className="flex items-center gap-3.5">
+          <div className="relative">
+            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
+            <img
+              src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+              }}
+              className="relative h-10 w-10 rounded-full border border-purple-500/30 shrink-0 object-cover bg-black"
+              alt="Sonikoma Logo"
+            />
           </div>
           <div>
-            <span className="font-black text-neutral-100 tracking-tight block leading-none text-sm font-mono">
-              CREATIVE
-            </span>
-            <span className="text-[9px] text-purple-400 font-mono uppercase tracking-widest block mt-0.5 leading-none">
-              Suite Workspace
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-sm tracking-tight text-white font-sans">
+                Creative Suite
+              </span>
+              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md font-mono">
+                SUITE
+              </span>
+            </div>
+            <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
+              AI Creative Workspace
+            </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg border border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 transition-all cursor-pointer active:scale-95"
+          className="w-9 h-9 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
+          title="Close sidebar drawer"
         >
           <X className="w-4 h-4" />
         </button>

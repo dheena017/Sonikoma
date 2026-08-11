@@ -305,6 +305,18 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           )}
         </div>
 
+        {/* User Profile Avatar Launcher */}
+        <button
+          onClick={() => navigateTo("/profile")}
+          className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-800 transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-sm active:scale-95"
+          title="View Profile"
+          aria-label="Open User profile"
+        >
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-[10px] font-extrabold text-white">
+            A
+          </div>
+        </button>
+
         {/* Telemetry/Activity Popover */}
         <div className="relative" ref={telemetryRef}>
           <button

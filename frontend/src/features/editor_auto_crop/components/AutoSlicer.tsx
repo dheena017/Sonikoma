@@ -119,11 +119,11 @@ export default function AutoSlicer({
   );
 
   return (
-    <div className="space-y-4 bg-white/[0.01] p-4 rounded-2xl border border-white/[0.05] shadow-xl">
+    <div className="space-y-4 bg-neutral-900/60 p-5 rounded-3xl border border-neutral-800/80 shadow-2xl backdrop-blur-xl">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-1 rounded-lg bg-emerald-500/10 border border-emerald-500/15">
-            <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-purple-500/50 flex items-center justify-center shadow-[0_0_18px_rgba(168,85,247,0.35)] shrink-0">
+            <Sparkles className="h-5 w-5 text-purple-300" />
           </div>
           <span className="text-[10px] uppercase font-mono font-bold text-neutral-300 tracking-wider">
             Contours-Detection Auto Cutter
@@ -167,14 +167,15 @@ export default function AutoSlicer({
         </div>
       )}
 
-      <div className="flex gap-2">
+      {/* Strategy Toggle Pill Switcher */}
+      <div className="flex gap-2 p-1.5 bg-neutral-950/90 rounded-2xl border border-neutral-800">
         <button
           type="button"
           onClick={() => setStrategy("local-cv")}
-          className={`flex-1 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer ${
+          className={`flex-1 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
             strategy === "local-cv"
-              ? "bg-emerald-600/20 border-emerald-500/50 text-white shadow-md shadow-emerald-950/20"
-              : "bg-black/20 border-white/5 text-neutral-500 hover:text-neutral-300"
+              ? "bg-gradient-to-r from-purple-950/80 via-purple-900/50 to-purple-950/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.3)] border border-purple-500/40"
+              : "text-neutral-400 hover:text-white border border-transparent"
           }`}
         >
           CV Contours
@@ -182,10 +183,10 @@ export default function AutoSlicer({
         <button
           type="button"
           onClick={() => setStrategy("ai")}
-          className={`flex-1 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer ${
+          className={`flex-1 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
             strategy === "ai"
-              ? "bg-indigo-600/20 border-indigo-500/50 text-white shadow-md shadow-indigo-950/20"
-              : "bg-black/20 border-white/5 text-neutral-500 hover:text-neutral-300"
+              ? "bg-gradient-to-r from-purple-950/80 via-purple-900/50 to-purple-950/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.3)] border border-purple-500/40"
+              : "text-neutral-400 hover:text-white border border-transparent"
           }`}
         >
           Smart Scanner
@@ -193,23 +194,23 @@ export default function AutoSlicer({
       </div>
 
       {/* Primary Action Button Row */}
-      <div className="flex items-center h-9 w-full">
+      <div className="flex items-center gap-2 w-full">
         {isDetecting ? (
           <button
             type="button"
             onClick={handleCancelDetect}
-            className="flex-1 h-full px-3.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-300 hover:text-red-200 rounded-l-xl border-r-0 flex items-center justify-center gap-1.5 transition-all text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm"
+            className="flex-1 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-2xl flex items-center justify-center gap-2 transition-all text-xs font-black uppercase tracking-widest cursor-pointer active:scale-95 shadow-[0_4px_14px_rgba(239,68,68,0.3)] border border-red-400/30"
           >
-            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+            <RefreshCw className="h-4 w-4 animate-spin text-red-200" />
             <span>Stop Scanning</span>
           </button>
         ) : (
           <button
             type="button"
             onClick={handleScan}
-            className="flex-1 h-full px-3.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-300 hover:text-indigo-200 rounded-l-xl border-r-0 flex items-center justify-center gap-1.5 transition-all text-[11px] uppercase tracking-wider font-bold cursor-pointer active:scale-95 shadow-sm"
+            className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl flex items-center justify-center gap-2 transition-all text-xs font-black uppercase tracking-widest cursor-pointer active:scale-95 shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-purple-400/30"
           >
-            <Scissors className="h-3.5 w-3.5" />
+            <Scissors className="h-4 w-4 text-purple-200" />
             <span>{dryRun ? "Dry Run Preview" : "Slice Panel Cuts"}</span>
           </button>
         )}
@@ -217,13 +218,13 @@ export default function AutoSlicer({
           type="button"
           onClick={() => setShowSettings(!showSettings)}
           title="Toggle Auto-crop Settings"
-          className={`h-full px-2.5 border rounded-r-xl transition-all cursor-pointer active:scale-95 flex items-center justify-center ${
+          className={`w-11 h-11 rounded-2xl border flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ${
             showSettings
-              ? "bg-indigo-500/20 text-indigo-200 border-indigo-500/40"
-              : "bg-indigo-500/10 text-indigo-300 border-indigo-500/20 hover:bg-indigo-500/20"
+              ? "bg-purple-950/60 border-purple-500/50 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+              : "bg-neutral-950/80 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-900"
           }`}
         >
-          <Sliders className="h-3.5 w-3.5" />
+          <Sliders className="h-4 w-4" />
         </button>
       </div>
 

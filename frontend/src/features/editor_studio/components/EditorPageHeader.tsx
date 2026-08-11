@@ -283,17 +283,17 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           )}
         </button>
 
-        {/* Share */}
+        {/* User Profile Avatar Launcher */}
         <button
-          type="button"
-          title="Share project link"
-          className="flex items-center justify-center gap-1.5 h-11 rounded-2xl border border-neutral-700 bg-neutral-800 px-4 text-xs font-bold text-neutral-400 transition-all hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 active:scale-95 cursor-pointer"
+          onClick={() => navigateTo?.("/profile")}
+          className="w-11 h-11 rounded-2xl bg-neutral-900 border border-neutral-700 hover:border-purple-500/50 hover:bg-neutral-800 transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-sm active:scale-95"
+          title="View Profile"
+          aria-label="Open User profile"
         >
-          <Share2 className="h-4 w-4" />
-          <span className="hidden lg:inline">Share</span>
+          <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-xs font-extrabold text-white">
+            U
+          </div>
         </button>
-
-
       </div>
     </header>
   );

@@ -19,5 +19,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "exclude": ["node_modules", "dist", ".venv"]
+  "exclude": ["node_modules", "dist", ".venv", "src/editor_video", "editor_video"]
 }

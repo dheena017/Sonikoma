@@ -4,6 +4,7 @@ import { useImageEditor } from "@/features/editor_image/hooks/useImageEditor";
 import { useAppLogic } from "@/shared/hooks/useAppLogic";
 import { ImageEditorHeader } from "@/features/editor_image/components/ImageEditorHeader";
 import ImageEditorCanvasContainer from "@/features/editor_image/components/ImageEditorCanvasContainer";
+import ImageEditorToolsPanel from "@/features/editor_image/components/ImageEditorToolsPanel";
 import ImageEditorSidebar from "@/features/editor_image/components/ImageEditorSidebar";
 import { ImageEditorLayout } from "@/features/editor_image/components/ImageEditorLayout";
 import { ImageEditorEmptyState } from "@/features/editor_image/components/ImageEditorEmptyState";
@@ -32,6 +33,28 @@ const ImageEditorPage = React.memo(({
   const { editingImageIdx, setEditingImageIdx } = appLogic;
   const { activeTool, setActiveTool } = useCropEditorStore();
   const [isToolsPanelOpen, setIsToolsPanelOpen] = useState(true);
+
+  const [localSidebarOpen, setLocalSidebarOpen] = useState(false);
+  const sidebarOpen = isSidebarOpen !== undefined ? isSidebarOpen : localSidebarOpen;
+  const handleToggleSidebar = () => {
+    if (setIsSidebarOpen) {
+      setIsSidebarOpen(!isSidebarOpen);
+    } else {
+      setLocalSidebarOpen((prev) => !prev);
+    }
+  };
+
+  // Lock body scrolling when sidebar drawer overlay is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [sidebarOpen]);
 
   // Auto-select the first image if the user opens the editor but hasn't picked one yet
   useEffect(() => {
@@ -130,6 +153,12 @@ const ImageEditorPage = React.memo(({
   // Render standard inline layout (No Modal/Fixed overlays!)
   return (
     <ImageEditorLayout
+      onToggleSidebar={handleToggleSidebar}
+      navigateTo={navigateTo}
+      seriesSlug={seriesSlug}
+      chapterSlug={chapterSlug}
+      scrapedCount={appLogic.scrapedImages?.length || 0}
+      panelsCount={appLogic.panels?.length || 0}
       header={
         <ImageEditorHeader
           editingImageIdx={editingImageIdx ?? 0}
@@ -159,14 +188,29 @@ const ImageEditorPage = React.memo(({
           setNotificationsMuted={appLogic.setNotificationsMuted}
           themeMode={themeMode}
           toggleThemeMode={toggleThemeMode}
-          onToggleSidebar={() => setIsToolsPanelOpen(!isToolsPanelOpen)}
-          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={handleToggleSidebar}
+          isSidebarOpen={sidebarOpen}
           navigateTo={navigateTo}
           seriesSlug={seriesSlug}
           chapterSlug={chapterSlug}
         />
       }
     >
+      {/* Full Expanded Navigation Sidebar Drawer Overlay */}
+      <ImageEditorSidebar
+        isCollapsed={!sidebarOpen}
+        setIsCollapsed={() => handleToggleSidebar()}
+        activeTool={activeTool}
+        setActiveTool={setActiveTool}
+        scrapedCount={appLogic.scrapedImages?.length || 0}
+        panelsCount={appLogic.panels?.length || 0}
+        navigateTo={navigateTo}
+        projectId={new URLSearchParams(window.location.search).get("id") || null}
+        seriesSlug={seriesSlug}
+        chapterSlug={chapterSlug}
+        onOpenAutoCropModal={() => setActiveTool("crop")}
+      />
+
       <div className="flex-1 flex flex-row overflow-hidden w-full relative">
         {/* Left Tools Sidebar */}
         <aside
@@ -175,7 +219,7 @@ const ImageEditorPage = React.memo(({
           }`}
         >
           <div className="w-[360px] lg:w-[420px] h-full flex flex-col min-h-0 overflow-hidden">
-              <ImageEditorSidebar
+              <ImageEditorToolsPanel
               setActiveTab={setActiveTool}
               slices={editorProps.slices}
               setSlices={editorProps.setSlices}

@@ -1,624 +1,357 @@
 import React from "react";
-import { RefreshCw, Layers, Database } from "lucide-react";
-import MergePanel from "@/features/editor_merge_panel";
-import ImageEditorPanel from "@/features/editor_image/components/ImageEditorPanel";
-import FreehandPanel from "@/features/editor_freehand_draw/components/FreehandPanel";
-import EnhancementsPanel from "@/features/editor_image_enhancements/components/EnhancementsPanel";
-import LayerSeparationPanel from "@/features/editor_layer_separation/components/LayerSeparationPanel";
-import HorizontalSplitter from "@/features/editor_horizontal_splitter";
-import CutsRegistry from "@/features/editor_cuts_registry";
-import AutoSlicer from "@/features/editor_auto_crop/components/AutoSlicer";
-import * as api from "@/api";
-import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
+import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
+import {
+  LayoutGrid,
+  Layout,
+  Layers,
+  Sparkles,
+  Settings2,
+  Brush,
+  Scissors,
+  Crop,
+  Link2,
+  Database,
+  Brain,
+  Settings,
+  ExternalLink,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import { useImageEditorStore, ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
 
-interface ImageEditorSidebarProps {
-  activeTab: ImageTool;
-  setActiveTab: (tab: ImageTool) => void;
-
-  handleSaveTrainingData: () => Promise<void>;
-  slices: any[];
-  setSlices: any;
-  editingImageIdx: number;
-  scrapedImages: string[];
-  isMerging: boolean;
-  handleMergeWithNext: any;
-  editCropTop: number;
-  editCropBottom: number;
-  editCropLeft: number;
-  editCropRight: number;
-  setEditCropTop: (v: number) => void;
-  setEditCropBottom: (v: number) => void;
-  setEditCropLeft: (v: number) => void;
-  setEditCropRight: (v: number) => void;
-  zoom: number;
-  setZoom: (v: number) => void;
-  isTransforming: boolean;
-  handleTransform: (action: string, param: string) => void;
-  handleResetCropBounds: () => void;
-  activeStoryboardPanel: any;
-  handleModifyBrightness: any;
-  handleModifyContrast: any;
-  handleModifySaturation: any;
-  handleModifyFilterPreset: any;
-  handleModifyGrayscale: any;
-  handleModifyDuration: any;
-  handleModifyMotionType: any;
-  handleModifySpeechText: any;
-  handleModifyNarrative?: any;
-  handleModifyVisualDescription?: any;
-  handleModifySfx: any;
-  handleModifyCropPadding: any;
-  setScrapedImages: any;
-  setPanels: any;
-  addNotification: any;
-  fetchWithInterceptor: any;
-  setConsoleLogs: any;
-  editMode: any;
-  setEditMode: any;
-  brushSize: number;
-  setBrushSize: any;
-  brushAction: any;
-  setBrushAction: any;
-  handleClearBrushMask: any;
-  detectionStyle: any;
-  setDetectionStyle: any;
-  eraseMethod: any;
-  setEraseMethod: any;
-  sensitivity: number;
-  setSensitivity: any;
-  dilation: number;
-  setDilation: any;
-  inpaintRadius: number;
-  setInpaintRadius: any;
-  debugMode: boolean;
-  setDebugMode: any;
-  fillColor: string;
-  setFillColor: any;
-  textBgColor?: string;
-  setTextBgColor?: any;
-  ocrLang: string;
-  setOcrLang: any;
-  gpu: boolean;
-  setGpu: any;
-  morphKernelSize: number;
-  setMorphKernelSize: any;
-  morphShape: string;
-  setMorphShape: any;
-  useCustomColorTarget: boolean;
-  setUseCustomColorTarget: any;
-  customColorTarget: string;
-  setCustomColorTarget: any;
-  customColorTolerance: number;
-  setCustomColorTolerance: any;
-  splitPosition: number;
-  setSplitPosition: any;
-  splitLines: number[];
-  setSplitLines: any;
-  showSplitPosition: boolean;
-  setShowSplitPosition: any;
-  setSelectedSliceId: any;
-  handleAddSplitLine: any;
-  handleRemoveSplitLine: any;
-  handleExecuteHorizontalSplit: any;
-  isSavingEdit: boolean;
-  imageUrl: string | null;
-  magneticSnap: boolean;
-  setMagneticSnap: any;
-  detectedGutters: number[];
-  setDetectedGutters: any;
-  selectedSliceId: string | null;
-  editAutoTrim: boolean;
-  handlePushToSlices: any;
-  autoPushOnDraw: boolean;
-  setAutoPushOnDraw: any;
-  handleClearAllSlices: any;
-  handleNudge: any;
-  handleSelectSlice: any;
-  handleDeleteSlice: any;
-  handleCropSingleSlice: any;
-  isCroppingSlice: string | null;
-  handleDetectPanels: any;
-  handleCancelDetect: () => void;
-  isDetecting: boolean;
-  handleCommitDetectedBoxes: any;
-  detectedBoxes: any[];
-  handleClearDetectedBoxes: any;
-  handleExecuteSave: any;
+export interface ImageEditorSidebarProps {
+  isCollapsed: boolean;
+  setIsCollapsed: (v: boolean) => void;
+  activeTool?: ImageTool;
+  setActiveTool?: (tool: ImageTool) => void;
+  onBackToApp?: () => void;
+  scrapedCount?: number;
+  panelsCount?: number;
+  navigateTo?: (path: string) => void;
+  projectId?: string | null;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
+  onOpenAutoCropModal?: () => void;
 }
 
-function ImageEditorSidebar({
-  activeTab,
-  setActiveTab,
-  slices,
-  setSlices,
-  editingImageIdx,
-  scrapedImages,
-  isMerging,
-  handleMergeWithNext,
-  editCropTop,
-  editCropBottom,
-  editCropLeft,
-  editCropRight,
-  setEditCropTop,
-  setEditCropBottom,
-  setEditCropLeft,
-  setEditCropRight,
-  zoom,
-  setZoom,
-  isTransforming,
-  handleTransform,
-  handleResetCropBounds,
-  activeStoryboardPanel,
-  handleModifyBrightness,
-  handleModifyContrast,
-  handleModifySaturation,
-  handleModifyFilterPreset,
-  handleModifyGrayscale,
-  handleModifyDuration,
-  handleModifyMotionType,
-  handleModifySpeechText,
-  handleModifyNarrative,
-  handleModifyVisualDescription,
-  handleModifySfx,
-  handleModifyCropPadding,
-  setScrapedImages,
-  setPanels,
-  addNotification,
-  fetchWithInterceptor,
-  setConsoleLogs,
-  editMode,
-  setEditMode,
-  brushSize,
-  setBrushSize,
-  brushAction,
-  setBrushAction,
-  handleClearBrushMask,
-  detectionStyle,
-  setDetectionStyle,
-  eraseMethod,
-  setEraseMethod,
-  sensitivity,
-  setSensitivity,
-  dilation,
-  setDilation,
-  inpaintRadius,
-  setInpaintRadius,
-  debugMode,
-  setDebugMode,
-  fillColor,
-  setFillColor,
-  textBgColor,
-  setTextBgColor,
-  ocrLang,
-  setOcrLang,
-  gpu,
-  setGpu,
-  morphKernelSize,
-  setMorphKernelSize,
-  morphShape,
-  setMorphShape,
-  useCustomColorTarget,
-  setUseCustomColorTarget,
-  customColorTarget,
-  setCustomColorTarget,
-  customColorTolerance,
-  setCustomColorTolerance,
-  splitPosition,
-  setSplitPosition,
-  splitLines,
-  setSplitLines,
-  showSplitPosition,
-  setShowSplitPosition,
-  setSelectedSliceId,
-  handleAddSplitLine,
-  handleRemoveSplitLine,
-  handleExecuteHorizontalSplit,
-  isSavingEdit,
-  imageUrl,
-  magneticSnap,
-  setMagneticSnap,
-  detectedGutters,
-  setDetectedGutters,
-  selectedSliceId,
-  editAutoTrim,
-  handlePushToSlices,
-  autoPushOnDraw,
-  setAutoPushOnDraw,
-  handleClearAllSlices,
-  handleNudge,
-  handleSelectSlice,
-  handleDeleteSlice,
-  handleCropSingleSlice,
-  isCroppingSlice,
-  handleDetectPanels,
-  handleCancelDetect,
-  isDetecting,
-  handleCommitDetectedBoxes,
-  detectedBoxes,
-  handleClearDetectedBoxes,
-  handleExecuteSave,
-  handleSaveTrainingData,
-}: ImageEditorSidebarProps & { handleSaveTrainingData: () => Promise<void> }) {
-  const [sampleCount, setSampleCount] = React.useState<number | null>(null);
-  const [isTraining, setIsTraining] = React.useState(false);
-  const [trainingEpoch, setTrainingEpoch] = React.useState(0);
-  const [totalTrainingEpochs, setTotalTrainingEpochs] = React.useState(0);
-  const [trainingElapsed, setTrainingElapsed] = React.useState(0);
-  const [trainingMetrics, setTrainingMetrics] = React.useState<any>({});
-  const [trainingError, setTrainingError] = React.useState<string | null>(null);
-  const [epochsToTrain, setEpochsToTrain] = React.useState(20);
+interface SidebarMenuItem {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  badge?: string | number;
+  isProcessing?: boolean;
+  type: "tool" | "nav" | "modal" | "link";
+}
 
-  React.useEffect(() => {
-    if (activeTab === "train") {
-      const fetchCount = async () => {
-        try {
-          const res = await fetchWithInterceptor("/api/image/training-data-count");
-          const data = await res.json();
-          if (data && typeof data.count === "number") {
-            setSampleCount(data.count);
-          }
-        } catch (err) {
-          console.error("Failed to load training count:", err);
-        }
-      };
-      fetchCount();
+interface SidebarGroup {
+  title: string;
+  items: SidebarMenuItem[];
+}
+
+export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
+  isCollapsed,
+  setIsCollapsed,
+  activeTool = "crop",
+  setActiveTool,
+  onBackToApp,
+  scrapedCount = 0,
+  panelsCount = 0,
+  navigateTo,
+  projectId,
+  seriesSlug,
+  chapterSlug,
+  onOpenAutoCropModal,
+}) => {
+  const slicesCount = useImageEditorStore((state) => state.slicesCount);
+
+  const menuGroups: SidebarGroup[] = [
+    {
+      title: "Editing Tools",
+      items: [
+        {
+          id: "adjust",
+          label: "Color & Filters",
+          icon: Sparkles,
+          type: "tool",
+        },
+        {
+          id: "edit",
+          label: "Transform & Bounds",
+          icon: Settings2,
+          type: "tool",
+        },
+        {
+          id: "draw",
+          label: "Retouch & Brush",
+          icon: Brush,
+          type: "tool",
+        },
+        {
+          id: "slice",
+          label: "Horizontal Cutter",
+          icon: Scissors,
+          type: "tool",
+        },
+        {
+          id: "crop",
+          label: "Panel Cuts Registry",
+          icon: Crop,
+          badge: slicesCount > 0 ? slicesCount : undefined,
+          type: "tool",
+        },
+        {
+          id: "merge",
+          label: "Merge Panels",
+          icon: Link2,
+          type: "tool",
+        },
+      ],
+    },
+    {
+      title: "AI Intelligence",
+      items: [
+        {
+          id: "separate",
+          label: "Layer Separation",
+          icon: Layers,
+          type: "tool",
+        },
+        {
+          id: "train",
+          label: "YOLO AI Fine-Tuner",
+          icon: Database,
+          type: "tool",
+        },
+        {
+          id: "autocrop-hub",
+          label: "Auto Panel Detection",
+          icon: Brain,
+          type: "modal",
+        },
+      ],
+    },
+    {
+      title: "Preferences",
+      items: [
+        {
+          id: "settings",
+          label: "Editor Settings",
+          icon: Settings,
+          type: "link",
+        },
+      ],
+    },
+  ];
+
+  const handleReturnToWorkspace = () => {
+    if (onBackToApp) {
+      onBackToApp();
+      return;
     }
-  }, [activeTab, fetchWithInterceptor]);
+    const path = resolveWorkspaceReturnPath({
+      projectId,
+      searchParams: window.location.search,
+    });
 
-  React.useEffect(() => {
-    let intervalId: any = null;
-
-    const checkStatus = async () => {
-      try {
-        const data = await api.getYoloTrainingStatus(fetchWithInterceptor);
-        setIsTraining(data.is_training);
-        setTrainingEpoch(data.epoch);
-        setTotalTrainingEpochs(data.total_epochs);
-        setTrainingElapsed(data.elapsed_seconds);
-        setTrainingMetrics(data.metrics || {});
-        setTrainingError(data.error);
-
-        if (!data.is_training && isTraining) {
-          const countRes = await fetchWithInterceptor("/api/image/training-data-count");
-          const countData = await countRes.json();
-          if (countData && typeof countData.count === "number") {
-            setSampleCount(countData.count);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to check training status:", err);
-      }
-    };
-
-    checkStatus();
-
-    if (activeTab === "train" || isTraining) {
-      intervalId = setInterval(checkStatus, 3000);
+    if (navigateTo) {
+      navigateTo(path);
+    } else {
+      window.history.pushState({}, "", path);
+      window.dispatchEvent(new Event("popstate"));
     }
+    setIsCollapsed(true);
+  };
 
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [fetchWithInterceptor, isTraining, activeTab]);
+  if (isCollapsed) return null;
 
   return (
-    <div className="w-full h-full flex flex-col min-h-0 overflow-hidden">
-      {/* Tab Contents */}
-      <div className="flex-1 min-h-0 overflow-y-auto custom-purple-scrollbar px-5 py-4 space-y-4">
-        {activeTab === "merge" && (
-          <MergePanel
-            editingImageIdx={editingImageIdx}
-            scrapedImages={scrapedImages}
-            isMerging={isMerging}
-            onMerge={handleMergeWithNext}
-          />
-        )}
+    <>
+      {/* Drawer Backdrop Overlay when open (Hides Header & Prevents Scrolling) */}
+      <div
+        className="fixed inset-0 bg-black/75 backdrop-blur-md z-[110] transition-opacity animate-[fadeIn_0.2s_ease-out]"
+        onClick={() => setIsCollapsed(true)}
+      />
 
-        {activeTab === "separate" && (
-          <LayerSeparationPanel
-            activeStoryboardPanel={activeStoryboardPanel}
-            setPanels={setPanels}
-            addNotification={addNotification}
-            fetchWithInterceptor={fetchWithInterceptor}
-          />
-        )}
-
-        {activeTab === "train" && (
-          <div className="space-y-4">
-            {/* Header */}
-            <div className="flex items-center gap-2 pb-2 border-b border-white/5">
-              <div className="p-1.5 rounded-lg bg-purple-500/10">
-                <Database className="h-4 w-4 text-purple-400" />
-              </div>
-              <div>
-                <h4 className="text-xs font-mono font-bold text-white uppercase">
-                  AI Model Fine-Tuning
-                </h4>
-                <p className="text-[9px] text-purple-300/80 font-mono">
-                  YOLO v8 Segment Fine-Tuner
-                </p>
-              </div>
+      <aside
+        className="fixed top-0 bottom-0 left-0 h-screen w-[280px] bg-gradient-to-b from-neutral-950 via-[#0a0712] to-neutral-950 backdrop-blur-2xl border-r border-neutral-800/80 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.9)] overflow-hidden select-none"
+      >
+        {/* Top Header / Close Area */}
+        <div
+          className={`flex items-center border-b border-neutral-800/60 transition-all duration-300 shrink-0 ${
+            isCollapsed ? "h-16 justify-center" : "h-16 px-4 justify-between"
+          }`}
+        >
+          {isCollapsed ? (
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 flex items-center justify-center shadow-[0_0_18px_rgba(168,85,247,0.35)]">
+              <Sparkles className="w-5 h-5 text-purple-300 animate-pulse" />
             </div>
-
-            {/* Stats / Flywheel Card */}
-            <div className="bg-[#111115] border border-white/5 rounded-2xl p-3.5 flex items-center justify-between">
-              <div className="space-y-0.5">
-                <span className="text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider block">
-                  Training Dataset
-                </span>
-                <span className="text-[10px] text-neutral-300 font-sans">
-                  Total saved correction pairs:
-                </span>
-              </div>
-              <div className="bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
-                <span className="text-xs font-mono font-black text-purple-400">
-                  {sampleCount !== null ? sampleCount : "..."}
-                </span>
-                <span className="text-[8px] font-mono text-purple-300 uppercase font-bold">
-                  pairs
-                </span>
-              </div>
-            </div>
-
-            {/* Fine-Tuning Controller */}
-            <div className="bg-[#111115] border border-white/5 rounded-2xl p-3.5 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[9px] font-mono text-purple-400 uppercase font-bold tracking-wider block">
-                  Fine-Tuning Controls
-                </span>
-                {isTraining && (
-                  <span className="flex h-2 w-2 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-                  </span>
-                )}
-              </div>
-
-              {isTraining ? (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-[10px] text-neutral-300">
-                    <span className="font-mono">Epoch {trainingEpoch} / {totalTrainingEpochs}</span>
-                    <span className="font-mono text-neutral-500">{Math.floor(trainingElapsed / 60)}m {trainingElapsed % 60}s</span>
-                  </div>
-                  <div className="w-full bg-neutral-900 h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className="bg-purple-500 h-full rounded-full transition-all duration-500"
-                      style={{ width: `${(trainingEpoch / (totalTrainingEpochs || 1)) * 100}%` }}
-                    ></div>
-                  </div>
-                  {Object.keys(trainingMetrics).length > 0 && (
-                    <div className="grid grid-cols-2 gap-1 text-[8px] font-mono text-neutral-500 bg-neutral-950 p-2 rounded-xl border border-white/5">
-                      {Object.entries(trainingMetrics).map(([k, v]: [string, any]) => (
-                        <div key={k} className="flex justify-between">
-                          <span>{k}:</span>
-                          <span className="text-purple-400 font-bold">{v.toFixed(4)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+          ) : (
+            <>
+              <div className="flex items-center gap-3.5">
+                <div className="relative">
+                  <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
+                  <img
+                    src="/logo-dark.png"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+                    }}
+                    className="relative h-11 w-11 rounded-full border border-purple-500/30 shrink-0 object-cover bg-black"
+                    alt="Sonikoma Logo"
+                  />
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-[9px] text-neutral-400 leading-relaxed font-sans">
-                    Fine-tune the YOLO segmentation model directly on your corrected dataset. The server will hot-swap the fine-tuned weights automatically.
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-base tracking-tight text-white font-sans">
+                      Image Studio
+                    </span>
+                    <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md font-mono">
+                      IMAGE
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
+                    Image Processing Suite
                   </p>
+                </div>
+              </div>
 
-                  {trainingError && (
-                    <div className="text-[9px] text-red-400 bg-red-950/20 border border-red-900/30 p-2.5 rounded-xl font-mono leading-relaxed">
-                      ⚠️ Error: {trainingError}
-                    </div>
-                  )}
+              <button
+                onClick={() => setIsCollapsed(true)}
+                className="w-8 h-8 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
+                title="Close sidebar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </>
+          )}
+        </div>
 
-                  {(!sampleCount || sampleCount === 0) ? (
-                    <div className="text-[9px] text-purple-300/80 bg-purple-950/10 border border-purple-900/20 p-2.5 rounded-xl leading-relaxed">
-                      💡 <strong>Get started:</strong> Save at least 1 mask correction in the <strong>Eraser</strong> tool to unlock fine-tuning.
-                    </div>
-                  ) : (
-                    <div className="flex gap-2 items-center">
-                      <div className="flex-1 flex flex-col space-y-1">
-                        <label className="text-[8px] font-mono text-neutral-500 uppercase font-bold">Epochs</label>
-                        <select
-                          value={epochsToTrain}
-                          onChange={(e) => setEpochsToTrain(Number(e.target.value))}
-                          className="bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2 py-1.5 text-[10px] font-mono cursor-pointer focus:outline-none focus:border-purple-500"
-                        >
-                          <option value={5}>5 epochs (Fast)</option>
-                          <option value={10}>10 epochs</option>
-                          <option value={20}>20 epochs (Recommended)</option>
-                          <option value={50}>50 epochs (Deep)</option>
-                        </select>
-                      </div>
+        {/* Navigation Groups */}
+        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {menuGroups.map((group, groupIdx) => (
+            <div key={group.title} className="space-y-2">
+              {!isCollapsed && groupIdx > 0 && (
+                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-2" />
+              )}
+              {!isCollapsed && (
+                <h3 className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans mb-1">
+                  {group.title}
+                </h3>
+              )}
+              <div className="space-y-1.5">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = item.type === "tool" && activeTool === item.id;
+
+                  return (
+                    <div key={item.id} className="relative flex justify-center">
+                      {/* Premium Floating Active Ribbon Pill */}
+                      <div
+                        className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+                          isActive
+                            ? "h-6 bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_14px_rgba(168,85,247,0.9)] opacity-100"
+                            : "h-0 bg-transparent opacity-0"
+                        }`}
+                      />
+
                       <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            addNotification("Starting YOLO fine-tuning...", "info");
-                            await api.startYoloTraining(fetchWithInterceptor, epochsToTrain);
-                            setIsTraining(true);
-                          } catch (err: any) {
-                            addNotification(`Failed to start training: ${err.message}`, "error");
+                        onClick={() => {
+                          if (item.type === "tool" && setActiveTool) {
+                            setActiveTool(item.id as ImageTool);
+                          } else if (item.id === "autocrop-hub" && onOpenAutoCropModal) {
+                            onOpenAutoCropModal();
+                          } else if (item.id === "canvas" || item.id === "image-editor") {
+                            const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
+                            const projId = projectId || new URLSearchParams(window.location.search).get("id") || "";
+                            const target = hasValidSlugs
+                              ? `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=0`
+                              : `/scraper/editor/image-editor?id=${projId}&idx=0`;
+                            if (navigateTo) {
+                              navigateTo(target);
+                            } else {
+                              window.history.pushState({}, "", target);
+                              window.dispatchEvent(new Event("popstate"));
+                            }
                           }
+                          setIsCollapsed(true);
                         }}
-                        className="flex-1 self-end py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-[10px] font-mono font-bold transition-all shadow-md shadow-purple-900/30 cursor-pointer"
+                        className={`w-full flex items-center ${
+                          isCollapsed
+                            ? "justify-center py-1"
+                            : "justify-between px-2.5 py-1.5"
+                        } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
+                          isActive && !isCollapsed
+                            ? "bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border border-purple-500/40 text-white shadow-[0_4px_20px_rgba(168,85,247,0.2)] font-bold"
+                            : "text-neutral-300 hover:text-white hover:bg-neutral-900/60 border border-transparent"
+                        }`}
+                        title={isCollapsed ? item.label : undefined}
                       >
-                        Start Fine-Tuning
+                        <div className="flex items-center gap-3">
+                          {/* iOS-Style Squircle Icon Pill (Identical to ImageEditorMiniSidebar) */}
+                          <div
+                            className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 shadow-sm ${
+                              isActive
+                                ? "bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-purple-500/60 shadow-[0_0_18px_rgba(168,85,247,0.35)] scale-105"
+                                : "bg-neutral-900/80 border border-neutral-800/80 group-hover:bg-purple-500/15 group-hover:border-purple-500/30"
+                            }`}
+                          >
+                            <Icon
+                              strokeWidth={isActive ? 2.5 : 2}
+                              className={`w-5 h-5 transition-colors duration-300 ${
+                                isActive ? "text-purple-300" : "text-neutral-400 group-hover:text-purple-300"
+                              }`}
+                            />
+                          </div>
+
+                          {!isCollapsed && (
+                            <span className="text-sm font-bold tracking-wide">
+                              {item.label}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Badge Logic */}
+                        {item.badge !== undefined && (
+                          <span
+                            className={`absolute ${
+                              isCollapsed ? "-top-1 -right-1" : "relative top-0 right-0"
+                            } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${
+                              isActive
+                                ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
+                                : "bg-neutral-900 text-neutral-500 border-white/5"
+                            }`}
+                          >
+                            {item.badge}
+                          </span>
+                        )}
                       </button>
                     </div>
-                  )}
-                </div>
-              )}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
 
-        {activeTab === "draw" && (
-          <FreehandPanel
-            brushSize={brushSize}
-            setBrushSize={setBrushSize}
-            brushAction={brushAction}
-            setBrushAction={setBrushAction}
-            fillColor={fillColor}
-            setFillColor={setFillColor}
-            textBgColor={textBgColor || "#ffffff"}
-            setTextBgColor={setTextBgColor || (() => { })}
-            activeStoryboardPanel={activeStoryboardPanel}
-            setPanels={setPanels}
-            addNotification={addNotification}
-            fetchWithInterceptor={fetchWithInterceptor}
-          />
-        )}
-
-        {activeTab === "edit" && (
-          <ImageEditorPanel
-            editCropTop={editCropTop}
-            editCropBottom={editCropBottom}
-            editCropLeft={editCropLeft}
-            editCropRight={editCropRight}
-            setEditCropTop={setEditCropTop}
-            setEditCropBottom={setEditCropBottom}
-            setEditCropLeft={setEditCropLeft}
-            setEditCropRight={setEditCropRight}
-            zoom={zoom}
-            setZoom={setZoom}
-            isTransforming={isTransforming}
-            onRotate={(deg) => handleTransform("rotate", String(deg))}
-            onFlip={(axis) => handleTransform("flip", axis)}
-            onReset={handleResetCropBounds}
-            handleNudge={handleNudge}
-          />
-        )}
-
-        {activeTab === "adjust" && (
-          <EnhancementsPanel
-            activeStoryboardPanel={activeStoryboardPanel}
-            handleModifyBrightness={handleModifyBrightness}
-            handleModifyContrast={handleModifyContrast}
-            handleModifySaturation={handleModifySaturation}
-            handleModifyFilterPreset={handleModifyFilterPreset}
-            handleModifyGrayscale={handleModifyGrayscale}
-            handleModifyDuration={handleModifyDuration}
-            handleModifyMotionType={handleModifyMotionType}
-            handleModifySpeechText={handleModifySpeechText}
-            handleModifyNarrative={handleModifyNarrative}
-            handleModifyVisualDescription={handleModifyVisualDescription}
-            handleModifySfx={handleModifySfx}
-            handleModifyCropPadding={handleModifyCropPadding}
-            setPanels={setPanels}
-            editingImageIdx={editingImageIdx}
-            totalImages={scrapedImages?.length || 1}
-            addNotification={addNotification}
-            fetchWithInterceptor={fetchWithInterceptor}
-          />
-        )}
-
-        {activeTab === "slice" && (
-          <HorizontalSplitter
-            splitPosition={splitPosition}
-            setSplitPosition={setSplitPosition}
-            splitLines={splitLines}
-            setSplitLines={setSplitLines}
-            showSplitPosition={showSplitPosition}
-            setShowSplitPosition={setShowSplitPosition}
-            setEditCropTop={setEditCropTop}
-            setEditCropBottom={setEditCropBottom}
-            setEditCropLeft={setEditCropLeft}
-            setEditCropRight={setEditCropRight}
-            setSelectedSliceId={setSelectedSliceId}
-            handleAddSplitLine={handleAddSplitLine}
-            handleRemoveSplitLine={handleRemoveSplitLine}
-            handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
-            isSavingEdit={isSavingEdit}
-            imageUrl={imageUrl}
-            magneticSnap={magneticSnap}
-            setMagneticSnap={setMagneticSnap}
-            detectedGutters={detectedGutters}
-            setDetectedGutters={setDetectedGutters}
-          />
-        )}
-
-        {activeTab === "crop" && (
-          <div className="space-y-4">
-            <CutsRegistry
-              slices={slices}
-              setSlices={setSlices}
-              selectedSliceId={selectedSliceId}
-              setSelectedSliceId={setSelectedSliceId}
-              editCropTop={editCropTop}
-              setEditCropTop={setEditCropTop}
-              editCropBottom={editCropBottom}
-              setEditCropBottom={setEditCropBottom}
-              editCropLeft={editCropLeft}
-              setEditCropLeft={setEditCropLeft}
-              editCropRight={editCropRight}
-              setEditCropRight={setEditCropRight}
-              editAutoTrim={editAutoTrim}
-              handlePushToSlices={handlePushToSlices}
-              autoPushOnDraw={autoPushOnDraw}
-              setAutoPushOnDraw={setAutoPushOnDraw}
-              handleClearAllSlices={handleClearAllSlices}
-              handleNudge={handleNudge}
-              handleSelectSlice={handleSelectSlice}
-              handleDeleteSlice={handleDeleteSlice}
-              handleCropSingleSlice={handleCropSingleSlice}
-              isCroppingSlice={isCroppingSlice}
-              isSavingEdit={isSavingEdit}
-            />
-            <AutoSlicer
-              handleDetectPanels={handleDetectPanels}
-              handleCancelDetect={handleCancelDetect}
-              isDetecting={isDetecting}
-              onCommitCuts={handleCommitDetectedBoxes}
-              hasDetectedBoxes={detectedBoxes && detectedBoxes.length > 0}
-              detectedCount={detectedBoxes.length}
-              clearDetectedBoxes={handleClearDetectedBoxes}
-            />
-            <button
-              type="button"
-              onClick={handleExecuteSave}
-              disabled={isSavingEdit}
-              className={`w-full relative px-6 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-2 shadow-lg ${selectedSliceId
-                  ? "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-900/50"
-                  : "bg-purple-600 hover:bg-purple-500 shadow-purple-900/50"
-                } disabled:opacity-40 disabled:cursor-not-allowed text-white`}
-              style={{
-                boxShadow: isSavingEdit
-                  ? undefined
-                  : `0 0 20px ${selectedSliceId
-                    ? "rgba(16,185,129,0.25)"
-                    : "rgba(139,92,246,0.25)"
-                  }, 0 4px 12px rgba(0,0,0,0.4)`,
-              }}
-            >
-              {isSavingEdit ? (
-                <>
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                  <span>Processing Crops...</span>
-                </>
-              ) : (
-                <>
-                  {selectedSliceId ? (
-                    <>
-                      <Layers className="h-4 w-4 text-emerald-200" />
-                      <span>Execute Selected Crop</span>
-                    </>
-                  ) : (
-                    <>
-                      <Layers className="h-4 w-4 text-purple-200" />
-                      <span>
-                        {slices.length > 0
-                          ? `Execute ${slices.length} Crops`
-                          : "Execute Crop"}
-                      </span>
-                    </>
-                  )}
-                </>
-              )}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+        {/* Bottom Action Footer - Return to Workspace */}
+        <div className="p-3.5 border-t border-neutral-800/60 bg-neutral-950/90 flex justify-center w-full shrink-0">
+          <button
+            onClick={handleReturnToWorkspace}
+            className={`flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white transition-all active:scale-95 border border-purple-400/30 cursor-pointer shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] ${
+              isCollapsed ? "w-11 h-11 p-0" : "w-full py-3.5 px-4 gap-3 text-xs font-black tracking-widest uppercase"
+            }`}
+            title="Return to Workspace"
+          >
+            <ExternalLink className="w-5 h-5 shrink-0 text-purple-200" />
+            {!isCollapsed && (
+              <span className="text-xs font-black tracking-widest uppercase">
+                Return to Workspace
+              </span>
+            )}
+          </button>
+        </div>
+      </aside>
+    </>
   );
-}
+};
 
-export default React.memo(ImageEditorSidebar);
+export default ImageEditorSidebar;

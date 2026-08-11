@@ -1337,7 +1337,7 @@ export default function AppRouter(props: AppRouterProps) {
       )}
 
       {/* PAGE VIEW 19: Full Editor Page */}
-      {isEditorPath && !isPipMode && isProEditorPage && (
+      {isEditorPath && !isPipMode && isProEditorPage && !isImageEditorPage && (
         <EditorPage
           appLogic={memoizedAppLogic}
           navigateTo={navigateTo}

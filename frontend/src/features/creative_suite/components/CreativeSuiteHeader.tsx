@@ -6,11 +6,6 @@ import {
   Sparkles,
   Zap,
   Menu,
-  Cpu,
-  Volume2,
-  VolumeX,
-  Sliders,
-  Activity,
 } from "lucide-react";
 import * as api from "@/api";
 import { getUserCreditsPayload } from "@/api/endpoints/auth";
@@ -45,45 +40,13 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   setNotificationsMuted,
   isSidebarOpen = false,
 }) => {
-  const [stats, setStats] = useState<any>({
-    cpu: 0,
-    memory: "0MB",
-    dbLatency: 0,
-    gpu: { total: 4, busy: 1, idle: 3 },
-    uptime: "",
-  });
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showTelemetryPopover, setShowTelemetryPopover] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
-  const [volume, setVolume] = useState(80);
-  const [isMuted, setIsMuted] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
 
   const notificationsRef = useRef<HTMLDivElement>(null);
-  const telemetryRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
-
-  const fetchStats = async () => {
-    try {
-      const data = await api.getMetrics(fetchWithInterceptor);
-      setStats({
-        cpu: data.memory?.cpuPct || 0,
-        memory: `${data.memory?.rssMB || 0}MB`,
-        dbLatency: data.database?.dbLatencyMs || 0,
-        gpu: data.database?.gpuWorkers || { total: 4, busy: 1, idle: 3 },
-        uptime: data.server?.uptime || "",
-      });
-    } catch (err) {
-      console.error("Failed to fetch creative header stats:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-    const interval = setInterval(fetchStats, 12000);
-    return () => clearInterval(interval);
-  }, []);
 
   useEffect(() => {
     if (!fetchWithInterceptor) return;
@@ -108,9 +71,6 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
         !notificationsRef.current.contains(target)
       ) {
         setShowNotifications(false);
-      }
-      if (telemetryRef.current && !telemetryRef.current.contains(target)) {
-        setShowTelemetryPopover(false);
       }
       if (searchRef.current && !searchRef.current.contains(target)) {
         setShowSearchDropdown(false);
@@ -164,14 +124,6 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
             Creative Suite
           </span>
-        </div>
-
-        {/* User profile identifier (Creative Suite badge) moved to left */}
-        <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-850 px-3 py-1 rounded-full select-none cursor-pointer ml-1" onClick={() => navigateTo("/profile")}>
-          <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-[10px] text-white font-extrabold uppercase shadow shadow-purple-900/30">
-            C
-          </div>
-          <span className="text-xs text-neutral-300 font-bold hidden sm:inline">creator</span>
         </div>
       </div>
 
@@ -262,31 +214,6 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           </button>
         )}
 
-        {/* Volume Controller */}
-        <div className="hidden xl:flex items-center gap-2 bg-neutral-900/50 border border-neutral-850/40 px-3 py-1 rounded-full">
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="text-neutral-400 hover:text-white cursor-pointer"
-          >
-            {isMuted || volume === 0 ? (
-              <VolumeX className="w-3.5 h-3.5 text-neutral-500" />
-            ) : (
-              <Volume2 className="w-3.5 h-3.5 text-neutral-400" />
-            )}
-          </button>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={isMuted ? 0 : volume}
-            onChange={(e) => {
-              setVolume(Number(e.target.value));
-              setIsMuted(false);
-            }}
-            className="w-16 accent-purple-500 h-1 bg-neutral-850 rounded-lg appearance-none cursor-pointer"
-          />
-        </div>
-
         {/* Notifications Bell */}
         <div className="relative" ref={notificationsRef}>
           <button
@@ -329,65 +256,17 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           )}
         </div>
 
-        {/* Telemetry/Creative Processing Queue Popover */}
-        <div className="relative" ref={telemetryRef}>
-          <button
-            onClick={() => setShowTelemetryPopover(!showTelemetryPopover)}
-            className={`icon-pill cursor-pointer transition-all ${
-              showTelemetryPopover ? "icon-pill--active" : ""
-            }`}
-            title="Creative Pipeline telemetry"
-          >
-            <Activity className="h-4 w-4" />
-          </button>
-
-          {showTelemetryPopover && (
-            <div className="absolute right-0 mt-2 w-72 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150 font-mono">
-              <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 mb-3 flex items-center gap-1.5">
-                <Cpu className="h-4 w-4" /> Creative Engine
-              </h3>
-              <div className="space-y-3 text-xs">
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px]">
-                    <span className="text-neutral-500">AI WORKER LOAD</span>
-                    <span className="text-neutral-300 font-bold">{stats.cpu}%</span>
-                  </div>
-                  <div className="w-full bg-neutral-900 h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-purple-500 h-full transition-all duration-300" style={{ width: `${stats.cpu}%` }} />
-                  </div>
-                </div>
-
-                <div className="flex justify-between text-[10px] items-center">
-                  <span className="text-neutral-500">AUDIO BUFFER MEMORY</span>
-                  <span className="text-neutral-300 font-bold">{stats.memory}</span>
-                </div>
-
-                <div className="flex justify-between text-[10px] items-center border-t border-neutral-800/80 pt-2">
-                  <span className="text-neutral-500">DB TELEMETRY SYNC</span>
-                  <span className="text-purple-400 font-bold">{stats.dbLatency}ms</span>
-                </div>
-
-                <div className="flex justify-between text-[10px] items-center">
-                  <span className="text-neutral-500">GPU CORE WORKERS</span>
-                  <span className="text-indigo-400 font-bold">
-                    {stats.gpu?.busy || 1}/{stats.gpu?.total || 4} active
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Quick Settings Icon */}
+        {/* User Profile Avatar Launcher */}
         <button
-          onClick={() => navigateTo("/settings")}
-          className="icon-pill cursor-pointer transition-all"
-          title="Creative Settings"
+          onClick={() => navigateTo("/profile")}
+          className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-800 transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-sm active:scale-95"
+          title="View Profile"
+          aria-label="Open User profile"
         >
-          <Sliders className="h-4 w-4" />
+          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-extrabold text-white">
+            C
+          </div>
         </button>
-
-
       </div>
     </header>
   );

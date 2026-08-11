@@ -111,23 +111,37 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
           {/* Header & Logo */}
           <div className="space-y-4 flex flex-col flex-grow min-h-0">
             <div className="flex items-center justify-between pb-3 border-b border-purple-900/20">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-fuchsia-600 to-indigo-600 flex items-center justify-center text-white shadow-[0_0_16px_rgba(168,85,247,0.4)]">
-                  <Video className="h-4 w-4" />
+              <div className="flex items-center gap-3.5">
+                <div className="relative">
+                  <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
+                  <img
+                    src="/logo-dark.png"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+                    }}
+                    className="relative h-10 w-10 rounded-full border border-purple-500/30 shrink-0 object-cover bg-black"
+                    alt="Sonikoma Logo"
+                  />
                 </div>
                 <div>
-                  <h3 className="font-bold text-xs tracking-wide text-white font-mono uppercase">
-                    Sonikoma Studio
-                  </h3>
-                  <p className="text-[9px] text-purple-300/80 font-mono">
-                    {seriesTitle ? `${seriesTitle}` : "NLE Production Suite"}
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-sm tracking-tight text-white font-sans">
+                      Video Editor
+                    </span>
+                    <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md font-mono">
+                      NLE
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
+                    Video Production Suite
                   </p>
                 </div>
               </div>
 
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
+                title="Close sidebar drawer"
               >
                 <X className="h-4 w-4" />
               </button>

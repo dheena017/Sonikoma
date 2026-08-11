@@ -24,6 +24,8 @@ export * from "./ImageEditorLayout";
 export * from "./ImageEditorMiniSidebar";
 export * from "./ImageEditorPanel";
 export { default as ImageEditorPanel } from "./ImageEditorPanel";
+export * from "./ImageEditorToolsPanel";
+export { default as ImageEditorToolsPanel } from "./ImageEditorToolsPanel";
 export * from "./ImageEditorSidebar";
 export { default as ImageEditorSidebar } from "./ImageEditorSidebar";
 export * from "./RangeSlider";
