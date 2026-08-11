@@ -30,6 +30,8 @@ jobs:
         run: npm run lint
 
       - name: Build Frontend
+        env:
+          APP_URL: "http://localhost:3000"
         run: npm run build:frontend
 
   build-backend:
@@ -58,6 +60,13 @@ jobs:
         run: python -m py_compile backend/app/main.py
 
       - name: Run backend tests
+        env:
+          FRONTEND_PORT: 3000
+          BACKEND_PORT: 8000
+          APP_URL: "http://localhost:3000"
+          JWT_SECRET_KEY: test
+          GEMINI_API_KEY: test
         run: |
           cd backend
-          PYTHONPATH=app python -m pytest -q
+          pip install pytest
+          PYTHONPATH=app python -m pytest -q tests/test_project_service.py
