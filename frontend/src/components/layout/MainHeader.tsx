@@ -27,7 +27,7 @@ import {
 import { GeneratedPanel } from "@/types";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import { Notification } from "@/features/app_notification";
-import { getUserCredits, getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
+import {  getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import { useProjectStore } from "@/store/useProjectStore";
 
@@ -460,33 +460,6 @@ const HeaderInner = ({
           </span>
         </div>
 
-        {/* User Profile Avatar & Name Pill next to logo */}
-        <button
-          onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/40 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1"
-          title="View Profile & Account Settings"
-          aria-label="Open User profile"
-        >
-          <img
-            src={
-              (() => {
-                const raw = user?.avatar_url || user?.picture || user?.photo_url;
-                if (raw && typeof raw === "string" && !raw.includes("dicebear") && !raw.includes("avataaars")) {
-                  return raw;
-                }
-                return "https://lh3.googleusercontent.com/a/default-user";
-              })()
-            }
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
-            }}
-            alt="User Avatar"
-            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
-          />
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans">
-            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "User")}
-          </span>
-        </button>
       </div>
 
       {/* Center Side: Quick Search / Command Bar */}
@@ -856,6 +829,34 @@ const HeaderInner = ({
             )}
           </button>
         </div>
+
+        {/* User Profile Pill at Far Right End (Image 3 Style) */}
+        <button
+          onClick={() => navigateTo && navigateTo("/profile")}
+          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95"
+          title="View Profile & Account Settings"
+          aria-label="Open User profile"
+        >
+          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "User")}
+          </span>
+          <img
+            src={
+              (() => {
+                const raw = user?.avatar_url || user?.picture || user?.photo_url;
+                if (raw && typeof raw === "string" && !raw.includes("dicebear") && !raw.includes("avataaars")) {
+                  return raw;
+                }
+                return "https://lh3.googleusercontent.com/a/default-user";
+              })()
+            }
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+            }}
+            alt="User Avatar"
+            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+          />
+        </button>
 
       </div>
     </header>

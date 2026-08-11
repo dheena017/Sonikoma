@@ -12,9 +12,13 @@ import {
   Settings,
   Volume2,
   VolumeX,
+  FolderSync,
 } from "lucide-react";
 import * as api from "@/api";
+import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
+import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
+import { useProjectStore } from "@/store/useProjectStore";
 
 export interface AdminHeaderPageProps {
   currentPath: string;
@@ -29,6 +33,8 @@ export interface AdminHeaderPageProps {
   notificationsMuted?: boolean;
   setNotificationsMuted?: (muted: boolean) => void;
   isSidebarOpen?: boolean;
+  user?: any;
+  addNotification?: (message: string, type?: string) => void;
 }
 
 const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
@@ -44,6 +50,8 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
   notificationsMuted = false,
   setNotificationsMuted,
   isSidebarOpen = false,
+  user,
+  addNotification,
 }) => {
   const [stats, setStats] = useState<any>({
     cpu: 0,
@@ -54,14 +62,57 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
   });
   const [showNotifications, setShowNotifications] = useState(false);
   const [showTelemetryPopover, setShowTelemetryPopover] = useState(false);
+  const [showCreditsPopover, setShowCreditsPopover] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [volume, setVolume] = useState(80);
   const [isMuted, setIsMuted] = useState(false);
+  const [credits, setCredits] = useState<number | null>(
+    user?.credits !== undefined ? user.credits : null
+  );
+
+  const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const telemetryRef = useRef<HTMLDivElement>(null);
+  const creditsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const handleClaimDailyBonus = async () => {
+    if (!fetchWithInterceptor) return;
+    try {
+      const res = await claimDailyCredits(fetchWithInterceptor);
+      if (res.success && typeof res.new_balance === "number") {
+        setCredits(res.new_balance);
+        if (addNotification) {
+          addNotification(res.message || "Claimed daily bonus!", "success");
+        }
+      }
+    } catch {
+      // silent
+    }
+  };
+
+  useEffect(() => {
+    if (!fetchWithInterceptor) return;
+    const pollCredits = async () => {
+      try {
+        const payload = await getUserCreditsPayload(fetchWithInterceptor);
+        if (payload !== null) setCredits(payload.credits);
+      } catch {
+        // silent
+      }
+    };
+    pollCredits();
+    const interval = setInterval(pollCredits, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchWithInterceptor]);
+
+  useEffect(() => {
+    if (user?.credits !== undefined) {
+      setCredits(user.credits);
+    }
+  }, [user?.credits]);
 
   const fetchStats = async () => {
     try {
@@ -96,6 +147,9 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
       if (telemetryRef.current && !telemetryRef.current.contains(target)) {
         setShowTelemetryPopover(false);
       }
+      if (creditsRef.current && !creditsRef.current.contains(target)) {
+        setShowCreditsPopover(false);
+      }
       if (searchRef.current && !searchRef.current.contains(target)) {
         setShowSearchDropdown(false);
       }
@@ -129,7 +183,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
       id="header_pane"
       className="fixed top-0 left-0 w-full h-16 border-b border-neutral-900 bg-neutral-955/80 backdrop-blur-md z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4"
     >
-      {/* Left side: Hamburger, Brand, and Admin Profile badge */}
+      {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-3 shrink-0 h-full">
         <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
           <button
@@ -156,19 +210,6 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
             Sonikoma
           </span>
-        </div>
-
-        {/* User profile identifier next to logo */}
-        <div className="flex items-center gap-2 bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/40 px-2.5 py-1 rounded-full select-none cursor-pointer ml-1" onClick={() => navigateTo("/admin/settings")}>
-          <img
-            src="https://lh3.googleusercontent.com/a/default-user"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
-            }}
-            alt="Admin Avatar"
-            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
-          />
-          <span className="text-xs text-neutral-300 font-bold hidden sm:inline">Admin</span>
         </div>
       </div>
 
@@ -230,7 +271,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
       </div>
 
       {/* Right side: Controls matching main header layout */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-2 lg:gap-3 shrink-0">
         
         {/* Server: ONLINE badge */}
         <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 rounded-full text-xs font-bold font-mono">
@@ -238,40 +279,49 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           <span>Server: ONLINE</span>
         </div>
 
-        {/* Saved badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-850 rounded-full text-xs font-bold text-neutral-400">
-          <span>Saved</span>
-        </div>
+        {/* ⚡ Credits Pill & Popover */}
+        {credits !== null && (
+          <div className="relative" ref={creditsRef}>
+            <button
+              onClick={() => {
+                setShowCreditsPopover(!showCreditsPopover);
+                setShowNotifications(false);
+              }}
+              title="Your credit balance & daily rewards — click to view"
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+                credits < 20
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
+                  : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
+              }`}
+            >
+              <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
+              {credits.toLocaleString()}
+            </button>
 
-        {/* Audio Volume Slider */}
-        <div className="hidden xl:flex items-center gap-2 bg-neutral-900/50 border border-neutral-850/40 px-3 py-1 rounded-full">
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="text-neutral-400 hover:text-white cursor-pointer"
-          >
-            {isMuted || volume === 0 ? (
-              <VolumeX className="w-3.5 h-3.5 text-neutral-500" />
-            ) : (
-              <Volume2 className="w-3.5 h-3.5 text-neutral-400" />
+            {showCreditsPopover && (
+              <div className="absolute right-0 top-full mt-2 z-50">
+                <HeaderCreditsPopover
+                  credits={credits}
+                  hasClaimedToday={user?.has_claimed_today}
+                  streakDays={user?.streak_days || 1}
+                  onClaimDaily={handleClaimDailyBonus}
+                  onNavigateToBilling={() => {
+                    setShowCreditsPopover(false);
+                    navigateTo("/profile?tab=billing");
+                  }}
+                />
+              </div>
             )}
-          </button>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={isMuted ? 0 : volume}
-            onChange={(e) => {
-              setVolume(Number(e.target.value));
-              setIsMuted(false);
-            }}
-            className="w-16 accent-purple-500 h-1 bg-neutral-850 rounded-lg appearance-none cursor-pointer"
-          />
-        </div>
+          </div>
+        )}
 
         {/* Notifications Bell */}
         <div className="relative" ref={notificationsRef}>
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              setShowCreditsPopover(false);
+            }}
             className={`icon-pill cursor-pointer relative transition-all ${
               showNotifications ? "icon-pill--active" : ""
             }`}
@@ -310,80 +360,51 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           )}
         </div>
 
-        {/* User Profile Avatar Launcher */}
-        <button
-          onClick={() => navigateTo("/profile")}
-          className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-800 transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-sm active:scale-95"
-          title="View Profile"
-          aria-label="Open User profile"
-        >
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-[10px] font-extrabold text-white">
-            A
-          </div>
-        </button>
-
-        {/* Telemetry/Activity Popover */}
-        <div className="relative" ref={telemetryRef}>
+        {/* Active Project Selector Icon Button */}
+        <div className="relative">
           <button
-            onClick={() => setShowTelemetryPopover(!showTelemetryPopover)}
-            className={`icon-pill cursor-pointer transition-all ${
-              showTelemetryPopover ? "icon-pill--active" : ""
-            }`}
-            title="Telemetry monitors"
+            onClick={() => setDrawerOpen(true)}
+            className="icon-pill cursor-pointer transition-all relative hover:bg-purple-500/20 hover:text-purple-300"
+            title={
+              activeProjectId && activeProjectData
+                ? `Active Project: ${activeProjectData.project?.title || "Active"} — Click to switch`
+                : "Select Active Project"
+            }
           >
-            <Activity className="h-4 w-4" />
+            <FolderSync className="h-4 w-4 text-purple-400" />
+            {activeProjectId && activeProjectData && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+            )}
           </button>
-
-          {showTelemetryPopover && (
-            <div className="absolute right-0 mt-2 w-72 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150 font-mono">
-              <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 mb-3 flex items-center gap-1.5">
-                <Activity className="h-4 w-4" /> Host Telemetry
-              </h3>
-              <div className="space-y-3 text-xs">
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px]">
-                    <span className="text-neutral-500">CPU LOAD</span>
-                    <span className="text-neutral-300 font-bold">{stats.cpu}%</span>
-                  </div>
-                  <div className="w-full bg-[#0b0b0f] h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-purple-500 h-full transition-all duration-300" style={{ width: `${stats.cpu}%` }} />
-                  </div>
-                </div>
-
-                <div className="flex justify-between text-[10px] items-center">
-                  <span className="text-neutral-500">RSS MEMORY</span>
-                  <span className="text-neutral-300 font-bold">{stats.memory}</span>
-                </div>
-
-                {stats.gpu?.total > 0 && (
-                  <div className="flex justify-between text-[10px] items-center">
-                    <span className="text-neutral-500">GPU WORKERS</span>
-                    <span className="text-amber-500 font-bold">{stats.gpu.busy}/{stats.gpu.total} busy</span>
-                  </div>
-                )}
-
-                <div className="flex justify-between text-[10px] items-center border-t border-neutral-800/80 pt-2">
-                  <span className="text-neutral-500">DB LATENCY</span>
-                  <span className="text-blue-400 font-bold">{stats.dbLatency}ms</span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Quick Settings Icon */}
+        {/* User Profile Pill at Far Right End (Image 3 Style) */}
         <button
-          onClick={() => navigateTo("/admin/settings")}
-          className="icon-pill cursor-pointer transition-all"
-          title="Admin Settings"
+          onClick={() => navigateTo && navigateTo("/profile")}
+          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95"
+          title="View Profile & Account Settings"
+          aria-label="Open User profile"
         >
-          <Settings className="h-4 w-4" />
+          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "Admin")}
+          </span>
+          <img
+            src={
+              (() => {
+                const raw = user?.avatar_url || user?.picture || user?.photo_url;
+                if (raw && typeof raw === "string" && !raw.includes("dicebear") && !raw.includes("avataaars")) {
+                  return raw;
+                }
+                return "https://lh3.googleusercontent.com/a/default-user";
+              })()
+            }
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+            }}
+            alt="User Avatar"
+            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+          />
         </button>
-
-
-
-
-
       </div>
     </header>
   );

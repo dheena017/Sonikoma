@@ -13,12 +13,15 @@ import {
   Save,
   Menu,
   Film,
+  FolderSync,
 } from "lucide-react";
 import VideoCustomizeLayoutModal from "./VideoCustomizeLayoutModal";
 import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
+import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import { Notification } from "@/features/app_notification";
-import { getUserCreditsPayload } from "@/api/endpoints/auth";
+import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
+import { useProjectStore } from "@/store/useProjectStore";
 
 interface VideoEditorHeaderProps {
   seriesTitle?: string;
@@ -48,6 +51,8 @@ interface VideoEditorHeaderProps {
   onNavigateToAll?: () => void;
   navigateTo?: (path: string) => void;
   fetchWithInterceptor?: any;
+  user?: any;
+  addNotification?: (message: string, type?: string) => void;
 }
 
 const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
@@ -78,14 +83,36 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
   onNavigateToAll,
   navigateTo,
   fetchWithInterceptor,
+  user,
+  addNotification,
 }) => {
   const [showCustomizeLayout, setShowCustomizeLayout] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showCreditsPopover, setShowCreditsPopover] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [credits, setCredits] = useState<number | null>(
-    userCredits !== undefined && userCredits !== null ? userCredits : null
+    userCredits !== undefined && userCredits !== null ? userCredits : (user?.credits !== undefined ? user.credits : null)
   );
+
+  const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
+
   const notificationsRef = useRef<HTMLDivElement | null>(null);
+  const creditsRef = useRef<HTMLDivElement | null>(null);
+
+  const handleClaimDailyBonus = async () => {
+    if (!fetchWithInterceptor) return;
+    try {
+      const res = await claimDailyCredits(fetchWithInterceptor);
+      if (res.success && typeof res.new_balance === "number") {
+        setCredits(res.new_balance);
+        if (addNotification) {
+          addNotification(res.message || "Claimed daily bonus!", "success");
+        }
+      }
+    } catch {
+      // silent
+    }
+  };
 
   useEffect(() => {
     if (!fetchWithInterceptor) return;
@@ -105,8 +132,10 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
   useEffect(() => {
     if (userCredits !== undefined && userCredits !== null) {
       setCredits(userCredits);
+    } else if (user?.credits !== undefined) {
+      setCredits(user.credits);
     }
-  }, [userCredits]);
+  }, [userCredits, user?.credits]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -115,6 +144,12 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
         !notificationsRef.current.contains(e.target as Node)
       ) {
         setShowNotifications(false);
+      }
+      if (
+        creditsRef.current &&
+        !creditsRef.current.contains(e.target as Node)
+      ) {
+        setShowCreditsPopover(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -159,25 +194,6 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </span>
           </div>
 
-          {/* User Profile Pill next to logo */}
-          <button
-            onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/40 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1"
-            title="View Profile & Account Settings"
-          >
-            <img
-              src="https://lh3.googleusercontent.com/a/default-user"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
-              }}
-              alt="User Avatar"
-              className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
-            />
-            <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans">
-              Studio Creator
-            </span>
-          </button>
-
           <div className="flex items-center gap-2 ml-1 bg-[#121218] border border-neutral-800 px-3 py-1 rounded-lg text-xs font-semibold text-neutral-200 cursor-pointer hover:border-neutral-700 transition-all max-w-[240px] truncate">
             <span className="text-neutral-400 font-normal shrink-0">Project:</span>
             <span className="font-semibold text-white truncate">{displayTitle}</span>
@@ -203,19 +219,40 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
         </div>
 
         <div className="flex items-center gap-2.5">
+          {/* ⚡ Credits Pill & Popover */}
           {credits !== null && (
-            <button
-              onClick={() => navigateTo?.("/profile?tab=billing")}
-              title="Your credit balance — click to top up"
-              className={`hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-lg border text-[11px] font-bold font-mono cursor-pointer transition-all ${
-                credits < 20
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
-                  : "bg-neutral-900 border-neutral-800 text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/20"
-              }`}
-            >
-              <Zap className="h-3.5 w-3.5 shrink-0" />
-              <span>{credits.toLocaleString()}</span>
-            </button>
+            <div className="relative" ref={creditsRef}>
+              <button
+                onClick={() => {
+                  setShowCreditsPopover(!showCreditsPopover);
+                  setShowNotifications(false);
+                }}
+                title="Your credit balance & daily rewards — click to view"
+                className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+                  credits < 20
+                    ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
+                    : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
+                }`}
+              >
+                <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
+                {credits.toLocaleString()}
+              </button>
+
+              {showCreditsPopover && (
+                <div className="absolute right-0 top-full mt-2 z-50">
+                  <HeaderCreditsPopover
+                    credits={credits}
+                    hasClaimedToday={user?.has_claimed_today}
+                    streakDays={user?.streak_days || 1}
+                    onClaimDaily={handleClaimDailyBonus}
+                    onNavigateToBilling={() => {
+                      setShowCreditsPopover(false);
+                      if (navigateTo) navigateTo("/profile?tab=billing");
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           )}
 
           <div className="hidden lg:flex items-center gap-1 p-1 bg-[#121218] border border-neutral-800/90 rounded-xl">
@@ -283,17 +320,20 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
           <div className="relative" ref={notificationsRef}>
             <button
-              onClick={() => setShowNotifications((v) => !v)}
+              onClick={() => {
+                setShowNotifications((v) => !v);
+                setShowCreditsPopover(false);
+              }}
               title="Notifications"
               className="relative w-9 h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-white hover:bg-neutral-700/80 transition-all cursor-pointer flex items-center justify-center shadow-sm"
             >
               {notificationsMuted ? (
-                <BellOff className="h-4 w-4" />
+                <BellOff className="h-4 w-4 text-rose-500" />
               ) : (
                 <Bell className="h-4 w-4" />
               )}
               {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center h-4 min-w-[18px] px-1 rounded-full bg-[#ff3555] text-white text-[9px] font-extrabold border-2 border-[#09090e] shadow-sm">
+                <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center h-4 min-w-[18px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-extrabold border-2 border-[#09090e] shadow-sm">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -313,8 +353,53 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             )}
           </div>
 
+          {/* Active Project Selector Icon Button */}
+          <div className="relative">
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="w-9 h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-purple-300 hover:bg-purple-500/10 transition-all cursor-pointer flex items-center justify-center relative shadow-sm"
+              title={
+                activeProjectId && activeProjectData
+                  ? `Active Project: ${activeProjectData.project?.title || "Active"} — Click to switch`
+                  : "Select Active Project"
+              }
+            >
+              <FolderSync className="h-4 w-4 text-purple-400" />
+              {activeProjectId && activeProjectData && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+              )}
+            </button>
+          </div>
 
+          {/* User Profile Pill at Far Right End (Image 3 Style) */}
+          <button
+            onClick={() => navigateTo && navigateTo("/profile")}
+            className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95"
+            title="View Profile & Account Settings"
+            aria-label="Open User profile"
+          >
+            <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+              {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "Studio Creator")}
+            </span>
+            <img
+              src={
+                (() => {
+                  const raw = user?.avatar_url || user?.picture || user?.photo_url;
+                  if (raw && typeof raw === "string" && !raw.includes("dicebear") && !raw.includes("avataaars")) {
+                    return raw;
+                  }
+                  return "https://lh3.googleusercontent.com/a/default-user";
+                })()
+              }
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+              }}
+              alt="User Avatar"
+              className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+            />
+          </button>
 
+          {/* Export Button */}
           <button
             onClick={onExport}
             disabled={isRendering}

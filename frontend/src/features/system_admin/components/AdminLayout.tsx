@@ -16,6 +16,8 @@ interface AdminLayoutProps {
   clearAllNotifications?: () => void;
   notificationsMuted?: boolean;
   setNotificationsMuted?: (muted: boolean) => void;
+  user?: any;
+  addNotification?: (message: string, type?: string) => void;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({
@@ -30,6 +32,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   clearAllNotifications,
   notificationsMuted,
   setNotificationsMuted,
+  user,
+  addNotification,
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -53,6 +57,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         clearAllNotifications={clearAllNotifications}
         notificationsMuted={notificationsMuted}
         setNotificationsMuted={setNotificationsMuted}
+        user={user}
+        addNotification={addNotification}
         // Pass the state down so the header knows when to hide
         isSidebarOpen={isSidebarOpen}
       />

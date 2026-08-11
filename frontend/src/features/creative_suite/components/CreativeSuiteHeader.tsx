@@ -13,8 +13,9 @@ import {
   X,
 } from "lucide-react";
 import * as api from "@/api";
-import { getUserCreditsPayload } from "@/api/endpoints/auth";
+import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
+import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import { useProjectStore } from "@/store/useProjectStore";
 
 
@@ -31,6 +32,8 @@ export interface CreativeSuiteHeaderProps {
   notificationsMuted?: boolean;
   setNotificationsMuted?: (muted: boolean) => void;
   isSidebarOpen?: boolean;
+  user?: any;
+  addNotification?: (message: string, type?: string) => void;
 }
 
 const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
@@ -46,17 +49,37 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   notificationsMuted = false,
   setNotificationsMuted,
   isSidebarOpen = false,
+  user,
+  addNotification,
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showCreditsPopover, setShowCreditsPopover] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
-  const [credits, setCredits] = useState<number | null>(null);
+  const [credits, setCredits] = useState<number | null>(
+    user?.credits !== undefined ? user.credits : null
+  );
 
-  const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
-
+  const { activeProjectId, activeProjectData, projectState, setDrawerOpen } = useProjectStore();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const creditsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  const handleClaimDailyBonus = async () => {
+    if (!fetchWithInterceptor) return;
+    try {
+      const res = await claimDailyCredits(fetchWithInterceptor);
+      if (res.success && typeof res.new_balance === "number") {
+        setCredits(res.new_balance);
+        if (addNotification) {
+          addNotification(res.message || "Claimed daily bonus!", "success");
+        }
+      }
+    } catch {
+      // silent
+    }
+  };
 
   useEffect(() => {
     if (!fetchWithInterceptor) return;
@@ -74,6 +97,12 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   }, [fetchWithInterceptor]);
 
   useEffect(() => {
+    if (user?.credits !== undefined) {
+      setCredits(user.credits);
+    }
+  }, [user?.credits]);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
       if (
@@ -81,6 +110,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
         !notificationsRef.current.contains(target)
       ) {
         setShowNotifications(false);
+      }
+      if (creditsRef.current && !creditsRef.current.contains(target)) {
+        setShowCreditsPopover(false);
       }
       if (searchRef.current && !searchRef.current.contains(target)) {
         setShowSearchDropdown(false);
@@ -112,7 +144,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
       id="creative_header_pane"
       className="fixed top-0 left-0 w-full h-16 border-b border-neutral-900 bg-[#070709]/80 backdrop-blur-md z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 selection:bg-purple-600/30"
     >
-      {/* Left side: Hamburger, Brand, and Creator profile badge */}
+      {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-3 shrink-0 h-full">
         <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
           <button
@@ -141,26 +173,6 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
             Sonikoma
           </span>
         </div>
-
-        {/* User Profile Pill next to logo */}
-        <button
-          onClick={() => navigateTo("/profile")}
-          className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/40 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1"
-          title="View Profile & Account Settings"
-          aria-label="Open User profile"
-        >
-          <img
-            src="https://lh3.googleusercontent.com/a/default-user"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
-            }}
-            alt="User Avatar"
-            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
-          />
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans">
-            Creator
-          </span>
-        </button>
       </div>
 
       {/* Middle side: Search Command Palette */}
@@ -225,55 +237,51 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
         )}
       </div>
 
-      {/* Right side: Controls matching creative layout */}
-      <div className="flex items-center gap-3 shrink-0">
-        {/* Active Project Quick Button */}
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
-            activeProjectId && activeProjectData
-              ? "bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20"
-              : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-purple-500/40 hover:text-white"
-          }`}
-          title="Switch or Select Active Project"
-        >
-          {activeProjectId && activeProjectData ? (
-            <>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-semibold truncate max-w-[120px]">
-                {activeProjectData.project?.title || "Active Project"}
-              </span>
-              <FolderSync className="w-3.5 h-3.5 text-purple-400 ml-0.5" />
-            </>
-          ) : (
-            <>
-              <FolderOpen className="w-3.5 h-3.5 text-purple-400" />
-              <span>Select Active Project</span>
-            </>
-          )}
-        </button>
-
-
-        {/* ⚡ Credits Pill */}
+      {/* Right side: Standardized Controls Suite */}
+      <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+        {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (
-          <button
-            onClick={() => navigateTo("/profile?tab=billing")}
-            title="Your credit balance — click to top up"
-            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
-              credits < 20
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
-                : "bg-neutral-900 border-neutral-850 text-purple-400 hover:border-purple-500/40 hover:bg-purple-500/5"
-            }`}
-          >
-            <Zap className="h-3.5 w-3.5 shrink-0" />
-            {credits.toLocaleString()}
-          </button>
+          <div className="relative" ref={creditsRef}>
+            <button
+              onClick={() => {
+                setShowCreditsPopover(!showCreditsPopover);
+                setShowNotifications(false);
+              }}
+              title="Your credit balance & daily rewards — click to view"
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+                credits < 20
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
+                  : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
+              }`}
+            >
+              <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
+              {credits.toLocaleString()}
+            </button>
+
+            {showCreditsPopover && (
+              <div className="absolute right-0 top-full mt-2 z-50">
+                <HeaderCreditsPopover
+                  credits={credits}
+                  hasClaimedToday={user?.has_claimed_today}
+                  streakDays={user?.streak_days || 1}
+                  onClaimDaily={handleClaimDailyBonus}
+                  onNavigateToBilling={() => {
+                    setShowCreditsPopover(false);
+                    navigateTo("/profile?tab=billing");
+                  }}
+                />
+              </div>
+            )}
+          </div>
         )}
 
         {/* Notifications Bell */}
         <div className="relative" ref={notificationsRef}>
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              setShowCreditsPopover(false);
+            }}
             className={`icon-pill cursor-pointer relative transition-all ${
               showNotifications ? "icon-pill--active" : ""
             }`}
@@ -285,7 +293,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
               <Bell className="h-4 w-4" />
             )}
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-purple-600 text-[9px] font-bold text-white ring-2 ring-neutral-950">
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
@@ -311,6 +319,52 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
             />
           )}
         </div>
+
+        {/* Active Project Selector Icon Button */}
+        <div className="relative">
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="icon-pill cursor-pointer transition-all relative hover:bg-purple-500/20 hover:text-purple-300"
+            title={
+              activeProjectId && activeProjectData
+                ? `Active Project: ${activeProjectData.project?.title || "Active"} — Click to switch`
+                : "Select Active Project"
+            }
+          >
+            <FolderSync className="h-4 w-4 text-purple-400" />
+            {activeProjectId && activeProjectData && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+            )}
+          </button>
+        </div>
+
+        {/* User Profile Pill at Far Right End (Image 3 Style) */}
+        <button
+          onClick={() => navigateTo && navigateTo("/profile")}
+          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95"
+          title="View Profile & Account Settings"
+          aria-label="Open User profile"
+        >
+          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "Creator")}
+          </span>
+          <img
+            src={
+              (() => {
+                const raw = user?.avatar_url || user?.picture || user?.photo_url;
+                if (raw && typeof raw === "string" && !raw.includes("dicebear") && !raw.includes("avataaars")) {
+                  return raw;
+                }
+                return "https://lh3.googleusercontent.com/a/default-user";
+              })()
+            }
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+            }}
+            alt="User Avatar"
+            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+          />
+        </button>
       </div>
     </header>
   );

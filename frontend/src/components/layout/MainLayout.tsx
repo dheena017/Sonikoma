@@ -410,6 +410,8 @@ export default function MainLayout(props: MainLayoutProps) {
               notificationsMuted={notificationsMuted}
               setNotificationsMuted={setNotificationsMuted}
               isSidebarOpen={isSidebarOpen}
+              user={user}
+              addNotification={addNotification}
             />
           ) : (
             <Header
