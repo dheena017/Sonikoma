@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
+import { groupProjectsIntoSeries, Series } from "@/features/workspace_projects/utils/seriesGrouping";
 
 export interface UseProjectsComputedState {
   stats: {
@@ -8,7 +9,8 @@ export interface UseProjectsComputedState {
     totalPanels: number;
   };
   uniqueGenres: string[];
-  filteredProjects: Project[];
+  filteredSeries: Series[];
+  filteredProjects: Project[]; // Still return filtered projects for some legacy references
 }
 
 export function useProjectsComputed(
@@ -18,58 +20,70 @@ export function useProjectsComputed(
   genreFilter: string,
   sortBy: string
 ): UseProjectsComputedState {
+
+  // Group all projects into series first
+  const allSeries = useMemo(() => groupProjectsIntoSeries(projects), [projects]);
+
   const stats = useMemo(() => {
-    const totalProjects = projects.length;
-    const completedProjects = projects.filter(
-      (p) => p.status?.toLowerCase() === "completed"
+    // Stats apply to series now, but we can maintain total panels correctly
+    const totalProjects = allSeries.length;
+
+    // Series is completed if all chapters are completed (or just use latest chapter status for now)
+    const completedProjects = allSeries.filter(
+      (s) => s.latestChapter?.status?.toLowerCase() === "completed"
     ).length;
+
     const totalPanels = projects.reduce(
       (acc, p) => acc + (p.panels_count || p.imported_assets_count || 0),
       0
     );
     return { totalProjects, completedProjects, totalPanels };
-  }, [projects]);
+  }, [projects, allSeries]);
 
   const uniqueGenres = useMemo(() => {
-    const genres = projects.map((p) => p.genre).filter(Boolean) as string[];
+    const genres = allSeries.map((s) => s.genre).filter(Boolean) as string[];
     return ["All", ...Array.from(new Set(genres))];
-  }, [projects]);
+  }, [allSeries]);
 
-  const filteredProjects = useMemo(() => {
-    let result = [...projects];
+  const filteredSeries = useMemo(() => {
+    let result = [...allSeries];
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
-        (p) =>
-          (p.title || "").toLowerCase().includes(q) ||
-          (p.author || "").toLowerCase().includes(q)
+        (s) =>
+          (s.title || "").toLowerCase().includes(q) ||
+          (s.author || "").toLowerCase().includes(q) ||
+          // Also search within chapter titles
+          s.chapters.some(c => (c.title || "").toLowerCase().includes(q))
       );
     }
 
     if (statusFilter !== "All") {
       result = result.filter(
-        (p) =>
-          (p.status || "Draft").toLowerCase() === statusFilter.toLowerCase()
+        (s) =>
+          (s.latestChapter?.status || "Draft").toLowerCase() === statusFilter.toLowerCase()
       );
     }
 
     if (genreFilter !== "All") {
-      result = result.filter((p) => p.genre === genreFilter);
+      result = result.filter((s) => s.genre === genreFilter);
     }
 
     result.sort((a, b) => {
       if (sortBy === "Newest")
         return (
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          (b.latestUpdatedAt ? new Date(b.latestUpdatedAt).getTime() : 0) -
+          (a.latestUpdatedAt ? new Date(a.latestUpdatedAt).getTime() : 0)
         );
       if (sortBy === "Oldest")
         return (
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          (a.latestUpdatedAt ? new Date(a.latestUpdatedAt).getTime() : 0) -
+          (b.latestUpdatedAt ? new Date(b.latestUpdatedAt).getTime() : 0)
         );
       if (sortBy === "Most Panels") {
-        const countA = a.panels_count || a.imported_assets_count || 0;
-        const countB = b.panels_count || b.imported_assets_count || 0;
+        const countA = a.chapters.reduce((acc, c) => acc + (c.panels_count || c.imported_assets_count || 0), 0);
+        const countB = b.chapters.reduce((acc, c) => acc + (c.panels_count || c.imported_assets_count || 0), 0);
         return countB - countA;
       }
       if (sortBy === "A-Z") return (a.title || "").localeCompare(b.title || "");
@@ -77,11 +91,18 @@ export function useProjectsComputed(
     });
 
     return result;
-  }, [projects, searchQuery, statusFilter, genreFilter, sortBy]);
+  }, [allSeries, searchQuery, statusFilter, genreFilter, sortBy]);
+
+  // Keep filtered projects for compatibility where needed (like select all)
+  const filteredProjects = useMemo(() => {
+      // Flatten filtered series back to projects for select all, etc.
+      return filteredSeries.flatMap(s => s.chapters);
+  }, [filteredSeries]);
 
   return {
     stats,
     uniqueGenres,
+    filteredSeries,
     filteredProjects,
   };
 }

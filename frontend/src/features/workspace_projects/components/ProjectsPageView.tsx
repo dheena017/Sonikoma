@@ -4,10 +4,12 @@ import ProjectsFilters from "@/features/workspace_projects/components/ProjectsFi
 import ProjectsStats from "@/features/workspace_projects/components/ProjectsStats";
 import ProjectsPageResultView from "@/features/workspace_projects/components/ProjectsPageResultView";
 import type { Project, ViewMode } from "@/features/workspace_projects/hooks/ProjectTypes";
+import type { Series } from "@/features/workspace_projects/utils/seriesGrouping";
 
 export interface ProjectsPageViewProps {
   projectsLength: number;
   filteredProjects: Project[];
+  filteredSeries: Series[];
   loading: boolean;
   error: string | null;
   searchQuery: string;
@@ -31,6 +33,7 @@ export interface ProjectsPageViewProps {
   setViewMode: (value: ViewMode) => void;
   handleNewSeries: () => void;
   handleOpenProject: (project: Project) => void;
+  handleOpenSeries: (series: Series) => void;
   handleOpenCreativeSuite: (e: React.MouseEvent, project: Project) => void;
   handleExport: (e: React.MouseEvent, project: Project) => void;
   handleRename: (e: React.MouseEvent, project: Project) => void;
@@ -48,6 +51,7 @@ export interface ProjectsPageViewProps {
 export default function ProjectsPageView({
   projectsLength,
   filteredProjects,
+  filteredSeries,
   loading,
   error,
   searchQuery,
@@ -66,7 +70,7 @@ export default function ProjectsPageView({
   setSortBy,
   setViewMode,
   handleNewSeries,
-  handleOpenProject,
+  handleOpenSeries,
   handleOpenCreativeSuite,
   handleExport,
   handleRename,
@@ -111,6 +115,7 @@ export default function ProjectsPageView({
         <ProjectsPageResultView
           projectsLength={projectsLength}
           filteredProjects={filteredProjects}
+          filteredSeries={filteredSeries}
           loading={loading}
           error={error}
           viewMode={viewMode}
@@ -119,7 +124,7 @@ export default function ProjectsPageView({
           onToggleMenu={toggleMenu}
           toggleSelection={toggleSelection}
           toggleSelectAll={toggleSelectAll}
-          onOpenProject={handleOpenProject}
+          onOpenSeries={handleOpenSeries}
           onOpenCreativeSuite={handleOpenCreativeSuite}
           onOpenDetails={handleOpenDetails}
           onRename={handleRename}

@@ -23,10 +23,7 @@ import RegisterPage from "@/features/app_auth/pages/RegisterPage";
 import ForgotPasswordPage from "@/features/app_auth/pages/ForgotPasswordPage";
 import LoadingPage from "@/components/feedback/LoadingPage";
 import ProjectsPage from "@/features/workspace_projects/pages/ProjectsPage";
-// workspace_series feature not yet implemented — stub component
-const SeriesDetailsPage: React.FC<{ onNavigateHome: () => void; navigateTo: (path: string) => void; fetchWithInterceptor: typeof fetch }> = ({ navigateTo }) => (
-  <div className="flex items-center justify-center h-full text-neutral-400 p-8">Series details coming soon. <button onClick={() => navigateTo("/")} className="ml-2 underline">Go home</button></div>
-);
+import SeriesDetailsPage from "@/features/workspace_series/pages/SeriesDetailsPage";
 import CreativeSuiteLayout from "@/features/creative_suite/components/CreativeSuiteLayout";
 
 // --- Lazy Loaded Heavy Feature Pages (Phase 9 Performance Code-Splitting) ---
@@ -641,7 +638,7 @@ export default function AppRouter(props: AppRouterProps) {
       isChapterDetailsPath: false,
       isProjectEditorPath: false,
       isSeriesDetailsPath:
-        !chapterPathMatch && currentPath.match(/\/series\/([^\/]+)$/) !== null,
+        currentPath.startsWith("/projects/") && !currentPath.includes("/chapter/"),
       isCreativeSuiteDashboardPath:
         currentPath === "/creative-suite" ||
         currentPath === "/creative-suite/" ||

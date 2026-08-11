@@ -5,10 +5,15 @@ import useProjectsPage from "@/features/workspace_projects/hooks/useProjectsPage
 export default function ProjectsPageContent() {
   const page = useProjectsPage();
 
+  const handleOpenSeries = (series: any) => {
+    (window as any).navigateTo?.(`/projects/${series.slug}`);
+  };
+
   return (
     <ProjectsPageView
       projectsLength={page.projects.length}
       filteredProjects={page.filteredProjects}
+      filteredSeries={page.filteredSeries}
       loading={page.loading}
       error={page.error}
       searchQuery={page.searchQuery}
@@ -28,6 +33,7 @@ export default function ProjectsPageContent() {
       setViewMode={page.setViewMode}
       handleNewSeries={page.handleNewSeries}
       handleOpenProject={page.handleOpenProject}
+      handleOpenSeries={handleOpenSeries}
       handleExport={page.handleExport}
       handleRename={page.handleRename}
       handleOpenDetails={page.handleOpenDetails}

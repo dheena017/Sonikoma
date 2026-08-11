@@ -48,6 +48,7 @@ export interface ProjectsPageState {
   };
   uniqueGenres: string[];
   filteredProjects: Project[];
+  filteredSeries: any[]; // Using any to avoid circular deps if needed, or import Series
 }
 
 export default function useProjectsPage(): ProjectsPageState {
@@ -176,5 +177,6 @@ export default function useProjectsPage(): ProjectsPageState {
     stats: computedState.stats,
     uniqueGenres: computedState.uniqueGenres,
     filteredProjects: computedState.filteredProjects,
+    filteredSeries: computedState.filteredSeries,
   };
 }

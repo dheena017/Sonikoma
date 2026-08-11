@@ -241,7 +241,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
   };
 
   const handleBackToApp = () => {
-    navigateTo("/scraper");
+    const slug = seriesSlug || appLogic.seriesSlugState;
+    if (slug) {
+      navigateTo(`/projects/${slug}`);
+    } else {
+      navigateTo("/projects");
+    }
   };
 
   // SCROLL RESTORATION: Restore the scroll position when returning from the Image Editor
