@@ -223,11 +223,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
-                credits < 20
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${credits < 20
                   ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
                   : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
-              }`}
+                }`}
             >
               <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
               {credits.toLocaleString()}
@@ -259,8 +258,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           }}
           title="Toggle Floating Player"
           className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${isPlayerOpen
-              ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-              : "border-neutral-700 bg-neutral-800 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+            ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
+            : "border-neutral-700 bg-neutral-800 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
             }`}
         >
           <Monitor className="h-4 w-4" />
@@ -277,6 +276,25 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             }`}
         >
           <Focus className="h-4 w-4" />
+        </button>
+
+        {/* Save Button */}
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={isSaving}
+          title={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"}
+          className={`flex items-center gap-1.5 px-3.5 h-11 rounded-2xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${isSaving
+              ? "bg-purple-600/30 border-purple-500/40 text-purple-200 cursor-wait opacity-80"
+              : isDirty
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-400/50 shadow-lg shadow-purple-900/40 animate-pulse"
+                : "bg-neutral-800 hover:bg-neutral-750 border-neutral-700 text-neutral-300 hover:text-white"
+            }`}
+        >
+          <Save className={`h-4 w-4 ${isSaving ? "animate-spin text-purple-200" : isDirty ? "text-purple-300" : "text-neutral-400"}`} />
+          <span className="hidden sm:inline font-sans">
+            {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
+          </span>
         </button>
 
         {/* Notifications */}

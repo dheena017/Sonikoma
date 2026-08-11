@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { AlertTriangle, RefreshCcw, Home } from "lucide-react";
+import { AlertTriangle, RefreshCcw, Home, ArrowLeft } from "lucide-react";
 
 interface Props {
   children?: ReactNode;
@@ -34,11 +34,20 @@ class ErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
+  private handleGoBack = () => {
+    this.setState({ hasError: false, error: null });
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = "/";
+    }
+  };
+
   public render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-[#070709] flex items-center justify-center p-6 text-neutral-100 font-sans">
-          <div className="max-w-md w-full bg-neutral-900 border border-rose-500/20 rounded-[32px] p-10 text-center shadow-2xl shadow-rose-950/20 animate-in fade-in zoom-in duration-300">
+          <div className="max-w-lg w-full bg-neutral-900 border border-rose-500/20 rounded-[32px] p-8 sm:p-10 text-center shadow-2xl shadow-rose-950/20 animate-in fade-in zoom-in duration-300">
             <div className="w-20 h-20 bg-rose-500/10 border border-rose-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8">
               <AlertTriangle className="w-10 h-10 text-rose-500" />
             </div>
@@ -62,20 +71,30 @@ class ErrorBoundary extends Component<Props, State> {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={this.handleReload}
-                className="flex items-center justify-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-bold py-3 rounded-2xl text-xs transition-all cursor-pointer"
+                className="flex items-center justify-center gap-1.5 bg-neutral-800 hover:bg-neutral-750 text-white font-bold py-3 rounded-2xl text-xs transition-all cursor-pointer border border-neutral-700"
+                title="Reload the current browser tab"
               >
-                <RefreshCcw className="w-4 h-4" />
-                Reload App
+                <RefreshCcw className="w-4 h-4 text-neutral-400" />
+                <span>Reload App</span>
+              </button>
+              <button
+                onClick={this.handleGoBack}
+                className="flex items-center justify-center gap-1.5 bg-neutral-800 hover:bg-neutral-750 text-white font-bold py-3 rounded-2xl text-xs transition-all cursor-pointer border border-neutral-700"
+                title="Return to the previous page"
+              >
+                <ArrowLeft className="w-4 h-4 text-purple-400" />
+                <span>Go Back</span>
               </button>
               <button
                 onClick={this.handleReset}
-                className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-2xl text-xs transition-all cursor-pointer shadow-lg shadow-purple-900/20"
+                className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 rounded-2xl text-xs transition-all cursor-pointer shadow-lg shadow-purple-900/30 border border-purple-500/30"
+                title="Return to Dashboard Home"
               >
                 <Home className="w-4 h-4" />
-                Back Home
+                <span>Back Home</span>
               </button>
             </div>
 

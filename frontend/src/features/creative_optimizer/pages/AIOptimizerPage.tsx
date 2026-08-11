@@ -51,6 +51,14 @@ const AIOptimizerPage = React.memo(
     const storePanels = activeProjectData?.panels || [];
     const safePanels = (panels && panels.length > 0) ? panels : storePanels;
 
+    const [selectedIdx, setSelectedIdx] = useState(0);
+    const [activeTab, setActiveTab] = useState<"seo" | "thumbnails" | "shorts" | "sound" | "ads">("seo");
+    const [selectedModel, setSelectedModel] = useState<string>(
+      () => localStorage.getItem("ai_comic_model") || ""
+    );
+    const [copiedAll, setCopiedAll] = useState(false);
+    const filmstripRef = useRef<HTMLDivElement>(null);
+
     if (safePanels.length === 0) {
       return (
         <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
@@ -64,16 +72,6 @@ const AIOptimizerPage = React.memo(
         </div>
       );
     }
-
-    const [selectedIdx, setSelectedIdx] = useState(0);
-    const [activeTab, setActiveTab] = useState<"seo" | "thumbnails" | "shorts" | "sound" | "ads">("seo");
-
-    const [selectedModel, setSelectedModel] = useState<string>(
-      () => localStorage.getItem("ai_comic_model") || ""
-    );
-    const [copiedAll, setCopiedAll] = useState(false);
-
-    const filmstripRef = useRef<HTMLDivElement>(null);
 
     const scrollFilmstrip = (direction: "left" | "right") => {
       if (filmstripRef.current) {

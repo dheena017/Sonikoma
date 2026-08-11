@@ -61,21 +61,6 @@ const YouTubePage = React.memo(
       "details" | "chapters_tags" | "comic_subtitles" | "settings" | "integrations"
     >("details");
 
-    if (safePanels.length === 0) {
-      return (
-        <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
-          <Youtube className="h-10 w-10 text-neutral-600 mb-3" />
-          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
-            No Panels Available
-          </h3>
-          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
-            Please import a series or add panels to your storyboard timeline to start publishing to YouTube.
-          </p>
-        </div>
-      );
-    }
-
-    // Leverage custom logic hook
     const {
       title,
       setTitle,
@@ -200,11 +185,25 @@ const YouTubePage = React.memo(
       handleThumbnailSelect,
     } = useYouTubePublisher({
       panels: safePanels,
-      videoUrl,
-      scrapedTitle,
-      scrapedGenre,
+      videoUrl: effectiveVideoUrl,
+      scrapedTitle: effectiveTitle,
+      scrapedGenre: effectiveGenre,
       addNotification,
     });
+
+    if (safePanels.length === 0) {
+      return (
+        <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
+          <Youtube className="h-10 w-10 text-neutral-600 mb-3" />
+          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
+            No Panels Available
+          </h3>
+          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
+            Please import a series or add panels to your storyboard timeline to start publishing to YouTube.
+          </p>
+        </div>
+      );
+    }
 
     return (
       <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
