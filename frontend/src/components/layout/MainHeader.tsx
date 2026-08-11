@@ -25,6 +25,10 @@ import {
   Cloud,
   Zap,
   Cpu,
+  FolderOpen,
+  FolderSync,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
@@ -32,6 +36,8 @@ import { Notification } from "@/features/app_notification";
 import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import { getUserCredits, getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
+import { useProjectStore } from "@/store/useProjectStore";
+
 
 
 interface HeaderProps {
@@ -141,6 +147,8 @@ const HeaderInner = ({
   const [showStats, setShowStats] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
   const { models: aiModels } = useAIModels();
+  const { activeProjectId, activeProjectData, projectState, missingProjectInfo, setDrawerOpen, clearActiveProject } = useProjectStore();
+
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
@@ -492,7 +500,7 @@ const HeaderInner = ({
 
     {
       name: "Voice & Sound Studio",
-      path: "/ai-voice",
+      path: "/creative-suite/ai-voice",
       desc: "Configure TTS voice actors, sound effects overlay, BGM loops and script dramatization",
     },
     {
@@ -574,6 +582,34 @@ const HeaderInner = ({
             Sonikoma
           </span>
         </div>
+
+        {/* User Profile Avatar & Name Pill next to logo */}
+        <button
+          onClick={() => navigateTo && navigateTo("/profile")}
+          className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/40 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1"
+          title="View Profile & Account Settings"
+          aria-label="Open User profile"
+        >
+          <img
+            src={
+              (() => {
+                const raw = user?.avatar_url || user?.picture || user?.photo_url;
+                if (raw && typeof raw === "string" && !raw.includes("dicebear") && !raw.includes("avataaars")) {
+                  return raw;
+                }
+                return "https://lh3.googleusercontent.com/a/default-user";
+              })()
+            }
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+            }}
+            alt="User Avatar"
+            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+          />
+          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans">
+            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "User")}
+          </span>
+        </button>
       </div>
 
       {/* Center Side: Quick Search / Command Bar */}
@@ -906,166 +942,44 @@ const HeaderInner = ({
           )}
         </div>
 
-        {/* Project Statistics Popover Button */}
-        <div className="relative" ref={statsRef}>
+        {/* Active Project Selector Icon Button */}
+        <div className="relative">
           <button
-            onClick={() => {
-              setShowStats(!showStats);
-              setShowSettings(false);
-              setShowNotifications(false);
-            }}
-            className={`icon-pill cursor-pointer transition-all ${
-              showStats ? "icon-pill--active" : ""
+            onClick={() => setDrawerOpen(true)}
+            className={`icon-pill cursor-pointer transition-all relative ${
+              projectState === "missing"
+                ? "text-rose-300 bg-rose-500/15 border-rose-500/50 hover:bg-rose-500/25"
+                : projectState === "loading"
+                ? "text-purple-300 bg-purple-500/15 border-purple-500/40 animate-pulse"
+                : projectState === "active"
+                ? "text-purple-300 bg-purple-500/15 border-purple-500/40 hover:bg-purple-500/25"
+                : "hover:bg-purple-500/20 hover:text-purple-300"
             }`}
-            title="Timeline Analytics & Statistics"
+            title={
+              projectState === "missing"
+                ? `Project Unavailable: ${missingProjectInfo?.missingId || activeProjectId} — Click to resolve`
+                : projectState === "loading"
+                ? "Loading project workspace..."
+                : projectState === "active"
+                ? `Active Project: ${activeProjectData?.project?.title || "Active"} — Click to switch`
+                : "Select Active Project"
+            }
           >
-            <Activity className="h-4 w-4" />
+            {projectState === "missing" ? (
+              <AlertCircle className="h-4 w-4 text-rose-400" />
+            ) : projectState === "loading" ? (
+              <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+            ) : (
+              <FolderSync className="h-4 w-4 text-purple-400" />
+            )}
+
+            {projectState === "active" && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+            )}
+            {projectState === "missing" && (
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-black animate-pulse" />
+            )}
           </button>
-
-          {showStats && (
-            <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-72 max-w-[360px] bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 p-4 origin-top sm:origin-top-right">
-              <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 mb-3 flex items-center gap-1.5">
-                <Activity className="h-4 w-4" /> Timeline Analytics
-              </h3>
-
-              <div className="space-y-3">
-                {/* Completion Dial Widget */}
-                <div className="bg-neutral-955/40 border border-neutral-850 p-3 rounded-xl flex items-center gap-3">
-                  <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
-                    <svg className="w-full h-full transform -rotate-90">
-                      <circle
-                        cx="24"
-                        cy="24"
-                        r="20"
-                        stroke="#1f1f1f"
-                        strokeWidth="3.5"
-                        fill="transparent"
-                      />
-                      <circle
-                        cx="24"
-                        cy="24"
-                        r="20"
-                        stroke="var(--color-purple-500, #a855f7)"
-                        strokeWidth="3.5"
-                        fill="transparent"
-                        strokeDasharray={2 * Math.PI * 20}
-                        strokeDashoffset={
-                          2 * Math.PI * 20 * (1 - progressPercent / 100)
-                        }
-                        className="transition-all duration-500"
-                      />
-                    </svg>
-                    <span className="absolute text-[10px] font-bold text-neutral-250 font-mono">
-                      {progressPercent}%
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="text-[11px] font-bold text-neutral-200">
-                      Composition Progress
-                    </h4>
-                    <p className="text-[9px] text-neutral-500 leading-relaxed font-mono">
-                      Speech + Audio coverage
-                    </p>
-                  </div>
-                </div>
-
-                {/* Numeric Grid */}
-                <div className="grid grid-cols-2 gap-2 text-center">
-                  <div className="bg-neutral-950/30 border border-neutral-850/60 p-2 rounded-lg">
-                    <p className="text-[9px] text-neutral-500 font-mono uppercase tracking-wide">
-                      Total Panels
-                    </p>
-                    <p className="text-sm font-black text-white font-mono mt-0.5">
-                      {panels.length}
-                    </p>
-                  </div>
-                  <div className="bg-neutral-950/30 border border-neutral-850/60 p-2 rounded-lg">
-                    <p className="text-[9px] text-neutral-500 font-mono uppercase tracking-wide">
-                      Est. Duration
-                    </p>
-                    <p className="text-sm font-black text-purple-400 font-mono mt-0.5">
-                      {formatDuration(totalCalculatedDuration)}
-                    </p>
-                  </div>
-                  <div className="bg-neutral-950/30 border border-neutral-850/60 p-2 rounded-lg">
-                    <p className="text-[9px] text-neutral-500 font-mono uppercase tracking-wide">
-                      Narrated
-                    </p>
-                    <p className="text-xs font-bold text-neutral-300 font-mono mt-0.5">
-                      {totalWithSpeech}{" "}
-                      <span className="text-[9px] text-neutral-500">
-                        panels
-                      </span>
-                    </p>
-                  </div>
-                  <div className="bg-neutral-950/30 border border-neutral-850/60 p-2 rounded-lg">
-                    <p className="text-[9px] text-neutral-500 font-mono uppercase tracking-wide">
-                      Audio Rendered
-                    </p>
-                    <p className="text-xs font-bold text-neutral-300 font-mono mt-0.5">
-                      {totalWithAudio}{" "}
-                      <span className="text-[9px] text-neutral-500">
-                        tracks
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Predicted Engagement metrics */}
-                <div className="bg-neutral-955/20 border border-neutral-850/60 rounded-xl p-2.5 space-y-1.5">
-                  <span className="text-[9px] font-extrabold font-sans text-neutral-400 uppercase tracking-wide block">
-                    Predicted Quality Scores
-                  </span>
-                  <div className="flex justify-between items-center text-[10px]">
-                    <span className="text-neutral-500 font-mono">
-                      Est. Audience Retention:
-                    </span>
-                    <span
-                      className={`font-bold font-mono ${
-                        panels.length === 0
-                          ? "text-neutral-500"
-                          : audienceRetentionPct >= 75
-                          ? "text-emerald-400"
-                          : audienceRetentionPct >= 50
-                          ? "text-amber-400"
-                          : "text-rose-400"
-                      }`}
-                    >
-                      {panels.length === 0
-                        ? "—"
-                        : `${audienceRetentionPct}% (${audienceRetentionLabel})`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px]">
-                    <span className="text-neutral-500 font-mono">
-                      A/B Title CTR Expectation:
-                    </span>
-                    <span
-                      className={`font-bold font-mono ${
-                        panels.length === 0
-                          ? "text-neutral-500"
-                          : ctrScore >= 7
-                          ? "text-purple-400"
-                          : ctrScore >= 5
-                          ? "text-amber-400"
-                          : "text-rose-400"
-                      }`}
-                    >
-                      {panels.length === 0 ? "—" : `${ctrScore}/10`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-[10px]">
-                    <span className="text-neutral-500 font-mono">
-                      Cliffhanger Ending Index:
-                    </span>
-                    <span className={`font-bold font-mono ${cliffhangerColor}`}>
-                      {cliffhangerScore}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Quick Settings Dropdown (Cog Button) */}

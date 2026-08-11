@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS chapters (
   video_url       TEXT,                             -- Path or URL to completed video output (.mp4)
   total_tokens_used INTEGER NOT NULL DEFAULT 0,
   audio_settings  TEXT,                             -- Serialized JSONB string of audio mixer settings
+  project_type    TEXT    NOT NULL DEFAULT 'permanent', -- temp | permanent
   created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at      TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (series_id) REFERENCES series(id) ON DELETE CASCADE

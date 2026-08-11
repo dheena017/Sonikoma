@@ -42,6 +42,9 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   const activePanels = activeProjectData?.panels ?? panels ?? [];
 
   const panelRequiredPaths = [
+    "/creative-suite/ai-optimizer",
+    "/creative-suite/panel-assistant",
+    "/creative-suite/ai-voice",
     "/ai-optimizer",
     "/panel-assistant",
     "/ai-voice",
@@ -114,8 +117,17 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       return "Overview Hub";
     }
 
+    const cleanPath = currentPath.split("?")[0];
+
     // Map paths directly to clean labels
     const pathMap: Record<string, string> = {
+      "/creative-suite/ai-optimizer": "Video Optimizer",
+      "/creative-suite/panel-assistant": "Panel Assistant",
+      "/creative-suite/ai-thumbnails": "Thumbnail Studio",
+      "/creative-suite/ai-analytics": "CTR Predictor",
+      "/creative-suite/ai-voice": "Voice & Sound Studio",
+      "/creative-suite/ai-characters": "Character Database",
+      "/creative-suite/youtube": "YouTube Publisher",
       "/ai-optimizer": "Video Optimizer",
       "/panel-assistant": "Panel Assistant",
       "/ai-thumbnails": "Thumbnail Studio",
@@ -125,7 +137,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       "/youtube": "YouTube Publisher",
     };
 
-    return pathMap[currentPath] || currentPath.split("/").pop() || "Creative Suite";
+    return pathMap[cleanPath] || cleanPath.split("/").pop() || "Creative Suite";
   };
 
   const activeBreadcrumb = getBreadcrumbName();

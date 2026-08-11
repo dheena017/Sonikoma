@@ -297,7 +297,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
       if (!detail) return;
 
       if (detail === "image-editor") {
-        // Save current scroll position before navigating (both window scroll and main container scroll)
         sessionStorage.setItem("editor_page_scroll_top_window", String(window.scrollY));
         const container = document.getElementById("main-scroll-container");
         if (container) {
@@ -305,12 +304,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
         }
 
         const idx = useImageEditorStore.getState().editingImageIdx ?? appLogic.editingImageIdx ?? 0;
-        const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
-        const projId = appLogic.projectId || new URLSearchParams(window.location.search).get("id") || "";
-        const target = hasValidSlugs
-          ? `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${idx}`
-          : `/scraper/editor/image-editor?id=${projId}&idx=${idx}`;
-        navigateTo(target);
+        navigateTo(`/image-editor?idx=${idx}`);
+      } else if (detail === "video-editor") {
+        navigateTo("/video-editor");
       } else {
         setCurrentSection(detail);
       }

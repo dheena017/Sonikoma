@@ -138,7 +138,7 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
 
         <button
           onClick={onToggleMultiSelectMode}
-          className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all ${
+          className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all cursor-pointer active:scale-95 ${
             isMultiSelectMode
               ? 'border-purple-500/50 bg-purple-600 text-white shadow-lg shadow-purple-600/30'
               : 'border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-purple-500/40 hover:text-white'
@@ -151,7 +151,7 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
 
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all ${
+          className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all cursor-pointer active:scale-95 ${
             showAdvanced || hasAdvancedFilters
               ? 'border-purple-500/50 bg-purple-950/50 text-purple-300'
               : 'border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-purple-500/40 hover:text-white'

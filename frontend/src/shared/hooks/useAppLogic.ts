@@ -15,6 +15,7 @@ export function useAppLogic() {
   const sourceMismatchNotified = useRef(false);
   const lastScrapedUrlRef = useRef<string>("");
   const saveProjectRef = useRef<any>(null);
+  const isGeneratingRef = useRef(false);
 
   const [isGeneratingStoryboard, setIsGeneratingStoryboard] =
     useState<boolean>(false);
@@ -27,6 +28,9 @@ export function useAppLogic() {
     cover_image?: string;
     synopsis?: string;
   }) => {
+    if (isGeneratingStoryboard || isGeneratingRef.current) return;
+    isGeneratingRef.current = true;
+
     const activeUrl = targetUrl;
     const projId = state.projectId;
     if (!activeUrl || !activeUrl.trim() || !projId) {
@@ -34,6 +38,7 @@ export function useAppLogic() {
         "Please ensure target URL is pasted and project is created.",
         "error"
       );
+      isGeneratingRef.current = false;
       return;
     }
 
@@ -107,8 +112,10 @@ export function useAppLogic() {
       );
     } finally {
       setIsGeneratingStoryboard(false);
+      isGeneratingRef.current = false;
     }
   }, [
+    isGeneratingStoryboard,
     targetUrl,
     state.projectId,
     selectedModel,

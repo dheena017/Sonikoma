@@ -34,7 +34,7 @@ async def register(user_data: UserRegister):
         "email": user_data.email,
         "hashed_password": hashed_password,
         "full_name": user_data.full_name,
-        "avatar_url": f"https://api.dicebear.com/7.x/avataaars/svg?seed={user_id}"
+        "avatar_url": "https://lh3.googleusercontent.com/a/default-user"
     }
 
     try:

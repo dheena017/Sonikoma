@@ -105,7 +105,7 @@ def seed_data_for_path(target_db):
             (
                 "user_testuser1", "testuser1", "creator@sonikoma.com", pw_hash,
                 '{"theme":"dark","autoSave":true,"volume":0.8}',
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=testuser1",
+                "https://lh3.googleusercontent.com/a/default-user",
                 "Test User One", None, "creator",
                 "Casual webtoon compiler and creator testing the Sonikoma suite.",
                 1, "en", "[]", 1250, 1250, None, "[]", 0,
@@ -115,7 +115,7 @@ def seed_data_for_path(target_db):
             (
                 "user_creator_pro", "creator_pro", "pro@gmail.com", pw_hash,
                 '{"theme":"cyberpunk","autoSave":true,"volume":1.0}',
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=creator_pro",
+                "https://lh3.googleusercontent.com/a/default-user",
                 "Sarah Jenkins (Pro)", None, "director",
                 "Professional animator and comic creator pushing Webtoons to cinematic heights.",
                 1, "en",
@@ -127,7 +127,7 @@ def seed_data_for_path(target_db):
             (
                 "user_editor_test", "editor_test", "editor@gmail.com", pw_hash,
                 '{"theme":"light","autoSave":false,"volume":0.5}',
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=editor_test",
+                "https://lh3.googleusercontent.com/a/default-user",
                 "Alex Rivera", None, "editor",
                 "Collaborative editor testing timeline synchronization and audio syncing.",
                 0, "es", "[]", 350, 350, None, "[]", 0,
@@ -137,7 +137,7 @@ def seed_data_for_path(target_db):
             (
                 "user_manga_fan", "manga_fan", "manga@hotmail.com", pw_hash,
                 '{"theme":"dark","autoSave":true,"volume":0.6}',
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=manga_fan",
+                "https://lh3.googleusercontent.com/a/default-user",
                 "Kenji Tanaka", None, "viewer",
                 "Manga enthusiast exploring Sonikoma as a video-compilation tool.",
                 1, "ja", "[]", 200, 200, None, "[]", 0,
@@ -147,7 +147,7 @@ def seed_data_for_path(target_db):
             (
                 "user_anim_studio", "anim_studio", "studio@animx.io", pw_hash,
                 '{"theme":"dark","autoSave":true,"volume":1.0}',
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=anim_studio",
+                "https://lh3.googleusercontent.com/a/default-user",
                 "AnimX Studio", None, "director",
                 "Studio account for batch-rendering multiple webtoon series into reels.",
                 1, "en",
@@ -159,7 +159,7 @@ def seed_data_for_path(target_db):
             (
                 "user_free_trial", "free_trial", "trial@example.com", pw_hash,
                 '{"theme":"light","autoSave":false,"volume":0.3}',
-                "https://api.dicebear.com/7.x/avataaars/svg?seed=free_trial",
+                "https://lh3.googleusercontent.com/a/default-user",
                 "Trial User", None, "viewer",
                 "Free-tier trial user with limited credits, testing the basic pipeline.",
                 0, "en", "[]", 0, 0, None, "[]", 0,

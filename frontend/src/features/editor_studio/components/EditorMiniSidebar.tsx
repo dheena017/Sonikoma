@@ -295,12 +295,16 @@ const EditorMiniSidebarInner = ({
               }
             }
 
-            if (item.id === "image-editor") {
-              const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
-              const projId = projectId || new URLSearchParams(window.location.search).get("id") || "";
-              const target = hasValidSlugs
-                ? `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=${editingImageIdx ?? 0}`
-                : `/scraper/editor/image-editor?id=${projId}&idx=${editingImageIdx ?? 0}`;
+            if (item.id === "video-editor") {
+              const target = "/video-editor";
+              if (navigateTo) {
+                navigateTo(target);
+              } else {
+                window.history.pushState({}, "", target);
+                window.dispatchEvent(new Event("popstate"));
+              }
+            } else if (item.id === "image-editor") {
+              const target = `/image-editor?idx=${editingImageIdx ?? 0}`;
               if (navigateTo) {
                 navigateTo(target);
               } else {

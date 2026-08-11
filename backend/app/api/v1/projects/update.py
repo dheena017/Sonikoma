@@ -151,3 +151,24 @@ async def update_project_details(
     except Exception as e:
         logger.error(f"Failed to update project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to update project: {e}")
+
+
+@router.post("/{projectId}/promote", summary="Promote temporary workspace project to permanent saved status")
+async def promote_project_endpoint(
+    projectId: str = Path(...),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        logger.info(f"[Database] Promoting project {projectId} from temp to permanent status.")
+        try:
+            return service.promote_project(projectId, current_user["user_id"])
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail="Access denied.") from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to promote project: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to promote project: {e}")
+

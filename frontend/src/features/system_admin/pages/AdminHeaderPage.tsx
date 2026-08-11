@@ -158,12 +158,17 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           </span>
         </div>
 
-        {/* User profile identifier (Admin badge) moved to left */}
-        <div className="flex items-center gap-2 bg-neutral-900 border border-neutral-850 px-3 py-1 rounded-full select-none cursor-pointer ml-1" onClick={() => navigateTo("/admin/settings")}>
-          <div className="w-5 h-5 rounded-full bg-violet-600 flex items-center justify-center text-[10px] text-white font-extrabold uppercase shadow shadow-violet-600/30">
-            A
-          </div>
-          <span className="text-xs text-neutral-300 font-bold hidden sm:inline">admin</span>
+        {/* User profile identifier next to logo */}
+        <div className="flex items-center gap-2 bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/40 px-2.5 py-1 rounded-full select-none cursor-pointer ml-1" onClick={() => navigateTo("/admin/settings")}>
+          <img
+            src="https://lh3.googleusercontent.com/a/default-user"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+            }}
+            alt="Admin Avatar"
+            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+          />
+          <span className="text-xs text-neutral-300 font-bold hidden sm:inline">Admin</span>
         </div>
       </div>
 

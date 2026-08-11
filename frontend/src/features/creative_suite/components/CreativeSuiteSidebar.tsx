@@ -14,8 +14,79 @@ import {
   ArrowLeft,
   X,
   Settings,
+  Zap,
+  FolderOpen,
+  FolderSync,
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
+import { useProjectStore } from "@/store/useProjectStore";
+
+
+const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => void }> = ({ setDrawerOpen }) => {
+  const { activeProjectId, activeProjectData } = useProjectStore();
+
+  return (
+    <div className="p-3 rounded-2xl bg-[#0e0f17] border border-white/10 text-xs shadow-md my-2">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1">
+          <Zap className="w-3 h-3 text-purple-400" /> Active Project
+        </span>
+        {activeProjectId ? (
+          <span className="text-[9px] text-emerald-400 font-medium px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            ● Active
+          </span>
+        ) : null}
+      </div>
+
+      {activeProjectId && activeProjectData ? (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 shrink-0">
+              {activeProjectData.project?.cover_image || activeProjectData.panels?.[0]?.image_url ? (
+                <img
+                  src={activeProjectData.project?.cover_image || activeProjectData.panels?.[0]?.image_url}
+                  alt={activeProjectData.project?.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center text-purple-300 font-bold text-xs">
+                  {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex flex-col">
+              <h4 className="font-semibold text-xs text-white truncate">
+                {activeProjectData.project?.title || "Untitled Project"}
+              </h4>
+              <span className="text-[10px] text-neutral-400 truncate">
+                {activeProjectData.panels?.length || 0} Panels
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="w-full py-1.5 px-2 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <FolderSync className="w-3.5 h-3.5" />
+            <span>Switch Project</span>
+          </button>
+        </div>
+      ) : (
+        <div>
+          <p className="text-[11px] text-neutral-400 mb-2">No active project selected.</p>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="w-full py-1.5 px-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/20 cursor-pointer"
+          >
+            <FolderOpen className="w-3.5 h-3.5" />
+            <span>Select Active Project</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface CreativeSuiteSidebarProps {
   currentPath: string;
@@ -66,14 +137,14 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
           id: "optimizer",
           label: "Video Optimizer",
           icon: Film,
-          path: "/ai-optimizer",
+          path: "/creative-suite/ai-optimizer",
           requiresPanels: true,
         },
         {
           id: "assistant",
           label: "Translation Studio",
           icon: Globe,
-          path: "/panel-assistant",
+          path: "/creative-suite/panel-assistant",
           requiresPanels: true,
         },
       ],
@@ -85,7 +156,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
           id: "voice",
           label: "Voice & Sound Studio",
           icon: Mic,
-          path: "/ai-voice",
+          path: "/creative-suite/ai-voice",
           requiresPanels: true,
         },
       ],
@@ -97,7 +168,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
           id: "characters",
           label: "Character DB",
           icon: Users,
-          path: "/ai-characters",
+          path: "/creative-suite/ai-characters",
           requiresPanels: false,
         },
       ],
@@ -109,7 +180,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
           id: "youtube",
           label: "YouTube Publisher",
           icon: Youtube,
-          path: "/youtube",
+          path: "/creative-suite/youtube",
           requiresPanels: false,
         },
       ],
@@ -166,8 +237,13 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
         </button>
       </div>
 
+      {/* Active Project Widget in CreativeSuiteSidebar */}
+      <div className="px-4 pt-3">
+        <ActiveProjectSidebarWidget setDrawerOpen={(open) => useProjectStore.getState().setDrawerOpen(open)} />
+      </div>
+
       {/* Navigation Groups */}
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto py-4 px-4 space-y-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {groups.map((group, groupIdx) => (
           <div key={group.name} className="space-y-2.5">
             {groupIdx > 0 && (

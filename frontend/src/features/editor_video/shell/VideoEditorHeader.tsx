@@ -142,19 +142,41 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div
+            className="flex items-center gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
+            onClick={() => navigateTo && navigateTo("/dashboard")}
+          >
             <img
               src="/logo-dark.png"
               alt="Sonikoma Logo"
-              className="h-8 w-8 rounded-xl object-cover shadow-[0_0_12px_rgba(168,85,247,0.4)] border border-white/10 shrink-0"
+              className="h-9 w-9 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
               onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-light.png";
+                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
             />
-            <span className="font-bold text-sm text-white tracking-wide font-mono hidden sm:inline">
-              Sonikoma Studio
+            <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
+              Sonikoma
             </span>
           </div>
+
+          {/* User Profile Pill next to logo */}
+          <button
+            onClick={() => navigateTo && navigateTo("/profile")}
+            className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/40 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1"
+            title="View Profile & Account Settings"
+          >
+            <img
+              src="https://lh3.googleusercontent.com/a/default-user"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+              }}
+              alt="User Avatar"
+              className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+            />
+            <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans">
+              Studio Creator
+            </span>
+          </button>
 
           <div className="flex items-center gap-2 ml-1 bg-[#121218] border border-neutral-800 px-3 py-1 rounded-lg text-xs font-semibold text-neutral-200 cursor-pointer hover:border-neutral-700 transition-all max-w-[240px] truncate">
             <span className="text-neutral-400 font-normal shrink-0">Project:</span>
@@ -314,10 +336,6 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               </>
             )}
           </button>
-
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold ring-2 ring-purple-500/20 cursor-pointer shrink-0">
-            S
-          </div>
         </div>
       </header>
 

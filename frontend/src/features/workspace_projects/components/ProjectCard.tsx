@@ -314,28 +314,14 @@ export default function ProjectCard({
           </div>
 
           {/* Action Buttons Grid */}
-          <div className="grid grid-cols-2 gap-2.5 w-full pt-1">
-            {onOpenCreativeSuite && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenCreativeSuite(e, project);
-                }}
-                className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl border border-purple-500/40 bg-purple-500/20 hover:bg-purple-500/35 text-xs font-black uppercase tracking-wider text-purple-200 transition-all cursor-pointer shadow-md active:scale-95 shrink-0"
-              >
-                ✦ Creative
-              </button>
-            )}
+          <div className="w-full pt-1">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onOpenProject(project);
               }}
-              className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl border border-purple-400/40 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-xs font-black uppercase tracking-wider text-white transition-all cursor-pointer shadow-[0_4px_14px_rgba(168,85,247,0.35)] active:scale-95 shrink-0 ${
-                !onOpenCreativeSuite ? "col-span-2" : ""
-              }`}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl border border-purple-400/40 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-xs font-black uppercase tracking-wider text-white transition-all cursor-pointer shadow-[0_4px_14px_rgba(168,85,247,0.35)] active:scale-95 shrink-0"
             >
               <span>Resume</span>
               <ArrowRight className="w-3.5 h-3.5 text-white" />

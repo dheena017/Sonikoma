@@ -201,6 +201,25 @@ def init_postgres(conn) -> None:
         except Exception:
             pass
 
+        # project_type lifecycle column on chapters ('temp' | 'permanent')
+        try:
+            row_pt = conn.execute(
+                "SELECT EXISTS ("
+                "  SELECT FROM information_schema.columns"
+                "  WHERE table_schema = 'public'"
+                "    AND table_name = 'chapters'"
+                "    AND column_name = 'project_type'"
+                ") as exists"
+            ).fetchone()
+            if not row_pt or not row_pt.get("exists"):
+                logger.info("[Database] Migration: adding 'project_type' column to 'chapters' table...")
+                conn.execute(
+                    "ALTER TABLE chapters ADD COLUMN project_type TEXT NOT NULL DEFAULT 'permanent'"
+                )
+                conn.commit()
+        except Exception:
+            pass
+
     except Exception as e:
         logger.error(f"[Database] Error checking PostgreSQL schema: {e}")
     finally:
@@ -281,6 +300,11 @@ def init_sqlite(conn) -> None:
         _run_safe_alter(cursor, conn,
                         "ALTER TABLE series ADD COLUMN is_flagged INTEGER NOT NULL DEFAULT 0",
                         "added 'is_flagged' to 'series'")
+        # project_type lifecycle column: 'temp' | 'permanent'
+        # All existing chapters default to 'permanent' (backwards safe).
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE chapters ADD COLUMN project_type TEXT NOT NULL DEFAULT 'permanent'",
+                        "added 'project_type' to 'chapters'")
 
         # ── Slug indexes ──────────────────────────────────────────────────
         try:

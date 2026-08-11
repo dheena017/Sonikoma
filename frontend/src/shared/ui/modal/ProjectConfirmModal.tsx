@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
@@ -156,7 +156,11 @@ export default function ProjectConfirmModal({
 
   if (!isOpen) return null;
 
+  const isSubmittingRef = useRef(false);
+
   const handleConfirm = async (shouldGenerate: boolean) => {
+    if (isSaving || isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setIsSaving(true);
     try {
       const success = await onConfirm(
@@ -189,6 +193,7 @@ export default function ProjectConfirmModal({
       }
     } finally {
       setIsSaving(false);
+      isSubmittingRef.current = false;
     }
   };
 

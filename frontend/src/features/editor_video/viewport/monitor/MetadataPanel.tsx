@@ -95,9 +95,9 @@ const VideoPreviewMetadataPanel = React.memo(
     const handlePublishYouTube = () => {
       setShowMore(false);
       if (navigateTo) {
-        navigateTo("/youtube");
+        navigateTo("/creative-suite/youtube");
       } else {
-        window.history.pushState({}, "", "/youtube");
+        window.history.pushState({}, "", "/creative-suite/youtube");
         window.dispatchEvent(new Event("popstate"));
       }
     };

@@ -74,7 +74,7 @@ export default function EnhancementsPanel({
   };
 
   const handleOpenPanelAssistant = () => {
-    window.history.pushState({}, "", `/panel-assistant?idx=${editingImageIdx}`);
+    window.history.pushState({}, "", `/creative-suite/panel-assistant?idx=${editingImageIdx}`);
     window.dispatchEvent(new Event("popstate"));
   };
 

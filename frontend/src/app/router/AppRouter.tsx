@@ -48,6 +48,7 @@ const AdminPage = React.lazy(() => import("@/features/system_admin/pages/AdminPa
 const AdminDashboardPage = React.lazy(() => import("@/features/system_admin/pages/AdminDashboardPage"));
 const VideoEditorPage = React.lazy(() => import("@/features/editor_video/pages/VideoEditorPage"));
 
+
 import MainLayout from "@/components/layout/MainLayout";
 
 export interface AppRouterProps {
@@ -606,11 +607,29 @@ export default function AppRouter(props: AppRouterProps) {
       isModelTrainingPath: currentPath === "/model-training",
       isShortcutsPath: currentPath === "/shortcuts",
       isAudioSettingsPath: currentPath === "/scraper/audio-settings",
-      isOptimizerPath: currentPath === "/ai-optimizer",
-      isPanelAssistantPath: currentPath.startsWith("/panel-assistant"),
-      isCharacterPath: currentPath === "/ai-characters",
-      isVoicePath: currentPath === "/ai-voice",
-      isYouTubePath: currentPath === "/youtube",
+      isOptimizerPath:
+        currentPath === "/creative-suite/ai-optimizer" ||
+        currentPath.startsWith("/creative-suite/ai-optimizer?") ||
+        currentPath.startsWith("/creative-suite/ai-optimizer/") ||
+        currentPath === "/ai-optimizer",
+      isPanelAssistantPath:
+        currentPath.startsWith("/creative-suite/panel-assistant") ||
+        currentPath.startsWith("/panel-assistant"),
+      isCharacterPath:
+        currentPath === "/creative-suite/ai-characters" ||
+        currentPath.startsWith("/creative-suite/ai-characters?") ||
+        currentPath.startsWith("/creative-suite/ai-characters/") ||
+        currentPath === "/ai-characters",
+      isVoicePath:
+        currentPath === "/creative-suite/ai-voice" ||
+        currentPath.startsWith("/creative-suite/ai-voice?") ||
+        currentPath.startsWith("/creative-suite/ai-voice/") ||
+        currentPath === "/ai-voice",
+      isYouTubePath:
+        currentPath === "/creative-suite/youtube" ||
+        currentPath.startsWith("/creative-suite/youtube?") ||
+        currentPath.startsWith("/creative-suite/youtube/") ||
+        currentPath === "/youtube",
       isProfilePath: currentPath === "/profile",
       isNotificationsPath: currentPath === "/notifications",
       isAdminDashboardPath:
@@ -632,6 +651,7 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/creative-suite" ||
         currentPath === "/creative-suite/" ||
         currentPath === "/creative-suite-dashboard" ||
+        currentPath.startsWith("/creative-suite/") ||
         currentPath === "/ai-optimizer" ||
         currentPath === "/panel-assistant" ||
         currentPath === "/ai-characters" ||

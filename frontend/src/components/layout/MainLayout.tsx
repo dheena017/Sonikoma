@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import * as api from "@/api";
 
@@ -16,6 +16,10 @@ import MiniSidebar from "@/components/layout/MainMiniSidebar";
 import CreativeSuiteHeader from "@/features/creative_suite/components/CreativeSuiteHeader";
 import CreativeSuiteSidebar from "@/features/creative_suite/components/CreativeSuiteSidebar";
 import CreativeSuiteMiniSidebar from "@/features/creative_suite/components/CreativeSuiteMiniSidebar";
+import ActiveProjectWorkspaceBar from "@/components/layout/ActiveProjectWorkspaceBar";
+import ActiveProjectSelectorDrawer from "@/components/layout/ActiveProjectSelectorDrawer";
+import { useProjectStore } from "@/store/useProjectStore";
+
 
 export interface MainLayoutProps {
   children: React.ReactNode;
@@ -271,6 +275,22 @@ export default function MainLayout(props: MainLayoutProps) {
 
   const isAdminRestricted = isAnyAdmin && (!user || user.creator_role !== "admin");
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlProjectId = params.get("project_id");
+    if (urlProjectId) {
+      useProjectStore.getState().setActiveProjectId(urlProjectId);
+      useProjectStore.getState().hydrateActiveProject(urlProjectId, fetchWithInterceptor);
+    } else {
+      const storeState = useProjectStore.getState();
+      if (storeState.activeProjectId && !storeState.activeProjectData) {
+        storeState.hydrateActiveProject(null, fetchWithInterceptor);
+      }
+    }
+  }, [currentPath, fetchWithInterceptor]);
+
+  const isDrawerOpen = useProjectStore((s) => s.isDrawerOpen);
+
   return (
     <div
       id="app_root"
@@ -286,7 +306,7 @@ export default function MainLayout(props: MainLayoutProps) {
             isOpen={isSidebarOpen}
             onClose={() => setIsSidebarOpen(false)}
           />
-          {!isSidebarOpen && (
+          {!isSidebarOpen && !isDrawerOpen && (
             <AdminMiniSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
@@ -303,7 +323,7 @@ export default function MainLayout(props: MainLayoutProps) {
             onClose={() => setIsSidebarOpen(false)}
             panels={panels}
           />
-          {!isSidebarOpen && (
+          {!isSidebarOpen && !isDrawerOpen && (
             <CreativeSuiteMiniSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
@@ -353,7 +373,7 @@ export default function MainLayout(props: MainLayoutProps) {
             seriesSlug={seriesSlugState}
             chapterSlug={chapterSlugState}
           />
-          {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && (
+          {!isSidebarOpen && !isDrawerOpen && !isProEditorPage && !isAnyAdmin && (
             <MiniSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
@@ -549,11 +569,6 @@ export default function MainLayout(props: MainLayoutProps) {
             </div>
           )}
 
-          {/* Route Transition Top Progress Flash */}
-          <div key={`route-bar-${currentPath}`} className="fixed top-0 left-0 right-0 h-[3px] z-[99999] pointer-events-none overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 via-pink-500 to-amber-400 animate-route-bar" />
-          </div>
-
           {/* Children Page Views */}
           <div
             key={currentPath}
@@ -714,6 +729,12 @@ export default function MainLayout(props: MainLayoutProps) {
           )}
         </button>
       </div>
+
+      {/* Global Active Project Activation Drawer */}
+      <ActiveProjectSelectorDrawer
+        fetchWithInterceptor={fetchWithInterceptor}
+        navigateTo={navigateTo}
+      />
     </div>
   );
 }

@@ -149,8 +149,8 @@ class JobIdFlowTests(unittest.TestCase):
         stored = get_project(project_id)
         self.assertEqual(stored['job_id'], job_id_1, "job_id must remain unchanged after a rejected update.")
 
-    def test_5_update_missing_project_persists_job_id(self):
-        """Case 5: Updating a missing project inserts it and preserves job_id."""
+    def test_5_update_missing_project_raises_error(self):
+        """Case 5: Updating a missing project raises ValueError instead of auto-creating."""
         project_id = 'proj_missing_5'
         job_id = 'job_new_555'
         service = ProjectService()
@@ -159,12 +159,35 @@ class JobIdFlowTests(unittest.TestCase):
             job_id=job_id,
             url='https://example.com/missing5'
         )
-        service.update_project_details(project_id, update_req, 'user_test_1')
+        with self.assertRaises(ValueError):
+            service.update_project_details(project_id, update_req, 'user_test_1')
 
-        created = get_project(project_id)
-        self.assertIsNotNone(created)
-        self.assertEqual(created['project_id'], project_id)
-        self.assertEqual(created['job_id'], job_id)
+    def test_7_project_lifecycle_promotion(self):
+        """Case 7: Temp project promotion flips project_type to permanent."""
+        project_id = 'temp_proj_lifecycle_7'
+        insert_project({
+            'project_id': project_id,
+            'project_type': 'temp',
+            'user_id': 'user_test_1',
+            'title': 'Temp Workspace',
+            'genre': 'fantasy',
+            'episode': 'Chapter 1',
+            'status': 'pending',
+            'panels_count': 0,
+            'url': 'https://example.com/temp7',
+            'author': 'Author Seven',
+        })
+
+        initial = get_project(project_id)
+        self.assertEqual(initial['project_type'], 'temp')
+
+        service = ProjectService()
+        res = service.promote_project(project_id, 'user_test_1')
+        self.assertTrue(res['success'])
+
+        promoted = get_project(project_id)
+        self.assertEqual(promoted['project_type'], 'permanent')
+        self.assertEqual(promoted['project_id'], project_id, "Project ID remains identical post-promotion")
 
     def test_6_token_logging_attaches_job_id(self):
         """Case 6: Token log persistence attaches job_id correctly."""

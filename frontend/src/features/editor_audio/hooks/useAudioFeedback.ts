@@ -33,69 +33,73 @@ export function useAudioFeedback(globalVolume: number, globalMuted: boolean) {
     ) => {
       if (globalMuted) return;
 
-      try {
-        const ctx = getOrCreateContext();
-        if (!ctx) return;
+      setTimeout(() => {
+        try {
+          const ctx = getOrCreateContext();
+          if (!ctx) return;
 
-        const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+          const now = ctx.currentTime;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
 
-        const finalVolume = (globalVolume / 100) * 0.1 * volumeMultiplier;
+          const finalVolume = (globalVolume / 100) * 0.1 * volumeMultiplier;
 
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, now);
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
 
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(finalVolume, now + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(finalVolume, now + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-        osc.connect(gain);
-        gain.connect(ctx.destination);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
 
-        osc.start(now);
-        osc.stop(now + duration);
-      } catch (err) {
-        // Gracefully catch DOMException if AudioContext is not allowed to start
-        console.debug("Audio feedback blocked or failed:", err);
-      }
+          osc.start(now);
+          osc.stop(now + duration);
+        } catch (err) {
+          // Gracefully catch DOMException if AudioContext is not allowed to start
+          console.debug("Audio feedback blocked or failed:", err);
+        }
+      }, 0);
     },
     [globalVolume, globalMuted, getOrCreateContext]
   );
 
   const playSuccess = useCallback(() => {
     if (globalMuted) return;
-    const ctx = getOrCreateContext();
-    if (!ctx) return;
+    setTimeout(() => {
+      const ctx = getOrCreateContext();
+      if (!ctx) return;
 
-    // A warm, subtle chime (D5 then A5)
-    const playToneInternal = (
-      freq: number,
-      startOffset: number,
-      duration: number
-    ) => {
-      try {
-        const now = ctx.currentTime + startOffset;
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        const finalVolume = (globalVolume / 100) * 0.08;
+      // A warm, subtle chime (D5 then A5)
+      const playToneInternal = (
+        freq: number,
+        startOffset: number,
+        duration: number
+      ) => {
+        try {
+          const now = ctx.currentTime + startOffset;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const finalVolume = (globalVolume / 100) * 0.08;
 
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(freq, now);
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(finalVolume, now + 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + duration);
-      } catch (e) {
-        // Gracefully ignore
-      }
-    };
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(finalVolume, now + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration);
+        } catch (e) {
+          // Gracefully ignore
+        }
+      };
 
-    playToneInternal(587.33, 0, 0.4); // D5
-    playToneInternal(880.0, 0.1, 0.5); // A5
+      playToneInternal(587.33, 0, 0.4); // D5
+      playToneInternal(880.0, 0.1, 0.5); // A5
+    }, 0);
   }, [globalVolume, globalMuted, getOrCreateContext]);
 
   const playError = useCallback(() => {

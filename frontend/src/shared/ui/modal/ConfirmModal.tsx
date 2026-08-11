@@ -20,6 +20,17 @@ export default function ConfirmModal({
   isAlert = false,
 }: ConfirmModalProps) {
   const isRed = accentColor === "red" || accentColor === "rose";
+  const isExecutingRef = React.useRef(false);
+
+  const handleConfirmClick = () => {
+    if (isExecutingRef.current) return;
+    isExecutingRef.current = true;
+    try {
+      onConfirm();
+    } finally {
+      setTimeout(() => { isExecutingRef.current = false; }, 300);
+    }
+  };
 
   React.useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -36,7 +47,7 @@ export default function ConfirmModal({
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
-        onClick={onCancel || onConfirm}
+        onClick={onCancel || handleConfirmClick}
       />
 
       {/* Modal Container */}
@@ -70,7 +81,7 @@ export default function ConfirmModal({
           </div>
           <button
             type="button"
-            onClick={onCancel || onConfirm}
+            onClick={onCancel || handleConfirmClick}
             className="text-neutral-400 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
           >
             <X className="h-4 w-4" />
@@ -97,7 +108,7 @@ export default function ConfirmModal({
           )}
           <button
             type="button"
-            onClick={onConfirm}
+            onClick={handleConfirmClick}
             className={`px-6 py-2.5 border text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer ${
               isRed
                 ? "bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border-red-550/30 shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)]"

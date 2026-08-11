@@ -6,10 +6,17 @@ import {
   Sparkles,
   Zap,
   Menu,
+  FolderOpen,
+  FolderSync,
+  Activity,
+  Film,
+  X,
 } from "lucide-react";
 import * as api from "@/api";
 import { getUserCreditsPayload } from "@/api/endpoints/auth";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
+import { useProjectStore } from "@/store/useProjectStore";
+
 
 export interface CreativeSuiteHeaderProps {
   currentPath: string;
@@ -44,6 +51,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [credits, setCredits] = useState<number | null>(null);
+
+  const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
+
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -84,11 +94,11 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
 
   const quickNavItems = [
     { label: "Creative Dashboard", path: "/creative-suite", keyword: "home dashboard overview creative suite hub" },
-    { label: "AI Video Optimizer", path: "/ai-optimizer", keyword: "video optimizer resolution pacing scenes compile" },
-    { label: "AI Panel Assistant", path: "/panel-assistant", keyword: "panel editing speech bubble clean crop repaint" },
-    { label: "AI Character DB", path: "/ai-characters", keyword: "characters profile sheet database prompts reference" },
-    { label: "AI Voice & Sound Studio", path: "/ai-voice", keyword: "voice synthesis narrator sound design bgm sfx casting speed pitch" },
-    { label: "YouTube Publisher Studio", path: "/youtube", keyword: "youtube upload publish export draft title" },
+    { label: "AI Video Optimizer", path: "/creative-suite/ai-optimizer", keyword: "video optimizer resolution pacing scenes compile" },
+    { label: "AI Panel Assistant", path: "/creative-suite/panel-assistant", keyword: "panel editing speech bubble clean crop repaint" },
+    { label: "AI Character DB", path: "/creative-suite/ai-characters", keyword: "characters profile sheet database prompts reference" },
+    { label: "AI Voice & Sound Studio", path: "/creative-suite/ai-voice", keyword: "voice synthesis narrator sound design bgm sfx casting speed pitch" },
+    { label: "YouTube Publisher Studio", path: "/creative-suite/youtube", keyword: "youtube upload publish export draft title" },
   ];
 
   const filteredNavItems = quickNavItems.filter(
@@ -118,13 +128,39 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           className="flex items-center gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
           onClick={() => navigateTo("/creative-suite")}
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-900/40 shrink-0 transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
+          <img
+            src="/logo-dark.png"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+            }}
+            className="h-10 w-10 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
+            style={{ background: "#000000" }}
+            alt="Sonikoma Logo"
+          />
           <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
-            Creative Suite
+            Sonikoma
           </span>
         </div>
+
+        {/* User Profile Pill next to logo */}
+        <button
+          onClick={() => navigateTo("/profile")}
+          className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/40 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1"
+          title="View Profile & Account Settings"
+          aria-label="Open User profile"
+        >
+          <img
+            src="https://lh3.googleusercontent.com/a/default-user"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+            }}
+            alt="User Avatar"
+            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+          />
+          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans">
+            Creator
+          </span>
+        </button>
       </div>
 
       {/* Middle side: Search Command Palette */}
@@ -191,12 +227,32 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
 
       {/* Right side: Controls matching creative layout */}
       <div className="flex items-center gap-3 shrink-0">
-        
-        {/* Creative Node Badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-purple-550/10 text-purple-400 border border-purple-550/15 rounded-full text-xs font-bold font-mono">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-          <span>AI Engine: ACTIVE</span>
-        </div>
+        {/* Active Project Quick Button */}
+        <button
+          onClick={() => setDrawerOpen(true)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
+            activeProjectId && activeProjectData
+              ? "bg-purple-500/10 border-purple-500/30 text-purple-300 hover:bg-purple-500/20"
+              : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-purple-500/40 hover:text-white"
+          }`}
+          title="Switch or Select Active Project"
+        >
+          {activeProjectId && activeProjectData ? (
+            <>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-semibold truncate max-w-[120px]">
+                {activeProjectData.project?.title || "Active Project"}
+              </span>
+              <FolderSync className="w-3.5 h-3.5 text-purple-400 ml-0.5" />
+            </>
+          ) : (
+            <>
+              <FolderOpen className="w-3.5 h-3.5 text-purple-400" />
+              <span>Select Active Project</span>
+            </>
+          )}
+        </button>
+
 
         {/* ⚡ Credits Pill */}
         {credits !== null && (
@@ -255,18 +311,6 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
             />
           )}
         </div>
-
-        {/* User Profile Avatar Launcher */}
-        <button
-          onClick={() => navigateTo("/profile")}
-          className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 hover:bg-neutral-800 transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-sm active:scale-95"
-          title="View Profile"
-          aria-label="Open User profile"
-        >
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-[10px] font-extrabold text-white">
-            C
-          </div>
-        </button>
       </div>
     </header>
   );

@@ -34,9 +34,12 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
 
   const handleOpenProject = useCallback((project: Project) => {
     const jobId = project.job_id;
+    useProjectStore.getState().setActiveProjectId(project.project_id);
+    useProjectStore.getState().hydrateActiveProject(project.project_id);
+
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}?project_id=${encodeURIComponent(project.project_id)}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`
       );
     } else if (jobId) {
       (window as any).navigateTo?.(
@@ -52,47 +55,15 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
   const handleOpenCreativeSuite = useCallback(
     async (e: MouseEvent, project: Project) => {
       e.stopPropagation();
-      try {
-        const token =
-          localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token") ||
-          "";
-        const headers: Record<string, string> = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
-
-        const res = await fetch(`/api/projects/${project.project_id}`, {
-          headers,
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          const loadedSettings = data.project?.audio_settings || {};
-          const savedScrapedImages =
-            Array.isArray(data.scraped_images) && data.scraped_images.length > 0
-              ? data.scraped_images
-              : loadedSettings.scraped_images;
-          const scrapedImages =
-            Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0
-              ? savedScrapedImages
-              : (data.panels || []).map((p: any) => p.image_url).filter(Boolean);
-
-          useProjectStore.getState().setActiveProject({
-            project: data.project,
-            panels: data.panels || [],
-            scrapedImages,
-          });
-        }
-      } catch (err) {
-        console.error("Failed to load project for Creative Suite", err);
-      }
+      useProjectStore.getState().setActiveProjectId(project.project_id);
+      await useProjectStore.getState().hydrateActiveProject(project.project_id);
 
       const nav = (window as any).navigateTo;
+      const targetUrl = `/creative-suite?project_id=${encodeURIComponent(project.project_id)}`;
       if (typeof nav === "function") {
-        nav("/creative-suite");
+        nav(targetUrl);
       } else {
-        window.history.pushState({}, "", "/creative-suite");
+        window.history.pushState({}, "", targetUrl);
         window.dispatchEvent(new Event("popstate"));
       }
     },

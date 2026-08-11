@@ -794,6 +794,19 @@ export function useAppState() {
       const urlProjectId = params.get("id") || params.get("project_id");
       const urlJobId = params.get("job_id") || params.get("jobId") || null;
 
+      // ── Guard: if the URL contains a job_ ID as project_id, clean it up
+      // immediately and delegate to loadProject which will set the missing state.
+      if (urlProjectId && urlProjectId.startsWith("job_")) {
+        console.warn(`[AppState] job_ ID found in URL project param: "${urlProjectId}". Stripping and setting missing state.`);
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("project_id");
+        cleanUrl.searchParams.delete("id");
+        window.history.replaceState({}, "", cleanUrl.toString());
+        // delegate to loadProject which has the full missing-state guard
+        loadProject(urlProjectId, urlJobId);
+        return;
+      }
+
       const path = window.location.pathname;
       const match = path.match(
         /(?:\/scraper\/editor)?\/series\/[^\/]+\/chapters\/([^\/]+)/
@@ -906,8 +919,28 @@ export function useAppState() {
     };
 
     const loadProject = async (lookupId: string, jobId?: string | null) => {
+      // ── Guard: job_ IDs are processing references, never real project IDs.
+      // Short-circuit immediately — no network call needed, the server would
+      // always 404 on these and we already know the correct error state.
+      if (lookupId.startsWith("job_")) {
+        console.warn(`[AppState] Detected job ID in URL: "${lookupId}". Entering missing state without API call.`);
+        useProjectStore.getState().setProjectMissing(lookupId, { isJobId: true });
+        if (addNotification) {
+          addNotification(
+            `Processing Job ID "${lookupId}" is not a project reference.`,
+            "warning",
+            { details: "Open the project selector to pick an active project or clear the workspace." }
+          );
+        }
+        // Also clean the stale job ID out of the URL so it can't loop
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("project_id");
+        cleanUrl.searchParams.delete("id");
+        window.history.replaceState({}, "", cleanUrl.toString());
+        return;
+      }
+
       try {
-        const token = getToken();
         const data = await api.getProject(fetchWithInterceptor, lookupId, jobId);
         if (data.success && data.project) {
           localStorage.setItem("active_project_id", data.project.project_id);
@@ -1076,38 +1109,26 @@ export function useAppState() {
           );
         }
       } catch (err: any) {
-        if (
+        const is404 =
           err.message?.includes("404") ||
-          err.message?.includes("Project not found")
-        ) {
-          console.warn(
-            `[AppState] Project ${lookupId} not found. Clearing broken workspace state.`
+          err.message?.includes("Project not found") ||
+          err.status === 404;
+
+        const isJobId = lookupId.startsWith("job_");
+        console.warn(`[AppState] Project ${lookupId} ${is404 ? "not found" : "load error"}. Setting missing state.`);
+
+        useProjectStore.getState().setProjectMissing(lookupId, { isJobId });
+
+        if (addNotification) {
+          addNotification(
+            isJobId
+              ? `Processing Job ID "${lookupId}" is not associated with an active project.`
+              : `Project "${lookupId}" could not be found or loaded.`,
+            "warning",
+            {
+              details: "Open the project selector in the header to pick another project or clear the workspace.",
+            }
           );
-          setProjectId(null);
-          setSeriesSlugState(null);
-          setChapterSlugState(null);
-          localStorage.removeItem("active_project_id");
-          localStorage.removeItem("active_series_slug");
-          localStorage.removeItem("active_chapter_slug");
-
-          if (
-            window.location.search.includes("id=") ||
-            window.location.search.includes("project_id=")
-          ) {
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.delete("id");
-            urlParams.delete("project_id");
-            const newSearch = urlParams.toString();
-            const newUrl =
-              window.location.pathname + (newSearch ? "?" + newSearch : "");
-            window.history.replaceState(null, "", newUrl);
-          }
-
-          addNotification("Project not found or was deleted.", "error", {
-            details: `The requested project ID (${lookupId}) could not be found. Your workspace has been reset to a blank slate.`,
-          });
-        } else {
-          console.error("Failed to load project into workspace:", err);
         }
       }
     };

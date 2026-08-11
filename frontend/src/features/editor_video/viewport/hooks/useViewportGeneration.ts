@@ -418,7 +418,11 @@ export function useVideoPreviewGeneration({
     [panels, setConsoleLogs, setPanels, addNotification]
   );
 
+  const isRenderingRef = React.useRef(false);
+
   const handleRenderFinalVideo = useCallback(async () => {
+    if (isRendering || isRenderingRef.current) return;
+    isRenderingRef.current = true;
     setIsRendering(true);
     setRenderProgress(5);
     setRenderEtaSeconds(null);
@@ -482,6 +486,7 @@ export function useVideoPreviewGeneration({
             addNotification("Final video rendered successfully!", "success");
             audioFeedback?.playSuccess();
             setIsRendering(false);
+            isRenderingRef.current = false;
             setTimeout(() => setRenderProgress(0), 2000);
             if (saveProject) {
               saveProject(undefined, {
@@ -498,6 +503,7 @@ export function useVideoPreviewGeneration({
           console.error("Polling error:", pollErr);
           addNotification(`Render failed: ${pollErr.message}`, "error");
           setIsRendering(false);
+          isRenderingRef.current = false;
           setRenderProgress(0);
         }
       }, 2000);
@@ -505,6 +511,7 @@ export function useVideoPreviewGeneration({
       console.error("Error starting render:", error);
       addNotification(`Render failed: ${error.message}`, "error");
       setIsRendering(false);
+      isRenderingRef.current = false;
       setRenderProgress(0);
       setRenderEtaSeconds(null);
     }

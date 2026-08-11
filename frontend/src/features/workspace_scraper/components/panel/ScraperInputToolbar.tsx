@@ -141,13 +141,13 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         />
 
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-2 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl z-[100] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-            <div className="px-3 py-2 border-b border-neutral-800/80 bg-neutral-950/40">
-              <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
-                Recent & Bookmarked Episodes
+          <div className="absolute left-0 right-0 top-full mt-2 bg-[#0a0a10] border border-neutral-800 rounded-xl shadow-2xl z-[1000] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="px-3 py-2 border-b border-neutral-800/80 bg-[#111218]">
+              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                Recent &amp; Bookmarked Episodes
               </span>
             </div>
-            <div className="max-h-60 overflow-y-auto divide-y divide-neutral-800/50">
+            <div className="max-h-60 overflow-y-auto divide-y divide-neutral-800/50 bg-[#0a0a10]">
               {suggestions.map((series, idx) => {
                 const parsed = parseWebtoonUrl(series.url);
                 const seriesTitleText = parsed.title || series.title || "Webtoon Series";
@@ -160,7 +160,11 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                     key={idx}
                     onClick={() => {
                       if (series.url) {
-                        setTargetUrl(series.url);
+                        const normalized = extractWebtoonUrl(series.url);
+                        if (normalized !== targetUrl && resetWorkspace) {
+                          resetWorkspace();
+                        }
+                        setTargetUrl(normalized);
                         if (setSeriesTitle) setSeriesTitle(parsed.title);
                         if (setScrapedGenre) setScrapedGenre(parsed.genre);
                         if (setChapterNumber) setChapterNumber(parsed.chapterNumber);
@@ -168,7 +172,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                       }
                       setShowSuggestions(false);
                     }}
-                    className="w-full px-4 py-2.5 hover:bg-neutral-800/60 flex items-center justify-between gap-3 transition-colors cursor-pointer group relative"
+                    className="w-full px-4 py-2.5 hover:bg-purple-950/40 flex items-center justify-between gap-3 transition-colors cursor-pointer group relative bg-[#0a0a10]"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="w-9 h-9 bg-neutral-850 rounded-lg flex items-center justify-center border border-neutral-800 flex-shrink-0">

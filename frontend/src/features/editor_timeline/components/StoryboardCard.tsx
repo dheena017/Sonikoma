@@ -1092,7 +1092,7 @@ const StoryboardCard = ({
           <button
             type="button"
             onClick={() => {
-              window.history.pushState({}, "", `/panel-assistant?idx=${idx}`);
+              window.history.pushState({}, "", `/creative-suite/panel-assistant?idx=${idx}`);
               window.dispatchEvent(new Event("popstate"));
             }}
             className="w-full py-1.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-600/50 text-neutral-350 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all"

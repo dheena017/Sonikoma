@@ -203,9 +203,11 @@ export function useAppRouter({
         if (!isAuthenticated) {
           const isProtectedRoute =
             path === "/dashboard" ||
+            path === "/dashboard" ||
             path === "/creative-suite" ||
             path === "/creative-suite/" ||
             path === "/creative-suite-dashboard" ||
+            path.startsWith("/creative-suite/") ||
             path === "/scraper" ||
             path === "/settings" ||
             path === "/settings/account" ||
@@ -240,6 +242,9 @@ export function useAppRouter({
             path === "/image-editor" ||
             path === "/image-editor/" ||
             path.startsWith("/image-editor/") ||
+            path === "/video-editor" ||
+            path === "/video-editor/" ||
+            path.startsWith("/video-editor/") ||
             /^\/scraper\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
 
           if (isProtectedRoute) {
@@ -266,6 +271,36 @@ export function useAppRouter({
         }
       }
 
+      // Automatic redirect for legacy top-level Creative Suite routes to /creative-suite/...
+      if (
+        path === "/ai-optimizer" ||
+        path.startsWith("/ai-optimizer?") ||
+        path.startsWith("/ai-optimizer/") ||
+        path === "/panel-assistant" ||
+        path.startsWith("/panel-assistant?") ||
+        path.startsWith("/panel-assistant/") ||
+        path === "/ai-characters" ||
+        path.startsWith("/ai-characters?") ||
+        path.startsWith("/ai-characters/") ||
+        path === "/ai-thumbnails" ||
+        path.startsWith("/ai-thumbnails?") ||
+        path.startsWith("/ai-thumbnails/") ||
+        path === "/ai-voice" ||
+        path.startsWith("/ai-voice?") ||
+        path.startsWith("/ai-voice/") ||
+        path === "/ai-analytics" ||
+        path.startsWith("/ai-analytics?") ||
+        path.startsWith("/ai-analytics/") ||
+        path === "/youtube" ||
+        path.startsWith("/youtube?") ||
+        path.startsWith("/youtube/")
+      ) {
+        const target = `/creative-suite${path}`;
+        window.history.replaceState({}, "", target);
+        setCurrentPath(target);
+        return;
+      }
+
       const isSeriesPath = path.startsWith("/series/");
       const isChapterDetails = isSeriesPath && path.endsWith("/details");
       const isWorkspacePath =
@@ -278,17 +313,11 @@ export function useAppRouter({
         path === "/creative-suite" ||
         path === "/creative-suite/" ||
         path === "/creative-suite-dashboard" ||
+        path.startsWith("/creative-suite/") ||
         path === "/logs" ||
         path === "/status" ||
         path === "/ai-models" ||
         path === "/shortcuts" ||
-        path === "/ai-optimizer" ||
-        path === "/panel-assistant" ||
-        path === "/ai-characters" ||
-        path === "/ai-thumbnails" ||
-        path === "/ai-voice" ||
-        path === "/ai-analytics" ||
-        path === "/youtube" ||
         path === "/profile" ||
         path === "/notifications" ||
         path === "/projects" ||
@@ -326,7 +355,8 @@ export function useAppRouter({
       } else if (
         path.startsWith("/editor") ||
         path.startsWith("/scraper/editor") ||
-        path.startsWith("/image-editor")
+        path.startsWith("/image-editor") ||
+        path.startsWith("/video-editor")
       ) {
         const params = new URLSearchParams(window.location.search);
 

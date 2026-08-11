@@ -70,6 +70,7 @@ class ProjectService:
         self.repo.insert_project(
             {
                 "project_id": body.project_id,
+                "project_type": getattr(body, "project_type", "permanent") or "permanent",
                 "job_id": getattr(body, "job_id", None),
                 "url": unwrap_proxy_url(body.url),
                 "title": body.title,
@@ -85,6 +86,29 @@ class ProjectService:
             }
         )
         return {"success": True, "project_id": body.project_id}
+
+    def promote_project(self, project_id: str, current_user_id: str) -> Dict[str, Any]:
+        """
+        Promote a temporary workspace project to permanent saved status.
+        The project_id stays the same — only project_type flips to 'permanent'.
+        """
+        project = self.repo.get_project(project_id)
+        if not project:
+            project = self.repo.get_project_by_slug(project_id)
+            if project:
+                project_id = project["project_id"]
+
+        if not project:
+            raise ValueError("Project not found.")
+
+        if project.get("user_id") != current_user_id:
+            raise PermissionError("Access denied.")
+
+        if project.get("project_type") == "permanent":
+            return {"success": True, "project_id": project_id, "already_permanent": True}
+
+        self.repo.update_project(project_id, {"project_type": "permanent", "status": "ready"})
+        return {"success": True, "project_id": project_id, "promoted": True}
 
     def save_project_panels(self, project_id: str, panels: Any, current_user_id: str, audit_logger=None, request_client=None) -> Dict[str, Any]:
         project = self.repo.get_project(project_id)
@@ -155,24 +179,7 @@ class ProjectService:
                 project_id = project["project_id"]
 
         if not project:
-            self.repo.insert_project(
-                {
-                    "project_id": project_id,
-                    "job_id": getattr(body, "job_id", None),
-                    "url": body.url or "",
-                    "title": body.title or "Untitled Project",
-                    "genre": body.genre or "general",
-                    "episode": body.episode or "",
-                    "status": "pending",
-                    "panels_count": len(body.panels) if body.panels else 0,
-                    "video_url": None,
-                    "user_id": current_user_id,
-                    "author": body.author or "",
-                    "cover_image": unwrap_proxy_url(body.cover_image) if body.cover_image is not None else "",
-                    "synopsis": body.synopsis or "",
-                }
-            )
-            project = {"user_id": current_user_id}
+            raise ValueError("Project not found.")
 
         if project.get("user_id") != current_user_id:
             raise PermissionError("Access denied.")
@@ -324,5 +331,10 @@ def get_series_details(series_id_or_slug: str, current_user_id: str) -> Optional
     return ProjectService().get_series_details(series_id_or_slug, current_user_id)
 
 
+def promote_project(project_id: str, current_user_id: str) -> Dict[str, Any]:
+    return ProjectService().promote_project(project_id, current_user_id)
+
+
 def delete_temp_file(image_path: Optional[str]) -> None:
     ProjectService().delete_temp_file(image_path)
+

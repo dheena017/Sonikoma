@@ -231,7 +231,7 @@ async def google_callback(request: Request):
             name = email.split("@")[0]
         else:
             name = f"user_{uuid.uuid4().hex[:8]}"
-        picture = info.get("picture") or f"https://api.dicebear.com/7.x/avataaars/svg?seed={google_id}"
+        picture = info.get("picture") or "https://lh3.googleusercontent.com/a/default-user"
 
         if not email:
             raise HTTPException(status_code=400, detail="Google account did not return a valid email address")

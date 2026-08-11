@@ -69,7 +69,7 @@ export function TestimonialCard({
           src={avatar}
           alt={author}
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(author)}`;
+            (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
           }}
           className="w-12 h-12 rounded-2xl object-cover bg-purple-600/10 border border-purple-500/20 shrink-0"
         />
