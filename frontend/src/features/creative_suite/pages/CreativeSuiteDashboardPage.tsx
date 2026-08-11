@@ -134,15 +134,6 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       badge: "Audio Production",
     },
     {
-      id: "characters",
-      label: "Character DB",
-      desc: "Store custom character prompt rules and image references.",
-      icon: Users,
-      path: "/creative-suite/ai-characters",
-      requiresPanels: false,
-      badge: "Context",
-    },
-    {
       id: "youtube",
       label: "YouTube Publisher",
       desc: "Push completed video exports to YouTube Shorts or channel feed.",

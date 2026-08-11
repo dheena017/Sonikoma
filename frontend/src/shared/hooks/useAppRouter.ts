@@ -279,9 +279,6 @@ export function useAppRouter({
         path === "/panel-assistant" ||
         path.startsWith("/panel-assistant?") ||
         path.startsWith("/panel-assistant/") ||
-        path === "/ai-characters" ||
-        path.startsWith("/ai-characters?") ||
-        path.startsWith("/ai-characters/") ||
         path === "/ai-thumbnails" ||
         path.startsWith("/ai-thumbnails?") ||
         path.startsWith("/ai-thumbnails/") ||

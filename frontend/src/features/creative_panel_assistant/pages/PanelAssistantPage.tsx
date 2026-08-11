@@ -5,6 +5,8 @@ import { cleanDialogueDisplay } from "@/utils";
 
 import PanelTranslationTool from "@/features/creative_panel_assistant/components/PanelTranslationTool";
 
+import { useProjectStore } from "@/store/useProjectStore";
+
 interface PanelAssistantPageProps {
   panels?: GeneratedPanel[];
   setPanels?: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
@@ -19,7 +21,9 @@ const PanelAssistantPage = React.memo(
     onNavigateHome = () => {},
     addNotification,
   }: PanelAssistantPageProps) => {
-    const safePanels = Array.isArray(panels) ? panels : [];
+    const activeProjectData = useProjectStore((state) => state.activeProjectData);
+    const storePanels = activeProjectData?.panels || [];
+    const safePanels = (panels && panels.length > 0) ? panels : (Array.isArray(storePanels) ? storePanels : []);
     const [selectedIdx, setSelectedIdx] = useState(0);
 
     const filmstripRef = useRef<HTMLDivElement>(null);

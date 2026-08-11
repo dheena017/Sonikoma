@@ -27,6 +27,8 @@ import AdPlacementTab from "@/features/creative_optimizer/components/AdPlacement
 import ThumbnailStudioTab from "@/features/creative_optimizer/components/ThumbnailStudioTab";
 import ModelSelect from "@/features/ai_core/components/ModelSelect";
 
+import { useProjectStore } from "@/store/useProjectStore";
+
 interface AIOptimizerPageProps {
   panels: GeneratedPanel[];
   onNavigateHome: () => void;
@@ -45,7 +47,11 @@ const AIOptimizerPage = React.memo(
     scrapedGenre,
     videoUrl,
   }: AIOptimizerPageProps) => {
-    if (panels.length === 0) {
+    const activeProjectData = useProjectStore((state) => state.activeProjectData);
+    const storePanels = activeProjectData?.panels || [];
+    const safePanels = (panels && panels.length > 0) ? panels : storePanels;
+
+    if (safePanels.length === 0) {
       return (
         <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
           <Sparkles className="h-10 w-10 text-neutral-600 mb-3" />

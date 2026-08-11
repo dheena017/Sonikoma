@@ -23,7 +23,7 @@ import RegisterPage from "@/features/app_auth/pages/RegisterPage";
 import ForgotPasswordPage from "@/features/app_auth/pages/ForgotPasswordPage";
 import LoadingPage from "@/components/feedback/LoadingPage";
 import ProjectsPage from "@/features/workspace_projects/pages/ProjectsPage";
-import SeriesDetailsPage from "@/features/workspace_series/pages/SeriesDetailsPage";
+import SeriesDetailsPage from "@/features/workspace_projects/pages/SeriesDetailsPage";
 import CreativeSuiteLayout from "@/features/creative_suite/components/CreativeSuiteLayout";
 
 // --- Lazy Loaded Heavy Feature Pages (Phase 9 Performance Code-Splitting) ---

@@ -23,6 +23,8 @@ import SfxOverlayMixer from "@/features/editor_audio/components/SfxOverlayMixer"
 
 import ModelSelect from "@/features/ai_core/components/ModelSelect";
 
+import { useProjectStore } from "@/store/useProjectStore";
+
 interface VoiceStudioPageProps {
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
@@ -41,6 +43,10 @@ const VoiceStudioPage = React.memo(
     scrapedGenre,
     setMusicTheme,
   }: VoiceStudioPageProps) => {
+    const activeProjectData = useProjectStore((state) => state.activeProjectData);
+    const storePanels = activeProjectData?.panels || [];
+    const safePanels = (panels && panels.length > 0) ? panels : storePanels;
+
     const [selectedIdx, setSelectedIdx] = useState(0);
     const [activeTab, setActiveTab] = useState<"dramatize" | "cast" | "sound">("dramatize");
     const [selectedModel, setSelectedModel] = useState<string>(
@@ -70,7 +76,6 @@ const VoiceStudioPage = React.memo(
       setIsPlayingNarrative(false);
     };
 
-    const safePanels = panels || [];
     const activePanel = safePanels[selectedIdx] || safePanels[0];
     const parsedSpeech = cleanDialogueDisplay(activePanel?.speech_text);
 

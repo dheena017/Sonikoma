@@ -162,18 +162,6 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
       ],
     },
     {
-      name: "Context & Script",
-      items: [
-        {
-          id: "characters",
-          label: "Character DB",
-          icon: Users,
-          path: "/creative-suite/ai-characters",
-          requiresPanels: false,
-        },
-      ],
-    },
-    {
       name: "Distribution",
       items: [
         {

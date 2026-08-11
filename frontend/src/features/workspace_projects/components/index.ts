@@ -6,3 +6,6 @@ export * from "./ProjectsPageHeader";
 export * from "./ProjectsPageResultView";
 export * from "./ProjectsPageView";
 export * from "./ProjectsStats";
+export { default as SeriesEditModal } from "./SeriesEditModal";
+export { default as SeriesPublishModal } from "./SeriesPublishModal";
+export { default as SeriesReaderModal } from "./SeriesReaderModal";

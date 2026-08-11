@@ -128,7 +128,6 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
     { label: "Creative Dashboard", path: "/creative-suite", keyword: "home dashboard overview creative suite hub" },
     { label: "AI Video Optimizer", path: "/creative-suite/ai-optimizer", keyword: "video optimizer resolution pacing scenes compile" },
     { label: "AI Panel Assistant", path: "/creative-suite/panel-assistant", keyword: "panel editing speech bubble clean crop repaint" },
-    { label: "AI Character DB", path: "/creative-suite/ai-characters", keyword: "characters profile sheet database prompts reference" },
     { label: "AI Voice & Sound Studio", path: "/creative-suite/ai-voice", keyword: "voice synthesis narrator sound design bgm sfx casting speed pitch" },
     { label: "YouTube Publisher Studio", path: "/creative-suite/youtube", keyword: "youtube upload publish export draft title" },
   ];

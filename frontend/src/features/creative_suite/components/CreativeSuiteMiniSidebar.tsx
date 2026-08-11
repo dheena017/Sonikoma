@@ -73,18 +73,6 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
       ],
     },
     {
-      name: "Script",
-      items: [
-        {
-          id: "characters",
-          label: "Character DB",
-          icon: Users,
-          path: "/creative-suite/ai-characters",
-          requiresPanels: false,
-        },
-      ],
-    },
-    {
       name: "Dist",
       items: [
         {

@@ -282,47 +282,60 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
       <div className="relative w-full max-w-lg h-full bg-[#0c0d14] border-l border-white/10 text-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-300">
         
         {/* ─── Website Logo & Header ─── */}
-        <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#11121d]">
+        <div className="p-4 border-b border-neutral-800 flex items-center justify-between bg-[#0e0f18]/90 backdrop-blur-md">
           <div className="flex items-center gap-3.5">
             <div className="relative">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-indigo-500 opacity-50 blur-sm" />
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 opacity-60 blur-sm" />
               <img
                 src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
                 }}
-                className="relative h-10 w-10 rounded-full border border-purple-500/30 object-cover bg-black shrink-0"
+                className="relative h-10 w-10 rounded-full border border-purple-500/40 object-cover bg-black shrink-0 shadow-lg"
                 alt="Sonikoma Logo"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-extrabold text-base text-white font-sans tracking-tight">
+                <h3 className="font-black text-base text-white font-sans tracking-tight">
                   Select Active Project
                 </h3>
-                <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md font-mono">
-                  ACTIVE
+                <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-md font-mono animate-pulse">
+                  CONTEXT
                 </span>
               </div>
               <p className="text-[11px] text-neutral-400 font-sans leading-tight">
-                Global workspace project context
+                Global workspace active context switcher
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             {navigateTo && (
-              <button
-                onClick={() => {
-                  setDrawerOpen(false);
-                  navigateTo("/scraper");
-                }}
-                className="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-                title="Scrape Webtoon / New Project"
-              >
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">New Project</span>
-              </button>
+              <>
+                <button
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    navigateTo("/projects");
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-750 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                  title="View All Projects Workspace"
+                >
+                  <FolderOpen className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="hidden sm:inline">All Projects</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setDrawerOpen(false);
+                    navigateTo("/scraper");
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-500/30 text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+                  title="Scrape Webtoon / New Project"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">New Project</span>
+                </button>
+              </>
             )}
             <button
               onClick={() => setDrawerOpen(false)}
@@ -521,30 +534,66 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
 
                 <div className="flex flex-col items-end gap-1.5 shrink-0">
                   {navigateTo && (
-                    <>
+                    <div className="grid grid-cols-2 gap-1.5">
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
                           navigateTo(`/scraper/editor?project_id=${encodeURIComponent(activeProjectId!)}`);
                         }}
-                        className="px-2.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1 cursor-pointer active:scale-95 w-full justify-center"
-                        title="Open in Video Editor"
+                        className="px-2.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-[11px] font-extrabold transition-all shadow-md flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                        title="Open Studio Editor"
                       >
                         <Film className="w-3.5 h-3.5" />
-                        <span>Editor</span>
+                        <span>Studio</span>
                       </button>
+
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
-                          navigateTo(`/creative-suite?project_id=${encodeURIComponent(activeProjectId!)}`);
+                          navigateTo(`/editor/image?project_id=${encodeURIComponent(activeProjectId!)}`);
                         }}
-                        className="px-2.5 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition-all border border-purple-500/30 flex items-center gap-1 cursor-pointer active:scale-95 w-full justify-center"
-                        title="Open in Creative Suite"
+                        className="px-2.5 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                        title="Open Image Cropper & Cleaner"
                       >
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Suite</span>
+                        <Zap className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Image</span>
                       </button>
-                    </>
+
+                      <button
+                        onClick={() => {
+                          setDrawerOpen(false);
+                          navigateTo(`/creative-suite/ai-voice?project_id=${encodeURIComponent(activeProjectId!)}`);
+                        }}
+                        className="px-2.5 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                        title="Open AI Voice Studio"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>Voice</span>
+                      </button>
+
+                      {proj?.series_slug ? (
+                        <button
+                          onClick={() => {
+                            setDrawerOpen(false);
+                            navigateTo(`/projects/${encodeURIComponent(proj.series_slug!)}`);
+                          }}
+                          className="px-2.5 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-300 border border-neutral-700 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                          title="Open Series Details Page"
+                        >
+                          <FolderOpen className="w-3.5 h-3.5 text-purple-400" />
+                          <span>Series</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => clearActiveProject()}
+                          className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                          title="Deactivate / Clear active project"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          <span>Clear</span>
+                        </button>
+                      )}
+                    </div>
                   )}
                   <button
                     onClick={() => clearActiveProject()}
@@ -561,7 +610,9 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[11px] font-mono">
                     <span className="text-neutral-400">Composition Progress</span>
-                    <span className="text-purple-300 font-bold">{activeProgressPct}%</span>
+                    <span className="text-purple-300 font-bold">
+                      {activeProgressPct}% · ~{formatDuration(activeDurationSeconds)}
+                    </span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-neutral-900 overflow-hidden border border-white/5">
                     <div
@@ -598,17 +649,60 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                 </div>
               </div>
 
-              {/* Synopsis snippet if available */}
-              {proj?.synopsis && (
-                <p className="text-[11px] text-neutral-500 font-sans leading-relaxed line-clamp-2 px-0.5">
-                  {proj.synopsis}
-                </p>
+              {/* Panel Storyboard Preview Reel Carousel */}
+              {activePanels.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="text-neutral-400 uppercase tracking-wider flex items-center gap-1">
+                      <Film className="w-3 h-3 text-purple-400" /> Storyboard Panels
+                    </span>
+                    <span className="text-purple-300 font-bold">{activePanels.length} panels</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                    {activePanels.slice(0, 10).map((panel: any, i: number) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setDrawerOpen(false);
+                          if (navigateTo) {
+                            navigateTo(`/scraper/editor?project_id=${encodeURIComponent(activeProjectId!)}&panel=${i}`);
+                          }
+                        }}
+                        className="w-11 h-11 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 hover:border-purple-500 shrink-0 relative transition-all group cursor-pointer"
+                        title={`Panel #${i + 1} — Click to edit`}
+                      >
+                        {panel.image_url ? (
+                          <img
+                            src={getProxiedImageUrl(panel.image_url, proj?.url)}
+                            alt={`Panel ${i + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-neutral-500 font-mono">
+                            #{i + 1}
+                          </div>
+                        )}
+                        <span className="absolute bottom-0.5 right-0.5 bg-black/80 px-1 rounded text-[8px] font-bold font-mono text-purple-300">
+                          #{i + 1}
+                        </span>
+                      </button>
+                    ))}
+                    {activePanels.length > 10 && (
+                      <div className="w-11 h-11 rounded-lg bg-purple-500/10 border border-purple-500/20 shrink-0 flex items-center justify-center">
+                        <span className="text-[10px] text-purple-300 font-bold font-mono">+{activePanels.length - 10}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
 
               {/* Scraped Images Preview Strip — shown when scraped images are available */}
               {(() => {
                 const scraped = activeProjectData.scrapedImages || [];
-                if (scraped.length === 0) return null;
+                if (scraped.length === 0 || activePanels.length > 0) return null;
                 const preview = scraped.slice(0, 8);
                 const remaining = scraped.length - preview.length;
                 return (

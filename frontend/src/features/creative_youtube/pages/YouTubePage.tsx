@@ -31,6 +31,8 @@ import SubtitleConfig from "@/features/creative_youtube/components/SubtitleConfi
 // Import custom hook
 import { useYouTubePublisher } from "@/features/creative_youtube/hooks/useYouTubePublisher";
 
+import { useProjectStore } from "@/store/useProjectStore";
+
 interface YouTubePageProps {
   panels: GeneratedPanel[];
   videoUrl: string | null;
@@ -49,7 +51,12 @@ const YouTubePage = React.memo(
     onNavigateHome,
     addNotification,
   }: YouTubePageProps) => {
-    const safePanels = Array.isArray(panels) ? panels : [];
+    const activeProjectData = useProjectStore((state) => state.activeProjectData);
+    const storePanels = activeProjectData?.panels || [];
+    const safePanels = (panels && panels.length > 0) ? panels : (Array.isArray(storePanels) ? storePanels : []);
+    const effectiveTitle = scrapedTitle || activeProjectData?.project?.title || "";
+    const effectiveGenre = scrapedGenre || activeProjectData?.project?.genre || "";
+    const effectiveVideoUrl = videoUrl || activeProjectData?.project?.video_url || null;
     const [activeTab, setActiveTab] = useState<
       "details" | "chapters_tags" | "comic_subtitles" | "settings" | "integrations"
     >("details");
