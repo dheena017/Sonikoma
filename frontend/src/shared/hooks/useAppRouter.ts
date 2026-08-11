@@ -208,19 +208,11 @@ export function useAppRouter({
             path === "/creative-suite/" ||
             path === "/creative-suite-dashboard" ||
             path.startsWith("/creative-suite/") ||
-            path === "/scraper" ||
-            path === "/settings" ||
-            path === "/settings/account" ||
-            path === "/settings/account/" ||
-            path === "/logs" ||
-            path === "/status" ||
-            path === "/ai-models" ||
-            path === "/shortcuts" ||
+            path === "/scraper" ||            path === "/settings/account" ||
+            path === "/settings/account/" ||            path === "/shortcuts" ||
             path === "/ai-optimizer" ||
             path === "/panel-assistant" ||
-            path === "/ai-characters" ||
-            path === "/model-training" ||
-            path === "/ai-voice" ||
+            path === "/ai-characters" ||            path === "/ai-voice" ||
             path === "/youtube" ||
             path === "/profile" ||
             path === "/notifications" ||
@@ -306,18 +298,12 @@ export function useAppRouter({
       const isWorkspacePath =
         path === "/scraper" || (isSeriesPath && !isChapterDetails);
 
-      if (
-        path === "/settings" ||
-        path === "/settings/account" ||
+      if (        path === "/settings/account" ||
         path === "/settings/account/" ||
         path === "/creative-suite" ||
         path === "/creative-suite/" ||
         path === "/creative-suite-dashboard" ||
-        path.startsWith("/creative-suite/") ||
-        path === "/logs" ||
-        path === "/status" ||
-        path === "/ai-models" ||
-        path === "/shortcuts" ||
+        path.startsWith("/creative-suite/") ||        path === "/shortcuts" ||
         path === "/profile" ||
         path === "/notifications" ||
         path === "/projects" ||

@@ -45,12 +45,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     currentPath.startsWith("/editor") ||
     currentPath.startsWith("/scraper/editor");
 
-  const isLogs = currentPath.startsWith("/logs");
-  const isStatus = currentPath.startsWith("/status");
-  const isAIModels = currentPath.startsWith("/ai-models");
-  const isModelTraining = currentPath.startsWith("/model-training");
   const isShortcuts = currentPath.startsWith("/shortcuts");
-  const isSettings = currentPath.startsWith("/settings");
   const isAdminPath = currentPath.startsWith("/admin");
   const isProEditorPage =
     currentPath === "/editor" ||
@@ -141,42 +136,12 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     {
       group: "System",
       items: [
-        {
-          label: "Logs",
-          icon: Terminal,
-          active: isLogs,
-          onClick: () => navigateTo("/logs"),
-        },
-        {
-          label: "Status",
-          icon: Activity,
-          active: isStatus,
-          onClick: () => navigateTo("/status"),
-        },
-        {
-          label: "AI Models",
-          icon: Award,
-          active: isAIModels,
-          onClick: () => navigateTo("/ai-models"),
-        },
-        {
-          label: "Model Training",
-          icon: Database,
-          active: isModelTraining,
-          onClick: () => navigateTo("/model-training"),
-        },
-        {
-          label: "Keys",
-          icon: Keyboard,
-          active: isShortcuts,
-          onClick: () => navigateTo("/shortcuts"),
-        },
-        {
-          label: "Settings",
-          icon: Sliders,
-          active: isSettings,
-          onClick: () => navigateTo("/settings"),
-        },
+
+
+
+
+
+
       ],
     },
     {
