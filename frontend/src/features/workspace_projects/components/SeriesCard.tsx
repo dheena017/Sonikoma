@@ -1,67 +1,49 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
-  ArrowRight,
-  CheckSquare,
-  Download,
-  Edit2,
-  ExternalLink,
   FolderOpen,
-  Link,
   MoreVertical,
+  Clock,
   Play,
   Scissors,
-  Square,
+  CheckCircle2,
   Trash2,
-  Clock,
+  ArrowRight,
+  Globe,
+  Edit2,
+  Download,
+  Link,
+  Layers,
 } from "lucide-react";
-import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
-
-type ProjectCardItem = Project;
-import {
-  getProxiedImageUrl,
-  getSourceIcon,
-  getSourceName,
-} from "@/utils";
+import type { Series } from "@/features/workspace_projects/utils/seriesGrouping";
 import { timeAgo } from "@/utils/dateUtils";
 
-interface ProjectCardProps {
-  project: Project;
-  onOpenProject: (project: ProjectCardItem) => void;
-  onRename?: (e: React.MouseEvent, project: ProjectCardItem) => void;
-  onExport?: (e: React.MouseEvent, project: ProjectCardItem) => void;
-  onOpenDetails?: (e: React.MouseEvent, project: ProjectCardItem) => void;
-  onDelete?: (e: React.MouseEvent, projectId: string) => void;
-  onCopyLink?: (e: React.MouseEvent, project: ProjectCardItem) => void;
-  onOpenCreativeSuite?: (e: React.MouseEvent, project: ProjectCardItem) => void;
+interface SeriesCardProps {
+  series: Series;
+  onOpenSeries: (series: Series) => void;
+  onOpenCreativeSuite?: (e: React.MouseEvent, series: Series) => void;
+  onRename?: (e: React.MouseEvent, series: Series) => void;
+  onExport?: (e: React.MouseEvent, series: Series) => void;
+  onOpenDetails?: (e: React.MouseEvent, series: Series) => void;
+  onDelete?: (e: React.MouseEvent, seriesId: string) => void;
+  onCopyLink?: (e: React.MouseEvent, series: Series) => void;
   isSelected?: boolean;
-  onToggleSelect?: (e: React.MouseEvent, projectId: string) => void;
+  onToggleSelect?: (e: React.MouseEvent, seriesId: string) => void;
   showSelection?: boolean;
   openMenuId?: string | null;
-  onToggleMenu?: (e: React.MouseEvent, projectId: string) => void;
+  onToggleMenu?: (e: React.MouseEvent, seriesId: string) => void;
   renamingProjectId?: string | null;
-  onSaveRename?: (projectId: string, newName: string) => void;
+  onSaveRename?: (seriesId: string, newName: string) => void;
 }
 
-function formatEpisodeLabel(ep: any): string {
-  if (ep === undefined || ep === null) return "";
-  const str = String(ep).trim();
-  if (!str) return "";
-  const numMatch = str.match(/\d+/);
-  if (numMatch) {
-    return `CH ${numMatch[0]}`;
-  }
-  return str;
-}
-
-export default function ProjectCard({
-  project,
-  onOpenProject,
+export default function SeriesCard({
+  series,
+  onOpenSeries,
+  onOpenCreativeSuite,
   onRename,
   onExport,
   onOpenDetails,
   onDelete,
   onCopyLink,
-  onOpenCreativeSuite,
   isSelected = false,
   onToggleSelect,
   showSelection = false,
@@ -69,61 +51,81 @@ export default function ProjectCard({
   onToggleMenu,
   renamingProjectId,
   onSaveRename,
-}: ProjectCardProps) {
-  const isProcessing =
-    project.status?.toLowerCase() === "processing" ||
-    project.status?.toLowerCase() === "exporting";
-  const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
-  const isRenaming = renamingProjectId === project.project_id;
-  const titleText = project.title || "Untitled Series";
-  const statusColor =
-    project.status?.toLowerCase() === "completed"
-      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-emerald-950/20"
-      : project.status?.toLowerCase() === "processing"
-      ? "bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse"
-      : "bg-neutral-800/80 text-neutral-400 border-neutral-700/50";
+}: SeriesCardProps) {
+  const isRenaming = renamingProjectId === series.id;
+  const [titleText, setTitleText] = useState(series.title || "Untitled Series");
+
+  useEffect(() => {
+    setTitleText(series.title || "Untitled Series");
+  }, [series.title]);
+
+  const statusColors: Record<string, string> = {
+    Completed: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+    "In Progress": "bg-amber-500/20 text-amber-300 border-amber-500/30",
+    Draft: "bg-neutral-500/20 text-neutral-300 border-neutral-500/30",
+    Processing: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+  };
+
+  // Use the latest chapter's status or default to Draft
+  const seriesStatus = series.latestChapter?.status || "Draft";
+  const statusColor = statusColors[seriesStatus] || statusColors["Draft"];
+
+  const getSourceIcon = (url?: string) => {
+    if (!url) return FolderOpen;
+    if (url.includes("webtoons.com")) return Globe;
+    if (url.includes("tapas.io")) return Globe;
+    return Globe;
+  };
+  const SourceIcon = getSourceIcon(series.latestChapter?.url);
+  const getSourceName = (url?: string) => {
+    if (!url) return "Local";
+    if (url.includes("webtoons.com")) return "Webtoon";
+    if (url.includes("tapas.io")) return "Tapas";
+    try {
+      const { hostname } = new URL(url);
+      return hostname.replace("www.", "");
+    } catch {
+      return "Web";
+    }
+  };
+
+  const isProcessing = series.latestChapter?.status?.toLowerCase() === "processing";
 
   return (
     <div
-      onClick={() => onOpenProject(project)}
-      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0c0c12] via-[#10101a] to-[#12121f] shadow-xl shadow-purple-950/10 cursor-pointer transition-all duration-300 glass-interactive hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-950/40 flex flex-col h-full ${
-        isSelected
-          ? "border-purple-500/50 shadow-purple-900/30 ring-1 ring-purple-500/50"
-          : "hover:border-purple-500/40"
-      }`}
+      onClick={() => onOpenSeries(series)}
+      className={`group relative flex flex-col bg-[#111116] border ${
+        isSelected ? "border-purple-500 shadow-lg shadow-purple-500/20" : "border-white/10 hover:border-purple-500/50"
+      } rounded-3xl overflow-hidden transition-all duration-300 cursor-pointer shadow-xl`}
     >
-      {/* Selection checkbox */}
-      {showSelection && onToggleSelect && (
-        <div
-          className="absolute top-3 left-3 z-10 cursor-pointer"
-          onClick={(e) => onToggleSelect(e, project.project_id)}
-        >
-          {isSelected ? (
-            <CheckSquare className="w-5 h-5 text-purple-400 drop-shadow-md" />
-          ) : (
-            <Square className="w-5 h-5 text-white/40 opacity-0 group-hover:opacity-100 transition-opacity hover:text-white drop-shadow-md" />
-          )}
-        </div>
-      )}
+      {/* ─── Thumbnail / Header Section ────────────────── */}
+      <div className="relative aspect-video w-full bg-neutral-900 overflow-hidden border-b border-white/10 shrink-0">
 
-      {/* ─── Thumbnail ─────────────────────────────────── */}
-      <div className="relative aspect-[16/10] w-full bg-neutral-950 overflow-hidden flex-shrink-0 rounded-t-3xl">
-        {project.cover_image ? (
-          <>
-            <img
-              src={getProxiedImageUrl(project.cover_image, project.url)}
-              alt={project.title}
-              className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
-                isSelected ? "scale-105 opacity-80" : "group-hover:scale-105"
-              }`}
-            />
-            {/* Bottom fade into card body */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c12] via-[#0c0c12]/40 to-transparent" />
-            {/* Subtle side vignette */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
-            {/* Soft glow overlay */}
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.15),_transparent_45%)]" />
-          </>
+        {/* Selection checkbox overlay */}
+        {showSelection && (
+          <div
+            className={`absolute top-3 left-3 z-20 w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer shadow-md ${
+              isSelected
+                ? "bg-purple-500 border-purple-500 text-white shadow-purple-500/40"
+                : "bg-black/40 border-white/30 text-transparent hover:border-white/60 backdrop-blur-sm"
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelect?.(e, series.id);
+            }}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+          </div>
+        )}
+
+        {/* Cover image or fallback */}
+        {series.cover ? (
+          <img
+            src={series.cover}
+            alt={series.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 group-hover:rotate-1 opacity-90 group-hover:opacity-100"
+            loading="lazy"
+          />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/20 via-neutral-900 to-neutral-950">
             <FolderOpen className="w-10 h-10 text-purple-500/40" />
@@ -142,12 +144,12 @@ export default function ProjectCard({
         <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
           {/* Status badge */}
           <div className={`px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] rounded-full border backdrop-blur-md shadow-md ${statusColor}`}>
-            {project.status || "Draft"}
+            {seriesStatus}
           </div>
 
           {/* 3-dot menu */}
           <button
-            onClick={(e) => onToggleMenu?.(e, project.project_id)}
+            onClick={(e) => onToggleMenu?.(e, series.id)}
             className="w-7 h-7 rounded-full bg-black/60 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
           >
             <MoreVertical className="w-3.5 h-3.5" />
@@ -156,57 +158,55 @@ export default function ProjectCard({
 
         {/* Bottom thumbnail badges */}
         <div className="absolute bottom-2.5 inset-x-2.5 z-10 flex items-center justify-between pointer-events-none">
-          {project.episode !== undefined && project.episode !== null ? (
-            <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1.5 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-              <span>{formatEpisodeLabel(project.episode)}</span>
-            </div>
-          ) : <div />}
+          <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1.5 font-mono">
+            <Layers className="w-3 h-3 text-purple-400" />
+            <span>{series.chapterCount} {series.chapterCount === 1 ? 'Chapter' : 'Chapters'}</span>
+          </div>
 
           <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-bold text-purple-300 tracking-wider shadow-lg flex items-center gap-1.5 font-mono">
             <Clock className="w-3 h-3 text-purple-400" />
-            <span>{timeAgo(project.created_at)}</span>
+            <span>{timeAgo(series.latestUpdatedAt || '')}</span>
           </div>
         </div>
 
       </div>
 
       {/* Dropdown menu — at card level so thumbnail overflow-hidden doesn't clip it */}
-      {openMenuId === project.project_id && (
+      {openMenuId === series.id && (
         <div
           className="absolute right-2.5 top-10 w-44 bg-[#16161b] border border-white/10 rounded-xl shadow-2xl py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100"
           onClick={(e) => e.stopPropagation()}
         >
           <button
-            onClick={(e) => { onOpenProject(project); onToggleMenu?.(e, project.project_id); }}
+            onClick={(e) => { onOpenSeries(series); onToggleMenu?.(e, series.id); }}
             className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
           >
-            <Play className="w-3.5 h-3.5" /> Resume
+            <Play className="w-3.5 h-3.5" /> Open Series
           </button>
           {onOpenDetails && (
-            <button onClick={(e) => onOpenDetails(e, project)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button onClick={(e) => onOpenDetails(e, series)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
               <FolderOpen className="w-3.5 h-3.5" /> Details
             </button>
           )}
           {onRename && (
-            <button onClick={(e) => onRename(e, project)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button onClick={(e) => onRename(e, series)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
               <Edit2 className="w-3.5 h-3.5" /> Rename
             </button>
           )}
           {onExport && (
-            <button onClick={(e) => onExport(e, project)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button onClick={(e) => onExport(e, series)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
               <Download className="w-3.5 h-3.5" /> Export
             </button>
           )}
           {onCopyLink && (
-            <button onClick={(e) => onCopyLink(e, project)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button onClick={(e) => onCopyLink(e, series)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
               <Link className="w-3.5 h-3.5" /> Copy Link
             </button>
           )}
           {onDelete && (
             <>
               <div className="h-px bg-white/5 my-1" />
-              <button onClick={(e) => onDelete(e, project.project_id)} className="w-full text-left px-3.5 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors">
+              <button onClick={(e) => onDelete(e, series.id)} className="w-full text-left px-3.5 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors">
                 <Trash2 className="w-3.5 h-3.5" /> Delete
               </button>
             </>
@@ -220,7 +220,7 @@ export default function ProjectCard({
         <div className="flex items-center gap-1.5">
           <SourceIcon className="h-3.5 w-3.5 text-neutral-500" />
           <span className="text-xs text-neutral-500 font-mono tracking-wider uppercase truncate">
-            {getSourceName(project.url)}
+            {getSourceName(series.latestChapter?.url)}
           </span>
         </div>
 
@@ -229,9 +229,9 @@ export default function ProjectCard({
           <input
             type="text"
             defaultValue={titleText}
-            onBlur={(e) => onSaveRename?.(project.project_id, e.target.value)}
+            onBlur={(e) => onSaveRename?.(series.id, e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") onSaveRename?.(project.project_id, e.currentTarget.value);
+              if (e.key === "Enter") onSaveRename?.(series.id, e.currentTarget.value);
             }}
             autoFocus
             className="text-base font-bold text-white bg-neutral-800 border border-neutral-700 rounded-md px-2 py-1 w-full"
@@ -245,22 +245,22 @@ export default function ProjectCard({
 
         {/* Genre + Author row */}
         <div className="flex items-center gap-2 flex-wrap">
-          {project.genre && (
+          {series.genre && (
             <span className="text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-full font-bold">
-              {project.genre}
+              {series.genre}
             </span>
           )}
-          {project.author && (
+          {series.author && (
             <span className="text-xs text-neutral-400 font-medium truncate">
-              {project.author}
+              {series.author}
             </span>
           )}
         </div>
 
         {/* Synopsis (optional) */}
-        {project.synopsis && (
+        {series.synopsis && (
           <p className="text-xs text-neutral-500 line-clamp-2 leading-relaxed flex-1">
-            {project.synopsis}
+            {series.synopsis}
           </p>
         )}
 
@@ -269,25 +269,25 @@ export default function ProjectCard({
           {/* Metadata Row: Panels Count + Time Ago */}
           <div className="flex items-center justify-between text-xs">
             {(() => {
-              const timelineCount = project.panels_count ?? 0;
-              const importedCount = project.imported_assets_count ?? 0;
-              const displayCount = timelineCount || importedCount || 0;
-              const hasDiff = timelineCount > 0 && importedCount > 0 && timelineCount !== importedCount;
+              const totalPanels = series.chapters.reduce((acc, c) => acc + (c.panels_count || 0), 0);
+              const totalImported = series.chapters.reduce((acc, c) => acc + (c.imported_assets_count || 0), 0);
+              const displayCount = totalPanels || totalImported || 0;
+              const hasDiff = totalPanels > 0 && totalImported > 0 && totalPanels !== totalImported;
 
               return (
                 <div
                   className="flex items-center gap-1.5 text-neutral-300 font-mono truncate"
                   title={
                     hasDiff
-                      ? `Timeline: ${timelineCount} panels | Imported: ${importedCount} assets`
+                      ? `Timeline: ${totalPanels} panels | Imported: ${totalImported} assets`
                       : `${displayCount} panels`
                   }
                 >
                   <Scissors className="h-3.5 w-3.5 text-purple-400 shrink-0" />
                   <span className="font-bold text-white">{displayCount} panels</span>
-                  {importedCount > 0 && (
+                  {totalImported > 0 && (
                     <span className="text-[10px] text-neutral-400 font-normal">
-                      ({importedCount} imp)
+                      ({totalImported} imp)
                     </span>
                   )}
                 </div>
@@ -296,7 +296,7 @@ export default function ProjectCard({
 
             <div className="flex items-center gap-1 text-xs text-neutral-400 font-mono shrink-0">
               <Clock className="h-3.5 w-3.5 text-purple-400" />
-              <span>{timeAgo(project.created_at)}</span>
+              <span>{timeAgo(series.latestUpdatedAt || '')}</span>
             </div>
           </div>
 
@@ -306,11 +306,11 @@ export default function ProjectCard({
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onOpenProject(project);
+                onOpenSeries(series);
               }}
               className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl border border-purple-400/40 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-xs font-black uppercase tracking-wider text-white transition-all cursor-pointer shadow-[0_4px_14px_rgba(168,85,247,0.35)] active:scale-95 shrink-0"
             >
-              <span>Resume</span>
+              <span>Open Series</span>
               <ArrowRight className="w-3.5 h-3.5 text-white" />
             </button>
           </div>

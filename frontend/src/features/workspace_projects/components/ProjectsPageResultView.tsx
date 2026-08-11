@@ -1,13 +1,15 @@
 import React from "react";
 import { FolderOpen, Loader2, Search, Activity } from "lucide-react";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
-import ProjectCard from "@/features/workspace_projects/components/ProjectCard";
+import type { Series } from "@/features/workspace_projects/utils/seriesGrouping";
+import SeriesCard from "@/features/workspace_projects/components/SeriesCard";
 import ProjectsTable from "@/features/workspace_projects/hooks/ProjectsTable";
 import BulkActionFooter from "@/features/workspace_projects/components/BulkActionFooter";
 
 interface ProjectsPageResultViewProps {
   projectsLength: number;
   filteredProjects: Project[];
+  filteredSeries: Series[];
   loading: boolean;
   error: string | null;
   viewMode: "grid" | "list";
@@ -16,7 +18,7 @@ interface ProjectsPageResultViewProps {
   onToggleMenu: (e: React.MouseEvent, projectId: string) => void;
   toggleSelection: (e: React.MouseEvent, projectId: string) => void;
   toggleSelectAll: () => void;
-  onOpenProject: (project: Project) => void;
+  onOpenSeries: (series: Series) => void;
   onOpenCreativeSuite: (e: React.MouseEvent, project: Project) => void;
   onOpenDetails: (e: React.MouseEvent, project: Project) => void;
   onRename: (e: React.MouseEvent, project: Project) => void;
@@ -32,6 +34,7 @@ interface ProjectsPageResultViewProps {
 export default function ProjectsPageResultView({
   projectsLength,
   filteredProjects,
+  filteredSeries,
   loading,
   error,
   viewMode,
@@ -40,7 +43,7 @@ export default function ProjectsPageResultView({
   onToggleMenu,
   toggleSelection,
   toggleSelectAll,
-  onOpenProject,
+  onOpenSeries,
   onOpenCreativeSuite,
   onOpenDetails,
   onRename,
@@ -97,13 +100,13 @@ export default function ProjectsPageResultView({
     );
   }
 
-  if (filteredProjects.length === 0) {
+  if (filteredSeries.length === 0) {
     return (
       <div className="text-center py-20">
         <div className="w-16 h-16 mx-auto bg-neutral-900 rounded-full flex items-center justify-center text-neutral-600 mb-4">
           <Search className="w-8 h-8" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">No projects found</h3>
+        <h3 className="text-xl font-bold text-white mb-2">No series found</h3>
         <p className="text-neutral-500">
           Try adjusting your filters or search query.
         </p>
@@ -115,29 +118,27 @@ export default function ProjectsPageResultView({
     <>
       {viewMode === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-7 stagger-container">
-          {filteredProjects.map((project) => {
-            const isSelected = selectedProjects.has(project.project_id);
+          {filteredSeries.map((series) => {
+            const isSelected = selectedProjects.has(series.id);
             return (
-              <ProjectCard
-                key={project.project_id}
-                project={project}
-                onOpenProject={onOpenProject}
-                onOpenCreativeSuite={(e, projectItem) => onOpenCreativeSuite(e, projectItem)}
-                onRename={(e, projectItem) => onRename(e, projectItem)}
-                onExport={(e, projectItem) => onExport(e, projectItem)}
-                onOpenDetails={(e, projectItem) =>
-                  onOpenDetails(e, projectItem)
-                }
-                onDelete={(e, projectId) => onDelete(e, projectId)}
-                onCopyLink={(e, projectItem) => onCopyLink(e, projectItem)}
+              <SeriesCard
+                key={series.id}
+                series={series}
+                onOpenSeries={onOpenSeries}
+                onOpenCreativeSuite={(e, seriesItem) => seriesItem.latestChapter ? onOpenCreativeSuite(e, seriesItem.latestChapter) : null}
+                onRename={(e, seriesItem) => seriesItem.latestChapter ? onRename(e, seriesItem.latestChapter) : null}
+                onExport={(e, seriesItem) => seriesItem.latestChapter ? onExport(e, seriesItem.latestChapter) : null}
+                onOpenDetails={(e, seriesItem) => seriesItem.latestChapter ? onOpenDetails(e, seriesItem.latestChapter) : null}
+                onDelete={(e, seriesId) => onDelete(e, seriesId)}
+                onCopyLink={(e, seriesItem) => seriesItem.latestChapter ? onCopyLink(e, seriesItem.latestChapter) : null}
                 isSelected={isSelected}
-                onToggleSelect={(e, projectId) => toggleSelection(e, projectId)}
+                onToggleSelect={(e, seriesId) => toggleSelection(e, seriesId)}
                 showSelection
                 openMenuId={openMenuId}
-                onToggleMenu={(e, projectId) => onToggleMenu(e, projectId)}
+                onToggleMenu={(e, seriesId) => onToggleMenu(e, seriesId)}
                 renamingProjectId={renamingProjectId}
-                onSaveRename={(projectId, newName) =>
-                  onSaveRename(projectId, newName)
+                onSaveRename={(seriesId, newName) =>
+                  onSaveRename(seriesId, newName)
                 }
               />
             );
@@ -151,7 +152,10 @@ export default function ProjectsPageResultView({
           onToggleMenu={onToggleMenu}
           toggleSelectAll={toggleSelectAll}
           toggleSelection={toggleSelection}
-          onOpenProject={onOpenProject}
+          onOpenProject={(p) => {
+            const series = filteredSeries.find(s => s.chapters.some(c => c.project_id === p.project_id));
+            if (series) onOpenSeries(series);
+          }}
           onOpenDetails={onOpenDetails}
           onRename={onRename}
           onExport={onExport}

@@ -30,6 +30,7 @@ jobs:
       - name: Build frontend
         run: npm run build:frontend
         env:
+          APP_URL: "http://localhost:3000"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
@@ -46,7 +47,7 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Check backend syntax
-        run: python -m py_compile backend/main.py
+        run: python -m py_compile backend/app/main.py
 
       - name: Deploy to Vercel
         run: |
