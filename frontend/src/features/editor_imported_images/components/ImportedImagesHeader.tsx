@@ -219,16 +219,7 @@ export default function ChapterScraperHeader({
         </button>
       )}
 
-      {handleSaveAssets && imagesCount > 0 && (
-        <button
-          type="button"
-          onClick={handleSaveAssets}
-          className="relative overflow-hidden h-7 px-3.5 rounded-lg font-black text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-white/10 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
-        >
-          <Save className="w-3 h-3 text-purple-200" />
-          <span>Save</span>
-        </button>
-      )}
+
     </div>
   );
 

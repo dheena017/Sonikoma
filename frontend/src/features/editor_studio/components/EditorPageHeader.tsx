@@ -256,32 +256,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           )}
         </div>
 
-        {/* Save Project */}
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={isSaving}
-          title={isSaving ? "Saving..." : isDirty ? "Unsaved changes detected - Click to Save Project" : "Save Project"}
-          className={`flex items-center gap-2 h-11 rounded-2xl px-4 text-xs font-bold text-white transition-all cursor-pointer ${isDirty
-              ? "bg-gradient-to-r from-amber-600 via-purple-600 to-indigo-600 border border-amber-400/50 hover:from-amber-500 hover:to-indigo-500 shadow-[0_0_18px_rgba(245,158,11,0.4)] animate-pulse"
-              : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 hover:shadow-[0_4px_14px_rgba(168,85,247,0.4)]"
-            } active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100`}
-        >
-          <Save className={`h-4 w-4 ${isSaving ? "animate-spin" : isDirty ? "text-amber-300" : ""}`} />
-          {isSaving ? (
-            "Saving..."
-          ) : (
-            <div className="flex items-center gap-1.5">
-              <span className="hidden sm:inline">Save Project</span>
-              <span className="sm:hidden">Save</span>
-              {isDirty && (
-                <span className="ml-1 px-1.5 py-0.5 text-[9px] font-black uppercase bg-amber-500/30 text-amber-200 border border-amber-400/40 rounded-full shrink-0">
-                  Unsaved
-                </span>
-              )}
-            </div>
-          )}
-        </button>
+
 
         {/* User Profile Avatar Launcher */}
         <button

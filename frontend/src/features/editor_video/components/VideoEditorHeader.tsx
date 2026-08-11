@@ -178,29 +178,6 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             <ChevronDown className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
           </div>
 
-          {/* Save status inline */}
-          <button
-            onClick={onSave}
-            className="flex items-center gap-1.5 text-xs font-medium transition-colors cursor-pointer ml-1"
-            title={isDirty ? "Unsaved changes — click to save" : "Project saved"}
-          >
-            {isSaving ? (
-              <span className="text-purple-400 flex items-center gap-1 font-semibold">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                <span>Saving...</span>
-              </span>
-            ) : isDirty ? (
-              <span className="text-amber-400 flex items-center gap-1 font-semibold hover:underline">
-                <Cloud className="h-3.5 w-3.5" />
-                <span>Not saved</span>
-              </span>
-            ) : (
-              <span className="text-emerald-400 flex items-center gap-1 font-semibold">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Saved</span>
-              </span>
-            )}
-          </button>
         </div>
 
         {/* ── CENTER: Backend Status Chip ── */}
@@ -342,26 +319,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             )}
           </div>
 
-          {/* Save Project */}
-          <button
-            type="button"
-            onClick={() => setShowSaveModal(true)}
-            disabled={isSaving}
-            title={isSaving ? "Saving..." : isDirty ? "Unsaved changes — click to Save" : "Save Project"}
-            className={`hidden sm:flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs font-bold text-white transition-all cursor-pointer active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 ${
-              isDirty
-                ? "bg-gradient-to-r from-amber-600 via-purple-600 to-indigo-600 border border-amber-400/50 shadow-[0_0_14px_rgba(245,158,11,0.3)] animate-pulse"
-                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-400/20"
-            }`}
-          >
-            <Save className={`h-3.5 w-3.5 ${isSaving ? "animate-spin" : isDirty ? "text-amber-300" : ""}`} />
-            <span>{isSaving ? "Saving..." : "Save"}</span>
-            {isDirty && !isSaving && (
-              <span className="px-1 py-0.5 text-[8px] font-black uppercase bg-amber-500/30 text-amber-200 border border-amber-400/40 rounded-full">
-                •
-              </span>
-            )}
-          </button>
+
 
           {/* Export Video */}
           <button

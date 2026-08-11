@@ -823,41 +823,6 @@ const HeaderInner = ({
         )}
 
 
-        {/* Save Action Button */}
-        {onSave && (
-          <button
-            onClick={onSave}
-            disabled={saveStatus === "saving"}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-sans transition-all cursor-pointer select-none ${
-              isDirty
-                ? "bg-purple-600/10 border-purple-500/40 text-purple-300 hover:bg-purple-600/20 hover:border-purple-500/60 shadow-[0_0_12px_rgba(168,85,247,0.15)] animate-[pulse_2s_infinite]"
-                : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-neutral-200 hover:border-neutral-750"
-            }`}
-            title={isDirty ? "Unsaved changes: click to save project" : "Project saved to cloud"}
-          >
-            {saveStatus === "saving" ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-400" />
-            ) : saveStatus === "saved" ? (
-              <Check className="h-3.5 w-3.5 text-emerald-400" />
-            ) : (
-              <Cloud className="h-3.5 w-3.5" />
-            )}
-            <span className="hidden sm:inline">
-              {saveStatus === "saving"
-                ? "Saving..."
-                : saveStatus === "saved"
-                ? "Saved"
-                : saveStatus === "error"
-                ? "Save Error"
-                : isDirty
-                ? "Save Work"
-                : "Saved"}
-            </span>
-            {isDirty && saveStatus !== "saving" && (
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse shrink-0" />
-            )}
-          </button>
-        )}
 
 
         {/* Playback Volume Widget */}
