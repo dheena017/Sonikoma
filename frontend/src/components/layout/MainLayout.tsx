@@ -298,7 +298,7 @@ export default function MainLayout(props: MainLayoutProps) {
   return (
     <div
       id="app_root"
-      className={`min-h-screen max-w-full bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
+      className={`min-h-screen max-w-full overflow-x-hidden bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
         }`}
     >
       {/* --- Page Navigation Sidebar --- */}

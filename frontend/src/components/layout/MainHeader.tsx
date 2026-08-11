@@ -424,7 +424,7 @@ const HeaderInner = ({
   return (
     <header
       id="header_pane"
-      className="fixed top-0 left-0 w-full h-16 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4"
+      className="fixed top-0 left-0 right-0 w-full h-16 border-b border-neutral-900 bg-neutral-955/95 backdrop-blur-xl z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 select-none"
     >
       {/* Left side: Hamburger, Brand, and User Profile */}
       <div className="flex items-center gap-3 shrink-0 h-full">
