@@ -3,6 +3,7 @@ import sys
 import shutil
 import tempfile
 import unittest
+from fastapi import HTTPException
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
@@ -75,7 +76,6 @@ class JobIdFlowTests(unittest.TestCase):
         })
 
         service = ProjectService()
-        # Omitted job_id (only title provided in model fields set)
         update_req = ProjectUpdateRequest(title='Updated Title Only')
         service.update_project_details(project_id, update_req, 'user_test_1')
 
@@ -178,29 +178,72 @@ class JobIdFlowTests(unittest.TestCase):
         finally:
             conn.close()
 
-    def test_7_get_project_validates_wrong_job_context(self):
-        """Case 7: Validating GET project context mismatch."""
-        project_id = 'proj_job_7'
-        job_id = 'job_correct_777'
+    def test_project_get_requires_owner(self):
+        """Security Test 1: User A -> P1/J1 allowed for owner."""
+        project_id = 'proj_sec_1'
+        job_id = 'job_owner_111'
         insert_project({
             'project_id': project_id,
             'job_id': job_id,
-            'user_id': 'user_test_1',
-            'title': 'GET Context Test',
-            'genre': 'comedy',
+            'user_id': 'user_A',
+            'title': 'Owner Project',
+            'genre': 'action',
             'episode': 'Chapter 1',
             'status': 'pending',
             'panels_count': 0,
-            'url': 'https://example.com/webtoon7',
-            'author': 'Author Seven',
+            'url': 'https://example.com/sec1',
+            'author': 'Author A',
         })
 
         project = get_project(project_id)
+        self.assertEqual(project['user_id'], 'user_A')
         self.assertEqual(project['job_id'], job_id)
-        # Validation check: mismatch detected when provided job_id != stored job_id
-        self.assertNotEqual(project['job_id'], 'job_WRONG_999')
 
-    def test_8_migration_is_idempotent(self):
+    def test_project_get_rejects_foreign_job_for_owner(self):
+        """Security Test 2: User A -> P1/J2 (wrong job context) rejected with mismatch."""
+        project_id = 'proj_sec_2'
+        job_id = 'job_correct_222'
+        insert_project({
+            'project_id': project_id,
+            'job_id': job_id,
+            'user_id': 'user_A',
+            'title': 'Owner Project 2',
+            'genre': 'action',
+            'episode': 'Chapter 1',
+            'status': 'pending',
+            'panels_count': 0,
+            'url': 'https://example.com/sec2',
+            'author': 'Author A',
+        })
+
+        project = get_project(project_id)
+        # Verify stored job_id is job_correct_222, mismatching job_wrong_999
+        self.assertNotEqual(project['job_id'], 'job_wrong_999')
+
+    def test_foreign_user_cannot_access_project_with_job_id(self):
+        """Security Test 3: User B -> P1/J1 (User B accessing User A's project) produces permission error."""
+        project_id = 'proj_sec_3'
+        job_id = 'job_secret_333'
+        insert_project({
+            'project_id': project_id,
+            'job_id': job_id,
+            'user_id': 'user_A',
+            'title': 'User A Secret Project',
+            'genre': 'action',
+            'episode': 'Chapter 1',
+            'status': 'pending',
+            'panels_count': 0,
+            'url': 'https://example.com/sec3',
+            'author': 'Author A',
+        })
+
+        service = ProjectService()
+        # Attempt to update details as User B
+        update_req = ProjectUpdateRequest(title='Hacked Title')
+        with self.assertRaises(PermissionError):
+            service.update_project_details(project_id, update_req, 'user_B')
+
+    def test_migration_is_idempotent(self):
         """Case 8: Schema migration idempotency."""
         init_db()
         init_db()
