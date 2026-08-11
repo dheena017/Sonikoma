@@ -1,5 +1,6 @@
 export interface WorkspaceReturnPathOptions {
   projectId?: string | null;
+  jobId?: string | null;
   seriesSlug?: string | null;
   chapterSlug?: string | null;
   searchParams?: URLSearchParams | string | null;
@@ -46,8 +47,10 @@ export function resolveWorkspaceReturnPath(
 
   const activeProjectId =
     options.projectId ??
+    options.jobId ??
     params.get("id") ??
     params.get("project_id") ??
+    params.get("job_id") ??
     storage?.getItem("active_project_id") ??
     null;
 

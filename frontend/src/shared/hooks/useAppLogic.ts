@@ -461,7 +461,9 @@ export function useAppLogic() {
           synopsis: state.seriesSynopsis
             ? state.seriesSynopsis.trim()
             : undefined,
-          project_id: overrideProjectId || undefined,
+          project_id:
+            overrideProjectId ||
+            `comic_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
           scrape_only: state.smartSlice,
         });
 
@@ -527,6 +529,7 @@ export function useAppLogic() {
           useProjectStore.getState().setActiveProject({
             project: {
               project_id: data.project_id || state.projectId || "",
+              job_id: data.job_id || data.project_id || state.projectId || "",
               title: data.title || state.seriesTitle || "",
               url: normalizedTargetUrl,
               series_slug: data.series_slug || null,

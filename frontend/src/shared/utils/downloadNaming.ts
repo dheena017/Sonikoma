@@ -71,6 +71,7 @@ export interface DetailedMetadataInfo {
   panelUrls?: string[];
   projectInfo?: {
     projectId?: string;
+    jobId?: string;
     aspectRatio?: string;
     totalDurationSec?: number;
     aiModel?: string;

@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 export interface ProjectMetadata {
   project_id: string;
+  job_id?: string;
   title: string;
   url: string;
   video_url?: string | null;

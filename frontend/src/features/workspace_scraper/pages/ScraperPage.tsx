@@ -454,7 +454,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   const handleWorkspaceImport = () => {
     if (!targetUrl.trim()) return;
 
-    const temporaryProjectId = `temp_${Date.now()}_${Math.random()
+    const temporaryProjectId = `comic_${Date.now()}_${Math.random()
       .toString(36)
       .substring(2, 10)}`;
 

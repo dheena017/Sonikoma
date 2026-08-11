@@ -73,6 +73,7 @@ export function useAppState() {
   }, []);
 
   const projectId = activeProjectData?.project?.project_id ?? null;
+  const jobId = activeProjectData?.project?.job_id ?? projectId;
   const setProjectId = useCallback((val: string | null) => {
     const cur = useProjectStore.getState().activeProjectData;
     if (!val) {
@@ -80,7 +81,7 @@ export function useAppState() {
       return;
     }
     useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { title: "", url: "" }), project_id: val },
+      project: { ...(cur?.project ?? { title: "", url: "" }), project_id: val, job_id: val },
       panels: cur?.panels ?? [],
     });
   }, []);
@@ -1403,6 +1404,7 @@ export function useAppState() {
       setSeriesSynopsis,
       audioFeedback,
       projectId,
+      jobId,
       setProjectId,
       seriesSlugState,
       setSeriesSlugState,
@@ -1515,6 +1517,7 @@ export function useAppState() {
       seriesSynopsis,
       audioFeedback,
       projectId,
+      jobId,
       seriesSlugState,
       chapterSlugState,
       smartSlice,
