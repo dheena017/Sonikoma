@@ -3,9 +3,16 @@ import sys
 import shutil
 import tempfile
 import unittest
-from fastapi import HTTPException
+import asyncio
+from fastapi import FastAPI, HTTPException
+from fastapi.testclient import TestClient
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
+BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app'))
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
+if APP_DIR not in sys.path:
+    sys.path.insert(0, APP_DIR)
 
 from database import config, bootstrap
 from database.bootstrap import init_db
@@ -14,6 +21,8 @@ from repositories.project.project import get_project, insert_project
 from repositories.project.tokens import insert_token_log
 from services.project.project_service import ProjectService
 from schemas.project import ProjectUpdateRequest
+from api.v1.projects.router import project_router, get_single_project
+from api.dependencies.auth import get_current_user
 
 
 class JobIdFlowTests(unittest.TestCase):
@@ -178,81 +187,106 @@ class JobIdFlowTests(unittest.TestCase):
         finally:
             conn.close()
 
-    def test_project_get_requires_owner(self):
-        """Security Test 1: User A -> P1/J1 allowed for owner."""
-        project_id = 'proj_sec_1'
-        job_id = 'job_owner_111'
+    def test_router_get_single_project_matrix_http_client(self):
+        """
+        Direct HTTP API router tests via FastAPI TestClient for all 4 security matrix cases:
+        1. User A (owner) + P1 + J1 -> HTTP 200
+        2. User A (owner) + P1 + WRONG_JOB -> HTTP 400
+        3. User B (foreign) + P1 + J1 -> HTTP 403
+        4. User B (foreign) + P1 + WRONG_JOB -> HTTP 403
+        """
+        app = FastAPI()
+        app.include_router(project_router, prefix="/api/projects")
+        client = TestClient(app)
+
+        project_id = 'proj_matrix_http_100'
+        correct_job = 'job_matrix_http_100'
+        wrong_job = 'job_matrix_http_WRONG'
+        user_a = {'user_id': 'user_A'}
+        user_b = {'user_id': 'user_B'}
+
         insert_project({
             'project_id': project_id,
-            'job_id': job_id,
+            'job_id': correct_job,
             'user_id': 'user_A',
-            'title': 'Owner Project',
+            'title': 'Matrix HTTP Test Project',
             'genre': 'action',
             'episode': 'Chapter 1',
             'status': 'pending',
             'panels_count': 0,
-            'url': 'https://example.com/sec1',
-            'author': 'Author A',
+            'url': 'https://example.com/matrix_http_100',
+            'author': 'Matrix Author',
         })
 
-        project = get_project(project_id)
-        self.assertEqual(project['user_id'], 'user_A')
-        self.assertEqual(project['job_id'], job_id)
+        try:
+            # Case 1: User A + P1 + J1 -> 200
+            app.dependency_overrides[get_current_user] = lambda: user_a
+            res1 = client.get(f"/api/projects/{project_id}?job_id={correct_job}")
+            self.assertEqual(res1.status_code, 200)
+            data1 = res1.json()
+            self.assertTrue(data1.get('success'))
+            self.assertEqual(data1['project']['project_id'], project_id)
+            self.assertEqual(data1['project']['job_id'], correct_job)
 
-    def test_project_get_rejects_foreign_job_for_owner(self):
-        """Security Test 2: User A -> P1/J2 (wrong job context) rejected with mismatch."""
-        project_id = 'proj_sec_2'
-        job_id = 'job_correct_222'
-        insert_project({
-            'project_id': project_id,
-            'job_id': job_id,
-            'user_id': 'user_A',
-            'title': 'Owner Project 2',
-            'genre': 'action',
-            'episode': 'Chapter 1',
-            'status': 'pending',
-            'panels_count': 0,
-            'url': 'https://example.com/sec2',
-            'author': 'Author A',
-        })
+            # Case 2: User A + P1 + WRONG_JOB -> 400
+            res2 = client.get(f"/api/projects/{project_id}?job_id={wrong_job}")
+            self.assertEqual(res2.status_code, 400)
+            data2 = res2.json()
+            self.assertIn("Job ID mismatch", data2.get("detail", ""))
 
-        project = get_project(project_id)
-        # Verify stored job_id is job_correct_222, mismatching job_wrong_999
-        self.assertNotEqual(project['job_id'], 'job_wrong_999')
+            # Case 3: User B + P1 + J1 -> 403
+            app.dependency_overrides[get_current_user] = lambda: user_b
+            res3 = client.get(f"/api/projects/{project_id}?job_id={correct_job}")
+            self.assertEqual(res3.status_code, 403)
+            data3 = res3.json()
+            self.assertEqual(data3.get("detail"), "Access denied.")
 
-    def test_foreign_user_cannot_access_project_with_job_id(self):
-        """Security Test 3: User B -> P1/J1 (User B accessing User A's project) produces permission error."""
-        project_id = 'proj_sec_3'
-        job_id = 'job_secret_333'
-        insert_project({
-            'project_id': project_id,
-            'job_id': job_id,
-            'user_id': 'user_A',
-            'title': 'User A Secret Project',
-            'genre': 'action',
-            'episode': 'Chapter 1',
-            'status': 'pending',
-            'panels_count': 0,
-            'url': 'https://example.com/sec3',
-            'author': 'Author A',
-        })
+            # Case 4: User B + P1 + WRONG_JOB -> 403
+            res4 = client.get(f"/api/projects/{project_id}?job_id={wrong_job}")
+            self.assertEqual(res4.status_code, 403)
+            data4 = res4.json()
+            self.assertEqual(data4.get("detail"), "Access denied.")
+        finally:
+            app.dependency_overrides.clear()
 
-        service = ProjectService()
-        # Attempt to update details as User B
-        update_req = ProjectUpdateRequest(title='Hacked Title')
-        with self.assertRaises(PermissionError):
-            service.update_project_details(project_id, update_req, 'user_B')
-
-    def test_migration_is_idempotent(self):
-        """Case 8: Schema migration idempotency."""
+    def test_migration_is_idempotent_and_creates_job_id_in_all_tables(self):
+        """Case 8: Schema migration idempotency and table verification for job_id in both chapters and token_usage_logs."""
+        # Test idempotency
         init_db()
         init_db()
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
             cursor.execute("PRAGMA table_info(chapters)")
-            cols = [row['name'] for row in cursor.fetchall()]
-            self.assertIn('job_id', cols)
+            chapters_cols = [row['name'] for row in cursor.fetchall()]
+            self.assertIn('job_id', chapters_cols, "chapters table must contain job_id column")
+
+            cursor.execute("PRAGMA table_info(token_usage_logs)")
+            token_logs_cols = [row['name'] for row in cursor.fetchall()]
+            self.assertIn('job_id', token_logs_cols, "token_usage_logs table must contain job_id column")
+        finally:
+            conn.close()
+
+    def test_fresh_sqlite_migration_without_existing_schema(self):
+        """Verify fresh SQLite DB migration creates job_id column in both chapters and token_usage_logs."""
+        fresh_temp_dir = tempfile.mkdtemp(prefix='sonikoma-fresh-db-test-', dir=self.temp_dir)
+        fresh_db_path = os.path.join(fresh_temp_dir, 'fresh.db')
+
+        # Point DB path to fresh db
+        config.DB_PATH = fresh_db_path
+        bootstrap._db_initialized = False
+        init_db()
+
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA table_info(chapters)")
+            chapters_cols = [row['name'] for row in cursor.fetchall()]
+            self.assertIn('job_id', chapters_cols, "chapters table must contain job_id column on fresh DB")
+
+            cursor.execute("PRAGMA table_info(token_usage_logs)")
+            token_logs_cols = [row['name'] for row in cursor.fetchall()]
+            self.assertIn('job_id', token_logs_cols, "token_usage_logs table must contain job_id column on fresh DB")
         finally:
             conn.close()
 

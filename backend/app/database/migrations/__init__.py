@@ -299,6 +299,7 @@ def init_sqlite(conn) -> None:
             CREATE TABLE IF NOT EXISTS token_usage_logs (
               id                  TEXT PRIMARY KEY,
               project_id          TEXT NOT NULL,
+              job_id              TEXT,
               input_tokens        INTEGER NOT NULL DEFAULT 0,
               output_tokens       INTEGER NOT NULL DEFAULT 0,
               total_tokens        INTEGER NOT NULL DEFAULT 0,
