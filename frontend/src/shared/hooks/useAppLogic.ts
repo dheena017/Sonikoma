@@ -463,7 +463,7 @@ export function useAppLogic() {
             : undefined,
           project_id:
             overrideProjectId ||
-            `comic_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            `job_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
           scrape_only: state.smartSlice,
         });
 
