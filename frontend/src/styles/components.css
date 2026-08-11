@@ -43,7 +43,8 @@ button:not(:disabled):active,
 }
 
 /* GPU Acceleration & Layout Containment Utilities */
-.gpu-accelerated {
+.gpu-accelerated,
+[class*="backdrop-blur-"] {
   transform: translateZ(0);
   backface-visibility: hidden;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import {
   Sliders,
   Search,
@@ -90,24 +90,28 @@ const AIOptimizerPage = React.memo(
     const title = scrapedTitle || "Overpowered S-Rank Recap";
     const genre = scrapedGenre || "Fantasy Action";
 
-    const storyboardSummary = panels
-      .map(
-        (p, idx) =>
-          `Panel ${idx + 1}: Dialogue: "${p.speech_text || "Silent scene"}" | Visual action: ${p.visual_description || "No visual details"}`
-      )
-      .join("\n");
+    const storyboardSummary = useMemo(() => {
+      return panels
+        .map(
+          (p, idx) =>
+            `Panel ${idx + 1}: Dialogue: "${p.speech_text || "Silent scene"}" | Visual action: ${p.visual_description || "No visual details"}`
+        )
+        .join("\n");
+    }, [panels]);
 
     // Compile chronological script timestamps for chapter splits
-    let currentAccumulator = 0.0;
-    const compiledScript = panels
-      .map((p, idx) => {
-        const minutes = Math.floor(currentAccumulator / 60);
-        const seconds = Math.floor(currentAccumulator % 60);
-        const timestamp = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-        currentAccumulator += p.duration ?? 0;
-        return `${timestamp} - Panel ${idx + 1}: ${p.speech_text || "(Silent)"}`;
-      })
-      .join("\n");
+    const compiledScript = useMemo(() => {
+      let currentAccumulator = 0.0;
+      return panels
+        .map((p, idx) => {
+          const minutes = Math.floor(currentAccumulator / 60);
+          const seconds = Math.floor(currentAccumulator % 60);
+          const timestamp = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+          currentAccumulator += p.duration ?? 0;
+          return `${timestamp} - Panel ${idx + 1}: ${p.speech_text || "(Silent)"}`;
+        })
+        .join("\n");
+    }, [panels]);
 
     const handleCopyAllPackage = () => {
       const pkg = `=== YOUTUBE VIDEO PACKAGE ===\nTITLE: ${title}\nGENRE: ${genre}\n\nTIMESTAMPS:\n${compiledScript}\n\nSTORYBOARD SUMMARY:\n${storyboardSummary}`;

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import * as api from "@/api";
 
@@ -291,6 +291,10 @@ export default function MainLayout(props: MainLayoutProps) {
 
   const isDrawerOpen = useProjectStore((s) => s.isDrawerOpen);
 
+  const handleCloseSidebar = useCallback(() => setIsSidebarOpen(false), [setIsSidebarOpen]);
+  const handleOpenSidebar = useCallback(() => setIsSidebarOpen(true), [setIsSidebarOpen]);
+  const handleToggleSidebar = useCallback(() => setIsSidebarOpen(!isSidebarOpen), [isSidebarOpen, setIsSidebarOpen]);
+
   return (
     <div
       id="app_root"
@@ -304,13 +308,13 @@ export default function MainLayout(props: MainLayoutProps) {
             currentPath={currentPath}
             navigateTo={navigateTo}
             isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
+            onClose={handleCloseSidebar}
           />
           {!isSidebarOpen && !isDrawerOpen && (
             <AdminMiniSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
-              onOpenSidebar={() => setIsSidebarOpen(true)}
+              onOpenSidebar={handleOpenSidebar}
             />
           )}
         </>
@@ -320,7 +324,7 @@ export default function MainLayout(props: MainLayoutProps) {
             currentPath={currentPath}
             navigateTo={navigateTo}
             isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
+            onClose={handleCloseSidebar}
             panels={panels}
           />
           {!isSidebarOpen && !isDrawerOpen && (
@@ -328,7 +332,7 @@ export default function MainLayout(props: MainLayoutProps) {
               currentPath={currentPath}
               navigateTo={navigateTo}
               panels={panels}
-              onOpenSidebar={() => setIsSidebarOpen(true)}
+              onOpenSidebar={handleOpenSidebar}
             />
           )}
         </>
@@ -344,7 +348,7 @@ export default function MainLayout(props: MainLayoutProps) {
           isBatchCropping={isBatchCropping}
           isCleaningBubbles={isCleaningBubbles}
           isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
+          onClose={handleCloseSidebar}
           projectId={projectId}
           isDirty={isWorkspaceDirty}
           navigateTo={navigateTo}
@@ -365,7 +369,7 @@ export default function MainLayout(props: MainLayoutProps) {
             isBatchCropping={isBatchCropping}
             isCleaningBubbles={isCleaningBubbles}
             isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
+            onClose={handleCloseSidebar}
             projectId={projectId}
             isDirty={isWorkspaceDirty}
             navigateTo={navigateTo}
@@ -389,7 +393,7 @@ export default function MainLayout(props: MainLayoutProps) {
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-scroll-container"
-        className={`flex-grow flex-1 flex flex-col min-h-screen max-w-full justify-between transition-all duration-300 ${showAutoCropModal || showBubbleModal
+        className={`flex-grow flex-1 flex flex-col min-h-screen max-w-full justify-between ${showAutoCropModal || showBubbleModal
           ? "overflow-hidden"
           : ""
           }`}
@@ -401,7 +405,7 @@ export default function MainLayout(props: MainLayoutProps) {
               currentPath={currentPath}
               navigateTo={navigateTo}
               fetchWithInterceptor={fetchWithInterceptor}
-              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+              onToggleSidebar={handleToggleSidebar}
               notifications={notifications}
               markNotificationAsRead={markNotificationAsRead as any}
               markAllNotificationsAsRead={markAllNotificationsAsRead}
@@ -425,7 +429,7 @@ export default function MainLayout(props: MainLayoutProps) {
               isCleaningBubbles={isCleaningBubbles}
               cleanProgress={cleanProgress}
               batchProgress={batchProgress}
-              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+              onToggleSidebar={handleToggleSidebar}
               isSidebarOpen={isSidebarOpen}
               backendStatus={backendStatus as any}
               selectedModel={selectedModel}
@@ -460,7 +464,7 @@ export default function MainLayout(props: MainLayoutProps) {
               : isProEditorPage
                 ? "min-h-screen"
                 : "pt-16 min-h-[calc(100vh-64px)]"
-            } flex-grow flex-1 flex flex-col transition-all duration-300 gpu-accelerated smooth-scroll`}
+            } flex-grow flex-1 flex flex-col transition-[padding] duration-300 ease-out gpu-accelerated smooth-scroll`}
         >
           {/* Impersonation Banner */}
           {localStorage.getItem("sonikoma_admin_token") && (

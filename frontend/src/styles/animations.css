@@ -76,22 +76,17 @@
 @keyframes page-view-entry {
   0% {
     opacity: 0;
-    filter: blur(4px);
-    transform: translateY(6px) scale(0.992);
-  }
-  60% {
-    opacity: 0.9;
-    filter: blur(1px);
+    transform: translateY(4px);
   }
   100% {
     opacity: 1;
-    filter: blur(0px);
-    transform: none;
+    transform: translateY(0);
   }
 }
 
 .page-view-transition {
-  animation: page-view-entry 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: page-view-entry 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
 }
 
 @keyframes route-bar-sweep {
