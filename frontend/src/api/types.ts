@@ -80,12 +80,15 @@ export interface RedeemRewardPayload {
 
 // Projects Related Payload Types
 export interface CreateProjectPayload {
+  project_id?: string;
+  job_id?: string | null;
   title?: string;
   description?: string;
   [key: string]: any;
 }
 
 export interface UpdateProjectPayload {
+  job_id?: string | null;
   title?: string;
   description?: string;
   [key: string]: any;

@@ -15,9 +15,11 @@ export const getProjects = async (
 
 export const getProject = async (
   fetchWithInterceptor: FetchClient,
-  projectId: string
+  projectId: string,
+  jobId?: string | null
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}`);
+  const query = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}${query}`);
 };
 
 export const getPublicProject = async (

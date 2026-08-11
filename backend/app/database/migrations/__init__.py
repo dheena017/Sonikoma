@@ -230,6 +230,10 @@ def init_sqlite(conn) -> None:
                         "added 'slug' to 'series'")
         _run_safe_alter(cursor, conn, "ALTER TABLE chapters ADD COLUMN slug TEXT",
                         "added 'slug' to 'chapters'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE chapters ADD COLUMN job_id TEXT",
+                        "added 'job_id' to 'chapters'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN job_id TEXT",
+                        "added 'job_id' to 'token_usage_logs'")
         _run_safe_alter(cursor, conn,
                         "ALTER TABLE chapters ADD COLUMN total_tokens_used INTEGER NOT NULL DEFAULT 0",
                         "added 'total_tokens_used' to 'chapters'")

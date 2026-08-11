@@ -11,7 +11,7 @@ import { ErrorModalDetail } from "@/shared/ui/modal/ErrorModal";
 import { parseWebtoonUrl } from "@/shared/utils/url";
 import { useAudioFeedback } from "@/features/editor_audio/hooks/useAudioFeedback";
 import { LogEntry, normalizeLog } from "@/types/logs";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore, WorkspaceContext } from "@/store/useProjectStore";
 
 export function useAppState() {
   const [user, setUser] = useState<any>(() => {
@@ -73,7 +73,7 @@ export function useAppState() {
   }, []);
 
   const projectId = activeProjectData?.project?.project_id ?? null;
-  const jobId = activeProjectData?.project?.job_id ?? projectId;
+  const jobId = activeProjectData?.project?.job_id ?? null;
   const setProjectId = useCallback((val: string | null) => {
     const cur = useProjectStore.getState().activeProjectData;
     if (!val) {
@@ -81,10 +81,24 @@ export function useAppState() {
       return;
     }
     useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { title: "", url: "" }), project_id: val, job_id: val },
+      project: { ...(cur?.project ?? { title: "", url: "" }), project_id: val, job_id: cur?.project?.job_id ?? null },
       panels: cur?.panels ?? [],
     });
   }, []);
+
+  const setJobId = useCallback((val: string | null) => {
+    const cur = useProjectStore.getState().activeProjectData;
+    if (!cur) return;
+    useProjectStore.getState().setActiveProject({
+      ...cur,
+      project: { ...cur.project, job_id: val },
+    });
+  }, []);
+
+  const workspaceContext = useMemo<WorkspaceContext>(
+    () => ({ projectId, jobId }),
+    [projectId, jobId]
+  );
 
   const seriesSlugState = activeProjectData?.project?.series_slug ?? null;
   const setSeriesSlugState = useCallback((val: string | null) => {
@@ -1518,6 +1532,9 @@ export function useAppState() {
       audioFeedback,
       projectId,
       jobId,
+      setProjectId,
+      setJobId,
+      workspaceContext,
       seriesSlugState,
       chapterSlugState,
       smartSlice,

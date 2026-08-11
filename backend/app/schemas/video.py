@@ -48,6 +48,8 @@ class PanelData(BaseModel):
 
 
 class RenderRequest(BaseModel):
+    project_id: Optional[str] = Field(None, description="Project ID")
+    job_id: Optional[str] = Field(None, description="Workspace Job ID")
     panels: List[PanelData]
     voice: Optional[str] = "en-US-GuyNeural"
     music_theme: Optional[str] = "none"          # "none" | "action" | "adventure" | etc.

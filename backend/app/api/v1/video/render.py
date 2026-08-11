@@ -36,7 +36,11 @@ async def render_video(
     job_queue = get_job_queue()
     video_id = str(uuid.uuid4())[:8]
     
-    # Register the job using the same ID we return to the client.
+    logger.info(
+        f"[Render] Initiating render execution_id={video_id} for project_id={request.project_id or 'N/A'}, workspace_job_id={request.job_id or 'N/A'}"
+    )
+
+    # Register the job using the execution ID returned to client for status polling.
     job_queue.create_job("video_render", job_id=video_id)
 
     # Deduct credits
@@ -62,7 +66,14 @@ async def render_video(
         request.speech_pitch if request.speech_pitch is not None else 1.0,
     )
 
-    return {"success": True, "job_id": video_id, "low_balance": new_balance < LOW_BALANCE_THRESHOLD}
+    return {
+        "success": True,
+        "job_id": video_id,
+        "execution_id": video_id,
+        "project_id": request.project_id,
+        "workspace_job_id": request.job_id,
+        "low_balance": new_balance < LOW_BALANCE_THRESHOLD,
+    }
 
 
 @router.get("/status/{job_id}")

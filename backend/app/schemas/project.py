@@ -10,6 +10,7 @@ from typing import List, Dict, Any, Optional, Literal
 
 class ProjectCreateRequest(BaseModel):
     project_id: str = Field(..., description="Unique Project ID")
+    job_id: Optional[str] = Field(None, description="Workspace Job ID")
     url: str = Field(..., description="Original Webtoon episode URL")
     title: Optional[str] = Field("Untitled Webtoon")
     genre: Optional[str] = Field("general")
@@ -50,6 +51,7 @@ class PanelsSaveRequest(BaseModel):
 
 
 class ProjectUpdateRequest(BaseModel):
+    job_id: Optional[str] = Field(None, description="Workspace Job ID")
     url: Optional[str] = Field(None, description="Original Webtoon episode URL")
     title: Optional[str] = Field(None, description="Series Title")
     genre: Optional[str] = Field(None, description="Series Genre")

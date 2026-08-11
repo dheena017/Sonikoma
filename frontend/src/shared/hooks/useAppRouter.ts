@@ -366,7 +366,7 @@ export function useAppRouter({
           return;
         }
 
-        const hasProjId = params.has("id") || params.has("project_id") || (params.has("series") && params.has("chapter"));
+        const hasProjId = params.has("id") || params.has("project_id") || params.has("job_id") || params.has("jobId") || (params.has("series") && params.has("chapter"));
         const hasSlugs = /^\/scraper\/editor\/series\/[^\/]+\/chapters\/[^\/]+(?:\/image-editor)?\/?$/.test(path);
         if (
           scrapedImagesRef.current.length === 0 &&

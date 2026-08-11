@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS series (
 CREATE TABLE IF NOT EXISTS chapters (
   id              TEXT    PRIMARY KEY,
   series_id       TEXT    NOT NULL,
+  job_id          TEXT,
   episode_number  TEXT    NOT NULL,
   slug            TEXT    UNIQUE,
   original_url    TEXT,
@@ -169,6 +170,7 @@ CREATE INDEX IF NOT EXISTS idx_chapters_slug ON chapters(slug);
 CREATE TABLE IF NOT EXISTS token_usage_logs (
   id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id          TEXT NOT NULL,
+  job_id              TEXT,
   input_tokens        INTEGER NOT NULL DEFAULT 0,
   output_tokens       INTEGER NOT NULL DEFAULT 0,
   total_tokens        INTEGER NOT NULL DEFAULT 0,

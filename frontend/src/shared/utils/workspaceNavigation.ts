@@ -34,25 +34,51 @@ export function formatProjectIdDisplay(id?: string | null): string {
   return id;
 }
 
+export interface ResolvedWorkspaceParams {
+  projectId: string | null;
+  jobId: string | null;
+}
+
+export function parseWorkspaceParams(
+  searchParams?: URLSearchParams | string | null,
+  options?: { projectId?: string | null; jobId?: string | null; storage?: Pick<Storage, "getItem"> | null }
+): ResolvedWorkspaceParams {
+  const params =
+    searchParams instanceof URLSearchParams
+      ? searchParams
+      : new URLSearchParams(searchParams || "");
+
+  const storage = options?.storage ??
+    (typeof window !== "undefined" ? window.localStorage : null);
+
+  const projectId =
+    options?.projectId ??
+    params.get("project_id") ??
+    params.get("projectId") ??
+    params.get("id") ??
+    storage?.getItem("active_project_id") ??
+    null;
+
+  const jobId =
+    options?.jobId ??
+    params.get("job_id") ??
+    params.get("jobId") ??
+    storage?.getItem("active_job_id") ??
+    null;
+
+  return { projectId, jobId };
+}
+
 export function resolveWorkspaceReturnPath(
   options: WorkspaceReturnPathOptions = {}
 ): string {
-  const params =
-    options.searchParams instanceof URLSearchParams
-      ? options.searchParams
-      : new URLSearchParams(options.searchParams || "");
+  const { projectId: activeProjectId, jobId: activeJobId } = parseWorkspaceParams(
+    options.searchParams,
+    { projectId: options.projectId, jobId: options.jobId, storage: options.storage }
+  );
 
   const storage = options.storage ??
     (typeof window !== "undefined" ? window.localStorage : null);
-
-  const activeProjectId =
-    options.projectId ??
-    options.jobId ??
-    params.get("id") ??
-    params.get("project_id") ??
-    params.get("job_id") ??
-    storage?.getItem("active_project_id") ??
-    null;
 
   const activeSeriesSlug =
     options.seriesSlug ??
@@ -69,9 +95,13 @@ export function resolveWorkspaceReturnPath(
   }
 
   if (activeProjectId) {
+    const query = activeJobId
+      ? `project_id=${encodeURIComponent(activeProjectId)}&job_id=${encodeURIComponent(activeJobId)}`
+      : `id=${encodeURIComponent(activeProjectId)}`;
+
     return activeProjectId.startsWith("temp_")
-      ? `/scraper/editor?id=${activeProjectId}`
-      : `/scraper?id=${activeProjectId}`;
+      ? `/scraper/editor?${query}`
+      : `/scraper?${query}`;
   }
 
   return "/scraper";

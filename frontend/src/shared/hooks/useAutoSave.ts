@@ -6,7 +6,9 @@ export type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface AutoSaveState {
   projectId: string | null;
+  jobId?: string | null;
   setProjectId?: (id: string | null) => void;
+  setJobId?: (id: string | null) => void;
   setSeriesSlug?: (slug: string | null) => void;
   setChapterSlug?: (slug: string | null) => void;
   seriesTitle: string;
@@ -173,26 +175,28 @@ export function useAutoSave(state: AutoSaveState) {
       ? serializedState !== lastSavedStateRef.current
       : false;
 
-  const prevProjectIdRef = useRef<string | null>(null);
+  const prevIdentityRef = useRef<string>("");
   const wasScrapedImagesLoadedRef = useRef<boolean>(false);
 
-  // Reset or initialize state ref when switching projects
+  const currentIdentityKey = `${state.projectId || ""}:${state.jobId || ""}`;
+
+  // Reset or initialize state ref when switching projects or jobs
   useEffect(() => {
     if (state.projectId) {
       console.log(
-        `[Save Hook] Switched project to ${state.projectId}. Initializing state ref.`
+        `[Save Hook] Switched workspace context to project=${state.projectId}, job=${state.jobId}. Initializing state ref.`
       );
-      prevProjectIdRef.current = state.projectId;
+      prevIdentityRef.current = currentIdentityKey;
       wasScrapedImagesLoadedRef.current = false;
       lastSavedStateRef.current = getSerializedState();
       setSaveStatus("idle");
     } else {
-      prevProjectIdRef.current = null;
+      prevIdentityRef.current = "";
       wasScrapedImagesLoadedRef.current = false;
       lastSavedStateRef.current = "";
       setSaveStatus("idle");
     }
-  }, [state.projectId]);
+  }, [state.projectId, state.jobId]);
 
   // Sync state when scrapedImages first loads asynchronously
   useEffect(() => {
@@ -208,7 +212,7 @@ export function useAutoSave(state: AutoSaveState) {
       wasScrapedImagesLoadedRef.current = true;
       lastSavedStateRef.current = getSerializedState();
     }
-  }, [state.scrapedImages, state.projectId]);
+  }, [state.scrapedImages, state.projectId, state.jobId]);
 
   // Manual save trigger function
   const saveProject = async (

@@ -3,6 +3,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { GeneratedPanel } from "@/types";
 import { NotificationType } from "@/features/app_notification";
 import * as api from "@/api/index";
+import { useProjectStore } from "@/store/useProjectStore";
 
 export interface UseVideoPreviewGenerationProps {
   panels: GeneratedPanel[];
@@ -425,7 +426,10 @@ export function useVideoPreviewGeneration({
     setRenderStartTime(startTime);
 
     try {
+      const activeProj = useProjectStore.getState().activeProjectData?.project;
       const data = await api.renderVideo(fetchWithInterceptor, {
+        project_id: activeProj?.project_id || null,
+        job_id: activeProj?.job_id || null,
         panels,
         voice: voiceActor,
         music_theme: musicTheme || "none",

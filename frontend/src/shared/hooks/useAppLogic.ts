@@ -529,7 +529,7 @@ export function useAppLogic() {
           useProjectStore.getState().setActiveProject({
             project: {
               project_id: data.project_id || state.projectId || "",
-              job_id: data.job_id || data.project_id || state.projectId || "",
+              job_id: data.job_id ?? null,
               title: data.title || state.seriesTitle || "",
               url: normalizedTargetUrl,
               series_slug: data.series_slug || null,

@@ -77,6 +77,7 @@ def insert_project(data: Dict[str, Any]) -> None:
 
         # Now, insert the Chapter (which represents the flat Project)
         chapter_id = data['project_id']
+        chapter_job_id = data.get('job_id')
         episode_number = data.get('episode') or 'Chapter 1'
         original_url = unwrap_proxy_url(data.get('url'))
         status = data.get('status') or 'pending'
@@ -90,16 +91,16 @@ def insert_project(data: Dict[str, Any]) -> None:
 
             conn.execute("""
                 UPDATE chapters
-                SET episode_number = ?, original_url = ?, status = ?, panels_count = ?, video_url = ?, total_tokens_used = ?
+                SET episode_number = ?, original_url = ?, status = ?, panels_count = ?, video_url = ?, total_tokens_used = ?, job_id = COALESCE(?, job_id)
                 WHERE id = ?
-            """, (episode_number, original_url, status, panels_count, video_url, new_token_total, chapter_id))
+            """, (episode_number, original_url, status, panels_count, video_url, new_token_total, chapter_job_id, chapter_id))
         else:
             chapter_slug = generate_unique_slug(f"{title} {episode_number}", 'chapters', conn)
             initial_tokens = data.get('total_tokens_used', 0)
             conn.execute("""
-                INSERT INTO chapters (id, series_id, episode_number, slug, original_url, status, panels_count, video_url, total_tokens_used)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (chapter_id, series_id, episode_number, chapter_slug, original_url, status, panels_count, video_url, initial_tokens))
+                INSERT INTO chapters (id, series_id, job_id, episode_number, slug, original_url, status, panels_count, video_url, total_tokens_used)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (chapter_id, series_id, chapter_job_id, episode_number, chapter_slug, original_url, status, panels_count, video_url, initial_tokens))
         conn.commit()
     finally:
         conn.close()
@@ -146,7 +147,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     try:
         if user_id:
             rows = conn.execute("""
-                SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+                SELECT c.id AS project_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
@@ -157,7 +158,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
             """, (user_id,)).fetchall()
         else:
             rows = conn.execute("""
-                SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+                SELECT c.id AS project_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
@@ -175,7 +176,7 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         row = conn.execute("""
-            SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+            SELECT c.id AS project_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                    s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
@@ -193,7 +194,7 @@ def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         row = conn.execute("""
-            SELECT c.id AS project_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+            SELECT c.id AS project_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                    s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings
@@ -279,6 +280,9 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             if 'panels_count' in updates:
                 chapter_set_parts.append("panels_count = ?")
                 chapter_params.append(updates['panels_count'])
+            if 'job_id' in updates:
+                chapter_set_parts.append("job_id = ?")
+                chapter_params.append(updates['job_id'])
             if 'audio_settings' in updates:
                 chapter_set_parts.append("audio_settings = ?")
                 val = updates['audio_settings']

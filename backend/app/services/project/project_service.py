@@ -70,6 +70,7 @@ class ProjectService:
         self.repo.insert_project(
             {
                 "project_id": body.project_id,
+                "job_id": getattr(body, "job_id", None),
                 "url": unwrap_proxy_url(body.url),
                 "title": body.title,
                 "genre": body.genre,
@@ -184,6 +185,7 @@ class ProjectService:
             "video_url": body.video_url,
             "status": body.status,
             "audio_settings": body.audio_settings,
+            "job_id": getattr(body, "job_id", None),
         }
         updates = {k: v for k, v in field_map.items() if v is not None}
         if body.cover_image is not None:

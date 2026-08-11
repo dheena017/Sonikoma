@@ -33,6 +33,7 @@ class Chapter(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
     series_id: Mapped[str] = mapped_column(ForeignKey("series.id", ondelete="CASCADE"))
+    job_id: Mapped[str | None] = mapped_column(String, nullable=True)
     episode_number: Mapped[str] = mapped_column(String, nullable=False)
     slug: Mapped[str | None] = mapped_column(String, unique=True)
     original_url: Mapped[str | None] = mapped_column(Text)

@@ -1,4 +1,5 @@
 export interface Project {
+  job_id?: string | null;
   project_id: string;
   title: string;
   url: string;

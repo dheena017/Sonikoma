@@ -1,9 +1,14 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+export interface WorkspaceContext {
+  projectId: string | null;
+  jobId: string | null;
+}
+
 export interface ProjectMetadata {
   project_id: string;
-  job_id?: string;
+  job_id?: string | null;
   title: string;
   url: string;
   video_url?: string | null;

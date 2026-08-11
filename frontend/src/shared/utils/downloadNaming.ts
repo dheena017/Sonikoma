@@ -103,6 +103,7 @@ export function generateMetadataText(info: DetailedMetadataInfo): string {
     lines.push("                      PROJECT & COMPILER DETAILS                          ");
     lines.push("--------------------------------------------------------------------------");
     if (info.projectInfo.projectId) lines.push(`Project ID      : ${info.projectInfo.projectId}`);
+    lines.push(`Job ID          : ${info.projectInfo.jobId || "Not assigned"}`);
     if (info.projectInfo.aspectRatio) lines.push(`Aspect Ratio    : ${info.projectInfo.aspectRatio}`);
     if (info.projectInfo.totalDurationSec) lines.push(`Total Duration  : ${info.projectInfo.totalDurationSec}s`);
     if (info.projectInfo.aiModel) lines.push(`AI Model        : ${info.projectInfo.aiModel}`);
@@ -155,6 +156,7 @@ ${
 
 ## 🎬 Project & Compiler Metadata
 - **Project ID**: \`${info.projectInfo.projectId || "N/A"}\`
+- **Job ID**: \`${info.projectInfo.jobId || "Not assigned"}\`
 - **Aspect Ratio**: ${info.projectInfo.aspectRatio || "9:16"}
 - **Estimated Video Duration**: ${info.projectInfo.totalDurationSec || 0}s
 - **AI Processing Model**: \`${info.projectInfo.aiModel || "Default Engine"}\`

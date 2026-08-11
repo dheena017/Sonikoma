@@ -37,8 +37,14 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
       (window as any).navigateTo?.(
         `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
       );
+    } else if (project.job_id) {
+      (window as any).navigateTo?.(
+        `/scraper/editor?project_id=${encodeURIComponent(project.project_id)}&job_id=${encodeURIComponent(project.job_id)}`
+      );
     } else {
-      (window as any).navigateTo?.(`/scraper/editor?id=${project.project_id}`);
+      (window as any).navigateTo?.(
+        `/scraper/editor?project_id=${encodeURIComponent(project.project_id)}`
+      );
     }
   }, []);
 
