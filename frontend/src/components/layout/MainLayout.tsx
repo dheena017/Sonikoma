@@ -426,20 +426,12 @@ export default function MainLayout(props: MainLayoutProps) {
               onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
               isSidebarOpen={isSidebarOpen}
               backendStatus={backendStatus as any}
-              narrationStyle={narrationStyle}
-              setNarrationStyle={setNarrationStyle}
               selectedModel={selectedModel}
               setSelectedModel={setSelectedModel}
               volume={volume}
               setVolume={setVolume}
               isMuted={isMuted}
               setIsMuted={setIsMuted}
-              autoPlayAudio={autoPlayAudio}
-              setAutoPlayAudio={setAutoPlayAudio}
-              sfxVolume={appLogic.sfxVolume}
-              setSfxVolume={appLogic.setSfxVolume}
-              sfxEnabled={appLogic.sfxEnabled}
-              setSfxEnabled={appLogic.setSfxEnabled}
               user={user}
               notifications={notifications}
               markNotificationAsRead={markNotificationAsRead as any}
@@ -453,8 +445,6 @@ export default function MainLayout(props: MainLayoutProps) {
               navigateTo={navigateTo}
               notificationsMuted={notificationsMuted}
               setNotificationsMuted={setNotificationsMuted}
-              themeMode={themeMode as any}
-              toggleThemeMode={toggleThemeMode}
               fetchWithInterceptor={fetchWithInterceptor}
             />
           )

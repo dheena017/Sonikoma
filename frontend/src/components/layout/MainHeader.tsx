@@ -6,22 +6,16 @@ import {
   Bell,
   BellOff,
   X,
-  Settings,
   Search,
   Volume2,
   VolumeX,
   Volume1,
   Activity,
-  Check,
   ChevronDown,
   Loader2,
   Sparkles,
-  Sliders,
-  Paintbrush,
   HelpCircle,
   FileText,
-  Sun,
-  Moon,
   Cloud,
   Zap,
   Cpu,
@@ -33,7 +27,6 @@ import {
 import { GeneratedPanel } from "@/types";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import { Notification } from "@/features/app_notification";
-import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import { getUserCredits, getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import { useProjectStore } from "@/store/useProjectStore";
@@ -54,18 +47,12 @@ interface HeaderProps {
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
   backendStatus: "online" | "offline" | "checking";
-  narrationStyle?: string;
-  setNarrationStyle?: (style: "long" | "short") => void;
   selectedModel?: string;
   setSelectedModel?: (model: string) => void;
   volume?: number;
   setVolume?: (vol: number) => void;
   isMuted?: boolean;
   setIsMuted?: (muted: boolean) => void;
-  sfxVolume?: number;
-  setSfxVolume?: (vol: number) => void;
-  sfxEnabled?: boolean;
-  setSfxEnabled?: (enabled: boolean) => void;
   user?: any;
   notifications: Notification[];
   markNotificationAsRead: (id: number) => void;
@@ -79,10 +66,6 @@ interface HeaderProps {
   navigateTo?: (path: string) => void;
   notificationsMuted?: boolean;
   setNotificationsMuted?: (muted: boolean) => void;
-  themeMode?: "dark" | "light";
-  toggleThemeMode?: () => void;
-  autoPlayAudio?: boolean;
-  setAutoPlayAudio?: (val: boolean) => void;
   fetchWithInterceptor?: any;
   addNotification?: (message: string, type?: string) => void;
 }
@@ -110,18 +93,12 @@ const HeaderInner = ({
   onToggleSidebar,
   isSidebarOpen = false,
   backendStatus,
-  narrationStyle = "long",
-  setNarrationStyle,
   selectedModel = "",
   setSelectedModel,
   volume = 0.8,
   setVolume,
   isMuted = false,
   setIsMuted,
-  sfxVolume = 60,
-  setSfxVolume,
-  sfxEnabled = true,
-  setSfxEnabled,
   user,
   notifications,
   markNotificationAsRead,
@@ -135,23 +112,16 @@ const HeaderInner = ({
   navigateTo: routerNavigateTo,
   notificationsMuted = false,
   setNotificationsMuted,
-  themeMode = "dark",
-  toggleThemeMode,
-  autoPlayAudio: autoPlayAudioProp,
-  setAutoPlayAudio,
   fetchWithInterceptor,
   addNotification,
 }: HeaderProps) => {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
-  const { models: aiModels } = useAIModels();
   const { activeProjectId, activeProjectData, projectState, missingProjectInfo, setDrawerOpen, clearActiveProject } = useProjectStore();
 
 
   const notificationsRef = useRef<HTMLDivElement>(null);
-  const settingsRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -271,9 +241,6 @@ const HeaderInner = ({
       ) {
         setShowNotifications(false);
       }
-      if (settingsRef.current && !settingsRef.current.contains(target)) {
-        setShowSettings(false);
-      }
       if (statsRef.current && !statsRef.current.contains(target)) {
         setShowStats(false);
       }
@@ -288,97 +255,7 @@ const HeaderInner = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Theme configuration
-  const [accentColor, setAccentColor] = useState<string>(() => {
-    return localStorage.getItem("app-accent-color") || "purple";
-  });
 
-  useEffect(() => {
-    localStorage.setItem("app-accent-color", accentColor);
-    let styleEl = document.getElementById("dynamic-theme-style");
-    if (!styleEl) {
-      styleEl = document.createElement("style");
-      styleEl.id = "dynamic-theme-style";
-      document.head.appendChild(styleEl);
-    }
-
-    const themeColors: Record<string, string> = {
-      purple: ``, // Reset theme variables
-      emerald: `
-        :root {
-          --color-purple-400: var(--color-emerald-400, #34d399);
-          --color-purple-500: var(--color-emerald-500, #10b981);
-          --color-purple-600: var(--color-emerald-600, #059669);
-          --color-purple-750: var(--color-emerald-700, #047857);
-          --color-purple-900: var(--color-emerald-900, #064e3b);
-          --color-purple-950: var(--color-emerald-950, #022c22);
-          --color-indigo-600: var(--color-teal-600, #0d9488);
-          --color-indigo-700: var(--color-teal-700, #0f766e);
-        }
-      `,
-      rose: `
-        :root {
-          --color-purple-400: var(--color-rose-300, #fda4af);
-          --color-purple-500: var(--color-rose-500, #f43f5e);
-          --color-purple-600: var(--color-rose-600, #e11d48);
-          --color-purple-750: var(--color-rose-700, #be123c);
-          --color-purple-900: var(--color-rose-900, #881337);
-          --color-purple-950: var(--color-rose-950, #4c0519);
-          --color-indigo-600: var(--color-pink-600, #db2777);
-          --color-indigo-700: var(--color-pink-700, #be185d);
-        }
-      `,
-      amber: `
-        :root {
-          --color-purple-400: var(--color-amber-400, #fbbf24);
-          --color-purple-500: var(--color-amber-500, #f59e0b);
-          --color-purple-600: var(--color-amber-600, #d97706);
-          --color-purple-750: var(--color-amber-700, #b45309);
-          --color-purple-900: var(--color-amber-900, #78350f);
-          --color-purple-950: var(--color-amber-950, #451a03);
-          --color-indigo-600: var(--color-orange-600, #ea580c);
-          --color-indigo-700: var(--color-orange-700, #c2410c);
-        }
-      `,
-      cyan: `
-        :root {
-          --color-purple-400: var(--color-cyan-400, #22d3ee);
-          --color-purple-500: var(--color-cyan-500, #06b6d4);
-          --color-purple-600: var(--color-cyan-600, #0891b2);
-          --color-purple-750: var(--color-cyan-700, #0e7490);
-          --color-purple-900: var(--color-cyan-900, #164e63);
-          --color-purple-950: var(--color-cyan-950, #083344);
-          --color-indigo-600: var(--color-blue-600, #2563eb);
-          --color-indigo-700: var(--color-blue-700, #1d4ed8);
-        }
-      `,
-      slate: `
-        :root {
-          --color-purple-400: var(--color-neutral-350, #d4d4d4);
-          --color-purple-500: var(--color-neutral-450, #a3a3a3);
-          --color-purple-600: var(--color-neutral-600, #525252);
-          --color-purple-750: var(--color-neutral-750, #3f3f46);
-          --color-purple-900: var(--color-neutral-850, #262626);
-          --color-purple-950: var(--color-neutral-925, #171717);
-          --color-indigo-600: var(--color-zinc-600, #52525b);
-          --color-indigo-700: var(--color-zinc-700, #3f3f46);
-        }
-      `,
-    };
-
-    styleEl.innerHTML = themeColors[accentColor] || "";
-  }, [accentColor]);
-
-  // Audio Playback Auto-play setting local storage fallback
-  const [localAutoPlayAudio, setLocalAutoPlayAudio] = useState(() => {
-    return localStorage.getItem("app-autoplay-audio") === "true";
-  });
-  const autoPlayAudio =
-    autoPlayAudioProp !== undefined ? autoPlayAudioProp : localAutoPlayAudio;
-
-  useEffect(() => {
-    localStorage.setItem("app-autoplay-audio", String(autoPlayAudio));
-  }, [autoPlayAudio]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -567,14 +444,14 @@ const HeaderInner = ({
           onClick={() => navigateTo("/dashboard")}
         >
           <img
-            key={themeMode}
-            src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+
+            src="/logo-dark.png"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
             }}
             className="h-10 w-10 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
             style={{
-              background: themeMode === "light" ? "#ffffff" : "#000000",
+              background: "#000000",
             }}
             alt="Sonikoma Logo"
           />
@@ -744,7 +621,7 @@ const HeaderInner = ({
           )}
       </div>
 
-      {/* Right side: Volume, Notifications, Settings, Stats, Profile */}
+      {/* Right side: Volume, Notifications, Stats, Profile */}
       <div className="flex items-center gap-2 lg:gap-3 shrink-0">
         {/* Server Status Pill */}
         <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-850 text-[10px] font-medium font-sans select-none hover:border-neutral-750 transition-all">
@@ -827,7 +704,6 @@ const HeaderInner = ({
               onClick={() => {
                 setShowCreditsPopover(!showCreditsPopover);
                 setShowNotifications(false);
-                setShowSettings(false);
                 setShowStats(false);
               }}
               title="Your credit balance & daily rewards — click to view"
@@ -899,7 +775,6 @@ const HeaderInner = ({
           <button
             onClick={() => {
               setShowNotifications(!showNotifications);
-              setShowSettings(false);
               setShowStats(false);
             }}
             className={`icon-pill cursor-pointer relative transition-all ${
@@ -981,256 +856,6 @@ const HeaderInner = ({
             )}
           </button>
         </div>
-
-        {/* Quick Settings Dropdown (Cog Button) */}
-        <div className="relative" ref={settingsRef}>
-          <button
-            onClick={() => {
-              setShowSettings(!showSettings);
-              setShowStats(false);
-              setShowNotifications(false);
-            }}
-            className={`icon-pill cursor-pointer transition-all ${
-              showSettings ? "icon-pill--active" : ""
-            }`}
-            title="Quick Settings & Preferences"
-          >
-            <Settings className="h-4 w-4" />
-          </button>
-
-          {showSettings && (
-            <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-72 max-w-[360px] bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 p-4 space-y-4 origin-top sm:origin-top-right">
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
-                  <Sliders className="h-4 w-4" /> Quick Settings
-                </h3>
-                <p className="text-[9px] text-neutral-500 font-mono mt-0.5">
-                  Configure preferences for this rendering session
-                </p>
-              </div>
-
-              {/* Models Settings */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-neutral-300 font-sans block">
-                  Models
-                </label>
-                <select
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel?.(e.target.value)}
-                  className="w-full bg-neutral-900 border border-neutral-850 text-white rounded-lg px-3 py-2 text-xs focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 font-mono"
-                >
-                  {aiModels.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Toggles */}
-              <div className="space-y-2 border-y border-neutral-850 py-3">
-                {/* Narration style select inside settings */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold text-neutral-300">
-                      Narration Script Length
-                    </p>
-                    <p className="text-[9px] text-neutral-500 font-mono">
-                      Long Storyteller vs Snappy Subtitles
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (setNarrationStyle) {
-                        setNarrationStyle(
-                          narrationStyle === "long" ? "short" : "long"
-                        );
-                      }
-                    }}
-                    className={`px-2 py-1 rounded text-[9px] font-bold font-mono tracking-wider transition-colors cursor-pointer border border-neutral-800 ${
-                      narrationStyle === "long"
-                        ? "border-purple-500/40 bg-purple-950/30 text-purple-300"
-                        : "border-emerald-500/40 bg-emerald-950/30 text-emerald-300"
-                    }`}
-                  >
-                    {narrationStyle === "long" ? "STORYTELLER" : "SUBTITLES"}
-                  </button>
-                </div>
-
-                {/* Auto Play Audio Checkbox */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold text-neutral-300">
-                      Auto-play TTS Audios
-                    </p>
-                    <p className="text-[9px] text-neutral-500 font-mono">
-                      Play voice on selection
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={autoPlayAudio}
-                    onChange={(e) => {
-                      if (setAutoPlayAudio) {
-                        setAutoPlayAudio(e.target.checked);
-                      } else {
-                        setLocalAutoPlayAudio(e.target.checked);
-                      }
-                    }}
-                    className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
-                  />
-                </div>
-
-                {/* Sound Effects Toggle */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold text-neutral-300">
-                      Interface Sound Effects
-                    </p>
-                    <p className="text-[9px] text-neutral-500 font-mono">
-                      Clicks, chimes, and alerts
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={sfxEnabled}
-                    onChange={(e) => setSfxEnabled?.(e.target.checked)}
-                    className="w-4 h-4 rounded bg-neutral-950 border border-neutral-850 accent-purple-500 cursor-pointer"
-                  />
-                </div>
-
-                {/* SFX Volume Slider */}
-                {sfxEnabled && (
-                  <div className="space-y-1.5 pt-1">
-                    <div className="flex justify-between items-center">
-                      <p className="text-[10px] font-bold text-neutral-300">
-                        SFX Volume
-                      </p>
-                      <span className="text-[9px] text-neutral-500 font-mono">
-                        {sfxVolume}%
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="5"
-                      value={sfxVolume}
-                      onChange={(e) => setSfxVolume?.(parseInt(e.target.value))}
-                      className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500 outline-none transition-all"
-                    />
-                  </div>
-                )}
-
-                {/* Dark / Light Mode Toggle */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-bold text-neutral-300">
-                      Interface Appearance
-                    </p>
-                    <p className="text-[9px] text-neutral-500 font-mono">
-                      {themeMode === "dark"
-                        ? "Dark mode active"
-                        : "Light mode active"}
-                    </p>
-                  </div>
-                  <button
-                    onClick={toggleThemeMode}
-                    title={
-                      themeMode === "dark"
-                        ? "Switch to Light Mode"
-                        : "Switch to Dark Mode"
-                    }
-                    className={`relative inline-flex items-center w-14 h-7 rounded-full border-2 transition-all duration-300 cursor-pointer focus:outline-none ${
-                      themeMode === "light"
-                        ? "bg-amber-400 border-amber-500 shadow-[0_0_10px_rgba(251,191,36,0.4)]"
-                        : "bg-neutral-800 border-neutral-700"
-                    }`}
-                  >
-                    <span
-                      className={`inline-flex items-center justify-center w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${
-                        themeMode === "light"
-                          ? "translate-x-7 bg-white"
-                          : "translate-x-1 bg-neutral-600"
-                      }`}
-                    >
-                      {themeMode === "light" ? (
-                        <Sun className="h-3 w-3 text-amber-500" />
-                      ) : (
-                        <Moon className="h-3 w-3 text-neutral-300" />
-                      )}
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Color Theme Selector */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-neutral-300 font-sans block flex items-center gap-1.5">
-                  <Paintbrush className="h-3.5 w-3.5" /> Accent Color Theme
-                </span>
-                <div className="flex gap-2.5 items-center bg-neutral-950/30 border border-neutral-850 p-2 rounded-xl justify-center">
-                  {[
-                    {
-                      id: "purple",
-                      color: "bg-purple-600",
-                      border: "border-purple-400",
-                      label: "Classic Purple",
-                    },
-                    {
-                      id: "emerald",
-                      color: "bg-emerald-600",
-                      border: "border-emerald-400",
-                      label: "Neon Emerald",
-                    },
-                    {
-                      id: "rose",
-                      color: "bg-rose-600",
-                      border: "border-rose-450",
-                      label: "Vibrant Rose",
-                    },
-                    {
-                      id: "amber",
-                      color: "bg-amber-600",
-                      border: "border-amber-400",
-                      label: "Retro Amber",
-                    },
-                    {
-                      id: "cyan",
-                      color: "bg-cyan-600",
-                      border: "border-cyan-400",
-                      label: "Ocean Cyan",
-                    },
-                    {
-                      id: "slate",
-                      color: "bg-neutral-400",
-                      border: "border-neutral-200",
-                      label: "Monochrome Slate",
-                    },
-                  ].map((theme) => (
-                    <button
-                      key={theme.id}
-                      onClick={() => setAccentColor(theme.id)}
-                      className={`w-5 h-5 rounded-full ${
-                        theme.color
-                      } cursor-pointer transition-all border-2 relative flex items-center justify-center ${
-                        accentColor === theme.id
-                          ? `${theme.border} scale-110 shadow-lg`
-                          : "border-transparent opacity-60 hover:opacity-100 hover:scale-105"
-                      }`}
-                      title={theme.label}
-                    >
-                      {accentColor === theme.id && (
-                        <Check className="h-3 w-3 text-white font-bold" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
 
       </div>
     </header>
