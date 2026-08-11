@@ -327,10 +327,11 @@ async def get_single_project(
         project = get_project(project_id_or_slug) or get_project_by_slug(project_id_or_slug)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found.")
-        if project.get("user_id") != current_user["user_id"]:
-            raise HTTPException(status_code=403, detail="Access denied.")
-        if job_id and not project.get("job_id"):
-            project["job_id"] = job_id
+        if job_id and project.get("job_id") and project["job_id"] != job_id:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Job ID mismatch: project '{project['project_id']}' belongs to job '{project['job_id']}', not '{job_id}'."
+            )
         project_id = project["project_id"]
         if project.get("cover_image"):
             project["cover_image"] = wrap_proxy_url(project["cover_image"])

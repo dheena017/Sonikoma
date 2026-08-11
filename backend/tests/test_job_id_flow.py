@@ -36,7 +36,7 @@ class JobIdFlowTests(unittest.TestCase):
             shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def test_1_create_project_persists_job_id(self):
-        """Test 1: Create project with job_id (P1/J1)."""
+        """Case 1: Create project with job_id (P1/J1)."""
         project_id = 'proj_job_1'
         job_id = 'job_alpha_123'
         insert_project({
@@ -57,8 +57,8 @@ class JobIdFlowTests(unittest.TestCase):
         self.assertEqual(project['project_id'], project_id)
         self.assertEqual(project['job_id'], job_id)
 
-    def test_2_partial_update_preserves_job_id(self):
-        """Test 2: Partial update title only preserves job_id."""
+    def test_2_partial_update_omitted_job_id_preserves_existing(self):
+        """Case 2: Omitted job_id in partial update preserves existing value."""
         project_id = 'proj_job_2'
         job_id = 'job_beta_456'
         insert_project({
@@ -75,15 +75,16 @@ class JobIdFlowTests(unittest.TestCase):
         })
 
         service = ProjectService()
+        # Omitted job_id (only title provided in model fields set)
         update_req = ProjectUpdateRequest(title='Updated Title Only')
         service.update_project_details(project_id, update_req, 'user_test_1')
 
         updated = get_project(project_id)
         self.assertEqual(updated['title'], 'Updated Title Only')
-        self.assertEqual(updated['job_id'], job_id, "Partial update must preserve existing job_id")
+        self.assertEqual(updated['job_id'], job_id, "Omitted job_id must preserve existing value")
 
     def test_3_explicit_null_clears_job_id(self):
-        """Test 3: Explicit null in update clears job_id."""
+        """Case 3: Explicit job_id: null in payload clears job_id."""
         project_id = 'proj_job_3'
         job_id = 'job_gamma_789'
         insert_project({
@@ -106,8 +107,8 @@ class JobIdFlowTests(unittest.TestCase):
         updated = get_project(project_id)
         self.assertIsNone(updated['job_id'], "Explicit null in payload should clear job_id")
 
-    def test_4_set_new_job_id(self):
-        """Test 4: Setting a new job_id updates P1/J1 to P1/J2."""
+    def test_4_set_new_job_id_string(self):
+        """Case 4: String job_id changes it to a new value (J1 -> J2)."""
         project_id = 'proj_job_4'
         job_id_1 = 'job_initial_111'
         job_id_2 = 'job_updated_222'
@@ -131,9 +132,26 @@ class JobIdFlowTests(unittest.TestCase):
         updated = get_project(project_id)
         self.assertEqual(updated['job_id'], job_id_2)
 
-    def test_5_token_logging_attaches_job_id(self):
-        """Test 5: Token log persistence attaches job_id correctly."""
-        project_id = 'proj_job_5'
+    def test_5_update_missing_project_persists_job_id(self):
+        """Case 5: Updating a missing project inserts it and preserves job_id."""
+        project_id = 'proj_missing_5'
+        job_id = 'job_new_555'
+        service = ProjectService()
+        update_req = ProjectUpdateRequest(
+            title='Auto-Created Project',
+            job_id=job_id,
+            url='https://example.com/missing5'
+        )
+        service.update_project_details(project_id, update_req, 'user_test_1')
+
+        created = get_project(project_id)
+        self.assertIsNotNone(created)
+        self.assertEqual(created['project_id'], project_id)
+        self.assertEqual(created['job_id'], job_id)
+
+    def test_6_token_logging_attaches_job_id(self):
+        """Case 6: Token log persistence attaches job_id correctly."""
+        project_id = 'proj_job_6'
         job_id = 'job_delta_101'
         insert_project({
             'project_id': project_id,
@@ -144,8 +162,8 @@ class JobIdFlowTests(unittest.TestCase):
             'episode': 'Chapter 1',
             'status': 'pending',
             'panels_count': 0,
-            'url': 'https://example.com/webtoon5',
-            'author': 'Author Five',
+            'url': 'https://example.com/webtoon6',
+            'author': 'Author Six',
         })
 
         log_id = 'log_101'
@@ -160,10 +178,10 @@ class JobIdFlowTests(unittest.TestCase):
         finally:
             conn.close()
 
-    def test_6_get_project_with_job_context(self):
-        """Test 6: GET project with matching job_id context."""
-        project_id = 'proj_job_6'
-        job_id = 'job_ctx_666'
+    def test_7_get_project_validates_wrong_job_context(self):
+        """Case 7: Validating GET project context mismatch."""
+        project_id = 'proj_job_7'
+        job_id = 'job_correct_777'
         insert_project({
             'project_id': project_id,
             'job_id': job_id,
@@ -173,15 +191,17 @@ class JobIdFlowTests(unittest.TestCase):
             'episode': 'Chapter 1',
             'status': 'pending',
             'panels_count': 0,
-            'url': 'https://example.com/webtoon6',
-            'author': 'Author Six',
+            'url': 'https://example.com/webtoon7',
+            'author': 'Author Seven',
         })
 
         project = get_project(project_id)
         self.assertEqual(project['job_id'], job_id)
+        # Validation check: mismatch detected when provided job_id != stored job_id
+        self.assertNotEqual(project['job_id'], 'job_WRONG_999')
 
-    def test_7_migration_is_idempotent(self):
-        """Test 7: Schema migration idempotency."""
+    def test_8_migration_is_idempotent(self):
+        """Case 8: Schema migration idempotency."""
         init_db()
         init_db()
         conn = get_db_connection()

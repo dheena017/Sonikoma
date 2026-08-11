@@ -158,6 +158,7 @@ class ProjectService:
             self.repo.insert_project(
                 {
                     "project_id": project_id,
+                    "job_id": getattr(body, "job_id", None),
                     "url": body.url or "",
                     "title": body.title or "Untitled Project",
                     "genre": body.genre or "general",
