@@ -20,6 +20,7 @@
     "start:prod": "npm run python:prod",
     "start:server": "npm run start:prod",
     "install:python": ".venv\\Scripts\\python.exe -m pip install -r backend/requirements.txt",
+    "postinstall": "cd frontend && npm install",
     "clean": "rimraf frontend/dist",
     "docker:build": "docker build -t sonikoma .",
     "docker:run": "docker run -p ${FRONTEND_PORT:-3000}:${FRONTEND_PORT:-3000} sonikoma",
