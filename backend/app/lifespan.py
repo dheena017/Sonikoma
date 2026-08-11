@@ -135,11 +135,14 @@ async def lifespan(app: FastAPI):
             logger.info("[Startup] Skipping AI model pre-warming (models will lazy-load on demand to preserve memory).")
 
         # Start automatic training background monitor service
-        try:
-            from services.training.training_monitor import start_background_monitor
-            start_background_monitor()
-        except Exception as e:
-            logger.warning(f"[Startup] Failed to start training data monitor service: {e}")
+        if os.getenv("ENABLE_TRAINING_MONITOR", "false").lower() == "true":
+            try:
+                from services.training.training_monitor import start_background_monitor
+                start_background_monitor()
+            except Exception as e:
+                logger.warning(f"[Startup] Failed to start training data monitor service: {e}")
+        else:
+            logger.info("[Startup] Training monitor is disabled via ENABLE_TRAINING_MONITOR.")
 
     # Launch background maintenance non-blocking so backend starts listening instantly
     asyncio.create_task(_startup_maintenance())

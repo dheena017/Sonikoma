@@ -16,9 +16,9 @@ easyocr: Any = None
 np: Any = None
 Image: Any = None
 try:
-    import easyocr
     import numpy as np
     from PIL import Image
+    # easyocr is lazily imported later
     _HAS_EASYOCR = True
 except ImportError:
     _HAS_EASYOCR = False
@@ -47,7 +47,12 @@ def _load_ocr_reader(langs: List[str] = ["en"]) -> Optional[Any]:
     global _ocr_reader
     if _ocr_reader is None and _HAS_EASYOCR:
         logger.info(f"[OCR] Initialising EasyOCR reader — languages: {langs}")
-        _ocr_reader = easyocr.Reader(langs, gpu=False)
+        try:
+            import easyocr
+            _ocr_reader = easyocr.Reader(langs, gpu=False)
+        except ImportError:
+            logger.warning("[OCR] EasyOCR is not actually installed.")
+            return None
     return _ocr_reader
 
 

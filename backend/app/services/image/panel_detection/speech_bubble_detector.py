@@ -40,6 +40,9 @@ def get_yolo_speech_bubble_model():
     if not has_yolo_dependencies:
         return None
 
+    from ultralytics import YOLO
+    from huggingface_hub import hf_hub_download
+
     # Priority 0: Custom locally fine-tuned model (if exists)
     try:
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -187,6 +190,8 @@ def get_yolo_character_segmentation_model():
         return None
 
     try:
+        from ultralytics import YOLO
+
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         local_path = os.path.join(base_dir, "yolov8n-seg.pt")
         if os.path.exists(local_path):

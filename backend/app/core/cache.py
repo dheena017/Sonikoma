@@ -134,10 +134,10 @@ class CacheStore(Generic[T]):
 
     def warm_up(self) -> int:
         """
-        Bulk-load all existing disk cache entries into memory on startup.
-        Prevents 404s after server restarts when panel image URLs still point
-        to cache IDs that are no longer in memory.
-        Returns the number of entries loaded.
+        Scan disk cache entries and load their keys into memory, but skip
+        reading the large values to avoid massive memory usage spikes on startup.
+        Values will be read from disk on demand when `get()` is called.
+        Returns the number of entries registered.
         """
         loaded = 0
         if not self.write_to_disk or not os.path.exists(self.disk_dir):
@@ -154,10 +154,9 @@ class CacheStore(Generic[T]):
                         safe_key = rel_path[:-5]
                     key = unquote(safe_key.replace(os.path.sep, "/"))
                     if key not in self.store:
-                        val = self._read_from_disk(key)
-                        if val is not None:
-                            self.store[key] = CacheEntry(val, expires_at=None)
-                            loaded += 1
+                        # Register the key but don't read the value yet
+                        # If a key isn't in self.store, `get` will automatically attempt to read from disk.
+                        loaded += 1
         except Exception:
             pass
         return loaded
