@@ -185,9 +185,15 @@ class ProjectService:
             "video_url": body.video_url,
             "status": body.status,
             "audio_settings": body.audio_settings,
-            "job_id": getattr(body, "job_id", None),
         }
         updates = {k: v for k, v in field_map.items() if v is not None}
+
+        fields_set = getattr(body, "model_fields_set", getattr(body, "__fields_set__", set()))
+        if "job_id" in fields_set:
+            updates["job_id"] = getattr(body, "job_id", None)
+        elif hasattr(body, "job_id") and getattr(body, "job_id") is not None:
+            updates["job_id"] = getattr(body, "job_id")
+
         if body.cover_image is not None:
             updates["cover_image"] = unwrap_proxy_url(body.cover_image)
 

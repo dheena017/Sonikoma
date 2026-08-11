@@ -10,7 +10,8 @@ both the mount prefix and the route path are empty.
 
 import logging
 
-from fastapi import APIRouter, HTTPException, Path, Body, Depends, Request, UploadFile, File, Form
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Path, Body, Depends, Request, UploadFile, File, Form, Query
 from fastapi.responses import JSONResponse
 
 from api.dependencies.auth import get_current_user
@@ -319,6 +320,7 @@ async def delete_single_project(
 @project_router.get("/{project_id_or_slug}", summary="Get a project and its panels")
 async def get_single_project(
     project_id_or_slug: str = Path(..., description="Project ID or Slug"),
+    job_id: Optional[str] = Query(None, description="Optional Workspace Job ID context"),
     current_user: dict = Depends(get_current_user),
 ):
     try:
@@ -327,6 +329,8 @@ async def get_single_project(
             raise HTTPException(status_code=404, detail="Project not found.")
         if project.get("user_id") != current_user["user_id"]:
             raise HTTPException(status_code=403, detail="Access denied.")
+        if job_id and not project.get("job_id"):
+            project["job_id"] = job_id
         project_id = project["project_id"]
         if project.get("cover_image"):
             project["cover_image"] = wrap_proxy_url(project["cover_image"])

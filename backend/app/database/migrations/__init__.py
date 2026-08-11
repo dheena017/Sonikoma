@@ -167,6 +167,40 @@ def init_postgres(conn) -> None:
         except Exception:
             pass
 
+        # job_id column on chapters
+        try:
+            row_chap_job = conn.execute(
+                "SELECT EXISTS ("
+                "  SELECT FROM information_schema.columns"
+                "  WHERE table_schema = 'public'"
+                "    AND table_name = 'chapters'"
+                "    AND column_name = 'job_id'"
+                ") as exists"
+            ).fetchone()
+            if not row_chap_job or not row_chap_job.get("exists"):
+                logger.info("[Database] Migration: adding 'job_id' column to 'chapters' table...")
+                conn.execute("ALTER TABLE chapters ADD COLUMN job_id TEXT")
+                conn.commit()
+        except Exception:
+            pass
+
+        # job_id column on token_usage_logs
+        try:
+            row_log_job = conn.execute(
+                "SELECT EXISTS ("
+                "  SELECT FROM information_schema.columns"
+                "  WHERE table_schema = 'public'"
+                "    AND table_name = 'token_usage_logs'"
+                "    AND column_name = 'job_id'"
+                ") as exists"
+            ).fetchone()
+            if not row_log_job or not row_log_job.get("exists"):
+                logger.info("[Database] Migration: adding 'job_id' column to 'token_usage_logs' table...")
+                conn.execute("ALTER TABLE token_usage_logs ADD COLUMN job_id TEXT")
+                conn.commit()
+        except Exception:
+            pass
+
     except Exception as e:
         logger.error(f"[Database] Error checking PostgreSQL schema: {e}")
     finally:

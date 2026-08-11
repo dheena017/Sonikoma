@@ -6,23 +6,38 @@ Token usage and LLM costs logging operations.
 """
 
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from database.engine import get_db_connection
 
 logger = logging.getLogger("sonikoma.repositories.project.tokens")
 
 
-def insert_token_log(log_id: str, project_id: str, input_tokens: int, output_tokens: int, total_tokens: int, estimated_cost_usd: float) -> None:
+def insert_token_log(
+    log_id: str,
+    project_id: str,
+    input_tokens: int,
+    output_tokens: int,
+    total_tokens: int,
+    estimated_cost_usd: float,
+    job_id: Optional[str] = None,
+) -> None:
     """
-    Inserts a new token usage log entry.
+    Inserts a new token usage log entry with project_id and job_id attribution.
     """
     conn = get_db_connection()
     try:
+        if not job_id:
+            try:
+                ch = conn.execute("SELECT job_id FROM chapters WHERE id = ?", (project_id,)).fetchone()
+                if ch and ch["job_id"]:
+                    job_id = ch["job_id"]
+            except Exception:
+                pass
         conn.execute("""
-            INSERT INTO token_usage_logs (id, project_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (log_id, project_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd))
+            INSERT INTO token_usage_logs (id, project_id, job_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (log_id, project_id, job_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd))
         conn.commit()
     except Exception as e:
         logger.error(f"Failed to insert token usage log: {e}")

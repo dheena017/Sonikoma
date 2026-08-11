@@ -324,6 +324,8 @@ export function useAutoSave(state: AutoSaveState) {
       const finalVideoUrl = options?.overrideVideoUrl !== undefined ? options.overrideVideoUrl : (state.videoUrl || null);
       const statusValue = overrideStatus ?? (finalVideoUrl ? "completed" : "pending");
 
+      const saveIdentity = `${targetProjectId}:${state.jobId || ""}`;
+
       const data = await api.updateProject(
         state.fetchWithInterceptor,
         targetProjectId,
@@ -337,6 +339,7 @@ export function useAutoSave(state: AutoSaveState) {
           synopsis: synopsis || null,
           video_url: finalVideoUrl,
           status: statusValue,
+          job_id: state.jobId !== undefined ? state.jobId : null,
           audio_settings: {
             voiceActor: state.voiceActor,
             musicTheme: state.musicTheme,
@@ -387,6 +390,14 @@ export function useAutoSave(state: AutoSaveState) {
           })),
         }
       );
+
+      const activeIdentity = `${state.projectId || ""}:${state.jobId || ""}`;
+      if (activeIdentity !== saveIdentity && !isConvertingTemp) {
+        console.warn(
+          `[Save Hook] Workspace context switched during save (from ${saveIdentity} to ${activeIdentity}). Aborting state ref sync.`
+        );
+        return false;
+      }
       if (data.success) {
         if (isConvertingTemp || data.series_slug) {
           state.setProjectId?.(targetProjectId);

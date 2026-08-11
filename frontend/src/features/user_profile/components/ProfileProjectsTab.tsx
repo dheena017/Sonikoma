@@ -240,6 +240,7 @@ export default function ProfileProjectsTab({
 
           const createBody = {
             project_id: proj.project_id,
+            job_id: proj.job_id || null,
             url: proj.url,
             title: proj.title || "Untitled Webtoon",
             genre: proj.genre || "general",
