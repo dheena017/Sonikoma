@@ -6,23 +6,24 @@ html {
   scrollbar-color: rgba(168, 85, 247, 0.4) #09090b;
 }
 
-::-webkit-scrollbar {
+/* Webkit scrollbar — scoped to scrollable inner containers, NOT the root window */
+*:not(html):not(body)::-webkit-scrollbar {
   width: 8px;
   height: 8px;
   background-color: #09090b;
 }
 
-::-webkit-scrollbar-track {
+*:not(html):not(body)::-webkit-scrollbar-track {
   background: #09090b;
 }
 
-::-webkit-scrollbar-thumb {
+*:not(html):not(body)::-webkit-scrollbar-thumb {
   background: rgba(168, 85, 247, 0.3);
   border-radius: 9999px;
   border: 2px solid #09090b;
 }
 
-::-webkit-scrollbar-thumb:hover {
+*:not(html):not(body)::-webkit-scrollbar-thumb:hover {
   background: rgba(168, 85, 247, 0.6);
 }
 

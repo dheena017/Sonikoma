@@ -267,7 +267,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   return (
     // Premium Glassmorphism Container
     <aside
-      className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-neutral-950/90 backdrop-blur-2xl border-r border-neutral-800/80 shadow-[4px_0_24px_rgba(0,0,0,0.4)] hidden lg:flex flex-col items-center py-4 z-[90]"
+      className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-neutral-950/90 backdrop-blur-2xl border-r border-neutral-800/80 shadow-[4px_0_24px_rgba(0,0,0,0.4)] hidden lg:flex flex-col items-center py-4 z-[90] overflow-hidden"
     >
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
