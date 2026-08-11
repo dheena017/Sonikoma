@@ -23,6 +23,7 @@ class ScrapeImagesRequest(BaseModel):
     cover_image: Optional[str] = None
     synopsis: Optional[str] = None
     project_id: Optional[str] = None
+    job_id: Optional[str] = None
     scrape_only: Optional[bool] = False
     limit: Optional[int] = None
     proxy_images: Optional[bool] = True
@@ -33,6 +34,7 @@ class ScrapeImagesRequest(BaseModel):
 class GenerateStoryboardOnlyRequest(BaseModel):
     url: str
     project_id: str
+    job_id: Optional[str] = None
     model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
     title: Optional[str] = None
@@ -46,6 +48,7 @@ class GenerateStoryboardOnlyRequest(BaseModel):
 class GenerateStoryboardRequest(BaseModel):
     url: str
     episode_id: Optional[str] = None
+    job_id: Optional[str] = None
     panels: Optional[List[Dict[str, Any]]] = None
     custom_background_video: Optional[str] = None
     model: Optional[str] = None
@@ -102,6 +105,8 @@ class ExportArchiveRequest(BaseModel):
 
 class BatchScrapeRequest(BaseModel):
     urls: List[str]
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
     limit: Optional[int] = None
     proxy_images: Optional[bool] = True
     filter_banners: Optional[bool] = True

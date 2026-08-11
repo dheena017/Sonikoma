@@ -17,11 +17,18 @@ logger = logging.getLogger("sonikoma.services.scraper.batch_job_service")
 BATCH_JOBS: Dict[str, Dict[str, Any]] = {}
 
 
-def create_batch_job(urls: List[str]) -> str:
+def create_batch_job(
+    urls: List[str],
+    project_id: Optional[str] = None,
+    workspace_job_id: Optional[str] = None,
+) -> str:
     """Initializes a new background batch scraping job."""
-    job_id = f"batch_{int(time.time())}_{uuid.uuid4().hex[:6]}"
-    BATCH_JOBS[job_id] = {
-        "job_id": job_id,
+    batch_execution_id = f"batch_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+    BATCH_JOBS[batch_execution_id] = {
+        "job_id": batch_execution_id,
+        "execution_id": batch_execution_id,
+        "project_id": project_id,
+        "workspace_job_id": workspace_job_id,
         "status": "queued",
         "progress_percentage": 0,
         "total_urls": len(urls),
@@ -32,7 +39,7 @@ def create_batch_job(urls: List[str]) -> str:
         "created_at": time.time(),
         "updated_at": time.time()
     }
-    return job_id
+    return batch_execution_id
 
 
 def get_batch_job_status(job_id: str) -> Optional[Dict[str, Any]]:
@@ -57,6 +64,8 @@ async def execute_batch_job(job_id: str, options: Dict[str, Any]):
         try:
             res = await scrape_and_initialize_project(
                 url=u,
+                project_id=job.get("project_id"),
+                job_id=job.get("workspace_job_id"),
                 limit=options.get("limit"),
                 proxy_images=options.get("proxy_images", True),
                 filter_banners=options.get("filter_banners", True),

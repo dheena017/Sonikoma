@@ -138,6 +138,8 @@ async def update_project_details(
             result = service.update_project_details(projectId, body, current_user["user_id"])
         except PermissionError as exc:
             raise HTTPException(status_code=403, detail="Access denied.") from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
 
         logger.info(
             f"[Database] Project {projectId} updated successfully. "

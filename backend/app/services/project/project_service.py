@@ -177,6 +177,16 @@ class ProjectService:
         if project.get("user_id") != current_user_id:
             raise PermissionError("Access denied.")
 
+        # Enforce job boundary: if the stored project has a job_id and the caller
+        # provides a different one, reject the update to prevent cross-job data corruption.
+        stored_job_id = project.get("job_id")
+        incoming_job_id = getattr(body, "job_id", None)
+        if stored_job_id and incoming_job_id and stored_job_id != incoming_job_id:
+            raise ValueError(
+                f"job_id mismatch: project belongs to job '{stored_job_id}', "
+                f"cannot update under job '{incoming_job_id}'."
+            )
+
         field_map = {
             "title": body.title,
             "genre": body.genre,

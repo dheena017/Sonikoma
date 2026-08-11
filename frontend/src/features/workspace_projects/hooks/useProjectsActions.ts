@@ -33,13 +33,14 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
   }, []);
 
   const handleOpenProject = useCallback((project: Project) => {
+    const jobId = project.job_id;
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
       );
-    } else if (project.job_id) {
+    } else if (jobId) {
       (window as any).navigateTo?.(
-        `/scraper/editor?project_id=${encodeURIComponent(project.project_id)}&job_id=${encodeURIComponent(project.job_id)}`
+        `/scraper/editor?project_id=${encodeURIComponent(project.project_id)}&job_id=${encodeURIComponent(jobId)}`
       );
     } else {
       (window as any).navigateTo?.(
@@ -100,13 +101,14 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
 
   const handleExport = useCallback((e: MouseEvent, project: Project) => {
     e.stopPropagation();
+    const jobId = project.job_id;
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
       );
     } else {
       (window as any).navigateTo?.(
-        `/scraper/editor?id=${project.project_id}`
+        `/scraper/editor?project_id=${project.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`
       );
     }
   }, []);
@@ -121,21 +123,23 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
 
   const handleOpenDetails = useCallback((e: MouseEvent, project: Project) => {
     e.stopPropagation();
+    const jobId = project.job_id;
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
       );
     } else {
-      (window as any).navigateTo?.(`/scraper/editor?id=${project.project_id}`);
+      (window as any).navigateTo?.(`/scraper/editor?project_id=${project.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`);
     }
   }, []);
 
   const handleCopyLink = useCallback((e: MouseEvent, project: Project) => {
     e.stopPropagation();
+    const jobId = project.job_id;
     const url =
       project.series_slug && project.chapter_slug
-        ? `${window.location.origin}/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
-        : `${window.location.origin}/scraper?id=${project.project_id}`;
+        ? `${window.location.origin}/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
+        : `${window.location.origin}/scraper?project_id=${project.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`;
     navigator.clipboard.writeText(url);
     (window as any).alertAsync?.(
       "Link copied to clipboard!",

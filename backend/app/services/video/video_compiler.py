@@ -117,7 +117,7 @@ async def compile_video_from_panels(
         if suggested_duration <= 0:
             suggested_duration = 4.5
 
-        speech_text = panel.get("speech_text", "").strip()
+        speech_text = (panel.get("speech_text") or "").strip()
 
         audio_path = os.path.join(temp_dir, f"{series_slug}_ep{ep_num}_p{panel_id}_audio_{uuid.uuid4().hex[:6]}.mp3")
         actual_duration = suggested_duration
@@ -242,20 +242,30 @@ async def process_render_job(
     bgm_volume: float = 1.0,
     speech_rate: float = 1.0,
     speech_pitch: float = 1.0,
+    project_id: Optional[str] = None,
+    workspace_job_id: Optional[str] = None,
 ) -> None:
     job_queue = get_job_queue()
 
     if job_queue.get_job(video_id) is None:
-        job_queue.update_status(video_id, "pending", progress=0.0)
+        job_queue.create_job(
+            "video_render",
+            job_id=video_id,
+            project_id=project_id,
+            workspace_job_id=workspace_job_id,
+        )
 
     try:
-        logger.info(f"[VideoService] Starting render job '{video_id}' ({len(panels)} panels)")
+        logger.info(
+            f"[VideoService] Starting render execution_id='{video_id}' for project_id='{project_id or 'N/A'}', "
+            f"workspace_job_id='{workspace_job_id or 'N/A'}' ({len(panels)} panels)"
+        )
         job_queue.update_status(video_id, "running", progress=5.0)
 
         os.makedirs(_VIDEO_OUTPUT_DIR, exist_ok=True)
 
         output_filename = await compile_video_from_panels(
-            project_id=video_id,
+            project_id=project_id or video_id,
             panels=panels,
             output_dir=_VIDEO_OUTPUT_DIR,
         )
@@ -268,18 +278,24 @@ async def process_render_job(
             progress=100.0,
             result=video_url,
         )
-        logger.info(f"[VideoService] Render job '{video_id}' completed → {video_url}")
-
-    except Exception as exc:
-        error_msg = str(exc)
+        logger.info(
+            f"[VideoService] Completed render execution_id='{video_id}' -> {video_url} "
+            f"(project_id='{project_id or 'N/A'}', workspace_job_id='{workspace_job_id or 'N/A'}')"
+        )
+    except Exception as e:
         logger.error(
-            f"[VideoService] Render job '{video_id}' failed: {error_msg}",
+            f"[VideoService] Failed render execution_id='{video_id}' "
+            f"(project_id='{project_id or 'N/A'}', workspace_job_id='{workspace_job_id or 'N/A'}'): {e}",
             exc_info=True,
         )
-        job_queue.update_status(video_id, "failed", progress=0.0, error=error_msg)
+        job_queue.update_status(
+            video_id,
+            "failed",
+            error=str(e),
+        )
+        job_queue.update_status(video_id, "failed", progress=0.0, error=str(e))
 
 
 # Human-readable aliases
 compile_panels_to_video_file = compile_video_from_panels
-render_video_job_in_background = process_render_job
 

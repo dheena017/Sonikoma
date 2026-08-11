@@ -37,6 +37,7 @@ async def scrape_and_initialize_project(
     smart_slice: bool = False,
     scrape_only: bool = False,
     project_id: Optional[str] = None,
+    job_id: Optional[str] = None,
     user_id: Optional[str] = None,
     title: Optional[str] = None,
     episode: Optional[str] = None,
@@ -142,6 +143,7 @@ async def scrape_and_initialize_project(
     if resolved_project_id and not resolved_project_id.startswith("temp_"):
         insert_project({
             "project_id": resolved_project_id,
+            "job_id": job_id,
             "url": normalized_url,
             "title": parsed.get("title") or "Untitled Project",
             "genre": parsed.get("genre") or "general",

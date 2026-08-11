@@ -20,8 +20,14 @@ class VideoJobQueueManager:
     def __init__(self):
         self.jobs: Dict[str, Dict[str, Any]] = {}
 
-    def create_job(self, task_name: str, job_id: Optional[str] = None) -> str:
-        """Create a new job record and return its unique job_id.
+    def create_job(
+        self,
+        task_name: str,
+        job_id: Optional[str] = None,
+        project_id: Optional[str] = None,
+        workspace_job_id: Optional[str] = None,
+    ) -> str:
+        """Create a new job record and return its unique job_id (execution_id).
 
         If the caller already has an external job identifier, it can be used
         to keep the queue entry keyed consistently across components.
@@ -30,6 +36,9 @@ class VideoJobQueueManager:
             job_id = str(uuid.uuid4())
         self.jobs[job_id] = {
             "job_id": job_id,
+            "execution_id": job_id,
+            "project_id": project_id,
+            "workspace_job_id": workspace_job_id,
             "task_name": task_name,
             "status": "pending",
             "progress": 0.0,
@@ -39,7 +48,10 @@ class VideoJobQueueManager:
             "result": None,
             "error": None
         }
-        logger.info(f"[Job Queue] Created job {job_id} for task '{task_name}'")
+        logger.info(
+            f"[Job Queue] Created execution_id={job_id} for task '{task_name}' "
+            f"(project_id={project_id or 'N/A'}, workspace_job_id={workspace_job_id or 'N/A'})"
+        )
         return job_id
 
     def update_status(self, job_id: str, status: str, progress: float = 0.0, result: Any = None, error: Optional[str] = None):

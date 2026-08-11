@@ -91,9 +91,11 @@ export const deleteSeries = async (
 export const updateProjectPanels = async (
   fetchWithInterceptor: FetchClient,
   projectId: string,
-  panels: any[]
+  panels: any[],
+  jobId?: string | null
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/panels`, {
+  const query = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/panels${query}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ panels }),
@@ -114,11 +116,12 @@ export const saveScrapedImages = async (
 export const updateProjectTokens = async (
   fetchWithInterceptor: FetchClient,
   projectId: string,
-  tokens: number
+  tokens: number,
+  jobId?: string | null
 ): Promise<ApiResponse<any>> => {
   return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/tokens`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tokens }),
+    body: JSON.stringify({ tokens, ...(jobId ? { job_id: jobId } : {}) }),
   });
 };

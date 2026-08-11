@@ -10,6 +10,7 @@ import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
 
 interface MatchingProjectSummary {
   project_id: string;
+  job_id?: string | null;
   title?: string;
   url?: string;
   cover_image?: string;
@@ -104,12 +105,13 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
         <button
           onClick={() => {
             if (!matchingProject.project_id) return;
+            const jobId = matchingProject.job_id;
             if (matchingProject.series_slug && matchingProject.chapter_slug) {
               navigateTo?.(
-                `/scraper/editor/series/${matchingProject.series_slug}/chapters/${matchingProject.chapter_slug}`
+                `/scraper/editor/series/${matchingProject.series_slug}/chapters/${matchingProject.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
               );
             } else {
-              navigateTo?.(`/scraper/editor?id=${matchingProject.project_id}`);
+              navigateTo?.(`/scraper/editor?project_id=${matchingProject.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`);
             }
           }}
           className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]"

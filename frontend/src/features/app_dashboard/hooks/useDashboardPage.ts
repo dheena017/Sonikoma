@@ -5,6 +5,7 @@ import { useProjectStore } from "@/store/useProjectStore";
 
 export interface Project {
   project_id: string;
+  job_id?: string | null;
   title: string;
   url: string;
   created_at: string;
@@ -207,10 +208,11 @@ export default function useDashboardPage() {
     }
 
     const nav = (window as any).navigateTo;
+    const jobId = project.job_id;
     const target =
       project.series_slug && project.chapter_slug
-        ? `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}`
-        : `/scraper?id=${project.project_id}`;
+        ? `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
+        : `/scraper?project_id=${project.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`;
 
     if (typeof nav === "function") {
       nav(target);

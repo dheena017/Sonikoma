@@ -16,6 +16,8 @@ from schemas.video import RenderRequest
 from services.video.job_queue import get_job_queue
 from services.video.video_service import process_render_job
 
+from repositories.project import get_project, get_project_by_slug
+
 logger = logging.getLogger("sonikoma.api.video.render")
 router = APIRouter()
 
@@ -29,6 +31,15 @@ async def render_video(
     if not request.panels:
         raise HTTPException(status_code=400, detail="Panel list is empty.")
 
+    if request.project_id and not (request.project_id.startswith("temp_") or request.project_id.startswith("draft_")):
+        project = get_project(request.project_id) or get_project_by_slug(request.project_id)
+        if not project:
+            raise HTTPException(status_code=404, detail=f"Project '{request.project_id}' not found.")
+        if project.get("user_id") and project.get("user_id") != current_user.get("user_id"):
+            raise HTTPException(status_code=403, detail=f"Access denied for project '{request.project_id}'.")
+        if request.job_id and project.get("job_id") and project.get("job_id") != request.job_id:
+            raise HTTPException(status_code=400, detail=f"Workspace job ID mismatch for project '{request.project_id}'.")
+
     COST = 20
     if get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST} for video render.")
@@ -40,8 +51,13 @@ async def render_video(
         f"[Render] Initiating render execution_id={video_id} for project_id={request.project_id or 'N/A'}, workspace_job_id={request.job_id or 'N/A'}"
     )
 
-    # Register the job using the execution ID returned to client for status polling.
-    job_queue.create_job("video_render", job_id=video_id)
+    # Register the job using execution ID (returned to client as execution_id & legacy job_id).
+    job_queue.create_job(
+        "video_render",
+        job_id=video_id,
+        project_id=request.project_id,
+        workspace_job_id=request.job_id,
+    )
 
     # Deduct credits
     new_balance = record_credit_transaction(current_user["user_id"], -COST, "video_render")
@@ -64,6 +80,8 @@ async def render_video(
         request.bgm_volume if request.bgm_volume is not None else 1.0,
         request.speech_rate if request.speech_rate is not None else 1.0,
         request.speech_pitch if request.speech_pitch is not None else 1.0,
+        project_id=request.project_id,
+        workspace_job_id=request.job_id,
     )
 
     return {

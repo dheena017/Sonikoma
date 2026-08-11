@@ -30,6 +30,7 @@ from repositories.project import (
     get_panels,
     insert_project,
     increment_project_tokens,
+    insert_token_log,
     delete_panels,
     delete_project,
     get_token_logs,
@@ -103,7 +104,8 @@ async def get_public_project(project_id: str = Path(..., description="Project ID
                     scraped_images = [wrap_proxy_url(img) for img in sess["image_urls"] if img]
             except Exception:
                 pass
-        return {"success": True, "project": project, "panels": panels, "scraped_images": scraped_images}
+        public_project = {k: v for k, v in project.items() if k != "job_id"}
+        return {"success": True, "project": public_project, "panels": panels, "scraped_images": scraped_images}
     except HTTPException:
         raise
     except Exception as e:
@@ -164,6 +166,7 @@ async def save_project_panels(
     request: Request,
     projectId: str = Path(...),
     body: PanelsSaveRequest = Body(...),
+    job_id: Optional[str] = Query(None, description="Workspace Job ID for ownership verification"),
     current_user: dict = Depends(get_current_user),
 ):
     try:
@@ -172,6 +175,16 @@ async def save_project_panels(
             project = get_project_by_slug(projectId)
             if project:
                 projectId = project["project_id"]
+
+        # Enforce job_id ownership boundary when caller supplies one
+        if job_id and project:
+            stored_job_id = project.get("job_id")
+            if stored_job_id and stored_job_id != job_id:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"job_id mismatch: panels belong to job '{stored_job_id}', not '{job_id}'.",
+                )
+
         try:
             result = project_service.save_project_panels(
                 projectId,
@@ -202,6 +215,7 @@ async def increment_project_tokens_route(
     current_user: dict = Depends(get_current_user),
 ):
     try:
+        import uuid
         project = get_project(projectId)
         if not project:
             project = get_project_by_slug(projectId)
@@ -211,7 +225,21 @@ async def increment_project_tokens_route(
             raise HTTPException(status_code=404, detail="Project not found.")
         if project.get("user_id") != current_user["user_id"]:
             raise HTTPException(status_code=403, detail="Access denied.")
+        # Resolve job_id: prefer caller-supplied value, fall back to project's stored job_id
+        resolved_job_id = body.job_id or project.get("job_id") or None
         increment_project_tokens(projectId, body.tokens)
+        try:
+            insert_token_log(
+                log_id=str(uuid.uuid4()),
+                project_id=projectId,
+                input_tokens=body.tokens,
+                output_tokens=0,
+                total_tokens=body.tokens,
+                estimated_cost_usd=round(body.tokens * 0.00000015, 6),
+                job_id=resolved_job_id,
+            )
+        except Exception as log_err:
+            logger.warning(f"[Tokens] insert_token_log failed (non-fatal): {log_err}")
         return {"success": True, "added": body.tokens}
     except HTTPException:
         raise

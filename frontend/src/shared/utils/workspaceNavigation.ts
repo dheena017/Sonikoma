@@ -51,20 +51,35 @@ export function parseWorkspaceParams(
   const storage = options?.storage ??
     (typeof window !== "undefined" ? window.localStorage : null);
 
-  const projectId =
+  const explicitProjectId =
     options?.projectId ??
     params.get("project_id") ??
     params.get("projectId") ??
     params.get("id") ??
-    storage?.getItem("active_project_id") ??
     null;
 
-  const jobId =
+  const explicitJobId =
     options?.jobId ??
     params.get("job_id") ??
     params.get("jobId") ??
-    storage?.getItem("active_job_id") ??
     null;
+
+  let projectId: string | null = null;
+  let jobId: string | null = null;
+
+  if (explicitProjectId !== null) {
+    projectId = explicitProjectId;
+    if (explicitJobId !== null) {
+      jobId = explicitJobId;
+    } else if (storage?.getItem("active_project_id") === explicitProjectId) {
+      jobId = storage?.getItem("active_job_id") ?? null;
+    } else {
+      jobId = null;
+    }
+  } else {
+    projectId = storage?.getItem("active_project_id") ?? null;
+    jobId = explicitJobId ?? storage?.getItem("active_job_id") ?? null;
+  }
 
   return { projectId, jobId };
 }
@@ -91,7 +106,8 @@ export function resolveWorkspaceReturnPath(
     null;
 
   if (activeSeriesSlug && activeChapterSlug) {
-    return `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+    const jobQuery = activeJobId ? `?job_id=${encodeURIComponent(activeJobId)}` : "";
+    return `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}${jobQuery}`;
   }
 
   if (activeProjectId) {

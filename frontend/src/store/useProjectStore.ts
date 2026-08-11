@@ -34,6 +34,7 @@ export interface ActiveProjectData {
 export interface ProjectStoreState {
   activeProjectData: ActiveProjectData | null;
   setActiveProject: (data: ActiveProjectData | null) => void;
+  setWorkspaceContext: (ctx: WorkspaceContext) => void;
   clearActiveProject: () => void;
   isEpisodeCollapsed: boolean;
   setIsEpisodeCollapsed: (v: boolean) => void;
@@ -44,6 +45,25 @@ export const useProjectStore = create<ProjectStoreState>()(
     (set) => ({
       activeProjectData: null,
       setActiveProject: (data) => set({ activeProjectData: data }),
+      setWorkspaceContext: (ctx: WorkspaceContext) =>
+        set((state) => {
+          if (!ctx.projectId) {
+            return { activeProjectData: null };
+          }
+          const cur = state.activeProjectData;
+          const projectChanged = cur?.project?.project_id !== ctx.projectId;
+          return {
+            activeProjectData: {
+              project: {
+                ...(cur?.project ?? { title: "", url: "" }),
+                project_id: ctx.projectId,
+                job_id: ctx.jobId ?? null,
+              },
+              panels: projectChanged ? [] : (cur?.panels ?? []),
+              scrapedImages: projectChanged ? [] : (cur?.scrapedImages ?? []),
+            },
+          };
+        }),
       clearActiveProject: () => set({ activeProjectData: null }),
       isEpisodeCollapsed: false,
       setIsEpisodeCollapsed: (v: boolean) => set({ isEpisodeCollapsed: v }),

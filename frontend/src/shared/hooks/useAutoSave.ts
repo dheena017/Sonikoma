@@ -453,7 +453,8 @@ export function useAutoSave(state: AutoSaveState) {
             await api.updateProjectTokens(
               state.fetchWithInterceptor,
               data.project_id || targetProjectId,
-              state.accumulatedTokens
+              state.accumulatedTokens,
+              state.jobId ?? null
             );
             state.setAccumulatedTokens?.(0);
             console.log(

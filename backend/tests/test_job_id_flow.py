@@ -116,8 +116,13 @@ class JobIdFlowTests(unittest.TestCase):
         updated = get_project(project_id)
         self.assertIsNone(updated['job_id'], "Explicit null in payload should clear job_id")
 
-    def test_4_set_new_job_id_string(self):
-        """Case 4: String job_id changes it to a new value (J1 -> J2)."""
+    def test_4_update_project_with_mismatched_job_id_is_rejected(self):
+        """Case 4: update_project_details rejects a mismatching job_id to prevent cross-job data corruption.
+
+        Previously this tested free job_id mutation. Now that the service enforces job
+        boundary integrity (issue #2 of the workspace isolation audit), providing a
+        different job_id from the one already stored on the project must raise ValueError.
+        """
         project_id = 'proj_job_4'
         job_id_1 = 'job_initial_111'
         job_id_2 = 'job_updated_222'
@@ -136,10 +141,13 @@ class JobIdFlowTests(unittest.TestCase):
 
         service = ProjectService()
         update_req = ProjectUpdateRequest(job_id=job_id_2)
-        service.update_project_details(project_id, update_req, 'user_test_1')
+        with self.assertRaises(ValueError) as ctx:
+            service.update_project_details(project_id, update_req, 'user_test_1')
+        self.assertIn('job_id mismatch', str(ctx.exception))
 
-        updated = get_project(project_id)
-        self.assertEqual(updated['job_id'], job_id_2)
+        # Verify the original job_id was NOT modified.
+        stored = get_project(project_id)
+        self.assertEqual(stored['job_id'], job_id_1, "job_id must remain unchanged after a rejected update.")
 
     def test_5_update_missing_project_persists_job_id(self):
         """Case 5: Updating a missing project inserts it and preserves job_id."""

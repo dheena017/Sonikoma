@@ -67,6 +67,7 @@ class ProjectUpdateRequest(BaseModel):
 
 class TokenIncrementRequest(BaseModel):
     tokens: int = Field(..., description="Number of tokens to add")
+    job_id: Optional[str] = Field(None, description="Workspace Job ID for attribution")
 
 
 class BatchDeleteRequest(BaseModel):

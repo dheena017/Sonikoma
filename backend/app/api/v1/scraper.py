@@ -108,6 +108,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
             smart_slice=body.smart_slice if body.smart_slice is not None else True,
             scrape_only=getattr(body, "scrape_only", False),
             project_id=body.project_id,
+            job_id=getattr(body, "job_id", None),
             user_id=user_id,
             title=getattr(body, "title", None),
             episode=getattr(body, "episode", None),
@@ -229,6 +230,7 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest,
             bypass_cache=body.bypass_cache if body.bypass_cache is not None else True,
             panels=body.panels,
             episode_id=body.episode_id,
+            job_id=getattr(body, "job_id", None),
             user_id=user_id,
             user_keys=user_keys,
             title=getattr(body, "title", None),
@@ -251,6 +253,7 @@ async def generate_storyboard_only(request: Request, body: GenerateStoryboardOnl
         result = await generate_storyboard_only_service(
             url=body.url,
             project_id=body.project_id,
+            job_id=getattr(body, "job_id", None),
             model=body.model or GEMINI_MODEL_PRIMARY,
             narration_style=body.narrationStyle or "long",
             user_id=user_id,
@@ -357,20 +360,24 @@ async def batch_scrape(body: BatchScrapeRequest):
     if not body.urls:
         raise HTTPException(status_code=400, detail="URL list cannot be empty.")
     try:
-        job_id = create_batch_job(body.urls)
+        batch_execution_id = create_batch_job(
+            body.urls,
+            project_id=getattr(body, "project_id", None),
+            workspace_job_id=getattr(body, "job_id", None),
+        )
         options = {
             "limit": body.limit,
             "proxy_images": body.proxy_images,
             "filter_banners": body.filter_banners,
             "include_metadata": body.include_metadata
         }
-        asyncio.create_task(execute_batch_job(job_id, options))
+        asyncio.create_task(execute_batch_job(batch_execution_id, options))
         return {
             "success": True,
-            "job_id": job_id,
+            "job_id": batch_execution_id,
             "status": "queued",
             "total_urls": len(body.urls),
-            "status_url": f"/api/v1/scraper/batch-status/{job_id}"
+            "status_url": f"/api/v1/scraper/batch-status/{batch_execution_id}"
         }
     except Exception as e:
         logger.error(f"[Batch Scrape Error] {e}", exc_info=True)

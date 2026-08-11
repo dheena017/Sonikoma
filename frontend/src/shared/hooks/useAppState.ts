@@ -80,9 +80,14 @@ export function useAppState() {
       useProjectStore.getState().clearActiveProject();
       return;
     }
+    const projectChanged = cur?.project?.project_id !== val;
     useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { title: "", url: "" }), project_id: val, job_id: cur?.project?.job_id ?? null },
-      panels: cur?.panels ?? [],
+      project: {
+        ...(cur?.project ?? { title: "", url: "" }),
+        project_id: val,
+        job_id: projectChanged ? null : (cur?.project?.job_id ?? null),
+      },
+      panels: projectChanged ? [] : (cur?.panels ?? []),
     });
   }, []);
 
@@ -93,6 +98,10 @@ export function useAppState() {
       ...cur,
       project: { ...cur.project, job_id: val },
     });
+  }, []);
+
+  const setWorkspaceContext = useCallback((ctx: WorkspaceContext) => {
+    useProjectStore.getState().setWorkspaceContext(ctx);
   }, []);
 
   const workspaceContext = useMemo<WorkspaceContext>(
@@ -783,6 +792,7 @@ export function useAppState() {
 
       const params = new URLSearchParams(window.location.search);
       const urlProjectId = params.get("id") || params.get("project_id");
+      const urlJobId = params.get("job_id") || params.get("jobId") || null;
 
       const path = window.location.pathname;
       const match = path.match(
@@ -795,6 +805,7 @@ export function useAppState() {
         if (path === "/scraper") {
           useProjectStore.getState().clearActiveProject();
           localStorage.removeItem("active_project_id");
+          localStorage.removeItem("active_job_id");
           localStorage.removeItem("active_series_slug");
           localStorage.removeItem("active_chapter_slug");
           setScrapedImages([]);
@@ -809,10 +820,14 @@ export function useAppState() {
       const currentActiveProject = useProjectStore.getState().activeProjectData;
       const currentActiveId = currentActiveProject?.project?.project_id;
       const currentChapterSlug = currentActiveProject?.project?.chapter_slug;
+      const currentJobId = currentActiveProject?.project?.job_id ?? null;
+
+      const targetJobId = urlJobId ?? null;
 
       const isSameProject =
-        lookupId === currentActiveId ||
-        (currentChapterSlug && lookupId === currentChapterSlug);
+        (lookupId === currentActiveId ||
+          (currentChapterSlug && lookupId === currentChapterSlug)) &&
+        (targetJobId === null || targetJobId === currentJobId);
 
       if (isSameProject) {
         if (
@@ -845,6 +860,9 @@ export function useAppState() {
                 setScrapedImages([]);
               }
               localStorage.setItem("active_project_id", lookupId);
+              if (urlJobId) {
+                localStorage.setItem("active_job_id", urlJobId);
+              }
               localStorage.removeItem("active_series_slug");
               localStorage.removeItem("active_chapter_slug");
               return;
@@ -866,6 +884,9 @@ export function useAppState() {
           const activeProject = useProjectStore.getState().activeProjectData;
           if (activeProject?.project?.project_id === lookupId) {
             localStorage.setItem("active_project_id", lookupId);
+            if (urlJobId) {
+              localStorage.setItem("active_job_id", urlJobId);
+            }
             localStorage.removeItem("active_series_slug");
             localStorage.removeItem("active_chapter_slug");
             return;
@@ -873,20 +894,28 @@ export function useAppState() {
         }
 
         localStorage.setItem("active_project_id", lookupId);
+        if (urlJobId) {
+          localStorage.setItem("active_job_id", urlJobId);
+        }
         localStorage.removeItem("active_series_slug");
         localStorage.removeItem("active_chapter_slug");
         return;
       }
 
-      loadProject(lookupId);
+      loadProject(lookupId, urlJobId);
     };
 
-    const loadProject = async (lookupId: string) => {
+    const loadProject = async (lookupId: string, jobId?: string | null) => {
       try {
         const token = getToken();
-        const data = await api.getProject(fetchWithInterceptor, lookupId);
+        const data = await api.getProject(fetchWithInterceptor, lookupId, jobId);
         if (data.success && data.project) {
           localStorage.setItem("active_project_id", data.project.project_id);
+          if (data.project.job_id) {
+            localStorage.setItem("active_job_id", data.project.job_id);
+          } else {
+            localStorage.removeItem("active_job_id");
+          }
           if (data.project.series_slug) {
             localStorage.setItem(
               "active_series_slug",
@@ -1420,6 +1449,8 @@ export function useAppState() {
       projectId,
       jobId,
       setProjectId,
+      setJobId,
+      setWorkspaceContext,
       seriesSlugState,
       setSeriesSlugState,
       chapterSlugState,
@@ -1534,6 +1565,7 @@ export function useAppState() {
       jobId,
       setProjectId,
       setJobId,
+      setWorkspaceContext,
       workspaceContext,
       seriesSlugState,
       chapterSlugState,
