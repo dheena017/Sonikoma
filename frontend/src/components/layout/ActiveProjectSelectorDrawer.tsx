@@ -378,15 +378,17 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                   </div>
 
                   <div className="flex items-center gap-2 pt-1 flex-wrap">
-                    <button
-                      onClick={() => {
-                        hydrateActiveProject(missingId, fetchWithInterceptor);
-                      }}
-                      className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-white rounded-xl text-xs font-bold transition-all border border-neutral-700 cursor-pointer flex items-center gap-1.5"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5 text-neutral-300" />
-                      <span>Retry Load</span>
-                    </button>
+                    {!isJobId && (
+                      <button
+                        onClick={() => {
+                          hydrateActiveProject(missingId, fetchWithInterceptor);
+                        }}
+                        className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-white rounded-xl text-xs font-bold transition-all border border-neutral-700 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-neutral-300" />
+                        <span>Retry Load</span>
+                      </button>
+                    )}
 
                     <button
                       onClick={() => clearActiveProject()}

@@ -468,9 +468,10 @@ export function useAppLogic() {
           synopsis: state.seriesSynopsis
             ? state.seriesSynopsis.trim()
             : undefined,
+          // Must use temp_ prefix — job_ is reserved for backend processing jobs only.
           project_id:
             overrideProjectId ||
-            `job_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+            `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
           scrape_only: state.smartSlice,
         });
 

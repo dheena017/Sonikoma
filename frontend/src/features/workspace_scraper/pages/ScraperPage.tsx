@@ -454,7 +454,10 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   const handleWorkspaceImport = () => {
     if (!targetUrl.trim()) return;
 
-    const temporaryProjectId = `job_${Date.now()}_${Math.random()
+    // Must use temp_ prefix, NOT job_ — job_ is reserved for backend processing jobs only.
+    // Using job_ here causes the frontend guard in useAppState.ts to immediately
+    // classify the project_id as an expired background job and enter the missing state.
+    const temporaryProjectId = `temp_${Date.now()}_${Math.random()
       .toString(36)
       .substring(2, 10)}`;
 
