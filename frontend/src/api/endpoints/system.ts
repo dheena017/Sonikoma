@@ -73,24 +73,5 @@ export const enhancePrompt = async (
   });
 };
 
-export const purgeCache = async (
-  fetchWithInterceptor: FetchClient
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/metrics/purge-cache", {
-    method: "POST",
-  });
-};
 
-export const emergencyStop = async (
-  fetchWithInterceptor: FetchClient
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/metrics/emergency-stop", {
-    method: "POST",
-  });
-};
 
-export const checkFfmpeg = async (): Promise<ApiResponse<any>> => {
-  const res = await fetch("/api/health/ffmpeg");
-  if (!res.ok) throw new Error("FFmpeg health check failed");
-  return res.json();
-};

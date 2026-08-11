@@ -10,7 +10,6 @@ import ScraperPage from "@/features/workspace_scraper/pages/ScraperPage";
 import EditorPage from "@/features/editor_studio/pages/EditorPage";
 import PageNotFound from "@/components/feedback/PageNotFound";
 import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
-import StatusPage from "@/features/system_status/pages/StatusPage";
 import ShortcutsPage from "@/features/app_shortcuts/pages/ShortcutsPage";
 
 // --- Processing & Editor Modals ---
@@ -29,8 +28,6 @@ import CreativeSuiteLayout from "@/features/creative_suite/components/CreativeSu
 // --- Lazy Loaded Heavy Feature Pages (Phase 9 Performance Code-Splitting) ---
 const DashboardPage = React.lazy(() => import("@/features/app_dashboard/pages/DashboardPage"));
 const ImageEditorPage = React.lazy(() => import("@/features/editor_image/pages/ImageEditorPage"));
-const AIModelsPage = React.lazy(() => import("@/features/ai_core/pages/AIModelsPage"));
-const ModelTrainingPage = React.lazy(() => import("@/features/ai_training/pages/ModelTrainingPage"));
 const YouTubePage = React.lazy(() => import("@/features/creative_youtube/pages/YouTubePage"));
 const VoiceStudioPage = React.lazy(() => import("@/features/creative_voice/pages/VoiceStudioPage"));
 const AIOptimizerPage = React.lazy(() => import("@/features/creative_optimizer/pages/AIOptimizerPage"));
@@ -586,9 +583,7 @@ export default function AppRouter(props: AppRouterProps) {
       isWorkspacePath,
       isWorkspaceOnly: isWorkspacePath,
       isDashboardOverviewPath: currentPath === "/dashboard",
-      isProjectsPath: currentPath === "/projects",
-      isSettingsPath: currentPath === "/settings",
-      isSettingsAccountPath:
+      isProjectsPath: currentPath === "/projects",      isSettingsAccountPath:
         currentPath === "/settings/account" ||
         currentPath === "/settings/account/",
       isAutoCropPath: currentPath === "/auto-crop",
@@ -597,12 +592,7 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath.startsWith("/editor") ||
         currentPath === "/scraper/editor" ||
         currentPath === "/scraper/editor/" ||
-        currentPath.startsWith("/scraper/editor/"),
-      isLogsPath: currentPath === "/logs",
-      isStatusPath: currentPath === "/status",
-      isAIModelsPath: currentPath === "/ai-models",
-      isModelTrainingPath: currentPath === "/model-training",
-      isShortcutsPath: currentPath === "/shortcuts",
+        currentPath.startsWith("/scraper/editor/"),      isShortcutsPath: currentPath === "/shortcuts",
       isAudioSettingsPath: currentPath === "/scraper/audio-settings",
       isOptimizerPath:
         currentPath === "/creative-suite/ai-optimizer" ||
@@ -669,17 +659,10 @@ export default function AppRouter(props: AppRouterProps) {
     isWorkspacePath,
     isWorkspaceOnly,
     isDashboardOverviewPath,
-    isProjectsPath,
-    isSettingsPath,
-    isSettingsAccountPath,
+    isProjectsPath,    isSettingsAccountPath,
     isAutoCropPath,
     isEpisodeScraperPath,
-    isEditorPath,
-    isLogsPath,
-    isStatusPath,
-    isAIModelsPath,
-    isModelTrainingPath,
-    isShortcutsPath,
+    isEditorPath,    isShortcutsPath,
     isAudioSettingsPath,
     isOptimizerPath,
     isPanelAssistantPath,
@@ -1038,66 +1021,7 @@ export default function AppRouter(props: AppRouterProps) {
         </div>
       )}
 
-      {/* PAGE VIEW 2: Advanced System Configuration Settings */}
-      {isSettingsPath && (
-        <div className="page-transition w-full flex-1 flex flex-col px-4 sm:px-6 py-6 md:py-10 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
-            <div>
-              <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-                <span
-                  className="hover:text-purple-400 cursor-pointer"
-                  onClick={handleNavigateHome}
-                >
-                  Dashboard
-                </span>
-                <span>&gt;</span>
-                <span className="text-purple-400">Settings</span>
-              </div>
-              <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-                <div className="icon-pill icon-pill--purple">
-                  <Sliders className="h-5 w-5" />
-                </div>
-                System Configuration Settings
-              </h2>
-              <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Manage voice synthesis, music composition, and output rendering profiles
-              </p>
-            </div>
-            <button
-              onClick={handleNavigateHome}
-              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Dashboard
-            </button>
-          </div>
-          <VideoPreviewAdvancedSettings
-            voiceActor={voiceActor}
-            setVoiceActor={setVoiceActor}
-            musicTheme={musicTheme}
-            setMusicTheme={setMusicTheme}
-            aspectRatio={aspectRatio as any}
-            setAspectRatio={setAspectRatio}
-            setFrameRate={setFrameRate}
-            activeTheme={activeTheme as any}
-            setActiveTheme={setActiveTheme}
-            targetUrl={targetUrl}
-            selectedModel={selectedModel}
-            selectedSource={selectedSource}
-            addNotification={addNotification}
-            fetchWithInterceptor={fetchWithInterceptor}
-            audioReactiveShake={audioReactiveShake}
-            setAudioReactiveShake={setAudioReactiveShake}
-            shakeIntensity={shakeIntensity as any}
-            setShakeIntensity={setShakeIntensity as any}
-            videoFormat={videoFormat as any}
-            setVideoFormat={setVideoFormat as any}
-            backgroundStyle={backgroundStyle as any}
-            setBackgroundStyle={setBackgroundStyle as any}
-            subtitlesStyle={subtitlesStyle as any}
-            setSubtitlesStyle={setSubtitlesStyle as any} frameRate={0}          />
-        </div>
-      )}
+
 
       {/* PAGE VIEW 2.25: SaaS Profile & Account Settings */}
       {isSettingsAccountPath && (
@@ -1142,51 +1066,13 @@ export default function AppRouter(props: AppRouterProps) {
         </div>
       )}
 
-      {/* PAGE VIEW 3: Real-Time Engine Logs Console */}
-      {isLogsPath && (
-        <div className="page-transition w-full flex-1 flex flex-col">
-          <StatusPage
-            onNavigateHome={handleNavigateHome}
-            fetchWithInterceptor={fetchWithInterceptor}
-            setSelectedModel={setSelectedModel}
-          />
-        </div>
-      )}
 
-      {/* PAGE VIEW 4: Computational Diagnostics Status */}
-      {isStatusPath && (
-        <div className="page-transition w-full flex-1 flex flex-col">
-          <StatusPage
-            onNavigateHome={handleNavigateHome}
-            fetchWithInterceptor={fetchWithInterceptor}
-            setSelectedModel={setSelectedModel}
-          />
-        </div>
-      )}
 
-      {/* PAGE VIEW 4.1: Dedicated AI Model Hub & Playground */}
-      {isAIModelsPath && (
-        <div className="page-transition w-full flex-1 flex flex-col">
-          <AIModelsPage
-            onNavigateHome={handleNavigateHome}
-            fetchWithInterceptor={fetchWithInterceptor}
-            selectedModel={selectedModel}
-            setSelectedModel={setSelectedModel}
-            addNotification={addNotification}
-          />
-        </div>
-      )}
 
-      {/* PAGE VIEW 4.2: YOLO Model Fine-Tuning Hub */}
-      {isModelTrainingPath && (
-        <div className="page-transition w-full flex-1 flex flex-col">
-          <ModelTrainingPage
-            onNavigateHome={handleNavigateHome}
-            fetchWithInterceptor={fetchWithInterceptor}
-            addNotification={addNotification}
-          />
-        </div>
-      )}
+
+
+
+
 
       {/* PAGE VIEW 5: Global Shortcuts Configuration */}
       {isShortcutsPath && (
@@ -1420,15 +1306,8 @@ export default function AppRouter(props: AppRouterProps) {
       {/* FALLBACK VIEW: 404 Route Not Found */}
       {!isWorkspacePath &&
         !isDashboardOverviewPath &&
-        !isProjectsPath &&
-        !isSettingsPath &&
-        !isAutoCropPath &&
-        !isEditorPath &&
-        !isLogsPath &&
-        !isStatusPath &&
-        !isAIModelsPath &&
-        !isModelTrainingPath &&
-        !isShortcutsPath &&
+        !isProjectsPath &&        !isAutoCropPath &&
+        !isEditorPath &&        !isShortcutsPath &&
         !isAudioSettingsPath &&
         !isOptimizerPath &&
         !isPanelAssistantPath &&

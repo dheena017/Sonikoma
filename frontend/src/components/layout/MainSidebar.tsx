@@ -147,15 +147,11 @@ const SidebarInner = ({
     currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard";
   const isAdminPath =
     currentPath.startsWith("/admin/") && currentPath !== "/admin/";
-  const isSettings = currentPath === "/settings";
   const isAutoCrop = currentPath === "/auto-crop";
   const isEditor =
     currentPath.startsWith("/editor") ||
     currentPath.startsWith("/scraper/editor");
-  const isLogs = currentPath === "/logs";
-  const isStatus = currentPath === "/status";
   const isShortcuts = currentPath === "/shortcuts";
-  const isAIModels = currentPath === "/ai-models";
   const isProjects = currentPath === "/projects";
 
   const activeProjectId = useMemo(() => {
@@ -241,53 +237,7 @@ const SidebarInner = ({
       ],
     },
 
-    {
-      group: "Diagnostics & Controls",
-      items: [
-        {
-          label: "Logs",
-          icon: Terminal,
-          active: isLogs,
-          onClick: () => navigateTo("/logs"),
-          enabled: true,
-        },
-        {
-          label: "Status",
-          icon: Activity,
-          active: isStatus,
-          onClick: () => navigateTo("/status"),
-          enabled: true,
-        },
-        {
-          label: "AI Models",
-          icon: Award,
-          active: isAIModels,
-          onClick: () => navigateTo("/ai-models"),
-          enabled: true,
-        },
-        {
-          label: "Model Training",
-          icon: Database,
-          active: currentPath === "/model-training",
-          onClick: () => navigateTo("/model-training"),
-          enabled: true,
-        },
-        {
-          label: "Keys",
-          icon: Keyboard,
-          active: isShortcuts,
-          onClick: () => navigateTo("/shortcuts"),
-          enabled: true,
-        },
-        {
-          label: "Settings",
-          icon: Sliders,
-          active: isSettings,
-          onClick: () => navigateTo("/settings"),
-          enabled: true,
-        },
-      ],
-    },
+
     {
       group: "Account & Alerts",
       items: [

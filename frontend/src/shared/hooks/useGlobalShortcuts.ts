@@ -157,9 +157,6 @@ export function useGlobalShortcuts({
         case "nav_dashboard":
           navigateTo("/dashboard");
           break;
-        case "nav_settings":
-          navigateTo("/settings");
-          break;
         case "nav_editor":
           if (scrapedImages.length > 0) {
             setIsPipMode(false);
@@ -177,13 +174,6 @@ export function useGlobalShortcuts({
           } else {
             addNotification("No scraped frames available.", "info");
           }
-          break;
-
-        case "nav_logs":
-          navigateTo("/logs");
-          break;
-        case "nav_status":
-          navigateTo("/status");
           break;
         case "nav_shortcuts":
           navigateTo("/shortcuts");
