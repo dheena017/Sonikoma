@@ -43,8 +43,9 @@ interface ProfileProjectsTabProps {
   projects: any[];
   onNavigateHome: () => void;
   onBatchDelete: (ids: string[]) => void;
-  onDeleteChapter: (id: string) => void;
-  onDeleteSeries: (seriesId: string) => void;
+  onDeleteChapter?: (id: string) => void;
+  onDeleteSeries?: (seriesId: string) => void;
+  navigateTo?: (path: string) => void;
   onRefreshProjects?: () => void;
 }
 

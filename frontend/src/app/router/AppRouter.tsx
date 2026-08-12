@@ -617,7 +617,10 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath.startsWith("/creative-suite/youtube?") ||
         currentPath.startsWith("/creative-suite/youtube/") ||
         currentPath === "/youtube",
-      isProfilePath: currentPath === "/profile",
+      isProfilePath:
+        currentPath === "/profile" ||
+        currentPath.startsWith("/profile?") ||
+        currentPath.startsWith("/profile/"),
       isNotificationsPath: currentPath === "/notifications",
       isAdminDashboardPath:
         currentPath === "/admin" ||
@@ -1025,15 +1028,21 @@ export default function AppRouter(props: AppRouterProps) {
 
       {/* PAGE VIEW 2.25: SaaS Profile & Account Settings */}
       {isSettingsAccountPath && (
-        <div className="page-transition w-full flex-1 flex flex-col">
-          <SettingsAccountPage
-            user={user}
-            onRefreshUser={checkAuth}
-            fetchWithInterceptor={fetchWithInterceptor}
-            addNotification={addNotification}
-            navigateTo={navigateTo}
-          />
-        </div>
+        <ProfilePage
+          user={user}
+          projects={[]}
+          onLogout={logout}
+          onNavigateHome={handleNavigateHome}
+          onRefreshUser={checkAuth}
+          themeMode={themeMode}
+          toggleThemeMode={toggleThemeMode}
+          navigateTo={navigateTo}
+          addNotification={addNotification}
+          fetchWithInterceptor={fetchWithInterceptor}
+          initialTab="account"
+          selectedModel={selectedModel}
+          setSelectedModel={setSelectedModel}
+        />
       )}
 
       {/* PAGE VIEW 2.5: Dedicated Audio & TTS Mixer Settings */}
@@ -1147,6 +1156,11 @@ export default function AppRouter(props: AppRouterProps) {
           onRefreshUser={checkAuth}
           themeMode={themeMode}
           toggleThemeMode={toggleThemeMode}
+          navigateTo={navigateTo}
+          addNotification={addNotification}
+          fetchWithInterceptor={fetchWithInterceptor}
+          selectedModel={selectedModel}
+          setSelectedModel={setSelectedModel}
         />
       )}
 

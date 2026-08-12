@@ -135,7 +135,9 @@ async def google_login(request: Request):
         "openid",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/youtube.readonly",
         "https://www.googleapis.com/auth/youtube.upload",
+        "https://www.googleapis.com/auth/youtube",
     ]
 
     state = _generate_oauth_state()
@@ -233,6 +235,48 @@ async def google_callback(request: Request):
             name = f"user_{uuid.uuid4().hex[:8]}"
         picture = info.get("picture") or "https://lh3.googleusercontent.com/a/default-user"
 
+        # Try to fetch YouTube channel title and profile picture if channel exists
+        try:
+            logger.info("Fetching YouTube channel info from YouTube Data API v3...")
+            yt_resp = requests.get(
+                "https://www.googleapis.com/youtube/v3/channels?mine=true&part=snippet",
+                headers={"Authorization": f"Bearer {google_access_token}"},
+                timeout=5,
+            )
+            logger.info("YouTube API status code: %s, body snippet: %s", yt_resp.status_code, yt_resp.text[:300])
+            if yt_resp.status_code == 200:
+                yt_data = yt_resp.json()
+                items = yt_data.get("items", [])
+                if items and isinstance(items, list) and len(items) > 0:
+                    clean_name = name.lower().replace("-", "").replace(" ", "")
+                    matching_ch = None
+                    if len(items) == 1:
+                        matching_ch = items[0]
+                    else:
+                        for ch in items:
+                            ch_title = ch.get("snippet", {}).get("title", "").strip().lower().replace("-", "").replace(" ", "")
+                            if ch_title and (ch_title in clean_name or clean_name in ch_title):
+                                matching_ch = ch
+                                break
+                    if not matching_ch and items:
+                        matching_ch = items[0]
+
+                    snippet = matching_ch.get("snippet", {})
+                    yt_title = snippet.get("title")
+                    thumbnails = snippet.get("thumbnails", {})
+                    yt_img = (
+                        thumbnails.get("high", {}).get("url")
+                        or thumbnails.get("medium", {}).get("url")
+                        or thumbnails.get("default", {}).get("url")
+                    )
+                    if yt_img:
+                        picture = yt_img
+                        logger.info("Successfully resolved YouTube channel photo: %s", yt_img)
+                    if yt_title and yt_title.strip():
+                        name = yt_title.strip()
+        except Exception as e:
+            logger.warning(f"Could not fetch YouTube channel info: {e}")
+
         if not email:
             raise HTTPException(status_code=400, detail="Google account did not return a valid email address")
 
@@ -252,23 +296,27 @@ async def google_callback(request: Request):
             if not user:
                 logger.error("Failed to create or fetch user after Google OAuth: %s", email)
                 raise HTTPException(status_code=500, detail="Failed to create user account")
-            # attach google fields
+            # attach google/youtube fields
             try:
                 update_user(user_uuid, {"google_id": google_id, "full_name": name, "avatar_url": picture})
+                user["avatar_url"] = picture
+                user["full_name"] = name
             except Exception:
-                logger.exception("Failed to update user with Google profile info: %s", user_uuid)
+                logger.exception("Failed to update user with Google/YouTube profile info: %s", user_uuid)
         else:
             # make sure user is a mapping and has user_id
             if not isinstance(user, dict) or "user_id" not in user:
                 logger.error("Unexpected user object returned for %s: %r", email, user)
                 raise HTTPException(status_code=500, detail="Invalid user record returned from repository")
 
-            if not user.get("google_id"):
-                try:
-                    update_user(user["user_id"], {"google_id": google_id})
-                    user["google_id"] = google_id
-                except Exception:
-                    logger.exception("Failed to update existing user with google_id: %s", user.get("user_id"))
+            updates = {"google_id": google_id, "full_name": name, "avatar_url": picture}
+            try:
+                update_user(user["user_id"], updates)
+                user["google_id"] = google_id
+                user["full_name"] = name
+                user["avatar_url"] = picture
+            except Exception:
+                logger.exception("Failed to update existing user with google/youtube info: %s", user.get("user_id"))
 
         access_token = create_access_token(data={"sub": user["user_id"]})
 

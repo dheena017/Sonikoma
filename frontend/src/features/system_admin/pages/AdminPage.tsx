@@ -261,16 +261,9 @@ const AdminPage = React.memo(
     };
 
     return (
-      // AdminLayout now flawlessly handles the fixed header, sidebar, and layout padding
-      <AdminLayout
-        currentPath={currentPath}
-        navigateTo={navigateTo}
-        fetchWithInterceptor={fetchWithInterceptor}
-      >
-        <div className="w-full animate-[fadeIn_0.3s_ease-out]">
-          {renderActiveModule()}
-        </div>
-      </AdminLayout>
+      <div className="w-full animate-[fadeIn_0.3s_ease-out]">
+        {renderActiveModule()}
+      </div>
     );
   }
 );

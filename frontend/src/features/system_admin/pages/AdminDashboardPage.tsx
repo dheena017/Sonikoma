@@ -901,15 +901,7 @@ const AdminDashboardPage = React.memo(
       </div>
     );
 
-    if (isTab) {
-      return dashboardContent;
-    }
-
-    return (
-      <AdminLayout currentPath="/admin" navigateTo={navigateTo} fetchWithInterceptor={fetchWithInterceptor}>
-        {dashboardContent}
-      </AdminLayout>
-    );
+    return dashboardContent;
   }
 );
 

@@ -17,6 +17,7 @@ import {
   FolderSync,
 } from "lucide-react";
 import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState"; // Adjust path if needed
+import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
@@ -227,20 +228,16 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           aria-label="Open User profile"
         >
           <img
-            src={
-              (() => {
-                const raw = user?.avatar_url || user?.picture || user?.photo_url;
-                if (raw && typeof raw === "string" && !raw.includes("dicebear") && !raw.includes("avataaars")) {
-                  return raw;
-                }
-                return "https://lh3.googleusercontent.com/a/default-user";
-              })()
-            }
+            key={user?.avatar_url || user?.full_name || "avatar"}
+            src={getUserAvatarUrl(user)}
+            referrerPolicy="no-referrer"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+              const target = e.currentTarget as HTMLImageElement;
+              target.onerror = null;
+              target.src = DEFAULT_USER_AVATAR_DATA_URI;
             }}
             alt="User Avatar"
-            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
           />
           <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans">
             {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "User")}

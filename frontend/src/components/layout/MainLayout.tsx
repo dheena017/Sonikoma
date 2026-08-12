@@ -12,6 +12,7 @@ import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import TerminalLogs from "@/features/system_terminal/components/TerminalLogs";
 import AdminSidebar from "@/features/system_admin/components/AdminSidebar";
 import AdminMiniSidebar from "@/features/system_admin/components/AdminMiniSidebar";
+import AdminHeaderPage from "@/features/system_admin/pages/AdminHeaderPage";
 import MiniSidebar from "@/components/layout/MainMiniSidebar";
 import CreativeSuiteHeader from "@/features/creative_suite/components/CreativeSuiteHeader";
 import CreativeSuiteSidebar from "@/features/creative_suite/components/CreativeSuiteSidebar";
@@ -407,8 +408,25 @@ export default function MainLayout(props: MainLayoutProps) {
           }`}
       >
         {/* Top Header */}
-        {!isSidebarOpen && !isProEditorPage && !isAnyAdmin && !isImageEditorPage && (
-          isCreativeSuitePath ? (
+        {!isSidebarOpen && !isProEditorPage && !isImageEditorPage && (
+          isAnyAdmin ? (
+            <AdminHeaderPage
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              fetchWithInterceptor={fetchWithInterceptor}
+              onToggleSidebar={handleToggleSidebar}
+              notifications={notifications}
+              markNotificationAsRead={markNotificationAsRead as any}
+              markAllNotificationsAsRead={markAllNotificationsAsRead}
+              deleteNotification={deleteNotification as any}
+              clearAllNotifications={clearAllNotifications}
+              notificationsMuted={notificationsMuted}
+              setNotificationsMuted={setNotificationsMuted}
+              isSidebarOpen={isSidebarOpen}
+              user={user}
+              addNotification={addNotification}
+            />
+          ) : isCreativeSuitePath ? (
             <CreativeSuiteHeader
               currentPath={currentPath}
               navigateTo={navigateTo}

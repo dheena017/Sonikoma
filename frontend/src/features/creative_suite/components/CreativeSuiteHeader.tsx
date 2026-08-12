@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import * as api from "@/api";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
+import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import { useProjectStore } from "@/store/useProjectStore";
@@ -348,20 +349,16 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
             {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "Creator")}
           </span>
           <img
-            src={
-              (() => {
-                const raw = user?.avatar_url || user?.picture || user?.photo_url;
-                if (raw && typeof raw === "string" && !raw.includes("dicebear") && !raw.includes("avataaars")) {
-                  return raw;
-                }
-                return "https://lh3.googleusercontent.com/a/default-user";
-              })()
-            }
+            key={user?.avatar_url || user?.full_name || "avatar"}
+            src={getUserAvatarUrl(user)}
+            referrerPolicy="no-referrer"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+              const target = e.currentTarget as HTMLImageElement;
+              target.onerror = null;
+              target.src = DEFAULT_USER_AVATAR_DATA_URI;
             }}
             alt="User Avatar"
-            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
           />
         </button>
       </div>

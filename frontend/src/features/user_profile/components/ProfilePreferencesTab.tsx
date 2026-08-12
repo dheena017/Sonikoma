@@ -44,11 +44,11 @@ interface ProfilePreferencesTabProps {
     autoSaveInterval: string;
   };
   setWorkspace: React.Dispatch<React.SetStateAction<any>>;
-  privacy: {
+  privacy?: {
     analyticsTelemetry: boolean;
     publicProfile: boolean;
   };
-  setPrivacy: React.Dispatch<React.SetStateAction<any>>;
+  setPrivacy?: React.Dispatch<React.SetStateAction<any>>;
   ai?: {
     defaultModel: string;
     defaultVoice: string;
@@ -63,16 +63,22 @@ interface ProfilePreferencesTabProps {
   setExportSettings?: React.Dispatch<React.SetStateAction<any>>;
   themeMode?: "dark" | "light" | string;
   toggleThemeMode?: () => void;
-  accentColor: string;
-  setAccentColor: (color: string) => void;
+  theme?: string;
+  setTheme?: (theme: string) => void;
+  accentColor?: string;
+  setAccentColor?: (color: string) => void;
   fontScale?: string;
   setFontScale?: (scale: string) => void;
   reduceMotion?: boolean;
   setReduceMotion?: (reduce: boolean) => void;
   cornerRadius?: string;
   setCornerRadius?: (radius: string) => void;
-  onSave: (e: React.FormEvent) => void;
-  saveSuccess: boolean;
+  onSave?: (e: React.FormEvent) => void;
+  onSavePreferences?: () => void;
+  isSaving?: boolean;
+  saveSuccess?: boolean;
+  selectedModel?: string;
+  setSelectedModel?: (model: string) => void;
 }
 
 export default function ProfilePreferencesTab({
