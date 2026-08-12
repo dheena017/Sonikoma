@@ -277,6 +277,28 @@ async def google_callback(request: Request):
         except Exception as e:
             logger.warning(f"Could not fetch YouTube channel info: {e}")
 
+        # Fallback: if picture is a generic Google letter badge (lh3.googleusercontent.com/a/), scrape YouTube channel avatar directly
+        if picture and "lh3.googleusercontent.com/a/" in picture and name:
+            try:
+                import re
+                handle = name.lower().replace(" ", "").replace("-", "")
+                yt_page_url = f"https://www.youtube.com/@{handle}"
+                page_resp = requests.get(
+                    yt_page_url,
+                    headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
+                    timeout=4,
+                )
+                if page_resp.status_code == 200:
+                    img_urls = re.findall(r'https://yt3\.[^"\s]+', page_resp.text)
+                    for u in img_urls:
+                        clean_u = u.replace("\\u0026", "&").split("=")[0] + "=s800-c-k-c0x00ffffff-no-rj"
+                        if "yt3.ggpht.com" in clean_u or "yt3.googleusercontent.com" in clean_u:
+                            picture = clean_u
+                            logger.info("Scraped live YouTube channel logo from official website: %s", picture)
+                            break
+            except Exception as e:
+                logger.warning(f"Could not scrape YouTube channel avatar fallback: {e}")
+
         if not email:
             raise HTTPException(status_code=400, detail="Google account did not return a valid email address")
 
