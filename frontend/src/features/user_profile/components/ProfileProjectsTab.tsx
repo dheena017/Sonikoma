@@ -852,7 +852,7 @@ export default function ProfileProjectsTab({
 
                   {/* Expanded chapters inside grid card */}
                   {isExpanded && (
-                    <div className="p-4 bg-black/35 border-t border-white/5 space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                    <div className="p-4 bg-black/35 border-t border-white/5 space-y-2">
                       {group.chapters.map((chapter, cIdx) => {
                         const pId = chapter.project_id;
                         const isChecked = selectedIds.includes(pId);

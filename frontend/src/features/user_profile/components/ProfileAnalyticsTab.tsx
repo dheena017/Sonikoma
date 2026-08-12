@@ -116,7 +116,7 @@ export default function ProfileAnalyticsTab() {
         </div>
 
         {/* Heatmap Grid Wrapper */}
-        <div className="flex flex-col space-y-2 w-full max-w-full overflow-x-auto pb-2 custom-purple-scrollbar">
+        <div className="w-full max-w-full">
           <div className="flex gap-3 min-w-[320px]">
             {/* Day Labels Column */}
             <div className="grid grid-rows-7 gap-1 text-[9px] font-bold text-neutral-500 pr-1 select-none font-mono">

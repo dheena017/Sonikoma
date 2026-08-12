@@ -151,6 +151,15 @@ const SidebarInner = ({
   const isEditor =
     currentPath.startsWith("/editor") ||
     currentPath.startsWith("/scraper/editor");
+  const isImageEditorPath =
+    currentPath === "/image-editor" ||
+    currentPath === "/image-editor/" ||
+    currentPath.startsWith("/image-editor/") ||
+    currentPath.includes("/image-editor");
+  const isVideoEditorPath =
+    currentPath === "/video-editor" ||
+    currentPath === "/video-editor/" ||
+    currentPath.startsWith("/video-editor/");
   const isShortcuts = currentPath === "/shortcuts";
   const isProjects = currentPath === "/projects";
 
@@ -233,11 +242,48 @@ const SidebarInner = ({
           onClick: () => navigateTo("/projects"),
           enabled: true,
         },
-        // WEBTOON Scraper entry removed — scraper now opens under workspace/episode-scraper
       ],
     },
-
-
+    {
+      group: "Creative Studio",
+      items: [
+        {
+          label: "Creative Suite",
+          icon: Sparkles,
+          active: currentPath === "/creative-suite" || currentPath.startsWith("/creative-suite/") || currentPath.startsWith("/ai-") || currentPath === "/panel-assistant" || currentPath === "/youtube",
+          onClick: () => navigateTo("/creative-suite"),
+          enabled: true,
+        },
+        {
+          label: "Editor",
+          icon: Scissors,
+          active: isEditor,
+          onClick: () => navigateTo("/editor"),
+          enabled: true,
+        },
+        {
+          label: "Image Editor",
+          icon: Film,
+          active: isImageEditorPath,
+          onClick: () => navigateTo("/image-editor"),
+          enabled: true,
+        },
+        {
+          label: "Video Editor",
+          icon: Film,
+          active: isVideoEditorPath,
+          onClick: () => navigateTo("/video-editor"),
+          enabled: true,
+        },
+        {
+          label: "Admin",
+          icon: Shield,
+          active: isAdminDashboardPath || isAdminPath,
+          onClick: () => navigateTo("/admin"),
+          enabled: true,
+        },
+      ],
+    },
     {
       group: "Account & Alerts",
       items: [
@@ -256,19 +302,10 @@ const SidebarInner = ({
           onClick: () => navigateTo("/profile"),
           enabled: true,
         },
-        {
-          label: "Admin Dashboard",
-          icon: Shield,
-          active: isAdminDashboardPath || isAdminPath,
-          onClick: () => navigateTo("/admin"),
-          enabled: true,
-        },
       ],
     },
   ];
 
-  const isCreativeSuitePath =
-    currentPath === "/creative-suite" || currentPath.startsWith("/creative-suite/") || currentPath.startsWith("/ai-") || currentPath === "/panel-assistant" || currentPath === "/youtube";
   const sidebarContent = (
     <div className="flex h-full flex-col justify-between p-5 space-y-6 bg-gradient-to-b from-neutral-950 via-[#0a0712] to-neutral-950 text-white select-none">
       {/* BRANDING LOGO */}
@@ -388,39 +425,6 @@ const SidebarInner = ({
               </ul>
             </div>
           ))}
-
-          {/* Creative Suite Navigation */}
-          <div className="space-y-2">
-            <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-3" />
-            <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans pl-2.5">
-              Creative Tools
-            </h4>
-            <div className="space-y-1.5">
-              <button
-                onClick={() => navigateTo("/creative-suite")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left border relative group ${
-                  isCreativeSuitePath
-                    ? "text-purple-200 bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border-purple-500/40 shadow-[0_4px_20px_rgba(168,85,247,0.2)] font-bold"
-                    : "text-neutral-300 hover:text-white hover:bg-neutral-900/80 border-transparent hover:border-neutral-800/60"
-                }`}
-                title="Open Creative Suite"
-              >
-                {isCreativeSuitePath && (
-                  <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-                )}
-                <div className="flex items-center gap-3">
-                  <Sparkles
-                    className={`h-4 w-4 transition-transform duration-200 ${
-                      isCreativeSuitePath
-                        ? "text-purple-300 scale-110"
-                        : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-105"
-                    }`}
-                  />
-                  <span>Creative Suite</span>
-                </div>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 

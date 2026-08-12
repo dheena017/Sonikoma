@@ -16,6 +16,7 @@ import {
   Shield,
   Zap,
   Database,
+  Image,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
@@ -44,6 +45,15 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   const isEditor =
     currentPath.startsWith("/editor") ||
     currentPath.startsWith("/scraper/editor");
+  const isImageEditorPath =
+    currentPath === "/image-editor" ||
+    currentPath === "/image-editor/" ||
+    currentPath.startsWith("/image-editor/") ||
+    currentPath.includes("/image-editor");
+  const isVideoEditorPath =
+    currentPath === "/video-editor" ||
+    currentPath === "/video-editor/" ||
+    currentPath.startsWith("/video-editor/");
 
   const isShortcuts = currentPath.startsWith("/shortcuts");
   const isAdminPath = currentPath.startsWith("/admin");
@@ -100,48 +110,38 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       ],
     },
     {
-      group: "Editor",
-      items: [
-        {
-          label: "Auto-Crop",
-          icon: Scissors,
-          active: isAutoCrop,
-          onClick: () => navigateTo("/auto-crop"),
-        },
-
-        {
-          label: "Video Studio",
-          icon: Film,
-          active: isEditor,
-          onClick: () => {
-            const tempId = `temp_${Date.now()}_${Math.random()
-              .toString(36)
-              .substring(2, 10)}`;
-            navigateTo(`/scraper/editor?id=${tempId}`);
-          },
-        },
-      ],
-    },
-    {
-      group: "Creative",
+      group: "Creative Studio",
       items: [
         {
           label: "Creative Suite",
           icon: Sparkles,
-          active: false,
+          active: currentPath === "/creative-suite" || currentPath.startsWith("/creative-suite/") || currentPath.startsWith("/ai-") || currentPath === "/panel-assistant" || currentPath === "/youtube",
           onClick: () => navigateTo("/creative-suite"),
         },
-      ],
-    },
-    {
-      group: "System",
-      items: [
-
-
-
-
-
-
+        {
+          label: "Editor",
+          icon: Scissors,
+          active: isEditor || isAutoCrop,
+          onClick: () => navigateTo("/editor"),
+        },
+        {
+          label: "Image Editor",
+          icon: Image,
+          active: isImageEditorPath,
+          onClick: () => navigateTo("/image-editor"),
+        },
+        {
+          label: "Video Editor",
+          icon: Film,
+          active: isVideoEditorPath,
+          onClick: () => navigateTo("/video-editor"),
+        },
+        {
+          label: "Admin",
+          icon: Shield,
+          active: isAdminPath,
+          onClick: () => navigateTo("/admin"),
+        },
       ],
     },
     {
@@ -159,12 +159,6 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           icon: Sparkles,
           active: currentPath === "/profile",
           onClick: () => navigateTo("/profile"),
-        },
-        {
-          label: "Admin Dashboard",
-          icon: Shield,
-          active: isAdminPath,
-          onClick: () => navigateTo("/admin"),
         },
       ],
     },
@@ -282,3 +276,5 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
 const MiniSidebar = React.memo(MiniSidebarInner);
 export default MiniSidebar;
+
+

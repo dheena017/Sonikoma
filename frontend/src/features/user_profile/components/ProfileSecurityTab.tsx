@@ -638,7 +638,7 @@ export default function ProfileSecurityTab({
           </div>
         </div>
 
-        <div className="w-full max-w-full overflow-x-auto">
+        <div className="w-full max-w-full">
           <table className="w-full text-left border-collapse min-w-[480px] sm:min-w-0">
             <thead>
               <tr className="border-b border-white/5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">

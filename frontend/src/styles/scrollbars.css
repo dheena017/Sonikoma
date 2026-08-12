@@ -2,35 +2,15 @@
    UNIFIED SONIKOMA DESIGN SYSTEM — PREMIUM SCROLLBAR STYLING
    ========================================================================== */
 
-/* 1. Root Window & Global Default Scrollbar (Firefox + WebKit/Blink) */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(168, 85, 247, 0.45) #050507;
+/* 1. Root Window — hide global scrollbar; only inner utility-class containers show one */
+html,
+body {
+  scrollbar-width: none; /* Firefox: no document-level scrollbar */
 }
 
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  background-color: #050507;
-}
-
-::-webkit-scrollbar-track {
-  background: #050507;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.45);
-  border-radius: 9999px;
-  border: 2px solid #050507;
-  transition: background-color 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.8);
-}
-
-::-webkit-scrollbar-corner {
-  background: #050507;
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome/Safari: no document-level scrollbar */
 }
 
 /* 2. Inner Containers Custom Scrollbar Utility Classes */
