@@ -389,18 +389,26 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
             {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "Admin")}
           </span>
-          <img
-            key={user?.avatar_url || user?.full_name || "avatar"}
-            src={getUserAvatarUrl(user)}
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              const target = e.currentTarget as HTMLImageElement;
-              target.onerror = null;
-              target.src = DEFAULT_USER_AVATAR_DATA_URI;
-            }}
-            alt="User Avatar"
-            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
-          />
+          <div className="relative w-6 h-6 rounded-full overflow-hidden border border-purple-500/40 bg-purple-950/40 shrink-0 shadow-xs ring-1 ring-white/10 group-hover:border-purple-400 group-hover:ring-purple-500/30 transition-all duration-300">
+            <img
+              key={user?.avatar_url || user?.full_name || "avatar"}
+              src={getUserAvatarUrl(user)}
+              referrerPolicy="no-referrer"
+              onLoad={(e) => {
+                e.currentTarget.classList.remove("opacity-0");
+                e.currentTarget.classList.add("opacity-100");
+              }}
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                target.onerror = null;
+                target.src = DEFAULT_USER_AVATAR_DATA_URI;
+                target.classList.remove("opacity-0");
+                target.classList.add("opacity-100");
+              }}
+              alt="User Avatar"
+              className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
+            />
+          </div>
         </button>
       </div>
     </header>
