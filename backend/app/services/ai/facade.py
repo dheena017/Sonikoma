@@ -25,7 +25,7 @@ from services.ai.skills.base import get_provider_and_model, resolve_api_key
 import services.image.utils.image_utils as img_utils
 from services.image.utils.panel_box_utils import PanelBounds
 from core.cache import stitched_cache, edit_history
-from media.audio.audio import generate_panel_audio
+from services.audio.tts_engine import generate_panel_audio
 
 logger = logging.getLogger("sonikoma.services.ai.facade")
 

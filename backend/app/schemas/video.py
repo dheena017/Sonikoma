@@ -7,7 +7,7 @@ Pydantic request/response schemas for video.
 
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from engines.ffmpeg import FilterType
+from app.engines.ffmpeg import FilterType
 
 class PanelLayersData(BaseModel):
     background_url: str

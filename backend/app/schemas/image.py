@@ -7,7 +7,7 @@ Pydantic request/response schemas for image.
 
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
-from providers.media.imagemagick import ResizeMode
+from app.providers.media.imagemagick import ResizeMode
 
 class EditImageRequest(BaseModel):
     url: str
