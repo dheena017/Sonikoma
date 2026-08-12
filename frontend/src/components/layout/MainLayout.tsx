@@ -298,7 +298,7 @@ export default function MainLayout(props: MainLayoutProps) {
   return (
     <div
       id="app_root"
-      className={`min-h-screen max-w-full overflow-x-hidden bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
+      className={`h-screen max-h-screen overflow-hidden max-w-full bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
         }`}
     >
       {/* --- Page Navigation Sidebar --- */}
@@ -459,11 +459,9 @@ export default function MainLayout(props: MainLayoutProps) {
         <div
           className={`${!isSidebarOpen && !isImageEditorPage && !isProEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage || (isAnyAdmin && isAdminRestricted)
             ? "h-screen max-h-screen overflow-hidden"
-            : isAnyAdmin
-              ? "min-h-screen overflow-x-hidden"
-              : isProEditorPage
-                ? "min-h-screen"
-                : "pt-16 min-h-[calc(100vh-64px)]"
+            : isProEditorPage
+              ? "h-screen max-h-screen overflow-hidden"
+              : "h-[calc(100vh-64px)] mt-16 overflow-y-auto custom-purple-scrollbar"
             } flex-grow flex-1 flex flex-col transition-[padding] duration-300 ease-out smooth-scroll`}
         >
           {/* Impersonation Banner */}

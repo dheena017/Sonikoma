@@ -80,7 +80,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-[#050507] text-white selection:bg-purple-500/30">
+    <div className="flex h-screen max-h-screen overflow-hidden bg-[#050507] text-white selection:bg-purple-500/30 relative">
       {/* Blurred Background Overlay when expanded sidebar is open */}
       {isSidebarOpen && (
         <div
@@ -160,8 +160,11 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           - pl-20 (80px) clears the fixed mini sidebar so content doesn't hide underneath.
       */}
       <div
-        className={`flex flex-1 flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] min-h-screen ${
-          isFocusMode ? "pt-0 pl-0 pr-0" : "pt-16 pl-0 pr-0 md:pl-20 md:pr-20"
+        id="main-scroll-container"
+        className={`flex flex-1 flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] custom-purple-scrollbar ${
+          isFocusMode
+            ? "h-screen mt-0 pl-0 pr-0 overflow-y-auto"
+            : "h-[calc(100vh-64px)] mt-16 pl-0 pr-0 md:pl-20 md:pr-0 overflow-y-auto"
         }`}
       >
         {/* Inner container — allow overflow so the parent scrollbar handles scrolling */}
