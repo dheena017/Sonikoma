@@ -35,9 +35,9 @@ export default function useDashboardPage() {
   const [metrics, setMetrics] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [onboardingTasks, setOnboardingTasks] = useState<OnboardingTask[]>([
-    { id: 1, text: "Create your first series", completed: false },
-    { id: 2, text: "Analyze panel storyboards", completed: false },
-    { id: 3, text: "Generate AI character voices", completed: false },
+    { id: 1, text: "Create your first project", completed: false },
+    { id: 2, text: "Import or scrape panels", completed: false },
+    { id: 3, text: "Generate AI voices and scenes", completed: false },
     { id: 4, text: "Render your first video", completed: false },
   ]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);

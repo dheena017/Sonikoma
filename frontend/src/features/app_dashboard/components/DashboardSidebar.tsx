@@ -19,7 +19,7 @@ export default function DashboardSidebar({
 }: DashboardSidebarProps) {
   return (
     <div className="space-y-6">
-      <QuickStartGuide onboardingTasks={onboardingTasks} />
+      <QuickStartGuide onboardingTasks={onboardingTasks} onNavigate={onNavigate} />
       <EngineStatus latency={latency} />
       <SystemResources metrics={metrics} analytics={analytics} />
       <GuidesReference onNavigate={onNavigate} />

@@ -117,14 +117,14 @@ export default function LoginPage({
       <AuthShowcase activeTheme={activeTheme} iconType="login" />
 
       {/* RIGHT PANEL: Login Form Interface */}
-      <div className="w-full lg:w-1/2 min-h-screen flex flex-col justify-between p-8 lg:p-16 bg-[#040406] relative overflow-y-auto">
+      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#040406] relative">
         {/* Soft background glow (Theme-driven) */}
         <div
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} blur-[120px] pointer-events-none transition-all duration-1000`}
         />
 
-        {/* Top Controls Toolbar */}
-        <div className="relative z-10 flex items-center justify-between mb-6">
+        {/* Top Controls Toolbar — pinned, never scrolls */}
+        <div className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-5 flex-shrink-0">
           {/* Header branding & Back Button */}
           <div className="flex items-center gap-2 lg:gap-3">
             {onNavigateHome && (
@@ -229,6 +229,9 @@ export default function LoginPage({
             </button>
           </div>
         </div>
+
+        {/* Scrollable form body — starts below toolbar */}
+        <div className="custom-scrollbar flex-1 overflow-y-auto px-8 lg:px-16 pb-8 lg:pb-16">
 
         {/* Form Container */}
         <div className="my-auto w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 py-6 text-left">
@@ -725,6 +728,8 @@ export default function LoginPage({
           </div>
         </div>
       )}
+
+        </div>{/* end scrollable body */}
 
       <style
         dangerouslySetInnerHTML={{

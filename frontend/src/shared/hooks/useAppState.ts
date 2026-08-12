@@ -704,6 +704,40 @@ export function useAppState() {
       };
 
       if (!token) {
+        // No token in storage — check if an OAuth HttpOnly cookie was set
+        // (e.g. right after a Google OAuth redirect). The browser sends it
+        // automatically; if valid the server returns a JSON access_token we
+        // can persist in localStorage so all subsequent requests work.
+        try {
+          const sessionRes = await fetch("/api/auth/google/session", {
+            credentials: "include",
+          });
+          if (sessionRes.ok) {
+            const sessionData = await sessionRes.json();
+            if (sessionData.access_token) {
+              localStorage.setItem("sonikoma_token", sessionData.access_token);
+              sessionStorage.removeItem("sonikoma_token");
+              const userPayload = sessionData.user ?? sessionData;
+              setUser(userPayload);
+              setIsAuthenticated(true);
+              addNotification("Signed in with Google!", "success", {
+                details: `Welcome back, ${userPayload.full_name || userPayload.email || ""}!`,
+              });
+              // Navigate to dashboard after OAuth login
+              const nav = (window as any).navigateTo;
+              if (typeof nav === "function") {
+                nav("/dashboard");
+              } else {
+                window.history.replaceState({}, "", "/dashboard");
+                window.dispatchEvent(new Event("popstate"));
+              }
+              finishAuth();
+              return;
+            }
+          }
+        } catch (_) {
+          // No cookie session available — fall through to unauthenticated state
+        }
         finishAuth();
         return;
       }
@@ -720,8 +754,9 @@ export function useAppState() {
         finishAuth();
       }
     },
-    [getToken, fetchWithInterceptor]
+    [getToken, fetchWithInterceptor, addNotification]
   );
+
 
   const forgotPassword = useCallback(
     async (email: string) => {

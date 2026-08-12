@@ -139,13 +139,13 @@ export default function LandingPage({
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 selection:bg-purple-500 selection:text-white ${
+      className={`h-screen flex flex-col transition-colors duration-300 selection:bg-purple-500 selection:text-white ${
         isLight ? "bg-[#f8fafc] text-slate-900" : "bg-[#09090b] text-neutral-100"
       }`}
     >
       {/* NAVIGATION */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b transition-colors duration-300 ${
+        className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-colors duration-300 flex-shrink-0 ${
           isLight
             ? "bg-white/90 border-slate-200/80 shadow-xs"
             : "bg-neutral-950/90 border-neutral-800/80"
@@ -154,7 +154,10 @@ export default function LandingPage({
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div
             className="flex items-center gap-3 group cursor-pointer"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => {
+              const el = document.getElementById("landing-scroll-area");
+              if (el) el.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           >
             <img
               src={isLight ? "/logo-light.png" : "/logo-dark.png"}
@@ -241,8 +244,16 @@ export default function LandingPage({
         </div>
       </nav>
 
+      {/* SCROLLABLE CONTENT AREA — starts below the sticky nav */}
+      <div
+        id="landing-scroll-area"
+        className={`custom-scrollbar flex-1 overflow-y-auto ${
+          isLight ? "bg-[#f8fafc]" : "bg-[#09090b]"
+        }`}
+      >
+
       {/* HERO SECTION */}
-      <section className="relative pt-40 pb-20 px-6 overflow-hidden">
+      <section className="relative pt-20 pb-20 px-6 overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-purple-600/15 via-indigo-600/10 to-transparent blur-[120px] rounded-full -z-10 animate-pulse" />
         <div className="absolute top-40 left-1/4 w-[400px] h-[400px] bg-indigo-500/10 blur-[100px] rounded-full -z-10" />
 
@@ -1076,6 +1087,7 @@ export default function LandingPage({
 
       {/* FOOTER */}
       <LandingFooter />
+      </div>{/* end landing-scroll-area */}
     </div>
   );
 }
