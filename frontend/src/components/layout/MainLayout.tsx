@@ -464,7 +464,7 @@ export default function MainLayout(props: MainLayoutProps) {
               : isProEditorPage
                 ? "min-h-screen"
                 : "pt-16 min-h-[calc(100vh-64px)]"
-            } flex-grow flex-1 flex flex-col transition-[padding] duration-300 ease-out gpu-accelerated smooth-scroll`}
+            } flex-grow flex-1 flex flex-col transition-[padding] duration-300 ease-out smooth-scroll`}
         >
           {/* Impersonation Banner */}
           {localStorage.getItem("sonikoma_admin_token") && (
