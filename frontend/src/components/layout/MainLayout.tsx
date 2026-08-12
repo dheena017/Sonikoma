@@ -276,6 +276,14 @@ export default function MainLayout(props: MainLayoutProps) {
   const isAdminRestricted = isAnyAdmin && (!user || user.creator_role !== "admin");
 
   useEffect(() => {
+    if (currentPath !== "/auto-crop" && showAutoCropModal) {
+      if (appLogic?.setShowAutoCropModal) {
+        appLogic.setShowAutoCropModal(false);
+      }
+    }
+  }, [currentPath, showAutoCropModal, appLogic]);
+
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlProjectId = params.get("project_id");
     if (urlProjectId) {
@@ -571,69 +579,57 @@ export default function MainLayout(props: MainLayoutProps) {
               : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16 page-view-transition stagger-container"
               }`}
           >
-            {children}
+            {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (
+              <AutoCropModal
+                isPage={false}
+                onClose={handleAutoCropClose}
+                onApply={handleAutoCropApply}
+                sensitivity={cropSensitivity}
+                setSensitivity={setCropSensitivity}
+                padding={cropPaddingPx}
+                setPadding={setCropPaddingPx}
+                backgroundColorMode={cropBackgroundMode}
+                setBackgroundColorMode={setCropBackgroundMode}
+                autoSplitTallStrips={autoSplitTallStrips}
+                setAutoSplitTallStrips={setAutoSplitTallStrips}
+                aspectRatioLock={aspectRatioLock}
+                setAspectRatioLock={setAspectRatioLock}
+                minPanelAreaPct={minPanelAreaPct}
+                setMinPanelAreaPct={setMinPanelAreaPct}
+                overlapMergeThreshold={overlapMergeThreshold}
+                setOverlapMergeThreshold={setOverlapMergeThreshold}
+                useLocalCV={useLocalCV}
+                setUseLocalCV={setUseLocalCV}
+                cropModel={cropModel}
+                setCropModel={setCropModel}
+                cropMinHeightPx={cropMinHeightPx}
+                setCropMinHeightPx={setCropMinHeightPx}
+                cropCannyLow={cropCannyLow}
+                setCropCannyLow={setCropCannyLow}
+                cropCannyHigh={cropCannyHigh}
+                setCropCannyHigh={setCropCannyHigh}
+                cropCloseKernelSize={cropCloseKernelSize}
+                setCropCloseKernelSize={setCropCloseKernelSize}
+                activeTab={activeAutoCropTab}
+                setActiveTab={setActiveAutoCropTab}
+                selectedCount={selectedScraped.length}
+                isApplying={isBatchCropping}
+                scrapedImages={scrapedImages}
+                selectedScraped={selectedScraped}
+                setSelectedScraped={setSelectedScraped}
+                setConsoleLogs={setConsoleLogs}
+                addNotification={addNotification}
+                cropGuidance={cropGuidance}
+                setCropGuidance={setCropGuidance}
+                cropFocusMode={cropFocusMode}
+                setCropFocusMode={setCropFocusMode}
+              />
+            ) : (
+              children
+            )}
           </div>
         </div>
       </div>
-
-      {/* --------------------------------------------------------------------------
-      // GLOBAL MODALS & FLOATERS LAYER
-      // -------------------------------------------------------------------------- */}
-
-      {/* Global Toast Stack */}
-      <NotificationStack
-        notifications={notifications}
-        removeNotification={removeNotification as any}
-        notificationsMuted={notificationsMuted}
-      />
-
-      {/* Dashboard / Editor Modal: Batch Panel Auto Crop */}
-      {(isWorkspacePath || !isProEditorPage || isProEditorPage) && showAutoCropModal && (
-        <AutoCropModal
-          isPage={false}
-          onClose={handleAutoCropClose}
-          onApply={handleAutoCropApply}
-          sensitivity={cropSensitivity}
-          setSensitivity={setCropSensitivity}
-          padding={cropPaddingPx}
-          setPadding={setCropPaddingPx}
-          backgroundColorMode={cropBackgroundMode}
-          setBackgroundColorMode={setCropBackgroundMode}
-          autoSplitTallStrips={autoSplitTallStrips}
-          setAutoSplitTallStrips={setAutoSplitTallStrips}
-          aspectRatioLock={aspectRatioLock}
-          setAspectRatioLock={setAspectRatioLock}
-          minPanelAreaPct={minPanelAreaPct}
-          setMinPanelAreaPct={setMinPanelAreaPct}
-          overlapMergeThreshold={overlapMergeThreshold}
-          setOverlapMergeThreshold={setOverlapMergeThreshold}
-          useLocalCV={useLocalCV}
-          setUseLocalCV={setUseLocalCV}
-          cropModel={cropModel}
-          setCropModel={setCropModel}
-          cropMinHeightPx={cropMinHeightPx}
-          setCropMinHeightPx={setCropMinHeightPx}
-          cropCannyLow={cropCannyLow}
-          setCropCannyLow={setCropCannyLow}
-          cropCannyHigh={cropCannyHigh}
-          setCropCannyHigh={setCropCannyHigh}
-          cropCloseKernelSize={cropCloseKernelSize}
-          setCropCloseKernelSize={setCropCloseKernelSize}
-          activeTab={activeAutoCropTab}
-          setActiveTab={setActiveAutoCropTab}
-          selectedCount={selectedScraped.length}
-          isApplying={isBatchCropping}
-          scrapedImages={scrapedImages}
-          selectedScraped={selectedScraped}
-          setSelectedScraped={setSelectedScraped}
-          setConsoleLogs={setConsoleLogs}
-          addNotification={addNotification}
-          cropGuidance={cropGuidance}
-          setCropGuidance={setCropGuidance}
-          cropFocusMode={cropFocusMode}
-          setCropFocusMode={setCropFocusMode}
-        />
-      )}
 
       {alertDialog && alertDialog.isOpen && (
         <ConfirmModal

@@ -582,7 +582,7 @@ export default function AppRouter(props: AppRouterProps) {
       isDetailsMode,
       isWorkspacePath,
       isWorkspaceOnly: isWorkspacePath,
-      isDashboardOverviewPath: currentPath === "/dashboard",
+      isDashboardOverviewPath: currentPath === "/dashboard" || currentPath === "/",
       isProjectsPath: currentPath === "/projects",      isSettingsAccountPath:
         currentPath === "/settings/account" ||
         currentPath === "/settings/account/",
@@ -1008,7 +1008,7 @@ export default function AppRouter(props: AppRouterProps) {
       </div>
 
       {/* PAGE VIEW 1.5: Dashboard Overview */}
-      {isDashboardOverviewPath && (
+      {(isDashboardOverviewPath || currentPath === "/") && (
         <div className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]">
           <DashboardPage />
         </div>

@@ -121,50 +121,6 @@ export default function AutoCropModal({
       ? scrapedImages[0]
       : null);
 
-  // Lock body, html, and main container scroll when modal is open so only the modal contents scroll
-  React.useEffect(() => {
-    if (!isPage) {
-      const originalBodyOverflow = document.body.style.overflow;
-      const originalHtmlOverflow = document.documentElement.style.overflow;
-
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
-
-      // Lock all background scroll containers (like <main> in MainLayout)
-      const scrollContainers = document.querySelectorAll("main, .overflow-y-auto");
-      const originalContainerStyles: { elem: HTMLElement; overflow: string }[] = [];
-
-      scrollContainers.forEach((el) => {
-        const elem = el as HTMLElement;
-        if (!elem.closest("#auto-crop-container")) {
-          originalContainerStyles.push({ elem, overflow: elem.style.overflow });
-          elem.style.overflow = "hidden";
-        }
-      });
-
-      const preventBackgroundScroll = (e: WheelEvent | TouchEvent) => {
-        const target = e.target as HTMLElement | null;
-        // If event target is NOT inside the modal/page container, block scrolling completely
-        if (!target || !target.closest("#auto-crop-container")) {
-          e.preventDefault();
-        }
-      };
-
-      window.addEventListener("wheel", preventBackgroundScroll, { passive: false });
-      window.addEventListener("touchmove", preventBackgroundScroll, { passive: false });
-
-      return () => {
-        document.body.style.overflow = originalBodyOverflow;
-        document.documentElement.style.overflow = originalHtmlOverflow;
-        window.removeEventListener("wheel", preventBackgroundScroll);
-        window.removeEventListener("touchmove", preventBackgroundScroll);
-        originalContainerStyles.forEach(({ elem, overflow }) => {
-          elem.style.overflow = overflow;
-        });
-      };
-    }
-  }, [isPage]);
-
   const handleResetAll = () => {
     console.log("[AutoCropModal] Resetting all parameters to defaults");
     setSensitivity(30);
@@ -199,7 +155,7 @@ export default function AutoCropModal({
   ];
 
   const mainCard = (
-    <div className="bg-[#050508] text-neutral-100 flex-1 w-full h-full overflow-y-auto custom-scrollbar flex flex-col p-4 sm:p-6 md:p-8 space-y-6 animate-[fadeIn_0.22s_ease-out]">
+    <div className="bg-[#050508] text-neutral-100 w-full flex flex-col p-4 sm:p-6 md:p-8 space-y-6 pb-24 animate-[fadeIn_0.22s_ease-out]">
       {/* HEADER SECTION (Matched to AI Model Control Hub Header) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800/80 pb-5 shrink-0">
         <div>
@@ -423,12 +379,7 @@ export default function AutoCropModal({
           Settings apply to all current and future auto-crop jobs.
         </p>
         <div className="flex items-center gap-3.5 ml-auto">
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 text-xs font-bold font-sans transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
+
 
           <button
             type="button"
@@ -446,19 +397,10 @@ export default function AutoCropModal({
     </div>
   );
 
-  if (isPage) {
-    return (
-      <div className="flex-1 w-full h-full min-h-screen flex flex-col animate-[fadeIn_0.22s_ease-out] bg-[#050508]">
-        <div className="flex-grow flex flex-col min-h-0 w-full">{mainCard}</div>
-      </div>
-    );
-  }
-
   return (
     <div
       id="auto-crop-container"
-      onWheel={(e) => e.stopPropagation()}
-      className="fixed top-16 left-16 lg:left-20 right-0 bottom-0 z-40 bg-[#050508] flex flex-col overflow-hidden animate-[fadeIn_0.18s_ease-out]"
+      className="flex-1 w-full min-h-full flex flex-col animate-[fadeIn_0.22s_ease-out] bg-[#050508]"
     >
       {mainCard}
     </div>
