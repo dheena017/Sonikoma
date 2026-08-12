@@ -53,7 +53,7 @@ export default function ProfilePage({
   // Navigation tabs - initialize from URL query parameter using browser location API
   const validTabs = ["account", "security", "billing", "api", "analytics", "preferences", "stats"] as const;
   type TabType = (typeof validTabs)[number];
-  
+
   // Helper function to get tab from URL
   const getTabFromUrl = (): TabType => {
     const params = new URLSearchParams(window.location.search);
@@ -553,7 +553,7 @@ export default function ProfilePage({
             setCacheLimit(res.storage.limitBytes);
           }
         })
-        .catch(() => {});
+        .catch(() => { });
 
       const token =
         localStorage.getItem("sonikoma_token") ||
@@ -568,7 +568,7 @@ export default function ProfilePage({
               setCredits(res.credits);
             }
           })
-          .catch(() => {});
+          .catch(() => { });
       }
     }, 5000); // 5 seconds
 
@@ -1249,7 +1249,7 @@ export default function ProfilePage({
       : "No finished compiles yet";
 
   return (
-    <div className="flex-grow flex-1 bg-neutral-955 text-white py-12 px-4 sm:px-6 lg:px-8 relative">
+    <div className="w-full max-w-full min-w-0 overflow-x-hidden flex-grow flex-1 bg-neutral-955 text-white py-12 px-4 sm:px-6 lg:px-8 relative">
       {/* Hidden file input for custom profile image upload */}
       <input
         type="file"
@@ -1262,7 +1262,7 @@ export default function ProfilePage({
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-600/5 blur-[120px] pointer-events-none" />
 
-      <div className="w-full space-y-8 stagger-container animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
+      <div className="w-full max-w-full min-w-0 space-y-8 stagger-container animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-10">
         {/* HEADER SECTION */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
           <div>
@@ -1318,7 +1318,7 @@ export default function ProfilePage({
         {/* User Card & Info Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 bg-neutral-900/20 border border-neutral-850 p-6 rounded-3xl shadow-xl">
           <div className="flex items-center gap-6">
-            <div 
+            <div
               className="relative w-28 h-28 rounded-3xl border border-purple-500/20 bg-neutral-900 cursor-pointer select-none hover:scale-105 hover:border-purple-500/50 transition-all duration-200 active:scale-95 group"
               onClick={() => fileInputRef.current?.click()}
               title="Upload Profile Image"
@@ -1331,7 +1331,7 @@ export default function ProfilePage({
                 )}
               </div>
               {/* Camera Badge */}
-              <div className="absolute -bottom-1 -right-1 bg-purple-600 text-white p-2 rounded-xl border border-neutral-950 shadow-lg shadow-purple-950/50 transition-all duration-200 group-hover:scale-110 group-hover:bg-purple-500 z-20">
+              <div className="absolute -bottom-1 -right-1 bg-purple-600 text-white p-2 rounded-xl border border-neutral-955 shadow-lg shadow-purple-950/50 transition-all duration-200 group-hover:scale-110 group-hover:bg-purple-500 z-20">
                 <Camera className="w-4 h-4" />
               </div>
             </div>
@@ -1352,8 +1352,8 @@ export default function ProfilePage({
         </div>
 
         {/* Premium overall stats counters row */}
-        <div className="flex overflow-x-auto sm:grid sm:grid-cols-3 gap-4 pb-4 sm:pb-0 scrollbar-none snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0">
-          <div className="min-w-[260px] sm:min-w-0 snap-center shrink-0 sm:shrink bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Total Compilation Queue
             </div>
@@ -1364,7 +1364,7 @@ export default function ProfilePage({
               <Sparkles className="w-3.5 h-3.5" /> {queueSubtext}
             </div>
           </div>
-          <div className="min-w-[260px] sm:min-w-0 snap-center shrink-0 sm:shrink bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
+          <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Average Panels per Strip
             </div>
@@ -1375,7 +1375,7 @@ export default function ProfilePage({
               {avgPanelsSubtext}
             </div>
           </div>
-          <div className="min-w-[260px] sm:min-w-0 snap-center shrink-0 sm:shrink bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
+          <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-5 text-left relative overflow-hidden shadow-xl">
             <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Smart Sync Success Rate
             </div>
@@ -1390,58 +1390,53 @@ export default function ProfilePage({
         {/* PROFILE WORKSPACE HORIZONTAL TABS */}
         <div className="space-y-6">
           {/* HORIZONTAL TAB BAR */}
-          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-thin snap-x snap-mandatory">
+          <div className="flex flex-wrap gap-2 pb-2">
             <button
               onClick={() => setActiveTab("analytics")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
-                activeTab === "analytics"
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${activeTab === "analytics"
                   ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
                   : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
-              }`}
+                }`}
             >
               <BarChart3 className="w-4 h-4" />
               Creator Analytics
             </button>
             <button
               onClick={() => setActiveTab("account")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
-                activeTab === "account"
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${activeTab === "account"
                   ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
                   : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
-              }`}
+                }`}
             >
               <User className="w-4 h-4" />
               Account Settings
             </button>
             <button
               onClick={() => setActiveTab("security")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
-                activeTab === "security"
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${activeTab === "security"
                   ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
                   : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
-              }`}
+                }`}
             >
               <Shield className="w-4 h-4" />
               Security & Sessions
             </button>
             <button
               onClick={() => setActiveTab("preferences")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
-                activeTab === "preferences"
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${activeTab === "preferences"
                   ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
                   : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
-              }`}
+                }`}
             >
               <Settings className="w-4 h-4" />
               Preferences & Theme
             </button>
             <button
               onClick={() => setActiveTab("billing")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
-                activeTab === "billing"
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${activeTab === "billing"
                   ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
                   : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
-              }`}
+                }`}
             >
               <CreditCard className="w-4 h-4" />
               Billing & Credits
@@ -1451,22 +1446,20 @@ export default function ProfilePage({
             </button>
             <button
               onClick={() => setActiveTab("api")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
-                activeTab === "api"
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${activeTab === "api"
                   ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
                   : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
-              }`}
+                }`}
             >
               <Key className="w-4 h-4" />
               Developer APIs
             </button>
             <button
               onClick={() => setActiveTab("stats")}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 whitespace-nowrap snap-start shrink-0 ${
-                activeTab === "stats"
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${activeTab === "stats"
                   ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-lg shadow-purple-950/40 border border-purple-400/30"
                   : "bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 hover:text-white hover:bg-neutral-850"
-              }`}
+                }`}
             >
               <Activity className="w-4 h-4" />
               Workspace Stats
@@ -1505,7 +1498,7 @@ export default function ProfilePage({
                                 1000,
                                 Math.min(5000, Math.ceil(credits / 1000) * 1000)
                               )) *
-                              100
+                            100
                           )}%`,
                         }}
                       />

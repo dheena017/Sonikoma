@@ -116,8 +116,8 @@ export default function ProfileAnalyticsTab() {
         </div>
 
         {/* Heatmap Grid Wrapper */}
-        <div className="flex flex-col space-y-2 overflow-x-auto pb-2 scrollbar-thin">
-          <div className="flex gap-3 min-w-[360px]">
+        <div className="flex flex-col space-y-2 w-full max-w-full overflow-x-auto pb-2 custom-purple-scrollbar">
+          <div className="flex gap-3 min-w-[320px]">
             {/* Day Labels Column */}
             <div className="grid grid-rows-7 gap-1 text-[9px] font-bold text-neutral-500 pr-1 select-none font-mono">
               <span>Sun</span>
@@ -136,18 +136,16 @@ export default function ProfileAnalyticsTab() {
                   {week.map((cell, dIdx) => (
                     <div
                       key={dIdx}
-                      className={`w-full aspect-square min-w-[12px] max-w-[16px] rounded-sm transition-colors cursor-pointer ${
-                        cell.level === 0
+                      className={`w-full aspect-square min-w-[12px] max-w-[16px] rounded-sm transition-colors cursor-pointer ${cell.level === 0
                           ? "bg-neutral-900 border border-white/5"
                           : cell.level === 1
-                          ? "bg-purple-900/30 border border-purple-500/10 hover:bg-purple-800/40"
-                          : cell.level === 2
-                          ? "bg-purple-600/50 border border-purple-500/20 hover:bg-purple-500/60"
-                          : "bg-purple-500 border border-purple-400/30 hover:bg-purple-400"
-                      }`}
-                      title={`${cell.count} operation(s) on ${cell.day} (Week ${
-                        wIdx + 1
-                      })`}
+                            ? "bg-purple-900/30 border border-purple-500/10 hover:bg-purple-800/40"
+                            : cell.level === 2
+                              ? "bg-purple-600/50 border border-purple-500/20 hover:bg-purple-500/60"
+                              : "bg-purple-500 border border-purple-400/30 hover:bg-purple-400"
+                        }`}
+                      title={`${cell.count} operation(s) on ${cell.day} (Week ${wIdx + 1
+                        })`}
                     />
                   ))}
                 </div>

@@ -638,8 +638,8 @@ export default function ProfileSecurityTab({
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="w-full max-w-full overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[480px] sm:min-w-0">
             <thead>
               <tr className="border-b border-white/5 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
                 <th className="py-3 px-2">Event</th>
@@ -664,13 +664,13 @@ export default function ProfileSecurityTab({
                     key={log.id}
                     className="hover:bg-white/5 transition-colors"
                   >
-                    <td className="py-3 px-2 font-semibold text-white">
+                    <td className="py-3 px-2 font-semibold text-white truncate max-w-[140px] sm:max-w-none">
                       {log.event}
                     </td>
-                    <td className="py-3 px-2 font-mono text-[10px] text-neutral-400">
+                    <td className="py-3 px-2 font-mono text-[10px] text-neutral-400 truncate">
                       {log.ip}
                     </td>
-                    <td className="py-3 px-2 text-neutral-500">{log.date}</td>
+                    <td className="py-3 px-2 text-neutral-500 whitespace-nowrap">{log.date}</td>
                     <td className="py-3 px-2 text-right">
                       <span
                         className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${

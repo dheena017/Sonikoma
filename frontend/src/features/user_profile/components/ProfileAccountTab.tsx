@@ -468,18 +468,18 @@ export default function ProfileAccountTab({
           {portfolios.map((port) => (
             <div
               key={port.id}
-              className="bg-black/30 border border-white/5 rounded-2xl p-3 flex items-center justify-between gap-4"
+              className="bg-black/30 border border-white/5 rounded-2xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 min-w-0"
             >
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black uppercase bg-purple-600/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-md">
+              <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+                <span className="text-[10px] font-black uppercase bg-purple-600/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-md shrink-0">
                   {port.site}
                 </span>
-                <span className="text-[11px] text-neutral-300 font-medium font-mono select-all truncate max-w-xs md:max-w-md">
+                <span className="text-[11px] text-neutral-300 font-medium font-mono select-all truncate min-w-0 flex-1">
                   {port.url}
                 </span>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => handleCopyPortfolio(port.url)}
@@ -500,11 +500,11 @@ export default function ProfileAccountTab({
         </div>
 
         {/* Add portfolio form */}
-        <form onSubmit={handleAddPortfolio} className="flex gap-2 pt-2">
+        <form onSubmit={handleAddPortfolio} className="flex flex-col sm:flex-row gap-2 pt-2">
           <select
             value={newPortfolioSite}
             onChange={(e) => setNewPortfolioSite(e.target.value)}
-            className="bg-black/40 border border-white/5 rounded-xl py-2 px-3 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20"
+            className="bg-black/40 border border-white/5 rounded-xl py-2 px-3 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 shrink-0"
           >
             <option value="Webtoons">Webtoons</option>
             <option value="Tapas">Tapas</option>
@@ -517,11 +517,11 @@ export default function ProfileAccountTab({
             value={newPortfolioUrl}
             onChange={(e) => setNewPortfolioUrl(e.target.value)}
             placeholder="Paste portfolio link (e.g. https://tapas.io/creator)"
-            className="flex-1 bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700"
+            className="flex-1 bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700 min-w-0"
           />
           <button
             type="submit"
-            className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded-xl text-[10px] transition-all cursor-pointer"
+            className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded-xl text-[10px] transition-all cursor-pointer shrink-0"
           >
             Add Portfolio
           </button>

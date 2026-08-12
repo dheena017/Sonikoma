@@ -401,7 +401,7 @@ export default function MainLayout(props: MainLayoutProps) {
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-scroll-container"
-        className={`flex-grow flex-1 flex flex-col min-h-screen max-w-full justify-between ${showAutoCropModal || showBubbleModal
+        className={`h-screen max-h-screen overflow-hidden flex-grow flex-1 flex flex-col max-w-full justify-between ${showAutoCropModal || showBubbleModal
           ? "overflow-hidden"
           : ""
           }`}
@@ -469,7 +469,7 @@ export default function MainLayout(props: MainLayoutProps) {
             ? "h-screen max-h-screen overflow-hidden"
             : isProEditorPage
               ? "h-screen max-h-screen overflow-hidden"
-              : "h-[calc(100vh-64px)] mt-16 overflow-y-auto custom-purple-scrollbar"
+              : "h-[calc(100vh-64px)] mt-16 overflow-x-hidden overflow-y-auto custom-purple-scrollbar"
             } flex-grow flex-1 flex flex-col transition-[padding] duration-300 ease-out smooth-scroll`}
         >
           {/* Impersonation Banner */}
@@ -574,7 +574,7 @@ export default function MainLayout(props: MainLayoutProps) {
           {/* Children Page Views */}
           <div
             key={currentPath}
-            className={`w-full flex-1 flex flex-col ${isImageEditorPage || isProEditorPage
+            className={`w-full max-w-full min-w-0 flex-1 flex flex-col ${isImageEditorPage || isProEditorPage
               ? "p-0"
               : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16 page-view-transition stagger-container"
               }`}
