@@ -258,13 +258,15 @@ export default function RegisterForm({
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4">
+                    <Lock className="w-4 h-4 text-neutral-500" />
+                  </div>
                   <input
                     type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-10 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
+                    className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
                       hasMinLength
                         ? "border-emerald-500/20 focus:border-emerald-500/40"
                         : `border-white/5 ${currentTheme.focus}`
@@ -274,7 +276,7 @@ export default function RegisterForm({
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors focus:outline-none"
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 text-neutral-500 hover:text-neutral-300 transition-colors focus:outline-none"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }

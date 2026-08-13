@@ -137,16 +137,21 @@ GEMINI_FALLBACK_MODELS: list = (
 ai_initialized = False
 genai_client = None
 try:
-    from google import genai
     api_key = GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")
     if not api_key:
         logger.warning("GEMINI_API_KEY is missing from environment variables.")
     else:
-        genai_client = genai.Client(api_key=api_key)
+        try:
+            from google import genai
+            genai_client = genai.Client(api_key=api_key)
+        except Exception:
+            import google.generativeai as legacy_genai
+            legacy_genai.configure(api_key=api_key)
+            genai_client = legacy_genai
         ai_initialized = True
-        logger.debug("Gemini GenAI client successfully configured server-side.")
-except (Exception, NameError, ImportError) as e:
-    logger.warning(f"google.genai client initialization skipped: {e}")
+        logger.debug("Gemini client successfully configured server-side.")
+except Exception as e:
+    logger.warning(f"Gemini client initialization skipped: {e}")
 
 # ── HuggingFace Client Initialization ─────────────────────────────────────────
 hf_client = None

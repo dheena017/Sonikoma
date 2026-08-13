@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get("/profiles", summary="Get custom YouTube publishing profiles")
 async def api_get_youtube_profiles(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
+    user_id = current_user.get("id") or current_user.get("user_id") or current_user.get("sub")
     try:
         profiles = get_youtube_profiles(user_id)
         return {"profiles": profiles}
@@ -32,7 +32,7 @@ async def api_get_youtube_profiles(current_user: dict = Depends(get_current_user
 async def api_save_youtube_profile(
     profile_req: YouTubeProfileRequest, current_user: dict = Depends(get_current_user)
 ):
-    user_id = current_user.get("id")
+    user_id = current_user.get("id") or current_user.get("user_id") or current_user.get("sub")
     try:
         profile_data = profile_req.dict()
         saved = save_youtube_profile(user_id, profile_data)
@@ -44,7 +44,7 @@ async def api_save_youtube_profile(
 
 @router.delete("/profiles/{name}", summary="Delete a YouTube publishing profile")
 async def api_delete_youtube_profile(name: str, current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
+    user_id = current_user.get("id") or current_user.get("user_id") or current_user.get("sub")
     try:
         deleted = delete_youtube_profile(user_id, name)
         if not deleted:

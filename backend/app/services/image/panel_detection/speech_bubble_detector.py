@@ -12,13 +12,15 @@ from typing import Optional, Dict, List, Tuple, Any
 
 logger = logging.getLogger("sonikoma.services.image.panel_detection.speech_bubble_detector")
 
+import importlib.util
+
+has_yolo_dependencies = False
 try:
-    from ultralytics import YOLO
-    from huggingface_hub import hf_hub_download
-    has_yolo_dependencies = True
-except ImportError:
+    if importlib.util.find_spec("ultralytics") is not None and importlib.util.find_spec("huggingface_hub") is not None:
+        has_yolo_dependencies = True
+except Exception:
     has_yolo_dependencies = False
-    logger.warning("[YOLO Detector] ultralytics or huggingface_hub is not installed. YOLO segmentation will be disabled.")
+    logger.warning("[YOLO Detector] ultralytics or huggingface_hub check failed. YOLO segmentation will be disabled.")
 
 _yolo_model = None
 

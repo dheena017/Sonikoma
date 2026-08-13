@@ -13,6 +13,11 @@ import {
   Sparkles,
   Navigation,
 } from "lucide-react";
+import YouTubeChannelSelector, { YouTubeChannel } from "./YouTubeChannelSelector";
+import YouTubeChannelHeader from "./YouTubeChannelHeader";
+import YouTubeSeoOptimizer from "./YouTubeSeoOptimizer";
+import YouTubeVideoGrid from "./YouTubeVideoGrid";
+
 
 interface PublishMonitorProps {
   activeVideoUrl: string | null;
@@ -75,6 +80,7 @@ export default function PublishMonitor({
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   // Clickbait thumbnail text overlay state
+  const [selectedChannel, setSelectedChannel] = useState<YouTubeChannel | null>(null);
   const [clickbaitText, setClickbaitText] = useState("");
   const [suggestedSlogans, setSuggestedSlogans] = useState<string[]>([]);
 
@@ -857,6 +863,7 @@ export default function PublishMonitor({
         </div>
       )}
 
+
       {/* Video properties diagnostics */}
       {activeVideoUrl && (
         <div className="bg-neutral-950/20 backdrop-blur-sm p-3.5 rounded-2xl border border-neutral-900 text-[10.5px] font-mono space-y-2 text-neutral-450 animate-fade-in shadow-inner">
@@ -1004,3 +1011,5 @@ export default function PublishMonitor({
     </div>
   );
 }
+
+

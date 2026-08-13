@@ -25,9 +25,42 @@ except ImportError:
 logger = logging.getLogger("sonikoma.services.export.youtube.oauth")
 
 async def get_authenticated_service(user_id: Optional[str] = None):
-    """Authenticates using the client_secrets and returns a YouTube service object."""
+    """Authenticates using stored YouTube OAuth tokens or client_secrets and returns a YouTube service object."""
     tmp_secrets_path = None
     try:
+        if user_id:
+            # 1st priority: dedicated YouTube OAuth tokens (from YouTube connect flow)
+            try:
+                from repositories.youtube import get_youtube_oauth_tokens
+                yt_tokens = get_youtube_oauth_tokens(user_id)
+                if yt_tokens and yt_tokens.get("access_token"):
+                    from google.oauth2.credentials import Credentials
+                    creds = Credentials(
+                        token=yt_tokens["access_token"],
+                        refresh_token=yt_tokens.get("refresh_token"),
+                        token_uri=yt_tokens.get("token_uri", "https://oauth2.googleapis.com/token"),
+                        client_id=yt_tokens.get("client_id"),
+                        client_secret=yt_tokens.get("client_secret"),
+                    )
+                    youtube = googleapiclient.discovery.build("youtube", "v3", credentials=creds)
+                    logger.info(f"Authenticated YouTube via dedicated YouTube OAuth tokens for user {user_id}")
+                    return youtube
+            except Exception as yt_err:
+                logger.info(f"YouTube OAuth token auth note: {yt_err}")
+
+            # 2nd priority: Google session token saved during Sonikoma login
+            try:
+                from repositories.user import get_user_by_id
+                user = get_user_by_id(user_id)
+                if user and user.get("google_access_token"):
+                    from google.oauth2.credentials import Credentials
+                    creds = Credentials(token=user.get("google_access_token"))
+                    youtube = googleapiclient.discovery.build("youtube", "v3", credentials=creds)
+                    logger.info(f"Authenticated YouTube via Google session token for user {user_id}")
+                    return youtube
+            except Exception as token_err:
+                logger.info(f"Google session token auth note: {token_err}")
+
         custom_secrets = None
         if user_id:
             db_creds = get_youtube_credentials(user_id)
@@ -270,3 +303,64 @@ async def get_authenticated_service(user_id: Optional[str] = None):
                 os.remove(tmp_secrets_path)
         except OSError:
             pass
+
+
+async def fetch_user_youtube_channels(user_id: Optional[str] = None) -> list[dict]:
+    """
+    Fetches all YouTube channels (personal & brand accounts) associated with the user's Google account/credentials.
+    Returns a list of dicts with channel details: id, title, description, thumbnail, custom_url, subscriber_count.
+    """
+    try:
+        youtube = await get_authenticated_service(user_id=user_id)
+        channel_map = {}
+
+        # 1. Fetch primary personal channels
+        try:
+            req_mine = youtube.channels().list(part="snippet,contentDetails,statistics", mine=True)
+            res_mine = req_mine.execute()
+            for item in res_mine.get("items", []):
+                cid = item.get("id")
+                if cid:
+                    snippet = item.get("snippet", {})
+                    stats = item.get("statistics", {})
+                    channel_map[cid] = {
+                        "id": cid,
+                        "title": snippet.get("title"),
+                        "description": snippet.get("description"),
+                        "custom_url": snippet.get("customUrl"),
+                        "thumbnail": snippet.get("thumbnails", {}).get("high", {}).get("url") or snippet.get("thumbnails", {}).get("default", {}).get("url"),
+                        "subscriber_count": f"{int(stats.get('subscriberCount', 0)):,}",
+                        "view_count": f"{int(stats.get('viewCount', 0)):,}",
+                        "video_count": stats.get("videoCount", "0"),
+                    }
+        except Exception as e_mine:
+            logger.warning(f"Error fetching mine=True channels: {e_mine}")
+
+        # 2. Fetch managed brand channels if available
+        try:
+            req_managed = youtube.channels().list(part="snippet,contentDetails,statistics", managedByMe=True)
+            res_managed = req_managed.execute()
+            for item in res_managed.get("items", []):
+                cid = item.get("id")
+                if cid and cid not in channel_map:
+                    snippet = item.get("snippet", {})
+                    stats = item.get("statistics", {})
+                    channel_map[cid] = {
+                        "id": cid,
+                        "title": snippet.get("title"),
+                        "description": snippet.get("description"),
+                        "custom_url": snippet.get("customUrl"),
+                        "thumbnail": snippet.get("thumbnails", {}).get("high", {}).get("url") or snippet.get("thumbnails", {}).get("default", {}).get("url"),
+                        "subscriber_count": f"{int(stats.get('subscriberCount', 0)):,}",
+                        "view_count": f"{int(stats.get('viewCount', 0)):,}",
+                        "video_count": stats.get("videoCount", "0"),
+                    }
+        except Exception as e_managed:
+            logger.info(f"Note on managedByMe channels query: {e_managed}")
+
+        return list(channel_map.values())
+    except Exception as e:
+        logger.error(f"Failed to fetch YouTube channels for user {user_id}: {e}")
+        return []
+
+

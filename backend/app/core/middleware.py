@@ -51,6 +51,7 @@ PUBLIC_ROUTE_SET = {
     "/api/auth/forgot-password",
     "/api/auth/google/login",
     "/api/auth/google/callback",
+    "/api/export/youtube/oauth/callback",
     "/api/auth/token",             # Swagger Authorize button
     "/api/proxy-image",
     "/api/proxy/image",

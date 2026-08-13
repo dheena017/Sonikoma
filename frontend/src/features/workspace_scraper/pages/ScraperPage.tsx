@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import {
   History,
-  ArrowRight,
   Sparkles,
   Brain,
-  Film,
   Award,
   BookOpenCheck,
   Search,
@@ -13,13 +11,9 @@ import {
   Clock,
   Layers,
   Plus,
-  Tag,
   User2,
-  Globe,
   BarChart2,
-  Star,
   Zap,
-  Keyboard,
   RefreshCw,
   CheckCircle2,
   Loader,
@@ -28,7 +22,6 @@ import {
 import UrlInputPanel from "@/features/workspace_scraper/components/UrlInputPanel";
 import WorkspaceResumeCard from "@/features/workspace_scraper/components/WorkspaceResumeCard";
 import WorkspaceStatsBar from "@/features/workspace_scraper/components/WorkspaceStatsBar";
-import DirectToolsLaunchpad from "@/features/workspace_scraper/components/DirectToolsLaunchpad";
 import RecentProjectsSection from "@/features/workspace_scraper/components/RecentProjectsSection";
 import CreatorGuideSection from "@/features/workspace_scraper/components/CreatorGuideSection";
 import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
@@ -146,14 +139,6 @@ function getGenreStyle(genre?: string): string {
   return GENRE_COLORS[key] || "bg-neutral-800/60 text-neutral-400 border-neutral-700/40";
 }
 
-const KEYBOARD_SHORTCUTS = [
-  { key: "⌘ + N", label: "New Project"      },
-  { key: "⌘ + K", label: "Quick Search"     },
-  { key: "⌘ + E", label: "Open Editor"      },
-  { key: "⌘ + R", label: "Reload Projects"  },
-  { key: "⌘ + /", label: "Toggle Shortcuts" },
-];
-
 export type AppWorkspaceProps = ScraperPageProps;
 
 const ScraperPageInner = (props: ScraperPageProps) => {
@@ -168,7 +153,6 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   const [stats, setStats] = useState<{ totalProjects: number; totalPanels: number; completedProjects: number }>({
     totalProjects: 0, totalPanels: 0, completedProjects: 0,
   });
-  const [showShortcuts, setShowShortcuts] = useState<boolean>(false);
 
   const handleOpenProject = (project: Project) => {
     const targetPath = `/scraper?id=${project.project_id}`;
@@ -306,86 +290,6 @@ const ScraperPageInner = (props: ScraperPageProps) => {
     chapterSlug,
     videoUrl,
   } = props;
-
-  const samplePresets = [
-    {
-      id: "boundless",
-      name: "Boundless Necromancer",
-      style: "Action Webtoon (Tall Strip)",
-      url: "https://www.webtoons.com/en/action/boundless-necromancer/viewer?title_no=5212&episode_no=1",
-      chapter: "1",
-      genre: "Action",
-      author: "Seong-su Gwang / Ji-hye Han",
-      synopsis: "A hunter climbs a mysterious tower to seek strength.",
-      cropSensitivity: 45,
-      autoSplit: true,
-      smartSlice: true,
-      narration: "long",
-    },
-    {
-      id: "sololeveling",
-      name: "Solo Leveling",
-      style: "Action/Fantasy (Webtoon)",
-      url: "https://www.webtoons.com/en/action/solo-leveling/episode-1/viewer?title_no=5999&episode_no=1",
-      chapter: "1",
-      genre: "Action/Fantasy",
-      author: "Chugong",
-      synopsis:
-        "In a world where hunters must battle deadly monsters, Jinwoo Sung is the weakest of them all.",
-      cropSensitivity: 50,
-      autoSplit: true,
-      smartSlice: true,
-      narration: "dramatic",
-    },
-    {
-      id: "traditional_manga",
-      name: "Manga Prototype",
-      style: "Page-based (B&W)",
-      url: "https://example.com/manga-sample/chapter-1",
-      chapter: "1",
-      genre: "Shonen",
-      author: "Artist Master",
-      synopsis: "Classic black and white page-based layout format.",
-      cropSensitivity: 60,
-      autoSplit: false,
-      smartSlice: false,
-      narration: "brief",
-    },
-    {
-      id: "western_grid",
-      name: "Comic Grid",
-      style: "Western Superhero Layout",
-      url: "https://example.com/western-comic/chapter-1",
-      chapter: "1",
-      genre: "Superhero",
-      author: "Writer & Penciler",
-      synopsis: "Multi-panel grid with border borders and action shots.",
-      cropSensitivity: 35,
-      autoSplit: false,
-      smartSlice: true,
-      narration: "long",
-    },
-  ];
-
-  const applyPreset = (preset: (typeof samplePresets)[0]) => {
-    setTargetUrl(preset.url);
-    setSeriesTitle(preset.name);
-    setChapterNumber(preset.chapter);
-    setChapterTitle(`Chapter ${preset.chapter}`);
-    setScrapedGenre(preset.genre);
-    setSeriesAuthor(preset.author);
-    setSeriesCoverImage("");
-    setSeriesSynopsis(preset.synopsis);
-    setSmartSlice?.(preset.smartSlice);
-    setCropSensitivity?.(preset.cropSensitivity);
-    setAutoSplitTallStrips?.(preset.autoSplit);
-    setNarrationStyle(preset.narration);
-
-    addNotification(
-      `Loaded preset configuration for "${preset.name}".`,
-      "success"
-    );
-  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -617,13 +521,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
         {/* ── STATS BAR ── */}
         <WorkspaceStatsBar statsLoading={statsLoading} stats={stats} projectId={projectId} />
 
-        {/* ── DIRECT TOOLS LAUNCHPAD ── */}
-        <DirectToolsLaunchpad
-          navigateTo={navigateTo}
-          showShortcuts={showShortcuts}
-          setShowShortcuts={setShowShortcuts}
-          keyboardShortcuts={KEYBOARD_SHORTCUTS}
-        />
+
 
         <div className="relative z-50">
           <UrlInputPanel
@@ -676,41 +574,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
           />
         </div>
 
-        {/* 2. SAMPLE PRESETS SELECTOR */}
-        <div className="w-full bg-[#111116]/60 border border-neutral-800/80 rounded-3xl p-6 backdrop-blur-md space-y-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-purple-400 shrink-0" />
-            <h4 className="text-sm font-bold text-white tracking-tight">
-              Quick Start Presets & Templates
-            </h4>
-          </div>
-          <p className="text-xs text-neutral-400 font-medium font-sans">
-            Select a pre-configured template format to instantly fill in scraper
-            parameters, crop sensitivities, and auto-split configurations.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
-            {samplePresets.map((preset) => (
-              <button
-                key={preset.id}
-                onClick={() => applyPreset(preset)}
-                className="group relative flex flex-col text-left p-3.5 rounded-2xl bg-neutral-900/60 border border-neutral-800/60 hover:border-purple-500/40 hover:bg-purple-955/10 cursor-pointer transition-all duration-200"
-              >
-                <span className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
-                  {preset.name}
-                </span>
-                <span className="text-[10px] text-neutral-500 font-medium mt-1">
-                  {preset.style}
-                </span>
-                <span className={`mt-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-bold ${getGenreStyle(preset.genre)}`}>
-                  <Tag className="h-2.5 w-2.5" />{preset.genre}
-                </span>
-                <span className="absolute bottom-2.5 right-3 h-4 w-4 rounded-full bg-purple-500/10 border border-purple-500/20 group-hover:bg-purple-500/20 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
-                  <ArrowRight className="h-2.5 w-2.5 text-purple-400" />
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+
 
 
 
@@ -745,19 +609,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
           setActiveGuideTab={setActiveGuideTab}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
-          {[
-            { title: "1. Scrape", desc: "Auto-fetch images from any link",      icon: <Globe  className="h-5 w-5 mx-auto text-sky-400 mb-1" />   },
-            { title: "2. Edit",   desc: "Sync audio & panels in Pro Editor",    icon: <Film   className="h-5 w-5 mx-auto text-purple-400 mb-1" /> },
-            { title: "3. Render", desc: "Export high-quality 4K videos",        icon: <Star   className="h-5 w-5 mx-auto text-amber-400 mb-1" />  },
-          ].map((step) => (
-            <div key={step.title} className="space-y-1">
-              {step.icon}
-              <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest">{step.title}</p>
-              <p className="text-xs text-neutral-400 font-medium">{step.desc}</p>
-            </div>
-          ))}
-        </div>
+
       </div>
     </main>
   );

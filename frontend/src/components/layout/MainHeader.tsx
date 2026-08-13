@@ -636,9 +636,9 @@ const HeaderInner = ({
             className="bg-transparent text-neutral-200 text-[10px] font-bold font-mono focus:outline-none cursor-pointer pr-1"
             title="Active AI Model"
           >
+            <option value="gemini-2.5-flash" className="bg-neutral-900 text-white">🚀 Gemini 2.5 Flash</option>
             <option value="gemini-2.0-flash" className="bg-neutral-900 text-white">⚡ Gemini 2.0 Flash</option>
-            <option value="gemini-1.5-pro" className="bg-neutral-900 text-white">🧠 Gemini 1.5 Pro</option>
-            <option value="gemini-1.5-flash" className="bg-neutral-900 text-white">⚡ Gemini 1.5 Flash</option>
+            <option value="gemini-2.5-flash-lite" className="bg-neutral-900 text-white">🪶 Gemini 2.5 Flash Lite</option>
           </select>
           {user?.preferences?.api_keys?.gemini ? (
             <span className="text-[9px] px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 font-sans font-bold" title="Using custom user Google API key">BYOK</span>

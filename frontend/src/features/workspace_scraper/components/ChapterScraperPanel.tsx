@@ -1,12 +1,9 @@
 import React from "react";
 import { Sparkles, Book, UploadCloud } from "lucide-react";
-import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import { NotificationType } from "@/features/app_notification";
 import { SeriesMetadataForm } from "./panel/SeriesMetadataForm";
-import { BatchPresetsControls } from "./panel/BatchPresetsControls";
 import { ScraperInputToolbar } from "./panel/ScraperInputToolbar";
 import { LocalImageUploadZone } from "./panel/LocalImageUploadZone";
-import { AdvancedPipelineConstraints } from "./panel/AdvancedPipelineConstraints";
 
 export interface UrlInputPanelProps {
   targetUrl: string;
@@ -51,7 +48,6 @@ export interface UrlInputPanelProps {
 }
 
 const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
-  const { models: aiModels } = useAIModels();
   const {
     targetUrl,
     setTargetUrl,
@@ -115,8 +111,8 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
         </div>
       </div>
 
-      {/* 2. Series Metadata & Batch Presets Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-black/20 p-6 rounded-2xl border border-white/5">
+      {/* 2. Series Metadata Form */}
+      <div className="bg-black/20 p-6 rounded-2xl border border-white/5">
         <SeriesMetadataForm
           seriesTitle={seriesTitle}
           setSeriesTitle={setSeriesTitle}
@@ -129,12 +125,6 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           setSeriesAuthor={setSeriesAuthor}
           setSeriesSynopsis={setSeriesSynopsis}
           setChapterTitle={setChapterTitle}
-        />
-        <BatchPresetsControls
-          cropSensitivity={cropSensitivity}
-          setCropSensitivity={setCropSensitivity}
-          autoSplitTallStrips={autoSplitTallStrips}
-          setAutoSplitTallStrips={setAutoSplitTallStrips}
         />
       </div>
 
@@ -199,16 +189,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
         )}
       </div>
 
-      {/* 4. Advanced Pipeline Constraints */}
-      <AdvancedPipelineConstraints
-        selectedModel={selectedModel}
-        setSelectedModel={setSelectedModel}
-        aiModels={aiModels}
-        narrationStyle={narrationStyle}
-        setNarrationStyle={setNarrationStyle}
-        smartSlice={smartSlice}
-        setSmartSlice={setSmartSlice}
-      />
+
     </div>
   );
 });

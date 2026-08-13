@@ -137,7 +137,6 @@ async def google_login(request: Request):
         "https://www.googleapis.com/auth/userinfo.profile",
         "https://www.googleapis.com/auth/youtube.readonly",
         "https://www.googleapis.com/auth/youtube.upload",
-        "https://www.googleapis.com/auth/youtube",
     ]
 
     state = _generate_oauth_state()
@@ -147,7 +146,7 @@ async def google_login(request: Request):
         "response_type": "code",
         "scope": " ".join(scopes),
         "access_type": "offline",
-        "prompt": "consent",
+        "prompt": "select_account consent",
         "state": state,
     }
 
@@ -233,44 +232,10 @@ async def google_callback(request: Request):
             name = email.split("@")[0]
         else:
             name = f"user_{uuid.uuid4().hex[:8]}"
-        # Use Google profile picture as initial fallback (better than hardcoded default)
+        # Use Google profile picture
         picture = info.get("picture") or ""
 
-        # Try to fetch YouTube channel profile picture (logo) via YouTube Data API v3
-        try:
-            logger.info("Fetching YouTube channel info from YouTube Data API v3...")
-            yt_resp = requests.get(
-                "https://www.googleapis.com/youtube/v3/channels?mine=true&part=snippet",
-                headers={"Authorization": f"Bearer {google_access_token}"},
-                timeout=5,
-            )
-            logger.info("YouTube API response status: %d", yt_resp.status_code)
-            if yt_resp.status_code == 200:
-                yt_data = yt_resp.json()
-                items = yt_data.get("items", [])
-                logger.info("YouTube API returned %d channel item(s)", len(items) if items else 0)
-                if items and isinstance(items, list) and len(items) > 0:
-                    snippet = items[0].get("snippet", {})
-                    thumbnails = snippet.get("thumbnails", {})
-                    logger.info("YouTube thumbnails: %s", thumbnails)
-                    yt_img = (
-                        thumbnails.get("high", {}).get("url")
-                        or thumbnails.get("medium", {}).get("url")
-                        or thumbnails.get("default", {}).get("url")
-                    )
-                    if yt_img:
-                        picture = yt_img
-                        logger.info("Using YouTube channel logo as avatar: %s", yt_img)
-                    else:
-                        logger.warning("YouTube channel found but no thumbnail URL in snippet: %s", snippet)
-                else:
-                    logger.warning("YouTube API returned no channel items. Full response: %s", yt_data)
-            else:
-                logger.warning("YouTube API error %d: %s", yt_resp.status_code, yt_resp.text[:500])
-        except Exception as e:
-            logger.warning("Could not fetch YouTube channel logo: %s", e)
-
-        # Final fallback if still no picture
+        # Final fallback if no picture
         if not picture:
             picture = "https://lh3.googleusercontent.com/a/default-user"
 

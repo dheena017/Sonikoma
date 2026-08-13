@@ -240,15 +240,20 @@ export default function LoginPage({
             <p className="text-neutral-400 text-sm">{t.subtitle}</p>
           </div>
 
-          {/* Social Sign-In buttons */}
-          <div className="w-full">
+          {/* Primary Google Sign-In Button */}
+          <div className="w-full space-y-2">
             <button
+              type="button"
               onClick={() => handleSocialLogin("Google")}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-white font-medium text-xs transition-all duration-300 cursor-pointer shadow-sm active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 cursor-pointer shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] border border-purple-400/30 group"
             >
-              <Chrome className="w-4 h-4 text-neutral-300" />
-              Sign in with Google
+              <Chrome className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
+              <span>Continue with Google Account</span>
+              <ArrowRight className="w-4 h-4 text-purple-200 group-hover:translate-x-1 transition-transform duration-200" />
             </button>
+            <p className="text-[11px] text-center text-neutral-400 font-sans">
+              🔒 Standard Sonikoma authentication requires your Google Account
+            </p>
           </div>
 
           {/* Separator Line */}
@@ -389,13 +394,15 @@ export default function LoginPage({
                     </button>
                   </div>
                   <div className="relative">
-                    <Lock
-                      className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                        isPasswordValid
-                          ? "text-emerald-400"
-                          : "text-neutral-500"
-                      }`}
-                    />
+                    <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4">
+                      <Lock
+                        className={`w-4 h-4 transition-colors ${
+                          isPasswordValid
+                            ? "text-emerald-400"
+                            : "text-neutral-500"
+                        }`}
+                      />
+                    </div>
                     <input
                       type={showPassword ? "text" : "password"}
                       required
@@ -403,7 +410,7 @@ export default function LoginPage({
                       onChange={(e) => setPassword(e.target.value)}
                       onKeyDown={checkCapsLock}
                       onKeyUp={checkCapsLock}
-                      className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-10 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
+                      className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
                         isPasswordValid
                           ? "border-emerald-500/20 focus:ring-emerald-500/20 focus:border-emerald-500/40"
                           : `border-white/5 ${currentTheme.focus}`
@@ -413,7 +420,7 @@ export default function LoginPage({
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300 transition-colors focus:outline-none"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 text-neutral-500 hover:text-neutral-300 transition-colors focus:outline-none"
                       aria-label={
                         showPassword ? "Hide password" : "Show password"
                       }

@@ -290,6 +290,18 @@ export function useAppRouter({
         return;
       }
 
+      if (
+        path === "/creative/youtube" ||
+        path.startsWith("/creative/youtube?") ||
+        path.startsWith("/creative/youtube/")
+      ) {
+        const search = window.location.search || "";
+        const target = `/creative-suite/youtube${search}`;
+        window.history.replaceState({}, "", target);
+        setCurrentPath(target);
+        return;
+      }
+
       const isSeriesPath = path.startsWith("/series/");
       const isChapterDetails = isSeriesPath && path.endsWith("/details");
       const isWorkspacePath =

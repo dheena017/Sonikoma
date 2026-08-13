@@ -14,11 +14,8 @@ from typing import Any, Optional
 from app.core.config import ai_initialized, call_gemini_with_retry, genai_client
 try:
     from google.genai import types
-except Exception as e:
-    raise ImportError(
-        "Failed to import 'google.genai.types'. "
-        "Ensure 'google-genai' is installed: pip install google-genai"
-    ) from e
+except Exception:
+    types = None
 from services.ai.skills.utils import resolve_api_key
 
 from app.core.config import GEMINI_FALLBACK_MODELS

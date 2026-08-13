@@ -156,3 +156,82 @@ def delete_youtube_credentials(user_id: str) -> bool:
         conn.close()
 
 
+# ── YouTube OAuth Token Store (separate from custom API credentials) ────────
+
+def save_youtube_oauth_tokens(
+    user_id: str,
+    access_token: str,
+    refresh_token: str | None = None,
+    client_id: str | None = None,
+    client_secret: str | None = None,
+    scopes: str | None = None,
+) -> None:
+    """
+    Persist YouTube-specific OAuth access/refresh tokens for a user.
+    These are obtained via the dedicated YouTube connect flow (not the Sonikoma login).
+    """
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            INSERT INTO youtube_oauth_tokens (user_id, access_token, refresh_token, client_id, client_secret, scopes, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(user_id) DO UPDATE SET
+                access_token=excluded.access_token,
+                refresh_token=COALESCE(excluded.refresh_token, refresh_token),
+                client_id=COALESCE(excluded.client_id, client_id),
+                client_secret=COALESCE(excluded.client_secret, client_secret),
+                scopes=COALESCE(excluded.scopes, scopes),
+                updated_at=datetime('now')
+        """, (user_id, access_token, refresh_token, client_id, client_secret, scopes))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_youtube_oauth_tokens(user_id: str) -> Optional[Dict[str, Any]]:
+    """Return the stored YouTube OAuth tokens for a user, or None if not connected."""
+    conn = get_db_connection()
+    try:
+        row = conn.execute("SELECT * FROM youtube_oauth_tokens WHERE user_id = ?", (user_id,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def save_selected_youtube_channel(
+    user_id: str,
+    channel_id: str,
+    title: str,
+    thumbnail: str | None = None,
+    handle: str | None = None,
+) -> None:
+    """Persist the user's selected active YouTube channel."""
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            UPDATE youtube_oauth_tokens
+            SET selected_channel_id=?, selected_channel_title=?,
+                selected_channel_thumbnail=?, selected_channel_handle=?,
+                updated_at=datetime('now')
+            WHERE user_id=?
+        """, (channel_id, title, thumbnail, handle, user_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_selected_youtube_channel(user_id: str) -> Optional[Dict[str, Any]]:
+    """Return the currently selected YouTube channel for a user."""
+    conn = get_db_connection()
+    try:
+        row = conn.execute("""
+            SELECT selected_channel_id AS id,
+                   selected_channel_title AS title,
+                   selected_channel_thumbnail AS thumbnail,
+                   selected_channel_handle AS custom_url
+            FROM youtube_oauth_tokens
+            WHERE user_id=? AND selected_channel_id IS NOT NULL
+        """, (user_id,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()

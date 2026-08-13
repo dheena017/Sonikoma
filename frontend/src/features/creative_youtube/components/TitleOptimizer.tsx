@@ -18,14 +18,18 @@ export default function TitleOptimizer({
   scrapedGenre,
   onInjectPowerWord,
 }: TitleOptimizerProps) {
-  const [variants, setVariants] = useState<string[]>([]);
+  const base = title.trim() || scrapedTitle || "Overpowered Webtoon Hero";
+  const cleanBase = base.replace(/\[.*?\]/g, "").trim();
+
+  const [variants, setVariants] = useState<string[]>([
+    `Reborn as ${cleanBase}, I Unlocked a Cheat System!`,
+    `He Was F-Rank, Until He Became the Ultimate ${scrapedGenre || "OP"} King!`,
+    `I Spent 10,000 Years Leveling Up ${cleanBase}...!`,
+  ]);
   const [loading, setLoading] = useState(false);
 
-  // Generate Clickbait title variants using AI skill
+  // Generate Clickbait title variants using AI skill (ONLY on explicit user click)
   const handleGenerateVariants = async () => {
-    const base = title.trim() || scrapedTitle || "Overpowered Webtoon Hero";
-    const cleanBase = base.replace(/\[.*?\]/g, "").trim();
-
     setLoading(true);
     try {
       const json = await api.runTitleAbSkill(fetchWithAuth, {
@@ -54,10 +58,6 @@ export default function TitleOptimizer({
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    handleGenerateVariants();
-  }, [scrapedTitle, scrapedGenre]);
 
   const isShortOverOptimal = title.length > 70;
   const isShortTooLong = title.length > 100;

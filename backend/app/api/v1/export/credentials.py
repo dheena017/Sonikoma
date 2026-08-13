@@ -19,7 +19,7 @@ router = APIRouter()
 
 @router.get("/credentials", summary="Get status of YouTube custom credentials")
 async def api_get_youtube_credentials(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
+    user_id = current_user.get("id") or current_user.get("user_id") or current_user.get("sub")
     try:
         creds = get_youtube_credentials(user_id)
         if creds:
@@ -39,7 +39,7 @@ async def api_get_youtube_credentials(current_user: dict = Depends(get_current_u
 async def api_save_youtube_credentials(
     creds_req: YouTubeCredentialsRequest, current_user: dict = Depends(get_current_user)
 ):
-    user_id = current_user.get("id")
+    user_id = current_user.get("id") or current_user.get("user_id") or current_user.get("sub")
     try:
         saved = save_youtube_credentials(
             user_id=user_id,
@@ -60,7 +60,7 @@ async def api_save_youtube_credentials(
 
 @router.delete("/credentials", summary="Remove user YouTube OAuth credentials")
 async def api_delete_youtube_credentials(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
+    user_id = current_user.get("id") or current_user.get("user_id") or current_user.get("sub")
     try:
         deleted = delete_youtube_credentials(user_id)
         if not deleted:

@@ -1,5 +1,5 @@
 import React from "react";
-import { Book, Loader2, ImageIcon, Zap, MoreVertical } from "lucide-react";
+import { Book, Loader2, ImageIcon, Zap, MoreVertical, Clock } from "lucide-react";
 import { parseWebtoonUrl, extractWebtoonUrl } from "@/shared/utils/url";
 import { FavoritesManager } from "@/features/workspace_scraper/episode-scraper/utils/FavoritesManager";
 
@@ -141,13 +141,21 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         />
 
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-2 bg-[#0a0a10] border border-neutral-800 rounded-xl shadow-2xl z-[1000] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
-            <div className="px-3 py-2 border-b border-neutral-800/80 bg-[#111218]">
-              <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
-                Recent &amp; Bookmarked Episodes
-              </span>
+          <div className="absolute left-0 right-0 top-full mt-2 bg-gradient-to-b from-neutral-900/95 to-neutral-950/85 border border-neutral-800/60 rounded-xl shadow-2xl z-[1000] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-sm">
+            <div className="px-4 py-3 border-b border-neutral-800/40 bg-gradient-to-r from-purple-950/30 to-neutral-950/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-purple-400" />
+                  <span className="text-[11px] font-bold text-neutral-300 uppercase tracking-wider">
+                    Recent &amp; Bookmarked Episodes
+                  </span>
+                  <span className="px-2 py-0.5 text-[9px] font-bold bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30">
+                    {suggestions.length}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="max-h-60 overflow-y-auto divide-y divide-neutral-800/50 bg-[#0a0a10]">
+            <div className="max-h-72 overflow-y-auto divide-y divide-neutral-800/30 bg-neutral-950/60">
               {suggestions.map((series, idx) => {
                 const parsed = parseWebtoonUrl(series.url);
                 const seriesTitleText = parsed.title || series.title || "Webtoon Series";
@@ -172,27 +180,27 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                       }
                       setShowSuggestions(false);
                     }}
-                    className="w-full px-4 py-2.5 hover:bg-purple-950/40 flex items-center justify-between gap-3 transition-colors cursor-pointer group relative bg-[#0a0a10]"
+                    className="w-full px-4 py-3 hover:bg-purple-600/15 border-b border-neutral-800/20 last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-neutral-950/40 hover:bg-neutral-900/60 relative"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="w-9 h-9 bg-neutral-850 rounded-lg flex items-center justify-center border border-neutral-800 flex-shrink-0">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-600/30 to-purple-700/20 rounded-lg flex items-center justify-center border border-purple-500/30 flex-shrink-0 shadow-sm">
                         <Book className="w-4 h-4 text-purple-400" />
                       </div>
                       <div className="flex-grow min-w-0">
-                        <p className="text-xs font-bold text-neutral-200 truncate leading-snug">
+                        <p className="text-xs font-bold text-neutral-100 group-hover:text-purple-300 truncate leading-snug transition-colors">
                           {seriesTitleText}
                         </p>
-                        <p className="text-[10px] text-neutral-400 truncate mt-0.5">
+                        <p className="text-[10px] text-neutral-500 group-hover:text-neutral-400 truncate mt-0.5 transition-colors">
                           {chapterText}
                         </p>
-                        <p className="text-[9px] text-neutral-600 font-mono truncate mt-0.5 select-all">
+                        <p className="text-[9px] text-neutral-600 font-mono truncate mt-0.5 select-all group-hover:text-neutral-500 transition-colors">
                           {series.url}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded border bg-neutral-800/80 text-neutral-400 border-neutral-700/50">
-                        DRAFT
+                      <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded border bg-purple-500/15 text-purple-300 border-purple-500/30 group-hover:bg-purple-500/25 transition-colors">
+                        Recent
                       </span>
                       <button
                         type="button"
@@ -200,7 +208,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                           e.stopPropagation();
                           setOpenSuggestionMenuIdx(openSuggestionMenuIdx === idx ? null : idx);
                         }}
-                        className="w-7 h-7 rounded-lg bg-black/40 hover:bg-black/70 text-neutral-400 hover:text-white border border-white/10 flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                        className="w-7 h-7 rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-neutral-400 hover:text-purple-300 border border-purple-500/20 flex items-center justify-center transition-all cursor-pointer active:scale-95"
                       >
                         <MoreVertical className="w-3.5 h-3.5" />
                       </button>

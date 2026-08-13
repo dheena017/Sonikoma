@@ -27,6 +27,10 @@ import UploadHistory from "@/features/creative_youtube/components/UploadHistory"
 import PlaylistSelector from "@/features/creative_youtube/components/PlaylistSelector";
 import WebtoonMetadata from "@/features/creative_youtube/components/WebtoonMetadata";
 import SubtitleConfig from "@/features/creative_youtube/components/SubtitleConfig";
+import YouTubeChannelHeader from "@/features/creative_youtube/components/YouTubeChannelHeader";
+import YouTubeSeoOptimizer from "@/features/creative_youtube/components/YouTubeSeoOptimizer";
+import YouTubeVideoGrid from "@/features/creative_youtube/components/YouTubeVideoGrid";
+import YouTubeChannelModal from "@/features/creative_youtube/components/YouTubeChannelModal";
 
 // Import custom hook
 import { useYouTubePublisher } from "@/features/creative_youtube/hooks/useYouTubePublisher";
@@ -58,8 +62,18 @@ const YouTubePage = React.memo(
     const effectiveGenre = scrapedGenre || activeProjectData?.project?.genre || "";
     const effectiveVideoUrl = videoUrl || activeProjectData?.project?.video_url || null;
     const [activeTab, setActiveTab] = useState<
-      "details" | "chapters_tags" | "comic_subtitles" | "settings" | "integrations"
+      "details" | "chapters_tags" | "comic_subtitles" | "settings"
     >("details");
+    const [isChannelModalOpen, setIsChannelModalOpen] = useState<boolean>(false);
+
+    React.useEffect(() => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("select_channel") === "true") {
+        setIsChannelModalOpen(true);
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, "", newUrl);
+      }
+    }, []);
 
     const {
       title,
@@ -191,51 +205,16 @@ const YouTubePage = React.memo(
       addNotification,
     });
 
-    if (safePanels.length === 0) {
-      return (
-        <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
-          <Youtube className="h-10 w-10 text-neutral-600 mb-3" />
-          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
-            No Panels Available
-          </h3>
-          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
-            Please import a series or add panels to your storyboard timeline to start publishing to YouTube.
-          </p>
-        </div>
-      );
-    }
+    // Allow full access to YouTube Studio & Publisher even if no project panels are currently loaded.
 
     return (
       <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
-        {/* PAGE HERO HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-850 pb-5">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 shadow-lg shadow-red-950/30">
-              <Youtube className="h-6 w-6 text-red-400 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-red-500/10 text-red-300 border border-red-500/20">
-                  DISTRIBUTION • PUBLISHER
-                </span>
-                <span className="text-xs text-neutral-400 font-mono">• SEO Audit Score: {seoScore}/100</span>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                YouTube Publisher
-              </h1>
-              <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Direct YouTube channel publishing, automated metadata optimization, chapter compilation, and SEO auditing.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 self-start md:self-center">
-            <div className="px-3.5 py-1.5 rounded-full bg-neutral-950 border border-neutral-850 text-neutral-300 text-xs font-mono flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${isPublishing ? "bg-amber-400 animate-ping" : "bg-emerald-400 animate-pulse"}`} />
-              <span>{isPublishing ? "Publishing Active" : "Publisher Ready"}</span>
-            </div>
-          </div>
-        </div>
+        {/* UNIFIED YOUTUBE INTEGRATION HEADER */}
+        <YouTubeChannelHeader
+          seoScore={seoScore}
+          isPublishing={isPublishing}
+          onOpenChannelModal={() => setIsChannelModalOpen(true)}
+        />
 
         {/* TWO-COLUMN DIRECT PUBLISHER WORKSPACE GRID (5 : 7) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -277,7 +256,7 @@ const YouTubePage = React.memo(
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-850 pb-3">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
-                  DIRECT VIDEO PUBLISHER
+                  YOUTUBE INTEGRATION STUDIO
                 </p>
                 <h4 className="text-base font-bold text-white mt-0.5 flex items-center gap-2">
                   <Youtube className="w-4 h-4 text-red-400" /> YouTube Video Metadata & Details
@@ -288,8 +267,8 @@ const YouTubePage = React.memo(
             {/* Real-time SEO Auditor Score Banner */}
             <SeoAuditor seoScore={seoScore} seoChecks={seoChecks} />
 
-            {/* Segmented 5-Tab Navigation Controller */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 bg-neutral-900/80 p-1 rounded-xl border border-neutral-800 shadow-inner gap-1">
+            {/* Segmented 4-Tab Navigation Controller */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 bg-neutral-900/80 p-1 rounded-xl border border-neutral-800 shadow-inner gap-1">
               <button
                 onClick={() => setActiveTab("details")}
                 className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
@@ -336,18 +315,6 @@ const YouTubePage = React.memo(
               >
                 <Sliders className="h-3.5 w-3.5 shrink-0" />
                 <span className="truncate">Settings</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("integrations")}
-                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
-                  activeTab === "integrations"
-                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
-                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
-                }`}
-              >
-                <Key className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">Keys</span>
               </button>
             </div>
 
@@ -586,49 +553,6 @@ const YouTubePage = React.memo(
                   </div>
                 </div>
               )}
-
-              {/* TAB 5: KEYS (Profiles, OAuth Credentials, Socials) */}
-              {activeTab === "integrations" && (
-                <div className="space-y-4 animate-fade-in animate-duration-300">
-                  <div className="border-b border-neutral-800 pb-2">
-                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
-                      Profiles, Keys &amp; Integrations
-                    </h3>
-                  </div>
-
-                  <div className="space-y-4">
-                    <ProfileManager
-                      currentProfileName={currentProfileName}
-                      profiles={profiles}
-                      onSaveProfile={handleSaveProfile}
-                      onLoadProfile={handleLoadProfile}
-                      onDeleteProfile={handleDeleteProfile}
-                      addNotification={addNotification}
-                    />
-
-                    <CredentialsConfig
-                      hasCustomCredentials={hasCustomCredentials}
-                      customClientId={customClientId}
-                      customProjectId={customProjectId}
-                      showCredentialsConfig={showCredentialsConfig}
-                      setShowCredentialsConfig={setShowCredentialsConfig}
-                      onSaveCredentials={handleSaveCredentials}
-                      onDeleteCredentials={handleDeleteCredentials}
-                    />
-
-                    <SocialsCustomizer
-                      channelLink={channelLink}
-                      setChannelLink={setChannelLink}
-                      discordLink={discordLink}
-                      setDiscordLink={setDiscordLink}
-                      patreonLink={patreonLink}
-                      setPatreonLink={setPatreonLink}
-                      showSocialsConfig={showSocialsConfig}
-                      setShowSocialsConfig={setShowSocialsConfig}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Database Upload History */}
@@ -637,6 +561,32 @@ const YouTubePage = React.memo(
             </div>
           </div>
         </div>
+
+        {/* FULL-WIDTH AI SEO & METADATA OPTIMIZER */}
+        <YouTubeSeoOptimizer
+          initialTitle={title}
+          onApplySeo={({ title: seoTitle, description: seoDesc, tags: seoTags }) => {
+            setTitle(seoTitle);
+            setDescription(seoDesc);
+            if (seoTags && seoTags.length > 0) {
+              seoTags.forEach((t) => handleAddSuggestedTag(t));
+            }
+          }}
+        />
+
+        {/* FULL-WIDTH PUBLISHED VIDEOS GRID & LIVE AUDIENCE COMMENTS */}
+        <YouTubeVideoGrid />
+
+        {/* YOUTUBE CHANNEL SELECTION MODAL */}
+        <YouTubeChannelModal
+          isOpen={isChannelModalOpen}
+          onClose={() => setIsChannelModalOpen(false)}
+          onChannelSelected={(channel) => {
+            if (addNotification) {
+              addNotification(`Connected YouTube channel: ${channel.title}`, "success");
+            }
+          }}
+        />
       </div>
     );
   }

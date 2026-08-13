@@ -20,8 +20,8 @@ export_router = APIRouter()
 
 # Mount sub-routers
 export_router.include_router(youtube_router)
-export_router.include_router(profiles_router)
-export_router.include_router(credentials_router)
+export_router.include_router(profiles_router, prefix="/youtube")
+export_router.include_router(credentials_router, prefix="/youtube")
 
 
 @export_router.get("/youtube/history", summary="Get YouTube video upload history")

@@ -105,7 +105,7 @@ export function createFetchWithInterceptor({
                 await (window as any).alertAsync(
                   "AI features require a valid API Key from the target provider. Please add it in your Profile Settings."
                 );
-                window.location.href = "/profile?tab=api";
+                window.location.href = "/profile";
                 const err = new Error(errorData.detail);
                 (err as any).intercepted = true;
                 reject(err);

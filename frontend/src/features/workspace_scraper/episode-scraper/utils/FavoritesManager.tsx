@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { Trash2, ExternalLink } from 'lucide-react';
 import { getProxiedImageUrl } from '@/shared/utils/url';
 
@@ -9,6 +9,8 @@ export interface FavoriteSeries {
   cover_image?: string;
   timestamp: number;
   url?: string;
+  episode_count?: number | string;
+  [x: string]: any;
 }
 
 const STORAGE_KEY = 'sonikoma_favorite_series';

@@ -459,6 +459,25 @@ def init_sqlite(conn) -> None:
         except Exception:
             pass
 
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS youtube_oauth_tokens (
+          user_id             TEXT    PRIMARY KEY,
+          access_token        TEXT    NOT NULL,
+          refresh_token       TEXT,
+          token_uri           TEXT    NOT NULL DEFAULT 'https://oauth2.googleapis.com/token',
+          client_id           TEXT,
+          client_secret       TEXT,
+          scopes              TEXT,
+          selected_channel_id TEXT,
+          selected_channel_title TEXT,
+          selected_channel_thumbnail TEXT,
+          selected_channel_handle TEXT,
+          updated_at          TEXT    NOT NULL DEFAULT (datetime('now')),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """)
+        logger.debug("[Database] Migration: verified youtube_oauth_tokens table.")
+
         # ── credit_transactions table ─────────────────────────────────────
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS credit_transactions (

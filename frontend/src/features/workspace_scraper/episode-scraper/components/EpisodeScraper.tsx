@@ -26,6 +26,8 @@ import {
   FileText,
   Star,
   Flame,
+  Trash2,
+  ArrowRight,
 } from "lucide-react";
 import { EpisodeGrid } from "./EpisodeGrid";
 import { EpisodeControls } from "./EpisodeControls";
@@ -843,22 +845,42 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
               <>
             {/* DYNAMIC USER RECENT / FAVORITE SERIES (IF ANY EXIST) */}
             {activeTab === "recent" && suggestions.length > 0 ? (
-              <div className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md space-y-6">
-                <div className="flex items-center justify-between border-b border-neutral-800/80 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
+              <div className="bg-gradient-to-b from-neutral-900/60 to-neutral-950/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md space-y-6">
+                {/* Header with Enhanced Design */}
+                <div className="flex items-center justify-between border-b border-neutral-800/40 pb-6">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 rounded-xl border border-purple-500/30 shadow-lg shadow-purple-950/20">
                       <Clock className="w-5 h-5" />
                     </div>
-                    <div>
-                      <h3 className="text-base font-bold text-white tracking-wide">
-                        {activeTab === "recent" ? "Recently Browsed Comics & Manhwa" : "Your Recent & Favorite Series"}
-                      </h3>
-                      <p className="text-xs text-neutral-400 font-mono mt-0.5">Click a series card to open its Episodes List</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-lg font-bold text-white tracking-wide">
+                          Recently Browsed Series
+                        </h3>
+                        <span className="px-2.5 py-0.5 text-[10px] font-bold bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30 font-mono">
+                          {suggestions.length} series
+                        </span>
+                      </div>
+                      <p className="text-xs text-neutral-400 font-mono">Click a card to load episodes or manage your recent history</p>
                     </div>
                   </div>
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Clear all recent series history?")) {
+                        FavoritesManager.clearRecent();
+                        window.location.reload();
+                      }
+                    }}
+                    className="px-3 py-2 text-xs font-bold rounded-lg bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 transition-all flex items-center gap-1.5"
+                    title="Clear recent history"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Clear
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {/* Series Grid - Enhanced Layout */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {suggestions.map((series) => (
                     <RecentSeriesCard
                       key={series.title_no}
@@ -872,8 +894,32 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                         setTitleNoInput(selectedSeries.title_no);
                         triggerScrape(selectedSeries.url, selectedSeries.title_no);
                       }}
+                      onRemove={() => {
+                        // Trigger UI refresh after remove
+                        setTimeout(() => window.location.reload(), 200);
+                      }}
                     />
                   ))}
+                </div>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-neutral-800/40">
+                  <div className="bg-neutral-950/40 rounded-xl p-3 text-center border border-neutral-800/20">
+                    <div className="text-xs text-neutral-500 font-mono mb-1">Total Bookmarked</div>
+                    <div className="text-lg font-bold text-purple-400">{FavoritesManager.getBookmarks().length}</div>
+                  </div>
+                  <div className="bg-neutral-950/40 rounded-xl p-3 text-center border border-neutral-800/20">
+                    <div className="text-xs text-neutral-500 font-mono mb-1">Recently Added</div>
+                    <div className="text-lg font-bold text-amber-400">{suggestions.length}</div>
+                  </div>
+                  <div className="bg-neutral-950/40 rounded-xl p-3 text-center border border-neutral-800/20">
+                    <div className="text-xs text-neutral-500 font-mono mb-1">Total Favorites</div>
+                    <div className="text-lg font-bold text-pink-400">{FavoritesManager.getFavorites().length}</div>
+                  </div>
+                  <div className="bg-neutral-950/40 rounded-xl p-3 text-center border border-neutral-800/20">
+                    <div className="text-xs text-neutral-500 font-mono mb-1">Storage Used</div>
+                    <div className="text-lg font-bold text-sky-400">{suggestions.length} series</div>
+                  </div>
                 </div>
               </div>
             ) : (
