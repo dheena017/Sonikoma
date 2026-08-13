@@ -6,6 +6,7 @@ import {
   ToggleLeft,
   ToggleRight,
   Sparkles,
+  Compass,
 } from "lucide-react";
 
 interface ProfileAccountTabProps {

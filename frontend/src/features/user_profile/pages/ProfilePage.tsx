@@ -282,8 +282,6 @@ export default function ProfilePage(props: ProfilePageProps) {
               unlockedRewards={state.unlockedRewards}
               setUnlockedRewards={state.setUnlockedRewards}
               unlockedAchievements={state.unlockedAchievements}
-              portfolios={state.portfolios}
-              setPortfolios={state.setPortfolios}
               onRedeemReward={state.handleRedeemReward}
             />
           )}
