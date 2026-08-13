@@ -19,6 +19,7 @@ from typing import List, Dict, Any, Optional
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 from services.image.utils.image_utils import resolve_image_to_buffer
 from services.video.job_queue import get_job_queue
+from services.audio.tts import generate_panel_audio
 
 logger = logging.getLogger("sonikoma.services.video.video_compiler")
 

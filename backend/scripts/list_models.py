@@ -17,9 +17,9 @@ from dotenv import load_dotenv
 # Ensure standard output/error streams support UTF-8 characters under all environments
 try:
     if hasattr(sys.stdout, 'reconfigure'):
-        sys.stdout.reconfigure(encoding='utf-8')
+        getattr(sys.stdout, 'reconfigure')(encoding='utf-8')
     if hasattr(sys.stderr, 'reconfigure'):
-        sys.stderr.reconfigure(encoding='utf-8')
+        getattr(sys.stderr, 'reconfigure')(encoding='utf-8')
 except Exception:
     pass
 
@@ -49,9 +49,7 @@ if sys.platform == "win32":
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from services.model_catalog.scanner import ModelScanner
 from services.model_catalog.registry import ModelRegistry
-from services.model_catalog.downloader import ModelCatalogDownloader
 from services.model_catalog.validator import ModelValidator
 
 # ANSI color codes
@@ -192,7 +190,7 @@ def fetch_and_store_models(api_key: str, provider: str) -> bool:
         print(f"\n{CLR_ERROR}❌ Connection Failure:{CLR_RESET}\n  {CLR_WARNING}{str(e)}{CLR_RESET}")
         return False
 
-def draw_models_table(filter_query: str = None, show_free_only: bool = False):
+def draw_models_table(filter_query: "Optional[str]" = None, show_free_only: bool = False):
     global models_list, active_provider
     if not models_list:
         print(f"{CLR_WARNING}No models loaded.{CLR_RESET}")

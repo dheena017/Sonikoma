@@ -26,7 +26,7 @@ class TestGoogleOAuthState(unittest.TestCase):
     def test_login_sets_state_cookie(self, mock_load_secrets):
         mock_load_secrets.return_value = ("test-client-id", "test-client-secret")
 
-        response = self.client.get("/api/auth/google/login", allow_redirects=False)
+        response = self.client.get("/api/auth/google/login", follow_redirects=False)
         self.assertEqual(response.status_code, 307)
         self.assertIn("google_oauth_state", response.cookies)
         self.assertIsNotNone(response.cookies.get("google_oauth_state"))
@@ -43,10 +43,11 @@ class TestGoogleOAuthState(unittest.TestCase):
     def test_callback_invalid_state(self, mock_load_secrets):
         mock_load_secrets.return_value = ("test-client-id", "test-client-secret")
 
-        login_response = self.client.get("/api/auth/google/login", allow_redirects=False)
+        login_response = self.client.get("/api/auth/google/login", follow_redirects=False)
         self.assertEqual(login_response.status_code, 307)
         auth_state = login_response.cookies.get("google_oauth_state")
         self.assertIsNotNone(auth_state)
+        assert auth_state is not None
 
         invalid_state = auth_state + "x"
         callback_response = self.client.get(

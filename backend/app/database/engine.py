@@ -10,9 +10,11 @@ Provides:
   - get_db_connection()     – public entry point (triggers init_db if needed)
 ─────────────────────────────────────────────────────────────────────────────
 """
+from typing import Union
+import sqlite3
 from database.core_engine import PostgresCursorWrapper, PostgresConnectionWrapper, _create_db_connection
 
-def get_db_connection():
+def get_db_connection() -> Union[PostgresConnectionWrapper, sqlite3.Connection]:
 
     """Public entry point — ensures the schema is initialised before returning
     a connection. Import init_db lazily to avoid circular imports."""

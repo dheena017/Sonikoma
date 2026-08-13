@@ -62,7 +62,7 @@ def test_panel_crop_cache_records_original_url():
     _crop_panels_server_side(buf.getvalue(), panels, source_url="https://example.com/source.jpg")
 
     assert panels[0].get("croppedUrl")
-    assert edit_history.get(panels[0]["croppedUrl"]) == "https://example.com/source.jpg"
+    assert edit_history.get(str(panels[0]["croppedUrl"])) == "https://example.com/source.jpg"
 
 
 def test_edit_history_persists_string_values_on_warm_up(tmp_path):

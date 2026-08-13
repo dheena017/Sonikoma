@@ -206,21 +206,24 @@ def get_user_achievements_and_points(user_id: str) -> dict:
     try:
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM series WHERE user_id = ?", (user_id,))
-        series_count = cursor.fetchone()[0]
+        row1 = cursor.fetchone()
+        series_count = row1[0] if row1 else 0
         first_scrape = series_count > 0
 
         cursor.execute("""
             SELECT COUNT(*) FROM user_audit_logs
             WHERE user_id = ? AND (event LIKE '%translation%' OR event LIKE '%translate%')
         """, (user_id,))
-        translation_count = cursor.fetchone()[0]
+        row2 = cursor.fetchone()
+        translation_count = row2[0] if row2 else 0
         gemini_translator = translation_count > 0
 
         cursor.execute("""
             SELECT COUNT(*) FROM user_audit_logs
             WHERE user_id = ? AND event LIKE '%Saved Storyboard Panels%'
         """, (user_id,))
-        saved_panels_count = cursor.fetchone()[0]
+        row3 = cursor.fetchone()
+        saved_panels_count = row3[0] if row3 else 0
 
         cursor.execute("""
             SELECT COUNT(*) FROM panels p
@@ -228,7 +231,8 @@ def get_user_achievements_and_points(user_id: str) -> dict:
             JOIN series s ON c.series_id = s.id
             WHERE s.user_id = ?
         """, (user_id,))
-        panels_count = cursor.fetchone()[0]
+        row4 = cursor.fetchone()
+        panels_count = row4[0] if row4 else 0
         keyframe_director = (saved_panels_count > 0) or (panels_count > 0)
 
         cursor.execute("""
@@ -236,7 +240,8 @@ def get_user_achievements_and_points(user_id: str) -> dict:
             JOIN series s ON c.series_id = s.id
             WHERE s.user_id = ? AND c.status = 'completed'
         """, (user_id,))
-        completed_count = cursor.fetchone()[0]
+        row5 = cursor.fetchone()
+        completed_count = row5[0] if row5 else 0
         pro_producer = completed_count > 0
 
         unlocked = []

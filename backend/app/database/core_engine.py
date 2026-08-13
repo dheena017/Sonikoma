@@ -6,6 +6,7 @@ Base connection factory without initialization dependencies.
 """
 import sqlite3
 import logging
+from typing import Union
 import database.config as config
 
 try:
@@ -42,6 +43,10 @@ class PostgresCursorWrapper:
             return [dict(r) for r in rows]
         except Exception:
             return []
+
+    @property
+    def rowcount(self) -> int:
+        return self.cursor.rowcount
 
     def close(self):
         self.cursor.close()
@@ -80,7 +85,7 @@ class PostgresConnectionWrapper:
             self.conn.commit()
         return False
 
-def _create_db_connection():
+def _create_db_connection() -> Union["PostgresConnectionWrapper", sqlite3.Connection]:
     if config.is_postgres:
         if not psycopg2:
             raise RuntimeError(

@@ -31,6 +31,12 @@ class FakeProjectRepository:
     def update_project(self, project_id, updates):
         self.updated.append((project_id, updates))
 
+    def update_project_full(self, project_id, updates):
+        self.updated.append((project_id, updates))
+
+    def increment_project_tokens(self, project_id, tokens):
+        pass
+
 
 class ProjectServiceTests(unittest.TestCase):
     def test_create_project_inserts_payload_for_new_project(self):

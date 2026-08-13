@@ -64,6 +64,7 @@ class JobIdFlowTests(unittest.TestCase):
 
         project = get_project(project_id)
         self.assertIsNotNone(project)
+        assert project is not None
         self.assertEqual(project['project_id'], project_id)
         self.assertEqual(project['job_id'], job_id)
 
@@ -89,6 +90,7 @@ class JobIdFlowTests(unittest.TestCase):
         service.update_project_details(project_id, update_req, 'user_test_1')
 
         updated = get_project(project_id)
+        assert updated is not None
         self.assertEqual(updated['title'], 'Updated Title Only')
         self.assertEqual(updated['job_id'], job_id, "Omitted job_id must preserve existing value")
 
@@ -114,6 +116,7 @@ class JobIdFlowTests(unittest.TestCase):
         service.update_project_details(project_id, update_req, 'user_test_1')
 
         updated = get_project(project_id)
+        assert updated is not None
         self.assertIsNone(updated['job_id'], "Explicit null in payload should clear job_id")
 
     def test_4_update_project_with_mismatched_job_id_is_rejected(self):
@@ -147,6 +150,7 @@ class JobIdFlowTests(unittest.TestCase):
 
         # Verify the original job_id was NOT modified.
         stored = get_project(project_id)
+        assert stored is not None
         self.assertEqual(stored['job_id'], job_id_1, "job_id must remain unchanged after a rejected update.")
 
     def test_5_update_missing_project_raises_error(self):
@@ -179,6 +183,7 @@ class JobIdFlowTests(unittest.TestCase):
         })
 
         initial = get_project(project_id)
+        assert initial is not None
         self.assertEqual(initial['project_type'], 'temp')
 
         service = ProjectService()
@@ -186,6 +191,7 @@ class JobIdFlowTests(unittest.TestCase):
         self.assertTrue(res['success'])
 
         promoted = get_project(project_id)
+        assert promoted is not None
         self.assertEqual(promoted['project_type'], 'permanent')
         self.assertEqual(promoted['project_id'], project_id, "Project ID remains identical post-promotion")
 
@@ -213,6 +219,7 @@ class JobIdFlowTests(unittest.TestCase):
         try:
             row = conn.execute("SELECT * FROM token_usage_logs WHERE id = ?", (log_id,)).fetchone()
             self.assertIsNotNone(row)
+            assert row is not None
             self.assertEqual(row['project_id'], project_id)
             self.assertEqual(row['job_id'], job_id, "Token log should automatically acquire job_id from chapter")
         finally:

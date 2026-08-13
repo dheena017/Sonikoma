@@ -11,7 +11,7 @@ from typing import Optional
 try:
     from googleapiclient.http import MediaFileUpload
 except ImportError:
-    pass
+    MediaFileUpload = None  # type: ignore[assignment,misc]
 
 logger = logging.getLogger("sonikoma.services.export.youtube.upload")
 

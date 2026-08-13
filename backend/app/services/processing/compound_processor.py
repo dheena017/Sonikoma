@@ -9,17 +9,15 @@ Compound media processor orchestrating multi-step workflows:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from app.providers import get_whisper_engine
-import os
-import logging
-import tempfile
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
-from enum import Enum
-
 from app.providers.ffmpeg import get_ffmpeg_engine, CutSpec
 from app.providers.librosa import get_librosa_engine, LIBROSA_AVAILABLE
 from app.providers.stable_diffusion import get_stable_diffusion_engine, DIFFUSERS_AVAILABLE
+from app.providers.whisper import get_whisper_engine, WHISPER_AVAILABLE, WhisperModel
+try:
+    from app.services.image.processing.imagemagick import get_imagemagick_engine, WAND_AVAILABLE
+except ImportError:
+    get_imagemagick_engine = None
+    WAND_AVAILABLE = False
 
 logger = logging.getLogger("sonikoma.services.processing.compound_processor")
 
@@ -54,7 +52,7 @@ class CompoundProcessor:
         self.ffmpeg = get_ffmpeg_engine()
         self.librosa = get_librosa_engine() if LIBROSA_AVAILABLE else None
         self.whisper = get_whisper_engine(model_name=WhisperModel.BASE) if WHISPER_AVAILABLE else None
-        self.imagemagick = get_imagemagick_engine() if WAND_AVAILABLE else None
+        self.imagemagick = get_imagemagick_engine() if WAND_AVAILABLE and get_imagemagick_engine is not None else None
         self.stable_diffusion = get_stable_diffusion_engine(device="cpu") if DIFFUSERS_AVAILABLE else None
 
         # Workflow tracking

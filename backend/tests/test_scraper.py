@@ -1,5 +1,5 @@
 import pytest
-from app.services.scraper.scraper import parse_episodes_from_soup, extract_max_page_from_soup
+from app.services.image.scraper.scraper import parse_episodes_from_soup, extract_max_page_from_soup
 
 def test_parse_episodes_from_soup_none():
     result = parse_episodes_from_soup(None, "https://example.com")
@@ -10,7 +10,7 @@ def test_extract_max_page_from_soup_none():
     assert result == 1
 
 def test_parse_with_bs4_ignores_creator_notes_and_avatars():
-    from app.services.scraper.parsers.html import parse_with_bs4
+    from services.image.scraper.parsers import parse_with_bs4
     sample_html = """
     <html>
       <body>

@@ -27,7 +27,8 @@ class AuthServiceTests(unittest.TestCase):
         service = AuthService(user_repo=repo)
 
         user = service.authenticate_token("av_live_abc")
-
+        self.assertIsNotNone(user)
+        assert user is not None
         self.assertEqual(user["id"], "api-user")
         self.assertEqual(repo.api_key_calls, ["av_live_abc"])
 
@@ -39,7 +40,8 @@ class AuthServiceTests(unittest.TestCase):
         )
 
         user = service.authenticate_token("jwt-token")
-
+        self.assertIsNotNone(user)
+        assert user is not None
         self.assertEqual(user["id"], "jwt-user")
         self.assertEqual(repo.user_id_calls, ["jwt-user"])
 

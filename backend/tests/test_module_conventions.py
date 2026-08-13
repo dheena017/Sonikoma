@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from services.project import ProjectService
 from services.processing import CompoundProcessor
-from services.scraper import scrape_images_from_url
+from services.image.scraper import scrape_images_from_url
 
 
 def test_service_packages_expose_authoritative_symbols():

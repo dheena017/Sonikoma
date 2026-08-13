@@ -65,7 +65,7 @@ async def generate_dynamic_panels(
     genre: str,
     episode: str,
     img_urls: List[str],
-    model: str,
+    model: Optional[str] = None,
     narration_style: str = "long",
     user_keys: Optional[Dict[str, str]] = None
 ) -> List[Dict[str, Any]]:
@@ -98,8 +98,9 @@ async def generate_dynamic_panels(
     gemini_key = user_keys.get("gemini") or os.getenv("GEMINI_API_KEY")
     hf_key = user_keys.get("huggingface") or os.getenv("HUGGINGFACE_API_KEY")
 
+    resolved_model = model or "gemini"
     # 1. HuggingFace Fallback check
-    if model.startswith('huggingface') and hf_key:
+    if resolved_model.startswith('huggingface') and hf_key:
         try:
             logger.info(f"[HuggingFace] Creating storyboard using Mistral 7B for \"{title}\" (using resolved HF key)")
             from huggingface_hub import InferenceClient

@@ -17,6 +17,8 @@ from typing import List, Optional, Dict, Any
 from services.image.scraper.url_utils import extract_webtoon_url, parse_webtoon_url
 import services.image.utils.image_utils as img_utils
 from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+from app.core.cache import stitched_cache, edit_history
+from app.core.utils.id_utils import generate_project_id
 from services.image.scraper.scraper import scrape_images_from_url, scraped_metadata_cache
 from services.ai.pipelines.storyboard_ai import generate_dynamic_panels
 from services.video.video import compile_video_from_panels

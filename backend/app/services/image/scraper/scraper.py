@@ -400,7 +400,7 @@ def normalize_series_url(url: str) -> str:
         return url
 
 
-def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> List[Dict[str, Any]]:
+def parse_episodes_from_soup(soup: Any, fetch_url: str) -> List[Dict[str, Any]]:
     if not soup:
         return []
 
@@ -554,7 +554,7 @@ def parse_episodes_from_soup(soup: Optional[BeautifulSoup], fetch_url: str) -> L
     return episodes
 
 
-def extract_max_page_from_soup(soup: Optional[BeautifulSoup]) -> int:
+def extract_max_page_from_soup(soup: Any) -> int:
     max_page = 1
     if not soup:
         return max_page

@@ -19,6 +19,7 @@ try:
     from curl_cffi.requests import AsyncSession as CurlAsyncSession
     HAS_CURL_CFFI = True
 except ImportError:
+    CurlAsyncSession = None
     HAS_CURL_CFFI = False
 
 logger = logging.getLogger("sonikoma.services.image.image_resolver")
@@ -261,10 +262,10 @@ async def resolve_url_to_buffer(
 
         # 2. Try curl_cffi with browser TLS impersonation if available
         # Cycles multiple profiles because some CDNs fingerprint the TLS handshake
-        if HAS_CURL_CFFI:
-            from typing import Literal, cast
+        if HAS_CURL_CFFI and CurlAsyncSession is not None:
+            from typing import Literal, cast, List
             _ImpersonateProfile = Literal["chrome124", "chrome110", "safari17_0", "firefox133"]
-            _impersonate_profiles: list[_ImpersonateProfile] = ["chrome124", "chrome110", "safari17_0", "firefox133"]
+            _impersonate_profiles: List[_ImpersonateProfile] = ["chrome124", "chrome110", "safari17_0", "firefox133"]
             for profile in _impersonate_profiles:
                 try:
                     async with CurlAsyncSession(impersonate=profile, verify=False) as session:

@@ -11,6 +11,7 @@ from services.image.scraper.scraper_service import (
     generate_storyboard_only_service,
 )
 from services.image.scraper.scraper import (
+    scrape_images_from_url,
     scrape_webtoon_episodes,
     extract_webtoon_url,
 )

@@ -51,6 +51,7 @@ class InsertProjectTests(unittest.TestCase):
 
         project = get_project(project_id)
         self.assertIsNotNone(project)
+        assert project is not None
         self.assertEqual(project['project_id'], project_id)
         self.assertEqual(project['title'], 'Copycat')
         self.assertIsNotNone(get_user_by_id('system_default'))

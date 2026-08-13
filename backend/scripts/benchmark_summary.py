@@ -2,10 +2,10 @@ import os
 import json
 import glob
 import csv
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
-def aggregate_pipeline_summaries(logs_dir: str = None, output_csv: str = None) -> List[Dict[str, Any]]:
+def aggregate_pipeline_summaries(logs_dir: Optional[str] = None, output_csv: Optional[str] = None) -> List[Dict[str, Any]]:
     """
     Scans the logs directory for pipeline_summary_*.json artifacts and aggregates them
     into a structured benchmark summary report (CSV and JSON).

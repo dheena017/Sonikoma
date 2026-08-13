@@ -41,7 +41,7 @@ def default_output_path(suffix: str) -> str:
     return os.path.join(tempfile.gettempdir(), f"stable_diffusion_{os.urandom(4).hex()}{suffix}")
 
 
-async def run_md_skill(skill_name: str, model: str, api_key: Any = None, **kwargs) -> Dict[str, Any]:
+async def run_md_skill(skill_name: str, model: Optional[str], api_key: Any = None, **kwargs) -> Dict[str, Any]:
     """Runs a markdown-templated AI skill and returns structured output."""
     try:
         skill = registry.get(skill_name)
