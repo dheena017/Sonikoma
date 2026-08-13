@@ -5,9 +5,8 @@ import { defineConfig, loadEnv } from "vite";
 import { spawn } from "child_process";
 import http from "http";
 import fs from "fs";
-
 export default defineConfig(({ mode, command }) => {
-  const env = loadEnv(mode, path.resolve(__dirname, ".."));
+  const env = loadEnv(mode, path.resolve(__dirname, ".."), "");
 
   const isProductionBuild =
     command === "build" ||
@@ -299,7 +298,7 @@ export default defineConfig(({ mode, command }) => {
                   `\x1b[90m(${duration}ms)\x1b[0m`
               );
 
-              // Forward local file loading details to backend logger to show in the UI terminal
+              // Local file loading dev console log
               const isLocalSrc =
                 url.startsWith("/src/") || url === "/" || url.endsWith(".html");
               const isNoisy =
@@ -310,15 +309,6 @@ export default defineConfig(({ mode, command }) => {
                 url.includes("/api/") ||
                 url.includes("/media/") ||
                 url.includes(".vite/deps");
-              if (isLocalSrc && !isNoisy) {
-                const logMsg = `[Vite] Loaded: ${url}`;
-                const level = res.statusCode >= 400 ? "error" : "info";
-                fetch(`${backendTarget}/api/system-logs/log`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ message: logMsg, level }),
-                }).catch(() => {});
-              }
             });
             next();
           });

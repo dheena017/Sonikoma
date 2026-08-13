@@ -31,7 +31,7 @@ api_router = APIRouter()
 
 # Include all sub-routers with exact prefixes matching application contracts
 api_router.include_router(health_router,         prefix="/api", tags=["Health & System"])
-api_router.include_router(auth_router,           prefix="/api/auth", tags=["Authentication"])
+api_router.include_router(auth_router,           prefix="/api/auth")
 api_router.include_router(project_router,        prefix="/api/projects", tags=["Projects"])
 api_router.include_router(panel_router,          prefix="/api/panels", tags=["Panels"])
 api_router.include_router(proxy_router,          prefix="/api", tags=["Proxy"])
