@@ -68,6 +68,7 @@ export default function LoginPage({
     isShortcutsOpen,
     setIsShortcutsOpen,
     isPasskeyLoading,
+    setIsPasskeyLoading,
     passkeyStatus,
     isTourOpen,
     setIsTourOpen,
@@ -106,10 +107,6 @@ export default function LoginPage({
         return Volume2;
     }
   };
-
-  function setIsPasskeyLoading(arg0: boolean): void {
-    throw new Error("Function not implemented.");
-  }
 
   return (
     <div className="min-h-screen flex bg-[#070709] text-white font-sans overflow-hidden">
@@ -264,8 +261,8 @@ export default function LoginPage({
           </div>
 
           {/* Login Card */}
-          <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+          <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-500">
+            <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${currentTheme.cardBorder}`} />
 
             {/* Passkey authentication status overlay */}
             {isPasskeyLoading && (

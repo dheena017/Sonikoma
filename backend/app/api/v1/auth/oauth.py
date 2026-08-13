@@ -233,9 +233,10 @@ async def google_callback(request: Request):
             name = email.split("@")[0]
         else:
             name = f"user_{uuid.uuid4().hex[:8]}"
-        picture = info.get("picture") or "https://lh3.googleusercontent.com/a/default-user"
+        # Use Google profile picture as initial fallback (better than hardcoded default)
+        picture = info.get("picture") or ""
 
-        # Try to fetch YouTube channel title and profile picture if channel exists
+        # Try to fetch YouTube channel profile picture (logo) via YouTube Data API v3
         try:
             logger.info("Fetching YouTube channel info from YouTube Data API v3...")
             yt_resp = requests.get(
@@ -243,27 +244,15 @@ async def google_callback(request: Request):
                 headers={"Authorization": f"Bearer {google_access_token}"},
                 timeout=5,
             )
-            logger.info("YouTube API status code: %s, body snippet: %s", yt_resp.status_code, yt_resp.text[:300])
+            logger.info("YouTube API response status: %d", yt_resp.status_code)
             if yt_resp.status_code == 200:
                 yt_data = yt_resp.json()
                 items = yt_data.get("items", [])
+                logger.info("YouTube API returned %d channel item(s)", len(items) if items else 0)
                 if items and isinstance(items, list) and len(items) > 0:
-                    clean_name = name.lower().replace("-", "").replace(" ", "")
-                    matching_ch = None
-                    if len(items) == 1:
-                        matching_ch = items[0]
-                    else:
-                        for ch in items:
-                            ch_title = ch.get("snippet", {}).get("title", "").strip().lower().replace("-", "").replace(" ", "")
-                            if ch_title and (ch_title in clean_name or clean_name in ch_title):
-                                matching_ch = ch
-                                break
-                    if not matching_ch and items:
-                        matching_ch = items[0]
-
-                    snippet = matching_ch.get("snippet", {})
-                    yt_title = snippet.get("title")
+                    snippet = items[0].get("snippet", {})
                     thumbnails = snippet.get("thumbnails", {})
+                    logger.info("YouTube thumbnails: %s", thumbnails)
                     yt_img = (
                         thumbnails.get("high", {}).get("url")
                         or thumbnails.get("medium", {}).get("url")
@@ -271,33 +260,19 @@ async def google_callback(request: Request):
                     )
                     if yt_img:
                         picture = yt_img
-                        logger.info("Successfully resolved YouTube channel photo: %s", yt_img)
-                    if yt_title and yt_title.strip():
-                        name = yt_title.strip()
+                        logger.info("Using YouTube channel logo as avatar: %s", yt_img)
+                    else:
+                        logger.warning("YouTube channel found but no thumbnail URL in snippet: %s", snippet)
+                else:
+                    logger.warning("YouTube API returned no channel items. Full response: %s", yt_data)
+            else:
+                logger.warning("YouTube API error %d: %s", yt_resp.status_code, yt_resp.text[:500])
         except Exception as e:
-            logger.warning(f"Could not fetch YouTube channel info: {e}")
+            logger.warning("Could not fetch YouTube channel logo: %s", e)
 
-        # Fallback: if picture is a generic Google letter badge (lh3.googleusercontent.com/a/), scrape YouTube channel avatar directly
-        if picture and "lh3.googleusercontent.com/a/" in picture and name:
-            try:
-                import re
-                handle = name.lower().replace(" ", "").replace("-", "")
-                yt_page_url = f"https://www.youtube.com/@{handle}"
-                page_resp = requests.get(
-                    yt_page_url,
-                    headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
-                    timeout=4,
-                )
-                if page_resp.status_code == 200:
-                    img_urls = re.findall(r'https://yt3\.[^"\s]+', page_resp.text)
-                    for u in img_urls:
-                        clean_u = u.replace("\\u0026", "&").split("=")[0] + "=s800-c-k-c0x00ffffff-no-rj"
-                        if "yt3.ggpht.com" in clean_u or "yt3.googleusercontent.com" in clean_u:
-                            picture = clean_u
-                            logger.info("Scraped live YouTube channel logo from official website: %s", picture)
-                            break
-            except Exception as e:
-                logger.warning(f"Could not scrape YouTube channel avatar fallback: {e}")
+        # Final fallback if still no picture
+        if not picture:
+            picture = "https://lh3.googleusercontent.com/a/default-user"
 
         if not email:
             raise HTTPException(status_code=400, detail="Google account did not return a valid email address")
@@ -320,7 +295,7 @@ async def google_callback(request: Request):
                 raise HTTPException(status_code=500, detail="Failed to create user account")
             # attach google/youtube fields
             try:
-                update_user(user_uuid, {"google_id": google_id, "full_name": name, "avatar_url": picture})
+                update_user(user_uuid, {"google_id": google_id, "full_name": name, "avatar_url": picture, "google_access_token": google_access_token})
                 user["avatar_url"] = picture
                 user["full_name"] = name
             except Exception:
@@ -331,7 +306,7 @@ async def google_callback(request: Request):
                 logger.error("Unexpected user object returned for %s: %r", email, user)
                 raise HTTPException(status_code=500, detail="Invalid user record returned from repository")
 
-            updates = {"google_id": google_id, "full_name": name, "avatar_url": picture}
+            updates = {"google_id": google_id, "full_name": name, "avatar_url": picture, "google_access_token": google_access_token}
             try:
                 update_user(user["user_id"], updates)
                 user["google_id"] = google_id

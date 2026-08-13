@@ -4,12 +4,13 @@ import StoryboardTimeline from "@/features/editor_timeline/components/Storyboard
 import EditorViewport from "@/features/editor_video/viewport/EditorViewport";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
 import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
-import AudioSettingsPage from "@/features/editor_audio/pages/AudioSettingsPage";
-import VideoEditorPage from "@/features/editor_video/pages/VideoEditorPage";
 import { useBackendHealth } from "@/shared/hooks/useBackendHealth";
 import { getUserCredits } from "@/api/endpoints/auth";
 import { Sliders, X, Mic, Tv, Eye } from "lucide-react";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
+
+const AudioSettingsPage = React.lazy(() => import("@/features/editor_audio/pages/AudioSettingsPage"));
+const VideoEditorPage = React.lazy(() => import("@/features/editor_video/pages/VideoEditorPage"));
 
 
 interface EditorPageProps {

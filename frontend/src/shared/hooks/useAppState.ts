@@ -723,6 +723,32 @@ export function useAppState() {
               addNotification("Signed in with Google!", "success", {
                 details: `Welcome back, ${userPayload.full_name || userPayload.email || ""}!`,
               });
+
+              // Auto-refresh YouTube avatar in background (fire-and-forget)
+              const avatarUrl = userPayload.avatar_url || "";
+              const needsRefresh =
+                !avatarUrl ||
+                avatarUrl.includes("default-user") ||
+                avatarUrl.startsWith("data:");
+              if (needsRefresh) {
+                fetch("/api/auth/avatar/youtube-refresh", {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${sessionData.access_token}`,
+                  },
+                })
+                  .then((r) => r.json())
+                  .then((res) => {
+                    if (res.success && res.avatar_url) {
+                      setUser((prev: any) => ({
+                        ...prev,
+                        avatar_url: res.avatar_url,
+                      }));
+                    }
+                  })
+                  .catch(() => {/* silent */});
+              }
+
               // Navigate to dashboard after OAuth login
               const nav = (window as any).navigateTo;
               if (typeof nav === "function") {

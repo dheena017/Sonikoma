@@ -19,6 +19,7 @@ class User(Base):
     avatar_url: Mapped[str | None] = mapped_column(Text)
     full_name: Mapped[str | None] = mapped_column(String)
     google_id: Mapped[str | None] = mapped_column(String)
+    google_access_token: Mapped[str | None] = mapped_column(Text)
     creator_role: Mapped[str] = mapped_column(String, nullable=False, default="creator")
     bio: Mapped[str] = mapped_column(Text, nullable=False, default="")
     newsletter: Mapped[int] = mapped_column(Integer, nullable=False, default=1)

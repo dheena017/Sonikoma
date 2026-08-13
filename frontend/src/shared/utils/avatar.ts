@@ -9,12 +9,19 @@ export const DEFAULT_USER_AVATAR_DATA_URI =
 export function getUserAvatarUrl(user: any): string {
   const raw = user?.avatar_url || user?.picture || user?.photo_url;
 
+  // Only block truly generic/default Google avatar URLs, not all lh3 URLs.
+  // YouTube channel logos also use lh3.googleusercontent.com but are NOT generic.
+  const isGenericDefault =
+    !raw ||
+    typeof raw !== "string" ||
+    raw.trim() === "" ||
+    raw.includes("default-user") ||
+    // The exact Google "no photo" placeholder paths
+    raw === "https://lh3.googleusercontent.com/a/default-user" ||
+    raw === "https://lh3.googleusercontent.com/a/ACg8ocI";
+
   if (
-    raw &&
-    typeof raw === "string" &&
-    raw.trim() !== "" &&
-    !raw.includes("default-user") &&
-    !raw.includes("lh3.googleusercontent.com/a/") &&
+    !isGenericDefault &&
     (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("data:"))
   ) {
     return raw;

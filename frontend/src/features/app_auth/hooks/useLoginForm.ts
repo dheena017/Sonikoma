@@ -83,7 +83,9 @@ export default function useLoginForm(props: LoginFormProps) {
   };
 
   const handleQuickFill = () => {
-    // Quick fill removed — no hardcoded credentials allowed
+    setEmail("demo@sonikoma.ai");
+    setPassword("Demo@12345");
+    setError(null);
   };
 
   const handlePasskeySignIn = () => {
@@ -130,6 +132,7 @@ export default function useLoginForm(props: LoginFormProps) {
     isShortcutsOpen,
     setIsShortcutsOpen,
     isPasskeyLoading,
+    setIsPasskeyLoading,
     passkeyStatus,
     isTourOpen,
     setIsTourOpen,

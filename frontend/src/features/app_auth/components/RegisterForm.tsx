@@ -151,8 +151,8 @@ export default function RegisterForm({
             <div className="flex-grow border-t border-white/5" />
           </div>
 
-          <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
+          <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-500">
+            <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${currentTheme.cardBorder}`} />
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               {error && (
@@ -172,7 +172,7 @@ export default function RegisterForm({
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-medium"
+                    className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${currentTheme.focus}`}
                     placeholder="John Doe"
                   />
                 </div>
@@ -204,10 +204,10 @@ export default function RegisterForm({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-medium ${
+                    className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
                       isEmailValid
                         ? "border-emerald-500/20 focus:border-emerald-500/40"
-                        : "border-white/5 focus:border-purple-500/50"
+                        : `border-white/5 ${currentTheme.focus}`
                     }`}
                     placeholder="name@example.com"
                   />
@@ -216,7 +216,7 @@ export default function RegisterForm({
 
               <div className="space-y-2">
                 <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1 flex items-center gap-1">
-                  <Compass className="w-3.5 h-3.5 text-purple-400" />
+                  <Compass className={`w-3.5 h-3.5 ${currentTheme.accentText}`} />
                   Select Creator Profile
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -229,7 +229,7 @@ export default function RegisterForm({
                         onClick={() => setCreatorRole(role.id)}
                         className={`text-left p-2.5 rounded-xl border transition-all duration-300 cursor-pointer ${
                           isSelected
-                            ? "bg-purple-600/20 border-purple-500 text-white shadow-md shadow-purple-900/10"
+                            ? `${currentTheme.accentBg} ${currentTheme.accentBorder} text-white shadow-md`
                             : "bg-black/30 border-white/5 hover:border-white/10 text-neutral-400 hover:text-neutral-300"
                         }`}
                       >
@@ -251,7 +251,7 @@ export default function RegisterForm({
                   <button
                     type="button"
                     onClick={handleGeneratePassword}
-                    className="text-[9px] text-purple-400 hover:text-purple-300 font-extrabold flex items-center gap-0.5 cursor-pointer hover:underline transition-all"
+                    className={`text-[9px] ${currentTheme.accentText} hover:opacity-85 font-extrabold flex items-center gap-0.5 cursor-pointer hover:underline transition-all`}
                   >
                     <Key className="w-3 h-3" />
                     Auto-Generate Secure Password
@@ -267,7 +267,7 @@ export default function RegisterForm({
                     className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-10 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
                       hasMinLength
                         ? "border-emerald-500/20 focus:border-emerald-500/40"
-                        : "border-white/5 focus:border-purple-500/50"
+                        : `border-white/5 ${currentTheme.focus}`
                     }`}
                     placeholder="••••••••"
                   />
@@ -395,7 +395,7 @@ export default function RegisterForm({
                     <div
                       className={`w-4 h-4 rounded border transition-all duration-300 flex items-center justify-center ${
                         acceptTerms
-                          ? "bg-purple-600 border-purple-500 shadow-md shadow-purple-900/30"
+                          ? `${currentTheme.dot} border-transparent shadow-md`
                           : "bg-black/40 border-white/10 group-hover:border-white/20"
                       }`}
                     >
@@ -408,14 +408,14 @@ export default function RegisterForm({
                     I accept Sonikoma's{" "}
                     <button
                       type="button"
-                      className="text-purple-400 hover:text-purple-300 underline font-semibold"
+                      className={`${currentTheme.accentText} hover:opacity-85 underline font-semibold`}
                     >
                       Terms of Service
                     </button>{" "}
                     and{" "}
                     <button
                       type="button"
-                      className="text-purple-400 hover:text-purple-300 underline font-semibold"
+                      className={`${currentTheme.accentText} hover:opacity-85 underline font-semibold`}
                     >
                       Privacy Policy
                     </button>
@@ -436,7 +436,7 @@ export default function RegisterForm({
                     <div
                       className={`w-4 h-4 rounded border transition-all duration-300 flex items-center justify-center ${
                         subscribeNewsletter
-                          ? "bg-purple-600 border-purple-500 shadow-md shadow-purple-900/30"
+                          ? `${currentTheme.dot} border-transparent shadow-md`
                           : "bg-black/40 border-white/10 group-hover:border-white/20"
                       }`}
                     >
@@ -446,7 +446,7 @@ export default function RegisterForm({
                     </div>
                   </div>
                   <span className="text-xs text-neutral-400 group-hover:text-neutral-300 transition-colors font-medium flex items-center gap-1">
-                    <Bell className="w-3.5 h-3.5 text-purple-400" />
+                    <Bell className={`w-3.5 h-3.5 ${currentTheme.accentText}`} />
                     Receive comic updates and tutorial emails
                   </span>
                 </label>
@@ -455,7 +455,7 @@ export default function RegisterForm({
               <button
                 type="submit"
                 disabled={!isFormValid || isLoading}
-                className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 disabled:text-white/40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-purple-900/30 cursor-pointer duration-300 active:scale-[0.99] mt-2"
+                className={`w-full ${currentTheme.button} disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group cursor-pointer duration-300 active:scale-[0.99] mt-2`}
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -473,7 +473,7 @@ export default function RegisterForm({
             Already have an account?{" "}
             <button
               onClick={onNavigateToLogin}
-              className="text-purple-400 hover:text-purple-300 font-extrabold transition-colors cursor-pointer"
+              className={`${currentTheme.accentText} hover:opacity-85 font-extrabold transition-colors cursor-pointer`}
             >
               Sign In
             </button>

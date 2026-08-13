@@ -41,6 +41,7 @@ interface ProfileSecurityTabProps {
   handleToggleMfa: (enabled: boolean) => Promise<boolean>;
   onExportData?: () => void;
   onDeleteAccount?: () => void;
+  fetchWithInterceptor?: any;
 }
 
 export default function ProfileSecurityTab({
@@ -55,6 +56,7 @@ export default function ProfileSecurityTab({
   handleToggleMfa,
   onExportData,
   onDeleteAccount,
+  fetchWithInterceptor,
 }: ProfileSecurityTabProps) {
   // 2FA state simulations
   const [show2faSetup, setShow2faSetup] = React.useState(false);
@@ -68,13 +70,10 @@ export default function ProfileSecurityTab({
   const [totalLogsCount, setTotalLogsCount] = React.useState(0);
 
   React.useEffect(() => {
-    const token =
-      localStorage.getItem("sonikoma_token") ||
-      sessionStorage.getItem("sonikoma_token");
-    if (!token) return;
+    if (!fetchWithInterceptor) return;
 
     api
-      .getAuditLogs(token, searchQuery, currentPage, 3)
+      .getAuditLogs(fetchWithInterceptor, searchQuery, currentPage, 3)
       .then((data) => {
         if (data.success) {
           setAuditLogs(
@@ -90,7 +89,7 @@ export default function ProfileSecurityTab({
         }
       })
       .catch(console.error);
-  }, [searchQuery, currentPage]);
+  }, [searchQuery, currentPage, fetchWithInterceptor]);
 
   // Real-time password strength check
   const passwordStrength = React.useMemo(() => {

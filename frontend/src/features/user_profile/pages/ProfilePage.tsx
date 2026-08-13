@@ -25,7 +25,6 @@ import {
   ProfileApiTab,
   ProfileBillingTab,
   ProfilePreferencesTab,
-  ProfileProjectsTab,
   ProfileSecurityTab,
 } from "../components";
 
@@ -63,19 +62,18 @@ export default function ProfilePage(props: ProfilePageProps) {
     navigateTo,
     selectedModel,
     setSelectedModel,
+    fetchWithInterceptor,
   } = props;
 
   const state = useProfileState(props);
+  const [privacy, setPrivacy] = React.useState({
+    analyticsTelemetry: true,
+    publicProfile: false,
+  });
 
   const tabsList = useMemo(
     () => [
       { id: "account" as ProfileTabId, label: "Account", icon: User, badge: null },
-      {
-        id: "projects" as ProfileTabId,
-        label: "Projects",
-        icon: FolderGit2,
-        badge: state.projectsList.length > 0 ? state.projectsList.length : null,
-      },
       { id: "analytics" as ProfileTabId, label: "Analytics", icon: BarChart3, badge: null },
       {
         id: "billing" as ProfileTabId,
@@ -192,16 +190,6 @@ export default function ProfilePage(props: ProfilePageProps) {
 
               <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-center min-w-[75px]">
                 <div className="flex items-center justify-center gap-1 text-[10px] text-neutral-400 font-mono">
-                  <FolderGit2 className="w-3 h-3 text-indigo-400" />
-                  <span>Projects</span>
-                </div>
-                <p className="text-sm font-bold text-white mt-0.5">
-                  {state.projectsList.length}
-                </p>
-              </div>
-
-              <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-center min-w-[75px]">
-                <div className="flex items-center justify-center gap-1 text-[10px] text-neutral-400 font-mono">
                   <Flame className="w-3 h-3 text-orange-400" />
                   <span>Streak</span>
                 </div>
@@ -300,16 +288,6 @@ export default function ProfilePage(props: ProfilePageProps) {
             />
           )}
 
-          {state.activeTab === "projects" && (
-            <ProfileProjectsTab
-              projects={state.projectsList}
-              onNavigateHome={onNavigateHome || (() => { })}
-              onBatchDelete={state.handleBatchDeleteProjects}
-              navigateTo={navigateTo}
-              onRefreshProjects={state.fetchProjects}
-            />
-          )}
-
           {state.activeTab === "analytics" && <ProfileAnalyticsTab />}
 
           {state.activeTab === "billing" && (
@@ -346,6 +324,8 @@ export default function ProfilePage(props: ProfilePageProps) {
               setNotifications={state.setNotifications}
               workspace={state.workspace}
               setWorkspace={state.setWorkspace}
+              privacy={privacy}
+              setPrivacy={setPrivacy}
               theme={themeMode || "obsidian"}
               setTheme={toggleThemeMode || (() => { })}
               themeMode={themeMode}
@@ -371,6 +351,7 @@ export default function ProfilePage(props: ProfilePageProps) {
               handleToggleMfa={state.handleToggleMfa}
               onExportData={state.handleExportData}
               onDeleteAccount={state.handleDeleteAccountConfirm}
+              fetchWithInterceptor={fetchWithInterceptor}
             />
           )}
         </div>

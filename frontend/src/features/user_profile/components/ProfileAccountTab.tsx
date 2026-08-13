@@ -1,7 +1,6 @@
 import React from "react";
 import {
   CheckCircle2,
-  Compass,
   Award,
   Link2,
   ToggleLeft,
@@ -44,10 +43,6 @@ interface ProfileAccountTabProps {
   unlockedRewards: string[];
   setUnlockedRewards: React.Dispatch<React.SetStateAction<string[]>>;
   unlockedAchievements: string[];
-  portfolios: { id: string; site: string; url: string }[];
-  setPortfolios: React.Dispatch<
-    React.SetStateAction<{ id: string; site: string; url: string }[]>
-  >;
   onRedeemReward: (
     cost: number,
     type: string,
@@ -99,14 +94,10 @@ export default function ProfileAccountTab({
   unlockedRewards,
   setUnlockedRewards,
   unlockedAchievements,
-  portfolios,
-  setPortfolios,
   onRedeemReward,
   isDirty = false,
 }: ProfileAccountTabProps) {
   const [rewardsToast, setRewardsToast] = React.useState<string | null>(null);
-  const [newPortfolioUrl, setNewPortfolioUrl] = React.useState("");
-  const [newPortfolioSite, setNewPortfolioSite] = React.useState("Webtoons");
 
   const dynamicAchievements = React.useMemo(() => {
     return ACHIEVEMENTS.map((ach) => ({
@@ -165,156 +156,10 @@ export default function ProfileAccountTab({
     }
   };
 
-  const handleAddPortfolio = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPortfolioUrl.trim()) return;
 
-    if (
-      !newPortfolioUrl.startsWith("http://") &&
-      !newPortfolioUrl.startsWith("https://")
-    ) {
-      await (window as any).alertAsync(
-        "Portfolio link must start with http:// or https://"
-      );
-      return;
-    }
-
-    const newLink = {
-      id: Date.now().toString(),
-      site: newPortfolioSite,
-      url: newPortfolioUrl,
-    };
-
-    setPortfolios((prev) => [...prev, newLink]);
-    setNewPortfolioUrl("");
-  };
-
-  const handleDeletePortfolio = (id: string) => {
-    setPortfolios((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  const handleCopyPortfolio = async (url: string) => {
-    navigator.clipboard.writeText(url);
-    await (window as any).alertAsync("Portfolio URL copied to clipboard!");
-  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
-      {/* Dynamic Profile Profile Completion Meter & Connected Accounts Split grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Completion Progress ring card */}
-        <div className="md:col-span-1 bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 flex flex-col items-center justify-center text-center space-y-4">
-          <div className="relative w-24 h-24 flex items-center justify-center">
-            {/* SVG circle track */}
-            <svg className="w-full h-full transform -rotate-90">
-              <circle
-                cx="48"
-                cy="48"
-                r="40"
-                stroke="rgba(255,255,255,0.05)"
-                strokeWidth="6"
-                fill="transparent"
-              />
-              <circle
-                cx="48"
-                cy="48"
-                r="40"
-                stroke="#a855f7"
-                strokeWidth="6"
-                fill="transparent"
-                strokeDasharray={251.2}
-                strokeDashoffset={251.2 - (251.2 * completionPct) / 100}
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
-            <span className="absolute text-lg font-black text-white font-mono">
-              {completionPct}%
-            </span>
-          </div>
-
-          <div className="space-y-1">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-              Profile Status
-            </h4>
-            <p className="text-[10px] text-neutral-500 font-semibold">
-              Complete profile setups to unlock developer bonuses
-            </p>
-          </div>
-        </div>
-
-        {/* Connected accounts manager card */}
-        <div className="md:col-span-2 bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 space-y-4 flex flex-col justify-center">
-          <h4 className="text-xs font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5 border-b border-white/5 pb-2">
-            <Link2 className="w-4 h-4 text-purple-400" />
-            Integrate Social logins
-          </h4>
-
-          <div className="space-y-2.5">
-            {/* Google connection */}
-            <div className="flex items-center justify-between text-xs py-1">
-              <span className="text-neutral-300 font-medium flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Google Account Login
-              </span>
-              <button
-                onClick={() => toggleLink("google")}
-                className="cursor-pointer text-purple-400"
-              >
-                {connections.google ? (
-                  <ToggleRight className="w-7 h-7 text-purple-500" />
-                ) : (
-                  <ToggleLeft className="w-7 h-7 text-neutral-600" />
-                )}
-              </button>
-            </div>
-
-            {/* GitHub connection */}
-            <div className="flex items-center justify-between text-xs py-1">
-              <span className="text-neutral-300 font-medium flex items-center gap-2">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    connections.github ? "bg-emerald-500" : "bg-neutral-600"
-                  }`}
-                />
-                GitHub Repositories
-              </span>
-              <button
-                onClick={() => toggleLink("github")}
-                className="cursor-pointer text-purple-400"
-              >
-                {connections.github ? (
-                  <ToggleRight className="w-7 h-7 text-purple-500" />
-                ) : (
-                  <ToggleLeft className="w-7 h-7 text-neutral-600" />
-                )}
-              </button>
-            </div>
-
-            {/* Discord connection */}
-            <div className="flex items-center justify-between text-xs py-1">
-              <span className="text-neutral-300 font-medium flex items-center gap-2">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    connections.discord ? "bg-emerald-500" : "bg-neutral-600"
-                  }`}
-                />
-                Discord Publisher Community
-              </span>
-              <button
-                onClick={() => toggleLink("discord")}
-                className="cursor-pointer text-purple-400"
-              >
-                {connections.discord ? (
-                  <ToggleRight className="w-7 h-7 text-purple-500" />
-                ) : (
-                  <ToggleLeft className="w-7 h-7 text-neutral-600" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Account details Form Card */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
@@ -446,85 +291,6 @@ export default function ProfileAccountTab({
               </button>
             )}
           </div>
-        </form>
-      </div>
-
-      {/* Portfolios links manager card */}
-      <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative space-y-4">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
-
-        <div className="space-y-1">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Compass className="w-5 h-5 text-purple-400" />
-            Creator Portfolios URLs
-          </h3>
-          <p className="text-xs text-neutral-400 font-semibold">
-            Link your publications from popular webcomic hosting websites
-          </p>
-        </div>
-
-        {/* Existing portfolio links */}
-        <div className="space-y-2">
-          {portfolios.map((port) => (
-            <div
-              key={port.id}
-              className="bg-black/30 border border-white/5 rounded-2xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 min-w-0"
-            >
-              <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
-                <span className="text-[10px] font-black uppercase bg-purple-600/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-md shrink-0">
-                  {port.site}
-                </span>
-                <span className="text-[11px] text-neutral-300 font-medium font-mono select-all truncate min-w-0 flex-1">
-                  {port.url}
-                </span>
-              </div>
-
-              <div className="flex gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => handleCopyPortfolio(port.url)}
-                  className="text-[9px] font-bold text-purple-400 hover:text-purple-300 hover:underline cursor-pointer"
-                >
-                  Copy URL
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDeletePortfolio(port.id)}
-                  className="text-[9px] font-bold text-rose-400 hover:text-rose-300 hover:underline cursor-pointer"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Add portfolio form */}
-        <form onSubmit={handleAddPortfolio} className="flex flex-col sm:flex-row gap-2 pt-2">
-          <select
-            value={newPortfolioSite}
-            onChange={(e) => setNewPortfolioSite(e.target.value)}
-            className="bg-black/40 border border-white/5 rounded-xl py-2 px-3 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 shrink-0"
-          >
-            <option value="Webtoons">Webtoons</option>
-            <option value="Tapas">Tapas</option>
-            <option value="ArtStation">ArtStation</option>
-            <option value="Behance">Behance</option>
-          </select>
-          <input
-            type="text"
-            required
-            value={newPortfolioUrl}
-            onChange={(e) => setNewPortfolioUrl(e.target.value)}
-            placeholder="Paste portfolio link (e.g. https://tapas.io/creator)"
-            className="flex-1 bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700 min-w-0"
-          />
-          <button
-            type="submit"
-            className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded-xl text-[10px] transition-all cursor-pointer shrink-0"
-          >
-            Add Portfolio
-          </button>
         </form>
       </div>
 

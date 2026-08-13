@@ -446,6 +446,11 @@ def init_sqlite(conn) -> None:
             "ALTER TABLE users ADD COLUMN credit_balance INTEGER NOT NULL DEFAULT 840",
             "added 'credit_balance' to 'users'",
         )
+        _run_safe_alter(
+            cursor, conn,
+            "ALTER TABLE users ADD COLUMN google_access_token TEXT",
+            "added 'google_access_token' to 'users'",
+        )
         try:
             cursor.execute(
                 "UPDATE users SET credit_balance = credits "

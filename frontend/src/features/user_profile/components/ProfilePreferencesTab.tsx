@@ -913,7 +913,8 @@ export default function ProfilePreferencesTab({
           </div>
 
           {/* PRIVACY & DATA */}
-          <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-5 sm:p-6 shadow-2xl relative space-y-6">
+          {privacy && setPrivacy && (
+            <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-5 sm:p-6 shadow-2xl relative space-y-6">
             <div
               className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent ${tc.via} to-transparent`}
             />
@@ -988,6 +989,7 @@ export default function ProfilePreferencesTab({
               </div>
             </div>
           </div>
+          )}
 
           {/* EXPORT SETTINGS */}
           {exportSettings && setExportSettings && (
