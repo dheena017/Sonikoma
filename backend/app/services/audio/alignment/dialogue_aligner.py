@@ -35,9 +35,10 @@ async def align_dialogue_and_extract_peaks(
     """
     logger.info(f"Aligning dialogue for {audio_path} against {len(ocr_texts)} OCR bubbles.")
 
-    result = {
+    result: Dict[str, Any] = {
         "dialogue_map": [],
-        "audio_peaks": []
+        "audio_peaks": [],
+        "peaks_fps": 0.0
     }
 
     whisper_engine = get_whisper_engine(language=language)
@@ -89,7 +90,7 @@ async def align_dialogue_and_extract_peaks(
                             "matched_text": candidate_text
                         }
 
-            if best_match and best_match["ratio"] > 0.4:
+            if best_match and float(best_match["ratio"]) > 0.4:
                 start_word = transcript_words[int(best_match["start_idx"])]
                 end_word = transcript_words[int(best_match["end_idx"])]
 
@@ -107,20 +108,24 @@ async def align_dialogue_and_extract_peaks(
                 logger.debug(f"Could not find a strong match for OCR text: '{raw_ocr_text}'")
 
     try:
-        librosa_engine = get_librosa_engine()
-        y, sr = librosa.load(audio_path, sr=librosa_engine.sr, mono=True)
-        rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
-        rms = np.nan_to_num(rms, nan=0.0, posinf=1.0, neginf=0.0)
+        if librosa is not None:
+            librosa_engine = get_librosa_engine()
+            y, sr = librosa.load(audio_path, sr=librosa_engine.sr, mono=True)
+            rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
+            rms = np.nan_to_num(rms, nan=0.0, posinf=1.0, neginf=0.0)
 
-        if len(rms) > 0:
-            rms_max = np.max(rms)
-            if rms_max > 0 and np.isfinite(rms_max):
-                rms_normalized = rms / rms_max
-            else:
-                rms_normalized = rms
+            if len(rms) > 0:
+                rms_max = np.max(rms)
+                if rms_max > 0 and np.isfinite(rms_max):
+                    rms_normalized = rms / rms_max
+                else:
+                    rms_normalized = rms
 
-            result["audio_peaks"] = [round(float(val), 3) for val in rms_normalized]
-            result["peaks_fps"] = sr / 512.0
+                result["audio_peaks"] = [round(float(val), 3) for val in rms_normalized]
+                result["peaks_fps"] = sr / 512.0
+        else:
+            logger.warning("librosa module is not available; skipping audio peak extraction.")
+            result["audio_peaks"] = []
 
     except Exception as e:
         logger.error(f"Librosa feature extraction failed: {e}")
