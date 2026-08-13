@@ -547,6 +547,18 @@ def run_chat_playground():
         print(f"{CLR_WARNING}⚠️  Chat console play is optimized for Gemini streaming contexts.{CLR_RESET}")
         return
 
+    if not client_instance:
+        if configured_api_key:
+            try:
+                from google import genai
+                client_instance = genai.Client(api_key=configured_api_key)
+            except Exception as e:
+                print(f"{CLR_ERROR}❌ Could not initialize Gemini client: {e}{CLR_RESET}")
+                return
+        else:
+            print(f"{CLR_ERROR}❌ Gemini API key is missing or client is not initialized.{CLR_RESET}")
+            return
+
     choice = input("Enter Model Number or Model ID [default: gemini-2.5-flash]: ").strip()
     model = ModelRegistry.resolve_model_by_input(choice or "gemini-2.5-flash", models_list, active_provider)
     if not model:
