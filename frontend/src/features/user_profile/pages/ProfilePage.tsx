@@ -5,7 +5,6 @@ import {
   FolderGit2,
   BarChart3,
   CreditCard,
-  Key,
   Settings,
   ShieldCheck,
   LogOut,
@@ -22,7 +21,6 @@ import {
 import {
   ProfileAccountTab,
   ProfileAnalyticsTab,
-  ProfileApiTab,
   ProfileBillingTab,
   ProfilePreferencesTab,
   ProfileSecurityTab,
@@ -80,12 +78,6 @@ export default function ProfilePage(props: ProfilePageProps) {
         label: "Billing & Credits",
         icon: CreditCard,
         badge: `${state.userCredits} CR`,
-      },
-      {
-        id: "api" as ProfileTabId,
-        label: "API Keys",
-        icon: Key,
-        badge: state.apiTokens.length > 0 ? state.apiTokens.length : null,
       },
       { id: "preferences" as ProfileTabId, label: "Preferences", icon: Settings, badge: null },
       { id: "security" as ProfileTabId, label: "Security", icon: ShieldCheck, badge: null },
@@ -301,18 +293,6 @@ export default function ProfilePage(props: ProfilePageProps) {
               onUpdateCard={state.handleUpdateCard}
               onUpgradePlan={state.handleUpgradePlan}
               onPurchaseCredits={state.handlePurchaseCredits}
-            />
-          )}
-
-          {state.activeTab === "api" && (
-            <ProfileApiTab
-              apiTokens={state.apiTokens}
-              newTokenName={state.newTokenName}
-              setNewTokenName={state.setNewTokenName}
-              handleGenerateToken={state.handleGenerateToken}
-              tokenToast={state.tokenToast}
-              handleCopyToastKey={state.handleCopyToastKey}
-              handleDeleteToken={state.handleDeleteToken}
             />
           )}
 
