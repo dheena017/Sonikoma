@@ -21,6 +21,7 @@ import {
   Menu,
   Zap,
   Database,
+  Image,
 } from "lucide-react";
 
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
@@ -263,7 +264,7 @@ const SidebarInner = ({
         },
         {
           label: "Image Editor",
-          icon: Film,
+          icon: Image,
           active: isImageEditorPath,
           onClick: () => navigateTo("/image-editor"),
           enabled: true,

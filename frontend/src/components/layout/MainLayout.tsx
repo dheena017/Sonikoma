@@ -160,6 +160,7 @@ export default function MainLayout(props: MainLayoutProps) {
     isCreativeSuitePath,
     isImageEditorPage,
     isProEditorPage,
+    isVideoEditorPage,
     isSidebarOpen,
     setIsSidebarOpen,
     isTerminalOpen,
@@ -386,7 +387,7 @@ export default function MainLayout(props: MainLayoutProps) {
             seriesSlug={seriesSlugState}
             chapterSlug={chapterSlugState}
           />
-          {!isSidebarOpen && !isDrawerOpen && !isProEditorPage && !isAnyAdmin && (
+          {!isSidebarOpen && !isDrawerOpen && !isProEditorPage && !isVideoEditorPage && !isAnyAdmin && (
             <MiniSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
@@ -408,7 +409,7 @@ export default function MainLayout(props: MainLayoutProps) {
           }`}
       >
         {/* Top Header */}
-        {!isSidebarOpen && !isProEditorPage && !isImageEditorPage && (
+        {!isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isVideoEditorPage && (
           isAnyAdmin ? (
             <AdminHeaderPage
               currentPath={currentPath}
@@ -483,11 +484,9 @@ export default function MainLayout(props: MainLayoutProps) {
         )}
 
         <div
-          className={`${!isSidebarOpen && !isImageEditorPage && !isProEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage || (isAnyAdmin && isAdminRestricted)
+          className={`${!isSidebarOpen && !isImageEditorPage && !isProEditorPage && !isVideoEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage || isProEditorPage || isVideoEditorPage || (isAnyAdmin && isAdminRestricted)
             ? "h-screen max-h-screen overflow-hidden"
-            : isProEditorPage
-              ? "h-screen max-h-screen overflow-hidden"
-              : "h-[calc(100vh-64px)] mt-16 overflow-x-hidden overflow-y-auto custom-purple-scrollbar"
+            : "h-[calc(100vh-64px)] mt-16 overflow-x-hidden overflow-y-auto custom-purple-scrollbar"
             } flex-grow flex-1 flex flex-col transition-[padding] duration-300 ease-out smooth-scroll`}
         >
           {/* Impersonation Banner */}

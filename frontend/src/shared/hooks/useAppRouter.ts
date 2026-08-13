@@ -368,6 +368,8 @@ export function useAppRouter({
         // Upgrade temp_ URLs to clean series/chapter routes if slugs exist in storage
         const activeSeriesSlug = localStorage.getItem("active_series_slug");
         const activeChapterSlug = localStorage.getItem("active_chapter_slug");
+        const activeProjId = localStorage.getItem("active_project_id") || projectId;
+
         if (
           params.get("id")?.startsWith("temp_") &&
           activeSeriesSlug &&
@@ -379,18 +381,40 @@ export function useAppRouter({
           return;
         }
 
-        const hasProjId = params.has("id") || params.has("project_id") || params.has("job_id") || params.has("jobId") || (params.has("series") && params.has("chapter"));
-        const hasSlugs = /^\/scraper\/editor\/series\/[^\/]+\/chapters\/[^\/]+(?:\/image-editor)?\/?$/.test(path);
-        if (
-          scrapedImagesRef.current.length === 0 &&
-          panelsRef.current.length === 0 &&
-          !hasProjId &&
-          !hasSlugs
-        ) {
-          window.history.replaceState({}, "", "/dashboard");
-          setCurrentPath("/dashboard");
-          return;
+        // Auto-upgrade plain routes (/editor, /image-editor, /video-editor) if active series/chapter or project exists in storage
+        if ((path === "/editor" || path === "/editor/") && !params.has("id")) {
+          if (activeSeriesSlug && activeChapterSlug && activeSeriesSlug !== "null" && activeChapterSlug !== "null") {
+            const target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
+            window.history.replaceState({}, "", target);
+            setCurrentPath(target);
+            return;
+          } else if (activeProjId && activeProjId !== "null") {
+            const target = `/scraper/editor?id=${activeProjId}`;
+            window.history.replaceState({}, "", target);
+            setCurrentPath(target);
+            return;
+          }
+        } else if ((path === "/image-editor" || path === "/image-editor/") && !params.has("id")) {
+          if (activeSeriesSlug && activeChapterSlug && activeSeriesSlug !== "null" && activeChapterSlug !== "null") {
+            const target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}/image-editor`;
+            window.history.replaceState({}, "", target);
+            setCurrentPath(target);
+            return;
+          } else if (activeProjId && activeProjId !== "null") {
+            const target = `/image-editor?id=${activeProjId}`;
+            window.history.replaceState({}, "", target);
+            setCurrentPath(target);
+            return;
+          }
+        } else if ((path === "/video-editor" || path === "/video-editor/") && !params.has("id")) {
+          if (activeProjId && activeProjId !== "null") {
+            const target = `/video-editor?id=${activeProjId}`;
+            window.history.replaceState({}, "", target);
+            setCurrentPath(target);
+            return;
+          }
         }
+
         setIsPipMode(false);
         setLastEditorPath(path + window.location.search);
 
