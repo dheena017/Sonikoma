@@ -10,7 +10,7 @@ import logging
 import asyncio
 from typing import List, Dict, Any, Optional
 
-from core.config import ai_initialized
+from app.core.config import ai_initialized
 from services.ai.skills.registry import registry
 
 logger = logging.getLogger("sonikoma.services.storyboard_ai")
@@ -146,7 +146,7 @@ async def generate_dynamic_panels(
     # 2. Gemini generation using storyboard_narrative skill
     if gemini_key or ai_initialized:
         try:
-            from core.settings import GEMINI_MODEL_PRIMARY
+            from app.core.config import GEMINI_MODEL_PRIMARY
             target_model_name = model or GEMINI_MODEL_PRIMARY
             logger.info(f"[Gemini] Storyboard narrative generation using: {target_model_name}")
 
@@ -181,3 +181,8 @@ async def generate_dynamic_panels(
             raise e
 
     raise RuntimeError("AI Storyboard generation failed: No active providers resolved the storyboard narrative script.")
+
+
+# Alias for backward compatibility
+generate_storyboard_ai = generate_dynamic_panels
+

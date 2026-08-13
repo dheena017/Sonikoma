@@ -16,7 +16,7 @@ from fastapi import Header, HTTPException
 from api.dependencies.auth import clean_api_key
 from services.ai.skills.registry import registry
 
-from core.settings import GEMINI_FALLBACK_MODELS
+from app.core.config import GEMINI_FALLBACK_MODELS
 
 logger = logging.getLogger("sonikoma.api.ai")
 

@@ -7,8 +7,7 @@ from typing import Optional, Dict, Any
 
 from PIL import Image
 
-import services.image.utils as img_utils
-from core.cache import stitched_cache, edit_history
+from app.core.cache import stitched_cache, edit_history
 from database.supabase.storage import upload_to_supabase_bucket
 
 logger = logging.getLogger("sonikoma.services.image.edit")

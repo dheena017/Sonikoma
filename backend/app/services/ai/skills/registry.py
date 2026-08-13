@@ -34,11 +34,11 @@ class SkillRegistry:
         return {name: skill.description for name, skill in self._skills.items()}
 
     def load_skills(self):
-        """Scans the local directory for all markdown files and registers them."""
+        """Scans the prompts/ directory and local directory for all markdown files and registers them."""
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        md_pattern = os.path.join(current_dir, "*.md")
+        prompts_dir = os.path.join(current_dir, "prompts")
 
-        md_files = glob.glob(md_pattern)
+        md_files = glob.glob(os.path.join(prompts_dir, "*.md")) + glob.glob(os.path.join(current_dir, "*.md"))
 
         loaded_count = 0
         for filepath in md_files:

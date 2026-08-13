@@ -11,7 +11,7 @@ import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
 import logging
-from core.settings import JWT_SECRET_KEY
+from app.core.config import JWT_SECRET_KEY
 
 logger = logging.getLogger("sonikoma.core.security")
 

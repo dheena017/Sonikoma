@@ -1,11 +1,18 @@
 """
 backend/app/api/router.py
 ─────────────────────────────────────────────────────────────────────────────
-Consolidated API router registry. Enforces correct prefixes and tags.
+Consolidated API router registry & static mount manager.
+Aggregates all v1 sub-routers, mounts media directories, and handles SPA fallback.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from fastapi import APIRouter
+import os
+from fastapi import FastAPI, APIRouter
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
+
+from app.core.config import PROJECT_ROOT, IS_PRODUCTION
+from app.core.logging import logger
 
 # Import all specific sub-routers directly from their router modules
 from api.v1.auth.router import auth_router
@@ -22,21 +29,7 @@ from api.v1.compound import compound_router
 
 api_router = APIRouter()
 
-# Register legacy/duplicate endpoints or specific routes
-# Note: panels endpoint prefix is /api/panels in the original main.py?
-# Wait! Let's check how panels.py was mounted in original main.py.
-# In original main.py, was panels_router imported or mounted?
-# Let's search main.py for 'panels_router' or 'panel_router'.
-# Wait, original main.py did NOT mount panels_router because panels was imported in routes/__init__.py and mounted as part of routes, or not mounted at all?
-# Let's check: in main.py, line 867 was:
-# app.include_router(projects_router,       prefix="/api/projects", tags=["Projects"])
-# And panels routes were actually mounted under prefix '/api/panels' inside routes/panels.py itself?
-# Yes! routes/panels.py defined router = APIRouter(prefix="/api/panels")?
-# Wait! We checked that routes/panels.py defined router = APIRouter().
-# And in routes/__init__.py or routes/panels.py, did it have prefix?
-# Let's search original main.py for 'panels'.
-
-# Include all sub-routers with exact prefixes matching original main.py
+# Include all sub-routers with exact prefixes matching application contracts
 api_router.include_router(health_router,         prefix="/api", tags=["Health & System"])
 api_router.include_router(auth_router,           prefix="/api/auth", tags=["Authentication"])
 api_router.include_router(project_router,        prefix="/api/projects", tags=["Projects"])
@@ -59,3 +52,68 @@ api_router.include_router(export_router,         prefix="/api/export", tags=["Ex
 # Legacy /api/py endpoints for backward compatibility
 api_router.include_router(health_router,         prefix="/api/py", tags=["Health & System (Legacy)"])
 api_router.include_router(audio_router,          prefix="/api/py/audio", tags=["Audio Synthesis (Legacy)"])
+
+
+def register_routers(app: FastAPI):
+    """Registers API routers and static mounts onto the FastAPI application."""
+    # Include main API router
+    app.include_router(api_router)
+
+    # Serve generated videos (public static mount)
+    videos_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "media"))
+    os.makedirs(videos_path, exist_ok=True)
+    app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
+
+    # Serve locally generated panel layer WebPs
+    local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "local_media"))
+    os.makedirs(local_media_dir, exist_ok=True)
+    app.mount("/media", StaticFiles(directory=local_media_dir), name="media")
+
+    # Serve locally saved training data
+    training_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "training_data"))
+    os.makedirs(training_data_dir, exist_ok=True)
+    app.mount("/training_data", StaticFiles(directory=training_data_dir), name="training_data")
+
+    # Static Frontend Serving (Production Only)
+    dist_path = os.path.join(PROJECT_ROOT, "dist")
+    repo_root = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
+    frontend_dist_path = os.path.join(repo_root, "frontend", "dist")
+    if IS_PRODUCTION:
+        if os.path.exists(dist_path):
+            logger.info(f"Mounting static files directory: {dist_path}")
+            app.mount("/", StaticFiles(directory=dist_path, html=True), name="static")
+        elif os.path.exists(frontend_dist_path):
+            logger.info(f"Mounting static files directory from frontend build: {frontend_dist_path}")
+            app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="static")
+        else:
+            logger.warning(
+                "Production mode active but no frontend build folder was found. "
+                f"Checked: {dist_path} and {frontend_dist_path}"
+            )
+
+    # Root redirect
+    @app.get("/", include_in_schema=False)
+    async def root_redirect():
+        return RedirectResponse(url="/api/health")
+
+    # SPA Fallback Route for client-side routing
+    @app.get("/{fallback_path:path}", include_in_schema=False)
+    async def spa_fallback(fallback_path: str):
+        index_file = None
+        if IS_PRODUCTION:
+            if os.path.exists(os.path.join(dist_path, "index.html")):
+                index_file = os.path.join(dist_path, "index.html")
+            elif os.path.exists(os.path.join(frontend_dist_path, "index.html")):
+                index_file = os.path.join(frontend_dist_path, "index.html")
+
+        if index_file:
+            return FileResponse(index_file)
+
+        return JSONResponse(
+            status_code=404,
+            content={
+                "success": False,
+                "error": f"Route not found: {fallback_path}",
+                "hint": "Ensure the API prefix is correct (/api/...) or check health check."
+            }
+        )

@@ -1,7 +1,7 @@
 """
 backend/app/core/logging/filters.py
 ─────────────────────────────────────────────────────────────────────────────
-Custom logging filters.
+Custom logging filters to suppress high-frequency system/polling endpoints.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -9,6 +9,8 @@ import logging
 
 
 class EndpointFilter(logging.Filter):
+    """Filter out high-frequency polling, health checks, and static asset log records."""
+
     NOISY_PATHS = (
         "/system-logs",
         "/api/system-logs",

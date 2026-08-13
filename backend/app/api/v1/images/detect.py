@@ -13,7 +13,7 @@ from schemas.image import (
     RemoveBubblesBatchRequest,
     CleanerBase64Request
 )
-from services.image.processing.image_service import (
+from services.image.processing.image_detection import (
     debug_yolo_detections_service,
     bubble_cleaning_service,
     bubble_cleaning_batch_service

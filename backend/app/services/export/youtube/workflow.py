@@ -8,7 +8,7 @@ import os
 import logging
 from typing import Optional, List
 
-from domain.exceptions import ResourceNotFoundException, ProcessingException
+from app.core.exceptions import ResourceNotFoundException, ProcessingException
 from .oauth import get_authenticated_service
 from .metadata import format_video_metadata
 from .upload import upload_video_and_thumbnail

@@ -15,8 +15,8 @@ import asyncio
 from typing import Any, Optional, Type
 from pydantic import BaseModel
 
-from core.config import ai_initialized, call_gemini_with_retry, genai_client
-from core.settings import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+from app.core.config import ai_initialized, call_gemini_with_retry, genai_client
+from app.core.config import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
 try:
     from google.genai import types
 except Exception:
@@ -115,6 +115,12 @@ class BaseAISkill:
                 key_to_use = resolve_api_key("gemini", api_key, user_keys)
                 if not ai_initialized and not key_to_use:
                     raise RuntimeError("Gemini is not initialized and no API key was provided.")
+
+                if types is None:
+                    raise RuntimeError(
+                        "google-genai package is not installed or failed to import. "
+                        "Run: pip install google-genai"
+                    )
 
                 config_args = {}
                 schema = self.response_schema

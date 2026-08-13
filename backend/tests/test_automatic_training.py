@@ -8,7 +8,7 @@ from unittest.mock import patch
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app')))
 
 from services.training import training_monitor as monitor
-from providers.vision.yolo import trigger_fine_tuning
+from services.image.panel_detection.speech_bubble_detector import trigger_fine_tuning
 
 class TestAutomaticTraining(unittest.TestCase):
     def setUp(self):

@@ -18,14 +18,14 @@ import json
 from typing import List, Optional, Dict, Any
 from PIL import Image
 
-from core.config import call_gemini_with_retry
-from core.settings import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+from app.core.config import call_gemini_with_retry
+from app.core.config import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
-import services.image.utils.image_utils as img_utils
 from services.image.utils.panel_box_utils import PanelBounds
 from core.cache import stitched_cache, edit_history
-from services.audio.tts_engine import generate_panel_audio
+from services.audio import generate_panel_audio
+import services.image.utils.image_utils as img_utils
 
 logger = logging.getLogger("sonikoma.services.ai.facade")
 
@@ -630,10 +630,10 @@ async def facade_smart_crop(
             "y": int(final_pb.y),
             "width": int(final_pb.width),
             "height": int(final_pb.height),
-            "cropTop": float(insets["cropTop"]),
-            "cropBottom": float(insets["cropBottom"]),
-            "cropLeft": float(insets["cropLeft"]),
-            "cropRight": float(insets["cropRight"]),
+            "cropTop": insets["cropTop"],
+            "cropBottom": insets["cropBottom"],
+            "cropLeft": insets["cropLeft"],
+            "cropRight": insets["cropRight"],
             "area": int(final_pb.area)
         })
 

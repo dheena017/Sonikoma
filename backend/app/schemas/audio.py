@@ -1,20 +1,27 @@
 """
 backend/app/schemas/audio.py
 ─────────────────────────────────────────────────────────────────────────────
-Pydantic request/response schemas for audio.
+Pydantic request/response schemas for audio synthesis, analysis, and transcription.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from app.engines.whisper import WhisperModel
+from app.providers.whisper import WhisperModel
+
+
+# =============================================================================
+# 1. Speech Synthesis & Dialogue Alignment
+# =============================================================================
 
 class AlignDialogueRequest(BaseModel):
+    """Aligns audio files with detected OCR text."""
     audio_url: str = Field(..., description="URL of the audio file to analyze")
     ocr_texts: List[str] = Field(..., description="Array of OCR text strings detected in the panel")
 
 
 class AudioGenerateRequest(BaseModel):
+    """Text-To-Speech (TTS) audio synthesis settings using Edge-TTS."""
     dialogue_list: List[str] = Field(
         default_factory=list,
         description="Ordered list of dialogue strings to synthesize"
@@ -41,24 +48,35 @@ class AudioGenerateRequest(BaseModel):
     )
 
 
+# =============================================================================
+# 2. Audio Analysis & Segmentation
+# =============================================================================
 
 class AudioPathRequest(BaseModel):
+    """Simple file path wrapper for audio processing."""
     audio_path: str
 
 
 class SilenceDetectRequest(BaseModel):
+    """Detects silence based on decibel threshold and duration."""
     audio_path: str
     threshold_db: Optional[float] = Field(default=-40.0, description="Silence threshold in dB")
     min_duration: Optional[float] = Field(default=0.5, description="Minimum silence duration in seconds")
 
 
 class EnergySegmentRequest(BaseModel):
+    """Divides audio into segments based on energy levels."""
     audio_path: str
     num_segments: Optional[int] = Field(default=10, description="Number of segments to divide audio into")
     energy_threshold: Optional[float] = Field(default=0.01, description="Energy threshold for segmentation")
 
 
+# =============================================================================
+# 3. Transcription & Subtitles (Whisper)
+# =============================================================================
+
 class TranscribeRequest(BaseModel):
+    """Transcribes speech using OpenAI Whisper."""
     audio_path: str
     language: Optional[str] = None
     task: Optional[str] = Field("transcribe", description="Either 'transcribe' or 'translate'")
@@ -67,6 +85,7 @@ class TranscribeRequest(BaseModel):
 
 
 class SubtitleRequest(BaseModel):
+    """Generates subtitle files from audio."""
     audio_path: str
     output_path: Optional[str] = None
     language: Optional[str] = None
@@ -74,13 +93,14 @@ class SubtitleRequest(BaseModel):
 
 
 class ExtractWordsRequest(BaseModel):
+    """Extracts word-level timestamps from audio."""
     audio_path: str
     language: Optional[str] = None
     model_name: Optional[WhisperModel] = WhisperModel.BASE
 
 
 class BatchTranscribeRequest(BaseModel):
+    """Transcribes multiple audio files in batch."""
     audio_paths: List[str]
     language: Optional[str] = None
     model_name: Optional[WhisperModel] = WhisperModel.BASE
-

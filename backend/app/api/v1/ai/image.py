@@ -13,12 +13,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.v1.ai._deps import get_user_gemini_key, default_output_path
-from api.dependencies.auth import get_current_user
+from app.api.v1.ai._deps import get_user_gemini_key, default_output_path
+from app.api.dependencies.auth import get_current_user
 
-from services.user.credit_service import get_available_credits, record_credit_transaction
-from database.config import LOW_BALANCE_THRESHOLD
-from schemas.ai import (
+from app.services.user.credit_service import get_available_credits, record_credit_transaction
+from app.database.config import LOW_BALANCE_THRESHOLD
+from app.schemas.ai import (
     AnalyzeImageRequest,
     AnalyzeBatchRequest,
     AnalyzeSequenceRequest,
@@ -31,7 +31,7 @@ from schemas.ai import (
     StyleTransferRequest,
     BatchGenerateRequest,
 )
-from services.ai.facade import (
+from app.services.ai.facade import (
     facade_analyze_image,
     facade_analyze_narrative_sequence,
     facade_smart_crop,
@@ -47,7 +47,7 @@ def _get_sd_engine():
     global stable_diffusion
     if stable_diffusion is None:
         try:
-            from engines.stable_diffusion import get_stable_diffusion_engine
+            from providers.stable_diffusion import get_stable_diffusion_engine
             stable_diffusion = get_stable_diffusion_engine()
         except Exception as e:
             logger.warning(f"Stable Diffusion engine could not be initialized: {e}")

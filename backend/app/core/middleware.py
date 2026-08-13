@@ -1,5 +1,5 @@
 """
-backend/app/middleware.py
+backend/app/core/middleware.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma FastAPI Middleware Stack
 ─────────────────────────────────────────────────────────────────────────────
@@ -13,9 +13,9 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.startup import logger, API_VERSION
-from core.settings import APP_URL, BACKEND_PORT, FRONTEND_PORT, NODE_ENV
-from api.dependencies.auth import get_current_user
+from app.core.logging import logger
+from app.core.config import APP_URL, BACKEND_PORT, FRONTEND_PORT, NODE_ENV, API_VERSION
+from app.api.dependencies.auth import get_current_user
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CORS CONFIGURATION

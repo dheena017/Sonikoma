@@ -1,12 +1,13 @@
 """
-backend/python/utils/id_utils.py
+backend/app/core/utils/id_utils.py
 ─────────────────────────────────────────────────────────────────────────────
-Standardized Project ID generator.
+Standardized Project ID and UUID generator utilities.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import time
 import uuid
+
 
 def generate_project_id() -> str:
     """
@@ -16,3 +17,8 @@ def generate_project_id() -> str:
     timestamp = int(time.time() * 1000)
     uuid_part = str(uuid.uuid4()).split('-')[0]
     return f"proj_{timestamp}_{uuid_part}"
+
+
+def generate_uuid() -> str:
+    """Returns a standard string representation of UUIDv4."""
+    return str(uuid.uuid4())

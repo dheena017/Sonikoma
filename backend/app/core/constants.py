@@ -5,7 +5,7 @@ Global constants for the Sonikoma computational engine.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from core.settings import GEMINI_FALLBACK_MODELS
+from app.core.config import GEMINI_FALLBACK_MODELS
 
 VALID_MOTIONS = ['zoom_in', 'zoom_out', 'pan_left', 'pan_right', 'pan_up', 'pan_down']
 MODEL_FALLBACKS = GEMINI_FALLBACK_MODELS

@@ -11,14 +11,17 @@ import logging
 import asyncio
 from typing import Any, Optional
 
-from core.config import ai_initialized, call_gemini_with_retry, genai_client
+from app.core.config import ai_initialized, call_gemini_with_retry, genai_client
 try:
     from google.genai import types
-except Exception:
-    types = None
+except Exception as e:
+    raise ImportError(
+        "Failed to import 'google.genai.types'. "
+        "Ensure 'google-genai' is installed: pip install google-genai"
+    ) from e
 from services.ai.skills.utils import resolve_api_key
 
-from core.settings import GEMINI_FALLBACK_MODELS
+from app.core.config import GEMINI_FALLBACK_MODELS
 
 logger = logging.getLogger("sonikoma.skills.coordinator")
 
@@ -513,3 +516,8 @@ async def execute_provider_call(
 
     else:
         raise ValueError(f"Unsupported provider: {provider}")
+
+
+# Alias for backward compatibility
+execute_skill_pipeline = execute_provider_call
+

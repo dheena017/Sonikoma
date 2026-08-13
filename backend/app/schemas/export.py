@@ -1,14 +1,20 @@
 """
 backend/app/schemas/export.py
 ─────────────────────────────────────────────────────────────────────────────
-Pydantic request/response schemas for export.
+Pydantic request/response schemas for YouTube export and profile settings.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 from pydantic import BaseModel
 from typing import List, Optional
 
+
+# =============================================================================
+# 1. YouTube Export & Publishing
+# =============================================================================
+
 class YouTubeExportRequest(BaseModel):
+    """Parameters for exporting and publishing a video to YouTube."""
     video_url: str
     title: str
     synopsis: str
@@ -20,6 +26,7 @@ class YouTubeExportRequest(BaseModel):
 
 
 class YouTubeProfileRequest(BaseModel):
+    """Reusable profile templates for YouTube publishing defaults."""
     name: str
     title_template: str
     description_template: str
@@ -37,7 +44,7 @@ class YouTubeProfileRequest(BaseModel):
 
 
 class YouTubeCredentialsRequest(BaseModel):
+    """OAuth API client keys for YouTube integrations."""
     client_id: str
     client_secret: str
     project_id: str
-

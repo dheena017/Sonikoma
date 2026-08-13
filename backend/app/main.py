@@ -6,15 +6,11 @@ Sonikoma Webtoon-to-Video Compiler — FastAPI Computational Engine & API Server
 """
 
 import os
+import sys
 import uvicorn
 from fastapi import FastAPI
 
-# 1. Import startup FIRST to configure UTF-8, logging, colorama, and dotenv immediately
-import sys
-
-# Ensure project root is on PYTHONPATH so `import backend.*` works when launched from different CWDs.
-PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
+# Ensure backend directory is on sys.path for top-level package resolution
 APP_DIR = os.path.abspath(os.path.dirname(__file__))
 BACKEND_DIR = os.path.abspath(os.path.join(APP_DIR, ".."))
 PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, "../.."))
@@ -23,30 +19,12 @@ for p in [APP_DIR, BACKEND_DIR, PROJECT_ROOT]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
-try:
-    import startup as startup
-    from startup import API_VERSION, IS_PRODUCTION
-except ImportError:
-    import app.startup as startup
-    from app.startup import API_VERSION, IS_PRODUCTION
-
-try:
-    from lifespan import lifespan
-except ImportError:
-    from app.lifespan import lifespan
-
-from core.middleware import setup_middleware
-
-try:
-    from exception_handlers import global_exception_handler
-except ImportError:
-    from app.exception_handlers import global_exception_handler
-
-try:
-    from router import register_routers
-except ImportError:
-    from app.router import register_routers
-from core.settings import BACKEND_PORT
+from app.core.config import API_VERSION, IS_PRODUCTION, BACKEND_PORT
+from app.core.logging import ColoredFormatter, setup_logging, logger
+from app.core.exceptions import global_exception_handler
+from app.core.middleware import setup_middleware
+from app.api.router import register_routers
+from app.lifespan import lifespan
 
 # Create FastAPI app instance
 app = FastAPI(
@@ -68,6 +46,7 @@ app.add_exception_handler(Exception, global_exception_handler)
 # Register routes & SPA fallback
 register_routers(app)
 
+
 # ─────────────────────────────────────────────────────────────────────────────
 # ENTRYPOINT
 # ─────────────────────────────────────────────────────────────────────────────
@@ -79,11 +58,11 @@ if __name__ == "__main__":
         "disable_existing_loggers": False,
         "formatters": {
             "default": {
-                "()": startup.ColoredFormatter,
+                "()": ColoredFormatter,
                 "use_colors": True,
             },
             "access": {
-                "()": startup.ColoredFormatter,
+                "()": ColoredFormatter,
                 "use_colors": True,
             },
         },
@@ -114,15 +93,14 @@ if __name__ == "__main__":
     }
 
     run_args = {
-        "app": "main:app",
+        "app": "app.main:app",
         "host": os.getenv("HOST", "0.0.0.0"),
         "port": BACKEND_PORT,
         "log_level": log_level_name,
         "log_config": custom_log_config,
         "use_colors": True,
+        "reload": False,
     }
-    # Reload is disabled because reloading is managed externally by the Node runner
-    run_args["reload"] = False
     if IS_PRODUCTION:
         run_args["workers"] = 1
 

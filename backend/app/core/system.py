@@ -1,12 +1,21 @@
-import psutil
-import platform
+"""
+backend/app/core/system.py
+─────────────────────────────────────────────────────────────────────────────
+System diagnostics and process hardware snapshot helper.
+─────────────────────────────────────────────────────────────────────────────
+"""
+
 import os
 import time
+import psutil
+import platform
+from typing import Dict, Any
 
-def get_engine_snapshot():
+
+def get_engine_snapshot() -> Dict[str, Any]:
     """
     Returns a dictionary containing a snapshot of the current hardware and process state.
-    Used for attaching diagnostic metadata to error logs.
+    Used for attaching diagnostic metadata to error logs and failure reports.
     """
     try:
         process = psutil.Process(os.getpid())
@@ -30,3 +39,6 @@ def get_engine_snapshot():
         }
     except Exception:
         return {"error": "Failed to capture system snapshot"}
+
+
+__all__ = ["get_engine_snapshot"]

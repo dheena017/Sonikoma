@@ -7,29 +7,29 @@ and post-processing pipelines with clean, human-readable function names.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from app.services.image.panel_detection.panel_detector import (
+from .panel_detector import (
     detect_panels_in_image,
     run_cv_detection,
     _sort_panels_reading_order,
     _split_oversized_webtoon_boxes,
 )
-from app.services.image.panel_detection.grid_detector import (
+from .grid_detector import (
     detect_manga_grid_panels,
     _detect_panels_grid_cv,
     _detect_panels_grid_pil,
 )
-from app.services.image.panel_detection.webtoon_detector import (
+from .webtoon_detector import (
     detect_vertical_strip_panels,
     _detect_panels_webtoon,
     _detect_bg_color_and_threshold,
 )
-from app.services.image.panel_detection.panel_postprocessor import (
+from .panel_postprocessor import (
     compute_post_panel_confidence,
     resolve_micro_panels,
     resolve_overlapping_panels_lineage,
     recover_coverage_selectively,
 )
-from app.services.image.panel_detection.speech_bubble_detector import (
+from .speech_bubble_detector import (
     get_yolo_speech_bubble_model,
     segment_speech_bubbles_and_text_balloons,
     get_yolo_character_segmentation_model,

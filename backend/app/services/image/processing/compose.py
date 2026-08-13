@@ -8,8 +8,8 @@ from typing import Optional, Dict, Any, List, Literal
 
 from PIL import Image
 
-import services.image.utils as img_utils
-from core.cache import stitched_cache, edit_history
+from services.image.utils.image_resolver import resolve_image_to_buffer, resolve_url_to_buffer
+from app.core.cache import stitched_cache, edit_history
 from database.supabase.storage import upload_to_supabase_bucket
 
 logger = logging.getLogger("sonikoma.services.image.compose")
@@ -161,8 +161,11 @@ async def download_zip_service(urls: List[str], referer_url: Optional[str] = Non
         "filename": "sonikoma_export.zip"
     }
 
+from services.image.scraper.panel_splitter import split_vertical_strip_into_panels
+
 __all__ = [
     "merge_images_service",
     "execute_splits_service",
     "download_zip_service",
+    "split_vertical_strip_into_panels",
 ]

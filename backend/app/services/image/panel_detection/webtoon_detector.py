@@ -11,7 +11,7 @@ import numpy as np
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Optional, Any, Union
 
-from app.services.image.utils.panel_box_utils import protect_slice_x, protect_slice_y
+from services.image.utils.panel_box_utils import protect_slice_x, protect_slice_y
 
 logger = logging.getLogger("sonikoma.services.image.panel_detection.webtoon_detector")
 

@@ -17,7 +17,7 @@ from api.dependencies.auth import get_current_user
 from schemas.export import YouTubeExportRequest
 from repositories.youtube import log_youtube_publication
 from services.export.youtube.workflow import execute_youtube_upload_workflow
-from domain.exceptions import ResourceNotFoundException, ProcessingException
+from app.core.exceptions import ResourceNotFoundException, ProcessingException
 
 try:
     import google_auth_oauthlib.flow  # noqa: F401

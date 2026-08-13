@@ -9,8 +9,8 @@ import asyncio
 from typing import List, Dict, Any
 
 from services.image.processing.panel_cleaner import remove_speech_bubbles
-import services.image.utils.image_utils as img_utils
-from core.cache import stitched_cache, edit_history
+from services.image.utils.image_resolver import resolve_image_to_buffer
+from app.core.cache import stitched_cache, edit_history
 from database.supabase.storage import upload_to_supabase_bucket
 from repositories.project.panels import save_edit_history
 
@@ -18,7 +18,7 @@ logger = logging.getLogger("sonikoma.services.image.detection")
 
 
 async def debug_yolo_detections_service(url: str, confidence: float = 0.25) -> Dict[str, Any]:
-    resolved = await img_utils.resolve_image_to_buffer(url)
+    resolved = await resolve_image_to_buffer(url)
     cleaned_bytes, boxes = await remove_speech_bubbles(
         resolved["data"],
         confidence=confidence,
@@ -39,7 +39,7 @@ async def debug_yolo_detections_service(url: str, confidence: float = 0.25) -> D
 
 
 async def bubble_cleaning_service(url: str, confidence: float = 0.25) -> Dict[str, Any]:
-    resolved = await img_utils.resolve_image_to_buffer(url)
+    resolved = await resolve_image_to_buffer(url)
     cleaned_bytes, boxes = await remove_speech_bubbles(
         resolved["data"],
         confidence=confidence,

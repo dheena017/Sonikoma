@@ -6,7 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'app'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from services.project import ProjectService
-from services.compound import CompoundProcessor
+from services.processing import CompoundProcessor
 from services.scraper import scrape_images_from_url
 
 
@@ -18,10 +18,10 @@ def test_service_packages_expose_authoritative_symbols():
 
 def test_media_engine_wrappers_resolve_to_canonical_modules():
     wrappers = [
-        ("media.audio.librosa_engine", "app.engines.librosa"),
-        ("media.audio.whisper_engine", "app.engines.whisper"),
-        ("media.video.ffmpeg_engine", "app.engines.ffmpeg"),
-        ("media.image.imagemagick_engine", "providers.media.imagemagick"),
+        ("media.audio.librosa_engine", "app.providers.librosa"),
+        ("media.audio.whisper_engine", "app.providers.whisper"),
+        ("media.video.ffmpeg_engine", "app.providers.ffmpeg"),
+        ("media.image.imagemagick_engine", "services.image.processing.imagemagick"),
     ]
 
     for wrapper_name, canonical_name in wrappers:

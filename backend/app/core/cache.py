@@ -1,5 +1,5 @@
 """
-backend/python/utils/cache.py
+backend/app/core/cache.py
 ─────────────────────────────────────────────────────────────────────────────
 Shared in-memory caches with TTL eviction, hit/miss tracking, and stats.
 ─────────────────────────────────────────────────────────────────────────────
@@ -363,7 +363,7 @@ def get_total_storage_size_bytes() -> int:
                     except OSError:
                         pass
     try:
-        from database.config import DB_PATH
+        from app.database.config import DB_PATH
         if os.path.exists(DB_PATH):
             total_size += os.path.getsize(DB_PATH)
     except Exception:

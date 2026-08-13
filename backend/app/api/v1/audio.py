@@ -25,8 +25,9 @@ from schemas.audio import (
     BatchTranscribeRequest
 )
 
-from services.audio.tts_service import generate_tts_audio, get_available_voices
-from services.audio.alignment_service import (
+from services.audio import (
+    generate_tts_audio,
+    get_available_voices,
     align_dialogue_service,
     analyze_audio_service,
     detect_silence_service,
@@ -36,7 +37,7 @@ from services.audio.alignment_service import (
     generate_srt_service,
     generate_vtt_service,
     extract_words_service,
-    batch_transcribe_service
+    batch_transcribe_service,
 )
 
 logger = logging.getLogger("sonikoma.api.audio")

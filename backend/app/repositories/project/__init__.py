@@ -5,7 +5,7 @@ Domain wrapper functions are defined at the bottom of this file.
 # Import functions directly from their modules when needed
 
 from typing import List, Optional
-from domain.project import Panel, Project, Series, TokenLog
+from app.schemas.domain import Panel, Project, Series, TokenLog
 from .project import (
     insert_project,
     _parse_audio_settings,

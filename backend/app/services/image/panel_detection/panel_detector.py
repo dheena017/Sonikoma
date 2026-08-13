@@ -26,21 +26,21 @@ except ImportError:
 
 
 # Import helper sub-modules from panel_detector package & utils
-from app.services.image.panel_detection.panel_postprocessor import compute_post_panel_confidence
-from app.services.image.utils.panel_box_utils import (
+from .panel_postprocessor import compute_post_panel_confidence
+from services.image.utils.panel_box_utils import (
     PanelBounds,
     adjust_to_aspect_ratio,
     merge_overlapping_boxes
 )
-from app.services.image.panel_detection.webtoon_detector import (
+from .webtoon_detector import (
     _detect_bg_color_and_threshold,
     _detect_panels_webtoon
 )
-from app.services.image.panel_detection.grid_detector import (
+from .grid_detector import (
     _detect_panels_grid_cv,
     _detect_panels_grid_pil
 )
-from app.services.image.utils.panel_image_utils import (
+from services.image.utils.panel_image_utils import (
     trim_solid_borders,
     _filter_solid_noise
 )
@@ -600,7 +600,7 @@ def detect_panels_in_image(
     if _run_ocr_for_protection:
         try:
             import asyncio
-            from app.services.image.ocr.ocr_engine import extract_full_ocr_data
+            from services.image.ocr.ocr_engine import extract_full_ocr_data
             try:
                 loop = asyncio.get_event_loop()
             except RuntimeError:
@@ -633,7 +633,7 @@ def detect_panels_in_image(
     # YOLO AI Object & Speech Bubble Detection + Panel Candidate Extraction
     if use_yolo:
         try:
-            from app.services.image.panel_detection.speech_bubble_detector import get_yolo_speech_bubble_model
+            from .speech_bubble_detector import get_yolo_speech_bubble_model
             yolo_model = get_yolo_speech_bubble_model()
             if yolo_model is not None:
                 is_tall_strip_image = orig_h > 2000 and (float(orig_h) / float(max(1, orig_w)) > 1.5)
@@ -956,7 +956,7 @@ def detect_panels_in_image(
                     f"{pre_split_count} -> {len(merged_boxes)}"
                 )
 
-        from app.services.image.panel_detection.panel_postprocessor import (
+        from .panel_postprocessor import (
             resolve_micro_panels,
             resolve_overlapping_panels_lineage,
             recover_coverage_selectively
@@ -1274,7 +1274,7 @@ def detect_panels_in_image(
 
     debug_exported = False
     try:
-        from app.services.image.panel_detection.debug_visualizer import export_multi_stage_debug_images
+        from .debug_visualizer import export_multi_stage_debug_images
         debug_pb_list = [
             PanelBounds.from_pixels(p["x"], p["y"], p["width"], p["height"], space="merged_canvas")
             for p in sanitized_panels

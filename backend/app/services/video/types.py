@@ -5,7 +5,7 @@ Backward-compatible proxy re-exporting symbols from ffmpeg_types.py.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from app.engines.ffmpeg.types import (  # noqa: F401
+from app.providers.ffmpeg.types import (  # noqa: F401
     TransitionType,
     FilterType,
     VideoMetadata,

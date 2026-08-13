@@ -1,45 +1,27 @@
 """
 backend/app/lifespan.py
 ─────────────────────────────────────────────────────────────────────────────
-Sonikoma FastAPI Lifespan Manager
+Sonikoma FastAPI Lifespan Manager (startup and shutdown lifecycle events).
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import os
-import sys
 import time
 import logging
-import platform
 import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-
-def _should_use_colors() -> bool:
-    return True
-
-try:
-    from startup import (
-        logger,
-        IS_PRODUCTION,
-        ColoredFormatter,
-        _print_startup_banner,
-        API_VERSION,
-    )
-except ImportError:
-    from app.startup import (
-        logger,
-        IS_PRODUCTION,
-        ColoredFormatter,
-        _print_startup_banner,
-        API_VERSION,
-    )
-from core.settings import BACKEND_PORT
+from app.core.config import IS_PRODUCTION, API_VERSION, BACKEND_PORT
+from app.core.utils.banner import _print_startup_banner
+from app.core.logging import logger, ColoredFormatter
+from app.core.logging.handlers import UIStreamLogHandler
 
 SERVER_START = time.time()
 
 
 class EndpointFilter(logging.Filter):
+    """Filter noisy system-logs and status endpoints."""
     def filter(self, record: logging.LogRecord) -> bool:
         try:
             msg = record.getMessage()
@@ -64,7 +46,7 @@ def _clean_temp_workspace():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Step 15: Environment Security Validation (Warn Only)
+    # Step 1: Environment Security Validation
     required_envs = ["SUPABASE_URL", "GEMINI_API_KEY"]
     missing_envs = [env for env in required_envs if not os.getenv(env)]
     if missing_envs:
@@ -79,13 +61,13 @@ async def lifespan(app: FastAPI):
         logging.getLogger(logger_name).addFilter(EndpointFilter())
     logging.getLogger().addFilter(EndpointFilter())
 
-    # Initialize database inside the worker process and defer some maintenance work
-    from database.bootstrap import init_db
+    # Initialize database inside the worker process
+    from app.database.bootstrap import init_db
     init_db()
 
-    # Clean up stale training lock file on startup (safely using local paths)
+    # Clean up stale training lock file on startup
     try:
-        base_dir = os.path.dirname(os.path.abspath(__file__)) # backend/app
+        base_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.abspath(os.path.join(base_dir, "..", ".."))
         training_dir = os.path.join(project_root, "data", "training_data")
         lock_file = os.path.join(training_dir, "training.lock")
@@ -98,7 +80,7 @@ async def lifespan(app: FastAPI):
     # Run startup maintenance asynchronously so the API can start responding quickly
     async def _startup_maintenance():
         try:
-            from repositories.system.logs import prune_system_logs
+            from app.repositories.system.logs import prune_system_logs
             pruned = prune_system_logs()
             if pruned > 0:
                 logger.info(f"[System] Startup maintenance: Pruned {pruned} old log entries.")
@@ -106,24 +88,20 @@ async def lifespan(app: FastAPI):
             logger.warning(f"[System] Log pruning failed during startup: {e}")
 
         try:
-            from services.ai.skills import registry
+            from app.services.ai.skills import registry
             registry.load_skills()
         except Exception as e:
-            try:
-                from app.services.ai.skills import registry
-                registry.load_skills()
-            except Exception as e2:
-                logger.warning(f"[System] Skill registry initialization failed during startup: {e}")
+            logger.warning(f"[System] Skill registry initialization failed during startup: {e}")
 
-        # Pre-warm rembg U-2-Net and YOLO segmentation models unless disabled or in low-RAM cloud envs (e.g. Render 512MB free tier)
+        # Pre-warm vision models unless disabled
         skip_prewarm = (
             os.getenv("SKIP_MODEL_PREWARM", "").lower() in ("1", "true", "yes")
             or os.getenv("RENDER") is not None
         )
         if not skip_prewarm:
             try:
-                from providers.vision.sam import get_rembg_session
-                from providers.vision.yolo import get_yolo_model
+                from services.image.layer_separation.sam import get_rembg_session
+                from services.image.panel_detection.speech_bubble_detector import get_yolo_model
                 logger.debug("[Startup] Pre-warming rembg U-2-Net session...")
                 await asyncio.to_thread(get_rembg_session)
                 logger.debug("[Startup] Pre-warming YOLO manga-segmentation model...")
@@ -134,34 +112,23 @@ async def lifespan(app: FastAPI):
         else:
             logger.info("[Startup] Skipping AI model pre-warming (models will lazy-load on demand to preserve memory).")
 
-        # Start automatic training background monitor service
+        # Start automatic training background monitor service if enabled
         if os.getenv("ENABLE_TRAINING_MONITOR", "false").lower() == "true":
             try:
-                from services.training.training_monitor import start_background_monitor
+                from app.services.training.training_monitor import start_background_monitor
                 start_background_monitor()
             except Exception as e:
                 logger.warning(f"[Startup] Failed to start training data monitor service: {e}")
         else:
             logger.info("[Startup] Training monitor is disabled via ENABLE_TRAINING_MONITOR.")
 
-    # Launch background maintenance non-blocking so backend starts listening instantly
+    # Launch background maintenance non-blocking
     asyncio.create_task(_startup_maintenance())
 
     # Purge stale temporary workspace directories
     _clean_temp_workspace()
 
-    # Re-apply ColoredFormatter to all non-UI handlers for beautiful console output.
-    # UIStreamLogHandler keeps its own plain formatter so log entries reach the frontend cleanly.
-    try:
-        from core.logging.handlers import UIStreamLogHandler as _UIStreamLogHandler
-        ui_handler_cls = _UIStreamLogHandler
-    except (ModuleNotFoundError, ImportError):
-        try:
-            from app.core.logging.handlers import UIStreamLogHandler as _UIStreamLogHandler
-            ui_handler_cls = _UIStreamLogHandler
-        except (ModuleNotFoundError, ImportError):
-            ui_handler_cls = None
-
+    # Apply ColoredFormatter to console loggers
     def _should_use_colors() -> bool:
         force_color = os.getenv("FORCE_COLOR", "").strip().lower()
         if force_color in ("0", "false", "no"):
@@ -171,20 +138,18 @@ async def lifespan(app: FastAPI):
     for name in list(logging.root.manager.loggerDict.keys()):
         l = logging.getLogger(name)
         for h in l.handlers:
-            if ui_handler_cls is None or not isinstance(h, _UIStreamLogHandler):
+            if not isinstance(h, UIStreamLogHandler):
                 h.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))
 
     for h in logging.getLogger().handlers:
-        if ui_handler_cls is None or not isinstance(h, _UIStreamLogHandler):
+        if not isinstance(h, UIStreamLogHandler):
             h.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))
 
     _print_startup_banner()
 
-
-    # Warm up the persistent image cache — loads all previously scraped panel images
-    # from disk back into memory so they survive server restarts without 404s.
+    # Warm up persistent image cache
     try:
-        from core.cache import stitched_cache, edit_history
+        from app.core.cache import stitched_cache, edit_history
         n_stitched = stitched_cache.warm_up()
         n_history = edit_history.warm_up()
         if n_stitched > 0 or n_history > 0:

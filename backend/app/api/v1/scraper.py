@@ -31,25 +31,25 @@ from schemas.scraper import (
 from core.security import SECRET_KEY
 
 
-from services.scraper.scraper import (
+from services.image.scraper.scraper import (
     scrape_webtoon_episodes,
     extract_webtoon_url
 )
-from services.workflows.scraper import (
+from services.image.scraper.workflow import (
     scrape_webtoon_episodes_advanced,
     scrape_webtoon_episodes_paginated,
     batch_scrape_series
 )
 from repositories.scraper import save_scrape_session
-from services.scraper.scraper_service import (
+from services.image.scraper.scraper_service import (
     scrape_and_initialize_project,
     generate_storyboard_and_video,
     generate_storyboard_only_service
 )
-from services.scraper.ocr_service import extract_script_from_panels
-from services.scraper.archive_exporter import create_comic_archive
-from services.scraper.batch_job_service import create_batch_job, get_batch_job_status, execute_batch_job
-from services.scraper.panel_splitter import split_vertical_strip_into_panels
+from services.image.scraper.ocr_service import extract_script_from_panels
+from services.image.scraper.archive_exporter import create_comic_archive
+from services.image.scraper.batch_job_service import create_batch_job, get_batch_job_status, execute_batch_job
+from services.image.scraper.panel_splitter import split_vertical_strip_into_panels
 
 ALGORITHM = "HS256"
 logger = logging.getLogger("sonikoma.api.scraper")
@@ -217,7 +217,7 @@ async def batch_scrape_series_route(request: Request, body: BatchScrapeSeriesReq
         raise HTTPException(status_code=500, detail=str(e))
 
 
-from core.settings import GEMINI_MODEL_PRIMARY
+from app.core.config import GEMINI_MODEL_PRIMARY
 
 @router.post("/generate", summary="Generate storyboard and narrative scripts")
 async def generate_storyboard(request: Request, body: GenerateStoryboardRequest, user_keys: dict = Depends(get_all_user_keys)):

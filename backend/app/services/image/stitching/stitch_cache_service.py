@@ -13,11 +13,10 @@ import json
 from urllib.parse import urlparse, parse_qs
 from typing import Tuple
 
-from core.cache import stitched_cache, edit_history
+from app.core.cache import stitched_cache, edit_history
 # I am mocking the imports that were inside the function
 
 from database.transaction import unwrap_proxy_url
-import services.image.utils as img_utils
 
 logger = logging.getLogger("sonikoma.services.image.stitch_cache")
 

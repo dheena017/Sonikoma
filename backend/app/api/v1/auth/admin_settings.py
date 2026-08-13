@@ -13,7 +13,7 @@ import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
-from core.security import SECRET_KEY
+from app.core.security import SECRET_KEY
 from api.dependencies.auth import get_admin_user
 from schemas.auth import (
     AdminUpdateUser,

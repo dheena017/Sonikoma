@@ -19,7 +19,6 @@ listeners = set()
 # ANSI escape sequence remover
 ANSI_ESCAPE = re.compile(r'\x1b\[[0-9;]*[mK]')
 
-
 # Track last log message to suppress rapid infinite loop duplicates
 _last_emitted_msg = ""
 _last_emitted_time = 0.0
@@ -27,10 +26,12 @@ _repeat_count = 0
 
 
 class UIStreamLogHandler(logging.Handler):
+    """Logging handler streaming structured entries to UI log buffer and database."""
+
     def emit(self, record):
         global log_seq, _last_emitted_msg, _last_emitted_time, _repeat_count
         try:
-            from core.logging.filters import EndpointFilter
+            from app.core.logging.filters import EndpointFilter
             if not EndpointFilter().filter(record):
                 return
 
@@ -53,7 +54,6 @@ class UIStreamLogHandler(logging.Handler):
             module = "System"
             if record.name.startswith("sonikoma."):
                 module = record.name.split(".")[1].capitalize()
-                # Map related modules to "Media" for better grouping
                 if module in ("Video", "Audio", "Stitch", "Stitcher", "Moviepy"):
                     module = "Media"
                 elif module in ("Db", "Database"):
@@ -63,7 +63,6 @@ class UIStreamLogHandler(logging.Handler):
             elif "uvicorn" in record.name:
                 module = "API"
 
-            # Special case for Vite/Frontend logs
             if record.name == "sonikoma.vite":
                 module = "Frontend"
 
@@ -83,24 +82,27 @@ class UIStreamLogHandler(logging.Handler):
             user_id = getattr(record, 'user_id', None)
             snapshot = getattr(record, 'snapshot', None)
 
-            if correlation_id: entry["correlation_id"] = correlation_id
-            if user_id: entry["user_id"] = user_id
+            if correlation_id:
+                entry["correlation_id"] = correlation_id
+            if user_id:
+                entry["user_id"] = user_id
 
             # Auto-capture snapshot for errors if not provided
             if not snapshot and level in ("ERROR", "CRITICAL"):
                 try:
-                    from core.system import get_engine_snapshot
+                    from app.core.system import get_engine_snapshot
                     snapshot = get_engine_snapshot()
-                except:
+                except Exception:
                     pass
 
-            if snapshot: entry["snapshot"] = snapshot
+            if snapshot:
+                entry["snapshot"] = snapshot
 
             log_buffer.append(entry)
 
-            # Persist to Database asynchronously (lazy import to avoid circular)
+            # Persist to Database asynchronously (lazy import to avoid circular dependency)
             try:
-                from repositories.system.logs import insert_system_log
+                from app.repositories.system.logs import insert_system_log
                 insert_system_log(
                     level,
                     module,

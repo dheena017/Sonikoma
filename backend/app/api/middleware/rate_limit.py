@@ -11,7 +11,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 
-from core.settings import RATE_LIMIT_RPM
+from app.core.config import RATE_LIMIT_RPM
 
 logger = logging.getLogger("sonikoma.api.middleware.rate_limit")
 

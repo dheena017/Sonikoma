@@ -11,7 +11,7 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
-from core.security import verify_password, create_access_token
+from app.core.security import verify_password, create_access_token
 from repositories.user import get_user_by_email, create_user_session, write_audit_log
 from schemas.auth import UserLogin
 

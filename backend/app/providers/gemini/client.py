@@ -5,7 +5,7 @@ Wrapper for Gemini provider (moved from providers/ai/gemini.py).
 
 import logging
 from typing import Any, Optional
-from core.config import call_gemini_with_retry, genai_client, ai_initialized
+from app.core.config import call_gemini_with_retry, genai_client, ai_initialized
 
 logger = logging.getLogger("sonikoma.services.ai.providers.gemini")
 
@@ -13,7 +13,7 @@ try:
     from google import genai
     from google.genai import types
     GEMINI_AVAILABLE = True
-except ImportError:
+except (ImportError, NameError, Exception):
     genai = None
     types = None
     GEMINI_AVAILABLE = False

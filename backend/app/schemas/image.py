@@ -1,15 +1,21 @@
 """
 backend/app/schemas/image.py
 ─────────────────────────────────────────────────────────────────────────────
-Pydantic request/response schemas for image.
+Pydantic request/response schemas for image transformations, cleaning, OCR, and stitching.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
-from app.providers.media.imagemagick import ResizeMode
+from services.image.processing.imagemagick import ResizeMode
+
+
+# =============================================================================
+# 1. Image Editing & Transformations
+# =============================================================================
 
 class EditImageRequest(BaseModel):
+    """Cropping, trimming, aspect ratio, rotation, and quality adjustments."""
     url: str
     cropTop: Optional[float] = 0.0
     cropBottom: Optional[float] = 0.0
@@ -27,16 +33,19 @@ class EditImageRequest(BaseModel):
 
 
 class UndoEditRequest(BaseModel):
+    """Reverts image modifications."""
     url: str
 
 
 class TransformImageRequest(BaseModel):
+    """Basic rotation and flip operations."""
     url: str
     type: Literal["rotate", "flip"]
     value: str
 
 
 class StitchImagesRequest(BaseModel):
+    """Merges multiple images horizontally or vertically."""
     url1: Optional[str] = None
     url2: Optional[str] = None
     imageUrl1: Optional[str] = None
@@ -54,58 +63,15 @@ class StitchImagesRequest(BaseModel):
 
 
 class SplitImagesRequest(BaseModel):
+    """Splits long vertical images along defined lines."""
     url: str
     splitLines: Optional[List[float]] = Field(default_factory=list)
     split_points: Optional[List[float]] = None
     format: Optional[str] = "jpeg"
 
 
-class DownloadZipRequest(BaseModel):
-    urls: List[str]
-    url: Optional[str] = None
-
-
-class RemoveBubblesRequest(BaseModel):
-    url: str
-    method: Optional[str] = "auto"
-    sensitivity: Optional[float] = 50.0
-    confidence: Optional[float] = None
-    dilation: Optional[int] = -1
-    inpaint_radius: Optional[int] = 3
-    detection_style: Optional[str] = "all"
-
-
-class ProcessLayersRequest(BaseModel):
-    url: str
-
-
-class RemoveBubblesBatchRequest(BaseModel):
-    urls: List[str]
-    method: Optional[str] = "auto"
-    sensitivity: Optional[float] = 50.0
-    confidence: Optional[float] = None
-    dilation: Optional[int] = -1
-    inpaint_radius: Optional[int] = 3
-    detection_style: Optional[str] = "all"
-
-
-
-class CleanerBase64Request(BaseModel):
-    image_base64: str = Field(..., description="Base64-encoded source image (PNG/JPG)")
-    method: Literal["inpaint", "blur"] = Field("inpaint", description="Removal method")
-    sensitivity: float = Field(50.0, ge=0.0, le=100.0)
-    dilation: int = Field(-1, ge=-1, le=100)
-    inpaint_radius: int = Field(3, ge=1, le=20)
-    detection_style: str = Field("all")
-
-
-
-class ImagePathRequest(BaseModel):
-    image_path: str
-    output_path: Optional[str] = None
-
-
 class BatchResizeRequest(BaseModel):
+    """Resizes multiple images at once."""
     image_paths: List[str]
     output_dir: Optional[str] = None
     width: Optional[int] = None
@@ -115,6 +81,7 @@ class BatchResizeRequest(BaseModel):
 
 
 class CompositeRequest(BaseModel):
+    """Overlays one image onto a base image."""
     base_image_path: str
     overlay_image_path: str
     output_path: Optional[str] = None
@@ -123,12 +90,69 @@ class CompositeRequest(BaseModel):
     opacity: Optional[float] = Field(1.0, ge=0.0, le=1.0)
 
 
+class ImagePathRequest(BaseModel):
+    """Local file path wrapper."""
+    image_path: str
+    output_path: Optional[str] = None
+
+
 class MetadataRequest(BaseModel):
+    """Requests image EXIF/technical metadata."""
     image_path: str
 
 
+# =============================================================================
+# 2. Bubble Removal & Layer Cleaning
+# =============================================================================
+
+class RemoveBubblesRequest(BaseModel):
+    """Speech bubble detection and removal parameters."""
+    url: str
+    method: Optional[str] = "auto"
+    sensitivity: Optional[float] = 50.0
+    confidence: Optional[float] = None
+    dilation: Optional[int] = -1
+    inpaint_radius: Optional[int] = 3
+    detection_style: Optional[str] = "all"
+
+
+class RemoveBubblesBatchRequest(BaseModel):
+    """Batch bubble removal parameters."""
+    urls: List[str]
+    method: Optional[str] = "auto"
+    sensitivity: Optional[float] = 50.0
+    confidence: Optional[float] = None
+    dilation: Optional[int] = -1
+    inpaint_radius: Optional[int] = 3
+    detection_style: Optional[str] = "all"
+
+
+class ProcessLayersRequest(BaseModel):
+    """Triggers image layer decomposition."""
+    url: str
+
+
+class CleanerBase64Request(BaseModel):
+    """Base64-encoded image cleaning using inpainting/blurring."""
+    image_base64: str = Field(..., description="Base64-encoded source image (PNG/JPG)")
+    method: Literal["inpaint", "blur"] = Field("inpaint", description="Removal method")
+    sensitivity: float = Field(50.0, ge=0.0, le=100.0)
+    dilation: int = Field(-1, ge=-1, le=100)
+    inpaint_radius: int = Field(3, ge=1, le=20)
+    detection_style: str = Field("all")
+
+
+# =============================================================================
+# 3. OCR & Utilities
+# =============================================================================
 
 class OCRBase64Request(BaseModel):
+    """Base64-encoded EasyOCR text detection request."""
     image_base64: str = Field(..., description="Base64-encoded panel image")
     langs: List[str] = Field(default=["en"], description="Language codes for EasyOCR")
 
+
+class DownloadZipRequest(BaseModel):
+    """Requests a ZIP archive containing specified image URLs."""
+    urls: List[str]
+    url: Optional[str] = None

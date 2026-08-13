@@ -109,3 +109,7 @@ def get_job_queue() -> VideoJobQueueManager:
     if _job_queue_instance is None:
         _job_queue_instance = VideoJobQueueManager()
     return _job_queue_instance
+
+
+# Class alias for backward compatibility
+JobQueue = VideoJobQueueManager

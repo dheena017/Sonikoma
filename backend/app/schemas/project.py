@@ -1,14 +1,20 @@
 """
 backend/app/schemas/project.py
 ─────────────────────────────────────────────────────────────────────────────
-Pydantic request/response schemas for projects.
+Pydantic request/response schemas for comic projects, storyboards, and panel items.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional, Literal
 
+
+# =============================================================================
+# 1. Project & Panel Management
+# =============================================================================
+
 class ProjectCreateRequest(BaseModel):
+    """Creates a new comic-to-video project."""
     project_id: str = Field(..., description="Unique Project ID")
     project_type: Optional[Literal["temp", "permanent"]] = Field("permanent", description="Project lifecycle state")
     job_id: Optional[str] = Field(None, description="Workspace Job ID")
@@ -24,6 +30,7 @@ class ProjectCreateRequest(BaseModel):
 
 
 class PanelSaveItem(BaseModel):
+    """Represents an individual storyboard panel (dialogue, motion, narrative, speech text, filters)."""
     image_url: Optional[str] = Field("")
     original_image_url: Optional[str] = Field(None, alias="original_url")
     speech_text: Optional[str] = Field("")
@@ -48,10 +55,12 @@ class PanelSaveItem(BaseModel):
 
 
 class PanelsSaveRequest(BaseModel):
+    """Saves or updates a list of project panels."""
     panels: List[PanelSaveItem] = Field(..., description="Curated panel items list")
 
 
 class ProjectUpdateRequest(BaseModel):
+    """Modifies existing project settings, audio parameters, or metadata."""
     job_id: Optional[str] = Field(None, description="Workspace Job ID")
     project_type: Optional[Literal["temp", "permanent"]] = Field(None, description="Project lifecycle state")
     url: Optional[str] = Field(None, description="Original Webtoon episode URL")
@@ -68,25 +77,26 @@ class ProjectUpdateRequest(BaseModel):
 
 
 class TokenIncrementRequest(BaseModel):
+    """Tracks token consumption for a project."""
     tokens: int = Field(..., description="Number of tokens to add")
     job_id: Optional[str] = Field(None, description="Workspace Job ID for attribution")
 
 
 class BatchDeleteRequest(BaseModel):
+    """Deletes multiple projects by ID."""
     project_ids: List[str] = Field(..., description="List of Project IDs to delete")
 
 
-
 class DetectPanelsBase64Request(BaseModel):
+    """Panel detection parameters for base64 image streams."""
     image_base64: str = Field(..., description="Base64-encoded source image")
     sensitivity: float = Field(30.0, ge=0.0, le=100.0)
     background_mode: Literal["auto", "white", "black"] = "auto"
     min_width_pct: float = Field(0.15, ge=0.0, le=1.0)
-    min_height_px: int   = Field(60, ge=1)
+    min_height_px: int = Field(60, ge=1)
     merge_threshold: int = Field(20, ge=0)
     aspect_ratio: Literal["free", "1:1", "16:9", "9:16", "4:3"] = "free"
-    canny_low: int  = Field(20, ge=0, le=255)
+    canny_low: int = Field(20, ge=0, le=255)
     canny_high: int = Field(100, ge=0, le=255)
     close_kernel_size: int = Field(15, ge=1, le=99)
     auto_split: bool = Field(True, description="Automatically split tall strips at gutters")
-

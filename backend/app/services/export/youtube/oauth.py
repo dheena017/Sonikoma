@@ -12,7 +12,7 @@ import asyncio
 import tempfile
 from typing import Optional
 
-from core.exceptions import ServiceException
+from app.core.exceptions import ServiceException
 from repositories.youtube import get_youtube_credentials
 
 try:

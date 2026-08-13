@@ -22,10 +22,8 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from api.dependencies.auth import get_admin_user
 
 from core.logging import get_logs, add_log_listener, remove_log_listener
-from core.settings import NODE_ENV
-
+from app.core.config import NODE_ENV, BACKEND_PORT
 from core.cache import get_all_cache_stats, get_total_storage_size_bytes
-from core.settings import BACKEND_PORT
 from schemas.health import CustomLogPayload
 
 # Import repository functions directly

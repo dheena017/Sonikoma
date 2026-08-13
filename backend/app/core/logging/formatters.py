@@ -1,7 +1,7 @@
 """
 backend/app/core/logging/formatters.py
 ─────────────────────────────────────────────────────────────────────────────
-Custom log formatting and colorization.
+Custom log formatting and ANSI colorization for HTTP requests, URLs, and levels.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -10,15 +10,20 @@ import logging
 
 
 class ColoredFormatter(logging.Formatter):
+    """
+    Formatter adding rich ANSI colorization for log levels, HTTP methods,
+    URLs, status codes, and custom engine tags.
+    """
+
     COLORS = {
-        'TRACE': '\x1b[90m',     # Dark Grey
-        'DEBUG': '\x1b[37m',     # White
-        'INFO': '\x1b[36m',      # Cyan
-        'NOTICE': '\x1b[35m',    # Magenta
-        'SUCCESS': '\x1b[32m',   # Green
-        'WARNING': '\x1b[33m',   # Yellow
-        'ERROR': '\x1b[31m',     # Red
-        'CRITICAL': '\x1b[1;31m' # Bold Red
+        'TRACE': '\x1b[90m',      # Dark Grey
+        'DEBUG': '\x1b[37m',      # White
+        'INFO': '\x1b[96m',       # Bright Cyan
+        'NOTICE': '\x1b[95m',     # Bright Magenta
+        'SUCCESS': '\x1b[92m',    # Bright Green
+        'WARNING': '\x1b[33m',    # Yellow
+        'ERROR': '\x1b[91m',      # Bright Red
+        'CRITICAL': '\x1b[1;91m'  # Bold Bright Red
     }
     RESET = '\x1b[0m'
 
@@ -51,7 +56,6 @@ class ColoredFormatter(logging.Formatter):
         if match:
             prefix, url, status, suffix = match.groups()
 
-            # Colorize prefix
             colorized_prefix = ""
             if prefix:
                 method_match = re.match(r'^(.*?\b)(POST|GET|PUT|DELETE)(\s*)$', prefix, re.IGNORECASE)
@@ -68,9 +72,7 @@ class ColoredFormatter(logging.Formatter):
                             pre_colorized += f"\x1b[90m{part}\x1b[0m"
                         elif part == "httpx":
                             pre_colorized += f"\x1b[95m{part}\x1b[0m"
-                        elif part == "HTTP":
-                            pre_colorized += f"\x1b[35m{part}\x1b[0m"
-                        elif part == "Request":
+                        elif part in ("HTTP", "Request"):
                             pre_colorized += f"\x1b[35m{part}\x1b[0m"
                         elif part in (":", "[", "]"):
                             pre_colorized += f"\x1b[90m{part}\x1b[0m"
@@ -92,24 +94,17 @@ class ColoredFormatter(logging.Formatter):
                 else:
                     parts = re.split(r'(\s+|:|\[|\])', prefix)
                     for part in parts:
-                        if not part:
-                            continue
-                        if part.isspace():
+                        if not part or part.isspace():
                             colorized_prefix += part
-                        elif part == "INFO":
+                        elif part in ("INFO", ":", "[", "]"):
                             colorized_prefix += f"\x1b[90m{part}\x1b[0m"
                         elif part == "httpx":
                             colorized_prefix += f"\x1b[95m{part}\x1b[0m"
-                        elif part == "HTTP":
+                        elif part in ("HTTP", "Request"):
                             colorized_prefix += f"\x1b[35m{part}\x1b[0m"
-                        elif part == "Request":
-                            colorized_prefix += f"\x1b[35m{part}\x1b[0m"
-                        elif part in (":", "[", "]"):
-                            colorized_prefix += f"\x1b[90m{part}\x1b[0m"
                         else:
                             colorized_prefix += f"\x1b[90m{part}\x1b[0m"
 
-            # Colorize URL
             colorized_url = ""
             gemini_match = re.match(r'^(https?://)(generativelanguage\.googleapis\.com)(/v1beta/models/)?([^/:]+)?(:[a-zA-Z0-9]+)?(.*)$', url)
             if gemini_match:
@@ -139,7 +134,6 @@ class ColoredFormatter(logging.Formatter):
                 else:
                     colorized_url = f"\x1b[36m{url}\x1b[0m"
 
-            # Colorize Status
             colorized_status = ""
             if status:
                 clean_status = status.strip()
@@ -150,22 +144,16 @@ class ColoredFormatter(logging.Formatter):
                 http_match = re.match(r'^(HTTP/\d\.\d)\s+(\d{3})\s*(.*)$', inner_status, re.IGNORECASE)
                 if http_match:
                     http_version, code, status_msg = http_match.groups()
-
                     if code.startswith('2'):
-                        code_color = "\x1b[1;32m"
-                        msg_color = "\x1b[32m"
+                        code_color, msg_color = "\x1b[1;32m", "\x1b[32m"
                     elif code == '429':
-                        code_color = "\x1b[1;33m"
-                        msg_color = "\x1b[1;33m"
+                        code_color, msg_color = "\x1b[1;33m", "\x1b[1;33m"
                     elif code.startswith('4'):
-                        code_color = "\x1b[1;33m"
-                        msg_color = "\x1b[33m"
+                        code_color, msg_color = "\x1b[1;33m", "\x1b[33m"
                     elif code.startswith('5'):
-                        code_color = "\x1b[1;31m"
-                        msg_color = "\x1b[31m"
+                        code_color, msg_color = "\x1b[1;31m", "\x1b[31m"
                     else:
-                        code_color = "\x1b[37m"
-                        msg_color = "\x1b[37m"
+                        code_color, msg_color = "\x1b[37m", "\x1b[37m"
 
                     inner_colorized = f"\x1b[36m{http_version}\x1b[0m {code_color}{code}\x1b[0m"
                     if status_msg:
@@ -178,17 +166,11 @@ class ColoredFormatter(logging.Formatter):
                         colorized_status = f" {inner_colorized}"
                 else:
                     if re.match(r'^\d{3}$', inner_status):
-                        if inner_status.startswith('2'):
-                            code_color = "\x1b[1;32m"
-                        elif inner_status == '429':
-                            code_color = "\x1b[1;33m"
-                        elif inner_status.startswith('4'):
-                            code_color = "\x1b[1;33m"
-                        elif inner_status.startswith('5'):
-                            code_color = "\x1b[1;31m"
-                        else:
-                            code_color = "\x1b[37m"
-
+                        code_color = "\x1b[1;32m" if inner_status.startswith('2') else (
+                            "\x1b[1;33m" if inner_status.startswith('4') else (
+                                "\x1b[1;31m" if inner_status.startswith('5') else "\x1b[37m"
+                            )
+                        )
                         quotes_color = "\x1b[90m"
                         if has_quotes:
                             colorized_status = f" {quotes_color}\"{code_color}{inner_status}\x1b[0m{quotes_color}\""
@@ -197,40 +179,27 @@ class ColoredFormatter(logging.Formatter):
                     else:
                         colorized_status = f" \x1b[33m{status}\x1b[0m"
 
-            # Suffix
             colorized_suffix = f"\x1b[90m{suffix}\x1b[0m" if suffix else ""
-
             return f"{colorized_prefix}{colorized_url}{colorized_status}{colorized_suffix}"
 
         # 3. Standalone colorization fallback when no URL is present
         if "HTTP Request" in message or "httpx" in message:
-            standalone_http_regex = re.compile(
-                r'^(.*?)\b(POST|GET|PUT|DELETE)\b(.*)$',
-                re.IGNORECASE
-            )
+            standalone_http_regex = re.compile(r'^(.*?)\b(POST|GET|PUT|DELETE)\b(.*)$', re.IGNORECASE)
             st_match = standalone_http_regex.match(message)
             if st_match:
                 prefix, method, suffix = st_match.groups()
-
-                # Colorize prefix
                 colorized_prefix = ""
                 if prefix:
                     parts = re.split(r'(\s+|:|\[|\])', prefix)
                     for part in parts:
-                        if not part:
-                            continue
-                        if part.isspace():
+                        if not part or part.isspace():
                             colorized_prefix += part
                         elif part == "INFO":
                             colorized_prefix += f"\x1b[90m{part}\x1b[0m"
                         elif part == "httpx":
                             colorized_prefix += f"\x1b[95m{part}\x1b[0m"
-                        elif part == "HTTP":
+                        elif part in ("HTTP", "Request"):
                             colorized_prefix += f"\x1b[35m{part}\x1b[0m"
-                        elif part == "Request":
-                            colorized_prefix += f"\x1b[35m{part}\x1b[0m"
-                        elif part in (":", "[", "]"):
-                            colorized_prefix += f"\x1b[90m{part}\x1b[0m"
                         else:
                             colorized_prefix += f"\x1b[90m{part}\x1b[0m"
 
@@ -256,31 +225,38 @@ class ColoredFormatter(logging.Formatter):
         if self.use_colors and isinstance(record.msg, str):
             record.msg = self.colorize_message(record.msg)
 
+        level_padded = record.levelname.ljust(7)
+        filename_bracket = f"[{record.filename}]"
+        file_padded = filename_bracket.ljust(20)
+
         if self.use_colors:
             color = self.COLORS.get(record.levelname, '\x1b[37m')
-            grey = '\x1b[90m'
-            magenta = '\x1b[35m'
-            blue = '\x1b[94m'
+            timestamp_color = '\x1b[90m'
+            backend_color = '\x1b[95m'
+            file_color = '\x1b[94m'
             message_color = '\x1b[37m'
             if record.levelname == 'ERROR' or record.levelno >= logging.ERROR:
-                message_color = '\x1b[31m'
+                message_color = '\x1b[91m'
             elif record.levelname == 'WARNING':
                 message_color = '\x1b[33m'
             elif record.levelname == 'SUCCESS':
-                message_color = '\x1b[32m'
+                message_color = '\x1b[92m'
             elif record.levelname == 'NOTICE':
-                message_color = '\x1b[35m'
+                message_color = '\x1b[95m'
+            elif record.levelname == 'INFO':
+                message_color = '\x1b[96m'
             elif record.levelname == 'DEBUG':
                 message_color = '\x1b[37m'
             elif record.levelname == 'TRACE':
                 message_color = '\x1b[90m'
             log_fmt = (
-                f"{grey}%(asctime)s{self.RESET} "
-                f"{magenta}[BACKEND]{self.RESET} [{color}%(levelname)s{self.RESET}] "
-                f"{blue}[%(filename)s]{self.RESET} {message_color}%(message)s{self.RESET}"
+                f"{timestamp_color}%(asctime)s{self.RESET} "
+                f"{backend_color}[BACKEND]{self.RESET} [{color}{level_padded}{self.RESET}] "
+                f"{file_color}{file_padded}{self.RESET} {message_color}%(message)s{self.RESET}"
             )
         else:
-            log_fmt = "%(asctime)s [BACKEND] [%(levelname)s] [%(filename)s] %(message)s"
+            log_fmt = f"%(asctime)s [BACKEND] [{level_padded}] {file_padded} %(message)s"
+
         formatter = logging.Formatter(log_fmt, datefmt="%H:%M:%S")
         result = formatter.format(record)
 

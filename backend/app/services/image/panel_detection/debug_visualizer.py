@@ -145,7 +145,7 @@ def draw_yolo_detections(image_path: str, conf_threshold: float = 0.25,
             logger.error(f"[DebugViz] Image file not found: {image_path}")
             raise FileNotFoundError(f"Image file not found: {image_path}")
             
-        from providers.vision.yolo import get_yolo_model
+        from services.image.panel_detection.speech_bubble_detector import get_yolo_model
 
         model = get_yolo_model()
         if model is None:

@@ -29,7 +29,7 @@ from services.image.panel_detection.speech_bubble_detector import (
     segment_character_foreground as segment_characters,
 )
 from database.supabase.storage import upload_to_supabase_bucket
-from providers.vision.sam import has_rembg, segment_character_u2net
+from services.image.layer_separation.sam import has_rembg, segment_character_u2net
 
 
 def create_blank_webp(width: int, height: int) -> bytes:
@@ -604,6 +604,7 @@ async def process_layers(image_path: str, panel_id: str) -> Dict[str, Any]:
     }
 
 
-# Human-readable alias
+# Human-readable alias & vision imports
 separate_foreground_background_text = process_layers
+from services.image.layer_separation.sam import segment_character_u2net
 

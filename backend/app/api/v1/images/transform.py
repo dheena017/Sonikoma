@@ -12,7 +12,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Response, Path, Request
 from pydantic import Field
 
-from providers.media.imagemagick import ResizeMode, FilterType
+from services.image.processing.imagemagick import ResizeMode, FilterType
 from schemas.image import (
     TransformImageRequest,
     StitchImagesRequest,
@@ -23,19 +23,21 @@ from schemas.image import (
     CompositeRequest,
     ImagePathRequest,
 )
-from services.image.processing.image_service import (
-    transform_image_service,
+from services.image.processing.edit import transform_image_service
+from services.image.processing.compose import (
     merge_images_service,
     execute_splits_service,
     download_zip_service,
-    extract_panel_layers_service,
+)
+from services.image.layer_separation.layer_separator import extract_panel_layers_service
+from services.image.processing.image_transformer import (
     resize_image_service,
     rotate_image_service,
     apply_image_enhancements_service,
     remove_background_service,
     add_text_service,
     batch_resize_service,
-    composite_images_service
+    composite_images_service,
 )
 
 

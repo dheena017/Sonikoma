@@ -40,3 +40,9 @@ def delete_video_file(video_url: Optional[str]) -> None:
             logger.info(f"[Storage] Deleted compiled video file: {local_path}")
     except Exception as exc:
         logger.error(f"[Storage] Failed to delete video file {video_url}: {exc}")
+
+
+class AssetService:
+    """Service wrapper for managing project assets (media files and videos)."""
+    cleanup_cached_url = staticmethod(cleanup_cached_url)
+    delete_video_file = staticmethod(delete_video_file)

@@ -10,7 +10,7 @@ from typing import Any, Optional
 
 import jwt
 
-from core.security import SECRET_KEY, ALGORITHM
+from app.core.security import SECRET_KEY, ALGORITHM
 
 logger = logging.getLogger("sonikoma.services.auth")
 

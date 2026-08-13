@@ -222,7 +222,7 @@ def test_yolo_class_filtering_speech_bubble_vs_panel():
                 MockBox([200, 200, 350, 350], 0.9, 1), # frame
             ])]
 
-    with patch("providers.vision.yolo.get_yolo_model") as mock_get_yolo, \
+    with patch("services.image.panel_detection.speech_bubble_detector.get_yolo_model") as mock_get_yolo, \
          patch("services.image.panel_detection.panel_detector._detect_panels_grid_cv") as mock_grid_cv:
         mock_get_yolo.return_value = MockYOLO()
         mock_grid_cv.return_value = []

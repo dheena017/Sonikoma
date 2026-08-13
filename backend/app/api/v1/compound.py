@@ -26,7 +26,7 @@ processor = None
 def _get_processor():
     global processor
     if processor is None:
-        from services.compound.compound_processor import get_compound_processor
+        from services.processing.compound_processor import get_compound_processor
         processor = get_compound_processor()
     return processor
 

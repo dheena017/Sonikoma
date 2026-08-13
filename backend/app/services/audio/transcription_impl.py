@@ -2,8 +2,8 @@
 backend/app/services/audio/transcription_impl.py
 ─────────────────────────────────────────────────────────────────────────────
 Backward-compatibility proxy.
-Re-exports speech transcription functions from `services.audio.speech_transcriber`.
+Re-exports speech transcription functions from `services.audio.transcription`.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from services.audio.speech_transcriber import *
+from services.audio.transcription import *
