@@ -56,22 +56,23 @@ const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => v
   const { activeProjectId, activeProjectData } = useProjectStore();
 
   return (
-    <div className="p-3 rounded-2xl bg-[#0e0f17] border border-white/10 text-xs shadow-md my-2">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1">
-          <Zap className="w-3 h-3 text-purple-400" /> Active Project
+    <div className="px-3 py-3.5 rounded-2xl bg-gradient-to-br from-purple-950/40 via-[#0e0f17] to-indigo-950/30 border border-purple-500/20 text-xs shadow-lg shadow-purple-900/20 my-3 backdrop-blur-sm">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10px] uppercase font-bold text-purple-300 tracking-widest flex items-center gap-1.5">
+          <Zap className="w-3 h-3 text-amber-400" /> Active Project
         </span>
         {activeProjectId ? (
-          <span className="text-[9px] text-emerald-400 font-medium px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            ● Active
+          <span className="text-[9px] text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Active
           </span>
         ) : null}
       </div>
 
       {activeProjectId && activeProjectData ? (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 shrink-0">
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2.5 min-w-0 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-colors">
+            <div className="w-9 h-9 rounded-lg overflow-hidden bg-neutral-900 border border-purple-500/30 shrink-0 shadow-md">
               {activeProjectData.project?.cover_image || activeProjectData.panels?.[0]?.image_url ? (
                 <img
                   src={activeProjectData.project?.cover_image || activeProjectData.panels?.[0]?.image_url}
@@ -79,38 +80,41 @@ const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => v
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center text-purple-300 font-bold text-xs">
+                <div className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
                   {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
                 </div>
               )}
             </div>
             <div className="min-w-0 flex flex-col">
-              <h4 className="font-semibold text-xs text-white truncate">
+              <h4 className="font-semibold text-xs text-white truncate leading-tight">
                 {activeProjectData.project?.title || "Untitled Project"}
               </h4>
-              <span className="text-[10px] text-neutral-400 truncate">
-                {activeProjectData.panels?.length || 0} Panels
+              <span className="text-[9px] text-neutral-400 truncate font-mono">
+                {activeProjectData.panels?.length || 0} panel{activeProjectData.panels?.length !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-1.5 px-2 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600/30 to-indigo-600/20 hover:from-purple-600/50 hover:to-indigo-600/40 text-purple-300 hover:text-purple-100 border border-purple-500/40 hover:border-purple-500/60 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
           >
             <FolderSync className="w-3.5 h-3.5" />
             <span>Switch Project</span>
           </button>
         </div>
       ) : (
-        <div>
-          <p className="text-[11px] text-neutral-400 mb-2">No active project selected.</p>
+        <div className="space-y-2.5">
+          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
+            <p className="text-[10px] text-amber-200 font-medium">No active project</p>
+            <p className="text-[9px] text-amber-100/60 mt-0.5">Select one to get started</p>
+          </div>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-1.5 px-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/20 cursor-pointer"
+            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/30 hover:shadow-lg hover:shadow-purple-600/40 cursor-pointer"
           >
             <FolderOpen className="w-3.5 h-3.5" />
-            <span>Select Active Project</span>
+            <span>Select Project</span>
           </button>
         </div>
       )}

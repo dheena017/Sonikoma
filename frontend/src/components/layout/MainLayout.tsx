@@ -6,7 +6,6 @@ import Header from "@/components/layout/MainHeader";
 import Sidebar from "@/components/layout/MainSidebar";
 import MiniSidebar from "@/components/layout/MainMiniSidebar";
 import NotificationStack from "@/features/app_notification/components/NotificationStack";
-import ActiveProjectWorkspaceBar from "@/components/layout/ActiveProjectWorkspaceBar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import { useProjectStore } from "@/store/useProjectStore";
 
@@ -495,14 +494,6 @@ export default function MainLayout(props: MainLayoutProps) {
           removeNotification={removeNotification}
           notificationsMuted={notificationsMuted}
         />
-
-        {/* Active Project Workspace Bar */}
-        {!isProEditorPage && !isImageEditorPage && !isVideoEditorPage && (
-          <ActiveProjectWorkspaceBar
-            navigateTo={navigateTo}
-            fetchWithInterceptor={fetchWithInterceptor}
-          />
-        )}
 
         {/* Scrollable Main Children Page Area */}
         <div
