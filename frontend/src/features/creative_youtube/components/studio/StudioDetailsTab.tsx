@@ -2,6 +2,105 @@ import React from "react";
 import { Sparkles, UploadCloud, ChevronRight } from "lucide-react";
 import PlaylistSelector from "../PlaylistSelector";
 
+// Full YouTube category list (official IDs)
+const YOUTUBE_CATEGORIES = [
+  { id: "1",  label: "Film & Animation" },
+  { id: "2",  label: "Autos & Vehicles" },
+  { id: "10", label: "Music" },
+  { id: "15", label: "Pets & Animals" },
+  { id: "17", label: "Sports" },
+  { id: "18", label: "Short Movies" },
+  { id: "19", label: "Travel & Events" },
+  { id: "20", label: "Gaming" },
+  { id: "21", label: "Videoblogging" },
+  { id: "22", label: "People & Blogs" },
+  { id: "23", label: "Comedy" },
+  { id: "24", label: "Entertainment" },
+  { id: "25", label: "News & Politics" },
+  { id: "26", label: "Howto & Style" },
+  { id: "27", label: "Education" },
+  { id: "28", label: "Science & Technology" },
+  { id: "29", label: "Nonprofits & Activism" },
+];
+
+// Full language list for YouTube
+const YOUTUBE_LANGUAGES = [
+  { code: "af",    label: "Afrikaans" },
+  { code: "sq",    label: "Albanian" },
+  { code: "ar",    label: "Arabic" },
+  { code: "hy",    label: "Armenian" },
+  { code: "az",    label: "Azerbaijani" },
+  { code: "eu",    label: "Basque" },
+  { code: "be",    label: "Belarusian" },
+  { code: "bn",    label: "Bengali" },
+  { code: "bs",    label: "Bosnian" },
+  { code: "bg",    label: "Bulgarian" },
+  { code: "ca",    label: "Catalan" },
+  { code: "zh-Hans", label: "Chinese (Simplified)" },
+  { code: "zh-Hant", label: "Chinese (Traditional)" },
+  { code: "hr",    label: "Croatian" },
+  { code: "cs",    label: "Czech" },
+  { code: "da",    label: "Danish" },
+  { code: "nl",    label: "Dutch" },
+  { code: "en",    label: "English" },
+  { code: "en-GB", label: "English (UK)" },
+  { code: "et",    label: "Estonian" },
+  { code: "fil",   label: "Filipino" },
+  { code: "fi",    label: "Finnish" },
+  { code: "fr",    label: "French" },
+  { code: "gl",    label: "Galician" },
+  { code: "ka",    label: "Georgian" },
+  { code: "de",    label: "German" },
+  { code: "el",    label: "Greek" },
+  { code: "gu",    label: "Gujarati" },
+  { code: "iw",    label: "Hebrew" },
+  { code: "hi",    label: "Hindi" },
+  { code: "hu",    label: "Hungarian" },
+  { code: "is",    label: "Icelandic" },
+  { code: "id",    label: "Indonesian" },
+  { code: "it",    label: "Italian" },
+  { code: "ja",    label: "Japanese" },
+  { code: "kn",    label: "Kannada" },
+  { code: "kk",    label: "Kazakh" },
+  { code: "km",    label: "Khmer" },
+  { code: "ko",    label: "Korean" },
+  { code: "lo",    label: "Lao" },
+  { code: "lv",    label: "Latvian" },
+  { code: "lt",    label: "Lithuanian" },
+  { code: "mk",    label: "Macedonian" },
+  { code: "ms",    label: "Malay" },
+  { code: "ml",    label: "Malayalam" },
+  { code: "mt",    label: "Maltese" },
+  { code: "mr",    label: "Marathi" },
+  { code: "mn",    label: "Mongolian" },
+  { code: "ne",    label: "Nepali" },
+  { code: "no",    label: "Norwegian" },
+  { code: "fa",    label: "Persian" },
+  { code: "pl",    label: "Polish" },
+  { code: "pt",    label: "Portuguese" },
+  { code: "pt-BR", label: "Portuguese (Brazil)" },
+  { code: "pa",    label: "Punjabi" },
+  { code: "ro",    label: "Romanian" },
+  { code: "ru",    label: "Russian" },
+  { code: "sr",    label: "Serbian" },
+  { code: "si",    label: "Sinhala" },
+  { code: "sk",    label: "Slovak" },
+  { code: "sl",    label: "Slovenian" },
+  { code: "es",    label: "Spanish" },
+  { code: "es-419", label: "Spanish (Latin America)" },
+  { code: "sw",    label: "Swahili" },
+  { code: "sv",    label: "Swedish" },
+  { code: "ta",    label: "Tamil" },
+  { code: "te",    label: "Telugu" },
+  { code: "th",    label: "Thai" },
+  { code: "tr",    label: "Turkish" },
+  { code: "uk",    label: "Ukrainian" },
+  { code: "ur",    label: "Urdu" },
+  { code: "uz",    label: "Uzbek" },
+  { code: "vi",    label: "Vietnamese" },
+  { code: "zu",    label: "Zulu" },
+];
+
 export interface StudioDetailsTabProps {
   title: string;
   setTitle: (val: string) => void;
@@ -26,6 +125,7 @@ export interface StudioDetailsTabProps {
   handleInsertDisclaimer: () => void;
   handleInsertSocials: () => void;
   onNext: () => void;
+  addNotification?: (msg: string, type: any) => void;
 }
 
 export default function StudioDetailsTab({
@@ -52,6 +152,7 @@ export default function StudioDetailsTab({
   handleInsertDisclaimer,
   handleInsertSocials,
   onNext,
+  addNotification,
 }: StudioDetailsTabProps) {
   return (
     <div className="space-y-5 animate-fade-in">
@@ -178,11 +279,12 @@ export default function StudioDetailsTab({
         </div>
       </div>
 
-      {/* PLAYLIST */}
+      {/* PLAYLIST — live from YouTube */}
       <PlaylistSelector
         playlist={playlist}
         setPlaylist={setPlaylist}
         hasCustomCredentials={hasCustomCredentials}
+        addNotification={addNotification}
       />
 
       {/* CATEGORY + LANGUAGE */}
@@ -196,15 +298,11 @@ export default function StudioDetailsTab({
             onChange={(e) => setCategory(e.target.value)}
             className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
           >
-            <option value="1" className="bg-neutral-950">Film &amp; Animation</option>
-            <option value="24" className="bg-neutral-950">Entertainment</option>
-            <option value="20" className="bg-neutral-950">Gaming</option>
-            <option value="23" className="bg-neutral-950">Comedy</option>
-            <option value="22" className="bg-neutral-950">People &amp; Blogs</option>
-            <option value="27" className="bg-neutral-950">Education</option>
-            <option value="28" className="bg-neutral-950">Science &amp; Technology</option>
-            <option value="10" className="bg-neutral-950">Music</option>
-            <option value="2" className="bg-neutral-950">Autos &amp; Vehicles</option>
+            {YOUTUBE_CATEGORIES.map((cat) => (
+              <option key={cat.id} value={cat.id} className="bg-neutral-950">
+                {cat.label}
+              </option>
+            ))}
           </select>
         </div>
         <div className="space-y-1.5">
@@ -217,15 +315,11 @@ export default function StudioDetailsTab({
             className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
           >
             <option value="" className="bg-neutral-950">Select language</option>
-            <option value="en" className="bg-neutral-950">English</option>
-            <option value="ko" className="bg-neutral-950">Korean</option>
-            <option value="ja" className="bg-neutral-950">Japanese</option>
-            <option value="zh" className="bg-neutral-950">Chinese</option>
-            <option value="es" className="bg-neutral-950">Spanish</option>
-            <option value="fr" className="bg-neutral-950">French</option>
-            <option value="de" className="bg-neutral-950">German</option>
-            <option value="pt" className="bg-neutral-950">Portuguese</option>
-            <option value="hi" className="bg-neutral-950">Hindi</option>
+            {YOUTUBE_LANGUAGES.map((lang) => (
+              <option key={lang.code} value={lang.code} className="bg-neutral-950">
+                {lang.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>

@@ -424,6 +424,7 @@ export default function YouTubeStudioPage({
               handleInsertDisclaimer={handleInsertDisclaimer}
               handleInsertSocials={handleInsertSocials}
               onNext={() => setCurrentStep("elements")}
+              addNotification={addNotification}
             />
           )}
 

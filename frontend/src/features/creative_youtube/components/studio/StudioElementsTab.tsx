@@ -160,8 +160,8 @@ export default function StudioElementsTab({
             className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/60 rounded-xl px-3 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
           >
             <option value="none" className="bg-neutral-950">No subtitles</option>
-            <option value="auto" className="bg-neutral-950">Auto-generated</option>
-            <option value="manual" className="bg-neutral-950">Upload SRT file</option>
+            <option value="auto" className="bg-neutral-950">Auto-generated (YouTube ASR)</option>
+            <option value="manual" className="bg-neutral-950">Upload SRT / VTT file</option>
           </select>
           <select
             value={subtitlesLanguage}
@@ -169,11 +169,51 @@ export default function StudioElementsTab({
             className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/60 rounded-xl px-3 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
           >
             <option value="" className="bg-neutral-950">Select language</option>
-            <option value="en" className="bg-neutral-950">English</option>
-            <option value="ko" className="bg-neutral-950">Korean</option>
-            <option value="ja" className="bg-neutral-950">Japanese</option>
-            <option value="zh" className="bg-neutral-950">Chinese</option>
-            <option value="es" className="bg-neutral-950">Spanish</option>
+            <option value="ar"      className="bg-neutral-950">Arabic</option>
+            <option value="bn"      className="bg-neutral-950">Bengali</option>
+            <option value="zh-Hans" className="bg-neutral-950">Chinese (Simplified)</option>
+            <option value="zh-Hant" className="bg-neutral-950">Chinese (Traditional)</option>
+            <option value="cs"      className="bg-neutral-950">Czech</option>
+            <option value="da"      className="bg-neutral-950">Danish</option>
+            <option value="nl"      className="bg-neutral-950">Dutch</option>
+            <option value="en"      className="bg-neutral-950">English</option>
+            <option value="en-GB"   className="bg-neutral-950">English (UK)</option>
+            <option value="fil"     className="bg-neutral-950">Filipino</option>
+            <option value="fi"      className="bg-neutral-950">Finnish</option>
+            <option value="fr"      className="bg-neutral-950">French</option>
+            <option value="de"      className="bg-neutral-950">German</option>
+            <option value="el"      className="bg-neutral-950">Greek</option>
+            <option value="iw"      className="bg-neutral-950">Hebrew</option>
+            <option value="hi"      className="bg-neutral-950">Hindi</option>
+            <option value="hu"      className="bg-neutral-950">Hungarian</option>
+            <option value="id"      className="bg-neutral-950">Indonesian</option>
+            <option value="it"      className="bg-neutral-950">Italian</option>
+            <option value="ja"      className="bg-neutral-950">Japanese</option>
+            <option value="kn"      className="bg-neutral-950">Kannada</option>
+            <option value="ko"      className="bg-neutral-950">Korean</option>
+            <option value="ms"      className="bg-neutral-950">Malay</option>
+            <option value="ml"      className="bg-neutral-950">Malayalam</option>
+            <option value="mr"      className="bg-neutral-950">Marathi</option>
+            <option value="no"      className="bg-neutral-950">Norwegian</option>
+            <option value="fa"      className="bg-neutral-950">Persian</option>
+            <option value="pl"      className="bg-neutral-950">Polish</option>
+            <option value="pt"      className="bg-neutral-950">Portuguese</option>
+            <option value="pt-BR"   className="bg-neutral-950">Portuguese (Brazil)</option>
+            <option value="pa"      className="bg-neutral-950">Punjabi</option>
+            <option value="ro"      className="bg-neutral-950">Romanian</option>
+            <option value="ru"      className="bg-neutral-950">Russian</option>
+            <option value="sr"      className="bg-neutral-950">Serbian</option>
+            <option value="es"      className="bg-neutral-950">Spanish</option>
+            <option value="es-419"  className="bg-neutral-950">Spanish (Latin America)</option>
+            <option value="sw"      className="bg-neutral-950">Swahili</option>
+            <option value="sv"      className="bg-neutral-950">Swedish</option>
+            <option value="ta"      className="bg-neutral-950">Tamil</option>
+            <option value="te"      className="bg-neutral-950">Telugu</option>
+            <option value="th"      className="bg-neutral-950">Thai</option>
+            <option value="tr"      className="bg-neutral-950">Turkish</option>
+            <option value="uk"      className="bg-neutral-950">Ukrainian</option>
+            <option value="ur"      className="bg-neutral-950">Urdu</option>
+            <option value="vi"      className="bg-neutral-950">Vietnamese</option>
           </select>
         </div>
       </div>
