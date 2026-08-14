@@ -46,6 +46,7 @@ from services.image.scraper.scraper_service import (
     generate_storyboard_and_video,
     generate_storyboard_only_service
 )
+from services.scraper.facade import scraper_service
 from services.image.scraper.ocr_service import extract_script_from_panels
 from services.image.scraper.archive_exporter import create_comic_archive
 from services.image.scraper.batch_job_service import create_batch_job, get_batch_job_status, execute_batch_job
@@ -99,6 +100,8 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
             f"[Scraper Route] /scrape-images request: url={body.url!r}, user_id={user_id}, "
             f"bypass_cache={body.bypass_cache}, limit={body.limit}, project_id={body.project_id}"
         )
+        # Temporarily route back to old implementation until new one is fully implemented
+        # result = scraper_service.scrape(body.url)
         result = await scrape_and_initialize_project(
             url=body.url,
             source=body.source,
