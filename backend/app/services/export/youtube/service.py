@@ -7,6 +7,7 @@ management, video uploads, analytics, subtitles, and SEO optimization.
 """
 
 import os
+import asyncio
 import logging
 from typing import Optional, List, Dict, Any
 
@@ -16,6 +17,18 @@ from .metadata import format_video_metadata
 from .upload import upload_video_and_thumbnail
 
 logger = logging.getLogger("sonikoma.services.export.youtube.service")
+
+
+async def _exec(request: Any) -> Any:
+    """Run a synchronous googleapiclient request.execute() in a thread pool.
+
+    All YouTube Data API v3 calls use httplib2 under the hood, which is
+    a blocking I/O library.  Calling .execute() directly on the async
+    event loop stalls every other coroutine until the HTTP round-trip
+    completes (typically 1-5 seconds per call).  This helper offloads
+    each call to a thread so FastAPI remains responsive.
+    """
+    return await asyncio.to_thread(request.execute)
 
 
 class YouTubeService:
@@ -30,16 +43,21 @@ class YouTubeService:
 
     async def get_channel_overview(self) -> Dict[str, Any]:
         """Fetch complete channel overview, branding, banner, avatar, and total views."""
-        try:
-            youtube = await get_authenticated_service(user_id=self.user_id)
+        has_tokens = False
+        selected_ch = None
 
-            selected_ch = None
-            if self.user_id:
-                try:
-                    from repositories.youtube import get_selected_youtube_channel
-                    selected_ch = get_selected_youtube_channel(self.user_id)
-                except Exception:
-                    pass
+        if self.user_id:
+            try:
+                from repositories.youtube import get_youtube_oauth_tokens, get_selected_youtube_channel
+                yt_tokens = get_youtube_oauth_tokens(self.user_id)
+                if yt_tokens and (yt_tokens.get("access_token") or yt_tokens.get("refresh_token")):
+                    has_tokens = True
+                selected_ch = get_selected_youtube_channel(self.user_id)
+            except Exception:
+                pass
+
+        try:
+            youtube: Any = await get_authenticated_service(user_id=self.user_id)
 
             if selected_ch and selected_ch.get("id"):
                 request = youtube.channels().list(
@@ -51,10 +69,21 @@ class YouTubeService:
                     part="snippet,brandingSettings,statistics",
                     mine=True,
                 )
-            response = request.execute()
+            response = await _exec(request)
 
             items = response.get("items", [])
             if not items:
+                if selected_ch or has_tokens:
+                    return {
+                        "authenticated": True,
+                        "id": selected_ch.get("id") if selected_ch else None,
+                        "title": selected_ch.get("title") if selected_ch else "YouTube Channel Connected",
+                        "custom_url": selected_ch.get("custom_url") if selected_ch else "Connected",
+                        "thumbnail": selected_ch.get("thumbnail") if selected_ch else None,
+                        "subscriber_count": "--",
+                        "view_count": "--",
+                        "video_count": "--",
+                    }
                 return {
                     "authenticated": False,
                     "title": "No Channel Found",
@@ -83,10 +112,22 @@ class YouTubeService:
             }
         except Exception as e:
             logger.info(f"YouTube OAuth connection status check: {e}")
+            if has_tokens or selected_ch:
+                return {
+                    "authenticated": True,
+                    "id": selected_ch.get("id") if selected_ch else None,
+                    "title": selected_ch.get("title") if selected_ch else "YouTube Channel Connected",
+                    "custom_url": selected_ch.get("custom_url") if selected_ch else "Connected",
+                    "thumbnail": selected_ch.get("thumbnail") if selected_ch else None,
+                    "subscriber_count": "--",
+                    "view_count": "--",
+                    "video_count": "--",
+                    "message": str(e),
+                }
             return {
                 "authenticated": False,
-                "title": "Google Account Disconnected",
-                "custom_url": "Sign in with Google to load real live channel statistics",
+                "title": "YouTube Not Connected",
+                "custom_url": "Connect YouTube to select your channel and load live stats",
                 "subscriber_count": "--",
                 "view_count": "--",
                 "video_count": "--",
@@ -96,27 +137,33 @@ class YouTubeService:
     async def get_user_videos(self, max_results: int = 24) -> List[Dict[str, Any]]:
         """Fetch list of user's uploaded YouTube videos with live view counts and likes."""
         try:
-            youtube = await get_authenticated_service(user_id=self.user_id)
-            channels_resp = youtube.channels().list(part="contentDetails", mine=True).execute()
+            youtube: Any = await get_authenticated_service(user_id=self.user_id)
+            channels_resp = await _exec(
+                youtube.channels().list(part="contentDetails", mine=True)
+            )
             items = channels_resp.get("items", [])
             if not items:
                 return []
 
             uploads_playlist_id = items[0]["contentDetails"]["relatedPlaylists"]["uploads"]
-            playlist_resp = youtube.playlistItems().list(
-                part="snippet,contentDetails",
-                playlistId=uploads_playlist_id,
-                maxResults=max_results,
-            ).execute()
+            playlist_resp = await _exec(
+                youtube.playlistItems().list(
+                    part="snippet,contentDetails",
+                    playlistId=uploads_playlist_id,
+                    maxResults=max_results,
+                )
+            )
 
             video_ids = [item["contentDetails"]["videoId"] for item in playlist_resp.get("items", [])]
             if not video_ids:
                 return []
 
-            stats_resp = youtube.videos().list(
-                part="snippet,statistics,status",
-                id=",".join(video_ids),
-            ).execute()
+            stats_resp = await _exec(
+                youtube.videos().list(
+                    part="snippet,statistics,status",
+                    id=",".join(video_ids),
+                )
+            )
 
             videos = []
             for item in stats_resp.get("items", []):
@@ -143,13 +190,15 @@ class YouTubeService:
     async def get_video_comments(self, video_id: str) -> List[Dict[str, Any]]:
         """Fetch live top-level comments and viewer feedback for a video."""
         try:
-            youtube = await get_authenticated_service(user_id=self.user_id)
-            resp = youtube.commentThreads().list(
-                part="snippet",
-                videoId=video_id,
-                maxResults=20,
-                order="relevance",
-            ).execute()
+            youtube: Any = await get_authenticated_service(user_id=self.user_id)
+            resp = await _exec(
+                youtube.commentThreads().list(
+                    part="snippet",
+                    videoId=video_id,
+                    maxResults=20,
+                    order="relevance",
+                )
+            )
 
             comments = []
             for item in resp.get("items", []):
@@ -164,7 +213,11 @@ class YouTubeService:
                 })
             return comments
         except Exception as e:
-            logger.warning(f"Comment fetch failed for {video_id}: {e}")
+            err_str = str(e)
+            if "commentsDisabled" in err_str or "disabled comments" in err_str:
+                logger.info(f"[YouTube Comments] Comments are disabled on video {video_id}.")
+            else:
+                logger.warning(f"[YouTube Comments] Comment fetch for {video_id}: {e}")
             return []
 
     async def upload_video(
@@ -183,7 +236,7 @@ class YouTubeService:
             raise ResourceNotFoundException("Video file not found for YouTube upload.")
 
         try:
-            youtube = await get_authenticated_service(user_id=self.user_id)
+            youtube: Any = await get_authenticated_service(user_id=self.user_id)
             request_body = format_video_metadata(
                 title=title,
                 description=description,
@@ -193,7 +246,8 @@ class YouTubeService:
                 is_short=is_short,
             )
 
-            res = upload_video_and_thumbnail(
+            res = await asyncio.to_thread(
+                upload_video_and_thumbnail,
                 youtube=youtube,
                 video_path=video_path,
                 request_body=request_body,
@@ -207,13 +261,14 @@ class YouTubeService:
     async def get_playlists(self) -> List[Dict[str, Any]]:
         """Fetch all playlists for the user's YouTube channel."""
         try:
-            youtube = await get_authenticated_service(user_id=self.user_id)
-            request = youtube.playlists().list(
-                part="snippet,contentDetails,status",
-                mine=True,
-                maxResults=50,
+            youtube: Any = await get_authenticated_service(user_id=self.user_id)
+            response = await _exec(
+                youtube.playlists().list(
+                    part="snippet,contentDetails,status",
+                    mine=True,
+                    maxResults=50,
+                )
             )
-            response = request.execute()
             playlists = []
             for item in response.get("items", []):
                 snippet = item.get("snippet", {})
@@ -226,7 +281,7 @@ class YouTubeService:
                 })
             return playlists
         except Exception as e:
-            logger.error(f"Failed to fetch YouTube playlists: {e}")
+            logger.warning(f"Failed to fetch YouTube playlists: {e}")
             return []
 
     async def generate_seo_metadata(self, title: str, series: str) -> Dict[str, Any]:

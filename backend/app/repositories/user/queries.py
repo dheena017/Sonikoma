@@ -12,14 +12,31 @@ from database.engine import get_db_connection
 
 def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
     """
-    Get a user by their email address.
+    Get a user by their email address (case-insensitive).
     """
     conn = get_db_connection()
     try:
-        row = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        row = conn.execute('SELECT * FROM users WHERE LOWER(email) = LOWER(?)', (email.strip(),)).fetchone()
         if row:
             res = dict(row)
             # Map database 'password_hash' to expected 'hashed_password' for auth route compatibility
+            res['hashed_password'] = res.get('password_hash')
+            res['user_id'] = res.get('id')
+            return res
+        return None
+    finally:
+        conn.close()
+
+
+def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
+    """
+    Get a user by their username (case-insensitive).
+    """
+    conn = get_db_connection()
+    try:
+        row = conn.execute('SELECT * FROM users WHERE LOWER(username) = LOWER(?)', (username.strip(),)).fetchone()
+        if row:
+            res = dict(row)
             res['hashed_password'] = res.get('password_hash')
             res['user_id'] = res.get('id')
             return res

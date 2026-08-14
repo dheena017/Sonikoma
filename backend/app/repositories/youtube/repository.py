@@ -215,6 +215,17 @@ def save_selected_youtube_channel(
                 updated_at=datetime('now')
             WHERE user_id=?
         """, (channel_id, title, thumbnail, handle, user_id))
+        
+        # Also mark this channel as selected in user_youtube_channels
+        try:
+            conn.execute("""
+                UPDATE user_youtube_channels
+                SET is_selected = CASE WHEN channel_id = ? THEN 1 ELSE 0 END,
+                    updated_at = datetime('now')
+                WHERE user_id = ?
+            """, (channel_id, user_id))
+        except Exception:
+            pass
         conn.commit()
     finally:
         conn.close()
@@ -235,3 +246,154 @@ def get_selected_youtube_channel(user_id: str) -> Optional[Dict[str, Any]]:
         return dict(row) if row else None
     finally:
         conn.close()
+
+
+def save_user_youtube_channel(user_id: str, ch: Dict[str, Any]) -> None:
+    """Save or update a discovered/authorized YouTube channel for a user."""
+    channel_id = ch.get("id") or ch.get("channel_id")
+    if not channel_id:
+        return
+    title = ch.get("title") or "YouTube Channel"
+    description = ch.get("description") or ""
+    custom_url = ch.get("custom_url") or ""
+    thumbnail = ch.get("thumbnail") or ""
+    subscriber_count = str(ch.get("subscriber_count") or "")
+    view_count = str(ch.get("view_count") or "")
+    video_count = str(ch.get("video_count") or "")
+    channel_type = ch.get("type") or "personal"
+    is_selected = 1 if ch.get("is_selected") else 0
+
+    conn = get_db_connection()
+    try:
+        # Clear from unlinked list if user is explicitly re-adding or linking this channel
+        try:
+            conn.execute(
+                "DELETE FROM user_unlinked_youtube_channels WHERE user_id = ? AND channel_id = ?",
+                (user_id, channel_id),
+            )
+        except Exception:
+            pass
+
+        conn.execute("""
+            INSERT INTO user_youtube_channels (
+                channel_id, user_id, title, description, custom_url,
+                thumbnail, subscriber_count, view_count, video_count,
+                channel_type, is_selected, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(user_id, channel_id) DO UPDATE SET
+                title=excluded.title,
+                description=COALESCE(NULLIF(excluded.description, ''), description),
+                custom_url=COALESCE(NULLIF(excluded.custom_url, ''), custom_url),
+                thumbnail=COALESCE(NULLIF(excluded.thumbnail, ''), thumbnail),
+                subscriber_count=COALESCE(NULLIF(excluded.subscriber_count, ''), subscriber_count),
+                view_count=COALESCE(NULLIF(excluded.view_count, ''), view_count),
+                video_count=COALESCE(NULLIF(excluded.video_count, ''), video_count),
+                channel_type=excluded.channel_type,
+                updated_at=datetime('now')
+        """, (
+            channel_id, user_id, title, description, custom_url,
+            thumbnail, subscriber_count, view_count, video_count,
+            channel_type, is_selected
+        ))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_user_unlinked_channel_ids(user_id: str) -> set[str]:
+    """Return the set of channel IDs that the user explicitly unlinked."""
+    conn = get_db_connection()
+    try:
+        rows = conn.execute(
+            "SELECT channel_id FROM user_unlinked_youtube_channels WHERE user_id = ?",
+            (user_id,),
+        ).fetchall()
+        return {r[0] for r in rows if r[0]}
+    except Exception:
+        return set()
+    finally:
+        conn.close()
+
+
+def get_user_youtube_channels(user_id: str) -> List[Dict[str, Any]]:
+    """Return all discovered and authorized YouTube channels for a user."""
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("""
+            SELECT channel_id AS id,
+                   channel_id,
+                   title,
+                   description,
+                   custom_url,
+                   thumbnail,
+                   subscriber_count,
+                   view_count,
+                   video_count,
+                   channel_type AS type,
+                   is_selected
+            FROM user_youtube_channels
+            WHERE user_id = ?
+            ORDER BY is_selected DESC, updated_at DESC
+        """, (user_id,)).fetchall()
+        return [dict(r) for r in rows]
+    except Exception as e:
+        logger.debug(f"Error querying user_youtube_channels: {e}")
+        return []
+    finally:
+        conn.close()
+
+
+def delete_user_youtube_channel(user_id: str, channel_id: str) -> bool:
+    """Remove a saved YouTube channel from a user's channel list."""
+    conn = get_db_connection()
+    try:
+        # 1. Delete from user_youtube_channels
+        cur = conn.execute(
+            "DELETE FROM user_youtube_channels WHERE user_id = ? AND channel_id = ?",
+            (user_id, channel_id),
+        )
+
+        # 2. Record in unlinked channels so auto-discovery doesn't resurrect it
+        try:
+            conn.execute(
+                "INSERT OR IGNORE INTO user_unlinked_youtube_channels (user_id, channel_id, unlinked_at) VALUES (?, ?, datetime('now'))",
+                (user_id, channel_id),
+            )
+        except Exception:
+            pass
+
+        # 3. If the deleted channel was currently active, switch to next remaining channel
+        remaining = conn.execute(
+            "SELECT * FROM user_youtube_channels WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1",
+            (user_id,),
+        ).fetchone()
+
+        if remaining:
+            rem = dict(remaining)
+            conn.execute("""
+                UPDATE youtube_oauth_tokens
+                SET selected_channel_id = ?, selected_channel_title = ?,
+                    selected_channel_thumbnail = ?, selected_channel_handle = ?,
+                    updated_at = datetime('now')
+                WHERE user_id = ?
+            """, (rem["channel_id"], rem["title"], rem["thumbnail"], rem["custom_url"], user_id))
+            conn.execute(
+                "UPDATE user_youtube_channels SET is_selected = 1 WHERE user_id = ? AND channel_id = ?",
+                (user_id, rem["channel_id"]),
+            )
+        else:
+            conn.execute("""
+                UPDATE youtube_oauth_tokens
+                SET selected_channel_id = NULL, selected_channel_title = NULL,
+                    selected_channel_thumbnail = NULL, selected_channel_handle = NULL,
+                    updated_at = datetime('now')
+                WHERE user_id = ?
+            """, (user_id,))
+
+        conn.commit()
+        return cur.rowcount > 0
+    finally:
+        conn.close()
+
+

@@ -35,12 +35,14 @@ interface YouTubeChannelHeaderProps {
   seoScore?: number;
   isPublishing?: boolean;
   onOpenChannelModal?: () => void;
+  addNotification?: (msg: string, type: string) => void;
 }
 
 export default function YouTubeChannelHeader({
   seoScore = 0,
   isPublishing = false,
   onOpenChannelModal,
+  addNotification,
 }: YouTubeChannelHeaderProps) {
   const [profileData, setProfileData] = useState<YouTubeProfileResponse | null>(null);
   const [channels, setChannels] = useState<ChannelItem[]>([]);
@@ -92,17 +94,18 @@ export default function YouTubeChannelHeader({
       if (res.ok) {
         const data = await res.json();
         if (data.auth_url) {
+          addNotification?.("Redirecting to Google to connect YouTube...", "info");
           window.location.href = data.auth_url;
         } else {
-          alert("Failed to get YouTube authorization URL. Please try again.");
+          addNotification?.("Failed to get YouTube authorization URL. Please try again.", "error");
         }
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(`YouTube connection failed: ${err.detail || res.statusText}`);
+        addNotification?.(`YouTube connection failed: ${err.detail || res.statusText}`, "error");
       }
     } catch (err) {
       console.error("YouTube connect error:", err);
-      alert("Failed to start YouTube connection. Please check that you are logged in.");
+      addNotification?.("Failed to start YouTube connection. Please check that you are logged in.", "error");
     } finally {
       setIsConnecting(false);
     }
@@ -119,7 +122,7 @@ export default function YouTubeChannelHeader({
     : "YouTube Integration Hub";
 
   const activeHandle = isConnected
-    ? (selectedChannel?.custom_url || profileData?.overview?.custom_url || profileData?.user_email || "Google Account Connected")
+    ? (selectedChannel?.custom_url || profileData?.overview?.custom_url || "YouTube Channel Connected")
     : "Connect YouTube to select your channel & load profile stats";
 
   const activeThumbnail = isConnected
@@ -307,31 +310,6 @@ export default function YouTubeChannelHeader({
         </div>
       </div>
 
-      {/* Disconnected Alert Banner */}
-      {!isConnected && (
-        <div className="bg-gradient-to-r from-amber-950/40 via-red-950/20 to-neutral-950 p-4 border-b border-amber-900/30 flex items-center justify-between gap-4 animate-fade-in font-mono">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-amber-950/60 border border-amber-800/50 rounded-xl text-amber-400 shrink-0">
-              <Youtube className="w-5 h-5 animate-pulse" />
-            </div>
-            <div>
-              <div className="text-xs font-bold text-amber-200 font-sans">
-                YouTube Integration Not Connected
-              </div>
-              <div className="text-[11px] text-neutral-400 font-sans leading-relaxed">
-                Click <strong className="text-amber-200">Connect YouTube</strong> above to authorize YouTube and select your channel.
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={handleConnectYouTube}
-            disabled={isConnecting}
-            className="px-3.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 disabled:opacity-60 text-amber-300 font-mono text-xs font-bold rounded-xl border border-amber-500/30 transition-all shrink-0"
-          >
-            {isConnecting ? "Connecting..." : "Connect Now →"}
-          </button>
-        </div>
-      )}
 
 
       {/* Stats Counter Bar */}

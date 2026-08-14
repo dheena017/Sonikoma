@@ -351,19 +351,37 @@ export default defineConfig(({ mode, command }) => {
         "@shared": path.resolve(__dirname, "../shared"),
       },
     },
+    optimizeDeps: {
+      include: [
+        "react",
+        "react-dom",
+        "react/jsx-runtime",
+        "zustand",
+        "lucide-react",
+        "@supabase/supabase-js",
+        "date-fns",
+        "jszip",
+        "file-saver",
+        "clsx",
+        "tailwind-merge",
+      ],
+    },
     build: {
       chunkSizeWarningLimit: 800,
       rollupOptions: {
         output: {
           manualChunks(id) {
             if (id.includes("node_modules")) {
-              if (id.includes("react") || id.includes("scheduler")) {
+              if (
+                id.includes("/react/") ||
+                id.includes("/react-dom/") ||
+                id.includes("/scheduler/")
+              ) {
                 return "vendor-react-core";
               }
-              if (id.includes("lucide") || id.includes("icons")) {
+              if (id.includes("lucide-react")) {
                 return "vendor-icons";
               }
-              return "vendor-libs";
             }
           },
         },

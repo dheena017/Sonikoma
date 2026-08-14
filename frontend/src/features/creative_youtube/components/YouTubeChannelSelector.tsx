@@ -52,14 +52,14 @@ export default function YouTubeChannelSelector({
         const current = channelList.find((c) => c.id === selectedChannelId) || channelList[0];
         onSelectChannel(current);
         if (addNotification) {
-          addNotification(`Found ${channelList.length} YouTube channel(s) linked to your Google Account.`, "success");
+          addNotification(`Loaded ${channelList.length} YouTube channel(s).`, "success");
         }
       } else {
-        setError("No YouTube channels found for this Google Account.");
+        setError("No YouTube channels found. Please connect your YouTube account.");
       }
     } catch (err: any) {
       console.warn("YouTube channel fetch notice:", err.message);
-      setError("Unable to load channels. Sign in with Google to load live accounts.");
+      setError("Unable to load channels. Please connect your YouTube account.");
       setChannels([]);
     } finally {
       setIsLoading(false);
@@ -81,10 +81,10 @@ export default function YouTubeChannelSelector({
           </div>
           <div>
             <span className="text-white font-bold text-xs block font-sans">
-              Target YouTube Channel / Brand Account
+              Target YouTube Channel
             </span>
             <span className="text-[10px] text-neutral-500 block font-sans">
-              Choose which YouTube channel under your Google email to publish to
+              Choose which YouTube channel to publish your video to
             </span>
           </div>
         </div>
@@ -102,7 +102,7 @@ export default function YouTubeChannelSelector({
       {isLoading ? (
         <div className="py-4 text-center text-neutral-500 text-[11px] animate-pulse flex items-center justify-center gap-2">
           <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
-          Fetching YouTube channels for your Google Account...
+          Fetching connected YouTube channels...
         </div>
       ) : activeChannel ? (
         <div className="relative">

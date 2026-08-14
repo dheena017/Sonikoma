@@ -737,6 +737,8 @@ export function useYouTubePublisher({
         (1024 * 1024)
       ).toFixed(1)} MB)`,
     ]);
+    if (addNotification)
+      addNotification(`📹 Video loaded: ${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)`, "success");
   };
 
   const handleClearSelectedFile = () => {
@@ -749,6 +751,7 @@ export function useYouTubePublisher({
       ...prev,
       `[File] Cleared local file selection. Reverted to workspace video.`,
     ]);
+    if (addNotification) addNotification("Video file cleared. Using workspace video.", "info");
   };
 
   // Handle local thumbnail selection
@@ -800,8 +803,10 @@ export function useYouTubePublisher({
         ...prev,
         `[Thumbnail] Selected AI generated thumbnail from project library.`,
       ]);
+      if (addNotification) addNotification("🖼️ AI thumbnail selected from project library!", "success");
     } catch (e) {
       console.error("Failed to select AI thumbnail", e);
+      if (addNotification) addNotification("Failed to load AI thumbnail. Please try another.", "error");
     }
   };
 
@@ -881,6 +886,8 @@ export function useYouTubePublisher({
       ...prev,
       "[Chapters] Tuned chapters outline successfully appended to description.",
     ]);
+    if (addNotification)
+      addNotification("Tuned chapter timestamps appended to description!", "success");
   };
 
   // Load Description Preset Templates
@@ -917,6 +924,8 @@ export function useYouTubePublisher({
       ...prev,
       `[Template] Loaded description template preset: ${type.toUpperCase()}`,
     ]);
+    if (addNotification)
+      addNotification(`📋 Description template "${type}" applied!`, "info");
   };
 
   // AI Generation helper

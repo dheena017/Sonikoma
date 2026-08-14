@@ -9,6 +9,7 @@ interface TitleOptimizerProps {
   scrapedTitle: string;
   scrapedGenre: string;
   onInjectPowerWord: (word: string) => void;
+  addNotification?: (msg: string, type: string) => void;
 }
 
 export default function TitleOptimizer({
@@ -17,6 +18,7 @@ export default function TitleOptimizer({
   scrapedTitle,
   scrapedGenre,
   onInjectPowerWord,
+  addNotification,
 }: TitleOptimizerProps) {
   const base = title.trim() || scrapedTitle || "Overpowered Webtoon Hero";
   const cleanBase = base.replace(/\[.*?\]/g, "").trim();
@@ -40,6 +42,7 @@ export default function TitleOptimizer({
       if (json.success && json.result?.suggested_alternatives) {
         const aiTitles = json.result.suggested_alternatives.map((a: any) => a.title);
         setVariants(aiTitles);
+        addNotification?.(`✅ ${aiTitles.length} AI title variants generated!`, "success");
       } else {
         // Fallback options
         setVariants([
@@ -47,6 +50,7 @@ export default function TitleOptimizer({
           `He Was F-Rank, Until He Became the Ultimate ${scrapedGenre || "OP"} King!`,
           `I Spent 10,000 Years Leveling Up ${cleanBase}...!`,
         ]);
+        addNotification?.("AI returned no variants, loaded fallback clickbait templates.", "info");
       }
     } catch {
       setVariants([
@@ -54,6 +58,7 @@ export default function TitleOptimizer({
         `He Was F-Rank, Until He Became the Ultimate ${scrapedGenre || "OP"} King!`,
         `I Spent 10,000 Years Leveling Up ${cleanBase}...!`,
       ]);
+      addNotification?.("AI title generation failed. Loaded fallback templates.", "warning");
     } finally {
       setLoading(false);
     }

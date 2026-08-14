@@ -50,10 +50,12 @@ router = APIRouter()
 # Cookie name for tracking YouTube OAuth state (separate from Sonikoma login cookie)
 YT_OAUTH_STATE_COOKIE = "yt_oauth_state"
 
-# Minimum required scopes for reading channels & uploading videos
+# Scopes for full YouTube channel management, statistics & video publishing
 YOUTUBE_SCOPES = [
+    "https://www.googleapis.com/auth/youtube",
     "https://www.googleapis.com/auth/youtube.readonly",
     "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
 ]
 
 
@@ -320,11 +322,77 @@ async def get_youtube_channels(
 ):
     """
     Returns all YouTube channels/accounts linked to the authenticated user's Google account.
+    Returns needs_reauth=True when the user has no stored YouTube OAuth tokens.
     """
     user_id = _get_user_id(current_user)
+    if not user_id:
+        return {"channels": [], "count": 0, "needs_reauth": True, "message": "User session required"}
+
+    # Check if the user has dedicated YouTube OAuth tokens or custom credentials
+    has_youtube_tokens = False
+    try:
+        tokens = get_youtube_oauth_tokens(user_id)
+        if tokens and (tokens.get("access_token") or tokens.get("refresh_token")):
+            has_youtube_tokens = True
+    except Exception:
+        pass
+
+    if not has_youtube_tokens:
+        return {
+            "channels": [],
+            "count": 0,
+            "needs_reauth": True,
+            "message": "YouTube authorization required. Please connect your YouTube account.",
+        }
+
     service = YouTubeService(user_id=user_id)
     channels = await service.get_channels()
-    return {"channels": channels, "count": len(channels)}
+    return {
+        "channels": channels,
+        "count": len(channels),
+        "needs_reauth": False,
+    }
+
+
+@router.post("/youtube/channel/lookup", summary="Search or add a YouTube channel by handle or ID")
+async def lookup_youtube_channel_route(
+    payload: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Looks up a YouTube channel by handle (e.g. '@motivatenow-t1e') or ID ('UC...'),
+    verifies it against YouTube Data API, and stores it in the user's channel list.
+    """
+    user_id = _get_user_id(current_user)
+    query = payload.get("query", "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="Channel handle or ID is required")
+
+    from services.export.youtube.oauth import lookup_youtube_channel_by_handle
+    channel = await lookup_youtube_channel_by_handle(user_id=user_id, query=query)
+    if not channel:
+        raise HTTPException(status_code=404, detail=f"No YouTube channel found for '{query}'")
+
+    return {
+        "success": True,
+        "channel": channel,
+        "message": f"Found channel: {channel.get('title')}",
+    }
+
+
+@router.delete("/youtube/channel/{channel_id}", summary="Remove a channel from user's channel list")
+async def delete_youtube_channel_route(
+    channel_id: str,
+    current_user: dict = Depends(get_current_user),
+):
+    """Removes a channel from the user's saved channels."""
+    user_id = _get_user_id(current_user)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    from repositories.youtube.repository import delete_user_youtube_channel
+    deleted = delete_user_youtube_channel(user_id=user_id, channel_id=channel_id)
+    return {"success": deleted, "channel_id": channel_id}
+
 
 
 @router.get("/youtube/playlists")
@@ -359,8 +427,20 @@ async def get_youtube_profile_details(
     service = YouTubeService(user_id=user_id)
     overview = await service.get_channel_overview()
     channels = await service.get_channels()
+
+    has_tokens = False
+    if user_id:
+        try:
+            tokens = get_youtube_oauth_tokens(user_id)
+            if tokens and (tokens.get("access_token") or tokens.get("refresh_token")):
+                has_tokens = True
+        except Exception:
+            pass
+
+    is_authenticated = overview.get("authenticated", False) or has_tokens
+
     return {
-        "authenticated": overview.get("authenticated", False),
+        "authenticated": is_authenticated,
         "user_email": current_user.get("email") if current_user else None,
         "user_name": current_user.get("name") or current_user.get("full_name") if current_user else None,
         "user_picture": current_user.get("picture") or current_user.get("avatar_url") if current_user else None,
@@ -466,13 +546,12 @@ async def youtube_oauth_connect(
         "response_type": "code",
         "scope": " ".join(YOUTUBE_SCOPES),
         "access_type": "offline",
-        "prompt": "consent",  # force consent to always get refresh_token
+        "prompt": "select_account consent",  # Show Google account & Brand Account picker
         "state": state,
-        "login_hint": current_user.get("email", ""),
     }
 
     auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
-    logger.info(f"Initiating signed YouTube OAuth for user {user_id} with redirect_uri: {redirect_uri}")
+    logger.info(f"[YouTube OAuth] Initiating signed YouTube OAuth for user {user_id} with redirect_uri: {redirect_uri}")
 
     secure = request.url.scheme == "https"
     accept_header = request.headers.get("accept", "")
@@ -496,7 +575,7 @@ async def youtube_oauth_callback(request: Request):
     Handles the Google OAuth callback specifically for YouTube channel authorization.
     Verifies the HMAC signature of state to extract and validate the authenticated user_id.
     Does NOT create a Sonikoma login session or JWT.
-    Redirects back to /creative/youtube?select_channel=true.
+    Redirects back to /creative-suite/youtube?select_channel=true.
     """
     state = request.query_params.get("state")
     code = request.query_params.get("code")
@@ -513,19 +592,19 @@ async def youtube_oauth_callback(request: Request):
     yt_page_url = f"{frontend_url}/creative-suite/youtube"
 
     if error:
-        logger.warning(f"YouTube OAuth error: {error}")
+        logger.warning(f"[YouTube OAuth] OAuth error returned: {error}")
         return RedirectResponse(f"{yt_page_url}?yt_error={urllib.parse.quote(error)}")
 
     # Verify cryptographic HMAC signature of state token to get user_id securely
     user_id = _verify_signed_state(state)
     if not user_id:
-        logger.error("YouTube OAuth: state token verification failed or expired")
+        logger.error("[YouTube OAuth] State token verification failed or expired")
         return RedirectResponse(f"{yt_page_url}?yt_error=invalid_state")
 
     # Verify cookie matches query state for double-submit protection
     cookie_state = request.cookies.get(YT_OAUTH_STATE_COOKIE)
     if cookie_state and not hmac.compare_digest(state, cookie_state):
-        logger.error("YouTube OAuth cookie state mismatch")
+        logger.error("[YouTube OAuth] Cookie state mismatch")
         return RedirectResponse(f"{yt_page_url}?yt_error=state_mismatch")
 
     if not code:
@@ -549,17 +628,18 @@ async def youtube_oauth_callback(request: Request):
                 "redirect_uri": redirect_uri,
                 "grant_type": "authorization_code",
             },
+            timeout=15,
         )
         token_data = token_resp.json()
     except Exception as e:
-        logger.error(f"YouTube token exchange failed: {e}")
+        logger.error(f"[YouTube OAuth] Token exchange request failed: {e}")
         return RedirectResponse(f"{yt_page_url}?yt_error=token_exchange_failed")
 
     access_token = token_data.get("access_token")
     refresh_token = token_data.get("refresh_token")
 
     if not access_token:
-        logger.error(f"YouTube token exchange: no access_token returned")
+        logger.error(f"[YouTube OAuth] Token exchange: no access_token returned in response")
         return RedirectResponse(f"{yt_page_url}?yt_error=no_access_token")
 
     # Save YouTube-specific tokens (attached to verified user_id)
@@ -572,10 +652,31 @@ async def youtube_oauth_callback(request: Request):
             client_secret=client_secret,
             scopes=" ".join(YOUTUBE_SCOPES),
         )
-        logger.info(f"YouTube OAuth tokens saved securely for user {user_id}")
+        logger.info(f"[YouTube OAuth] YouTube OAuth tokens saved securely for user {user_id}")
     except Exception as e:
-        logger.error(f"Failed to save YouTube OAuth tokens for user {user_id}: {e}")
+        logger.error(f"[YouTube OAuth] Failed to save YouTube OAuth tokens for user {user_id}: {e}")
         return RedirectResponse(f"{yt_page_url}?yt_error=save_failed")
+
+    # Immediately discover and persist the authorized YouTube channel
+    try:
+        discovered_channels = await fetch_user_youtube_channels(user_id=user_id)
+        if discovered_channels:
+            first_ch = discovered_channels[0]
+            cid = first_ch.get("id")
+            title = first_ch.get("title")
+            # If no channel is currently selected, select this newly connected channel
+            current_selected = get_selected_youtube_channel(user_id)
+            if not current_selected or not current_selected.get("id"):
+                save_selected_youtube_channel(
+                    user_id=user_id,
+                    channel_id=cid,
+                    title=title,
+                    thumbnail=first_ch.get("thumbnail"),
+                    handle=first_ch.get("custom_url"),
+                )
+                logger.info(f"[YouTube OAuth] Auto-selected newly authorized channel '{title}' ({cid})")
+    except Exception as disc_err:
+        logger.warning(f"[YouTube OAuth] Post-auth channel discovery warning: {disc_err}")
 
     response = RedirectResponse(f"{yt_page_url}?select_channel=true")
     response.delete_cookie(YT_OAUTH_STATE_COOKIE, path="/")

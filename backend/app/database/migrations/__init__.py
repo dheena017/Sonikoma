@@ -476,7 +476,38 @@ def init_sqlite(conn) -> None:
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """)
-        logger.debug("[Database] Migration: verified youtube_oauth_tokens table.")
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_youtube_channels (
+          channel_id          TEXT NOT NULL,
+          user_id             TEXT NOT NULL,
+          title               TEXT NOT NULL,
+          description         TEXT,
+          custom_url          TEXT,
+          thumbnail           TEXT,
+          subscriber_count    TEXT,
+          view_count          TEXT,
+          video_count         TEXT,
+          channel_type        TEXT DEFAULT 'personal',
+          is_selected         INTEGER DEFAULT 0,
+          created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at          TEXT NOT NULL DEFAULT (datetime('now')),
+          PRIMARY KEY (user_id, channel_id),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_unlinked_youtube_channels (
+          user_id             TEXT NOT NULL,
+          channel_id          TEXT NOT NULL,
+          unlinked_at         TEXT NOT NULL DEFAULT (datetime('now')),
+          PRIMARY KEY (user_id, channel_id),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """)
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_user_yt_channels_user ON user_youtube_channels(user_id)"
+        )
+        logger.debug("[Database] Migration: verified youtube_oauth_tokens and user_youtube_channels tables.")
 
         # ── credit_transactions table ─────────────────────────────────────
         cursor.execute("""

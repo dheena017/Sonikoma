@@ -709,9 +709,13 @@ export function useAppState() {
         // automatically; if valid the server returns a JSON access_token we
         // can persist in localStorage so all subsequent requests work.
         try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1000);
           const sessionRes = await fetch("/api/auth/google/session", {
             credentials: "include",
+            signal: controller.signal,
           });
+          clearTimeout(timeoutId);
           if (sessionRes.ok) {
             const sessionData = await sessionRes.json();
             if (sessionData.access_token) {

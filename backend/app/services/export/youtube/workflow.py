@@ -6,7 +6,7 @@ Orchestrates the OAuth authentication, metadata formatting, and upload logic.
 """
 import os
 import logging
-from typing import Optional, List
+from typing import Optional, List, Any
 
 from app.core.exceptions import ResourceNotFoundException, ProcessingException
 from .oauth import get_authenticated_service
@@ -32,7 +32,7 @@ async def execute_youtube_upload_workflow(
 
     try:
         # Step 1: Authenticate
-        youtube = await get_authenticated_service(user_id=user_id)
+        youtube: Any = await get_authenticated_service(user_id=user_id)
 
         # Step 2: Format Metadata
         request_body = format_video_metadata(

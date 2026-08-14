@@ -6,6 +6,7 @@ Google OAuth2 authentication routes.
 """
 
 import os
+import re
 import uuid
 import json
 import hmac
@@ -19,6 +20,7 @@ from app.core.config import APP_URL
 from app.core.security import get_password_hash, create_access_token
 from repositories.user import (
     get_user_by_email,
+    get_user_by_username,
     create_user_relational,
     update_user,
 )
@@ -135,8 +137,6 @@ async def google_login(request: Request):
         "openid",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/youtube.readonly",
-        "https://www.googleapis.com/auth/youtube.upload",
     ]
 
     state = _generate_oauth_state()
@@ -244,15 +244,41 @@ async def google_callback(request: Request):
 
         user = get_user_by_email(email)
         if not user:
+            # Generate a clean unique username based on the Google display name / email prefix
+            raw_base = name.strip() if (isinstance(name, str) and name.strip()) else email.split("@")[0]
+            base_username = re.sub(r"[^\w.-]", "_", raw_base).strip("_") or "user"
+            candidate_username = base_username
+
+            # Check for existing username collisions in SQLite
+            attempt = 0
+            while get_user_by_username(candidate_username) is not None:
+                attempt += 1
+                candidate_username = f"{base_username}_{uuid.uuid4().hex[:4]}"
+                if attempt > 10:
+                    candidate_username = f"user_{uuid.uuid4().hex[:8]}"
+                    break
+
             user_uuid = f"user_{uuid.uuid4().hex[:8]}"
             password_hash = get_password_hash(f"google_oauth_{uuid.uuid4().hex}")
-            created = create_user_relational(
-                user_id=user_uuid,
-                username=name,
-                email=email,
-                password_hash=password_hash,
-                preferences="{}",
-            )
+            try:
+                create_user_relational(
+                    user_id=user_uuid,
+                    username=candidate_username,
+                    email=email,
+                    password_hash=password_hash,
+                    preferences="{}",
+                )
+            except Exception as insert_err:
+                logger.warning("Username conflict for '%s' (%s), using random uuid username fallback", candidate_username, insert_err)
+                fallback_username = f"user_{uuid.uuid4().hex[:8]}"
+                create_user_relational(
+                    user_id=user_uuid,
+                    username=fallback_username,
+                    email=email,
+                    password_hash=password_hash,
+                    preferences="{}",
+                )
+
             # ensure the newly created user exists and is fetchable
             user = get_user_by_email(email)
             if not user:

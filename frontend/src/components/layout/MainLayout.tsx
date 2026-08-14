@@ -6,7 +6,6 @@ import Header from "@/components/layout/MainHeader";
 import Sidebar from "@/components/layout/MainSidebar";
 import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
-import AutoCropModal from "@/features/editor_auto_crop/components/AutoCropModal";
 import NotificationStack from "@/features/app_notification/components/NotificationStack";
 import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
 import TerminalLogs from "@/features/system_terminal/components/TerminalLogs";
@@ -20,6 +19,7 @@ import CreativeSuiteMiniSidebar from "@/features/creative_suite/components/Creat
 import ActiveProjectWorkspaceBar from "@/components/layout/ActiveProjectWorkspaceBar";
 import ActiveProjectSelectorDrawer from "@/components/layout/ActiveProjectSelectorDrawer";
 import { useProjectStore } from "@/store/useProjectStore";
+const AutoCropModal = React.lazy(() => import("@/features/editor_auto_crop/components/AutoCropModal"));
 
 
 export interface MainLayoutProps {
@@ -597,50 +597,52 @@ export default function MainLayout(props: MainLayoutProps) {
               }`}
           >
             {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (
-              <AutoCropModal
-                isPage={false}
-                onClose={handleAutoCropClose}
-                onApply={handleAutoCropApply}
-                sensitivity={cropSensitivity}
-                setSensitivity={setCropSensitivity}
-                padding={cropPaddingPx}
-                setPadding={setCropPaddingPx}
-                backgroundColorMode={cropBackgroundMode}
-                setBackgroundColorMode={setCropBackgroundMode}
-                autoSplitTallStrips={autoSplitTallStrips}
-                setAutoSplitTallStrips={setAutoSplitTallStrips}
-                aspectRatioLock={aspectRatioLock}
-                setAspectRatioLock={setAspectRatioLock}
-                minPanelAreaPct={minPanelAreaPct}
-                setMinPanelAreaPct={setMinPanelAreaPct}
-                overlapMergeThreshold={overlapMergeThreshold}
-                setOverlapMergeThreshold={setOverlapMergeThreshold}
-                useLocalCV={useLocalCV}
-                setUseLocalCV={setUseLocalCV}
-                cropModel={cropModel}
-                setCropModel={setCropModel}
-                cropMinHeightPx={cropMinHeightPx}
-                setCropMinHeightPx={setCropMinHeightPx}
-                cropCannyLow={cropCannyLow}
-                setCropCannyLow={setCropCannyLow}
-                cropCannyHigh={cropCannyHigh}
-                setCropCannyHigh={setCropCannyHigh}
-                cropCloseKernelSize={cropCloseKernelSize}
-                setCropCloseKernelSize={setCropCloseKernelSize}
-                activeTab={activeAutoCropTab}
-                setActiveTab={setActiveAutoCropTab}
-                selectedCount={selectedScraped.length}
-                isApplying={isBatchCropping}
-                scrapedImages={scrapedImages}
-                selectedScraped={selectedScraped}
-                setSelectedScraped={setSelectedScraped}
-                setConsoleLogs={setConsoleLogs}
-                addNotification={addNotification}
-                cropGuidance={cropGuidance}
-                setCropGuidance={setCropGuidance}
-                cropFocusMode={cropFocusMode}
-                setCropFocusMode={setCropFocusMode}
-              />
+              <React.Suspense fallback={null}>
+                <AutoCropModal
+                  isPage={false}
+                  onClose={handleAutoCropClose}
+                  onApply={handleAutoCropApply}
+                  sensitivity={cropSensitivity}
+                  setSensitivity={setCropSensitivity}
+                  padding={cropPaddingPx}
+                  setPadding={setCropPaddingPx}
+                  backgroundColorMode={cropBackgroundMode}
+                  setBackgroundColorMode={setCropBackgroundMode}
+                  autoSplitTallStrips={autoSplitTallStrips}
+                  setAutoSplitTallStrips={setAutoSplitTallStrips}
+                  aspectRatioLock={aspectRatioLock}
+                  setAspectRatioLock={setAspectRatioLock}
+                  minPanelAreaPct={minPanelAreaPct}
+                  setMinPanelAreaPct={setMinPanelAreaPct}
+                  overlapMergeThreshold={overlapMergeThreshold}
+                  setOverlapMergeThreshold={setOverlapMergeThreshold}
+                  useLocalCV={useLocalCV}
+                  setUseLocalCV={setUseLocalCV}
+                  cropModel={cropModel}
+                  setCropModel={setCropModel}
+                  cropMinHeightPx={cropMinHeightPx}
+                  setCropMinHeightPx={setCropMinHeightPx}
+                  cropCannyLow={cropCannyLow}
+                  setCropCannyLow={setCropCannyLow}
+                  cropCannyHigh={cropCannyHigh}
+                  setCropCannyHigh={setCropCannyHigh}
+                  cropCloseKernelSize={cropCloseKernelSize}
+                  setCropCloseKernelSize={setCropCloseKernelSize}
+                  activeTab={activeAutoCropTab}
+                  setActiveTab={setActiveAutoCropTab}
+                  selectedCount={selectedScraped.length}
+                  isApplying={isBatchCropping}
+                  scrapedImages={scrapedImages}
+                  selectedScraped={selectedScraped}
+                  setSelectedScraped={setSelectedScraped}
+                  setConsoleLogs={setConsoleLogs}
+                  addNotification={addNotification}
+                  cropGuidance={cropGuidance}
+                  setCropGuidance={setCropGuidance}
+                  cropFocusMode={cropFocusMode}
+                  setCropFocusMode={setCropFocusMode}
+                />
+              </React.Suspense>
             ) : (
               children
             )}

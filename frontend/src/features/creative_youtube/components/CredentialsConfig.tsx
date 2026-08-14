@@ -21,6 +21,7 @@ interface CredentialsConfigProps {
     projectId: string
   ) => void;
   onDeleteCredentials: () => void;
+  addNotification?: (msg: string, type: string) => void;
 }
 
 export default function CredentialsConfig({
@@ -31,6 +32,7 @@ export default function CredentialsConfig({
   setShowCredentialsConfig,
   onSaveCredentials,
   onDeleteCredentials,
+  addNotification,
 }: CredentialsConfigProps) {
   const [clientId, setClientId] = useState("");
   const [clientSecret, setClientSecret] = useState("");
@@ -63,14 +65,16 @@ export default function CredentialsConfig({
           !core.client_secret ||
           !core.project_id
         ) {
-          alert(
-            "Invalid Google client secrets JSON structure. Must contain 'installed' or 'web' object with 'client_id', 'client_secret', and 'project_id'."
+          addNotification?.(
+            "Invalid Google client secrets JSON. Must contain 'installed' or 'web' with 'client_id', 'client_secret', and 'project_id'.",
+            "error"
           );
           return;
         }
         onSaveCredentials(core.client_id, core.client_secret, core.project_id);
+        addNotification?.("OAuth credentials loaded from JSON file!", "success");
       } catch (err: any) {
-        alert(`Error parsing client secrets JSON: ${err.message}`);
+        addNotification?.(`Error parsing client secrets JSON: ${err.message}`, "error");
       }
     };
     reader.readAsText(file);

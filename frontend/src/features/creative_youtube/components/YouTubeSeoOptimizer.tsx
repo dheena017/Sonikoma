@@ -4,9 +4,10 @@ import { Sparkles, Wand2, CheckCircle, Copy, AlertCircle } from "lucide-react";
 interface YouTubeSeoOptimizerProps {
   initialTitle?: string;
   onApplySeo: (seoData: { title: string; description: string; tags: string[] }) => void;
+  addNotification?: (msg: string, type: string) => void;
 }
 
-export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo }: YouTubeSeoOptimizerProps) {
+export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo, addNotification }: YouTubeSeoOptimizerProps) {
   const [seriesName, setSeriesName] = useState("");
   const [chapterTitle, setChapterTitle] = useState(initialTitle || "");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -27,9 +28,13 @@ export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo }: Y
       if (res.ok) {
         const data = await res.json();
         setResult(data);
+        addNotification?.(`✅ AI SEO metadata generated! Score: ${data.seo_score}/100`, "success");
+      } else {
+        addNotification?.("Failed to generate SEO metadata.", "error");
       }
     } catch (err) {
       console.warn("SEO generation notice:", err);
+      addNotification?.("SEO generation failed. Check your connection.", "error");
     } finally {
       setIsGenerating(false);
     }
@@ -98,7 +103,10 @@ export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo }: Y
             </div>
           </div>
           <button
-            onClick={() => onApplySeo({ title: result.title, description: result.description, tags: result.tags })}
+            onClick={() => {
+              onApplySeo({ title: result.title, description: result.description, tags: result.tags });
+              addNotification?.("SEO metadata applied to upload form!", "success");
+            }}
             className="w-full py-2 bg-purple-950/40 hover:bg-purple-950/80 border border-purple-800/40 text-purple-300 rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
           >
             <CheckCircle className="w-3.5 h-3.5 text-purple-400" />

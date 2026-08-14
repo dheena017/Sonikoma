@@ -392,37 +392,28 @@ async function start() {
         handleBackendExit(initialProcess, code);
       });
 
-      // Wait for backend to respond to health check
-      logger.info(`Waiting for backend to initialize...`);
-      await new Promise((resolve) => {
-        function check() {
-          // If the process has already exited, resolve immediately to let the exit handler run
-          if (initialProcess.exitCode !== null) {
-            resolve();
-            return;
-          }
-          http
-            .get(url, (res) => {
-              if (
-                res.statusCode === 200 ||
-                res.statusCode === 307 ||
-                res.statusCode === 302
-              ) {
-                resolve();
-              } else {
-                setTimeout(check, 300);
+      // Poll backend health in background without blocking frontend startup
+      function pollBackendHealth() {
+        if (initialProcess.exitCode !== null) return;
+        http
+          .get(url, (res) => {
+            if (
+              res.statusCode === 200 ||
+              res.statusCode === 307 ||
+              res.statusCode === 302
+            ) {
+              if (initialProcess.exitCode === null) {
+                logger.success(`Backend initialized successfully and online on port ${port}!`);
               }
-            })
-            .on("error", () => {
-              setTimeout(check, 300);
-            });
-        }
-        check();
-      });
-
-      if (initialProcess.exitCode === null) {
-        logger.success(`Backend initialized successfully!`);
+            } else {
+              setTimeout(pollBackendHealth, 300);
+            }
+          })
+          .on("error", () => {
+            setTimeout(pollBackendHealth, 300);
+          });
       }
+      setTimeout(pollBackendHealth, 300);
     }
   }
 

@@ -5,27 +5,24 @@ import { GeneratedPanel } from "@/types";
 // --- Custom Logic Hooks ---
 import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
 
-// --- Layout & Main Workspace Components ---
-import ScraperPage from "@/features/workspace_scraper/pages/ScraperPage";
-import EditorPage from "@/features/editor_studio/pages/EditorPage";
+// --- Processing & Feedback Components ---
 import PageNotFound from "@/components/feedback/PageNotFound";
-import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
-import ShortcutsPage from "@/features/app_shortcuts/pages/ShortcutsPage";
-
-// --- Processing & Editor Modals ---
-import AutoCropModal from "@/features/editor_auto_crop/components/AutoCropModal";
+import LoadingPage from "@/components/feedback/LoadingPage";
 
 // --- Authentication & Landing Views ---
 import LandingPage from "@/features/app_landing/pages/LandingPage";
 import LoginPage from "@/features/app_auth/pages/LoginPage";
 import RegisterPage from "@/features/app_auth/pages/RegisterPage";
 import ForgotPasswordPage from "@/features/app_auth/pages/ForgotPasswordPage";
-import LoadingPage from "@/components/feedback/LoadingPage";
-import ProjectsPage from "@/features/workspace_projects/pages/ProjectsPage";
-import SeriesDetailsPage from "@/features/workspace_projects/pages/SeriesDetailsPage";
-import CreativeSuiteLayout from "@/features/creative_suite/components/CreativeSuiteLayout";
 
-// --- Lazy Loaded Heavy Feature Pages (Phase 9 Performance Code-Splitting) ---
+// --- Lazy Loaded Feature Pages & Modals ---
+const ScraperPage = React.lazy(() => import("@/features/workspace_scraper/pages/ScraperPage"));
+const EditorPage = React.lazy(() => import("@/features/editor_studio/pages/EditorPage"));
+const AutoCropModal = React.lazy(() => import("@/features/editor_auto_crop/components/AutoCropModal"));
+const ProjectsPage = React.lazy(() => import("@/features/workspace_projects/pages/ProjectsPage"));
+const SeriesDetailsPage = React.lazy(() => import("@/features/workspace_projects/pages/SeriesDetailsPage"));
+const ShortcutsPage = React.lazy(() => import("@/features/app_shortcuts/pages/ShortcutsPage"));
+const CreativeSuiteLayout = React.lazy(() => import("@/features/creative_suite/components/CreativeSuiteLayout"));
 const DashboardPage = React.lazy(() => import("@/features/app_dashboard/pages/DashboardPage"));
 const ImageEditorPage = React.lazy(() => import("@/features/editor_image/pages/ImageEditorPage"));
 const YouTubePage = React.lazy(() => import("@/features/creative_youtube/pages/YouTubePage"));
@@ -483,8 +480,25 @@ export default function AppRouter(props: AppRouterProps) {
   // AUTHENTICATION GUARDS & EARLY RETURNS
   // --------------------------------------------------------------------------
 
+  // Detect whether we have a saved auth token in local or session storage
+  const hasSavedToken = Boolean(
+    typeof window !== "undefined" &&
+      (localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token"))
+  );
+
+  const isPublicAuthRoute =
+    currentPath === "/" ||
+    currentPath === "/landing" ||
+    currentPath === "" ||
+    currentPath === "/index.html" ||
+    currentPath === "/login" ||
+    currentPath === "/register" ||
+    currentPath === "/forgot-password";
+
   // --- Guard: Session Initialization loading state ---
-  if (isInitializing || authLoading) {
+  // Only show full-screen initializing loader if we are on a protected route or have a saved token being validated
+  if ((isInitializing || authLoading) && (!isPublicAuthRoute || hasSavedToken)) {
     const loadingStatus = isInitializing
       ? "Initializing App..."
       : "Checking Authentication...";
@@ -887,8 +901,9 @@ export default function AppRouter(props: AppRouterProps) {
       showAutoCropModal={showAutoCropModal}
       showBubbleModal={showBubbleModal}
     >
-      {/* PAGE VIEW 1: Main Editor Workspace */}
-      <div
+      <React.Suspense fallback={<LoadingPage status="Loading Studio..." themeMode={themeMode} />}>
+        {/* PAGE VIEW 1: Main Editor Workspace */}
+        <div
         className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
         style={{ display: isWorkspacePath ? "flex" : "none" }}
       >
@@ -1320,8 +1335,10 @@ export default function AppRouter(props: AppRouterProps) {
       {/* FALLBACK VIEW: 404 Route Not Found */}
       {!isWorkspacePath &&
         !isDashboardOverviewPath &&
-        !isProjectsPath &&        !isAutoCropPath &&
-        !isEditorPath &&        !isShortcutsPath &&
+        !isProjectsPath &&
+        !isAutoCropPath &&
+        !isEditorPath &&
+        !isShortcutsPath &&
         !isAudioSettingsPath &&
         !isOptimizerPath &&
         !isPanelAssistantPath &&
@@ -1339,6 +1356,7 @@ export default function AppRouter(props: AppRouterProps) {
         !isVideoEditorPath && (
           <PageNotFound onNavigateHome={() => navigateTo("/")} />
         )}
+      </React.Suspense>
     </MainLayout>
   );
 }

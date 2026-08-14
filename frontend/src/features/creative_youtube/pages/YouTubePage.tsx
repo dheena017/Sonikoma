@@ -207,13 +207,17 @@ const YouTubePage = React.memo(
 
     // Allow full access to YouTube Studio & Publisher even if no project panels are currently loaded.
 
+    const [headerRefreshKey, setHeaderRefreshKey] = useState<number>(0);
+
     return (
       <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
         {/* UNIFIED YOUTUBE INTEGRATION HEADER */}
         <YouTubeChannelHeader
+          key={headerRefreshKey}
           seoScore={seoScore}
           isPublishing={isPublishing}
           onOpenChannelModal={() => setIsChannelModalOpen(true)}
+          addNotification={addNotification}
         />
 
         {/* TWO-COLUMN DIRECT PUBLISHER WORKSPACE GRID (5 : 7) */}
@@ -581,10 +585,10 @@ const YouTubePage = React.memo(
         <YouTubeChannelModal
           isOpen={isChannelModalOpen}
           onClose={() => setIsChannelModalOpen(false)}
+          addNotification={addNotification}
           onChannelSelected={(channel) => {
-            if (addNotification) {
-              addNotification(`Connected YouTube channel: ${channel.title}`, "success");
-            }
+            setHeaderRefreshKey((prev) => prev + 1);
+            addNotification?.(`Connected YouTube channel: ${channel.title}`, "success");
           }}
         />
       </div>

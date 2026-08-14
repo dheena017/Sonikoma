@@ -122,6 +122,16 @@ async def lifespan(app: FastAPI):
         else:
             logger.info("[Startup] Training monitor is disabled via ENABLE_TRAINING_MONITOR.")
 
+        # Warm up persistent image cache in background
+        try:
+            from app.core.cache import stitched_cache, edit_history
+            n_stitched = stitched_cache.warm_up()
+            n_history = edit_history.warm_up()
+            if n_stitched > 0 or n_history > 0:
+                logger.info(f"[Cache] Warm-up complete — loaded {n_stitched} panel images, {n_history} edit history entries from disk")
+        except Exception as e:
+            logger.warning(f"[Cache] Warm-up failed (non-critical): {e}")
+
     # Launch background maintenance non-blocking
     asyncio.create_task(_startup_maintenance())
 
@@ -146,16 +156,6 @@ async def lifespan(app: FastAPI):
             h.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))
 
     _print_startup_banner()
-
-    # Warm up persistent image cache
-    try:
-        from app.core.cache import stitched_cache, edit_history
-        n_stitched = stitched_cache.warm_up()
-        n_history = edit_history.warm_up()
-        if n_stitched > 0 or n_history > 0:
-            logger.info(f"[Cache] Warm-up complete — loaded {n_stitched} panel images, {n_history} edit history entries from disk")
-    except Exception as e:
-        logger.warning(f"[Cache] Warm-up failed (non-critical): {e}")
 
     logger.success("Server ready - waiting for requests")
 

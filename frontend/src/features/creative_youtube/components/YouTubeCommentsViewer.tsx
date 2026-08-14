@@ -59,8 +59,8 @@ export function YouTubeCommentsViewer({ videoId, onClose }: YouTubeCommentsViewe
           Fetching live comments from YouTube...
         </div>
       ) : comments.length === 0 ? (
-        <div className="py-2 text-center text-[10px] text-neutral-500">
-          No comments yet on this video.
+        <div className="py-2 text-center text-[10px] text-neutral-400 font-sans">
+          No comments yet or comments are turned off for this video.
         </div>
       ) : (
         <div className="space-y-2 max-h-48 overflow-y-auto pr-1 divide-y divide-neutral-900">

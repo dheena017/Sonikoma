@@ -6,7 +6,7 @@ Handles uploading the physical video file and custom thumbnails to YouTube.
 """
 import os
 import logging
-from typing import Optional
+from typing import Optional, Any
 
 try:
     from googleapiclient.http import MediaFileUpload
@@ -16,7 +16,7 @@ except ImportError:
 logger = logging.getLogger("sonikoma.services.export.youtube.upload")
 
 def upload_video_and_thumbnail(
-    youtube,
+    youtube: Any,
     video_path: str,
     request_body: dict,
     thumbnail_path: Optional[str] = None
