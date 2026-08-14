@@ -16,6 +16,12 @@ import {
   Share2,
   Check,
   Film,
+  X,
+  Eye,
+  Calendar,
+  Sparkles,
+  ArrowRight,
+  FolderPlus,
 } from "lucide-react";
 import type { YouTubeVideoItem } from "./YouTubeChannelHome";
 import YouTubeCreatePlaylistPanel from "./YouTubeCreatePlaylistPanel";
@@ -57,14 +63,13 @@ export default function YouTubePlaylistsManager({
   const [privacyFilter, setPrivacyFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<"items" | "newest" | "alpha">("items");
 
-  // View state inside Playlist Panel: "gallery" | "detail" | "create"
+  // View state: "gallery" | "detail" | "create"
   const [currentView, setCurrentView] = useState<"gallery" | "detail" | "create">("gallery");
 
   // Selected Playlist for Dedicated Detail View
   const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistData | null>(null);
   const [selectedVideos, setSelectedVideos] = useState<PlaylistItem[]>([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
-
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const getToken = () =>
@@ -91,7 +96,7 @@ export default function YouTubePlaylistsManager({
     fetchPlaylists();
   }, []);
 
-  // When clicking a playlist, open the dedicated playlist page and fetch its videos
+  // When clicking a playlist, open the dedicated playlist tracklist and fetch its videos
   const handleOpenPlaylist = async (playlist: PlaylistData) => {
     setSelectedPlaylist(playlist);
     setSelectedVideos([]);
@@ -156,38 +161,35 @@ export default function YouTubePlaylistsManager({
     }
   };
 
-  const handleCopyLink = (pl: PlaylistData) => {
-    const url = pl.url || `https://youtube.com/playlist?list=${pl.id}`;
+  const handleCopyLink = (url: string, id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     navigator.clipboard.writeText(url);
-    setCopiedId(pl.id);
+    setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const filteredAndSorted = useMemo(() => {
+  // Filter & sort
+  const filteredPlaylists = useMemo(() => {
     let list = [...playlists];
-
     if (privacyFilter !== "all") {
-      list = list.filter((p) => p.privacy?.toLowerCase() === privacyFilter);
+      list = list.filter((p) => (p.privacy || "public").toLowerCase() === privacyFilter);
     }
-
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
-        (p) =>
-          p.title?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q)
+        (p) => p.title?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
       );
     }
-
     list.sort((a, b) => {
-      if (sortBy === "items") return (b.item_count || 0) - (a.item_count || 0);
-      if (sortBy === "alpha") return a.title.localeCompare(b.title);
-      return (
-        new Date(b.published_at || 0).getTime() -
-        new Date(a.published_at || 0).getTime()
-      );
+      if (sortBy === "newest") {
+        return new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime();
+      }
+      if (sortBy === "alpha") {
+        return (a.title || "").localeCompare(b.title || "");
+      }
+      // default: items count
+      return (b.item_count || 0) - (a.item_count || 0);
     });
-
     return list;
   }, [playlists, privacyFilter, search, sortBy]);
 
@@ -195,382 +197,360 @@ export default function YouTubePlaylistsManager({
     return playlists.reduce((acc, p) => acc + (p.item_count || 0), 0);
   }, [playlists]);
 
-  const privacyIcon = (p: string) => {
-    if (p === "public") return <Globe className="w-3.5 h-3.5 text-emerald-400" />;
-    if (p === "private") return <Lock className="w-3.5 h-3.5 text-red-400" />;
-    return <LinkIcon className="w-3.5 h-3.5 text-amber-400" />;
-  };
-
-  const privacyColor = (p: string) => {
-    if (p === "public")
-      return "text-emerald-400 bg-emerald-950/50 border-emerald-900/40";
-    if (p === "private")
-      return "text-red-400 bg-red-950/50 border-red-900/40";
-    return "text-amber-400 bg-amber-950/50 border-amber-900/40";
-  };
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // VIEW 1: DEDICATED CREATE PLAYLIST PANEL (Inside Playlists tab!)
-  // ─────────────────────────────────────────────────────────────────────────────
+  // If in create view
   if (currentView === "create") {
     return (
-      <YouTubeCreatePlaylistPanel
-        onNavigatePlaylists={() => setCurrentView("gallery")}
-        onPlaylistCreated={(newPl) => {
-          if (newPl) setPlaylists((prev) => [newPl, ...prev]);
-          setCurrentView("gallery");
-        }}
-      />
+      <div className="space-y-4">
+        <button
+          onClick={() => {
+            setCurrentView("gallery");
+            fetchPlaylists();
+          }}
+          className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-colors cursor-pointer"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>Back to Playlists Hub</span>
+        </button>
+        <YouTubeCreatePlaylistPanel
+          onPlaylistCreated={() => {
+            fetchPlaylists();
+            setCurrentView("gallery");
+          }}
+          onNavigatePlaylists={() => {
+            fetchPlaylists();
+            setCurrentView("gallery");
+          }}
+        />
+      </div>
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // VIEW 2: DEDICATED PLAYLIST DETAIL VIEW (When a playlist is clicked!)
-  // ─────────────────────────────────────────────────────────────────────────────
+  // If in detail tracklist view
   if (currentView === "detail" && selectedPlaylist) {
     return (
       <div className="space-y-6 animate-fade-in">
-        {/* Back Button Bar */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => {
-              setSelectedPlaylist(null);
-              setCurrentView("gallery");
-            }}
-            className="flex items-center gap-2 text-xs font-bold font-mono text-neutral-400 hover:text-white transition-colors cursor-pointer group px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700"
-          >
-            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            Back to All Playlists
-          </button>
+        {/* Top Back Navigation */}
+        <button
+          onClick={() => {
+            setCurrentView("gallery");
+            setSelectedPlaylist(null);
+          }}
+          className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-colors cursor-pointer"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>Back to All Playlists</span>
+        </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleCopyLink(selectedPlaylist)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all cursor-pointer"
-            >
-              {copiedId === selectedPlaylist.id ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Copied Link</span>
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-3.5 h-3.5" />
-                  <span>Share</span>
-                </>
-              )}
-            </button>
-            <a
-              href={selectedPlaylist.url || `https://youtube.com/playlist?list=${selectedPlaylist.id}`}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              Open on YouTube
-            </a>
-          </div>
-        </div>
-
-        {/* Playlist Hub Layout (Left: Hero Card, Right: Video Queue) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Playlist Card & Play All CTA */}
-          <div className="lg:col-span-4 bg-gradient-to-b from-purple-950/40 via-neutral-900/90 to-neutral-950 p-6 rounded-3xl border border-purple-900/30 shadow-2xl space-y-5 lg:sticky lg:top-4 self-start">
-            {/* Cover Artwork */}
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-neutral-950 border border-neutral-800 shadow-xl group">
-              {selectedPlaylist.thumbnail ? (
-                <img
-                  src={selectedPlaylist.thumbnail}
-                  alt={selectedPlaylist.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-900 to-neutral-950 flex items-center justify-center">
-                  <ListVideo className="w-16 h-16 text-purple-300/60" />
-                </div>
-              )}
-              <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={handlePlayAll}
-                  disabled={selectedVideos.length === 0}
-                  className="p-4 bg-purple-600 rounded-full shadow-2xl transform scale-90 group-hover:scale-100 transition-transform cursor-pointer"
-                >
-                  <Play className="w-7 h-7 text-white fill-white ml-0.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Title & Metadata */}
-            <div className="space-y-2">
-              <span
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border uppercase ${privacyColor(
-                  selectedPlaylist.privacy
-                )}`}
-              >
-                {privacyIcon(selectedPlaylist.privacy)}
-                {selectedPlaylist.privacy}
+        {/* Playlist Hero Banner & Tracklist Header */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-gradient-to-r from-purple-950/40 via-neutral-900 to-neutral-950 p-6 sm:p-8 rounded-3xl border border-purple-900/40 shadow-2xl items-center">
+          <div className="lg:col-span-4 relative aspect-video rounded-2xl overflow-hidden bg-neutral-950 border border-neutral-800 shadow-2xl flex items-center justify-center">
+            {selectedPlaylist.thumbnail ? (
+              <img
+                src={selectedPlaylist.thumbnail}
+                alt={selectedPlaylist.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <ListVideo className="w-16 h-16 text-purple-500/40" />
+            )}
+            <div className="absolute inset-y-0 right-0 w-28 bg-black/85 backdrop-blur-md border-l border-white/10 flex flex-col items-center justify-center gap-1 text-white">
+              <Layers className="w-5 h-5 text-purple-400" />
+              <span className="text-sm font-black font-mono">
+                {selectedVideos.length || selectedPlaylist.item_count}
               </span>
-              <h1 className="text-lg sm:text-xl font-black text-white font-sans leading-tight">
+              <span className="text-[9px] font-mono uppercase tracking-wider text-neutral-400">
+                Videos
+              </span>
+            </div>
+          </div>
+
+          <div className="lg:col-span-8 space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[10px] font-mono font-bold uppercase">
+                  {selectedPlaylist.privacy || "public"} Series
+                </span>
+                <span className="text-xs font-mono text-neutral-500">
+                  {selectedVideos.length || selectedPlaylist.item_count} items
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-white font-sans tracking-tight">
                 {selectedPlaylist.title}
               </h1>
               {selectedPlaylist.description && (
-                <p className="text-xs text-neutral-300 font-sans leading-relaxed pt-1">
+                <p className="text-xs text-neutral-400 font-sans leading-relaxed line-clamp-3">
                   {selectedPlaylist.description}
                 </p>
               )}
             </div>
 
-            {/* Stats */}
-            <div className="flex items-center gap-3 text-xs font-mono text-neutral-400 py-3 border-y border-neutral-800/80">
-              <span className="flex items-center gap-1.5">
-                <Film className="w-3.5 h-3.5 text-purple-400" />
-                <strong className="text-white">{selectedVideos.length || selectedPlaylist.item_count}</strong> videos
-              </span>
-              <span>•</span>
-              <span>Updated recently</span>
-            </div>
-
-            {/* Actions */}
-            <div className="space-y-2.5">
+            {/* Actions Bar */}
+            <div className="flex items-center gap-3 pt-2 flex-wrap">
               <button
                 onClick={handlePlayAll}
                 disabled={selectedVideos.length === 0}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-black font-mono rounded-xl shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-black font-mono shadow-lg shadow-purple-600/30 transition-all cursor-pointer active:scale-95"
               >
                 <Play className="w-4 h-4 fill-white" />
-                Play All ({selectedVideos.length || selectedPlaylist.item_count} Videos)
+                <span>Play All in Sequence</span>
               </button>
+
+              <button
+                onClick={(e) =>
+                  handleCopyLink(
+                    `https://youtube.com/playlist?list=${selectedPlaylist.id}`,
+                    selectedPlaylist.id,
+                    e
+                  )
+                }
+                className="flex items-center gap-1.5 px-4 py-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-colors cursor-pointer"
+              >
+                {copiedId === selectedPlaylist.id ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-400 font-bold">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5" />
+                    <span>Share</span>
+                  </>
+                )}
+              </button>
+
+              <a
+                href={`https://youtube.com/playlist?list=${selectedPlaylist.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 px-4 py-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open on YouTube</span>
+              </a>
             </div>
           </div>
+        </div>
 
-          {/* Right Column: Playlist Video Tracklist */}
-          <div className="lg:col-span-8 bg-neutral-900/70 border border-neutral-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
-              <div className="flex items-center gap-2">
-                <Layers className="w-4 h-4 text-purple-400" />
-                <h3 className="text-xs font-black text-white font-mono uppercase tracking-wider">
-                  Videos in Playlist ({selectedVideos.length})
-                </h3>
-              </div>
+        {/* Video Items List */}
+        <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-3xl p-6 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+            <h3 className="text-xs font-black text-white font-mono uppercase tracking-wider flex items-center gap-2">
+              <Film className="w-4 h-4 text-purple-400" />
+              <span>Playlist Tracklist ({selectedVideos.length} Episodes)</span>
+            </h3>
+            <span className="text-[10px] font-mono text-neutral-500">
+              Click any video to start playback
+            </span>
+          </div>
+
+          {loadingVideos ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <Loader2 className="w-7 h-7 text-purple-400 animate-spin" />
+              <p className="text-xs text-neutral-400 font-mono">Loading playlist items…</p>
             </div>
+          ) : selectedVideos.length === 0 ? (
+            <div className="p-12 text-center border border-neutral-800/60 rounded-2xl bg-neutral-950/40">
+              <p className="text-xs text-neutral-500 font-mono">No videos found in this playlist.</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {selectedVideos.map((vid, idx) => (
+                <div
+                  key={vid.playlist_item_id || vid.id}
+                  onClick={() => handlePlaySingleVideo(vid)}
+                  className="flex items-center gap-4 p-3 rounded-2xl bg-neutral-950/60 hover:bg-neutral-950 border border-neutral-800/60 hover:border-purple-500/50 transition-all cursor-pointer group"
+                >
+                  <span className="w-6 text-center text-xs font-mono font-black text-neutral-500 group-hover:text-purple-400 shrink-0">
+                    #{idx + 1}
+                  </span>
 
-            {loadingVideos ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
-                <p className="text-xs text-neutral-400 font-mono">Loading playlist videos…</p>
-              </div>
-            ) : selectedVideos.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3 text-center border border-neutral-800/60 rounded-2xl bg-neutral-950/40">
-                <ListVideo className="w-8 h-8 text-neutral-500" />
-                <p className="text-sm font-bold text-neutral-300">This playlist has no videos</p>
-                <p className="text-xs text-neutral-500 font-mono">
-                  Publish or add new videos in the Studio tab
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {selectedVideos.map((vid, idx) => (
-                  <div
-                    key={vid.id + idx}
-                    onClick={() => handlePlaySingleVideo(vid)}
-                    className="group flex flex-col sm:flex-row sm:items-center gap-3.5 p-3 bg-neutral-950/80 border border-neutral-800/80 rounded-2xl hover:border-purple-500/50 hover:bg-neutral-900/90 transition-all cursor-pointer"
-                  >
-                    {/* Index Number */}
-                    <span className="text-xs font-black font-mono text-neutral-500 w-6 shrink-0 text-center group-hover:text-purple-400 transition-colors">
-                      #{idx + 1}
-                    </span>
-
-                    {/* Video Thumbnail */}
-                    <div className="relative w-full sm:w-36 aspect-video bg-black rounded-xl overflow-hidden shrink-0">
-                      <img
-                        src={vid.thumbnail}
-                        alt={vid.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="p-2 bg-purple-600 rounded-full shadow-lg">
-                          <Play className="w-3.5 h-3.5 text-white fill-white ml-0.5" />
-                        </div>
-                      </div>
+                  <div className="relative w-24 sm:w-28 aspect-video bg-black rounded-xl overflow-hidden shrink-0 border border-neutral-800">
+                    <img src={vid.thumbnail} alt={vid.title} className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                      <Play className="w-4 h-4 text-white fill-white" />
                     </div>
-
-                    {/* Video Info */}
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <h4 className="text-xs font-bold text-neutral-200 line-clamp-2 font-sans group-hover:text-white transition-colors leading-snug">
-                        {vid.title}
-                      </h4>
-                      {vid.published_at && (
-                        <p className="text-[10px] text-neutral-500 font-mono">
-                          {new Date(vid.published_at).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Play Action Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePlaySingleVideo(vid);
-                      }}
-                      className="px-3 py-1.5 bg-purple-600/20 group-hover:bg-purple-600 hover:bg-purple-500 text-purple-300 group-hover:text-white rounded-xl text-xs font-bold font-mono transition-all shrink-0 cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Play className="w-3 h-3 fill-current" />
-                      Watch
-                    </button>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <h4 className="text-xs font-bold text-white truncate font-sans group-hover:text-purple-200 transition-colors">
+                      {vid.title}
+                    </h4>
+                    {vid.description && (
+                      <p className="text-[10px] text-neutral-500 line-clamp-1 font-mono">
+                        {vid.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlaySingleVideo(vid);
+                    }}
+                    className="p-2 rounded-xl bg-neutral-900 hover:bg-purple-950/40 border border-neutral-800 hover:border-purple-500/50 text-neutral-400 hover:text-purple-300 transition-colors cursor-pointer shrink-0"
+                    title="Play in Theater"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // VIEW 3: MAIN PLAYLISTS GALLERY LIST VIEW
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ── GALLERY VIEW (Default) ──
   return (
-    <div className="space-y-6">
-      {/* Header & Quick Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-purple-950/40 via-neutral-900 to-neutral-950 p-5 rounded-2xl border border-purple-900/30 shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-purple-600 rounded-2xl shadow-lg shadow-purple-600/30">
+    <div className="space-y-6 animate-fade-in">
+      {/* ── 1. HEADER BANNER & METRICS ── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-gradient-to-r from-purple-950/40 via-neutral-900 to-neutral-950 p-6 rounded-3xl border border-purple-900/30 shadow-2xl">
+        <div className="flex items-center gap-4">
+          <div className="p-3.5 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl shadow-xl shadow-purple-600/30 shrink-0">
             <ListVideo className="w-6 h-6 text-white" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black text-white font-sans tracking-tight">
-                Playlists & Series Hub
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-lg sm:text-xl font-black text-white font-sans tracking-tight">
+                Playlists &amp; Series Hub
               </h2>
-              <span className="px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-400 text-[10px] font-mono font-bold">
-                {playlists.length} Collections · {totalVideosInPlaylists} Videos
+              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[10px] font-mono font-bold">
+                {playlists.length} Playlists
               </span>
             </div>
-            <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Click any playlist to open its full collection, manage videos, and play
+            <p className="text-xs text-neutral-400 font-mono">
+              Curate, organize, and publish binge-worthy episode playlists on YouTube
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Actions & Stats */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="px-4 py-2 bg-neutral-950/80 border border-neutral-800 rounded-2xl text-xs font-mono text-purple-300 font-bold">
+            <span className="text-white">{totalVideosInPlaylists}</span> total curated videos
+          </div>
+
+          <button
+            onClick={() => setCurrentView("create")}
+            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold font-mono shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
+          >
+            <FolderPlus className="w-4 h-4" />
+            <span>Create New Playlist</span>
+          </button>
+
           <button
             onClick={fetchPlaylists}
             disabled={isLoading}
-            className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-neutral-400 hover:text-white transition-all cursor-pointer"
+            className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm"
             title="Refresh Playlists"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-          </button>
-          <button
-            onClick={() => setCurrentView("create")}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white text-xs font-black font-mono rounded-xl shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            Create Playlist
+            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-purple-400" : ""}`} />
           </button>
         </div>
       </div>
 
-      {/* Controls & Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search playlists..."
-            className="w-full bg-neutral-900/80 border border-neutral-800 focus:border-purple-500/60 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder:text-neutral-500 font-mono focus:outline-none transition-all"
-          />
-        </div>
-
-        {/* Filters & Sorting */}
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Privacy */}
-          <div className="flex items-center gap-1 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl">
-            {["all", "public", "unlisted", "private"].map((p) => (
+      {/* ── 2. SEARCH & FILTER TOOLBAR ── */}
+      <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+          {/* Search */}
+          <div className="md:col-span-6 relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search playlists by title or description..."
+              className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500/70 focus:ring-1 focus:ring-purple-500/20 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder:text-neutral-500 font-sans focus:outline-none transition-all"
+            />
+            {search && (
               <button
-                key={p}
-                onClick={() => setPrivacyFilter(p)}
-                className={`px-3 py-1 rounded-lg text-[10px] font-bold font-mono uppercase transition-all cursor-pointer ${
-                  privacyFilter === p
-                    ? "bg-purple-600 text-white shadow-sm"
-                    : "text-neutral-400 hover:text-white"
-                }`}
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
               >
-                {p}
+                <X className="w-3.5 h-3.5" />
               </button>
-            ))}
+            )}
           </div>
 
-          {/* Sort */}
-          <div className="flex items-center gap-1.5 bg-neutral-900/80 border border-neutral-800 rounded-xl px-3 py-1">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-500" />
+          {/* Privacy Filter */}
+          <div className="md:col-span-3">
             <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-transparent text-[11px] font-mono text-neutral-300 focus:outline-none cursor-pointer"
+              value={privacyFilter}
+              onChange={(e) => setPrivacyFilter(e.target.value)}
+              className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500/60 rounded-xl px-3 py-2.5 text-xs text-neutral-300 font-mono focus:outline-none cursor-pointer"
             >
-              <option value="items" className="bg-neutral-950">Most Videos</option>
-              <option value="newest" className="bg-neutral-950">Newest First</option>
-              <option value="alpha" className="bg-neutral-950">Alphabetical</option>
+              <option value="all">All Privacy Types</option>
+              <option value="public">Public</option>
+              <option value="unlisted">Unlisted</option>
+              <option value="private">Private</option>
             </select>
           </div>
 
-          <span className="text-[11px] font-mono text-neutral-500">
-            {filteredAndSorted.length} Playlists
+          {/* Sort By */}
+          <div className="md:col-span-3">
+            <select
+              value={sortBy}
+              onChange={(e: any) => setSortBy(e.target.value)}
+              className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500/60 rounded-xl px-3 py-2.5 text-xs text-neutral-300 font-mono focus:outline-none cursor-pointer"
+            >
+              <option value="items">Most Videos First</option>
+              <option value="newest">Recently Published</option>
+              <option value="alpha">Alphabetical (A-Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 pt-2 border-t border-neutral-800/60">
+          <span>
+            Showing <strong className="text-white">{filteredPlaylists.length}</strong> of{" "}
+            <strong>{playlists.length}</strong> playlists
           </span>
+          {(search || privacyFilter !== "all") && (
+            <button
+              onClick={() => {
+                setSearch("");
+                setPrivacyFilter("all");
+              }}
+              className="text-purple-400 hover:text-purple-300 underline cursor-pointer"
+            >
+              Clear filters
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Playlists Gallery Grid */}
+      {/* ── 3. PLAYLISTS CARDS GRID ── */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-neutral-900/40 border border-neutral-800/60 rounded-3xl overflow-hidden p-0 animate-pulse space-y-3"
-            >
-              <div className="aspect-video bg-neutral-800/80 rounded-t-3xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-              </div>
-              <div className="p-4 space-y-2.5">
-                <div className="h-4 bg-neutral-800/80 rounded-md w-3/4" />
-                <div className="h-3 bg-neutral-800/50 rounded-md w-1/2" />
-              </div>
-            </div>
-          ))}
+        <div className="flex flex-col items-center justify-center py-24 gap-3">
+          <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+          <p className="text-xs text-neutral-400 font-mono">Loading playlists from YouTube…</p>
         </div>
-      ) : filteredAndSorted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-center border border-neutral-800/60 rounded-3xl bg-neutral-950/40">
-          <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-2xl">
-            <ListVideo className="w-8 h-8 text-neutral-500" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-neutral-200">No Playlists Found</p>
-            <p className="text-xs text-neutral-500 font-mono mt-1">
-              {search
-                ? `No results for "${search}"`
-                : "Create your first playlist collection above"}
-            </p>
-          </div>
+      ) : filteredPlaylists.length === 0 ? (
+        <div className="p-16 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
+          <ListVideo className="w-12 h-12 text-neutral-600 mx-auto" />
+          <h3 className="text-sm font-bold text-white">No playlists found</h3>
+          <p className="text-xs text-neutral-500 font-mono max-w-sm mx-auto">
+            Organize your episodes into bingeable playlists to increase channel watch time and SEO rankings.
+          </p>
+          <button
+            onClick={() => setCurrentView("create")}
+            className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-purple-600/30 transition-all cursor-pointer inline-flex items-center gap-2"
+          >
+            <FolderPlus className="w-4 h-4" />
+            <span>Create First Playlist</span>
+          </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredAndSorted.map((pl) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {filteredPlaylists.map((pl) => (
             <div
               key={pl.id}
               onClick={() => handleOpenPlaylist(pl)}
-              className="group bg-neutral-900/80 border border-neutral-800/80 rounded-3xl overflow-hidden hover:border-purple-600/50 hover:shadow-2xl hover:shadow-purple-950/30 transition-all duration-300 flex flex-col cursor-pointer"
+              className="group bg-neutral-900/70 border border-neutral-800/80 rounded-3xl overflow-hidden hover:border-purple-500/50 hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col backdrop-blur-sm"
             >
-              {/* Playlist Thumbnail / Stack Effect */}
-              <div className="relative aspect-video bg-neutral-950 overflow-hidden">
+              {/* Cover Preview Area */}
+              <div className="relative aspect-video bg-neutral-950 overflow-hidden flex items-center justify-center">
                 {pl.thumbnail ? (
                   <img
                     src={pl.thumbnail}
@@ -578,87 +558,82 @@ export default function YouTubePlaylistsManager({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-purple-950/70 via-neutral-900 to-neutral-950 flex items-center justify-center">
-                    <ListVideo className="w-12 h-12 text-purple-400/60" />
-                  </div>
+                  <ListVideo className="w-12 h-12 text-purple-400/40" />
                 )}
 
-                {/* Playlist Stack Ribbon on the right */}
-                <div className="absolute inset-y-0 right-0 w-24 bg-black/75 backdrop-blur-md border-l border-white/10 flex flex-col items-center justify-center gap-1.5 p-2 text-white">
-                  <Layers className="w-5 h-5 text-purple-300" />
-                  <span className="text-xs font-black font-mono">
-                    {pl.item_count}
-                  </span>
-                  <span className="text-[9px] font-mono uppercase text-neutral-400">
+                {/* Video Count Sidebar Overlay */}
+                <div className="absolute inset-y-0 right-0 w-24 bg-black/85 backdrop-blur-md border-l border-white/10 flex flex-col items-center justify-center gap-1 text-white">
+                  <Layers className="w-4 h-4 text-purple-400" />
+                  <span className="text-xs font-black font-mono">{pl.item_count ?? "?"}</span>
+                  <span className="text-[8px] font-mono uppercase tracking-wider text-neutral-400">
                     Videos
                   </span>
                 </div>
 
-                {/* Play Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                  <div className="p-3.5 bg-purple-600/90 rounded-full shadow-2xl transform scale-90 group-hover:scale-100 transition-transform">
-                    <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                  </div>
+                {/* Privacy Badge */}
+                <div
+                  className={`absolute top-2 left-2 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold uppercase backdrop-blur-sm border ${
+                    pl.privacy === "public"
+                      ? "bg-emerald-950/80 text-emerald-300 border-emerald-800/60"
+                      : pl.privacy === "unlisted"
+                      ? "bg-amber-950/80 text-amber-300 border-amber-800/60"
+                      : "bg-neutral-950/80 text-neutral-400 border-neutral-700/60"
+                  }`}
+                >
+                  {pl.privacy || "public"}
                 </div>
 
-                {/* Privacy Badge */}
-                <div className="absolute top-2.5 left-2.5">
-                  <span
-                    className={`flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[9px] font-bold border uppercase backdrop-blur-md ${privacyColor(
-                      pl.privacy
-                    )}`}
-                  >
-                    {privacyIcon(pl.privacy)}
-                    {pl.privacy}
-                  </span>
+                {/* Hover Play Button */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                  <div className="p-3 bg-purple-600 rounded-2xl shadow-xl transform group-hover:scale-110 transition-transform">
+                    <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                  </div>
                 </div>
               </div>
 
-              {/* Playlist Meta */}
-              <div className="p-4 flex flex-col gap-2 flex-1">
-                <h3 className="text-sm font-bold text-white line-clamp-1 font-sans group-hover:text-purple-300 transition-colors">
-                  {pl.title}
-                </h3>
-                {pl.description ? (
-                  <p className="text-xs text-neutral-400 line-clamp-2 font-sans leading-relaxed">
-                    {pl.description}
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-neutral-500 italic font-mono">
-                    Click to view collection &amp; play
-                  </p>
-                )}
+              {/* Details & Actions */}
+              <div className="p-4 flex flex-col gap-2 flex-1 justify-between">
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-white line-clamp-1 font-sans group-hover:text-purple-300 transition-colors">
+                    {pl.title}
+                  </h4>
+                  {pl.description && (
+                    <p className="text-[10px] text-neutral-400 line-clamp-2 font-mono leading-relaxed">
+                      {pl.description}
+                    </p>
+                  )}
+                </div>
 
-                {/* Actions Bar */}
-                <div className="flex items-center justify-between pt-3 border-t border-neutral-800/80 mt-auto text-xs font-mono">
-                  <span className="text-purple-400 group-hover:text-purple-300 font-bold flex items-center gap-1 transition-colors">
-                    View Playlist →
+                {/* Actions Footer */}
+                <div className="flex items-center justify-between pt-3 border-t border-neutral-800/60 mt-auto">
+                  <span className="text-[10px] font-mono text-purple-400 font-bold flex items-center gap-1">
+                    <span>View Tracklist</span>
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                   </span>
 
-                  <div
-                    className="flex items-center gap-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <div className="flex items-center gap-1.5">
                     <button
-                      onClick={() => handleCopyLink(pl)}
-                      className="p-1.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                      onClick={(e) =>
+                        handleCopyLink(`https://youtube.com/playlist?list=${pl.id}`, pl.id, e)
+                      }
+                      className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
                       title="Copy Playlist URL"
                     >
                       {copiedId === pl.id ? (
-                        <Check className="w-4 h-4 text-emerald-400" />
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
                       ) : (
-                        <Share2 className="w-4 h-4" />
+                        <Share2 className="w-3.5 h-3.5" />
                       )}
                     </button>
-
                     <a
-                      href={pl.url || `https://youtube.com/playlist?list=${pl.id}`}
+                      href={`https://youtube.com/playlist?list=${pl.id}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="p-1.5 text-neutral-400 hover:text-white transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
                       title="Open on YouTube"
                     >
-                      <ExternalLink className="w-4 h-4" />
+                      <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
                 </div>

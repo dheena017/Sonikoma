@@ -536,6 +536,28 @@ async def generate_youtube_seo_metadata(
     return await service.generate_seo_metadata(title=title, series=series)
 
 
+@router.post("/youtube/playlist/ai-generate", summary="Real AI generation for playlist title, description, tags and video sequencing")
+async def generate_youtube_playlist_ai_route(
+    payload: dict,
+    current_user: Optional[dict] = Depends(get_current_user),
+):
+    """
+    Analyzes available YouTube videos and creator theme/prompt with real LLM to synthesize
+    a viral title, comprehensive SEO description, indexed hashtags, and optimal video sequencing.
+    """
+    user_id = _get_user_id(current_user)
+    service = YouTubeService(user_id=user_id)
+    prompt = payload.get("prompt", "")
+    videos = payload.get("videos", [])
+    channel_name = payload.get("channel_name", "")
+    return await service.generate_playlist_ai_metadata(
+        prompt=prompt,
+        videos=videos,
+        channel_name=channel_name,
+    )
+
+
+
 @router.post("/youtube/copyright-check")
 async def check_youtube_copyright(
     payload: dict,

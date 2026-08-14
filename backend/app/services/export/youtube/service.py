@@ -471,3 +471,151 @@ class YouTubeService:
             "remaining": 10000,
             "status": "HEALTHY",
         }
+
+    async def generate_playlist_ai_metadata(
+        self,
+        prompt: Optional[str] = None,
+        videos: Optional[List[Dict[str, Any]]] = None,
+        channel_name: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Uses real LLM / AI to generate search-optimized YouTube playlist title,
+        comprehensive description, hashtags, and selects/sequences the matching videos.
+        """
+        import json
+        import re
+        from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+
+        prompt_text = (prompt or "").strip()
+        videos = videos or []
+
+        # Prepare summary of available channel videos
+        video_summaries = []
+        for idx, v in enumerate(videos[:35]):
+            vid_id = v.get("id") or f"vid_{idx}"
+            v_title = v.get("title", "")
+            v_desc = (v.get("description") or "")[:120].replace("\n", " ")
+            video_summaries.append(f"- ID: {vid_id} | Title: {v_title} | Snippet: {v_desc}")
+
+        catalog_str = "\n".join(video_summaries) if video_summaries else "No channel videos provided."
+
+        system_instruction = (
+            "You are an elite YouTube strategist, SEO copywriter, and anime/webtoon creator manager.\n"
+            "Your task is to create a viral, high-CTR YouTube Playlist title, an engaging 2-3 paragraph description with timestamps/flow and 4-6 hashtags, "
+            "and select which video IDs from the available list belong in this playlist in the optimal chronological or narrative order.\n\n"
+            "Respond ONLY with a valid JSON object matching this schema:\n"
+            "{\n"
+            '  "title": "String (engaging title with emoji under 80 chars)",\n'
+            '  "description": "String (rich description with overview, call to subscribe, and hashtags at bottom)",\n'
+            '  "tags": ["#Tag1", "#Tag2", "#Tag3", "#Tag4"],\n'
+            '  "suggested_video_ids": ["matching_video_id_1", "matching_video_id_2"],\n'
+            '  "theme": "String (2-3 words summary)"\n'
+            "}"
+        )
+
+        user_content = (
+            f"User Prompt / Theme Idea: {prompt_text if prompt_text else 'Create a curated playlist for this channel'}\n"
+            f"Channel Context: {channel_name or 'Webtoon & Comic Animation Studio'}\n\n"
+            f"Available Channel Videos:\n{catalog_str}"
+        )
+
+        # 1. Try real Gemini AI generation if available
+        if ai_initialized and genai_client:
+            models_to_try = [GEMINI_MODEL_PRIMARY] + [m for m in GEMINI_FALLBACK_MODELS if m != GEMINI_MODEL_PRIMARY]
+            for model_name in models_to_try:
+                try:
+                    logger.info(f"[YouTube AI Playlist] Invoking Gemini model '{model_name}' for playlist generation...")
+                    
+                    async def _call():
+                        # Check google-genai vs legacy google.generativeai
+                        if hasattr(genai_client, "models") and hasattr(genai_client.models, "generate_content"):
+                            from google.genai import types
+                            config = types.GenerateContentConfig(
+                                system_instruction=system_instruction,
+                                response_mime_type="application/json",
+                                temperature=0.7,
+                            )
+                            return genai_client.models.generate_content(
+                                model=model_name,
+                                contents=user_content,
+                                config=config,
+                            )
+                        else:
+                            # Legacy GenerativeModel
+                            model = genai_client.GenerativeModel(
+                                model_name=model_name,
+                                system_instruction=system_instruction,
+                                generation_config={"response_mime_type": "application/json", "temperature": 0.7}
+                            )
+                            return model.generate_content(user_content)
+
+                    response = await call_gemini_with_retry(_call, max_attempts=2)
+                    raw_text = response.text if hasattr(response, "text") else str(response)
+
+                    # Extract JSON block
+                    json_match = re.search(r"\{.*\}", raw_text, re.DOTALL)
+                    if json_match:
+                        parsed = json.loads(json_match.group(0))
+                        if parsed.get("title") and parsed.get("description"):
+                            suggested_ids = parsed.get("suggested_video_ids", [])
+                            # Ensure IDs exist in user's videos
+                            valid_ids = [v["id"] for v in videos if "id" in v]
+                            matched_ids = [sid for sid in suggested_ids if sid in valid_ids]
+                            if not matched_ids and valid_ids:
+                                matched_ids = valid_ids[:min(5, len(valid_ids))]
+
+                            return {
+                                "success": True,
+                                "model_used": model_name,
+                                "title": parsed.get("title", "").strip(),
+                                "description": parsed.get("description", "").strip(),
+                                "tags": parsed.get("tags", []),
+                                "suggested_video_ids": matched_ids,
+                                "theme": parsed.get("theme", "Series Collection"),
+                            }
+                except Exception as err:
+                    logger.warning(f"[YouTube AI Playlist] Gemini generation failed with model '{model_name}': {err}")
+
+        # 2. Intelligent NLP Heuristic Fallback (when AI API is unavailable)
+        logger.info("[YouTube AI Playlist] Using intelligent heuristic generation fallback.")
+        
+        # Extract title keywords or prompt words
+        clean_prompt = prompt_text or "Webtoon Series Recaps & Highlights"
+        topic_words = [w.lower() for w in re.findall(r'\w+', clean_prompt) if len(w) > 2]
+        
+        # Match videos by keyword score
+        scored_videos = []
+        for v in videos:
+            v_title = (v.get("title") or "").lower()
+            v_desc = (v.get("description") or "").lower()
+            score = sum(3 for w in topic_words if w in v_title) + sum(1 for w in topic_words if w in v_desc)
+            views = int(str(v.get("view_count", "0")).replace(",", "")) if str(v.get("view_count", "0")).replace(",", "").isdigit() else 0
+            scored_videos.append((score, views, v.get("id")))
+
+        # Sort by score then views
+        scored_videos.sort(key=lambda x: (x[0], x[1]), reverse=True)
+        top_ids = [item[2] for item in scored_videos if item[2]][:min(8, len(videos))]
+        if not top_ids and videos:
+            top_ids = [v["id"] for v in videos if "id" in v][:min(5, len(videos))]
+
+        capitalized_topic = clean_prompt.title()
+        ai_title = f"{capitalized_topic} | Complete Series Collection 🎬"
+        ai_desc = (
+            f"🎬 Welcome to the official {capitalized_topic} playlist!\n\n"
+            f"Binge watch the entire animated manhwa and webtoon series in full chronological sequence with enhanced audio and sound effects.\n\n"
+            f"📌 Episodes are continuously updated with new releases.\n"
+            f"🔔 Make sure to Subscribe and turn on notifications so you never miss an episode!\n\n"
+            f"#Webtoon #Manhwa #AnimeRecap #MangaStory #Animation"
+        )
+        ai_tags = ["#Webtoon", "#Manhwa", "#AnimeRecap", "#MangaStory", "#Animation"]
+
+        return {
+            "success": True,
+            "model_used": "nlp_heuristic_engine",
+            "title": ai_title[:100],
+            "description": ai_desc,
+            "tags": ai_tags,
+            "suggested_video_ids": top_ids,
+            "theme": clean_prompt,
+        }
+

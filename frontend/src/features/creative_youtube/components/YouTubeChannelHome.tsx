@@ -12,13 +12,21 @@ import {
   Youtube,
   Play,
   BadgeCheck,
-  Radio,
   Zap,
   ArrowRight,
   TrendingUp,
   Share2,
   Calendar,
   Sparkles,
+  ListMusic,
+  Trophy,
+  Flame,
+  Layers,
+  FolderPlus,
+  BarChart3,
+  Check,
+  Film,
+  Plus,
 } from "lucide-react";
 
 export interface YouTubeVideoItem {
@@ -46,6 +54,15 @@ interface ChannelData {
   description?: string;
 }
 
+interface PlaylistSummary {
+  id: string;
+  title: string;
+  description?: string;
+  item_count?: number;
+  thumbnail?: string;
+  privacy?: string;
+}
+
 interface YouTubeChannelHomeProps {
   onWatchVideo: (videoId: string, video: YouTubeVideoItem) => void;
   onViewComments: (videoId: string) => void;
@@ -59,7 +76,10 @@ export default function YouTubeChannelHome({
 }: YouTubeChannelHomeProps) {
   const [videos, setVideos] = useState<YouTubeVideoItem[]>([]);
   const [channel, setChannel] = useState<ChannelData | null>(null);
+  const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<"all" | "popular" | "shorts" | "playlists">("all");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -67,9 +87,10 @@ export default function YouTubeChannelHome({
       const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [videosRes, channelRes] = await Promise.all([
+      const [videosRes, channelRes, playlistsRes] = await Promise.all([
         fetch("/api/export/youtube/videos?max_results=50", { headers }),
         fetch("/api/export/youtube/channel/details", { headers }),
+        fetch("/api/export/youtube/playlists", { headers }),
       ]);
 
       if (videosRes.ok) {
@@ -79,6 +100,10 @@ export default function YouTubeChannelHome({
       if (channelRes.ok) {
         const data = await channelRes.json();
         setChannel(data);
+      }
+      if (playlistsRes.ok) {
+        const data = await playlistsRes.json();
+        setPlaylists(data.playlists || []);
       }
     } catch (err) {
       console.warn("Failed to load channel home:", err);
@@ -101,11 +126,22 @@ export default function YouTubeChannelHome({
     );
   }, [videos]);
 
+  // Top performing videos
+  const topVideos = useMemo(() => {
+    return [...videos]
+      .sort((a, b) => {
+        const av = parseInt(a.view_count?.replace(/,/g, "") || "0");
+        const bv = parseInt(b.view_count?.replace(/,/g, "") || "0");
+        return bv - av;
+      })
+      .slice(0, 4);
+  }, [videos]);
+
   const recentUploads = useMemo(() => {
     return videos.slice(0, 8);
   }, [videos]);
 
-  const featuredVideo = videos[0] || null;
+  const featuredVideo = topVideos[0] || videos[0] || null;
 
   const formatDate = (iso?: string) => {
     if (!iso) return "";
@@ -116,12 +152,19 @@ export default function YouTubeChannelHome({
     });
   };
 
+  const handleCopyLink = (url: string, id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(url);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   return (
-    <div className="space-y-8">
-      {/* ── Channel Hero Banner & Profile Card ── */}
+    <div className="space-y-8 animate-fade-in">
+      {/* ── 1. CHANNEL HERO BANNER & PROFILE CARD ── */}
       <div className="relative w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-neutral-950">
         {/* Banner Area */}
-        <div className="relative w-full h-40 sm:h-56 md:h-64 overflow-hidden bg-neutral-950">
+        <div className="relative w-full h-44 sm:h-56 md:h-64 overflow-hidden bg-neutral-950">
           {channel?.banner_url ? (
             <img
               src={channel.banner_url}
@@ -129,10 +172,10 @@ export default function YouTubeChannelHome({
               className="w-full h-full object-cover object-center"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-red-950/70 via-purple-950/60 to-neutral-950 relative flex items-center justify-center">
+            <div className="w-full h-full bg-gradient-to-r from-red-950/70 via-neutral-900 to-neutral-950 relative flex items-center justify-center">
               <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#ff0000_1px,transparent_1px)] [background-size:20px_20px]" />
               <div className="flex items-center gap-3 text-red-500/30">
-                <Youtube className="w-16 h-16" />
+                <Youtube className="w-20 h-20" />
               </div>
             </div>
           )}
@@ -201,7 +244,7 @@ export default function YouTubeChannelHome({
           </div>
 
           {/* Quick Header Actions */}
-          <div className="flex items-center gap-2.5 shrink-0 self-start lg:self-end">
+          <div className="flex items-center gap-2.5 shrink-0 self-start lg:self-end flex-wrap">
             <a
               href={
                 channel?.custom_url
@@ -212,7 +255,7 @@ export default function YouTubeChannelHome({
               }
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-2 px-4 py-2.5 bg-neutral-900/90 hover:bg-neutral-850 border border-neutral-800 hover:border-neutral-700 rounded-xl text-xs font-bold font-mono text-neutral-200 hover:text-white transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95"
+              className="flex items-center gap-2 px-4 py-2.5 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-xl text-xs font-bold font-mono text-neutral-200 hover:text-white transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95"
             >
               <ExternalLink className="w-3.5 h-3.5 text-neutral-400" />
               <span>Open on YouTube</span>
@@ -220,7 +263,7 @@ export default function YouTubeChannelHome({
             <button
               onClick={fetchData}
               disabled={isLoading}
-              className="p-2.5 bg-neutral-900/90 hover:bg-neutral-850 border border-neutral-800 hover:border-neutral-700 rounded-xl text-neutral-400 hover:text-white transition-all cursor-pointer shadow-md active:scale-95"
+              className="p-2.5 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-xl text-neutral-400 hover:text-white transition-all cursor-pointer shadow-md active:scale-95"
               title="Refresh Channel Data"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-red-400" : ""}`} />
@@ -229,39 +272,108 @@ export default function YouTubeChannelHome({
         </div>
       </div>
 
+      {/* ── 2. QUICK LAUNCH STUDIO BAR ── */}
+      {onNavigateTab && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <button
+            onClick={() => onNavigateTab("studio")}
+            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-red-950/40 to-neutral-900/80 hover:from-red-900/40 hover:to-neutral-850 border border-red-500/30 hover:border-red-500/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
+          >
+            <div className="p-2.5 rounded-xl bg-red-600 text-white shadow-md shadow-red-600/30 shrink-0 group-hover:scale-105 transition-transform">
+              <Youtube className="w-4 h-4 fill-white" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-white block truncate">Publish Video</span>
+              <span className="text-[10px] font-mono text-neutral-400">Open Studio Flow</span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigateTab("playlists")}
+            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-purple-950/40 to-neutral-900/80 hover:from-purple-900/40 hover:to-neutral-850 border border-purple-500/30 hover:border-purple-500/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
+          >
+            <div className="p-2.5 rounded-xl bg-purple-600 text-white shadow-md shadow-purple-600/30 shrink-0 group-hover:scale-105 transition-transform">
+              <FolderPlus className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-white block truncate">Create Playlist</span>
+              <span className="text-[10px] font-mono text-neutral-400">Curate Series</span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigateTab("analytics")}
+            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-sky-950/40 to-neutral-900/80 hover:from-sky-900/40 hover:to-neutral-850 border border-sky-500/30 hover:border-sky-500/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
+          >
+            <div className="p-2.5 rounded-xl bg-sky-600 text-white shadow-md shadow-sky-600/30 shrink-0 group-hover:scale-105 transition-transform">
+              <BarChart3 className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-white block truncate">Analytics</span>
+              <span className="text-[10px] font-mono text-neutral-400">Channel Intelligence</span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => onNavigateTab("title-optimizer")}
+            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-amber-950/40 to-neutral-900/80 hover:from-amber-900/40 hover:to-neutral-850 border border-amber-500/30 hover:border-amber-500/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
+          >
+            <div className="p-2.5 rounded-xl bg-amber-600 text-white shadow-md shadow-amber-600/30 shrink-0 group-hover:scale-105 transition-transform">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-bold text-white block truncate">AI SEO Optimizer</span>
+              <span className="text-[10px] font-mono text-neutral-400">Viral Titles & Tags</span>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* ── 3. CONTENT FILTER PILLS ── */}
+      <div className="flex items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800/80 rounded-2xl w-fit">
+        {[
+          { id: "all", label: "All Content", icon: Film },
+          { id: "popular", label: "🔥 Top Watched", icon: Flame },
+          { id: "shorts", label: "⚡ Shorts", icon: Zap },
+          { id: "playlists", label: "📁 Playlists", icon: ListMusic },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isSel = activeFilter === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveFilter(tab.id as any)}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
+                isSel
+                  ? "bg-red-600 text-white shadow-lg shadow-red-600/30"
+                  : "text-neutral-400 hover:text-neutral-200"
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {isLoading ? (
         <div className="space-y-6">
-          {/* Spotlight Hero Skeleton */}
+          {/* Skeleton Loader */}
           <div className="bg-neutral-900/40 border border-neutral-800/60 rounded-3xl p-6 animate-pulse grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-7 aspect-video bg-neutral-800/80 rounded-2xl" />
             <div className="lg:col-span-5 space-y-4 justify-center flex flex-col">
               <div className="h-4 bg-neutral-800/80 rounded-md w-1/3" />
               <div className="h-6 bg-neutral-800/90 rounded-md w-4/5" />
               <div className="h-4 bg-neutral-800/50 rounded-md w-full" />
-              <div className="h-4 bg-neutral-800/50 rounded-md w-2/3" />
               <div className="h-10 bg-neutral-800/70 rounded-xl w-1/2 pt-2" />
             </div>
-          </div>
-
-          {/* Grid Skeleton */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-neutral-900/40 border border-neutral-800/60 rounded-2xl p-0 animate-pulse space-y-3">
-                <div className="aspect-video bg-neutral-800/70 rounded-t-2xl" />
-                <div className="p-3 space-y-2">
-                  <div className="h-3.5 bg-neutral-800/80 rounded w-4/5" />
-                  <div className="h-3 bg-neutral-800/50 rounded w-1/2" />
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       ) : (
         <>
-          {/* ── Featured Spotlight Video Hero ── */}
-          {featuredVideo && (
+          {/* ── 4. FEATURED SPOTLIGHT HERO VIDEO ── */}
+          {featuredVideo && (activeFilter === "all" || activeFilter === "popular") && (
             <div className="relative rounded-3xl bg-gradient-to-r from-red-950/25 via-neutral-900/70 to-neutral-950 border border-red-500/20 p-6 md:p-8 shadow-2xl backdrop-blur-xl overflow-hidden">
-              {/* Ambient Red Spot Glow */}
               <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
 
               <div className="flex items-center justify-between mb-5">
@@ -271,11 +383,11 @@ export default function YouTubeChannelHome({
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
                   </span>
                   <span className="text-xs font-black font-mono text-red-400 uppercase tracking-widest">
-                    Featured Premiere • Latest Video
+                    Featured Spotlight • Top Story
                   </span>
                 </div>
                 <div className="px-2.5 py-1 rounded-lg bg-neutral-900/80 border border-neutral-800 text-[11px] font-mono text-neutral-400">
-                  HD • 1080p
+                  HD 1080p
                 </div>
               </div>
 
@@ -296,7 +408,7 @@ export default function YouTubeChannelHome({
                     </div>
                   </div>
                   <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded bg-black/80 text-[11px] font-mono font-bold text-white backdrop-blur-sm border border-white/10">
-                    Play Video
+                    Play in Theater
                   </div>
                 </div>
 
@@ -338,23 +450,156 @@ export default function YouTubeChannelHome({
                       <Play className="w-4 h-4 fill-white" />
                       <span>Watch in Theater</span>
                     </button>
-                    {onNavigateTab && (
-                      <button
-                        onClick={() => onNavigateTab("videos")}
-                        className="flex items-center gap-2 px-5 py-3 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-bold font-mono rounded-xl transition-all cursor-pointer shadow-md active:scale-95"
-                      >
-                        <span>All Videos</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                    <button
+                      onClick={(e) => handleCopyLink(featuredVideo.youtube_url, featuredVideo.id, e)}
+                      className="flex items-center gap-1.5 px-4 py-3 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-bold font-mono rounded-xl transition-all cursor-pointer shadow-md"
+                    >
+                      {copiedId === featuredVideo.id ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">Copied Link</span>
+                        </>
+                      ) : (
+                        <>
+                          <Share2 className="w-3.5 h-3.5" />
+                          <span>Share</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* ── Section: ⚡ Latest Shorts Shelf ── */}
-          {shorts.length > 0 && (
+          {/* ── 5. TOP PERFORMING STORIES (LEADERBOARD) ── */}
+          {(activeFilter === "all" || activeFilter === "popular") && topVideos.length > 1 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-amber-500/10 border border-amber-500/25 rounded-xl text-amber-400">
+                    <Trophy className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-white font-sans tracking-tight">
+                      Top Performing Videos
+                    </h3>
+                    <p className="text-[11px] text-neutral-400 font-mono">
+                      Your channel's highest watched and most engaged content
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {topVideos.map((vid, idx) => (
+                  <div
+                    key={vid.id}
+                    onClick={() => onWatchVideo(vid.id, vid)}
+                    className="group relative bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-amber-500/40 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col"
+                  >
+                    <div className="relative aspect-video bg-black overflow-hidden">
+                      <img
+                        src={vid.thumbnail}
+                        alt={vid.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-black/85 backdrop-blur-md text-[10px] font-mono font-black text-amber-400 border border-amber-500/30">
+                        {idx === 0 ? "🥇 #1 Top" : idx === 1 ? "🥈 #2 Top" : idx === 2 ? "🥉 #3 Top" : `#${idx + 1}`}
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                        <div className="p-3 bg-red-600 rounded-2xl shadow-xl">
+                          <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3.5 space-y-2 flex-1 flex flex-col justify-between">
+                      <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug group-hover:text-amber-300 transition-colors">
+                        {vid.title}
+                      </h4>
+                      <div className="flex items-center justify-between text-[10px] font-mono pt-2 border-t border-neutral-800/60">
+                        <span className="text-sky-400 font-bold flex items-center gap-1">
+                          <Eye className="w-3 h-3" /> {vid.view_count}
+                        </span>
+                        <span className="text-emerald-400 font-bold flex items-center gap-1">
+                          <ThumbsUp className="w-3 h-3" /> {vid.like_count}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── 6. PLAYLISTS & SERIES SHELF ── */}
+          {(activeFilter === "all" || activeFilter === "playlists") && playlists.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-purple-500/10 border border-purple-500/25 rounded-xl text-purple-400">
+                    <ListMusic className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-white font-sans tracking-tight">
+                      Series &amp; Playlists
+                    </h3>
+                    <p className="text-[11px] text-neutral-400 font-mono">
+                      Curated episode collections on your YouTube channel
+                    </p>
+                  </div>
+                </div>
+
+                {onNavigateTab && (
+                  <button
+                    onClick={() => onNavigateTab("playlists")}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-xs font-mono font-bold text-purple-300 hover:text-white transition-all cursor-pointer"
+                  >
+                    <span>Manage Playlists ({playlists.length})</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {playlists.slice(0, 4).map((pl) => (
+                  <div
+                    key={pl.id}
+                    onClick={() => onNavigateTab && onNavigateTab("playlists")}
+                    className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-xl transition-all cursor-pointer flex flex-col"
+                  >
+                    <div className="relative aspect-video bg-neutral-950 flex items-center justify-center overflow-hidden">
+                      {pl.thumbnail ? (
+                        <img
+                          src={pl.thumbnail}
+                          alt={pl.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <ListMusic className="w-10 h-10 text-neutral-600" />
+                      )}
+                      <div className="absolute inset-y-0 right-0 w-24 bg-black/85 backdrop-blur-md border-l border-white/10 flex flex-col items-center justify-center gap-1 text-white">
+                        <Layers className="w-4 h-4 text-purple-300" />
+                        <span className="text-xs font-black font-mono">{pl.item_count ?? "?"}</span>
+                        <span className="text-[8px] font-mono uppercase text-neutral-400">Videos</span>
+                      </div>
+                    </div>
+                    <div className="p-3.5 space-y-1">
+                      <h4 className="text-xs font-bold text-white truncate group-hover:text-purple-300 transition-colors font-sans">
+                        {pl.title}
+                      </h4>
+                      <p className="text-[10px] font-mono text-neutral-500 capitalize">
+                        {pl.privacy || "public"} series
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── 7. SHORTS SHELF ── */}
+          {(activeFilter === "all" || activeFilter === "shorts") && shorts.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
@@ -366,7 +611,7 @@ export default function YouTubeChannelHome({
                       YouTube Shorts
                     </h3>
                     <p className="text-[11px] text-neutral-400 font-mono">
-                      Fast-paced vertical shorts generated from your webtoon strips
+                      Vertical micro-episodes generated for mobile discovery
                     </p>
                   </div>
                 </div>
@@ -374,7 +619,7 @@ export default function YouTubeChannelHome({
                 {onNavigateTab && (
                   <button
                     onClick={() => onNavigateTab("shorts")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 hover:bg-neutral-850 border border-neutral-800 text-xs font-mono font-bold text-red-400 hover:text-red-300 transition-all cursor-pointer group shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-xs font-mono font-bold text-red-400 hover:text-red-300 transition-all cursor-pointer group shadow-sm"
                   >
                     <span>View All ({shorts.length})</span>
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -410,86 +655,106 @@ export default function YouTubeChannelHome({
             </div>
           )}
 
-          {/* ── Section: 🎬 Recent Uploads Grid ── */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-neutral-900 rounded-xl border border-neutral-800 text-purple-400">
-                  <Video className="w-4 h-4" />
+          {/* ── 8. RECENT UPLOADS GRID ── */}
+          {(activeFilter === "all" || activeFilter === "popular") && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-neutral-900 rounded-xl border border-neutral-800 text-purple-400">
+                    <Video className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-white font-sans tracking-tight">
+                      Recent Uploads
+                    </h3>
+                    <p className="text-[11px] text-neutral-400 font-mono">
+                      Latest storyboards and episodes published to YouTube
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-lg font-black text-white font-sans tracking-tight">
-                    Recent Uploads
-                  </h3>
-                  <p className="text-[11px] text-neutral-400 font-mono">
-                    Latest storyboards and episodes published to YouTube
-                  </p>
-                </div>
+
+                {onNavigateTab && (
+                  <button
+                    onClick={() => onNavigateTab("videos")}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-xs font-mono font-bold text-neutral-300 hover:text-white transition-all cursor-pointer group shadow-sm"
+                  >
+                    <span>View All ({videos.length})</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                )}
               </div>
 
-              {onNavigateTab && (
-                <button
-                  onClick={() => onNavigateTab("videos")}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 hover:bg-neutral-850 border border-neutral-800 text-xs font-mono font-bold text-neutral-300 hover:text-white transition-all cursor-pointer group shadow-sm"
-                >
-                  <span>View All ({videos.length})</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              )}
-            </div>
+              {videos.length === 0 ? (
+                <div className="p-12 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
+                  <Youtube className="w-12 h-12 text-neutral-600 mx-auto" />
+                  <h4 className="text-sm font-bold text-white">No videos published yet</h4>
+                  <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
+                    Export your first webtoon animation from the Creative Suite directly to your YouTube channel.
+                  </p>
+                  {onNavigateTab && (
+                    <button
+                      onClick={() => onNavigateTab("studio")}
+                      className="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-red-600/30 transition-all cursor-pointer inline-flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Upload First Video</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {recentUploads.map((vid) => (
+                    <div
+                      key={vid.id}
+                      className="group bg-neutral-900/60 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-red-500/40 hover:shadow-xl transition-all duration-300 flex flex-col backdrop-blur-sm"
+                    >
+                      <div
+                        className="relative aspect-video bg-black cursor-pointer overflow-hidden"
+                        onClick={() => onWatchVideo(vid.id, vid)}
+                      >
+                        <img
+                          src={vid.thumbnail}
+                          alt={vid.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40">
+                          <div className="p-3 bg-red-600/95 rounded-2xl shadow-xl border border-red-400/40">
+                            <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                          </div>
+                        </div>
+                      </div>
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {recentUploads.map((vid) => (
-                <div
-                  key={vid.id}
-                  className="group bg-neutral-900/60 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-red-500/40 hover:shadow-xl transition-all duration-300 flex flex-col backdrop-blur-sm"
-                >
-                  <div
-                    className="relative aspect-video bg-black cursor-pointer overflow-hidden"
-                    onClick={() => onWatchVideo(vid.id, vid)}
-                  >
-                    <img
-                      src={vid.thumbnail}
-                      alt={vid.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40">
-                      <div className="p-3 bg-red-600/95 rounded-2xl shadow-xl border border-red-400/40">
-                        <Play className="w-4 h-4 text-white fill-white ml-0.5" />
+                      <div className="p-4 flex flex-col gap-2 flex-1">
+                        <h4
+                          className="text-xs font-bold text-neutral-200 line-clamp-2 font-sans cursor-pointer hover:text-red-300 transition-colors leading-snug"
+                          onClick={() => onWatchVideo(vid.id, vid)}
+                        >
+                          {vid.title}
+                        </h4>
+                        <p className="text-[10px] text-neutral-500 font-mono">
+                          {formatDate(vid.published_at)}
+                        </p>
+                        <div className="flex items-center justify-between text-[10px] text-neutral-400 font-mono pt-3 border-t border-neutral-800/60 mt-auto">
+                          <span className="flex items-center gap-1 font-bold text-sky-400">
+                            <Eye className="w-3 h-3" /> {vid.view_count}
+                          </span>
+                          <span className="flex items-center gap-1 font-bold text-emerald-400">
+                            <ThumbsUp className="w-3 h-3" /> {vid.like_count}
+                          </span>
+                          <button
+                            onClick={() => onViewComments(vid.id)}
+                            className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
+                          >
+                            <MessageSquare className="w-3 h-3 text-purple-400" /> {vid.comment_count}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="p-4 flex flex-col gap-2 flex-1">
-                    <h4
-                      className="text-xs font-bold text-neutral-200 line-clamp-2 font-sans cursor-pointer hover:text-red-300 transition-colors leading-snug"
-                      onClick={() => onWatchVideo(vid.id, vid)}
-                    >
-                      {vid.title}
-                    </h4>
-                    <p className="text-[10px] text-neutral-500 font-mono">
-                      {formatDate(vid.published_at)}
-                    </p>
-                    <div className="flex items-center justify-between text-[10px] text-neutral-400 font-mono pt-3 border-t border-neutral-800/60 mt-auto">
-                      <span className="flex items-center gap-1 font-bold text-sky-400">
-                        <Eye className="w-3 h-3" /> {vid.view_count}
-                      </span>
-                      <span className="flex items-center gap-1 font-bold text-emerald-400">
-                        <ThumbsUp className="w-3 h-3" /> {vid.like_count}
-                      </span>
-                      <button
-                        onClick={() => onViewComments(vid.id)}
-                        className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
-                      >
-                        <MessageSquare className="w-3 h-3 text-purple-400" /> {vid.comment_count}
-                      </button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          </div>
+          )}
         </>
       )}
     </div>

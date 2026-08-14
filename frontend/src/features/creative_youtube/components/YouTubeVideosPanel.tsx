@@ -14,6 +14,15 @@ import {
   Calendar,
   SlidersHorizontal,
   Plus,
+  Zap,
+  Film,
+  Share2,
+  Check,
+  X,
+  TrendingUp,
+  FolderPlus,
+  Clock,
+  Sparkles,
 } from "lucide-react";
 import type { YouTubeVideoItem } from "./YouTubeChannelHome";
 
@@ -32,8 +41,10 @@ export default function YouTubeVideosPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [privacyFilter, setPrivacyFilter] = useState<string>("all");
+  const [formatFilter, setFormatFilter] = useState<"all" | "videos" | "shorts">("all");
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "views" | "likes" | "comments">("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fetchVideos = async () => {
     setIsLoading(true);
@@ -59,6 +70,23 @@ export default function YouTubeVideosPanel({
 
   const filteredAndSorted = useMemo(() => {
     let list = [...videos];
+
+    // Format filter (Shorts vs Long-form)
+    if (formatFilter === "shorts") {
+      list = list.filter(
+        (v) =>
+          v.title?.toLowerCase().includes("#short") ||
+          v.title?.toLowerCase().includes("short") ||
+          v.description?.toLowerCase().includes("#shorts")
+      );
+    } else if (formatFilter === "videos") {
+      list = list.filter(
+        (v) =>
+          !v.title?.toLowerCase().includes("#short") &&
+          !v.title?.toLowerCase().includes("short") &&
+          !v.description?.toLowerCase().includes("#shorts")
+      );
+    }
 
     // Privacy Filter
     if (privacyFilter !== "all") {
@@ -91,14 +119,23 @@ export default function YouTubeVideosPanel({
         return bc - ac;
       }
       if (sortBy === "oldest") {
-        return (new Date(a.published_at || 0).getTime()) - (new Date(b.published_at || 0).getTime());
+        return new Date(a.published_at || 0).getTime() - new Date(b.published_at || 0).getTime();
       }
       // default: newest
-      return (new Date(b.published_at || 0).getTime()) - (new Date(a.published_at || 0).getTime());
+      return new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime();
     });
 
     return list;
-  }, [videos, privacyFilter, search, sortBy]);
+  }, [videos, privacyFilter, formatFilter, search, sortBy]);
+
+  // Aggregated stats
+  const totalViews = useMemo(() => {
+    return videos.reduce((acc, v) => acc + (parseInt(v.view_count?.replace(/,/g, "") || "0") || 0), 0);
+  }, [videos]);
+
+  const totalLikes = useMemo(() => {
+    return videos.reduce((acc, v) => acc + (parseInt(v.like_count?.replace(/,/g, "") || "0") || 0), 0);
+  }, [videos]);
 
   const formatDate = (iso?: string) => {
     if (!iso) return "";
@@ -109,313 +146,433 @@ export default function YouTubeVideosPanel({
     });
   };
 
-  const privacyBadge = (p: string) => {
-    if (p === "public")
-      return "text-emerald-400 border-emerald-900/40 bg-emerald-950/50";
-    if (p === "unlisted")
-      return "text-amber-400 border-amber-900/40 bg-amber-950/50";
-    return "text-neutral-400 border-neutral-800 bg-neutral-950/50";
+  const handleCopy = (url: string, id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(url);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const isShortVideo = (v: YouTubeVideoItem) => {
+    return (
+      v.title?.toLowerCase().includes("#short") ||
+      v.title?.toLowerCase().includes("short") ||
+      v.description?.toLowerCase().includes("#shorts")
+    );
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header & Quick Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-neutral-900 via-neutral-900/80 to-neutral-950 p-5 rounded-2xl border border-neutral-800 shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-red-600 rounded-2xl shadow-lg shadow-red-600/30">
+    <div className="space-y-6 animate-fade-in">
+      {/* ── 1. HEADER & KPI SUMMARY BANNER ── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-gradient-to-r from-red-950/40 via-neutral-900 to-neutral-950 p-6 rounded-3xl border border-red-900/30 shadow-2xl">
+        <div className="flex items-center gap-4">
+          <div className="p-3.5 bg-gradient-to-br from-red-600 to-rose-700 rounded-2xl shadow-xl shadow-red-600/30 shrink-0">
             <Video className="w-6 h-6 text-white" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black text-white font-sans tracking-tight">
-                Channel Videos
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-lg sm:text-xl font-black text-white font-sans tracking-tight">
+                Channel Videos &amp; Catalog
               </h2>
-              <span className="px-2 py-0.5 rounded-full bg-neutral-800 border border-neutral-700 text-neutral-300 text-[10px] font-mono font-bold">
+              <span className="px-2.5 py-0.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 text-[10px] font-mono font-bold">
                 {videos.length} Uploads
               </span>
             </div>
-            <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Manage, search, and watch your published YouTube video catalog
+            <p className="text-xs text-neutral-400 font-mono">
+              Manage, analyze, search, and watch your published YouTube video catalog
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={fetchVideos}
-            disabled={isLoading}
-            className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-xl text-neutral-400 hover:text-white transition-all cursor-pointer"
-            title="Refresh Videos"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-          </button>
+        {/* Aggregated Stats & Actions */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-3 px-4 py-2 bg-neutral-950/80 border border-neutral-800 rounded-2xl text-xs font-mono">
+            <span className="flex items-center gap-1.5 text-sky-400 font-bold">
+              <Eye className="w-3.5 h-3.5" />
+              {totalViews.toLocaleString()} views
+            </span>
+            <span className="text-neutral-700">|</span>
+            <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
+              <ThumbsUp className="w-3.5 h-3.5" />
+              {totalLikes.toLocaleString()} likes
+            </span>
+          </div>
+
           {onNavigateStudio && (
             <button
               onClick={onNavigateStudio}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 text-white text-xs font-black font-mono rounded-xl shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold font-mono shadow-md shadow-red-600/30 transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              Upload New Video
+              <span>Upload Video</span>
+            </button>
+          )}
+
+          <button
+            onClick={fetchVideos}
+            disabled={isLoading}
+            className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm"
+            title="Refresh Videos"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-red-400" : ""}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* ── 2. SEARCH, FILTER & TOOLBAR ── */}
+      <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+          {/* Search Bar */}
+          <div className="md:col-span-5 relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by video title, keywords, tags..."
+              className="w-full bg-neutral-950 border border-neutral-800 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder:text-neutral-500 font-sans focus:outline-none transition-all"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Format Filter Pills */}
+          <div className="md:col-span-3 flex items-center gap-1 p-1 bg-neutral-950 border border-neutral-800 rounded-xl">
+            {[
+              { id: "all", label: "All Formats", icon: Film },
+              { id: "videos", label: "HD Videos", icon: Video },
+              { id: "shorts", label: "Shorts", icon: Zap },
+            ].map((f) => {
+              const isSel = formatFilter === f.id;
+              const Icon = f.icon;
+              return (
+                <button
+                  key={f.id}
+                  onClick={() => setFormatFilter(f.id as any)}
+                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                    isSel ? "bg-red-600 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-200"
+                  }`}
+                >
+                  <Icon className="w-3 h-3" />
+                  <span>{f.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Privacy & Sort Dropdowns */}
+          <div className="md:col-span-3 flex items-center gap-2">
+            <select
+              value={privacyFilter}
+              onChange={(e) => setPrivacyFilter(e.target.value)}
+              className="w-1/2 bg-neutral-950 border border-neutral-800 focus:border-red-500/60 rounded-xl px-2.5 py-2.5 text-xs text-neutral-300 font-mono focus:outline-none cursor-pointer"
+            >
+              <option value="all">All Privacy</option>
+              <option value="public">Public</option>
+              <option value="unlisted">Unlisted</option>
+              <option value="private">Private</option>
+            </select>
+
+            <select
+              value={sortBy}
+              onChange={(e: any) => setSortBy(e.target.value)}
+              className="w-1/2 bg-neutral-950 border border-neutral-800 focus:border-red-500/60 rounded-xl px-2.5 py-2.5 text-xs text-neutral-300 font-mono focus:outline-none cursor-pointer"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="views">Most Views</option>
+              <option value="likes">Most Likes</option>
+              <option value="comments">Most Comments</option>
+            </select>
+          </div>
+
+          {/* View Mode Toggle (Grid vs List) */}
+          <div className="md:col-span-1 flex items-center justify-end gap-1">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                viewMode === "grid"
+                  ? "bg-red-600/20 border-red-500 text-red-400"
+                  : "bg-neutral-950 border-neutral-800 text-neutral-500 hover:text-neutral-300"
+              }`}
+              title="Grid View"
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                viewMode === "list"
+                  ? "bg-red-600/20 border-red-500 text-red-400"
+                  : "bg-neutral-950 border-neutral-800 text-neutral-500 hover:text-neutral-300"
+              }`}
+              title="List View"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Status Bar */}
+        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 pt-2 border-t border-neutral-800/60">
+          <span>
+            Showing <strong className="text-white">{filteredAndSorted.length}</strong> of{" "}
+            <strong>{videos.length}</strong> videos
+          </span>
+          {(search || privacyFilter !== "all" || formatFilter !== "all") && (
+            <button
+              onClick={() => {
+                setSearch("");
+                setPrivacyFilter("all");
+                setFormatFilter("all");
+              }}
+              className="text-red-400 hover:text-red-300 underline cursor-pointer"
+            >
+              Clear all filters
             </button>
           )}
         </div>
       </div>
 
-      {/* Filter, Search & View Modes */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title or description..."
-            className="w-full bg-neutral-900/80 border border-neutral-800 focus:border-red-500/60 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder:text-neutral-500 font-mono focus:outline-none transition-all"
-          />
-        </div>
-
-        {/* Filters & View Toggles */}
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Privacy Status */}
-          <div className="flex items-center gap-1 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl">
-            {["all", "public", "unlisted", "private"].map((p) => (
-              <button
-                key={p}
-                onClick={() => setPrivacyFilter(p)}
-                className={`px-3 py-1 rounded-lg text-[10px] font-bold font-mono uppercase transition-all cursor-pointer ${
-                  privacyFilter === p
-                    ? "bg-red-600 text-white shadow-sm"
-                    : "text-neutral-400 hover:text-white"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-1.5 bg-neutral-900/80 border border-neutral-800 rounded-xl px-3 py-1">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-neutral-500" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-transparent text-[11px] font-mono text-neutral-300 focus:outline-none cursor-pointer"
-            >
-              <option value="newest" className="bg-neutral-950">Newest First</option>
-              <option value="oldest" className="bg-neutral-950">Oldest First</option>
-              <option value="views" className="bg-neutral-950">Most Viewed</option>
-              <option value="likes" className="bg-neutral-950">Most Liked</option>
-              <option value="comments" className="bg-neutral-950">Most Discussed</option>
-            </select>
-          </div>
-
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === "grid" ? "bg-neutral-800 text-white" : "text-neutral-500 hover:text-white"
-              }`}
-              title="Grid View"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === "list" ? "bg-neutral-800 text-white" : "text-neutral-500 hover:text-white"
-              }`}
-              title="List View"
-            >
-              <List className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Video Content */}
+      {/* ── 3. VIDEOS FEED ── */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {[...Array(8)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-neutral-900/40 border border-neutral-800/60 rounded-2xl overflow-hidden p-0 animate-pulse space-y-3"
-            >
-              <div className="aspect-video bg-neutral-800/70 rounded-t-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
-              </div>
-              <div className="p-3.5 space-y-2.5">
-                <div className="h-3.5 bg-neutral-800/80 rounded-md w-4/5" />
-                <div className="h-3 bg-neutral-800/50 rounded-md w-3/5" />
-                <div className="flex justify-between items-center pt-2">
-                  <div className="h-2.5 bg-neutral-800/60 rounded w-16" />
-                  <div className="h-2.5 bg-neutral-800/60 rounded w-12" />
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
+          <p className="text-xs text-neutral-400 font-mono">Loading channel videos catalog…</p>
         </div>
       ) : filteredAndSorted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-center border border-neutral-800/60 rounded-3xl bg-neutral-950/40">
-          <div className="p-4 bg-neutral-900 border border-neutral-800 rounded-2xl">
-            <Video className="w-8 h-8 text-neutral-500" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-neutral-200">No Videos Found</p>
-            <p className="text-xs text-neutral-500 font-mono mt-1">
-              {search ? `No results for "${search}"` : "Upload a video in the Studio tab to see it here"}
-            </p>
-          </div>
+        <div className="p-16 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
+          <Video className="w-12 h-12 text-neutral-600 mx-auto" />
+          <h3 className="text-sm font-bold text-white">No matching videos found</h3>
+          <p className="text-xs text-neutral-500 font-mono max-w-sm mx-auto">
+            Try adjusting your search terms or filters above to find published videos.
+          </p>
         </div>
       ) : viewMode === "grid" ? (
-        /* GRID VIEW */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filteredAndSorted.map((vid) => (
-            <div
-              key={vid.id}
-              className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-red-500/40 hover:shadow-xl hover:shadow-red-950/20 transition-all flex flex-col"
-            >
-              {/* Thumbnail Container */}
+        /* ── GRID VIEW ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {filteredAndSorted.map((vid) => {
+            const isShort = isShortVideo(vid);
+            return (
               <div
-                className="relative aspect-video bg-black cursor-pointer overflow-hidden"
-                onClick={() => onWatchVideo(vid.id, vid)}
+                key={vid.id}
+                className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-red-500/40 hover:shadow-2xl transition-all duration-300 flex flex-col backdrop-blur-sm"
               >
-                <img
-                  src={vid.thumbnail}
-                  alt={vid.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {/* Thumbnail Preview Area */}
+                <div
+                  className="relative aspect-video bg-black cursor-pointer overflow-hidden"
+                  onClick={() => onWatchVideo(vid.id, vid)}
+                >
+                  <img
+                    src={vid.thumbnail}
+                    alt={vid.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
 
-                {/* Hover Play Button */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                  <div className="p-3 bg-red-600/90 rounded-full shadow-xl transform scale-75 group-hover:scale-100 transition-transform">
-                    <Play className="w-5 h-5 text-white fill-white" />
+                  {/* Format Pill */}
+                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-black/80 backdrop-blur-sm text-[9px] font-mono font-bold text-white border border-white/10 flex items-center gap-1">
+                    {isShort ? (
+                      <>
+                        <Zap className="w-2.5 h-2.5 text-red-400 fill-red-400" />
+                        <span>Shorts</span>
+                      </>
+                    ) : (
+                      <>
+                        <Film className="w-2.5 h-2.5 text-sky-400" />
+                        <span>HD Video</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Privacy Badge */}
+                  <div
+                    className={`absolute top-2 right-2 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold uppercase backdrop-blur-sm border ${
+                      vid.privacy_status === "public"
+                        ? "bg-emerald-950/80 text-emerald-300 border-emerald-800/60"
+                        : vid.privacy_status === "unlisted"
+                        ? "bg-amber-950/80 text-amber-300 border-amber-800/60"
+                        : "bg-neutral-950/80 text-neutral-400 border-neutral-700/60"
+                    }`}
+                  >
+                    {vid.privacy_status}
+                  </div>
+
+                  {/* Hover Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40">
+                    <div className="p-3.5 bg-gradient-to-br from-red-600 to-rose-600 rounded-2xl shadow-2xl border border-red-400/40 transform group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                    </div>
                   </div>
                 </div>
 
-                {/* Privacy Badge */}
-                <span
-                  className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-lg text-[9px] font-bold font-mono border uppercase backdrop-blur-md ${privacyBadge(
-                    vid.privacy_status
-                  )}`}
-                >
-                  {vid.privacy_status}
-                </span>
-              </div>
+                {/* Content & Metadata */}
+                <div className="p-4 flex flex-col gap-2 flex-1 justify-between">
+                  <div className="space-y-1">
+                    <h4
+                      className="text-xs font-bold text-neutral-100 line-clamp-2 font-sans cursor-pointer hover:text-red-300 transition-colors leading-snug"
+                      onClick={() => onWatchVideo(vid.id, vid)}
+                    >
+                      {vid.title}
+                    </h4>
+                    <p className="text-[10px] text-neutral-500 font-mono">
+                      {formatDate(vid.published_at)}
+                    </p>
+                  </div>
 
-              {/* Card Body */}
-              <div className="p-4 flex flex-col gap-3 flex-1">
-                <div className="space-y-1">
-                  <h3
-                    className="text-xs font-bold text-neutral-200 line-clamp-2 font-sans leading-snug cursor-pointer hover:text-red-300 transition-colors"
-                    onClick={() => onWatchVideo(vid.id, vid)}
-                  >
-                    {vid.title}
-                  </h3>
-                  <p className="text-[10px] text-neutral-500 font-mono">
-                    {formatDate(vid.published_at)}
-                  </p>
-                </div>
+                  {/* Telemetry Footer */}
+                  <div className="space-y-2.5 pt-3 border-t border-neutral-800/60">
+                    <div className="flex items-center justify-between text-[10.5px] font-mono text-neutral-400">
+                      <span className="flex items-center gap-1 font-bold text-sky-400">
+                        <Eye className="w-3 h-3" /> {vid.view_count}
+                      </span>
+                      <span className="flex items-center gap-1 font-bold text-emerald-400">
+                        <ThumbsUp className="w-3 h-3" /> {vid.like_count}
+                      </span>
+                      <button
+                        onClick={() => onViewComments(vid.id)}
+                        className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
+                        title="View Comments"
+                      >
+                        <MessageSquare className="w-3 h-3 text-purple-400" /> {vid.comment_count}
+                      </button>
+                    </div>
 
-                {/* Card Footer */}
-                <div className="flex items-center justify-between text-[10px] text-neutral-400 font-mono pt-3 border-t border-neutral-800/60 mt-auto">
-                  <span className="flex items-center gap-1">
-                    <Eye className="w-3.5 h-3.5 text-sky-400" /> {vid.view_count}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <ThumbsUp className="w-3.5 h-3.5 text-emerald-400" /> {vid.like_count}
-                  </span>
-                  <button
-                    onClick={() => onViewComments(vid.id)}
-                    className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5 text-purple-400" /> {vid.comment_count}
-                  </button>
-                  <a
-                    href={vid.youtube_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="hover:text-white transition-colors"
-                    title="Open in YouTube"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5 text-neutral-500 hover:text-white" />
-                  </a>
+                    {/* Action Bar */}
+                    <div className="flex items-center justify-between gap-2 pt-1">
+                      <button
+                        onClick={() => onWatchVideo(vid.id, vid)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-neutral-950 hover:bg-red-950/40 border border-neutral-800 hover:border-red-500/50 rounded-xl text-[10px] font-mono font-bold text-neutral-300 hover:text-red-300 transition-all cursor-pointer"
+                      >
+                        <Play className="w-3 h-3 fill-current" />
+                        <span>Theater</span>
+                      </button>
+                      <button
+                        onClick={(e) => handleCopy(vid.youtube_url, vid.id, e)}
+                        className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                        title="Copy YouTube Link"
+                      >
+                        {copiedId === vid.id ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        ) : (
+                          <Share2 className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                      <a
+                        href={vid.youtube_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                        title="Open on YouTube"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
-        /* LIST VIEW */
-        <div className="space-y-3">
-          {filteredAndSorted.map((vid) => (
-            <div
-              key={vid.id}
-              className="group flex flex-col sm:flex-row sm:items-center gap-4 p-3.5 bg-neutral-900/70 border border-neutral-800/80 rounded-2xl hover:border-red-500/40 transition-all"
-            >
-              {/* Thumbnail */}
+        /* ── LIST VIEW ── */
+        <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-3xl overflow-hidden shadow-xl">
+          <div className="divide-y divide-neutral-800/60">
+            {filteredAndSorted.map((vid) => (
               <div
-                className="relative w-full sm:w-48 aspect-video bg-black rounded-xl overflow-hidden shrink-0 cursor-pointer"
-                onClick={() => onWatchVideo(vid.id, vid)}
+                key={vid.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 hover:bg-neutral-950/40 transition-colors group"
               >
-                <img
-                  src={vid.thumbnail}
-                  alt={vid.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                  <Play className="w-5 h-5 text-white fill-white" />
-                </div>
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-2 py-0.5 rounded-lg text-[9px] font-bold font-mono border uppercase ${privacyBadge(
-                      vid.privacy_status
-                    )}`}
-                  >
-                    {vid.privacy_status}
-                  </span>
-                  <span className="text-[10px] text-neutral-500 font-mono">
-                    {formatDate(vid.published_at)}
-                  </span>
-                </div>
-                <h3
-                  className="text-sm font-bold text-white line-clamp-1 font-sans cursor-pointer hover:text-red-300 transition-colors"
+                <div
+                  className="flex items-center gap-3.5 min-w-0 flex-1 cursor-pointer"
                   onClick={() => onWatchVideo(vid.id, vid)}
                 >
-                  {vid.title}
-                </h3>
-                {vid.description && (
-                  <p className="text-xs text-neutral-400 line-clamp-1 font-sans">
-                    {vid.description}
-                  </p>
-                )}
-              </div>
+                  <div className="relative w-28 sm:w-36 aspect-video bg-black rounded-xl overflow-hidden shrink-0 border border-neutral-800">
+                    <img
+                      src={vid.thumbnail}
+                      alt={vid.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                      <Play className="w-4 h-4 text-white fill-white" />
+                    </div>
+                  </div>
 
-              {/* Actions & Stats */}
-              <div className="flex items-center gap-4 shrink-0 text-xs font-mono text-neutral-400">
-                <span className="flex items-center gap-1.5">
-                  <Eye className="w-4 h-4 text-sky-400" />
-                  {vid.view_count}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <ThumbsUp className="w-4 h-4 text-emerald-400" />
-                  {vid.like_count}
-                </span>
-                <button
-                  onClick={() => onWatchVideo(vid.id, vid)}
-                  className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 text-red-400 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer"
-                >
-                  Watch
-                </button>
+                  <div className="space-y-1 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-xs sm:text-sm font-bold text-white truncate font-sans group-hover:text-red-300 transition-colors">
+                        {vid.title}
+                      </h4>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase border ${
+                          vid.privacy_status === "public"
+                            ? "text-emerald-400 border-emerald-900/40 bg-emerald-950/40"
+                            : "text-amber-400 border-amber-900/40 bg-amber-950/40"
+                        }`}
+                      >
+                        {vid.privacy_status}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-neutral-500 font-mono">
+                      Published {formatDate(vid.published_at)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stats & Actions */}
+                <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 text-xs font-mono text-neutral-400">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1 text-sky-400 font-bold">
+                      <Eye className="w-3.5 h-3.5" /> {vid.view_count}
+                    </span>
+                    <span className="flex items-center gap-1 text-emerald-400 font-bold">
+                      <ThumbsUp className="w-3.5 h-3.5" /> {vid.like_count}
+                    </span>
+                    <button
+                      onClick={() => onViewComments(vid.id)}
+                      className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-purple-400" /> {vid.comment_count}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => onWatchVideo(vid.id, vid)}
+                      className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-300 rounded-xl text-xs font-bold font-mono transition-colors cursor-pointer"
+                    >
+                      Watch
+                    </button>
+                    <button
+                      onClick={(e) => handleCopy(vid.youtube_url, vid.id, e)}
+                      className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                      title="Copy Link"
+                    >
+                      {copiedId === vid.id ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : (
+                        <Share2 className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                    <a
+                      href={vid.youtube_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                      title="Open on YouTube"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
