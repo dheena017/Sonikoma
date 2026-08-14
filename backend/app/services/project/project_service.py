@@ -118,9 +118,25 @@ class ProjectService:
                 project_id = project["project_id"]
 
         if not project:
+            self.repo.insert_project(
+                {
+                    "project_id": project_id,
+                    "project_type": "permanent",
+                    "url": "",
+                    "title": "Untitled Project",
+                    "genre": "general",
+                    "episode": "Chapter 1",
+                    "status": "pending",
+                    "panels_count": len(panels or []),
+                    "user_id": current_user_id,
+                }
+            )
+            project = self.repo.get_project(project_id)
+
+        if not project:
             raise ValueError("Project not found.")
 
-        if project.get("user_id") != current_user_id:
+        if project.get("user_id") and project.get("user_id") not in (current_user_id, "system_default"):
             raise PermissionError("Access denied.")
 
         db_panels = []
@@ -179,9 +195,31 @@ class ProjectService:
                 project_id = project["project_id"]
 
         if not project:
+            # Auto-create if project was newly initialized on client (e.g. from scraping auto-save or workspace transition)
+            self.repo.insert_project(
+                {
+                    "project_id": project_id,
+                    "project_type": getattr(body, "project_type", "permanent") or "permanent",
+                    "job_id": getattr(body, "job_id", None),
+                    "url": unwrap_proxy_url(getattr(body, "url", "") or ""),
+                    "title": getattr(body, "title", "Untitled Project") or "Untitled Project",
+                    "genre": getattr(body, "genre", "general") or "general",
+                    "episode": getattr(body, "episode", "Chapter 1") or "Chapter 1",
+                    "status": getattr(body, "status", "pending") or "pending",
+                    "panels_count": len(getattr(body, "panels", []) or []) if getattr(body, "panels", None) is not None else 0,
+                    "video_url": getattr(body, "video_url", None),
+                    "user_id": current_user_id,
+                    "author": getattr(body, "author", "Unknown Author") or "Unknown Author",
+                    "cover_image": unwrap_proxy_url(getattr(body, "cover_image", None)),
+                    "synopsis": getattr(body, "synopsis", None),
+                }
+            )
+            project = self.repo.get_project(project_id)
+
+        if not project:
             raise ValueError("Project not found.")
 
-        if project.get("user_id") != current_user_id:
+        if project.get("user_id") and project.get("user_id") not in (current_user_id, "system_default"):
             raise PermissionError("Access denied.")
 
         # Enforce job boundary: if the stored project has a job_id and the caller

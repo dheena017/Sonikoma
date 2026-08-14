@@ -118,12 +118,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           active: currentPath === "/creative-suite" || currentPath.startsWith("/creative-suite/") || currentPath.startsWith("/ai-") || currentPath === "/panel-assistant" || currentPath === "/youtube",
           onClick: () => navigateTo("/creative-suite"),
         },
-        {
-          label: "Editor",
-          icon: Scissors,
-          active: isEditor || isAutoCrop,
-          onClick: () => navigateTo("/editor"),
-        },
+
         {
           label: "Image Editor",
           icon: Image,

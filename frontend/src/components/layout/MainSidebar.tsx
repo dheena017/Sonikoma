@@ -255,13 +255,7 @@ const SidebarInner = ({
           onClick: () => navigateTo("/creative-suite"),
           enabled: true,
         },
-        {
-          label: "Editor",
-          icon: Scissors,
-          active: isEditor,
-          onClick: () => navigateTo("/editor"),
-          enabled: true,
-        },
+
         {
           label: "Image Editor",
           icon: Image,
@@ -373,15 +367,13 @@ const SidebarInner = ({
                       <button
                         onClick={item.onClick}
                         disabled={!item.enabled}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
-                          item.active
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${item.active
                             ? "text-white bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border border-purple-500/40 shadow-[0_4px_20px_rgba(168,85,247,0.2)]"
                             : "text-neutral-300 hover:text-white hover:bg-neutral-900/80 border border-transparent hover:border-neutral-800/60"
-                        } ${
-                          (item as any).isProcessing
+                          } ${(item as any).isProcessing
                             ? "ring-1 ring-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                             : ""
-                        }`}
+                          }`}
                         title={
                           !item.enabled ? (item as any).disabledTip : item.label
                         }
@@ -393,11 +385,10 @@ const SidebarInner = ({
 
                         <div className="flex items-center gap-3">
                           <Icon
-                            className={`h-4 w-4 transition-transform duration-200 ${
-                              item.active
+                            className={`h-4 w-4 transition-transform duration-200 ${item.active
                                 ? "text-purple-300 scale-110"
                                 : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-105"
-                            }`}
+                              }`}
                           />
                           <span className={item.active ? "font-bold text-white" : "font-medium"}>
                             {item.label}
@@ -405,13 +396,12 @@ const SidebarInner = ({
                         </div>
                         {(item as any).badge && (
                           <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-bold ${
-                              item.label === "Notifications" && !item.active
+                            className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-bold ${item.label === "Notifications" && !item.active
                                 ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-sm shadow-purple-900/50"
                                 : item.active
-                                ? "bg-purple-900/80 text-purple-200 border border-purple-400/30"
-                                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
-                            }`}
+                                  ? "bg-purple-900/80 text-purple-200 border border-purple-400/30"
+                                  : "bg-neutral-900 text-neutral-400 border border-neutral-800"
+                              }`}
                           >
                             {(item as any).badge}
                           </span>
@@ -455,11 +445,10 @@ const SidebarInner = ({
 
       {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/80 z-50 transition-all duration-300 ease-out transform overflow-hidden ${
-          isOpen
+        className={`fixed top-0 bottom-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/80 z-50 transition-all duration-300 ease-out transform overflow-hidden ${isOpen
             ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]"
             : "-translate-x-full"
-        }`}
+          }`}
       >
         {sidebarContent}
       </aside>

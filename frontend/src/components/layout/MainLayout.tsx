@@ -505,7 +505,7 @@ export default function MainLayout(props: MainLayoutProps) {
         {/* Scrollable Main Children Page Area */}
         <div
           id="main-scrollable-area"
-          className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center justify-start w-full relative"
+          className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col w-full relative"
         >
           {/* Admin Back to Admin Bar */}
           {localStorage.getItem("sonikoma_admin_token") && (
@@ -583,7 +583,7 @@ export default function MainLayout(props: MainLayoutProps) {
                   </button>
                   <button
                     onClick={recheckBackend}
-                    className="px-3 py-1 bg-rose-900/60 hover:bg-rose-850 text-rose-100 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border border-rose-700/50 shadow-sm cursor-pointer whitespace-nowrap"
+                    className="px-3 py-1 bg-rose-900/60 hover:bg-rose-855 text-rose-100 text-[10px] rounded-lg font-mono uppercase tracking-wider font-bold transition-all border border-rose-700/50 shadow-sm cursor-pointer whitespace-nowrap"
                   >
                     Recheck Connection
                   </button>
@@ -607,11 +607,11 @@ export default function MainLayout(props: MainLayoutProps) {
           <div
             key={currentPath}
             className={`w-full max-w-full min-w-0 flex-1 flex flex-col ${
-              isImageEditorPage || isProEditorPage
+              isImageEditorPage || isProEditorPage || isVideoEditorPage
                 ? "p-0"
-                : !isSidebarOpen && (isCreativeSuitePath || isAnyAdmin || !isWorkspacePath)
-                ? "px-4 sm:px-6 md:px-8 lg:pl-24 lg:pr-8 pb-12 md:pb-16 page-view-transition stagger-container"
-                : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16 page-view-transition stagger-container"
+                : !isSidebarOpen
+                ? "px-4 sm:px-6 lg:px-8 lg:pl-28 pb-12 md:pb-16 page-view-transition stagger-container"
+                : "px-4 sm:px-6 lg:px-8 pb-12 md:pb-16 page-view-transition stagger-container"
             }`}
           >
             {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (

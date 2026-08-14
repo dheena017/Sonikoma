@@ -13,6 +13,8 @@ import {
   Rows,
   Loader2,
   Save,
+  PanelLeft,
+  PanelLeftClose,
 } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -126,40 +128,40 @@ export const HorizontalScrollContainer: React.FC<{
   };
 
   return (
-    <div className="relative group/scroll-container w-full min-w-0">
-      {/* Scroll Left Navigation Arrow Button */}
-      {canScrollLeft && (
-        <button
-          type="button"
-          onClick={() => scroll("left")}
-          aria-label="Scroll Left"
-          title="Scroll Left (Left to Right)"
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-neutral-955/95 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-      )}
+    <div className="w-full min-w-0 flex items-center gap-2">
+      {/* Left Arrow */}
+      <button
+        type="button"
+        onClick={() => scroll("left")}
+        aria-label="Scroll Left"
+        title="Scroll Left"
+        className={`shrink-0 w-9 h-9 rounded-full bg-neutral-900/90 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md ${
+          canScrollLeft ? "opacity-90 hover:opacity-100" : "opacity-20 pointer-events-none"
+        }`}
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
 
-      {/* Scroll Right Navigation Arrow Button */}
-      {canScrollRight && (
-        <button
-          type="button"
-          onClick={() => scroll("right")}
-          aria-label="Scroll Right"
-          title="Scroll Right (Left to Right)"
-          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-10 h-10 rounded-full bg-neutral-955/95 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
-      )}
-
-      {/* Horizontal Scroll Container Track */}
+      {/* Scroll Track — hidden scrollbar, arrows handle navigation */}
       <div
         ref={scrollRef}
-        className={`w-full max-w-full flex gap-4 overflow-x-auto pb-4 pt-3.5 custom-purple-scrollbar scroll-smooth px-1 select-none ${className}`}
+        className={`flex-1 min-w-0 flex gap-4 overflow-x-auto pb-4 pt-3.5 hide-scrollbar scroll-smooth select-none ${className}`}
       >
         {children}
       </div>
+
+      {/* Right Arrow */}
+      <button
+        type="button"
+        onClick={() => scroll("right")}
+        aria-label="Scroll Right"
+        title="Scroll Right"
+        className={`shrink-0 w-9 h-9 rounded-full bg-neutral-900/90 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md ${
+          canScrollRight ? "opacity-90 hover:opacity-100" : "opacity-20 pointer-events-none"
+        }`}
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
     </div>
   );
 };
@@ -620,11 +622,10 @@ const ChapterScraperDeck = React.memo(
                   type="button"
                   onClick={() => setViewLayout("scroll")}
                   title="Horizontal Scroll View"
-                  className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${
-                    viewLayout === "scroll"
+                  className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${viewLayout === "scroll"
                       ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
                       : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-                  }`}
+                    }`}
                 >
                   <Rows className="w-3 h-3" />
                   <span>Scroll</span>
@@ -633,11 +634,10 @@ const ChapterScraperDeck = React.memo(
                   type="button"
                   onClick={() => setViewLayout("grid")}
                   title="Grid View"
-                  className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${
-                    viewLayout === "grid"
+                  className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${viewLayout === "grid"
                       ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
                       : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-                  }`}
+                    }`}
                 >
                   <LayoutGrid className="w-3 h-3" />
                   <span>Grid</span>
@@ -645,6 +645,29 @@ const ChapterScraperDeck = React.memo(
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
+                {/* Episode sidebar toggle — only when multiple episodes loaded */}
+                {(() => {
+                  const headerEpisodeGroups = ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || [];
+                  return headerEpisodeGroups.length > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsEpisodeCollapsed(!isEpisodeCollapsed)}
+                      title={isEpisodeCollapsed ? "Show Episode Navigator" : "Hide Episode Navigator"}
+                      className={`h-7 px-2.5 rounded-lg text-[10px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
+                        isEpisodeCollapsed
+                          ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-purple-300 hover:border-purple-700"
+                          : "bg-purple-600/20 border-purple-600/50 text-purple-300 hover:bg-purple-600/30"
+                      }`}
+                    >
+                      {isEpisodeCollapsed ? (
+                        <><PanelLeft className="w-3.5 h-3.5" /><span className="hidden sm:inline">Episodes</span></>
+                      ) : (
+                        <><PanelLeftClose className="w-3.5 h-3.5" /><span className="hidden sm:inline">Episodes</span></>
+                      )}
+                    </button>
+                  ) : null;
+                })()}
+
                 {handleSaveAssets && scrapedImages.length > 0 && (
                   <button
                     type="button"
@@ -704,64 +727,89 @@ const ChapterScraperDeck = React.memo(
                     selectedEpisodeIdx === "all"
                       ? sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }))
                       : episodeGroups[selectedEpisodeIdx]
-                      ? [{ grp: episodeGroups[selectedEpisodeIdx], gIdx: selectedEpisodeIdx as number }]
-                      : sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }));
+                        ? [{ grp: episodeGroups[selectedEpisodeIdx], gIdx: selectedEpisodeIdx as number }]
+                        : sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }));
 
                   return (
                     <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
                       {/* IN-PANEL LEFT SIDEBAR: EPISODE NAVIGATOR */}
-                        <aside
-                          className={`relative bg-neutral-950/90 border border-neutral-850 rounded-2xl shrink-0 space-y-3 shadow-2xl lg:sticky lg:top-24 self-start transition-all duration-200 ${
-                            isEpisodeCollapsed ? "w-12 p-2" : "w-full lg:w-56 p-4"
-                          }`}
-                        >
-                          <div className="absolute inset-x-4 top-0 h-px bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
-                          <div className="relative flex items-center justify-between gap-3 border-b border-neutral-850/80 pb-3 pt-2.5">
-                            <div className="min-w-0 flex items-center gap-2">
-                              <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.45)] shrink-0" />
-                              <div className="min-w-0">
-                                <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono truncate">
-                                  Imported Episodes
-                                </h4>
-                                <p className="text-[10px] text-neutral-400 font-mono tracking-wide">
-                                  {episodeGroups.length} episode{episodeGroups.length === 1 ? "" : "s"}
-                                </p>
+                      <aside
+                        className={`relative bg-neutral-950/90 border border-neutral-850 rounded-2xl shrink-0 shadow-2xl lg:sticky lg:top-24 self-start transition-all duration-300 overflow-hidden ${
+                          isEpisodeCollapsed ? "w-10 p-2" : "w-full lg:w-56 p-4 space-y-3"
+                        }`}
+                      >
+                        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
+
+                        {/* Collapsed state — just a vertical icon strip */}
+                        {isEpisodeCollapsed ? (
+                          <button
+                            type="button"
+                            onClick={() => setIsEpisodeCollapsed(false)}
+                            title="Open Episode Navigator"
+                            className="w-full flex flex-col items-center gap-2 pt-2 cursor-pointer group"
+                          >
+                            <PanelLeft className="w-4 h-4 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                            <span
+                              className="text-[8px] font-black font-mono uppercase text-neutral-500 group-hover:text-purple-400 transition-colors tracking-widest"
+                              style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}
+                            >
+                              Episodes
+                            </span>
+                          </button>
+                        ) : (
+                          <>
+                            {/* Expanded header */}
+                            <div className="relative flex items-center justify-between gap-2 border-b border-neutral-850/80 pb-3 pt-1.5">
+                              <div className="min-w-0 flex items-center gap-2">
+                                <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.45)] shrink-0" />
+                                <div className="min-w-0">
+                                  <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono truncate">Episodes</h4>
+                                  <p className="text-[10px] text-neutral-400 font-mono">{episodeGroups.length} loaded</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setEpisodeSortAscending((prev) => !prev)}
+                                  title="Toggle Sort Order"
+                                  className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
+                                >
+                                  {episodeSortAscending ? "1→N" : "N→1"}
+                                </button>
+                                {/* Close toggle */}
+                                <button
+                                  type="button"
+                                  onClick={() => setIsEpisodeCollapsed(true)}
+                                  title="Hide Episode Navigator"
+                                  className="w-6 h-6 flex items-center justify-center rounded-lg bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 hover:border-neutral-700 text-neutral-500 hover:text-white transition-all cursor-pointer"
+                                >
+                                  <PanelLeftClose className="w-3.5 h-3.5" />
+                                </button>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => setEpisodeSortAscending((prev) => !prev)}
-                                title="Toggle Sort Order (Ascending / Descending)"
-                                className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
-                              >
-                                {episodeSortAscending ? "1 → N" : "N → 1"}
-                              </button>
-                            </div>
-                          </div>
 
-                          {/* Search & Filter Bar */}
-                          <div className={isEpisodeCollapsed ? "hidden" : "relative"}>
-                            <input
-                              type="text"
-                              value={episodeSearchQuery}
-                              onChange={(e) => setEpisodeSearchQuery(e.target.value)}
-                              placeholder="Search episodes..."
-                              className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/60 font-mono transition-all"
-                            />
-                            {episodeSearchQuery && (
-                              <button
-                                type="button"
-                                onClick={() => setEpisodeSearchQuery("")}
-                                className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold"
-                              >
-                                ✕
-                              </button>
-                            )}
-                          </div>
+                        {/* Search & Filter Bar */}
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={episodeSearchQuery}
+                            onChange={(e) => setEpisodeSearchQuery(e.target.value)}
+                            placeholder="Search episodes..."
+                            className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/60 font-mono transition-all"
+                          />
+                          {episodeSearchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setEpisodeSearchQuery("")}
+                              className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
 
-                          {/* Episodes Scroll List - Hidden Scrollbars */}
-                          <div className={isEpisodeCollapsed ? "hidden" : "space-y-1.5 max-h-[55vh] overflow-y-auto overflow-x-hidden p-1 pt-2 pb-2 custom-purple-scrollbar"}>
+                        {/* Episodes Scroll List */}
+                        <div className="space-y-1.5 max-h-[55vh] overflow-y-auto overflow-x-hidden p-1 pt-2 pb-2 custom-purple-scrollbar">
                           {/* All Episodes Button */}
                           {(() => {
                             const totalScrapedFrames = episodeGroups.length > 0
@@ -773,11 +821,10 @@ const ChapterScraperDeck = React.memo(
                                 type="button"
                                 title={`Show all episodes — ${totalScrapedFrames} frames total`}
                                 onClick={() => setSelectedEpisodeIdx("all")}
-                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
-                                  selectedEpisodeIdx === "all"
+                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${selectedEpisodeIdx === "all"
                                     ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
                                     : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-850"
-                                }`}
+                                  }`}
                               >
                                 <span className="truncate">All Episodes</span>
                                 <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
@@ -811,18 +858,16 @@ const ChapterScraperDeck = React.memo(
                                   onClick={() => setSelectedEpisodeIdx(originalIdx)}
                                   onMouseEnter={() => setHoveredEpisodeIdx(originalIdx)}
                                   onMouseLeave={() => setHoveredEpisodeIdx(null)}
-                                  className={`w-full flex flex-col gap-1 px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
-                                    isSelected
+                                  className={`w-full flex flex-col gap-1 px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${isSelected
                                       ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.25)]"
                                       : "bg-neutral-900/40 border-neutral-850 text-neutral-350 hover:text-white hover:bg-neutral-850/80"
-                                  }`}
+                                    }`}
                                 >
                                   <div className="flex items-center justify-between gap-1.5 w-full">
                                     <div className="flex items-center gap-2 truncate">
                                       <span
-                                        className={`h-2 w-2 rounded-full shrink-0 ${
-                                          isSelected ? "bg-purple-400 animate-pulse" : "bg-emerald-500/80"
-                                        }`}
+                                        className={`h-2 w-2 rounded-full shrink-0 ${isSelected ? "bg-purple-400 animate-pulse" : "bg-emerald-500/80"
+                                          }`}
                                       />
                                       <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
                                     </div>
@@ -882,10 +927,10 @@ const ChapterScraperDeck = React.memo(
                             ✅ Select All Panels
                           </button>
                         </div>
+                        </>
+                        )}
 
-                          {/* side-edge toggle removed — header now controls collapse */}
-
-                        </aside>
+                      </aside>
 
                       {/* IN-PANEL RIGHT MAIN AREA: EPISODE IMAGES */}
                       <div className="flex-1 w-full space-y-6 min-w-0">
@@ -900,179 +945,179 @@ const ChapterScraperDeck = React.memo(
                               id={`ep-section-${gIdx}`}
                               className="bg-neutral-955 border border-neutral-850 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl scroll-mt-24"
                             >
-                               {/* Episode Horizontal / Grid Cards */}
-                               {viewLayout === "scroll" ? (
-                                 <HorizontalScrollContainer>
-                                   {grpImages.map((imgUrl, localIdx) => {
-                                     const globalIdx = grp.startIndex + localIdx;
-                                     const isSelected = selectedScraped.includes(imgUrl);
-                                     const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
-                                     const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
-                                     const isInTimeline = activePanels.some(
-                                       (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
-                                     );
+                              {/* Episode Horizontal / Grid Cards */}
+                              {viewLayout === "scroll" ? (
+                                <HorizontalScrollContainer>
+                                  {grpImages.map((imgUrl, localIdx) => {
+                                    const globalIdx = grp.startIndex + localIdx;
+                                    const isSelected = selectedScraped.includes(imgUrl);
+                                    const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+                                    const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                                    const isInTimeline = activePanels.some(
+                                      (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                                    );
 
-                                     return (
-                                       <PanelCard
-                                         key={`${imgUrl}-${globalIdx}`}
-                                         imgUrl={proxiedUrl}
-                                         rawImgUrl={imgUrl}
-                                         idx={globalIdx}
-                                         displayIdx={localIdx}
-                                         isSelected={isSelected}
-                                         isInTimeline={isInTimeline}
-                                         isBatchCropping={isBatchCropping}
-                                         croppingImgUrl={croppingImgUrl}
-                                         bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                                         scrapedImages={scrapedImages}
-                                         mergingIndices={mergingIndices}
-                                         handleMergeWithNext={handleMergeWithNext}
-                                         setScrapedImages={setScrapedImages}
-                                         setSelectedScraped={setSelectedScraped}
-                                         setConsoleLogs={setConsoleLogs}
-                                         addPanelsToStoryboard={addPanelsToStoryboard}
-                                         addNotification={addNotification}
-                                         onCardClick={handleCardClick}
-                                         onCardDoubleClick={handleCardDoubleClick}
-                                       />
-                                     );
-                                   })}
-                                 </HorizontalScrollContainer>
-                               ) : (
-                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-3.5 px-1 w-full">
-                                   {grpImages.map((imgUrl, localIdx) => {
-                                     const globalIdx = grp.startIndex + localIdx;
-                                     const isSelected = selectedScraped.includes(imgUrl);
-                                     const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
-                                     const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
-                                     const isInTimeline = activePanels.some(
-                                       (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
-                                     );
+                                    return (
+                                      <PanelCard
+                                        key={`${imgUrl}-${globalIdx}`}
+                                        imgUrl={proxiedUrl}
+                                        rawImgUrl={imgUrl}
+                                        idx={globalIdx}
+                                        displayIdx={localIdx}
+                                        isSelected={isSelected}
+                                        isInTimeline={isInTimeline}
+                                        isBatchCropping={isBatchCropping}
+                                        croppingImgUrl={croppingImgUrl}
+                                        bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                                        scrapedImages={scrapedImages}
+                                        mergingIndices={mergingIndices}
+                                        handleMergeWithNext={handleMergeWithNext}
+                                        setScrapedImages={setScrapedImages}
+                                        setSelectedScraped={setSelectedScraped}
+                                        setConsoleLogs={setConsoleLogs}
+                                        addPanelsToStoryboard={addPanelsToStoryboard}
+                                        addNotification={addNotification}
+                                        onCardClick={handleCardClick}
+                                        onCardDoubleClick={handleCardDoubleClick}
+                                      />
+                                    );
+                                  })}
+                                </HorizontalScrollContainer>
+                              ) : (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-3.5 px-1 w-full">
+                                  {grpImages.map((imgUrl, localIdx) => {
+                                    const globalIdx = grp.startIndex + localIdx;
+                                    const isSelected = selectedScraped.includes(imgUrl);
+                                    const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+                                    const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                                    const isInTimeline = activePanels.some(
+                                      (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                                    );
 
-                                     return (
-                                       <PanelCard
-                                         key={`${imgUrl}-${globalIdx}`}
-                                         imgUrl={proxiedUrl}
-                                         rawImgUrl={imgUrl}
-                                         idx={globalIdx}
-                                         displayIdx={localIdx}
-                                         isSelected={isSelected}
-                                         isInTimeline={isInTimeline}
-                                         isBatchCropping={isBatchCropping}
-                                         croppingImgUrl={croppingImgUrl}
-                                         bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                                         scrapedImages={scrapedImages}
-                                         mergingIndices={mergingIndices}
-                                         handleMergeWithNext={handleMergeWithNext}
-                                         setScrapedImages={setScrapedImages}
-                                         setSelectedScraped={setSelectedScraped}
-                                         setConsoleLogs={setConsoleLogs}
-                                         addPanelsToStoryboard={addPanelsToStoryboard}
-                                         addNotification={addNotification}
-                                         onCardClick={handleCardClick}
-                                         onCardDoubleClick={handleCardDoubleClick}
-                                       />
-                                     );
-                                   })}
-                                 </div>
-                               )}
-                             </div>
-                           );
-                         })}
-                       </div>
-                     </div>
-                   );
-                 }
+                                    return (
+                                      <PanelCard
+                                        key={`${imgUrl}-${globalIdx}`}
+                                        imgUrl={proxiedUrl}
+                                        rawImgUrl={imgUrl}
+                                        idx={globalIdx}
+                                        displayIdx={localIdx}
+                                        isSelected={isSelected}
+                                        isInTimeline={isInTimeline}
+                                        isBatchCropping={isBatchCropping}
+                                        croppingImgUrl={croppingImgUrl}
+                                        bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                                        scrapedImages={scrapedImages}
+                                        mergingIndices={mergingIndices}
+                                        handleMergeWithNext={handleMergeWithNext}
+                                        setScrapedImages={setScrapedImages}
+                                        setSelectedScraped={setSelectedScraped}
+                                        setConsoleLogs={setConsoleLogs}
+                                        addPanelsToStoryboard={addPanelsToStoryboard}
+                                        addNotification={addNotification}
+                                        onCardClick={handleCardClick}
+                                        onCardDoubleClick={handleCardDoubleClick}
+                                      />
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                }
 
-                 return viewLayout === "scroll" ? (
-                   <HorizontalScrollContainer>
-                     {scrapedImages.map((imgUrl, idx) => {
-                       const isSelected = selectedScraped.includes(imgUrl);
-                       const proxiedUrl = imgUrl?.startsWith("/api/")
-                         ? imgUrl
-                         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
-                       const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
-                       const isInTimeline = activePanels.some(
-                         (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
-                       );
+                return viewLayout === "scroll" ? (
+                  <HorizontalScrollContainer>
+                    {scrapedImages.map((imgUrl, idx) => {
+                      const isSelected = selectedScraped.includes(imgUrl);
+                      const proxiedUrl = imgUrl?.startsWith("/api/")
+                        ? imgUrl
+                        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+                      const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                      const isInTimeline = activePanels.some(
+                        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                      );
 
-                       return (
-                         <PanelCard
-                           key={`${imgUrl}-${idx}`}
-                           imgUrl={proxiedUrl}
-                           rawImgUrl={imgUrl}
-                           idx={idx}
-                           isSelected={isSelected}
-                           isInTimeline={isInTimeline}
-                           isBatchCropping={isBatchCropping}
-                           croppingImgUrl={croppingImgUrl}
-                           bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                           scrapedImages={scrapedImages}
-                           mergingIndices={mergingIndices}
-                           handleMergeWithNext={handleMergeWithNext}
-                           setScrapedImages={setScrapedImages}
-                           setSelectedScraped={setSelectedScraped}
-                           setConsoleLogs={setConsoleLogs}
-                           addPanelsToStoryboard={addPanelsToStoryboard}
-                           addNotification={addNotification}
-                           onCardClick={handleCardClick}
-                           onCardDoubleClick={handleCardDoubleClick}
-                         />
-                       );
-                     })}
+                      return (
+                        <PanelCard
+                          key={`${imgUrl}-${idx}`}
+                          imgUrl={proxiedUrl}
+                          rawImgUrl={imgUrl}
+                          idx={idx}
+                          isSelected={isSelected}
+                          isInTimeline={isInTimeline}
+                          isBatchCropping={isBatchCropping}
+                          croppingImgUrl={croppingImgUrl}
+                          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                          scrapedImages={scrapedImages}
+                          mergingIndices={mergingIndices}
+                          handleMergeWithNext={handleMergeWithNext}
+                          setScrapedImages={setScrapedImages}
+                          setSelectedScraped={setSelectedScraped}
+                          setConsoleLogs={setConsoleLogs}
+                          addPanelsToStoryboard={addPanelsToStoryboard}
+                          addNotification={addNotification}
+                          onCardClick={handleCardClick}
+                          onCardDoubleClick={handleCardDoubleClick}
+                        />
+                      );
+                    })}
 
-                      {isScraping && scrapedImages.length > 0 && (
-                        <div className="shrink-0 flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 w-[140px] text-center gap-2 text-neutral-500">
-                          <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
-                          <span className="text-[10px] font-mono uppercase tracking-wider font-medium">Extracting...</span>
-                        </div>
-                      )}
-                    </HorizontalScrollContainer>
-                 ) : (
-                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-3.5 px-1 w-full">
-                     {scrapedImages.map((imgUrl, idx) => {
-                       const isSelected = selectedScraped.includes(imgUrl);
-                       const proxiedUrl = imgUrl?.startsWith("/api/")
-                         ? imgUrl
-                         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
-                       const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
-                       const isInTimeline = activePanels.some(
-                         (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
-                       );
+                    {isScraping && scrapedImages.length > 0 && (
+                      <div className="shrink-0 flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 w-[140px] text-center gap-2 text-neutral-500">
+                        <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+                        <span className="text-[10px] font-mono uppercase tracking-wider font-medium">Extracting...</span>
+                      </div>
+                    )}
+                  </HorizontalScrollContainer>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-3.5 px-1 w-full">
+                    {scrapedImages.map((imgUrl, idx) => {
+                      const isSelected = selectedScraped.includes(imgUrl);
+                      const proxiedUrl = imgUrl?.startsWith("/api/")
+                        ? imgUrl
+                        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+                      const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                      const isInTimeline = activePanels.some(
+                        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                      );
 
-                       return (
-                         <PanelCard
-                           key={`${imgUrl}-${idx}`}
-                           imgUrl={proxiedUrl}
-                           rawImgUrl={imgUrl}
-                           idx={idx}
-                           isSelected={isSelected}
-                           isInTimeline={isInTimeline}
-                           isBatchCropping={isBatchCropping}
-                           croppingImgUrl={croppingImgUrl}
-                           bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-                           scrapedImages={scrapedImages}
-                           mergingIndices={mergingIndices}
-                           handleMergeWithNext={handleMergeWithNext}
-                           setScrapedImages={setScrapedImages}
-                           setSelectedScraped={setSelectedScraped}
-                           setConsoleLogs={setConsoleLogs}
-                           addPanelsToStoryboard={addPanelsToStoryboard}
-                           addNotification={addNotification}
-                           onCardClick={handleCardClick}
-                           onCardDoubleClick={handleCardDoubleClick}
-                         />
-                        );
-                      })}
+                      return (
+                        <PanelCard
+                          key={`${imgUrl}-${idx}`}
+                          imgUrl={proxiedUrl}
+                          rawImgUrl={imgUrl}
+                          idx={idx}
+                          isSelected={isSelected}
+                          isInTimeline={isInTimeline}
+                          isBatchCropping={isBatchCropping}
+                          croppingImgUrl={croppingImgUrl}
+                          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                          scrapedImages={scrapedImages}
+                          mergingIndices={mergingIndices}
+                          handleMergeWithNext={handleMergeWithNext}
+                          setScrapedImages={setScrapedImages}
+                          setSelectedScraped={setSelectedScraped}
+                          setConsoleLogs={setConsoleLogs}
+                          addPanelsToStoryboard={addPanelsToStoryboard}
+                          addNotification={addNotification}
+                          onCardClick={handleCardClick}
+                          onCardDoubleClick={handleCardDoubleClick}
+                        />
+                      );
+                    })}
 
-                     {isScraping && scrapedImages.length > 0 && (
-                       <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 min-h-[200px] text-center gap-2 text-neutral-500">
-                         <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
-                         <span className="text-[10px] font-mono uppercase tracking-wider font-medium">Extracting panel...</span>
-                       </div>
-                     )}
-                   </div>
-                 );
+                    {isScraping && scrapedImages.length > 0 && (
+                      <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 min-h-[200px] text-center gap-2 text-neutral-500">
+                        <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
+                        <span className="text-[10px] font-mono uppercase tracking-wider font-medium">Extracting panel...</span>
+                      </div>
+                    )}
+                  </div>
+                );
               })()}
             </div>
           )}
