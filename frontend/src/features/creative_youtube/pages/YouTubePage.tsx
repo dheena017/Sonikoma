@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Sparkles,
   Loader2,
   Sliders,
-  Key,
   FileText,
   Youtube,
   Tags,
@@ -11,32 +10,27 @@ import {
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 
-// Import modular sub-components
-import SeoAuditor from "@/features/creative_youtube/components/SeoAuditor";
-import ProfileManager from "@/features/creative_youtube/components/ProfileManager";
-import CredentialsConfig from "@/features/creative_youtube/components/CredentialsConfig";
-import TitleOptimizer from "@/features/creative_youtube/components/TitleOptimizer";
-import TagManager from "@/features/creative_youtube/components/TagManager";
-import DescriptionEditor from "@/features/creative_youtube/components/DescriptionEditor";
-import ChaptersTuner from "@/features/creative_youtube/components/ChaptersTuner";
-import SocialsCustomizer from "@/features/creative_youtube/components/SocialsCustomizer";
-import SelfRatingForm from "@/features/creative_youtube/components/SelfRatingForm";
-import AdvancedSettings from "@/features/creative_youtube/components/AdvancedSettings";
-import PublishMonitor from "@/features/creative_youtube/components/PublishMonitor";
-import UploadHistory from "@/features/creative_youtube/components/UploadHistory";
-import PlaylistSelector from "@/features/creative_youtube/components/PlaylistSelector";
-import WebtoonMetadata from "@/features/creative_youtube/components/WebtoonMetadata";
-import SubtitleConfig from "@/features/creative_youtube/components/SubtitleConfig";
-import YouTubeChannelHeader from "@/features/creative_youtube/components/YouTubeChannelHeader";
-import YouTubeSeoOptimizer from "@/features/creative_youtube/components/YouTubeSeoOptimizer";
-import YouTubeVideoGrid from "@/features/creative_youtube/components/YouTubeVideoGrid";
 import YouTubeChannelModal from "@/features/creative_youtube/components/YouTubeChannelModal";
 
-// Import custom hook
-import { useYouTubePublisher } from "@/features/creative_youtube/hooks/useYouTubePublisher";
+// ── App Components ────────────────────────────────────────────────────────────
+import YouTubeAppNavBar from "@/features/creative_youtube/components/YouTubeAppNavBar";
+import YouTubeChannelHome, {
+  YouTubeVideoItem,
+} from "@/features/creative_youtube/components/YouTubeChannelHome";
+import YouTubeVideosPanel from "@/features/creative_youtube/components/YouTubeVideosPanel";
+import YouTubeShortsPanel from "@/features/creative_youtube/components/YouTubeShortsPanel";
+import YouTubeTheaterPlayer from "@/features/creative_youtube/components/YouTubeTheaterPlayer";
+import YouTubeAnalyticsDashboard from "@/features/creative_youtube/components/YouTubeAnalyticsDashboard";
+import YouTubePlaylistsManager from "@/features/creative_youtube/components/YouTubePlaylistsManager";
+import YouTubeTopProgressBar from "@/features/creative_youtube/components/YouTubeTopProgressBar";
+import YouTubeCreatePlaylistPanel from "@/features/creative_youtube/components/YouTubeCreatePlaylistPanel";
+import YouTubeStudioPage from "@/features/creative_youtube/components/YouTubeStudioPage";
 
+// ── Hook ──────────────────────────────────────────────────────────────────────
+import { useYouTubePublisher } from "@/features/creative_youtube/hooks/useYouTubePublisher";
 import { useProjectStore } from "@/store/useProjectStore";
 
+// ── Types ─────────────────────────────────────────────────────────────────────
 interface YouTubePageProps {
   panels: GeneratedPanel[];
   videoUrl: string | null;
@@ -46,6 +40,18 @@ interface YouTubePageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
+type AppTab = "home" | "videos" | "shorts" | "playlists" | "analytics" | "studio";
+type StudioSubTab = "details" | "chapters_tags" | "comic_subtitles" | "settings";
+
+interface ChannelOverview {
+  id?: string;
+  title?: string;
+  custom_url?: string;
+  thumbnail?: string;
+  authenticated?: boolean;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 const YouTubePage = React.memo(
   ({
     panels = [],
@@ -57,24 +63,102 @@ const YouTubePage = React.memo(
   }: YouTubePageProps) => {
     const activeProjectData = useProjectStore((state) => state.activeProjectData);
     const storePanels = activeProjectData?.panels || [];
-    const safePanels = (panels && panels.length > 0) ? panels : (Array.isArray(storePanels) ? storePanels : []);
-    const effectiveTitle = scrapedTitle || activeProjectData?.project?.title || "";
-    const effectiveGenre = scrapedGenre || activeProjectData?.project?.genre || "";
-    const effectiveVideoUrl = videoUrl || activeProjectData?.project?.video_url || null;
-    const [activeTab, setActiveTab] = useState<
-      "details" | "chapters_tags" | "comic_subtitles" | "settings"
-    >("details");
-    const [isChannelModalOpen, setIsChannelModalOpen] = useState<boolean>(false);
+    const safePanels =
+      panels && panels.length > 0
+        ? panels
+        : Array.isArray(storePanels)
+        ? storePanels
+        : [];
+    const effectiveTitle =
+      scrapedTitle || activeProjectData?.project?.title || "";
+    const effectiveGenre =
+      scrapedGenre || activeProjectData?.project?.genre || "";
+    const effectiveVideoUrl =
+      videoUrl || activeProjectData?.project?.video_url || null;
 
-    React.useEffect(() => {
+    // ── App Navigation State ──────────────────────────────────────────────────
+    const [activeTab, setActiveTab] = useState<AppTab>("home");
+    const [visitedTabs, setVisitedTabs] = useState<Set<AppTab>>(new Set(["home"]));
+    const [isNavigating, setIsNavigating] = useState<boolean>(false);
+    const [studioSubTab, setStudioSubTab] = useState<StudioSubTab>("details");
+    const [isChannelModalOpen, setIsChannelModalOpen] = useState<boolean>(false);
+    const [headerRefreshKey, setHeaderRefreshKey] = useState<number>(0);
+
+    const handleTabChange = useCallback((tab: AppTab) => {
+      if (tab === activeTab) return;
+      setIsNavigating(true);
+      setActiveTab(tab);
+      setVisitedTabs((prev) => new Set([...prev, tab]));
+      setWatchingVideo(null);
+      setWatchingPlaylistId(undefined);
+      const timer = setTimeout(() => setIsNavigating(false), 200);
+      return () => clearTimeout(timer);
+    }, [activeTab]);
+
+    // ── Theater Player State ──────────────────────────────────────────────────
+    const [watchingVideo, setWatchingVideo] = useState<YouTubeVideoItem | null>(null);
+    const [watchingPlaylistId, setWatchingPlaylistId] = useState<string | undefined>(undefined);
+
+    // ── Channel Header State ──────────────────────────────────────────────────
+    const [navChannel, setNavChannel] = useState<ChannelOverview | null>(null);
+
+    useEffect(() => {
+      const fetchNavChannel = async () => {
+        try {
+          const token =
+            localStorage.getItem("sonikoma_token") ||
+            localStorage.getItem("token") ||
+            "";
+          const res = await fetch("/api/export/youtube/channel/details", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setNavChannel(data);
+          }
+        } catch {
+          // Gracefully ignore
+        }
+      };
+      fetchNavChannel();
+    }, [headerRefreshKey]);
+
+    // Handle OAuth redirect query param
+    useEffect(() => {
       const params = new URLSearchParams(window.location.search);
       if (params.get("select_channel") === "true") {
         setIsChannelModalOpen(true);
-        const newUrl = window.location.pathname;
-        window.history.replaceState({}, "", newUrl);
+        window.history.replaceState({}, "", window.location.pathname);
       }
     }, []);
 
+    // ── Navigation Handlers ───────────────────────────────────────────────────
+    const handleWatchVideo = useCallback(
+      (videoId: string, video: YouTubeVideoItem, playlistId?: string) => {
+        setWatchingVideo(video);
+        setWatchingPlaylistId(playlistId);
+      },
+      []
+    );
+
+    const handleViewComments = useCallback((videoId: string) => {
+      setWatchingVideo({
+        id: videoId,
+        title: "YouTube Video",
+        thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+        view_count: "--",
+        like_count: "--",
+        comment_count: "--",
+        privacy_status: "public",
+        youtube_url: `https://youtube.com/watch?v=${videoId}`,
+      });
+    }, []);
+
+    const handleQuickPublish = useCallback(() => {
+      handleTabChange("studio");
+    }, [handleTabChange]);
+
+    // ── Publisher Hook ────────────────────────────────────────────────────────
     const {
       title,
       setTitle,
@@ -205,390 +289,214 @@ const YouTubePage = React.memo(
       addNotification,
     });
 
-    // Allow full access to YouTube Studio & Publisher even if no project panels are currently loaded.
-
-    const [headerRefreshKey, setHeaderRefreshKey] = useState<number>(0);
-
     return (
-      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
-        {/* UNIFIED YOUTUBE INTEGRATION HEADER */}
-        <YouTubeChannelHeader
-          key={headerRefreshKey}
-          seoScore={seoScore}
-          isPublishing={isPublishing}
+      <div className="flex-1 w-full space-y-4 animate-fade-in relative">
+        {/* ── YOUTUBE RED TOP LOADING BAR ─────────────────────────────────── */}
+        <YouTubeTopProgressBar isLoading={isNavigating || isPublishing} />
+
+        {/* ── TOP APP NAVIGATION BAR ─────────────────────────────────────── */}
+        <YouTubeAppNavBar
+          activeTab={activeTab}
+          onTabChange={(tab) => handleTabChange(tab as AppTab)}
+          channelTitle={navChannel?.title || "Connect YouTube"}
+          channelHandle={navChannel?.custom_url || ""}
+          channelThumbnail={navChannel?.thumbnail}
+          isConnected={!!navChannel?.authenticated}
           onOpenChannelModal={() => setIsChannelModalOpen(true)}
-          addNotification={addNotification}
+          onPublish={handleQuickPublish}
         />
 
-        {/* TWO-COLUMN DIRECT PUBLISHER WORKSPACE GRID (5 : 7) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-          {/* COLUMN 1 (LEFT - 5 COLS): STICKY VIDEO MONITOR */}
-          <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-4 self-start">
-            {/* Video Monitor & Publish Execution */}
-            <PublishMonitor
-              activeVideoUrl={activeVideoUrl}
-              videoUrl={videoUrl}
-              selectedFile={selectedFile}
-              selectedThumbnail={selectedThumbnail}
-              thumbnailPreviewUrl={thumbnailPreviewUrl}
-              videoDuration={videoDuration}
-              videoAspectRatio={videoAspectRatio}
-              isShort={isShort}
-              privacy={privacy}
-              publishLogs={publishLogs}
-              isPublishing={isPublishing}
-              youtubeUrl={youtubeUrl}
-              title={title}
-              onClearSelectedFile={handleClearSelectedFile}
-              onClearThumbnail={handleClearThumbnail}
-              onFileChange={handleFileChange}
-              onThumbnailChange={handleThumbnailChange}
-              onThumbnailSelect={handleThumbnailSelect}
-              onPublish={handlePublish}
-              isScheduled={isScheduled}
-              setIsScheduled={setIsScheduled}
-              scheduleDate={scheduleDate}
-              setScheduleDate={setScheduleDate}
-              scheduleTime={scheduleTime}
-              setScheduleTime={setScheduleTime}
-            />
-          </div>
-
-          {/* COLUMN 2 (RIGHT - 7 COLS): METADATA & CONFIGURATION CANVAS */}
-          <div className="lg:col-span-7 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 sm:p-6 shadow-xl flex flex-col space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-850 pb-3">
-              <div>
-                <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
-                  YOUTUBE INTEGRATION STUDIO
-                </p>
-                <h4 className="text-base font-bold text-white mt-0.5 flex items-center gap-2">
-                  <Youtube className="w-4 h-4 text-red-400" /> YouTube Video Metadata & Details
-                </h4>
-              </div>
+        {/* ── MAIN TAB CANVAS CONTAINER (KEEP-ALIVE SPA PERSISTENCE) ──────── */}
+        <div className="rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl min-h-[600px]">
+          {/* 1. TAB: HOME / OVERVIEW */}
+          {visitedTabs.has("home") && (
+            <div className={activeTab === "home" ? "block animate-fade-in" : "hidden"}>
+              <YouTubeChannelHome
+                onWatchVideo={handleWatchVideo}
+                onViewComments={handleViewComments}
+                onNavigateTab={(t) => handleTabChange(t as AppTab)}
+              />
             </div>
+          )}
 
-            {/* Real-time SEO Auditor Score Banner */}
-            <SeoAuditor seoScore={seoScore} seoChecks={seoChecks} />
-
-            {/* Segmented 4-Tab Navigation Controller */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 bg-neutral-900/80 p-1 rounded-xl border border-neutral-800 shadow-inner gap-1">
-              <button
-                onClick={() => setActiveTab("details")}
-                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
-                  activeTab === "details"
-                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
-                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
-                }`}
-              >
-                <FileText className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">Details</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("chapters_tags")}
-                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
-                  activeTab === "chapters_tags"
-                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
-                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
-                }`}
-              >
-                <Tags className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">Chapters &amp; Tags</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("comic_subtitles")}
-                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
-                  activeTab === "comic_subtitles"
-                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
-                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
-                }`}
-              >
-                <BookOpenText className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">Comic &amp; Captions</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab("settings")}
-                className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none text-center ${
-                  activeTab === "settings"
-                    ? "bg-red-600 text-white shadow-md shadow-red-950/40"
-                    : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/40"
-                }`}
-              >
-                <Sliders className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">Settings</span>
-              </button>
+          {/* 2. TAB: DEDICATED VIDEOS PANEL */}
+          {visitedTabs.has("videos") && (
+            <div className={activeTab === "videos" ? "block animate-fade-in" : "hidden"}>
+              <YouTubeVideosPanel
+                onWatchVideo={handleWatchVideo}
+                onViewComments={handleViewComments}
+                onNavigateStudio={handleQuickPublish}
+              />
             </div>
+          )}
 
-            {/* Tab Body Content */}
-            <div className="space-y-4">
-              {/* TAB 1: DETAILS (Title & Description) */}
-              {activeTab === "details" && (
-                <div className="space-y-4 animate-fade-in animate-duration-300">
-                  <div className="flex items-center justify-between border-b border-neutral-800 pb-2">
-                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
-                      Title &amp; Video Description
-                    </h3>
-                    <button
-                      onClick={handleGenerateMetadata}
-                      disabled={isAiGenerating || isPublishing}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/20 border border-red-900/40 text-red-400 hover:text-red-300 hover:bg-red-900/20 text-xs font-mono font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer active:scale-98 shadow-sm"
-                    >
-                      {isAiGenerating ? (
-                        <>
-                          <Loader2 className="h-3 w-3 animate-spin text-red-400" />
-                          <span>Generating...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-3 w-3 animate-pulse text-red-400" />
-                          <span>Generate with AI</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    <TitleOptimizer
-                      title={title}
-                      setTitle={setTitle}
-                      scrapedTitle={scrapedTitle}
-                      scrapedGenre={scrapedGenre}
-                      onInjectPowerWord={handleInjectPowerWord}
-                    />
-
-                    <DescriptionEditor
-                      description={description}
-                      setDescription={setDescription}
-                      panels={safePanels}
-                      onApplyPresetTemplate={handleApplyPresetTemplate}
-                      onCompileChapters={handleCompileChapters}
-                      onInsertDisclaimer={handleInsertDisclaimer}
-                      onInsertSocials={handleInsertSocials}
-                      onInsertMusicCredit={handleInsertMusicCredit}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 2: CHAPTERS & TAGS (Chapters Tuner & Tag Chip Manager) */}
-              {activeTab === "chapters_tags" && (
-                <div className="space-y-4 animate-fade-in animate-duration-300">
-                  <div className="border-b border-neutral-800 pb-2">
-                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
-                      Chapters Timestamps &amp; SEO Tags
-                    </h3>
-                  </div>
-
-                  <div className="space-y-4">
-                    <ChaptersTuner
-                      panels={safePanels}
-                      onInsertChapters={handleAppendTunedChapters}
-                      addNotification={addNotification}
-                    />
-
-                    <TagManager
-                      tags={tags}
-                      tagInput={tagInput}
-                      setTagInput={setTagInput}
-                      onAddTag={handleAddTag}
-                      onRemoveTag={handleRemoveTag}
-                      onAddSuggestedTag={handleAddSuggestedTag}
-                      suggestedTags={suggestedTags}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 3: COMIC & CAPTIONS (Webtoon Credits, Playlist, Subtitles) */}
-              {activeTab === "comic_subtitles" && (
-                <div className="space-y-4 animate-fade-in animate-duration-300">
-                  <div className="border-b border-neutral-800 pb-2">
-                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
-                      Webtoon Metadata, Playlist &amp; Subtitles
-                    </h3>
-                  </div>
-
-                  <div className="space-y-4">
-                    <WebtoonMetadata
-                      authorName={authorName}
-                      setAuthorName={setAuthorName}
-                      artistName={artistName}
-                      setArtistName={setArtistName}
-                      webtoonPlatform={webtoonPlatform}
-                      setWebtoonPlatform={setWebtoonPlatform}
-                      customPlatform={customPlatform}
-                      setCustomPlatform={setCustomPlatform}
-                      chapterStart={chapterStart}
-                      setChapterStart={setChapterStart}
-                      chapterEnd={chapterEnd}
-                      setChapterEnd={setChapterEnd}
-                      chapterValidationError={chapterValidationError}
-                    />
-
-                    <PlaylistSelector
-                      playlist={playlist}
-                      setPlaylist={setPlaylist}
-                      hasCustomCredentials={hasCustomCredentials}
-                    />
-
-                    <SubtitleConfig
-                      subtitlesType={subtitlesType}
-                      setSubtitlesType={setSubtitlesType}
-                      subtitlesLanguage={subtitlesLanguage}
-                      setSubtitlesLanguage={setSubtitlesLanguage}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 4: SETTINGS (Category, Privacy, Shorts, Self Rating, Advanced) */}
-              {activeTab === "settings" && (
-                <div className="space-y-4 animate-fade-in animate-duration-300">
-                  <div className="border-b border-neutral-800 pb-2">
-                    <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono">
-                      Publish &amp; Audience Settings
-                    </h3>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-xs font-mono text-neutral-400 font-bold block">
-                          Video Category
-                        </label>
-                        <select
-                          value={category}
-                          onChange={(e) => setCategory(e.target.value)}
-                          className="w-full bg-neutral-950/40 border border-neutral-900 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer shadow-inner"
-                        >
-                          <option value="1" className="bg-neutral-950">Film &amp; Animation</option>
-                          <option value="24" className="bg-neutral-950">Entertainment</option>
-                          <option value="20" className="bg-neutral-950">Gaming</option>
-                          <option value="23" className="bg-neutral-950">Comedy</option>
-                          <option value="22" className="bg-neutral-950">People &amp; Blogs</option>
-                          <option value="27" className="bg-neutral-950">Education</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs font-mono text-neutral-400 font-bold block">
-                          Privacy Status
-                        </label>
-                        <select
-                          value={privacy}
-                          onChange={(e) => setPrivacy(e.target.value)}
-                          className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer shadow-inner"
-                        >
-                          <option value="unlisted" className="bg-neutral-950">
-                            Unlisted (Review First)
-                          </option>
-                          <option value="private" className="bg-neutral-950">Private</option>
-                          <option value="public" className="bg-neutral-950">
-                            Public (Immediate Publish)
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-neutral-950/20 backdrop-blur-sm rounded-xl border border-neutral-900 transition-all hover:border-neutral-800">
-                      <div className="space-y-0.5 pr-4">
-                        <div className="text-xs font-bold text-white flex items-center gap-1.5 font-mono">
-                          <span>YouTube Shorts Format</span>
-                          <span className="text-[9px] font-bold px-2 py-0.5 bg-red-950/25 text-red-400 rounded-md border border-red-900/40 uppercase">
-                            Beta
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-neutral-500 leading-relaxed font-sans">
-                          Optimize video format description and hashtag indicators suited for vertical mobile feeds.
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => setIsShort(!isShort)}
-                        className={`w-11 h-6 flex items-center rounded-full p-1 cursor-pointer transition-all duration-300 shrink-0 ${
-                          isShort ? "bg-[#FF0000]" : "bg-neutral-800"
-                        }`}
-                      >
-                        <div
-                          className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${
-                            isShort ? "translate-x-5" : "translate-x-0"
-                          }`}
-                        />
-                      </button>
-                    </div>
-
-                    <SelfRatingForm
-                      ratings={ratings}
-                      setRatings={setRatings}
-                      showSelfRating={showSelfRating}
-                      setShowSelfRating={setShowSelfRating}
-                    />
-
-                    <AdvancedSettings
-                      madeForKids={madeForKids}
-                      setMadeForKids={setMadeForKids}
-                      paidPromotion={paidPromotion}
-                      setPaidPromotion={setPaidPromotion}
-                      license={license}
-                      setLicense={setLicense}
-                      videoLanguage={videoLanguage}
-                      setVideoLanguage={setVideoLanguage}
-                      showAdvanced={showAdvanced}
-                      setShowAdvanced={setShowAdvanced}
-                      ageRestriction={ageRestriction}
-                      setAgeRestriction={setAgeRestriction}
-                      shortsRemixing={shortsRemixing}
-                      setShortsRemixing={setShortsRemixing}
-                      commentsMode={commentsMode}
-                      setCommentsMode={setCommentsMode}
-                      showLikes={showLikes}
-                      setShowLikes={setShowLikes}
-                      allowEmbedding={allowEmbedding}
-                      setAllowEmbedding={setAllowEmbedding}
-                      notifySubscribers={notifySubscribers}
-                      setNotifySubscribers={setNotifySubscribers}
-                      recordingDate={recordingDate}
-                      setRecordingDate={setRecordingDate}
-                      videoLocation={videoLocation}
-                      setVideoLocation={setVideoLocation}
-                    />
-                  </div>
-                </div>
-              )}
+          {/* 3. TAB: DEDICATED SHORTS PANEL */}
+          {visitedTabs.has("shorts") && (
+            <div className={activeTab === "shorts" ? "block animate-fade-in" : "hidden"}>
+              <YouTubeShortsPanel
+                onNavigateStudio={() => {
+                  setIsShort(true);
+                  handleTabChange("studio");
+                }}
+              />
             </div>
+          )}
 
-            {/* Database Upload History */}
-            <div className="pt-4 border-t border-neutral-850">
-              <UploadHistory history={uploadHistory} />
+          {/* 4. TAB: PLAYLISTS & LIBRARY */}
+          {visitedTabs.has("playlists") && (
+            <div className={activeTab === "playlists" ? "block animate-fade-in" : "hidden"}>
+              <YouTubePlaylistsManager
+                onWatchVideo={handleWatchVideo}
+                onNavigateStudio={handleQuickPublish}
+              />
             </div>
-          </div>
+          )}
+
+          {/* 5. TAB: ANALYTICS & INTELLIGENCE */}
+          {visitedTabs.has("analytics") && (
+            <div className={activeTab === "analytics" ? "block animate-fade-in" : "hidden"}>
+              <YouTubeAnalyticsDashboard uploadHistory={uploadHistory} />
+            </div>
+          )}
+
+          {/* 6. TAB: CREATOR STUDIO & AI PUBLISHER */}
+          {visitedTabs.has("studio") && (
+            <div className={activeTab === "studio" ? "block animate-fade-in" : "hidden"}>
+              <YouTubeStudioPage
+                activeVideoUrl={activeVideoUrl}
+                videoUrl={videoUrl}
+                selectedFile={selectedFile}
+                selectedThumbnail={selectedThumbnail}
+                thumbnailPreviewUrl={thumbnailPreviewUrl}
+                videoDuration={videoDuration}
+                videoAspectRatio={videoAspectRatio}
+                isShort={isShort}
+                setIsShort={setIsShort}
+                title={title}
+                setTitle={setTitle}
+                description={description}
+                setDescription={setDescription}
+                tags={tags}
+                tagInput={tagInput}
+                setTagInput={setTagInput}
+                suggestedTags={suggestedTags}
+                handleAddTag={handleAddTag}
+                handleRemoveTag={handleRemoveTag}
+                handleAddSuggestedTag={handleAddSuggestedTag}
+                category={category}
+                setCategory={setCategory}
+                privacy={privacy}
+                setPrivacy={setPrivacy}
+                isScheduled={isScheduled}
+                setIsScheduled={setIsScheduled}
+                scheduleDate={scheduleDate}
+                setScheduleDate={setScheduleDate}
+                scheduleTime={scheduleTime}
+                setScheduleTime={setScheduleTime}
+                authorName={authorName}
+                setAuthorName={setAuthorName}
+                artistName={artistName}
+                setArtistName={setArtistName}
+                webtoonPlatform={webtoonPlatform}
+                setWebtoonPlatform={setWebtoonPlatform}
+                customPlatform={customPlatform}
+                setCustomPlatform={setCustomPlatform}
+                chapterStart={chapterStart}
+                setChapterStart={setChapterStart}
+                chapterEnd={chapterEnd}
+                setChapterEnd={setChapterEnd}
+                chapterValidationError={chapterValidationError}
+                playlist={playlist}
+                setPlaylist={setPlaylist}
+                subtitlesType={subtitlesType}
+                setSubtitlesType={setSubtitlesType}
+                subtitlesLanguage={subtitlesLanguage}
+                setSubtitlesLanguage={setSubtitlesLanguage}
+                ratings={ratings}
+                setRatings={setRatings}
+                showSelfRating={showSelfRating}
+                setShowSelfRating={setShowSelfRating}
+                madeForKids={madeForKids}
+                setMadeForKids={setMadeForKids}
+                paidPromotion={paidPromotion}
+                setPaidPromotion={setPaidPromotion}
+                license={license}
+                setLicense={setLicense}
+                videoLanguage={videoLanguage}
+                setVideoLanguage={setVideoLanguage}
+                showAdvanced={showAdvanced}
+                setShowAdvanced={setShowAdvanced}
+                ageRestriction={ageRestriction}
+                setAgeRestriction={setAgeRestriction}
+                shortsRemixing={shortsRemixing}
+                setShortsRemixing={setShortsRemixing}
+                commentsMode={commentsMode}
+                setCommentsMode={setCommentsMode}
+                showLikes={showLikes}
+                setShowLikes={setShowLikes}
+                allowEmbedding={allowEmbedding}
+                setAllowEmbedding={setAllowEmbedding}
+                notifySubscribers={notifySubscribers}
+                setNotifySubscribers={setNotifySubscribers}
+                recordingDate={recordingDate}
+                setRecordingDate={setRecordingDate}
+                videoLocation={videoLocation}
+                setVideoLocation={setVideoLocation}
+                seoScore={seoScore}
+                seoChecks={seoChecks}
+                isPublishing={isPublishing}
+                publishLogs={publishLogs}
+                youtubeUrl={youtubeUrl}
+                isAiGenerating={isAiGenerating}
+                hasCustomCredentials={hasCustomCredentials}
+                onClearSelectedFile={handleClearSelectedFile}
+                onClearThumbnail={handleClearThumbnail}
+                onFileChange={handleFileChange}
+                onThumbnailChange={handleThumbnailChange}
+                onThumbnailSelect={handleThumbnailSelect}
+                onPublish={handlePublish}
+                handleGenerateMetadata={handleGenerateMetadata}
+                handleInjectPowerWord={handleInjectPowerWord}
+                handleApplyPresetTemplate={handleApplyPresetTemplate}
+                handleCompileChapters={handleCompileChapters}
+                handleAppendTunedChapters={handleAppendTunedChapters}
+                handleInsertDisclaimer={handleInsertDisclaimer}
+                handleInsertSocials={handleInsertSocials}
+                handleInsertMusicCredit={handleInsertMusicCredit}
+                safePanels={safePanels}
+                scrapedTitle={effectiveTitle}
+                scrapedGenre={effectiveGenre}
+                headerRefreshKey={headerRefreshKey}
+                setIsChannelModalOpen={setIsChannelModalOpen}
+                addNotification={addNotification}
+              />
+            </div>
+          )}
         </div>
 
-        {/* FULL-WIDTH AI SEO & METADATA OPTIMIZER */}
-        <YouTubeSeoOptimizer
-          initialTitle={title}
-          onApplySeo={({ title: seoTitle, description: seoDesc, tags: seoTags }) => {
-            setTitle(seoTitle);
-            setDescription(seoDesc);
-            if (seoTags && seoTags.length > 0) {
-              seoTags.forEach((t) => handleAddSuggestedTag(t));
-            }
-          }}
-        />
+        {/* ── THEATER OVERLAY PLAYER MODAL ──────────────────────────────── */}
+        {watchingVideo && (
+          <YouTubeTheaterPlayer
+            video={watchingVideo}
+            playlistId={watchingPlaylistId}
+            onClose={() => {
+              setWatchingVideo(null);
+              setWatchingPlaylistId(undefined);
+            }}
+          />
+        )}
 
-        {/* FULL-WIDTH PUBLISHED VIDEOS GRID & LIVE AUDIENCE COMMENTS */}
-        <YouTubeVideoGrid />
-
-        {/* YOUTUBE CHANNEL SELECTION MODAL */}
+        {/* ── CHANNEL SELECTION MODAL ──────────────────────────────────────── */}
         <YouTubeChannelModal
           isOpen={isChannelModalOpen}
           onClose={() => setIsChannelModalOpen(false)}
           addNotification={addNotification}
           onChannelSelected={(channel) => {
             setHeaderRefreshKey((prev) => prev + 1);
-            addNotification?.(`Connected YouTube channel: ${channel.title}`, "success");
+            addNotification?.(
+              `Connected YouTube channel: ${channel.title}`,
+              "success"
+            );
           }}
         />
       </div>

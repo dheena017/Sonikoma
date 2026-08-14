@@ -16,8 +16,8 @@ from typing import List, Optional
 class YouTubeExportRequest(BaseModel):
     """Parameters for exporting and publishing a video to YouTube."""
     video_url: str
-    title: str
-    synopsis: str
+    title: Optional[str] = "Untitled Video"
+    synopsis: Optional[str] = ""
     tags: Optional[List[str]] = None
     privacy_status: Optional[str] = "unlisted"
     category_id: Optional[str] = "1"

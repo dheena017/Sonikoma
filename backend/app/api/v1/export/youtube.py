@@ -235,13 +235,22 @@ async def export_to_youtube(
 @router.post("/youtube/upload")
 async def upload_and_export_to_youtube(
     file: UploadFile = File(...),
-    title: str = Form(...),
-    synopsis: str = Form(...),
+    title: str = Form("Untitled Video"),
+    synopsis: Optional[str] = Form(""),
     tags: Optional[str] = Form(None),
     privacy_status: Optional[str] = Form("unlisted"),
     category_id: Optional[str] = Form("1"),
-    is_short: Optional[bool] = Form(False),
+    is_short: Optional[str] = Form("false"),
     thumbnail: Optional[UploadFile] = File(None),
+    playlist: Optional[str] = Form(None),
+    author_name: Optional[str] = Form(None),
+    artist_name: Optional[str] = Form(None),
+    webtoon_platform: Optional[str] = Form(None),
+    custom_platform: Optional[str] = Form(None),
+    chapter_start: Optional[str] = Form(None),
+    chapter_end: Optional[str] = Form(None),
+    subtitles_type: Optional[str] = Form(None),
+    subtitles_language: Optional[str] = Form(None),
     current_user: dict = Depends(get_current_user),
 ):
     if not HAS_YOUTUBE_API:
@@ -250,7 +259,10 @@ async def upload_and_export_to_youtube(
             detail="Google API client libraries not installed. Run 'pip install google-api-python-client google-auth-oauthlib google-auth-httplib2'",
         )
 
-    logger.info(f"Received YouTube local file export request: {file.filename}")
+    # Normalize is_short: FormData sends strings "true"/"false"
+    is_short_bool: bool = str(is_short).lower() in ("true", "1", "yes", "on")
+
+    logger.info(f"Received YouTube local file export request: {file.filename} | is_short={is_short_bool} | title={title}")
 
     fd, tmp_video_path = tempfile.mkstemp(suffix=".mp4")
     os.close(fd)
@@ -281,7 +293,7 @@ async def upload_and_export_to_youtube(
             tags=tags_list,
             category_id=category_id,
             privacy_status=privacy_status,
-            is_short=is_short,
+            is_short=is_short_bool,
             thumbnail_path=thumbnail_path,
             user_id=_get_user_id(current_user),
         )
@@ -399,13 +411,51 @@ async def delete_youtube_channel_route(
 async def get_youtube_playlists(
     current_user: Optional[dict] = Depends(get_current_user)
 ):
-    """
-    Returns all playlists under the user's YouTube channel.
-    """
+    """Returns all playlists under the user's YouTube channel."""
     user_id = _get_user_id(current_user)
     service = YouTubeService(user_id=user_id)
     playlists = await service.get_playlists()
     return {"playlists": playlists, "count": len(playlists)}
+
+
+@router.post("/youtube/playlists", summary="Create a new YouTube playlist")
+async def create_youtube_playlist(
+    payload: dict,
+    current_user: dict = Depends(get_current_user),
+):
+    """Creates a new playlist on the user's YouTube channel."""
+    user_id = _get_user_id(current_user)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    title = payload.get("title", "").strip()
+    if not title:
+        raise HTTPException(status_code=400, detail="Playlist title is required")
+    description = payload.get("description", "")
+    privacy = payload.get("privacy", "public")
+    video_ids = payload.get("video_ids", [])
+    service = YouTubeService(user_id=user_id)
+    try:
+        playlist = await service.create_playlist(
+            title=title,
+            description=description,
+            privacy=privacy,
+            video_ids=video_ids,
+        )
+        return {"success": True, "playlist": playlist}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create playlist: {e}")
+
+@router.get("/youtube/playlist/{playlist_id}/items", summary="Fetch videos in a YouTube playlist")
+async def get_youtube_playlist_items_route(
+    playlist_id: str,
+    max_results: int = 50,
+    current_user: Optional[dict] = Depends(get_current_user),
+):
+    """Returns all video items inside a playlist."""
+    user_id = _get_user_id(current_user)
+    service = YouTubeService(user_id=user_id)
+    items = await service.get_playlist_items(playlist_id=playlist_id, max_results=max_results)
+    return {"items": items, "count": len(items)}
 
 
 @router.get("/youtube/channel/details")

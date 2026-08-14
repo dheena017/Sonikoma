@@ -12,7 +12,7 @@ import {
   saveDbCredentials,
   deleteDbCredentials,
 } from "@/services/youtubePublisher";
-import { PublisherProfile } from "@/features/creative_youtube/components/ProfileManager";
+import { PublisherProfile } from "@/features/creative_youtube/types";
 
 const DEFAULT_PRESETS: PublisherProfile[] = [
   {

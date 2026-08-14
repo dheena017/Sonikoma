@@ -1,89 +1,128 @@
 import React, { useEffect, useState } from "react";
-import { MessageSquare, ThumbsUp, X, User } from "lucide-react";
+import { MessageSquare, ThumbsUp, Loader2, User } from "lucide-react";
 
-interface Comment {
+interface CommentItem {
   id: string;
-  author_name: string;
-  author_avatar?: string;
+  author: string;
+  author_profile_image?: string;
   text: string;
-  like_count: number;
+  like_count?: number;
   published_at?: string;
 }
 
 interface YouTubeCommentsViewerProps {
   videoId: string;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
-export function YouTubeCommentsViewer({ videoId, onClose }: YouTubeCommentsViewerProps) {
-  const [comments, setComments] = useState<Comment[]>([]);
+export function YouTubeCommentsViewer({ videoId }: YouTubeCommentsViewerProps) {
+  const [comments, setComments] = useState<CommentItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchComments = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
-        const res = await fetch(`/api/export/youtube/comments/${videoId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const res = await fetch(`/api/export/youtube/videos/${videoId}/comments`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
           const data = await res.json();
-          setComments(data.comments || []);
+          if (isMounted) {
+            setComments(data.comments || []);
+          }
+        } else {
+          if (isMounted) {
+            setError("Comments are disabled or unavailable for this video.");
+          }
         }
-      } catch (err) {
-        console.warn("Failed to load video comments:", err);
+      } catch (e) {
+        if (isMounted) {
+          setError("Failed to load comments.");
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
-    fetchComments();
+
+    if (videoId) {
+      fetchComments();
+    }
+
+    return () => {
+      isMounted = false;
+    };
   }, [videoId]);
 
-  return (
-    <div className="mt-2 p-3 bg-neutral-950 border border-neutral-800 rounded-xl space-y-2 font-mono animate-fade-in">
-      <div className="flex items-center justify-between border-b border-neutral-900 pb-1.5 text-[10px]">
-        <span className="text-purple-300 font-bold flex items-center gap-1.5">
-          <MessageSquare className="w-3.5 h-3.5" />
-          Live YouTube Audience Comments
-        </span>
-        <button onClick={onClose} className="text-neutral-500 hover:text-white cursor-pointer">
-          <X className="w-3.5 h-3.5" />
-        </button>
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 gap-2">
+        <Loader2 className="w-5 h-5 text-red-500 animate-spin" />
+        <span className="text-xs font-mono text-neutral-500">Loading comments...</span>
       </div>
+    );
+  }
 
-      {isLoading ? (
-        <div className="py-3 text-center text-[10px] text-neutral-500 animate-pulse">
-          Fetching live comments from YouTube...
-        </div>
-      ) : comments.length === 0 ? (
-        <div className="py-2 text-center text-[10px] text-neutral-400 font-sans">
-          No comments yet or comments are turned off for this video.
-        </div>
-      ) : (
-        <div className="space-y-2 max-h-48 overflow-y-auto pr-1 divide-y divide-neutral-900">
-          {comments.map((c) => (
-            <div key={c.id} className="pt-2 text-[10.5px] space-y-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  {c.author_avatar ? (
-                    <img src={c.author_avatar} alt={c.author_name} className="w-4 h-4 rounded-full" />
-                  ) : (
-                    <User className="w-3.5 h-3.5 text-neutral-500" />
-                  )}
-                  <span className="font-bold text-neutral-300">{c.author_name}</span>
+  if (error) {
+    return (
+      <div className="py-6 text-center text-xs font-mono text-neutral-500">
+        {error}
+      </div>
+    );
+  }
+
+  if (comments.length === 0) {
+    return (
+      <div className="py-8 text-center text-xs font-mono text-neutral-500 flex flex-col items-center gap-2">
+        <MessageSquare className="w-5 h-5 text-neutral-600" />
+        <span>No comments yet.</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {comments.map((c) => (
+        <div
+          key={c.id}
+          className="p-3 rounded-xl bg-neutral-900/60 border border-neutral-800/80 space-y-1.5"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              {c.author_profile_image ? (
+                <img
+                  src={c.author_profile_image}
+                  alt={c.author}
+                  className="w-5 h-5 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-5 h-5 rounded-full bg-neutral-800 flex items-center justify-center">
+                  <User className="w-3 h-3 text-neutral-400" />
                 </div>
-                <span className="text-[9px] text-neutral-500 flex items-center gap-1">
-                  <ThumbsUp className="w-2.5 h-2.5 text-emerald-400" /> {c.like_count}
-                </span>
-              </div>
-              <p className="text-neutral-400 leading-relaxed font-sans pl-5">{c.text}</p>
+              )}
+              <span className="text-xs font-bold text-white font-sans">{c.author}</span>
             </div>
-          ))}
+            {c.published_at && (
+              <span className="text-[10px] text-neutral-500 font-mono">
+                {new Date(c.published_at).toLocaleDateString()}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-neutral-300 font-sans leading-relaxed pl-7">{c.text}</p>
+          {typeof c.like_count === "number" && c.like_count > 0 && (
+            <div className="flex items-center gap-1 text-[10px] font-mono text-neutral-400 pl-7 pt-1">
+              <ThumbsUp className="w-3 h-3" />
+              <span>{c.like_count}</span>
+            </div>
+          )}
         </div>
-      )}
+      ))}
     </div>
   );
 }

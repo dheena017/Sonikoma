@@ -258,6 +258,85 @@ class YouTubeService:
             logger.error(f"YouTubeService upload_video failed: {e}", exc_info=True)
             raise ProcessingException(str(e))
 
+    async def create_playlist(
+        self,
+        title: str,
+        description: str = "",
+        privacy: str = "public",
+        video_ids: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """Creates a new playlist on the user's YouTube channel and optionally adds videos."""
+        try:
+            youtube: Any = await get_authenticated_service(user_id=self.user_id)
+            response = await _exec(
+                youtube.playlists().insert(
+                    part="snippet,status",
+                    body={
+                        "snippet": {"title": title, "description": description},
+                        "status": {"privacyStatus": privacy},
+                    },
+                )
+            )
+            playlist_id = response.get("id")
+            snippet = response.get("snippet", {})
+
+            added_count = 0
+            if video_ids and playlist_id:
+                for vid in video_ids:
+                    try:
+                        await _exec(
+                            youtube.playlistItems().insert(
+                                part="snippet",
+                                body={
+                                    "snippet": {
+                                        "playlistId": playlist_id,
+                                        "resourceId": {
+                                            "kind": "youtube#video",
+                                            "videoId": vid,
+                                        },
+                                    },
+                                },
+                            )
+                        )
+                        added_count += 1
+                    except Exception as add_err:
+                        logger.warning(f"Failed to add video {vid} to new playlist {playlist_id}: {add_err}")
+
+            return {
+                "id": playlist_id,
+                "title": snippet.get("title"),
+                "description": snippet.get("description"),
+                "privacy": response.get("status", {}).get("privacyStatus", "public"),
+                "item_count": added_count,
+                "url": f"https://youtube.com/playlist?list={playlist_id}",
+            }
+        except Exception as e:
+            logger.warning(f"Failed to create YouTube playlist: {e}")
+            raise
+
+    async def add_video_to_playlist(self, playlist_id: str, video_id: str) -> Dict[str, Any]:
+        """Adds a video to an existing playlist."""
+        try:
+            youtube: Any = await get_authenticated_service(user_id=self.user_id)
+            response = await _exec(
+                youtube.playlistItems().insert(
+                    part="snippet",
+                    body={
+                        "snippet": {
+                            "playlistId": playlist_id,
+                            "resourceId": {
+                                "kind": "youtube#video",
+                                "videoId": video_id,
+                            },
+                        },
+                    },
+                )
+            )
+            return {"success": True, "item_id": response.get("id")}
+        except Exception as e:
+            logger.warning(f"Failed to add video {video_id} to playlist {playlist_id}: {e}")
+            raise
+
     async def get_playlists(self) -> List[Dict[str, Any]]:
         """Fetch all playlists for the user's YouTube channel."""
         try:
@@ -272,16 +351,64 @@ class YouTubeService:
             playlists = []
             for item in response.get("items", []):
                 snippet = item.get("snippet", {})
+                thumbs = snippet.get("thumbnails", {})
+                thumb_url = (
+                    thumbs.get("maxres", {}).get("url")
+                    or thumbs.get("high", {}).get("url")
+                    or thumbs.get("medium", {}).get("url")
+                    or thumbs.get("default", {}).get("url")
+                )
                 playlists.append({
                     "id": item.get("id"),
                     "title": snippet.get("title"),
                     "description": snippet.get("description"),
+                    "thumbnail": thumb_url,
+                    "published_at": snippet.get("publishedAt"),
                     "item_count": item.get("contentDetails", {}).get("itemCount", 0),
                     "privacy": item.get("status", {}).get("privacyStatus", "public"),
+                    "url": f"https://youtube.com/playlist?list={item.get('id')}",
                 })
             return playlists
         except Exception as e:
             logger.warning(f"Failed to fetch YouTube playlists: {e}")
+            return []
+
+    async def get_playlist_items(self, playlist_id: str, max_results: int = 50) -> List[Dict[str, Any]]:
+        """Fetch all video items inside a given playlist."""
+        try:
+            youtube: Any = await get_authenticated_service(user_id=self.user_id)
+            response = await _exec(
+                youtube.playlistItems().list(
+                    part="snippet,contentDetails,status",
+                    playlistId=playlist_id,
+                    maxResults=max_results,
+                )
+            )
+            items = []
+            for item in response.get("items", []):
+                snippet = item.get("snippet", {})
+                thumbs = snippet.get("thumbnails", {})
+                thumb_url = (
+                    thumbs.get("high", {}).get("url")
+                    or thumbs.get("medium", {}).get("url")
+                    or thumbs.get("default", {}).get("url")
+                )
+                vid_id = snippet.get("resourceId", {}).get("videoId")
+                if vid_id:
+                    items.append({
+                        "id": vid_id,
+                        "playlist_item_id": item.get("id"),
+                        "title": snippet.get("title"),
+                        "description": snippet.get("description"),
+                        "thumbnail": thumb_url,
+                        "published_at": snippet.get("publishedAt"),
+                        "position": snippet.get("position", 0),
+                        "video_owner_channel_title": snippet.get("videoOwnerChannelTitle"),
+                        "youtube_url": f"https://youtube.com/watch?v={vid_id}&list={playlist_id}",
+                    })
+            return items
+        except Exception as e:
+            logger.warning(f"Failed to fetch playlist items for {playlist_id}: {e}")
             return []
 
     async def generate_seo_metadata(self, title: str, series: str) -> Dict[str, Any]:
