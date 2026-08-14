@@ -277,6 +277,7 @@ export default function MainLayout(props: MainLayoutProps) {
       !currentPath.startsWith("/scraper/editor/"));
 
   const isAdminRestricted = isAnyAdmin && (!user || user.creator_role !== "admin");
+  const showTopHeader = !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isVideoEditorPage;
 
   useEffect(() => {
     if (currentPath !== "/auto-crop" && showAutoCropModal) {
@@ -412,7 +413,7 @@ export default function MainLayout(props: MainLayoutProps) {
           }`}
       >
         {/* Top Header */}
-        {!isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isVideoEditorPage && (
+        {showTopHeader && (
           <React.Suspense fallback={null}>
             {isAnyAdmin ? (
               <AdminHeaderPage
@@ -498,7 +499,7 @@ export default function MainLayout(props: MainLayoutProps) {
         {/* Scrollable Main Children Page Area */}
         <div
           id="main-scrollable-area"
-          className={`flex-1 flex flex-col w-full relative ${
+          className={`flex-1 flex flex-col w-full relative ${showTopHeader ? "pt-16" : ""} ${
             isImageEditorPage || isProEditorPage || isVideoEditorPage
               ? "overflow-hidden"
               : "overflow-y-auto overflow-x-hidden"
