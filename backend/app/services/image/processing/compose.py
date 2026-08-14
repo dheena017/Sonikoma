@@ -8,6 +8,7 @@ from typing import Optional, Dict, Any, List, Literal
 
 from PIL import Image
 
+import services.image.utils.image_utils as img_utils
 from services.image.utils.image_resolver import resolve_image_to_buffer, resolve_url_to_buffer
 from app.core.cache import stitched_cache, edit_history
 from database.supabase.storage import upload_to_supabase_bucket
