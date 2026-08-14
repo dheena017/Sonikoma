@@ -499,7 +499,7 @@ export default function MainLayout(props: MainLayoutProps) {
         {/* Scrollable Main Children Page Area */}
         <div
           id="main-scrollable-area"
-          className={`flex-1 flex flex-col w-full relative ${showTopHeader ? "pt-16" : ""} ${
+          className={`flex-1 flex flex-col w-full relative ${showTopHeader ? "pt-20" : ""} ${
             isImageEditorPage || isProEditorPage || isVideoEditorPage
               ? "overflow-hidden"
               : "overflow-y-auto overflow-x-hidden"
