@@ -406,7 +406,7 @@ export default function MainLayout(props: MainLayoutProps) {
 
       {/* --- Main Contents Controller & Router --- */}
       <div
-        id="main-scroll-container"
+        id="main-content-layout"
         className={`h-screen max-h-screen overflow-hidden flex-grow flex-1 flex flex-col max-w-full justify-between ${showAutoCropModal || showBubbleModal
           ? "overflow-hidden"
           : ""
@@ -497,15 +497,21 @@ export default function MainLayout(props: MainLayoutProps) {
         />
 
         {/* Active Project Workspace Bar */}
-        <ActiveProjectWorkspaceBar
-          navigateTo={navigateTo}
-          fetchWithInterceptor={fetchWithInterceptor}
-        />
+        {!isProEditorPage && !isImageEditorPage && !isVideoEditorPage && (
+          <ActiveProjectWorkspaceBar
+            navigateTo={navigateTo}
+            fetchWithInterceptor={fetchWithInterceptor}
+          />
+        )}
 
         {/* Scrollable Main Children Page Area */}
         <div
           id="main-scrollable-area"
-          className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col w-full relative"
+          className={`flex-1 flex flex-col w-full relative ${
+            isImageEditorPage || isProEditorPage || isVideoEditorPage
+              ? "overflow-hidden"
+              : "overflow-y-auto overflow-x-hidden"
+          }`}
         >
           {/* Admin Back to Admin Bar */}
           {localStorage.getItem("sonikoma_admin_token") && (

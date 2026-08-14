@@ -142,10 +142,10 @@ export const HorizontalScrollContainer: React.FC<{
         <ChevronLeft className="w-5 h-5" />
       </button>
 
-      {/* Scroll Track — hidden scrollbar, arrows handle navigation */}
+      {/* Scroll Track — custom purple scrollbar with smooth horizontal scrolling */}
       <div
         ref={scrollRef}
-        className={`flex-1 min-w-0 flex gap-4 overflow-x-auto pb-4 pt-3.5 hide-scrollbar scroll-smooth select-none ${className}`}
+        className={`flex-1 min-w-0 flex gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar scroll-smooth select-none ${className}`}
       >
         {children}
       </div>
@@ -368,12 +368,12 @@ const ChapterScraperDeck = React.memo(
         document.body.style.overflow = "hidden";
         if (container) container.style.overflow = "hidden";
       } else {
-        document.body.style.overflow = "unset";
-        if (container) container.style.overflow = "unset";
+        document.body.style.overflow = "";
+        if (container) container.style.overflow = "";
       }
       return () => {
-        document.body.style.overflow = "unset";
-        if (container) container.style.overflow = "unset";
+        document.body.style.overflow = "";
+        if (container) container.style.overflow = "";
       };
     }, [showDeleteConfirm]);
 

@@ -161,7 +161,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
       */}
       <div
         id="main-scroll-container"
-        className={`flex flex-1 flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hide-scrollbar ${
+        className={`flex flex-1 flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] custom-purple-scrollbar ${
           isFocusMode
             ? "h-screen mt-0 pl-0 pr-0 overflow-y-auto"
             : "h-[calc(100vh-64px)] mt-16 pl-0 pr-0 md:pl-20 md:pr-0 overflow-y-auto"
