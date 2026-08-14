@@ -395,7 +395,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
       <main className="flex-1 w-full relative bg-neutral-950 min-w-0">
         {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
         <div
-          className={`relative z-10 bg-[#070709] min-h-screen min-w-0 ${activeTab === "settings" || activeTab === "audio-settings"
+          className={`relative z-10 bg-[#070709] min-h-0 min-w-0 ${activeTab === "settings" || activeTab === "audio-settings"
               ? "px-4 md:px-8 py-8 flex flex-col gap-8"
               : `border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] px-4 md:px-6 py-8 flex flex-col gap-12 ${isFocusMode ? "hidden" : "block"
               }`
@@ -534,29 +534,42 @@ const EditorPage: React.FC<EditorPageProps> = ({
             <>
               {/* TOP: Video Preview Player / Viewport Monitor */}
               {playerSettings.isPlayerOpen ? (
-                <EditorViewport
-                  panels={panels}
-                  videoUrl={videoUrl}
-                  setVideoUrl={setVideoUrl}
-                  currentPanelIndex={currentPanelIndex}
-                  setCurrentPanelIndex={setCurrentPanelIndex}
-                  activePreviewTab={activePreviewTab}
-                  setActivePreviewTab={setActivePreviewTab}
-                  musicTheme={musicTheme}
-                  voiceActor={voiceActor}
-                  navigateTo={navigateTo}
-                  seriesTitle={seriesTitle}
-                  chapterNumber={chapterNumber}
-                  chapterTitle={chapterTitle}
-                  targetUrl={targetUrl}
-                  isRendering={isRendering}
-                  renderProgress={renderProgress}
-                  handleRenderFinalVideo={handleRenderFinalVideo}
-                  progressStatus={progressStatus}
-                  hasEnoughCredits={hasEnoughCredits}
-                  addNotification={addNotification}
-                  onOpenVideoEditor={() => setCurrentSection("video-editor")}
-                />
+                <>
+                  {/* Section Header: Video Monitor */}
+                  <div className="w-full max-w-[1600px] ml-0 mr-0">
+                    <div className="flex items-center gap-3 pb-3 border-b border-white/5">
+                      <div className="flex items-center gap-2">
+                        <div className="h-5 w-1 rounded-full bg-gradient-to-b from-purple-400 to-purple-600 shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
+                        <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-mono">Video Monitor</h3>
+                      </div>
+                      <div className="flex-1 h-[1px] bg-gradient-to-r from-purple-500/20 to-transparent" />
+                      <span className="text-[9px] font-mono font-bold text-purple-400/70 uppercase tracking-widest">Preview</span>
+                    </div>
+                  </div>
+                  <EditorViewport
+                    panels={panels}
+                    videoUrl={videoUrl}
+                    setVideoUrl={setVideoUrl}
+                    currentPanelIndex={currentPanelIndex}
+                    setCurrentPanelIndex={setCurrentPanelIndex}
+                    activePreviewTab={activePreviewTab}
+                    setActivePreviewTab={setActivePreviewTab}
+                    musicTheme={musicTheme}
+                    voiceActor={voiceActor}
+                    navigateTo={navigateTo}
+                    seriesTitle={seriesTitle}
+                    chapterNumber={chapterNumber}
+                    chapterTitle={chapterTitle}
+                    targetUrl={targetUrl}
+                    isRendering={isRendering}
+                    renderProgress={renderProgress}
+                    handleRenderFinalVideo={handleRenderFinalVideo}
+                    progressStatus={progressStatus}
+                    hasEnoughCredits={hasEnoughCredits}
+                    addNotification={addNotification}
+                    onOpenVideoEditor={() => setCurrentSection("video-editor")}
+                  />
+                </>
               ) : (
                 <div className="w-full max-w-[1600px] ml-0 mr-0 mb-4">
                   <button
@@ -590,10 +603,19 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 id="section-timeline"
                 className="w-full max-w-[1600px] ml-0 mr-0 space-y-4 scroll-mt-24"
               >
-                <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                  <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
-                    Storyboard
-                  </h3>
+                {/* Section Header: Storyboard */}
+                <div className="flex items-center gap-3 pb-3 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-1 rounded-full bg-gradient-to-b from-purple-400 to-purple-600 shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
+                    <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-mono">Storyboard</h3>
+                    {panels.length > 0 && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-[9px] font-black text-purple-300 font-mono">
+                        {panels.length}f
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 h-[1px] bg-gradient-to-r from-purple-500/20 to-transparent" />
+                  <span className="text-[9px] font-mono font-bold text-purple-400/70 uppercase tracking-widest">Timeline</span>
                 </div>
                 <StoryboardTimeline
                   panels={panels}
@@ -649,10 +671,19 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 id="section-assets"
                 className="w-full max-w-[1600px] ml-0 mr-0 space-y-4 scroll-mt-24"
               >
-                <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                  <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono">
-                    Imported Assets
-                  </h3>
+                {/* Section Header: Imported Assets */}
+                <div className="flex items-center gap-3 pb-3 border-b border-white/5">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-1 rounded-full bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                    <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-mono">Imported Assets</h3>
+                    {scrapedImages.length > 0 && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[9px] font-black text-emerald-300 font-mono">
+                        {scrapedImages.length}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 h-[1px] bg-gradient-to-r from-emerald-500/20 to-transparent" />
+                  <span className="text-[9px] font-mono font-bold text-emerald-400/70 uppercase tracking-widest">Asset Pool</span>
                 </div>
                 <div className="bg-transparent">
                   <ChapterScraperDeck

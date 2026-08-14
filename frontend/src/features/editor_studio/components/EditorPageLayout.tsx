@@ -154,21 +154,16 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
         />
       )}
 
-      {/* Main Content Wrapper 
-          PREMIUM LAYOUT SPACING: 
-          - pt-16 (64px) clears the fixed header.
-          - pl-20 (80px) clears the fixed mini sidebar so content doesn't hide underneath.
-      */}
+      {/* Main content sits directly below the fixed header without reserving extra blank space. */}
       <div
         id="main-scroll-container"
-        className={`flex flex-1 flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] custom-purple-scrollbar ${
+        className={`flex flex-1 flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] custom-purple-scrollbar overflow-y-auto overflow-x-hidden ${
           isFocusMode
-            ? "h-screen mt-0 pl-0 pr-0 overflow-y-auto"
-            : "h-[calc(100vh-64px)] mt-16 pl-0 pr-0 md:pl-20 md:pr-0 overflow-y-auto"
+            ? "h-screen pl-0 pr-0"
+            : "h-screen pt-16 pl-0 pr-0 md:pl-20 md:pr-0"
         }`}
       >
-        {/* Inner container — allow overflow so the parent scrollbar handles scrolling */}
-        <div className="flex-1 w-full relative min-w-0">
+        <div className="relative flex-1 w-full min-w-0">
           <div className="w-full flex flex-col min-w-0 pb-36">
             {children}
           </div>

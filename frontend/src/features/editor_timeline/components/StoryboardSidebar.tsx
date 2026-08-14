@@ -40,7 +40,7 @@ const StoryboardSidebar = ({
   const safeEpisodeGroups = episodeGroups.length > 0 ? episodeGroups : [];
 
   return (
-    <aside className="w-full lg:w-64 bg-[#0d0d12] border border-neutral-800 rounded-2xl p-3 shrink-0 shadow-[0_16px_40px_rgba(0,0,0,0.38)] lg:sticky lg:top-24 self-start overflow-hidden">
+    <aside className="w-full lg:w-64 bg-[#0d0d12] border border-neutral-800 rounded-2xl p-3 shrink-0 shadow-[0_16px_40px_rgba(0,0,0,0.38)] flex flex-col h-full">
       <div className="flex items-center justify-between border-b border-neutral-800 pb-2.5 mb-3">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
@@ -60,7 +60,7 @@ const StoryboardSidebar = ({
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3 flex-1 min-h-0">
         <div className="relative">
           <input
             type="text"
@@ -105,13 +105,13 @@ const StoryboardSidebar = ({
         </div>
 
         {safeEpisodeGroups.length > 0 ? (
-          <div className="space-y-2 pt-2 border-t border-neutral-800">
-            <div className="flex items-center justify-between text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono">
+          <div className="flex flex-col gap-2 pt-2 border-t border-neutral-800 flex-1 min-h-0">
+            <div className="flex items-center justify-between text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono shrink-0">
               <span>Episodes</span>
               <span>({safeEpisodeGroups.length})</span>
             </div>
 
-            <div className="space-y-1.5 max-h-60 overflow-y-auto overflow-x-hidden p-1 custom-purple-scrollbar">
+            <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto overflow-x-hidden p-1 custom-purple-scrollbar">
               {(() => {
                 const rawSorted = getSortedEpisodeGroups(safeEpisodeGroups);
                 const sorted = timelineEpSortAscending ? rawSorted : [...rawSorted].reverse();

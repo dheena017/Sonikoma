@@ -860,7 +860,7 @@ const StoryboardTimeline = React.memo(
             ((window as any).__scrapeEpisodeGroups as EpisodeGroupRecord[]) || [];
 
           return (
-            <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+            <div className="flex flex-col lg:flex-row gap-6 w-full items-stretch">
               <StoryboardSidebar
                 episodeGroups={episodeGroups}
                 panels={panels}
