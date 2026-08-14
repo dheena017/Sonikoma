@@ -9,11 +9,11 @@ import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
 import PageNotFound from "@/components/feedback/PageNotFound";
 import LoadingPage from "@/components/feedback/LoadingPage";
 
-// --- Authentication & Landing Views ---
-import LandingPage from "@/features/app_landing/pages/LandingPage";
-import LoginPage from "@/features/app_auth/pages/LoginPage";
-import RegisterPage from "@/features/app_auth/pages/RegisterPage";
-import ForgotPasswordPage from "@/features/app_auth/pages/ForgotPasswordPage";
+// --- Authentication & Landing Views (Lazy Loaded) ---
+const LandingPage = React.lazy(() => import("@/features/app_landing/pages/LandingPage"));
+const LoginPage = React.lazy(() => import("@/features/app_auth/pages/LoginPage"));
+const RegisterPage = React.lazy(() => import("@/features/app_auth/pages/RegisterPage"));
+const ForgotPasswordPage = React.lazy(() => import("@/features/app_auth/pages/ForgotPasswordPage"));
 
 // --- Lazy Loaded Feature Pages & Modals ---
 const ScraperPage = React.lazy(() => import("@/features/workspace_scraper/pages/ScraperPage"));
@@ -513,46 +513,54 @@ export default function AppRouter(props: AppRouterProps) {
     currentPath === "/index.html"
   ) {
     return (
-      <LandingPage
-        onGetStarted={() => navigateTo("/register")}
-        onLogin={() => navigateTo("/login")}
-        themeMode={themeMode}
-        toggleThemeMode={toggleThemeMode}
-      />
+      <React.Suspense fallback={<LoadingPage status="Loading Sonikoma..." themeMode={themeMode} />}>
+        <LandingPage
+          onGetStarted={() => navigateTo("/register")}
+          onLogin={() => navigateTo("/login")}
+          themeMode={themeMode}
+          toggleThemeMode={toggleThemeMode}
+        />
+      </React.Suspense>
     );
   }
 
   // --- Guard: Login Screen ---
   if (currentPath === "/login") {
     return (
-      <LoginPage
-        onLogin={login}
-        onNavigateToRegister={() => navigateTo("/register")}
-        onNavigateToForgotPassword={() => navigateTo("/forgot-password")}
-        onNavigateHome={() => navigateTo("/")}
-      />
+      <React.Suspense fallback={<LoadingPage status="Loading Login..." themeMode={themeMode} />}>
+        <LoginPage
+          onLogin={login}
+          onNavigateToRegister={() => navigateTo("/register")}
+          onNavigateToForgotPassword={() => navigateTo("/forgot-password")}
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </React.Suspense>
     );
   }
 
   // --- Guard: Registration Screen ---
   if (currentPath === "/register") {
     return (
-      <RegisterPage
-        onRegister={register}
-        onNavigateToLogin={() => navigateTo("/login")}
-        onNavigateHome={() => navigateTo("/")}
-      />
+      <React.Suspense fallback={<LoadingPage status="Loading Registration..." themeMode={themeMode} />}>
+        <RegisterPage
+          onRegister={register}
+          onNavigateToLogin={() => navigateTo("/login")}
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </React.Suspense>
     );
   }
 
   // --- Guard: Password Recovery Screen ---
   if (currentPath === "/forgot-password") {
     return (
-      <ForgotPasswordPage
-        onForgotPassword={forgotPassword}
-        onNavigateToLogin={() => navigateTo("/login")}
-        onNavigateHome={() => navigateTo("/")}
-      />
+      <React.Suspense fallback={<LoadingPage status="Loading Recovery..." themeMode={themeMode} />}>
+        <ForgotPasswordPage
+          onForgotPassword={forgotPassword}
+          onNavigateToLogin={() => navigateTo("/login")}
+          onNavigateHome={() => navigateTo("/")}
+        />
+      </React.Suspense>
     );
   }
 

@@ -263,8 +263,9 @@ export default defineConfig(({ mode, command }) => {
             const startTime = Date.now();
             res.on("finish", () => {
               const url = req.url || "";
-              // Skip noisy polling logs
+              // Only log API and backend requests to avoid console I/O spam during module loading
               if (
+                !url.startsWith("/api/") ||
                 url.includes("system-logs") ||
                 url.includes("health") ||
                 url.includes("metrics") ||
@@ -291,24 +292,12 @@ export default defineConfig(({ mode, command }) => {
 
               console.log(
                 `\x1b[90m${new Date().toLocaleTimeString()}\x1b[0m ` +
-                  `\x1b[35m[Vite]\x1b[0m ` +
+                  `\x1b[35m[Vite API]\x1b[0m ` +
                   `${methodColor}${req.method || "GET"}\x1b[0m ` +
                   `\x1b[36m${url}\x1b[0m ` +
                   `${statusColor}${res.statusCode}\x1b[0m ` +
                   `\x1b[90m(${duration}ms)\x1b[0m`
               );
-
-              // Local file loading dev console log
-              const isLocalSrc =
-                url.startsWith("/src/") || url === "/" || url.endsWith(".html");
-              const isNoisy =
-                url.includes("node_modules") ||
-                url.includes("@vite") ||
-                url.includes("@react-refresh") ||
-                url.includes("system-logs") ||
-                url.includes("/api/") ||
-                url.includes("/media/") ||
-                url.includes(".vite/deps");
             });
             next();
           });
@@ -358,12 +347,11 @@ export default defineConfig(({ mode, command }) => {
         "react/jsx-runtime",
         "zustand",
         "lucide-react",
-        "@supabase/supabase-js",
         "date-fns",
         "jszip",
         "file-saver",
-        "clsx",
-        "tailwind-merge",
+        "fabric",
+        "react-rnd",
       ],
     },
     build: {

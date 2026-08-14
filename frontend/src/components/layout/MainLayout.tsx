@@ -4,21 +4,23 @@ import * as api from "@/api";
 
 import Header from "@/components/layout/MainHeader";
 import Sidebar from "@/components/layout/MainSidebar";
-import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
-import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
-import NotificationStack from "@/features/app_notification/components/NotificationStack";
-import ConfirmModal from "@/shared/ui/modal/ConfirmModal";
-import TerminalLogs from "@/features/system_terminal/components/TerminalLogs";
-import AdminSidebar from "@/features/system_admin/components/AdminSidebar";
-import AdminMiniSidebar from "@/features/system_admin/components/AdminMiniSidebar";
-import AdminHeaderPage from "@/features/system_admin/pages/AdminHeaderPage";
 import MiniSidebar from "@/components/layout/MainMiniSidebar";
-import CreativeSuiteHeader from "@/features/creative_suite/components/CreativeSuiteHeader";
-import CreativeSuiteSidebar from "@/features/creative_suite/components/CreativeSuiteSidebar";
-import CreativeSuiteMiniSidebar from "@/features/creative_suite/components/CreativeSuiteMiniSidebar";
+import NotificationStack from "@/features/app_notification/components/NotificationStack";
 import ActiveProjectWorkspaceBar from "@/components/layout/ActiveProjectWorkspaceBar";
-import ActiveProjectSelectorDrawer from "@/components/layout/ActiveProjectSelectorDrawer";
+import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import { useProjectStore } from "@/store/useProjectStore";
+
+// --- Lazy Loaded Heavy Conditional Components ---
+const ProjectConfirmModal = React.lazy(() => import("@/shared/ui/modal/ProjectConfirmModal"));
+const ConfirmModal = React.lazy(() => import("@/shared/ui/modal/ConfirmModal"));
+const TerminalLogs = React.lazy(() => import("@/features/system_terminal/components/TerminalLogs"));
+const AdminSidebar = React.lazy(() => import("@/features/system_admin/components/AdminSidebar"));
+const AdminMiniSidebar = React.lazy(() => import("@/features/system_admin/components/AdminMiniSidebar"));
+const AdminHeaderPage = React.lazy(() => import("@/features/system_admin/pages/AdminHeaderPage"));
+const CreativeSuiteHeader = React.lazy(() => import("@/features/creative_suite/components/CreativeSuiteHeader"));
+const CreativeSuiteSidebar = React.lazy(() => import("@/features/creative_suite/components/CreativeSuiteSidebar"));
+const CreativeSuiteMiniSidebar = React.lazy(() => import("@/features/creative_suite/components/CreativeSuiteMiniSidebar"));
+const ActiveProjectSelectorDrawer = React.lazy(() => import("@/components/layout/ActiveProjectSelectorDrawer"));
 const AutoCropModal = React.lazy(() => import("@/features/editor_auto_crop/components/AutoCropModal"));
 
 
@@ -312,62 +314,42 @@ export default function MainLayout(props: MainLayoutProps) {
         }`}
     >
       {/* --- Page Navigation Sidebar --- */}
-      {isAdminRestricted ? null : isAnyAdmin ? (
-        <>
-          <AdminSidebar
-            currentPath={currentPath}
-            navigateTo={navigateTo}
-            isOpen={isSidebarOpen}
-            onClose={handleCloseSidebar}
-          />
-          {!isSidebarOpen && !isDrawerOpen && (
-            <AdminMiniSidebar
+      <React.Suspense fallback={null}>
+        {isAdminRestricted ? null : isAnyAdmin ? (
+          <>
+            <AdminSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
-              onOpenSidebar={handleOpenSidebar}
+              isOpen={isSidebarOpen}
+              onClose={handleCloseSidebar}
             />
-          )}
-        </>
-      ) : isCreativeSuitePath ? (
-        <>
-          <CreativeSuiteSidebar
-            currentPath={currentPath}
-            navigateTo={navigateTo}
-            isOpen={isSidebarOpen}
-            onClose={handleCloseSidebar}
-            panels={panels}
-          />
-          {!isSidebarOpen && !isDrawerOpen && (
-            <CreativeSuiteMiniSidebar
+            {!isSidebarOpen && !isDrawerOpen && (
+              <AdminMiniSidebar
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                onOpenSidebar={handleOpenSidebar}
+              />
+            )}
+          </>
+        ) : isCreativeSuitePath ? (
+          <>
+            <CreativeSuiteSidebar
               currentPath={currentPath}
               navigateTo={navigateTo}
+              isOpen={isSidebarOpen}
+              onClose={handleCloseSidebar}
               panels={panels}
-              onOpenSidebar={handleOpenSidebar}
             />
-          )}
-        </>
-      ) : isImageEditorPage ? (
-        <Sidebar
-          isProcessing={appLogic.isProcessing}
-          panels={panels}
-          scrapedImages={scrapedImages}
-          totalCalculatedDuration={totalCalculatedDuration}
-          currentPath={currentPath}
-          editingImageIdx={editingImageIdx}
-          lastEditorPath={lastEditorPath}
-          isBatchCropping={isBatchCropping}
-          isCleaningBubbles={isCleaningBubbles}
-          isOpen={isSidebarOpen}
-          onClose={handleCloseSidebar}
-          projectId={projectId}
-          isDirty={isWorkspaceDirty}
-          navigateTo={navigateTo}
-          notifications={notifications}
-          seriesSlug={seriesSlugState}
-          chapterSlug={chapterSlugState}
-        />
-      ) : (
-        <>
+            {!isSidebarOpen && !isDrawerOpen && (
+              <CreativeSuiteMiniSidebar
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                onOpenSidebar={handleOpenSidebar}
+                panels={panels}
+              />
+            )}
+          </>
+        ) : isImageEditorPage ? (
           <Sidebar
             isProcessing={appLogic.isProcessing}
             panels={panels}
@@ -387,18 +369,40 @@ export default function MainLayout(props: MainLayoutProps) {
             seriesSlug={seriesSlugState}
             chapterSlug={chapterSlugState}
           />
-          {!isSidebarOpen && !isDrawerOpen && !isProEditorPage && !isVideoEditorPage && !isAnyAdmin && (
-            <MiniSidebar
+        ) : (
+          <>
+            <Sidebar
+              isProcessing={appLogic.isProcessing}
+              panels={panels}
+              scrapedImages={scrapedImages}
+              totalCalculatedDuration={totalCalculatedDuration}
               currentPath={currentPath}
-              navigateTo={navigateTo}
-              notificationsCount={notifications.filter((n) => !n.isRead).length}
+              editingImageIdx={editingImageIdx}
+              lastEditorPath={lastEditorPath}
+              isBatchCropping={isBatchCropping}
+              isCleaningBubbles={isCleaningBubbles}
+              isOpen={isSidebarOpen}
+              onClose={handleCloseSidebar}
               projectId={projectId}
+              isDirty={isWorkspaceDirty}
+              navigateTo={navigateTo}
+              notifications={notifications}
               seriesSlug={seriesSlugState}
               chapterSlug={chapterSlugState}
             />
-          )}
-        </>
-      )}
+            {!isSidebarOpen && !isDrawerOpen && !isProEditorPage && !isVideoEditorPage && !isAnyAdmin && (
+              <MiniSidebar
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                notificationsCount={notifications.filter((n) => !n.isRead).length}
+                projectId={projectId}
+                seriesSlug={seriesSlugState}
+                chapterSlug={chapterSlugState}
+              />
+            )}
+          </>
+        )}
+      </React.Suspense>
 
       {/* --- Main Contents Controller & Router --- */}
       <div
@@ -410,92 +414,103 @@ export default function MainLayout(props: MainLayoutProps) {
       >
         {/* Top Header */}
         {!isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isVideoEditorPage && (
-          isAnyAdmin ? (
-            <AdminHeaderPage
-              currentPath={currentPath}
-              navigateTo={navigateTo}
-              fetchWithInterceptor={fetchWithInterceptor}
-              onToggleSidebar={handleToggleSidebar}
-              notifications={notifications}
-              markNotificationAsRead={markNotificationAsRead as any}
-              markAllNotificationsAsRead={markAllNotificationsAsRead}
-              deleteNotification={deleteNotification as any}
-              clearAllNotifications={clearAllNotifications}
-              notificationsMuted={notificationsMuted}
-              setNotificationsMuted={setNotificationsMuted}
-              isSidebarOpen={isSidebarOpen}
-              user={user}
-              addNotification={addNotification}
-            />
-          ) : isCreativeSuitePath ? (
-            <CreativeSuiteHeader
-              currentPath={currentPath}
-              navigateTo={navigateTo}
-              fetchWithInterceptor={fetchWithInterceptor}
-              onToggleSidebar={handleToggleSidebar}
-              notifications={notifications}
-              markNotificationAsRead={markNotificationAsRead as any}
-              markAllNotificationsAsRead={markAllNotificationsAsRead}
-              deleteNotification={deleteNotification as any}
-              clearAllNotifications={clearAllNotifications}
-              notificationsMuted={notificationsMuted}
-              setNotificationsMuted={setNotificationsMuted}
-              isSidebarOpen={isSidebarOpen}
-              user={user}
-              addNotification={addNotification}
-            />
-          ) : (
-            <Header
-              isProcessing={appLogic.isProcessing}
-              panels={panels}
-              totalCalculatedDuration={totalCalculatedDuration}
-              currentPath={currentPath}
-              editingImageIdx={editingImageIdx}
-              lastEditorPath={lastEditorPath}
-              isBatchCropping={isBatchCropping}
-              isCleaningBubbles={isCleaningBubbles}
-              cleanProgress={cleanProgress}
-              batchProgress={batchProgress}
-              onToggleSidebar={handleToggleSidebar}
-              isSidebarOpen={isSidebarOpen}
-              backendStatus={backendStatus as any}
-              selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
-              volume={volume}
-              setVolume={setVolume}
-              isMuted={isMuted}
-              setIsMuted={setIsMuted}
-              user={user}
-              notifications={notifications}
-              markNotificationAsRead={markNotificationAsRead as any}
-              markAllNotificationsAsRead={markAllNotificationsAsRead}
-              deleteNotification={deleteNotification as any}
-              clearAllNotifications={clearAllNotifications}
-              projectId={headerProjectId}
-              saveStatus={headerSaveStatus}
-              isDirty={headerIsDirty}
-              onSave={headerOnSave}
-              navigateTo={navigateTo}
-              notificationsMuted={notificationsMuted}
-              setNotificationsMuted={setNotificationsMuted}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          )
+          <React.Suspense fallback={null}>
+            {isAnyAdmin ? (
+              <AdminHeaderPage
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                fetchWithInterceptor={fetchWithInterceptor}
+                onToggleSidebar={handleToggleSidebar}
+                notifications={notifications}
+                markNotificationAsRead={markNotificationAsRead as any}
+                markAllNotificationsAsRead={markAllNotificationsAsRead}
+                deleteNotification={deleteNotification as any}
+                clearAllNotifications={clearAllNotifications}
+                notificationsMuted={notificationsMuted}
+                setNotificationsMuted={setNotificationsMuted}
+                isSidebarOpen={isSidebarOpen}
+                user={user}
+                addNotification={addNotification}
+              />
+            ) : isCreativeSuitePath ? (
+              <CreativeSuiteHeader
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                fetchWithInterceptor={fetchWithInterceptor}
+                onToggleSidebar={handleToggleSidebar}
+                notifications={notifications}
+                markNotificationAsRead={markNotificationAsRead as any}
+                markAllNotificationsAsRead={markAllNotificationsAsRead}
+                deleteNotification={deleteNotification as any}
+                clearAllNotifications={clearAllNotifications}
+                notificationsMuted={notificationsMuted}
+                setNotificationsMuted={setNotificationsMuted}
+                isSidebarOpen={isSidebarOpen}
+                user={user}
+                addNotification={addNotification}
+              />
+            ) : (
+              <Header
+                isProcessing={appLogic.isProcessing}
+                panels={panels}
+                totalCalculatedDuration={totalCalculatedDuration}
+                currentPath={currentPath}
+                editingImageIdx={editingImageIdx}
+                lastEditorPath={lastEditorPath}
+                isBatchCropping={isBatchCropping}
+                isCleaningBubbles={isCleaningBubbles}
+                cleanProgress={cleanProgress}
+                batchProgress={batchProgress}
+                onToggleSidebar={handleToggleSidebar}
+                isSidebarOpen={isSidebarOpen}
+                backendStatus={backendStatus as any}
+                selectedModel={selectedModel}
+                setSelectedModel={setSelectedModel}
+                volume={volume}
+                setVolume={setVolume}
+                isMuted={isMuted}
+                setIsMuted={setIsMuted}
+                user={user}
+                notifications={notifications}
+                markNotificationAsRead={markNotificationAsRead as any}
+                markAllNotificationsAsRead={markAllNotificationsAsRead}
+                deleteNotification={deleteNotification as any}
+                clearAllNotifications={clearAllNotifications}
+                projectId={headerProjectId}
+                saveStatus={headerSaveStatus}
+                isDirty={headerIsDirty}
+                onSave={headerOnSave}
+                navigateTo={navigateTo}
+                notificationsMuted={notificationsMuted}
+                setNotificationsMuted={setNotificationsMuted}
+                fetchWithInterceptor={fetchWithInterceptor}
+              />
+            )}
+          </React.Suspense>
         )}
 
+        {/* Global Floating Toast Notifications */}
+        <NotificationStack
+          notifications={notifications}
+          removeNotification={removeNotification}
+          notificationsMuted={notificationsMuted}
+        />
+
+        {/* Active Project Workspace Bar */}
+        <ActiveProjectWorkspaceBar
+          navigateTo={navigateTo}
+          fetchWithInterceptor={fetchWithInterceptor}
+        />
+
+        {/* Scrollable Main Children Page Area */}
         <div
-          className={`${!isSidebarOpen && !isImageEditorPage && !isProEditorPage && !isVideoEditorPage && !isAdminRestricted ? "lg:pl-20" : ""} ${isImageEditorPage || isProEditorPage || isVideoEditorPage || (isAnyAdmin && isAdminRestricted)
-            ? "h-screen max-h-screen overflow-hidden"
-            : "h-[calc(100vh-64px)] mt-16 overflow-x-hidden overflow-y-auto custom-purple-scrollbar"
-            } flex-grow flex-1 flex flex-col transition-[padding] duration-300 ease-out smooth-scroll`}
+          id="main-scrollable-area"
+          className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col items-center justify-start w-full relative"
         >
-          {/* Impersonation Banner */}
+          {/* Admin Back to Admin Bar */}
           {localStorage.getItem("sonikoma_admin_token") && (
-            <div className="bg-rose-600 text-white text-center py-2 px-4 text-sm font-bold flex justify-center items-center gap-4 z-[100] relative shadow-md">
-              <AlertTriangle className="w-4 h-4" />
-              <span>
-                You are currently impersonating {user?.email || "a user"}.
-              </span>
+            <div className="bg-amber-600/90 text-white text-xs font-semibold py-1.5 px-4 flex items-center justify-between shadow-md z-40 w-full">
+              <span>You are viewing Sonikoma in user mode via Admin Impersonation.</span>
               <button
                 onClick={() => {
                   const adminToken = localStorage.getItem(
@@ -591,10 +606,13 @@ export default function MainLayout(props: MainLayoutProps) {
           {/* Children Page Views */}
           <div
             key={currentPath}
-            className={`w-full max-w-full min-w-0 flex-1 flex flex-col ${isImageEditorPage || isProEditorPage
-              ? "p-0"
-              : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16 page-view-transition stagger-container"
-              }`}
+            className={`w-full max-w-full min-w-0 flex-1 flex flex-col ${
+              isImageEditorPage || isProEditorPage
+                ? "p-0"
+                : !isSidebarOpen && (isCreativeSuitePath || isAnyAdmin || !isWorkspacePath)
+                ? "px-4 sm:px-6 md:px-8 lg:pl-24 lg:pr-8 pb-12 md:pb-16 page-view-transition stagger-container"
+                : "px-4 sm:px-6 md:px-8 pb-12 md:pb-16 page-view-transition stagger-container"
+            }`}
           >
             {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (
               <React.Suspense fallback={null}>
@@ -650,100 +668,104 @@ export default function MainLayout(props: MainLayoutProps) {
         </div>
       </div>
 
-      {alertDialog && alertDialog.isOpen && (
-        <ConfirmModal
-          title={alertDialog.title}
-          message={alertDialog.message}
-          accentColor={alertDialog.accentColor}
-          isAlert={true}
-          onConfirm={() => {
-            alertDialog.resolve();
-            setAlertDialog(null);
-          }}
-          onCancel={() => {
-            alertDialog.resolve();
-            setAlertDialog(null);
-          }}
-        />
-      )}
-
-      {confirmDialog && confirmDialog.isOpen && (
-        <ConfirmModal
-          title={confirmDialog.title}
-          message={confirmDialog.message}
-          accentColor={confirmDialog.accentColor}
-          onConfirm={() => {
-            confirmDialog.resolve(true);
-            setConfirmDialog(null);
-          }}
-          onCancel={() => {
-            confirmDialog.resolve(false);
-            setConfirmDialog(null);
-          }}
-        />
-      )}
-
-      <ProjectConfirmModal
-        isOpen={showScrapeConfirmModal}
-        onClose={() => setShowScrapeConfirmModal(false)}
-        onConfirm={handleProjectConfirm}
-        initialDetails={{
-          seriesTitle,
-          chapterNumber,
-          chapterTitle,
-          scrapedGenre,
-          seriesAuthor,
-          seriesCoverImage,
-          seriesSynopsis,
-        }}
-      />
-
-      {/* --- Terminal Floating Interface --- */}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
-        {isTerminalOpen && (
-          <div className="w-[90vw] md:w-[600px] max-h-[70vh] bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
-            <div className="p-2">
-              <TerminalLogs
-                consoleLogs={consoleLogs}
-                setConsoleLogs={setConsoleLogs}
-              />
-            </div>
-          </div>
+      <React.Suspense fallback={null}>
+        {alertDialog && alertDialog.isOpen && (
+          <ConfirmModal
+            title={alertDialog.title}
+            message={alertDialog.message}
+            accentColor={alertDialog.accentColor}
+            isAlert={true}
+            onConfirm={() => {
+              alertDialog.resolve();
+              setAlertDialog(null);
+            }}
+            onCancel={() => {
+              alertDialog.resolve();
+              setAlertDialog(null);
+            }}
+          />
         )}
 
-        <button
-          onClick={() => setIsTerminalOpen(!isTerminalOpen)}
-          className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-95 cursor-pointer border ${isTerminalOpen
-            ? "bg-rose-600 border-rose-500 text-white rotate-90"
-            : "bg-purple-600 border-purple-500 text-white hover:bg-purple-500"
-            }`}
-          title={isTerminalOpen ? "Close Terminal" : "Open System Terminal"}
-        >
-          {isTerminalOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-          )}
-        </button>
-      </div>
+        {confirmDialog && confirmDialog.isOpen && (
+          <ConfirmModal
+            title={confirmDialog.title}
+            message={confirmDialog.message}
+            accentColor={confirmDialog.accentColor}
+            onConfirm={() => {
+              confirmDialog.resolve(true);
+              setConfirmDialog(null);
+            }}
+            onCancel={() => {
+              confirmDialog.resolve(false);
+              setConfirmDialog(null);
+            }}
+          />
+        )}
 
-      {/* Global Active Project Activation Drawer */}
-      <ActiveProjectSelectorDrawer
-        fetchWithInterceptor={fetchWithInterceptor}
-        navigateTo={navigateTo}
-      />
+        {showScrapeConfirmModal && (
+          <ProjectConfirmModal
+            isOpen={showScrapeConfirmModal}
+            onClose={() => setShowScrapeConfirmModal(false)}
+            onConfirm={handleProjectConfirm}
+            initialDetails={{
+              seriesTitle,
+              chapterNumber,
+              chapterTitle,
+              scrapedGenre,
+              seriesAuthor,
+              seriesCoverImage,
+              seriesSynopsis,
+            }}
+          />
+        )}
+
+        {/* --- Terminal Floating Interface --- */}
+        <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
+          {isTerminalOpen && (
+            <div className="w-[90vw] md:w-[600px] max-h-[70vh] bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+              <div className="p-2">
+                <TerminalLogs
+                  consoleLogs={consoleLogs}
+                  setConsoleLogs={setConsoleLogs}
+                />
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => setIsTerminalOpen(!isTerminalOpen)}
+            className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-95 cursor-pointer border ${isTerminalOpen
+              ? "bg-rose-600 border-rose-500 text-white rotate-90"
+              : "bg-purple-600 border-purple-500 text-white hover:bg-purple-500"
+              }`}
+            title={isTerminalOpen ? "Close Terminal" : "Open System Terminal"}
+          >
+            {isTerminalOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Global Active Project Activation Drawer */}
+        <ActiveProjectSelectorDrawer
+          fetchWithInterceptor={fetchWithInterceptor}
+          navigateTo={navigateTo}
+        />
+      </React.Suspense>
     </div>
   );
 }

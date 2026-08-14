@@ -43,9 +43,15 @@ export function useAppState() {
         if (params.get("mock_auth") === "true") {
           return false;
         }
+        // If there's no stored token and no token in query, we are not loading auth
+        const token =
+          localStorage.getItem("sonikoma_token") ||
+          sessionStorage.getItem("sonikoma_token") ||
+          params.get("token");
+        return Boolean(token);
       }
     } catch (e) {}
-    return true;
+    return false;
   });
   const [isInitializing, setIsInitializing] = useState<boolean>(() => {
     try {
@@ -54,9 +60,14 @@ export function useAppState() {
         if (params.get("mock_auth") === "true") {
           return false;
         }
+        const token =
+          localStorage.getItem("sonikoma_token") ||
+          sessionStorage.getItem("sonikoma_token") ||
+          params.get("token");
+        return Boolean(token);
       }
     } catch (e) {}
-    return true;
+    return false;
   });
 
   const activeProjectData = useProjectStore((state) => state.activeProjectData);

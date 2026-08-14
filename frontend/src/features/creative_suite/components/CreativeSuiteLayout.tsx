@@ -142,59 +142,71 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
 
   const activeBreadcrumb = getBreadcrumbName();
 
-  if (hideSidebarAndHeader) {
-    return (
-      <div className="flex-grow w-full px-6 py-6 md:px-8 md:py-8 flex flex-col min-h-full">
-        {/* Standard layout header for all Creative Suite pages */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900 pb-5 mb-6">
+  const renderHeader = () => (
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900/80 pb-5 mb-6">
+      <div className="space-y-2">
+        {/* Breadcrumb pills */}
+        <div className="flex items-center gap-1.5 text-xs font-mono flex-wrap">
+          <button
+            onClick={() => navigateTo("/dashboard")}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-purple-950/40 border border-neutral-800/80 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
+          >
+            <span>Main Dashboard</span>
+          </button>
+          <span className="text-neutral-600 font-bold">&rsaquo;</span>
+          <button
+            onClick={() => navigateTo("/creative-suite")}
+            className="px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-purple-950/40 border border-neutral-800/80 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
+          >
+            <span>Creative Suite</span>
+          </button>
+          <span className="text-neutral-600 font-bold">&rsaquo;</span>
+          <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300 font-bold">
+            {activeBreadcrumb}
+          </span>
+        </div>
+
+        {/* Title and subtitle */}
+        <div className="flex items-center gap-3 pt-0.5">
+          <div className="p-2.5 bg-gradient-to-br from-purple-500/20 via-indigo-500/10 to-transparent border border-purple-500/30 rounded-2xl text-purple-400 shadow-lg shadow-purple-500/10 shrink-0">
+            <Sparkles className="h-5 w-5" />
+          </div>
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-              <span
-                className="hover:text-purple-400 cursor-pointer"
-                onClick={() => navigateTo("/dashboard")}
-              >
-                Main Dashboard
-              </span>
-              <span>&gt;</span>
-              <span
-                className="hover:text-purple-400 cursor-pointer"
-                onClick={() => navigateTo("/creative-suite")}
-              >
-                Creative Suite
-              </span>
-              <span>&gt;</span>
-              <span className="text-purple-400">{activeBreadcrumb}</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-              <div className="p-2 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400">
-                <Sparkles className="h-5 w-5" />
-              </div>
+            <h2 className="text-2xl font-black text-white tracking-tight font-sans">
               Creative Tools Workspace
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
               Access AI-assisted video editing, audio composition, translations, and publisher tools
             </p>
           </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-center">
-            {activeSkillRequests > 0 && (
-              <button
-                onClick={() => window.__sonikomaAbortAllSkillRequests?.()}
-                className="flex items-center gap-1.5 px-3 py-2 bg-rose-600/90 hover:bg-rose-500 text-white border border-rose-500/70 rounded-xl text-[11px] font-mono transition-all cursor-pointer font-bold shadow-md active:scale-95"
-              >
-                <Square className="h-3.5 w-3.5" />
-                Stop generation
-              </button>
-            )}
-            <button
-              onClick={() => navigateTo("/dashboard")}
-              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md active:scale-95"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Main App
-            </button>
-          </div>
         </div>
+      </div>
+
+      <div className="flex items-center gap-2.5 self-start sm:self-center shrink-0">
+        {activeSkillRequests > 0 && (
+          <button
+            onClick={() => window.__sonikomaAbortAllSkillRequests?.()}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-rose-600/90 hover:bg-rose-500 text-white border border-rose-500/70 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-rose-950/40 active:scale-95"
+          >
+            <Square className="h-3.5 w-3.5 fill-current" />
+            Stop Generation
+          </button>
+        )}
+        <button
+          onClick={() => navigateTo("/dashboard")}
+          className="group flex items-center gap-2 px-4 py-2.5 bg-neutral-900/90 hover:bg-neutral-800/90 text-neutral-200 hover:text-white border border-neutral-800 hover:border-neutral-700 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md hover:shadow-lg active:scale-95"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          <span>Main App</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  if (hideSidebarAndHeader) {
+    return (
+      <div className="flex-grow w-full px-6 py-6 md:px-8 md:py-8 flex flex-col min-h-full">
+        {renderHeader()}
         {shouldShowFallbackUI ? <FallbackUI /> : children}
       </div>
     );
@@ -239,56 +251,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
         <main className="flex-1 px-6 pb-6 pt-6 md:px-8 md:pb-8 md:pt-8">
           <div className="w-full animate-[fadeIn_0.3s_ease-out]">
 
-            {/* Standard layout header for all Creative Suite pages */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900 pb-5 mb-6">
-              <div>
-                <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-                  <span
-                    className="hover:text-purple-400 cursor-pointer"
-                    onClick={() => navigateTo("/dashboard")}
-                  >
-                    Main Dashboard
-                  </span>
-                  <span>&gt;</span>
-                  <span
-                    className="hover:text-purple-400 cursor-pointer"
-                    onClick={() => navigateTo("/creative-suite")}
-                  >
-                    Creative Suite
-                  </span>
-                  <span>&gt;</span>
-                  <span className="text-purple-400">{activeBreadcrumb}</span>
-                </div>
-                <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-                  <div className="p-2 bg-purple-500/10 border border-purple-500/20 rounded-xl text-purple-400">
-                    <Sparkles className="h-5 w-5" />
-                  </div>
-                  Creative Tools Workspace
-                </h2>
-                <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                  Access AI-assisted video editing, audio composition, translations, and publisher tools
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 self-start sm:self-center">
-                {activeSkillRequests > 0 && (
-                  <button
-                    onClick={() => window.__sonikomaAbortAllSkillRequests?.()}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-rose-600/90 hover:bg-rose-500 text-white border border-rose-500/70 rounded-xl text-[11px] font-mono transition-all cursor-pointer font-bold shadow-md active:scale-95"
-                  >
-                    <Square className="h-3.5 w-3.5" />
-                    Stop generation
-                  </button>
-                )}
-                <button
-                  onClick={() => navigateTo("/dashboard")}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md active:scale-95"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Main App
-                </button>
-              </div>
-            </div>
+            {renderHeader()}
             {shouldShowFallbackUI ? <FallbackUI /> : children}
           </div>
         </main>
