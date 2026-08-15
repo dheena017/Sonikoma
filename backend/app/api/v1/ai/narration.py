@@ -1,8 +1,7 @@
 """
 backend/app/api/v1/ai/narration.py
 ─────────────────────────────────────────────────────────────────────────────
-Narrative sequence generation, SFX, BGM, camera dynamics, chapter markers,
-midrolls, shorts, transitions, and emotion routes.
+Narrative sequence generation, SFX, BGM, shorts, and midroll routes.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -20,14 +19,8 @@ from schemas.ai import (
     BGMVibeRequest,
     ShortsScriptRequest,
     SFXOverlayRequest,
-    CameraShakeRequest,
-    SceneCompositionRequest,
-    SubtitleStylerRequest,
-    YouTubeChapterRequest,
-    MidrollPlacementRequest,
     ShortsHookRequest,
-    CharacterEmotionRequest,
-    TransitionSpeedRequest,
+    MidrollPlacementRequest,
 )
 
 logger = logging.getLogger("sonikoma.api.ai.narration")
@@ -123,32 +116,6 @@ async def get_sfx_mix(body: SFXOverlayRequest, user_api_key: dict = Depends(get_
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/skills/camera-shake", summary="Calculate camera shake dynamics")
-async def get_camera_shake(body: CameraShakeRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    try:
-        desc = body.visual_description.strip() if body.visual_description else "Action frame close-up"
-        sfx = body.sfx.strip() if body.sfx else "[Explosion]"
-        logger.info(f"[Camera Shake Skill] Calculating dynamics...")
-        return await run_md_skill("camera_shake_dynamics", body.model, api_key=user_api_key,
-                                  visual_description=desc, sfx=sfx)
-    except Exception as e:
-        logger.error(f"[Camera Shake Skill Error]: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/skills/scene-composition", summary="Generate image prompt and camera composition description")
-async def get_scene_composition(body: SceneCompositionRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    try:
-        desc = body.visual_description.strip() if body.visual_description else "Detailed anime comic panel"
-        speech = body.speech_text.strip() if body.speech_text else ""
-        logger.info(f"[Scene Composition Skill] Composing scene prompt...")
-        return await run_md_skill("scene_composition_desc", body.model, api_key=user_api_key,
-                                  visual_description=desc, speech_text=speech)
-    except Exception as e:
-        logger.error(f"[Scene Composition Skill Error]: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @router.post("/skills/shorts-script", summary="Adapt storyboard script for YouTube Shorts/Reels")
 async def get_shorts_script(body: ShortsScriptRequest, user_api_key: dict = Depends(get_user_gemini_key)):
     try:
@@ -174,18 +141,6 @@ async def get_shorts_hook(body: ShortsHookRequest, user_api_key: dict = Depends(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/skills/chapters", summary="Generate YouTube video chapter timestamps")
-async def get_chapters(body: YouTubeChapterRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    try:
-        script = body.compiled_script.strip() if body.compiled_script else "00:00 - Intro\n01:30 - Climax"
-        logger.info(f"[YouTube Chapters Skill] Generating timeline chapters...")
-        return await run_md_skill("youtube_chapter_gen", body.model, api_key=user_api_key,
-                                  compiled_script=script)
-    except Exception as e:
-        logger.error(f"[YouTube Chapters Skill Error]: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @router.post("/skills/midrolls", summary="Calculate optimal midroll ad break placements")
 async def get_midrolls(body: MidrollPlacementRequest, user_api_key: dict = Depends(get_user_gemini_key)):
     try:
@@ -196,44 +151,5 @@ async def get_midrolls(body: MidrollPlacementRequest, user_api_key: dict = Depen
                                   compiled_script=script, max_ads=max_ads)
     except Exception as e:
         logger.error(f"[Midroll Placement Skill Error]: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/skills/transition-speed", summary="Tune transition speed and rationale")
-async def get_transition_speed(body: TransitionSpeedRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    try:
-        desc = body.visual_description.strip() if body.visual_description else "Panel scene transition"
-        speech = body.speech_text.strip() if body.speech_text else ""
-        logger.info(f"[Transition Speed Skill] Tuning transitions...")
-        return await run_md_skill("transition_speed_tuner", body.model, api_key=user_api_key,
-                                  visual_description=desc, speech_text=speech)
-    except Exception as e:
-        logger.error(f"[Transition Speed Skill Error]: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/skills/emotion", summary="Classify character emotion and vocal inflection")
-async def get_emotion(body: CharacterEmotionRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    try:
-        desc = body.visual_description.strip() if body.visual_description else "Character face expression"
-        speech = body.speech_text.strip() if body.speech_text else ""
-        logger.info(f"[Character Emotion Skill] Classifying emotion...")
-        return await run_md_skill("character_emotion_class", body.model, api_key=user_api_key,
-                                  visual_description=desc, speech_text=speech)
-    except Exception as e:
-        logger.error(f"[Character Emotion Skill Error]: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/skills/subtitle-styler", summary="Recommend subtitle style and animation")
-async def get_subtitle_styler(body: SubtitleStylerRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    try:
-        desc = body.visual_description.strip() if body.visual_description else "Comic panel scene"
-        speech = body.speech_text.strip() if body.speech_text else "Subtitled text"
-        logger.info(f"[Subtitle Styler Skill] Generating subtitle design...")
-        return await run_md_skill("subtitle_styler", body.model, api_key=user_api_key,
-                                  visual_description=desc, speech_text=speech)
-    except Exception as e:
-        logger.error(f"[Subtitle Styler Skill Error]: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 

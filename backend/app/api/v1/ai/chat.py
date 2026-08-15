@@ -1,7 +1,7 @@
 """
 backend/app/api/v1/ai/chat.py
 ─────────────────────────────────────────────────────────────────────────────
-Script dramatization, character bio, voice casting, copyright scrub routes.
+Script dramatization, voice casting, copyright scrub, and thumbnail routes.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -11,18 +11,12 @@ from fastapi import APIRouter, Depends
 from api.v1.ai._deps import get_user_gemini_key, run_md_skill
 from schemas.ai import (
     DramatizeRequest,
-    CharacterBioRequest,
     VoiceCastingRequest,
     CopyrightScrubRequest,
-    CopyrightScrubBatchRequest,
     ThumbnailRequest,
     ThumbnailLayoutRequest,
-    SeriesIntroHookRequest,
-    TitleABRequest,
     ThumbnailVisualRequest,
-    GenerateThumbnailRequest,
     SEORequest,
-    NarrativePacingRequest,
 )
 
 logger = logging.getLogger("sonikoma.api.ai.chat")
@@ -33,12 +27,6 @@ router = APIRouter()
 async def dramatize_script(body: DramatizeRequest, user_api_key: dict = Depends(get_user_gemini_key)):
     return await run_md_skill("script_dramatization", body.model, api_key=user_api_key,
                               raw_ocr_text=body.raw_ocr_text, genre=body.genre, scene_context=body.scene_context)
-
-
-@router.post("/skills/character-bio")
-async def get_character_bio(body: CharacterBioRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    return await run_md_skill("character_bio_profiler", body.model, api_key=user_api_key,
-                              dialogue=body.dialogue)
 
 
 @router.post("/skills/voice-cast")
@@ -52,15 +40,6 @@ async def get_voice_cast(body: VoiceCastingRequest, user_api_key: dict = Depends
 @router.post("/skills/copyright-scrub")
 async def get_copyright_scrub(body: CopyrightScrubRequest, user_api_key: dict = Depends(get_user_gemini_key)):
     return await run_md_skill("copyright_scrubber", body.model, api_key=user_api_key, text=body.text)
-
-
-@router.post("/skills/copyright-scrub-batch")
-async def get_copyright_scrub_batch(body: CopyrightScrubBatchRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    results = []
-    for t in body.texts:
-        res = await run_md_skill("copyright_scrubber", body.model, api_key=user_api_key, text=t)
-        results.append({"text": t, "success": True, "data": res})
-    return {"success": True, "results": results}
 
 
 @router.post("/skills/thumbnail")
@@ -81,43 +60,7 @@ async def get_thumbnail_visual(body: ThumbnailVisualRequest, user_api_key: dict 
                               thumbnail_concept=body.thumbnail_concept)
 
 
-@router.post("/skills/generate-thumbnail")
-async def generate_thumbnail_variation(body: GenerateThumbnailRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    panel_descriptions = "\n".join(
-        f"Panel {i + 1}: {p.get('visual_description', 'No description')}"
-        for i, p in enumerate(body.panels)
-    )
-    return await run_md_skill(
-        "thumbnail_auto_composition",
-        body.model,
-        api_key=user_api_key,
-        title=body.title,
-        genre=body.genre,
-        total_panels=len(body.panels),
-        panel_descriptions=panel_descriptions,
-    )
-
-
-@router.post("/skills/intro-hook")
-async def get_intro_hook(body: SeriesIntroHookRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    return await run_md_skill("series_intro_hook", body.model, api_key=user_api_key,
-                              title=body.title, premise_summary=body.premise_summary, genre=body.genre)
-
-
-@router.post("/skills/title-ab")
-async def get_title_ab(body: TitleABRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    return await run_md_skill("title_ab_tester", body.model, api_key=user_api_key,
-                              title=body.title, key_climax_event=body.key_climax_event)
-
-
 @router.post("/skills/seo")
 async def get_seo_metadata(body: SEORequest, user_api_key: dict = Depends(get_user_gemini_key)):
     return await run_md_skill("video_seo_metadata", body.model, api_key=user_api_key,
                               title=body.title, genre=body.genre, storyboard_summary=body.storyboard_summary)
-
-
-@router.post("/skills/pacing")
-async def get_pacing(body: NarrativePacingRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    return await run_md_skill("narrative_pace_controller", body.model, api_key=user_api_key,
-                              visual_description=body.visual_description,
-                              speech_text=body.speech_text, sfx=body.sfx)

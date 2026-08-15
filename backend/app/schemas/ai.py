@@ -92,28 +92,6 @@ class DramatizeRequest(BaseModel):
     model: Optional[str] = None
 
 
-class SeriesIntroHookRequest(BaseModel):
-    """Generates an engaging introduction hook for a series."""
-    title: str
-    premise_summary: str
-    genre: str
-    model: Optional[str] = None
-
-
-class CharacterBioRequest(BaseModel):
-    """Generates character background bio from dialogue snippets."""
-    dialogue: str
-    model: Optional[str] = None
-
-
-class NarrativePacingRequest(BaseModel):
-    """Determines optimal narrative pacing for scene elements."""
-    visual_description: str
-    speech_text: str
-    sfx: str
-    model: Optional[str] = None
-
-
 class ShortsScriptRequest(BaseModel):
     """Generates a vertical YouTube Shorts / TikTok script."""
     storyboard_summary: str
@@ -168,14 +146,6 @@ class ThumbnailLayoutRequest(BaseModel):
     model: Optional[str] = None
 
 
-class GenerateThumbnailRequest(BaseModel):
-    """Generates thumbnail prompt/image specifications from panel data."""
-    title: str
-    genre: str
-    panels: List[Dict[str, Any]]
-    model: Optional[str] = None
-
-
 class ThumbnailVisualRequest(BaseModel):
     """Refines visual focus elements for thumbnail graphics."""
     thumbnail_concept: str
@@ -192,23 +162,10 @@ class SEORequest(BaseModel):
     model: Optional[str] = None
 
 
-class YouTubeChapterRequest(BaseModel):
-    """Generates timestamped YouTube video chapters."""
-    compiled_script: str
-    model: Optional[str] = None
-
-
 class MidrollPlacementRequest(BaseModel):
     """Recommends mid-roll ad placements within video script."""
     compiled_script: str
     max_ads: Optional[int] = 3
-    model: Optional[str] = None
-
-
-class TitleABRequest(BaseModel):
-    """Generates A/B test variations for video titles."""
-    title: str
-    key_climax_event: str
     model: Optional[str] = None
 
 
@@ -219,41 +176,6 @@ class VoiceCastingRequest(BaseModel):
     character_name: str
     dialogue_sample: str
     visual_description: str
-    model: Optional[str] = None
-
-
-class CharacterEmotionRequest(BaseModel):
-    """Analyzes character facial emotion and expression."""
-    visual_description: str
-    speech_text: str
-    model: Optional[str] = None
-
-
-class CameraShakeRequest(BaseModel):
-    """Determines camera shake intensity for dramatic impact."""
-    visual_description: str
-    sfx: str
-    model: Optional[str] = None
-
-
-class SceneCompositionRequest(BaseModel):
-    """Analyzes scene framing, lighting, and composition."""
-    visual_description: str
-    speech_text: str
-    model: Optional[str] = None
-
-
-class SubtitleStylerRequest(BaseModel):
-    """Recommends subtitle font styling and animations."""
-    visual_description: str
-    speech_text: str
-    model: Optional[str] = None
-
-
-class TransitionSpeedRequest(BaseModel):
-    """Calculates ideal transition speeds between scene cuts."""
-    visual_description: str
-    speech_text: str
     model: Optional[str] = None
 
 
@@ -269,12 +191,6 @@ class TranslationRequest(BaseModel):
 class CopyrightScrubRequest(BaseModel):
     """Scrubs copyrighted or protected terms from text."""
     text: str
-    model: Optional[str] = None
-
-
-class CopyrightScrubBatchRequest(BaseModel):
-    """Batch copyright scrubbing across multiple text inputs."""
-    texts: List[str]
     model: Optional[str] = None
 
 

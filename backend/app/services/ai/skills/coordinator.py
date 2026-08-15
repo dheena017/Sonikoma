@@ -64,25 +64,10 @@ class FallbackCoordinator:
                     {"timestamp": "01:15", "tension_reason": "High cliffhanger point before revelation."}
                 ]
             }
-        elif skill_name == "scene_composition_desc":
-            return {
-                "visual_prompt": "Cinematic manhwa page close-up, dramatic shadows, soft backlight",
-                "camera_angle": "low angle",
-                "lighting": "dramatic backlighting",
-                "style_description": "detailed manhwa"
-            }
         elif skill_name == "shorts_retention_hook":
             return {
                 "hook_sentence": "This S-Rank just unlocked absolute ruin!",
                 "psychological_trigger": "curiosity"
-            }
-        elif skill_name == "subtitle_styler":
-            return {
-                "font_name": "Montserrat",
-                "scale_size": 1.5,
-                "primary_fill_color": "#FFCC00",
-                "outline_stroke_thickness": 4.0,
-                "bounce_animation_style": "pop"
             }
         elif skill_name == "thumbnail_visual_comp":
             return {
@@ -91,20 +76,6 @@ class FallbackCoordinator:
                 "highlight_borders": ["yellow glow", "red overlay arrow"],
                 "layout_margins": "safe bottom right corner"
             }
-        elif skill_name == "transition_speed_tuner":
-            return {
-                "transition_style": "crossfade",
-                "duration_frames": 15,
-                "pacing_rationale": "Soft dialogue transitions."
-            }
-        elif skill_name == "youtube_chapter_gen":
-            return {
-                "chapters": [
-                    {"timestamp": "00:00", "title": "Introduction"},
-                    {"timestamp": "01:30", "title": "Climax Reveal"}
-                ]
-            }
-
         elif skill_name == "video_seo_metadata":
             title = kwargs.get("title", "Webtoon Story Recap")
             genre = kwargs.get("genre", "Fantasy Action")
@@ -125,25 +96,6 @@ class FallbackCoordinator:
                     {"panel_index": 0, "description": f"Protagonist from {title}", "style_effect": "glow_outline"}
                 ],
                 "background_panel_index": 0
-            }
-        elif skill_name == "title_ab_tester":
-            title = kwargs.get("title", "My Webtoon Story")
-            return {
-                "original_score": 7.2,
-                "suggested_alternatives": [
-                    {
-                        "title": f"Reborn as {title}, I Unlocked a Cheat System!",
-                        "ctr_score": 9.4,
-                        "clickbait_level": "High",
-                        "reasoning": "Strong power-fantasy hook for anime/webtoon audience."
-                    },
-                    {
-                        "title": f"He Was Weakest F-Rank Until THIS Happened... ({title})",
-                        "ctr_score": 8.9,
-                        "clickbait_level": "Medium-High",
-                        "reasoning": "High curiosity trigger with cliffhanger phrasing."
-                    }
-                ]
             }
         elif skill_name == "shorts_script_adapter":
             return {
@@ -170,14 +122,6 @@ class FallbackCoordinator:
                 "voice_tone": "confident antihero with deep resonance",
                 "speech_tempo": 1.1,
                 "accent": "neutral english"
-            }
-        elif skill_name == "character_bio_profiler":
-            return {
-                "name": "Shadow Sovereign",
-                "estimated_age": "19-22",
-                "power_description": "Monarch shadow extraction and domain expansion",
-                "clothing_color": "#8B5CF6 (Purple/Black)",
-                "active_role": "Protagonist"
             }
         elif skill_name == "script_dramatization":
             return {
