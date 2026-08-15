@@ -226,6 +226,7 @@ async def compile_video_from_panels(
 
 
 async def process_render_job(
+    report_progress: Any,
     job_id: str,
     panels: List[Dict[str, Any]],
     voice: Optional[str] = None,
@@ -243,36 +244,27 @@ async def process_render_job(
     speech_rate: float = 1.0,
     speech_pitch: float = 1.0,
     project_id: Optional[str] = None,
-) -> None:
+) -> Dict[str, str]:
+    logger.info(
+        f"[VideoService] Starting render job_id='{job_id}' for project_id='{project_id or 'N/A'}', ({len(panels)} panels)"
+    )
+    report_progress(5.0)
 
-    try:
-        logger.info(
-            f"[VideoService] Starting render job_id='{job_id}' for project_id='{project_id or 'N/A'}', ({len(panels)} panels)"
-        )
-        job_manager.update_progress(job_id, progress=5.0)
+    os.makedirs(_VIDEO_OUTPUT_DIR, exist_ok=True)
 
-        os.makedirs(_VIDEO_OUTPUT_DIR, exist_ok=True)
+    output_filename = await compile_video_from_panels(
+        project_id=project_id or job_id,
+        panels=panels,
+        output_dir=_VIDEO_OUTPUT_DIR,
+    )
 
-        output_filename = await compile_video_from_panels(
-            project_id=project_id or job_id,
-            panels=panels,
-            output_dir=_VIDEO_OUTPUT_DIR,
-        )
+    video_url = f"/videos/{output_filename}"
 
-        video_url = f"/videos/{output_filename}"
-
-        job_manager.complete_job(job_id, result={"video_url": video_url})
-        logger.info(
-            f"[VideoService] Completed render job_id='{job_id}' -> {video_url} "
-            f"(project_id='{project_id or 'N/A'}')"
-        )
-    except Exception as e:
-        logger.error(
-            f"[VideoService] Failed render job_id='{job_id}' "
-            f"(project_id='{project_id or 'N/A'}'): {e}",
-            exc_info=True,
-        )
-        job_manager.fail_job(job_id, error_message=str(e))
+    logger.info(
+        f"[VideoService] Completed render job_id='{job_id}' -> {video_url} "
+        f"(project_id='{project_id or 'N/A'}')"
+    )
+    return {"video_url": video_url}
 
 
 # Human-readable aliases

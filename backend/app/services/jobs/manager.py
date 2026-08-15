@@ -141,15 +141,18 @@ class UnifiedJobManager:
             started_at = now
 
         with get_db_connection() as conn:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 UPDATE jobs
                 SET progress = ?, stage = ?, status = ?, started_at = ?
-                WHERE id = ?
+                WHERE id = ? AND status NOT IN ('COMPLETED', 'FAILED', 'CANCELLED')
                 """,
                 (new_progress, new_stage, new_status.value, started_at, job_id)
             )
             conn.commit()
+            if cursor.rowcount == 0:
+                logger.warning(f"[JobManager] update_progress failed for job {job_id}. Possible race condition or already terminal.")
+                return self.get_job(job_id)
 
         logger.debug(f"[JobManager] Job {job_id} progress: {new_progress:.1f}% | stage={new_stage}")
         return self.get_job(job_id)
@@ -168,15 +171,18 @@ class UnifiedJobManager:
         result_json = json.dumps(result) if result is not None else None
 
         with get_db_connection() as conn:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 UPDATE jobs
                 SET status = ?, progress = ?, stage = ?, completed_at = ?, result = ?
-                WHERE id = ?
+                WHERE id = ? AND status NOT IN ('COMPLETED', 'FAILED', 'CANCELLED')
                 """,
                 (JobStatus.COMPLETED.value, 100.0, JobStage.COMPLETED.value, now, result_json, job_id)
             )
             conn.commit()
+            if cursor.rowcount == 0:
+                logger.warning(f"[JobManager] complete_job failed for job {job_id}. Possible race condition.")
+                return self.get_job(job_id)
 
         logger.info(f"[JobManager] Job {job_id} COMPLETED successfully")
         return self.get_job(job_id)
@@ -206,15 +212,18 @@ class UnifiedJobManager:
         error_json = json.dumps(error_payload)
 
         with get_db_connection() as conn:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 UPDATE jobs
                 SET status = ?, stage = ?, completed_at = ?, error = ?
-                WHERE id = ?
+                WHERE id = ? AND status NOT IN ('COMPLETED', 'FAILED', 'CANCELLED')
                 """,
                 (JobStatus.FAILED.value, JobStage.FAILED.value, now, error_json, job_id)
             )
             conn.commit()
+            if cursor.rowcount == 0:
+                logger.warning(f"[JobManager] fail_job failed for job {job_id}. Possible race condition.")
+                return self.get_job(job_id)
 
         logger.error(f"[JobManager] Job {job_id} FAILED: {error_message}")
         return self.get_job(job_id)
@@ -232,15 +241,18 @@ class UnifiedJobManager:
         now = datetime.datetime.now().isoformat()
 
         with get_db_connection() as conn:
-            conn.execute(
+            cursor = conn.execute(
                 """
                 UPDATE jobs
                 SET status = ?, stage = ?, cancelled_at = ?
-                WHERE id = ?
+                WHERE id = ? AND status NOT IN ('COMPLETED', 'FAILED', 'CANCELLED')
                 """,
                 (JobStatus.CANCELLED.value, JobStage.CANCELLED.value, now, job_id)
             )
             conn.commit()
+            if cursor.rowcount == 0:
+                logger.warning(f"[JobManager] cancel_job failed for job {job_id}. Possible race condition.")
+                return self.get_job(job_id)
 
         task = self._tasks.get(job_id)
         if task and not task.done():

@@ -495,7 +495,7 @@ async def facade_smart_crop(
                 auto_split=auto_split,
                 padding_px=padding_px,
                 use_yolo=use_yolo,
-                job_id=ai_execution_id
+                job_id=job_id
             )
             if len(cv_panels) > 0:
                 # Crop all panels server-side in one pass (image[y:y+h, x:x+w])
