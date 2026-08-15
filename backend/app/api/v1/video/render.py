@@ -13,7 +13,7 @@ from api.dependencies.auth import get_current_user
 from services.user.credit_service import get_available_credits, record_credit_transaction
 from database.config import LOW_BALANCE_THRESHOLD
 from schemas.video import RenderRequest
-from services.video.job_queue import get_job_queue
+from services.jobs import job_manager, JobType
 from services.video.video_service import process_render_job
 
 from repositories.project import get_project, get_project_by_slug
@@ -37,26 +37,19 @@ async def render_video(
             raise HTTPException(status_code=404, detail=f"Project '{request.project_id}' not found.")
         if project.get("user_id") and project.get("user_id") != current_user.get("user_id"):
             raise HTTPException(status_code=403, detail=f"Access denied for project '{request.project_id}'.")
-        if request.job_id and project.get("job_id") and project.get("job_id") != request.job_id:
-            raise HTTPException(status_code=400, detail=f"Workspace job ID mismatch for project '{request.project_id}'.")
 
     COST = 20
     if get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST} for video render.")
 
-    job_queue = get_job_queue()
-    video_id = str(uuid.uuid4())[:8]
+    job = job_manager.create_job(
+        job_type=JobType.RENDER_VIDEO,
+        user_id=current_user["user_id"],
+        project_id=request.project_id,
+    )
     
     logger.info(
-        f"[Render] Initiating render execution_id={video_id} for project_id={request.project_id or 'N/A'}, workspace_job_id={request.job_id or 'N/A'}"
-    )
-
-    # Register the job using execution ID (returned to client as execution_id & legacy job_id).
-    job_queue.create_job(
-        "video_render",
-        job_id=video_id,
-        project_id=request.project_id,
-        workspace_job_id=request.job_id,
+        f"[Render] Initiating render job_id={job.job_id} for project_id={request.project_id or 'N/A'}"
     )
 
     # Deduct credits
@@ -64,7 +57,7 @@ async def render_video(
 
     background_tasks.add_task(
         process_render_job,
-        video_id,
+        job.job_id,
         [p.model_dump() for p in request.panels],
         request.voice,
         request.music_theme or "none",
@@ -81,35 +74,13 @@ async def render_video(
         request.speech_rate if request.speech_rate is not None else 1.0,
         request.speech_pitch if request.speech_pitch is not None else 1.0,
         project_id=request.project_id,
-        workspace_job_id=request.job_id,
     )
 
     return {
         "success": True,
-        "job_id": video_id,
-        "execution_id": video_id,
+        "job_id": job.job_id,
         "project_id": request.project_id,
-        "workspace_job_id": request.job_id,
         "low_balance": new_balance < LOW_BALANCE_THRESHOLD,
     }
 
 
-@router.get("/status/{job_id}")
-async def get_render_status(job_id: str):
-    job_queue = get_job_queue()
-    job = job_queue.get_job(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-    
-    status = "processing"
-    if job["status"] == "completed":
-        status = "completed"
-    elif job["status"] == "failed":
-        status = "failed"
-        
-    return {
-        "status": status,
-        "progress": int(job["progress"]),
-        "url": job["result"],
-        "error": job["error"]
-    }

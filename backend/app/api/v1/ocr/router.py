@@ -7,7 +7,8 @@ Speech bubble dialogue OCR extraction API routes.
 
 import httpx
 import logging
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
+from api.dependencies.auth import get_current_user
 
 from schemas.scraper import ExtractScriptRequest
 from services.scraper.service import scrape_and_initialize_project
@@ -20,14 +21,14 @@ ocr_router = APIRouter()
 
 
 @ocr_router.post("/extract", summary="Extract speech bubble dialogue script via OCR (Creates OCR Job)")
-async def extract_ocr_endpoint(body: ExtractScriptRequest):
+async def extract_ocr_endpoint(body: ExtractScriptRequest, current_user: dict = Depends(get_current_user)):
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Webtoon URL is required.")
 
     job = job_manager.create_job(
         job_type=JobType.OCR,
+        user_id=current_user["user_id"],
         project_id=body.project_id,
-        job_id=body.job_id,
         metadata={"url": body.url}
     )
 

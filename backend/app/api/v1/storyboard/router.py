@@ -9,7 +9,7 @@ import logging
 import jwt
 from fastapi import APIRouter, HTTPException, Request, Depends
 
-from api.dependencies.auth import get_all_user_keys
+from api.dependencies.auth import get_all_user_keys, get_current_user
 from core.security import SECRET_KEY
 from app.core.config import GEMINI_MODEL_PRIMARY
 from schemas.scraper import GenerateStoryboardOnlyRequest, GenerateStoryboardRequest
@@ -26,13 +26,14 @@ ALGORITHM = "HS256"
 async def generate_storyboard_endpoint(
     request: Request,
     body: GenerateStoryboardOnlyRequest,
-    user_keys: dict = Depends(get_all_user_keys)
+    user_keys: dict = Depends(get_all_user_keys),
+    current_user: dict = Depends(get_current_user)
 ):
-    user_id = get_optional_user_id(request)
+    user_id = current_user['user_id']
     job = job_manager.create_job(
         job_type=JobType.GENERATE_STORYBOARD,
+        user_id=current_user["user_id"],
         project_id=body.project_id,
-        job_id=body.job_id,
         metadata={"url": body.url, "model": body.model}
     )
 

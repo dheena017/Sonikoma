@@ -433,7 +433,7 @@ export function useVideoPreviewGeneration({
       const activeProj = useProjectStore.getState().activeProjectData?.project;
       const data = await api.renderVideo(fetchWithInterceptor, {
         project_id: activeProj?.project_id || null,
-        job_id: activeProj?.job_id || null,
+
         panels,
         voice: voiceActor,
         music_theme: musicTheme || "none",
@@ -477,11 +477,11 @@ export function useVideoPreviewGeneration({
             }
           }
 
-          if (statusData.status === "completed") {
+          if (statusData.status === "completed" || statusData.status === "COMPLETED") {
             clearInterval(pollInterval);
             setRenderProgress(100);
             setRenderEtaSeconds(0);
-            setVideoUrl(statusData.url);
+            setVideoUrl(statusData.result?.video_url || statusData.url);
             setActivePreviewTab("video");
             addNotification("Final video rendered successfully!", "success");
             audioFeedback?.playSuccess();
@@ -494,7 +494,7 @@ export function useVideoPreviewGeneration({
                 overrideVideoUrl: statusData.url,
               });
             }
-          } else if (statusData.status === "failed") {
+          } else if (statusData.status === "failed" || statusData.status === "FAILED") {
             clearInterval(pollInterval);
             throw new Error(statusData.error || "Render failed");
           }

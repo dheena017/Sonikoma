@@ -17,7 +17,6 @@ class ScrapeChapterRequest(BaseModel):
     """Canonical request for scraping a single chapter URL via AdaptiveScraperEngine."""
     url: str
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
     force_refresh: Optional[bool] = False
     bypass_cache: Optional[bool] = False
     limit: Optional[int] = None
@@ -43,7 +42,6 @@ class ScrapeImagesRequest(BaseModel):
     cover_image: Optional[str] = None
     synopsis: Optional[str] = None
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
     scrape_only: Optional[bool] = False
     limit: Optional[int] = None
     proxy_images: Optional[bool] = True
@@ -55,7 +53,6 @@ class ProcessUrlRequest(BaseModel):
     """Validates or parses a Webtoon URL."""
     url: str
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
 
 
 class SaveScrapedImagesRequest(BaseModel):
@@ -63,7 +60,6 @@ class SaveScrapedImagesRequest(BaseModel):
     url: str
     images: List[str]
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
 
 
 class ScrapeEpisodesRequest(BaseModel):
@@ -77,7 +73,6 @@ class ScrapeEpisodesRequest(BaseModel):
     auto_paginate: Optional[bool] = False
     bypass_cache: Optional[bool] = False
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
 
 
 class ScrapeEpisodesAdvancedRequest(BaseModel):
@@ -90,7 +85,6 @@ class ScrapeEpisodesAdvancedRequest(BaseModel):
     sort_by: Optional[str] = "latest"  # latest, oldest, rating, likes
     bypass_cache: Optional[bool] = False
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
 
 
 class BatchScrapeSeriesRequest(BaseModel):
@@ -98,14 +92,12 @@ class BatchScrapeSeriesRequest(BaseModel):
     series: List[Dict[str, Optional[str]]]
     max_episodes_per_series: Optional[int] = 50
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
 
 
 class BatchScrapeRequest(BaseModel):
     """Scrapes multiple episode URLs in batch."""
     urls: List[str]
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
     limit: Optional[int] = None
     proxy_images: Optional[bool] = True
     filter_banners: Optional[bool] = True
@@ -120,7 +112,6 @@ class GenerateStoryboardOnlyRequest(BaseModel):
     """Generates a storyboard script from a URL without video compilation."""
     url: str
     project_id: str
-    job_id: Optional[str] = None
     model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
     title: Optional[str] = None
@@ -136,7 +127,6 @@ class GenerateStoryboardRequest(BaseModel):
     url: str
     project_id: Optional[str] = None
     episode_id: Optional[str] = None
-    job_id: Optional[str] = None
     panels: Optional[List[Dict[str, Any]]] = None
     custom_background_video: Optional[str] = None
     model: Optional[str] = None
@@ -154,7 +144,6 @@ class ExtractScriptRequest(BaseModel):
     """Extracts script and text data from a Webtoon URL."""
     url: str
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
     limit: Optional[int] = None
 
 
@@ -162,7 +151,6 @@ class SmartSplitRequest(BaseModel):
     """Automatically splits long vertical strips into individual panel images."""
     url: str
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
     min_panel_height: Optional[int] = 250
 
 
@@ -174,6 +162,5 @@ class ExportArchiveRequest(BaseModel):
     """Exports scraped comic episodes as CBZ archives."""
     url: str
     project_id: Optional[str] = None
-    job_id: Optional[str] = None
     format: Optional[str] = "cbz"
     limit: Optional[int] = None

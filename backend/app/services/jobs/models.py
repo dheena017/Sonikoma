@@ -138,14 +138,17 @@ class JobStage(str, Enum):
 class JobRecord(BaseModel):
     """Authoritative representation of an asynchronous processing job."""
     job_id: str
+    user_id: str
     type: JobType
     status: JobStatus = JobStatus.QUEUED
     progress: float = 0.0
     stage: str = JobStage.QUEUED.value
     project_id: Optional[str] = None
-    created_at: float
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
+    chapter_id: Optional[str] = None
+    created_at: str
+    started_at: Optional[str] = None
+    completed_at: Optional[str] = None
+    cancelled_at: Optional[str] = None
     result: Optional[Any] = None
     error: Optional[Dict[str, Any]] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)

@@ -457,12 +457,10 @@ async def facade_smart_crop(
     use_yolo: bool = True,
     guidance_instructions: Optional[str] = None,
     focus_mode: Optional[str] = None,
-    ai_execution_id: Optional[str] = None,
     job_id: Optional[str] = None
 ) -> Dict[str, Any]:
     """Uses LLM or local OpenCV panel detection based on strategy & configuration."""
-    ai_execution_id = ai_execution_id or job_id or f"ai_exec_{uuid.uuid4().hex[:8]}"
-    logger.info(f"[{ai_execution_id}] Starting facade_smart_crop for URL: {url[:60]}... (strategy={strategy})")
+    logger.info(f"[{job_id}] Starting facade_smart_crop for URL: {url[:60]}... (strategy={strategy})")
 
     resolved = await img_utils.resolve_image_to_buffer(url)
     img_buffer = resolved["data"]
@@ -503,7 +501,7 @@ async def facade_smart_crop(
                 # Crop all panels server-side in one pass (image[y:y+h, x:x+w])
                 # so the frontend gets croppedUrl on each panel and skips extra API calls
                 await asyncio.to_thread(_crop_panels_server_side, img_buffer, cv_panels, url)
-                logger.info(f"[{ai_execution_id}] Successfully returned {len(cv_panels)} detected panels.")
+                logger.info(f"[{job_id}] Successfully returned {len(cv_panels)} detected panels.")
                 return {
                     "success": True,
                     "total_panels": len(cv_panels),
@@ -512,8 +510,7 @@ async def facade_smart_crop(
                     "panels": cv_panels,
                     "provider": "opencv_webtoon" if is_tall_strip else "opencv",
                     "isTallStrip": is_tall_strip,
-                    "ai_execution_id": ai_execution_id,
-                    "job_id": ai_execution_id,
+                    "job_id": job_id,
                 }
         finally:
             if tmp_in_path and os.path.exists(tmp_in_path):

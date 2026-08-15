@@ -7,7 +7,8 @@ Panel processing API routes: strip splitting, panel detection, and bounding boxe
 
 import httpx
 import logging
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
+from api.dependencies.auth import get_current_user
 
 from schemas.scraper import SmartSplitRequest
 from services.scraper.splitter import split_vertical_strip_into_panels
@@ -19,14 +20,14 @@ panels_router = APIRouter()
 
 
 @panels_router.post("/split", summary="Split tall vertical strip into discrete panels (Creates PANEL_SPLIT Job)")
-async def split_panels_endpoint(body: SmartSplitRequest):
+async def split_panels_endpoint(body: SmartSplitRequest, current_user: dict = Depends(get_current_user)):
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target image URL is required.")
 
     job = job_manager.create_job(
         job_type=JobType.PANEL_SPLIT,
+        user_id=current_user["user_id"],
         project_id=body.project_id,
-        job_id=body.job_id,
         metadata={"url": body.url, "min_panel_height": body.min_panel_height}
     )
 
