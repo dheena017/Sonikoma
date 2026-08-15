@@ -1,0 +1,399 @@
+/* ==========================================================================
+   KEYFRAME DEFINITIONS FOR SONIKOMA
+   ========================================================================== */
+
+/* Universal Breathing & Drifting */
+@keyframes anime-art-drift {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-1.5vw, -1vh, 0) scale(1.035);
+  }
+}
+
+@keyframes anime-art-drift-slow {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1.01);
+  }
+  50% {
+    transform: translate3d(1.2vw, -0.8vh, 0) scale(1.04);
+  }
+}
+
+@keyframes anime-art-drift-dynamic {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  33% {
+    transform: translate3d(-1.8vw, 0.8vh, 0) scale(1.03);
+  }
+  66% {
+    transform: translate3d(1vw, -1.2vh, 0) scale(1.045);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Floating & Floating with Rotation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+
+@keyframes float-subtle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* Speed Lines & Streaks */
+@keyframes anime-hero-speed {
+  0% {
+    opacity: 0;
+    transform: translateX(0) scaleX(0.3);
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(160vw) scaleX(1.55);
+  }
+}
+
+@keyframes anime-hero-speed-vertical {
+  0% {
+    opacity: 0;
+    transform: translateY(-20vh) scaleY(0.2);
+  }
+  20% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(120vh) scaleY(1.4);
+  }
+}
+
+/* Filmstrip & Comic Cell Shimmer */
+@keyframes anime-film-shimmer {
+  0%, 100% {
+    opacity: 0.35;
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translateY(-4px) rotate(1deg);
+  }
+}
+
+@keyframes anime-film-drift-horizontal {
+  0% {
+    transform: translateX(0) skewY(-2deg);
+  }
+  50% {
+    transform: translateX(-3vw) skewY(-1deg);
+  }
+  100% {
+    transform: translateX(0) skewY(-2deg);
+  }
+}
+
+/* Sparkles, Embers & Constellations */
+@keyframes anime-sparkle-rise {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.6);
+  }
+  45% {
+    opacity: 0.95;
+    transform: translateY(-8px) scale(1.1);
+  }
+}
+
+@keyframes anime-ember-float {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.5);
+  }
+  25% {
+    opacity: 0.85;
+  }
+  75% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(40px, -90px, 0) scale(1.2);
+  }
+}
+
+/* Cyber Matrix & Tech Scanners */
+@keyframes scan-laser {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+@keyframes grid-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.45);
+  }
+}
+
+/* Audio & Creative Waves */
+@keyframes wave-bar-dance {
+  0%, 100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes audio-ring-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+}
+
+/* Page Entry & View Transitions */
+@keyframes page-entry {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-view-entry {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stagger-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes route-bar-sweep {
+  0% {
+    width: 0%;
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 0 0 20px rgba(245, 158, 11, 0.6);
+  }
+  65% {
+    width: 80%;
+    opacity: 1;
+    box-shadow: 0 0 14px rgba(168, 85, 247, 1), 0 0 28px rgba(245, 158, 11, 0.8);
+  }
+  100% {
+    width: 100%;
+    opacity: 0;
+    box-shadow: none;
+  }
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes infinite-scroll {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(150%);
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes anime-aura-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.45;
+    filter: blur(80px);
+  }
+  50% {
+    transform: scale(1.08) rotate(3deg);
+    opacity: 0.75;
+    filter: blur(100px);
+  }
+}
+
+@keyframes anime-border-sweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes anime-energy-sheen {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(250%) rotate(25deg);
+  }
+}
+
+/* Loading Stages */
+@keyframes loading-background-breathe {
+  0%, 100% {
+    opacity: 0.68;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.92;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes loading-light-sweep {
+  0%, 100% {
+    transform: translate3d(-18%, 0, 0);
+  }
+  50% {
+    transform: translate3d(8%, 0, 0);
+  }
+}
+
+@keyframes loading-scanline-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(16px);
+  }
+}
+
+@keyframes loading-stage-pulse {
+  0%, 100% {
+    opacity: 0.46;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes loading-panel-orbit {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(-4deg) scale(0.96);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0) rotate(4deg) scale(1);
+  }
+}
+
+@keyframes loading-panel-scan {
+  0%, 100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  18%, 74% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+}
+
+@keyframes loading-logo-breathe {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.025);
+  }
+}
+
+@keyframes loading-logo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading-logo-ring {
+  0% {
+    opacity: 0.76;
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.22);
+  }
+}

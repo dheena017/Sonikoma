@@ -7,7 +7,7 @@ interface PageNotFoundProps {
 
 export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
   return (
-    <div className="flex-1 flex items-center justify-center px-4 py-16 md:py-24 relative overflow-hidden bg-[#070709]">
+    <div className="flex-1 flex items-center justify-center px-4 py-16 md:py-24 relative overflow-hidden bg-transparent">
       {/* Background decorative glowing orbs */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />

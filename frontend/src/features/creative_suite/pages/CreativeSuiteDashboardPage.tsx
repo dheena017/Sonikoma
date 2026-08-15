@@ -168,16 +168,16 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   ];
 
   return (
-    <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl text-left">
+    <div className="flex-1 w-full space-y-6 animate-fade-in text-left">
       
       {/* Welcome Hero Panel */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-purple-900/20 via-neutral-900/90 to-neutral-950 p-7 shadow-xl">
-        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+      <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-neutral-900/60 to-neutral-950/70 backdrop-blur-md p-6 sm:p-8 shadow-xl">
+        <div className="absolute top-0 right-0 p-8 opacity-15 pointer-events-none">
           <Sparkles className="w-36 h-36 text-purple-400" />
         </div>
         
         <div className="relative z-10 max-w-xl">
-          <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-[10px] text-purple-300 font-bold uppercase tracking-wider rounded-full font-mono mb-3 inline-block">
+          <span className="px-3 py-1 bg-purple-500/15 border border-purple-500/30 text-[10px] text-purple-300 font-bold uppercase tracking-wider rounded-full font-mono mb-3 inline-block">
             CREATOR STUDIO HUB
           </span>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
@@ -186,7 +186,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
               Creative Suite
             </span>
           </h1>
-          <p className="text-neutral-400 mt-2 text-xs leading-relaxed font-mono">
+          <p className="text-neutral-300 mt-2 text-xs leading-relaxed font-mono">
             Fine-tune visual boundaries, compose orchestral backings, cast AI narrators, translate speech dialogues, and evaluate engagement ratings in a single location.
           </p>
         </div>

@@ -7,7 +7,7 @@ import Sidebar from "@/components/layout/MainSidebar";
 import MiniSidebar from "@/components/layout/MainMiniSidebar";
 import NotificationStack from "@/features/app_notification/components/NotificationStack";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
-import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
+import { LandingAnimeScene, AnimeSceneVariant } from "@/features/app_landing/components/LandingAnimeScene";
 import { useProjectStore } from "@/store/useProjectStore";
 
 // --- Lazy Loaded Heavy Conditional Components ---
@@ -305,6 +305,43 @@ export default function MainLayout(props: MainLayoutProps) {
   const isDrawerOpen = useProjectStore((s) => s.isDrawerOpen);
   const animeThemeMode = themeMode === "light" ? "light" : "dark";
 
+  const pageSceneVariant: AnimeSceneVariant = React.useMemo(() => {
+    if (isAnyAdmin) return "admin";
+    if (isCreativeSuitePath) return "creative";
+    if (isImageEditorPage || isProEditorPage || isVideoEditorPage) return "editor";
+    if (
+      currentPath === "/scraper" ||
+      currentPath.startsWith("/scraper") ||
+      isWorkspacePath ||
+      currentPath.includes("episode-scraper")
+    ) {
+      return "workspace";
+    }
+    if (currentPath.startsWith("/projects") || currentPath.startsWith("/series")) {
+      return "projects";
+    }
+    if (
+      currentPath.startsWith("/profile") ||
+      currentPath.startsWith("/settings") ||
+      currentPath === "/notifications" ||
+      currentPath === "/shortcuts"
+    ) {
+      return "profile";
+    }
+    if (currentPath === "/dashboard" || currentPath === "/") {
+      return "dashboard";
+    }
+    return "app";
+  }, [
+    isAnyAdmin,
+    isCreativeSuitePath,
+    isImageEditorPage,
+    isProEditorPage,
+    isVideoEditorPage,
+    isWorkspacePath,
+    currentPath,
+  ]);
+
   const handleCloseSidebar = useCallback(() => setIsSidebarOpen(false), [setIsSidebarOpen]);
   const handleOpenSidebar = useCallback(() => setIsSidebarOpen(true), [setIsSidebarOpen]);
   const handleToggleSidebar = useCallback(() => setIsSidebarOpen(!isSidebarOpen), [isSidebarOpen, setIsSidebarOpen]);
@@ -315,7 +352,7 @@ export default function MainLayout(props: MainLayoutProps) {
       className={`app-anime-shell h-screen max-h-screen overflow-hidden max-w-full bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
         }`}
     >
-      <LandingAnimeScene themeMode={animeThemeMode} variant="app" />
+      <LandingAnimeScene themeMode={animeThemeMode} variant={pageSceneVariant} />
 
       {/* --- Page Navigation Sidebar --- */}
       <React.Suspense fallback={null}>

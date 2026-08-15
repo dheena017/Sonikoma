@@ -158,10 +158,15 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
     </div>
   );
 
+  const isOverviewHub =
+    currentPath === "/creative-suite" ||
+    currentPath === "/creative-suite/" ||
+    currentPath === "/creative-suite-dashboard";
+
   if (hideSidebarAndHeader) {
     return (
       <div className="flex-grow w-full flex flex-col min-h-full">
-        {renderHeader()}
+        {!isOverviewHub && renderHeader()}
         {children}
       </div>
     );

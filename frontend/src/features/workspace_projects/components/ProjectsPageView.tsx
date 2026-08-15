@@ -85,7 +85,7 @@ export default function ProjectsPageView({
   saveProjectName,
 }: ProjectsPageViewProps) {
   return (
-    <div className="w-full min-h-full bg-neutral-955 text-neutral-100 flex flex-col pt-6 animate-fade-in relative z-10 pb-32">
+    <div className="w-full min-h-full bg-transparent text-neutral-100 flex flex-col pt-6 animate-fade-in relative z-10 pb-32">
       <ProjectsPageHeader onNewSeries={handleNewSeries} />
 
       {!loading && projectsLength > 0 && (

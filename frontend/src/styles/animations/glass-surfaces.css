@@ -1,0 +1,129 @@
+/* ==========================================================================
+   GLASS SURFACES & TRANSPARENT LAYOUT OVERRIDES
+   ========================================================================== */
+
+.app-anime-shell,
+.auth-anime-shell {
+  isolation: isolate;
+}
+
+.auth-anime-shell > *:not(.anime-hero-scene) {
+  position: relative;
+  z-index: 10;
+}
+
+.app-anime-shell #main-content-layout,
+.app-anime-shell #main-scrollable-area,
+.app-anime-shell #main-scrollable-area > div,
+.app-anime-shell #main-scrollable-area > div > div {
+  background: transparent !important;
+}
+
+/* Header Frosted Glass */
+[data-mode="dark"] #app_root.app-anime-shell #header_pane,
+[data-mode="dark"] #header_pane {
+  background-color: rgba(7, 7, 9, 0.65) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) saturate(1.25);
+  -webkit-backdrop-filter: blur(20px) saturate(1.25);
+}
+
+[data-mode="light"] #app_root.app-anime-shell #header_pane,
+[data-mode="light"] #header_pane {
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  border-bottom-color: rgba(148, 163, 184, 0.35) !important;
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+}
+
+/* Sidebar Frosted Glass */
+[data-mode="dark"] #app_root.app-anime-shell #sidebar_pane,
+[data-mode="dark"] #app_root.app-anime-shell aside,
+[data-mode="dark"] aside {
+  background-color: rgba(7, 7, 9, 0.76) !important;
+  border-right-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(24px) saturate(1.15);
+  -webkit-backdrop-filter: blur(24px) saturate(1.15);
+}
+
+[data-mode="light"] #app_root.app-anime-shell #sidebar_pane,
+[data-mode="light"] #app_root.app-anime-shell aside,
+[data-mode="light"] aside {
+  background-color: rgba(255, 255, 255, 0.78) !important;
+  border-right-color: rgba(148, 163, 184, 0.28) !important;
+  backdrop-filter: blur(24px) saturate(1.1);
+  -webkit-backdrop-filter: blur(24px) saturate(1.1);
+}
+
+/* Global Page Translucent Layers — opaque hex backgrounds become glassmorphic */
+#app_root.app-anime-shell .min-h-screen:not(aside):not(nav):not(header),
+#app_root.app-anime-shell .min-h-full:not(aside):not(nav):not(header),
+#app_root.app-anime-shell .bg-\[\#050507\],
+#app_root.app-anime-shell .bg-\[\#050508\],
+#app_root.app-anime-shell .bg-\[\#070709\],
+#app_root.app-anime-shell .bg-\[\#07070a\],
+#app_root.app-anime-shell .bg-\[\#08080c\],
+#app_root.app-anime-shell .bg-\[\#09090b\],
+#app_root.app-anime-shell .bg-\[\#0a0a0e\],
+#app_root.app-anime-shell .bg-\[\#0b0b0e\],
+#app_root.app-anime-shell .bg-neutral-955 {
+  background-color: rgba(7, 7, 9, 0.70) !important;
+}
+
+[data-mode="light"] #app_root.app-anime-shell .min-h-screen:not(aside):not(nav):not(header),
+[data-mode="light"] #app_root.app-anime-shell .min-h-full:not(aside):not(nav):not(header),
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#050507\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#050508\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#070709\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#07070a\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#08080c\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#09090b\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#0a0a0e\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#0b0b0e\],
+[data-mode="light"] #app_root.app-anime-shell .bg-neutral-955 {
+  background-color: rgba(248, 250, 252, 0.75) !important;
+}
+
+/* Creative Suite & Admin page content — force transparent page wrappers */
+#app_root.app-anime-shell .flex-grow.w-full.flex.flex-col,
+#app_root.app-anime-shell .w-full.animate-\[fadeIn_0\.3s_ease-out\] {
+  background: transparent !important;
+}
+
+/* Glassmorphism Card Utility */
+.glass-panel {
+  background-color: rgba(12, 12, 18, 0.65) !important;
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[data-mode="light"] .glass-panel {
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(16px) saturate(1.1);
+  -webkit-backdrop-filter: blur(16px) saturate(1.1);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.glass-interactive {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.25);
+  border-color: rgba(168, 85, 247, 0.35);
+}
+
+/* Landing Navigation */
+[data-mode="dark"] .landing-anime-nav {
+  background-color: rgba(9, 9, 11, 0.65) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(16px);
+}
+
+[data-mode="light"] .landing-anime-nav {
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  border-bottom-color: rgba(148, 163, 184, 0.34) !important;
+  backdrop-filter: blur(16px);
+}
