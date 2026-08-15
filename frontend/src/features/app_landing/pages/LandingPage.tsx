@@ -146,7 +146,7 @@ export default function LandingPage({
     >
       {/* NAVIGATION */}
       <nav
-        className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-colors duration-300 flex-shrink-0 ${
+        className={`landing-anime-nav sticky top-0 z-50 backdrop-blur-xl border-b transition-colors duration-300 flex-shrink-0 ${
           isLight
             ? "bg-white/90 border-slate-200/80 shadow-xs"
             : "bg-neutral-950/90 border-neutral-800/80"

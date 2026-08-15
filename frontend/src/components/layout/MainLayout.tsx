@@ -7,6 +7,7 @@ import Sidebar from "@/components/layout/MainSidebar";
 import MiniSidebar from "@/components/layout/MainMiniSidebar";
 import NotificationStack from "@/features/app_notification/components/NotificationStack";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
+import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
 import { useProjectStore } from "@/store/useProjectStore";
 
 // --- Lazy Loaded Heavy Conditional Components ---
@@ -302,6 +303,7 @@ export default function MainLayout(props: MainLayoutProps) {
   }, [currentPath, fetchWithInterceptor]);
 
   const isDrawerOpen = useProjectStore((s) => s.isDrawerOpen);
+  const animeThemeMode = themeMode === "light" ? "light" : "dark";
 
   const handleCloseSidebar = useCallback(() => setIsSidebarOpen(false), [setIsSidebarOpen]);
   const handleOpenSidebar = useCallback(() => setIsSidebarOpen(true), [setIsSidebarOpen]);
@@ -310,9 +312,11 @@ export default function MainLayout(props: MainLayoutProps) {
   return (
     <div
       id="app_root"
-      className={`h-screen max-h-screen overflow-hidden max-w-full bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
+      className={`app-anime-shell h-screen max-h-screen overflow-hidden max-w-full bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
         }`}
     >
+      <LandingAnimeScene themeMode={animeThemeMode} variant="app" />
+
       {/* --- Page Navigation Sidebar --- */}
       <React.Suspense fallback={null}>
         {isAdminRestricted ? null : isAnyAdmin ? (
@@ -407,7 +411,7 @@ export default function MainLayout(props: MainLayoutProps) {
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-content-layout"
-        className={`h-screen max-h-screen overflow-hidden flex-grow flex-1 flex flex-col max-w-full justify-between ${showAutoCropModal || showBubbleModal
+        className={`relative z-10 h-screen max-h-screen overflow-hidden flex-grow flex-1 flex flex-col max-w-full justify-between ${showAutoCropModal || showBubbleModal
           ? "overflow-hidden"
           : ""
           }`}

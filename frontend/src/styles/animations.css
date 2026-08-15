@@ -201,6 +201,14 @@
   background: #f8fafc;
 }
 
+.anime-hero-scene-app {
+  opacity: 0.72;
+}
+
+.anime-hero-scene-app.anime-hero-scene-light {
+  opacity: 0.58;
+}
+
 .anime-hero-art {
   position: absolute;
   inset: 0;
@@ -215,6 +223,16 @@
 .anime-hero-scene-light .anime-hero-art {
   opacity: 0.74;
   filter: saturate(1.03) contrast(0.96) brightness(1.08);
+}
+
+.anime-hero-scene-app .anime-hero-art {
+  animation-duration: 24s;
+  filter: saturate(1.02) contrast(0.98) brightness(0.86);
+}
+
+.anime-hero-scene-app.anime-hero-scene-light .anime-hero-art {
+  opacity: 0.58;
+  filter: saturate(0.96) contrast(0.92) brightness(1.08);
 }
 
 .anime-hero-vignette,
@@ -250,10 +268,26 @@
     linear-gradient(180deg, rgba(248, 250, 252, 0.66) 0%, transparent 36%, rgba(248, 250, 252, 0.84) 100%);
 }
 
+.anime-hero-scene-app .anime-hero-readability {
+  background:
+    linear-gradient(90deg, rgba(7, 7, 9, 0.9) 0%, rgba(7, 7, 9, 0.74) 38%, rgba(7, 7, 9, 0.48) 100%),
+    linear-gradient(180deg, rgba(7, 7, 9, 0.82) 0%, rgba(7, 7, 9, 0.56) 42%, rgba(7, 7, 9, 0.9) 100%);
+}
+
+.anime-hero-scene-app.anime-hero-scene-light .anime-hero-readability {
+  background:
+    linear-gradient(90deg, rgba(248, 250, 252, 0.88) 0%, rgba(248, 250, 252, 0.7) 42%, rgba(248, 250, 252, 0.46) 100%),
+    linear-gradient(180deg, rgba(248, 250, 252, 0.82) 0%, rgba(248, 250, 252, 0.54) 44%, rgba(248, 250, 252, 0.92) 100%);
+}
+
 .anime-hero-speed-lines {
   transform: rotate(-12deg);
   opacity: 0.72;
   mix-blend-mode: screen;
+}
+
+.anime-hero-scene-app .anime-hero-speed-lines {
+  opacity: 0.46;
 }
 
 .anime-hero-speed-lines span {
@@ -298,6 +332,10 @@
   background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.24), transparent);
   transform: skewY(-2deg);
   opacity: 0.46;
+}
+
+.anime-hero-scene-app .anime-hero-filmstrip {
+  opacity: 0.26;
 }
 
 .anime-hero-filmstrip span {
@@ -345,6 +383,10 @@
   animation: anime-sparkle-rise 6s ease-in-out infinite;
 }
 
+.anime-hero-scene-app .anime-hero-sparkles span {
+  opacity: 0.72;
+}
+
 .anime-hero-sparkles span:nth-child(1) {
   left: 17%;
   top: 22%;
@@ -381,6 +423,335 @@
   animation-delay: -5.1s;
 }
 
+.app-anime-shell,
+.auth-anime-shell {
+  isolation: isolate;
+}
+
+.auth-anime-shell > *:not(.anime-hero-scene) {
+  position: relative;
+  z-index: 10;
+}
+
+.app-anime-shell #main-content-layout,
+.app-anime-shell #main-scrollable-area,
+.app-anime-shell #main-scrollable-area > div {
+  background: transparent !important;
+}
+
+[data-mode="dark"] #app_root.app-anime-shell #header_pane {
+  background-color: rgba(7, 7, 9, 0.62) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(18px) saturate(1.2);
+}
+
+[data-mode="light"] #app_root.app-anime-shell #header_pane {
+  background-color: rgba(255, 255, 255, 0.68) !important;
+  border-bottom-color: rgba(148, 163, 184, 0.36) !important;
+  backdrop-filter: blur(18px) saturate(1.12);
+}
+
+[data-mode="dark"] #app_root.app-anime-shell #sidebar_pane,
+[data-mode="dark"] #app_root.app-anime-shell aside {
+  background-color: rgba(7, 7, 9, 0.76) !important;
+  backdrop-filter: blur(22px) saturate(1.12);
+}
+
+[data-mode="light"] #app_root.app-anime-shell #sidebar_pane,
+[data-mode="light"] #app_root.app-anime-shell aside {
+  background-color: rgba(255, 255, 255, 0.76) !important;
+  backdrop-filter: blur(22px) saturate(1.08);
+}
+
+[data-mode="dark"] #app_root.app-anime-shell .min-h-screen,
+[data-mode="dark"] #app_root.app-anime-shell .min-h-full,
+[data-mode="dark"] #app_root.app-anime-shell .bg-\[\#050507\],
+[data-mode="dark"] #app_root.app-anime-shell .bg-\[\#050508\],
+[data-mode="dark"] #app_root.app-anime-shell .bg-\[\#070709\],
+[data-mode="dark"] #app_root.app-anime-shell .bg-\[\#07070a\],
+[data-mode="dark"] #app_root.app-anime-shell .bg-\[\#08080c\],
+[data-mode="dark"] #app_root.app-anime-shell .bg-\[\#09090b\],
+[data-mode="dark"] #app_root.app-anime-shell .bg-\[\#0a0a0e\],
+[data-mode="dark"] #app_root.app-anime-shell .bg-\[\#0b0b0e\],
+[data-mode="dark"] #app_root.app-anime-shell .bg-neutral-955 {
+  background-color: rgba(7, 7, 9, 0.74) !important;
+}
+
+[data-mode="light"] #app_root.app-anime-shell .min-h-screen,
+[data-mode="light"] #app_root.app-anime-shell .min-h-full,
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#050507\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#050508\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#070709\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#07070a\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#08080c\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#09090b\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#0a0a0e\],
+[data-mode="light"] #app_root.app-anime-shell .bg-\[\#0b0b0e\],
+[data-mode="light"] #app_root.app-anime-shell .bg-neutral-955 {
+  background-color: rgba(248, 250, 252, 0.74) !important;
+}
+
+[data-mode="dark"] .landing-anime-nav {
+  background-color: rgba(9, 9, 11, 0.64) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-mode="light"] .landing-anime-nav {
+  background-color: rgba(255, 255, 255, 0.72) !important;
+  border-bottom-color: rgba(148, 163, 184, 0.34) !important;
+}
+
+.auth-anime-shell.bg-\[\#070709\] {
+  background-color: #070709 !important;
+}
+
+.auth-anime-shell .bg-\[\#040406\],
+.auth-anime-shell .from-\[\#0a0a10\],
+.auth-anime-shell .to-\[\#040406\] {
+  background-color: rgba(4, 4, 6, 0.72) !important;
+  backdrop-filter: blur(18px) saturate(1.12);
+}
+
+.auth-anime-shell .from-\[\#0a0a10\] {
+  --tw-gradient-from: rgba(10, 10, 16, 0.72) !important;
+}
+
+.auth-anime-shell .to-\[\#040406\] {
+  --tw-gradient-to: rgba(4, 4, 6, 0.72) !important;
+}
+
+.auth-anime-shell .bg-gradient-to-br.from-\[\#0a0a10\].to-\[\#040406\] {
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(10, 10, 16, 0.72),
+    rgba(4, 4, 6, 0.72)
+  ) !important;
+}
+
+/* Full-screen loading page animation */
+.loading-page-shell {
+  isolation: isolate;
+}
+
+.loading-anime-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(124, 58, 237, 0.14), transparent 34%),
+    linear-gradient(180deg, #050507 0%, #08080e 48%, #050507 100%);
+}
+
+.loading-page-shell-light .loading-anime-backdrop {
+  background:
+    radial-gradient(circle at 50% 44%, rgba(124, 58, 237, 0.1), transparent 34%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2ff 50%, #f8fafc 100%);
+}
+
+.loading-anime-backdrop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 44%, rgba(168, 85, 247, 0.24), transparent 36%),
+    radial-gradient(ellipse at 54% 56%, rgba(34, 211, 238, 0.12), transparent 42%);
+  opacity: 0.85;
+  animation: loading-background-breathe 5.8s ease-in-out infinite;
+}
+
+.loading-anime-backdrop::after {
+  content: "";
+  position: absolute;
+  left: -20%;
+  top: -18%;
+  z-index: 1;
+  width: 140%;
+  height: 140%;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0 38%,
+      rgba(34, 211, 238, 0.09) 45%,
+      rgba(168, 85, 247, 0.11) 50%,
+      transparent 58% 100%
+    );
+  opacity: 0.42;
+  transform: translate3d(-14%, 0, 0);
+  animation: loading-light-sweep 8s ease-in-out infinite;
+}
+
+.loading-page-shell-light .loading-anime-backdrop::before {
+  background:
+    radial-gradient(ellipse at 50% 44%, rgba(124, 58, 237, 0.16), transparent 36%),
+    radial-gradient(ellipse at 54% 56%, rgba(14, 165, 233, 0.1), transparent 42%);
+}
+
+.loading-page-shell-light .loading-anime-backdrop::after {
+  opacity: 0.28;
+}
+
+.loading-anime-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    radial-gradient(circle at center, transparent 0 26%, rgba(5, 5, 7, 0.28) 58%, rgba(5, 5, 7, 0.78) 100%),
+    linear-gradient(180deg, rgba(5, 5, 7, 0.08), rgba(5, 5, 7, 0.38));
+}
+
+.loading-page-shell-light .loading-anime-wash {
+  background:
+    radial-gradient(circle at center, transparent 0 26%, rgba(248, 250, 252, 0.3) 58%, rgba(248, 250, 252, 0.74) 100%),
+    linear-gradient(180deg, rgba(248, 250, 252, 0.08), rgba(248, 250, 252, 0.38));
+}
+
+.loading-scanline {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 0.045;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 7px,
+      rgba(255, 255, 255, 0.08) 8px
+    );
+  animation: loading-scanline-drift 7s linear infinite;
+}
+
+.loading-page-shell-light .loading-scanline {
+  opacity: 0.04;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 7px,
+      rgba(15, 23, 42, 0.12) 8px
+    );
+}
+
+.loading-motion-stage {
+  position: relative;
+  width: 178px;
+  height: 140px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+}
+
+.loading-motion-stage::before {
+  content: "";
+  position: absolute;
+  inset: 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  box-shadow: 0 0 38px rgba(124, 58, 237, 0.18);
+  animation: loading-stage-pulse 2.8s ease-in-out infinite;
+}
+
+.loading-panel-chip {
+  position: absolute;
+  width: 42px;
+  height: 58px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(168, 85, 247, 0.44), rgba(6, 182, 212, 0.22)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03));
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.26);
+  opacity: 0.78;
+  animation: loading-panel-orbit 5.4s ease-in-out infinite;
+}
+
+.loading-page-shell-light .loading-panel-chip {
+  border-color: rgba(15, 23, 42, 0.12);
+  opacity: 0.68;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+
+.loading-panel-chip::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border-radius: 5px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.24) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 100% 34%, 46% 100%;
+}
+
+.loading-panel-chip::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 10px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #22d3ee, transparent);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.7);
+  animation: loading-panel-scan 2.2s ease-in-out infinite;
+}
+
+.loading-panel-chip-one {
+  left: 0;
+  top: 38px;
+  animation-delay: -0.3s;
+}
+
+.loading-panel-chip-two {
+  right: 0;
+  top: 22px;
+  animation-delay: -2s;
+}
+
+.loading-panel-chip-three {
+  left: 68px;
+  bottom: 0;
+  animation-delay: -3.6s;
+}
+
+.loading-logo-stage {
+  animation: loading-logo-breathe 2.4s ease-in-out infinite;
+}
+
+.loading-logo-frame {
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.loading-logo-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, #a855f7, #06b6d4, #f59e0b, #a855f7);
+  animation: loading-logo-spin 4s linear infinite;
+}
+
+.loading-logo-stage::before,
+.loading-logo-stage::after {
+  content: "";
+  position: absolute;
+  inset: -13px;
+  border-radius: 28px;
+  border: 1px solid rgba(168, 85, 247, 0.42);
+  opacity: 0;
+  animation: loading-logo-ring 2.8s ease-out infinite;
+}
+
+.loading-logo-stage::after {
+  inset: -23px;
+  border-color: rgba(34, 211, 238, 0.32);
+  animation-delay: -1.4s;
+}
+
 @keyframes anime-art-drift {
   0%,
   100% {
@@ -388,6 +759,102 @@
   }
   50% {
     transform: translate3d(-1.6vw, -1vh, 0) scale(1.035);
+  }
+}
+
+@keyframes loading-background-breathe {
+  0%,
+  100% {
+    opacity: 0.68;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.92;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes loading-light-sweep {
+  0%,
+  100% {
+    transform: translate3d(-18%, 0, 0);
+  }
+  50% {
+    transform: translate3d(8%, 0, 0);
+  }
+}
+
+@keyframes loading-scanline-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(16px);
+  }
+}
+
+@keyframes loading-stage-pulse {
+  0%,
+  100% {
+    opacity: 0.46;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes loading-panel-orbit {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-4deg) scale(0.96);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0) rotate(4deg) scale(1);
+  }
+}
+
+@keyframes loading-panel-scan {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  18%,
+  74% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 0;
+    transform: translateY(35px);
+  }
+}
+
+@keyframes loading-logo-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.025);
+  }
+}
+
+@keyframes loading-logo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loading-logo-ring {
+  0% {
+    opacity: 0.76;
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.22);
   }
 }
 
@@ -434,6 +901,10 @@
     opacity: 0.72;
   }
 
+  .anime-hero-scene-app {
+    opacity: 0.54;
+  }
+
   .anime-hero-art {
     object-position: 68% center;
   }
@@ -447,7 +918,17 @@
   .anime-hero-art,
   .anime-hero-speed-lines span,
   .anime-hero-filmstrip span,
-  .anime-hero-sparkles span {
+  .anime-hero-sparkles span,
+  .loading-anime-backdrop::before,
+  .loading-anime-backdrop::after,
+  .loading-scanline,
+  .loading-motion-stage::before,
+  .loading-panel-chip,
+  .loading-panel-chip::after,
+  .loading-logo-stage,
+  .loading-logo-frame::before,
+  .loading-logo-stage::before,
+  .loading-logo-stage::after {
     animation: none;
   }
 }

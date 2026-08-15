@@ -1,13 +1,17 @@
 interface LandingAnimeSceneProps {
   themeMode?: "dark" | "light";
+  variant?: "landing" | "app";
 }
 
-export function LandingAnimeScene({ themeMode = "dark" }: LandingAnimeSceneProps) {
+export function LandingAnimeScene({
+  themeMode = "dark",
+  variant = "landing",
+}: LandingAnimeSceneProps) {
   const isLight = themeMode === "light";
 
   return (
     <div
-      className={`anime-hero-scene fixed inset-0 z-0 pointer-events-none ${
+      className={`anime-hero-scene anime-hero-scene-${variant} fixed inset-0 z-0 pointer-events-none ${
         isLight ? "anime-hero-scene-light" : "anime-hero-scene-dark"
       }`}
       aria-hidden="true"

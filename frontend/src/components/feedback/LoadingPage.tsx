@@ -8,22 +8,11 @@ interface LoadingPageProps {
   progress?: number;
 }
 
-const LOADING_TIPS = [
-  "Use the Speech Bubble Cleaner to erase text for translation.",
-  "Select from multiple Voice Actors to narrate your webtoon.",
-  "Enable Smart Scanner for automatic webtoon strip division.",
-  "Check the System Diagnostics page to view GPU utilization.",
-  "Stitch adjacent panels to create wide landscape scenes.",
-  "The first URL import is free. Sign in to import more!",
-];
-
 export default function LoadingPage({
   status = "Initializing",
   progress,
   themeMode,
 }: LoadingPageProps) {
-  const [tipIndex, setTipIndex] = useState(0);
-  const [fadeState, setFadeState] = useState<"in" | "out">("in");
   const [activeMode, setActiveMode] = useState<ThemeMode>(themeMode || "dark");
 
   useEffect(() => {
@@ -40,17 +29,6 @@ export default function LoadingPage({
     }
   }, [themeMode]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFadeState("out");
-      setTimeout(() => {
-        setTipIndex((prev) => (prev + 1) % LOADING_TIPS.length);
-        setFadeState("in");
-      }, 500);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
   const hasProgress = progress !== undefined && progress >= 0;
   const clampedProgress = hasProgress
     ? Math.min(100, Math.max(0, progress))
@@ -60,6 +38,9 @@ export default function LoadingPage({
 
   return (
     <div
+      className={`loading-page-shell ${
+        isLight ? "loading-page-shell-light" : "loading-page-shell-dark"
+      }`}
       style={{
         position: "fixed",
         inset: 0,
@@ -74,7 +55,10 @@ export default function LoadingPage({
         overflow: "hidden",
       }}
     >
-      {/* Ambient glows removed to avoid light-colored halo in header */}
+      <div className="loading-anime-backdrop" aria-hidden="true">
+        <div className="loading-anime-wash" />
+        <div className="loading-scanline" />
+      </div>
 
       {/* Glass Card Container */}
       <div
@@ -82,54 +66,64 @@ export default function LoadingPage({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          padding: "40px",
-          borderRadius: "24px",
-          background: isLight ? "rgba(255, 255, 255, 0.85)" : "rgba(10, 10, 15, 0.6)",
-          border: isLight ? "1px solid rgba(0, 0, 0, 0.08)" : "1px solid rgba(255, 255, 255, 0.05)",
-          backdropFilter: "blur(12px)",
-          boxShadow: isLight ? "0 20px 50px rgba(0, 0, 0, 0.06)" : "0 20px 50px rgba(0, 0, 0, 0.3)",
+          padding: "42px 40px 36px",
+          borderRadius: "28px",
+          background: isLight ? "rgba(255, 255, 255, 0.92)" : "rgba(8, 8, 12, 0.88)",
+          border: isLight ? "1px solid rgba(148, 163, 184, 0.24)" : "1px solid rgba(255, 255, 255, 0.09)",
+          backdropFilter: "blur(22px) saturate(1.15)",
+          boxShadow: isLight
+            ? "0 28px 70px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(255,255,255,0.6) inset"
+            : "0 30px 90px rgba(0, 0, 0, 0.5), 0 0 70px rgba(124,58,237,0.12)",
           width: "90%",
-          maxWidth: "400px",
+          maxWidth: "380px",
           position: "relative",
           zIndex: 1,
         }}
       >
-        {/* Pulsing Glowing Logo Wrapper */}
-        <div
-          style={{
-            position: "relative",
-            marginBottom: "16px",
-            animation: "lp-pulse 2s infinite ease-in-out",
-          }}
-        >
+        <div className="loading-motion-stage">
+          {/* Pulsing Glowing Logo Wrapper */}
           <div
+            className="loading-logo-stage"
             style={{
               position: "relative",
-              width: 96,
-              height: 96,
-              borderRadius: 18,
-              background: "linear-gradient(135deg, #a855f7, #06b6d4)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "none",
             }}
           >
-            <img
-              src={isLight ? "/logo-light.png" : "/logo-dark.png"}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              alt="Sonikoma Logo"
+            <div
+              className="loading-logo-frame"
               style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "15px",
-                objectFit: "cover",
-                padding: "3px",
-                background: isLight ? "#ffffff" : "#000000",
+                position: "relative",
+                width: 102,
+                height: 102,
+                borderRadius: 26,
+                padding: 4,
+                background: isLight ? "rgba(255, 255, 255, 0.86)" : "rgba(8, 8, 12, 0.92)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: isLight
+                  ? "0 18px 40px rgba(15, 23, 42, 0.12)"
+                  : "0 18px 50px rgba(0, 0, 0, 0.48)",
               }}
-            />
+            >
+              <img
+                src={isLight ? "/logo-light.png" : "/logo-dark.png"}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+                }}
+                alt="Sonikoma Logo"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: "20px",
+                  objectFit: "cover",
+                  padding: "5px",
+                  boxSizing: "border-box",
+                  background: isLight ? "#ffffff" : "#000000",
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -140,7 +134,7 @@ export default function LoadingPage({
             fontWeight: 800,
             color: isLight ? "#18181b" : "#ffffff",
             letterSpacing: "-0.02em",
-            marginBottom: "4px",
+            marginBottom: "6px",
             background: isLight ? "linear-gradient(to right, #18181b, #3f3f46)" : "linear-gradient(to right, #ffffff, #e4e4e7)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -157,9 +151,10 @@ export default function LoadingPage({
             letterSpacing: "0.08em",
             textTransform: "uppercase",
             fontWeight: 600,
-            marginBottom: "24px",
+            marginBottom: "28px",
             textAlign: "center",
           }}
+          aria-live="polite"
         >
           {status}
         </div>
@@ -172,15 +167,14 @@ export default function LoadingPage({
             flexDirection: "column",
             alignItems: "center",
             gap: "12px",
-            marginBottom: "24px",
           }}
         >
           {/* Progress bar container */}
           <div
             style={{
               width: "100%",
-              height: 4,
-              background: isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)",
+              height: 5,
+              background: isLight ? "rgba(15,23,42,0.08)" : "rgba(255,255,255,0.08)",
               borderRadius: 9999,
               overflow: "hidden",
               position: "relative",
@@ -264,14 +258,6 @@ export default function LoadingPage({
         @keyframes lp-shimmer {
           0%   { left: -40%; }
           100% { left: 100%; }
-        }
-        @keyframes lp-pulse {
-          0%, 100% { transform: scale(1); }
-          50%      { transform: scale(1.02); }
-        }
-        @keyframes lp-float-bg {
-          0%   { transform: translate(0, 0) scale(1); }
-          100% { transform: translate(30px, -30px) scale(1.1); }
         }
       `}</style>
     </div>
