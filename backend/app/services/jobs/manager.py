@@ -63,6 +63,36 @@ class UnifiedJobManager:
 
     def __init__(self):
         self._tasks: Dict[str, asyncio.Task] = {}
+        self._ensure_table()
+
+    def _ensure_table(self):
+        try:
+            with get_db_connection() as conn:
+                conn.execute("""
+                CREATE TABLE IF NOT EXISTS jobs (
+                  id              TEXT    PRIMARY KEY,
+                  user_id         TEXT    NOT NULL,
+                  project_id      TEXT,
+                  chapter_id      TEXT,
+                  type            TEXT    NOT NULL,
+                  status          TEXT    NOT NULL DEFAULT 'QUEUED',
+                  progress        REAL    NOT NULL DEFAULT 0.0,
+                  stage           TEXT    NOT NULL DEFAULT 'QUEUED',
+                  result          TEXT,
+                  error           TEXT,
+                  metadata        TEXT,
+                  created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+                  started_at      TEXT,
+                  completed_at    TEXT,
+                  cancelled_at    TEXT
+                )
+                """)
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id)")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_project_id ON jobs(project_id)")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
+                conn.commit()
+        except Exception as e:
+            logger.warning(f"[JobManager] Failed to verify jobs table: {e}")
 
     def create_job(
         self,

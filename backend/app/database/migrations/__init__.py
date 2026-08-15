@@ -524,7 +524,30 @@ def init_sqlite(conn) -> None:
             "CREATE INDEX IF NOT EXISTS idx_credit_transactions_user "
             "ON credit_transactions(user_id)"
         )
-        logger.debug("[Database] Migration: verified credit_transactions table.")
+        # ── jobs table ───────────────────────────────────────────────────
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS jobs (
+          id              TEXT    PRIMARY KEY,
+          user_id         TEXT    NOT NULL,
+          project_id      TEXT,
+          chapter_id      TEXT,
+          type            TEXT    NOT NULL,
+          status          TEXT    NOT NULL DEFAULT 'QUEUED',
+          progress        REAL    NOT NULL DEFAULT 0.0,
+          stage           TEXT    NOT NULL DEFAULT 'QUEUED',
+          result          TEXT,
+          error           TEXT,
+          metadata        TEXT,
+          created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+          started_at      TEXT,
+          completed_at    TEXT,
+          cancelled_at    TEXT
+        )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_project_id ON jobs(project_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
+        logger.debug("[Database] Migration: verified jobs table.")
 
         conn.commit()
 
