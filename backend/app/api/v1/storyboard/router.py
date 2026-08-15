@@ -62,13 +62,3 @@ async def generate_storyboard_endpoint(
     return job.model_dump()
 
 
-def get_optional_user_id(request: Request):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        return None
-    try:
-        token = auth_header.split(" ")[1]
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload.get("sub")
-    except Exception:
-        return None

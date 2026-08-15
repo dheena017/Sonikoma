@@ -65,15 +65,15 @@ async def scrape_chapter_canonical(body: ScrapeChapterRequest, current_user: dic
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Chapter URL is required and cannot be empty.")
     try:
-        user_id = get_optional_user_id(Request)
+        user_id = current_user["user_id"]
         logger.info(f"[Scraper Route] Creating SCRAPE_CHAPTER job: url={body.url!r}, user_id={user_id}, project_id={body.project_id}")
         
         job = job_manager.create_job(
-        job_type=JobType.SCRAPE_CHAPTER,
-        user_id=current_user["user_id"],
-        project_id=body.project_id,
-        metadata={"url": body.url.strip()}
-    )
+            job_type=JobType.SCRAPE_CHAPTER,
+            user_id=user_id,
+            project_id=body.project_id,
+            metadata={"url": body.url.strip()}
+        )
         
         parsed_cookies = parse_cookie_string(body.cookies) if body.cookies else None
         bypass = True if body.force_refresh else (body.bypass_cache or False)
