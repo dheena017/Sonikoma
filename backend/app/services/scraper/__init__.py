@@ -33,11 +33,6 @@ from .workflow import (
     scrape_webtoon_episodes_paginated,
     batch_scrape_series
 )
-from .batch import (
-    create_batch_job,
-    get_batch_job_status,
-    execute_batch_job
-)
 from .ocr import extract_script_from_panels
 from .export import create_comic_archive
 from .splitter import split_vertical_strip_into_panels
@@ -66,9 +61,6 @@ __all__ = [
     "scrape_webtoon_episodes_advanced",
     "scrape_webtoon_episodes_paginated",
     "batch_scrape_series",
-    "create_batch_job",
-    "get_batch_job_status",
-    "execute_batch_job",
     "extract_script_from_panels",
     "create_comic_archive",
     "split_vertical_strip_into_panels"

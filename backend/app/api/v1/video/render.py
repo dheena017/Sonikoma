@@ -55,25 +55,31 @@ async def render_video(
     # Deduct credits
     new_balance = record_credit_transaction(current_user["user_id"], -COST, "video_render")
 
-    background_tasks.add_task(
-        process_render_job,
+    async def process_render_wrapper(report_progress):
+        return await process_render_job(
+            report_progress=report_progress,
+            job_id=job.job_id,
+            panels=[p.model_dump() for p in request.panels],
+            voice=request.voice,
+            music_theme=request.music_theme or "none",
+            aspect_ratio=request.aspect_ratio or "auto",
+            frame_rate=request.frame_rate or 24,
+            video_format=request.video_format or "mp4",
+            background_style=request.background_style or "black",
+            subtitles_style=request.subtitles_style or "none",
+            audio_reactive_shake=request.audio_reactive_shake or False,
+            shake_intensity=request.shake_intensity or "medium",
+            master_volume=request.master_volume if request.master_volume is not None else 1.0,
+            narration_volume=request.narration_volume if request.narration_volume is not None else 1.0,
+            bgm_volume=request.bgm_volume if request.bgm_volume is not None else 1.0,
+            speech_rate=request.speech_rate if request.speech_rate is not None else 1.0,
+            speech_pitch=request.speech_pitch if request.speech_pitch is not None else 1.0,
+            project_id=request.project_id,
+        )
+
+    job_manager.run_in_background(
         job.job_id,
-        [p.model_dump() for p in request.panels],
-        request.voice,
-        request.music_theme or "none",
-        request.aspect_ratio or "auto",
-        request.frame_rate or 24,
-        request.video_format or "mp4",
-        request.background_style or "black",
-        request.subtitles_style or "none",
-        request.audio_reactive_shake or False,
-        request.shake_intensity or "medium",
-        request.master_volume if request.master_volume is not None else 1.0,
-        request.narration_volume if request.narration_volume is not None else 1.0,
-        request.bgm_volume if request.bgm_volume is not None else 1.0,
-        request.speech_rate if request.speech_rate is not None else 1.0,
-        request.speech_pitch if request.speech_pitch is not None else 1.0,
-        project_id=request.project_id,
+        process_render_wrapper,
     )
 
     return {
