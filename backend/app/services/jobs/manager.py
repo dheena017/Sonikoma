@@ -1,63 +1,114 @@
 """
 backend/app/services/jobs/manager.py
 ─────────────────────────────────────────────────────────────────────────────
-Unified in-memory Job Manager for asynchronous tasks, progress tracking, and results.
+Unified database-backed Job Manager for asynchronous tasks, progress tracking, and results.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import time
 import uuid
+import json
 import asyncio
 import logging
+import datetime
 from typing import Dict, Any, Optional, Callable, Coroutine, List
 
+from database.engine import get_db_connection
 from .models import JobRecord, JobStatus, JobType, JobStage
 
 logger = logging.getLogger("sonikoma.services.jobs")
 
+def _job_record_from_row(row: dict) -> JobRecord:
+    result = None
+    if row.get("result"):
+        try:
+            result = json.loads(row["result"])
+        except:
+            result = row["result"]
+
+    error = None
+    if row.get("error"):
+        try:
+            error = json.loads(row["error"])
+        except:
+            error = {"message": row["error"]}
+
+    metadata = {}
+    if row.get("metadata"):
+        try:
+            metadata = json.loads(row["metadata"])
+        except:
+            pass
+
+    return JobRecord(
+        job_id=row["id"],
+        user_id=row["user_id"],
+        type=JobType(row["type"]),
+        status=JobStatus(row["status"]),
+        progress=float(row["progress"]),
+        stage=row["stage"],
+        project_id=row.get("project_id"),
+        chapter_id=row.get("chapter_id"),
+        created_at=row["created_at"],
+        started_at=row.get("started_at"),
+        completed_at=row.get("completed_at"),
+        cancelled_at=row.get("cancelled_at"),
+        result=result,
+        error=error,
+        metadata=metadata
+    )
 
 class UnifiedJobManager:
-    """Central Job Manager across all processing domains."""
+    """Central Job Manager across all processing domains, backed by the database."""
 
     def __init__(self):
-        self._jobs: Dict[str, JobRecord] = {}
         self._tasks: Dict[str, asyncio.Task] = {}
 
     def create_job(
         self,
         job_type: JobType,
+        user_id: str,
         project_id: Optional[str] = None,
-        job_id: Optional[str] = None,
+        chapter_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None
     ) -> JobRecord:
-        """Creates a new Job in QUEUED state."""
-        if not job_id:
-            job_id = f"job_{uuid.uuid4().hex[:12]}"
+        """Creates a new Job in QUEUED state, persisted to database. Only backend can set job_id."""
+        job_id = f"job_{uuid.uuid4().hex[:12]}"
+        now = datetime.datetime.now().isoformat()
 
-        record = JobRecord(
-            job_id=job_id,
-            type=job_type,
-            status=JobStatus.QUEUED,
-            progress=0.0,
-            stage=JobStage.QUEUED.value,
-            project_id=project_id,
-            created_at=time.time(),
-            metadata=metadata or {}
-        )
-        self._jobs[job_id] = record
-        logger.info(f"[JobManager] Created job {job_id} (type={job_type.value}, project={project_id or 'N/A'})")
+        with get_db_connection() as conn:
+            metadata_json = json.dumps(metadata) if metadata else "{}"
+            conn.execute(
+                """
+                INSERT INTO jobs (id, user_id, project_id, chapter_id, type, status, progress, stage, metadata, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (job_id, user_id, project_id, chapter_id, job_type.value, JobStatus.QUEUED.value, 0.0, JobStage.QUEUED.value, metadata_json, now)
+            )
+            conn.commit()
+
+        record = self.get_job(job_id)
+        if metadata:
+            record.metadata = metadata
+        logger.info(f"[JobManager] Created job {job_id} (type={job_type.value}, user={user_id})")
         return record
 
     def get_job(self, job_id: str) -> Optional[JobRecord]:
-        """Retrieves a job by ID."""
-        return self._jobs.get(job_id)
+        """Retrieves a job by ID from the database."""
+        with get_db_connection() as conn:
+            row = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
+            if not row:
+                return None
+            return _job_record_from_row(dict(row))
 
-    def list_jobs(self, project_id: Optional[str] = None) -> List[JobRecord]:
-        """Lists jobs, optionally filtered by project ID."""
-        jobs = list(self._jobs.values())
-        if project_id:
-            jobs = [j for j in jobs if j.project_id == project_id]
-        return sorted(jobs, key=lambda j: j.created_at, reverse=True)
+    def list_jobs(self, user_id: str, project_id: Optional[str] = None) -> List[JobRecord]:
+        """Lists jobs for a user, optionally filtered by project ID."""
+        with get_db_connection() as conn:
+            if project_id:
+                rows = conn.execute("SELECT * FROM jobs WHERE user_id = ? AND project_id = ? ORDER BY created_at DESC", (user_id, project_id)).fetchall()
+            else:
+                rows = conn.execute("SELECT * FROM jobs WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
+            return [_job_record_from_row(dict(r)) for r in rows]
 
     def update_progress(
         self,
@@ -67,36 +118,68 @@ class UnifiedJobManager:
         status: Optional[JobStatus] = None
     ) -> Optional[JobRecord]:
         """Updates progress and stage for an active job."""
-        job = self._jobs.get(job_id)
+        job = self.get_job(job_id)
         if not job:
             return None
 
-        job.progress = max(0.0, min(100.0, progress))
-        if stage:
-            job.stage = stage
+        # Protect terminal states
+        if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
+            logger.warning(f"[JobManager] Cannot update progress for terminal job {job_id} ({job.status})")
+            return job
 
-        if status:
-            job.status = status
-        elif job.status == JobStatus.QUEUED:
-            job.status = JobStatus.RUNNING
-            job.started_at = time.time()
+        new_progress = max(0.0, min(100.0, progress))
+        new_stage = stage if stage else job.stage
+        new_status = status if status else job.status
+        now = datetime.datetime.now().isoformat()
+        started_at = job.started_at
 
-        logger.debug(f"[JobManager] Job {job_id} progress: {job.progress:.1f}% | stage={job.stage}")
-        return job
+        # Transition from QUEUED to RUNNING implicitly or explicitly sets started_at
+        if job.status == JobStatus.QUEUED and new_status == JobStatus.RUNNING:
+            started_at = now
+        elif job.status == JobStatus.QUEUED and status is None:
+            new_status = JobStatus.RUNNING
+            started_at = now
+
+        with get_db_connection() as conn:
+            conn.execute(
+                """
+                UPDATE jobs
+                SET progress = ?, stage = ?, status = ?, started_at = ?
+                WHERE id = ?
+                """,
+                (new_progress, new_stage, new_status.value, started_at, job_id)
+            )
+            conn.commit()
+
+        logger.debug(f"[JobManager] Job {job_id} progress: {new_progress:.1f}% | stage={new_stage}")
+        return self.get_job(job_id)
 
     def complete_job(self, job_id: str, result: Any = None) -> Optional[JobRecord]:
         """Marks a job as COMPLETED with its output result."""
-        job = self._jobs.get(job_id)
+        job = self.get_job(job_id)
         if not job:
             return None
 
-        job.status = JobStatus.COMPLETED
-        job.progress = 100.0
-        job.stage = JobStage.COMPLETED.value
-        job.completed_at = time.time()
-        job.result = result
+        if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
+            logger.warning(f"[JobManager] Cannot complete terminal job {job_id} ({job.status})")
+            return job
+
+        now = datetime.datetime.now().isoformat()
+        result_json = json.dumps(result) if result is not None else None
+
+        with get_db_connection() as conn:
+            conn.execute(
+                """
+                UPDATE jobs
+                SET status = ?, progress = ?, stage = ?, completed_at = ?, result = ?
+                WHERE id = ?
+                """,
+                (JobStatus.COMPLETED.value, 100.0, JobStage.COMPLETED.value, now, result_json, job_id)
+            )
+            conn.commit()
+
         logger.info(f"[JobManager] Job {job_id} COMPLETED successfully")
-        return job
+        return self.get_job(job_id)
 
     def fail_job(
         self,
@@ -106,37 +189,65 @@ class UnifiedJobManager:
         details: Optional[Dict[str, Any]] = None
     ) -> Optional[JobRecord]:
         """Marks a job as FAILED with error payload."""
-        job = self._jobs.get(job_id)
+        job = self.get_job(job_id)
         if not job:
             return None
 
-        job.status = JobStatus.FAILED
-        job.stage = JobStage.FAILED.value
-        job.completed_at = time.time()
-        job.error = {
+        if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
+            logger.warning(f"[JobManager] Cannot fail terminal job {job_id} ({job.status})")
+            return job
+
+        now = datetime.datetime.now().isoformat()
+        error_payload = {
             "code": error_code or "INTERNAL_ERROR",
             "message": error_message,
             "details": details or {}
         }
+        error_json = json.dumps(error_payload)
+
+        with get_db_connection() as conn:
+            conn.execute(
+                """
+                UPDATE jobs
+                SET status = ?, stage = ?, completed_at = ?, error = ?
+                WHERE id = ?
+                """,
+                (JobStatus.FAILED.value, JobStage.FAILED.value, now, error_json, job_id)
+            )
+            conn.commit()
+
         logger.error(f"[JobManager] Job {job_id} FAILED: {error_message}")
-        return job
+        return self.get_job(job_id)
 
     def cancel_job(self, job_id: str) -> Optional[JobRecord]:
         """Cancels a running or queued job."""
-        job = self._jobs.get(job_id)
+        job = self.get_job(job_id)
         if not job:
             return None
 
-        job.status = JobStatus.CANCELLED
-        job.stage = JobStage.CANCELLED.value
-        job.completed_at = time.time()
+        if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
+            logger.warning(f"[JobManager] Cannot cancel terminal job {job_id} ({job.status})")
+            return job
+
+        now = datetime.datetime.now().isoformat()
+
+        with get_db_connection() as conn:
+            conn.execute(
+                """
+                UPDATE jobs
+                SET status = ?, stage = ?, cancelled_at = ?
+                WHERE id = ?
+                """,
+                (JobStatus.CANCELLED.value, JobStage.CANCELLED.value, now, job_id)
+            )
+            conn.commit()
 
         task = self._tasks.get(job_id)
         if task and not task.done():
             task.cancel()
 
         logger.info(f"[JobManager] Job {job_id} CANCELLED")
-        return job
+        return self.get_job(job_id)
 
     def run_in_background(
         self,
@@ -151,6 +262,7 @@ class UnifiedJobManager:
             self.update_progress(job_id, pct, stage=stage)
 
         async def _wrapper():
+            # Update to RUNNING with started_at correctly set in db
             self.update_progress(job_id, 0.0, status=JobStatus.RUNNING)
             try:
                 result = await coroutine_func(report_progress)

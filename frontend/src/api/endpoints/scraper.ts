@@ -74,7 +74,8 @@ export const pollJobUntilComplete = async <T = any>(
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 
-  throw new Error(`[Job ${jobId}] Polling timed out after ${timeoutMs / 1000}s.`);
+  console.warn(`[Job ${jobId}] Polling timed out. Returning last known state.`);
+  return await getJobStatus<T>(fetchWithInterceptor, jobId);
 };
 
 // ============================================================================

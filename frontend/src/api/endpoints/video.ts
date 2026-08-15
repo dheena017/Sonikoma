@@ -32,7 +32,7 @@ export const getVideoStatus = async (
   jobId: string,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/video/status/${jobId}`, options);
+  return apiRequest(fetchWithInterceptor, `/api/v1/jobs/${jobId}`, options);
 };
 
 export const generateTts = async (

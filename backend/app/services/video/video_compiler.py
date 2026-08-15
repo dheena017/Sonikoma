@@ -18,7 +18,7 @@ from typing import List, Dict, Any, Optional
 
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 from services.image.utils.image_utils import resolve_image_to_buffer
-from services.video.job_queue import get_job_queue
+from services.jobs import job_manager
 from services.audio.tts import generate_panel_audio
 
 logger = logging.getLogger("sonikoma.services.video.video_compiler")
@@ -226,7 +226,7 @@ async def compile_video_from_panels(
 
 
 async def process_render_job(
-    video_id: str,
+    job_id: str,
     panels: List[Dict[str, Any]],
     voice: Optional[str] = None,
     music_theme: str = "none",
@@ -243,57 +243,36 @@ async def process_render_job(
     speech_rate: float = 1.0,
     speech_pitch: float = 1.0,
     project_id: Optional[str] = None,
-    workspace_job_id: Optional[str] = None,
 ) -> None:
-    job_queue = get_job_queue()
-
-    if job_queue.get_job(video_id) is None:
-        job_queue.create_job(
-            "video_render",
-            job_id=video_id,
-            project_id=project_id,
-            workspace_job_id=workspace_job_id,
-        )
 
     try:
         logger.info(
-            f"[VideoService] Starting render execution_id='{video_id}' for project_id='{project_id or 'N/A'}', "
-            f"workspace_job_id='{workspace_job_id or 'N/A'}' ({len(panels)} panels)"
+            f"[VideoService] Starting render job_id='{job_id}' for project_id='{project_id or 'N/A'}', ({len(panels)} panels)"
         )
-        job_queue.update_status(video_id, "running", progress=5.0)
+        job_manager.update_progress(job_id, progress=5.0)
 
         os.makedirs(_VIDEO_OUTPUT_DIR, exist_ok=True)
 
         output_filename = await compile_video_from_panels(
-            project_id=project_id or video_id,
+            project_id=project_id or job_id,
             panels=panels,
             output_dir=_VIDEO_OUTPUT_DIR,
         )
 
         video_url = f"/videos/{output_filename}"
 
-        job_queue.update_status(
-            video_id,
-            "completed",
-            progress=100.0,
-            result=video_url,
-        )
+        job_manager.complete_job(job_id, result={"video_url": video_url})
         logger.info(
-            f"[VideoService] Completed render execution_id='{video_id}' -> {video_url} "
-            f"(project_id='{project_id or 'N/A'}', workspace_job_id='{workspace_job_id or 'N/A'}')"
+            f"[VideoService] Completed render job_id='{job_id}' -> {video_url} "
+            f"(project_id='{project_id or 'N/A'}')"
         )
     except Exception as e:
         logger.error(
-            f"[VideoService] Failed render execution_id='{video_id}' "
-            f"(project_id='{project_id or 'N/A'}', workspace_job_id='{workspace_job_id or 'N/A'}'): {e}",
+            f"[VideoService] Failed render job_id='{job_id}' "
+            f"(project_id='{project_id or 'N/A'}'): {e}",
             exc_info=True,
         )
-        job_queue.update_status(
-            video_id,
-            "failed",
-            error=str(e),
-        )
-        job_queue.update_status(video_id, "failed", progress=0.0, error=str(e))
+        job_manager.fail_job(job_id, error_message=str(e))
 
 
 # Human-readable aliases

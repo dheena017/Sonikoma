@@ -44,9 +44,6 @@ from services.scraper import (
     generate_storyboard_only_service,
     extract_script_from_panels,
     create_comic_archive,
-    create_batch_job,
-    get_batch_job_status,
-    execute_batch_job,
     split_vertical_strip_into_panels
 )
 from services.scraper.normalizer import UrlNormalizer
@@ -62,7 +59,7 @@ router = scraper_router
 from services.jobs import job_manager, JobType, JobStage, JobStatus
 
 @router.post("/chapter", summary="Scrape single chapter URL via AdaptiveScraperEngine")
-async def scrape_chapter_canonical(request: Request, body: ScrapeChapterRequest):
+async def scrape_chapter_canonical(body: ScrapeChapterRequest, current_user: dict = Depends(get_current_user)):
     """Canonical single-request chapter scraper endpoint returning a Job."""
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Chapter URL is required and cannot be empty.")
@@ -71,11 +68,11 @@ async def scrape_chapter_canonical(request: Request, body: ScrapeChapterRequest)
         logger.info(f"[Scraper Route] Creating SCRAPE_CHAPTER job: url={body.url!r}, user_id={user_id}, project_id={body.project_id}")
         
         job = job_manager.create_job(
-            job_type=JobType.SCRAPE_CHAPTER,
-            project_id=body.project_id,
-            job_id=body.job_id,
-            metadata={"url": body.url.strip()}
-        )
+        job_type=JobType.SCRAPE_CHAPTER,
+        user_id=current_user["user_id"],
+        project_id=body.project_id,
+        metadata={"url": body.url.strip()}
+    )
         
         parsed_cookies = parse_cookie_string(body.cookies) if body.cookies else None
         bypass = True if body.force_refresh else (body.bypass_cache or False)
@@ -150,7 +147,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
         user_id = get_optional_user_id(request)
         logger.debug(
             f"[Scraper Route] /scrape-images request: url={body.url!r}, user_id={user_id}, "
-            f"bypass_cache={body.bypass_cache}, limit={body.limit}, project_id={body.project_id}, job_id={body.job_id}"
+            f"bypass_cache={body.bypass_cache}, limit={body.limit}, project_id={body.project_id}, "
         )
         result = await scrape_and_initialize_project(
             url=body.url,
@@ -161,7 +158,6 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
             smart_slice=body.smart_slice if body.smart_slice is not None else True,
             scrape_only=getattr(body, "scrape_only", False),
             project_id=body.project_id,
-            job_id=getattr(body, "job_id", None),
             user_id=user_id,
             title=getattr(body, "title", None),
             episode=getattr(body, "episode", None),
@@ -184,19 +180,19 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
 
 @router.post("/series/episodes", summary="Scrape series episodes & metadata (Canonical)")
 @router.post("/series", summary="Scrape series episodes (Canonical alias)")
-async def scrape_episodes(request: Request, body: ScrapeEpisodesRequest):
+async def scrape_episodes(body: ScrapeEpisodesRequest, current_user: dict = Depends(get_current_user)):
     try:
         if not body.url and not body.title_no:
             raise HTTPException(status_code=400, detail="Either 'url' or 'title_no' is required")
         
-        logger.info(f"[Routes] Creating DISCOVER_EPISODES job: url={body.url}, title_no={body.title_no}, job_id={body.job_id}")
+        logger.info(f"[Routes] Creating DISCOVER_EPISODES job: url={body.url}, title_no={body.title_no}, ")
         
         job = job_manager.create_job(
-            job_type=JobType.DISCOVER_EPISODES,
-            project_id=body.project_id,
-            job_id=body.job_id,
-            metadata={"url": body.url, "title_no": body.title_no}
-        )
+        job_type=JobType.DISCOVER_EPISODES,
+        user_id=current_user["user_id"],
+        project_id=body.project_id,
+        metadata={"url": body.url, "title_no": body.title_no}
+    )
         
         async def _episodes_coro(report_progress):
             report_progress(20.0, JobStage.FETCHING.value)
@@ -243,7 +239,7 @@ async def scrape_episodes_advanced(request: Request, body: ScrapeEpisodesAdvance
         if not body.url and not body.title_no:
             raise HTTPException(status_code=400, detail="Either 'url' or 'title_no' is required")
         
-        logger.info(f"[Routes] Advanced episode scrape: title_no={body.title_no}, sort_by={body.sort_by}, job_id={body.job_id}")
+        logger.info(f"[Routes] Advanced episode scrape: title_no={body.title_no}, sort_by={body.sort_by}, ")
         result = await scrape_webtoon_episodes_advanced(
             series_url=body.url or f"?title_no={body.title_no}",
             title_no=body.title_no,
@@ -255,8 +251,6 @@ async def scrape_episodes_advanced(request: Request, body: ScrapeEpisodesAdvance
         )
         if not result.get("success"):
             raise HTTPException(status_code=500, detail=result.get("error", "Failed to scrape episodes"))
-        if body.job_id:
-            result["job_id"] = body.job_id
         if body.project_id:
             result["project_id"] = body.project_id
         return result
@@ -273,15 +267,13 @@ async def scrape_episodes_paginated(request: Request, body: ScrapeEpisodesReques
         if not body.title_no:
             raise HTTPException(status_code=400, detail="'title_no' is required for paginated scraping")
         
-        logger.info(f"[Routes] Paginated episode scrape: title_no={body.title_no}, job_id={body.job_id}")
+        logger.info(f"[Routes] Paginated episode scrape: title_no={body.title_no}, ")
         result = await scrape_webtoon_episodes_paginated(
             title_no=body.title_no,
             max_episodes=body.max_episodes
         )
         if not result.get("success"):
             raise HTTPException(status_code=500, detail=result.get("error", "Failed to scrape episodes"))
-        if body.job_id:
-            result["job_id"] = body.job_id
         if body.project_id:
             result["project_id"] = body.project_id
         return result
@@ -293,18 +285,18 @@ async def scrape_episodes_paginated(request: Request, body: ScrapeEpisodesReques
 
 
 @router.post("/series/batch", summary="Batch scrape multiple WEBTOON series (Canonical)")
-async def batch_scrape_series_route(request: Request, body: BatchScrapeSeriesRequest):
+async def batch_scrape_series_route(body: BatchScrapeSeriesRequest, current_user: dict = Depends(get_current_user)):
     try:
         if not body.series or len(body.series) == 0:
             raise HTTPException(status_code=400, detail="'series' list cannot be empty")
         
-        logger.info(f"[Routes] Creating BATCH_SERIES job for {len(body.series)} series, job_id={body.job_id}")
+        logger.info(f"[Routes] Creating BATCH_SERIES job for {len(body.series)} series, ")
         job = job_manager.create_job(
-            job_type=JobType.BATCH_SERIES,
-            project_id=body.project_id,
-            job_id=body.job_id,
-            metadata={"total_series": len(body.series)}
-        )
+        job_type=JobType.BATCH_SERIES,
+        user_id=current_user["user_id"],
+        project_id=body.project_id,
+        metadata={"total_series": len(body.series)}
+    )
         
         async def _batch_series_coro(report_progress):
             report_progress(20.0, JobStage.FETCHING.value)
@@ -337,7 +329,6 @@ async def generate_storyboard(request: Request, body: GenerateStoryboardRequest,
             bypass_cache=body.bypass_cache if body.bypass_cache is not None else True,
             panels=body.panels,
             episode_id=body.episode_id,
-            job_id=getattr(body, "job_id", None),
             user_id=user_id,
             user_keys=user_keys,
             title=getattr(body, "title", None),
@@ -360,7 +351,6 @@ async def generate_storyboard_only(request: Request, body: GenerateStoryboardOnl
         result = await generate_storyboard_only_service(
             url=body.url,
             project_id=body.project_id,
-            job_id=getattr(body, "job_id", None),
             model=body.model or GEMINI_MODEL_PRIMARY,
             narration_style=body.narrationStyle or "long",
             user_id=user_id,
@@ -380,14 +370,14 @@ async def generate_storyboard_only(request: Request, body: GenerateStoryboardOnl
 
 @router.post("/process-url", summary="Legacy endpoint")
 async def process_url(body: ProcessUrlRequest):
-    return {"status": "success", "payload": {"url": body.url, "title": "Processed", "job_id": body.job_id, "project_id": body.project_id}}
+    return {"status": "success", "payload": {"url": body.url, "title": "Processed",  "project_id": body.project_id}}
 
 
 @router.put("/cache/session", summary="Update scraped images session cache (Canonical)")
 async def save_scraped_images(body: SaveScrapedImagesRequest):
     try:
         save_scrape_session(extract_webtoon_url(body.url), body.images)
-        return {"success": True, "job_id": body.job_id, "project_id": body.project_id}
+        return {"success": True,  "project_id": body.project_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -397,7 +387,7 @@ async def extract_script(body: ExtractScriptRequest):
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Webtoon URL is required.")
     try:
-        res = await scrape_and_initialize_project(url=body.url, limit=body.limit, proxy_images=False, job_id=body.job_id, project_id=body.project_id)
+        res = await scrape_and_initialize_project(url=body.url, limit=body.limit, proxy_images=False, project_id=body.project_id)
         panel_urls = res.get("images", [])
         
         import httpx
@@ -415,7 +405,7 @@ async def extract_script(body: ExtractScriptRequest):
         return {
             "success": True,
             "url": body.url,
-            "job_id": body.job_id,
+
             "project_id": body.project_id,
             "total_dialogue_panels": sum(1 for p in script if p["has_dialogue"]),
             "script": script
@@ -430,7 +420,7 @@ async def export_archive(body: ExportArchiveRequest):
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Webtoon URL is required.")
     try:
-        res = await scrape_and_initialize_project(url=body.url, limit=body.limit, proxy_images=False, job_id=body.job_id, project_id=body.project_id)
+        res = await scrape_and_initialize_project(url=body.url, limit=body.limit, proxy_images=False, project_id=body.project_id)
         panel_urls = res.get("images", [])
         metadata = res.get("metadata", {})
 
@@ -465,16 +455,16 @@ async def export_archive(body: ExportArchiveRequest):
 
 
 @router.post("/batch", summary="Submit background batch scraping job for multiple URLs (Canonical)")
-async def batch_scrape(body: BatchScrapeRequest):
+async def batch_scrape(body: BatchScrapeRequest, current_user: dict = Depends(get_current_user)):
     if not body.urls:
         raise HTTPException(status_code=400, detail="URL list cannot be empty.")
     try:
         job = job_manager.create_job(
-            job_type=JobType.BATCH_SCRAPE,
-            project_id=body.project_id,
-            job_id=body.job_id,
-            metadata={"urls": body.urls, "total": len(body.urls)}
-        )
+        job_type=JobType.BATCH_SCRAPE,
+        user_id=current_user["user_id"],
+        project_id=body.project_id,
+        metadata={"urls": body.urls, "total": len(body.urls)}
+    )
         
         async def _batch_coro(report_progress):
             total = len(body.urls)
@@ -497,18 +487,6 @@ async def batch_scrape(body: BatchScrapeRequest):
         job_manager.run_in_background(job.job_id, _batch_coro)
         
         # Also maintain compatibility with legacy batch job queue
-        batch_execution_id = create_batch_job(
-            body.urls,
-            project_id=getattr(body, "project_id", None),
-            workspace_job_id=job.job_id,
-        )
-        options = {
-            "limit": body.limit,
-            "proxy_images": body.proxy_images,
-            "filter_banners": body.filter_banners,
-            "include_metadata": body.include_metadata
-        }
-        asyncio.create_task(execute_batch_job(batch_execution_id, options))
 
         return {
             "success": True,
@@ -524,12 +502,6 @@ async def batch_scrape(body: BatchScrapeRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/batch/{job_id}", summary="Check background batch scraping status (Canonical)")
-async def get_batch_status(job_id: str):
-    job = get_batch_job_status(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail=f"Batch job '{job_id}' not found.")
-    return {"success": True, "job_id": job_id, "job": job}
 
 
 @router.post("/tools/split", summary="Smart AI panel cutter for vertical Webtoon strips (Canonical)")
@@ -552,7 +524,7 @@ async def smart_split(body: SmartSplitRequest):
         return {
             "success": True,
             "original_url": body.url,
-            "job_id": body.job_id,
+
             "project_id": body.project_id,
             "extracted_panels_count": len(split_buffers),
             "message": f"Successfully split vertical strip into {len(split_buffers)} discrete panels."

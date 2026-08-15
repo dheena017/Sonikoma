@@ -255,3 +255,26 @@ CREATE TABLE IF NOT EXISTS youtube_credentials (
 );
 
 
+
+-- 17. Persistent Background Jobs
+CREATE TABLE IF NOT EXISTS jobs (
+  id              TEXT    PRIMARY KEY,              -- Replaces job_id as the canonical identifier
+  user_id         TEXT    NOT NULL,
+  project_id      TEXT,                             -- Can be series_id depending on context
+  chapter_id      TEXT,
+  type            TEXT    NOT NULL,
+  status          TEXT    NOT NULL DEFAULT 'QUEUED',
+  progress        REAL    NOT NULL DEFAULT 0.0,
+  stage           TEXT    NOT NULL DEFAULT 'QUEUED',
+  result          JSONB,                            -- JSON string for result payload
+  error           JSONB,
+  metadata        JSONB,                            -- JSON payload for metadata                            -- JSON string for error payload
+  created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  started_at      TIMESTAMP,
+  completed_at    TIMESTAMP,
+  cancelled_at    TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_project_id ON jobs(project_id);
