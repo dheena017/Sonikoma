@@ -38,6 +38,7 @@ import {
   TranslationBefore,
   TranslationAfter,
   CinematicRenderDemo,
+  Landing3DScene,
 } from "@/features/app_landing/components";
 
 interface LandingPageProps {
@@ -247,17 +248,19 @@ export default function LandingPage({
       {/* SCROLLABLE CONTENT AREA — starts below the sticky nav */}
       <div
         id="landing-scroll-area"
-        className={`custom-scrollbar flex-1 overflow-y-auto ${
+        className={`custom-scrollbar flex-1 overflow-y-auto relative ${
           isLight ? "bg-[#f8fafc]" : "bg-[#09090b]"
         }`}
       >
+        <Landing3DScene themeMode={themeMode} />
 
       {/* HERO SECTION */}
       <section className="relative pt-20 pb-20 px-6 overflow-hidden">
+        {/* We keep the glows behind the 3D scene but make sure content is above */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-purple-600/15 via-indigo-600/10 to-transparent blur-[120px] rounded-full -z-10 animate-pulse" />
         <div className="absolute top-40 left-1/4 w-[400px] h-[400px] bg-indigo-500/10 blur-[100px] rounded-full -z-10" />
 
-        <div className="max-w-7xl mx-auto text-center space-y-8">
+        <div className="max-w-7xl mx-auto text-center space-y-8 relative z-10">
           <div className="flex flex-wrap items-center justify-center gap-3">
             <div
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold tracking-widest uppercase border transition-colors ${
