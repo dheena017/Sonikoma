@@ -188,20 +188,23 @@ export default function LoadingPage({
                   height: "100%",
                   background: "linear-gradient(to right, #a855f7, #06b6d4)",
                   borderRadius: 9999,
-                  transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                  transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
                   boxShadow: "0 0 8px rgba(6,182,212,0.5)",
+                  willChange: "width",
                 }}
               />
             ) : (
-              // Indeterminate shimmer bar
+              // Indeterminate shimmer bar using GPU transform for seamless movement
               <div
                 style={{
-                  width: "40%",
+                  width: "100%",
                   height: "100%",
-                  background: "linear-gradient(to right, #a855f7, #06b6d4)",
+                  background: "linear-gradient(to right, transparent 0%, #a855f7 35%, #06b6d4 65%, transparent 100%)",
                   borderRadius: 9999,
-                  animation: "lp-shimmer 1.4s infinite ease-in-out",
+                  animation: "lp-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite",
                   position: "absolute",
+                  inset: 0,
+                  willChange: "transform",
                 }}
               />
             )}
@@ -229,7 +232,8 @@ export default function LoadingPage({
                 width: 20,
                 height: 20,
                 color: "#a855f7",
-                animation: "lp-spin 1s linear infinite",
+                animation: "lp-spin 1.8s linear infinite",
+                willChange: "transform",
               }}
             >
               <circle
@@ -252,12 +256,26 @@ export default function LoadingPage({
 
       <style>{`
         @keyframes lp-spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
         @keyframes lp-shimmer {
-          0%   { left: -40%; }
-          100% { left: 100%; }
+          0%   { transform: translate3d(-100%, 0, 0); }
+          100% { transform: translate3d(100%, 0, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .loading-anime-backdrop::before,
+          .loading-anime-backdrop::after,
+          .loading-scanline,
+          .loading-motion-stage::before,
+          .loading-panel-chip,
+          .loading-panel-chip::after,
+          .loading-logo-stage,
+          .loading-logo-frame::before,
+          .loading-logo-stage::before,
+          .loading-logo-stage::after {
+            animation: none !important;
+          }
         }
       `}</style>
     </div>

@@ -558,8 +558,9 @@
   background:
     radial-gradient(ellipse at 50% 44%, rgba(168, 85, 247, 0.24), transparent 36%),
     radial-gradient(ellipse at 54% 56%, rgba(34, 211, 238, 0.12), transparent 42%);
-  opacity: 0.85;
-  animation: loading-background-breathe 5.8s ease-in-out infinite;
+  opacity: 0.75;
+  will-change: transform, opacity;
+  animation: loading-background-breathe 12s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .loading-anime-backdrop::after {
@@ -578,9 +579,10 @@
       rgba(168, 85, 247, 0.11) 50%,
       transparent 58% 100%
     );
-  opacity: 0.42;
+  opacity: 0.38;
+  will-change: transform;
   transform: translate3d(-14%, 0, 0);
-  animation: loading-light-sweep 8s ease-in-out infinite;
+  animation: loading-light-sweep 14s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .loading-page-shell-light .loading-anime-backdrop::before {
@@ -620,7 +622,8 @@
       transparent 7px,
       rgba(255, 255, 255, 0.08) 8px
     );
-  animation: loading-scanline-drift 7s linear infinite;
+  will-change: transform;
+  animation: loading-scanline-drift 10s linear infinite;
 }
 
 .loading-page-shell-light .loading-scanline {
@@ -650,7 +653,8 @@
   border-radius: 999px;
   border: 1px solid rgba(168, 85, 247, 0.18);
   box-shadow: 0 0 38px rgba(124, 58, 237, 0.18);
-  animation: loading-stage-pulse 2.8s ease-in-out infinite;
+  will-change: transform, opacity;
+  animation: loading-stage-pulse 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .loading-panel-chip {
@@ -665,7 +669,8 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.03));
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.26);
   opacity: 0.78;
-  animation: loading-panel-orbit 5.4s ease-in-out infinite;
+  will-change: transform;
+  animation: loading-panel-orbit 6.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .loading-page-shell-light .loading-panel-chip {
@@ -695,7 +700,8 @@
   border-radius: 999px;
   background: linear-gradient(90deg, transparent, #22d3ee, transparent);
   box-shadow: 0 0 12px rgba(34, 211, 238, 0.7);
-  animation: loading-panel-scan 2.2s ease-in-out infinite;
+  will-change: transform, opacity;
+  animation: loading-panel-scan 3.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .loading-panel-chip-one {
@@ -717,7 +723,8 @@
 }
 
 .loading-logo-stage {
-  animation: loading-logo-breathe 2.4s ease-in-out infinite;
+  will-change: transform;
+  animation: loading-logo-breathe 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .loading-logo-frame {
@@ -728,11 +735,12 @@
 .loading-logo-frame::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: -50%;
   z-index: 0;
   border-radius: inherit;
   background: conic-gradient(from 0deg, #a855f7, #06b6d4, #f59e0b, #a855f7);
-  animation: loading-logo-spin 4s linear infinite;
+  will-change: transform;
+  animation: loading-logo-spin 6s linear infinite;
 }
 
 .loading-logo-stage::before,
@@ -743,13 +751,14 @@
   border-radius: 28px;
   border: 1px solid rgba(168, 85, 247, 0.42);
   opacity: 0;
-  animation: loading-logo-ring 2.8s ease-out infinite;
+  will-change: transform, opacity;
+  animation: loading-logo-ring 4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 .loading-logo-stage::after {
   inset: -23px;
   border-color: rgba(34, 211, 238, 0.32);
-  animation-delay: -1.4s;
+  animation-delay: -2s;
 }
 
 @keyframes anime-art-drift {
@@ -765,12 +774,12 @@
 @keyframes loading-background-breathe {
   0%,
   100% {
-    opacity: 0.68;
-    transform: scale(0.96);
+    opacity: 0.65;
+    transform: scale(0.97) translate3d(0, 0, 0);
   }
   50% {
-    opacity: 0.92;
-    transform: scale(1.04);
+    opacity: 0.88;
+    transform: scale(1.03) translate3d(0, 0, 0);
   }
 }
 
@@ -785,23 +794,23 @@
 }
 
 @keyframes loading-scanline-drift {
-  from {
-    transform: translateY(0);
+  0% {
+    transform: translate3d(0, 0, 0);
   }
-  to {
-    transform: translateY(16px);
+  100% {
+    transform: translate3d(0, 16px, 0);
   }
 }
 
 @keyframes loading-stage-pulse {
   0%,
   100% {
-    opacity: 0.46;
-    transform: scale(0.96);
+    opacity: 0.42;
+    transform: scale(0.97) translate3d(0, 0, 0);
   }
   50% {
-    opacity: 0.9;
-    transform: scale(1.04);
+    opacity: 0.82;
+    transform: scale(1.03) translate3d(0, 0, 0);
   }
 }
 
@@ -819,42 +828,45 @@
   0%,
   100% {
     opacity: 0;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
-  18%,
-  74% {
+  20%,
+  75% {
     opacity: 1;
   }
-  82% {
+  85% {
     opacity: 0;
-    transform: translateY(35px);
+    transform: translate3d(0, 35px, 0);
   }
 }
 
 @keyframes loading-logo-breathe {
   0%,
   100% {
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
   50% {
-    transform: translateY(-2px) scale(1.025);
+    transform: translate3d(0, -3px, 0) scale(1.025);
   }
 }
 
 @keyframes loading-logo-spin {
-  to {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
     transform: rotate(360deg);
   }
 }
 
 @keyframes loading-logo-ring {
   0% {
-    opacity: 0.76;
-    transform: scale(0.88);
+    opacity: 0.72;
+    transform: scale(0.88) translate3d(0, 0, 0);
   }
   100% {
     opacity: 0;
-    transform: scale(1.22);
+    transform: scale(1.22) translate3d(0, 0, 0);
   }
 }
 
