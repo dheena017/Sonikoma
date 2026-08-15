@@ -21,7 +21,7 @@ import {
   Sparkles,
   Volume2,
   Keyboard,
-  QrCode,
+
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
@@ -63,9 +63,7 @@ export default function LoginPage({
     language,
     setLanguage,
     isCapsLockOn,
-    isQrLogin,
-    setIsQrLogin,
-    qrTimer,
+
     isShortcutsOpen,
     setIsShortcutsOpen,
     isPasskeyLoading,
@@ -79,9 +77,7 @@ export default function LoginPage({
     isPasswordValid,
     handleSubmit,
     handleSocialLogin,
-    handleQuickFill,
     handlePasskeySignIn,
-    handleQrSimulateSuccess,
     checkCapsLock,
     currentTheme,
     t,
@@ -172,61 +168,6 @@ export default function LoginPage({
             >
               <Keyboard className="w-4 h-4" />
             </button>
-
-            {/* Multi-language translator dropdown selector */}
-            <div className="flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-xl backdrop-blur-md">
-              <Languages className="w-3.5 h-3.5 text-neutral-400 ml-1.5" />
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as Language)}
-                className="bg-transparent border-none text-[11px] font-bold text-white py-1 pl-1 pr-6 focus:outline-none cursor-pointer"
-              >
-                <option value="en" className="bg-[#0c0c14] text-white">
-                  English
-                </option>
-                <option value="ko" className="bg-[#0c0c14] text-white">
-                  한국어
-                </option>
-                <option value="ja" className="bg-[#0c0c14] text-white">
-                  日本語
-                </option>
-              </select>
-            </div>
-
-            {/* Minimal Palette Theme Switcher */}
-            <div className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-full backdrop-blur-md">
-              {(Object.keys(THEMES) as ThemeKey[]).map((theme) => {
-                const colors = {
-                  purple: "bg-purple-500",
-                  blue: "bg-blue-500",
-                  emerald: "bg-emerald-500",
-                  amber: "bg-amber-500",
-                };
-
-                return (
-                  <button
-                    key={theme}
-                    onClick={() => setActiveTheme(theme)}
-                    className={`w-4 h-4 rounded-full transition-transform active:scale-90 cursor-pointer ${
-                      colors[theme]
-                    } ${
-                      activeTheme === theme
-                        ? "scale-110 ring-2 ring-white/40"
-                        : "scale-90 opacity-60 hover:opacity-100"
-                    }`}
-                    title={`Switch to ${theme} theme`}
-                  />
-                );
-              })}
-            </div>
-
-            <button
-              onClick={() => setIsTourOpen(true)}
-              className={`hidden sm:flex items-center gap-1 text-xs ${currentTheme.accentText} ${currentTheme.accentBg} border ${currentTheme.accentBorder} px-3 py-1.5 rounded-full cursor-pointer hover:bg-white/5 transition-all`}
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-              {t.tour}
-            </button>
           </div>
         </div>
 
@@ -297,46 +238,7 @@ export default function LoginPage({
               </div>
             )}
 
-            {isQrLogin ? (
-              // SIMULATED MOBILE QR LOGIN LAYOUT
-              <div className="space-y-5 flex flex-col items-center text-center py-2 animate-in fade-in duration-350">
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-white">{t.qrTitle}</h4>
-                  <p className="text-[10px] text-neutral-500 max-w-xs">
-                    {t.qrDesc}
-                  </p>
-                </div>
-
-                {/* Pulse QR Code Layout */}
-                <div className="w-44 h-44 bg-white p-3 rounded-2xl relative overflow-hidden flex items-center justify-center shadow-lg shadow-purple-500/10">
-                  <QrCode className="w-full h-full text-black" />
-
-                  {/* Neon scan beam */}
-                  <div className="absolute inset-x-0 h-0.5 bg-purple-500 shadow-md shadow-purple-500 animate-scan-beam" />
-                </div>
-
-                <div className="text-[10px] font-bold text-purple-400 font-mono">
-                  {t.qrExpire}
-                  {qrTimer}s
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleQrSimulateSuccess}
-                  className="bg-purple-600/10 border border-purple-500/20 hover:bg-purple-600/20 text-purple-400 font-bold py-1.5 px-4 rounded-xl text-[10px] cursor-pointer"
-                >
-                  {t.qrSimulate}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsQrLogin(false)}
-                  className="text-xs font-bold text-neutral-500 hover:text-white hover:underline transition-all cursor-pointer"
-                >
-                  {t.qrFormToggle}
-                </button>
-              </div>
-            ) : (
+            {
               // DEFAULT EMAIL/PASSWORD INPUT FORM
               <form className="space-y-5" onSubmit={handleSubmit}>
                 {error && (
@@ -491,7 +393,7 @@ export default function LoginPage({
                   )}
                 </button>
               </form>
-            )}
+            }
 
             {/* Toggle between QR Code and Form buttons */}
             <div className="mt-3 flex gap-2">
@@ -503,34 +405,7 @@ export default function LoginPage({
                 <KeyRound className="w-3.5 h-3.5 text-purple-400" />
                 {t.passkeyBtn}
               </button>
-
-              <button
-                type="button"
-                onClick={() => setIsQrLogin(!isQrLogin)}
-                className="flex-1 bg-[#0a0a0e]/60 hover:bg-[#101018]/80 text-neutral-300 hover:text-white border border-white/5 hover:border-white/10 text-[10px] font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer duration-300"
-              >
-                <QrCode className="w-3.5 h-3.5 text-purple-400" />
-                {isQrLogin ? t.qrFormToggle : t.qrToggle}
-              </button>
             </div>
-
-                        {/* Quick Demo Fill Utility Banner */}
-            {!isQrLogin && (
-              <div className="mt-5 pt-4 border-t border-white/5 flex flex-col gap-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-neutral-500 flex items-center gap-1 font-medium">
-                    <Info className={`w-3.5 h-3.5 ${currentTheme.accentText}`} />
-                    {t.demo}
-                  </span>
-                  <button
-                    onClick={handleQuickFill}
-                    className={`hover:opacity-85 hover:underline font-bold cursor-pointer transition-colors active:scale-95 ${currentTheme.accentText}`}
-                  >
-                    {t.demoBtn}
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Create Account Link */}

@@ -20,8 +20,6 @@ export default function useLoginForm(props: LoginFormProps) {
   const [activeTheme, setActiveTheme] = React.useState<ThemeKey>("purple");
   const [language, setLanguage] = React.useState<Language>("en");
   const [isCapsLockOn, setIsCapsLockOn] = React.useState(false);
-  const [isQrLogin, setIsQrLogin] = React.useState(false);
-  const [qrTimer, setQrTimer] = React.useState(60);
   const [isShortcutsOpen, setIsShortcutsOpen] = React.useState(false);
   const [isPasskeyLoading, setIsPasskeyLoading] = React.useState(false);
   const [passkeyStatus, setPasskeyStatus] = React.useState<string | null>(null);
@@ -37,13 +35,7 @@ export default function useLoginForm(props: LoginFormProps) {
     }
   }, []);
 
-  React.useEffect(() => {
-    if (!isQrLogin || qrTimer <= 0) return;
-    const interval = setInterval(() => {
-      setQrTimer((prev) => (prev <= 1 ? 60 : prev - 1));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isQrLogin, qrTimer]);
+
 
   const isEmailValid = React.useMemo(() => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -82,11 +74,7 @@ export default function useLoginForm(props: LoginFormProps) {
     }
   };
 
-  const handleQuickFill = () => {
-    setEmail("demo@sonikoma.ai");
-    setPassword("Demo@12345");
-    setError(null);
-  };
+
 
   const handlePasskeySignIn = () => {
     setIsPasskeyLoading(true);
@@ -100,11 +88,7 @@ export default function useLoginForm(props: LoginFormProps) {
     }, 1000);
   };
 
-  const handleQrSimulateSuccess = async () => {
-    await (window as any).alertAsync(
-      "QR login is not yet configured for this environment."
-    );
-  };
+
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
     setIsCapsLockOn(e.getModifierState("CapsLock"));
@@ -126,9 +110,6 @@ export default function useLoginForm(props: LoginFormProps) {
     language,
     setLanguage,
     isCapsLockOn,
-    isQrLogin,
-    setIsQrLogin,
-    qrTimer,
     isShortcutsOpen,
     setIsShortcutsOpen,
     isPasskeyLoading,
@@ -142,9 +123,7 @@ export default function useLoginForm(props: LoginFormProps) {
     isPasswordValid,
     handleSubmit,
     handleSocialLogin,
-    handleQuickFill,
     handlePasskeySignIn,
-    handleQrSimulateSuccess,
     checkCapsLock,
     currentTheme: THEMES[activeTheme],
     t: TRANSLATIONS[language],

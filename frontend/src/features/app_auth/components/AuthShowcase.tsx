@@ -284,27 +284,7 @@ export default function AuthShowcase({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Dynamic button to trigger simulated video player demo */}
-          <button
-            onClick={() => {
-              setIsPlayerOpen(true);
-              setIsPlaying(true);
-            }}
-            className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase bg-white/5 border border-white/5 hover:border-white/10 px-3 py-1.5 rounded-full cursor-pointer hover:bg-white/10 transition-all text-neutral-300"
-          >
-            <Play className="w-3.5 h-3.5 fill-current text-purple-400" />
-            Play Showcase Demo
-          </button>
-
-          <button
-            onClick={() => setIsSandboxOpen(true)}
-            className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase bg-white/5 border border-white/5 hover:border-white/10 px-3 py-1.5 rounded-full cursor-pointer hover:bg-white/10 transition-all text-neutral-300"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-            Storyboard Sandbox
-          </button>
-        </div>
+        <div className="flex items-center gap-2"></div>
       </div>
 
       {/* Carousel Slide Area */}
@@ -372,55 +352,7 @@ export default function AuthShowcase({
             ))}
           </div>
 
-          <div className="relative">
-            <button
-              onClick={() =>
-                setIsParticleCustomizerOpen(!isParticleCustomizerOpen)
-              }
-              className="px-2 py-1 bg-white/5 hover:bg-white/10 rounded border border-white/5 text-[9px] font-bold text-neutral-400 hover:text-white cursor-pointer transition-colors"
-              title="Customize Star Particles"
-            >
-              Star Config
-            </button>
 
-            {isParticleCustomizerOpen && (
-              <div className="absolute bottom-7 left-0 bg-black/90 border border-white/10 p-3.5 rounded-2xl shadow-2xl backdrop-blur-md space-y-2.5 min-w-[160px] z-50 text-left animate-in slide-in-from-bottom-2 duration-250">
-                <div className="text-[8px] font-black text-purple-400 uppercase tracking-widest">
-                  Star Settings
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[8px] text-neutral-400 font-mono">
-                    <span>Speed</span>
-                    <span>{particleSpeed}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="5"
-                    max="150"
-                    value={particleSpeed}
-                    onChange={(e) => setParticleSpeed(parseInt(e.target.value))}
-                    className="w-full h-1 bg-white/10 rounded cursor-pointer accent-purple-500"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[8px] text-neutral-400 font-mono">
-                    <span>Stars</span>
-                    <span>{starDensity} stars</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="10"
-                    max="100"
-                    value={starDensity}
-                    onChange={(e) => setStarDensity(parseInt(e.target.value))}
-                    className="w-full h-1 bg-white/10 rounded cursor-pointer accent-purple-500"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
         </div>
         <p className="text-xs text-neutral-600 font-medium font-mono">
           © {new Date().getFullYear()} Sonikoma AI Corp. All rights reserved.
