@@ -105,9 +105,9 @@ export default function LoginPage({
 
       {/* RIGHT PANEL: Login Form Interface */}
       <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#040406] relative">
-        {/* Soft background glow (Theme-driven) */}
+        {/* Soft background anime aura glow */}
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} blur-[120px] pointer-events-none transition-all duration-1000`}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} anime-aura-bg pointer-events-none transition-all duration-1000`}
         />
 
         {/* Top Controls Toolbar — pinned, never scrolls */}
@@ -165,7 +165,7 @@ export default function LoginPage({
             <button
               type="button"
               onClick={() => handleSocialLogin("Google")}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 cursor-pointer shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] border border-purple-400/30 group"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 cursor-pointer shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] border border-purple-400/30 group anime-button-sheen"
             >
               <Chrome className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
               <span>Continue with Google Account</span>
@@ -186,7 +186,7 @@ export default function LoginPage({
           </div>
 
           {/* Login Card */}
-          <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-500">
+          <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-500 anime-card-glow">
             <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${currentTheme.cardBorder}`} />
 
             {
@@ -332,7 +332,7 @@ export default function LoginPage({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full ${currentTheme.button} text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group cursor-pointer duration-300 active:scale-[0.99] mt-2`}
+                  className={`w-full ${currentTheme.button} text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group cursor-pointer duration-300 active:scale-[0.99] mt-2 anime-button-sheen`}
                 >
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
