@@ -13,7 +13,8 @@ from typing import Dict, Optional
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import Response
 
-from api.dependencies.auth import get_all_user_keys
+from api.dependencies.auth import get_all_user_keys, get_current_user
+from repositories.scraper.repository import save_scrape_session
 from schemas.scraper import (
     ScrapeChapterRequest,
     ScrapeImagesRequest,
@@ -64,7 +65,7 @@ async def scrape_chapter_canonical(body: ScrapeChapterRequest, current_user: dic
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Chapter URL is required and cannot be empty.")
     try:
-        user_id = get_optional_user_id(request)
+        user_id = get_optional_user_id(Request)
         logger.info(f"[Scraper Route] Creating SCRAPE_CHAPTER job: url={body.url!r}, user_id={user_id}, project_id={body.project_id}")
         
         job = job_manager.create_job(
