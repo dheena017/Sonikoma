@@ -896,6 +896,97 @@
   }
 }
 
+/* Unique Anime Auth Animations */
+@keyframes anime-aura-pulse {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.45;
+    filter: blur(80px);
+  }
+  50% {
+    transform: scale(1.08) rotate(3deg);
+    opacity: 0.75;
+    filter: blur(100px);
+  }
+}
+
+@keyframes anime-border-sweep {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes anime-energy-sheen {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(250%) rotate(25deg);
+  }
+}
+
+.anime-card-glow {
+  position: relative;
+}
+
+.anime-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 1.5rem;
+  padding: 1px;
+  background: linear-gradient(
+    115deg,
+    rgba(168, 85, 247, 0.5),
+    rgba(99, 102, 241, 0.2),
+    rgba(236, 72, 153, 0.4),
+    rgba(168, 85, 247, 0.5)
+  );
+  background-size: 200% 200%;
+  animation: anime-border-sweep 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.anime-aura-bg {
+  animation: anime-aura-pulse 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.anime-button-sheen {
+  position: relative;
+  overflow: hidden;
+}
+
+.anime-button-sheen::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transform: translateX(-100%) rotate(25deg);
+  transition: none;
+  pointer-events: none;
+}
+
+.anime-button-sheen:hover::after {
+  animation: anime-energy-sheen 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @media (max-width: 900px) {
   .anime-hero-scene {
     opacity: 0.72;

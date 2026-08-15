@@ -20,9 +20,6 @@ export default function useLoginForm(props: LoginFormProps) {
   const [activeTheme, setActiveTheme] = React.useState<ThemeKey>("purple");
   const [language, setLanguage] = React.useState<Language>("en");
   const [isCapsLockOn, setIsCapsLockOn] = React.useState(false);
-  const [isShortcutsOpen, setIsShortcutsOpen] = React.useState(false);
-  const [isPasskeyLoading, setIsPasskeyLoading] = React.useState(false);
-  const [passkeyStatus, setPasskeyStatus] = React.useState<string | null>(null);
   const [isTourOpen, setIsTourOpen] = React.useState(false);
   const [tourStep, setTourStep] = React.useState(0);
 
@@ -76,20 +73,6 @@ export default function useLoginForm(props: LoginFormProps) {
 
 
 
-  const handlePasskeySignIn = () => {
-    setIsPasskeyLoading(true);
-    setPasskeyStatus("Contacting biometric key hardware...");
-    setTimeout(() => {
-      setPasskeyStatus("Scanning TouchID / FaceID sensors...");
-      setTimeout(() => {
-        setIsPasskeyLoading(false);
-        setPasskeyStatus("Passkey authentication is not yet configured.");
-      }, 1400);
-    }, 1000);
-  };
-
-
-
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
     setIsCapsLockOn(e.getModifierState("CapsLock"));
   };
@@ -110,11 +93,6 @@ export default function useLoginForm(props: LoginFormProps) {
     language,
     setLanguage,
     isCapsLockOn,
-    isShortcutsOpen,
-    setIsShortcutsOpen,
-    isPasskeyLoading,
-    setIsPasskeyLoading,
-    passkeyStatus,
     isTourOpen,
     setIsTourOpen,
     tourStep,
@@ -123,7 +101,6 @@ export default function useLoginForm(props: LoginFormProps) {
     isPasswordValid,
     handleSubmit,
     handleSocialLogin,
-    handlePasskeySignIn,
     checkCapsLock,
     currentTheme: THEMES[activeTheme],
     t: TRANSLATIONS[language],

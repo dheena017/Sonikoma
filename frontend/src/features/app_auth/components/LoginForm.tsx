@@ -12,15 +12,12 @@ import {
   Chrome,
   Github,
   Languages,
-  Activity,
-  KeyRound,
   HelpCircle,
   X,
   Film,
   Info,
   Sparkles,
   Volume2,
-  Keyboard,
 
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
@@ -64,11 +61,6 @@ export default function LoginPage({
     setLanguage,
     isCapsLockOn,
 
-    isShortcutsOpen,
-    setIsShortcutsOpen,
-    isPasskeyLoading,
-    setIsPasskeyLoading,
-    passkeyStatus,
     isTourOpen,
     setIsTourOpen,
     tourStep,
@@ -77,7 +69,6 @@ export default function LoginPage({
     isPasswordValid,
     handleSubmit,
     handleSocialLogin,
-    handlePasskeySignIn,
     checkCapsLock,
     currentTheme,
     t,
@@ -114,9 +105,9 @@ export default function LoginPage({
 
       {/* RIGHT PANEL: Login Form Interface */}
       <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#040406] relative">
-        {/* Soft background glow (Theme-driven) */}
+        {/* Soft background anime aura glow */}
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} blur-[120px] pointer-events-none transition-all duration-1000`}
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} anime-aura-bg pointer-events-none transition-all duration-1000`}
         />
 
         {/* Top Controls Toolbar — pinned, never scrolls */}
@@ -149,25 +140,10 @@ export default function LoginPage({
               <span className="text-lg font-bold text-white tracking-tight mr-0.5">
                 Sonikoma
               </span>
-              <button
-                onClick={() => setIsShortcutsOpen(true)}
-                className="p-1.5 bg-neutral-900/60 border border-white/5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer"
-                title="Keyboard Shortcuts Guide"
-              >
-                <Keyboard className="w-4 h-4" />
-              </button>
             </div>
           </div>
           {/* Theme Selector & Tour Button */}
           <div className="flex items-center gap-2 lg:gap-4">
-            {/* Keyboard Shortcuts Trigger Button (Desktop) */}
-            <button
-              onClick={() => setIsShortcutsOpen(true)}
-              className="hidden lg:flex p-1.5 bg-neutral-900/60 border border-white/5 rounded-xl hover:bg-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer"
-              title="Keyboard Shortcuts Guide"
-            >
-              <Keyboard className="w-4 h-4" />
-            </button>
           </div>
         </div>
 
@@ -189,7 +165,7 @@ export default function LoginPage({
             <button
               type="button"
               onClick={() => handleSocialLogin("Google")}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 cursor-pointer shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] border border-purple-400/30 group"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 cursor-pointer shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] border border-purple-400/30 group anime-button-sheen"
             >
               <Chrome className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
               <span>Continue with Google Account</span>
@@ -210,33 +186,8 @@ export default function LoginPage({
           </div>
 
           {/* Login Card */}
-          <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-500">
+          <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-500 anime-card-glow">
             <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${currentTheme.cardBorder}`} />
-
-            {/* Passkey authentication status overlay */}
-            {isPasskeyLoading && (
-              <div className="absolute inset-0 z-30 bg-[#070709]/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6 space-y-6 animate-in fade-in duration-300">
-                <div className="w-16 h-16 rounded-full bg-purple-600/10 border border-purple-500/30 flex items-center justify-center relative">
-                  <div className="absolute inset-2 border-2 border-purple-500 rounded-full animate-ping" />
-                  <KeyRound className="w-8 h-8 text-purple-400" />
-                </div>
-                <div className="space-y-2 max-w-xs">
-                  <span className="text-xs font-black text-white uppercase tracking-wider block">
-                    Passkey Quick Authentication
-                  </span>
-                  <span className="text-[10px] text-neutral-400 font-medium leading-relaxed block">
-                    {passkeyStatus}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsPasskeyLoading(false)}
-                  className="bg-white/5 border border-white/10 text-neutral-400 hover:text-white px-4 py-1.5 rounded-xl text-[10px] font-bold cursor-pointer"
-                >
-                  Cancel Passkey sign in
-                </button>
-              </div>
-            )}
 
             {
               // DEFAULT EMAIL/PASSWORD INPUT FORM
@@ -381,7 +332,7 @@ export default function LoginPage({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className={`w-full ${currentTheme.button} text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group cursor-pointer duration-300 active:scale-[0.99] mt-2`}
+                  className={`w-full ${currentTheme.button} text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group cursor-pointer duration-300 active:scale-[0.99] mt-2 anime-button-sheen`}
                 >
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -394,18 +345,6 @@ export default function LoginPage({
                 </button>
               </form>
             }
-
-            {/* Toggle between QR Code and Form buttons */}
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                onClick={handlePasskeySignIn}
-                className="flex-1 bg-[#0a0a0e]/60 hover:bg-[#101018]/80 text-neutral-300 hover:text-white border border-white/5 hover:border-white/10 text-[10px] font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer duration-300"
-              >
-                <KeyRound className="w-3.5 h-3.5 text-purple-400" />
-                {t.passkeyBtn}
-              </button>
-            </div>
           </div>
 
           {/* Create Account Link */}
@@ -420,108 +359,11 @@ export default function LoginPage({
           </p>
         </div>
 
-        {/* Live System Health Dashboard */}
-        <div className="relative z-10 w-full max-w-md mx-auto mt-4 p-4 bg-neutral-900/20 border border-white/5 rounded-2xl flex items-center justify-between text-[10px] font-bold text-neutral-500 tracking-wider uppercase">
-          <span className="flex items-center gap-1.5">
-            <Activity className="w-3.5 h-3.5 text-neutral-600 animate-pulse" />
-            {t.systemHealth}
-          </span>
-          <div className="flex gap-4 font-mono">
-            <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 absolute" />
-              <span className="text-neutral-400">FastAPI</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span className="text-neutral-400">Gemini</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span className="text-neutral-400">SQLite</span>
-            </div>
-          </div>
-        </div>
-
         {/* Footer for mobile only */}
         <div className="flex lg:hidden text-center justify-center mt-8 text-[10px] text-neutral-600 font-semibold">
           © {new Date().getFullYear()} Sonikoma AI Corp. All rights reserved.
         </div>
       </div>
-
-      {/* KEYBOARD SHORTCUTS GUIDE OVERLAY MODAL */}
-      {isShortcutsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-300">
-          <div className="relative w-full max-w-md bg-gradient-to-b from-[#101018] to-[#070709] border border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-300 text-left">
-            <button
-              onClick={() => setIsShortcutsOpen(false)}
-              className="absolute top-4 right-4 text-neutral-500 hover:text-white bg-white/5 hover:bg-white/10 p-2 rounded-full cursor-pointer transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            <div className="space-y-1">
-              <h3 className="text-lg font-black text-white flex items-center gap-2">
-                <Keyboard className="w-5 h-5 text-purple-400" />
-                Workspace Hotkeys Guide
-              </h3>
-              <p className="text-xs text-neutral-500">
-                Accelerate your Webtoon-to-Video compilation workflow
-              </p>
-            </div>
-
-            <div className="space-y-2 border-t border-white/5 pt-3">
-              <div className="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
-                <span className="text-neutral-400 font-medium">
-                  Toggle Playback
-                </span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
-                  Space
-                </kbd>
-              </div>
-              <div className="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
-                <span className="text-neutral-400 font-medium">
-                  Auto-Crop Strip
-                </span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
-                  Ctrl + Shift + C
-                </kbd>
-              </div>
-              <div className="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
-                <span className="text-neutral-400 font-medium">
-                  Next Panel Frame
-                </span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
-                  →
-                </kbd>
-              </div>
-              <div className="flex items-center justify-between text-xs py-1.5 border-b border-white/5">
-                <span className="text-neutral-400 font-medium">
-                  Previous Panel Frame
-                </span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
-                  ←
-                </kbd>
-              </div>
-              <div className="flex items-center justify-between text-xs py-1.5">
-                <span className="text-neutral-400 font-medium">
-                  Mute Synthesizer
-                </span>
-                <kbd className="bg-neutral-800 text-neutral-200 border border-white/15 px-2 py-0.5 rounded text-[10px] font-mono shadow-sm">
-                  M
-                </kbd>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setIsShortcutsOpen(false)}
-              className="mt-2 w-full bg-neutral-900 border border-white/5 hover:bg-neutral-800 py-2.5 rounded-xl text-xs font-bold transition-all text-neutral-300 hover:text-white cursor-pointer"
-            >
-              Close Guide Drawer
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* PORTAL OVERLAY: Step-by-Step Interactive Features Tour Modal */}
       {isTourOpen && (

@@ -156,9 +156,7 @@ export const TRANSLATIONS = {
     or: "Or Sign In With Email",
     createAcc: "Don't have an account yet?",
     createBtn: "Create free account",
-    systemHealth: "Compute System Health",
     tour: "Take Tour",
-    passkeyBtn: "Sign in with Passkey",
     capsLock: "Warning: Caps Lock is ON",
   },
   ko: {
@@ -174,9 +172,7 @@ export const TRANSLATIONS = {
     or: "또는 이메일로 로그인",
     createAcc: "아직 계정이 없으신가요?",
     createBtn: "무료 계정 생성",
-    systemHealth: "컴퓨팅 시스템 상태",
     tour: "튜토리얼 보기",
-    passkeyBtn: "패스키(Passkey)로 로그인",
     capsLock: "주의: Caps Lock이 켜져 있습니다",
   },
   ja: {
@@ -195,9 +191,7 @@ export const TRANSLATIONS = {
     demoBtn: "デモ認証情報の自動入力",
     createAcc: "アカウントをお持ちでないですか？",
     createBtn: "無料アカウントを作成",
-    systemHealth: "システム稼働ステータス",
     tour: "ツアーを開始",
-    passkeyBtn: "パスキーでサインイン",
     capsLock: "警告: Caps Lockがオンになっています",
 
   },
