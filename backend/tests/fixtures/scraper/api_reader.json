@@ -1,0 +1,12 @@
+{
+  "status": 200,
+  "chapter": {
+    "id": 42,
+    "title": "Chapter 42: The Revelation",
+    "pages": [
+      { "index": 0, "url": "https://api-cdn.example.com/ch42/001.webp", "width": 800, "height": 1200 },
+      { "index": 1, "url": "https://api-cdn.example.com/ch42/002.webp", "width": 800, "height": 1200 },
+      { "index": 2, "url": "https://api-cdn.example.com/ch42/003.webp", "width": 800, "height": 1200 }
+    ]
+  }
+}

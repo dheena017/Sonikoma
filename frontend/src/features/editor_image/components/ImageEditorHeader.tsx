@@ -20,6 +20,8 @@ import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState"; /
 import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
+import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
+import { useBackendHealth } from "@/shared/hooks";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { useProjectStore } from "@/store/useProjectStore";
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
@@ -108,6 +110,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   );
 
   const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
+  const { status: backendStatus } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
@@ -310,6 +313,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
       {/* Right: Toggle Sidebar, Credits, Notifications, Project, Profile & Exit Actions */}
       <div className="flex items-center space-x-2 sm:space-x-3">
+        {/* Server Status Indicator */}
+        <ServerStatusIndicator status={backendStatus} />
+
         {/* Toggle properties panel */}
         <button
           onClick={() => setIsToolsPanelOpen((prev) => !prev)}

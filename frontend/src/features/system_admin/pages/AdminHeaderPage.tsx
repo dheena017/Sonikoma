@@ -19,6 +19,8 @@ import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
+import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
+import { useBackendHealth } from "@/shared/hooks";
 import { useProjectStore } from "@/store/useProjectStore";
 
 export interface AdminHeaderPageProps {
@@ -73,6 +75,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
   );
 
   const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
+  const { status: backendStatus } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const telemetryRef = useRef<HTMLDivElement>(null);
@@ -273,12 +276,8 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
 
       {/* Right side: Controls matching main header layout */}
       <div className="flex items-center gap-2 lg:gap-3 shrink-0">
-        
-        {/* Server: ONLINE badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 rounded-full text-xs font-bold font-mono">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Server: ONLINE</span>
-        </div>
+        {/* Server Status Indicator */}
+        <ServerStatusIndicator status={backendStatus} />
 
         {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (

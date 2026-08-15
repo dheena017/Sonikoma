@@ -30,6 +30,7 @@ import { Notification } from "@/features/app_notification";
 import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
 import {  getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
+import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useProjectStore } from "@/store/useProjectStore";
 
 
@@ -598,34 +599,7 @@ const HeaderInner = ({
       {/* Right side: Volume, Notifications, Stats, Profile */}
       <div className="flex items-center gap-2 lg:gap-3 shrink-0">
         {/* Server Status Pill */}
-        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-850 text-[10px] font-medium font-sans select-none hover:border-neutral-750 transition-all">
-          <span className="relative flex h-2 w-2">
-            <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${
-              backendStatus === "online"
-                ? "bg-emerald-400"
-                : backendStatus === "offline"
-                ? "bg-rose-450"
-                : "bg-amber-400"
-            }`} />
-            <span className={`relative inline-flex rounded-full h-2 w-2 ${
-              backendStatus === "online"
-                ? "bg-emerald-500"
-                : backendStatus === "offline"
-                ? "bg-rose-500"
-                : "bg-amber-500"
-            }`} />
-          </span>
-          <span className="text-neutral-400">Server:</span>
-          <span className={`font-bold uppercase tracking-wider ${
-            backendStatus === "online"
-              ? "text-emerald-400"
-              : backendStatus === "offline"
-              ? "text-rose-400"
-              : "text-amber-400"
-          }`}>
-            {backendStatus}
-          </span>
-        </div>
+        <ServerStatusIndicator status={backendStatus} />
 
         {/* 🤖 AI Model Selector Pill */}
         <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-850 text-[10px] font-mono select-none hover:border-purple-500/40 transition-all">

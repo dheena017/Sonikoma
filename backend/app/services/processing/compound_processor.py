@@ -9,6 +9,12 @@ Compound media processor orchestrating multi-step workflows:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import tempfile
+import logging
+from enum import Enum
+from dataclasses import dataclass
+from typing import List, Dict, Any, Optional
+
 from app.providers.ffmpeg import get_ffmpeg_engine, CutSpec
 from app.providers.librosa import get_librosa_engine, LIBROSA_AVAILABLE
 from app.providers.stable_diffusion import get_stable_diffusion_engine, DIFFUSERS_AVAILABLE

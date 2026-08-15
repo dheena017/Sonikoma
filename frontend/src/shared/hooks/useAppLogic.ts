@@ -452,118 +452,94 @@ export function useAppLogic() {
           return "";
         })();
 
-        const data = await api.scrapeImages(state.fetchWithInterceptor, {
+        const targetProjectId =
+          overrideProjectId ||
+          `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+        const data = await api.scrapeChapter(state.fetchWithInterceptor, {
           url: normalizedTargetUrl,
-          model: selectedModel,
-          source: selectedSource,
+          project_id: targetProjectId,
           bypass_cache: false,
-          smart_slice: state.smartSlice,
-          title: state.seriesTitle ? state.seriesTitle.trim() : undefined,
-          episode: formattedEpisode || undefined,
-          genre: state.scrapedGenre ? state.scrapedGenre.trim() : undefined,
-          author: state.seriesAuthor ? state.seriesAuthor.trim() : undefined,
-          cover_image: state.seriesCoverImage
-            ? state.seriesCoverImage.trim()
-            : undefined,
-          synopsis: state.seriesSynopsis
-            ? state.seriesSynopsis.trim()
-            : undefined,
-          // Must use temp_ prefix — job_ is reserved for backend processing jobs only.
-          project_id:
-            overrideProjectId ||
-            `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
-          scrape_only: state.smartSlice,
+          proxy_images: true,
+          filter_banners: true,
         });
 
         if (data.success && data.images && data.images.length > 0) {
-          const finalImages = data.images.map((img: string) =>
+          const rawImageUrls = data.images.map((img: any) =>
+            typeof img === "string" ? img : img.url
+          );
+          const finalImages = rawImageUrls.map((img: string) =>
             img.startsWith("http") && !api.isApiUrl(img)
               ? api.getProxyImageUrl(img)
               : img
           );
 
-          const origins: Record<string, string> = data.image_origins || {};
+          const origins: Record<string, string> = {};
+          data.images.forEach((img: any) => {
+            if (typeof img === "object" && img.url && img.origin) {
+              origins[img.url] = img.origin;
+            }
+          });
           (window as any).__scrapeImageOrigins = origins;
           // Clear any stale batch episode groups so single-episode view renders cleanly
           (window as any).__scrapeEpisodeGroups = [];
 
           state.setScrapedImages(finalImages);
 
-          if (data.project_id) {
-            state.setProjectId(data.project_id);
-            if (data.series_slug && data.chapter_slug) {
-              const newPath = `/scraper/editor/series/${data.series_slug}/chapters/${data.chapter_slug}`;
-              if (window.location.pathname !== newPath) {
-                window.history.pushState(null, "", newPath);
-              }
-            } else if (!data.project_id.startsWith("temp_")) {
-              const urlParams = new URLSearchParams(window.location.search);
-              urlParams.delete("project_id");
-              urlParams.delete("url");
-              urlParams.set("id", data.project_id);
-              const newSearch = urlParams.toString();
-              window.history.pushState(
-                null,
-                "",
-                window.location.pathname + (newSearch ? "?" + newSearch : "")
-              );
-            }
-          }
+          // Update series & chapter state if returned by scraper
+          const returnedTitle = data.series?.title || (state.seriesTitle ? state.seriesTitle.trim() : "");
+          const returnedAuthor = data.series?.author || (state.seriesAuthor ? state.seriesAuthor.trim() : "");
+          const returnedCover = data.series?.cover_image || (state.seriesCoverImage ? state.seriesCoverImage.trim() : "");
+          const returnedSynopsis = data.series?.description || (state.seriesSynopsis ? state.seriesSynopsis.trim() : "");
+          const returnedGenre = (data.series?.genres && data.series.genres.length > 0)
+            ? data.series.genres.join(", ")
+            : (state.scrapedGenre ? state.scrapedGenre.trim() : "");
+          const returnedChapterNum = data.chapter?.number != null
+            ? String(data.chapter.number)
+            : state.chapterNumber.trim();
+          const returnedChapterTitle = data.chapter?.title || state.chapterTitle.trim();
 
-          const resolvedPanels =
-            data.panels && data.panels.length > 0
-              ? data.panels.map((p: any) => ({
-                  ...p,
-                  grayscale: p.grayscale === 1 || p.grayscale === true,
-                }))
-              : []; // No saved panels → start with empty timeline; user adds manually
+          if (returnedTitle && !state.seriesTitle) state.setSeriesTitle(returnedTitle);
+          if (returnedAuthor && !state.seriesAuthor) state.setSeriesAuthor(returnedAuthor);
+          if (returnedCover && !state.seriesCoverImage) state.setSeriesCoverImage(returnedCover);
+          if (returnedSynopsis && !state.seriesSynopsis) state.setSeriesSynopsis(returnedSynopsis);
+          if (returnedGenre && !state.scrapedGenre) state.setScrapedGenre(returnedGenre);
+          if (returnedChapterNum && !state.chapterNumber) state.setChapterNumber(returnedChapterNum);
+          if (returnedChapterTitle && !state.chapterTitle) state.setChapterTitle(returnedChapterTitle);
 
-          let loadedChapterNumber = "";
-          let loadedChapterTitle = "";
-          if (data.episode) {
-            const epMatch = data.episode.match(
-              /^Chapter\s+(\d+)(?:\s+-\s+(.+))?$/i
-            );
-            if (epMatch) {
-              loadedChapterNumber = epMatch[1];
-              loadedChapterTitle = epMatch[2] || "";
-            } else {
-              const epParts = data.episode.split(" - ");
-              loadedChapterNumber = epParts[0].replace("Chapter ", "").trim();
-              loadedChapterTitle = epParts.slice(1).join(" - ").trim();
-            }
-          }
+          state.setProjectId(targetProjectId);
 
           useProjectStore.getState().setActiveProject({
             project: {
-              project_id: data.project_id || state.projectId || "",
-              job_id: data.job_id ?? null,
-              title: data.title || state.seriesTitle || "",
+              project_id: targetProjectId,
+              job_id: null,
+              title: returnedTitle,
               url: normalizedTargetUrl,
-              series_slug: data.series_slug || null,
-              chapter_slug: data.chapter_slug || null,
-              author: data.author || "",
-              cover_image: data.cover_image || "",
-              synopsis: data.synopsis || "",
-              genre: data.genre || "",
-              chapterNumber: loadedChapterNumber,
-              chapterTitle: loadedChapterTitle,
+              series_slug: null,
+              chapter_slug: null,
+              author: returnedAuthor,
+              cover_image: returnedCover,
+              synopsis: returnedSynopsis,
+              genre: returnedGenre,
+              chapterNumber: returnedChapterNum,
+              chapterTitle: returnedChapterTitle,
             },
-            panels: resolvedPanels,
+            panels: [],
           });
 
           setCurrentPanelIndex(0);
           setPlaybackTime(0);
           setStoryboardPlaying(false);
 
+          const totalCount = data.scrape?.image_count ?? finalImages.length;
           state.setConsoleLogs((prev) => {
             const filtered = prev.filter((log) => {
               const msg = typeof log === "string" ? log : log.message || "";
               return !msg.startsWith("[Scraper] Spawned live scraping task");
             });
             return [
-              `[Scraper] Extraction completed. Total assets returned: ${data.total_images}`,
-              `[API] Scrape response received — Model: ${selectedModel} | Assets: ${data.total_images}`,
+              `[Scraper] Extraction completed. Total assets returned: ${totalCount}`,
+              `[API] Adaptive chapter scrape response received — Assets: ${totalCount} | Completeness: ${data.scrape?.completeness || 'COMPLETE'}`,
               ...filtered,
             ];
           });
@@ -572,6 +548,7 @@ export function useAppLogic() {
         } else {
           state.setIsScraping(false);
           const errMsg =
+            data.error?.message ||
             data.message ||
             "Connected but no native comic elements identified on page.";
           state.setScrapedImages([]);
@@ -680,19 +657,19 @@ export function useAppLogic() {
         ]);
 
         try {
-          const data = await api.scrapeImages(state.fetchWithInterceptor, {
+          const data = await api.scrapeChapter(state.fetchWithInterceptor, {
             url: target,
-            model: selectedModel,
-            source: selectedSource,
-            bypass_cache: false,
-            smart_slice: state.smartSlice,
-            episode: epLabel,
             project_id: overrideProjectId || undefined,
-            scrape_only: state.smartSlice,
+            bypass_cache: false,
+            proxy_images: true,
+            filter_banners: true,
           });
 
           if (data.success && data.images && data.images.length > 0) {
-            const finalImages = data.images.map((img: string) =>
+            const rawUrls = data.images.map((img: any) =>
+              typeof img === "string" ? img : img.url
+            );
+            const finalImages = rawUrls.map((img: string) =>
               img.startsWith("http") && !api.isApiUrl(img)
                 ? api.getProxyImageUrl(img)
                 : img
@@ -703,9 +680,11 @@ export function useAppLogic() {
               startIndex,
               count: finalImages.length,
             });
-            if (data.image_origins) {
-              Object.assign(origins, data.image_origins);
-            }
+            data.images.forEach((img: any) => {
+              if (typeof img === "object" && img.url && img.origin) {
+                origins[img.url] = img.origin;
+              }
+            });
           }
         } catch (err) {
           console.error(`[Batch Import] Failed to scrape ${epLabel}:`, err);

@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import http from "http";
@@ -174,6 +174,36 @@ function isPortTaken(port) {
   });
 }
 
+function killStaleListenerOnPort(port) {
+  if (process.platform !== "win32") return false;
+  try {
+    const netstatOutput = execSync(`netstat -ano -p tcp | findstr :${port}`, {
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "pipe"]
+    });
+    const pids = new Set();
+    for (const line of netstatOutput.split(/\r?\n/)) {
+      const match = line.match(/\s+LISTENING\s+(\d+)\s*$/);
+      if (match) {
+        pids.add(match[1]);
+      }
+    }
+    if (pids.size === 0) return false;
+
+    logger.warn(`⚠️ Clearing stale listener(s) on port ${port}: ${[...pids].join(", ")}`);
+    for (const pid of pids) {
+      try {
+        spawn("taskkill", ["/F", "/PID", pid]);
+      } catch (err) {
+        logger.warn(`Failed to terminate PID ${pid}: ${err.message || err}`);
+      }
+    }
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
 // Poll the health endpoint
 const url = `http://127.0.0.1:${port}/api/health`;
 
@@ -204,8 +234,20 @@ function checkHealth() {
 async function init() {
   const isTaken = await isPortTaken(port);
   if (isTaken) {
-    logger.warn(`⚠️ Port ${port} is already in use.`);
-    logger.info(`Waiting for existing process to respond...`);
+    const cleared = killStaleListenerOnPort(port);
+    if (cleared) {
+      logger.info(`Retrying backend start after clearing stale listener on port ${port}...`);
+    } else {
+      logger.warn(`⚠️ Port ${port} is already in use.`);
+      logger.info(`Waiting for existing process to respond...`);
+      checkHealth();
+      return;
+    }
+  }
+
+  const isStillTaken = await isPortTaken(port);
+  if (isStillTaken) {
+    logger.warn(`⚠️ Port ${port} remains unavailable after cleanup. Waiting for existing process to respond...`);
     checkHealth();
     return;
   }

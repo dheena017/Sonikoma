@@ -26,18 +26,33 @@ from api.v1.health import health_router
 from api.v1.proxy import proxy_router
 from api.v1.audio import audio_router, librosa_router, whisper_router
 from api.v1.compound import compound_router
+from api.v1.jobs import jobs_router
+from api.v1.panels.router import panels_router
+from api.v1.ocr.router import ocr_router
+from api.v1.storyboard.router import storyboard_router
 
 api_router = APIRouter()
 
-# Include all sub-routers with exact prefixes matching application contracts
+# Include all sub-routers with exact prefixes matching application contracts.
+# Each sub-router defines relative paths only; the mount prefix is the single place
+# where the domain namespace is applied.
+api_router.include_router(jobs_router,           prefix="/api/v1/jobs", tags=["Jobs (v1)"])
+api_router.include_router(jobs_router,           prefix="/api/jobs", tags=["Jobs (Legacy)"])
+api_router.include_router(scraper_router,        prefix="/api/scraper", tags=["Scraper (Legacy)"])
+api_router.include_router(scraper_router,        prefix="/api/v1/scraper", tags=["Scraper (v1)"])
+api_router.include_router(panels_router,         prefix="/api/panels", tags=["Panels (Legacy)"])
+api_router.include_router(panels_router,         prefix="/api/v1/panels", tags=["Panels (v1)"])
+api_router.include_router(ocr_router,            prefix="/api/ocr", tags=["OCR (Legacy)"])
+api_router.include_router(ocr_router,            prefix="/api/v1/ocr", tags=["OCR (v1)"])
+api_router.include_router(storyboard_router,     prefix="/api/storyboard", tags=["Storyboard (Legacy)"])
+api_router.include_router(storyboard_router,     prefix="/api/v1/storyboard", tags=["Storyboard (v1)"])
 api_router.include_router(health_router,         prefix="/api", tags=["Health & System"])
 api_router.include_router(auth_router,           prefix="/api/auth")
 api_router.include_router(project_router,        prefix="/api/projects", tags=["Projects"])
-api_router.include_router(panel_router,          prefix="/api/panels", tags=["Panels"])
+api_router.include_router(panel_router,          prefix="/api/panels", tags=["Panel Detection"])
 api_router.include_router(proxy_router,          prefix="/api", tags=["Proxy"])
 api_router.include_router(image_router,          prefix="/api/image", tags=["Image Editing"])
 api_router.include_router(cleaner_router,        prefix="/api/image", tags=["Image Editing"])
-api_router.include_router(scraper_router,        prefix="/api", tags=["Scraper"])
 api_router.include_router(ai_router,             prefix="/api", tags=["AI Processing"])
 api_router.include_router(audio_router,          prefix="/api/audio", tags=["Audio Synthesis"])
 api_router.include_router(video_router,          prefix="/api/video", tags=["Video Rendering"])

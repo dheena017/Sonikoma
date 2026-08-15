@@ -17,6 +17,8 @@ import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
+import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
+import { useBackendHealth } from "@/shared/hooks";
 import { useProjectStore } from "@/store/useProjectStore";
 
 
@@ -62,6 +64,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   );
 
   const { activeProjectId, activeProjectData, projectState, setDrawerOpen } = useProjectStore();
+  const { status: backendStatus } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
@@ -239,6 +242,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
 
       {/* Right side: Standardized Controls Suite */}
       <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+        {/* Server Status Indicator */}
+        <ServerStatusIndicator status={backendStatus} />
+
         {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>

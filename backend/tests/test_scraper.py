@@ -1,16 +1,22 @@
+"""
+backend/tests/test_scraper.py
+─────────────────────────────────────────────────────────────────────────────
+Unit tests for the new Adaptive Webtoon / Chapter Scraper facade and parser.
+─────────────────────────────────────────────────────────────────────────────
+"""
+
 import pytest
-from app.services.image.scraper.scraper import parse_episodes_from_soup, extract_max_page_from_soup
+from services.scraper.extraction.dom import DomExtractor
+from services.scraper.reader_detector import ReaderDetector
+from services.scraper.workflow import scrape_webtoon_episodes
 
-def test_parse_episodes_from_soup_none():
-    result = parse_episodes_from_soup(None, "https://example.com")
-    assert result == []
 
-def test_extract_max_page_from_soup_none():
-    result = extract_max_page_from_soup(None)
-    assert result == 1
+def test_dom_extractor_empty_soup():
+    soup = DomExtractor.get_soup("")
+    assert soup is None
 
-def test_parse_with_bs4_ignores_creator_notes_and_avatars():
-    from services.image.scraper.parsers import parse_with_bs4
+
+def test_reader_detector_ignores_creator_notes_and_avatars():
     sample_html = """
     <html>
       <body>
@@ -27,9 +33,16 @@ def test_parse_with_bs4_ignores_creator_notes_and_avatars():
       </body>
     </html>
     """
-    images = parse_with_bs4(sample_html, "https://example.com/comic/viewer")
-    assert "https://example.com/panel_1.jpg" in images
-    assert "https://example.com/panel_2.jpg" in images
-    assert "https://example.com/creator_avatar.jpg" not in images
-    assert "https://example.com/author_profile.jpg" not in images
+    candidates, best = ReaderDetector.detect_reader(sample_html)
+    assert best is not None
+    assert best.selector == "#_imageList"
 
+    soup = DomExtractor.get_soup(sample_html)
+    selected_node = soup.select_one(best.selector)
+    extracted = DomExtractor.extract_images_from_container(selected_node, "https://example.com/comic/viewer")
+
+    extracted_urls = [c.url for c in extracted]
+    assert "https://example.com/panel_1.jpg" in extracted_urls
+    assert "https://example.com/panel_2.jpg" in extracted_urls
+    assert "https://example.com/creator_avatar.jpg" not in extracted_urls
+    assert "https://example.com/author_profile.jpg" not in extracted_urls

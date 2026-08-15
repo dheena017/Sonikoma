@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Play, Loader, AlertTriangle, ArrowRight, Minimize2, Maximize2 } from 'lucide-react';
 import { getProxiedImageUrl } from "@/shared/utils/url";
+import { scrapeChapter } from "@/api";
 
 import type { Episode } from "../types/EpisodeTypes";
 
@@ -58,25 +59,19 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
       setImages([]);
 
       try {
-        const res = await fetchWithInterceptor('/api/scrape-images', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: episode.url,
-            scrape_only: true,
-            bypass_cache: true,
-          }),
+        const data = await scrapeChapter(fetchWithInterceptor, {
+          url: episode.url,
+          force_refresh: true,
+          proxy_images: true,
         });
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch: ${res.statusText}`);
-        }
-
-        const data = await res.json();
         if (data.success && data.images && data.images.length > 0) {
-          setImages(data.images);
+          const imageUrls = data.images.map((img: any) =>
+            typeof img === "string" ? img : img.url
+          );
+          setImages(imageUrls);
         } else {
-          throw new Error(data.error || 'No images found on this Webtoon page.');
+          throw new Error(data.error?.message || (data as any).message || 'No images found on this Webtoon page.');
         }
       } catch (err) {
         console.error('[Preview Scraper Error] ', err);

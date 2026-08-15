@@ -94,11 +94,13 @@ def test_batch_scrape_endpoint():
     data = response.json()
     assert data["success"] is True
     assert "job_id" in data
-    assert data["status"] == "queued"
+    # New Job-based architecture returns uppercase status from the unified JobManager
+    assert data["status"].upper() == "QUEUED"
+    assert "/jobs/" in data["status_url"]
 
+    # Verify job is retrievable via unified jobs API
     job_id = data["job_id"]
-    status_resp = client.get(f"/batch-status/{job_id}")
-    assert status_resp.status_code == 200
-    status_data = status_resp.json()
-    assert status_data["success"] is True
-    assert status_data["job"]["job_id"] == job_id
+    from services.jobs import job_manager
+    job = job_manager.get_job(job_id)
+    assert job is not None
+    assert job.job_id == job_id
