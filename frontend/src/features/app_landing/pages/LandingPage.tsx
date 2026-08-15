@@ -38,7 +38,7 @@ import {
   TranslationBefore,
   TranslationAfter,
   CinematicRenderDemo,
-  Landing3DScene,
+  LandingAnimeScene,
 } from "@/features/app_landing/components";
 
 interface LandingPageProps {
@@ -152,7 +152,7 @@ export default function LandingPage({
             : "bg-neutral-950/90 border-neutral-800/80"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <div
             className="flex items-center gap-3 group cursor-pointer"
             onClick={() => {
@@ -165,18 +165,18 @@ export default function LandingPage({
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
-              className="w-10 h-10 rounded-xl shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform object-cover bg-purple-600/10 border border-purple-500/30"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl shadow-lg shadow-purple-500/20 group-hover:scale-105 transition-transform object-cover bg-purple-600/10 border border-purple-500/30"
               alt="Sonikoma Logo"
             />
             <div className="flex flex-col">
               <span
-                className={`text-xl font-black tracking-tighter uppercase transition-colors duration-300 ${
+                className={`text-lg sm:text-xl font-black tracking-tighter uppercase transition-colors duration-300 ${
                   isLight ? "text-slate-900" : "text-white"
                 }`}
               >
                 Sonikoma
               </span>
-              <span className="text-[9px] font-mono font-bold tracking-widest text-purple-500 uppercase -mt-1">
+              <span className="hidden sm:block text-[9px] font-mono font-bold tracking-widest text-purple-500 uppercase -mt-1">
                 Comic to Video AI
               </span>
             </div>
@@ -212,7 +212,7 @@ export default function LandingPage({
           <div className="flex items-center gap-3">
             <button
               onClick={toggleThemeMode}
-              className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+              className={`p-2 sm:p-2.5 rounded-xl border transition-all cursor-pointer ${
                 isLight
                   ? "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
                   : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"
@@ -227,7 +227,7 @@ export default function LandingPage({
             </button>
             <button
               onClick={onLogin}
-              className={`px-5 py-2.5 text-sm font-bold transition-colors cursor-pointer ${
+              className={`hidden sm:inline-flex px-5 py-2.5 text-sm font-bold transition-colors cursor-pointer ${
                 isLight
                   ? "text-slate-700 hover:text-slate-950"
                   : "text-neutral-300 hover:text-white"
@@ -237,7 +237,7 @@ export default function LandingPage({
             </button>
             <button
               onClick={onGetStarted}
-              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-black rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all shadow-md shadow-purple-600/30 active:scale-95 cursor-pointer"
+              className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-black rounded-xl hover:from-purple-500 hover:to-indigo-500 transition-all shadow-md shadow-purple-600/30 active:scale-95 cursor-pointer"
             >
               Get Started
             </button>
@@ -252,13 +252,13 @@ export default function LandingPage({
           isLight ? "bg-[#f8fafc]" : "bg-[#09090b]"
         }`}
       >
-        <Landing3DScene themeMode={themeMode} />
+        <LandingAnimeScene themeMode={themeMode} />
 
       {/* HERO SECTION */}
       <section className="relative pt-20 pb-20 px-6 overflow-hidden">
-        {/* We keep the glows behind the 3D scene but make sure content is above */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-gradient-to-b from-purple-600/15 via-indigo-600/10 to-transparent blur-[120px] rounded-full -z-10 animate-pulse" />
-        <div className="absolute top-40 left-1/4 w-[400px] h-[400px] bg-indigo-500/10 blur-[100px] rounded-full -z-10" />
+        {/* Anime motion layer stays behind the hero copy while this wash keeps text readable. */}
+        <div className="absolute inset-x-0 top-0 h-[560px] bg-gradient-to-b from-purple-600/12 via-indigo-600/8 to-transparent -z-10 animate-pulse" />
+        <div className="absolute inset-x-0 top-16 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent -z-10" />
 
         <div className="max-w-7xl mx-auto text-center space-y-8 relative z-10">
           <div className="flex flex-wrap items-center justify-center gap-3">

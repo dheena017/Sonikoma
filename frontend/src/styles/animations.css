@@ -189,3 +189,266 @@
   transform: translateY(-2px);
   box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.25);
 }
+
+/* Anime landing key visual */
+.anime-hero-scene {
+  overflow: hidden;
+  opacity: 0.92;
+  background: linear-gradient(115deg, #08080d 0%, #18213d 48%, #0e2638 100%);
+}
+
+.anime-hero-scene-light {
+  background: #f8fafc;
+}
+
+.anime-hero-art {
+  position: absolute;
+  left: -8vw;
+  top: -6vh;
+  width: 118vw;
+  height: 112vh;
+  object-fit: cover;
+  object-position: 54% center;
+  filter: saturate(1.08) contrast(1.04);
+  animation: anime-art-drift 16s ease-in-out infinite;
+}
+
+.anime-hero-scene-light .anime-hero-art {
+  opacity: 0.74;
+  filter: saturate(1.03) contrast(0.96) brightness(1.08);
+}
+
+.anime-hero-vignette,
+.anime-hero-readability,
+.anime-hero-speed-lines,
+.anime-hero-filmstrip,
+.anime-hero-sparkles {
+  position: absolute;
+  inset: 0;
+}
+
+.anime-hero-vignette {
+  background:
+    radial-gradient(circle at 82% 38%, transparent 0 36%, rgba(8, 8, 13, 0.08) 64%, rgba(8, 8, 13, 0.34) 100%),
+    linear-gradient(180deg, rgba(8, 8, 13, 0.16), rgba(8, 8, 13, 0.52));
+}
+
+.anime-hero-scene-light .anime-hero-vignette {
+  background:
+    radial-gradient(circle at 82% 38%, transparent 0 36%, rgba(248, 250, 252, 0.1) 64%, rgba(248, 250, 252, 0.58) 100%),
+    linear-gradient(180deg, rgba(248, 250, 252, 0.18), rgba(248, 250, 252, 0.74));
+}
+
+.anime-hero-readability {
+  background:
+    linear-gradient(90deg, rgba(8, 8, 13, 0.88) 0%, rgba(8, 8, 13, 0.54) 34%, rgba(8, 8, 13, 0.16) 62%, transparent 100%),
+    linear-gradient(180deg, rgba(8, 8, 13, 0.64) 0%, transparent 34%, rgba(8, 8, 13, 0.78) 100%);
+}
+
+.anime-hero-scene-light .anime-hero-readability {
+  background:
+    linear-gradient(90deg, rgba(248, 250, 252, 0.9) 0%, rgba(248, 250, 252, 0.62) 35%, rgba(248, 250, 252, 0.18) 62%, transparent 100%),
+    linear-gradient(180deg, rgba(248, 250, 252, 0.66) 0%, transparent 36%, rgba(248, 250, 252, 0.84) 100%);
+}
+
+.anime-hero-speed-lines {
+  transform: rotate(-12deg);
+  opacity: 0.72;
+  mix-blend-mode: screen;
+}
+
+.anime-hero-speed-lines span {
+  position: absolute;
+  left: -30vw;
+  width: 38vw;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.88), rgba(34, 211, 238, 0.62), transparent);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.56);
+  animation: anime-hero-speed 5.8s linear infinite;
+}
+
+.anime-hero-speed-lines span:nth-child(1) {
+  top: 19vh;
+  animation-delay: -0.8s;
+}
+
+.anime-hero-speed-lines span:nth-child(2) {
+  top: 38vh;
+  width: 28vw;
+  animation-delay: -3.4s;
+}
+
+.anime-hero-speed-lines span:nth-child(3) {
+  top: 59vh;
+  width: 46vw;
+  animation-delay: -1.9s;
+}
+
+.anime-hero-speed-lines span:nth-child(4) {
+  top: 77vh;
+  height: 1px;
+  animation-delay: -4.6s;
+}
+
+.anime-hero-filmstrip {
+  top: auto;
+  bottom: clamp(70px, 10vh, 126px);
+  left: 0;
+  right: 0;
+  height: clamp(36px, 5vw, 58px);
+  background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.24), transparent);
+  transform: skewY(-2deg);
+  opacity: 0.46;
+}
+
+.anime-hero-filmstrip span {
+  position: absolute;
+  top: 18%;
+  width: clamp(42px, 7vw, 98px);
+  height: 64%;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.24), rgba(34, 211, 238, 0.16));
+  animation: anime-film-shimmer 7s ease-in-out infinite;
+}
+
+.anime-hero-filmstrip span:nth-child(1) {
+  left: 15%;
+  animation-delay: -0.4s;
+}
+
+.anime-hero-filmstrip span:nth-child(2) {
+  left: 28%;
+  animation-delay: -1.6s;
+}
+
+.anime-hero-filmstrip span:nth-child(3) {
+  left: 42%;
+  animation-delay: -2.8s;
+}
+
+.anime-hero-filmstrip span:nth-child(4) {
+  left: 57%;
+  animation-delay: -4s;
+}
+
+.anime-hero-filmstrip span:nth-child(5) {
+  left: 72%;
+  animation-delay: -5.2s;
+}
+
+.anime-hero-sparkles span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.82), 0 0 24px rgba(34, 211, 238, 0.5);
+  animation: anime-sparkle-rise 6s ease-in-out infinite;
+}
+
+.anime-hero-sparkles span:nth-child(1) {
+  left: 17%;
+  top: 22%;
+  animation-delay: -0.6s;
+}
+
+.anime-hero-sparkles span:nth-child(2) {
+  left: 38%;
+  top: 15%;
+  animation-delay: -2.1s;
+}
+
+.anime-hero-sparkles span:nth-child(3) {
+  left: 61%;
+  top: 31%;
+  animation-delay: -4.8s;
+}
+
+.anime-hero-sparkles span:nth-child(4) {
+  left: 74%;
+  top: 58%;
+  animation-delay: -1.4s;
+}
+
+.anime-hero-sparkles span:nth-child(5) {
+  left: 29%;
+  top: 72%;
+  animation-delay: -3.3s;
+}
+
+.anime-hero-sparkles span:nth-child(6) {
+  left: 86%;
+  top: 19%;
+  animation-delay: -5.1s;
+}
+
+@keyframes anime-art-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-1.6vw, -1vh, 0) scale(1.035);
+  }
+}
+
+@keyframes anime-hero-speed {
+  0% {
+    opacity: 0;
+    transform: translateX(0) scaleX(0.3);
+  }
+  14% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(160vw) scaleX(1.55);
+  }
+}
+
+@keyframes anime-film-shimmer {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.88;
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes anime-sparkle-rise {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.7);
+  }
+  45% {
+    opacity: 0.92;
+    transform: translateY(-6px) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .anime-hero-scene {
+    opacity: 0.72;
+  }
+
+  .anime-hero-art {
+    object-position: 68% center;
+  }
+
+  .anime-hero-filmstrip {
+    bottom: 46px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anime-hero-art,
+  .anime-hero-speed-lines span,
+  .anime-hero-filmstrip span,
+  .anime-hero-sparkles span {
+    animation: none;
+  }
+}
