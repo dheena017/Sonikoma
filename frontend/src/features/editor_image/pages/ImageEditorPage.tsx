@@ -339,10 +339,10 @@ const ImageEditorPage = React.memo(({
         </aside>
 
         {/* Center Canvas */}
-        <main className="flex-1 h-full relative overflow-hidden bg-black/50 flex items-center justify-center">
+        <main className="flex-1 h-full relative overflow-hidden bg-black/30 backdrop-blur-sm flex items-center justify-center">
           <div
             className="absolute inset-0 opacity-20 pointer-events-none"
-            style={{ backgroundImage: "radial-gradient(#374151 1px, transparent 0)", backgroundSize: "20px 20px" }}
+            style={{ backgroundImage: "radial-gradient(#a855f7 1px, transparent 0)", backgroundSize: "20px 20px" }}
           />
           <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
             {canvasSubtree}

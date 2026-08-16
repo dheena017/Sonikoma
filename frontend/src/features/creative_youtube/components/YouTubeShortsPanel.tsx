@@ -258,8 +258,11 @@ export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPa
             >
               {/* Thumbnail Image */}
               <img
-                src={short.thumbnail}
+                src={short.thumbnail || `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`}
                 alt={short.title}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`;
+                }}
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
 

@@ -9,7 +9,7 @@ from typing import Any, Optional
 logger = logging.getLogger("sonikoma.providers.whisper")
 
 try:
-    import whisper as whisper_lib
+    import whisper as whisper_lib  # type: ignore[import-not-found]
     WHISPER_AVAILABLE = True
 except Exception:
     whisper_lib = None

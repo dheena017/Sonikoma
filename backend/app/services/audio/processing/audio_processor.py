@@ -36,6 +36,9 @@ async def detect_silence(
     threshold_db: float = -40,
     min_duration: float = 0.5
 ) -> List[SilenceSegment]:
+    if librosa is None:
+        raise RuntimeError("librosa is not available. Please install librosa to use this feature.")
+
     y, sr = await engine.load_audio(audio_path)
 
     S = librosa.feature.melspectrogram(y=y, sr=sr)
@@ -74,6 +77,9 @@ async def segment_by_energy(
     num_segments: int = 10,
     energy_threshold: Optional[float] = None
 ) -> List[EnergySegment]:
+    if librosa is None:
+        raise RuntimeError("librosa is not available. Please install librosa to use this feature.")
+
     y, sr = await engine.load_audio(audio_path)
     energy = await asyncio.to_thread(engine._compute_energy, y)
 
@@ -161,6 +167,9 @@ async def save_audio_segment(
     end_time: float,
     output_path: str
 ) -> str:
+    if sf is None:
+        raise RuntimeError("soundfile is not available. Please install soundfile to use this feature.")
+
     y, sr = await engine.load_audio(audio_path)
     start_sample = int(start_time * sr)
     end_sample = int(end_time * sr)

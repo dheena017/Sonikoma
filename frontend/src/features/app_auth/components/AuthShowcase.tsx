@@ -296,7 +296,7 @@ export default function AuthShowcase({
       </div>
 
       {/* Carousel Slide Area */}
-      <div className="relative z-10 my-auto max-w-lg min-h-[260px] flex flex-col justify-center">
+      <div className="relative z-10 my-auto w-full max-w-xl min-h-[440px] flex flex-col justify-center">
         {SHOWCASE_SLIDES.map((slide, idx) => {
           const IconComponent = slide.icon;
           const isActive = idx === currentSlide;
@@ -304,66 +304,262 @@ export default function AuthShowcase({
           return (
             <div
               key={idx}
-              className={`absolute inset-0 flex flex-col justify-center transition-all duration-700 ease-out transform ${
+              className={`absolute inset-0 flex flex-col justify-between transition-all duration-700 ease-out transform ${
                 isActive
                   ? "opacity-100 scale-100 translate-y-0"
                   : "opacity-0 scale-95 translate-y-8 pointer-events-none"
               }`}
             >
-              <div className="flex">
-                <span
-                  className={`text-[10px] font-bold tracking-wider uppercase bg-gradient-to-r ${slide.color} text-transparent bg-clip-text px-3 py-1 rounded-full border border-white/5 backdrop-blur-md`}
-                >
-                  {slide.badge}
-                </span>
-              </div>
-              <h1 className="text-4xl font-extrabold text-white mt-4 tracking-tight leading-tight">
-                {slide.title}
-              </h1>
-              <p className="mt-4 text-neutral-400 text-base leading-relaxed font-sans">
-                {slide.description}
-              </p>
-              <div className="flex items-center gap-3 mt-6">
-                <div
-                  className={`flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${slide.color} shadow-lg shadow-purple-500/10 overflow-hidden`}
-                >
-                  <img
-                    src="/logo-dark.png"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                    }}
-                    alt="Sonikoma Logo"
-                    className="w-8 h-8 object-contain drop-shadow-md"
-                  />
+              {/* Header Info */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-[10px] font-mono font-bold tracking-wider uppercase bg-gradient-to-r ${slide.color} text-transparent bg-clip-text px-3 py-1 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-md shadow-sm`}
+                  >
+                    {slide.badge}
+                  </span>
+                  <span className="text-[10px] font-mono text-neutral-500 font-semibold">
+                    0{idx + 1} / 0{SHOWCASE_SLIDES.length}
+                  </span>
                 </div>
+
+                <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-tight">
+                  {slide.title}
+                </h1>
+                <p className="text-neutral-400 text-sm leading-relaxed font-sans max-w-lg">
+                  {slide.description}
+                </p>
+              </div>
+
+              {/* DYNAMIC INTERACTIVE VISUAL MOCKUP CARD FOR EACH SLIDE */}
+              <div className="my-5 w-full bg-[#0c0d16]/80 backdrop-blur-2xl rounded-2xl border border-white/10 p-4 shadow-[0_12px_32px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                {/* Subtle top laser glow */}
+                <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${slide.color} opacity-60`} />
+
+                {idx === 0 && (
+                  /* Slide 0: AI Webtoon Slicer Mockup with Real Panel Artwork */
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 border-b border-white/5 pb-2">
+                      <span className="flex items-center gap-1.5 text-purple-300 font-bold">
+                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        CV Strip Segmentation Engine
+                      </span>
+                      <span className="text-[10px] text-emerald-400 font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+                        ✓ 99.8% Precision
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <div className="bg-neutral-900/90 border border-purple-500/50 rounded-xl overflow-hidden flex flex-col relative group shadow-md">
+                        <div className="relative aspect-[3/4] w-full overflow-hidden">
+                          <img
+                            src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop&q=80"
+                            alt="Panel 1"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+                          <div className="absolute top-1 right-1 text-[8px] font-mono bg-purple-600 text-white font-bold px-1.5 py-0.5 rounded shadow">P1</div>
+                        </div>
+                        <div className="p-1.5 text-center bg-[#0d0f1a]">
+                          <span className="text-[10px] font-bold text-neutral-200 block truncate">Hero Entry</span>
+                          <span className="text-[8px] font-mono text-purple-400">1080×1920</span>
+                        </div>
+                      </div>
+                      <div className="bg-neutral-900/90 border border-indigo-500/50 rounded-xl overflow-hidden flex flex-col relative group shadow-md">
+                        <div className="relative aspect-[3/4] w-full overflow-hidden">
+                          <img
+                            src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400&auto=format&fit=crop&q=80"
+                            alt="Panel 2"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+                          <div className="absolute top-1 right-1 text-[8px] font-mono bg-indigo-600 text-white font-bold px-1.5 py-0.5 rounded shadow">P2</div>
+                        </div>
+                        <div className="p-1.5 text-center bg-[#0d0f1a]">
+                          <span className="text-[10px] font-bold text-neutral-200 block truncate">Dialogue Close</span>
+                          <span className="text-[8px] font-mono text-indigo-400">OCR Detected</span>
+                        </div>
+                      </div>
+                      <div className="bg-neutral-900/90 border border-cyan-500/50 rounded-xl overflow-hidden flex flex-col relative group shadow-md">
+                        <div className="relative aspect-[3/4] w-full overflow-hidden">
+                          <img
+                            src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&auto=format&fit=crop&q=80"
+                            alt="Panel 3"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+                          <div className="absolute top-1 right-1 text-[8px] font-mono bg-cyan-600 text-white font-bold px-1.5 py-0.5 rounded shadow">P3</div>
+                        </div>
+                        <div className="p-1.5 text-center bg-[#0d0f1a]">
+                          <span className="text-[10px] font-bold text-neutral-200 block truncate">Action Climax</span>
+                          <span className="text-[8px] font-mono text-cyan-400">Auto Gutter</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {idx === 1 && (
+                  /* Slide 1: Cinematic Motion Dynamics Mockup with Real Artwork */
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 border-b border-white/5 pb-2">
+                      <span className="flex items-center gap-1.5 text-cyan-300 font-bold">
+                        <Film className="w-3.5 h-3.5 text-cyan-400" />
+                        Camera Pan & Zoom Director
+                      </span>
+                      <span className="text-[10px] text-cyan-400 font-mono font-bold px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20">
+                        60 FPS Live
+                      </span>
+                    </div>
+                    <div className="relative aspect-[16/7] bg-neutral-950/80 rounded-xl border border-white/10 overflow-hidden group shadow-lg">
+                      <img
+                        src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=800&auto=format&fit=crop&q=80"
+                        alt="Cinematic Camera Preview"
+                        className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-1000"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/30 to-black/80" />
+                      <div className="absolute inset-3 border border-cyan-400/50 rounded-lg flex items-center justify-between px-3 pointer-events-none">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-cyan-500/30 border border-cyan-400 flex items-center justify-center text-cyan-200 animate-pulse">
+                            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-bold text-white drop-shadow">Ken-Burns Pan Sequence</p>
+                            <p className="text-[9px] font-mono text-cyan-300">Duration: 4.5s • Smooth Cubic</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 font-mono text-[9px]">
+                          <span className="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-neutral-200 border border-white/20">✦ Zoom In</span>
+                          <span className="px-2 py-1 rounded bg-cyan-600/80 text-white font-bold border border-cyan-400/50 shadow">✦ 4K 60FPS</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {idx === 2 && (
+                  /* Slide 2: AI Narrative Audio Mixer Mockup */
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 border-b border-white/5 pb-2">
+                      <span className="flex items-center gap-1.5 text-pink-300 font-bold">
+                        <Volume2 className="w-3.5 h-3.5 text-pink-400" />
+                        Multi-Track Neural Speech Synthesis
+                      </span>
+                      <span className="text-[10px] text-pink-400 font-bold px-2 py-0.5 rounded-md bg-pink-500/10 border border-pink-500/20">
+                        Stereo 48kHz
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-neutral-950/70 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] font-bold text-white">Akira (Narrator)</p>
+                          <p className="text-[8px] font-mono text-neutral-400">Japanese • Dramatic</p>
+                        </div>
+                        <div className="flex items-end gap-0.5 h-5">
+                          <span className="w-1 bg-pink-500 h-3 rounded-full animate-pulse" />
+                          <span className="w-1 bg-purple-500 h-5 rounded-full animate-pulse" />
+                          <span className="w-1 bg-indigo-500 h-2 rounded-full animate-pulse" />
+                          <span className="w-1 bg-pink-400 h-4 rounded-full animate-pulse" />
+                        </div>
+                      </div>
+                      <div className="bg-neutral-950/70 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] font-bold text-white">Ambient SFX Track</p>
+                          <p className="text-[8px] font-mono text-neutral-400">⚡ Thunder Rumble</p>
+                        </div>
+                        <span className="text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                          Synced
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {idx === 3 && (
+                  /* Slide 3: One-Click Video Compiler Mockup */
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 border-b border-white/5 pb-2">
+                      <span className="flex items-center gap-1.5 text-amber-300 font-bold">
+                        <Cpu className="w-3.5 h-3.5 text-amber-400" />
+                        Hardware Accelerated Video Compiler
+                      </span>
+                      <span className="text-[10px] text-amber-400 font-mono font-bold px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20">
+                        ProRes / MP4
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-[10px] font-mono">
+                        <span className="text-neutral-300">Compiling 4K UHD Storyboard...</span>
+                        <span className="text-amber-400 font-bold">96% Complete</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden border border-white/5">
+                        <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 w-[96%] rounded-full shadow-sm" />
+                      </div>
+                      <div className="flex items-center gap-1.5 pt-1">
+                        <span className="text-[9px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">4K 60FPS</span>
+                        <span className="text-[9px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">H.265 / HEVC</span>
+                        <span className="text-[9px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">14+ Languages</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Feature Metrics Chips Row */}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <span className="text-[10px] font-mono font-bold text-neutral-300 bg-white/[0.03] border border-white/8 px-2.5 py-1 rounded-lg">
+                  ⚡ 0.4s Fast Inference
+                </span>
+                <span className="text-[10px] font-mono font-bold text-neutral-300 bg-white/[0.03] border border-white/8 px-2.5 py-1 rounded-lg">
+                  🎬 4K 60FPS Engine
+                </span>
+                <span className="text-[10px] font-mono font-bold text-neutral-300 bg-white/[0.03] border border-white/8 px-2.5 py-1 rounded-lg">
+                  🎯 99.8% OCR Precision
+                </span>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Footer Navigation Dots & Copyright */}
-      <div className="relative z-10 flex items-center justify-between">
+      {/* Footer Navigation Dots & Slide Switcher */}
+      <div className="relative z-10 flex items-center justify-between border-t border-white/5 pt-5 mt-4">
         <div className="flex items-center gap-3">
           <div className="flex gap-2">
             {SHOWCASE_SLIDES.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                   idx === currentSlide
                     ? `w-8 ${currentTheme.dot}`
-                    : "w-2 bg-neutral-700 hover:bg-neutral-600"
+                    : "w-2 bg-neutral-700 hover:bg-neutral-500"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
           </div>
-
-
+          <div className="flex items-center gap-1 ml-2">
+            <button
+              type="button"
+              onClick={() => setCurrentSlide((prev) => (prev === 0 ? SHOWCASE_SLIDES.length - 1 : prev - 1))}
+              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-mono font-bold px-2"
+              title="Previous slide"
+            >
+              &larr;
+            </button>
+            <button
+              type="button"
+              onClick={() => setCurrentSlide((prev) => (prev + 1) % SHOWCASE_SLIDES.length)}
+              className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-mono font-bold px-2"
+              title="Next slide"
+            >
+              &rarr;
+            </button>
+          </div>
         </div>
-        <p className="text-xs text-neutral-600 font-medium font-mono">
-          © {new Date().getFullYear()} Sonikoma AI Corp. All rights reserved.
+
+        <p className="text-[11px] text-neutral-500 font-medium font-mono">
+          © {new Date().getFullYear()} Sonikoma AI Corp.
         </p>
       </div>
 

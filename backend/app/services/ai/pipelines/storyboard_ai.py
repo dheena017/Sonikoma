@@ -61,19 +61,23 @@ def get_programmatic_panels(title: str, genre: str, episode: str, img_urls: List
 
 
 async def generate_dynamic_panels(
-    title: str,
-    genre: str,
-    episode: str,
-    img_urls: List[str],
+    title: str = "",
+    genre: str = "",
+    episode: str = "Episode 1",
+    img_urls: Optional[List[str]] = None,
     model: Optional[str] = None,
     narration_style: str = "long",
-    user_keys: Optional[Dict[str, str]] = None
+    user_keys: Optional[Dict[str, str]] = None,
+    images: Optional[List[str]] = None,
+    synopsis: Optional[str] = None,
+    **kwargs
 ) -> List[Dict[str, Any]]:
     """
     Generates narration script and storyboard camera moves via AI Markdown Skills.
     """
     import os
-    active_slices_count = min(len(img_urls), 8)
+    resolved_urls = img_urls if img_urls is not None else (images or [])
+    active_slices_count = min(len(resolved_urls), 8)
     if active_slices_count == 0:
         logger.warning("[Storyboard AI] No image URLs provided for storyboard generation.")
         return []
@@ -132,8 +136,8 @@ async def generate_dynamic_panels(
 
                     result.append({
                         "id": idx + 1,
-                        "image_url": img_urls[idx],
-                        "original_image_url": img_urls[idx],
+                        "image_url": resolved_urls[idx],
+                        "original_image_url": resolved_urls[idx],
                         "speech_text": p.get("speech_text") or f"Scene {idx + 1}",
                         "sfx": p.get("sfx") or "[Action]",
                         "duration": duration_val,
@@ -167,8 +171,8 @@ async def generate_dynamic_panels(
 
                         result.append({
                             "id": idx + 1,
-                            "image_url": img_urls[idx],
-                            "original_image_url": img_urls[idx],
+                            "image_url": resolved_urls[idx],
+                            "original_image_url": resolved_urls[idx],
                             "speech_text": p.get("speech_text") or f"Scene {idx + 1} of {title}",
                             "sfx": p.get("sfx") or "[Action Sounds]",
                             "duration": duration_val,

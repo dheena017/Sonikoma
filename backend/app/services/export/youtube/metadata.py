@@ -7,8 +7,8 @@ Handles YouTube video metadata formatting, tag validation, and shorts logic.
 from typing import Optional, List
 
 def format_video_metadata(
-    title: str,
-    description: str,
+    title: Optional[str] = "Untitled Video",
+    description: Optional[str] = "",
     tags: Optional[List[str]] = None,
     category_id: Optional[str] = "1",
     privacy_status: Optional[str] = "unlisted",
@@ -19,8 +19,8 @@ def format_video_metadata(
     user_tags = tags if tags else []
     final_tags = list(set(default_tags + [t.strip() for t in user_tags if t.strip()]))
 
-    final_title = title
-    final_description = description
+    final_title = title or "Untitled Video"
+    final_description = description or ""
 
     if is_short:
         if "#Shorts" not in final_title and "#shorts" not in final_title:

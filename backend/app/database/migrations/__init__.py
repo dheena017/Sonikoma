@@ -468,6 +468,7 @@ def init_sqlite(conn) -> None:
           client_id           TEXT,
           client_secret       TEXT,
           scopes              TEXT,
+          google_email        TEXT,
           selected_channel_id TEXT,
           selected_channel_title TEXT,
           selected_channel_thumbnail TEXT,
@@ -476,6 +477,10 @@ def init_sqlite(conn) -> None:
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """)
+        try:
+            cursor.execute("ALTER TABLE youtube_oauth_tokens ADD COLUMN google_email TEXT")
+        except Exception:
+            pass
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_youtube_channels (
           channel_id          TEXT NOT NULL,

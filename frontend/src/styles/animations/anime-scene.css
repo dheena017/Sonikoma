@@ -3,6 +3,10 @@
    ========================================================================== */
 
 .anime-hero-scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   opacity: 0.92;
   background: linear-gradient(115deg, #08080d 0%, #151d36 48%, #0d2232 100%);
@@ -13,17 +17,18 @@
   background: #f8fafc;
 }
 
-/* Base Art Layer with Parallax */
+/* Base Art Layer: Auto-fit all screens with full object-cover */
 .anime-hero-art {
   position: absolute;
-  inset: -20px;
-  width: calc(100% + 40px);
-  height: calc(100% + 40px);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center center;
   filter: saturate(1.1) contrast(1.05);
   animation: anime-art-drift 20s ease-in-out infinite;
-  transform: translate(var(--mouse-x, 0px), var(--mouse-y, 0px)) scale(1.02);
+  transform-origin: center center;
   transition: filter 0.5s ease, opacity 0.5s ease, transform 0.2s ease-out;
 }
 
@@ -416,12 +421,20 @@
 }
 
 /* 8. AUTH & LANDING: High-impact hero presentation */
-.anime-hero-scene-landing,
 .anime-hero-scene-auth {
   opacity: 0.95;
 }
-.anime-hero-scene-landing .anime-hero-art,
 .anime-hero-scene-auth .anime-hero-art {
+  animation: anime-art-drift 16s ease-in-out infinite;
+  filter: saturate(1.15) contrast(1.08);
+}
+
+.anime-hero-scene-landing {
+  opacity: 0.95;
+  mask-image: linear-gradient(to bottom, black 0%, black 500px, rgba(0, 0, 0, 0.35) 750px, transparent 950px);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 500px, rgba(0, 0, 0, 0.35) 750px, transparent 950px);
+}
+.anime-hero-scene-landing .anime-hero-art {
   animation: anime-art-drift 16s ease-in-out infinite;
   filter: saturate(1.15) contrast(1.08);
 }

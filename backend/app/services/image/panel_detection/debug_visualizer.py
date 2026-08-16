@@ -73,15 +73,20 @@ DEFAULT_CONFIG = VisualizationConfig()
 def _extract_box_coords(obj: Union[Dict[str, Any], Any]) -> Tuple[int, int, int, int]:
     try:
         if isinstance(obj, dict):
-            x = int(obj.get("x", 0))
-            y = int(obj.get("y", 0))
-            w = int(obj.get("width", obj.get("w", 0)))
-            h = int(obj.get("height", obj.get("h", 0)))
+            raw_x = obj.get("x")
+            raw_y = obj.get("y")
+            raw_w = obj.get("width") if obj.get("width") is not None else obj.get("w")
+            raw_h = obj.get("height") if obj.get("height") is not None else obj.get("h")
         else:
-            x = int(getattr(obj, "x", 0))
-            y = int(getattr(obj, "y", 0))
-            w = int(getattr(obj, "width", getattr(obj, "w", 0)))
-            h = int(getattr(obj, "height", getattr(obj, "h", 0)))
+            raw_x = getattr(obj, "x", None)
+            raw_y = getattr(obj, "y", None)
+            raw_w = getattr(obj, "width", None) if getattr(obj, "width", None) is not None else getattr(obj, "w", None)
+            raw_h = getattr(obj, "height", None) if getattr(obj, "height", None) is not None else getattr(obj, "h", None)
+
+        x = int(raw_x) if raw_x is not None else 0
+        y = int(raw_y) if raw_y is not None else 0
+        w = int(raw_w) if raw_w is not None else 0
+        h = int(raw_h) if raw_h is not None else 0
         return x, y, w, h
     except (ValueError, TypeError, AttributeError) as e:
         logger.debug(f"[DebugViz] Failed to extract box coordinates: {e}")
@@ -91,8 +96,10 @@ def _extract_box_coords(obj: Union[Dict[str, Any], Any]) -> Tuple[int, int, int,
 def _get_depth(obj: Union[Dict[str, Any], Any], default: int = 0) -> int:
     try:
         if isinstance(obj, dict):
-            return int(obj.get("depth", default))
-        return int(getattr(obj, "depth", default))
+            val = obj.get("depth")
+        else:
+            val = getattr(obj, "depth", None)
+        return int(val) if val is not None else default
     except (ValueError, TypeError):
         return default
 
@@ -100,8 +107,10 @@ def _get_depth(obj: Union[Dict[str, Any], Any], default: int = 0) -> int:
 def _get_confidence(obj: Union[Dict[str, Any], Any], default: float = 0.90) -> float:
     try:
         if isinstance(obj, dict):
-            return float(obj.get("confidence", default))
-        return float(getattr(obj, "confidence", default))
+            val = obj.get("confidence")
+        else:
+            val = getattr(obj, "confidence", None)
+        return float(val) if val is not None else default
     except (ValueError, TypeError):
         return default
 

@@ -17,11 +17,11 @@ export default function ChapterScraperDeckEmptyState({
   icon,
 }: ChapterScraperDeckEmptyStateProps) {
   return (
-    <div className="relative w-full flex flex-col items-center justify-center p-8 sm:p-12 my-2 rounded-2xl bg-neutral-950/80 border border-neutral-850 shadow-2xl backdrop-blur-xl text-center space-y-5 animate-in fade-in duration-300">
+    <div className="relative w-full flex flex-col items-center justify-center p-8 sm:p-12 my-2 rounded-2xl bg-white/[0.02] border border-white/8 text-center space-y-5 animate-in fade-in duration-300">
       {/* Animated Hero Icon Badge */}
       <div className="relative flex items-center justify-center">
         <div className="relative p-0.5 rounded-2xl bg-gradient-to-br from-purple-500/80 via-cyan-500/80 to-purple-600/80 shadow-lg">
-          <div className="w-14 h-14 rounded-[14px] bg-neutral-950 flex items-center justify-center text-purple-400">
+          <div className="w-14 h-14 rounded-[14px] bg-[#0c0d16]/90 flex items-center justify-center text-purple-400">
             {icon ?? <ImageIcon className="w-6 h-6 text-purple-400" />}
           </div>
         </div>
@@ -39,11 +39,11 @@ export default function ChapterScraperDeckEmptyState({
 
       {/* Feature Badges */}
       <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[10px] font-mono text-neutral-400">
-        <span className="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 flex items-center gap-1.5">
+        <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/8 flex items-center gap-1.5">
           <Zap className="w-3 h-3 text-purple-400" />
           <span>Auto-Stitcher</span>
         </span>
-        <span className="px-3 py-1 rounded-full bg-neutral-900 border border-neutral-800 flex items-center gap-1.5">
+        <span className="px-3 py-1 rounded-full bg-white/[0.04] border border-white/8 flex items-center gap-1.5">
           <Sparkles className="w-3 h-3 text-cyan-400" />
           <span>AI Bubble Cleaner</span>
         </span>

@@ -642,6 +642,10 @@ export function useAppState() {
           sessionStorage.setItem("sonikoma_token", data.access_token);
           localStorage.removeItem("sonikoma_token");
         }
+        if (data.user?.email) {
+          localStorage.setItem("user_email", data.user.email);
+          localStorage.setItem("sonikoma_user_email", data.user.email);
+        }
         setUser(data.user);
         setIsAuthenticated(true);
         addNotification("Logged in successfully!", "success", {
@@ -663,6 +667,10 @@ export function useAppState() {
         // Default to localStorage for registration/new accounts
         localStorage.setItem("sonikoma_token", data.access_token);
         sessionStorage.removeItem("sonikoma_token");
+        if (data.user?.email) {
+          localStorage.setItem("user_email", data.user.email);
+          localStorage.setItem("sonikoma_user_email", data.user.email);
+        }
         setUser(data.user);
         setIsAuthenticated(true);
         addNotification("Account created successfully!", "success", {
@@ -680,6 +688,8 @@ export function useAppState() {
   const logout = useCallback(() => {
     localStorage.removeItem("sonikoma_token");
     sessionStorage.removeItem("sonikoma_token");
+    localStorage.removeItem("user_email");
+    localStorage.removeItem("sonikoma_user_email");
     setUser(null);
     setIsAuthenticated(false);
     addNotification("Logged out successfully.", "info", {
@@ -733,6 +743,10 @@ export function useAppState() {
               localStorage.setItem("sonikoma_token", sessionData.access_token);
               sessionStorage.removeItem("sonikoma_token");
               const userPayload = sessionData.user ?? sessionData;
+              if (userPayload.email) {
+                localStorage.setItem("user_email", userPayload.email);
+                localStorage.setItem("sonikoma_user_email", userPayload.email);
+              }
               setUser(userPayload);
               setIsAuthenticated(true);
               addNotification("Signed in with Google!", "success", {

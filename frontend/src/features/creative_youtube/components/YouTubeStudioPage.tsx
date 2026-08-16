@@ -130,6 +130,7 @@ interface YouTubeStudioPageProps {
   onThumbnailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onThumbnailSelect: (url: string) => void;
   onPublish: () => void;
+  onResetUploadState?: () => void;
   handleGenerateMetadata: () => void;
   handleInjectPowerWord: (word: string) => void;
   handleApplyPresetTemplate: (type: "recap" | "trailer") => void;
@@ -243,6 +244,7 @@ export default function YouTubeStudioPage({
   onThumbnailChange,
   onThumbnailSelect,
   onPublish,
+  onResetUploadState,
   handleGenerateMetadata,
   handleInjectPowerWord,
   handleApplyPresetTemplate,
@@ -387,6 +389,8 @@ export default function YouTubeStudioPage({
             onThumbnailChange={onThumbnailChange}
             onThumbnailSelect={onThumbnailSelect}
             onPublish={onPublish}
+            onResetUploadState={onResetUploadState}
+            onOpenChannelModal={() => setIsChannelModalOpen(true)}
             isScheduled={isScheduled}
             setIsScheduled={setIsScheduled}
             scheduleDate={scheduleDate}

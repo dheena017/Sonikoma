@@ -720,29 +720,29 @@ const StoryboardCard = ({
   return (
     <div
       className={`${
-        viewLayout === "grid" ? "w-full min-w-0" : "w-[260px] sm:w-[290px] shrink-0"
-      } rounded-3xl border overflow-hidden transition-all duration-200 bg-neutral-950/95 shadow-[0_20px_60px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 hover:shadow-[0_25px_80px_rgba(131,63,248,0.18)] ${(panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll)
-          ? "border-2 border-purple-500/80 bg-purple-950/20 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.01]"
+        viewLayout === "grid" ? "w-full min-w-0" : "w-[260px] sm:w-[280px] shrink-0"
+      } group relative rounded-[1.5rem] overflow-hidden border p-4 space-y-3.5 transition-all duration-300 ease-out select-none outline-none backdrop-blur-xl shadow-[0_20px_50px_-30px_rgba(0,0,0,0.65)] ${(panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll)
+          ? "border-2 border-purple-500 bg-purple-950/30 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.02]"
           : isCurrent && isSelected
-            ? "bg-purple-950/40 border-purple-400 ring-2 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)]"
+            ? "bg-purple-950/40 border-purple-400 ring-2 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)] scale-[1.02]"
             : isCurrent
-              ? "bg-neutral-800/95 border-purple-500 shadow-lg"
+              ? "bg-[#0c0d16]/90 border-purple-500 shadow-lg scale-[1.01]"
               : isSelected
-                ? "bg-purple-950/35 border-purple-500 ring-2 ring-purple-500/70 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
-                : "border-neutral-800 hover:border-neutral-700"
+                ? "border-purple-500 bg-purple-950/30 shadow-[0_12px_40px_-12px_rgba(168,85,247,0.35)] ring-1 ring-purple-500/20 scale-[1.02]"
+                : "border-white/10 bg-[#0c0d16]/80 hover:border-purple-500/50 hover:shadow-[0_18px_40px_-20px_rgba(168,85,247,0.25)] hover:scale-[1.02] hover:-translate-y-1"
         }`}
     >
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className="relative h-48 sm:h-56 rounded-t-3xl overflow-hidden cursor-pointer select-none bg-gradient-to-br from-neutral-950 via-[#07050d] to-neutral-950 border-b border-neutral-800 shadow-inner flex items-center justify-center p-1.5 group"
+        className="relative h-48 sm:h-52 rounded-2xl overflow-hidden cursor-pointer select-none bg-gradient-to-br from-neutral-950 via-[#07050d] to-neutral-950 border border-white/8 shadow-inner flex items-center justify-center p-1.5 group/thumb"
       >
         <img
           src={panel.image_url}
           alt={`Panel ${panel.id}`}
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
-          className="w-full h-full object-contain object-center group-hover:scale-[1.03] transition-transform duration-300 rounded-2xl"
+          className="w-full h-full object-contain object-center group-hover/thumb:scale-[1.03] transition-transform duration-300 rounded-xl"
           style={{ filter: getPanelFilterStyle(panel) }}
           onError={(e) => {
             const img = e.currentTarget;
@@ -764,11 +764,11 @@ const StoryboardCard = ({
 
         {/* Selection indicator overlay when selected */}
         {isSelected && (
-          <div className="absolute inset-0 bg-purple-600/10 border-2 border-purple-500/60 rounded-lg pointer-events-none z-[5]" />
+          <div className="absolute inset-0 bg-purple-600/10 border-2 border-purple-500/60 rounded-xl pointer-events-none z-[5]" />
         )}
 
         {/* Hover hint label overlay */}
-        <div className="absolute inset-x-0 bottom-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20">
+        <div className="absolute inset-x-0 bottom-0 opacity-0 group-hover/thumb:opacity-100 transition-opacity duration-300 pointer-events-none z-20">
           <div className="bg-gradient-to-t from-neutral-950 via-neutral-950/85 to-transparent text-[9px] text-purple-300 font-mono text-center pb-2 pt-5 font-bold tracking-wide">
             Click select · 2x Click player · Shift range
           </div>
@@ -783,7 +783,7 @@ const StoryboardCard = ({
           }}
           className={`absolute top-2 left-2 h-6 w-6 rounded-md flex items-center justify-center z-20 transition-all duration-150 ${isSelected
               ? "bg-purple-500 border-2 border-purple-300 shadow-lg shadow-purple-500/50 scale-110"
-              : "bg-black/60 border-2 border-neutral-500 hover:border-purple-400 hover:bg-purple-900/50 opacity-0 group-hover:opacity-100"
+              : "bg-black/60 border-2 border-neutral-500 hover:border-purple-400 hover:bg-purple-900/50 opacity-0 group-hover/thumb:opacity-100"
             }`}
           title={isSelected ? "Deselect panel" : "Select panel"}
         >
@@ -797,7 +797,7 @@ const StoryboardCard = ({
         </button>
 
         {/* Number tag */}
-        <div className="absolute top-2 left-8 h-5 rounded bg-black/80 backdrop-blur flex items-center justify-center font-mono text-[10px] text-purple-400 font-bold border border-purple-900/40 px-1.5">
+        <div className="absolute top-2 left-8 h-5 rounded-md bg-black/80 backdrop-blur flex items-center justify-center font-mono text-[10px] text-purple-300 font-bold border border-purple-500/30 px-2">
           #{panel.id}
         </div>
 
@@ -811,7 +811,7 @@ const StoryboardCard = ({
               handleShiftPanel(idx, "left");
             }}
             disabled={idx === 0}
-            className="p-1 rounded bg-black/85 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[8px] leading-none"
+            className="p-1 rounded-md bg-black/85 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[8px] leading-none"
             title="Move Panel Left"
           >
             ◀
@@ -824,7 +824,7 @@ const StoryboardCard = ({
               handleShiftPanel(idx, "right");
             }}
             disabled={idx === panelsLength - 1}
-            className="p-1 rounded bg-black/85 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[8px] leading-none"
+            className="p-1 rounded-md bg-black/85 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[8px] leading-none"
             title="Move Panel Right"
           >
             ▶
@@ -833,13 +833,13 @@ const StoryboardCard = ({
 
         {/* Motion overlay text */}
         {panel.motion_type && (
-          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono uppercase tracking-wider text-neutral-300">
+          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/80 text-[9px] font-mono uppercase tracking-wider text-neutral-300 border border-white/8">
             {panel.motion_type}
           </div>
         )}
       </div>
 
-      <div className="p-3.5 space-y-2.5">
+      <div className="space-y-2.5 w-full">
         {/* Content Inspector Mini Tabs */}
         <div className="flex items-center justify-between gap-1.5 border-b border-neutral-850 pb-2">
           <div className="grid grid-cols-4 gap-0.5 bg-neutral-900/90 p-0.5 rounded-xl border border-neutral-800 text-[9.5px] font-mono flex-1 min-w-0">
@@ -1027,34 +1027,34 @@ const StoryboardCard = ({
               value={panel.visual_description || ""}
               onChange={(e) => handleModifyVisualDescription(panel.id, e.target.value)}
               placeholder="Describe visual scene for lighting, atmosphere..."
-              className={`w-full bg-neutral-900/90 border border-neutral-800 text-[11px] rounded-xl p-2.5 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all resize-none ${
+              className={`w-full bg-[#07050e]/90 border border-white/10 text-[11px] rounded-xl p-2.5 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all resize-none ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
                   ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
-                  : "hover:border-neutral-700"
+                  : "hover:border-white/20"
               }`}
             />
           </div>
         )}
 
         {/* Compact Motion & Timing Row */}
-        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-900">
-          <div className="flex items-center gap-1.5 bg-neutral-900/90 border border-neutral-800/80 rounded-xl px-2 py-1">
+        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/8">
+          <div className="flex items-center gap-1.5 bg-[#07050e]/90 border border-white/10 rounded-xl px-2.5 py-1.5">
             <Video className="w-3 h-3 text-purple-400 shrink-0" />
             <select
               value={panel.motion_type ?? ""}
               onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
               className="appearance-none bg-transparent text-[10px] font-mono text-neutral-300 w-full outline-none cursor-pointer"
             >
-              <option value="" className="bg-neutral-900 text-neutral-300">Motion: None</option>
-              <option value="zoom_in" className="bg-neutral-900 text-neutral-300">Zoom In</option>
-              <option value="zoom_out" className="bg-neutral-900 text-neutral-300">Zoom Out</option>
-              <option value="pan_right" className="bg-neutral-900 text-neutral-300">Pan Right</option>
-              <option value="pan_left" className="bg-neutral-900 text-neutral-300">Pan Left</option>
-              <option value="pan_down" className="bg-neutral-900 text-neutral-300">Pan Down</option>
+              <option value="" className="bg-[#0c0d16] text-neutral-300">Motion: None</option>
+              <option value="zoom_in" className="bg-[#0c0d16] text-neutral-300">Zoom In</option>
+              <option value="zoom_out" className="bg-[#0c0d16] text-neutral-300">Zoom Out</option>
+              <option value="pan_right" className="bg-[#0c0d16] text-neutral-300">Pan Right</option>
+              <option value="pan_left" className="bg-[#0c0d16] text-neutral-300">Pan Left</option>
+              <option value="pan_down" className="bg-[#0c0d16] text-neutral-300">Pan Down</option>
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-neutral-900/90 border border-neutral-800/80 rounded-xl px-2 py-1">
+          <div className="flex items-center gap-1.5 bg-[#07050e]/90 border border-white/10 rounded-xl px-2.5 py-1.5">
             <Clock className="w-3 h-3 text-purple-400 shrink-0" />
             <input
               type="number"

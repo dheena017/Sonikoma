@@ -7,17 +7,18 @@ import os
 import logging
 import asyncio
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
+
+import importlib
 
 # Lazy loaded whisper to keep startup RAM under 120MB
 WHISPER_AVAILABLE = True
 
 def _get_whisper_lib():
     try:
-        import whisper
-        return whisper
+        return importlib.import_module("whisper")
     except ImportError:
         return None
 
@@ -58,7 +59,7 @@ class WhisperEngine:
 
     def __init__(
         self,
-        model_name: WhisperModel = WhisperModel.BASE,
+        model_name: Optional[Union[WhisperModel, str]] = WhisperModel.BASE,
         device: str = "cpu",
         language: Optional[str] = None
     ):
@@ -74,7 +75,7 @@ class WhisperEngine:
             device: Device to use (cpu, cuda)
             language: ISO language code (e.g., 'en', 'fr'). None = auto-detect
         """
-        self.model_name = model_name
+        self.model_name = model_name or WhisperModel.BASE
         self.device = device
         self.language = language
         self.model = None
@@ -87,8 +88,9 @@ class WhisperEngine:
         if whisper_lib is None:
             raise RuntimeError("openai-whisper module is not available.")
         try:
+            model_value = self.model_name.value if isinstance(self.model_name, WhisperModel) else str(self.model_name)
             self.model = whisper_lib.load_model(
-                self.model_name.value,
+                model_value,
                 device=self.device
             )
             logger.info(f"✓ Whisper model loaded on device: {self.device}")
@@ -206,7 +208,7 @@ _whisper_instance: Optional[WhisperEngine] = None
 
 
 def get_whisper_engine(
-    model_name: WhisperModel = WhisperModel.BASE,
+    model_name: Optional[Union[WhisperModel, str]] = WhisperModel.BASE,
     device: str = "cpu",
     language: Optional[str] = None
 ) -> WhisperEngine:

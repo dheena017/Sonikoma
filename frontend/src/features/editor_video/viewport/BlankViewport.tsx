@@ -10,6 +10,7 @@ import {
   Minus,
   Plus,
   RefreshCcw,
+  Film,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 
@@ -188,14 +189,14 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
   );
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#08080d] overflow-hidden relative select-none font-sans">
+    <div className="flex flex-col h-full w-full bg-transparent overflow-hidden relative select-none font-sans">
       {/* ── Canvas Stage Workspace ─────────────────────────────────────── */}
-      <div className="flex-1 h-full flex items-center justify-center relative overflow-hidden bg-[#09090f] p-4">
+      <div className="flex-1 h-full flex items-center justify-center relative overflow-hidden bg-black/40 backdrop-blur-md p-4">
         {/* Professional Canvas Editor Dot Grid Pattern */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#a855f7_1px,transparent_1px)] [background-size:16px_16px]" />
+        <div className="absolute inset-0 opacity-25 pointer-events-none bg-[radial-gradient(#a855f7_1px,transparent_1px)] [background-size:18px_18px]" />
 
-        {/* Canvas Frame — Slate (#14141f) container with distinct purple border & shadow */}
-        <div className="relative w-full h-full overflow-hidden bg-[#14141f] border border-purple-500/35 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] flex items-center justify-center">
+        {/* Canvas Frame — Slate container with distinct purple border & shadow */}
+        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-[#0e0a20]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl border border-purple-500/35 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] flex items-center justify-center">
 
           {/* Layer 1: Background Plate */}
           {layerVisibility.background && (
@@ -221,8 +222,12 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
                   className="w-full h-full object-contain object-center pointer-events-none"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-950 via-neutral-950 to-indigo-950 flex items-center justify-center text-neutral-600 font-mono text-xs">
-                  Background Canvas Plate
+                <div className="w-full h-full bg-gradient-to-br from-purple-950/40 via-neutral-950/30 to-indigo-950/40 flex flex-col items-center justify-center gap-2 text-neutral-400 font-mono text-xs select-none p-6 text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+                    <Film className="w-5 h-5" />
+                  </div>
+                  <span className="font-bold text-neutral-300 tracking-wider">Video Viewport Canvas</span>
+                  <span className="text-[10px] text-neutral-500">Select a storyboard panel or import media to start playback</span>
                 </div>
               )}
             </div>

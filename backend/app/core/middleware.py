@@ -70,6 +70,7 @@ PUBLIC_ROUTE_PREFIXES = (
     "/videos/",        # Generated videos serving
     "/media/",         # Local processed panel layers served via <img src="/media/...">
     "/media",          # Defensive: allow the exact mount path too
+    "/api/export/youtube/", # YouTube publisher routes (uses get_optional_current_user in router)
 )
 
 # Admin-only endpoints (require creator_role/admin)
@@ -93,12 +94,8 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         if request.method == "OPTIONS":
             return await call_next(request)
 
-        # 1) Public bypass
-        if path in PUBLIC_ROUTE_SET or any(path.startswith(p) for p in PUBLIC_ROUTE_PREFIXES):
-            return await call_next(request)
-
-        # Explicit allow: GET /api/proxy-image (public)
-        if path.startswith("/api/proxy-image"):
+        # 1) Public bypass: any non-api route, public route, or static asset
+        if not path.startswith("/api") or path in PUBLIC_ROUTE_SET or any(path.startswith(p) for p in PUBLIC_ROUTE_PREFIXES):
             return await call_next(request)
 
         # 2) Auth guard for everything else

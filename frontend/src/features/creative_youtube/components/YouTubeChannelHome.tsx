@@ -80,17 +80,21 @@ export default function YouTubeChannelHome({
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<"all" | "popular" | "shorts" | "playlists">("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const fetchData = async () => {
+  const [bannerError, setBannerError] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+const fetchData = async () => {
     setIsLoading(true);
+    setBannerError(false);
+    setAvatarError(false);
     try {
       const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
       const headers = { Authorization: `Bearer ${token}` };
+      const cacheBust = Date.now();
 
       const [videosRes, channelRes, playlistsRes] = await Promise.all([
-        fetch("/api/export/youtube/videos?max_results=50", { headers }),
-        fetch("/api/export/youtube/channel/details", { headers }),
-        fetch("/api/export/youtube/playlists", { headers }),
+        fetch(`/api/export/youtube/videos?max_results=50&_t=${cacheBust}`, { headers }),
+        fetch(`/api/export/youtube/channel/details?_t=${cacheBust}`, { headers }),
+        fetch(`/api/export/youtube/playlists?_t=${cacheBust}`, { headers }),
       ]);
 
       if (videosRes.ok) {
@@ -165,10 +169,12 @@ export default function YouTubeChannelHome({
       <div className="relative w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-neutral-950">
         {/* Banner Area */}
         <div className="relative w-full h-44 sm:h-56 md:h-64 overflow-hidden bg-neutral-950">
-          {channel?.banner_url ? (
+          {channel?.banner_url && !bannerError ? (
             <img
               src={channel.banner_url}
               alt="Channel Banner"
+              referrerPolicy="no-referrer"
+              onError={() => setBannerError(true)}
               className="w-full h-full object-cover object-center"
             />
           ) : (
@@ -187,18 +193,25 @@ export default function YouTubeChannelHome({
         <div className="px-6 py-6 flex flex-col lg:flex-row lg:items-end justify-between gap-6 bg-neutral-950/95 -mt-14 sm:-mt-16 relative z-10 border-t border-white/5">
           <div className="flex flex-col sm:flex-row sm:items-end gap-5 min-w-0">
             {/* Channel Avatar */}
-            {channel?.thumbnail ? (
+            {channel?.thumbnail && !avatarError ? (
               <div className="relative shrink-0">
                 <img
                   src={channel.thumbnail}
                   alt={channel.title}
+                  referrerPolicy="no-referrer"
+                  onError={() => setAvatarError(true)}
                   className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover border-4 border-neutral-950 ring-2 ring-white/10 shadow-2xl bg-neutral-900"
                 />
                 <span className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-neutral-950 shadow-md" />
               </div>
             ) : (
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-neutral-900 border-4 border-neutral-950 ring-2 ring-white/10 flex items-center justify-center shrink-0 shadow-2xl">
-                <Youtube className="w-12 h-12 text-red-500" />
+              <div className="relative shrink-0">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-br from-red-600 via-rose-700 to-purple-800 border-4 border-neutral-950 ring-2 ring-white/10 flex items-center justify-center shrink-0 shadow-2xl">
+                  <span className="text-3xl sm:text-4xl font-black text-white font-sans uppercase">
+                    {channel?.title ? channel.title.charAt(0) : "Y"}
+                  </span>
+                </div>
+                <span className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-neutral-950 shadow-md" />
               </div>
             )}
 
@@ -398,8 +411,11 @@ export default function YouTubeChannelHome({
                   onClick={() => onWatchVideo(featuredVideo.id, featuredVideo)}
                 >
                   <img
-                    src={featuredVideo.thumbnail}
+                    src={featuredVideo.thumbnail || `https://i.ytimg.com/vi/${featuredVideo.id}/hqdefault.jpg`}
                     alt={featuredVideo.title}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${featuredVideo.id}/hqdefault.jpg`;
+                    }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all duration-300">
@@ -500,8 +516,11 @@ export default function YouTubeChannelHome({
                   >
                     <div className="relative aspect-video bg-black overflow-hidden">
                       <img
-                        src={vid.thumbnail}
+                        src={vid.thumbnail || `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`}
                         alt={vid.title}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
+                        }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       <div className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-black/85 backdrop-blur-md text-[10px] font-mono font-black text-amber-400 border border-amber-500/30">
@@ -636,8 +655,11 @@ export default function YouTubeChannelHome({
                     className="group relative aspect-[9/16] bg-neutral-950 rounded-2xl overflow-hidden border border-neutral-800/80 hover:border-red-500/60 shadow-lg hover:shadow-[0_0_24px_rgba(239,68,68,0.25)] transition-all duration-300 cursor-pointer flex flex-col justify-end"
                   >
                     <img
-                      src={short.thumbnail}
+                      src={short.thumbnail || `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`}
                       alt={short.title}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`;
+                      }}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
@@ -713,8 +735,11 @@ export default function YouTubeChannelHome({
                         onClick={() => onWatchVideo(vid.id, vid)}
                       >
                         <img
-                          src={vid.thumbnail}
+                          src={vid.thumbnail || `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`}
                           alt={vid.title}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40">

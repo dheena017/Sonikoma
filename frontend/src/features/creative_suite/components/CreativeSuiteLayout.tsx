@@ -266,7 +266,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
         <main className="flex-1 px-6 pb-6 pt-6 md:px-8 md:pb-8 md:pt-8">
           <div className="w-full animate-[fadeIn_0.3s_ease-out]">
 
-            {renderHeader()}
+            {!currentPath.includes("/youtube") && renderHeader()}
             {children}
           </div>
         </main>

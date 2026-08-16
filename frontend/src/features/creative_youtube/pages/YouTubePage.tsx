@@ -121,6 +121,14 @@ const YouTubePage = React.memo(
         }
       };
       fetchNavChannel();
+
+      const handleChannelChanged = () => {
+        fetchNavChannel();
+      };
+      window.addEventListener("youtube_channel_changed", handleChannelChanged);
+      return () => {
+        window.removeEventListener("youtube_channel_changed", handleChannelChanged);
+      };
     }, [headerRefreshKey]);
 
     // Handle OAuth redirect query param
@@ -262,6 +270,7 @@ const YouTubePage = React.memo(
       handleLoadProfile,
       handleDeleteProfile,
       handleClearForm,
+      handleResetUploadState,
       handleSaveCredentials,
       handleDeleteCredentials,
       handleAddTag,
@@ -312,6 +321,7 @@ const YouTubePage = React.memo(
           {visitedTabs.has("home") && (
             <div className={activeTab === "home" ? "block animate-fade-in" : "hidden"}>
               <YouTubeChannelHome
+                key={`home-${headerRefreshKey}`}
                 onWatchVideo={handleWatchVideo}
                 onViewComments={handleViewComments}
                 onNavigateTab={(t) => handleTabChange(t as AppTab)}
@@ -323,6 +333,7 @@ const YouTubePage = React.memo(
           {visitedTabs.has("videos") && (
             <div className={activeTab === "videos" ? "block animate-fade-in" : "hidden"}>
               <YouTubeVideosPanel
+                key={`videos-${headerRefreshKey}`}
                 onWatchVideo={handleWatchVideo}
                 onViewComments={handleViewComments}
                 onNavigateStudio={handleQuickPublish}
@@ -334,6 +345,7 @@ const YouTubePage = React.memo(
           {visitedTabs.has("shorts") && (
             <div className={activeTab === "shorts" ? "block animate-fade-in" : "hidden"}>
               <YouTubeShortsPanel
+                key={`shorts-${headerRefreshKey}`}
                 onNavigateStudio={() => {
                   setIsShort(true);
                   handleTabChange("studio");
@@ -346,6 +358,7 @@ const YouTubePage = React.memo(
           {visitedTabs.has("playlists") && (
             <div className={activeTab === "playlists" ? "block animate-fade-in" : "hidden"}>
               <YouTubePlaylistsManager
+                key={`playlists-${headerRefreshKey}`}
                 onWatchVideo={handleWatchVideo}
                 onNavigateStudio={handleQuickPublish}
               />
@@ -355,7 +368,10 @@ const YouTubePage = React.memo(
           {/* 5. TAB: ANALYTICS & INTELLIGENCE */}
           {visitedTabs.has("analytics") && (
             <div className={activeTab === "analytics" ? "block animate-fade-in" : "hidden"}>
-              <YouTubeAnalyticsDashboard uploadHistory={uploadHistory} />
+              <YouTubeAnalyticsDashboard
+                key={`analytics-${headerRefreshKey}`}
+                uploadHistory={uploadHistory}
+              />
             </div>
           )}
 
@@ -455,6 +471,7 @@ const YouTubePage = React.memo(
                 onThumbnailChange={handleThumbnailChange}
                 onThumbnailSelect={handleThumbnailSelect}
                 onPublish={handlePublish}
+                onResetUploadState={handleResetUploadState}
                 handleGenerateMetadata={handleGenerateMetadata}
                 handleInjectPowerWord={handleInjectPowerWord}
                 handleApplyPresetTemplate={handleApplyPresetTemplate}
@@ -493,6 +510,14 @@ const YouTubePage = React.memo(
           addNotification={addNotification}
           onChannelSelected={(channel) => {
             setHeaderRefreshKey((prev) => prev + 1);
+            setNavChannel({
+              id: channel.id,
+              title: channel.title,
+              custom_url: channel.custom_url,
+              thumbnail: channel.thumbnail,
+              authenticated: true,
+            });
+            setVisitedTabs(new Set([activeTab]));
             addNotification?.(
               `Connected YouTube channel: ${channel.title}`,
               "success"

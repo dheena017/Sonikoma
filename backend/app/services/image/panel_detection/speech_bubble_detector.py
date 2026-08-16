@@ -226,8 +226,9 @@ def segment_character_foreground(image_path: str, conf_threshold: float = 0.25) 
         raise FileNotFoundError(f"Image path does not exist for YOLO character segmentation: {image_path}")
 
     try:
-        results = model.predict(image_path, conf=conf_threshold, verbose=False)
-        if not results or len(results) == 0:
+        raw_results = model.predict(image_path, conf=conf_threshold, verbose=False)
+        results = list(raw_results) if raw_results is not None else []
+        if not results:
             return None
 
         result = results[0]
@@ -278,6 +279,15 @@ segment_characters = segment_character_foreground
 class TrainingStatus:
     def __init__(self):
         self.lock = threading.Lock()
+        self.is_training: bool = False
+        self.epoch: int = 0
+        self.total_epochs: int = 0
+        self.elapsed_seconds: int = 0
+        self.training_pairs: int = 0
+        self.metrics: Dict[str, float] = {}
+        self.error: Optional[str] = None
+        self.start_time: Optional[float] = None
+        self.dataset_dir: Optional[str] = None
         self.reset()
 
     def reset(self):
@@ -490,7 +500,9 @@ def _train_worker(epochs: int, batch_size: int = 4):
             raise RuntimeError("YOLO model not available/loading failed.")
 
         default_model_path = os.path.join(base_dir, "data", "models", "yolov8n-seg.pt")
-        model_path = current_model.ckpt_path if hasattr(current_model, 'ckpt_path') else (default_model_path if os.path.exists(default_model_path) else 'yolov8n-seg.pt')
+        fallback_model_path = default_model_path if os.path.exists(default_model_path) else 'yolov8n-seg.pt'
+        ckpt = getattr(current_model, 'ckpt_path', None)
+        model_path: str = str(ckpt) if ckpt is not None else fallback_model_path
         model = YOLO(model_path)
 
         def on_fit_epoch_end(trainer):
@@ -539,7 +551,7 @@ def _train_worker(epochs: int, batch_size: int = 4):
         global _yolo_model
         _yolo_model = YOLO(finetuned_path)
 
-        elapsed = int(time.time() - status.start_time)
+        elapsed = int(time.time() - status.start_time) if status.start_time is not None else 0
         status.update(
             is_training=False,
             elapsed_seconds=elapsed

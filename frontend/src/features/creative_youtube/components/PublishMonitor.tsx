@@ -12,6 +12,8 @@ import {
   Calendar,
   Sparkles,
   Navigation,
+  RotateCcw,
+  PlusCircle,
 } from "lucide-react";
 import YouTubeChannelSelector, { YouTubeChannel } from "./YouTubeChannelSelector";
 import YouTubeChannelHeader from "./YouTubeChannelHeader";
@@ -40,6 +42,8 @@ interface PublishMonitorProps {
   onThumbnailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onThumbnailSelect?: (url: string) => void;
   onPublish: () => void;
+  onResetUploadState?: () => void;
+  onOpenChannelModal?: () => void;
 
   isScheduled: boolean;
   setIsScheduled: (val: boolean) => void;
@@ -69,6 +73,8 @@ export default function PublishMonitor({
   onThumbnailChange,
   onThumbnailSelect,
   onPublish,
+  onResetUploadState,
+  onOpenChannelModal,
   isScheduled,
   setIsScheduled,
   scheduleDate,
@@ -150,6 +156,38 @@ export default function PublishMonitor({
     ];
     setSuggestedSlogans(suggested);
   };
+
+  useEffect(() => {
+    async function loadActiveChannel() {
+      try {
+        const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+        const res = await fetch("/api/export/youtube/active-channel", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.channel) {
+            setSelectedChannel(data.channel);
+          }
+        }
+      } catch (e) {
+        console.debug("Failed to load active channel for monitor", e);
+      }
+    }
+    loadActiveChannel();
+
+    const handleChannelChanged = (e: any) => {
+      if (e.detail) {
+        setSelectedChannel(e.detail);
+      } else {
+        loadActiveChannel();
+      }
+    };
+    window.addEventListener("youtube_channel_changed", handleChannelChanged);
+    return () => {
+      window.removeEventListener("youtube_channel_changed", handleChannelChanged);
+    };
+  }, []);
 
   useEffect(() => {
     if (title) {
@@ -958,6 +996,42 @@ export default function PublishMonitor({
         </div>
       )}
 
+      {/* Target Channel Info Card */}
+      {selectedChannel && !youtubeUrl && (
+        <div className="p-3 bg-neutral-900/80 border border-neutral-800 rounded-2xl flex items-center justify-between gap-3 font-mono shadow-sm">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            {selectedChannel.thumbnail ? (
+              <img
+                src={selectedChannel.thumbnail}
+                alt={selectedChannel.title}
+                className="w-7 h-7 rounded-lg object-cover border border-neutral-700 shrink-0"
+              />
+            ) : (
+              <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center font-bold text-white text-[10px] shrink-0">
+                {selectedChannel.title ? selectedChannel.title.charAt(0) : "Y"}
+              </div>
+            )}
+            <div className="truncate text-xs">
+              <div className="text-[9.5px] text-neutral-500 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Target Channel
+              </div>
+              <div className="font-bold text-white truncate font-sans">{selectedChannel.title}</div>
+            </div>
+          </div>
+
+          {onOpenChannelModal && (
+            <button
+              type="button"
+              onClick={onOpenChannelModal}
+              className="text-[10px] text-red-400 hover:text-red-300 font-bold hover:underline shrink-0 cursor-pointer bg-neutral-950 px-2.5 py-1 rounded-lg border border-neutral-800"
+            >
+              Switch ↗
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Final Publish Button */}
       {!youtubeUrl ? (
         <button
@@ -990,22 +1064,42 @@ export default function PublishMonitor({
           )}
         </button>
       ) : (
-        <div className="space-y-3 pt-0.5">
-          <div className="p-3 bg-emerald-950/10 border border-emerald-900/30 rounded-2xl flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-            <span className="text-[10.5px] font-mono font-bold text-emerald-300">
-              Video Upload Successfully Initiated!
+        <div className="space-y-3 pt-0.5 animate-in fade-in duration-200">
+          <div className="p-3 bg-emerald-950/20 border border-emerald-800/40 rounded-2xl flex items-center justify-between gap-2 shadow-sm">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+              <span className="text-[11px] font-mono font-bold text-emerald-300">
+                Video Upload Successfully Initiated!
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-emerald-500 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800/40">
+              Live
             </span>
           </div>
-          <a
-            href={youtubeUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none border border-emerald-500/50 shadow-lg shadow-emerald-950/20 font-mono active:scale-98"
-          >
-            <ExternalLink className="h-4.5 w-4.5" />
-            <span>View Video on YouTube</span>
-          </a>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <a
+              href={youtubeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none border border-emerald-500/50 shadow-md font-mono active:scale-98"
+            >
+              <ExternalLink className="h-4 w-4" />
+              <span>View Video</span>
+            </a>
+
+            {onResetUploadState && (
+              <button
+                type="button"
+                onClick={onResetUploadState}
+                className="w-full bg-neutral-900 hover:bg-neutral-800 text-white hover:text-red-400 font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer select-none border border-neutral-700 hover:border-red-500/40 shadow-sm font-mono active:scale-98"
+                title="Reset upload state to upload another video"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span>Upload Another Video</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

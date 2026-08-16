@@ -799,7 +799,7 @@ const StoryboardTimeline = React.memo(
     return (
       <div
         id="panels_timeline_section"
-        className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4 transition-all pb-24 relative"
+        className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-6 space-y-4 transition-all pb-24 relative shadow-[0_10px_40px_rgba(0,0,0,0.6)]"
       >
         <StoryboardAnalysisBanner
           isAnalyzingAll={isAnalyzingAll}

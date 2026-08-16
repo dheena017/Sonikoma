@@ -95,8 +95,8 @@ def _normalize_box(box: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         **box,
-        "x": int(max(0, x or 0)),
-        "y": int(max(0, y or 0)),
+        "x": int(max(0, int(x or 0))),
+        "y": int(max(0, int(y or 0))),
         "w": max(1, int(width or 1)),
         "h": max(1, int(height or 1)),
         "confidence": float(box.get("confidence", 0.90) or 0.90),
@@ -108,7 +108,7 @@ def _normalize_box(box: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def sort_boxes_by_position(boxes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    return sorted(boxes, key=lambda b: (b.get("y", 0), b.get("x", 0)))
+    return sorted(boxes, key=lambda b: (int(b.get("y", 0) or 0), int(b.get("x", 0) or 0)))
 
 
 def compute_overlap_count(boxes: List[Dict[str, Any]], iou_thresh: float = 0.40) -> int:
@@ -211,8 +211,8 @@ def merge_similar_neighbor_slices(
     merged: List[Dict[str, Any]] = [dict(boxes[0])]
     for curr in boxes[1:]:
         prev = merged[-1]
-        prev_y2 = prev.get("y", 0) + prev.get("h", prev.get("height", 0))
-        curr_y1 = curr.get("y", 0)
+        prev_y2 = int(prev.get("y", 0) or 0) + int(prev.get("h", 0) or prev.get("height", 0) or 0)
+        curr_y1 = int(curr.get("y", 0) or 0)
 
         gap = abs(curr_y1 - prev_y2)
         if gap <= DEFAULT_MERGE_GAP:
@@ -229,14 +229,14 @@ def merge_similar_neighbor_slices(
                     is_dark_gap = True
 
             if (sim > 0.75 and sep_conf < 0.70) or is_dark_gap:
-                new_x = min(prev.get("x", 0), curr.get("x", 0))
+                new_x = min(int(prev.get("x", 0) or 0), int(curr.get("x", 0) or 0))
                 new_x2 = max(
-                    prev.get("x", 0) + prev.get("w", 0),
-                    curr.get("x", 0) + curr.get("w", curr.get("width", 0))
+                    int(prev.get("x", 0) or 0) + int(prev.get("w", 0) or 0),
+                    int(curr.get("x", 0) or 0) + int(curr.get("w", 0) or curr.get("width", 0) or 0)
                 )
                 prev["x"] = new_x
                 prev["w"] = new_x2 - new_x
-                prev["h"] = (curr.get("y", 0) + curr.get("h", curr.get("height", 0))) - prev["y"]
+                prev["h"] = (int(curr.get("y", 0) or 0) + int(curr.get("h", 0) or curr.get("height", 0) or 0)) - int(prev.get("y", 0) or 0)
                 logger.info(f"[PostProcessor] Merging dark-background scene sequence (sim={sim:.2f}, is_dark_gap={is_dark_gap})")
                 continue
 
@@ -276,11 +276,11 @@ def resolve_micro_panels(
         if bh < MIN_NOISE_HEIGHT or min_conf < 0.30:
             if resolved:
                 prev = resolved[-1]
-                b_x1, b_y1 = b.get("x", 0), b.get("y", 0)
-                b_x2, b_y2 = b_x1 + b.get("w", 0), b_y1 + b.get("h", 0)
-                p_x1, p_y1 = prev.get("x", 0), prev.get("y", 0)
-                p_x2 = p_x1 + prev.get("w", 0)
-                p_y2 = p_y1 + prev.get("h", prev.get("height", 0))
+                b_x1, b_y1 = int(b.get("x", 0) or 0), int(b.get("y", 0) or 0)
+                b_x2, b_y2 = b_x1 + int(b.get("w", 0) or 0), b_y1 + int(b.get("h", 0) or 0)
+                p_x1, p_y1 = int(prev.get("x", 0) or 0), int(prev.get("y", 0) or 0)
+                p_x2 = p_x1 + int(prev.get("w", 0) or 0)
+                p_y2 = p_y1 + int(prev.get("h", 0) or prev.get("height", 0) or 0)
 
                 new_x1 = min(p_x1, b_x1)
                 new_y1 = min(p_y1, b_y1)
@@ -310,7 +310,7 @@ def recover_coverage_selectively(
     if not final_boxes or not discarded_boxes:
         return final_boxes
 
-    current_covered = sum(b.get("h", b.get("height", 0)) for b in final_boxes)
+    current_covered: int = sum([int(b.get("h") or b.get("height") or 0) for b in final_boxes])
     current_cov = float(current_covered) / float(max(1, img_h))
 
     if current_cov >= 0.90:
@@ -329,10 +329,10 @@ def recover_coverage_selectively(
         if current_cov >= target_coverage:
             break
         recovered.append(box)
-        current_covered += box.get("h", box.get("height", 0))
+        current_covered += int(box.get("h", 0) or box.get("height", 0) or 0)
         current_cov = float(current_covered) / float(max(1, img_h))
 
-    return sorted(recovered, key=lambda b: (b.get("y", 0), b.get("x", 0)))
+    return sorted(recovered, key=lambda b: (int(b.get("y", 0) or 0), int(b.get("x", 0) or 0)))
 
 
 def resolve_overlapping_panels_lineage(
@@ -343,27 +343,28 @@ def resolve_overlapping_panels_lineage(
     if not boxes or len(boxes) <= 1:
         return boxes
 
-    sorted_boxes = sorted(boxes, key=lambda b: (b.get("y", 0), b.get("x", 0)))
+    normalized_boxes = [_normalize_box(b) for b in boxes]
+    sorted_boxes = sorted(normalized_boxes, key=lambda b: (b.get("y", 0) or 0, b.get("x", 0) or 0))
     kept: List[Dict[str, Any]] = []
 
     for cand in sorted_boxes:
-        cx1 = cand.get("x", 0)
-        cy1 = cand.get("y", 0)
-        cw = cand.get("w", cand.get("width", 0))
-        ch = cand.get("h", cand.get("height", 0))
-        cx2 = cx1 + cw
-        cy2 = cy1 + ch
+        cx1: int = int(cand.get("x", 0) or 0)
+        cy1: int = int(cand.get("y", 0) or 0)
+        cw: int = max(1, int(cand.get("w", 0) or cand.get("width", 0) or 1))
+        ch: int = max(1, int(cand.get("h", 0) or cand.get("height", 0) or 1))
+        cx2: int = cx1 + cw
+        cy2: int = cy1 + ch
         c_lineage = set(cand.get("lineage", []))
-        c_conf = cand.get("confidence", 0.90)
+        c_conf: float = float(cand.get("confidence", 0.90) or 0.90)
 
         duplicate = False
         for k in kept:
-            kx1 = k.get("x", 0)
-            ky1 = k.get("y", 0)
-            kw = k.get("w", k.get("width", 0))
-            kh = k.get("h", k.get("height", 0))
-            kx2 = kx1 + kw
-            ky2 = ky1 + kh
+            kx1: int = int(k.get("x", 0) or 0)
+            ky1: int = int(k.get("y", 0) or 0)
+            kw: int = max(1, int(k.get("w", 0) or k.get("width", 0) or 1))
+            kh: int = max(1, int(k.get("h", 0) or k.get("height", 0) or 1))
+            kx2: int = kx1 + kw
+            ky2: int = ky1 + kh
 
             inter_x1 = max(cx1, kx1)
             inter_x2 = min(cx2, kx2)
@@ -379,7 +380,7 @@ def resolve_overlapping_panels_lineage(
                 iou = inter_area / float(max(1, min_area))
                 if iou >= iou_thresh:
                     k_lineage = set(k.get("lineage", []))
-                    k_conf = k.get("confidence", 0.90)
+                    k_conf: float = float(k.get("confidence", 0.90) or 0.90)
 
                     if c_lineage and k_lineage and bool(c_lineage & k_lineage):
                         new_x = min(kx1, cx1)

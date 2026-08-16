@@ -55,10 +55,10 @@ class PanelBounds:
 
     @classmethod
     def from_absolute_percent(cls, top: float, bottom: float, left: float, right: float, img_w: int, img_h: int, space: str = "ai_percent") -> "PanelBounds":
-        y1 = int(round((top / 100.0) * img_h))
-        y2 = int(round((bottom / 100.0) * img_h))
-        x1 = int(round((left / 100.0) * img_w))
-        x2 = int(round((right / 100.0) * img_w))
+        y1 = round((top / 100.0) * img_h)
+        y2 = round((bottom / 100.0) * img_h)
+        x1 = round((left / 100.0) * img_w)
+        x2 = round((right / 100.0) * img_w)
         if y2 < y1:
             y1, y2 = y2, y1
         if x2 < x1:
@@ -69,10 +69,10 @@ class PanelBounds:
 
     @classmethod
     def from_inset_percent(cls, crop_top: float, crop_bottom: float, crop_left: float, crop_right: float, img_w: int, img_h: int, space: str = "frontend_css") -> "PanelBounds":
-        top_px = int(round((crop_top / 100.0) * img_h))
-        bot_px = int(round((crop_bottom / 100.0) * img_h))
-        left_px = int(round((crop_left / 100.0) * img_w))
-        right_px = int(round((crop_right / 100.0) * img_w))
+        top_px = round((crop_top / 100.0) * img_h)
+        bot_px = round((crop_bottom / 100.0) * img_h)
+        left_px = round((crop_left / 100.0) * img_w)
+        right_px = round((crop_right / 100.0) * img_w)
         x1 = max(0, min(img_w - 1, left_px))
         y1 = max(0, min(img_h - 1, top_px))
         x2 = max(x1 + 1, img_w - right_px)

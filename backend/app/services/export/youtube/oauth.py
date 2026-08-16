@@ -1,4 +1,4 @@
-"""
+"""c
 backend/app/services/export/youtube/oauth.py
 ─────────────────────────────────────────────────────────────────────────────
 Handles OAuth flow, credentials resolution, and YouTube client instantiation.
@@ -115,6 +115,10 @@ async def get_authenticated_service(user_id: Optional[str] = None) -> Any:
 
         PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 
+        tmp_secrets_path = None
+        secrets_text = ""
+        secrets_obj = None
+
         # Canonical location after restructure: backend/client_secrets.json
         client_secrets_file = os.path.join(PROJECT_ROOT, "backend", "data", "client_secrets.json")
         if not os.path.exists(client_secrets_file):
@@ -184,20 +188,38 @@ async def get_authenticated_service(user_id: Optional[str] = None) -> Any:
             repo_default = os.path.join(PROJECT_ROOT, "backend", "client_secrets.json")
             legacy_default = os.path.join(PROJECT_ROOT, "backend", "app", "client_secrets.json")
             if os.path.exists(repo_default):
-                logger.warning(f"client_secrets.json not found; falling back to {repo_default} (dev secrets).")
+                logger.info(f"Using client secrets from: {repo_default}")
                 client_secrets_file = repo_default
             elif os.path.exists(legacy_default):
-                logger.warning(f"client_secrets.json not found; falling back to {legacy_default} (legacy dev secrets).")
+                logger.info(f"Using client secrets from: {legacy_default}")
                 client_secrets_file = legacy_default
             else:
-                logger.warning("client_secrets.json not found (locally or via env).")
-                raise ServiceException(
-                    status_code=400,
-                    message=(
-                        "YouTube export is not configured. Provide 'client_secrets.json' in backend/ "
-                        "or set env var 'YOUTUBE_CLIENT_SECRETS_JSON' (contents of the JSON file) to enable real uploads."
-                    ),
-                )
+                # Check environment variables GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
+                google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+                google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+                if google_client_id:
+                    synthetic_secrets = json.dumps({
+                        "web": {
+                            "client_id": google_client_id.strip().strip('"').strip("'"),
+                            "client_secret": (google_client_secret or "").strip().strip('"').strip("'"),
+                            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                            "token_uri": "https://oauth2.googleapis.com/token",
+                        }
+                    })
+                    fd, tmp_secrets_path = tempfile.mkstemp(suffix=".json")
+                    os.close(fd)
+                    with open(tmp_secrets_path, "w", encoding="utf-8") as f:
+                        f.write(synthetic_secrets)
+                    client_secrets_file = tmp_secrets_path
+                else:
+                    logger.warning("client_secrets.json not found (locally or via env).")
+                    raise ServiceException(
+                        status_code=400,
+                        message=(
+                            "YouTube export is not configured. Provide 'client_secrets.json' in backend/ "
+                            "or set env var 'GOOGLE_CLIENT_ID' and 'GOOGLE_CLIENT_SECRET' in .env to enable real uploads."
+                        ),
+                    )
 
         try:
             with open(client_secrets_file, "r", encoding="utf-8") as f:

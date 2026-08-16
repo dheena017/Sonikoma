@@ -333,6 +333,6 @@ export default function StoryboardHeader({
   ) : null;
 
   return (
-    <EditorHeaderFrame left={titleBlock} center={viewToggle} right={rightBlock} className="border-b-0 rounded-2xl bg-neutral-900/50 border border-neutral-800/80 p-2" />
+    <EditorHeaderFrame left={titleBlock} center={viewToggle} right={rightBlock} className="border-b-0 rounded-2xl bg-[#0c0d16]/70 backdrop-blur-xl border border-white/10 p-2 shadow-lg" />
   );
 }

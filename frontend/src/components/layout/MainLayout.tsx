@@ -448,7 +448,7 @@ export default function MainLayout(props: MainLayoutProps) {
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-content-layout"
-        className={`relative z-10 h-screen max-h-screen overflow-hidden flex-grow flex-1 flex flex-col max-w-full justify-between ${showAutoCropModal || showBubbleModal
+        className={`relative z-10 h-screen max-h-screen overflow-hidden flex-1 flex flex-col max-w-full min-h-0 ${showAutoCropModal || showBubbleModal
           ? "overflow-hidden"
           : ""
           }`}
@@ -546,9 +546,9 @@ export default function MainLayout(props: MainLayoutProps) {
         </div>
 
         {/* Scrollable Main Children Page Area */}
-        <div
+        <main
           id="main-scrollable-area"
-          className={`flex-1 flex flex-col w-full relative min-h-0 custom-purple-scrollbar page-scrollbar ${showTopHeader ? "pt-16" : ""} ${
+          className={`flex-1 flex flex-col w-full relative min-h-0 custom-purple-scrollbar page-scrollbar ${
             isImageEditorPage || isProEditorPage || isVideoEditorPage
               ? "overflow-hidden"
               : "overflow-y-auto overflow-x-hidden"
@@ -584,8 +584,8 @@ export default function MainLayout(props: MainLayoutProps) {
               isImageEditorPage || isProEditorPage || isVideoEditorPage
                 ? "p-0"
                 : !isSidebarOpen
-                ? "px-4 sm:px-6 lg:px-8 lg:pl-28 pb-16 md:pb-24 page-view-transition stagger-container"
-                : "px-4 sm:px-6 lg:px-8 pb-16 md:pb-24 page-view-transition stagger-container"
+                ? "px-4 sm:px-6 lg:px-8 lg:pl-28 pb-8 page-view-transition stagger-container"
+                : "px-4 sm:px-6 lg:px-8 pb-8 page-view-transition stagger-container"
             }`}
           >
             {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (
@@ -639,7 +639,7 @@ export default function MainLayout(props: MainLayoutProps) {
               children
             )}
           </div>
-        </div>
+        </main>
       </div>
 
       <React.Suspense fallback={null}>

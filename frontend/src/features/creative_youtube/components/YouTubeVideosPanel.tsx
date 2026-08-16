@@ -370,8 +370,11 @@ export default function YouTubeVideosPanel({
                   onClick={() => onWatchVideo(vid.id, vid)}
                 >
                   <img
-                    src={vid.thumbnail}
+                    src={vid.thumbnail || `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`}
                     alt={vid.title}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
+                    }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
 

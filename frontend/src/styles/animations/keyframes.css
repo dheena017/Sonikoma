@@ -5,34 +5,34 @@
 /* Universal Breathing & Drifting */
 @keyframes anime-art-drift {
   0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: scale(1.05) translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(-1.5vw, -1vh, 0) scale(1.035);
+    transform: scale(1.08) translate3d(-1%, -0.8%, 0);
   }
 }
 
 @keyframes anime-art-drift-slow {
   0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1.01);
+    transform: scale(1.04) translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(1.2vw, -0.8vh, 0) scale(1.04);
+    transform: scale(1.07) translate3d(0.8%, -0.6%, 0);
   }
 }
 
 @keyframes anime-art-drift-dynamic {
   0% {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: scale(1.05) translate3d(0, 0, 0);
   }
   33% {
-    transform: translate3d(-1.8vw, 0.8vh, 0) scale(1.03);
+    transform: scale(1.08) translate3d(-1.2%, 0.6%, 0);
   }
   66% {
-    transform: translate3d(1vw, -1.2vh, 0) scale(1.045);
+    transform: scale(1.07) translate3d(0.8%, -1%, 0);
   }
   100% {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: scale(1.05) translate3d(0, 0, 0);
   }
 }
 

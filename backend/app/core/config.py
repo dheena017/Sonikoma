@@ -144,12 +144,20 @@ try:
         try:
             from google import genai
             genai_client = genai.Client(api_key=api_key)
-        except Exception:
-            import google.generativeai as legacy_genai
-            legacy_genai.configure(api_key=api_key)
-            genai_client = legacy_genai
-        ai_initialized = True
-        logger.debug("Gemini client successfully configured server-side.")
+            ai_initialized = True
+            logger.debug("Gemini client successfully configured server-side.")
+        except ImportError:
+            try:
+                import importlib
+                legacy_genai = importlib.import_module("google.generativeai")
+                legacy_genai.configure(api_key=api_key)
+                genai_client = legacy_genai
+                ai_initialized = True
+                logger.debug("Legacy Gemini client configured.")
+            except Exception:
+                logger.warning("Could not initialize google-genai or google.generativeai.")
+        except Exception as e:
+            logger.warning(f"Gemini client initialization error: {e}")
 except Exception as e:
     logger.warning(f"Gemini client initialization skipped: {e}")
 

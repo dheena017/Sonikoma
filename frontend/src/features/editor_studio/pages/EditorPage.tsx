@@ -392,12 +392,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
       fetchWithInterceptor={fetchWithInterceptor}
       locationSearch={window.location.search}
     >
-      <main className="flex-1 w-full relative bg-neutral-950 min-w-0">
+      <main className="flex-1 w-full relative bg-transparent min-w-0">
         {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
         <div
-          className={`relative z-10 bg-[#070709] min-h-0 min-w-0 ${activeTab === "settings" || activeTab === "audio-settings"
+          className={`relative z-10 bg-transparent min-h-0 min-w-0 ${activeTab === "settings" || activeTab === "audio-settings"
               ? "px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8 w-full max-w-[1720px] mx-auto"
-              : `border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10 w-full max-w-[1720px] mx-auto ${isFocusMode ? "hidden" : "block"
+              : `border-t border-white/5 px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10 w-full max-w-[1720px] mx-auto ${isFocusMode ? "hidden" : "block"
               }`
             }`}
         >

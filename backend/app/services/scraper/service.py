@@ -275,7 +275,10 @@ async def generate_storyboard_and_video(
     cover_image: Optional[str] = None,
     synopsis: Optional[str] = None,
     user_id: Optional[str] = None,
-    bypass_cache: bool = True
+    bypass_cache: bool = True,
+    user_keys: Optional[Dict[str, str]] = None,
+    episode_id: Optional[str] = None,
+    **kwargs: Any
 ) -> Dict[str, Any]:
     """Generates storyboard script and compiles video from panels."""
     scrape_res = await scrape_and_initialize_project(
@@ -284,7 +287,7 @@ async def generate_storyboard_and_video(
         job_id=job_id,
         user_id=user_id,
         title=title,
-        episode=episode,
+        episode=episode or episode_id,
         genre=genre,
         author=author,
         cover_image=cover_image,
@@ -298,12 +301,14 @@ async def generate_storyboard_and_video(
     images = scrape_res.get("images", [])
 
     generated_panels = await generate_dynamic_panels(
-        images=images,
-        title=scrape_res.get("title", ""),
-        genre=scrape_res.get("genre", ""),
-        synopsis=scrape_res.get("synopsis", ""),
+        title=scrape_res.get("title") or title or "Comic Recap",
+        genre=scrape_res.get("genre") or genre or "Action",
+        episode=scrape_res.get("episode") or episode or episode_id or "Episode 1",
+        img_urls=images,
+        synopsis=scrape_res.get("synopsis", "") or synopsis or "",
         narration_style=narration_style,
-        model=model
+        model=model,
+        user_keys=user_keys
     )
 
     video_res = await compile_video_from_panels(
@@ -332,7 +337,10 @@ async def generate_storyboard_only_service(
     author: Optional[str] = None,
     cover_image: Optional[str] = None,
     synopsis: Optional[str] = None,
-    user_id: Optional[str] = None
+    user_id: Optional[str] = None,
+    user_keys: Optional[Dict[str, str]] = None,
+    episode_id: Optional[str] = None,
+    **kwargs: Any
 ) -> Dict[str, Any]:
     """Generates storyboard panel scripts from URL without compiling video."""
     scrape_res = await scrape_and_initialize_project(
@@ -341,7 +349,7 @@ async def generate_storyboard_only_service(
         job_id=job_id,
         user_id=user_id,
         title=title,
-        episode=episode,
+        episode=episode or episode_id,
         genre=genre,
         author=author,
         cover_image=cover_image,
@@ -352,12 +360,14 @@ async def generate_storyboard_only_service(
 
     images = scrape_res.get("images", [])
     generated_panels = await generate_dynamic_panels(
-        images=images,
-        title=scrape_res.get("title", ""),
-        genre=scrape_res.get("genre", ""),
-        synopsis=scrape_res.get("synopsis", ""),
+        title=scrape_res.get("title") or title or "Comic Recap",
+        genre=scrape_res.get("genre") or genre or "Action",
+        episode=scrape_res.get("episode") or episode or episode_id or "Episode 1",
+        img_urls=images,
+        synopsis=scrape_res.get("synopsis", "") or synopsis or "",
         narration_style=narration_style,
-        model=model
+        model=model,
+        user_keys=user_keys
     )
 
     return {

@@ -60,12 +60,16 @@ def build_panel_frame_image(
 async def compile_video_from_panels(
     project_id: str,
     panels: List[Dict[str, Any]],
-    output_dir: str,
+    output_dir: Optional[str] = None,
     target_width: int = 1920,
-    target_height: int = 1080
+    target_height: int = 1080,
+    **kwargs: Any
 ) -> str:
     if not panels:
         raise ValueError("No panels provided for video compilation.")
+
+    if not output_dir:
+        output_dir = _VIDEO_OUTPUT_DIR
 
     normalized_panels = []
     for p in panels:

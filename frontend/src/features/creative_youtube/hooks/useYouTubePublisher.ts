@@ -1098,6 +1098,18 @@ export function useYouTubePublisher({
     }
   };
 
+  const handleResetUploadState = () => {
+    setYoutubeUrl(null);
+    setPublishLogs([]);
+    setIsPublishing(false);
+    handleClearSelectedFile();
+    handleClearThumbnail();
+    handleClearForm();
+    if (addNotification) {
+      addNotification("Upload state reset. Ready for next video upload!", "success");
+    }
+  };
+
   return {
     title,
     setTitle,
@@ -1202,6 +1214,7 @@ export function useYouTubePublisher({
     handleLoadProfile,
     handleDeleteProfile,
     handleClearForm,
+    handleResetUploadState,
     handleSaveCredentials,
     handleDeleteCredentials,
     handleAddTag,

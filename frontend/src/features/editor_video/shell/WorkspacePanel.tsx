@@ -73,7 +73,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
 
       {showContent && (
         <div
-          className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0a0814]/95 border-r border-purple-900/20 shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]"
+          className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0c0d16]/75 backdrop-blur-2xl border-r border-white/10 shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]"
           style={{
             width: config.defaultWidth ? config.defaultWidth - 64 : undefined,
           }}

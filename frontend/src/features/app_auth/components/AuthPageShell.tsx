@@ -22,7 +22,7 @@ export default function AuthPageShell({
 
   return (
     <div className="auth-anime-shell min-h-screen flex bg-[#070709] text-white font-sans overflow-hidden relative">
-      <LandingAnimeScene variant="app" />
+      <LandingAnimeScene variant="auth" />
 
       <AuthShowcase activeTheme={activeTheme} iconType={iconType} />
 

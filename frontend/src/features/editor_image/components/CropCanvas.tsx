@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Image as ImageIcon } from "lucide-react";
 import { Slice } from "@/features/editor_image/components";
 import { ImageTool, useImageEditorStore } from "@/features/editor_image/hooks/useImageEditorState";
 import CanvasBrushLayer from "@/features/editor_image/components/CanvasBrushLayer";
@@ -334,9 +334,8 @@ export default function CropCanvas({
   return (
     <div
       ref={scrollParentRef}
-      className={`relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black ${zoom > 1 ? "overflow-auto" : "overflow-hidden"
-        } flex-1 h-0 flex items-center justify-center select-none transition-colors`}
-      style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
+      className={`relative border border-white/10 hover:border-purple-500/30 rounded-2xl bg-gradient-to-br from-[#0c0a1a]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl ${zoom > 1 ? "overflow-auto" : "overflow-hidden"
+        } flex-1 h-0 flex items-center justify-center select-none transition-all shadow-[0_10px_40px_rgba(0,0,0,0.7)]`}
     >
       <div
         style={{
@@ -454,20 +453,30 @@ export default function CropCanvas({
             </div>
           )}
 
-          <img
-            ref={imgRef}
-            src={imgUrl}
-            alt="Preview"
-            onLoad={handleImageLoad}
-            className="pointer-events-none select-none block w-full h-full object-contain max-h-full max-w-full mx-auto"
-            style={{
-              maxWidth: "100%",
-              maxHeight: "100%",
-              objectFit: "contain",
-              filter: previewFilter,
-            }}
-            draggable={false}
-          />
+          {imgUrl ? (
+            <img
+              ref={imgRef}
+              src={imgUrl}
+              alt="Editor Canvas"
+              onLoad={handleImageLoad}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+              }}
+              className="pointer-events-none select-none block w-full h-full object-contain max-h-full max-w-full mx-auto"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "contain",
+                filter: previewFilter,
+              }}
+              draggable={false}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center p-8 text-neutral-500 gap-2">
+              <ImageIcon className="w-8 h-8 opacity-40 text-purple-400" />
+              <span className="text-xs font-mono">No Image Source Loaded</span>
+            </div>
+          )}
 
           {/* Brush Layer */}
           {isManualBrushActive && (

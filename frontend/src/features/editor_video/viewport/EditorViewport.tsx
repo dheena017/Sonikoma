@@ -75,7 +75,7 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
   return (
     <div
       id="section-monitor"
-      className="w-full bg-neutral-900/70 backdrop-blur-lg rounded-3xl border border-neutral-800/90 p-4 sm:p-5 space-y-4 mb-4 scroll-mt-24 shadow-2xl flex flex-col min-w-0"
+      className="w-full bg-[#0c0d16]/70 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 space-y-4 mb-4 scroll-mt-24 shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex flex-col min-w-0"
     >
       <MonitorHeader
         videoUrl={videoUrl}

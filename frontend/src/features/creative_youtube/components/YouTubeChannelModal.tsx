@@ -115,11 +115,21 @@ export default function YouTubeChannelModal({
     }
   };
 
-  const handleAuthorizeYouTube = async () => {
+  const handleAuthorizeYouTube = async (forceSwitch: boolean | React.MouseEvent = false) => {
+    const shouldSwitch = typeof forceSwitch === "boolean" ? forceSwitch : false;
     setIsConnecting(true);
     try {
       const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
-      const res = await fetch("/api/export/youtube/oauth/connect", {
+      const userEmail = localStorage.getItem("user_email") || localStorage.getItem("sonikoma_user_email") || localStorage.getItem("email") || "";
+      
+      const params = new URLSearchParams();
+      if (userEmail) {
+        params.append("email", userEmail.trim());
+      }
+      const qs = params.toString();
+      const connectUrl = qs ? `/api/export/youtube/oauth/connect?${qs}` : "/api/export/youtube/oauth/connect";
+
+      const res = await fetch(connectUrl, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -129,7 +139,7 @@ export default function YouTubeChannelModal({
       if (res.ok) {
         const data = await res.json();
         if (data.auth_url) {
-          addNotification?.("Opening Google account & Brand Account chooser…", "info");
+          addNotification?.("Opening Google Brand Account & channel chooser…", "info");
           window.location.href = data.auth_url;
         } else {
           setError("Failed to get YouTube authorization URL.");
@@ -174,20 +184,60 @@ export default function YouTubeChannelModal({
     }
   };
 
-  const handleAddPreviewChannel = () => {
+  const handleAddPreviewChannel = async () => {
     if (!previewChannel) return;
+    const target = previewChannel;
+
     setChannels((prev) => {
-      const exists = prev.some((c) => c.id === previewChannel.id);
+      const exists = prev.some((c) => c.id === target.id);
       if (exists) {
-        return prev.map((c) => (c.id === previewChannel.id ? { ...c, ...previewChannel } : c));
+        return prev.map((c) => (c.id === target.id ? { ...c, ...target } : c));
       }
-      return [previewChannel, ...prev];
+      return [target, ...prev];
     });
-    setSelectedId(previewChannel.id);
-    addNotification?.(`Added channel: ${previewChannel.title}`, "success");
-    setPreviewChannel(null);
-    setLookupQuery("");
-    setShowLookupDrawer(false);
+    setSelectedId(target.id);
+
+    setIsSaving(true);
+    try {
+      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const res = await fetch("/api/export/youtube/select-channel", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          channel_id: target.id,
+          title: target.title,
+          thumbnail: target.thumbnail,
+          custom_url: target.custom_url,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+
+      if (data.needs_auth && data.auth_url) {
+        addNotification?.(`Switching Google authorization to "${target.title}"…`, "info");
+        window.location.href = data.auth_url;
+        return;
+      }
+
+      addNotification?.(`✅ Connected active YouTube channel: ${target.title}`, "success");
+      window.dispatchEvent(new CustomEvent("youtube_channel_changed", { detail: target }));
+      onChannelSelected(target);
+      setPreviewChannel(null);
+      setLookupQuery("");
+      setShowLookupDrawer(false);
+      onClose();
+    } catch {
+      addNotification?.(`Added channel: ${target.title}`, "info");
+      setPreviewChannel(null);
+      setLookupQuery("");
+      setShowLookupDrawer(false);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDeleteChannel = async (channelId: string, e: React.MouseEvent) => {
@@ -253,8 +303,17 @@ export default function YouTubeChannelModal({
         }),
       });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+
+      if (data.needs_auth && data.auth_url) {
+        addNotification?.(`Switching Google authorization to "${ch.title}"…`, "info");
+        window.location.href = data.auth_url;
+        return;
+      }
+
       addNotification?.(`✅ Connected active YouTube channel: ${ch.title}`, "success");
+      window.dispatchEvent(new CustomEvent("youtube_channel_changed", { detail: ch }));
       onChannelSelected(ch);
       onClose();
     } catch {
@@ -331,14 +390,14 @@ export default function YouTubeChannelModal({
           {/* Action Toolbar */}
           {!isLoading && !needsReauth && channels.length > 0 && (
             <div className="mt-4 flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-neutral-800/40">
-              {/* Search input */}
+              {/* Search filter input */}
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter by name, @handle, or ID..."
+                  placeholder="Search among your accessible channels..."
                   className="w-full bg-neutral-900/90 border border-neutral-800 focus:border-red-500/60 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 font-mono focus:outline-none transition-all"
                 />
               </div>
@@ -346,25 +405,13 @@ export default function YouTubeChannelModal({
               {/* Action Buttons */}
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setShowLookupDrawer(!showLookupDrawer)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-medium transition-all cursor-pointer border ${
-                    showLookupDrawer
-                      ? "bg-red-950/50 border-red-700/60 text-red-300"
-                      : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
-                  }`}
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  <span>{showLookupDrawer ? "Close Search" : "Add by @Handle"}</span>
-                </button>
-
-                <button
-                  onClick={handleAuthorizeYouTube}
+                  onClick={() => handleAuthorizeYouTube(true)}
                   disabled={isConnecting}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-purple-900/60 to-purple-800/40 hover:from-purple-900 hover:to-purple-700 border border-purple-700/50 rounded-xl text-xs font-mono font-bold text-purple-200 hover:text-white transition-all shadow-sm cursor-pointer disabled:opacity-60"
-                  title="Connect another YouTube Brand Account via Google"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-red-600/20 via-purple-600/20 to-pink-600/20 hover:from-red-600/30 hover:to-pink-600/30 border border-red-500/30 rounded-xl text-xs font-mono font-bold text-neutral-200 hover:text-white transition-all shadow-sm cursor-pointer disabled:opacity-60"
+                  title="Authorize and add another YouTube channel or Brand Account"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>{isConnecting ? "Opening…" : "+ Link Brand Account"}</span>
+                  <Plus className="w-3.5 h-3.5 text-red-400" />
+                  <span>{isConnecting ? "Opening Google…" : "+ Add / Link YouTube Channel"}</span>
                 </button>
               </div>
             </div>
@@ -636,11 +683,15 @@ export default function YouTubeChannelModal({
                             <img
                               src={ch.thumbnail}
                               alt={ch.title}
+                              referrerPolicy="no-referrer"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.display = "none";
+                              }}
                               className="w-13 h-13 rounded-2xl object-cover border border-neutral-700/80 shadow-md group-hover:scale-105 transition-transform"
                             />
                           ) : (
-                            <div className="w-13 h-13 rounded-2xl bg-neutral-800 flex items-center justify-center border border-neutral-700 shrink-0">
-                              <Youtube className="w-6 h-6 text-neutral-400" />
+                            <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-red-600 to-purple-600 flex items-center justify-center border border-neutral-700 shrink-0 font-bold text-white text-sm font-sans uppercase">
+                              {ch.title ? ch.title.charAt(0) : "Y"}
                             </div>
                           )}
                           {isDbActive && (
@@ -661,9 +712,13 @@ export default function YouTubeChannelModal({
                                 <BadgeCheck className="w-3 h-3" /> Active
                               </span>
                             )}
-                            {ch.type === "brand" && (
-                              <span className="px-1.5 py-0.2 rounded bg-purple-950/60 border border-purple-800/50 text-purple-300 text-[9px] font-mono shrink-0">
-                                Brand
+                            {ch.type === "brand" ? (
+                              <span className="px-2 py-0.5 rounded-lg bg-purple-950/70 border border-purple-800/60 text-purple-300 text-[10px] font-mono font-bold shrink-0 flex items-center gap-1">
+                                <Sparkles className="w-2.5 h-2.5 text-purple-400" /> Brand Channel
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-lg bg-neutral-950/70 border border-neutral-800 text-neutral-400 text-[10px] font-mono shrink-0">
+                                Primary Channel
                               </span>
                             )}
                           </div>
@@ -687,8 +742,8 @@ export default function YouTubeChannelModal({
                             </button>
                           </div>
 
-                          {/* Stats Pills */}
-                          <div className="flex flex-wrap items-center gap-2.5 mt-2 text-[11px] font-mono">
+                          {/* Stats Pills & Permission Status */}
+                          <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px] font-mono">
                             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-neutral-950/80 border border-neutral-800/80 text-neutral-300">
                               <Users className="w-3 h-3 text-red-400" />
                               <span>{ch.subscriber_count && ch.subscriber_count !== "--" ? `${ch.subscriber_count} subs` : "0 subs"}</span>
@@ -699,12 +754,9 @@ export default function YouTubeChannelModal({
                               <span>{ch.video_count || "0"} videos</span>
                             </span>
 
-                            {ch.view_count && ch.view_count !== "--" && ch.view_count !== "0" && (
-                              <span className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-neutral-950/80 border border-neutral-800/80 text-neutral-400">
-                                <Eye className="w-3 h-3 text-sky-400" />
-                                <span>{ch.view_count} views</span>
-                              </span>
-                            )}
+                            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-950/40 border border-emerald-800/40 text-emerald-400 text-[10px] font-bold">
+                              <ShieldCheck className="w-3 h-3" /> Full Studio Access
+                            </span>
                           </div>
                         </div>
 
@@ -720,8 +772,8 @@ export default function YouTubeChannelModal({
                             target="_blank"
                             rel="noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="p-2 rounded-xl bg-neutral-950/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer"
-                            title="Open channel on YouTube ↗"
+                            className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800/80 border border-neutral-800 transition-colors"
+                            title="Open on YouTube"
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
@@ -730,7 +782,7 @@ export default function YouTubeChannelModal({
                           <button
                             onClick={(e) => handleDeleteChannel(ch.id, e)}
                             disabled={deletingId === ch.id}
-                            className="p-2 rounded-xl bg-neutral-950/80 hover:bg-red-950/50 border border-neutral-800 hover:border-red-800 text-neutral-500 hover:text-red-400 transition-all cursor-pointer"
+                            className="p-2 rounded-xl text-neutral-500 hover:text-red-400 hover:bg-red-950/30 border border-neutral-800 hover:border-red-900/50 transition-colors cursor-pointer"
                             title="Unlink channel from workspace"
                           >
                             {deletingId === ch.id ? (
@@ -746,30 +798,34 @@ export default function YouTubeChannelModal({
                 })}
               </div>
 
-              {/* Selected Channel Summary Card */}
+              {/* Selected Channel Summary Card & Permission Matrix */}
               {selectedChannelObj && (
-                <div className="mt-4 p-4 rounded-2xl bg-neutral-900/80 border border-neutral-800/90 space-y-2.5 animate-in fade-in duration-200">
+                <div className="mt-4 p-4 rounded-2xl bg-neutral-900/80 border border-neutral-800/90 space-y-3 animate-in fade-in duration-200">
                   <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-neutral-400 font-bold flex items-center gap-1.5">
+                    <span className="text-neutral-300 font-bold flex items-center gap-1.5">
                       <Zap className="w-3.5 h-3.5 text-amber-400" />
-                      Publishing Target: <span className="text-white font-black">{selectedChannelObj.title}</span>
+                      Active Target: <span className="text-white font-black">{selectedChannelObj.title}</span>
                     </span>
                     <span className="text-emerald-400 font-bold flex items-center gap-1 text-[11px]">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> API Connected
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Verified Publishing Rights
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-[11px] font-mono text-neutral-400">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono text-neutral-400">
                     <div className="p-2 bg-neutral-950/80 border border-neutral-800/60 rounded-xl">
-                      <div className="text-[10px] text-neutral-500 uppercase">Channel ID</div>
-                      <div className="text-neutral-300 truncate font-mono mt-0.5">{selectedChannelObj.id}</div>
+                      <div className="text-[10px] text-neutral-500 uppercase">Channel Type</div>
+                      <div className="text-neutral-200 font-bold mt-0.5 capitalize">{selectedChannelObj.type || "Personal"} Account</div>
                     </div>
                     <div className="p-2 bg-neutral-950/80 border border-neutral-800/60 rounded-xl">
-                      <div className="text-[10px] text-neutral-500 uppercase">Content ID Guard</div>
-                      <div className="text-emerald-400 font-bold mt-0.5">Pre-scan Active</div>
+                      <div className="text-[10px] text-neutral-500 uppercase">Publish Scope</div>
+                      <div className="text-emerald-400 font-bold mt-0.5">Video &amp; Shorts (v3)</div>
                     </div>
-                    <div className="hidden sm:block p-2 bg-neutral-950/80 border border-neutral-800/60 rounded-xl">
-                      <div className="text-[10px] text-neutral-500 uppercase">Quota Pool</div>
+                    <div className="p-2 bg-neutral-950/80 border border-neutral-800/60 rounded-xl">
+                      <div className="text-[10px] text-neutral-500 uppercase">Content ID Pre-Scan</div>
+                      <div className="text-sky-400 font-bold mt-0.5">Guard Active</div>
+                    </div>
+                    <div className="p-2 bg-neutral-950/80 border border-neutral-800/60 rounded-xl">
+                      <div className="text-[10px] text-neutral-500 uppercase">Daily Quota Pool</div>
                       <div className="text-purple-400 font-bold mt-0.5">10,000 Units/day</div>
                     </div>
                   </div>

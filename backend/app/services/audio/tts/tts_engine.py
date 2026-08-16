@@ -159,21 +159,22 @@ async def generate_panel_audio(
                 silence_seg = AudioSegment.silent(duration=1000)
                 silence_seg.export(temp_file_path, format="mp3")
 
-        def process_audio_sync():
-            combined_audio = AudioSegment.empty()
+        def process_audio_sync() -> float:
+            combined_audio: AudioSegment = AudioSegment.empty()
             for idx, file_path in enumerate(temp_files):
                 if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
                     continue
 
-                segment = AudioSegment.from_file(file_path, format="mp3")
-                normalized_seg = segment.set_frame_rate(44100).set_channels(2)
+                segment = cast(AudioSegment, AudioSegment.from_file(file_path, format="mp3"))
+                normalized_seg: AudioSegment = cast(AudioSegment, segment.set_frame_rate(44100).set_channels(2))
 
                 combined_audio += normalized_seg
                 if idx < len(temp_files) - 1:
                     combined_audio += AudioSegment.silent(duration=100)
 
-            current_duration_ms = len(combined_audio)
+            current_duration_ms: int = len(combined_audio)
 
+            final_audio: AudioSegment
             if current_duration_ms == 0:
                 final_audio = AudioSegment.silent(duration=target_duration_ms)
             elif force_duration:
@@ -186,16 +187,16 @@ async def generate_panel_audio(
                             final_audio = combined_audio
                     else:
                         final_audio = combined_audio
-                    final_audio = final_audio[:target_duration_ms]
+                    final_audio = cast(AudioSegment, final_audio[:target_duration_ms])
                 else:
                     silence_needed_ms = target_duration_ms - current_duration_ms
                     silence_padding = AudioSegment.silent(duration=silence_needed_ms)
-                    final_audio = combined_audio + silence_padding
-                    final_audio = final_audio[:target_duration_ms]
+                    final_audio = cast(AudioSegment, combined_audio + silence_padding)
+                    final_audio = cast(AudioSegment, final_audio[:target_duration_ms])
             else:
                 final_audio = combined_audio
 
-            final_duration_ms = len(final_audio)
+            final_duration_ms: int = len(final_audio)
 
             if os.path.dirname(output_path):
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)

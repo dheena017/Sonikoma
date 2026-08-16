@@ -1,89 +1,40 @@
 /* ==========================================================================
-   UNIFIED SONIKOMA DESIGN SYSTEM — PREMIUM SCROLLBAR STYLING
+   UNIFIED SONIKOMA DESIGN SYSTEM — ZERO-SCROLLBAR INVISIBLE SCROLLING
+   - Hides all OS native & webkit scrollbars across all pages and viewports
+   - Preserves 100% native smooth mousewheel, touchpad, touch & keyboard scrolling
    ========================================================================== */
 
-/* 1. Global Default: Hide scrollbars across all secondary elements, sidebars, widgets & containers */
+/* Global Default: Completely hide scrollbars across all elements & pages */
 *,
 *::before,
-*::after {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-*::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
+*::after,
 html,
 body,
+#root,
 #app_root,
-#main-content-layout {
-  scrollbar-width: none !important;
-  -ms-overflow-style: none !important;
-}
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-#app_root::-webkit-scrollbar,
-#main-content-layout::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-/* 2. Main Page Scrollbar — ONLY the main page scroll container displays the custom purple scrollbar */
+#main-content-layout,
 #main-scrollable-area,
 .page-scrollbar,
-.custom-purple-scrollbar {
-  scrollbar-width: thin !important;
-  scrollbar-color: #a855f7 rgba(10, 10, 16, 0.4) !important;
-}
-
-#main-scrollable-area::-webkit-scrollbar,
-.page-scrollbar::-webkit-scrollbar,
-.custom-purple-scrollbar::-webkit-scrollbar {
-  display: block !important;
-  width: 8px !important;
-  height: 8px !important;
-  background: rgba(0, 0, 0, 0.25) !important;
-}
-
-#main-scrollable-area::-webkit-scrollbar-track,
-.page-scrollbar::-webkit-scrollbar-track,
-.custom-purple-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03) !important;
-  border-radius: 9999px !important;
-}
-
-#main-scrollable-area::-webkit-scrollbar-thumb,
-.page-scrollbar::-webkit-scrollbar-thumb,
-.custom-purple-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.8) !important;
-  border-radius: 9999px !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.5) !important;
-  transition: background-color 0.2s ease !important;
-}
-
-#main-scrollable-area::-webkit-scrollbar-thumb:hover,
-.page-scrollbar::-webkit-scrollbar-thumb:hover,
-.custom-purple-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(192, 132, 252, 0.95) !important;
-  box-shadow: 0 0 14px rgba(168, 85, 247, 0.8) !important;
-}
-
-/* 3. Hide Scrollbar Utilities */
+.custom-purple-scrollbar,
 .hide-scrollbar,
 .mini-sidebar-scrollbar {
-  -ms-overflow-style: none !important;
   scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar,
+#app_root::-webkit-scrollbar,
+#main-content-layout::-webkit-scrollbar,
+#main-scrollable-area::-webkit-scrollbar,
+.page-scrollbar::-webkit-scrollbar,
+.custom-purple-scrollbar::-webkit-scrollbar,
 .hide-scrollbar::-webkit-scrollbar,
 .mini-sidebar-scrollbar::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
 }
+

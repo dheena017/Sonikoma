@@ -5,6 +5,7 @@ Core YouTube upload workflow and associated API endpoints.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import asyncio
 import os
 import json
 import hmac
@@ -21,7 +22,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 
-from api.dependencies.auth import get_current_user
+from api.dependencies.auth import get_current_user, get_optional_current_user
 from schemas.export import YouTubeExportRequest
 from repositories.youtube import (
     log_youtube_publication,
@@ -193,8 +194,8 @@ async def export_to_youtube(
     try:
         res = await execute_youtube_upload_workflow(
             video_path=video_path,
-            title=request.title,
-            description=request.synopsis,
+            title=request.title or "Untitled Video",
+            description=request.synopsis or "",
             tags=request.tags,
             category_id=request.category_id,
             privacy_status=request.privacy_status,
@@ -204,14 +205,15 @@ async def export_to_youtube(
         )
         try:
             user_id = _get_user_id(current_user)
-            log_youtube_publication(
-                user_id=user_id,
-                chapter_id=None,
-                youtube_url=res["youtube_url"],
-                title=request.title,
-                privacy_status=request.privacy_status or "unlisted",
-            )
-            logger.info(f"[Database] Logged publication to database: {res['youtube_url']}")
+            if user_id:
+                log_youtube_publication(
+                    user_id=user_id,
+                    chapter_id=None,
+                    youtube_url=res["youtube_url"],
+                    title=request.title or "Untitled Video",
+                    privacy_status=request.privacy_status or "unlisted",
+                )
+                logger.info(f"[Database] Logged publication to database: {res['youtube_url']}")
         except Exception as db_err:
             logger.error(f"[Database] Failed to log YouTube publication: {db_err}")
         return res
@@ -288,8 +290,8 @@ async def upload_and_export_to_youtube(
 
         res = await execute_youtube_upload_workflow(
             video_path=tmp_video_path,
-            title=title,
-            description=synopsis,
+            title=title or "Untitled Video",
+            description=synopsis or "",
             tags=tags_list,
             category_id=category_id,
             privacy_status=privacy_status,
@@ -299,22 +301,22 @@ async def upload_and_export_to_youtube(
         )
         try:
             user_id = _get_user_id(current_user)
-            log_youtube_publication(
-                user_id=user_id,
-                chapter_id=None,
-                youtube_url=res["youtube_url"],
-                title=title,
-                privacy_status=privacy_status or "unlisted",
-            )
-            logger.info(f"[Database] Logged multipart publication to database: {res['youtube_url']}")
-
+            if user_id:
+                log_youtube_publication(
+                    user_id=user_id,
+                    chapter_id=None,
+                    youtube_url=res["youtube_url"],
+                    title=title,
+                    privacy_status=privacy_status or "unlisted",
+                )
+                logger.info(f"[Database] Logged multipart publication to database: {res['youtube_url']}")
         except Exception as db_err:
             logger.error(f"[Database] Failed to log YouTube publication: {db_err}")
         return res
     except ResourceNotFoundException as rnf:
-        raise HTTPException(status_code=404, detail=str(rnf.message))
+        raise HTTPException(status_code=404, detail=rnf.message)
     except ProcessingException as pe:
-        raise HTTPException(status_code=500, detail=str(pe.message))
+        raise HTTPException(status_code=500, detail=pe.message)
     finally:
         if tmp_video_path and os.path.exists(tmp_video_path):
             try:
@@ -330,7 +332,7 @@ async def upload_and_export_to_youtube(
 
 @router.get("/youtube/channels")
 async def get_youtube_channels(
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """
     Returns all YouTube channels/accounts linked to the authenticated user's Google account.
@@ -369,7 +371,7 @@ async def get_youtube_channels(
 @router.post("/youtube/channel/lookup", summary="Search or add a YouTube channel by handle or ID")
 async def lookup_youtube_channel_route(
     payload: dict,
-    current_user: dict = Depends(get_current_user),
+    current_user: Optional[dict] = Depends(get_optional_current_user),
 ):
     """
     Looks up a YouTube channel by handle (e.g. '@motivatenow-t1e') or ID ('UC...'),
@@ -395,7 +397,7 @@ async def lookup_youtube_channel_route(
 @router.delete("/youtube/channel/{channel_id}", summary="Remove a channel from user's channel list")
 async def delete_youtube_channel_route(
     channel_id: str,
-    current_user: dict = Depends(get_current_user),
+    current_user: Optional[dict] = Depends(get_optional_current_user),
 ):
     """Removes a channel from the user's saved channels."""
     user_id = _get_user_id(current_user)
@@ -409,10 +411,12 @@ async def delete_youtube_channel_route(
 
 @router.get("/youtube/playlists")
 async def get_youtube_playlists(
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Returns all playlists under the user's YouTube channel."""
     user_id = _get_user_id(current_user)
+    if not user_id:
+        return {"playlists": [], "count": 0}
     service = YouTubeService(user_id=user_id)
     playlists = await service.get_playlists()
     return {"playlists": playlists, "count": len(playlists)}
@@ -421,7 +425,7 @@ async def get_youtube_playlists(
 @router.post("/youtube/playlists", summary="Create a new YouTube playlist")
 async def create_youtube_playlist(
     payload: dict,
-    current_user: dict = Depends(get_current_user),
+    current_user: Optional[dict] = Depends(get_optional_current_user),
 ):
     """Creates a new playlist on the user's YouTube channel."""
     user_id = _get_user_id(current_user)
@@ -449,10 +453,12 @@ async def create_youtube_playlist(
 async def get_youtube_playlist_items_route(
     playlist_id: str,
     max_results: int = 50,
-    current_user: Optional[dict] = Depends(get_current_user),
+    current_user: Optional[dict] = Depends(get_optional_current_user),
 ):
     """Returns all video items inside a playlist."""
     user_id = _get_user_id(current_user)
+    if not user_id:
+        return {"items": [], "count": 0}
     service = YouTubeService(user_id=user_id)
     items = await service.get_playlist_items(playlist_id=playlist_id, max_results=max_results)
     return {"items": items, "count": len(items)}
@@ -460,7 +466,7 @@ async def get_youtube_playlist_items_route(
 
 @router.get("/youtube/channel/details")
 async def get_youtube_channel_details(
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Returns complete channel header, banner, subscriber count, and total views."""
     user_id = _get_user_id(current_user)
@@ -470,7 +476,7 @@ async def get_youtube_channel_details(
 
 @router.get("/youtube/profile")
 async def get_youtube_profile_details(
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Returns full YouTube profile details, user identity, avatar, description, and connected channels."""
     user_id = _get_user_id(current_user)
@@ -479,11 +485,14 @@ async def get_youtube_profile_details(
     channels = await service.get_channels()
 
     has_tokens = False
+    connected_google_email = None
     if user_id:
         try:
             tokens = get_youtube_oauth_tokens(user_id)
-            if tokens and (tokens.get("access_token") or tokens.get("refresh_token")):
-                has_tokens = True
+            if tokens:
+                if tokens.get("access_token") or tokens.get("refresh_token"):
+                    has_tokens = True
+                connected_google_email = tokens.get("google_email")
         except Exception:
             pass
 
@@ -491,7 +500,7 @@ async def get_youtube_profile_details(
 
     return {
         "authenticated": is_authenticated,
-        "user_email": current_user.get("email") if current_user else None,
+        "user_email": connected_google_email or (current_user.get("email") if current_user else None),
         "user_name": current_user.get("name") or current_user.get("full_name") if current_user else None,
         "user_picture": current_user.get("picture") or current_user.get("avatar_url") if current_user else None,
         "overview": overview,
@@ -502,10 +511,12 @@ async def get_youtube_profile_details(
 @router.get("/youtube/videos")
 async def get_youtube_videos(
     max_results: int = 24,
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Returns uploaded videos feed with real-time statistics."""
     user_id = _get_user_id(current_user)
+    if not user_id:
+        return {"videos": [], "count": 0}
     service = YouTubeService(user_id=user_id)
     videos = await service.get_user_videos(max_results=max_results)
     return {"videos": videos, "count": len(videos)}
@@ -514,10 +525,12 @@ async def get_youtube_videos(
 @router.get("/youtube/comments/{video_id}")
 async def get_youtube_video_comments(
     video_id: str,
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Fetches live comments for a YouTube video."""
     user_id = _get_user_id(current_user)
+    if not user_id:
+        return {"comments": [], "count": 0}
     service = YouTubeService(user_id=user_id)
     comments = await service.get_video_comments(video_id=video_id)
     return {"comments": comments, "count": len(comments)}
@@ -526,7 +539,7 @@ async def get_youtube_video_comments(
 @router.post("/youtube/seo/generate")
 async def generate_youtube_seo_metadata(
     payload: dict,
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Generates AI-optimized titles, descriptions, hashtags & SEO score."""
     user_id = _get_user_id(current_user)
@@ -539,7 +552,7 @@ async def generate_youtube_seo_metadata(
 @router.post("/youtube/playlist/ai-generate", summary="Real AI generation for playlist title, description, tags and video sequencing")
 async def generate_youtube_playlist_ai_route(
     payload: dict,
-    current_user: Optional[dict] = Depends(get_current_user),
+    current_user: Optional[dict] = Depends(get_optional_current_user),
 ):
     """
     Analyzes available YouTube videos and creator theme/prompt with real LLM to synthesize
@@ -561,7 +574,7 @@ async def generate_youtube_playlist_ai_route(
 @router.post("/youtube/copyright-check")
 async def check_youtube_copyright(
     payload: dict,
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Pre-scans background audio for YouTube copyright safety."""
     user_id = _get_user_id(current_user)
@@ -572,7 +585,7 @@ async def check_youtube_copyright(
 
 @router.get("/youtube/quota")
 async def get_youtube_quota_telemetry(
-    current_user: Optional[dict] = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Returns API quota metrics and rate limiting health."""
     user_id = _get_user_id(current_user)
@@ -589,7 +602,7 @@ async def get_youtube_quota_telemetry(
 @router.get("/youtube/oauth/connect", summary="Initiate YouTube-specific OAuth authorization")
 async def youtube_oauth_connect(
     request: Request,
-    current_user: dict = Depends(get_current_user),
+    current_user: Optional[dict] = Depends(get_optional_current_user),
 ):
     """
     Starts the YouTube channel connect flow for an already logged-in Sonikoma user.
@@ -607,10 +620,31 @@ async def youtube_oauth_connect(
 
     user_id = _get_user_id(current_user)
     if not user_id:
-        raise HTTPException(status_code=401, detail="User session required")
+        cookie_token = request.cookies.get("access_token") or request.cookies.get("sonikoma_session")
+        if cookie_token:
+            user_id = hashlib.sha256(cookie_token.encode()).hexdigest()[:16]
+        else:
+            user_id = "default_studio_user"
 
     redirect_uri = _get_youtube_redirect_uri(request)
     state = _generate_signed_state(user_id)
+
+    # Strictly bind to the EXACT email the user entered / logged in with on the website
+    user_email = (
+        (current_user.get("email") if current_user else None)
+        or request.query_params.get("email")
+    )
+    if not user_email and user_id and user_id != "default_studio_user":
+        try:
+            from repositories.user import get_user_by_id
+            db_user = get_user_by_id(user_id)
+            if db_user and db_user.get("email"):
+                user_email = db_user["email"]
+        except Exception:
+            pass
+
+    if user_email:
+        user_email = user_email.strip()
 
     params = {
         "client_id": client_id,
@@ -618,12 +652,15 @@ async def youtube_oauth_connect(
         "response_type": "code",
         "scope": " ".join(YOUTUBE_SCOPES),
         "access_type": "offline",
-        "prompt": "select_account consent",  # Show Google account & Brand Account picker
+        "prompt": "consent",
         "state": state,
     }
 
+    if user_email and "@" in user_email:
+        params["login_hint"] = user_email
+
     auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
-    logger.info(f"[YouTube OAuth] Initiating signed YouTube OAuth for user {user_id} with redirect_uri: {redirect_uri}")
+    logger.info(f"[YouTube OAuth] Initiating YouTube OAuth for user {user_id} (email: {user_email}) with redirect_uri: {redirect_uri}")
 
     secure = request.url.scheme == "https"
     accept_header = request.headers.get("accept", "")
@@ -668,6 +705,10 @@ async def youtube_oauth_callback(request: Request):
         return RedirectResponse(f"{yt_page_url}?yt_error={urllib.parse.quote(error)}")
 
     # Verify cryptographic HMAC signature of state token to get user_id securely
+    if not state:
+        logger.error("[YouTube OAuth] Missing state parameter")
+        return RedirectResponse(f"{yt_page_url}?yt_error=invalid_state")
+
     user_id = _verify_signed_state(state)
     if not user_id:
         logger.error("[YouTube OAuth] State token verification failed or expired")
@@ -714,6 +755,20 @@ async def youtube_oauth_callback(request: Request):
         logger.error(f"[YouTube OAuth] Token exchange: no access_token returned in response")
         return RedirectResponse(f"{yt_page_url}?yt_error=no_access_token")
 
+    google_account_email = None
+    try:
+        userinfo_resp = requests.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=10,
+        )
+        if userinfo_resp.ok:
+            u_info = userinfo_resp.json()
+            google_account_email = u_info.get("email")
+            logger.info(f"[YouTube OAuth] Authenticated Google email: {google_account_email}")
+    except Exception as u_err:
+        logger.debug(f"[YouTube OAuth] Failed to fetch Google email from userinfo: {u_err}")
+
     # Save YouTube-specific tokens (attached to verified user_id)
     try:
         save_youtube_oauth_tokens(
@@ -723,6 +778,7 @@ async def youtube_oauth_callback(request: Request):
             client_id=client_id,
             client_secret=client_secret,
             scopes=" ".join(YOUTUBE_SCOPES),
+            google_email=google_account_email,
         )
         logger.info(f"[YouTube OAuth] YouTube OAuth tokens saved securely for user {user_id}")
     except Exception as e:
@@ -735,10 +791,10 @@ async def youtube_oauth_callback(request: Request):
         if discovered_channels:
             first_ch = discovered_channels[0]
             cid = first_ch.get("id")
-            title = first_ch.get("title")
+            title = first_ch.get("title") or "YouTube Channel"
             # If no channel is currently selected, select this newly connected channel
             current_selected = get_selected_youtube_channel(user_id)
-            if not current_selected or not current_selected.get("id"):
+            if (not current_selected or not current_selected.get("id")) and isinstance(cid, str) and cid:
                 save_selected_youtube_channel(
                     user_id=user_id,
                     channel_id=cid,
@@ -786,7 +842,9 @@ async def get_active_youtube_channel(
     current_user: dict = Depends(get_current_user),
 ):
     """Returns the currently selected YouTube channel for this user, if any."""
-    user_id = current_user.get("id") or current_user.get("user_id")
+    user_id = _get_user_id(current_user)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     channel = get_selected_youtube_channel(user_id)
     tokens = get_youtube_oauth_tokens(user_id)
     return {
@@ -798,13 +856,16 @@ async def get_active_youtube_channel(
 @router.post("/youtube/select-channel", summary="Save the user's selected YouTube channel")
 async def select_youtube_channel(
     payload: dict,
+    request: Request,
     current_user: dict = Depends(get_current_user),
 ):
     """
     Saves the user's selected YouTube channel after they pick one from the channel-selection modal.
-    Associates the channel ID/title/thumbnail with their Sonikoma account.
+    Verifies if the active OAuth token is already matched or requires a one-time Google confirmation.
     """
-    user_id = current_user.get("id") or current_user.get("user_id")
+    user_id = _get_user_id(current_user)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
     channel_id = payload.get("channel_id")
     title = payload.get("title", "")
     thumbnail = payload.get("thumbnail")
@@ -830,8 +891,54 @@ async def select_youtube_channel(
         logger.error(f"Failed to save selected channel for user {user_id}: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to save channel selection: {e}")
 
+    # Check if active token is currently bound to a different brand account
+    needs_auth = False
+    auth_url = None
+    try:
+        from services.export.youtube.oauth import get_authenticated_service, YOUTUBE_SCOPES
+        youtube_service = await get_authenticated_service(user_id=user_id)
+        active_token_req = youtube_service.channels().list(part="snippet", mine=True)
+        active_token_resp = await asyncio.to_thread(active_token_req.execute)
+        if active_token_resp.get("items"):
+            token_cid = active_token_resp["items"][0]["id"]
+            if token_cid != channel_id:
+                try:
+                    client_id, _ = _load_google_secrets()
+                except Exception:
+                    client_id = os.environ.get("GOOGLE_CLIENT_ID", "")
+                state = _generate_signed_state(user_id)
+                redirect_uri = _get_youtube_redirect_uri(request)
+                user_email = current_user.get("email")
+                if not user_email and user_id and user_id != "default_studio_user":
+                    try:
+                        from repositories.user import get_user_by_id
+                        db_user = get_user_by_id(user_id)
+                        if db_user and db_user.get("email"):
+                            user_email = db_user["email"]
+                    except Exception:
+                        pass
+
+                params = {
+                    "client_id": client_id,
+                    "redirect_uri": redirect_uri,
+                    "response_type": "code",
+                    "scope": " ".join(YOUTUBE_SCOPES),
+                    "access_type": "offline",
+                    "prompt": "consent",
+                    "state": state,
+                }
+                if user_email and "@" in user_email:
+                    params["login_hint"] = user_email.strip()
+
+                auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
+                needs_auth = True
+    except Exception as e:
+        logger.debug(f"[YouTube Channel Select] Active token check: {e}")
+
     return {
         "success": True,
+        "needs_auth": needs_auth,
+        "auth_url": auth_url,
         "selected_channel": {
             "id": channel_id,
             "title": title,

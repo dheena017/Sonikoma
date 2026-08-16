@@ -58,18 +58,18 @@ def _sort_panels_reading_order(panels: List[Dict[str, Any]], reading_order: str 
     if not panels:
         return panels
 
-    sorted_by_y = sorted(panels, key=lambda b: (b.get("y", 0), b.get("x", 0)))
+    sorted_by_y = sorted(panels, key=lambda b: (b.get("y") or 0, b.get("x") or 0))
     
     rows: List[List[Dict[str, Any]]] = []
     for panel in sorted_by_y:
-        py = panel.get("y", 0)
-        ph = panel.get("height", 0)
+        py = float(panel.get("y") or 0)
+        ph = float(panel.get("height") or panel.get("h") or 0)
         
         placed = False
         for row in rows:
-            row_y_min = min(p.get("y", 0) for p in row)
-            row_y_max = max(p.get("y", 0) for p in row)
-            row_avg_h = sum(p.get("h", p.get("height", 0)) for p in row) / float(len(row))
+            row_y_min = min(float(p.get("y") or 0) for p in row)
+            row_y_max = max(float(p.get("y") or 0) for p in row)
+            row_avg_h = sum(float(p.get("h") or p.get("height") or 0) for p in row) / float(len(row))
             
             row_tolerance = max(30.0, row_avg_h * 0.40)
             
@@ -85,7 +85,7 @@ def _sort_panels_reading_order(panels: List[Dict[str, Any]], reading_order: str 
     ordered_panels: List[Dict[str, Any]] = []
     
     for row in rows:
-        sorted_row = sorted(row, key=lambda b: -b.get("x", 0) if is_rtl else b.get("x", 0))
+        sorted_row = sorted(row, key=lambda b: -(b.get("x") or 0) if is_rtl else (b.get("x") or 0))
         ordered_panels.extend(sorted_row)
         
     return ordered_panels
@@ -141,7 +141,7 @@ def _subdivide_continuous_tall_art_panel(
     bh: int,
     child_ocr: List[Dict[str, Any]],
     target_card_h: int = 650
-) -> List[Dict[str, int]]:
+) -> List[Dict[str, Any]]:
     """
     Scans continuous artwork scenes for natural visual scene transitions, horizontal panel
     border lines, background luminance shifts, or low-feature inter-text gaps.
@@ -430,7 +430,7 @@ def _split_oversized_webtoon_boxes(
 
         child_boxes: List[Dict[str, Any]] = []
         for child_idx, child in enumerate(merged_children, start=1):
-            shifted_child = dict(child)
+            shifted_child: Dict[str, Any] = dict(child)
             shifted_child["x"] = bx + int(child["x"])
             shifted_child["y"] = by + int(child["y"])
             shifted_child["w"] = int(child["w"])

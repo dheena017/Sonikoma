@@ -98,17 +98,30 @@ class YouTubeService:
             stats = item.get("statistics", {})
             branding = item.get("brandingSettings", {}).get("image", {})
 
+            thumb_url = (
+                snippet.get("thumbnails", {}).get("high", {}).get("url")
+                or snippet.get("thumbnails", {}).get("medium", {}).get("url")
+                or snippet.get("thumbnails", {}).get("default", {}).get("url")
+                or (selected_ch.get("thumbnail") if selected_ch else None)
+                or ""
+            )
+            banner_url = (
+                branding.get("bannerExternalUrl")
+                or item.get("brandingSettings", {}).get("channel", {}).get("bannerImageUrl")
+                or ""
+            )
+
             return {
                 "authenticated": True,
                 "id": item.get("id"),
-                "title": snippet.get("title"),
-                "description": snippet.get("description"),
-                "custom_url": snippet.get("customUrl", ""),
-                "thumbnail": snippet.get("thumbnails", {}).get("high", {}).get("url") or snippet.get("thumbnails", {}).get("default", {}).get("url"),
-                "banner_url": branding.get("bannerExternalUrl"),
+                "title": snippet.get("title") or (selected_ch.get("title") if selected_ch else "YouTube Channel"),
+                "description": snippet.get("description", ""),
+                "custom_url": snippet.get("customUrl") or (selected_ch.get("custom_url") if selected_ch else ""),
+                "thumbnail": thumb_url,
+                "banner_url": banner_url,
                 "subscriber_count": f"{int(stats.get('subscriberCount', 0)):,}",
                 "view_count": f"{int(stats.get('viewCount', 0)):,}",
-                "video_count": stats.get("videoCount", "0"),
+                "video_count": str(stats.get("videoCount", "0")),
             }
         except Exception as e:
             logger.info(f"YouTube OAuth connection status check: {e}")
@@ -136,25 +149,57 @@ class YouTubeService:
 
     async def get_user_videos(self, max_results: int = 24) -> List[Dict[str, Any]]:
         """Fetch list of user's uploaded YouTube videos with live view counts and likes."""
+        selected_ch = None
+        if self.user_id:
+            try:
+                from repositories.youtube import get_selected_youtube_channel
+                selected_ch = get_selected_youtube_channel(self.user_id)
+            except Exception:
+                pass
+
         try:
             youtube: Any = await get_authenticated_service(user_id=self.user_id)
-            channels_resp = await _exec(
-                youtube.channels().list(part="contentDetails", mine=True)
-            )
+            if selected_ch and selected_ch.get("id"):
+                channels_resp = await _exec(
+                    youtube.channels().list(part="contentDetails", id=selected_ch["id"])
+                )
+            else:
+                channels_resp = await _exec(
+                    youtube.channels().list(part="contentDetails", mine=True)
+                )
             items = channels_resp.get("items", [])
             if not items:
                 return []
 
             uploads_playlist_id = items[0]["contentDetails"]["relatedPlaylists"]["uploads"]
-            playlist_resp = await _exec(
-                youtube.playlistItems().list(
-                    part="snippet,contentDetails",
-                    playlistId=uploads_playlist_id,
-                    maxResults=max_results,
+            video_ids = []
+            try:
+                playlist_resp = await _exec(
+                    youtube.playlistItems().list(
+                        part="snippet,contentDetails",
+                        playlistId=uploads_playlist_id,
+                        maxResults=max_results,
+                    )
                 )
-            )
+                video_ids = [item["contentDetails"]["videoId"] for item in playlist_resp.get("items", [])]
+            except Exception as pl_err:
+                # Common for newly created or 0-video channels where YouTube hasn't instantiated the uploads playlist
+                logger.info(f"[YouTube] Uploads playlist ({uploads_playlist_id}) not found or channel has 0 uploads: {pl_err}")
+                channel_id = items[0].get("id") or (selected_ch.get("id") if selected_ch else None)
+                if channel_id:
+                    try:
+                        search_resp = await _exec(
+                            youtube.search().list(
+                                part="id",
+                                channelId=channel_id,
+                                type="video",
+                                maxResults=max_results,
+                            )
+                        )
+                        video_ids = [item["id"]["videoId"] for item in search_resp.get("items", []) if "videoId" in item.get("id", {})]
+                    except Exception:
+                        pass
 
-            video_ids = [item["contentDetails"]["videoId"] for item in playlist_resp.get("items", [])]
             if not video_ids:
                 return []
 
@@ -170,17 +215,26 @@ class YouTubeService:
                 snippet = item.get("snippet", {})
                 stats = item.get("statistics", {})
                 status = item.get("status", {})
+                vid_id = item.get("id")
+                thumbnails = snippet.get("thumbnails", {})
+                thumb_url = (
+                    thumbnails.get("maxres", {}).get("url")
+                    or thumbnails.get("high", {}).get("url")
+                    or thumbnails.get("medium", {}).get("url")
+                    or thumbnails.get("default", {}).get("url")
+                    or f"https://i.ytimg.com/vi/{vid_id}/hqdefault.jpg"
+                )
                 videos.append({
-                    "id": item.get("id"),
-                    "title": snippet.get("title"),
-                    "description": snippet.get("description"),
+                    "id": vid_id,
+                    "title": snippet.get("title") or "Untitled Video",
+                    "description": snippet.get("description", ""),
                     "published_at": snippet.get("publishedAt"),
-                    "thumbnail": snippet.get("thumbnails", {}).get("high", {}).get("url"),
+                    "thumbnail": thumb_url,
                     "view_count": f"{int(stats.get('viewCount', 0)):,}",
                     "like_count": f"{int(stats.get('likeCount', 0)):,}",
                     "comment_count": f"{int(stats.get('commentCount', 0)):,}",
                     "privacy_status": status.get("privacyStatus", "public"),
-                    "youtube_url": f"https://youtube.com/watch?v={item.get('id')}",
+                    "youtube_url": f"https://youtube.com/watch?v={vid_id}",
                 })
             return videos
         except Exception as e:
@@ -339,15 +393,32 @@ class YouTubeService:
 
     async def get_playlists(self) -> List[Dict[str, Any]]:
         """Fetch all playlists for the user's YouTube channel."""
+        selected_ch = None
+        if self.user_id:
+            try:
+                from repositories.youtube import get_selected_youtube_channel
+                selected_ch = get_selected_youtube_channel(self.user_id)
+            except Exception:
+                pass
+
         try:
             youtube: Any = await get_authenticated_service(user_id=self.user_id)
-            response = await _exec(
-                youtube.playlists().list(
-                    part="snippet,contentDetails,status",
-                    mine=True,
-                    maxResults=50,
+            if selected_ch and selected_ch.get("id"):
+                response = await _exec(
+                    youtube.playlists().list(
+                        part="snippet,contentDetails,status",
+                        channelId=selected_ch["id"],
+                        maxResults=50,
+                    )
                 )
-            )
+            else:
+                response = await _exec(
+                    youtube.playlists().list(
+                        part="snippet,contentDetails,status",
+                        mine=True,
+                        maxResults=50,
+                    )
+                )
             playlists = []
             for item in response.get("items", []):
                 snippet = item.get("snippet", {})

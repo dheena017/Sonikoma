@@ -9,6 +9,7 @@ Compound media processor orchestrating multi-step workflows:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import os
 import tempfile
 import logging
 from enum import Enum

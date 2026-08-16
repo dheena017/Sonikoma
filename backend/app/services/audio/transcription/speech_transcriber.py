@@ -9,18 +9,32 @@ timestamp extraction, and batch transcription.
 import os
 import json
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 
 from app.providers.whisper.engine import TranscriptionResult, get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
 
 logger = logging.getLogger("sonikoma.services.audio.transcription.speech_transcriber")
 
 
-def _ensure_whisper_engine(model_name: WhisperModel = WhisperModel.BASE, device: str = "cpu"):
+def _ensure_whisper_engine(
+    model_name: Optional[Union[WhisperModel, str]] = WhisperModel.BASE,
+    device: str = "cpu"
+):
     if not WHISPER_AVAILABLE:
         raise ValueError("Whisper is not installed or available.")
+    selected_model: WhisperModel
+    if isinstance(model_name, WhisperModel):
+        selected_model = model_name
+    elif isinstance(model_name, str):
+        try:
+            selected_model = WhisperModel(model_name.lower())
+        except ValueError:
+            selected_model = WhisperModel.BASE
+    else:
+        selected_model = WhisperModel.BASE
+
     try:
-        return get_whisper_engine(model_name=model_name, device=device)
+        return get_whisper_engine(model_name=selected_model, device=device)
     except ImportError as exc:
         raise ValueError(str(exc))
 
@@ -174,13 +188,18 @@ async def batch_transcribe(
 
 async def transcribe_audio_service(
     audio_path: str,
-    model_name: WhisperModel = WhisperModel.BASE,
+    model_name: Optional[Union[WhisperModel, str]] = WhisperModel.BASE,
     language: Optional[str] = None,
-    task: Optional[str] = None,
+    task: Optional[str] = "transcribe",
     verbose: bool = False
 ) -> Dict[str, Any]:
     engine = _ensure_whisper_engine(model_name, device="cpu")
-    result = await engine.transcribe(audio_path, language=language, task=task, verbose=verbose)
+    result = await engine.transcribe(
+        audio_path,
+        language=language,
+        task=task or "transcribe",
+        verbose=verbose
+    )
     return {
         "text": result.text,
         "language": result.language,
@@ -190,22 +209,40 @@ async def transcribe_audio_service(
     }
 
 
-async def generate_srt_service(audio_path: str, output_path: str, model_name: WhisperModel = "base", language: Optional[str] = None) -> str:
+async def generate_srt_service(
+    audio_path: str,
+    output_path: str,
+    model_name: Optional[Union[WhisperModel, str]] = WhisperModel.BASE,
+    language: Optional[str] = None
+) -> str:
     engine = _ensure_whisper_engine(model_name, device="cpu")
     return await generate_srt(engine, audio_path, output_path, language=language)
 
 
-async def generate_vtt_service(audio_path: str, output_path: str, model_name: WhisperModel = "base", language: Optional[str] = None) -> str:
+async def generate_vtt_service(
+    audio_path: str,
+    output_path: str,
+    model_name: Optional[Union[WhisperModel, str]] = WhisperModel.BASE,
+    language: Optional[str] = None
+) -> str:
     engine = _ensure_whisper_engine(model_name, device="cpu")
     return await generate_vtt(engine, audio_path, output_path, language=language)
 
 
-async def extract_words_service(audio_path: str, model_name: WhisperModel = "base", language: Optional[str] = None) -> List[Dict[str, Any]]:
+async def extract_words_service(
+    audio_path: str,
+    model_name: Optional[Union[WhisperModel, str]] = WhisperModel.BASE,
+    language: Optional[str] = None
+) -> List[Dict[str, Any]]:
     engine = _ensure_whisper_engine(model_name, device="cpu")
     return await extract_words_with_timestamps(engine, audio_path, language=language)
 
 
-async def batch_transcribe_service(audio_paths: List[str], model_name: WhisperModel = "base", language: Optional[str] = None) -> List[Optional[Dict[str, Any]]]:
+async def batch_transcribe_service(
+    audio_paths: List[str],
+    model_name: Optional[Union[WhisperModel, str]] = WhisperModel.BASE,
+    language: Optional[str] = None
+) -> List[Optional[Dict[str, Any]]]:
     engine = _ensure_whisper_engine(model_name, device="cpu")
     results = await batch_transcribe(engine, audio_paths, language=language)
     return [r.__dict__ if r else None for r in results]

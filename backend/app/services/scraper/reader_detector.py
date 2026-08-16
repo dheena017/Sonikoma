@@ -78,8 +78,8 @@ class ReaderDetector:
 
                     if parent_container and id(parent_container) not in tested_nodes and parent_container.name != "body":
                         tested_nodes.add(id(parent_container))
-                        cls_name = parent_container.get("class", [])
-                        cls_str = ".".join(cls_name) if isinstance(cls_name, list) else str(cls_name)
+                        cls_name = parent_container.get("class")
+                        cls_str = ".".join(cls_name) if isinstance(cls_name, list) else str(cls_name or "")
                         elem_id = parent_container.get("id")
                         inferred_sel = f"#{elem_id}" if elem_id else (f".{cls_str.split()[0]}" if cls_str else parent_container.name)
 
@@ -98,8 +98,8 @@ class ReaderDetector:
 
                 img_tags = elem.find_all(["img", "source", "picture", "canvas"])
                 if len(img_tags) >= 2:
-                    cls_name = elem.get("class", [])
-                    cls_str = ".".join(cls_name) if isinstance(cls_name, list) else str(cls_name)
+                    cls_name = elem.get("class")
+                    cls_str = ".".join(cls_name) if isinstance(cls_name, list) else str(cls_name or "")
                     elem_id = elem.get("id")
                     inferred_sel = f"#{elem_id}" if elem_id else (f".{cls_str.split()[0]}" if cls_str else elem.name)
 

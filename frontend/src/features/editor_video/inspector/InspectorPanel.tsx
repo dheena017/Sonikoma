@@ -199,7 +199,7 @@ export const InspectorPanel: React.FC<{
   const allSections = [...builtinSections, ...extraSections];
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-gradient-to-b from-[#0c0a1a] via-[#090714] to-[#05040a] text-white select-none backdrop-blur-2xl border-l border-purple-900/20">
+    <div className="h-full flex flex-col overflow-hidden bg-[#0c0d16]/75 text-white select-none backdrop-blur-3xl border-l border-white/10">
       {/* Header */}
       <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-purple-900/20 bg-neutral-950/70 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-2">

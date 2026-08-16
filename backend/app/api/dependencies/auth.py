@@ -44,6 +44,27 @@ async def get_current_user(request: Request, token: Optional[str] = Depends(oaut
         raise credentials_exception
     return user
 
+async def get_optional_current_user(request: Request, token: Optional[str] = Depends(oauth2_scheme)) -> Optional[dict]:
+    """Extract user if valid token is present, otherwise return None without throwing 401."""
+    try:
+        if not token or not isinstance(token, str):
+            auth_header = request.headers.get("Authorization")
+            if auth_header:
+                scheme, _, param = auth_header.partition(" ")
+                if scheme.lower() == "bearer":
+                    token = param.strip()
+                else:
+                    token = auth_header.strip()
+            else:
+                token = request.cookies.get("access_token") or request.query_params.get("token")
+
+        if not token or not isinstance(token, str) or token.strip() in ("", "null", "undefined"):
+            return None
+
+        return auth_service.authenticate_token(token)
+    except Exception:
+        return None
+
 async def get_admin_user(current_user: dict = Depends(get_current_user)):
     if current_user.get('creator_role') != 'admin':
         raise HTTPException(status_code=403, detail="Administrative privileges required.")

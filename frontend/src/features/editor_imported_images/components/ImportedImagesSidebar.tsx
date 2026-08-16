@@ -597,7 +597,7 @@ const ChapterScraperDeck = React.memo(
       <>
         <div
           id="scraped_strips_deck"
-          className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-4 sm:p-5 lg:p-6 backdrop-blur-md space-y-4 shadow-sm min-w-0 w-full overflow-hidden"
+          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 lg:p-6 space-y-4 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-w-0 w-full overflow-hidden"
         >
           <ImportedAssetsHeader
             scrapedImagesLength={scrapedImages.length}
@@ -679,7 +679,7 @@ const ChapterScraperDeck = React.memo(
                     <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
                       {/* IN-PANEL LEFT SIDEBAR: EPISODE NAVIGATOR */}
                       <aside
-                        className={`relative bg-neutral-950/90 border border-neutral-850 rounded-2xl shrink-0 shadow-2xl lg:sticky lg:top-24 self-start transition-all duration-300 overflow-hidden ${
+                        className={`relative bg-[#0c0d16]/70 border border-white/10 backdrop-blur-xl rounded-2xl shrink-0 shadow-2xl lg:sticky lg:top-24 self-start transition-all duration-300 overflow-hidden ${
                           isEpisodeCollapsed ? "w-10 p-2" : "w-full lg:w-56 p-4 space-y-3"
                         }`}
                       >
@@ -888,7 +888,7 @@ const ChapterScraperDeck = React.memo(
                             <div
                               key={`ep-section-${gIdx}`}
                               id={`ep-section-${gIdx}`}
-                              className="bg-neutral-955 border border-neutral-850 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl scroll-mt-24"
+                              className="bg-[#0c0d16]/70 border border-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl scroll-mt-24"
                             >
                               {/* Episode Horizontal / Grid Cards */}
                               {viewLayout === "scroll" ? (

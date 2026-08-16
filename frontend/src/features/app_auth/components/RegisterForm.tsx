@@ -15,6 +15,7 @@ import {
   Key,
   Compass,
   Bell,
+  Sparkles,
 } from "lucide-react";
 import AuthPageShell from "@/features/app_auth/components/AuthPageShell";
 import ThemeSwitcher from "@/features/app_auth/components/ThemeSwitcher";
@@ -117,11 +118,27 @@ export default function RegisterForm({
       }
       rightBody={
         <>
-          <div className="space-y-2">
-            <h2 className="text-3xl font-extrabold text-white tracking-tight">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-purple-600/20 border border-purple-500/40 p-2 shadow-[0_0_25px_rgba(168,85,247,0.35)] flex items-center justify-center backdrop-blur-md">
+                <img
+                  src="/logo-dark.png"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+                  }}
+                  alt="Sonikoma"
+                  className="w-full h-full object-contain drop-shadow"
+                />
+              </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold tracking-wide shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <span>Join Sonikoma Studio</span>
+              </div>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
               Create Account
             </h2>
-            <p className="text-neutral-400 text-sm font-medium">
+            <p className="text-neutral-300 text-sm font-medium leading-relaxed">
               Start parsing webtoons and compiling animations today.
             </p>
           </div>
@@ -129,30 +146,35 @@ export default function RegisterForm({
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => handleSocialRegister("Google")}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-white font-medium text-xs transition-all duration-300 cursor-pointer shadow-sm active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#141624] hover:bg-[#1a1e32] border border-white/10 hover:border-purple-500/40 text-white font-bold text-xs transition-all duration-300 cursor-pointer shadow-md active:scale-[0.98]"
             >
-              <Chrome className="w-4 h-4 text-neutral-300" />
-              Google
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span>Google</span>
             </button>
             <button
               onClick={() => handleSocialRegister("GitHub")}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-white font-medium text-xs transition-all duration-300 cursor-pointer shadow-sm active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#141624] hover:bg-[#1a1e32] border border-white/10 hover:border-purple-500/40 text-white font-bold text-xs transition-all duration-300 cursor-pointer shadow-md active:scale-[0.98]"
             >
-              <Github className="w-4 h-4 text-neutral-300" />
-              GitHub
+              <Github className="w-4 h-4 text-white" />
+              <span>GitHub</span>
             </button>
           </div>
 
           <div className="relative flex py-2 items-center">
-            <div className="flex-grow border-t border-white/5" />
-            <span className="flex-shrink mx-4 text-neutral-600 text-[10px] font-bold uppercase tracking-widest">
+            <div className="flex-grow border-t border-white/10" />
+            <span className="flex-shrink mx-4 text-neutral-400 text-[10px] font-bold uppercase tracking-widest bg-black/40 px-2.5 py-0.5 rounded-full border border-white/10">
               Or Sign Up With Email
             </span>
-            <div className="flex-grow border-t border-white/5" />
+            <div className="flex-grow border-t border-white/10" />
           </div>
 
-          <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-500">
-            <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${currentTheme.cardBorder}`} />
+          <div className="bg-[#0b0c18]/90 backdrop-blur-3xl border border-white/12 rounded-[28px] p-7 sm:p-8 shadow-[0_24px_64px_rgba(0,0,0,0.7),0_0_40px_rgba(168,85,247,0.12)] relative overflow-hidden transition-all duration-500">
+            <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500/80 to-transparent" />
 
             <form className="space-y-4" onSubmit={handleSubmit}>
               {error && (
@@ -257,8 +279,8 @@ export default function RegisterForm({
                     Auto-Generate Secure Password
                   </button>
                 </div>
-                <div className="relative flex items-center">
-                  <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 z-10">
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 pl-3.5 flex items-center z-10">
                     <Lock className="w-4 h-4 text-neutral-500" />
                   </div>
                   <input
@@ -266,27 +288,29 @@ export default function RegisterForm({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-12 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
+                    className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 transition-all font-medium ${
                       hasMinLength
                         ? "border-emerald-500/20 focus:border-emerald-500/40"
                         : `border-white/5 ${currentTheme.focus}`
                     }`}
-                    placeholder="••••••••"
+                    placeholder="Create password (min 6 characters)"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all focus:outline-none cursor-pointer z-10"
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="no-hover-lift p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-none cursor-pointer flex items-center justify-center"
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 {passwordNotification && (
                   <p className="text-[10px] font-semibold text-emerald-400 ml-1 animate-pulse">

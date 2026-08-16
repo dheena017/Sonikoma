@@ -15,6 +15,7 @@ import {
   Eye,
   EyeOff,
   Info,
+  Sparkles,
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
@@ -84,7 +85,7 @@ export default function ForgotPasswordPage({
 
   return (
     <div className="auth-anime-shell min-h-screen flex bg-[#070709] text-white font-sans overflow-hidden relative">
-      <LandingAnimeScene variant="app" />
+      <LandingAnimeScene variant="auth" />
 
       {/* LEFT PANEL: Auth Product Slideshow (extracted child component) */}
       <AuthShowcase activeTheme={activeTheme} iconType="forgot" />
@@ -172,8 +173,24 @@ export default function ForgotPasswordPage({
         {/* Form Container */}
         <div className="my-auto w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 py-6">
           {/* Welcome Text */}
-          <div className="space-y-2">
-            <h2 className="text-3xl font-extrabold text-white tracking-tight">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-purple-600/20 border border-purple-500/40 p-2 shadow-[0_0_25px_rgba(168,85,247,0.35)] flex items-center justify-center backdrop-blur-md">
+                <img
+                  src="/logo-dark.png"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+                  }}
+                  alt="Sonikoma"
+                  className="w-full h-full object-contain drop-shadow"
+                />
+              </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold tracking-wide shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <span>Account Recovery</span>
+              </div>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
               {isCompleted
                 ? "Reset Successful"
                 : isResetReady
@@ -184,7 +201,7 @@ export default function ForgotPasswordPage({
                 ? "Enter Verification"
                 : "Reset Password"}
             </h2>
-            <p className="text-neutral-400 text-sm font-medium leading-relaxed">
+            <p className="text-neutral-300 text-sm font-medium leading-relaxed">
               {isCompleted
                 ? "Your credentials have been successfully updated! You can now log into your Sonikoma account."
                 : isResetReady
@@ -279,8 +296,8 @@ export default function ForgotPasswordPage({
                   <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
                     New Secure Password
                   </label>
-                  <div className="relative flex items-center">
-                    <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 z-10">
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 pl-3.5 flex items-center z-10">
                       <Lock className="w-4 h-4 text-neutral-500" />
                     </div>
                     <input
@@ -288,20 +305,22 @@ export default function ForgotPasswordPage({
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-12 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
-                      placeholder="••••••••"
+                      className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
+                      placeholder="Enter new password (min 6 chars)"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all focus:outline-none cursor-pointer z-10"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="no-hover-lift p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-none cursor-pointer flex items-center justify-center"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -310,8 +329,8 @@ export default function ForgotPasswordPage({
                   <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
                     Confirm Password
                   </label>
-                  <div className="relative flex items-center">
-                    <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 z-10">
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 pl-3.5 flex items-center z-10">
                       <Lock className="w-4 h-4 text-neutral-500" />
                     </div>
                     <input
@@ -319,20 +338,22 @@ export default function ForgotPasswordPage({
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-12 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
-                      placeholder="••••••••"
+                      className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
+                      placeholder="Confirm new password"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all focus:outline-none cursor-pointer z-10"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="no-hover-lift p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-none cursor-pointer flex items-center justify-center"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                   {newPassword && confirmPassword && (
                     <div className="text-[9px] font-bold ml-1">

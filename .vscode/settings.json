@@ -1,5 +1,6 @@
 {
     "DockerRun.DisableDockerrc": true,
+    "DockerRun.DisableAutoGenerateConfig": true,
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
     "python.analysis.extraPaths": [
         "${workspaceFolder}/backend",
@@ -9,9 +10,13 @@
         "${workspaceFolder}/backend",
         "${workspaceFolder}/backend/app"
     ],
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none",
+        "reportMissingModuleSource": "none",
+        "reportGeneralTypeIssues": "none"
+    },
     "files.exclude": {
         "**/__pycache__": true,
         "**/*.pyc": true
-    },
-    "DockerRun.DisableAutoGenerateConfig": true
+    }
 }

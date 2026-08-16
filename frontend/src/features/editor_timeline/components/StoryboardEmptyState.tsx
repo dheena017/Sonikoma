@@ -16,10 +16,10 @@ export default function StoryboardEmptyState({
     return (
       <div
         id="panels_timeline_section_empty"
-        className="relative w-full flex flex-col items-center justify-center p-8 sm:p-10 my-2 rounded-2xl bg-neutral-950/80 border border-neutral-850 shadow-2xl backdrop-blur-xl text-center space-y-4 animate-in fade-in duration-300"
+        className="relative w-full flex flex-col items-center justify-center p-8 sm:p-12 my-2 rounded-2xl bg-white/[0.02] border border-white/8 text-center space-y-4 animate-in fade-in duration-300"
       >
         <div className="relative p-0.5 rounded-2xl bg-gradient-to-br from-purple-500/80 via-cyan-500/80 to-purple-600/80 shadow-md">
-          <div className="w-12 h-12 rounded-[14px] bg-neutral-950 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-[14px] bg-[#0c0d16]/90 flex items-center justify-center">
             <Layers className="w-6 h-6 text-purple-400" />
           </div>
         </div>
@@ -35,7 +35,7 @@ export default function StoryboardEmptyState({
           </p>
         </div>
 
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-[11px] font-mono text-purple-300">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/8 text-[11px] font-mono text-purple-300">
           <Plus className="w-3.5 h-3.5 text-purple-400" />
           <span>Click '+ Add to Storyboard' on any deck panel below</span>
         </div>
@@ -46,10 +46,10 @@ export default function StoryboardEmptyState({
   return (
     <div
       id="panels_timeline_section_empty"
-      className="relative w-full flex flex-col items-center justify-center p-8 sm:p-10 my-2 rounded-2xl bg-neutral-950/80 border border-neutral-850 shadow-2xl backdrop-blur-xl text-center space-y-4 animate-in fade-in duration-300"
+      className="relative w-full flex flex-col items-center justify-center p-8 sm:p-12 my-2 rounded-2xl bg-white/[0.02] border border-white/8 text-center space-y-4 animate-in fade-in duration-300"
     >
       <div className="relative p-0.5 rounded-2xl bg-gradient-to-br from-purple-500/80 via-cyan-500/80 to-purple-600/80 shadow-md">
-        <div className="w-12 h-12 rounded-[14px] bg-neutral-950 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-[14px] bg-[#0c0d16]/90 flex items-center justify-center">
           <Sparkles className="w-6 h-6 text-purple-400" />
         </div>
       </div>

@@ -4,6 +4,7 @@ backend/app/services/export/youtube/workflow.py
 Orchestrates the OAuth authentication, metadata formatting, and upload logic.
 ─────────────────────────────────────────────────────────────────────────────
 """
+import asyncio
 import os
 import logging
 from typing import Optional, List, Any
@@ -17,8 +18,8 @@ logger = logging.getLogger("sonikoma.services.export.youtube.workflow")
 
 async def execute_youtube_upload_workflow(
     video_path: str,
-    title: str,
-    description: str,
+    title: Optional[str] = "Untitled Video",
+    description: Optional[str] = "",
     tags: Optional[List[str]] = None,
     category_id: Optional[str] = "1",
     privacy_status: Optional[str] = "unlisted",
@@ -33,6 +34,21 @@ async def execute_youtube_upload_workflow(
     try:
         # Step 1: Authenticate
         youtube: Any = await get_authenticated_service(user_id=user_id)
+
+        # Step 1.5: Log targeted channel
+        if user_id:
+            try:
+                from repositories.youtube import get_selected_youtube_channel
+                selected_ch = get_selected_youtube_channel(user_id)
+                active_token_req = youtube.channels().list(part="snippet", mine=True)
+                active_token_resp = await asyncio.to_thread(active_token_req.execute)
+                if active_token_resp.get("items"):
+                    token_cid = active_token_resp["items"][0]["id"]
+                    token_title = active_token_resp["items"][0]["snippet"]["title"]
+                    selected_title = (selected_ch.get("title") if selected_ch else None) or token_title
+                    logger.info(f"[YouTube Upload] Publishing to channel '{token_title}' ({token_cid}) | Selected: '{selected_title}'")
+            except Exception as guard_err:
+                logger.debug(f"[YouTube Upload] Target channel note: {guard_err}")
 
         # Step 2: Format Metadata
         request_body = format_video_metadata(

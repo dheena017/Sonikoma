@@ -506,13 +506,13 @@ export default function LandingPage({
       {/* FEATURES GRID */}
       <section
         id="features"
-        className={`py-32 px-6 scroll-mt-24 transition-colors ${
-          isLight ? "bg-slate-100/50" : "bg-neutral-950/40"
+        className={`py-32 px-6 scroll-mt-24 transition-colors relative z-10 ${
+          isLight ? "bg-slate-100/90" : "bg-[#07070a]/90 backdrop-blur-2xl"
         }`}
       >
         <div className="max-w-7xl mx-auto space-y-20">
           <div className="text-center space-y-4">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-purple-500">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-purple-400">
               Powerful Creator Tools
             </span>
             <h2
@@ -523,8 +523,8 @@ export default function LandingPage({
               Built for Content Creators
             </h2>
             <p
-              className={`max-w-xl mx-auto text-base ${
-                isLight ? "text-slate-600" : "text-neutral-400"
+              className={`max-w-xl mx-auto text-base leading-relaxed ${
+                isLight ? "text-slate-600" : "text-neutral-300"
               }`}
             >
               We handle the complex image processing, text erasure, TTS dubbing, and video editing so you can focus on storytelling.

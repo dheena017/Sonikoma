@@ -165,6 +165,7 @@ def save_youtube_oauth_tokens(
     client_id: str | None = None,
     client_secret: str | None = None,
     scopes: str | None = None,
+    google_email: str | None = None,
 ) -> None:
     """
     Persist YouTube-specific OAuth access/refresh tokens for a user.
@@ -172,17 +173,23 @@ def save_youtube_oauth_tokens(
     """
     conn = get_db_connection()
     try:
+        try:
+            conn.execute("ALTER TABLE youtube_oauth_tokens ADD COLUMN google_email TEXT")
+        except Exception:
+            pass
+
         conn.execute("""
-            INSERT INTO youtube_oauth_tokens (user_id, access_token, refresh_token, client_id, client_secret, scopes, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            INSERT INTO youtube_oauth_tokens (user_id, access_token, refresh_token, client_id, client_secret, scopes, google_email, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
             ON CONFLICT(user_id) DO UPDATE SET
                 access_token=excluded.access_token,
                 refresh_token=COALESCE(excluded.refresh_token, refresh_token),
                 client_id=COALESCE(excluded.client_id, client_id),
                 client_secret=COALESCE(excluded.client_secret, client_secret),
                 scopes=COALESCE(excluded.scopes, scopes),
+                google_email=COALESCE(excluded.google_email, google_email),
                 updated_at=datetime('now')
-        """, (user_id, access_token, refresh_token, client_id, client_secret, scopes))
+        """, (user_id, access_token, refresh_token, client_id, client_secret, scopes, google_email))
         conn.commit()
     finally:
         conn.close()
