@@ -208,18 +208,24 @@
 @keyframes page-view-entry {
   0% {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(16px) scale(0.992);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 0.95;
+    filter: blur(0px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
 }
 
 @keyframes stagger-fade-up {
   0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(16px);
   }
   100% {
     opacity: 1;
@@ -231,12 +237,12 @@
   0% {
     width: 0%;
     opacity: 1;
-    box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 0 0 20px rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 12px rgba(168, 85, 247, 1), 0 0 24px rgba(34, 211, 238, 0.8);
   }
-  65% {
-    width: 80%;
+  60% {
+    width: 75%;
     opacity: 1;
-    box-shadow: 0 0 14px rgba(168, 85, 247, 1), 0 0 28px rgba(245, 158, 11, 0.8);
+    box-shadow: 0 0 16px rgba(168, 85, 247, 1), 0 0 32px rgba(34, 211, 238, 0.9);
   }
   100% {
     width: 100%;
@@ -397,3 +403,65 @@
     transform: scale(1.22);
   }
 }
+
+/* Cosmic Aurora Light Waves */
+@keyframes anime-aurora-pulse {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(3vw, -2vh, 0) scale(1.18) rotate(4deg);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate3d(-2vw, 3vh, 0) scale(1.08) rotate(-3deg);
+    opacity: 0.5;
+  }
+}
+
+/* Energy Concentric Ripple Expansion */
+@keyframes anime-ring-expand {
+  0% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(1.6) rotate(90deg);
+    opacity: 0;
+  }
+}
+
+/* Floating 3D Hologram Panels */
+@keyframes anime-holo-float {
+  0% {
+    transform: translateY(0px) rotate(6deg) rotateX(12deg) rotateY(-15deg);
+  }
+  50% {
+    transform: translateY(-16px) rotate(8deg) rotateX(8deg) rotateY(-10deg);
+  }
+  100% {
+    transform: translateY(6px) rotate(4deg) rotateX(15deg) rotateY(-18deg);
+  }
+}
+
+/* Prismatic Crystal Tumble */
+@keyframes anime-crystal-tumble {
+  0% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-24px) rotate(180deg) scale(1.15);
+    opacity: 0.95;
+    filter: drop-shadow(0 0 16px rgba(236, 72, 153, 0.9));
+  }
+  100% {
+    transform: translateY(0px) rotate(360deg) scale(1);
+    opacity: 0.6;
+  }
+}
+

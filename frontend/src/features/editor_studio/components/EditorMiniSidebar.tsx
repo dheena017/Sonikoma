@@ -385,7 +385,7 @@ const EditorMiniSidebarInner = ({
     // Premium Glassmorphism Container
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950/90 backdrop-blur-2xl border-r border-neutral-800/80 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[90] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.4)] ${isCollapsed ? "w-20" : "w-24"
+      className={`hidden md:flex fixed bottom-0 left-0 bg-[#06060c]/85 backdrop-blur-3xl border-r border-white/8 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[90] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.5),inset_-1px_0_0_rgba(168,85,247,0.05)] ${isCollapsed ? "w-20" : "w-24"
         }`}
     >
       {/* Scrollable Tools Area */}
@@ -394,7 +394,7 @@ const EditorMiniSidebarInner = ({
           <div key={group.label} className="w-full flex flex-col items-center">
             {/* Section divider (only between groups) + label for every group */}
             <div className="w-full flex flex-col items-center" style={{ marginTop: gi > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
-              {gi > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+              {gi > 0 && <div className="w-8 h-px bg-white/10 rounded-full mb-1.5" />}
               <span className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
                 {group.label}
               </span>
@@ -410,7 +410,7 @@ const EditorMiniSidebarInner = ({
       </div>
 
       {/* Bottom Action Footer - Return to Workspace */}
-      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800/60 relative">
+      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-white/5 relative">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={handleReturnToWorkspace}

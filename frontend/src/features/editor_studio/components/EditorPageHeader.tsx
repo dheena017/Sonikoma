@@ -135,18 +135,18 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-neutral-900 bg-neutral-950/80 backdrop-blur-md shadow-2xl shadow-black/40 pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${className || ""
+      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-white/8 bg-[#06060c]/80 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${className || ""
         }`}
       style={style}
     >
       {/* Left Section - Menu Icon + Title */}
       <div className="flex items-center shrink-0 h-full">
         {/* PREMIUM ALIGNMENT FIX: w-20 wrapper perfectly aligns the menu button above the mini-sidebar */}
-        <div className="w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
+        <div className="w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-4">
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="w-11 h-11 rounded-2xl bg-neutral-800 border border-neutral-700 hover:bg-purple-500/10 hover:border-purple-500/20 text-neutral-400 hover:text-purple-300 cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center"
+              className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
               title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
             >
               <Menu className="h-5 w-5" />
@@ -258,10 +258,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: !current });
           }}
           title="Toggle Floating Player"
-          className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${isPlayerOpen
-            ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-            : "border-neutral-700 bg-neutral-800 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
-            }`}
+          className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+            isPlayerOpen
+              ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
+              : "border-white/8 bg-white/[0.03] text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+          }`}
         >
           <Monitor className="h-4 w-4" />
         </button>
@@ -271,10 +272,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           type="button"
           onClick={() => setIsFocusMode((value) => !value)}
           title={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
-          className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${isFocusMode
-            ? "border-purple-500/50 bg-purple-500/10 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-            : "border-neutral-700 bg-neutral-800 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
-            }`}
+          className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+            isFocusMode
+              ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
+              : "border-white/8 bg-white/[0.03] text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+          }`}
         >
           <Focus className="h-4 w-4" />
         </button>
@@ -303,7 +305,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <button
             onClick={() => setShowNotifications((v) => !v)}
             title="Notifications"
-            className="w-11 h-11 rounded-2xl border border-neutral-700 bg-neutral-800 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl border border-white/8 bg-white/[0.03] text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center"
           >
             {notificationsMuted ? (
               <BellOff className="h-4 w-4 text-rose-500" />
@@ -335,7 +337,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-11 h-11 rounded-2xl border border-neutral-700 bg-neutral-800 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
+            className="w-11 h-11 rounded-2xl border border-white/8 bg-white/[0.03] text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
             title={
               activeProjectId && activeProjectData
                 ? `Active Project: ${activeProjectData.project?.title || "Active"} — Click to switch`

@@ -167,12 +167,12 @@ const EditorSidebar = ({
 
   return (
     <aside
-      className={`fixed top-0 bottom-0 left-0 h-screen bg-gradient-to-b from-neutral-950 via-[#0a0712] to-neutral-950 backdrop-blur-2xl border-r border-neutral-800/80 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.8)] overflow-hidden select-none ${isCollapsed ? "w-20" : "w-[280px]"
+      className={`fixed top-0 bottom-0 left-0 h-screen bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(168,85,247,0.06)] overflow-hidden select-none ${isCollapsed ? "w-20" : "w-[280px]"
         }`}
     >
       {/* Top Header / Close Area */}
       <div
-        className={`flex items-center border-b border-neutral-800/60 transition-all duration-300 shrink-0 ${isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
+        className={`flex items-center border-b border-white/5 transition-all duration-300 shrink-0 ${isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
           }`}
       >
         {!isCollapsed && (
@@ -208,7 +208,7 @@ const EditorSidebar = ({
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
-            className="w-8 h-8 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
+            className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/8 text-neutral-400 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
             title="Close sidebar"
           >
             <X className="w-4 h-4" />
@@ -221,7 +221,7 @@ const EditorSidebar = ({
         {menuGroups.map((group, groupIdx) => (
           <div key={group.title} className="space-y-2">
             {!isCollapsed && groupIdx > 0 && (
-              <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-3" />
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-white/8 to-transparent my-3" />
             )}
             {!isCollapsed && (
               <h3 className="px-4 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans mb-1">
@@ -357,7 +357,7 @@ const EditorSidebar = ({
       </div>
 
       {/* Bottom Action Footer - Return to Workspace */}
-      <div className="p-4 border-t border-white/[0.02] bg-gradient-to-t from-black/20 to-transparent flex justify-center w-full">
+      <div className="p-4 border-t border-white/5 bg-gradient-to-t from-black/30 to-transparent flex justify-center w-full">
         <button
           onClick={handleReturnToWorkspace}
           className={`flex items-center justify-center rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all active:scale-95 border border-purple-400/30 cursor-pointer shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] ${isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"

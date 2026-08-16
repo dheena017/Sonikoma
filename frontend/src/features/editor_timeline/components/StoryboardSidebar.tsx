@@ -1,4 +1,5 @@
 import React from "react";
+import { PanelLeft, PanelLeftClose } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/editor_imported_images/components/ImportedImagesSidebar";
 
@@ -21,6 +22,8 @@ interface StoryboardSidebarProps {
   addNotification?: (message: string, type: any) => void;
   hoveredTimelineEpIdx: number | null;
   setHoveredTimelineEpIdx: React.Dispatch<React.SetStateAction<number | null>>;
+  isCollapsed?: boolean;
+  setIsCollapsed?: (v: boolean) => void;
 }
 
 const StoryboardSidebar = ({
@@ -36,11 +39,34 @@ const StoryboardSidebar = ({
   addNotification,
   hoveredTimelineEpIdx,
   setHoveredTimelineEpIdx,
+  isCollapsed = false,
+  setIsCollapsed,
 }: StoryboardSidebarProps) => {
   const safeEpisodeGroups = episodeGroups.length > 0 ? episodeGroups : [];
 
+  if (isCollapsed) {
+    return (
+      <aside className="bg-[#0d0d12] border border-neutral-800 rounded-2xl p-2 shrink-0 shadow-xl flex flex-col items-center gap-2 self-start transition-all duration-300 w-10">
+        <button
+          type="button"
+          onClick={() => setIsCollapsed?.(false)}
+          title="Open Storyboard Navigator"
+          className="w-full flex flex-col items-center gap-2 pt-2 cursor-pointer group"
+        >
+          <PanelLeft className="w-4 h-4 text-purple-400 group-hover:text-purple-300 transition-colors" />
+          <span
+            className="text-[8px] font-black font-mono uppercase text-neutral-500 group-hover:text-purple-400 transition-colors tracking-widest"
+            style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}
+          >
+            Sequences
+          </span>
+        </button>
+      </aside>
+    );
+  }
+
   return (
-    <aside className="w-full lg:w-64 bg-[#0d0d12] border border-neutral-800 rounded-2xl p-3 shrink-0 shadow-[0_16px_40px_rgba(0,0,0,0.38)] flex flex-col h-full">
+    <aside className="w-full lg:w-64 bg-[#0d0d12] border border-neutral-800 rounded-2xl p-3 shrink-0 shadow-[0_16px_40px_rgba(0,0,0,0.38)] flex flex-col self-start transition-all duration-300">
       <div className="flex items-center justify-between border-b border-neutral-800 pb-2.5 mb-3">
         <div className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
@@ -48,16 +74,28 @@ const StoryboardSidebar = ({
             Storyboard
           </h4>
         </div>
-        {safeEpisodeGroups.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setTimelineEpSortAscending((prev) => !prev)}
-            title="Toggle Sort Order (Ascending / Descending)"
-            className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
-          >
-            {timelineEpSortAscending ? "1 → N" : "N → 1"}
-          </button>
-        )}
+        <div className="flex items-center gap-1.5">
+          {safeEpisodeGroups.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setTimelineEpSortAscending((prev) => !prev)}
+              title="Toggle Sort Order (Ascending / Descending)"
+              className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
+            >
+              {timelineEpSortAscending ? "1 → N" : "N → 1"}
+            </button>
+          )}
+          {setIsCollapsed && (
+            <button
+              type="button"
+              onClick={() => setIsCollapsed(true)}
+              title="Collapse Navigator"
+              className="w-6 h-6 flex items-center justify-center rounded-lg bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 hover:border-neutral-700 text-neutral-500 hover:text-white transition-all cursor-pointer"
+            >
+              <PanelLeftClose className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 flex-1 min-h-0">

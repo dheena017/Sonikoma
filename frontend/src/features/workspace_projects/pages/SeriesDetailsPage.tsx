@@ -32,6 +32,7 @@ import { useProjectsActions } from "../hooks";
 import SeriesEditModal from "../components/SeriesEditModal";
 import SeriesPublishModal from "../components/SeriesPublishModal";
 import SeriesReaderModal from "../components/SeriesReaderModal";
+import LoadingPage from "@/components/feedback/LoadingPage";
 
 interface SeriesDetailsPageProps {
   onNavigateHome: () => void;
@@ -234,12 +235,7 @@ export default function SeriesDetailsPage({
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-col justify-center items-center h-full pt-32 text-neutral-500">
-        <Loader2 className="h-8 w-8 animate-spin mb-4 text-purple-400" />
-        <p className="font-mono text-sm">Loading series dashboard & chapters...</p>
-      </div>
-    );
+    return <LoadingPage status="Loading Series Dashboard & Chapters..." />;
   }
 
   if (error || !series) {
@@ -269,32 +265,42 @@ export default function SeriesDetailsPage({
   }
 
   return (
-    <div className="w-full min-h-full bg-[#07070a] text-neutral-100 flex flex-col pt-6 px-4 md:px-8 lg:px-12 pb-32 animate-fade-in relative z-10 selection:bg-purple-500/30">
+    <div className="w-full flex-1 flex flex-col text-neutral-100 animate-fade-in relative z-10 py-6 max-w-7xl mx-auto selection:bg-purple-500/30">
       {/* Top Back Nav & Quick Toolbar */}
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => navigateTo("/projects")}
-          className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors cursor-pointer group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-xs font-bold font-mono uppercase tracking-wider">Back to Projects</span>
-        </button>
-
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/5">
+        <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
           <button
+            type="button"
+            onClick={() => navigateTo("/projects")}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm group"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Projects</span>
+          </button>
+          <span className="text-neutral-600 font-bold">&rsaquo;</span>
+          <span className="px-2.5 py-1 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold truncate max-w-xs sm:max-w-md">
+            {series.title}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
             onClick={() => setIsFavorite(!isFavorite)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
               isFavorite
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
-                : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+                : "bg-neutral-900/80 border-white/10 text-neutral-400 hover:text-white hover:bg-neutral-850"
             }`}
           >
             <Star className={`w-3.5 h-3.5 ${isFavorite ? "fill-amber-400 text-amber-400" : ""}`} />
             <span>{isFavorite ? "Favorited" : "Favorite"}</span>
           </button>
+
           <button
+            type="button"
             onClick={() => setIsEditModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 border border-white/10 hover:border-purple-500/40 text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer hover:bg-neutral-850"
           >
             <Edit3 className="w-3.5 h-3.5 text-purple-400" />
             <span>Edit Info</span>
@@ -562,7 +568,7 @@ export default function SeriesDetailsPage({
       {/* 5. Chapters Grid or List View */}
       {filteredChapters.length > 0 ? (
         viewMode === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-7">
             {filteredChapters.map((chapter) => (
               <div key={chapter.project_id} className="relative group">
                 {isBatchMode && (

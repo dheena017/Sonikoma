@@ -479,19 +479,43 @@ export default function VideoPreviewCinemaPlayer({
     },
     [panels]
   );
+  // Synchronize playback timeline whenever a storyboard panel is selected / clicked
+  useEffect(() => {
+    if (currentPanelIndex !== undefined && panels && panels.length > 0 && !isPlaying) {
+      const validIdx = Math.max(0, Math.min(currentPanelIndex, panels.length - 1));
+      let accTime = 0;
+      for (let i = 0; i < validIdx; i++) {
+        accTime += (panels[i].duration || (panels[i] as any).duration_sec || 3.0);
+      }
+      setCurrentTime(accTime);
+      if (videoRef.current) {
+        videoRef.current.currentTime = accTime;
+      }
+    }
+  }, [currentPanelIndex, panels, isPlaying]);
 
   const activePanelForHover = getPanelAtTime(hoverProgress.time);
-  const activePanelNow = getPanelAtTime(currentTime) || panels[currentPanelIndex ?? 0] || panels[0] || null;
-  const activePanelImg = activePanelNow
-    ? activePanelNow.image_url ||
+  const activePanelNow = isPlaying
+    ? (getPanelAtTime(currentTime) || (currentPanelIndex !== undefined && panels[currentPanelIndex]) || panels[0] || null)
+    : ((currentPanelIndex !== undefined && panels[currentPanelIndex]) || getPanelAtTime(currentTime) || panels[0] || null);
+
+  const activePanelImg = useMemo(() => {
+    if (!activePanelNow) return null;
+    const raw =
+      activePanelNow.image_url ||
       (activePanelNow as any).imageUrl ||
       (activePanelNow as any).img_url ||
       (activePanelNow as any).panel_url ||
       (activePanelNow as any).src ||
       (activePanelNow as any).url ||
       activePanelNow.layers?.background_url ||
-      null
-    : null;
+      null;
+    if (!raw) return null;
+    if (raw.startsWith("data:") || raw.startsWith("blob:") || raw.startsWith("/api/")) {
+      return raw;
+    }
+    return `/api/proxy-image?url=${encodeURIComponent(raw)}`;
+  }, [activePanelNow]);
 
   // BGM Background Music Engine for Adaptation Player
   useEffect(() => {

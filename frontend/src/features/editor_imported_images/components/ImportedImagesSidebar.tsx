@@ -15,6 +15,12 @@ import {
   Save,
   PanelLeft,
   PanelLeftClose,
+  CheckSquare,
+  Square,
+  Scissors,
+  Sparkles,
+  Link2,
+  Plus,
 } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -22,12 +28,8 @@ import * as api from "@/api/index";
 import { useProjectStore } from "@/store/useProjectStore";
 import { ChapterScraperDeckProps } from "./types";
 import PanelCard from "./PanelCard";
-// ScraperControls moved into the floating selection bar; remove header rendering to free space
-import {
-  FloatingSelectionBar,
-  ScraperSelectionToolbar,
-} from "@/features/editor_studio/components/select";
 import ChapterScraperDeckEmptyState from "./ImportedImagesDeckEmptyState";
+import ImportedAssetsHeader from "./ImportedAssetsHeader";
 
 import { parseWebtoonUrl, getSourceName, getProxiedImageUrl } from "@/utils";
 import { updateSelection } from "@/shared/utils/selection";
@@ -597,92 +599,35 @@ const ChapterScraperDeck = React.memo(
           id="scraped_strips_deck"
           className="bg-neutral-900/40 rounded-2xl border border-neutral-800/80 p-4 sm:p-5 lg:p-6 backdrop-blur-md space-y-4 shadow-sm min-w-0 w-full overflow-hidden"
         >
-          <div className="relative flex flex-col gap-3 rounded-2xl overflow-hidden border border-neutral-800/80 bg-neutral-950/90 shadow-sm">
-            <div className="relative flex items-center justify-between px-4 h-12 shrink-0 bg-[#09090e]/95 backdrop-blur-md border-b border-neutral-800/80 select-none gap-3">
-              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
-              <div className="flex items-center gap-2.5 shrink-0">
-                <button
-                  type="button"
-                  title="Imported Images"
-                  className="h-7 w-7 rounded-lg flex items-center justify-center border border-neutral-800 bg-neutral-900 text-neutral-500 hover:text-white hover:border-neutral-700 transition-all"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                </button>
-                <div className="w-px h-4 bg-neutral-800" />
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.9)] shrink-0" />
-                  <h3 className="font-black text-[10px] sm:text-[11px] text-white uppercase tracking-widest font-mono truncate" title="Imported Images">
-                    Imported Images
-                  </h3>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5 bg-neutral-950/80 p-1 rounded-xl border border-neutral-800/80 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setViewLayout("scroll")}
-                  title="Horizontal Scroll View"
-                  className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${viewLayout === "scroll"
-                      ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
-                      : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-                    }`}
-                >
-                  <Rows className="w-3 h-3" />
-                  <span>Scroll</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewLayout("grid")}
-                  title="Grid View"
-                  className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${viewLayout === "grid"
-                      ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
-                      : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-                    }`}
-                >
-                  <LayoutGrid className="w-3 h-3" />
-                  <span>Grid</span>
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                {/* Episode sidebar toggle — only when multiple episodes loaded */}
-                {(() => {
-                  const headerEpisodeGroups = ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || [];
-                  return headerEpisodeGroups.length > 1 ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsEpisodeCollapsed(!isEpisodeCollapsed)}
-                      title={isEpisodeCollapsed ? "Show Episode Navigator" : "Hide Episode Navigator"}
-                      className={`h-7 px-2.5 rounded-lg text-[10px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
-                        isEpisodeCollapsed
-                          ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-purple-300 hover:border-purple-700"
-                          : "bg-purple-600/20 border-purple-600/50 text-purple-300 hover:bg-purple-600/30"
-                      }`}
-                    >
-                      {isEpisodeCollapsed ? (
-                        <><PanelLeft className="w-3.5 h-3.5" /><span className="hidden sm:inline">Episodes</span></>
-                      ) : (
-                        <><PanelLeftClose className="w-3.5 h-3.5" /><span className="hidden sm:inline">Episodes</span></>
-                      )}
-                    </button>
-                  ) : null;
-                })()}
-
-                {handleSaveAssets && scrapedImages.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleSaveAssets}
-                    className="relative overflow-hidden h-7 px-3.5 rounded-lg font-black text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-white/10 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
-                  >
-                    <Save className="w-3 h-3 text-purple-200" />
-                    <span>Save</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Panels/summary moved into main header; removed duplicate toolbar here. */}
-          </div>
+          <ImportedAssetsHeader
+            scrapedImagesLength={scrapedImages.length}
+            selectedScrapedLength={selectedScraped.length}
+            viewLayout={viewLayout}
+            setViewLayout={setViewLayout}
+            handleSelectAllToggle={handleSelectAllToggle}
+            handleClearAll={handleClearAll}
+            handleSelectOdd={handleSelectOdd}
+            handleSelectEven={handleSelectEven}
+            handleInvertSelection={handleInvertSelection}
+            handleAddToStoryboard={handleAddToStoryboard}
+            handleAutoCropSelected={handleAutoCropSelected}
+            handleCleanBubblesSelected={handleCleanBubblesSelected}
+            handleBatchMergeSelected={handleBatchMergeSelected}
+            handleDeleteSelected={handleDeleteSelected}
+            handleCancelBatch={handleCancelBatch}
+            handleSaveAssets={handleSaveAssets}
+            isBatchCropping={isBatchCropping}
+            batchProgress={batchProgress}
+            isCleaningBubbles={isCleaningBubbles}
+            cleanProgress={cleanProgress}
+            isBatchMerging={isBatchMerging}
+            isEpisodeCollapsed={isEpisodeCollapsed}
+            setIsEpisodeCollapsed={setIsEpisodeCollapsed}
+            hasMultipleEpisodes={(() => {
+              const headerEpisodeGroups = ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || [];
+              return headerEpisodeGroups.length > 1;
+            })()}
+          />
 
           {showEmptyState ? (
             <ChapterScraperDeckEmptyState />
@@ -979,6 +924,7 @@ const ChapterScraperDeck = React.memo(
                                         addNotification={addNotification}
                                         onCardClick={handleCardClick}
                                         onCardDoubleClick={handleCardDoubleClick}
+                                        viewLayout="scroll"
                                       />
                                     );
                                   })}
@@ -1016,6 +962,7 @@ const ChapterScraperDeck = React.memo(
                                         addNotification={addNotification}
                                         onCardClick={handleCardClick}
                                         onCardDoubleClick={handleCardDoubleClick}
+                                        viewLayout="grid"
                                       />
                                     );
                                   })}
@@ -1062,6 +1009,7 @@ const ChapterScraperDeck = React.memo(
                           addNotification={addNotification}
                           onCardClick={handleCardClick}
                           onCardDoubleClick={handleCardDoubleClick}
+                          viewLayout="scroll"
                         />
                       );
                     })}
@@ -1106,6 +1054,7 @@ const ChapterScraperDeck = React.memo(
                           addNotification={addNotification}
                           onCardClick={handleCardClick}
                           onCardDoubleClick={handleCardDoubleClick}
+                          viewLayout="grid"
                         />
                       );
                     })}
@@ -1122,47 +1071,6 @@ const ChapterScraperDeck = React.memo(
             </div>
           )}
         </div>
-
-        {/* Floating Selection Action Bar */}
-        {true && (
-          <FloatingSelectionBar
-            selectedCount={selectedScraped.length}
-            totalCount={scrapedImages.length}
-            isBatchCropping={isBatchCropping}
-            batchProgress={batchProgress}
-            isCleaningBubbles={isCleaningBubbles}
-            cleanProgress={cleanProgress}
-            isBatchMerging={isBatchMerging}
-            handleAutoCropSelected={handleAutoCropSelected}
-            handleCleanBubblesSelected={handleCleanBubblesSelected}
-            handleBatchMergeSelected={handleBatchMergeSelected}
-            handleAddToStoryboard={handleAddToStoryboard}
-            handleDeleteSelected={handleDeleteSelected}
-            handleClearAll={handleClearAll}
-            handleSelectAllToggle={handleSelectAllToggle}
-            handleDownloadZip={handleDownloadZip}
-            isZipping={isZipping}
-            // selection/filter props
-            scrapedImages={scrapedImages}
-            selectedScraped={selectedScraped}
-            setSelectedScraped={setSelectedScraped}
-            handleInvertSelection={handleInvertSelection}
-            handleSelectOdd={handleSelectOdd}
-            handleSelectEven={handleSelectEven}
-            handleReverseDeckOrder={handleReverseDeckOrder}
-            handleSelectFirstN={handleSelectFirstN}
-            handleSelectLastN={handleSelectLastN}
-            handleSelectRange={handleSelectRange}
-            showAutoCropModal={showAutoCropModal}
-            showBubbleModal={showBubbleModal}
-            setShowAutoCropModal={setShowAutoCropModal}
-            setShowBubbleModal={setShowBubbleModal}
-            handleCancelBatch={handleCancelBatch}
-            setScrapedImages={setScrapedImages}
-            fetchWithInterceptor={fetchWithInterceptor}
-            addNotification={addNotification}
-          />
-        )}
 
         {/* Delete Imported Frames Confirmation Modal */}
         {showDeleteConfirm &&

@@ -1,4 +1,5 @@
 import React from "react";
+import { FolderOpen, Layers, Zap, Clock, ArrowRight } from "lucide-react";
 import ProjectsPageHeader from "@/features/workspace_projects/components/ProjectsPageHeader";
 import ProjectsFilters from "@/features/workspace_projects/components/ProjectsFilters";
 import ProjectsStats from "@/features/workspace_projects/components/ProjectsStats";
@@ -85,8 +86,8 @@ export default function ProjectsPageView({
   saveProjectName,
 }: ProjectsPageViewProps) {
   return (
-    <div className="w-full min-h-full bg-transparent text-neutral-100 flex flex-col pt-6 animate-fade-in relative z-10 pb-32">
-      <ProjectsPageHeader onNewSeries={handleNewSeries} />
+    <div className="w-full flex-1 flex flex-col text-neutral-100 animate-fade-in relative z-10 py-6 max-w-7xl mx-auto">
+      <ProjectsPageHeader onNewSeries={handleNewSeries} stats={stats} />
 
       {!loading && projectsLength > 0 && (
         <ProjectsStats

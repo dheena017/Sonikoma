@@ -145,7 +145,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   return (
     <header
       id="creative_header_pane"
-      className="fixed top-0 left-0 right-0 w-full h-16 border-b border-neutral-900 bg-[#070709]/95 backdrop-blur-xl z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 selection:bg-purple-600/30"
+      className="fixed top-0 left-0 right-0 w-full h-16 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 selection:bg-purple-600/30"
     >
       {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-3 shrink-0 h-full">

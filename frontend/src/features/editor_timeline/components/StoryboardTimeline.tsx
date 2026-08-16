@@ -12,9 +12,8 @@ import StoryboardBulkOps from "@/features/editor_timeline/components/StoryboardB
 import StoryboardCard from "@/features/editor_timeline/components/StoryboardCard";
 import StoryboardSidebar from "@/features/editor_timeline/components/StoryboardSidebar";
 import StoryboardEpisodeGroup from "@/features/editor_timeline/components/StoryboardEpisodeGroup";
-import StoryboardAnalysisBanner from "@/features/editor_timeline/components/StoryboardAnalysisBanner";
 import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
-import { StoryboardSelectionBar } from "@/features/editor_studio/components/select";
+import StoryboardAnalysisBanner from "./StoryboardAnalysisBanner";
 
 type EpisodeGroupRecord = {
   episodeLabel: string;
@@ -141,6 +140,7 @@ const StoryboardTimeline = React.memo(
     const [hoveredTimelineEpIdx, setHoveredTimelineEpIdx] = useState<number | null>(null);
     const [timelineEpSearchQuery, setTimelineEpSearchQuery] = useState("");
     const [timelineEpSortAscending, setTimelineEpSortAscending] = useState(true);
+    const [isTimelineEpCollapsed, setIsTimelineEpCollapsed] = useState(false);
 
     const handlePanelClick = useCallback(
       (idx: number, panelId: number, shiftKey: boolean, ctrlOrMeta: boolean) => {
@@ -825,10 +825,10 @@ const StoryboardTimeline = React.memo(
           handleAutoCropSelected={handleAutoCropSelected}
           handleCleanBubblesSelected={handleCleanBubblesSelected}
           handleBatchMergeSelected={handleBatchMergeSelected}
-          batchProgress={cropProgress}
           cleanProgress={cleanProgress}
           isBatchCropping={isBatchCropping}
           isCleaningBubbles={isCleaningBubbles}
+          isBatchMerging={isBatchMerging}
           handleCancelBatch={handleCancelBatch}
           handleCancelAnalysis={handleCancelAnalysis}
           viewLayout={storyboardViewLayout}
@@ -859,8 +859,49 @@ const StoryboardTimeline = React.memo(
           const episodeGroups =
             ((window as any).__scrapeEpisodeGroups as EpisodeGroupRecord[]) || [];
 
+          if (episodeGroups.length === 0) {
+            return (
+              <div className="w-full min-w-0">
+                <StoryboardEpisodeGroup
+                  episodeGroups={[]}
+                  selectedTimelineEp={selectedTimelineEp}
+                  panels={panels}
+                  currentPanelIndex={currentPanelIndex}
+                  activePreviewTab={activePreviewTab}
+                  setCurrentPanelIndex={setCurrentPanelIndex}
+                  setActivePreviewTab={setActivePreviewTab}
+                  setPlaybackTime={setPlaybackTime}
+                  isAnalyzingAll={isAnalyzingAll}
+                  analyzingPanelId={analyzingPanelId}
+                  selectedPanelIds={selectedPanelIds}
+                  togglePanelSelection={togglePanelSelection}
+                  handlePanelClick={handlePanelClick}
+                  handlePanelDoubleClick={handlePanelDoubleClick}
+                  handleShiftPanel={handleShiftPanel}
+                  handleModifySpeechText={handleModifySpeechText}
+                  handleModifyMotion={handleModifyMotion}
+                  handleModifyDuration={handleModifyDuration}
+                  handleModifySFX={handleModifySFX}
+                  handleModifyVisualDescription={handleModifyVisualDescription}
+                  handleModifyNarrative={handleModifyNarrative}
+                  handleAnalyzePanel={handleAnalyzePanel}
+                  handleCancelAnalysis={handleCancelAnalysis}
+                  playStoryboardAudio={playStoryboardAudio}
+                  autoPlayAudio={autoPlayAudio}
+                  addNotification={addNotification}
+                  setPanels={setPanels}
+                  fetchWithInterceptor={fetchWithInterceptor}
+                  voiceActor={voiceActor}
+                  speechRate={speechRate}
+                  speechPitch={speechPitch}
+                  storyboardViewLayout={storyboardViewLayout}
+                />
+              </div>
+            );
+          }
+
           return (
-            <div className="flex flex-col lg:flex-row gap-6 w-full items-stretch">
+            <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
               <StoryboardSidebar
                 episodeGroups={episodeGroups}
                 panels={panels}
@@ -874,42 +915,46 @@ const StoryboardTimeline = React.memo(
                 addNotification={addNotification}
                 hoveredTimelineEpIdx={hoveredTimelineEpIdx}
                 setHoveredTimelineEpIdx={setHoveredTimelineEpIdx}
+                isCollapsed={isTimelineEpCollapsed}
+                setIsCollapsed={setIsTimelineEpCollapsed}
               />
 
-              <StoryboardEpisodeGroup
-                episodeGroups={episodeGroups}
-                selectedTimelineEp={selectedTimelineEp}
-                panels={panels}
-                currentPanelIndex={currentPanelIndex}
-                activePreviewTab={activePreviewTab}
-                setCurrentPanelIndex={setCurrentPanelIndex}
-                setActivePreviewTab={setActivePreviewTab}
-                setPlaybackTime={setPlaybackTime}
-                isAnalyzingAll={isAnalyzingAll}
-                analyzingPanelId={analyzingPanelId}
-                selectedPanelIds={selectedPanelIds}
-                togglePanelSelection={togglePanelSelection}
-                handlePanelClick={handlePanelClick}
-                handlePanelDoubleClick={handlePanelDoubleClick}
-                handleShiftPanel={handleShiftPanel}
-                handleModifySpeechText={handleModifySpeechText}
-                handleModifyMotion={handleModifyMotion}
-                handleModifyDuration={handleModifyDuration}
-                handleModifySFX={handleModifySFX}
-                handleModifyVisualDescription={handleModifyVisualDescription}
-                handleModifyNarrative={handleModifyNarrative}
-                handleAnalyzePanel={handleAnalyzePanel}
-                handleCancelAnalysis={handleCancelAnalysis}
-                playStoryboardAudio={playStoryboardAudio}
-                autoPlayAudio={autoPlayAudio}
-                addNotification={addNotification}
-                setPanels={setPanels}
-                fetchWithInterceptor={fetchWithInterceptor}
-                voiceActor={voiceActor}
-                speechRate={speechRate}
-                speechPitch={speechPitch}
-                storyboardViewLayout={storyboardViewLayout}
-              />
+              <div className="flex-1 w-full min-w-0">
+                <StoryboardEpisodeGroup
+                  episodeGroups={episodeGroups}
+                  selectedTimelineEp={selectedTimelineEp}
+                  panels={panels}
+                  currentPanelIndex={currentPanelIndex}
+                  activePreviewTab={activePreviewTab}
+                  setCurrentPanelIndex={setCurrentPanelIndex}
+                  setActivePreviewTab={setActivePreviewTab}
+                  setPlaybackTime={setPlaybackTime}
+                  isAnalyzingAll={isAnalyzingAll}
+                  analyzingPanelId={analyzingPanelId}
+                  selectedPanelIds={selectedPanelIds}
+                  togglePanelSelection={togglePanelSelection}
+                  handlePanelClick={handlePanelClick}
+                  handlePanelDoubleClick={handlePanelDoubleClick}
+                  handleShiftPanel={handleShiftPanel}
+                  handleModifySpeechText={handleModifySpeechText}
+                  handleModifyMotion={handleModifyMotion}
+                  handleModifyDuration={handleModifyDuration}
+                  handleModifySFX={handleModifySFX}
+                  handleModifyVisualDescription={handleModifyVisualDescription}
+                  handleModifyNarrative={handleModifyNarrative}
+                  handleAnalyzePanel={handleAnalyzePanel}
+                  handleCancelAnalysis={handleCancelAnalysis}
+                  playStoryboardAudio={playStoryboardAudio}
+                  autoPlayAudio={autoPlayAudio}
+                  addNotification={addNotification}
+                  setPanels={setPanels}
+                  fetchWithInterceptor={fetchWithInterceptor}
+                  voiceActor={voiceActor}
+                  speechRate={speechRate}
+                  speechPitch={speechPitch}
+                  storyboardViewLayout={storyboardViewLayout}
+                />
+              </div>
             </div>
           );
         })()}
@@ -926,36 +971,6 @@ const StoryboardTimeline = React.memo(
             onCancel={() => setShowDeleteConfirm(false)}
           />
         )}
-        {/* Floating Selection Bar — appears at bottom when panels are selected */}
-        <StoryboardSelectionBar
-          selectedCount={selectedCount}
-          totalCount={panels.length}
-          isAnalyzingAll={isAnalyzingAll}
-          handleAnalyzeSelected={() => {
-            handleAnalyzeSelectedPanels(Array.from(selectedPanelIds));
-            clearSelection();
-          }}
-          selectAllPanels={selectAllPanels}
-          clearSelection={clearSelection}
-          handleDeleteSelected={handleDeleteSelected}
-          isBatchCropping={isBatchCropping}
-          isCleaningBubbles={isCleaningBubbles}
-          isBatchMerging={isBatchMerging}
-          handleAutoCropSelected={handleAutoCropSelected}
-          handleCleanBubblesSelected={handleCleanBubblesSelected}
-          handleBatchMergeSelected={handleBatchMergeSelected}
-          batchProgress={cropProgress}
-          cleanProgress={cleanProgress}
-          handleCancelAnalysis={handleCancelAnalysis}
-          handleCancelBatch={handleCancelBatch}
-          panels={panels}
-          setPanels={setPanels}
-          selectedPanelIds={selectedPanelIds}
-          fetchWithInterceptor={fetchWithInterceptor}
-          addNotification={addNotification}
-          showAutoCropModal={showAutoCropModal}
-          setShowAutoCropModal={setShowAutoCropModal}
-        />
       </div>
     );
   }

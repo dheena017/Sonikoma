@@ -1,5 +1,28 @@
 import React from "react";
-import { Sparkles, RefreshCw, X, Eye, EyeOff, ChevronDown, ChevronUp, Layers, Play, Pause, Square, Sliders, Music, Mic } from "lucide-react";
+import {
+  Sparkles,
+  RefreshCw,
+  X,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  Play,
+  Pause,
+  Square,
+  Sliders,
+  Music,
+  Mic,
+  MessageSquare,
+  BookOpen,
+  Volume2,
+  Palette,
+  Video,
+  Clock,
+  Wand2,
+  Bot,
+} from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
 import { generateTts } from "@/api";
@@ -40,6 +63,7 @@ interface StoryboardCardProps {
   voiceActor?: string;
   speechRate?: number;
   speechPitch?: number;
+  viewLayout?: "scroll" | "grid";
 }
 
 interface DialogueClipSliderProps {
@@ -236,7 +260,9 @@ const StoryboardCard = ({
   voiceActor,
   speechRate,
   speechPitch,
+  viewLayout = "scroll",
 }: StoryboardCardProps) => {
+  const [activeTab, setActiveTab] = React.useState<"dialogue" | "narrative" | "sfx" | "visual">("dialogue");
   const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
   const [isMagicProcessing, setIsMagicProcessing] = React.useState(false);
   // Playback state for Narrative
@@ -693,7 +719,9 @@ const StoryboardCard = ({
 
   return (
     <div
-      className={`w-[220px] sm:w-[260px] shrink-0 rounded-3xl border overflow-hidden transition-all duration-200 bg-neutral-950/95 shadow-[0_20px_60px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 hover:shadow-[0_25px_80px_rgba(131,63,248,0.18)] ${(panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll)
+      className={`${
+        viewLayout === "grid" ? "w-full min-w-0" : "w-[260px] sm:w-[290px] shrink-0"
+      } rounded-3xl border overflow-hidden transition-all duration-200 bg-neutral-950/95 shadow-[0_20px_60px_rgba(0,0,0,0.35)] hover:-translate-y-0.5 hover:shadow-[0_25px_80px_rgba(131,63,248,0.18)] ${(panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll)
           ? "border-2 border-purple-500/80 bg-purple-950/20 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.01]"
           : isCurrent && isSelected
             ? "bg-purple-950/40 border-purple-400 ring-2 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)]"
@@ -811,59 +839,83 @@ const StoryboardCard = ({
         )}
       </div>
 
-      <div className="p-4 space-y-3">
-        {/* Dialogue/Subtitle Text OCR Editable Input */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
-              Dialogue/Subtitle Text
-            </label>
-            <div className="flex items-center gap-1 shrink-0">
-              {(panel.isAnalyzing || analyzingPanelId === panel.id) && (
-                <span className="text-[9px] font-mono font-bold text-purple-400 animate-pulse flex items-center gap-0.5 mr-1">
-                  <span>✦ Loading...</span>
-                </span>
-              )}
-              {/* Play / Pause / Resume Button */}
+      <div className="p-3.5 space-y-2.5">
+        {/* Content Inspector Mini Tabs */}
+        <div className="flex items-center justify-between gap-1.5 border-b border-neutral-850 pb-2">
+          <div className="grid grid-cols-4 gap-0.5 bg-neutral-900/90 p-0.5 rounded-xl border border-neutral-800 text-[9.5px] font-mono flex-1 min-w-0">
+            <button
+              type="button"
+              onClick={() => setActiveTab("dialogue")}
+              title="Dialogue & Subtitles"
+              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-lg font-bold transition-all cursor-pointer truncate ${
+                activeTab === "dialogue"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-neutral-400 hover:text-neutral-200"
+              }`}
+            >
+              <MessageSquare className="w-2.5 h-2.5 shrink-0" />
+              <span className="truncate">Dialogue</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("narrative")}
+              title="Narrative Voiceover"
+              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-lg font-bold transition-all cursor-pointer truncate ${
+                activeTab === "narrative"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-neutral-400 hover:text-neutral-200"
+              }`}
+            >
+              <BookOpen className="w-2.5 h-2.5 shrink-0" />
+              <span className="truncate">Narrative</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("sfx")}
+              title="Sound Effects (SFX)"
+              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-lg font-bold transition-all cursor-pointer truncate ${
+                activeTab === "sfx"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-neutral-400 hover:text-neutral-200"
+              }`}
+            >
+              <Volume2 className="w-2.5 h-2.5 shrink-0" />
+              <span className="truncate">SFX</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("visual")}
+              title="Visual Scene Prompt"
+              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-lg font-bold transition-all cursor-pointer truncate ${
+                activeTab === "visual"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-neutral-400 hover:text-neutral-200"
+              }`}
+            >
+              <Palette className="w-2.5 h-2.5 shrink-0" />
+              <span className="truncate">Visual</span>
+            </button>
+          </div>
+
+          {/* Audio Play/Stop Preview Button for Active Text Tab */}
+          {activeTab === "dialogue" && (
+            <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleToggleDialogueAudio();
                 }}
-                className={`px-3 py-1 rounded-2xl text-[10px] font-sans font-semibold flex items-center gap-2 transition-all cursor-pointer border shadow-sm outline-none focus:ring-2 focus:ring-purple-500/20 ${isDialoguePlaying && !isDialoguePaused
-                    ? "bg-amber-950/50 border-amber-500/40 text-amber-200 hover:bg-amber-900/75"
-                    : isDialoguePaused
-                      ? "bg-purple-950/50 border-purple-500/40 text-purple-200 hover:bg-purple-900/75"
-                      : "bg-indigo-950/50 border-indigo-500/30 text-indigo-200 hover:bg-indigo-900/75 hover:text-indigo-100"
-                  }`}
-                title={
+                className={`px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
                   isDialoguePlaying && !isDialoguePaused
-                    ? "Pause Dialogue"
-                    : isDialoguePaused
-                      ? "Resume Dialogue"
-                      : "Play Dialogue Preview"
-                }
+                    ? "bg-amber-950/60 border-amber-500/50 text-amber-300"
+                    : "bg-purple-950/40 border-purple-800/50 text-purple-300 hover:bg-purple-900/50"
+                }`}
+                title="Play Dialogue Preview"
               >
-                {isDialoguePlaying && !isDialoguePaused ? (
-                  <>
-                    <Pause className="w-2.5 h-2.5 fill-current" />
-                    <span>Pause</span>
-                  </>
-                ) : isDialoguePaused ? (
-                  <>
-                    <Play className="w-2.5 h-2.5 fill-current" />
-                    <span>Resume</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-2.5 h-2.5 fill-current" />
-                    <span>Play</span>
-                  </>
-                )}
+                {isDialoguePlaying && !isDialoguePaused ? <Pause className="w-2 h-2 fill-current" /> : <Play className="w-2 h-2 fill-current" />}
+                <span>{isDialoguePlaying && !isDialoguePaused ? "Pause" : "Play"}</span>
               </button>
-
-              {/* Stop Button */}
               {(isDialoguePlaying || isDialoguePaused) && (
                 <button
                   type="button"
@@ -871,75 +923,33 @@ const StoryboardCard = ({
                     e.stopPropagation();
                     stopDialogueAudio();
                   }}
-                  className="px-3 py-1 rounded-2xl text-[10px] font-sans font-semibold flex items-center gap-1 transition-all cursor-pointer bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 shadow-sm outline-none focus:ring-2 focus:ring-rose-400/25"
+                  className="p-1 rounded-lg text-[9px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
                   title="Stop Dialogue"
                 >
-                  <Square className="w-2.5 h-2.5 fill-current" />
-                  <span>Stop</span>
+                  <Square className="w-2 h-2 fill-current" />
                 </button>
               )}
             </div>
-          </div>
-          <textarea
-            rows={2}
-            disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
-            value={panel.speech_text}
-            onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
-            placeholder="Enter dialogue or subtitle text..."
-            className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-2xl p-3 text-neutral-100 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/15 font-sans transition-all no-drag ${panel.isAnalyzing || analyzingPanelId === panel.id
-                ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
-                : "hover:border-neutral-700"
-              }`}
-          />
-        </div>
+          )}
 
-        {/* Narrative Text Editable Input */}
-        <div className="space-y-1.5 animate-in fade-in duration-300">
-          <div className="flex items-center justify-between">
-            <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
-              Narrative Text
-            </label>
-            <div className="flex items-center gap-1 shrink-0">
-              {/* Play / Pause / Resume Button */}
+          {activeTab === "narrative" && (
+            <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleToggleNarrativeAudio();
                 }}
-                className={`px-3 py-1 rounded-2xl text-[10px] font-sans font-semibold flex items-center gap-2 transition-all cursor-pointer border shadow-sm outline-none focus:ring-2 focus:ring-purple-500/20 ${isNarrativePlaying && !isNarrativePaused
-                    ? "bg-amber-950/50 border-amber-500/40 text-amber-200 hover:bg-amber-900/75"
-                    : isNarrativePaused
-                      ? "bg-purple-950/50 border-purple-500/40 text-purple-200 hover:bg-purple-900/75"
-                      : "bg-indigo-950/50 border-indigo-500/30 text-indigo-200 hover:bg-indigo-900/75 hover:text-indigo-100"
-                  }`}
-                title={
+                className={`px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
                   isNarrativePlaying && !isNarrativePaused
-                    ? "Pause Narration"
-                    : isNarrativePaused
-                      ? "Resume Narration"
-                      : "Play Narration Preview"
-                }
+                    ? "bg-amber-950/60 border-amber-500/50 text-amber-300"
+                    : "bg-purple-950/40 border-purple-800/50 text-purple-300 hover:bg-purple-900/50"
+                }`}
+                title="Play Narration Preview"
               >
-                {isNarrativePlaying && !isNarrativePaused ? (
-                  <>
-                    <Pause className="w-2.5 h-2.5 fill-current" />
-                    <span>Pause</span>
-                  </>
-                ) : isNarrativePaused ? (
-                  <>
-                    <Play className="w-2.5 h-2.5 fill-current" />
-                    <span>Resume</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-2.5 h-2.5 fill-current" />
-                    <span>Play</span>
-                  </>
-                )}
+                {isNarrativePlaying && !isNarrativePaused ? <Pause className="w-2 h-2 fill-current" /> : <Play className="w-2 h-2 fill-current" />}
+                <span>{isNarrativePlaying && !isNarrativePaused ? "Pause" : "Play"}</span>
               </button>
-
-              {/* Stop Button */}
               {(isNarrativePlaying || isNarrativePaused) && (
                 <button
                   type="button"
@@ -947,90 +957,105 @@ const StoryboardCard = ({
                     e.stopPropagation();
                     stopNarrativeAudio();
                   }}
-                  className="px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/60 shadow-sm"
+                  className="p-1 rounded-lg text-[9px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
                   title="Stop Narration"
                 >
-                  <Square className="w-2.5 h-2.5 fill-current" />
-                  <span>Stop</span>
+                  <Square className="w-2 h-2 fill-current" />
                 </button>
               )}
             </div>
+          )}
+        </div>
+
+        {/* Tab Content Panels */}
+        {activeTab === "dialogue" && (
+          <div className="space-y-1 animate-in fade-in duration-150">
+            <textarea
+              rows={2}
+              disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+              value={panel.speech_text}
+              onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
+              placeholder="Enter dialogue or subtitle text..."
+              className={`w-full bg-neutral-900/90 border border-neutral-800 text-[11px] rounded-xl p-2.5 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all resize-none ${
+                panel.isAnalyzing || analyzingPanelId === panel.id
+                  ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
+                  : "hover:border-neutral-700"
+              }`}
+            />
           </div>
-          <textarea
-            rows={2}
-            disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
-            value={panel.narrative || ""}
-            onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
-            placeholder="Enter narrative text for scene description or voiceover..."
-            className={`w-full bg-neutral-900 border border-neutral-800 text-[11px] rounded-2xl p-3 text-neutral-100 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/15 font-sans transition-all no-drag ${panel.isAnalyzing || analyzingPanelId === panel.id
-                ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
-                : "hover:border-neutral-700"
-              }`}
-          />
-        </div>
+        )}
 
-        {/* Sound Effect (SFX) Editable Input */}
-        <div className="space-y-1.5">
-          <label className="text-[9px] font-sans text-neutral-500 uppercase tracking-[0.25em] block">
-            Sound Effect (SFX)
-          </label>
-          <input
-            type="text"
-            disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
-            value={panel.sfx || ""}
-            onChange={(e) => handleModifySFX(panel.id, e.target.value)}
-            placeholder="e.g. door slam, footsteps, thunder..."
-            className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-2xl px-3 py-2 text-neutral-100 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 font-sans transition-all no-drag ${panel.isAnalyzing || analyzingPanelId === panel.id
-                ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
-                : "hover:border-neutral-700"
+        {activeTab === "narrative" && (
+          <div className="space-y-1 animate-in fade-in duration-150">
+            <textarea
+              rows={2}
+              disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+              value={panel.narrative || ""}
+              onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
+              placeholder="Enter narrative voiceover or scene description..."
+              className={`w-full bg-neutral-900/90 border border-neutral-800 text-[11px] rounded-xl p-2.5 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all resize-none ${
+                panel.isAnalyzing || analyzingPanelId === panel.id
+                  ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
+                  : "hover:border-neutral-700"
               }`}
-          />
-        </div>
+            />
+          </div>
+        )}
 
-        {/* Visual Scene Description Editable Input */}
-        <div className="space-y-1.5">
-          <label className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider block">
-            Visual Scene Description
-          </label>
-          <textarea
-            rows={2}
-            disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
-            value={panel.visual_description || ""}
-            onChange={(e) =>
-              handleModifyVisualDescription(panel.id, e.target.value)
-            }
-            placeholder="Describe the visual scene for composition, lighting, or atmosphere..."
-            className={`w-full bg-neutral-900 border border-neutral-800 text-[10px] rounded-lg p-2 text-neutral-100 outline-none focus:border-purple-500 font-sans transition-all resize-none no-drag ${panel.isAnalyzing || analyzingPanelId === panel.id
-                ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
-                : ""
+        {activeTab === "sfx" && (
+          <div className="space-y-1 animate-in fade-in duration-150">
+            <input
+              type="text"
+              disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+              value={panel.sfx || ""}
+              onChange={(e) => handleModifySFX(panel.id, e.target.value)}
+              placeholder="e.g. door slam, footsteps, thunder..."
+              className={`w-full bg-neutral-900/90 border border-neutral-800 text-[11px] rounded-xl px-3 py-2 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all ${
+                panel.isAnalyzing || analyzingPanelId === panel.id
+                  ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
+                  : "hover:border-neutral-700"
               }`}
-          />
-        </div>
+            />
+          </div>
+        )}
 
-        {/* Playback specifications (hidden on small screens to save vertical space) */}
-        <div className="hidden sm:grid grid-cols-2 gap-2 pt-1.5 border-t border-neutral-900/80">
-          <div>
-            <span className="text-[9px] font-mono text-neutral-500 uppercase block">
-              Cam Motion
-            </span>
+        {activeTab === "visual" && (
+          <div className="space-y-1 animate-in fade-in duration-150">
+            <textarea
+              rows={2}
+              disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+              value={panel.visual_description || ""}
+              onChange={(e) => handleModifyVisualDescription(panel.id, e.target.value)}
+              placeholder="Describe visual scene for lighting, atmosphere..."
+              className={`w-full bg-neutral-900/90 border border-neutral-800 text-[11px] rounded-xl p-2.5 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all resize-none ${
+                panel.isAnalyzing || analyzingPanelId === panel.id
+                  ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
+                  : "hover:border-neutral-700"
+              }`}
+            />
+          </div>
+        )}
+
+        {/* Compact Motion & Timing Row */}
+        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-900">
+          <div className="flex items-center gap-1.5 bg-neutral-900/90 border border-neutral-800/80 rounded-xl px-2 py-1">
+            <Video className="w-3 h-3 text-purple-400 shrink-0" />
             <select
               value={panel.motion_type ?? ""}
               onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
-              className="appearance-none bg-neutral-800 text-[11px] text-white rounded-lg border border-neutral-700 hover:border-purple-500/50 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 p-1.5 w-full outline-none no-drag cursor-pointer transition-colors"
+              className="appearance-none bg-transparent text-[10px] font-mono text-neutral-300 w-full outline-none cursor-pointer"
             >
-              <option value="">None</option>
-              <option value="zoom_in">Zoom In</option>
-              <option value="zoom_out">Zoom Out</option>
-              <option value="pan_right">Pan Right</option>
-              <option value="pan_left">Pan Left</option>
-              <option value="pan_down">Pan Down</option>
+              <option value="" className="bg-neutral-900 text-neutral-300">Motion: None</option>
+              <option value="zoom_in" className="bg-neutral-900 text-neutral-300">Zoom In</option>
+              <option value="zoom_out" className="bg-neutral-900 text-neutral-300">Zoom Out</option>
+              <option value="pan_right" className="bg-neutral-900 text-neutral-300">Pan Right</option>
+              <option value="pan_left" className="bg-neutral-900 text-neutral-300">Pan Left</option>
+              <option value="pan_down" className="bg-neutral-900 text-neutral-300">Pan Down</option>
             </select>
           </div>
 
-          <div>
-            <span className="text-[9px] font-mono text-neutral-500 uppercase block">
-              Timing (sec)
-            </span>
+          <div className="flex items-center gap-1.5 bg-neutral-900/90 border border-neutral-800/80 rounded-xl px-2 py-1">
+            <Clock className="w-3 h-3 text-purple-400 shrink-0" />
             <input
               type="number"
               min={0.5}
@@ -1049,76 +1074,73 @@ const StoryboardCard = ({
                   handleModifyDuration(panel.id, 0);
                 }
               }}
-              placeholder="e.g. 4.5"
-              className="bg-neutral-800 text-[11px] text-white rounded-lg border border-neutral-700 hover:border-purple-500/50 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/40 p-1.5 w-full outline-none text-center font-mono no-drag transition-colors"
+              placeholder="3.0"
+              className="bg-transparent text-[10px] font-mono text-neutral-300 w-full outline-none text-left"
             />
+            <span className="text-[9px] font-mono text-neutral-500 shrink-0">sec</span>
           </div>
         </div>
 
-        <div className="pt-2">
+        {/* Unified 3-in-1 AI Action Toolbar */}
+        <div className="grid grid-cols-3 gap-1.5 pt-1">
+          {/* 1. Analyze Image */}
           {analyzingPanelId === panel.id ? (
             <button
               type="button"
               onClick={() => handleCancelAnalysis && handleCancelAnalysis()}
-              className="w-full py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 hover:bg-rose-600/40 text-rose-300 hover:border-rose-400 shadow-[0_0_10px_rgba(225,29,72,0.15)]"
+              className="py-1.5 rounded-xl border text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 text-rose-300"
+              title="Stop Analyzing"
             >
               <X className="h-3 w-3 text-rose-400" />
-              <span className="hidden sm:inline">Stop Analyzing</span>
+              <span>Stop</span>
             </button>
           ) : (
             <button
               type="button"
-              disabled={
-                analyzingPanelId !== null && analyzingPanelId !== panel.id
-              }
-              onClick={() => {
-                console.log(
-                  `[TimelineCard] Manual AI analysis triggered for panel #${panel.id}`
-                );
-                handleAnalyzePanel(panel.id, panel.image_url);
-              }}
-              className={`w-full py-1.5 rounded-2xl border text-[10px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all bg-gradient-to-r from-neutral-900 to-neutral-950 border-purple-800/40 hover:from-purple-950 hover:to-neutral-900 text-purple-200 hover:text-purple-100 shadow-sm shadow-black/20 ${analyzingPanelId !== null && analyzingPanelId !== panel.id
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:border-purple-600"
-                }`}
+              disabled={analyzingPanelId !== null && analyzingPanelId !== panel.id}
+              onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
+              className="py-1.5 px-1 rounded-xl border text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 text-neutral-300 hover:text-purple-300 shadow-sm active:scale-95 disabled:opacity-40"
+              title="Analyze Scene with AI"
             >
-              <Sparkles className="h-3 w-3 text-purple-400 animate-pulse" />
-              <span className="hidden sm:inline">Analyze Image</span>
+              <Sparkles className="h-3 w-3 text-purple-400" />
+              <span>Analyze</span>
             </button>
           )}
-        </div>
 
-        <div className="pt-1.5">
+          {/* 2. Magic Motion */}
+          {setPanels && fetchWithInterceptor ? (
+            <button
+              type="button"
+              disabled={isMagicProcessing}
+              onClick={handleMagicMotion}
+              className="py-1.5 px-1 rounded-xl border border-purple-900/60 bg-purple-950/30 hover:bg-purple-900/50 text-purple-300 hover:text-purple-200 text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all disabled:opacity-40 active:scale-95"
+              title="Apply Magic Motion"
+            >
+              {isMagicProcessing ? (
+                <RefreshCw className="h-3 w-3 animate-spin text-purple-400" />
+              ) : (
+                <Wand2 className="h-3 w-3 text-purple-400" />
+              )}
+              <span>{isMagicProcessing ? "Magic..." : "Magic"}</span>
+            </button>
+          ) : (
+            <div />
+          )}
+
+          {/* 3. Panel Assistant */}
           <button
             type="button"
             onClick={() => {
               window.history.pushState({}, "", `/creative-suite/panel-assistant?idx=${idx}`);
               window.dispatchEvent(new Event("popstate"));
             }}
-            className="w-full py-1.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-600/50 text-neutral-350 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+            className="py-1.5 px-1 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-600/50 text-neutral-350 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all active:scale-95"
+            title="Open Panel Assistant"
           >
-            <Sparkles className="h-3 w-3 text-purple-400" />
-            <span>Panel Assistant</span>
+            <Bot className="h-3 w-3 text-purple-400" />
+            <span>Assistant</span>
           </button>
         </div>
-
-        {setPanels && fetchWithInterceptor && (
-          <div className="pt-1.5">
-            <button
-              type="button"
-              disabled={isMagicProcessing}
-              onClick={handleMagicMotion}
-              className="w-full py-1.5 rounded-lg border border-purple-900/60 bg-purple-950/20 hover:bg-purple-900/40 text-purple-300 hover:text-purple-200 text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {isMagicProcessing ? (
-                <RefreshCw className="h-3 w-3 animate-spin text-purple-400" />
-              ) : (
-                <Sparkles className="h-3 w-3 text-purple-400 animate-pulse" />
-              )}
-              <span>{isMagicProcessing ? "Applying Magic..." : "Magic Motion"}</span>
-            </button>
-          </div>
-        )}
 
         {/* Accordion Layer Tracks (Motion Comic Mode) */}
         {panel.layers && setPanels && (

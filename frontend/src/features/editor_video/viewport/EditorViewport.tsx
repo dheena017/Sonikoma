@@ -75,11 +75,7 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
   return (
     <div
       id="section-monitor"
-      className={
-        isEmbedded
-          ? "flex flex-col h-full w-full min-h-0 overflow-hidden"
-          : "w-full max-w-[1600px] ml-0 mr-0 bg-neutral-900/70 backdrop-blur-lg rounded-2xl border border-neutral-800/90 p-4 sm:p-5 space-y-4 mb-4 scroll-mt-24 shadow-2xl"
-      }
+      className="w-full bg-neutral-900/70 backdrop-blur-lg rounded-3xl border border-neutral-800/90 p-4 sm:p-5 space-y-4 mb-4 scroll-mt-24 shadow-2xl flex flex-col min-w-0"
     >
       <MonitorHeader
         videoUrl={videoUrl}
@@ -111,31 +107,27 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
 
       {/* RIGHT: Cinema Player or Blank Viewport */}
       <div
-        className={
-          isEmbedded
-            ? "flex-1 h-full min-h-0 min-w-0 overflow-hidden relative bg-[#09090f]"
-            : "flex-1 w-full aspect-video rounded-2xl overflow-hidden border border-neutral-800/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative bg-[#09090f] min-w-0"
-        }
+        className="w-full h-[460px] sm:h-[540px] md:h-[600px] lg:h-[660px] max-h-[75vh] rounded-2xl overflow-hidden border border-neutral-800/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative bg-[#09090f] min-w-0"
       >
-          {activePreviewTab === "editor" ? (
-            <BlankViewport panels={panels} currentPanelIndex={currentPanelIndex} />
-          ) : (
-            <PlaybackMonitor
-              panels={panels}
-              videoUrl={activePreviewTab === "video" ? videoUrl : null}
-              mode={activePreviewTab}
-              currentPanelIndex={currentPanelIndex}
-              seriesSlug={null}
-              chapterSlug={null}
-              navigateTo={() => {}}
-              addNotification={addNotification}
-              variant={isEmbedded ? "embedded" : "floating"}
-              onCloseFloating={() => {
-                useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
-              }}
-            />
-          )}
-        </div>
+        {activePreviewTab === "editor" ? (
+          <BlankViewport panels={panels} currentPanelIndex={currentPanelIndex} />
+        ) : (
+          <PlaybackMonitor
+            panels={panels}
+            videoUrl={activePreviewTab === "video" ? videoUrl : null}
+            mode={activePreviewTab}
+            currentPanelIndex={currentPanelIndex}
+            seriesSlug={null}
+            chapterSlug={null}
+            navigateTo={() => {}}
+            addNotification={addNotification}
+            variant="embedded"
+            onCloseFloating={() => {
+              useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

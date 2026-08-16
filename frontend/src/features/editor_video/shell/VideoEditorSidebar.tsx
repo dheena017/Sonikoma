@@ -101,8 +101,8 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-80 shrink-0 bg-gradient-to-b from-neutral-950/98 via-[#0d0a1d]/98 to-neutral-950/98 border-r border-purple-900/30 z-50 transition-all duration-300 ease-out transform overflow-hidden backdrop-blur-2xl ${
-          isOpen ? "translate-x-0 shadow-[8px_0_32px_rgba(0,0,0,0.6)]" : "-translate-x-full"
+        className={`fixed top-0 bottom-0 left-0 h-screen w-80 shrink-0 bg-[#06060c]/90 border-r border-white/8 z-50 transition-all duration-300 ease-out transform overflow-hidden backdrop-blur-3xl ${
+          isOpen ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(168,85,247,0.06)]" : "-translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col justify-between p-5 space-y-4 select-none">

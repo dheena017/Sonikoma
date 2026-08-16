@@ -187,7 +187,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-neutral-955 backdrop-blur-3xl border-r border-neutral-900 shadow-[8px_0_32px_rgba(0,0,0,0.45)]">
+    <div className="flex h-full flex-col bg-neutral-950/85 backdrop-blur-3xl border-r border-white/10 shadow-[8px_0_32px_rgba(0,0,0,0.45)]">
       {/* Sidebar Header */}
       <div className="h-16 flex items-center justify-between px-5 border-b border-neutral-900/80 shrink-0">
         <div className="flex items-center gap-3.5">

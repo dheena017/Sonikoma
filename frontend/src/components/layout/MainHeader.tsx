@@ -426,7 +426,7 @@ const HeaderInner = ({
   return (
     <header
       id="header_pane"
-      className="fixed top-0 left-0 right-0 w-full h-16 border-b border-neutral-900 bg-neutral-955/95 backdrop-blur-xl z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 select-none"
+      className="fixed top-0 left-0 right-0 w-full h-16 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 select-none shadow-md shadow-black/20"
     >
       {/* Left side: Hamburger, Brand, and User Profile */}
       <div className="flex items-center gap-3 shrink-0 h-full">
@@ -495,7 +495,7 @@ const HeaderInner = ({
         {/* Command Palette Results Dropdown */}
         {showSearchDropdown &&
           (searchQuery.trim() !== "" || filteredNavItems.length > 0) && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto scrollbar-thin">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0d16]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {/* Pages Section */}
               <div className="p-2 border-b border-neutral-850/60">
                 <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">

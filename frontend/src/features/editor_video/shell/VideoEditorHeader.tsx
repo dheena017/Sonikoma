@@ -166,12 +166,12 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   return (
     <>
-      <header className="h-16 w-full bg-[#09090e]/90 backdrop-blur-md border-b border-neutral-800/80 pr-6 flex items-center justify-between z-30 shrink-0 select-none">
+      <header className="h-16 w-full bg-[#06060c]/80 backdrop-blur-2xl border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pr-6 flex items-center justify-between z-30 shrink-0 select-none">
         <div className="flex items-center gap-3 shrink-0 h-full">
-          <div className="w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-800/80 h-full mr-2">
+          <div className="w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-2">
             <button
               onClick={onToggleSidebar}
-              className="p-2 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/40 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm active:scale-95"
+              className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
               title="Toggle Sidebar Drawer"
             >
               <Menu className="h-5 w-5" />

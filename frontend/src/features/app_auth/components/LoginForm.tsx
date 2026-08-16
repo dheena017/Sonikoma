@@ -104,11 +104,14 @@ export default function LoginPage({
       <AuthShowcase activeTheme={activeTheme} iconType="login" />
 
       {/* RIGHT PANEL: Login Form Interface */}
-      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#040406] relative">
-        {/* Soft background anime aura glow */}
+      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-neutral-950/60 backdrop-blur-2xl relative border-l border-white/10">
+        {/* Soft background anime aura glow — layered depth */}
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} anime-aura-bg pointer-events-none transition-all duration-1000`}
+          className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[55%] rounded-full ${currentTheme.glowPrimary} anime-aura-bg pointer-events-none transition-all duration-1000 opacity-60`}
         />
+        <div className="absolute bottom-0 right-0 w-[50%] h-[40%] rounded-full bg-indigo-500/5 blur-[100px] pointer-events-none" />
+        {/* Subtle top-edge laser accent */}
+        <div className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent pointer-events-none`} />
 
         {/* Top Controls Toolbar — pinned, never scrolls */}
         <div className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-5 flex-shrink-0">
@@ -165,28 +168,29 @@ export default function LoginPage({
             <button
               type="button"
               onClick={() => handleSocialLogin("Google")}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 cursor-pointer shadow-lg hover:shadow-purple-500/25 active:scale-[0.98] border border-purple-400/30 group anime-button-sheen"
+              className="w-full flex items-center justify-center gap-3 py-4 px-5 rounded-2xl bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 hover:from-purple-500 hover:via-violet-500 hover:to-indigo-500 text-white font-bold text-sm transition-all duration-300 cursor-pointer shadow-[0_8px_32px_rgba(139,92,246,0.35)] hover:shadow-[0_12px_40px_rgba(139,92,246,0.5)] active:scale-[0.98] border border-purple-400/30 group anime-button-sheen relative overflow-hidden"
             >
-              <Chrome className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300" />
-              <span>Continue with Google Account</span>
-              <ArrowRight className="w-4 h-4 text-purple-200 group-hover:translate-x-1 transition-transform duration-200" />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+              <Chrome className="w-5 h-5 text-white group-hover:rotate-12 transition-transform duration-300 relative z-10" />
+              <span className="relative z-10">Continue with Google Account</span>
+              <ArrowRight className="w-4 h-4 text-purple-200 group-hover:translate-x-1 transition-transform duration-200 relative z-10" />
             </button>
-            <p className="text-[11px] text-center text-neutral-400 font-sans">
+            <p className="text-[11px] text-center text-neutral-500 font-sans">
               🔒 Standard Sonikoma authentication requires your Google Account
             </p>
           </div>
 
           {/* Separator Line */}
-          <div className="relative flex py-2 items-center">
-            <div className="flex-grow border-t border-white/5" />
-            <span className="flex-shrink mx-4 text-neutral-600 text-[10px] font-bold uppercase tracking-widest">
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-white/8" />
+            <span className="flex-shrink mx-4 text-neutral-600 text-[10px] font-bold uppercase tracking-widest bg-black/20 px-2 py-0.5 rounded-full border border-white/5">
               {t.or}
             </span>
-            <div className="flex-grow border-t border-white/5" />
+            <div className="flex-grow border-t border-white/8" />
           </div>
 
           {/* Login Card */}
-          <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-500 anime-card-glow">
+          <div className="bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-[0_24px_64px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.07)] relative overflow-hidden transition-all duration-500 anime-card-glow">
             <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${currentTheme.cardBorder}`} />
 
             {
@@ -249,8 +253,8 @@ export default function LoginPage({
                       {t.forgot}
                     </button>
                   </div>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4">
+                  <div className="relative flex items-center">
+                    <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 z-10">
                       <Lock
                         className={`w-4 h-4 transition-colors ${
                           isPasswordValid
@@ -266,7 +270,7 @@ export default function LoginPage({
                       onChange={(e) => setPassword(e.target.value)}
                       onKeyDown={checkCapsLock}
                       onKeyUp={checkCapsLock}
-                      className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
+                      className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-12 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
                         isPasswordValid
                           ? "border-emerald-500/20 focus:ring-emerald-500/20 focus:border-emerald-500/40"
                           : `border-white/5 ${currentTheme.focus}`
@@ -276,7 +280,7 @@ export default function LoginPage({
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 text-neutral-500 hover:text-neutral-300 transition-colors focus:outline-none"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all focus:outline-none cursor-pointer z-10"
                       aria-label={
                         showPassword ? "Hide password" : "Show password"
                       }

@@ -51,7 +51,7 @@ export default function ConfirmModal({
       />
 
       {/* Modal Container */}
-      <div className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
+      <div className="relative w-full max-w-md bg-neutral-950/90 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
         {/* Glow Accent */}
         <div
           className={`absolute top-0 left-0 right-0 h-[2px] blur-[1px] ${

@@ -26,53 +26,65 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
   };
 
   return (
-    <div className="page-view-transition stagger-container w-full flex-1 flex flex-col px-4 sm:px-6 py-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-            <span
-              className="hover:text-purple-400 cursor-pointer"
+    <div className="w-full flex-1 flex flex-col py-6 max-w-7xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-white/5 pb-5">
+        <div className="space-y-2 max-w-2xl">
+          <div className="flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
+            <button
+              type="button"
               onClick={handleNavigateHome}
+              className="px-2.5 py-0.5 rounded-md bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
             >
               Dashboard
-            </span>
+            </button>
             {lastEditorPath && (
               <>
-                <span>&gt;</span>
-                <span
-                  className="hover:text-purple-400 cursor-pointer"
+                <span className="text-neutral-600 font-bold">&rsaquo;</span>
+                <button
+                  type="button"
                   onClick={() => navigateTo(lastEditorPath)}
+                  className="px-2.5 py-0.5 rounded-md bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
                 >
                   Workspace Editor
-                </span>
+                </button>
               </>
             )}
-            <span>&gt;</span>
-            <span className="text-purple-400 font-bold">Episode Scraper</span>
+            <span className="text-neutral-600 font-bold">&rsaquo;</span>
+            <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold">
+              Episode Scraper
+            </span>
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-            <div className="icon-pill icon-pill--purple">
-              <Zap className="h-5 w-5 text-purple-400" />
+
+          <div className="flex items-center gap-3 pt-0.5">
+            <div className="relative group">
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-900/40 border border-purple-400/30 group-hover:scale-105 transition-transform">
+                <Zap className="h-5 w-5 text-white" />
+              </div>
+              <span className="absolute -inset-0.5 rounded-2xl border border-purple-500/40 pointer-events-none animate-pulse" />
             </div>
-            Manga & Manhwa Episode Scraper
-          </h2>
-          <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Browse episodes, manage bookmarks, filter by likes/rating/date, and batch import panels
-          </p>
+
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+                Manga & Webtoon Scraper
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase tracking-wider">
+                  Auto Engine
+                </span>
+              </h2>
+              <p className="text-xs text-neutral-400 font-sans mt-0.5">
+                Browse episodes, manage bookmarks, filter chapters, and batch import panels into your workspace.
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-3">
+
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
+            type="button"
             onClick={handleReturnToWorkspace}
-            className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-850 text-neutral-200 border border-neutral-800 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-mono font-bold text-xs shadow-lg shadow-purple-900/30 transition-all cursor-pointer active:scale-95 border border-purple-400/30"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Return to Workspace
-          </button>
-          <button
-            onClick={handleNavigateHome}
-            className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
-          >
-            Dashboard
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to Editor</span>
           </button>
         </div>
       </div>

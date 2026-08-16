@@ -239,29 +239,33 @@ export default function AuthShowcase({
   };
 
   return (
-    <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-16 bg-gradient-to-br from-[#0a0a10] to-[#040406] border-r border-white/5 overflow-hidden text-left select-none">
+    <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 xl:p-16 bg-neutral-950/40 backdrop-blur-md border-r border-white/10 overflow-hidden text-left select-none">
       {/* Canvas for animated star nodes */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none opacity-80"
       />
 
-      {/* Ambient background glows */}
+      {/* Layered ambient glows */}
       <div
-        className={`absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full ${currentTheme.glowPrimary} blur-[130px] pointer-events-none transition-all duration-1000 animate-pulse`}
+        className={`absolute top-[-15%] left-[-15%] w-[65%] h-[65%] rounded-full ${currentTheme.glowPrimary} blur-[140px] pointer-events-none transition-all duration-1000 opacity-70`}
       />
       <div
-        className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full ${currentTheme.glowSecondary} blur-[130px] pointer-events-none transition-all duration-1000 animate-pulse`}
+        className={`absolute bottom-[-15%] right-[-15%] w-[65%] h-[65%] rounded-full ${currentTheme.glowSecondary} blur-[140px] pointer-events-none transition-all duration-1000 opacity-60`}
       />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] rounded-full bg-violet-500/8 blur-[80px] pointer-events-none" />
 
-      {/* Fine grid overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#14141e_1px,transparent_1px),linear-gradient(to_bottom,#14141e_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_80%,transparent_100%)] opacity-30 pointer-events-none" />
+      {/* Fine grid overlay with inner fade */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#14141e_1px,transparent_1px),linear-gradient(to_bottom,#14141e_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_50%,#000_60%,transparent_100%)] opacity-25 pointer-events-none" />
+
+      {/* Right-edge shimmer border */}
+      <div className="absolute top-0 right-0 bottom-0 w-px bg-gradient-to-b from-transparent via-purple-500/20 to-transparent pointer-events-none" />
 
       {/* Top Header Branding */}
       <div className="relative z-10 flex items-center justify-between w-full">
         <div className="flex items-center gap-3">
           <div
-            className={`flex items-center justify-center w-10 h-10 rounded-xl ${currentTheme.accentBg} border ${currentTheme.accentBorder} transition-all duration-500 overflow-hidden`}
+            className={`flex items-center justify-center w-10 h-10 rounded-xl ${currentTheme.accentBg} border ${currentTheme.accentBorder} transition-all duration-500 overflow-hidden shadow-lg`}
           >
             <img
               src="/logo-dark.png"
@@ -284,7 +288,11 @@ export default function AuthShowcase({
           </div>
         </div>
 
-        <div className="flex items-center gap-2"></div>
+        {/* Live indicator badge */}
+        <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/8 rounded-full px-3 py-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase">Live Studio</span>
+        </div>
       </div>
 
       {/* Carousel Slide Area */}

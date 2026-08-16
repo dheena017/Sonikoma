@@ -6,7 +6,7 @@ import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayo
 import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
 import { useBackendHealth } from "@/shared/hooks/useBackendHealth";
 import { getUserCredits } from "@/api/endpoints/auth";
-import { Sliders, X, Mic, Tv, Eye } from "lucide-react";
+import { Sliders, X, Mic, Tv, Eye, Film, Images, Sparkles, Layers, PlaySquare, MonitorPlay } from "lucide-react";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 
 const AudioSettingsPage = React.lazy(() => import("@/features/editor_audio/pages/AudioSettingsPage"));
@@ -396,8 +396,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
         {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
         <div
           className={`relative z-10 bg-[#070709] min-h-0 min-w-0 ${activeTab === "settings" || activeTab === "audio-settings"
-              ? "px-4 md:px-8 py-8 flex flex-col gap-8"
-              : `border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] px-4 md:px-6 py-8 flex flex-col gap-12 ${isFocusMode ? "hidden" : "block"
+              ? "px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8 w-full max-w-[1720px] mx-auto"
+              : `border-t border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10 w-full max-w-[1720px] mx-auto ${isFocusMode ? "hidden" : "block"
               }`
             }`}
         >
@@ -536,14 +536,32 @@ const EditorPage: React.FC<EditorPageProps> = ({
               {playerSettings.isPlayerOpen ? (
                 <>
                   {/* Section Header: Video Monitor */}
-                  <div className="w-full max-w-[1600px] ml-0 mr-0">
-                    <div className="flex items-center gap-3 pb-3 border-b border-white/5">
-                      <div className="flex items-center gap-2">
-                        <div className="h-5 w-1 rounded-full bg-gradient-to-b from-purple-400 to-purple-600 shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
-                        <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-mono">Video Monitor</h3>
+                  <div className="w-full">
+                    <div className="relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/70 to-purple-950/40 border border-purple-500/25 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <div className="h-10 w-10 rounded-xl bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
+                          <Tv className="h-5 w-5 text-purple-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2.5 flex-wrap">
+                            <h3 className="text-sm font-black text-white uppercase tracking-[0.18em] font-mono truncate">
+                              Video Monitor
+                            </h3>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[10px] font-bold text-purple-300 font-mono">
+                              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+                              Live Preview
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-neutral-400 font-mono mt-0.5 truncate">
+                            Real-time compositor, camera-motion playback & program monitor
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 h-[1px] bg-gradient-to-r from-purple-500/20 to-transparent" />
-                      <span className="text-[9px] font-mono font-bold text-purple-400/70 uppercase tracking-widest">Preview</span>
+                      <div className="flex items-center gap-2 text-[10px] font-mono shrink-0 self-end sm:self-center">
+                        <span className="px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-purple-500/25 text-purple-300 font-bold uppercase tracking-wider shadow-inner">
+                          1080p · 60fps
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <EditorViewport
@@ -571,23 +589,28 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   />
                 </>
               ) : (
-                <div className="w-full max-w-[1600px] ml-0 mr-0 mb-4">
+                <div className="w-full mb-2">
                   <button
                     type="button"
                     onClick={() => {
                       useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: true });
                     }}
-                    className="w-full h-11 px-4 rounded-2xl bg-neutral-900/80 hover:bg-neutral-800/90 border border-purple-500/30 hover:border-purple-500/60 text-purple-300 hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-lg"
+                    className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/80 to-purple-950/30 hover:from-neutral-850 hover:to-purple-900/40 border border-purple-500/30 hover:border-purple-500/60 text-purple-300 hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-6 w-6 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 group-hover:scale-105 transition-transform">
-                        <Tv className="h-3.5 w-3.5" />
+                    <div className="flex items-center gap-3.5">
+                      <div className="h-8 w-8 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 group-hover:scale-105 transition-transform shadow-[0_0_12px_rgba(168,85,247,0.25)]">
+                        <Tv className="h-4 w-4" />
                       </div>
-                      <span className="text-xs font-bold font-mono tracking-wide uppercase">
-                        Show Program Monitor Viewport
-                      </span>
+                      <div className="text-left">
+                        <span className="text-xs font-bold font-mono tracking-wider uppercase block text-white">
+                          Program Monitor Viewport
+                        </span>
+                        <span className="text-[10px] text-neutral-400 font-mono">
+                          Click to expand video preview player & visual canvas monitor
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-purple-400/80 group-hover:text-purple-300">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/80 border border-purple-500/40 text-xs font-mono text-purple-300 group-hover:bg-purple-900/80 group-hover:text-purple-100 transition-colors shadow-sm">
                       <Eye className="h-3.5 w-3.5" />
                       <span>Expand Monitor</span>
                     </div>
@@ -595,27 +618,39 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 </div>
               )}
 
-
-
-
               {/* MIDDLE: Storyboard Workspace */}
               <div
                 id="section-timeline"
-                className="w-full max-w-[1600px] ml-0 mr-0 space-y-4 scroll-mt-24"
+                className="w-full space-y-4 scroll-mt-24"
               >
                 {/* Section Header: Storyboard */}
-                <div className="flex items-center gap-3 pb-3 border-b border-white/5">
-                  <div className="flex items-center gap-2">
-                    <div className="h-5 w-1 rounded-full bg-gradient-to-b from-purple-400 to-purple-600 shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
-                    <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-mono">Storyboard</h3>
-                    {panels.length > 0 && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-[9px] font-black text-purple-300 font-mono">
-                        {panels.length}f
+                <div className="w-full">
+                  <div className="relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/70 to-indigo-950/40 border border-indigo-500/25 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-indigo-500/15 border border-indigo-500/35 flex items-center justify-center text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.3)] shrink-0">
+                        <Film className="h-5 w-5 text-indigo-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                          <h3 className="text-sm font-black text-white uppercase tracking-[0.18em] font-mono truncate">
+                            Storyboard
+                          </h3>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-[10px] font-bold text-indigo-300 font-mono">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                            {panels.length} {panels.length === 1 ? "Scene" : "Scenes"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-neutral-400 font-mono mt-0.5 truncate">
+                          Motion sequence timeline, speech transcript alignment & audio-sync
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] font-mono shrink-0 self-end sm:self-center">
+                      <span className="px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-indigo-500/25 text-indigo-300 font-bold uppercase tracking-wider shadow-inner">
+                        Timeline Sequencer
                       </span>
-                    )}
+                    </div>
                   </div>
-                  <div className="flex-1 h-[1px] bg-gradient-to-r from-purple-500/20 to-transparent" />
-                  <span className="text-[9px] font-mono font-bold text-purple-400/70 uppercase tracking-widest">Timeline</span>
                 </div>
                 <StoryboardTimeline
                   panels={panels}
@@ -669,21 +704,36 @@ const EditorPage: React.FC<EditorPageProps> = ({
               {/* BOTTOM: Imported Assets (Resource Pool) */}
               <div
                 id="section-assets"
-                className="w-full max-w-[1600px] ml-0 mr-0 space-y-4 scroll-mt-24"
+                className="w-full space-y-4 scroll-mt-24"
               >
                 {/* Section Header: Imported Assets */}
-                <div className="flex items-center gap-3 pb-3 border-b border-white/5">
-                  <div className="flex items-center gap-2">
-                    <div className="h-5 w-1 rounded-full bg-gradient-to-b from-emerald-400 to-emerald-600 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-                    <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] font-mono">Imported Assets</h3>
-                    {scrapedImages.length > 0 && (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-[9px] font-black text-emerald-300 font-mono">
-                        {scrapedImages.length}
+                <div className="w-full">
+                  <div className="relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/70 to-emerald-950/40 border border-emerald-500/25 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center text-emerald-300 shadow-[0_0_16px_rgba(52,211,153,0.3)] shrink-0">
+                        <Images className="h-5 w-5 text-emerald-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                          <h3 className="text-sm font-black text-white uppercase tracking-[0.18em] font-mono truncate">
+                            Imported Assets
+                          </h3>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-300 font-mono">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            {scrapedImages.length} {scrapedImages.length === 1 ? "Asset" : "Assets"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-neutral-400 font-mono mt-0.5 truncate">
+                          Scraped image pool, OCR speech bubble extractor & AI smart-crop deck
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] font-mono shrink-0 self-end sm:self-center">
+                      <span className="px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-emerald-500/25 text-emerald-300 font-bold uppercase tracking-wider shadow-inner">
+                        Resource Pool
                       </span>
-                    )}
+                    </div>
                   </div>
-                  <div className="flex-1 h-[1px] bg-gradient-to-r from-emerald-500/20 to-transparent" />
-                  <span className="text-[9px] font-mono font-bold text-emerald-400/70 uppercase tracking-widest">Asset Pool</span>
                 </div>
                 <div className="bg-transparent">
                   <ChapterScraperDeck

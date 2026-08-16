@@ -49,18 +49,28 @@
 }
 
 html,
-body {
+body,
+#root {
   background-color: #09090b;
   color: #fafafa;
   font-family: var(--font-sans);
   overflow: hidden;
-  height: 100vh;
-  max-height: 100vh;
+  height: 100%;
+  max-height: 100%;
   max-width: 100vw;
   width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   color-scheme: dark;
   transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide default browser password reveal icons */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none !important;
 }
 
 :root[data-mode="light"] {

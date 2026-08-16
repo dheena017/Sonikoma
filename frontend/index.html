@@ -89,7 +89,7 @@
       />
     </noscript>
 
-    <!-- Instant Load Base Styles to match LoadingPage design -->
+    <!-- Base Styles -->
     <style>
       html, body {
         background-color: #050507 !important;
@@ -107,151 +107,6 @@
         max-height: 100vh;
         overflow: hidden;
         background-color: #050507;
-      }
-      .lp-root {
-        position: fixed;
-        inset: 0;
-        background: #050507;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 24px;
-        z-index: 9999;
-        overflow: hidden;
-      }
-      .lp-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 40px;
-        border-radius: 24px;
-        background: rgba(10, 10, 15, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-        width: 90%;
-        max-width: 400px;
-        position: relative;
-        z-index: 1;
-      }
-      .lp-logo-wrapper {
-        position: relative;
-        margin-bottom: 18px;
-        will-change: transform;
-        animation: lp-pulse 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-      }
-      .lp-logo-glow {
-        position: relative;
-        width: 102px;
-        height: 102px;
-        border-radius: 26px;
-        padding: 4px;
-        background: rgba(8, 8, 12, 0.92);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.48);
-        overflow: hidden;
-        isolation: isolate;
-      }
-      .lp-logo-glow::before {
-        content: "";
-        position: absolute;
-        inset: -50%;
-        z-index: 0;
-        border-radius: inherit;
-        background: conic-gradient(from 0deg, #a855f7, #06b6d4, #f59e0b, #a855f7);
-        will-change: transform;
-        animation: lp-logo-spin 6s linear infinite;
-      }
-      .lp-logo-img {
-        width: 100%;
-        height: 100%;
-        border-radius: 20px;
-        object-fit: cover;
-        padding: 5px;
-        background: #000000;
-        box-sizing: border-box;
-        position: relative;
-        z-index: 1;
-      }
-      .lp-app-title {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #ffffff;
-        letter-spacing: -0.02em;
-        margin-bottom: 6px;
-        background: linear-gradient(to right, #ffffff, #e4e4e7);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-      .lp-status-text {
-        font-size: 0.75rem;
-        color: #9ca3af;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        font-weight: 600;
-        margin-bottom: 28px;
-        text-align: center;
-      }
-      .lp-progress-wrapper {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-      }
-      .lp-progress-bar-bg {
-        width: 100%;
-        height: 5px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 9999px;
-        overflow: hidden;
-        position: relative;
-      }
-      .lp-progress-bar-fill {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to right, transparent 0%, #a855f7 35%, #06b6d4 65%, transparent 100%);
-        border-radius: 9999px;
-        will-change: transform;
-        animation: lp-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        position: absolute;
-        inset: 0;
-      }
-      .lp-spinner {
-        width: 20px;
-        height: 20px;
-        color: #a855f7;
-        will-change: transform;
-        animation: lp-spin 1.8s linear infinite;
-      }
-
-      @keyframes lp-spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      @keyframes lp-logo-spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      @keyframes lp-shimmer {
-        0%   { transform: translate3d(-100%, 0, 0); }
-        100% { transform: translate3d(100%, 0, 0); }
-      }
-      @keyframes lp-pulse {
-        0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-        50%      { transform: translate3d(0, -3px, 0) scale(1.025); }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .lp-logo-wrapper,
-        .lp-logo-glow::before,
-        .lp-progress-bar-fill,
-        .lp-spinner {
-          animation: none !important;
-        }
       }
     </style>
 
@@ -319,59 +174,7 @@
       </div>
     </noscript>
 
-    <div id="root">
-      <div class="lp-root">
-        <div class="lp-card">
-          <!-- Pulsing Glowing Logo Wrapper -->
-          <div class="lp-logo-wrapper">
-            <div class="lp-logo-glow">
-              <img
-                src="/logo-dark.png"
-                alt="Sonikoma Logo"
-                class="lp-logo-img"
-              />
-            </div>
-          </div>
-
-          <!-- App name -->
-          <div class="lp-app-title">
-            Sonikoma
-          </div>
-
-          <!-- Tagline / status -->
-          <div class="lp-status-text">
-            Initializing
-          </div>
-
-          <!-- Progress Display -->
-          <div class="lp-progress-wrapper">
-            <div class="lp-progress-bar-bg">
-              <div class="lp-progress-bar-fill"></div>
-            </div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              class="lp-spinner"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="3"
-                opacity="0.15"
-              />
-              <path
-                fill="currentColor"
-                opacity="0.85"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div id="root"></div>
 
     <script type="module" src="/src/main.tsx"></script>
   </body>

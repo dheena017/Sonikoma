@@ -537,10 +537,18 @@ export default function MainLayout(props: MainLayoutProps) {
           notificationsMuted={notificationsMuted}
         />
 
+        {/* Dynamic Page Transfer Laser Progress Bar */}
+        <div
+          key={`route-laser-${currentPath}`}
+          className="fixed top-16 left-0 right-0 h-[2px] z-50 pointer-events-none overflow-hidden"
+        >
+          <div className="h-full bg-gradient-to-r from-purple-500 via-indigo-400 to-cyan-400 animate-route-bar" />
+        </div>
+
         {/* Scrollable Main Children Page Area */}
         <div
           id="main-scrollable-area"
-          className={`flex-1 flex flex-col w-full relative ${showTopHeader ? "pt-20" : ""} ${
+          className={`flex-1 flex flex-col w-full relative min-h-0 custom-purple-scrollbar page-scrollbar ${showTopHeader ? "pt-16" : ""} ${
             isImageEditorPage || isProEditorPage || isVideoEditorPage
               ? "overflow-hidden"
               : "overflow-y-auto overflow-x-hidden"
@@ -576,8 +584,8 @@ export default function MainLayout(props: MainLayoutProps) {
               isImageEditorPage || isProEditorPage || isVideoEditorPage
                 ? "p-0"
                 : !isSidebarOpen
-                ? "px-4 sm:px-6 lg:px-8 lg:pl-28 pb-12 md:pb-16 page-view-transition stagger-container"
-                : "px-4 sm:px-6 lg:px-8 pb-12 md:pb-16 page-view-transition stagger-container"
+                ? "px-4 sm:px-6 lg:px-8 lg:pl-28 pb-16 md:pb-24 page-view-transition stagger-container"
+                : "px-4 sm:px-6 lg:px-8 pb-16 md:pb-24 page-view-transition stagger-container"
             }`}
           >
             {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (

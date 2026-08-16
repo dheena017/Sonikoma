@@ -86,13 +86,13 @@ export default function ProfilePage(props: ProfilePageProps) {
   );
 
   return (
-    <div className="w-full min-h-screen bg-[#07070a] text-white flex flex-col font-sans selection:bg-purple-500/30">
+    <div className="w-full flex-1 text-white flex flex-col font-sans selection:bg-purple-500/30">
       {/* Background glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="absolute -top-[200px] left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-purple-900/15 via-indigo-900/10 to-transparent blur-[100px] rounded-full" />
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col space-y-6">
+      <div className="relative z-10 w-full max-w-6xl mx-auto py-6 flex-1 flex flex-col space-y-6">
         {/* Compact Breadcrumb & Quick Actions Bar */}
         <div className="flex items-center justify-between border-b border-white/5 pb-3">
           <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">

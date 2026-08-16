@@ -306,7 +306,7 @@ const SidebarInner = ({
   ];
 
   const sidebarContent = (
-    <div className="flex h-full flex-col justify-between p-5 space-y-6 bg-gradient-to-b from-neutral-950 via-[#0a0712] to-neutral-950 text-white select-none">
+    <div className="flex h-full flex-col justify-between p-5 space-y-6 bg-neutral-950/85 backdrop-blur-2xl text-white select-none">
       {/* BRANDING LOGO */}
       <div className="space-y-6 flex flex-col flex-grow min-h-0">
         <div className="flex items-center justify-between pb-4 border-b border-neutral-800/60">
@@ -449,7 +449,7 @@ const SidebarInner = ({
 
       {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/80 z-50 transition-all duration-300 ease-out transform overflow-hidden ${isOpen
+        className={`fixed top-0 bottom-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/80 backdrop-blur-2xl border-r border-white/10 z-50 transition-all duration-300 ease-out transform overflow-hidden ${isOpen
             ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]"
             : "-translate-x-full"
           }`}

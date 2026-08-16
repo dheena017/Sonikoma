@@ -279,10 +279,10 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
       />
 
       {/* Drawer Panel */}
-      <div className="relative w-full max-w-lg h-full bg-[#0c0d14] border-l border-white/10 text-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-300">
+      <div className="relative w-full max-w-lg h-full bg-[#090910]/85 backdrop-blur-3xl border-l border-white/10 text-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-300">
         
         {/* ─── Website Logo & Header ─── */}
-        <div className="p-4 border-b border-neutral-800 flex items-center justify-between bg-[#0e0f18]/90 backdrop-blur-md">
+        <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#090910]/60 backdrop-blur-md">
           <div className="flex items-center gap-3.5">
             <div className="relative">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 opacity-60 blur-sm" />

@@ -279,8 +279,8 @@ export default function ForgotPasswordPage({
                   <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
                     New Secure Password
                   </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4">
+                  <div className="relative flex items-center">
+                    <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 z-10">
                       <Lock className="w-4 h-4 text-neutral-500" />
                     </div>
                     <input
@@ -288,13 +288,13 @@ export default function ForgotPasswordPage({
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
+                      className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-12 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
                       placeholder="••••••••"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 text-neutral-500 hover:text-neutral-300 transition-colors focus:outline-none"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all focus:outline-none cursor-pointer z-10"
                     >
                       {showPassword ? (
                         <EyeOff className="w-4 h-4" />
@@ -310,16 +310,29 @@ export default function ForgotPasswordPage({
                   <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
                     Confirm Password
                   </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <div className="relative flex items-center">
+                    <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center w-4 h-4 z-10">
+                      <Lock className="w-4 h-4 text-neutral-500" />
+                    </div>
                     <input
                       type={showPassword ? "text" : "password"}
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
+                      className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-12 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
                       placeholder="••••••••"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-7 h-7 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-all focus:outline-none cursor-pointer z-10"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
                   </div>
                   {newPassword && confirmPassword && (
                     <div className="text-[9px] font-bold ml-1">

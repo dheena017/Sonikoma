@@ -1205,9 +1205,7 @@ export default function AppRouter(props: AppRouterProps) {
       {isEpisodeScraperPath && (
         <React.Suspense
           fallback={
-            <div className="flex-1 flex items-center justify-center bg-[#050507] text-neutral-400 text-sm">
-              Loading Episode Scraper...
-            </div>
+            <LoadingPage status="Loading Episode Scraper..." themeMode={themeMode} />
           }
         >
           <EpisodeScraperPage

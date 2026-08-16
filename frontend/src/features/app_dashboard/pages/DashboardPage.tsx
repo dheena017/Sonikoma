@@ -39,7 +39,7 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="w-full min-h-full bg-transparent text-neutral-100 flex flex-col pt-5 animate-fade-in relative z-10 pb-20">
+    <div className="w-full flex-1 flex flex-col text-neutral-100 animate-fade-in relative z-10 py-6 max-w-7xl mx-auto">
       <DashboardHeader
         themeMode={themeMode}
         searchQuery={searchQuery}

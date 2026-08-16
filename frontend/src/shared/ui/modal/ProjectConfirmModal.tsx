@@ -321,7 +321,7 @@ export default function ProjectConfirmModal({
         onClick={onClose}
       />
 
-      <div className="relative ml-auto h-full w-full max-w-2xl bg-[#09090c] border-l border-neutral-800 rounded-l-3xl shadow-2xl overflow-hidden z-10 animate-in slide-in-from-right-4 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col">
+      <div className="relative ml-auto h-full w-full max-w-2xl bg-[#09090f]/90 backdrop-blur-2xl border-l border-white/10 rounded-l-3xl shadow-2xl overflow-hidden z-10 animate-in slide-in-from-right-4 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col">
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 blur-[1px]" />
 
         {/* Header */}

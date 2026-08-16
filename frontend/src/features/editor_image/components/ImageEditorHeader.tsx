@@ -187,14 +187,14 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-neutral-950/95 backdrop-blur-xl border-b border-neutral-900 flex items-center justify-between pl-4 lg:pl-0 pr-6 md:pr-8 flex-shrink-0 z-50 selection:bg-purple-650">
+    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#06060c]/80 backdrop-blur-2xl border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] flex items-center justify-between pl-4 lg:pl-0 pr-6 md:pr-8 flex-shrink-0 z-50 selection:bg-purple-650">
       {/* Left: Hamburger, Brand / Logo & Navigation */}
       <div className="flex items-center space-x-4 h-full">
         {onToggleSidebar && (
-          <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-4">
+          <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-4">
             <button
               onClick={onToggleSidebar}
-              className="w-11 h-11 rounded-2xl bg-neutral-900/90 border border-neutral-800/90 flex items-center justify-center text-neutral-300 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
+              className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/8 flex items-center justify-center text-neutral-300 hover:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
               title="Toggle Navigation Menu"
             >
               <Menu className="h-5 w-5" />

@@ -61,7 +61,7 @@ export default function ErrorModal({
 
       {/* Container */}
       <div
-        className={`relative w-full max-w-2xl bg-neutral-900 border-2 ${
+        className={`relative w-full max-w-2xl bg-neutral-950/90 backdrop-blur-2xl border-2 ${
           isWarning ? "border-amber-500/50" : "border-red-500/50"
         } rounded-3xl shadow-2xl p-6 md:p-8 overflow-hidden z-10 animate-in zoom-in-95 duration-200`}
       >

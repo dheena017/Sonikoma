@@ -173,7 +173,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
       />
 
       <aside
-        className="fixed top-0 bottom-0 left-0 h-screen w-[280px] bg-gradient-to-b from-neutral-950 via-[#0a0712] to-neutral-950 backdrop-blur-2xl border-r border-neutral-800/80 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.9)] overflow-hidden select-none"
+        className="fixed top-0 bottom-0 left-0 h-screen w-[280px] bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(168,85,247,0.06)] overflow-hidden select-none"
       >
         {/* Top Header / Close Area */}
         <div

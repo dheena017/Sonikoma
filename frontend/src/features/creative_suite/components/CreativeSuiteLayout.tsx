@@ -98,25 +98,27 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   const activeBreadcrumb = getBreadcrumbName();
 
   const renderHeader = () => (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-900/80 pb-5 mb-6">
-      <div className="space-y-2">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/5 pb-5 mb-6">
+      <div className="space-y-2 max-w-2xl">
         {/* Breadcrumb pills */}
-        <div className="flex items-center gap-1.5 text-xs font-mono flex-wrap">
+        <div className="flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
           <button
+            type="button"
             onClick={() => navigateTo("/dashboard")}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-purple-950/40 border border-neutral-800/80 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
           >
-            <span>Main Dashboard</span>
+            <span>Dashboard</span>
           </button>
           <span className="text-neutral-600 font-bold">&rsaquo;</span>
           <button
+            type="button"
             onClick={() => navigateTo("/creative-suite")}
-            className="px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-purple-950/40 border border-neutral-800/80 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
+            className="px-2.5 py-0.5 rounded-md bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
           >
             <span>Creative Suite</span>
           </button>
           <span className="text-neutral-600 font-bold">&rsaquo;</span>
-          <span className="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300 font-bold">
+          <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold">
             {activeBreadcrumb}
           </span>
         </div>
@@ -127,19 +129,71 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tight font-sans">
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-sans flex items-center gap-2.5">
               Creative Tools Workspace
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase tracking-wider">
+                AI Pro
+              </span>
             </h2>
-            <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Access AI-assisted video editing, audio composition, translations, and publisher tools
+            <p className="text-xs text-neutral-400 font-sans mt-0.5">
+              Access AI-assisted video editing, neural voice acting, translations, and publisher tools
             </p>
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 self-start sm:self-center shrink-0">
+      {/* Right side: Quick Tool Switcher Strip & Main App button */}
+      <div className="flex flex-wrap items-center gap-2 self-start lg:self-center shrink-0">
+        <div className="hidden sm:flex items-center gap-1.5 bg-neutral-900/80 p-1 rounded-xl border border-white/10 backdrop-blur-xl">
+          <button
+            type="button"
+            onClick={() => navigateTo("/creative-suite/ai-optimizer")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+              currentPath.includes("ai-optimizer")
+                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                : "text-neutral-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            Video
+          </button>
+          <button
+            type="button"
+            onClick={() => navigateTo("/creative-suite/ai-voice")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+              currentPath.includes("ai-voice")
+                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                : "text-neutral-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            Voice & Audio
+          </button>
+          <button
+            type="button"
+            onClick={() => navigateTo("/creative-suite/panel-assistant")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+              currentPath.includes("panel-assistant")
+                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                : "text-neutral-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            Panels
+          </button>
+          <button
+            type="button"
+            onClick={() => navigateTo("/creative-suite/youtube")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+              currentPath.includes("youtube")
+                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                : "text-neutral-400 hover:text-white hover:bg-white/5"
+            }`}
+          >
+            YouTube
+          </button>
+        </div>
+
         {activeSkillRequests > 0 && (
           <button
+            type="button"
             onClick={() => window.__sonikomaAbortAllSkillRequests?.()}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-rose-600/90 hover:bg-rose-500 text-white border border-rose-500/70 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-rose-950/40 active:scale-95"
           >
@@ -148,11 +202,12 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
           </button>
         )}
         <button
+          type="button"
           onClick={() => navigateTo("/dashboard")}
-          className="group flex items-center gap-2 px-4 py-2.5 bg-neutral-900/90 hover:bg-neutral-800/90 text-neutral-200 hover:text-white border border-neutral-800 hover:border-neutral-700 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md hover:shadow-lg active:scale-95"
+          className="group flex items-center gap-2 px-4 py-2 bg-neutral-900/90 hover:bg-neutral-800/90 text-neutral-200 hover:text-white border border-white/10 hover:border-purple-500/30 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md hover:shadow-lg active:scale-95"
         >
-          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
-          <span>Main App</span>
+          <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform text-purple-400" />
+          <span>Dashboard</span>
         </button>
       </div>
     </div>
@@ -165,7 +220,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
 
   if (hideSidebarAndHeader) {
     return (
-      <div className="flex-grow w-full flex flex-col min-h-full">
+      <div className="flex-1 w-full max-w-7xl mx-auto flex flex-col py-6">
         {!isOverviewHub && renderHeader()}
         {children}
       </div>

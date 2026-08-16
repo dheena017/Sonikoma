@@ -27,10 +27,13 @@ export default function AuthPageShell({
       <AuthShowcase activeTheme={activeTheme} iconType={iconType} />
 
       {/* RIGHT PANEL */}
-      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#040406] relative text-left">
+      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-neutral-950/60 backdrop-blur-xl relative border-l border-white/10 text-left">
         <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} blur-[120px] pointer-events-none transition-all duration-1000`}
+          className={`absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[55%] rounded-full ${currentTheme.glowPrimary} blur-[120px] pointer-events-none transition-all duration-1000 opacity-60`}
         />
+        <div className="absolute bottom-0 right-0 w-[50%] h-[40%] rounded-full bg-indigo-500/5 blur-[100px] pointer-events-none" />
+        {/* Subtle top-edge laser accent */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent pointer-events-none" />
 
         {/* Pinned header — never scrolls */}
         <div className="relative z-10 px-8 lg:px-16 pt-8 lg:pt-10 flex-shrink-0">

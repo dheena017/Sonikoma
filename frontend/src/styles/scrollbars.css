@@ -2,110 +2,88 @@
    UNIFIED SONIKOMA DESIGN SYSTEM — PREMIUM SCROLLBAR STYLING
    ========================================================================== */
 
-/* Global base scrollbar styling for all scrollable elements across the app */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #a855f7 rgba(255, 255, 255, 0.05);
-}
-
-*::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-*::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 9999px;
-}
-
-*::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.75);
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: background-color 0.2s ease;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(192, 132, 252, 0.95);
-}
-
-/* 1. Root Window — hide global document scrollbar so app handles internal scrolling cleanly */
-html,
-body {
+/* 1. Global Default: Hide scrollbars across all secondary elements, sidebars, widgets & containers */
+*,
+*::before,
+*::after {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
 
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
+*::-webkit-scrollbar {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
 }
 
-/* 2. Inner Containers Custom Scrollbar Utility Classes */
-.custom-purple-scrollbar,
-.custom-scrollbar,
-.custom-sidebar-scrollbar,
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: #a855f7 rgba(255, 255, 255, 0.05);
+html,
+body,
+#app_root,
+#main-content-layout {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
-.custom-purple-scrollbar::-webkit-scrollbar,
-.custom-scrollbar::-webkit-scrollbar,
-.custom-sidebar-scrollbar::-webkit-scrollbar,
-.scrollbar-thin::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.2);
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#app_root::-webkit-scrollbar,
+#main-content-layout::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-.custom-purple-scrollbar::-webkit-scrollbar-track,
-.custom-scrollbar::-webkit-scrollbar-track,
-.custom-sidebar-scrollbar::-webkit-scrollbar-track,
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 9999px;
+/* 2. Main Page Scrollbar — ONLY the main page scroll container displays the custom purple scrollbar */
+#main-scrollable-area,
+.page-scrollbar,
+.custom-purple-scrollbar {
+  scrollbar-width: thin !important;
+  scrollbar-color: #a855f7 rgba(10, 10, 16, 0.4) !important;
 }
 
-.custom-purple-scrollbar::-webkit-scrollbar-thumb,
-.custom-scrollbar::-webkit-scrollbar-thumb,
-.custom-sidebar-scrollbar::-webkit-scrollbar-thumb,
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.8);
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
-  transition: background-color 0.2s ease;
+#main-scrollable-area::-webkit-scrollbar,
+.page-scrollbar::-webkit-scrollbar,
+.custom-purple-scrollbar::-webkit-scrollbar {
+  display: block !important;
+  width: 8px !important;
+  height: 8px !important;
+  background: rgba(0, 0, 0, 0.25) !important;
 }
 
-.custom-purple-scrollbar:hover::-webkit-scrollbar-thumb,
-.custom-scrollbar:hover::-webkit-scrollbar-thumb,
-.custom-sidebar-scrollbar:hover::-webkit-scrollbar-thumb,
-.scrollbar-thin:hover::-webkit-scrollbar-thumb {
-  background: rgba(192, 132, 252, 0.95);
+#main-scrollable-area::-webkit-scrollbar-track,
+.page-scrollbar::-webkit-scrollbar-track,
+.custom-purple-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-radius: 9999px !important;
 }
 
-.custom-purple-scrollbar::-webkit-scrollbar-thumb:hover,
-.custom-scrollbar::-webkit-scrollbar-thumb:hover,
-.custom-sidebar-scrollbar::-webkit-scrollbar-thumb:hover,
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #d8b4fe;
-  box-shadow: 0 0 14px rgba(168, 85, 247, 0.8);
+#main-scrollable-area::-webkit-scrollbar-thumb,
+.page-scrollbar::-webkit-scrollbar-thumb,
+.custom-purple-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.8) !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.5) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+#main-scrollable-area::-webkit-scrollbar-thumb:hover,
+.page-scrollbar::-webkit-scrollbar-thumb:hover,
+.custom-purple-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(192, 132, 252, 0.95) !important;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.8) !important;
 }
 
 /* 3. Hide Scrollbar Utilities */
 .hide-scrollbar,
 .mini-sidebar-scrollbar {
-  -ms-overflow-style: none !important; /* IE and Edge */
-  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 .hide-scrollbar::-webkit-scrollbar,
 .mini-sidebar-scrollbar::-webkit-scrollbar {
-  display: none !important; /* Chrome, Safari, Opera */
+  display: none !important;
   width: 0 !important;
   height: 0 !important;
 }

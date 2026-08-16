@@ -86,7 +86,7 @@ export default function ProjectCard({
   return (
     <div
       onClick={() => onOpenProject(project)}
-      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0c0c12] via-[#10101a] to-[#12121f] shadow-xl shadow-purple-950/10 cursor-pointer transition-all duration-300 glass-interactive hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-950/40 flex flex-col h-full ${
+      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-neutral-900/70 backdrop-blur-xl shadow-xl shadow-purple-950/10 cursor-pointer transition-all duration-300 glass-interactive hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-950/40 flex flex-col h-full ${
         isSelected
           ? "border-purple-500/50 shadow-purple-900/30 ring-1 ring-purple-500/50"
           : "hover:border-purple-500/40"
@@ -110,61 +110,67 @@ export default function ProjectCard({
       <div className="relative aspect-[16/10] w-full bg-neutral-950 overflow-hidden flex-shrink-0 rounded-t-3xl">
         {project.cover_image ? (
           <>
+            {/* Ambient blurred background filler */}
+            <img
+              src={getProxiedImageUrl(project.cover_image, project.url)}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-125 pointer-events-none"
+            />
+            {/* Crisp full image without cropping */}
             <img
               src={getProxiedImageUrl(project.cover_image, project.url)}
               alt={project.title}
-              className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
-                isSelected ? "scale-105 opacity-80" : "group-hover:scale-105"
+              className={`relative z-[1] w-full h-full object-contain transition-transform duration-700 ease-out block ${
+                isSelected ? "scale-105 opacity-90" : "group-hover:scale-105"
               }`}
             />
-            {/* Bottom fade into card body */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c12] via-[#0c0c12]/40 to-transparent" />
-            {/* Subtle side vignette */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
+            {/* Seamless gradient overlay at bottom */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none z-[2]" />
             {/* Soft glow overlay */}
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.15),_transparent_45%)]" />
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.15),_transparent_45%)] z-[2]" />
           </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/20 via-neutral-900 to-neutral-950">
-            <FolderOpen className="w-10 h-10 text-purple-500/40" />
+            <FolderOpen className="w-8 h-8 text-purple-500/40" />
             <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">No Cover</span>
           </div>
         )}
 
         {/* Hover play overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/20 backdrop-blur-[2px] z-10">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-purple-900/60 scale-75 group-hover:scale-100 transition-transform duration-300 border border-purple-400/40">
-            <Play className="h-5 w-5 text-white fill-white ml-0.5" />
+          <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-purple-900/60 scale-75 group-hover:scale-100 transition-transform duration-300 border border-purple-400/40">
+            <Play className="h-4 w-4 text-white fill-white ml-0.5" />
           </div>
         </div>
 
         {/* Top badges row */}
-        <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+        <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
           {/* Status badge */}
-          <div className={`px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] rounded-full border backdrop-blur-md shadow-md ${statusColor}`}>
+          <div className={`px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider rounded-full border backdrop-blur-md shadow-md ${statusColor}`}>
             {project.status || "Draft"}
           </div>
 
           {/* 3-dot menu */}
           <button
             onClick={(e) => onToggleMenu?.(e, project.project_id)}
-            className="w-7 h-7 rounded-full bg-black/60 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
+            className="w-6 h-6 rounded-full bg-black/60 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
           >
-            <MoreVertical className="w-3.5 h-3.5" />
+            <MoreVertical className="w-3 h-3" />
           </button>
         </div>
 
         {/* Bottom thumbnail badges */}
-        <div className="absolute bottom-2.5 inset-x-2.5 z-10 flex items-center justify-between pointer-events-none">
+        <div className="absolute bottom-2 inset-x-2 z-10 flex items-center justify-between pointer-events-none">
           {project.episode !== undefined && project.episode !== null ? (
-            <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1.5 font-mono">
+            <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1 font-mono">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
               <span>{formatEpisodeLabel(project.episode)}</span>
             </div>
           ) : <div />}
 
-          <div className="px-2.5 py-1 bg-black/80 backdrop-blur-md border border-white/15 rounded-xl text-[9px] font-bold text-purple-300 tracking-wider shadow-lg flex items-center gap-1.5 font-mono">
-            <Clock className="w-3 h-3 text-purple-400" />
+          <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-bold text-purple-300 tracking-wider shadow-lg flex items-center gap-1 font-mono">
+            <Clock className="w-2.5 h-2.5 text-purple-400" />
             <span>{timeAgo(project.created_at)}</span>
           </div>
         </div>
@@ -215,11 +221,11 @@ export default function ProjectCard({
       )}
 
       {/* ─── Card Body ─────────────────────────────────── */}
-      <div className="px-4.5 pt-3.5 pb-4.5 flex flex-col flex-1 gap-2.5 relative z-10">
+      <div className="p-4 sm:p-4.5 flex flex-col flex-1 gap-2.5 relative z-10">
         {/* Source label */}
         <div className="flex items-center gap-1.5">
-          <SourceIcon className="h-3.5 w-3.5 text-neutral-500" />
-          <span className="text-xs text-neutral-500 font-mono tracking-wider uppercase truncate">
+          <SourceIcon className="h-3 w-3 text-neutral-500" />
+          <span className="text-[10.5px] text-neutral-500 font-mono tracking-wider uppercase truncate">
             {getSourceName(project.url)}
           </span>
         </div>
@@ -234,86 +240,60 @@ export default function ProjectCard({
               if (e.key === "Enter") onSaveRename?.(project.project_id, e.currentTarget.value);
             }}
             autoFocus
-            className="text-base font-bold text-white bg-neutral-800 border border-neutral-700 rounded-md px-2 py-1 w-full"
+            className="text-sm font-bold text-white bg-neutral-800 border border-neutral-700 rounded-md px-2 py-1 w-full"
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <h3 className="text-base font-extrabold text-white leading-snug line-clamp-2 group-hover:text-purple-300 transition-colors duration-200">
+          <h3 className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1 group-hover:text-purple-300 transition-colors duration-200" title={titleText}>
             {titleText}
           </h3>
         )}
 
         {/* Genre + Author row */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap text-xs">
           {project.genre && (
-            <span className="text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-full font-bold">
+            <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md font-bold">
               {project.genre}
             </span>
           )}
           {project.author && (
-            <span className="text-xs text-neutral-400 font-medium truncate">
+            <span className="text-[11px] text-neutral-400 font-medium truncate">
               {project.author}
             </span>
           )}
         </div>
 
-        {/* Synopsis (optional) */}
-        {project.synopsis && (
-          <p className="text-xs text-neutral-500 line-clamp-2 leading-relaxed flex-1">
-            {project.synopsis}
-          </p>
-        )}
-
         {/* ─── Footer ───────────────────────────────────── */}
-        <div className="pt-3 mt-auto border-t border-neutral-800/60 space-y-3">
-          {/* Metadata Row: Panels Count + Time Ago */}
-          <div className="flex items-center justify-between text-xs">
-            {(() => {
-              const timelineCount = project.panels_count ?? 0;
-              const importedCount = project.imported_assets_count ?? 0;
-              const displayCount = timelineCount || importedCount || 0;
-              const hasDiff = timelineCount > 0 && importedCount > 0 && timelineCount !== importedCount;
+        <div className="pt-1.5 mt-auto flex items-center justify-between gap-2">
+          {/* Panels Count */}
+          {(() => {
+            const timelineCount = project.panels_count ?? 0;
+            const importedCount = project.imported_assets_count ?? 0;
+            const displayCount = timelineCount || importedCount || 0;
 
-              return (
-                <div
-                  className="flex items-center gap-1.5 text-neutral-300 font-mono truncate"
-                  title={
-                    hasDiff
-                      ? `Timeline: ${timelineCount} panels | Imported: ${importedCount} assets`
-                      : `${displayCount} panels`
-                  }
-                >
-                  <Scissors className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-                  <span className="font-bold text-white">{displayCount} panels</span>
-                  {importedCount > 0 && (
-                    <span className="text-[10px] text-neutral-400 font-normal">
-                      ({importedCount} imp)
-                    </span>
-                  )}
-                </div>
-              );
-            })()}
+            return (
+              <div
+                className="flex items-center gap-1.5 text-neutral-300 font-mono text-xs truncate"
+                title={`${displayCount} panels`}
+              >
+                <Scissors className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+                <span className="font-bold text-white whitespace-nowrap">{displayCount} panels</span>
+              </div>
+            );
+          })()}
 
-            <div className="flex items-center gap-1 text-xs text-neutral-400 font-mono shrink-0">
-              <Clock className="h-3.5 w-3.5 text-purple-400" />
-              <span>{timeAgo(project.created_at)}</span>
-            </div>
-          </div>
-
-          {/* Action Buttons Grid */}
-          <div className="w-full pt-1">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenProject(project);
-              }}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-2xl border border-purple-400/40 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-xs font-black uppercase tracking-wider text-white transition-all cursor-pointer shadow-[0_4px_14px_rgba(168,85,247,0.35)] active:scale-95 shrink-0"
-            >
-              <span>Resume</span>
-              <ArrowRight className="w-3.5 h-3.5 text-white" />
-            </button>
-          </div>
+          {/* Compact Resume Action Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenProject(project);
+            }}
+            className="inline-flex items-center justify-center gap-1.5 h-8 px-4 rounded-xl border border-purple-400/40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-950/40 active:scale-95 shrink-0"
+          >
+            <span>Resume</span>
+            <ArrowRight className="w-3 h-3 text-white" />
+          </button>
         </div>
       </div>
 

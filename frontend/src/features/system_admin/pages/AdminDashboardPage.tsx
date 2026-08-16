@@ -515,7 +515,84 @@ const AdminDashboardPage = React.memo(
     }
 
     const dashboardContent = (
-      <div className="w-full space-y-6">
+      <div className="w-full max-w-7xl mx-auto py-6 space-y-6">
+          {/* Admin Header with Breadcrumbs & Action Toolbar */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/5 pb-5">
+            <div className="space-y-2.5 max-w-2xl text-left">
+              {/* Breadcrumbs */}
+              <div className="flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => navigateTo("/dashboard")}
+                  className="px-2.5 py-0.5 rounded-md bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
+                >
+                  Main App
+                </button>
+                <span className="text-neutral-600 font-bold">&rsaquo;</span>
+                <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold">
+                  System Administration
+                </span>
+                <span className="text-neutral-600 font-bold">&rsaquo;</span>
+                <span className="text-neutral-400">Root Telemetry Dashboard</span>
+              </div>
+
+              {/* Title & Badge */}
+              <div className="flex items-center gap-3 pt-0.5">
+                <div className="relative group">
+                  <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-900/40 border border-purple-400/30 group-hover:scale-105 transition-transform">
+                    <ShieldCheck className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="absolute -inset-0.5 rounded-2xl border border-purple-500/40 pointer-events-none animate-pulse" />
+                </div>
+
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+                    Root Admin Console
+                    <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase tracking-wider flex items-center gap-1">
+                      <Zap className="w-2.5 h-2.5 text-purple-400" />
+                      Superuser
+                    </span>
+                  </h1>
+                  <p className="text-xs text-neutral-400 font-sans mt-0.5">
+                    Monitor system health, database latency, active worker jobs, and user accounts.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Header Right Action Toolbar */}
+            <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center shrink-0">
+              <button
+                type="button"
+                onClick={handleClearCache}
+                disabled={processingAction === "cache"}
+                className="flex items-center gap-1.5 px-3.5 py-2.5 bg-neutral-900/80 hover:bg-neutral-850 text-neutral-300 hover:text-white border border-white/10 hover:border-purple-500/40 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+              >
+                <Wind className="w-3.5 h-3.5 text-purple-400" />
+                <span>{processingAction === "cache" ? "Purging..." : "Purge Cache"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleFlushTemp}
+                disabled={processingAction === "flush"}
+                className="flex items-center gap-1.5 px-3.5 py-2.5 bg-neutral-900/80 hover:bg-neutral-850 text-neutral-300 hover:text-white border border-white/10 hover:border-amber-500/40 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-amber-400" />
+                <span>Flush Temp</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={refreshData}
+                disabled={loadingStats}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-black uppercase tracking-wider shadow-lg shadow-purple-900/30 transition-all cursor-pointer active:scale-95 border border-purple-400/30"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingStats ? "animate-spin" : ""}`} />
+                <span>Refresh</span>
+              </button>
+            </div>
+          </div>
           
           {/* Header Banner */}
           {cpuLoad > 85 && (
@@ -537,72 +614,72 @@ const AdminDashboardPage = React.memo(
 
           {/* Stats Ribbon */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-5 relative overflow-hidden group hover:border-violet-500/50 hover:bg-[#0e0e14] transition-all shadow-lg text-left">
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-purple-500/50 transition-all shadow-lg text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Users className="w-16 h-16 text-violet-400" />
+                <Users className="w-16 h-16 text-purple-400" />
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-violet-500/10 rounded-xl text-violet-400">
+                <div className="p-2 bg-purple-500/10 rounded-xl text-purple-400 border border-purple-500/20">
                   <Users className="w-4 h-4" />
                 </div>
-                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Total Creators</h3>
+                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">Total Creators</h3>
               </div>
               <div className="text-3xl font-extrabold text-white leading-none mb-2">
                 {stats.users?.toLocaleString() || "0"}
               </div>
-              <p className="text-[10px] text-violet-400 font-bold flex items-center gap-1">
+              <p className="text-[10px] text-purple-400 font-bold flex items-center gap-1 font-mono">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Active platform subscription tier</span>
               </p>
             </div>
 
-            <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-5 relative overflow-hidden group hover:border-blue-500/50 hover:bg-[#0e0e14] transition-all shadow-lg text-left">
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-indigo-500/50 transition-all shadow-lg text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <FolderGit2 className="w-16 h-16 text-blue-400" />
+                <FolderGit2 className="w-16 h-16 text-indigo-400" />
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-blue-500/10 rounded-xl text-blue-400">
+                <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/20">
                   <FolderGit2 className="w-4 h-4" />
                 </div>
-                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Total Projects</h3>
+                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">Total Projects</h3>
               </div>
               <div className="text-3xl font-extrabold text-white leading-none mb-2">
                 {stats.projects?.toLocaleString() || "0"}
               </div>
-              <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+              <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono">
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span>Storyboards compiled</span>
               </p>
             </div>
 
-            <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/50 hover:bg-[#0e0e14] transition-all shadow-lg text-left">
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/50 transition-all shadow-lg text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <DollarSign className="w-16 h-16 text-emerald-400" />
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-400">
+                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
                   <DollarSign className="w-4 h-4" />
                 </div>
-                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Revenue MRR</h3>
+                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">Revenue MRR</h3>
               </div>
               <div className="text-3xl font-extrabold text-white leading-none mb-2">
                 ${(analytics?.mrr || 0).toLocaleString()}
               </div>
-              <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+              <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>{(analytics?.active_subscriptions || 0)} active paying plans</span>
               </p>
             </div>
 
-            <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-5 relative overflow-hidden group hover:border-violet-500/50 hover:bg-[#0e0e14] transition-all shadow-lg text-left">
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-cyan-500/50 transition-all shadow-lg text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Activity className="w-16 h-16 text-violet-400" />
+                <Activity className="w-16 h-16 text-cyan-400" />
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-violet-500/10 rounded-xl text-violet-400">
+                <div className="p-2 bg-cyan-500/10 rounded-xl text-cyan-400 border border-cyan-500/20">
                   <Activity className="w-4 h-4" />
                 </div>
-                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider">Pipeline Health</h3>
+                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">Pipeline Health</h3>
               </div>
               <div className="text-3xl font-extrabold text-white leading-none mb-2">
                 {analytics?.success_rate || 100}%
@@ -616,11 +693,11 @@ const AdminDashboardPage = React.memo(
 
           {/* Core Analytics SVG Trends Chart */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between shadow-xl text-left">
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between shadow-xl text-left">
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-md font-extrabold text-neutral-100 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-violet-400" /> Platform Signups & Project Activity
+                    <TrendingUp className="w-4 h-4 text-purple-400" /> Platform Signups & Project Activity
                   </h3>
                   <button onClick={refreshData} className="p-1 rounded bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer active:scale-95 transition-all">
                     <RefreshCw className="w-3.5 h-3.5" />
@@ -633,10 +710,10 @@ const AdminDashboardPage = React.memo(
             </div>
 
             {/* Performance status & Telemetry details */}
-            <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
               <div>
                 <h3 className="text-md font-extrabold text-neutral-100 mb-4 flex items-center gap-2">
-                  <Server className="w-4 h-4 text-violet-400" /> Infrastructure Pulse
+                  <Server className="w-4 h-4 text-purple-400" /> Infrastructure Pulse
                 </h3>
                 <div className="space-y-4">
                   {/* CPU Load bar */}

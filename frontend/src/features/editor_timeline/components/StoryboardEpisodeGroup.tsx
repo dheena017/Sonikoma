@@ -1,7 +1,11 @@
 import React from "react";
 import { GeneratedPanel } from "@/types";
 import StoryboardCard from "@/features/editor_timeline/components/StoryboardCard";
-import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/editor_imported_images/components/ImportedImagesSidebar";
+import {
+  formatDisplayEpisodeLabel,
+  getSortedEpisodeGroups,
+  HorizontalScrollContainer,
+} from "@/features/editor_imported_images/components/ImportedImagesSidebar";
 
 type EpisodeGroupRecord = {
   episodeLabel: string;
@@ -80,47 +84,88 @@ const StoryboardEpisodeGroup = ({
 }: StoryboardEpisodeGroupProps) => {
   if (episodeGroups.length === 0) {
     return (
-      <div
-        className={`${storyboardViewLayout === "scroll" ? "w-full max-w-full flex items-start gap-3 sm:gap-4 overflow-x-auto custom-purple-scrollbar" : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"} px-2 md:px-4 pt-3 ${
-          selectedPanelIds.size > 0 ? "pb-2" : "pb-4"
-        }`}
-      >
-        {panels.map((panel, idx) => (
-          <StoryboardCard
-            key={panel.id}
-            panel={panel}
-            idx={idx}
-            currentPanelIndex={currentPanelIndex}
-            activePreviewTab={activePreviewTab}
-            setCurrentPanelIndex={setCurrentPanelIndex}
-            setActivePreviewTab={setActivePreviewTab}
-            setPlaybackTime={setPlaybackTime}
-            analyzingPanelId={analyzingPanelId}
-            isAnalyzingAll={isAnalyzingAll}
-            handleShiftPanel={handleShiftPanel}
-            panelsLength={panels.length}
-            handleModifySpeechText={handleModifySpeechText}
-            handleModifyMotion={handleModifyMotion}
-            handleModifyDuration={handleModifyDuration}
-            handleModifySFX={handleModifySFX}
-            handleModifyVisualDescription={handleModifyVisualDescription}
-            handleModifyNarrative={handleModifyNarrative}
-            handleAnalyzePanel={handleAnalyzePanel}
-            handleCancelAnalysis={handleCancelAnalysis}
-            isSelected={selectedPanelIds.has(panel.id)}
-            onToggleSelect={() => togglePanelSelection(panel.id)}
-            onPanelClick={handlePanelClick}
-            onPanelDoubleClick={handlePanelDoubleClick}
-            playStoryboardAudio={playStoryboardAudio}
-            autoPlayAudio={autoPlayAudio}
-            addNotification={addNotification}
-            setPanels={setPanels}
-            fetchWithInterceptor={fetchWithInterceptor}
-            voiceActor={voiceActor}
-            speechRate={speechRate}
-            speechPitch={speechPitch}
-          />
-        ))}
+      <div className="w-full flex-1 min-w-0">
+        {storyboardViewLayout === "scroll" ? (
+          <HorizontalScrollContainer className="py-2">
+            {panels.map((panel, idx) => (
+              <StoryboardCard
+                key={panel.id}
+                panel={panel}
+                idx={idx}
+                currentPanelIndex={currentPanelIndex}
+                activePreviewTab={activePreviewTab}
+                setCurrentPanelIndex={setCurrentPanelIndex}
+                setActivePreviewTab={setActivePreviewTab}
+                setPlaybackTime={setPlaybackTime}
+                analyzingPanelId={analyzingPanelId}
+                isAnalyzingAll={isAnalyzingAll}
+                handleShiftPanel={handleShiftPanel}
+                panelsLength={panels.length}
+                handleModifySpeechText={handleModifySpeechText}
+                handleModifyMotion={handleModifyMotion}
+                handleModifyDuration={handleModifyDuration}
+                handleModifySFX={handleModifySFX}
+                handleModifyVisualDescription={handleModifyVisualDescription}
+                handleModifyNarrative={handleModifyNarrative}
+                handleAnalyzePanel={handleAnalyzePanel}
+                handleCancelAnalysis={handleCancelAnalysis}
+                isSelected={selectedPanelIds.has(panel.id)}
+                onToggleSelect={() => togglePanelSelection(panel.id)}
+                onPanelClick={handlePanelClick}
+                onPanelDoubleClick={handlePanelDoubleClick}
+                playStoryboardAudio={playStoryboardAudio}
+                autoPlayAudio={autoPlayAudio}
+                addNotification={addNotification}
+                setPanels={setPanels}
+                fetchWithInterceptor={fetchWithInterceptor}
+                voiceActor={voiceActor}
+                speechRate={speechRate}
+                speechPitch={speechPitch}
+                viewLayout="scroll"
+              />
+            ))}
+          </HorizontalScrollContainer>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-3.5 px-1 w-full">
+            {panels.map((panel, idx) => (
+              <StoryboardCard
+                key={panel.id}
+                panel={panel}
+                idx={idx}
+                currentPanelIndex={currentPanelIndex}
+                activePreviewTab={activePreviewTab}
+                setCurrentPanelIndex={setCurrentPanelIndex}
+                setActivePreviewTab={setActivePreviewTab}
+                setPlaybackTime={setPlaybackTime}
+                analyzingPanelId={analyzingPanelId}
+                isAnalyzingAll={isAnalyzingAll}
+                handleShiftPanel={handleShiftPanel}
+                panelsLength={panels.length}
+                handleModifySpeechText={handleModifySpeechText}
+                handleModifyMotion={handleModifyMotion}
+                handleModifyDuration={handleModifyDuration}
+                handleModifySFX={handleModifySFX}
+                handleModifyVisualDescription={handleModifyVisualDescription}
+                handleModifyNarrative={handleModifyNarrative}
+                handleAnalyzePanel={handleAnalyzePanel}
+                handleCancelAnalysis={handleCancelAnalysis}
+                isSelected={selectedPanelIds.has(panel.id)}
+                onToggleSelect={() => togglePanelSelection(panel.id)}
+                onPanelClick={handlePanelClick}
+                onPanelDoubleClick={handlePanelDoubleClick}
+                playStoryboardAudio={playStoryboardAudio}
+                autoPlayAudio={autoPlayAudio}
+                addNotification={addNotification}
+                setPanels={setPanels}
+                fetchWithInterceptor={fetchWithInterceptor}
+                voiceActor={voiceActor}
+                speechRate={speechRate}
+                speechPitch={speechPitch}
+                viewLayout="grid"
+              />
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -165,51 +210,93 @@ const StoryboardEpisodeGroup = ({
               )}
             </div>
 
-            <div
-              className={`${storyboardViewLayout === "scroll" ? "w-full max-w-full flex items-start gap-3 sm:gap-4 overflow-x-auto custom-purple-scrollbar" : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"} px-1 pt-3 ${
-                selectedPanelIds.size > 0 ? "pb-2" : "pb-4"
-              }`}
-            >
-              {grpPanels.map((panel, localIdx) => {
-                const globalIdx = grp.startIndex + localIdx;
-                return (
-                  <StoryboardCard
-                    key={panel.id}
-                    panel={panel}
-                    idx={globalIdx}
-                    currentPanelIndex={currentPanelIndex}
-                    activePreviewTab={activePreviewTab}
-                    setCurrentPanelIndex={setCurrentPanelIndex}
-                    setActivePreviewTab={setActivePreviewTab}
-                    setPlaybackTime={setPlaybackTime}
-                    analyzingPanelId={analyzingPanelId}
-                    isAnalyzingAll={isAnalyzingAll}
-                    handleShiftPanel={handleShiftPanel}
-                    panelsLength={panels.length}
-                    handleModifySpeechText={handleModifySpeechText}
-                    handleModifyMotion={handleModifyMotion}
-                    handleModifyDuration={handleModifyDuration}
-                    handleModifySFX={handleModifySFX}
-                    handleModifyVisualDescription={handleModifyVisualDescription}
-                    handleModifyNarrative={handleModifyNarrative}
-                    handleAnalyzePanel={handleAnalyzePanel}
-                    handleCancelAnalysis={handleCancelAnalysis}
-                    isSelected={selectedPanelIds.has(panel.id)}
-                    onToggleSelect={() => togglePanelSelection(panel.id)}
-                    onPanelClick={handlePanelClick}
-                    onPanelDoubleClick={handlePanelDoubleClick}
-                    playStoryboardAudio={playStoryboardAudio}
-                    autoPlayAudio={autoPlayAudio}
-                    addNotification={addNotification}
-                    setPanels={setPanels}
-                    fetchWithInterceptor={fetchWithInterceptor}
-                    voiceActor={voiceActor}
-                    speechRate={speechRate}
-                    speechPitch={speechPitch}
-                  />
-                );
-              })}
-            </div>
+            {storyboardViewLayout === "scroll" ? (
+              <HorizontalScrollContainer className="py-2">
+                {grpPanels.map((panel, localIdx) => {
+                  const globalIdx = grp.startIndex + localIdx;
+                  return (
+                    <StoryboardCard
+                      key={panel.id}
+                      panel={panel}
+                      idx={globalIdx}
+                      currentPanelIndex={currentPanelIndex}
+                      activePreviewTab={activePreviewTab}
+                      setCurrentPanelIndex={setCurrentPanelIndex}
+                      setActivePreviewTab={setActivePreviewTab}
+                      setPlaybackTime={setPlaybackTime}
+                      analyzingPanelId={analyzingPanelId}
+                      isAnalyzingAll={isAnalyzingAll}
+                      handleShiftPanel={handleShiftPanel}
+                      panelsLength={panels.length}
+                      handleModifySpeechText={handleModifySpeechText}
+                      handleModifyMotion={handleModifyMotion}
+                      handleModifyDuration={handleModifyDuration}
+                      handleModifySFX={handleModifySFX}
+                      handleModifyVisualDescription={handleModifyVisualDescription}
+                      handleModifyNarrative={handleModifyNarrative}
+                      handleAnalyzePanel={handleAnalyzePanel}
+                      handleCancelAnalysis={handleCancelAnalysis}
+                      isSelected={selectedPanelIds.has(panel.id)}
+                      onToggleSelect={() => togglePanelSelection(panel.id)}
+                      onPanelClick={handlePanelClick}
+                      onPanelDoubleClick={handlePanelDoubleClick}
+                      playStoryboardAudio={playStoryboardAudio}
+                      autoPlayAudio={autoPlayAudio}
+                      addNotification={addNotification}
+                      setPanels={setPanels}
+                      fetchWithInterceptor={fetchWithInterceptor}
+                      voiceActor={voiceActor}
+                      speechRate={speechRate}
+                      speechPitch={speechPitch}
+                      viewLayout="scroll"
+                    />
+                  );
+                })}
+              </HorizontalScrollContainer>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-3.5 px-1 w-full">
+                {grpPanels.map((panel, localIdx) => {
+                  const globalIdx = grp.startIndex + localIdx;
+                  return (
+                    <StoryboardCard
+                      key={panel.id}
+                      panel={panel}
+                      idx={globalIdx}
+                      currentPanelIndex={currentPanelIndex}
+                      activePreviewTab={activePreviewTab}
+                      setCurrentPanelIndex={setCurrentPanelIndex}
+                      setActivePreviewTab={setActivePreviewTab}
+                      setPlaybackTime={setPlaybackTime}
+                      analyzingPanelId={analyzingPanelId}
+                      isAnalyzingAll={isAnalyzingAll}
+                      handleShiftPanel={handleShiftPanel}
+                      panelsLength={panels.length}
+                      handleModifySpeechText={handleModifySpeechText}
+                      handleModifyMotion={handleModifyMotion}
+                      handleModifyDuration={handleModifyDuration}
+                      handleModifySFX={handleModifySFX}
+                      handleModifyVisualDescription={handleModifyVisualDescription}
+                      handleModifyNarrative={handleModifyNarrative}
+                      handleAnalyzePanel={handleAnalyzePanel}
+                      handleCancelAnalysis={handleCancelAnalysis}
+                      isSelected={selectedPanelIds.has(panel.id)}
+                      onToggleSelect={() => togglePanelSelection(panel.id)}
+                      onPanelClick={handlePanelClick}
+                      onPanelDoubleClick={handlePanelDoubleClick}
+                      playStoryboardAudio={playStoryboardAudio}
+                      autoPlayAudio={autoPlayAudio}
+                      addNotification={addNotification}
+                      setPanels={setPanels}
+                      fetchWithInterceptor={fetchWithInterceptor}
+                      voiceActor={voiceActor}
+                      speechRate={speechRate}
+                      speechPitch={speechPitch}
+                      viewLayout="grid"
+                    />
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })}

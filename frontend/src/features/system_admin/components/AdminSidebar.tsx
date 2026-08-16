@@ -145,9 +145,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-neutral-950 backdrop-blur-3xl border-r border-neutral-800 shadow-[8px_0_32px_rgba(0,0,0,0.4)]">
+    <div className="flex h-full flex-col bg-neutral-950/90 backdrop-blur-3xl border-r border-white/10 shadow-[8px_0_32px_rgba(0,0,0,0.4)]">
       {/* Sidebar Header */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-neutral-800/60 shrink-0">
+      <div className="h-16 flex items-center justify-between px-5 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-3.5">
           <div className="relative">
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
@@ -268,7 +268,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Sidebar Drawer */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[320px] bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/80 z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
+        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[320px] bg-neutral-950/85 backdrop-blur-2xl border-r border-white/10 z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
           isOpen ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]" : "-translate-x-full"
         }`}
       >

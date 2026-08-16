@@ -146,14 +146,13 @@ export default function SettingsAccountPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#08080c] text-neutral-200 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="w-full space-y-8">
+    <div className="w-full flex-1 text-neutral-200 py-6 max-w-5xl mx-auto space-y-8">
         
         {/* Navigation & Header */}
         <div className="flex items-center justify-between">
           <button
-            onClick={() => navigateTo("/scraper")}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs font-bold text-neutral-400 hover:text-neutral-200 transition-all hover:bg-neutral-800"
+            onClick={() => navigateTo("/dashboard")}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs font-bold text-neutral-400 hover:text-neutral-200 transition-all hover:bg-neutral-800 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Dashboard
           </button>
@@ -493,8 +492,6 @@ export default function SettingsAccountPage({
             </div>
           )}
         </div>
-        
       </div>
-    </div>
   );
 }

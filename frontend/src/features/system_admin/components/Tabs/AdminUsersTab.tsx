@@ -237,22 +237,22 @@ export function AdminUsersTab({
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-[#111115] border border-neutral-800 rounded-xl p-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-lg">
         <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
           <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <input
               type="text"
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
+              className="w-full bg-neutral-950/60 border border-white/10 text-sm text-neutral-200 rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
+            className="bg-neutral-950/60 border border-white/10 text-sm text-neutral-200 rounded-xl px-4 py-2 focus:outline-none focus:border-purple-500/50"
           >
             <option value="all">All Roles</option>
             <option value="admin">Admin</option>
@@ -262,22 +262,22 @@ export function AdminUsersTab({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
+            className="bg-neutral-950/60 border border-white/10 text-sm text-neutral-200 rounded-xl px-4 py-2 focus:outline-none focus:border-purple-500/50"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
             <option value="locked">Locked</option>
           </select>
         </div>
-        <p className="text-sm text-neutral-500 font-medium whitespace-nowrap">
+        <p className="text-xs font-mono text-neutral-400 font-bold whitespace-nowrap bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full">
           Showing {filteredUsers.length} users
         </p>
       </div>
 
-      <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-[#0b0b0e] text-neutral-400 border-b border-neutral-800 text-xs uppercase font-semibold">
+            <thead className="bg-neutral-950/70 text-neutral-400 border-b border-white/10 text-xs uppercase font-mono font-bold">
               <tr>
                 <th className="px-4 py-4 w-10">
                   <button
