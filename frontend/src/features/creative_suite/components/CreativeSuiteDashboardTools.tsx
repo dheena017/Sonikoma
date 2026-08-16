@@ -18,11 +18,9 @@ interface CreativeSuiteDashboardToolsProps {
   navigateTo: (path: string) => void;
 }
 
-const CreativeSuiteDashboardTools: React.FC<CreativeSuiteDashboardToolsProps> = ({
-  tools,
-  activePanelsCount,
-  navigateTo,
-}) => {
+const CreativeSuiteDashboardTools: React.FC<
+  CreativeSuiteDashboardToolsProps
+> = ({ tools, activePanelsCount, navigateTo }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {tools.map((tool) => {

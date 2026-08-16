@@ -1,2 +1,5 @@
-export { default as HorizontalSplitter, default } from "./components/HorizontalSplitter";
+export {
+  default as HorizontalSplitter,
+  default,
+} from "./components/HorizontalSplitter";
 export * from "./components";

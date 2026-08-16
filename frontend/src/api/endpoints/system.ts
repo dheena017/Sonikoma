@@ -21,7 +21,9 @@ export const checkHealth = async (): Promise<ApiResponse<any>> => {
   return res.json();
 };
 
-export const getSystemLogs = async (since?: string): Promise<ApiResponse<any>> => {
+export const getSystemLogs = async (
+  since?: string
+): Promise<ApiResponse<any>> => {
   const url = since ? `/api/system-logs?since=${since}` : "/api/system-logs";
   const res = await fetch(url, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error("Failed to fetch system logs");
@@ -72,6 +74,3 @@ export const enhancePrompt = async (
     ...options,
   });
 };
-
-
-

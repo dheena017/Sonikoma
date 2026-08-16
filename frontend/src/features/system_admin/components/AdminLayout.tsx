@@ -43,21 +43,80 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   const activeTabRaw = currentPath.split("/").pop() || "overview";
   const isOverview = activeTabRaw === "admin" || activeTabRaw === "overview";
 
-  const tabMetadata: Record<string, { title: string; desc: string; badge: string }> = {
-    overview: { title: "Root Telemetry Dashboard", desc: "Real-time infrastructure, pipeline telemetry & active creator metrics", badge: "Live Pulse" },
-    users: { title: "User Accounts & Role Management", desc: "Inspect user accounts, manage creator roles, permissions, and security status", badge: "Access Control" },
-    credits: { title: "Credits & Economy Control", desc: "Manage studio generation credits, transaction ledger, and top-ups", badge: "Ledger" },
-    announcements: { title: "System Broadcasts & Alerts", desc: "Publish platform-wide broadcast alerts and scheduled maintenance notices", badge: "Broadcast" },
-    content: { title: "Content Moderation & Projects", desc: "Inspect public and private storyboards, project status, and storage quotas", badge: "Assets" },
-    scrapers: { title: "Webtoon Engine Configuration", desc: "Tune scraper workers, domain proxies, selectors, and rate limiting", badge: "Engine" },
-    health: { title: "Infrastructure & Server Health", desc: "Host CPU, GPU worker nodes, memory pools, and database connection latency", badge: "Telemetry" },
-    activity: { title: "System Audit & Security Logs", desc: "Real-time administrative actions, authentication attempts, and event trail", badge: "Security Audit" },
-    analytics: { title: "Platform Growth Analytics", desc: "User acquisition funnels, retention cohorts, and project creation velocity", badge: "BI Insights" },
-    finance: { title: "Revenue & Subscription Ledger", desc: "Track Monthly Recurring Revenue (MRR), subscription churn, and payouts", badge: "Financials" },
-    usage: { title: "Resource Consumption & Quotas", desc: "AI generation tokens, image rendering compute, and bandwidth utilization", badge: "Quotas" },
-    settings: { title: "Platform Global Settings", desc: "Tune AI model endpoints, webhook secrets, rate limits, and server environment", badge: "System Config" },
-    explorer: { title: "Database Query Explorer", desc: "Direct read-only schema navigation and table query workbench", badge: "Database" },
-    console: { title: "Superuser Interactive Terminal", desc: "Direct command execution and server process diagnostics console", badge: "CLI Terminal" },
+  const tabMetadata: Record<
+    string,
+    { title: string; desc: string; badge: string }
+  > = {
+    overview: {
+      title: "Root Telemetry Dashboard",
+      desc: "Real-time infrastructure, pipeline telemetry & active creator metrics",
+      badge: "Live Pulse",
+    },
+    users: {
+      title: "User Accounts & Role Management",
+      desc: "Inspect user accounts, manage creator roles, permissions, and security status",
+      badge: "Access Control",
+    },
+    credits: {
+      title: "Credits & Economy Control",
+      desc: "Manage studio generation credits, transaction ledger, and top-ups",
+      badge: "Ledger",
+    },
+    announcements: {
+      title: "System Broadcasts & Alerts",
+      desc: "Publish platform-wide broadcast alerts and scheduled maintenance notices",
+      badge: "Broadcast",
+    },
+    content: {
+      title: "Content Moderation & Projects",
+      desc: "Inspect public and private storyboards, project status, and storage quotas",
+      badge: "Assets",
+    },
+    scrapers: {
+      title: "Webtoon Engine Configuration",
+      desc: "Tune scraper workers, domain proxies, selectors, and rate limiting",
+      badge: "Engine",
+    },
+    health: {
+      title: "Infrastructure & Server Health",
+      desc: "Host CPU, GPU worker nodes, memory pools, and database connection latency",
+      badge: "Telemetry",
+    },
+    activity: {
+      title: "System Audit & Security Logs",
+      desc: "Real-time administrative actions, authentication attempts, and event trail",
+      badge: "Security Audit",
+    },
+    analytics: {
+      title: "Platform Growth Analytics",
+      desc: "User acquisition funnels, retention cohorts, and project creation velocity",
+      badge: "BI Insights",
+    },
+    finance: {
+      title: "Revenue & Subscription Ledger",
+      desc: "Track Monthly Recurring Revenue (MRR), subscription churn, and payouts",
+      badge: "Financials",
+    },
+    usage: {
+      title: "Resource Consumption & Quotas",
+      desc: "AI generation tokens, image rendering compute, and bandwidth utilization",
+      badge: "Quotas",
+    },
+    settings: {
+      title: "Platform Global Settings",
+      desc: "Tune AI model endpoints, webhook secrets, rate limits, and server environment",
+      badge: "System Config",
+    },
+    explorer: {
+      title: "Database Query Explorer",
+      desc: "Direct read-only schema navigation and table query workbench",
+      badge: "Database",
+    },
+    console: {
+      title: "Superuser Interactive Terminal",
+      desc: "Direct command execution and server process diagnostics console",
+      badge: "CLI Terminal",
+    },
   };
 
   const currentTabInfo = tabMetadata[activeTabRaw] || {
@@ -85,7 +144,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
         isSidebarOpen={isSidebarOpen}
       />
 
-      <AdminMiniSidebar currentPath={currentPath} navigateTo={navigateTo} onOpenSidebar={toggleSidebar} />
+      <AdminMiniSidebar
+        currentPath={currentPath}
+        navigateTo={navigateTo}
+        onOpenSidebar={toggleSidebar}
+      />
 
       <AdminSidebar
         currentPath={currentPath}

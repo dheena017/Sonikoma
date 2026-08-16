@@ -21,8 +21,9 @@ import {
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { useProjectStore } from "@/store/useProjectStore";
 
-
-const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => void }> = ({ setDrawerOpen }) => {
+const ActiveProjectSidebarWidget: React.FC<{
+  setDrawerOpen: (open: boolean) => void;
+}> = ({ setDrawerOpen }) => {
   const { activeProjectId, activeProjectData } = useProjectStore();
 
   return (
@@ -42,15 +43,20 @@ const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => v
         <div className="space-y-2">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 shrink-0">
-              {activeProjectData.project?.cover_image || activeProjectData.panels?.[0]?.image_url ? (
+              {activeProjectData.project?.cover_image ||
+              activeProjectData.panels?.[0]?.image_url ? (
                 <img
-                  src={activeProjectData.project?.cover_image || activeProjectData.panels?.[0]?.image_url}
+                  src={
+                    activeProjectData.project?.cover_image ||
+                    activeProjectData.panels?.[0]?.image_url
+                  }
                   alt={activeProjectData.project?.title}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center text-purple-300 font-bold text-xs">
-                  {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
+                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
+                    "P"}
                 </div>
               )}
             </div>
@@ -74,7 +80,9 @@ const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => v
         </div>
       ) : (
         <div>
-          <p className="text-[11px] text-neutral-400 mb-2">No active project selected.</p>
+          <p className="text-[11px] text-neutral-400 mb-2">
+            No active project selected.
+          </p>
           <button
             onClick={() => setDrawerOpen(true)}
             className="w-full py-1.5 px-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/20 cursor-pointer"
@@ -183,7 +191,11 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
         currentPath === "/creative-suite-dashboard"
       );
     }
-    return currentPath === path || currentPath.startsWith(path + "?") || currentPath.startsWith(path + "/");
+    return (
+      currentPath === path ||
+      currentPath.startsWith(path + "?") ||
+      currentPath.startsWith(path + "/")
+    );
   };
 
   const sidebarContent = (
@@ -227,7 +239,11 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
 
       {/* Active Project Widget in CreativeSuiteSidebar */}
       <div className="px-4 pt-3">
-        <ActiveProjectSidebarWidget setDrawerOpen={(open) => useProjectStore.getState().setDrawerOpen(open)} />
+        <ActiveProjectSidebarWidget
+          setDrawerOpen={(open) =>
+            useProjectStore.getState().setDrawerOpen(open)
+          }
+        />
       </div>
 
       {/* Navigation Groups */}
@@ -270,7 +286,11 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
                           ? "text-neutral-600 hover:text-neutral-450 border border-transparent"
                           : "text-neutral-500 hover:text-neutral-250 hover:bg-neutral-900 border border-transparent"
                       }`}
-                      title={isLocked ? "Requires timeline panels to unlock" : undefined}
+                      title={
+                        isLocked
+                          ? "Requires timeline panels to unlock"
+                          : undefined
+                      }
                     >
                       <div className="flex items-center gap-3">
                         <item.icon
@@ -286,7 +306,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
                           {item.label}
                         </span>
                       </div>
-                      
+
                       {isLocked && (
                         <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/60 border border-neutral-900 text-neutral-600 scale-90">
                           🔒 LCK

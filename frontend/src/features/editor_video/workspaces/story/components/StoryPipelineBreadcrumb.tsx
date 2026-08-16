@@ -10,7 +10,9 @@ interface StoryPipelineBreadcrumbProps {
   steps: PipelineStep[];
 }
 
-export const StoryPipelineBreadcrumb: React.FC<StoryPipelineBreadcrumbProps> = ({ steps }) => {
+export const StoryPipelineBreadcrumb: React.FC<
+  StoryPipelineBreadcrumbProps
+> = ({ steps }) => {
   return (
     <div className="px-3 py-2 bg-[#08050e]/90 border-b border-purple-900/25 shrink-0">
       <div className="flex items-center justify-between gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

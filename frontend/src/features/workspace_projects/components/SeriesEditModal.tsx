@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { X, Save, Sparkles, Image, User, Tag, FileText, Loader2 } from "lucide-react";
+import {
+  X,
+  Save,
+  Sparkles,
+  Image,
+  User,
+  Tag,
+  FileText,
+  Loader2,
+} from "lucide-react";
 
 interface SeriesEditModalProps {
   isOpen: boolean;
@@ -81,8 +90,12 @@ export default function SeriesEditModal({
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white leading-tight">Edit Series Information</h2>
-              <p className="text-xs text-neutral-400 font-mono">Update metadata across all chapters in this series</p>
+              <h2 className="text-lg font-bold text-white leading-tight">
+                Edit Series Information
+              </h2>
+              <p className="text-xs text-neutral-400 font-mono">
+                Update metadata across all chapters in this series
+              </p>
             </div>
           </div>
           <button
@@ -94,7 +107,10 @@ export default function SeriesEditModal({
         </div>
 
         {/* Body Form */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 overflow-y-auto space-y-5 flex-1"
+        >
           {error && (
             <div className="p-3.5 bg-rose-950/60 border border-rose-800/60 rounded-xl text-xs font-semibold text-rose-300">
               ⚠️ {error}
@@ -120,7 +136,8 @@ export default function SeriesEditModal({
             {/* Author */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5 font-mono">
-                <User className="w-3.5 h-3.5 text-purple-400" /> Author / Creator
+                <User className="w-3.5 h-3.5 text-purple-400" /> Author /
+                Creator
               </label>
               <input
                 type="text"
@@ -161,7 +178,11 @@ export default function SeriesEditModal({
               />
               {cover && (
                 <div className="w-10 h-10 rounded-xl overflow-hidden border border-neutral-750 shrink-0 bg-neutral-955">
-                  <img src={cover} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    src={cover}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
             </div>

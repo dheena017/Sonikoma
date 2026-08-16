@@ -5,7 +5,9 @@ interface StoryAiToolbarProps {
   onTriggerFeedback: (msg: string) => void;
 }
 
-export const StoryAiToolbar: React.FC<StoryAiToolbarProps> = ({ onTriggerFeedback }) => {
+export const StoryAiToolbar: React.FC<StoryAiToolbarProps> = ({
+  onTriggerFeedback,
+}) => {
   return (
     <div className="px-3 py-2 bg-[#08050e]/95 border-b border-purple-900/25 flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <span className="text-[9px] font-mono font-bold text-purple-300 flex items-center gap-1 shrink-0">
@@ -13,7 +15,9 @@ export const StoryAiToolbar: React.FC<StoryAiToolbarProps> = ({ onTriggerFeedbac
       </span>
       <div className="flex items-center gap-1 shrink-0">
         <button
-          onClick={() => onTriggerFeedback("AI generating new scene breakdown...")}
+          onClick={() =>
+            onTriggerFeedback("AI generating new scene breakdown...")
+          }
           className="px-2.5 py-1 rounded-2xl bg-purple-900/45 hover:bg-purple-700 text-purple-100 hover:text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-purple-500/25 transition-all cursor-pointer whitespace-nowrap"
         >
           <Sparkles className="h-2.5 w-2.5" /> Gen Scene

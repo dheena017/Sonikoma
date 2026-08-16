@@ -7,22 +7,44 @@ import Sidebar from "@/components/layout/MainSidebar";
 import MiniSidebar from "@/components/layout/MainMiniSidebar";
 import NotificationStack from "@/features/app_notification/components/NotificationStack";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
-import { LandingAnimeScene, AnimeSceneVariant } from "@/features/app_landing/components/LandingAnimeScene";
+import {
+  LandingAnimeScene,
+  AnimeSceneVariant,
+} from "@/features/app_landing/components/LandingAnimeScene";
 import { useProjectStore } from "@/store/useProjectStore";
 
 // --- Lazy Loaded Heavy Conditional Components ---
-const ProjectConfirmModal = React.lazy(() => import("@/shared/ui/modal/ProjectConfirmModal"));
+const ProjectConfirmModal = React.lazy(
+  () => import("@/shared/ui/modal/ProjectConfirmModal")
+);
 const ConfirmModal = React.lazy(() => import("@/shared/ui/modal/ConfirmModal"));
-const TerminalLogs = React.lazy(() => import("@/features/system_terminal/components/TerminalLogs"));
-const AdminSidebar = React.lazy(() => import("@/features/system_admin/components/AdminSidebar"));
-const AdminMiniSidebar = React.lazy(() => import("@/features/system_admin/components/AdminMiniSidebar"));
-const AdminHeaderPage = React.lazy(() => import("@/features/system_admin/pages/AdminHeaderPage"));
-const CreativeSuiteHeader = React.lazy(() => import("@/features/creative_suite/components/CreativeSuiteHeader"));
-const CreativeSuiteSidebar = React.lazy(() => import("@/features/creative_suite/components/CreativeSuiteSidebar"));
-const CreativeSuiteMiniSidebar = React.lazy(() => import("@/features/creative_suite/components/CreativeSuiteMiniSidebar"));
-const ActiveProjectSelectorDrawer = React.lazy(() => import("@/components/layout/ActiveProjectSelectorDrawer"));
-const AutoCropModal = React.lazy(() => import("@/features/editor_auto_crop/components/AutoCropModal"));
-
+const TerminalLogs = React.lazy(
+  () => import("@/features/system_terminal/components/TerminalLogs")
+);
+const AdminSidebar = React.lazy(
+  () => import("@/features/system_admin/components/AdminSidebar")
+);
+const AdminMiniSidebar = React.lazy(
+  () => import("@/features/system_admin/components/AdminMiniSidebar")
+);
+const AdminHeaderPage = React.lazy(
+  () => import("@/features/system_admin/pages/AdminHeaderPage")
+);
+const CreativeSuiteHeader = React.lazy(
+  () => import("@/features/creative_suite/components/CreativeSuiteHeader")
+);
+const CreativeSuiteSidebar = React.lazy(
+  () => import("@/features/creative_suite/components/CreativeSuiteSidebar")
+);
+const CreativeSuiteMiniSidebar = React.lazy(
+  () => import("@/features/creative_suite/components/CreativeSuiteMiniSidebar")
+);
+const ActiveProjectSelectorDrawer = React.lazy(
+  () => import("@/components/layout/ActiveProjectSelectorDrawer")
+);
+const AutoCropModal = React.lazy(
+  () => import("@/features/editor_auto_crop/components/AutoCropModal")
+);
 
 export interface MainLayoutProps {
   children: React.ReactNode;
@@ -277,8 +299,13 @@ export default function MainLayout(props: MainLayoutProps) {
       !currentPath.endsWith("/details") &&
       !currentPath.startsWith("/scraper/editor/"));
 
-  const isAdminRestricted = isAnyAdmin && (!user || user.creator_role !== "admin");
-  const showTopHeader = !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isVideoEditorPage;
+  const isAdminRestricted =
+    isAnyAdmin && (!user || user.creator_role !== "admin");
+  const showTopHeader =
+    !isSidebarOpen &&
+    !isProEditorPage &&
+    !isImageEditorPage &&
+    !isVideoEditorPage;
 
   useEffect(() => {
     if (currentPath !== "/auto-crop" && showAutoCropModal) {
@@ -293,7 +320,9 @@ export default function MainLayout(props: MainLayoutProps) {
     const urlProjectId = params.get("project_id");
     if (urlProjectId) {
       useProjectStore.getState().setActiveProjectId(urlProjectId);
-      useProjectStore.getState().hydrateActiveProject(urlProjectId, fetchWithInterceptor);
+      useProjectStore
+        .getState()
+        .hydrateActiveProject(urlProjectId, fetchWithInterceptor);
     } else {
       const storeState = useProjectStore.getState();
       if (storeState.activeProjectId && !storeState.activeProjectData) {
@@ -308,7 +337,8 @@ export default function MainLayout(props: MainLayoutProps) {
   const pageSceneVariant: AnimeSceneVariant = React.useMemo(() => {
     if (isAnyAdmin) return "admin";
     if (isCreativeSuitePath) return "creative";
-    if (isImageEditorPage || isProEditorPage || isVideoEditorPage) return "editor";
+    if (isImageEditorPage || isProEditorPage || isVideoEditorPage)
+      return "editor";
     if (
       currentPath === "/scraper" ||
       currentPath.startsWith("/scraper") ||
@@ -317,7 +347,10 @@ export default function MainLayout(props: MainLayoutProps) {
     ) {
       return "workspace";
     }
-    if (currentPath.startsWith("/projects") || currentPath.startsWith("/series")) {
+    if (
+      currentPath.startsWith("/projects") ||
+      currentPath.startsWith("/series")
+    ) {
       return "projects";
     }
     if (
@@ -342,17 +375,30 @@ export default function MainLayout(props: MainLayoutProps) {
     currentPath,
   ]);
 
-  const handleCloseSidebar = useCallback(() => setIsSidebarOpen(false), [setIsSidebarOpen]);
-  const handleOpenSidebar = useCallback(() => setIsSidebarOpen(true), [setIsSidebarOpen]);
-  const handleToggleSidebar = useCallback(() => setIsSidebarOpen(!isSidebarOpen), [isSidebarOpen, setIsSidebarOpen]);
+  const handleCloseSidebar = useCallback(
+    () => setIsSidebarOpen(false),
+    [setIsSidebarOpen]
+  );
+  const handleOpenSidebar = useCallback(
+    () => setIsSidebarOpen(true),
+    [setIsSidebarOpen]
+  );
+  const handleToggleSidebar = useCallback(
+    () => setIsSidebarOpen(!isSidebarOpen),
+    [isSidebarOpen, setIsSidebarOpen]
+  );
 
   return (
     <div
       id="app_root"
-      className={`app-anime-shell h-screen max-h-screen overflow-hidden max-w-full bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
-        }`}
+      className={`app-anime-shell h-screen max-h-screen overflow-hidden max-w-full bg-neutral-955 text-neutral-100 flex flex-col selection:text-white relative ${
+        isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
+      }`}
     >
-      <LandingAnimeScene themeMode={animeThemeMode} variant={pageSceneVariant} />
+      <LandingAnimeScene
+        themeMode={animeThemeMode}
+        variant={pageSceneVariant}
+      />
 
       {/* --- Page Navigation Sidebar --- */}
       <React.Suspense fallback={null}>
@@ -431,16 +477,22 @@ export default function MainLayout(props: MainLayoutProps) {
               seriesSlug={seriesSlugState}
               chapterSlug={chapterSlugState}
             />
-            {!isSidebarOpen && !isDrawerOpen && !isProEditorPage && !isVideoEditorPage && !isAnyAdmin && (
-              <MiniSidebar
-                currentPath={currentPath}
-                navigateTo={navigateTo}
-                notificationsCount={notifications.filter((n) => !n.isRead).length}
-                projectId={projectId}
-                seriesSlug={seriesSlugState}
-                chapterSlug={chapterSlugState}
-              />
-            )}
+            {!isSidebarOpen &&
+              !isDrawerOpen &&
+              !isProEditorPage &&
+              !isVideoEditorPage &&
+              !isAnyAdmin && (
+                <MiniSidebar
+                  currentPath={currentPath}
+                  navigateTo={navigateTo}
+                  notificationsCount={
+                    notifications.filter((n) => !n.isRead).length
+                  }
+                  projectId={projectId}
+                  seriesSlug={seriesSlugState}
+                  chapterSlug={chapterSlugState}
+                />
+              )}
           </>
         )}
       </React.Suspense>
@@ -448,10 +500,9 @@ export default function MainLayout(props: MainLayoutProps) {
       {/* --- Main Contents Controller & Router --- */}
       <div
         id="main-content-layout"
-        className={`relative z-10 h-screen max-h-screen overflow-hidden flex-1 flex flex-col max-w-full min-h-0 ${showAutoCropModal || showBubbleModal
-          ? "overflow-hidden"
-          : ""
-          }`}
+        className={`relative z-10 h-screen max-h-screen overflow-hidden flex-1 flex flex-col max-w-full min-h-0 ${
+          showAutoCropModal || showBubbleModal ? "overflow-hidden" : ""
+        }`}
       >
         {/* Top Header */}
         {showTopHeader && (
@@ -557,7 +608,9 @@ export default function MainLayout(props: MainLayoutProps) {
           {/* Admin Back to Admin Bar */}
           {localStorage.getItem("sonikoma_admin_token") && (
             <div className="bg-amber-600/90 text-white text-xs font-semibold py-1.5 px-4 flex items-center justify-between shadow-md z-40 w-full">
-              <span>You are viewing Sonikoma in user mode via Admin Impersonation.</span>
+              <span>
+                You are viewing Sonikoma in user mode via Admin Impersonation.
+              </span>
               <button
                 onClick={() => {
                   const adminToken = localStorage.getItem(
@@ -708,10 +761,11 @@ export default function MainLayout(props: MainLayoutProps) {
 
           <button
             onClick={() => setIsTerminalOpen(!isTerminalOpen)}
-            className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-95 cursor-pointer border ${isTerminalOpen
-              ? "bg-rose-600 border-rose-500 text-white rotate-90"
-              : "bg-purple-600 border-purple-500 text-white hover:bg-purple-500"
-              }`}
+            className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-95 cursor-pointer border ${
+              isTerminalOpen
+                ? "bg-rose-600 border-rose-500 text-white rotate-90"
+                : "bg-purple-600 border-purple-500 text-white hover:bg-purple-500"
+            }`}
             title={isTerminalOpen ? "Close Terminal" : "Open System Terminal"}
           >
             {isTerminalOpen ? (

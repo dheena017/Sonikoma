@@ -25,18 +25,25 @@ interface YouTubeShortsPanelProps {
   onNavigateStudio?: () => void;
 }
 
-export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPanelProps) {
+export default function YouTubeShortsPanel({
+  onNavigateStudio,
+}: YouTubeShortsPanelProps) {
   const [shorts, setShorts] = useState<YouTubeVideoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"newest" | "popular" | "likes">("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "popular" | "likes">(
+    "newest"
+  );
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fetchShorts = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const res = await fetch("/api/export/youtube/videos?max_results=50", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -87,7 +94,10 @@ export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPa
       });
     } else {
       list.sort((a, b) => {
-        return new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime();
+        return (
+          new Date(b.published_at || 0).getTime() -
+          new Date(a.published_at || 0).getTime()
+        );
       });
     }
     return list;
@@ -95,11 +105,17 @@ export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPa
 
   // Aggregated telemetry
   const totalShortsViews = useMemo(() => {
-    return shorts.reduce((acc, s) => acc + (parseInt(s.view_count?.replace(/,/g, "") || "0") || 0), 0);
+    return shorts.reduce(
+      (acc, s) => acc + (parseInt(s.view_count?.replace(/,/g, "") || "0") || 0),
+      0
+    );
   }, [shorts]);
 
   const totalShortsLikes = useMemo(() => {
-    return shorts.reduce((acc, s) => acc + (parseInt(s.like_count?.replace(/,/g, "") || "0") || 0), 0);
+    return shorts.reduce(
+      (acc, s) => acc + (parseInt(s.like_count?.replace(/,/g, "") || "0") || 0),
+      0
+    );
   }, [shorts]);
 
   const handleCopy = (url: string, id: string, e: React.MouseEvent) => {
@@ -127,7 +143,8 @@ export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPa
               </span>
             </div>
             <p className="text-xs text-neutral-400 font-mono">
-              Continuous fullscreen reel player, performance analytics, and vertical story discovery
+              Continuous fullscreen reel player, performance analytics, and
+              vertical story discovery
             </p>
           </div>
         </div>
@@ -162,7 +179,11 @@ export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPa
             className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm"
             title="Refresh Shorts"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-red-400" : ""}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${
+                isLoading ? "animate-spin text-red-400" : ""
+              }`}
+            />
           </button>
         </div>
       </div>
@@ -204,7 +225,9 @@ export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPa
                   key={f.id}
                   onClick={() => setSortBy(f.id as any)}
                   className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    isSel ? "bg-red-600 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-200"
+                    isSel
+                      ? "bg-red-600 text-white shadow-sm"
+                      : "text-neutral-400 hover:text-neutral-200"
                   }`}
                 >
                   <Icon className="w-3 h-3" />
@@ -217,7 +240,9 @@ export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPa
 
         <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 pt-2 border-t border-neutral-800/60">
           <span>
-            Displaying <strong className="text-white">{sortedShorts.length}</strong> vertical shorts
+            Displaying{" "}
+            <strong className="text-white">{sortedShorts.length}</strong>{" "}
+            vertical shorts
           </span>
           <span className="text-[10px] text-neutral-500">
             Click any card to start full Reels Player
@@ -229,14 +254,19 @@ export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPa
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
-          <p className="text-xs text-neutral-400 font-mono">Loading Shorts reels…</p>
+          <p className="text-xs text-neutral-400 font-mono">
+            Loading Shorts reels…
+          </p>
         </div>
       ) : sortedShorts.length === 0 ? (
         <div className="p-16 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
           <Zap className="w-12 h-12 text-neutral-600 mx-auto" />
-          <h3 className="text-sm font-bold text-white">No YouTube Shorts found</h3>
+          <h3 className="text-sm font-bold text-white">
+            No YouTube Shorts found
+          </h3>
           <p className="text-xs text-neutral-500 font-mono max-w-sm mx-auto">
-            Upload your first vertical comic short by checking the "#Shorts" toggle in Studio.
+            Upload your first vertical comic short by checking the "#Shorts"
+            toggle in Studio.
           </p>
           {onNavigateStudio && (
             <button
@@ -258,10 +288,15 @@ export default function YouTubeShortsPanel({ onNavigateStudio }: YouTubeShortsPa
             >
               {/* Thumbnail Image */}
               <img
-                src={short.thumbnail || `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`}
+                src={
+                  short.thumbnail ||
+                  `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`
+                }
                 alt={short.title}
                 onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`;
+                  (
+                    e.currentTarget as HTMLImageElement
+                  ).src = `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`;
                 }}
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />

@@ -31,7 +31,6 @@ import { useProjectStore } from "@/store/useProjectStore";
 import { useMemo } from "react";
 import React from "react";
 
-
 interface SidebarProps {
   isProcessing: boolean;
   panels: GeneratedPanel[];
@@ -52,7 +51,9 @@ interface SidebarProps {
   chapterSlug?: string | null;
 }
 
-const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => void }> = ({ setDrawerOpen }) => {
+const ActiveProjectSidebarWidget: React.FC<{
+  setDrawerOpen: (open: boolean) => void;
+}> = ({ setDrawerOpen }) => {
   const { activeProjectId, activeProjectData } = useProjectStore();
 
   return (
@@ -73,15 +74,20 @@ const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => v
         <div className="space-y-2.5">
           <div className="flex items-center gap-2.5 min-w-0 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-colors">
             <div className="w-9 h-9 rounded-lg overflow-hidden bg-neutral-900 border border-purple-500/30 shrink-0 shadow-md">
-              {activeProjectData.project?.cover_image || activeProjectData.panels?.[0]?.image_url ? (
+              {activeProjectData.project?.cover_image ||
+              activeProjectData.panels?.[0]?.image_url ? (
                 <img
-                  src={activeProjectData.project?.cover_image || activeProjectData.panels?.[0]?.image_url}
+                  src={
+                    activeProjectData.project?.cover_image ||
+                    activeProjectData.panels?.[0]?.image_url
+                  }
                   alt={activeProjectData.project?.title}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
-                  {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
+                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
+                    "P"}
                 </div>
               )}
             </div>
@@ -90,7 +96,8 @@ const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => v
                 {activeProjectData.project?.title || "Untitled Project"}
               </h4>
               <span className="text-[9px] text-neutral-400 truncate font-mono">
-                {activeProjectData.panels?.length || 0} panel{activeProjectData.panels?.length !== 1 ? "s" : ""}
+                {activeProjectData.panels?.length || 0} panel
+                {activeProjectData.panels?.length !== 1 ? "s" : ""}
               </span>
             </div>
           </div>
@@ -106,8 +113,12 @@ const ActiveProjectSidebarWidget: React.FC<{ setDrawerOpen: (open: boolean) => v
       ) : (
         <div className="space-y-2.5">
           <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
-            <p className="text-[10px] text-amber-200 font-medium">No active project</p>
-            <p className="text-[9px] text-amber-100/60 mt-0.5">Select one to get started</p>
+            <p className="text-[10px] text-amber-200 font-medium">
+              No active project
+            </p>
+            <p className="text-[9px] text-amber-100/60 mt-0.5">
+              Select one to get started
+            </p>
           </div>
           <button
             onClick={() => setDrawerOpen(true)}
@@ -149,7 +160,9 @@ const SidebarInner = ({
   const isWorkspace = currentPath === "/scraper";
   const isDashboardOverview = currentPath === "/dashboard";
   const isAdminDashboardPath =
-    currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard";
+    currentPath === "/admin" ||
+    currentPath === "/admin/" ||
+    currentPath === "/admin-dashboard";
   const isAdminPath =
     currentPath.startsWith("/admin/") && currentPath !== "/admin/";
   const isAutoCrop = currentPath === "/auto-crop";
@@ -172,8 +185,6 @@ const SidebarInner = ({
     const params = new URLSearchParams(window.location.search);
     return params.get("id") || params.get("project_id") || projectId;
   }, [currentPath, projectId]);
-
-
 
   const navigateTo = async (path: string) => {
     if (routerNavigateTo) {
@@ -255,7 +266,12 @@ const SidebarInner = ({
         {
           label: "Creative Suite",
           icon: Sparkles,
-          active: currentPath === "/creative-suite" || currentPath.startsWith("/creative-suite/") || currentPath.startsWith("/ai-") || currentPath === "/panel-assistant" || currentPath === "/youtube",
+          active:
+            currentPath === "/creative-suite" ||
+            currentPath.startsWith("/creative-suite/") ||
+            currentPath.startsWith("/ai-") ||
+            currentPath === "/panel-assistant" ||
+            currentPath === "/youtube",
           onClick: () => navigateTo("/creative-suite"),
           enabled: true,
         },
@@ -317,7 +333,9 @@ const SidebarInner = ({
             <div className="relative">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
               <img
-                src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+                src={
+                  themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"
+                }
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
                 }}
@@ -371,13 +389,15 @@ const SidebarInner = ({
                       <button
                         onClick={item.onClick}
                         disabled={!item.enabled}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${item.active
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
+                          item.active
                             ? "text-white bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border border-purple-500/40 shadow-[0_4px_20px_rgba(168,85,247,0.2)]"
                             : "text-neutral-300 hover:text-white hover:bg-neutral-900/80 border border-transparent hover:border-neutral-800/60"
-                          } ${(item as any).isProcessing
+                        } ${
+                          (item as any).isProcessing
                             ? "ring-1 ring-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                             : ""
-                          }`}
+                        }`}
                         title={
                           !item.enabled ? (item as any).disabledTip : item.label
                         }
@@ -389,23 +409,31 @@ const SidebarInner = ({
 
                         <div className="flex items-center gap-3">
                           <Icon
-                            className={`h-4 w-4 transition-transform duration-200 ${item.active
+                            className={`h-4 w-4 transition-transform duration-200 ${
+                              item.active
                                 ? "text-purple-300 scale-110"
                                 : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-105"
-                              }`}
+                            }`}
                           />
-                          <span className={item.active ? "font-bold text-white" : "font-medium"}>
+                          <span
+                            className={
+                              item.active
+                                ? "font-bold text-white"
+                                : "font-medium"
+                            }
+                          >
                             {item.label}
                           </span>
                         </div>
                         {(item as any).badge && (
                           <span
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-bold ${item.label === "Notifications" && !item.active
+                            className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-bold ${
+                              item.label === "Notifications" && !item.active
                                 ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-sm shadow-purple-900/50"
                                 : item.active
-                                  ? "bg-purple-900/80 text-purple-200 border border-purple-400/30"
-                                  : "bg-neutral-900 text-neutral-400 border border-neutral-800"
-                              }`}
+                                ? "bg-purple-900/80 text-purple-200 border border-purple-400/30"
+                                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
+                            }`}
                           >
                             {(item as any).badge}
                           </span>
@@ -427,7 +455,9 @@ const SidebarInner = ({
       <div className="space-y-3 pt-4 border-t border-neutral-800/60">
         {panels.length > 0 && (
           <div className="px-3.5 py-2.5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 text-xs font-sans flex items-center justify-between backdrop-blur-md">
-            <span className="text-neutral-400 text-[11px]">Video Duration:</span>
+            <span className="text-neutral-400 text-[11px]">
+              Video Duration:
+            </span>
             <span className="font-bold text-purple-300 text-xs">
               {totalCalculatedDuration.toFixed(1)}s
             </span>
@@ -449,10 +479,11 @@ const SidebarInner = ({
 
       {/* Sidebar drawer container (visible on both mobile and desktop, slides in/out) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/80 backdrop-blur-2xl border-r border-white/10 z-50 transition-all duration-300 ease-out transform overflow-hidden ${isOpen
+        className={`fixed top-0 bottom-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/80 backdrop-blur-2xl border-r border-white/10 z-50 transition-all duration-300 ease-out transform overflow-hidden ${
+          isOpen
             ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]"
             : "-translate-x-full"
-          }`}
+        }`}
       >
         {sidebarContent}
       </aside>

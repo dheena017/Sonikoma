@@ -91,20 +91,40 @@ export default function ProfileBillingTab({
   const calculatorRef = useRef<HTMLDivElement>(null);
 
   const scrollToCalculator = () => {
-    calculatorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    calculatorRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   };
 
   // Tier colours for the balance hero card
   const balanceTier =
     credits < 10
-      ? { label: "Critical", ring: "ring-red-500/60", text: "text-red-400", bg: "bg-red-500/10", icon: <AlertTriangle className="w-5 h-5 text-red-400" /> }
+      ? {
+          label: "Critical",
+          ring: "ring-red-500/60",
+          text: "text-red-400",
+          bg: "bg-red-500/10",
+          icon: <AlertTriangle className="w-5 h-5 text-red-400" />,
+        }
       : credits < 50
-      ? { label: "Low", ring: "ring-amber-500/50", text: "text-amber-400", bg: "bg-amber-500/10", icon: <AlertTriangle className="w-5 h-5 text-amber-400" /> }
-      : { label: "Healthy", ring: "ring-emerald-500/40", text: "text-emerald-400", bg: "bg-emerald-500/10", icon: <CheckCircle className="w-5 h-5 text-emerald-400" /> };
+      ? {
+          label: "Low",
+          ring: "ring-amber-500/50",
+          text: "text-amber-400",
+          bg: "bg-amber-500/10",
+          icon: <AlertTriangle className="w-5 h-5 text-amber-400" />,
+        }
+      : {
+          label: "Healthy",
+          ring: "ring-emerald-500/40",
+          text: "text-emerald-400",
+          bg: "bg-emerald-500/10",
+          icon: <CheckCircle className="w-5 h-5 text-emerald-400" />,
+        };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
-
       {/* ── Credit Balance Hero Card ───────────────────────────────────────── */}
       <div className="bg-[#0f0f13]/60 border border-white/8 rounded-3xl p-7 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
@@ -113,7 +133,9 @@ export default function ProfileBillingTab({
         <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
           {/* Balance ring + number */}
           <div className="flex items-center gap-5">
-            <div className={`relative flex items-center justify-center w-20 h-20 rounded-full ring-2 ${balanceTier.ring} ${balanceTier.bg} shrink-0`}>
+            <div
+              className={`relative flex items-center justify-center w-20 h-20 rounded-full ring-2 ${balanceTier.ring} ${balanceTier.bg} shrink-0`}
+            >
               <Zap className={`w-8 h-8 ${balanceTier.text}`} />
               {credits < 10 && (
                 <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
@@ -123,11 +145,17 @@ export default function ProfileBillingTab({
               )}
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-0.5">AI Credits Balance</p>
-              <p className={`text-5xl font-black tabular-nums leading-none ${balanceTier.text}`}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-0.5">
+                AI Credits Balance
+              </p>
+              <p
+                className={`text-5xl font-black tabular-nums leading-none ${balanceTier.text}`}
+              >
                 {credits.toLocaleString()}
               </p>
-              <div className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${balanceTier.bg} ${balanceTier.text}`}>
+              <div
+                className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${balanceTier.bg} ${balanceTier.text}`}
+              >
                 {balanceTier.icon}
                 {balanceTier.label}
               </div>
@@ -160,7 +188,8 @@ export default function ProfileBillingTab({
           <div className="relative mt-5 flex items-center gap-3 bg-red-500/10 border border-red-500/25 rounded-2xl px-4 py-3">
             <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
             <p className="text-xs text-red-300 font-medium">
-              Your balance is critically low. Some AI features are disabled until you top up.
+              Your balance is critically low. Some AI features are disabled
+              until you top up.
             </p>
           </div>
         )}
@@ -231,7 +260,6 @@ export default function ProfileBillingTab({
           cardExpiry={cardHook.cardExpiry}
         />
       </div>
-
     </div>
   );
 }

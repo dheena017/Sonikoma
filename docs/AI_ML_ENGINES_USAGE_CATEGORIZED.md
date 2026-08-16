@@ -1,4 +1,5 @@
 # AI/ML Models and Media Processing Engines Usage Report
+
 **By Category**
 
 **Generated:** 2026-08-12  
@@ -10,27 +11,31 @@
 ## Quick Reference by Category
 
 ### 🎤 Speech & Audio Processing (2 engines)
-| Engine | Status | Type | Module Location | Key Usage |
-|--------|--------|------|-----------------|-----------|
-| Whisper | ✅ ACTIVE | Speech-to-Text | `engines/whisper/` | Audio transcription, dialogue extraction |
+
+| Engine  | Status    | Type           | Module Location    | Key Usage                                        |
+| ------- | --------- | -------------- | ------------------ | ------------------------------------------------ |
+| Whisper | ✅ ACTIVE | Speech-to-Text | `engines/whisper/` | Audio transcription, dialogue extraction         |
 | Librosa | ✅ ACTIVE | Audio Analysis | `engines/librosa/` | Audio feature extraction, silence/peak detection |
 
 ### 🎬 Video & Media Transcoding (1 engine)
-| Engine | Status | Type | Module Location | Key Usage |
-|--------|--------|------|-----------------|-----------|
+
+| Engine | Status    | Type             | Module Location   | Key Usage                                          |
+| ------ | --------- | ---------------- | ----------------- | -------------------------------------------------- |
 | FFmpeg | ✅ ACTIVE | Video Processing | `engines/ffmpeg/` | Video compilation, audio extraction, video cutting |
 
 ### 👁️ Computer Vision - Detection & Segmentation (3 engines)
-| Engine | Status | Type | Module Location | Key Usage |
-|--------|--------|------|-----------------|-----------|
-| YOLO | ✅ ACTIVE | Object Detection | `providers/vision/yolo.py` | Speech bubble detection, panel detection, fine-tuning |
-| SAM (rembg U-2-Net) | ✅ ACTIVE | Image Segmentation | `providers/vision/sam.py` | Character/subject isolation, layer segmentation |
-| OpenCV | ✅ ACTIVE | Computer Vision | Multiple modules | Panel detection, edge detection, inpainting |
+
+| Engine              | Status    | Type               | Module Location            | Key Usage                                             |
+| ------------------- | --------- | ------------------ | -------------------------- | ----------------------------------------------------- |
+| YOLO                | ✅ ACTIVE | Object Detection   | `providers/vision/yolo.py` | Speech bubble detection, panel detection, fine-tuning |
+| SAM (rembg U-2-Net) | ✅ ACTIVE | Image Segmentation | `providers/vision/sam.py`  | Character/subject isolation, layer segmentation       |
+| OpenCV              | ✅ ACTIVE | Computer Vision    | Multiple modules           | Panel detection, edge detection, inpainting           |
 
 ### 🎨 Image Generation & Enhancement (2 engines)
-| Engine | Status | Type | Module Location | Key Usage |
-|--------|--------|------|-----------------|-----------|
-| Stable Diffusion | ✅ ACTIVE | Image Generation | `engines/stable_diffusion/` | Image generation, inpainting, upscaling |
+
+| Engine             | Status    | Type                 | Module Location                  | Key Usage                                   |
+| ------------------ | --------- | -------------------- | -------------------------------- | ------------------------------------------- |
+| Stable Diffusion   | ✅ ACTIVE | Image Generation     | `engines/stable_diffusion/`      | Image generation, inpainting, upscaling     |
 | ImageMagick (Wand) | ✅ ACTIVE | Image Transformation | `providers/media/imagemagick.py` | Resize, rotate, enhance, background removal |
 
 ---
@@ -40,18 +45,22 @@
 ## 1.1 Whisper - Speech-to-Text Transcription
 
 ### Overview
+
 Whisper is OpenAI's speech-to-text model used for converting audio files to text with precise word-level timing. It's lazy-loaded at runtime to save memory on startup.
 
 ### Dependency
+
 - **Package:** `openai-whisper` (lazy-loaded at runtime)
 - **Status in requirements.txt:** NOT explicitly listed (lazy-loaded on-demand)
 
 ### Implementation Details
+
 - **Canonical Module:** [backend/app/engines/whisper/engine.py](backend/app/engines/whisper/engine.py)
 - **Wrapper/Compat Layer:** [backend/app/media/audio/whisper_engine.py](backend/app/media/audio/whisper_engine.py)
 - **Provider:** [backend/app/providers/whisper/client.py](backend/app/providers/whisper/client.py)
 
 ### Available Models
+
 ```python
 class WhisperModel(str, Enum):
     TINY = "tiny"          # Smallest, fastest
@@ -62,22 +71,27 @@ class WhisperModel(str, Enum):
 ```
 
 ### Files Using Whisper
+
 1. **API Endpoints:**
+
    - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/whisper` router
    - [backend/app/api/v1/audio.py](backend/app/api/v1/audio.py) - Whisper route definitions
 
 2. **Services:**
+
    - [backend/app/services/audio/speech_transcriber.py](backend/app/services/audio/speech_transcriber.py) - Main transcription service
+
      - `transcribe()` - Full transcription
      - `generate_srt_service()` - SRT subtitle generation
      - `generate_vtt_service()` - VTT subtitle generation
      - `extract_words_service()` - Word-level extraction with timestamps
      - `batch_transcribe_service()` - Batch processing
-   
+
    - [backend/app/services/audio/dialogue_aligner.py](backend/app/services/audio/dialogue_aligner.py) - Dialogue alignment
+
      - `align_dialogue_to_whisper_transcript()` - Aligns OCR text bubbles with audio timestamps
      - Uses Whisper word-level timestamps for precise audio peak extraction
-   
+
    - [backend/app/services/compound/compound_processor.py](backend/app/services/compound/compound_processor.py) - Compound processing
      - Integrated into compound audio processing pipeline
 
@@ -85,12 +99,14 @@ class WhisperModel(str, Enum):
    - [backend/app/schemas/audio.py](backend/app/schemas/audio.py) - Request/response schemas with model selection
 
 ### How It's Used
+
 1. **Speech Transcription:** Converts audio files to text with word-level timing
 2. **Dialogue Extraction:** Extracts dialogue from manga/comic panels with audio
 3. **Subtitle Generation:** Produces SRT/VTT files with timing information
 4. **Audio Peak Analysis:** Identifies speech peaks for synchronization with visual panels
 
 ### Features Implemented
+
 - ✅ Lazy loading (only loads when needed to save RAM)
 - ✅ Configurable model size (tiny to large)
 - ✅ CPU/GPU device selection
@@ -101,6 +117,7 @@ class WhisperModel(str, Enum):
 - ✅ Fuzzy text alignment with OCR results
 
 ### Test Coverage
+
 - [backend/tests/test_layer_pipeline.py](backend/tests/test_layer_pipeline.py) - Mocked Whisper testing
 
 ---
@@ -108,17 +125,21 @@ class WhisperModel(str, Enum):
 ## 1.2 Librosa - Audio Analysis & Feature Extraction
 
 ### Overview
+
 Librosa is a Python audio analysis library used for extracting features, detecting silence, and synchronizing audio with visual elements. It's used extensively in the dialogue alignment pipeline.
 
 ### Dependency
+
 - **Package:** `librosa`, `soundfile==0.14.0`
 - **Status in requirements.txt:** ✅ Listed
 
 ### Implementation Details
+
 - **Canonical Module:** [backend/app/engines/librosa/engine.py](backend/app/engines/librosa/engine.py)
 - **Wrapper/Compat Layer:** [backend/app/media/audio/librosa_engine.py](backend/app/media/audio/librosa_engine.py)
 
 ### Extracted Audio Features
+
 - **Mel-Frequency Cepstral Coefficients (MFCC)** - Perceptual sound representation
 - **Spectral Centroid** - Color of sound
 - **Spectral Bandwidth** - Spread of sound energy
@@ -130,14 +151,18 @@ Librosa is a Python audio analysis library used for extracting features, detecti
 - **Mel-Spectrograms** - Time-frequency representation
 
 ### Files Using Librosa
+
 1. **Core Audio Engine:**
+
    - [backend/app/engines/librosa/engine.py](backend/app/engines/librosa/engine.py)
      - `load_audio()` - Load audio with sample rate normalization
      - `extract_mel_spectrogram()` - Generate mel-scale spectrograms
      - `extract_summary_stats()` - Comprehensive audio feature extraction
 
 2. **Audio Analysis Services:**
+
    - [backend/app/services/audio/audio_processor.py](backend/app/services/audio/audio_processor.py)
+
      - `detect_silence()` - Identifies silent segments using mel-spectrograms
      - `segment_by_energy()` - Splits audio by energy levels
      - Uses librosa for:
@@ -154,6 +179,7 @@ Librosa is a Python audio analysis library used for extracting features, detecti
        - Peak detection and timing
 
 3. **Compound Processing:**
+
    - [backend/app/services/compound/compound_processor.py](backend/app/services/compound/compound_processor.py)
      - Audio analysis capabilities
      - Calls `extract_summary_stats()`
@@ -163,6 +189,7 @@ Librosa is a Python audio analysis library used for extracting features, detecti
    - [backend/app/api/v1/audio.py](backend/app/api/v1/audio.py) - Librosa endpoints
 
 ### How It's Used
+
 1. **Silence Detection:** Identifies pauses in audio for panel timing
 2. **Energy Segmentation:** Splits audio into segments by intensity
 3. **Peak Extraction:** Finds speech peaks for dialogue synchronization
@@ -170,6 +197,7 @@ Librosa is a Python audio analysis library used for extracting features, detecti
 5. **Dialogue Alignment:** Matches OCR text to audio timing
 
 ### Features Implemented
+
 - ✅ Lazy loading
 - ✅ Configurable sample rate
 - ✅ Multiple feature extraction methods
@@ -185,14 +213,17 @@ Librosa is a Python audio analysis library used for extracting features, detecti
 ## 2.1 FFmpeg - Video Processing & Rendering
 
 ### Overview
+
 FFmpeg is the industry-standard multimedia framework used for video compilation, audio extraction, frame extraction, and subtitle integration. The backend uses MoviePy as a Python wrapper around FFmpeg.
 
 ### Dependency
+
 - **Package:** `moviepy==1.0.3` (uses FFmpeg as backend)
 - **System Binary:** `ffmpeg` executable (must be installed separately)
 - **Status in requirements.txt:** ✅ Listed (moviepy)
 
 ### Implementation Details
+
 - **Canonical Module:** [backend/app/engines/ffmpeg/](backend/app/engines/ffmpeg/)
   - `engine.py` - Main facade
   - `commands.py` - Command builders
@@ -202,6 +233,7 @@ FFmpeg is the industry-standard multimedia framework used for video compilation,
   - `subtitle_engine.py` - Subtitle handling
 
 ### Supported Operations
+
 - **Video Metadata:** Duration, bitrate, resolution, codecs, sample rates
 - **Frame Extraction:** Extract all frames or frame ranges
 - **Audio Extraction:** With format and bitrate control
@@ -211,14 +243,18 @@ FFmpeg is the industry-standard multimedia framework used for video compilation,
 - **Transitions & Filters:** Visual effects during composition
 
 ### Files Using FFmpeg
+
 1. **Core Video Engine:**
+
    - [backend/app/engines/ffmpeg/engine.py](backend/app/engines/ffmpeg/engine.py)
+
      - `get_metadata()` - Extract video info (duration, bitrate, resolution, codec)
      - `extract_audio()` - Extract audio track from video
      - `cut_video()` - Trim video segments
      - Device verification and installation checking
 
    - [backend/app/engines/video/render_engine.py](backend/app/engines/video/render_engine.py)
+
      - `extract_frames()` - Frame-by-frame extraction
      - `extract_audio()` - Audio extraction with format/bitrate options
      - `concatenate_videos()` - Join multiple video segments
@@ -228,17 +264,20 @@ FFmpeg is the industry-standard multimedia framework used for video compilation,
      - `add_subtitles()` - Burn subtitles into video
 
 2. **Video Compilation:**
+
    - [backend/app/services/video/video_compiler.py](backend/app/services/video/video_compiler.py)
      - Uses MoviePy for high-level video composition
      - Creates videos from image sequences and audio tracks
      - Applies transitions and effects
 
 3. **Compound Processing:**
+
    - [backend/app/services/compound/compound_processor.py](backend/app/services/compound/compound_processor.py)
      - FFmpeg operations within compound pipeline
      - Video cutting and audio extraction
 
 4. **API Endpoints:**
+
    - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/ffmpeg` router
    - [backend/app/api/v1/video/router.py](backend/app/api/v1/video/router.py) - Video endpoints
    - [backend/app/api/v1/health.py](backend/app/api/v1/health.py) - FFmpeg health check
@@ -248,6 +287,7 @@ FFmpeg is the industry-standard multimedia framework used for video compilation,
    - [backend/app/engines/video/edit_helpers.py](backend/app/engines/video/edit_helpers.py) - Filter string builders
 
 ### How It's Used
+
 1. **Video Compilation:** Creates final videos from panel sequences and audio
 2. **Audio Extraction:** Pulls audio tracks for processing
 3. **Frame Extraction:** Converts video to image frames
@@ -256,6 +296,7 @@ FFmpeg is the industry-standard multimedia framework used for video compilation,
 6. **Metadata Analysis:** Determines video properties for composition
 
 ### Features Implemented
+
 - ✅ Binary verification and installation checking
 - ✅ Async/await support for long operations
 - ✅ Command builder with automatic quoting
@@ -265,6 +306,7 @@ FFmpeg is the industry-standard multimedia framework used for video compilation,
 - ✅ Health check endpoint
 
 ### Test Coverage
+
 - [backend/tests/test_health_and_metrics.py](backend/tests/test_health_and_metrics.py) - FFmpeg presence verification
 - [backend/tests/test_layer_pipeline.py](backend/tests/test_layer_pipeline.py) - Integration testing
 
@@ -275,41 +317,52 @@ FFmpeg is the industry-standard multimedia framework used for video compilation,
 ## 3.1 YOLO - Panel Detection & Speech Bubble Segmentation
 
 ### Overview
+
 YOLO (You Only Look Once) is used for real-time object detection and segmentation, specifically for identifying speech bubbles and panel layouts in manga/comic images. The system includes an automatic fine-tuning pipeline that improves models based on user corrections.
 
 ### Dependency
+
 - **Package:** `ultralytics==39` (YOLOv8)
 - **Status in requirements.txt:** ✅ Listed (`ultralytics`)
 
 ### Implementation Details
+
 - **Canonical Module:** [backend/app/providers/vision/yolo.py](backend/app/providers/vision/yolo.py)
 - **Service Integration:** [backend/app/services/image/panel_detection/speech_bubble_detector.py](backend/app/services/image/panel_detection/speech_bubble_detector.py)
 - **Fine-tuning Module:** [backend/app/services/image/panel_detection/train_yolo.py](backend/app/services/image/panel_detection/train_yolo.py)
 
 ### Available Models
+
 1. **kitsumed/yolov8m_seg-speech-bubble** (Primary)
+
    - YOLOv8m-seg model trained on manga/comic speech bubbles
    - Produces pixel-level masks
    - Downloaded from HuggingFace Hub
 
 2. **ogkalu/comic-speech-bubble-detector-yolov8m** (Fallback)
+
    - Broader comic coverage
 
 3. **yolov8n-seg.pt** (Last Resort)
+
    - Generic pretrained segmentation
 
 4. **Custom Fine-tuned Model** (Optional)
    - User-trained models via data flywheel
 
 ### Files Using YOLO
+
 1. **Core Detection:**
+
    - [backend/app/services/image/panel_detection/speech_bubble_detector.py](backend/app/services/image/panel_detection/speech_bubble_detector.py)
+
      - `get_yolo_speech_bubble_model()` - Lazy loads speech bubble segmentation model
      - `detect_bubbles_with_yolo()` - Runs segmentation on images
      - Priority models: `kitsumed/yolov8m_seg-speech-bubble` → fallback to generic models
      - Supports custom fine-tuned models via settings
 
    - [backend/app/services/image/panel_detection/panel_detector.py](backend/app/services/image/panel_detection/panel_detector.py)
+
      - Optional YOLO deep learning integration for panel detection
      - Parameter: `use_yolo: bool = True`
      - Works alongside OpenCV contour detection
@@ -318,7 +371,9 @@ YOLO (You Only Look Once) is used for real-time object detection and segmentatio
      - `segment_text_and_balloons()` - Text/dialogue bubble segmentation
 
 2. **Training & Fine-tuning:**
+
    - [backend/app/services/image/panel_detection/train_yolo.py](backend/app/services/image/panel_detection/train_yolo.py)
+
      - `trigger_fine_tuning()` - Initiates YOLO model fine-tuning
      - `get_fine_tuning_status()` - Monitors training progress
      - Training data directory structure setup
@@ -328,11 +383,13 @@ YOLO (You Only Look Once) is used for real-time object detection and segmentatio
      - Data flywheel integration
 
 3. **Visualization & Debugging:**
+
    - [backend/app/services/image/panel_detection/debug_visualizer.py](backend/app/services/image/panel_detection/debug_visualizer.py)
      - Visualizes YOLO detections (masks + boxes + labels)
      - Creates annotated images for QA/debugging
 
 4. **API Endpoints:**
+
    - [backend/app/api/v1/images/detect.py](backend/app/api/v1/images/detect.py)
      - POST `/api/images/debug-yolo-detections` - YOLO diagnostic endpoint
 
@@ -340,6 +397,7 @@ YOLO (You Only Look Once) is used for real-time object detection and segmentatio
    - [backend/app/core/settings.py](backend/app/core/settings.py) - YOLO models directory configuration
 
 ### How It's Used
+
 1. **Speech Bubble Detection:** Identifies text bubbles in comic panels
 2. **Text Segmentation:** Separates text/dialogue from background art
 3. **Panel Segmentation:** Assists in panel boundary detection
@@ -347,6 +405,7 @@ YOLO (You Only Look Once) is used for real-time object detection and segmentatio
 5. **Auto Fine-tuning:** System trains improved models when sufficient samples collected
 
 ### Features Implemented
+
 - ✅ Lazy model loading
 - ✅ GPU/CPU device support
 - ✅ Custom fine-tuned model loading
@@ -358,33 +417,40 @@ YOLO (You Only Look Once) is used for real-time object detection and segmentatio
 - ✅ Visual debugging/diagnostics
 
 ### Test Coverage
+
 - [backend/tests/test_yolo_diagnostic.py](backend/tests/test_yolo_diagnostic.py) - Direct YOLO testing
 - [backend/tests/test_automatic_training.py](backend/tests/test_automatic_training.py) - Fine-tuning pipeline
-- [backend/tests/test_panel_detection_*.py](backend/tests/test_panel_detection_*.py) - Integration tests
+- [backend/tests/test*panel_detection*\*.py](backend/tests/test_panel_detection_*.py) - Integration tests
 
 ---
 
 ## 3.2 SAM (Segment Anything Model) / rembg (U-2-Net)
 
 ### Overview
+
 SAM via rembg provides precise image segmentation for isolating characters and subjects from backgrounds. It uses the U-2-Net model with ONNX Runtime for efficient inference and is pre-warmed at startup for better latency.
 
 ### Dependency
+
 - **Package:** `rembg==2.0.76`, `onnxruntime`
 - **Status in requirements.txt:** ✅ Listed
 
 ### Implementation Details
+
 - **Canonical Module:** [backend/app/providers/vision/sam.py](backend/app/providers/vision/sam.py)
 - **Backend Model:** U-2-Net (via rembg library)
 - **Execution Runtime:** ONNX Runtime
 
 ### Supported Modes
+
 - **Default Model:** `u2net` (primary model in rembg)
 - **GPU Support:** Uses CUDA if torch/CUDA available, falls back to CPU
 - **Providers:** `["CUDAExecutionProvider", "CPUExecutionProvider"]`
 
 ### Files Using rembg/SAM
+
 1. **Segmentation Service:**
+
    - [backend/app/services/image/layer_separation/layer_segmentation.py](backend/app/services/image/layer_separation/layer_segmentation.py)
      - `segment_character_u2net()` - Isolates characters from background
      - Used as fallback when YOLO fails
@@ -397,12 +463,14 @@ SAM via rembg provides precise image segmentation for isolating characters and s
      - Improves latency on first use
 
 ### How It's Used
+
 1. **Character Segmentation:** Isolates main character/subject from background
 2. **Layer Generation:** Creates character layers for video compilation
 3. **Background Extraction:** Produces accurate character masks
 4. **Fallback Detection:** When YOLO segmentation unavailable or low confidence
 
 ### Features Implemented
+
 - ✅ Lazy loading (prevents ONNX Runtime RAM spikes)
 - ✅ Automatic GPU/CPU provider selection
 - ✅ Session-based caching (reuses loaded model)
@@ -411,6 +479,7 @@ SAM via rembg provides precise image segmentation for isolating characters and s
 - ✅ Pre-warming at startup for faster first request
 
 ### Test Coverage
+
 - [backend/tests/test_logging_system.py](backend/tests/test_logging_system.py) - Startup pre-warming verification
 
 ---
@@ -418,17 +487,21 @@ SAM via rembg provides precise image segmentation for isolating characters and s
 ## 3.3 OpenCV - Computer Vision & Edge Detection
 
 ### Overview
+
 OpenCV is the foundational computer vision library used throughout the pipeline for contour detection, morphological operations, text inpainting, and edge detection. It works alongside deep learning models as a robust fallback for panel detection and text segmentation.
 
 ### Dependency
+
 - **Package:** `opencv_python==4.13.0.92`, `opencv_python_headless==4.13.0.92`
 - **Status in requirements.txt:** ✅ Listed (both)
 
 ### Implementation Details
+
 - **Direct Integration:** Used throughout codebase via `import cv2`
 - **Primary Role:** Contour detection, morphological operations, inpainting
 
 ### Key OpenCV Techniques Used
+
 - **Morphological Operations:** Closing, opening for noise filtering
 - **Inpainting:** Two-stage pyramidal inpainting for text removal
 - **Contour Detection:** Finding and analyzing panel/text boundaries
@@ -438,8 +511,11 @@ OpenCV is the foundational computer vision library used throughout the pipeline 
 - **Edge Detection:** Sobel operators for panel boundaries
 
 ### Files Using OpenCV
+
 1. **Panel Detection Core:**
+
    - [backend/app/services/image/panel_detection/grid_detector.py](backend/app/services/image/panel_detection/grid_detector.py)
+
      - Adaptive thresholding: `cv2.adaptiveThreshold()`
      - Contour detection: `cv2.findContours()`
      - Morphological operations: `cv2.morphologyEx()`
@@ -449,6 +525,7 @@ OpenCV is the foundational computer vision library used throughout the pipeline 
      - Contour analysis for panel boundaries
 
 2. **Text Segmentation & Layer Separation:**
+
    - [backend/app/services/image/layer_separation/layer_segmentation.py](backend/app/services/image/layer_separation/layer_segmentation.py) (100+ lines of OpenCV usage)
      - Inpainting: `cv2.inpaint()` with multiple flags
      - Morphological filtering: `cv2.morphologyEx(cv2.MORPH_CLOSE)`, `cv2.morphologyEx(cv2.MORPH_OPEN)`
@@ -460,11 +537,13 @@ OpenCV is the foundational computer vision library used throughout the pipeline 
      - Image scaling: `cv2.resize()` with different interpolation methods
 
 3. **Speech Bubble Detection:**
+
    - [backend/app/services/image/panel_detection/speech_bubble_detector.py](backend/app/services/image/panel_detection/speech_bubble_detector.py)
      - Fallback to OpenCV when YOLO unavailable
      - Mask operations: `cv2.resize()`, `cv2.bitwise_or()`
 
 4. **Panel Cleaning:**
+
    - [backend/app/services/image/processing/panel_cleaner.py](backend/app/services/image/processing/panel_cleaner.py)
      - Image thresholding and mask generation
      - Contour filtering for text detection
@@ -477,6 +556,7 @@ OpenCV is the foundational computer vision library used throughout the pipeline 
      - Color conversion: `cv2.cvtColor()`
 
 ### How It's Used
+
 1. **Panel Detection:** Finds panel boundaries via contour analysis
 2. **Text Segmentation:** Isolates text regions from artwork
 3. **Background Inpainting:** Removes text and reconstructs background
@@ -485,6 +565,7 @@ OpenCV is the foundational computer vision library used throughout the pipeline 
 6. **Fallback Detection:** Secondary option when deep learning unavailable
 
 ### Features Implemented
+
 - ✅ Multi-scale processing (pyramid decomposition)
 - ✅ Adaptive parameter tuning
 - ✅ Multiple interpolation methods
@@ -493,6 +574,7 @@ OpenCV is the foundational computer vision library used throughout the pipeline 
 - ✅ Distance-weighted blending
 
 ### Test Coverage
+
 - [backend/tests/test_crop_engine.py](backend/tests/test_crop_engine.py) - OpenCV pipeline testing
 - [backend/tests/test_panel_detection_long_image.py](backend/tests/test_panel_detection_long_image.py) - Grid layout detection
 
@@ -503,18 +585,22 @@ OpenCV is the foundational computer vision library used throughout the pipeline 
 ## 4.1 Stable Diffusion - Image Generation
 
 ### Overview
+
 Stable Diffusion is a latent diffusion model used for generating images from text descriptions, performing inpainting, upscaling, and style transfer. The implementation uses lazy loading to minimize startup memory consumption.
 
 ### Dependency
+
 - **Package:** `diffusers==0.39.0`, `torch>=2.3.0`, `transformers`
 - **Status in requirements.txt:** ✅ Listed
 
 ### Implementation Details
+
 - **Canonical Module:** [backend/app/engines/stable_diffusion/engine.py](backend/app/engines/stable_diffusion/engine.py)
 - **Wrapper/Compat Layer:** [backend/app/media/image/stable_diffusion_engine.py](backend/app/media/image/stable_diffusion_engine.py)
 - **Provider:** [backend/app/providers/stable_diffusion/client.py](backend/app/providers/stable_diffusion/client.py)
 
 ### Supported Models
+
 ```python
 class StableDiffusionModel(str, Enum):
     V1_5 = "runwayml/stable-diffusion-v1-5"
@@ -523,17 +609,21 @@ class StableDiffusionModel(str, Enum):
 ```
 
 ### Implemented Methods
+
 - ✅ `generate_images()` - Text-to-image generation
 - ✅ `inpaint()` - Image inpainting (fill masked regions)
 - ✅ `upscale()` - Image upscaling using StableDiffusionUpscalePipeline
 - ✅ `style_transfer()` - Style transfer operations
 
 ### Files Using Stable Diffusion
+
 1. **API Endpoints:**
+
    - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/stable-diffusion` router
    - [backend/app/api/v1/ai/image.py](backend/app/api/v1/ai/image.py) - Stable Diffusion endpoints (currently empty router)
 
 2. **Services:**
+
    - [backend/app/services/compound/compound_processor.py](backend/app/services/compound/compound_processor.py)
      - Image generation capabilities in compound processor
      - Calls `generate_images()` method
@@ -545,6 +635,7 @@ class StableDiffusionModel(str, Enum):
      - Skill definition for thumbnail generation using Stable Diffusion
 
 ### How It's Used
+
 1. **Thumbnail Generation:** Creates visual prompts for manga/comic thumbnails
 2. **Concept Art:** Generates concept artwork from text descriptions
 3. **Image Inpainting:** Fills in masked regions of images
@@ -552,6 +643,7 @@ class StableDiffusionModel(str, Enum):
 5. **Style Transfer:** Applies artistic styles to images
 
 ### Features Implemented
+
 - ✅ Lazy loading (prevents RAM spikes at startup)
 - ✅ Multiple model support (v1.5, v2.1, XL)
 - ✅ GPU/CPU device selection
@@ -566,20 +658,25 @@ class StableDiffusionModel(str, Enum):
 ## 4.2 ImageMagick (Wand) - Image Transformation
 
 ### Overview
+
 ImageMagick is a powerful image manipulation library used for resizing, rotating, enhancing, and transforming images. The Python interface is provided through the Wand library, offering high-level operations for common image processing tasks.
 
 ### Dependency
+
 - **Package:** `wand==0.7.2`
 - **System Requirement:** ImageMagick binary (must be installed separately)
 - **Status in requirements.txt:** ✅ Listed
 
 ### Implementation Details
+
 - **Canonical Module:** [backend/app/providers/media/imagemagick.py](backend/app/providers/media/imagemagick.py)
 - **Wrapper/Compat Layer:** [backend/app/media/image/imagemagick_engine.py](backend/app/media/image/imagemagick_engine.py)
 - **Service Layer:** [backend/app/services/image/processing/image_transformer.py](backend/app/services/image/processing/image_transformer.py)
 
 ### Supported Modes
+
 - **Resize Modes:**
+
   - `FIT` - Fit image within bounds (letterbox)
   - `COVER` - Cover full dimensions (crop)
   - `STRETCH` - Distort to fit
@@ -590,7 +687,9 @@ ImageMagick is a powerful image manipulation library used for resizing, rotating
   - Saturation adjustment
 
 ### Files Using ImageMagick
+
 1. **Core ImageMagick Engine:**
+
    - [backend/app/providers/media/imagemagick.py](backend/app/providers/media/imagemagick.py)
      - `resize()` - Fit or cover mode resizing
      - `rotate()` - Image rotation by angle
@@ -601,12 +700,14 @@ ImageMagick is a powerful image manipulation library used for resizing, rotating
      - `composite()` - Layer composition
 
 2. **Service Layer:**
+
    - [backend/app/services/image/processing/image_transformer.py](backend/app/services/image/processing/image_transformer.py)
      - High-level wrappers around ImageMagick operations
      - Temporary file management
      - Error handling
 
 3. **API Endpoints:**
+
    - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/imagemagick` router
    - [backend/app/api/v1/images/transform.py](backend/app/api/v1/images/transform.py) - All transformation endpoints:
      - POST `/resize` - Resize with fit/cover modes
@@ -623,6 +724,7 @@ ImageMagick is a powerful image manipulation library used for resizing, rotating
      - Calls `auto_enhance()`
 
 ### How It's Used
+
 1. **Image Resizing:** Thumbnails, responsive sizing with fit/cover modes
 2. **Image Rotation:** Panel rotation and orientation correction
 3. **Enhancement:** Brightness, contrast, saturation adjustment for visual quality
@@ -632,6 +734,7 @@ ImageMagick is a powerful image manipulation library used for resizing, rotating
 7. **Layer Composition:** Combining multiple image layers
 
 ### Features Implemented
+
 - ✅ Multiple resize modes (fit, cover, stretch)
 - ✅ Lossless rotation
 - ✅ Granular enhancement controls
@@ -643,23 +746,23 @@ ImageMagick is a powerful image manipulation library used for resizing, rotating
 - ✅ Quality/compression control
 
 ### Test Coverage
+
 - Integration tests in compound processing tests
 
 ---
 
 # Summary: When to Use Each Engine
 
-| Task | Engine(s) | Location |
-|------|-----------|----------|
-| Convert audio to text with timestamps | **Whisper** | `engines/whisper/` |
-| Analyze audio for silence/peaks | **Librosa** | `engines/librosa/` |
-| Extract audio/video metadata | **FFmpeg** | `engines/ffmpeg/` |
-| Compile videos from frames | **FFmpeg + MoviePy** | `engines/video/` |
-| Detect speech bubbles in images | **YOLO** (primary) / OpenCV (fallback) | `providers/vision/` |
-| Detect panels/grids in images | **OpenCV** + optional YOLO | `services/image/panel_detection/` |
-| Extract characters from images | **SAM/rembg** (primary) / OpenCV (fallback) | `providers/vision/` |
-| Remove text from images | **OpenCV inpainting** | `services/image/layer_separation/` |
-| Generate images from text | **Stable Diffusion** | `engines/stable_diffusion/` |
-| Resize/rotate/enhance images | **ImageMagick** | `providers/media/imagemagick.py` |
-| Fine-tune detection models | **YOLO training** | `services/image/panel_detection/train_yolo.py` |
-
+| Task                                  | Engine(s)                                   | Location                                       |
+| ------------------------------------- | ------------------------------------------- | ---------------------------------------------- |
+| Convert audio to text with timestamps | **Whisper**                                 | `engines/whisper/`                             |
+| Analyze audio for silence/peaks       | **Librosa**                                 | `engines/librosa/`                             |
+| Extract audio/video metadata          | **FFmpeg**                                  | `engines/ffmpeg/`                              |
+| Compile videos from frames            | **FFmpeg + MoviePy**                        | `engines/video/`                               |
+| Detect speech bubbles in images       | **YOLO** (primary) / OpenCV (fallback)      | `providers/vision/`                            |
+| Detect panels/grids in images         | **OpenCV** + optional YOLO                  | `services/image/panel_detection/`              |
+| Extract characters from images        | **SAM/rembg** (primary) / OpenCV (fallback) | `providers/vision/`                            |
+| Remove text from images               | **OpenCV inpainting**                       | `services/image/layer_separation/`             |
+| Generate images from text             | **Stable Diffusion**                        | `engines/stable_diffusion/`                    |
+| Resize/rotate/enhance images          | **ImageMagick**                             | `providers/media/imagemagick.py`               |
+| Fine-tune detection models            | **YOLO training**                           | `services/image/panel_detection/train_yolo.py` |

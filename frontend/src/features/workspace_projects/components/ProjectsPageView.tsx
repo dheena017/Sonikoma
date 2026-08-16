@@ -4,7 +4,10 @@ import ProjectsPageHeader from "@/features/workspace_projects/components/Project
 import ProjectsFilters from "@/features/workspace_projects/components/ProjectsFilters";
 import ProjectsStats from "@/features/workspace_projects/components/ProjectsStats";
 import ProjectsPageResultView from "@/features/workspace_projects/components/ProjectsPageResultView";
-import type { Project, ViewMode } from "@/features/workspace_projects/hooks/ProjectTypes";
+import type {
+  Project,
+  ViewMode,
+} from "@/features/workspace_projects/hooks/ProjectTypes";
 import type { Series } from "@/features/workspace_projects/utils/seriesGrouping";
 
 export interface ProjectsPageViewProps {

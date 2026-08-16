@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Youtube, Users, Eye, Video, ShieldCheck, RefreshCw, ChevronDown, Check, User } from "lucide-react";
+import {
+  Youtube,
+  Users,
+  Eye,
+  Video,
+  ShieldCheck,
+  RefreshCw,
+  ChevronDown,
+  Check,
+  User,
+} from "lucide-react";
 
 export interface ChannelItem {
   id: string;
@@ -44,9 +54,13 @@ export default function YouTubeChannelHeader({
   onOpenChannelModal,
   addNotification,
 }: YouTubeChannelHeaderProps) {
-  const [profileData, setProfileData] = useState<YouTubeProfileResponse | null>(null);
+  const [profileData, setProfileData] = useState<YouTubeProfileResponse | null>(
+    null
+  );
   const [channels, setChannels] = useState<ChannelItem[]>([]);
-  const [selectedChannel, setSelectedChannel] = useState<ChannelItem | null>(null);
+  const [selectedChannel, setSelectedChannel] = useState<ChannelItem | null>(
+    null
+  );
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
@@ -54,7 +68,10 @@ export default function YouTubeChannelHeader({
   const fetchProfileDetails = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const res = await fetch("/api/export/youtube/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -83,10 +100,19 @@ export default function YouTubeChannelHeader({
   const handleConnectYouTube = async () => {
     setIsConnecting(true);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
-      const userEmail = localStorage.getItem("user_email") || localStorage.getItem("sonikoma_user_email") || localStorage.getItem("email") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
+      const userEmail =
+        localStorage.getItem("user_email") ||
+        localStorage.getItem("sonikoma_user_email") ||
+        localStorage.getItem("email") ||
+        "";
       const connectUrl = userEmail
-        ? `/api/export/youtube/oauth/connect?email=${encodeURIComponent(userEmail.trim())}`
+        ? `/api/export/youtube/oauth/connect?email=${encodeURIComponent(
+            userEmail.trim()
+          )}`
         : "/api/export/youtube/oauth/connect";
 
       const res = await fetch(connectUrl, {
@@ -99,18 +125,30 @@ export default function YouTubeChannelHeader({
       if (res.ok) {
         const data = await res.json();
         if (data.auth_url) {
-          addNotification?.("Redirecting to Google to connect YouTube...", "info");
+          addNotification?.(
+            "Redirecting to Google to connect YouTube...",
+            "info"
+          );
           window.location.href = data.auth_url;
         } else {
-          addNotification?.("Failed to get YouTube authorization URL. Please try again.", "error");
+          addNotification?.(
+            "Failed to get YouTube authorization URL. Please try again.",
+            "error"
+          );
         }
       } else {
         const err = await res.json().catch(() => ({}));
-        addNotification?.(`YouTube connection failed: ${err.detail || res.statusText}`, "error");
+        addNotification?.(
+          `YouTube connection failed: ${err.detail || res.statusText}`,
+          "error"
+        );
       }
     } catch (err) {
       console.error("YouTube connect error:", err);
-      addNotification?.("Failed to start YouTube connection. Please check that you are logged in.", "error");
+      addNotification?.(
+        "Failed to start YouTube connection. Please check that you are logged in.",
+        "error"
+      );
     } finally {
       setIsConnecting(false);
     }
@@ -123,38 +161,52 @@ export default function YouTubeChannelHeader({
     };
     window.addEventListener("youtube_channel_changed", handleChannelChanged);
     return () => {
-      window.removeEventListener("youtube_channel_changed", handleChannelChanged);
+      window.removeEventListener(
+        "youtube_channel_changed",
+        handleChannelChanged
+      );
     };
   }, []);
 
-  const isConnected = Boolean(profileData && profileData.authenticated === true);
+  const isConnected = Boolean(
+    profileData && profileData.authenticated === true
+  );
 
   const activeTitle = isConnected
-    ? (selectedChannel?.title || profileData?.overview?.title || profileData?.user_name || "YouTube Channel")
+    ? selectedChannel?.title ||
+      profileData?.overview?.title ||
+      profileData?.user_name ||
+      "YouTube Channel"
     : "YouTube Integration Hub";
 
   const activeHandle = isConnected
-    ? (selectedChannel?.custom_url || profileData?.overview?.custom_url || "YouTube Channel Connected")
+    ? selectedChannel?.custom_url ||
+      profileData?.overview?.custom_url ||
+      "YouTube Channel Connected"
     : "Connect YouTube to select your channel & load profile stats";
 
   const activeThumbnail = isConnected
-    ? (selectedChannel?.thumbnail || profileData?.overview?.thumbnail || profileData?.user_picture)
+    ? selectedChannel?.thumbnail ||
+      profileData?.overview?.thumbnail ||
+      profileData?.user_picture
     : undefined;
 
   const activeDescription = isConnected
-    ? (selectedChannel?.description || profileData?.overview?.description || "")
+    ? selectedChannel?.description || profileData?.overview?.description || ""
     : "";
 
   const activeSubscribers = isConnected
-    ? (selectedChannel?.subscriber_count || profileData?.overview?.subscriber_count || "0")
+    ? selectedChannel?.subscriber_count ||
+      profileData?.overview?.subscriber_count ||
+      "0"
     : "--";
 
   const activeViews = isConnected
-    ? (selectedChannel?.view_count || profileData?.overview?.view_count || "0")
+    ? selectedChannel?.view_count || profileData?.overview?.view_count || "0"
     : "--";
 
   const activeVideos = isConnected
-    ? (selectedChannel?.video_count || profileData?.overview?.video_count || "0")
+    ? selectedChannel?.video_count || profileData?.overview?.video_count || "0"
     : "--";
 
   return (
@@ -188,7 +240,8 @@ export default function YouTubeChannelHeader({
               </span>
               {seoScore > 0 && (
                 <span className="text-[11px] text-neutral-400 font-mono">
-                  • SEO Score: <strong className="text-purple-300">{seoScore}/100</strong>
+                  • SEO Score:{" "}
+                  <strong className="text-purple-300">{seoScore}/100</strong>
                 </span>
               )}
             </div>
@@ -210,7 +263,11 @@ export default function YouTubeChannelHeader({
                 <h2 className="text-xl font-black text-white tracking-tight group-hover:text-purple-300 transition-colors">
                   {activeTitle}
                 </h2>
-                <ChevronDown className={`w-4 h-4 text-neutral-400 group-hover:text-white transition-transform duration-200 ${isDropdownOpen ? "rotate-180 text-purple-400" : ""}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-neutral-400 group-hover:text-white transition-transform duration-200 ${
+                    isDropdownOpen ? "rotate-180 text-purple-400" : ""
+                  }`}
+                />
               </button>
 
               <span
@@ -227,7 +284,9 @@ export default function YouTubeChannelHeader({
             <p className="text-xs text-neutral-400 font-mono font-medium mt-0.5 flex items-center gap-2">
               <span>{activeHandle}</span>
               {profileData?.user_email && (
-                <span className="text-neutral-500">• {profileData.user_email}</span>
+                <span className="text-neutral-500">
+                  • {profileData.user_email}
+                </span>
               )}
             </p>
 
@@ -263,35 +322,56 @@ export default function YouTubeChannelHeader({
                         setSelectedChannel(ch);
                         setIsDropdownOpen(false);
                         try {
-                          const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
-                          const res = await fetch("/api/export/youtube/select-channel", {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                              Authorization: `Bearer ${token}`,
-                            },
-                            body: JSON.stringify({
-                              channel_id: ch.id,
-                              title: ch.title,
-                              thumbnail: ch.thumbnail,
-                              custom_url: ch.custom_url,
-                            }),
-                          });
+                          const token =
+                            localStorage.getItem("sonikoma_token") ||
+                            localStorage.getItem("token") ||
+                            "";
+                          const res = await fetch(
+                            "/api/export/youtube/select-channel",
+                            {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${token}`,
+                              },
+                              body: JSON.stringify({
+                                channel_id: ch.id,
+                                title: ch.title,
+                                thumbnail: ch.thumbnail,
+                                custom_url: ch.custom_url,
+                              }),
+                            }
+                          );
                           const data = await res.json().catch(() => ({}));
                           if (data.needs_auth && data.auth_url) {
-                            addNotification?.(`Switching Google authorization to "${ch.title}"…`, "info");
+                            addNotification?.(
+                              `Switching Google authorization to "${ch.title}"…`,
+                              "info"
+                            );
                             window.location.href = data.auth_url;
                             return;
                           }
-                          addNotification?.(`Switched active channel to "${ch.title}"`, "success");
-                          window.dispatchEvent(new CustomEvent("youtube_channel_changed", { detail: ch }));
+                          addNotification?.(
+                            `Switched active channel to "${ch.title}"`,
+                            "success"
+                          );
+                          window.dispatchEvent(
+                            new CustomEvent("youtube_channel_changed", {
+                              detail: ch,
+                            })
+                          );
                           fetchProfileDetails();
                         } catch {
-                          addNotification?.(`Selected channel: ${ch.title}`, "info");
+                          addNotification?.(
+                            `Selected channel: ${ch.title}`,
+                            "info"
+                          );
                         }
                       }}
                       className={`w-full flex items-center justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                        (selectedChannel?.id === ch.id || (!selectedChannel && ch.id === profileData?.overview?.id))
+                        selectedChannel?.id === ch.id ||
+                        (!selectedChannel &&
+                          ch.id === profileData?.overview?.id)
                           ? "bg-red-950/50 text-white border border-red-800/50 font-bold shadow-sm"
                           : "hover:bg-neutral-800/60 text-neutral-300 border border-transparent"
                       }`}
@@ -303,7 +383,9 @@ export default function YouTubeChannelHeader({
                             alt={ch.title}
                             referrerPolicy="no-referrer"
                             onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                              (
+                                e.currentTarget as HTMLImageElement
+                              ).style.display = "none";
                             }}
                             className="w-8 h-8 rounded-lg object-cover shrink-0 border border-neutral-700"
                           />
@@ -313,11 +395,17 @@ export default function YouTubeChannelHeader({
                           </div>
                         )}
                         <div className="truncate text-xs">
-                          <div className="truncate font-bold font-sans text-white">{ch.title}</div>
-                          <div className="text-[10px] text-neutral-400 font-mono">{ch.custom_url || `@${ch.id}`}</div>
+                          <div className="truncate font-bold font-sans text-white">
+                            {ch.title}
+                          </div>
+                          <div className="text-[10px] text-neutral-400 font-mono">
+                            {ch.custom_url || `@${ch.id}`}
+                          </div>
                         </div>
                       </div>
-                      {(selectedChannel?.id === ch.id || (!selectedChannel && ch.id === profileData?.overview?.id)) && (
+                      {(selectedChannel?.id === ch.id ||
+                        (!selectedChannel &&
+                          ch.id === profileData?.overview?.id)) && (
                         <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                       )}
                     </button>
@@ -345,8 +433,22 @@ export default function YouTubeChannelHeader({
         {/* Right Status Actions */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="px-3.5 py-1.5 rounded-full bg-neutral-950/80 border border-neutral-850 text-neutral-300 text-xs font-mono flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${isPublishing ? "bg-amber-400 animate-ping" : isConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
-            <span>{isPublishing ? "Publishing Active" : isConnected ? "YouTube Connected" : "Disconnected"}</span>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isPublishing
+                  ? "bg-amber-400 animate-ping"
+                  : isConnected
+                  ? "bg-emerald-400 animate-pulse"
+                  : "bg-amber-400"
+              }`}
+            />
+            <span>
+              {isPublishing
+                ? "Publishing Active"
+                : isConnected
+                ? "YouTube Connected"
+                : "Disconnected"}
+            </span>
           </div>
 
           {!isConnected ? (
@@ -355,7 +457,9 @@ export default function YouTubeChannelHeader({
               disabled={isConnecting}
               className="px-4 py-2 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-lg border border-red-500/30 transition-all font-mono active:scale-98 flex items-center gap-1.5 cursor-pointer"
             >
-              <Youtube className={`w-4 h-4 ${isConnecting ? "animate-spin" : ""}`} />
+              <Youtube
+                className={`w-4 h-4 ${isConnecting ? "animate-spin" : ""}`}
+              />
               <span>{isConnecting ? "Connecting..." : "Connect YouTube"}</span>
             </button>
           ) : (
@@ -376,12 +480,14 @@ export default function YouTubeChannelHeader({
             className="p-2.5 bg-neutral-900/80 hover:bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 rounded-xl transition-all cursor-pointer"
             title="Refresh YouTube Profile & Telemetry"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-purple-400" : ""}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${
+                isLoading ? "animate-spin text-purple-400" : ""
+              }`}
+            />
           </button>
         </div>
       </div>
-
-
 
       {/* Stats Counter Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-neutral-900 border-t border-neutral-900/50 bg-neutral-950/40 font-mono">
@@ -390,8 +496,12 @@ export default function YouTubeChannelHeader({
             <Users className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[10px] text-neutral-500 font-bold uppercase">Subscribers</div>
-            <div className="text-xs font-black text-white">{activeSubscribers}</div>
+            <div className="text-[10px] text-neutral-500 font-bold uppercase">
+              Subscribers
+            </div>
+            <div className="text-xs font-black text-white">
+              {activeSubscribers}
+            </div>
           </div>
         </div>
 
@@ -400,7 +510,9 @@ export default function YouTubeChannelHeader({
             <Eye className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[10px] text-neutral-500 font-bold uppercase">Lifetime Views</div>
+            <div className="text-[10px] text-neutral-500 font-bold uppercase">
+              Lifetime Views
+            </div>
             <div className="text-xs font-black text-white">{activeViews}</div>
           </div>
         </div>
@@ -410,7 +522,9 @@ export default function YouTubeChannelHeader({
             <Video className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[10px] text-neutral-500 font-bold uppercase">Videos Uploaded</div>
+            <div className="text-[10px] text-neutral-500 font-bold uppercase">
+              Videos Uploaded
+            </div>
             <div className="text-xs font-black text-white">{activeVideos}</div>
           </div>
         </div>
@@ -420,8 +534,12 @@ export default function YouTubeChannelHeader({
             <ShieldCheck className="w-4 h-4" />
           </div>
           <div>
-            <div className="text-[10px] text-neutral-500 font-bold uppercase">API Quota Health</div>
-            <div className="text-xs font-black text-emerald-400">97.6% Free</div>
+            <div className="text-[10px] text-neutral-500 font-bold uppercase">
+              API Quota Health
+            </div>
+            <div className="text-xs font-black text-emerald-400">
+              97.6% Free
+            </div>
           </div>
         </div>
       </div>

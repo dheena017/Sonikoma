@@ -37,9 +37,21 @@ interface ImageEditorPanelProps {
 }
 
 const FRAME_PRESETS = [
-  { id: "youtube", label: "16:9 YouTube", accent: "from-cyan-500/30 to-blue-500/20" },
-  { id: "shorts", label: "9:16 Shorts/TikTok", accent: "from-pink-500/30 to-fuchsia-500/20" },
-  { id: "social", label: "1:1 Social", accent: "from-violet-500/30 to-purple-500/20" },
+  {
+    id: "youtube",
+    label: "16:9 YouTube",
+    accent: "from-cyan-500/30 to-blue-500/20",
+  },
+  {
+    id: "shorts",
+    label: "9:16 Shorts/TikTok",
+    accent: "from-pink-500/30 to-fuchsia-500/20",
+  },
+  {
+    id: "social",
+    label: "1:1 Social",
+    accent: "from-violet-500/30 to-purple-500/20",
+  },
 ] as const;
 
 const BACKGROUND_FILL_OPTIONS = [
@@ -48,7 +60,17 @@ const BACKGROUND_FILL_OPTIONS = [
   "Transparent",
 ] as const;
 
-const FOCAL_GRID = ["TL", "TC", "TR", "ML", "MC", "MR", "BL", "BC", "BR"] as const;
+const FOCAL_GRID = [
+  "TL",
+  "TC",
+  "TR",
+  "ML",
+  "MC",
+  "MR",
+  "BL",
+  "BC",
+  "BR",
+] as const;
 
 export default function ImageEditorPanel({
   editCropTop,
@@ -68,20 +90,35 @@ export default function ImageEditorPanel({
   handleNudge,
 }: ImageEditorPanelProps) {
   const activeTool = useImageEditorStore((state) => state.activeTool);
-  const selectedFocalPoint = useImageEditorStore((state) => state.selectedFocalPoint);
-  const setSelectedFocalPoint = useImageEditorStore((state) => state.setSelectedFocalPoint);
+  const selectedFocalPoint = useImageEditorStore(
+    (state) => state.selectedFocalPoint
+  );
+  const setSelectedFocalPoint = useImageEditorStore(
+    (state) => state.setSelectedFocalPoint
+  );
   const showSafeZones = useImageEditorStore((state) => state.showSafeZones);
-  const setShowSafeZones = useImageEditorStore((state) => state.setShowSafeZones);
+  const setShowSafeZones = useImageEditorStore(
+    (state) => state.setShowSafeZones
+  );
   const lineSharpen = useImageEditorStore((state) => state.lineSharpen);
   const setLineSharpen = useImageEditorStore((state) => state.setLineSharpen);
   const mangaContrast = useImageEditorStore((state) => state.mangaContrast);
-  const setMangaContrast = useImageEditorStore((state) => state.setMangaContrast);
+  const setMangaContrast = useImageEditorStore(
+    (state) => state.setMangaContrast
+  );
   const popColorBoost = useImageEditorStore((state) => state.popColorBoost);
-  const setPopColorBoost = useImageEditorStore((state) => state.setPopColorBoost);
-  const [selectedFramePreset, setSelectedFramePreset] = useState<(typeof FRAME_PRESETS)[number]["id"]>("youtube");
-  const [backgroundFill, setBackgroundFill] = useState<(typeof BACKGROUND_FILL_OPTIONS)[number]>("Blurred Image Background");
+  const setPopColorBoost = useImageEditorStore(
+    (state) => state.setPopColorBoost
+  );
+  const [selectedFramePreset, setSelectedFramePreset] =
+    useState<(typeof FRAME_PRESETS)[number]["id"]>("youtube");
+  const [backgroundFill, setBackgroundFill] = useState<
+    (typeof BACKGROUND_FILL_OPTIONS)[number]
+  >("Blurred Image Background");
 
-  const handleFramePresetChange = (presetId: (typeof FRAME_PRESETS)[number]["id"]) => {
+  const handleFramePresetChange = (
+    presetId: (typeof FRAME_PRESETS)[number]["id"]
+  ) => {
     setSelectedFramePreset(presetId);
 
     if (presetId === "youtube") {
@@ -106,8 +143,8 @@ export default function ImageEditorPanel({
     selectedFramePreset === "youtube"
       ? "Letterbox for wide cinematic framing"
       : selectedFramePreset === "shorts"
-        ? "Centred vertical deck for phone-first delivery"
-        : "Balanced stack for social posts and avatars";
+      ? "Centred vertical deck for phone-first delivery"
+      : "Balanced stack for social posts and avatars";
 
   return (
     <div className="space-y-5 bg-white/[0.01] p-4 rounded-2xl border border-white/[0.05]">
@@ -205,7 +242,9 @@ export default function ImageEditorPanel({
                         : "bg-black/20 border-white/5 text-neutral-400 hover:border-white/10 hover:text-neutral-200"
                     } ${preset.accent}`}
                   >
-                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] font-mono">{preset.label}</div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] font-mono">
+                      {preset.label}
+                    </div>
                   </button>
                 );
               })}
@@ -237,10 +276,14 @@ export default function ImageEditorPanel({
               </div>
             </div>
 
-            <div className="text-[9px] font-mono text-neutral-500">{presetSummary}</div>
+            <div className="text-[9px] font-mono text-neutral-500">
+              {presetSummary}
+            </div>
           </div>
 
-          <SectionTitle icon={<Crosshair className="h-3 w-3 text-violet-400" />}>
+          <SectionTitle
+            icon={<Crosshair className="h-3 w-3 text-violet-400" />}
+          >
             Focal Point &amp; Safe Zones
           </SectionTitle>
 

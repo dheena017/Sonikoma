@@ -7,11 +7,9 @@ export interface EpisodeScraperEmptyStateProps {
   error?: string | null;
 }
 
-export const EpisodeScraperEmptyState: React.FC<EpisodeScraperEmptyStateProps> = ({
-  urlInput,
-  isLoading = false,
-  error = null,
-}) => {
+export const EpisodeScraperEmptyState: React.FC<
+  EpisodeScraperEmptyStateProps
+> = ({ urlInput, isLoading = false, error = null }) => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-16 space-y-4">
@@ -33,8 +31,12 @@ export const EpisodeScraperEmptyState: React.FC<EpisodeScraperEmptyStateProps> =
           <span className="text-2xl">⚠️</span>
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-bold text-red-400">Failed to fetch episodes</p>
-          <p className="text-xs text-neutral-500 max-w-sm leading-relaxed">{error}</p>
+          <p className="text-sm font-bold text-red-400">
+            Failed to fetch episodes
+          </p>
+          <p className="text-xs text-neutral-500 max-w-sm leading-relaxed">
+            {error}
+          </p>
         </div>
       </div>
     );
@@ -48,7 +50,8 @@ export const EpisodeScraperEmptyState: React.FC<EpisodeScraperEmptyStateProps> =
       <div className="space-y-1">
         <p className="text-sm font-bold text-neutral-400">No Episodes Found</p>
         <p className="text-xs text-neutral-600 max-w-sm leading-relaxed">
-          Paste a valid webtoon series URL above and press Enter to load its episode list.
+          Paste a valid webtoon series URL above and press Enter to load its
+          episode list.
         </p>
       </div>
     </div>

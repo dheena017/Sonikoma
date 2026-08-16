@@ -124,36 +124,64 @@ const StoryboardTimeline = React.memo(
     setSelectedPanelIds: propSetSelectedPanelIds,
   }: StoryboardTimelineProps) => {
     // ── Panel selection state ────────────────────────────────────────────────
-    const [localSelectedPanelIds, setLocalSelectedPanelIds] = useState<Set<number>>(
-      new Set()
-    );
+    const [localSelectedPanelIds, setLocalSelectedPanelIds] = useState<
+      Set<number>
+    >(new Set());
     const selectedPanelIds = propSelectedPanelIds ?? localSelectedPanelIds;
-    const setSelectedPanelIds = propSetSelectedPanelIds ?? setLocalSelectedPanelIds;
+    const setSelectedPanelIds =
+      propSetSelectedPanelIds ?? setLocalSelectedPanelIds;
 
-    const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
-    const [selectedStoryboardEp, setSelectedStoryboardEp] = useState<number | "all">("all");
+    const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
+      null
+    );
+    const [selectedStoryboardEp, setSelectedStoryboardEp] = useState<
+      number | "all"
+    >("all");
     const [storyboardEpSearchQuery, setStoryboardEpSearchQuery] = useState("");
-    const [storyboardEpSortAscending, setStoryboardEpSortAscending] = useState(true);
-    const [hoveredStoryboardEpIdx, setHoveredStoryboardEpIdx] = useState<number | null>(null);
-    const [storyboardViewLayout, setStoryboardViewLayout] = useState<"scroll" | "grid">("scroll");
-    const [selectedTimelineEp, setSelectedTimelineEp] = useState<number | "all">("all");
-    const [hoveredTimelineEpIdx, setHoveredTimelineEpIdx] = useState<number | null>(null);
+    const [storyboardEpSortAscending, setStoryboardEpSortAscending] =
+      useState(true);
+    const [hoveredStoryboardEpIdx, setHoveredStoryboardEpIdx] = useState<
+      number | null
+    >(null);
+    const [storyboardViewLayout, setStoryboardViewLayout] = useState<
+      "scroll" | "grid"
+    >("scroll");
+    const [selectedTimelineEp, setSelectedTimelineEp] = useState<
+      number | "all"
+    >("all");
+    const [hoveredTimelineEpIdx, setHoveredTimelineEpIdx] = useState<
+      number | null
+    >(null);
     const [timelineEpSearchQuery, setTimelineEpSearchQuery] = useState("");
-    const [timelineEpSortAscending, setTimelineEpSortAscending] = useState(true);
+    const [timelineEpSortAscending, setTimelineEpSortAscending] =
+      useState(true);
     const [isTimelineEpCollapsed, setIsTimelineEpCollapsed] = useState(false);
 
     const handlePanelClick = useCallback(
-      (idx: number, panelId: number, shiftKey: boolean, ctrlOrMeta: boolean) => {
+      (
+        idx: number,
+        panelId: number,
+        shiftKey: boolean,
+        ctrlOrMeta: boolean
+      ) => {
         if (shiftKey && lastSelectedIndex !== null) {
           const lo = Math.min(lastSelectedIndex, idx);
           const hi = Math.max(lastSelectedIndex, idx);
           const rangeIds = panels.slice(lo, hi + 1).map((p) => p.id);
-          setSelectedPanelIds((prev) =>
-            updateSelection(prev, { type: "range", items: rangeIds }) as Set<number>
+          setSelectedPanelIds(
+            (prev) =>
+              updateSelection(prev, {
+                type: "range",
+                items: rangeIds,
+              }) as Set<number>
           );
         } else if (ctrlOrMeta) {
-          setSelectedPanelIds((prev) =>
-            updateSelection(prev, { type: "toggle", item: panelId }) as Set<number>
+          setSelectedPanelIds(
+            (prev) =>
+              updateSelection(prev, {
+                type: "toggle",
+                item: panelId,
+              }) as Set<number>
           );
           setLastSelectedIndex(idx);
         } else {
@@ -163,13 +191,23 @@ const StoryboardTimeline = React.memo(
           setActivePreviewTab("timeline");
         }
       },
-      [lastSelectedIndex, panels, setSelectedPanelIds, setCurrentPanelIndex, setActivePreviewTab]
+      [
+        lastSelectedIndex,
+        panels,
+        setSelectedPanelIds,
+        setCurrentPanelIndex,
+        setActivePreviewTab,
+      ]
     );
 
     const handlePanelDoubleClick = useCallback(
       (idx: number, panelId: number) => {
-        setSelectedPanelIds((prev) =>
-          updateSelection(prev, { type: "double", item: panelId }) as Set<number>
+        setSelectedPanelIds(
+          (prev) =>
+            updateSelection(prev, {
+              type: "double",
+              item: panelId,
+            }) as Set<number>
         );
         setLastSelectedIndex(idx);
       },
@@ -181,26 +219,38 @@ const StoryboardTimeline = React.memo(
     const [isBatchMerging, setIsBatchMerging] = useState(false);
 
     const [isBatchMagicProcessing, setIsBatchMagicProcessing] = useState(false);
-    const [batchMagicProgress, setBatchMagicProgress] = useState<{ current: number; total: number } | null>(null);
+    const [batchMagicProgress, setBatchMagicProgress] = useState<{
+      current: number;
+      total: number;
+    } | null>(null);
 
     const handleBatchMagicMotion = async () => {
       if (selectedPanelIds.size === 0) {
-        addNotification?.("Please select at least one panel to apply Batch Magic Motion.", "info");
+        addNotification?.(
+          "Please select at least one panel to apply Batch Magic Motion.",
+          "info"
+        );
         return;
       }
 
       const selectedIds = Array.from(selectedPanelIds);
       const targetPanels = panels.filter((p) => selectedPanelIds.has(p.id));
 
-      const missingText = targetPanels.some(p => !p.speech_text?.trim());
+      const missingText = targetPanels.some((p) => !p.speech_text?.trim());
       if (missingText) {
-        addNotification?.("Some selected panels are missing Dialogue Subtitle text. All panels must have text to align audio sync.", "warning");
+        addNotification?.(
+          "Some selected panels are missing Dialogue Subtitle text. All panels must have text to align audio sync.",
+          "warning"
+        );
         return;
       }
 
       setIsBatchMagicProcessing(true);
       setBatchMagicProgress({ current: 0, total: targetPanels.length });
-      addNotification?.(`Starting Batch Magic Motion on ${selectedIds.length} panels...`, "info");
+      addNotification?.(
+        `Starting Batch Magic Motion on ${selectedIds.length} panels...`,
+        "info"
+      );
 
       let completed = 0;
       const chunks = chunkArray(targetPanels, 3); // process in chunks of 3 max to prevent rate-limiting or memory issues
@@ -212,11 +262,14 @@ const StoryboardTimeline = React.memo(
             chunk.map(async (panel) => {
               try {
                 // 1. Separate Layers
-                const layerRes = await activeFetch(`/api/image/process-layers/${panel.id}`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ url: panel.image_url }),
-                });
+                const layerRes = await activeFetch(
+                  `/api/image/process-layers/${panel.id}`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: panel.image_url }),
+                  }
+                );
                 const layerData = await layerRes.json();
                 let layersObj = null;
                 if (layerData.success && layerData.layers) {
@@ -235,7 +288,10 @@ const StoryboardTimeline = React.memo(
                   panel_id: panel.id,
                   text: panel.speech_text,
                   dialogue_list: [panel.speech_text],
-                  target_duration: panel.duration && panel.duration > 0 ? panel.duration : undefined,
+                  target_duration:
+                    panel.duration && panel.duration > 0
+                      ? panel.duration
+                      : undefined,
                   voice: voiceActor || undefined,
                   speech_rate: speechRate,
                   speech_pitch: speechPitch,
@@ -247,28 +303,42 @@ const StoryboardTimeline = React.memo(
                 } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
                   const binary = atob(ttsRes.audio_base64);
                   const bytes = new Uint8Array(binary.length);
-                  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                  audioUrl = URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" }));
+                  for (let i = 0; i < binary.length; i++)
+                    bytes[i] = binary.charCodeAt(i);
+                  audioUrl = URL.createObjectURL(
+                    new Blob([bytes], { type: "audio/mpeg" })
+                  );
                 }
 
                 // Capture actual audio duration for precise timing sync
                 const audioDuration: number =
-                  ttsRes && ttsRes.duration_actual_s && ttsRes.duration_actual_s > 0
+                  ttsRes &&
+                  ttsRes.duration_actual_s &&
+                  ttsRes.duration_actual_s > 0
                     ? Math.round(ttsRes.duration_actual_s * 10) / 10
                     : 0;
 
                 // 3. Dialogue Sync Alignment
                 let syncMapObj = null;
                 if (audioUrl) {
-                  const ocr_texts = panel.speech_text.split("\n").map((s) => s.trim()).filter(Boolean);
-                  const alignRes = await activeFetch(`/api/audio/align-dialogue/${panel.id}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      audio_url: audioUrl,
-                      ocr_texts: ocr_texts.length > 0 ? ocr_texts : [panel.speech_text],
-                    }),
-                  });
+                  const ocr_texts = panel.speech_text
+                    .split("\n")
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+                  const alignRes = await activeFetch(
+                    `/api/audio/align-dialogue/${panel.id}`,
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        audio_url: audioUrl,
+                        ocr_texts:
+                          ocr_texts.length > 0
+                            ? ocr_texts
+                            : [panel.speech_text],
+                      }),
+                    }
+                  );
                   const alignData = await alignRes.json();
                   if (alignData.success && alignData.dialogue_map) {
                     syncMapObj = {
@@ -289,11 +359,13 @@ const StoryboardTimeline = React.memo(
                       ? {
                           ...p,
                           // Preserve AI-decided motion; only default if completely unset
-                          motion_type: p.motion_type && p.motion_type.trim().length > 0
-                            ? p.motion_type
-                            : "",
+                          motion_type:
+                            p.motion_type && p.motion_type.trim().length > 0
+                              ? p.motion_type
+                              : "",
                           // Sync timing to actual audio length
-                          duration: audioDuration > 0 ? audioDuration : p.duration,
+                          duration:
+                            audioDuration > 0 ? audioDuration : p.duration,
                           audio_url: audioUrl || p.audio_url,
                           layers: layersObj || p.layers,
                           syncMap: syncMapObj || p.syncMap,
@@ -302,16 +374,25 @@ const StoryboardTimeline = React.memo(
                   )
                 );
               } catch (err) {
-                console.error(`[Batch Magic] Failed for panel #${panel.id}:`, err);
+                console.error(
+                  `[Batch Magic] Failed for panel #${panel.id}:`,
+                  err
+                );
               } finally {
                 completed++;
-                setBatchMagicProgress({ current: completed, total: targetPanels.length });
+                setBatchMagicProgress({
+                  current: completed,
+                  total: targetPanels.length,
+                });
               }
             })
           );
         }
 
-        addNotification?.(`Batch Magic Motion successfully completed on ${targetPanels.length} panels!`, "success");
+        addNotification?.(
+          `Batch Magic Motion successfully completed on ${targetPanels.length} panels!`,
+          "success"
+        );
       } catch (err: any) {
         console.error("[Batch Magic] Critical error:", err);
       } finally {
@@ -330,14 +411,17 @@ const StoryboardTimeline = React.memo(
       total: number;
     } | null>(null);
 
-    const togglePanelSelection = useCallback((id: number) => {
-      setSelectedPanelIds((prev) => {
-        const next = new Set(prev);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        return next;
-      });
-    }, [setSelectedPanelIds]);
+    const togglePanelSelection = useCallback(
+      (id: number) => {
+        setSelectedPanelIds((prev) => {
+          const next = new Set(prev);
+          if (next.has(id)) next.delete(id);
+          else next.add(id);
+          return next;
+        });
+      },
+      [setSelectedPanelIds]
+    );
 
     const selectAllPanels = useCallback(() => {
       setSelectedPanelIds(new Set(panels.map((p) => p.id)));
@@ -557,17 +641,20 @@ const StoryboardTimeline = React.memo(
                       let croppedUrl = box.croppedUrl;
 
                       if (!croppedUrl) {
-                        const cropData = await api.submitImageEdits(activeFetch, {
-                          url: originalPanel.image_url,
-                          cropTop: box.cropTop,
-                          cropBottom: box.cropBottom,
-                          cropLeft: box.cropLeft,
-                          cropRight: box.cropRight,
-                          autoTrim: false, // detection coordinates are already precise; autoTrim would over-crop artwork
-                          padding: cropPaddingPx,
-                          sensitivity: cropSensitivity,
-                          backgroundColorMode: cropBackgroundMode,
-                        });
+                        const cropData = await api.submitImageEdits(
+                          activeFetch,
+                          {
+                            url: originalPanel.image_url,
+                            cropTop: box.cropTop,
+                            cropBottom: box.cropBottom,
+                            cropLeft: box.cropLeft,
+                            cropRight: box.cropRight,
+                            autoTrim: false, // detection coordinates are already precise; autoTrim would over-crop artwork
+                            padding: cropPaddingPx,
+                            sensitivity: cropSensitivity,
+                            backgroundColorMode: cropBackgroundMode,
+                          }
+                        );
                         croppedUrl = cropData.url;
                       }
 
@@ -857,7 +944,8 @@ const StoryboardTimeline = React.memo(
 
         {(() => {
           const episodeGroups =
-            ((window as any).__scrapeEpisodeGroups as EpisodeGroupRecord[]) || [];
+            ((window as any).__scrapeEpisodeGroups as EpisodeGroupRecord[]) ||
+            [];
 
           if (episodeGroups.length === 0) {
             return (

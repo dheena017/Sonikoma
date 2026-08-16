@@ -53,20 +53,20 @@ export function useAutoAnalysis({
             prev.map((p) =>
               p.id === panelId
                 ? {
-                        ...p,
-                        speech_text: data.analysis.speech_text || p.speech_text,
-                        sfx: data.analysis.sfx || p.sfx,
-                        duration:
-                          data.analysis.duration !== undefined
-                            ? Number(data.analysis.duration)
-                            : p.duration,
-                        motion_type:
-                          data.analysis.motion_type !== undefined
-                            ? data.analysis.motion_type
-                            : p.motion_type,
-                        visual_description:
-                          data.analysis.visual_description || p.visual_description,
-                        isAnalyzing: false,
+                    ...p,
+                    speech_text: data.analysis.speech_text || p.speech_text,
+                    sfx: data.analysis.sfx || p.sfx,
+                    duration:
+                      data.analysis.duration !== undefined
+                        ? Number(data.analysis.duration)
+                        : p.duration,
+                    motion_type:
+                      data.analysis.motion_type !== undefined
+                        ? data.analysis.motion_type
+                        : p.motion_type,
+                    visual_description:
+                      data.analysis.visual_description || p.visual_description,
+                    isAnalyzing: false,
                   }
                 : p
             )
@@ -246,9 +246,21 @@ export function useAutoAnalysis({
       const baseId =
         panels.length > 0 ? Math.max(...panels.map((p) => p.id)) + 1 : 1;
 
-      const episodeGroups: Array<{ episodeLabel: string; startIndex: number; count: number }> =
-        ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || [];
-      const scrapedList: string[] = currentScrapedList || (window as any).__scrapedImagesList || scrapedImages || [];
+      const episodeGroups: Array<{
+        episodeLabel: string;
+        startIndex: number;
+        count: number;
+      }> =
+        ((window as any).__scrapeEpisodeGroups as Array<{
+          episodeLabel: string;
+          startIndex: number;
+          count: number;
+        }>) || [];
+      const scrapedList: string[] =
+        currentScrapedList ||
+        (window as any).__scrapedImagesList ||
+        scrapedImages ||
+        [];
 
       const newPanelsToAdd = imgUrls.map((imgUrl, loopIdx) => {
         // Resolve original_url from the scrape origins map so the DB can recover

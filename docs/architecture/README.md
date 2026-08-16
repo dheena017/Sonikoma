@@ -15,7 +15,7 @@ Welcome to the Sonikoma Architecture Directory. This directory contains detailed
 
 ## 🛠️ Specialized Architectural References
 
-*For specialized or low-level technical mappings, please refer to the pre-existing system documents below:*
+_For specialized or low-level technical mappings, please refer to the pre-existing system documents below:_
 
 - **[API Reference & Endpoints Guide](./api_reference.md):** Endpoint mappings, authorization, metrics, and security schemas.
 - **[Local Database Architecture](./database.md):** SQLite relational tables, schemas, and credit management logic.

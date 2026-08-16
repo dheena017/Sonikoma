@@ -65,7 +65,14 @@ export interface ElementItem {
 export interface TextPreset {
   id: string;
   title: string;
-  category: "titles" | "captions" | "speech-bubble" | "narration" | "credits" | "typography" | "animations";
+  category:
+    | "titles"
+    | "captions"
+    | "speech-bubble"
+    | "narration"
+    | "credits"
+    | "typography"
+    | "animations";
   previewText: string;
   fontFamily: string;
   styleClass: string;
@@ -75,7 +82,14 @@ export interface TextPreset {
 export interface AudioTrack {
   id: string;
   title: string;
-  category: "music" | "voice" | "sfx" | "ambient" | "mixer" | "recorder" | "ai-voice";
+  category:
+    | "music"
+    | "voice"
+    | "sfx"
+    | "ambient"
+    | "mixer"
+    | "recorder"
+    | "ai-voice";
   duration: string;
   mood?: string;
   genre?: string;
@@ -85,7 +99,14 @@ export interface AudioTrack {
 
 export interface AiEngineTool {
   id: string;
-  engine: "generate" | "analyze" | "enhance" | "voice" | "motion" | "translation" | "automation";
+  engine:
+    | "generate"
+    | "analyze"
+    | "enhance"
+    | "voice"
+    | "motion"
+    | "translation"
+    | "automation";
   title: string;
   badge: string;
   desc: string;
@@ -95,7 +116,17 @@ export interface AiEngineTool {
 export interface TemplateProject {
   id: string;
   title: string;
-  category: "manga" | "webtoon" | "anime" | "story-recap" | "shorts" | "tiktok" | "reels" | "trailer" | "opening" | "ending";
+  category:
+    | "manga"
+    | "webtoon"
+    | "anime"
+    | "story-recap"
+    | "shorts"
+    | "tiktok"
+    | "reels"
+    | "trailer"
+    | "opening"
+    | "ending";
   badge: string;
   gradient: string;
   accent: string;
@@ -105,7 +136,16 @@ export interface TemplateProject {
 export interface ResourceItem {
   id: string;
   title: string;
-  category: "fonts" | "logos" | "colors" | "watermarks" | "brushes" | "luts" | "overlays" | "intro" | "outro";
+  category:
+    | "fonts"
+    | "logos"
+    | "colors"
+    | "watermarks"
+    | "brushes"
+    | "luts"
+    | "overlays"
+    | "intro"
+    | "outro";
   detail: string;
   badge?: string;
   hex?: string;
@@ -114,7 +154,14 @@ export interface ResourceItem {
 export interface MarketplacePack {
   id: string;
   title: string;
-  category: "comic-packs" | "transition-packs" | "voice-packs" | "character-packs" | "template-packs" | "animation-packs" | "plugin-store";
+  category:
+    | "comic-packs"
+    | "transition-packs"
+    | "voice-packs"
+    | "character-packs"
+    | "template-packs"
+    | "animation-packs"
+    | "plugin-store";
   badge: string;
   price: string;
   rating: number;

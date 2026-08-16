@@ -11,7 +11,9 @@ import ImageEditorSidebarHeader from "./ImageEditorSidebarHeader";
 import { ImageEditorSidebarProps } from "./ImageEditorSidebarTypes";
 
 function ImageEditorToolsPanel(
-  props: ImageEditorSidebarProps & { handleSaveTrainingData: () => Promise<void> }
+  props: ImageEditorSidebarProps & {
+    handleSaveTrainingData: () => Promise<void>;
+  }
 ) {
   const {
     activeTab,

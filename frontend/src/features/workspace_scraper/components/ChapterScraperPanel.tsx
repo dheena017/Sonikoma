@@ -106,7 +106,8 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             Initialize New Video Pipeline
           </h2>
           <p className="text-xs text-neutral-400 font-medium">
-            Define your project parameters and Manhwa, Manga, or Webcomic source link to begin.
+            Define your project parameters and Manhwa, Manga, or Webcomic source
+            link to begin.
           </p>
         </div>
       </div>
@@ -188,8 +189,6 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           />
         )}
       </div>
-
-
     </div>
   );
 });

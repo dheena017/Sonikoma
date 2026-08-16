@@ -95,11 +95,15 @@ export const updateProjectPanels = async (
   jobId?: string | null
 ): Promise<ApiResponse<any>> => {
   const query = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/panels${query}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ panels }),
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/projects/${projectId}/panels${query}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ panels }),
+    }
+  );
 };
 
 export const saveScrapedImages = async (

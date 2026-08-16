@@ -4,8 +4,8 @@ import PlaylistSelector from "../PlaylistSelector";
 
 // Full YouTube category list (official IDs)
 const YOUTUBE_CATEGORIES = [
-  { id: "1",  label: "Film & Animation" },
-  { id: "2",  label: "Autos & Vehicles" },
+  { id: "1", label: "Film & Animation" },
+  { id: "2", label: "Autos & Vehicles" },
   { id: "10", label: "Music" },
   { id: "15", label: "Pets & Animals" },
   { id: "17", label: "Sports" },
@@ -25,80 +25,80 @@ const YOUTUBE_CATEGORIES = [
 
 // Full language list for YouTube
 const YOUTUBE_LANGUAGES = [
-  { code: "af",    label: "Afrikaans" },
-  { code: "sq",    label: "Albanian" },
-  { code: "ar",    label: "Arabic" },
-  { code: "hy",    label: "Armenian" },
-  { code: "az",    label: "Azerbaijani" },
-  { code: "eu",    label: "Basque" },
-  { code: "be",    label: "Belarusian" },
-  { code: "bn",    label: "Bengali" },
-  { code: "bs",    label: "Bosnian" },
-  { code: "bg",    label: "Bulgarian" },
-  { code: "ca",    label: "Catalan" },
+  { code: "af", label: "Afrikaans" },
+  { code: "sq", label: "Albanian" },
+  { code: "ar", label: "Arabic" },
+  { code: "hy", label: "Armenian" },
+  { code: "az", label: "Azerbaijani" },
+  { code: "eu", label: "Basque" },
+  { code: "be", label: "Belarusian" },
+  { code: "bn", label: "Bengali" },
+  { code: "bs", label: "Bosnian" },
+  { code: "bg", label: "Bulgarian" },
+  { code: "ca", label: "Catalan" },
   { code: "zh-Hans", label: "Chinese (Simplified)" },
   { code: "zh-Hant", label: "Chinese (Traditional)" },
-  { code: "hr",    label: "Croatian" },
-  { code: "cs",    label: "Czech" },
-  { code: "da",    label: "Danish" },
-  { code: "nl",    label: "Dutch" },
-  { code: "en",    label: "English" },
+  { code: "hr", label: "Croatian" },
+  { code: "cs", label: "Czech" },
+  { code: "da", label: "Danish" },
+  { code: "nl", label: "Dutch" },
+  { code: "en", label: "English" },
   { code: "en-GB", label: "English (UK)" },
-  { code: "et",    label: "Estonian" },
-  { code: "fil",   label: "Filipino" },
-  { code: "fi",    label: "Finnish" },
-  { code: "fr",    label: "French" },
-  { code: "gl",    label: "Galician" },
-  { code: "ka",    label: "Georgian" },
-  { code: "de",    label: "German" },
-  { code: "el",    label: "Greek" },
-  { code: "gu",    label: "Gujarati" },
-  { code: "iw",    label: "Hebrew" },
-  { code: "hi",    label: "Hindi" },
-  { code: "hu",    label: "Hungarian" },
-  { code: "is",    label: "Icelandic" },
-  { code: "id",    label: "Indonesian" },
-  { code: "it",    label: "Italian" },
-  { code: "ja",    label: "Japanese" },
-  { code: "kn",    label: "Kannada" },
-  { code: "kk",    label: "Kazakh" },
-  { code: "km",    label: "Khmer" },
-  { code: "ko",    label: "Korean" },
-  { code: "lo",    label: "Lao" },
-  { code: "lv",    label: "Latvian" },
-  { code: "lt",    label: "Lithuanian" },
-  { code: "mk",    label: "Macedonian" },
-  { code: "ms",    label: "Malay" },
-  { code: "ml",    label: "Malayalam" },
-  { code: "mt",    label: "Maltese" },
-  { code: "mr",    label: "Marathi" },
-  { code: "mn",    label: "Mongolian" },
-  { code: "ne",    label: "Nepali" },
-  { code: "no",    label: "Norwegian" },
-  { code: "fa",    label: "Persian" },
-  { code: "pl",    label: "Polish" },
-  { code: "pt",    label: "Portuguese" },
+  { code: "et", label: "Estonian" },
+  { code: "fil", label: "Filipino" },
+  { code: "fi", label: "Finnish" },
+  { code: "fr", label: "French" },
+  { code: "gl", label: "Galician" },
+  { code: "ka", label: "Georgian" },
+  { code: "de", label: "German" },
+  { code: "el", label: "Greek" },
+  { code: "gu", label: "Gujarati" },
+  { code: "iw", label: "Hebrew" },
+  { code: "hi", label: "Hindi" },
+  { code: "hu", label: "Hungarian" },
+  { code: "is", label: "Icelandic" },
+  { code: "id", label: "Indonesian" },
+  { code: "it", label: "Italian" },
+  { code: "ja", label: "Japanese" },
+  { code: "kn", label: "Kannada" },
+  { code: "kk", label: "Kazakh" },
+  { code: "km", label: "Khmer" },
+  { code: "ko", label: "Korean" },
+  { code: "lo", label: "Lao" },
+  { code: "lv", label: "Latvian" },
+  { code: "lt", label: "Lithuanian" },
+  { code: "mk", label: "Macedonian" },
+  { code: "ms", label: "Malay" },
+  { code: "ml", label: "Malayalam" },
+  { code: "mt", label: "Maltese" },
+  { code: "mr", label: "Marathi" },
+  { code: "mn", label: "Mongolian" },
+  { code: "ne", label: "Nepali" },
+  { code: "no", label: "Norwegian" },
+  { code: "fa", label: "Persian" },
+  { code: "pl", label: "Polish" },
+  { code: "pt", label: "Portuguese" },
   { code: "pt-BR", label: "Portuguese (Brazil)" },
-  { code: "pa",    label: "Punjabi" },
-  { code: "ro",    label: "Romanian" },
-  { code: "ru",    label: "Russian" },
-  { code: "sr",    label: "Serbian" },
-  { code: "si",    label: "Sinhala" },
-  { code: "sk",    label: "Slovak" },
-  { code: "sl",    label: "Slovenian" },
-  { code: "es",    label: "Spanish" },
+  { code: "pa", label: "Punjabi" },
+  { code: "ro", label: "Romanian" },
+  { code: "ru", label: "Russian" },
+  { code: "sr", label: "Serbian" },
+  { code: "si", label: "Sinhala" },
+  { code: "sk", label: "Slovak" },
+  { code: "sl", label: "Slovenian" },
+  { code: "es", label: "Spanish" },
   { code: "es-419", label: "Spanish (Latin America)" },
-  { code: "sw",    label: "Swahili" },
-  { code: "sv",    label: "Swedish" },
-  { code: "ta",    label: "Tamil" },
-  { code: "te",    label: "Telugu" },
-  { code: "th",    label: "Thai" },
-  { code: "tr",    label: "Turkish" },
-  { code: "uk",    label: "Ukrainian" },
-  { code: "ur",    label: "Urdu" },
-  { code: "uz",    label: "Uzbek" },
-  { code: "vi",    label: "Vietnamese" },
-  { code: "zu",    label: "Zulu" },
+  { code: "sw", label: "Swahili" },
+  { code: "sv", label: "Swedish" },
+  { code: "ta", label: "Tamil" },
+  { code: "te", label: "Telugu" },
+  { code: "th", label: "Thai" },
+  { code: "tr", label: "Turkish" },
+  { code: "uk", label: "Ukrainian" },
+  { code: "ur", label: "Urdu" },
+  { code: "uz", label: "Uzbek" },
+  { code: "vi", label: "Vietnamese" },
+  { code: "zu", label: "Zulu" },
 ];
 
 export interface StudioDetailsTabProps {
@@ -159,7 +159,9 @@ export default function StudioDetailsTab({
       {/* Step Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-800 pb-4">
         <div>
-          <h3 className="text-base font-black text-white font-sans tracking-tight">Details</h3>
+          <h3 className="text-base font-black text-white font-sans tracking-tight">
+            Details
+          </h3>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
             Tell viewers about your video
           </p>
@@ -188,7 +190,11 @@ export default function StudioDetailsTab({
           className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20 rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-600 focus:outline-none transition-all font-sans"
         />
         <div className="flex justify-end">
-          <span className={`text-[10px] font-mono ${title.length > 90 ? "text-amber-400" : "text-neutral-600"}`}>
+          <span
+            className={`text-[10px] font-mono ${
+              title.length > 90 ? "text-amber-400" : "text-neutral-600"
+            }`}
+          >
             {title.length}/100
           </span>
         </div>
@@ -230,7 +236,11 @@ export default function StudioDetailsTab({
               + Socials
             </button>
           </div>
-          <span className={`text-[10px] font-mono ${description.length > 4800 ? "text-amber-400" : "text-neutral-600"}`}>
+          <span
+            className={`text-[10px] font-mono ${
+              description.length > 4800 ? "text-amber-400" : "text-neutral-600"
+            }`}
+          >
             {description.length}/5000
           </span>
         </div>
@@ -242,13 +252,21 @@ export default function StudioDetailsTab({
           Thumbnail
         </label>
         <p className="text-[11px] text-neutral-500 font-mono">
-          Upload a picture that shows what's in your video. A good thumbnail stands out and draws viewers' attention.{" "}
-          <span className="text-neutral-400">JPG, GIF, or PNG recommended · Max 2MB</span>
+          Upload a picture that shows what's in your video. A good thumbnail
+          stands out and draws viewers' attention.{" "}
+          <span className="text-neutral-400">
+            JPG, GIF, or PNG recommended · Max 2MB
+          </span>
         </p>
         <div className="grid grid-cols-2 gap-3">
           {/* Upload button */}
           <label className="flex flex-col items-center justify-center gap-2 h-24 border-2 border-dashed border-neutral-700 hover:border-red-500/60 rounded-xl cursor-pointer transition-all bg-neutral-950/40 group">
-            <input type="file" accept="image/*" onChange={onThumbnailChange} className="hidden" />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={onThumbnailChange}
+              className="hidden"
+            />
             <UploadCloud className="w-6 h-6 text-neutral-500 group-hover:text-red-400 transition-colors" />
             <span className="text-xs font-mono text-neutral-500 group-hover:text-neutral-300 transition-colors">
               Upload thumbnail
@@ -314,9 +332,15 @@ export default function StudioDetailsTab({
             onChange={(e) => setVideoLanguage(e.target.value)}
             className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
           >
-            <option value="" className="bg-neutral-950">Select language</option>
+            <option value="" className="bg-neutral-950">
+              Select language
+            </option>
             {YOUTUBE_LANGUAGES.map((lang) => (
-              <option key={lang.code} value={lang.code} className="bg-neutral-950">
+              <option
+                key={lang.code}
+                value={lang.code}
+                className="bg-neutral-950"
+              >
                 {lang.label}
               </option>
             ))}
@@ -328,12 +352,18 @@ export default function StudioDetailsTab({
       <div className="space-y-3 p-4 bg-neutral-950/40 rounded-2xl border border-neutral-800/80">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-white font-sans">Audience</span>
-            <span className="text-[10px] text-neutral-500 font-mono">(required)</span>
+            <span className="text-xs font-bold text-white font-sans">
+              Audience
+            </span>
+            <span className="text-[10px] text-neutral-500 font-mono">
+              (required)
+            </span>
           </div>
         </div>
         <p className="text-[11px] text-neutral-400 font-mono leading-relaxed">
-          Regardless of your location, you're legally required to comply with the Children's Online Privacy Protection Act (COPPA) and/or other laws.
+          Regardless of your location, you're legally required to comply with
+          the Children's Online Privacy Protection Act (COPPA) and/or other
+          laws.
         </p>
         <div className="space-y-2.5">
           <label className="flex items-start gap-3 cursor-pointer group">
@@ -351,7 +381,9 @@ export default function StudioDetailsTab({
               <span className="text-xs font-bold text-white font-sans group-hover:text-red-300 transition-colors">
                 No, it's not made for kids
               </span>
-              <p className="text-[10.5px] text-neutral-500 font-mono mt-0.5">General audience content</p>
+              <p className="text-[10.5px] text-neutral-500 font-mono mt-0.5">
+                General audience content
+              </p>
             </div>
           </label>
           <label className="flex items-start gap-3 cursor-pointer group">
@@ -369,7 +401,9 @@ export default function StudioDetailsTab({
               <span className="text-xs font-bold text-white font-sans group-hover:text-red-300 transition-colors">
                 Yes, it's made for kids
               </span>
-              <p className="text-[10.5px] text-neutral-500 font-mono mt-0.5">Personalized ads and certain features will be disabled</p>
+              <p className="text-[10.5px] text-neutral-500 font-mono mt-0.5">
+                Personalized ads and certain features will be disabled
+              </p>
             </div>
           </label>
         </div>

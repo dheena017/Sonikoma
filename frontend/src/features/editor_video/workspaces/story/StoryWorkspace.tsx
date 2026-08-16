@@ -20,7 +20,10 @@ export const StoryWorkspace: React.FC<StoryWorkspaceProps> = ({
   const pipelineSteps = [
     { label: "Project", active: true },
     { label: "Story", active: true },
-    { label: "Scenes", active: activeTab === "Scenes" || activeTab === "Storyboard" },
+    {
+      label: "Scenes",
+      active: activeTab === "Scenes" || activeTab === "Storyboard",
+    },
     { label: "Panels", active: activeTab === "Storyboard" },
     { label: "Timeline", active: activeTab === "Timeline" },
     { label: "Video", active: false },
@@ -42,21 +45,29 @@ export const StoryWorkspace: React.FC<StoryWorkspaceProps> = ({
 
       {/* Contextual AI Action Bar Component */}
       <StoryAiToolbar onTriggerFeedback={onTriggerFeedback} />
-      
+
       <WorkspaceLayout.Content>
         {/* Scenes / Storyboard / Script View */}
-        {(activeTab === "Scenes" || activeTab === "Storyboard" || activeTab === "Script") && (
+        {(activeTab === "Scenes" ||
+          activeTab === "Storyboard" ||
+          activeTab === "Script") && (
           <div className="space-y-3">
             {/* Header Action Bar */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <BookOpen className="h-3.5 w-3.5 text-purple-400" />
                 <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                  {activeTab === "Script" ? "Full Narrative Script" : "Scene Sequence Breakdown"}
+                  {activeTab === "Script"
+                    ? "Full Narrative Script"
+                    : "Scene Sequence Breakdown"}
                 </span>
               </div>
               <button
-                onClick={() => onTriggerFeedback("AI Vision scanning pages & building scene breakdown...")}
+                onClick={() =>
+                  onTriggerFeedback(
+                    "AI Vision scanning pages & building scene breakdown..."
+                  )
+                }
                 className="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shadow-[0_0_10px_rgba(168,85,247,0.4)]"
               >
                 <Scan className="h-3 w-3" />
@@ -70,10 +81,16 @@ export const StoryWorkspace: React.FC<StoryWorkspaceProps> = ({
                 <StorySceneCard
                   key={scene.id}
                   scene={scene}
-                  onSelectScene={() => onTriggerFeedback(`Selected Scene #${scene.sceneNumber}: ${scene.title}`)}
+                  onSelectScene={() =>
+                    onTriggerFeedback(
+                      `Selected Scene #${scene.sceneNumber}: ${scene.title}`
+                    )
+                  }
                   onJumpToScene={(e) => {
                     e.stopPropagation();
-                    onTriggerFeedback(`Jumped timeline playhead to Scene #${scene.sceneNumber}`);
+                    onTriggerFeedback(
+                      `Jumped timeline playhead to Scene #${scene.sceneNumber}`
+                    );
                   }}
                 />
               ))}
@@ -88,9 +105,12 @@ export const StoryWorkspace: React.FC<StoryWorkspaceProps> = ({
               <FileText className="h-5 w-5 text-purple-400" />
             </div>
             <div>
-              <h4 className="text-xs font-bold text-white">{activeTab} Manager</h4>
+              <h4 className="text-xs font-bold text-white">
+                {activeTab} Manager
+              </h4>
               <p className="text-[10px] text-neutral-400 mt-1">
-                Refine story flow, narration voiceovers, dialogue captions, and director notes.
+                Refine story flow, narration voiceovers, dialogue captions, and
+                director notes.
               </p>
             </div>
             <button
@@ -102,7 +122,7 @@ export const StoryWorkspace: React.FC<StoryWorkspaceProps> = ({
           </div>
         )}
       </WorkspaceLayout.Content>
-      
+
       <WorkspaceLayout.Footer text="Sonikoma Narrative Engine — Story Drives Everything" />
     </WorkspaceLayout>
   );

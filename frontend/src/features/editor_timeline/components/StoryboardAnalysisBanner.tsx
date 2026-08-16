@@ -27,7 +27,8 @@ const StoryboardAnalysisBanner = ({
             </span>
           </h4>
           <p className="text-[11px] text-indigo-200/80 mt-0.5">
-            AI is composing story narrative and synthesizing TTS voiceover for sequence cards...
+            AI is composing story narrative and synthesizing TTS voiceover for
+            sequence cards...
           </p>
         </div>
       </div>

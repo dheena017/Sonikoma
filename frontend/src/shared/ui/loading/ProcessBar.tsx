@@ -93,7 +93,11 @@ export default function ProcessBar({ progressStatus }: ProcessBarProps) {
       </span>
 
       {/* Percentage */}
-      <span className={`text-[10px] font-black font-mono shrink-0 ${isDone ? "text-emerald-400" : "text-purple-300"}`}>
+      <span
+        className={`text-[10px] font-black font-mono shrink-0 ${
+          isDone ? "text-emerald-400" : "text-purple-300"
+        }`}
+      >
         {Math.round(displayPercent)}%
       </span>
     </div>

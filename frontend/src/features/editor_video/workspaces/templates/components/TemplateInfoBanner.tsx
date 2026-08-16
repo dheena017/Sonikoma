@@ -11,7 +11,8 @@ export const TemplateInfoBanner: React.FC<TemplateInfoBannerProps> = ({
     <div className="rounded-xl bg-amber-950/30 border border-amber-900/40 p-2.5 flex items-start gap-2 shrink-0">
       <span className="text-amber-400 text-sm shrink-0">📐</span>
       <p className="text-[10px] text-amber-200/80 leading-snug">
-        <span className="font-bold text-amber-300">Modular Templates: </span>{text}
+        <span className="font-bold text-amber-300">Modular Templates: </span>
+        {text}
       </p>
     </div>
   );

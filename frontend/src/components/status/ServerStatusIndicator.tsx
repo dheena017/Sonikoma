@@ -40,10 +40,14 @@ export const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
         <span
           className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${colors.pulseBg}`}
         />
-        <span className={`relative inline-flex rounded-full h-2 w-2 ${colors.dotBg}`} />
+        <span
+          className={`relative inline-flex rounded-full h-2 w-2 ${colors.dotBg}`}
+        />
       </span>
       {showLabel && <span className="text-neutral-400">Server:</span>}
-      <span className={`font-bold uppercase tracking-wider ${colors.textColor}`}>
+      <span
+        className={`font-bold uppercase tracking-wider ${colors.textColor}`}
+      >
         {status}
       </span>
     </div>

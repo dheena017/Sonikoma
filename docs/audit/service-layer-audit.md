@@ -1,6 +1,7 @@
 # Service Layer Audit Report
 
 ## 1. Scope
+
 Audited `backend/app/services/**` to ensure it only contains business logic, orchestrations, and coordinates repositories/providers, without depending on FastAPI or other infrastructure concerns.
 
 ## 2. Architectural Violations Found
@@ -18,9 +19,11 @@ Audited `backend/app/services/**` to ensure it only contains business logic, orc
 - `backend/app/api/v1/images/transform.py`: Updated `get_cached_stitch` to extract the `referer` header from the `Request` before passing it to the service.
 
 ## 4. Files Requiring Manual Review
+
 None.
 
 ## 5. Validation Results
+
 - Backend starts successfully.
 - Tests pass.
 - API behavior is strictly preserved.

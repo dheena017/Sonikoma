@@ -58,24 +58,30 @@ export function EnhancementsAudio({
   const handleToggleDialogueAudio = () => {
     if (isDialoguePlaying && !isDialoguePaused) {
       if (dialogueAudioRef.current) dialogueAudioRef.current.pause();
-      else if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.pause();
+      else if (typeof window !== "undefined" && "speechSynthesis" in window)
+        window.speechSynthesis.pause();
       setIsDialoguePaused(true);
       return;
     }
     if (isDialoguePlaying && isDialoguePaused) {
-      if (dialogueAudioRef.current) dialogueAudioRef.current.play().catch(console.error);
-      else if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.resume();
+      if (dialogueAudioRef.current)
+        dialogueAudioRef.current.play().catch(console.error);
+      else if (typeof window !== "undefined" && "speechSynthesis" in window)
+        window.speechSynthesis.resume();
       setIsDialoguePaused(false);
       return;
     }
 
     stopAllAudio();
-    const targetUrl = activeStoryboardPanel?.audio_url || activeStoryboardPanel?.speech_audio_url;
+    const targetUrl =
+      activeStoryboardPanel?.audio_url ||
+      activeStoryboardPanel?.speech_audio_url;
     if (targetUrl) {
       const audio = new Audio(targetUrl);
       dialogueAudioRef.current = audio;
       audio.onended = () => stopAllAudio();
-      audio.play()
+      audio
+        .play()
         .then(() => {
           setIsDialoguePlaying(true);
           setIsDialoguePaused(false);
@@ -105,13 +111,16 @@ export function EnhancementsAudio({
   const handleToggleNarrativeAudio = () => {
     if (isNarrativePlaying && !isNarrativePaused) {
       if (narrativeAudioRef.current) narrativeAudioRef.current.pause();
-      else if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.pause();
+      else if (typeof window !== "undefined" && "speechSynthesis" in window)
+        window.speechSynthesis.pause();
       setIsNarrativePaused(true);
       return;
     }
     if (isNarrativePlaying && isNarrativePaused) {
-      if (narrativeAudioRef.current) narrativeAudioRef.current.play().catch(console.error);
-      else if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.resume();
+      if (narrativeAudioRef.current)
+        narrativeAudioRef.current.play().catch(console.error);
+      else if (typeof window !== "undefined" && "speechSynthesis" in window)
+        window.speechSynthesis.resume();
       setIsNarrativePaused(false);
       return;
     }
@@ -205,7 +214,10 @@ export function EnhancementsAudio({
           rows={2}
           value={activeStoryboardPanel?.speech_text || ""}
           onChange={(e) =>
-            handleModifySpeechText(activeStoryboardPanel?.id ?? 0, e.target.value)
+            handleModifySpeechText(
+              activeStoryboardPanel?.id ?? 0,
+              e.target.value
+            )
           }
           className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
           placeholder=""
@@ -263,7 +275,10 @@ export function EnhancementsAudio({
           rows={2}
           value={activeStoryboardPanel?.narrative || ""}
           onChange={(e) =>
-            handleModifyNarrative?.(activeStoryboardPanel?.id ?? 0, e.target.value)
+            handleModifyNarrative?.(
+              activeStoryboardPanel?.id ?? 0,
+              e.target.value
+            )
           }
           className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
           placeholder=""
@@ -279,7 +294,10 @@ export function EnhancementsAudio({
           rows={2}
           value={activeStoryboardPanel?.visual_description || ""}
           onChange={(e) =>
-            handleModifyVisualDescription?.(activeStoryboardPanel?.id ?? 0, e.target.value)
+            handleModifyVisualDescription?.(
+              activeStoryboardPanel?.id ?? 0,
+              e.target.value
+            )
           }
           className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
           placeholder=""
@@ -314,7 +332,8 @@ export function EnhancementsAudio({
                 Audio-Reactive Shake
               </span>
               <p className="text-[8px] text-neutral-500 font-sans leading-relaxed max-w-[220px]">
-                Violently shakes the camera/subtitles for dramatic effect during loud shouts (&gt;0.85 peak threshold).
+                Violently shakes the camera/subtitles for dramatic effect during
+                loud shouts (&gt;0.85 peak threshold).
               </p>
             </div>
             <button

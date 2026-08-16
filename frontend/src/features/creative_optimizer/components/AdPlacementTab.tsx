@@ -36,7 +36,10 @@ export default function AdPlacementTab({
 
       if (json.success && json.result && json.result.placements) {
         setPlacements(json.result.placements);
-        addNotification?.("Calculated optimal midroll ad break timestamps!", "success");
+        addNotification?.(
+          "Calculated optimal midroll ad break timestamps!",
+          "success"
+        );
       }
     } catch (e) {
       console.error(e);
@@ -60,7 +63,8 @@ export default function AdPlacementTab({
             </h4>
           </div>
           <p className="text-[11px] text-neutral-400 font-mono pl-8">
-            Identify cliffhangers and natural narrative pause points for non-intrusive sponsor breaks.
+            Identify cliffhangers and natural narrative pause points for
+            non-intrusive sponsor breaks.
           </p>
         </div>
         <button
@@ -68,7 +72,11 @@ export default function AdPlacementTab({
           disabled={loading}
           className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
         >
-          {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          {loading ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
+            <Sparkles className="w-4 h-4" />
+          )}
           <span>{loading ? "Calculating..." : "✦ Calculate Ad Slots"}</span>
         </button>
       </div>
@@ -89,12 +97,18 @@ export default function AdPlacementTab({
           </span>
           <div className="space-y-2.5">
             {placements.map((p, idx) => (
-              <div key={idx} className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div
+                key={idx}
+                className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
                 <div className="flex items-center gap-3">
                   <span className="bg-neutral-900 text-purple-300 font-mono text-xs px-3 py-1 rounded-lg border border-neutral-800 font-bold flex items-center gap-1.5 shrink-0">
-                    <Clock className="w-3.5 h-3.5 text-purple-400" /> {p.timestamp}
+                    <Clock className="w-3.5 h-3.5 text-purple-400" />{" "}
+                    {p.timestamp}
                   </span>
-                  <span className="text-xs font-sans text-neutral-200 leading-relaxed">{p.tension_reason}</span>
+                  <span className="text-xs font-sans text-neutral-200 leading-relaxed">
+                    {p.tension_reason}
+                  </span>
                 </div>
               </div>
             ))}

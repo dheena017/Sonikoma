@@ -74,16 +74,27 @@ export function useCompileActions({
         { targetUrl }
       );
       saveAs(blob, zipFilename);
-      console.log(`[Timeline] ZIP archive download triggered successfully (${zipFilename})`);
+      console.log(
+        `[Timeline] ZIP archive download triggered successfully (${zipFilename})`
+      );
       if (addNotification) {
-        addNotification(`ZIP archive (${zipFilename}) downloaded successfully!`, "success");
+        addNotification(
+          `ZIP archive (${zipFilename}) downloaded successfully!`,
+          "success"
+        );
         audioFeedback?.playSuccess();
       }
     } catch (err: any) {
-      console.error("[Timeline] Client ZIP generation failed, falling back to API:", err);
+      console.error(
+        "[Timeline] Client ZIP generation failed, falling back to API:",
+        err
+      );
       try {
         const urls = panels.map((p) => p.image_url);
-        const data = await api.downloadZip(activeFetch, { urls, url: targetUrl });
+        const data = await api.downloadZip(activeFetch, {
+          urls,
+          url: targetUrl,
+        });
         if (data.success && data.downloadUrl) {
           const link = document.createElement("a");
           link.href = data.downloadUrl;
@@ -97,7 +108,10 @@ export function useCompileActions({
           throw new Error(data.error || "Failed to package ZIP archive.");
         }
       } catch (fallbackErr: any) {
-        console.error("[Timeline] ZIP download failed completely:", fallbackErr);
+        console.error(
+          "[Timeline] ZIP download failed completely:",
+          fallbackErr
+        );
         if (addNotification) {
           addNotification(
             fallbackErr.message || "Failed to compile ZIP archive.",
@@ -160,7 +174,8 @@ export function useCompileActions({
               ? {
                   ...p,
                   speech_text: data.analysis.speech_text || p.speech_text,
-                  dialogueSubtitleText: data.analysis.speech_text || p.speech_text,
+                  dialogueSubtitleText:
+                    data.analysis.speech_text || p.speech_text,
                   sfx: data.analysis.sfx || p.sfx,
                   soundEffectSfx: data.analysis.sfx || p.sfx,
                   // Always use System duration if it's a valid positive number
@@ -177,7 +192,9 @@ export function useCompileActions({
                   narrative:
                     data.narrative || data.analysis?.narrative || p.narrative,
                   narrative_audio_url:
-                    data.narrative_audio_url || data.analysis?.narrative_audio_url || p.narrative_audio_url,
+                    data.narrative_audio_url ||
+                    data.analysis?.narrative_audio_url ||
+                    p.narrative_audio_url,
                   isAnalyzing: false,
                 }
               : p
@@ -296,7 +313,8 @@ export function useCompileActions({
               return {
                 ...p,
                 speech_text: result.analysis.speech_text || p.speech_text,
-                dialogueSubtitleText: result.analysis.speech_text || p.speech_text,
+                dialogueSubtitleText:
+                  result.analysis.speech_text || p.speech_text,
                 sfx: result.analysis.sfx || p.sfx,
                 soundEffectSfx: result.analysis.sfx || p.sfx,
                 duration: aiDuration > 0 ? aiDuration : p.duration,
@@ -309,9 +327,15 @@ export function useCompileActions({
                   result.analysis.visual_description || p.visual_description,
                 audio_url: result.audio_url || p.audio_url,
                 narrative:
-                  result.narrative || result.narrativeText || result.analysis?.narrative || result.analysis?.narrativeText || p.narrative,
+                  result.narrative ||
+                  result.narrativeText ||
+                  result.analysis?.narrative ||
+                  result.analysis?.narrativeText ||
+                  p.narrative,
                 narrative_audio_url:
-                  result.narrative_audio_url || result.analysis?.narrative_audio_url || p.narrative_audio_url,
+                  result.narrative_audio_url ||
+                  result.analysis?.narrative_audio_url ||
+                  p.narrative_audio_url,
                 isAnalyzing: false,
               };
             }
@@ -372,7 +396,10 @@ export function useCompileActions({
     abortSignalRef.current.aborted = false;
 
     if (addNotification) {
-      addNotification("Analyzing Sequence... (Phase 1: Character Dialogue, Sound Effects & Timing)", "info");
+      addNotification(
+        "Analyzing Sequence... (Phase 1: Character Dialogue, Sound Effects & Timing)",
+        "info"
+      );
     }
 
     if (setConsoleLogs) {
@@ -423,7 +450,8 @@ export function useCompileActions({
               return {
                 ...p,
                 speech_text: result.analysis.speech_text || p.speech_text,
-                dialogueSubtitleText: result.analysis.speech_text || p.speech_text,
+                dialogueSubtitleText:
+                  result.analysis.speech_text || p.speech_text,
                 sfx: result.analysis.sfx || p.sfx,
                 soundEffectSfx: result.analysis.sfx || p.sfx,
                 duration: aiDuration > 0 ? aiDuration : p.duration,
@@ -436,9 +464,15 @@ export function useCompileActions({
                   result.analysis.visual_description || p.visual_description,
                 audio_url: result.audio_url || p.audio_url,
                 narrative:
-                  result.narrative || result.narrativeText || result.analysis?.narrative || result.analysis?.narrativeText || p.narrative,
+                  result.narrative ||
+                  result.narrativeText ||
+                  result.analysis?.narrative ||
+                  result.analysis?.narrativeText ||
+                  p.narrative,
                 narrative_audio_url:
-                  result.narrative_audio_url || result.analysis?.narrative_audio_url || p.narrative_audio_url,
+                  result.narrative_audio_url ||
+                  result.analysis?.narrative_audio_url ||
+                  p.narrative_audio_url,
               };
             }
             return p;

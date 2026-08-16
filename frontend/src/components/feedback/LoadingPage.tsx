@@ -21,7 +21,9 @@ export default function LoadingPage({
     if (themeMode) {
       setActiveMode(themeMode);
     } else {
-      const currentMode = document.documentElement.getAttribute("data-mode") as ThemeMode | null;
+      const currentMode = document.documentElement.getAttribute(
+        "data-mode"
+      ) as ThemeMode | null;
       if (currentMode) {
         setActiveMode(currentMode);
       } else {
@@ -44,7 +46,8 @@ export default function LoadingPage({
         isLight ? "loading-page-shell-light" : "loading-page-shell-dark"
       }`}
       style={{
-        fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif",
+        fontFamily:
+          "'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif",
       }}
     >
       {/* Background Anime Scene matching the app */}
@@ -68,9 +71,7 @@ export default function LoadingPage({
         </div>
 
         {/* Title */}
-        <div className="loading-title">
-          Sonikoma
-        </div>
+        <div className="loading-title">Sonikoma</div>
 
         {/* Status Pill */}
         <div className="loading-status-pill">

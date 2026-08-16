@@ -136,16 +136,18 @@ export default function ProfileAnalyticsTab() {
                   {week.map((cell, dIdx) => (
                     <div
                       key={dIdx}
-                      className={`w-full aspect-square min-w-[12px] max-w-[16px] rounded-sm transition-colors cursor-pointer ${cell.level === 0
+                      className={`w-full aspect-square min-w-[12px] max-w-[16px] rounded-sm transition-colors cursor-pointer ${
+                        cell.level === 0
                           ? "bg-neutral-900 border border-white/5"
                           : cell.level === 1
-                            ? "bg-purple-900/30 border border-purple-500/10 hover:bg-purple-800/40"
-                            : cell.level === 2
-                              ? "bg-purple-600/50 border border-purple-500/20 hover:bg-purple-500/60"
-                              : "bg-purple-500 border border-purple-400/30 hover:bg-purple-400"
-                        }`}
-                      title={`${cell.count} operation(s) on ${cell.day} (Week ${wIdx + 1
-                        })`}
+                          ? "bg-purple-900/30 border border-purple-500/10 hover:bg-purple-800/40"
+                          : cell.level === 2
+                          ? "bg-purple-600/50 border border-purple-500/20 hover:bg-purple-500/60"
+                          : "bg-purple-500 border border-purple-400/30 hover:bg-purple-400"
+                      }`}
+                      title={`${cell.count} operation(s) on ${cell.day} (Week ${
+                        wIdx + 1
+                      })`}
                     />
                   ))}
                 </div>

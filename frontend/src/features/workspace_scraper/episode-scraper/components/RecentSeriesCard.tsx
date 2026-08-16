@@ -10,9 +10,13 @@ interface RecentSeriesCardProps {
   onRemove?: (titleNo: string) => void;
 }
 
-export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({ series, onSelect, onRemove }) => {
+export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({
+  series,
+  onSelect,
+  onRemove,
+}) => {
   const [isHovered, setIsHovered] = useState(false);
-  
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -33,7 +37,7 @@ export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({ series, onSe
     const date = new Date(timestamp);
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
+
     if (seconds < 60) return "just now";
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;

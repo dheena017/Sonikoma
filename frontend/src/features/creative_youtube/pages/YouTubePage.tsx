@@ -40,8 +40,18 @@ interface YouTubePageProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-type AppTab = "home" | "videos" | "shorts" | "playlists" | "analytics" | "studio";
-type StudioSubTab = "details" | "chapters_tags" | "comic_subtitles" | "settings";
+type AppTab =
+  | "home"
+  | "videos"
+  | "shorts"
+  | "playlists"
+  | "analytics"
+  | "studio";
+type StudioSubTab =
+  | "details"
+  | "chapters_tags"
+  | "comic_subtitles"
+  | "settings";
 
 interface ChannelOverview {
   id?: string;
@@ -61,7 +71,9 @@ const YouTubePage = React.memo(
     onNavigateHome,
     addNotification,
   }: YouTubePageProps) => {
-    const activeProjectData = useProjectStore((state) => state.activeProjectData);
+    const activeProjectData = useProjectStore(
+      (state) => state.activeProjectData
+    );
     const storePanels = activeProjectData?.panels || [];
     const safePanels =
       panels && panels.length > 0
@@ -78,26 +90,36 @@ const YouTubePage = React.memo(
 
     // ── App Navigation State ──────────────────────────────────────────────────
     const [activeTab, setActiveTab] = useState<AppTab>("home");
-    const [visitedTabs, setVisitedTabs] = useState<Set<AppTab>>(new Set(["home"]));
+    const [visitedTabs, setVisitedTabs] = useState<Set<AppTab>>(
+      new Set(["home"])
+    );
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
     const [studioSubTab, setStudioSubTab] = useState<StudioSubTab>("details");
-    const [isChannelModalOpen, setIsChannelModalOpen] = useState<boolean>(false);
+    const [isChannelModalOpen, setIsChannelModalOpen] =
+      useState<boolean>(false);
     const [headerRefreshKey, setHeaderRefreshKey] = useState<number>(0);
 
-    const handleTabChange = useCallback((tab: AppTab) => {
-      if (tab === activeTab) return;
-      setIsNavigating(true);
-      setActiveTab(tab);
-      setVisitedTabs((prev) => new Set([...prev, tab]));
-      setWatchingVideo(null);
-      setWatchingPlaylistId(undefined);
-      const timer = setTimeout(() => setIsNavigating(false), 200);
-      return () => clearTimeout(timer);
-    }, [activeTab]);
+    const handleTabChange = useCallback(
+      (tab: AppTab) => {
+        if (tab === activeTab) return;
+        setIsNavigating(true);
+        setActiveTab(tab);
+        setVisitedTabs((prev) => new Set([...prev, tab]));
+        setWatchingVideo(null);
+        setWatchingPlaylistId(undefined);
+        const timer = setTimeout(() => setIsNavigating(false), 200);
+        return () => clearTimeout(timer);
+      },
+      [activeTab]
+    );
 
     // ── Theater Player State ──────────────────────────────────────────────────
-    const [watchingVideo, setWatchingVideo] = useState<YouTubeVideoItem | null>(null);
-    const [watchingPlaylistId, setWatchingPlaylistId] = useState<string | undefined>(undefined);
+    const [watchingVideo, setWatchingVideo] = useState<YouTubeVideoItem | null>(
+      null
+    );
+    const [watchingPlaylistId, setWatchingPlaylistId] = useState<
+      string | undefined
+    >(undefined);
 
     // ── Channel Header State ──────────────────────────────────────────────────
     const [navChannel, setNavChannel] = useState<ChannelOverview | null>(null);
@@ -127,7 +149,10 @@ const YouTubePage = React.memo(
       };
       window.addEventListener("youtube_channel_changed", handleChannelChanged);
       return () => {
-        window.removeEventListener("youtube_channel_changed", handleChannelChanged);
+        window.removeEventListener(
+          "youtube_channel_changed",
+          handleChannelChanged
+        );
       };
     }, [headerRefreshKey]);
 
@@ -319,7 +344,11 @@ const YouTubePage = React.memo(
         <div className="rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl min-h-[600px]">
           {/* 1. TAB: HOME / OVERVIEW */}
           {visitedTabs.has("home") && (
-            <div className={activeTab === "home" ? "block animate-fade-in" : "hidden"}>
+            <div
+              className={
+                activeTab === "home" ? "block animate-fade-in" : "hidden"
+              }
+            >
               <YouTubeChannelHome
                 key={`home-${headerRefreshKey}`}
                 onWatchVideo={handleWatchVideo}
@@ -331,7 +360,11 @@ const YouTubePage = React.memo(
 
           {/* 2. TAB: DEDICATED VIDEOS PANEL */}
           {visitedTabs.has("videos") && (
-            <div className={activeTab === "videos" ? "block animate-fade-in" : "hidden"}>
+            <div
+              className={
+                activeTab === "videos" ? "block animate-fade-in" : "hidden"
+              }
+            >
               <YouTubeVideosPanel
                 key={`videos-${headerRefreshKey}`}
                 onWatchVideo={handleWatchVideo}
@@ -343,7 +376,11 @@ const YouTubePage = React.memo(
 
           {/* 3. TAB: DEDICATED SHORTS PANEL */}
           {visitedTabs.has("shorts") && (
-            <div className={activeTab === "shorts" ? "block animate-fade-in" : "hidden"}>
+            <div
+              className={
+                activeTab === "shorts" ? "block animate-fade-in" : "hidden"
+              }
+            >
               <YouTubeShortsPanel
                 key={`shorts-${headerRefreshKey}`}
                 onNavigateStudio={() => {
@@ -356,7 +393,11 @@ const YouTubePage = React.memo(
 
           {/* 4. TAB: PLAYLISTS & LIBRARY */}
           {visitedTabs.has("playlists") && (
-            <div className={activeTab === "playlists" ? "block animate-fade-in" : "hidden"}>
+            <div
+              className={
+                activeTab === "playlists" ? "block animate-fade-in" : "hidden"
+              }
+            >
               <YouTubePlaylistsManager
                 key={`playlists-${headerRefreshKey}`}
                 onWatchVideo={handleWatchVideo}
@@ -367,7 +408,11 @@ const YouTubePage = React.memo(
 
           {/* 5. TAB: ANALYTICS & INTELLIGENCE */}
           {visitedTabs.has("analytics") && (
-            <div className={activeTab === "analytics" ? "block animate-fade-in" : "hidden"}>
+            <div
+              className={
+                activeTab === "analytics" ? "block animate-fade-in" : "hidden"
+              }
+            >
               <YouTubeAnalyticsDashboard
                 key={`analytics-${headerRefreshKey}`}
                 uploadHistory={uploadHistory}
@@ -377,7 +422,11 @@ const YouTubePage = React.memo(
 
           {/* 6. TAB: CREATOR STUDIO & AI PUBLISHER */}
           {visitedTabs.has("studio") && (
-            <div className={activeTab === "studio" ? "block animate-fade-in" : "hidden"}>
+            <div
+              className={
+                activeTab === "studio" ? "block animate-fade-in" : "hidden"
+              }
+            >
               <YouTubeStudioPage
                 activeVideoUrl={activeVideoUrl}
                 videoUrl={videoUrl}

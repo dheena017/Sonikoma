@@ -8,14 +8,20 @@ interface ResourcesWorkspaceProps {
   onTriggerFeedback: (msg: string) => void;
 }
 
-export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({ onTriggerFeedback }) => {
+export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
+  onTriggerFeedback,
+}) => {
   const [activeTab, setActiveTab] = useState("Fonts");
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const filtered = MOCK_RESOURCES.filter((r) => {
-    const tabMatch = activeTab === "All" || r.category.toLowerCase() === activeTab.toLowerCase();
-    const searchMatch = !searchQuery.trim() || r.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const tabMatch =
+      activeTab === "All" ||
+      r.category.toLowerCase() === activeTab.toLowerCase();
+    const searchMatch =
+      !searchQuery.trim() ||
+      r.title.toLowerCase().includes(searchQuery.toLowerCase());
     return tabMatch && searchMatch;
   });
 
@@ -44,7 +50,9 @@ export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({ onTrigge
               resource={res}
               copiedId={copiedId}
               onCopyColor={handleCopyColor}
-              onApply={(title) => onTriggerFeedback(`Applied resource: ${title}`)}
+              onApply={(title) =>
+                onTriggerFeedback(`Applied resource: ${title}`)
+              }
             />
           ))}
         </div>

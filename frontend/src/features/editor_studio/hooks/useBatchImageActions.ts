@@ -279,7 +279,8 @@ export function useBatchImageActions({
 
   const handleAutoCropSelected = useCallback(async () => {
     // Fall back to all images when nothing is explicitly selected
-    const targetImages = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+    const targetImages =
+      selectedScraped.length > 0 ? selectedScraped : scrapedImages;
     if (targetImages.length === 0) {
       addNotification(
         "No images available to crop — scrape some images first.",
@@ -291,7 +292,7 @@ export function useBatchImageActions({
     // Reset stale panel state, window cache, and selection
     setPanels([]);
     (window as any).__lastDetectedPanels = [];
-    
+
     console.log(
       `[Auto Cropper] Starting batch auto-crop on ${targetImages.length} images`,
       targetImages
@@ -311,23 +312,30 @@ export function useBatchImageActions({
         `[Auto Cropper] Merging ${targetImages.length} images into a single long strip for full-page panel detection...`,
         ...prev,
       ]);
-      console.group(`[DBG] Auto Crop — Pre-Stitch (${targetImages.length} images)`);
-      console.log('[DBG] Source image URLs:', targetImages);
+      console.group(
+        `[DBG] Auto Crop — Pre-Stitch (${targetImages.length} images)`
+      );
+      console.log("[DBG] Source image URLs:", targetImages);
       console.groupEnd();
       try {
-        const mergeData = await api.mergeImages(fetchWithInterceptor, { urls: targetImages });
-        console.log('[DBG] mergeImages response:', mergeData);
+        const mergeData = await api.mergeImages(fetchWithInterceptor, {
+          urls: targetImages,
+        });
+        console.log("[DBG] mergeImages response:", mergeData);
         if (mergeData && mergeData.url) {
           finalTargetImages = [mergeData.url];
           isStitchedCombined = true;
-          console.log('[DBG] Stitched URL:', mergeData.url);
+          console.log("[DBG] Stitched URL:", mergeData.url);
           setConsoleLogs((prev) => [
             `[Auto Cropper] Successfully stitched full long strip! Running panel detection on combined image...`,
             ...prev,
           ]);
         }
       } catch (mergeErr: any) {
-        console.warn("[Auto Cropper] Pre-crop image stitching failed, proceeding on individual images:", mergeErr);
+        console.warn(
+          "[Auto Cropper] Pre-crop image stitching failed, proceeding on individual images:",
+          mergeErr
+        );
       }
     }
 
@@ -348,26 +356,26 @@ export function useBatchImageActions({
           abortControllersRef.current.add(controller);
           try {
             const detectPayload = {
-                url: url,
-                sensitivity: cropSensitivity,
-                backgroundColorMode: cropBackgroundMode || "auto",
-                aspectRatio: aspectRatioLock,
-                minAreaPct: minPanelAreaPct / 100.0,
-                mergeThreshold: overlapMergeThreshold,
-                strategy: useLocalCV ? "local-cv" : "balanced",
-                model: cropModel,
-                cannyLow: cropCannyLow,
-                cannyHigh: cropCannyHigh,
-                closeKernelSize: cropCloseKernelSize,
-                minHeightPx: cropMinHeightPx || 150,
-                paddingPx: cropPaddingPx,
-                autoSplit: autoSplitTallStrips,
-                useYolo: true,
-                guidanceInstructions: cropGuidance,
-                focusMode: cropFocusMode,
-              };
+              url: url,
+              sensitivity: cropSensitivity,
+              backgroundColorMode: cropBackgroundMode || "auto",
+              aspectRatio: aspectRatioLock,
+              minAreaPct: minPanelAreaPct / 100.0,
+              mergeThreshold: overlapMergeThreshold,
+              strategy: useLocalCV ? "local-cv" : "balanced",
+              model: cropModel,
+              cannyLow: cropCannyLow,
+              cannyHigh: cropCannyHigh,
+              closeKernelSize: cropCloseKernelSize,
+              minHeightPx: cropMinHeightPx || 150,
+              paddingPx: cropPaddingPx,
+              autoSplit: autoSplitTallStrips,
+              useYolo: true,
+              guidanceInstructions: cropGuidance,
+              focusMode: cropFocusMode,
+            };
             console.group(`[DBG] detectPanels — Request`);
-            console.log('[DBG] Payload:', detectPayload);
+            console.log("[DBG] Payload:", detectPayload);
             console.groupEnd();
             const data = await api.detectPanels(
               fetchWithInterceptor,
@@ -375,9 +383,26 @@ export function useBatchImageActions({
               { signal: controller.signal }
             );
             console.group(`[DBG] detectPanels — Response`);
-            console.log('[DBG] success:', data.success, '| total_panels:', data.total_panels, '| imageWidth:', data.imageWidth, '| imageHeight:', data.imageHeight);
-            console.log('[DBG] isTallStrip:', data.isTallStrip, '| fallback:', data.fallback);
-            console.log('[DBG] Raw panels count:', Array.isArray(data.panels) ? data.panels.length : 'N/A');
+            console.log(
+              "[DBG] success:",
+              data.success,
+              "| total_panels:",
+              data.total_panels,
+              "| imageWidth:",
+              data.imageWidth,
+              "| imageHeight:",
+              data.imageHeight
+            );
+            console.log(
+              "[DBG] isTallStrip:",
+              data.isTallStrip,
+              "| fallback:",
+              data.fallback
+            );
+            console.log(
+              "[DBG] Raw panels count:",
+              Array.isArray(data.panels) ? data.panels.length : "N/A"
+            );
             console.groupEnd();
             if (abortBatchRef.current.aborted)
               throw new Error("Cancelled by user");
@@ -407,50 +432,95 @@ export function useBatchImageActions({
                   return (a.x ?? 0) - (b.x ?? 0);
                 });
                 (window as any).__lastDetectedPanels = sortedPanels;
-                const totalPanelsCount = data.total_panels || sortedPanels.length;
+                const totalPanelsCount =
+                  data.total_panels || sortedPanels.length;
                 const imgW = data.imageWidth || "auto";
                 const imgH = data.imageHeight || "auto";
-                console.log(`[Auto Cropper Debug JSON] Total panels: ${totalPanelsCount}, Image size: ${imgW}x${imgH}px`, sortedPanels);
+                console.log(
+                  `[Auto Cropper Debug JSON] Total panels: ${totalPanelsCount}, Image size: ${imgW}x${imgH}px`,
+                  sortedPanels
+                );
                 // ── Detailed gap analysis ────────────────────────────────────────
-                console.group(`[DBG] Panel Sorted Order — ${sortedPanels.length} panels (image: ${imgW}x${imgH}px)`);
+                console.group(
+                  `[DBG] Panel Sorted Order — ${sortedPanels.length} panels (image: ${imgW}x${imgH}px)`
+                );
                 let prevYEnd = 0;
                 const panelDebugRows = sortedPanels.map((p: any, i: number) => {
                   const gap = p.y - prevYEnd;
-                  const row = { '#': i + 1, id: p.id, y_start: p.y, y_end: p.y + p.height, height: p.height, x: p.x, width: p.width, gap_from_prev: gap, croppedUrl: p.croppedUrl ? '✓' : '✗' };
-                  if (gap > 0) console.warn(`[DBG] ⚠ GAP ${gap}px before panel ${i+1} (prev ended at y=${prevYEnd}, this starts at y=${p.y})`);
+                  const row = {
+                    "#": i + 1,
+                    id: p.id,
+                    y_start: p.y,
+                    y_end: p.y + p.height,
+                    height: p.height,
+                    x: p.x,
+                    width: p.width,
+                    gap_from_prev: gap,
+                    croppedUrl: p.croppedUrl ? "✓" : "✗",
+                  };
+                  if (gap > 0)
+                    console.warn(
+                      `[DBG] ⚠ GAP ${gap}px before panel ${
+                        i + 1
+                      } (prev ended at y=${prevYEnd}, this starts at y=${p.y})`
+                    );
                   prevYEnd = p.y + p.height;
                   return row;
                 });
                 console.table(panelDebugRows);
-                const totalGap = sortedPanels.reduce((acc: number, p: any, i: number) => {
-                  if (i === 0) return p.y; // gap from 0 to first panel
-                  return acc + (p.y - (sortedPanels[i-1].y + sortedPanels[i-1].height));
-                }, 0);
-                const coveredH = sortedPanels.reduce((acc: number, p: any) => acc + p.height, 0);
-                console.log(`[DBG] Coverage: ${coveredH}px covered out of ${imgH}px total | Total gap: ${totalGap}px | Panel 1 starts at y=${sortedPanels[0]?.y ?? 'N/A'}`);
+                const totalGap = sortedPanels.reduce(
+                  (acc: number, p: any, i: number) => {
+                    if (i === 0) return p.y; // gap from 0 to first panel
+                    return (
+                      acc +
+                      (p.y -
+                        (sortedPanels[i - 1].y + sortedPanels[i - 1].height))
+                    );
+                  },
+                  0
+                );
+                const coveredH = sortedPanels.reduce(
+                  (acc: number, p: any) => acc + p.height,
+                  0
+                );
+                console.log(
+                  `[DBG] Coverage: ${coveredH}px covered out of ${imgH}px total | Total gap: ${totalGap}px | Panel 1 starts at y=${
+                    sortedPanels[0]?.y ?? "N/A"
+                  }`
+                );
                 console.groupEnd();
-                const serverCroppedCount = sortedPanels.filter((b: any) => !!b.croppedUrl).length;
+                const serverCroppedCount = sortedPanels.filter(
+                  (b: any) => !!b.croppedUrl
+                ).length;
                 setConsoleLogs((prev) => [
                   `[Auto Cropper] Image Size: ${imgW}x${imgH}px | Total Panels: ${totalPanelsCount}`,
                   serverCroppedCount === sortedPanels.length
                     ? `[Auto Cropper] ✓ All ${sortedPanels.length} panels cropped server-side (no extra API calls needed)`
-                    : `[Auto Cropper] ${serverCroppedCount}/${sortedPanels.length} panels pre-cropped server-side, ${sortedPanels.length - serverCroppedCount} need edit API fallback`,
+                    : `[Auto Cropper] ${serverCroppedCount}/${
+                        sortedPanels.length
+                      } panels pre-cropped server-side, ${
+                        sortedPanels.length - serverCroppedCount
+                      } need edit API fallback`,
                   ...prev,
                 ]);
                 const croppedResults = await Promise.all(
                   sortedPanels.map(async (box: any, boxIdx: number) => {
-                    if (box.croppedUrl) return { orderIndex: boxIdx, url: box.croppedUrl };
-                    const cropData = await api.submitImageEdits(fetchWithInterceptor, {
-                      url: url,
-                      cropTop: box.cropTop,
-                      cropBottom: box.cropBottom,
-                      cropLeft: box.cropLeft,
-                      cropRight: box.cropRight,
-                      autoTrim: false, // detection coordinates are already precise; autoTrim would over-trim artwork
-                      padding: cropPaddingPx,
-                      sensitivity: cropSensitivity,
-                      backgroundColorMode: cropBackgroundMode,
-                    });
+                    if (box.croppedUrl)
+                      return { orderIndex: boxIdx, url: box.croppedUrl };
+                    const cropData = await api.submitImageEdits(
+                      fetchWithInterceptor,
+                      {
+                        url: url,
+                        cropTop: box.cropTop,
+                        cropBottom: box.cropBottom,
+                        cropLeft: box.cropLeft,
+                        cropRight: box.cropRight,
+                        autoTrim: false, // detection coordinates are already precise; autoTrim would over-trim artwork
+                        padding: cropPaddingPx,
+                        sensitivity: cropSensitivity,
+                        backgroundColorMode: cropBackgroundMode,
+                      }
+                    );
                     return { orderIndex: boxIdx, url: cropData.url };
                   })
                 );
@@ -507,7 +577,11 @@ export function useBatchImageActions({
     }
 
     setScrapedImages((prev) => {
-      if (isStitchedCombined && finalTargetImages[0] && newSlicedUrlsMap[finalTargetImages[0]]) {
+      if (
+        isStitchedCombined &&
+        finalTargetImages[0] &&
+        newSlicedUrlsMap[finalTargetImages[0]]
+      ) {
         // Multi-select stitch path: replace the selected source images (targetImages)
         // in-place with the new cropped panels. All other images stay untouched.
         const selectedSet = new Set(targetImages);

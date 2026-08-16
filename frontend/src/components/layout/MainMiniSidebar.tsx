@@ -115,7 +115,12 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         {
           label: "Creative Suite",
           icon: Sparkles,
-          active: currentPath === "/creative-suite" || currentPath.startsWith("/creative-suite/") || currentPath.startsWith("/ai-") || currentPath === "/panel-assistant" || currentPath === "/youtube",
+          active:
+            currentPath === "/creative-suite" ||
+            currentPath.startsWith("/creative-suite/") ||
+            currentPath.startsWith("/ai-") ||
+            currentPath === "/panel-assistant" ||
+            currentPath === "/youtube",
           onClick: () => navigateTo("/creative-suite"),
         },
 
@@ -200,7 +205,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-300 ${
-                item.active ? "text-purple-300" : "text-neutral-400 group-hover:text-purple-300"
+                item.active
+                  ? "text-purple-300"
+                  : "text-neutral-400 group-hover:text-purple-300"
               }`}
             />
           </div>
@@ -220,9 +227,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
   return (
     // Premium Glassmorphism Container
-    <aside
-      className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-neutral-955/95 backdrop-blur-2xl border-r border-neutral-800/80 shadow-[4px_0_24px_rgba(0,0,0,0.4)] hidden lg:flex flex-col items-center py-4 z-40 overflow-hidden"
-    >
+    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-neutral-955/95 backdrop-blur-2xl border-r border-neutral-800/80 shadow-[4px_0_24px_rgba(0,0,0,0.4)] hidden lg:flex flex-col items-center py-4 z-40 overflow-hidden">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div
@@ -230,8 +235,16 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             className="w-full flex flex-col items-center pb-2"
           >
             {/* Section divider (only between groups) + label for every group */}
-            <div className="w-full flex flex-col items-center" style={{ marginTop: groupIdx > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
-              {groupIdx > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+            <div
+              className="w-full flex flex-col items-center"
+              style={{
+                marginTop: groupIdx > 0 ? "0.5rem" : "0",
+                marginBottom: "0.375rem",
+              }}
+            >
+              {groupIdx > 0 && (
+                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />
+              )}
               <span className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
                 {group.group}
               </span>
@@ -271,5 +284,3 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
 const MiniSidebar = React.memo(MiniSidebarInner);
 export default MiniSidebar;
-
-

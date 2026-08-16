@@ -1,6 +1,16 @@
 import * as api from "@/api";
 import React, { useState, useEffect } from "react";
-import { Sparkles, Copy, Check, Wand2, RefreshCw, RotateCcw, Play, Square, BookmarkCheck } from "lucide-react";
+import {
+  Sparkles,
+  Copy,
+  Check,
+  Wand2,
+  RefreshCw,
+  RotateCcw,
+  Play,
+  Square,
+  BookmarkCheck,
+} from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { cleanDialogueDisplay, fetchWithAuth } from "@/utils";
 
@@ -46,7 +56,10 @@ export default function ScriptDramatizerForm({
   const handleSyncTimeline = () => {
     const lines = extractRawLines();
     setRawLines(lines);
-    addNotification?.(`Synced ${lines.length} speech dialogue lines from storyboard timeline!`, "info");
+    addNotification?.(
+      `Synced ${lines.length} speech dialogue lines from storyboard timeline!`,
+      "info"
+    );
   };
 
   const handleDramatize = async () => {
@@ -66,7 +79,10 @@ export default function ScriptDramatizerForm({
           : [json.result.dramatized_script || JSON.stringify(json.result)];
         setResults(resList);
       }
-      addNotification?.("Dramatized speech text script successfully!", "success");
+      addNotification?.(
+        "Dramatized speech text script successfully!",
+        "success"
+      );
     } catch (e) {
       console.error(e);
       addNotification?.("Failed to dramatize script lines.", "error");
@@ -98,7 +114,10 @@ export default function ScriptDramatizerForm({
       });
     });
 
-    addNotification?.("Successfully applied enhanced script to all timeline panels!", "success");
+    addNotification?.(
+      "Successfully applied enhanced script to all timeline panels!",
+      "success"
+    );
   };
 
   const handleApplySingleLine = (lineIdx: number, text: string) => {
@@ -164,7 +183,8 @@ export default function ScriptDramatizerForm({
               Dialogue & Script Dramatizer
             </h4>
             <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-              Enhance raw OCR webtoon speech bubbles into high-retention cinematic voice scripts.
+              Enhance raw OCR webtoon speech bubbles into high-retention
+              cinematic voice scripts.
             </p>
           </div>
         </div>
@@ -184,7 +204,11 @@ export default function ScriptDramatizerForm({
             disabled={loading || rawLines.length === 0}
             className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
           >
-            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-purple-200" />}
+            {loading ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4 text-purple-200" />
+            )}
             <span>{loading ? "Dramatizing..." : "✦ Enhance Script"}</span>
           </button>
         </div>
@@ -192,7 +216,6 @@ export default function ScriptDramatizerForm({
 
       {/* 2-COLUMN BALANCED INPUT & OUTPUT LAYOUT */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-
         {/* LEFT COLUMN (5 COLS): GENRE + CONTEXT + RAW DIALOGUE INPUTS */}
         <div className="xl:col-span-5 space-y-4 bg-neutral-950 border border-neutral-800 p-4 rounded-xl shadow-inner">
           <div className="space-y-1.5">
@@ -326,12 +349,17 @@ export default function ScriptDramatizerForm({
                       <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => handlePreviewLineTTS(resLine, idx)}
-                          className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${playingIdx === idx
+                          className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                            playingIdx === idx
                               ? "bg-purple-600 text-white animate-pulse"
                               : "bg-neutral-950 text-purple-300 border border-purple-500/30 hover:text-white"
-                            }`}
+                          }`}
                         >
-                          {playingIdx === idx ? <Square className="w-2.5 h-2.5 fill-current" /> : <Play className="w-2.5 h-2.5 fill-current" />}
+                          {playingIdx === idx ? (
+                            <Square className="w-2.5 h-2.5 fill-current" />
+                          ) : (
+                            <Play className="w-2.5 h-2.5 fill-current" />
+                          )}
                           <span>{playingIdx === idx ? "Stop" : "Listen"}</span>
                         </button>
                         {setPanels && panels[idx] && (
@@ -371,7 +399,8 @@ export default function ScriptDramatizerForm({
                     No dramatized lines generated yet.
                   </p>
                   <p className="text-[10px] text-neutral-500 font-mono mt-1 max-w-xs">
-                    Review dialogue lines on the left and click "✦ Enhance Script" to compose high-inflection voice script lines.
+                    Review dialogue lines on the left and click "✦ Enhance
+                    Script" to compose high-inflection voice script lines.
                   </p>
                 </div>
               </div>
@@ -388,7 +417,6 @@ export default function ScriptDramatizerForm({
             )}
           </div>
         </div>
-
       </div>
     </div>
   );

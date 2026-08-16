@@ -16,6 +16,7 @@ Added comprehensive WEBTOON episode list scraping functionality to extract episo
 ## Installation
 
 The scraper uses your existing dependencies:
+
 - `playwright` - For rendering dynamic content
 - `beautifulsoup4` - For HTML parsing
 - `httpx` - For HTTP requests
@@ -29,6 +30,7 @@ All are already in your project!
 **Purpose:** Scrape episode list from a WEBTOON series
 
 **Request Body:**
+
 ```json
 {
   "url": "https://www.webtoons.com/en/romance/love-by-mistake/list?title_no=10411",
@@ -38,13 +40,15 @@ All are already in your project!
 ```
 
 **Parameters:**
+
 - `url` (optional): Full WEBTOON series URL
 - `title_no` (optional): Series ID - can use instead of full URL
 - `max_episodes` (optional): Limit number of episodes to extract
 
-*Note: Either `url` or `title_no` is required*
+_Note: Either `url` or `title_no` is required_
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -116,6 +120,7 @@ curl -X POST http://localhost:8000/api/scrape-episodes \
 ### Example 4: Python / JavaScript Client
 
 **Python:**
+
 ```python
 import httpx
 import asyncio
@@ -136,21 +141,22 @@ asyncio.run(scrape_webtoon())
 ```
 
 **JavaScript/TypeScript:**
+
 ```javascript
 async function scrapeWebtoon() {
-  const response = await fetch('http://localhost:8000/api/scrape-episodes', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const response = await fetch("http://localhost:8000/api/scrape-episodes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      title_no: '10411',
-      max_episodes: 50
-    })
+      title_no: "10411",
+      max_episodes: 50,
+    }),
   });
-  
+
   const result = await response.json();
   console.log(`Series: ${result.series.title}`);
   console.log(`Episodes: ${result.total_episodes}`);
-  result.episodes.slice(0, 5).forEach(ep => {
+  result.episodes.slice(0, 5).forEach((ep) => {
     console.log(`  - ${ep.number}: ${ep.title}`);
   });
 }
@@ -163,11 +169,13 @@ scrapeWebtoon();
 The following three series are tested in the test script:
 
 1. **Love by Mistake**
+
    - URL: https://www.webtoons.com/en/romance/love-by-mistake/list?title_no=10411
    - ID: 10411
    - Genre: Romance
 
 2. **Duo Leveling**
+
    - URL: https://www.webtoons.com/en/action/duo-leveling/list?title_no=10193
    - ID: 10193
    - Genre: Action
@@ -189,6 +197,7 @@ python scratch/test_webtoon_episodes.py
 ### File Changes
 
 1. **`backend/python/services/scraper.py`**
+
    - Added `scrape_webtoon_episodes()` async function
    - Automatically detects series genre
    - Uses Playwright for JavaScript rendering
@@ -202,15 +211,18 @@ python scratch/test_webtoon_episodes.py
 ### Key Features
 
 **Automatic Genre Detection:**
+
 - Tries multiple genres (romance, action, fantasy, comedy, etc.) to find the right one
 - Falls back gracefully if the specified genre is wrong
 
 **Robust HTML Parsing:**
+
 - Multiple CSS selectors for different WEBTOON page layouts
 - Fallback to link-based episode detection
 - BeautifulSoup parsing with error recovery
 
 **Comprehensive Episode Data:**
+
 ```python
 {
   "number": str,      # Episode number/title from page
@@ -223,6 +235,7 @@ python scratch/test_webtoon_episodes.py
 ```
 
 **Error Handling:**
+
 - Returns `{"success": false, "error": "..."}` on failures
 - Logs detailed diagnostic information
 - Includes series metadata even on partial failures
@@ -230,6 +243,7 @@ python scratch/test_webtoon_episodes.py
 ## Future Enhancements
 
 Potential improvements:
+
 - [x] Pagination support for series with 100+ episodes
 - [x] Episode ratings/view counts extraction
 - [x] Comment/user engagement metrics
@@ -240,6 +254,7 @@ Potential improvements:
 ## Architecture Integration
 
 The episode scraper integrates with your existing infrastructure:
+
 - Uses existing `extract_metadata()` for series info
 - Uses Playwright fallback from `try_fetch_with_playwright()`
 - Follows same error handling patterns as image scraper
@@ -256,22 +271,26 @@ The episode scraper integrates with your existing infrastructure:
 ## Troubleshooting
 
 **"Playwright not found" error:**
+
 ```bash
 pip install playwright
 playwright install chromium
 ```
 
 **"Could not extract title_no" error:**
+
 - Ensure URL format is correct
 - Provide explicit `title_no` parameter
 - Check that WEBTOON still uses `?title_no=` parameter
 
 **No episodes found:**
+
 - Check if page layout has changed
 - Try with explicit genre in URL
 - Check Playwright rendering logs
 
 **Timeout errors:**
+
 - Increase timeout in Playwright (modify `timeout=45000`)
 - Check internet connection
 - Verify WEBTOON is accessible
@@ -279,6 +298,7 @@ playwright install chromium
 ## Support
 
 For issues or feature requests, check:
+
 - Test script output for diagnostic info
 - Backend logs in `backend/python/`
 - Playwright browser console output
@@ -292,27 +312,32 @@ For issues or feature requests, check:
 The episode scraper has been significantly enhanced with production-ready features:
 
 ### ✅ Episode Ratings & Engagement Metrics
+
 - Extracts episode ratings/scores
 - Captures like counts
 - Stores engagement metrics alongside episodes
 
 ### ✅ Smart Pagination
+
 - Handle series with 100+ episodes efficiently
 - Support page-based navigation
 - Configurable episodes per page (default: 50)
 
 ### ✅ Database Caching
+
 - SQLite-based cache for scraped episodes
 - 24-hour TTL with automatic expiration
 - Cache statistics and hit tracking
 - Significant performance improvement on repeated scrapes
 
 ### ✅ Batch Series Scraping
+
 - Scrape multiple series in one request
 - Concurrent-safe operations
 - Success/failure reporting per series
 
 ### ✅ Advanced Frontend Features
+
 - Sort by latest, oldest, rating, or likes
 - Full-text search on episode titles
 - Favorites management with localStorage
@@ -327,6 +352,7 @@ The episode scraper has been significantly enhanced with production-ready featur
 **Enhanced scraper with sorting and ratings extraction**
 
 **Request Body:**
+
 ```json
 {
   "url": "https://www.webtoons.com/en/romance/love-by-mistake/list?title_no=10411",
@@ -339,6 +365,7 @@ The episode scraper has been significantly enhanced with production-ready featur
 ```
 
 **Parameters:**
+
 - `url` (optional): Full WEBTOON URL
 - `title_no` (optional): Series ID
 - `max_episodes` (optional): Max episodes per page
@@ -351,6 +378,7 @@ The episode scraper has been significantly enhanced with production-ready featur
   - `"likes"` - Most liked first
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -393,6 +421,7 @@ The episode scraper has been significantly enhanced with production-ready featur
 **Automatically handle multi-page series**
 
 **Request Body:**
+
 ```json
 {
   "title_no": "10411",
@@ -401,11 +430,13 @@ The episode scraper has been significantly enhanced with production-ready featur
 ```
 
 **Features:**
+
 - Automatically fetches all pages
 - Respects `max_episodes` limit
 - Returns aggregated results with page count
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -422,18 +453,20 @@ The episode scraper has been significantly enhanced with production-ready featur
 **Scrape multiple series in one request**
 
 **Request Body:**
+
 ```json
 {
   "series": [
-    {"title_no": "10411"},
-    {"title_no": "10193"},
-    {"url": "https://www.webtoons.com/en/fantasy/..."}
+    { "title_no": "10411" },
+    { "title_no": "10193" },
+    { "url": "https://www.webtoons.com/en/fantasy/..." }
   ],
   "max_episodes_per_series": 50
 }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -463,12 +496,14 @@ The caching system uses SQLite to store scraped episodes:
 **Location:** `backend/database/webtoon_episodes_cache.db`
 
 **Features:**
+
 - Automatic cache key generation
 - 24-hour TTL (configurable)
 - Hit count tracking
 - Expired entry cleanup
 
 **Cache Hits:**
+
 - Repeated scrapes of same series return cached data
 - Includes "from_cache": true flag in response
 - ~10-100x faster than fresh scrape
@@ -516,8 +551,8 @@ import {
   EpisodeControls,
   EpisodeRatingDisplay,
   FavoritesManager,
-  BatchThumbnailDownloader
-} from '@/components/Feature/scraper';
+  BatchThumbnailDownloader,
+} from "@/components/Feature/scraper";
 
 // All integrated into EpisodeScraper component
 // Features automatically enabled
@@ -526,7 +561,7 @@ import {
 ### Favorites API
 
 ```typescript
-import { FavoritesManager } from '@/components/Feature/scraper/FavoritesManager';
+import { FavoritesManager } from "@/components/Feature/scraper/FavoritesManager";
 
 // Add to favorites
 FavoritesManager.addFavorite({
@@ -534,7 +569,7 @@ FavoritesManager.addFavorite({
   title: "Love by Mistake",
   genre: "romance",
   cover_image: "https://...",
-  timestamp: Date.now()
+  timestamp: Date.now(),
 });
 
 // Get favorites
@@ -550,16 +585,19 @@ const recent = FavoritesManager.getRecent();
 ## Performance Improvements
 
 ### Caching Impact
+
 - **First scrape:** 10-20 seconds (fresh fetch + parsing)
 - **Cached scrape:** <100ms (database lookup)
 - **Cache hit rate:** Typically 70-90% after initial fetch
 
 ### Pagination Efficiency
+
 - Series with 100+ episodes handled smoothly
 - Per-page processing prevents memory issues
 - Configurable batch sizes for optimization
 
 ### Batch Operations
+
 - 3 series batch: ~45-60 seconds
 - N series batch: ~15-20 seconds per series
 - Concurrent safe with proper locking
@@ -598,23 +636,17 @@ result = await scrape_webtoon_episodes_paginated(
 ### Workflow 3: Batch Multiple Series
 
 ```javascript
-const response = await batchScrapeSeriesAPI(
-  fetchWithInterceptor,
-  {
-    series: [
-      { title_no: "10411" },
-      { title_no: "10193" },
-      { title_no: "9592" }
-    ],
-    max_episodes_per_series: 50
-  }
-);
+const response = await batchScrapeSeriesAPI(fetchWithInterceptor, {
+  series: [{ title_no: "10411" }, { title_no: "10193" }, { title_no: "9592" }],
+  max_episodes_per_series: 50,
+});
 // Returns success/failure counts and all series data
 ```
 
 ### Workflow 4: Frontend Search & Sort
 
 The frontend now supports:
+
 ```
 1. Search by episode title
 2. Sort by: Latest, Oldest, Rating, Likes
@@ -628,6 +660,7 @@ The frontend now supports:
 ### Cache Issues
 
 **Cache not being used:**
+
 ```
 Check: backend/database/webtoon_episodes_cache.db exists
 Verify: Cache TTL hasn't expired
@@ -635,6 +668,7 @@ Check logs: [Cache Manager] Cache HIT/MISS messages
 ```
 
 **Clear cache (force fresh fetch):**
+
 ```python
 import os
 cache_db = "backend/database/webtoon_episodes_cache.db"
@@ -645,6 +679,7 @@ if os.path.exists(cache_db):
 ### Pagination Issues
 
 **Not getting all episodes:**
+
 - Check `pages_fetched` in response
 - Verify series has episodes on all pages
 - Check for network timeout during pagination
@@ -652,23 +687,25 @@ if os.path.exists(cache_db):
 ### Rating Extraction Issues
 
 **Ratings showing as null:**
+
 - WEBTOON HTML structure may have changed
 - Try clearing cache and rescaping
 - CSS selectors may need updating
 
 ## Performance Benchmarks
 
-| Operation | Time | Notes |
-|-----------|------|-------|
-| Fresh scrape (50 ep) | 10-15s | Playwright rendering |
-| Cached scrape | <100ms | Database lookup |
-| Paginated (200 ep) | 25-35s | Multiple pages |
-| Batch 3 series | 45-60s | Sequential processing |
+| Operation              | Time   | Notes                   |
+| ---------------------- | ------ | ----------------------- |
+| Fresh scrape (50 ep)   | 10-15s | Playwright rendering    |
+| Cached scrape          | <100ms | Database lookup         |
+| Paginated (200 ep)     | 25-35s | Multiple pages          |
+| Batch 3 series         | 45-60s | Sequential processing   |
 | Thumbnail ZIP (100 ep) | 15-20s | Download + ZIP creation |
 
 ## Next Steps
 
 Potential future enhancements:
+
 - [ ] Webhook API for new episode notifications
 - [ ] Bulk favorite import/export
 - [ ] Per-episode tagging/notes system

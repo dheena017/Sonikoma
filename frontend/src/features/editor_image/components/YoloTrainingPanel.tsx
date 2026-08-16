@@ -26,7 +26,9 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
     if (activeTab === "train") {
       const fetchCount = async () => {
         try {
-          const res = await fetchWithInterceptor("/api/image/training-data-count");
+          const res = await fetchWithInterceptor(
+            "/api/image/training-data-count"
+          );
           const data = await res.json();
           if (data && typeof data.count === "number") {
             setSampleCount(data.count);
@@ -53,7 +55,9 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
         setTrainingError(data.error);
 
         if (!data.is_training && isTraining) {
-          const countRes = await fetchWithInterceptor("/api/image/training-data-count");
+          const countRes = await fetchWithInterceptor(
+            "/api/image/training-data-count"
+          );
           const countData = await countRes.json();
           if (countData && typeof countData.count === "number") {
             setSampleCount(countData.count);
@@ -129,30 +133,44 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
         {isTraining ? (
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs text-neutral-300 font-mono">
-              <span>Epoch {trainingEpoch} / {totalTrainingEpochs}</span>
-              <span className="text-neutral-400">{Math.floor(trainingElapsed / 60)}m {trainingElapsed % 60}s</span>
+              <span>
+                Epoch {trainingEpoch} / {totalTrainingEpochs}
+              </span>
+              <span className="text-neutral-400">
+                {Math.floor(trainingElapsed / 60)}m {trainingElapsed % 60}s
+              </span>
             </div>
             <div className="w-full bg-neutral-950 h-2 rounded-full overflow-hidden border border-neutral-800 p-0.5">
               <div
                 className="bg-gradient-to-r from-purple-600 to-indigo-500 h-full rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(168,85,247,0.5)]"
-                style={{ width: `${(trainingEpoch / (totalTrainingEpochs || 1)) * 100}%` }}
+                style={{
+                  width: `${
+                    (trainingEpoch / (totalTrainingEpochs || 1)) * 100
+                  }%`,
+                }}
               ></div>
             </div>
             {Object.keys(trainingMetrics).length > 0 && (
               <div className="grid grid-cols-2 gap-2 text-[9px] font-mono text-neutral-400 bg-neutral-950/90 p-3 rounded-2xl border border-neutral-800">
-                {Object.entries(trainingMetrics).map(([k, v]: [string, any]) => (
-                  <div key={k} className="flex justify-between">
-                    <span>{k}:</span>
-                    <span className="text-purple-400 font-bold">{v.toFixed(4)}</span>
-                  </div>
-                ))}
+                {Object.entries(trainingMetrics).map(
+                  ([k, v]: [string, any]) => (
+                    <div key={k} className="flex justify-between">
+                      <span>{k}:</span>
+                      <span className="text-purple-400 font-bold">
+                        {v.toFixed(4)}
+                      </span>
+                    </div>
+                  )
+                )}
               </div>
             )}
           </div>
         ) : (
           <div className="space-y-3.5">
             <p className="text-xs text-neutral-400 leading-relaxed font-sans">
-              Fine-tune the YOLO segmentation model directly on your corrected dataset. The server will hot-swap the fine-tuned weights automatically.
+              Fine-tune the YOLO segmentation model directly on your corrected
+              dataset. The server will hot-swap the fine-tuned weights
+              automatically.
             </p>
 
             {trainingError && (
@@ -161,14 +179,17 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
               </div>
             )}
 
-            {(!sampleCount || sampleCount === 0) ? (
+            {!sampleCount || sampleCount === 0 ? (
               <div className="text-xs text-purple-300/90 bg-purple-950/30 border border-purple-900/40 p-3 rounded-2xl leading-relaxed">
-                💡 <strong>Get started:</strong> Save at least 1 mask correction in the <strong>Eraser</strong> tool to unlock fine-tuning.
+                💡 <strong>Get started:</strong> Save at least 1 mask correction
+                in the <strong>Eraser</strong> tool to unlock fine-tuning.
               </div>
             ) : (
               <div className="space-y-3 pt-1">
                 <div className="flex flex-col space-y-1.5">
-                  <label className="text-[9px] font-mono text-neutral-400 uppercase font-bold tracking-wider">Epochs</label>
+                  <label className="text-[9px] font-mono text-neutral-400 uppercase font-bold tracking-wider">
+                    Epochs
+                  </label>
                   <select
                     value={epochsToTrain}
                     onChange={(e) => setEpochsToTrain(Number(e.target.value))}
@@ -185,10 +206,16 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
                   onClick={async () => {
                     try {
                       addNotification("Starting YOLO fine-tuning...", "info");
-                      await api.startYoloTraining(fetchWithInterceptor, epochsToTrain);
+                      await api.startYoloTraining(
+                        fetchWithInterceptor,
+                        epochsToTrain
+                      );
                       setIsTraining(true);
                     } catch (err: any) {
-                      addNotification(`Failed to start training: ${err.message}`, "error");
+                      addNotification(
+                        `Failed to start training: ${err.message}`,
+                        "error"
+                      );
                     }
                   }}
                   className="w-full py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-black tracking-widest uppercase transition-all shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-purple-400/30 cursor-pointer active:scale-95 flex items-center justify-center gap-2"

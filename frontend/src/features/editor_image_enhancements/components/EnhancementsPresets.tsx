@@ -42,7 +42,10 @@ export function EnhancementsPresets({
               key={preset.id}
               type="button"
               onClick={() =>
-                handleModifyFilterPreset(activeStoryboardPanel?.id ?? 0, preset.id)
+                handleModifyFilterPreset(
+                  activeStoryboardPanel?.id ?? 0,
+                  preset.id
+                )
               }
               className={`relative text-left p-2.5 rounded-xl border text-[10px] font-bold cursor-pointer transition-all duration-200 overflow-hidden group ${
                 isActive
@@ -76,9 +79,7 @@ export function EnhancementsPresets({
           >
             <div
               className={`absolute top-0.5 w-3 h-3 bg-white rounded-full shadow transition-all ${
-                activeStoryboardPanel?.grayscale
-                  ? "left-4.5"
-                  : "left-0.5"
+                activeStoryboardPanel?.grayscale ? "left-4.5" : "left-0.5"
               }`}
             />
             <input

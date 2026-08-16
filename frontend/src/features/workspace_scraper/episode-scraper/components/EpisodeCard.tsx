@@ -102,11 +102,15 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   const handleExportSingleJSON = (e: React.MouseEvent) => {
     e.stopPropagation();
     const jsonContent = JSON.stringify(episode, null, 2);
-    const blob = new Blob([jsonContent], { type: "application/json;charset=utf-8;" });
+    const blob = new Blob([jsonContent], {
+      type: "application/json;charset=utf-8;",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const safeEp = (episode.number || 'ep').replace(/[^\w\s-]/g, "").replace(/\s+/g, "_");
+    const safeEp = (episode.number || "ep")
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "_");
     link.download = `Episode_${safeEp}_metadata.json`;
     link.click();
     URL.revokeObjectURL(url);
@@ -120,8 +124,10 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
   const getPlatformColor = (url: string) => {
     const name = getSourceName(url).toLowerCase();
-    if (name.includes("webtoon") || name.includes("naver")) return "bg-emerald-500 shadow-emerald-500/35";
-    if (name.includes("kakao") || name.includes("tapas")) return "bg-amber-500 shadow-amber-500/35";
+    if (name.includes("webtoon") || name.includes("naver"))
+      return "bg-emerald-500 shadow-emerald-500/35";
+    if (name.includes("kakao") || name.includes("tapas"))
+      return "bg-amber-500 shadow-amber-500/35";
     if (name.includes("lezhin")) return "bg-rose-500 shadow-rose-500/35";
     return "bg-purple-500 shadow-purple-500/35";
   };
@@ -133,7 +139,10 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
     const scaledRating = isScale10 ? rating / 2 : rating;
 
     return (
-      <div className="flex items-center gap-0.5" title={`Rating: ${Number(rating).toFixed(1)}/${maxVal}`}>
+      <div
+        className="flex items-center gap-0.5"
+        title={`Rating: ${Number(rating).toFixed(1)}/${maxVal}`}
+      >
         {Array(5)
           .fill(0)
           .map((_, i) => {
@@ -157,7 +166,10 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   const renderTitle = () => {
     const num = (episode.number || "").trim();
     const title = (episode.title || "")
-      .replace(/(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}.*$/i, "")
+      .replace(
+        /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}.*$/i,
+        ""
+      )
       .replace(/\blikes?\s*[\d,.]+[KMB]?.*$/i, "")
       .replace(/#\d+\s*$/, "")
       .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:–—]?\s*/i, "")
@@ -166,15 +178,23 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
     if (!title || title.toLowerCase() === num.toLowerCase()) {
       return (
-        <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={num || title}>
-          <span className="text-purple-400 font-extrabold font-mono">{num || title}</span>
+        <h3
+          className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
+          title={num || title}
+        >
+          <span className="text-purple-400 font-extrabold font-mono">
+            {num || title}
+          </span>
         </h3>
       );
     }
 
     if (!num) {
       return (
-        <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={title}>
+        <h3
+          className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
+          title={title}
+        >
           <span className="text-neutral-100">{title}</span>
         </h3>
       );
@@ -185,25 +205,43 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
     if (cleanNum === cleanTitle) {
       return (
-        <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={title}>
-          <span className="text-purple-400 font-extrabold font-mono">{title}</span>
+        <h3
+          className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
+          title={title}
+        >
+          <span className="text-purple-400 font-extrabold font-mono">
+            {title}
+          </span>
         </h3>
       );
     }
 
     if (cleanTitle.startsWith(cleanNum)) {
-      const remainder = title.slice(num.length).replace(/^[-_:\s•·/\\|]+/, "").trim();
+      const remainder = title
+        .slice(num.length)
+        .replace(/^[-_:\s•·/\\|]+/, "")
+        .trim();
       return (
-        <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={title}>
-          <span className="text-purple-400 font-extrabold font-mono mr-1.5">{num}</span>
+        <h3
+          className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
+          title={title}
+        >
+          <span className="text-purple-400 font-extrabold font-mono mr-1.5">
+            {num}
+          </span>
           {remainder && <span className="text-neutral-100">{remainder}</span>}
         </h3>
       );
     }
 
     return (
-      <h3 className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1" title={`${num}: ${title}`}>
-        <span className="text-purple-400 font-extrabold mr-1.5 font-mono">{num}</span>
+      <h3
+        className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
+        title={`${num}: ${title}`}
+      >
+        <span className="text-purple-400 font-extrabold mr-1.5 font-mono">
+          {num}
+        </span>
         <span className="text-neutral-100">{title}</span>
       </h3>
     );
@@ -225,7 +263,10 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
       {/* Top Banner / Image Area */}
       <div className="relative w-full bg-neutral-950 aspect-[16/9] overflow-hidden border-b border-neutral-850">
         {isMultiSelectMode && (
-          <div className="absolute top-3 left-3 z-20" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="absolute top-3 left-3 z-20"
+            onClick={(e) => e.stopPropagation()}
+          >
             <input
               type="checkbox"
               checked={isSelected}
@@ -250,7 +291,9 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-neutral-900 to-neutral-950">
             <ImageIcon className="w-10 h-10 text-neutral-700" />
-            <span className="text-[10px] text-neutral-600 font-mono">No Image</span>
+            <span className="text-[10px] text-neutral-600 font-mono">
+              No Image
+            </span>
           </div>
         )}
 
@@ -259,7 +302,9 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
         {/* Status badges (Single clean row, fades out on hover) */}
         <div
-          className={`absolute top-2.5 ${isMultiSelectMode ? "left-10" : "left-2.5"} flex items-center gap-1.5 z-10 max-w-[70%] overflow-hidden`}
+          className={`absolute top-2.5 ${
+            isMultiSelectMode ? "left-10" : "left-2.5"
+          } flex items-center gap-1.5 z-10 max-w-[70%] overflow-hidden`}
         >
           {episode.isNew && (
             <span className="bg-gradient-to-r from-rose-500 to-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-md border border-rose-400/20 font-mono shrink-0">
@@ -279,7 +324,9 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
           {episode.rating !== null && episode.rating !== undefined && (
             <div className="bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-1 shadow-md border border-white/10 shrink-0">
               <Star size={10} className="fill-amber-400 text-amber-400" />
-              <span className="text-[10px] font-extrabold text-amber-300 font-mono">{Number(episode.rating).toFixed(1)}</span>
+              <span className="text-[10px] font-extrabold text-amber-300 font-mono">
+                {Number(episode.rating).toFixed(1)}
+              </span>
             </div>
           )}
         </div>
@@ -295,7 +342,11 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             }`}
             title={isBookmarked ? "Remove Bookmark" : "Bookmark Episode"}
           >
-            {isBookmarked ? <BookmarkCheck size={14} className="fill-current" /> : <Bookmark size={14} />}
+            {isBookmarked ? (
+              <BookmarkCheck size={14} className="fill-current" />
+            ) : (
+              <Bookmark size={14} />
+            )}
           </button>
 
           <button
@@ -303,7 +354,11 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             className="p-1.5 rounded-xl backdrop-blur-md transition-all duration-200 border bg-black/60 text-neutral-300 hover:bg-white hover:text-black border-white/10 active:scale-90"
             title="Copy Episode Link"
           >
-            {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+            {copied ? (
+              <Check size={14} className="text-emerald-400" />
+            ) : (
+              <Copy size={14} />
+            )}
           </button>
         </div>
 
@@ -322,7 +377,10 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             {renderTitle()}
             <div className="flex items-center gap-1 shrink-0">
               {episode.index !== undefined && (
-                <span className="text-[10px] font-bold text-neutral-500 font-mono bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded-md" title={`Episode Index: ${episode.index}`}>
+                <span
+                  className="text-[10px] font-bold text-neutral-500 font-mono bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded-md"
+                  title={`Episode Index: ${episode.index}`}
+                >
                   #{episode.index}
                 </span>
               )}
@@ -342,7 +400,8 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
               <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => {
                   const filled = episode.rating! / 2 >= star;
-                  const halfFilled = !filled && episode.rating! / 2 >= star - 0.5;
+                  const halfFilled =
+                    !filled && episode.rating! / 2 >= star - 0.5;
                   return (
                     <Star
                       key={star}
@@ -359,9 +418,13 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
                 })}
               </div>
               <span className="text-[10px] font-extrabold text-amber-300 font-mono">
-                {episode.rating !== null && episode.rating !== undefined ? Number(episode.rating).toFixed(1) : "N/A"}
+                {episode.rating !== null && episode.rating !== undefined
+                  ? Number(episode.rating).toFixed(1)
+                  : "N/A"}
               </span>
-              <span className="text-[10px] text-neutral-600 font-mono">/10</span>
+              <span className="text-[10px] text-neutral-600 font-mono">
+                /10
+              </span>
             </div>
           )}
 
@@ -369,7 +432,11 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
           <div className="flex items-center justify-between text-xs text-neutral-400 pt-0.5">
             {episode.url && (
               <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-widest text-purple-400 bg-purple-950/40 border border-purple-500/20 px-2 py-0.5 rounded-md font-mono">
-                <span className={`w-1.5 h-1.5 rounded-full ${getPlatformColor(episode.url)} shadow-sm animate-pulse`} />
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${getPlatformColor(
+                    episode.url
+                  )} shadow-sm animate-pulse`}
+                />
                 {getSourceName(episode.url).toUpperCase()}
               </span>
             )}
@@ -388,18 +455,27 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
           <div className="flex items-center gap-3">
             {episode.likes && (
               <div className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono">
-                <ThumbsUp size={12} className="text-purple-400 fill-purple-400/20" />
+                <ThumbsUp
+                  size={12}
+                  className="text-purple-400 fill-purple-400/20"
+                />
                 <span>{episode.likes}</span>
               </div>
             )}
             {episode.views !== undefined && episode.views > 0 && (
               <div className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono">
                 <Eye size={12} className="text-sky-400" />
-                <span>{episode.views >= 1000 ? `${(episode.views / 1000).toFixed(1)}K` : episode.views}</span>
+                <span>
+                  {episode.views >= 1000
+                    ? `${(episode.views / 1000).toFixed(1)}K`
+                    : episode.views}
+                </span>
               </div>
             )}
             {!episode.likes && !episode.views && (
-              <div className="text-[10px] font-mono text-neutral-600">Ready to import</div>
+              <div className="text-[10px] font-mono text-neutral-600">
+                Ready to import
+              </div>
             )}
           </div>
 
@@ -444,7 +520,10 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
               >
                 {isBookmarked ? (
                   <>
-                    <BookmarkCheck size={14} className="text-amber-400 fill-current" />
+                    <BookmarkCheck
+                      size={14}
+                      className="text-amber-400 fill-current"
+                    />
                     <span>Remove Bookmark</span>
                   </>
                 ) : (

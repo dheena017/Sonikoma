@@ -145,7 +145,9 @@ export default function StoryboardBulkOps({
           {isBatchMagicProcessing ? (
             <>
               <RefreshCw className="h-3 w-3 animate-spin" />
-              <span>{batchMagicProgress?.current}/{batchMagicProgress?.total}</span>
+              <span>
+                {batchMagicProgress?.current}/{batchMagicProgress?.total}
+              </span>
             </>
           ) : (
             <>

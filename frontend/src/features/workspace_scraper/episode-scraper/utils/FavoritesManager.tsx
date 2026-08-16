@@ -1,6 +1,6 @@
-import React, { useState, useEffect, ReactNode } from 'react';
-import { Trash2, ExternalLink } from 'lucide-react';
-import { getProxiedImageUrl } from '@/shared/utils/url';
+import React, { useState, useEffect, ReactNode } from "react";
+import { Trash2, ExternalLink } from "lucide-react";
+import { getProxiedImageUrl } from "@/shared/utils/url";
 
 export interface FavoriteSeries {
   title_no: string;
@@ -13,14 +13,14 @@ export interface FavoriteSeries {
   [x: string]: any;
 }
 
-const STORAGE_KEY = 'sonikoma_favorite_series';
-const RECENT_KEY = 'sonikoma_recent_series';
+const STORAGE_KEY = "sonikoma_favorite_series";
+const RECENT_KEY = "sonikoma_recent_series";
 const MAX_RECENT = 10;
-export const FAVORITES_UPDATED_EVENT = 'sonikoma-favorites-updated';
+export const FAVORITES_UPDATED_EVENT = "sonikoma-favorites-updated";
 
 export class FavoritesManager {
   static notifyUpdated() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.dispatchEvent(new Event(FAVORITES_UPDATED_EVENT));
   }
 
@@ -47,7 +47,9 @@ export class FavoritesManager {
   }
 
   static removeFavorite(title_no: string) {
-    const favorites = this.getFavorites().filter((f) => f.title_no !== title_no);
+    const favorites = this.getFavorites().filter(
+      (f) => f.title_no !== title_no
+    );
     localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
     this.notifyUpdated();
   }
@@ -90,7 +92,7 @@ export class FavoritesManager {
 
   static getBookmarks(): string[] {
     try {
-      const data = localStorage.getItem('sonikoma_bookmarked_episodes');
+      const data = localStorage.getItem("sonikoma_bookmarked_episodes");
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
@@ -101,14 +103,20 @@ export class FavoritesManager {
     const bookmarks = this.getBookmarks();
     if (!bookmarks.includes(url)) {
       bookmarks.push(url);
-      localStorage.setItem('sonikoma_bookmarked_episodes', JSON.stringify(bookmarks));
+      localStorage.setItem(
+        "sonikoma_bookmarked_episodes",
+        JSON.stringify(bookmarks)
+      );
       this.notifyUpdated();
     }
   }
 
   static removeBookmark(url: string) {
     const bookmarks = this.getBookmarks().filter((u) => u !== url);
-    localStorage.setItem('sonikoma_bookmarked_episodes', JSON.stringify(bookmarks));
+    localStorage.setItem(
+      "sonikoma_bookmarked_episodes",
+      JSON.stringify(bookmarks)
+    );
     this.notifyUpdated();
   }
 
@@ -118,7 +126,7 @@ export class FavoritesManager {
 
   static getReadEpisodes(): string[] {
     try {
-      const data = localStorage.getItem('sonikoma_read_episodes');
+      const data = localStorage.getItem("sonikoma_read_episodes");
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
@@ -129,14 +137,14 @@ export class FavoritesManager {
     const readUrls = this.getReadEpisodes();
     if (!readUrls.includes(url)) {
       readUrls.push(url);
-      localStorage.setItem('sonikoma_read_episodes', JSON.stringify(readUrls));
+      localStorage.setItem("sonikoma_read_episodes", JSON.stringify(readUrls));
       this.notifyUpdated();
     }
   }
 
   static markAsUnread(url: string) {
     const readUrls = this.getReadEpisodes().filter((u) => u !== url);
-    localStorage.setItem('sonikoma_read_episodes', JSON.stringify(readUrls));
+    localStorage.setItem("sonikoma_read_episodes", JSON.stringify(readUrls));
     this.notifyUpdated();
   }
 
@@ -146,7 +154,7 @@ export class FavoritesManager {
 
   static getEnteredUrls(): string[] {
     try {
-      const data = localStorage.getItem('sonikoma_entered_urls');
+      const data = localStorage.getItem("sonikoma_entered_urls");
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
@@ -161,7 +169,10 @@ export class FavoritesManager {
       urls.splice(index, 1);
     }
     urls.unshift(url);
-    localStorage.setItem('sonikoma_entered_urls', JSON.stringify(urls.slice(0, 50)));
+    localStorage.setItem(
+      "sonikoma_entered_urls",
+      JSON.stringify(urls.slice(0, 50))
+    );
     this.notifyUpdated();
   }
 }
@@ -179,7 +190,9 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
 
   useEffect(() => {
     const refreshItems = () => {
-      const data = showRecent ? FavoritesManager.getRecent() : FavoritesManager.getFavorites();
+      const data = showRecent
+        ? FavoritesManager.getRecent()
+        : FavoritesManager.getFavorites();
       setItems(data);
     };
 
@@ -187,11 +200,14 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
 
     const handleFavoritesChanged = () => refreshItems();
     window.addEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesChanged);
-    window.addEventListener('storage', handleFavoritesChanged);
+    window.addEventListener("storage", handleFavoritesChanged);
 
     return () => {
-      window.removeEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesChanged);
-      window.removeEventListener('storage', handleFavoritesChanged);
+      window.removeEventListener(
+        FAVORITES_UPDATED_EVENT,
+        handleFavoritesChanged
+      );
+      window.removeEventListener("storage", handleFavoritesChanged);
     };
   }, [showRecent]);
 
@@ -209,7 +225,7 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
     return (
       <div className="p-4 text-center text-gray-400 bg-gray-800 rounded">
         <p className="text-sm">
-          {showRecent ? 'No recently browsed series' : 'No favorite series yet'}
+          {showRecent ? "No recently browsed series" : "No favorite series yet"}
         </p>
       </div>
     );
@@ -237,7 +253,9 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
               </h4>
               <div className="flex items-center justify-between gap-1 mt-1">
                 {series.genre && (
-                  <span className="text-[10px] text-gray-400 truncate">{series.genre}</span>
+                  <span className="text-[10px] text-gray-400 truncate">
+                    {series.genre}
+                  </span>
                 )}
                 {series.url && (
                   <a

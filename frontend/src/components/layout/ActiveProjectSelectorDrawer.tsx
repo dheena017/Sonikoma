@@ -20,11 +20,7 @@ import {
 } from "lucide-react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
-import {
-  getProxiedImageUrl,
-  getSourceIcon,
-  getSourceName,
-} from "@/utils";
+import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/utils";
 import { timeAgo } from "@/utils/dateUtils";
 
 interface ProjectItem {
@@ -60,10 +56,9 @@ function formatDuration(seconds: number): string {
   return m > 0 ? `${m}m ${s}s` : `${s}s`;
 }
 
-export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerProps> = ({
-  fetchWithInterceptor,
-  navigateTo,
-}) => {
+export const ActiveProjectSelectorDrawer: React.FC<
+  ActiveProjectSelectorDrawerProps
+> = ({ fetchWithInterceptor, navigateTo }) => {
   const { themeMode } = useThemeMode();
   const {
     activeProjectId,
@@ -84,7 +79,9 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
   const [activeTab, setActiveTab] = useState<
     "all" | "recent" | "draft" | "processing" | "completed" | "favorites"
   >("all");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "panels" | "title">("newest");
+  const [sortBy, setSortBy] = useState<
+    "newest" | "oldest" | "panels" | "title"
+  >("newest");
 
   // Favorites management via localStorage
   const [favorites, setFavorites] = useState<string[]>(() => {
@@ -99,9 +96,14 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
   const toggleFavorite = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     setFavorites((prev) => {
-      const updated = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      const updated = prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id];
       try {
-        localStorage.setItem("sonikoma_favorite_projects", JSON.stringify(updated));
+        localStorage.setItem(
+          "sonikoma_favorite_projects",
+          JSON.stringify(updated)
+        );
       } catch {}
       return updated;
     });
@@ -143,7 +145,8 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
 
         if (res.ok) {
           const json = await res.json();
-          const list = json.data || json.projects || (Array.isArray(json) ? json : []);
+          const list =
+            json.data || json.projects || (Array.isArray(json) ? json : []);
           if (isMounted) {
             setProjects(list);
           }
@@ -164,8 +167,12 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
   // Real Filter & Sort projects
   const filteredProjects = useMemo(() => {
     let result = projects.filter((p) => {
-      const titleMatch = (p.title || "").toLowerCase().includes(searchQuery.toLowerCase());
-      const chapterMatch = (p.chapter_slug || "").toLowerCase().includes(searchQuery.toLowerCase());
+      const titleMatch = (p.title || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const chapterMatch = (p.chapter_slug || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
       const matchesSearch = titleMatch || chapterMatch;
 
       if (!matchesSearch) return false;
@@ -175,16 +182,23 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
       if (activeTab === "recent") return true;
       if (activeTab === "draft") return status === "draft";
       if (activeTab === "processing") return status === "processing";
-      if (activeTab === "completed") return status === "completed" || status === "ready";
+      if (activeTab === "completed")
+        return status === "completed" || status === "ready";
       return true; // "all"
     });
 
     return result.sort((a, b) => {
       if (sortBy === "newest") {
-        return new Date(b.created_at || b.updated_at || 0).getTime() - new Date(a.created_at || a.updated_at || 0).getTime();
+        return (
+          new Date(b.created_at || b.updated_at || 0).getTime() -
+          new Date(a.created_at || a.updated_at || 0).getTime()
+        );
       }
       if (sortBy === "oldest") {
-        return new Date(a.created_at || a.updated_at || 0).getTime() - new Date(b.created_at || b.updated_at || 0).getTime();
+        return (
+          new Date(a.created_at || a.updated_at || 0).getTime() -
+          new Date(b.created_at || b.updated_at || 0).getTime()
+        );
       }
       if (sortBy === "panels") {
         const countA = a.panels_count ?? a.panel_count ?? a.panels?.length ?? 0;
@@ -240,23 +254,28 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
   const activePanelsCount: number =
     activePanels.length > 0
       ? activePanels.length
-      : (activeProjectObj?.panels_count ?? 0);
+      : activeProjectObj?.panels_count ?? 0;
 
   const activeDurationSeconds = activePanels.reduce(
     (acc: number, p: any) => acc + (p.duration || p.audio_duration || 3),
     0
   );
   const activeSpeechCount = activePanels.filter(
-    (p: any) => p.speech_text || p.narration_text || (p.dialogue && p.dialogue.length > 0)
+    (p: any) =>
+      p.speech_text || p.narration_text || (p.dialogue && p.dialogue.length > 0)
   ).length;
   const activeAudioCount = activePanels.filter(
-    (p: any) => p.audio_url || p.narration_url || p.audio_path || p.generated_audio
+    (p: any) =>
+      p.audio_url || p.narration_url || p.audio_path || p.generated_audio
   ).length;
   const activeProgressPct =
     activePanelsCount > 0
       ? Math.min(
           100,
-          Math.round(((activeSpeechCount + activeAudioCount) / (activePanelsCount * 2)) * 100)
+          Math.round(
+            ((activeSpeechCount + activeAudioCount) / (activePanelsCount * 2)) *
+              100
+          )
         )
       : 0;
 
@@ -280,14 +299,15 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
 
       {/* Drawer Panel */}
       <div className="relative w-full max-w-lg h-full bg-[#090910]/85 backdrop-blur-3xl border-l border-white/10 text-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-300">
-        
         {/* ─── Website Logo & Header ─── */}
         <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#090910]/60 backdrop-blur-md">
           <div className="flex items-center gap-3.5">
             <div className="relative">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 opacity-60 blur-sm" />
               <img
-                src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
+                src={
+                  themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"
+                }
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
                 }}
@@ -348,15 +368,23 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
 
         {/* ─── Global Project Context Banner (4 States: idle, loading, missing, active) ─── */}
         {(() => {
-          if (projectState === "missing" || (activeProjectId && !activeProjectData && !useProjectStore.getState().isHydrating)) {
-            const missingId = missingProjectInfo?.missingId || activeProjectId || "Unknown ID";
-            const isJobId = missingProjectInfo?.isJobId || missingId.startsWith("job_");
+          if (
+            projectState === "missing" ||
+            (activeProjectId &&
+              !activeProjectData &&
+              !useProjectStore.getState().isHydrating)
+          ) {
+            const missingId =
+              missingProjectInfo?.missingId || activeProjectId || "Unknown ID";
+            const isJobId =
+              missingProjectInfo?.isJobId || missingId.startsWith("job_");
 
             return (
               <div className="p-4 border-b border-rose-500/20 bg-gradient-to-b from-rose-950/20 to-[#0d0e19] space-y-3.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider flex items-center gap-1.5 font-mono">
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" /> Project Unavailable
+                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />{" "}
+                    Project Unavailable
                   </span>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-400 font-mono">
                     Missing 404
@@ -404,12 +432,16 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
             );
           }
 
-          if (projectState === "loading" || (activeProjectId && !activeProjectData)) {
+          if (
+            projectState === "loading" ||
+            (activeProjectId && !activeProjectData)
+          ) {
             return (
               <div className="p-4 border-b border-white/10 bg-gradient-to-b from-[#131427] to-[#0d0e19] space-y-3.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1.5 font-mono">
-                    <Activity className="w-3.5 h-3.5 text-purple-400 animate-spin" /> Active Project Context
+                    <Activity className="w-3.5 h-3.5 text-purple-400 animate-spin" />{" "}
+                    Active Project Context
                   </span>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 font-mono">
                     Loading...
@@ -431,7 +463,8 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
               <div className="p-4 border-b border-white/10 bg-gradient-to-b from-[#131427] to-[#0d0e19] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5 font-mono">
-                    <Zap className="w-3.5 h-3.5 text-amber-400" /> No Active Project
+                    <Zap className="w-3.5 h-3.5 text-amber-400" /> No Active
+                    Project
                   </span>
                   <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-neutral-700 bg-neutral-850 text-neutral-400 font-mono">
                     Idle
@@ -439,8 +472,12 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                 </div>
                 <div className="bg-[#17192e] border border-white/10 rounded-2xl p-3.5 flex items-center justify-between gap-3">
                   <div>
-                    <h4 className="font-extrabold text-xs text-white">No project currently active</h4>
-                    <p className="text-[11px] text-neutral-400 mt-0.5">Select a project below to enable your workspace tools.</p>
+                    <h4 className="font-extrabold text-xs text-white">
+                      No project currently active
+                    </h4>
+                    <p className="text-[11px] text-neutral-400 mt-0.5">
+                      Select a project below to enable your workspace tools.
+                    </p>
                   </div>
                   {navigateTo && (
                     <button
@@ -461,14 +498,20 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
 
           // Active State
           const proj = activeProjectData.project;
-          const importedCount = proj?.imported_assets_count ?? activeProjectData.scrapedImages?.length ?? 0;
+          const importedCount =
+            proj?.imported_assets_count ??
+            activeProjectData.scrapedImages?.length ??
+            0;
           const hasVideo = !!proj?.video_url;
           const statusLower = (proj?.status || "pending").toLowerCase();
           const statusColor =
-            statusLower === "processing" ? "text-amber-400 bg-amber-500/10 border-amber-500/30" :
-            statusLower === "draft" ? "text-neutral-400 bg-neutral-800 border-neutral-700" :
-            statusLower === "completed" || statusLower === "ready" ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" :
-            "text-blue-400 bg-blue-500/10 border-blue-500/30";
+            statusLower === "processing"
+              ? "text-amber-400 bg-amber-500/10 border-amber-500/30"
+              : statusLower === "draft"
+              ? "text-neutral-400 bg-neutral-800 border-neutral-700"
+              : statusLower === "completed" || statusLower === "ready"
+              ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
+              : "text-blue-400 bg-blue-500/10 border-blue-500/30";
 
           // Build a clean subtitle: prefer "Ep. X" or chapter slug short form
           const episodeLabel = proj?.episode
@@ -483,15 +526,20 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
             proj?.author ? `by ${proj.author}` : null,
             episodeLabel,
             proj?.genre,
-          ].filter(Boolean).join(" · ");
+          ]
+            .filter(Boolean)
+            .join(" · ");
 
           return (
             <div className="p-4 border-b border-white/10 bg-gradient-to-b from-[#131427] to-[#0d0e19] space-y-3.5">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1.5 font-mono">
-                  <Activity className="w-3.5 h-3.5 text-purple-400" /> Active Project Context
+                  <Activity className="w-3.5 h-3.5 text-purple-400" /> Active
+                  Project Context
                 </span>
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 font-mono capitalize ${statusColor}`}>
+                <span
+                  className={`text-[9px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 font-mono capitalize ${statusColor}`}
+                >
                   <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                   {proj?.status || "Active"}
                 </span>
@@ -516,7 +564,9 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                   <div className="min-w-0 flex flex-col gap-0.5">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <ActiveSourceIcon className="w-3 h-3 text-neutral-400 shrink-0" />
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">{activeSourceName}</span>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+                        {activeSourceName}
+                      </span>
                       {hasVideo && (
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">
                           VIDEO ✓
@@ -527,7 +577,9 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                       {proj?.title || "Untitled Project"}
                     </h4>
                     {infoLine && (
-                      <p className="text-[11px] text-neutral-400 font-mono truncate">{infoLine}</p>
+                      <p className="text-[11px] text-neutral-400 font-mono truncate">
+                        {infoLine}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -538,7 +590,11 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
-                          navigateTo(`/scraper/editor?project_id=${encodeURIComponent(activeProjectId!)}`);
+                          navigateTo(
+                            `/scraper/editor?project_id=${encodeURIComponent(
+                              activeProjectId!
+                            )}`
+                          );
                         }}
                         className="px-2.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-[11px] font-extrabold transition-all shadow-md flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
                         title="Open Studio Editor"
@@ -550,7 +606,11 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
-                          navigateTo(`/editor/image?project_id=${encodeURIComponent(activeProjectId!)}`);
+                          navigateTo(
+                            `/editor/image?project_id=${encodeURIComponent(
+                              activeProjectId!
+                            )}`
+                          );
                         }}
                         className="px-2.5 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
                         title="Open Image Cropper & Cleaner"
@@ -562,7 +622,11 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                       <button
                         onClick={() => {
                           setDrawerOpen(false);
-                          navigateTo(`/creative-suite/ai-voice?project_id=${encodeURIComponent(activeProjectId!)}`);
+                          navigateTo(
+                            `/creative-suite/ai-voice?project_id=${encodeURIComponent(
+                              activeProjectId!
+                            )}`
+                          );
                         }}
                         className="px-2.5 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
                         title="Open AI Voice Studio"
@@ -575,7 +639,11 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                         <button
                           onClick={() => {
                             setDrawerOpen(false);
-                            navigateTo(`/projects/${encodeURIComponent(proj.series_slug!)}`);
+                            navigateTo(
+                              `/projects/${encodeURIComponent(
+                                proj.series_slug!
+                              )}`
+                            );
                           }}
                           className="px-2.5 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-300 border border-neutral-700 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
                           title="Open Series Details Page"
@@ -609,9 +677,12 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
               {activePanelsCount > 0 && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-neutral-400">Composition Progress</span>
+                    <span className="text-neutral-400">
+                      Composition Progress
+                    </span>
                     <span className="text-purple-300 font-bold">
-                      {activeProgressPct}% · ~{formatDuration(activeDurationSeconds)}
+                      {activeProgressPct}% · ~
+                      {formatDuration(activeDurationSeconds)}
                     </span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-neutral-900 overflow-hidden border border-white/5">
@@ -626,24 +697,50 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
               {/* Real Stats Grid — 4 columns with contextual data */}
               <div className="grid grid-cols-4 gap-2 text-center text-xs">
                 <div className="bg-[#17192e] border border-white/5 p-2 rounded-xl">
-                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">Panels</span>
-                  <span className="font-bold text-white font-mono text-sm">{activePanelsCount}</span>
+                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">
+                    Panels
+                  </span>
+                  <span className="font-bold text-white font-mono text-sm">
+                    {activePanelsCount}
+                  </span>
                 </div>
                 <div className="bg-[#17192e] border border-white/5 p-2 rounded-xl">
-                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">Imported</span>
-                  <span className={`font-bold font-mono text-sm ${importedCount > 0 ? "text-purple-300" : "text-neutral-500"}`}>
+                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">
+                    Imported
+                  </span>
+                  <span
+                    className={`font-bold font-mono text-sm ${
+                      importedCount > 0 ? "text-purple-300" : "text-neutral-500"
+                    }`}
+                  >
                     {importedCount}
                   </span>
                 </div>
                 <div className="bg-[#17192e] border border-white/5 p-2 rounded-xl">
-                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">Speech</span>
-                  <span className={`font-bold font-mono text-sm ${activeSpeechCount > 0 ? "text-emerald-400" : "text-neutral-500"}`}>
+                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">
+                    Speech
+                  </span>
+                  <span
+                    className={`font-bold font-mono text-sm ${
+                      activeSpeechCount > 0
+                        ? "text-emerald-400"
+                        : "text-neutral-500"
+                    }`}
+                  >
                     {activeSpeechCount}
                   </span>
                 </div>
                 <div className="bg-[#17192e] border border-white/5 p-2 rounded-xl">
-                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">Audio</span>
-                  <span className={`font-bold font-mono text-sm ${activeAudioCount > 0 ? "text-pink-400" : "text-neutral-500"}`}>
+                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">
+                    Audio
+                  </span>
+                  <span
+                    className={`font-bold font-mono text-sm ${
+                      activeAudioCount > 0
+                        ? "text-pink-400"
+                        : "text-neutral-500"
+                    }`}
+                  >
                     {activeAudioCount}
                   </span>
                 </div>
@@ -654,9 +751,12 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                 <div className="space-y-1.5 pt-1">
                   <div className="flex items-center justify-between text-[10px] font-mono">
                     <span className="text-neutral-400 uppercase tracking-wider flex items-center gap-1">
-                      <Film className="w-3 h-3 text-purple-400" /> Storyboard Panels
+                      <Film className="w-3 h-3 text-purple-400" /> Storyboard
+                      Panels
                     </span>
-                    <span className="text-purple-300 font-bold">{activePanels.length} panels</span>
+                    <span className="text-purple-300 font-bold">
+                      {activePanels.length} panels
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     {activePanels.slice(0, 10).map((panel: any, i: number) => (
@@ -665,7 +765,11 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                         onClick={() => {
                           setDrawerOpen(false);
                           if (navigateTo) {
-                            navigateTo(`/scraper/editor?project_id=${encodeURIComponent(activeProjectId!)}&panel=${i}`);
+                            navigateTo(
+                              `/scraper/editor?project_id=${encodeURIComponent(
+                                activeProjectId!
+                              )}&panel=${i}`
+                            );
                           }
                         }}
                         className="w-11 h-11 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 hover:border-purple-500 shrink-0 relative transition-all group cursor-pointer"
@@ -677,7 +781,9 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                             alt={`Panel ${i + 1}`}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                              (
+                                e.currentTarget as HTMLImageElement
+                              ).style.display = "none";
                             }}
                           />
                         ) : (
@@ -692,7 +798,9 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                     ))}
                     {activePanels.length > 10 && (
                       <div className="w-11 h-11 rounded-lg bg-purple-500/10 border border-purple-500/20 shrink-0 flex items-center justify-center">
-                        <span className="text-[10px] text-purple-300 font-bold font-mono">+{activePanels.length - 10}</span>
+                        <span className="text-[10px] text-purple-300 font-bold font-mono">
+                          +{activePanels.length - 10}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -702,14 +810,19 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
               {/* Scraped Images Preview Strip — shown when scraped images are available */}
               {(() => {
                 const scraped = activeProjectData.scrapedImages || [];
-                if (scraped.length === 0 || activePanels.length > 0) return null;
+                if (scraped.length === 0 || activePanels.length > 0)
+                  return null;
                 const preview = scraped.slice(0, 8);
                 const remaining = scraped.length - preview.length;
                 return (
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-neutral-400 uppercase tracking-wider">Scraped Images</span>
-                      <span className="text-purple-300 font-bold">{scraped.length} images</span>
+                      <span className="text-neutral-400 uppercase tracking-wider">
+                        Scraped Images
+                      </span>
+                      <span className="text-purple-300 font-bold">
+                        {scraped.length} images
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                       {preview.map((src, i) => (
@@ -722,14 +835,18 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                             alt={`Scraped ${i + 1}`}
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                              (
+                                e.currentTarget as HTMLImageElement
+                              ).style.display = "none";
                             }}
                           />
                         </div>
                       ))}
                       {remaining > 0 && (
                         <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 shrink-0 flex items-center justify-center">
-                          <span className="text-[10px] text-purple-300 font-bold font-mono">+{remaining}</span>
+                          <span className="text-[10px] text-purple-300 font-bold font-mono">
+                            +{remaining}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -739,7 +856,6 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
             </div>
           );
         })()}
-
 
         {/* ─── Search & Filter Controls ─── */}
         <div className="p-4 pb-2 border-b border-white/5 bg-[#0e0f17] space-y-3">
@@ -808,7 +924,9 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 text-neutral-400 gap-3">
               <Loader2 className="w-7 h-7 animate-spin text-purple-400" />
-              <span className="text-xs font-mono">Loading real projects...</span>
+              <span className="text-xs font-mono">
+                Loading real projects...
+              </span>
             </div>
           ) : filteredProjects.length === 0 ? (
             <div className="text-center py-16 px-4 text-neutral-400 space-y-3">
@@ -816,9 +934,13 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                 <FolderOpen className="w-7 h-7" />
               </div>
               <div>
-                <p className="text-sm font-bold text-white">No projects found</p>
+                <p className="text-sm font-bold text-white">
+                  No projects found
+                </p>
                 <p className="text-xs text-neutral-500 mt-1">
-                  {searchQuery ? "No matches for your search term." : "No projects in this category."}
+                  {searchQuery
+                    ? "No matches for your search term."
+                    : "No projects in this category."}
                 </p>
               </div>
               {navigateTo && (
@@ -838,9 +960,13 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
             filteredProjects.map((p) => {
               const isActive = p.project_id === activeProjectId;
               const isFav = favorites.includes(p.project_id);
-              const cover = p.cover_image || p.first_panel_image || p.panels?.[0]?.image_url;
+              const cover =
+                p.cover_image ||
+                p.first_panel_image ||
+                p.panels?.[0]?.image_url;
               // Use real DB panels_count field (returned by the list API)
-              const panelCount = p.panels_count ?? p.panel_count ?? p.panels?.length ?? 0;
+              const panelCount =
+                p.panels_count ?? p.panel_count ?? p.panels?.length ?? 0;
               const importedCount = p.imported_assets_count ?? 0;
               const status = (p.status || "ready").toLowerCase();
               const ItemSourceIcon = getSourceIcon(p.url);
@@ -889,7 +1015,9 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                           {itemSourceName}
                         </span>
                         {/* Real status badge */}
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border font-mono capitalize ${statusColor}`}>
+                        <span
+                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border font-mono capitalize ${statusColor}`}
+                        >
                           {status}
                         </span>
                       </div>
@@ -905,7 +1033,9 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                         {importedCount > 0 && (
                           <>
                             <span>•</span>
-                            <span className="font-mono text-purple-400">{importedCount} imported</span>
+                            <span className="font-mono text-purple-400">
+                              {importedCount} imported
+                            </span>
                           </>
                         )}
                         <span>•</span>
@@ -917,17 +1047,22 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
                     </div>
                   </div>
 
-
                   <div className="flex items-center gap-2 shrink-0">
                     {/* Favorite Star Button */}
                     <button
                       onClick={(e) => toggleFavorite(e, p.project_id)}
                       className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                        isFav ? "text-amber-400 hover:text-amber-300" : "text-neutral-600 hover:text-neutral-400"
+                        isFav
+                          ? "text-amber-400 hover:text-amber-300"
+                          : "text-neutral-600 hover:text-neutral-400"
                       }`}
-                      title={isFav ? "Remove from Favorites" : "Add to Favorites"}
+                      title={
+                        isFav ? "Remove from Favorites" : "Add to Favorites"
+                      }
                     >
-                      <Star className={`w-4 h-4 ${isFav ? "fill-amber-400" : ""}`} />
+                      <Star
+                        className={`w-4 h-4 ${isFav ? "fill-amber-400" : ""}`}
+                      />
                     </button>
 
                     {isActive ? (
@@ -962,9 +1097,12 @@ export const ActiveProjectSelectorDrawer: React.FC<ActiveProjectSelectorDrawerPr
               <AlertTriangle className="w-6 h-6" />
             </div>
 
-            <h3 className="text-base font-bold text-white mb-1">Switch Active Project?</h3>
+            <h3 className="text-base font-bold text-white mb-1">
+              Switch Active Project?
+            </h3>
             <p className="text-xs text-neutral-400 mb-5 leading-relaxed font-sans">
-              Your current workspace has unsaved changes. Switching active projects will hydrate the new project state.
+              Your current workspace has unsaved changes. Switching active
+              projects will hydrate the new project state.
             </p>
 
             <div className="flex items-center gap-2">

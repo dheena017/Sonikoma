@@ -3,11 +3,19 @@ import { Sparkles, Wand2, CheckCircle, Copy, AlertCircle } from "lucide-react";
 
 interface YouTubeSeoOptimizerProps {
   initialTitle?: string;
-  onApplySeo: (seoData: { title: string; description: string; tags: string[] }) => void;
+  onApplySeo: (seoData: {
+    title: string;
+    description: string;
+    tags: string[];
+  }) => void;
   addNotification?: (msg: string, type: string) => void;
 }
 
-export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo, addNotification }: YouTubeSeoOptimizerProps) {
+export default function YouTubeSeoOptimizer({
+  initialTitle = "",
+  onApplySeo,
+  addNotification,
+}: YouTubeSeoOptimizerProps) {
   const [seriesName, setSeriesName] = useState("");
   const [chapterTitle, setChapterTitle] = useState(initialTitle || "");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -16,7 +24,10 @@ export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo, add
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const res = await fetch("/api/export/youtube/seo/generate", {
         method: "POST",
         headers: {
@@ -28,13 +39,19 @@ export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo, add
       if (res.ok) {
         const data = await res.json();
         setResult(data);
-        addNotification?.(`✅ AI SEO metadata generated! Score: ${data.seo_score}/100`, "success");
+        addNotification?.(
+          `✅ AI SEO metadata generated! Score: ${data.seo_score}/100`,
+          "success"
+        );
       } else {
         addNotification?.("Failed to generate SEO metadata.", "error");
       }
     } catch (err) {
       console.warn("SEO generation notice:", err);
-      addNotification?.("SEO generation failed. Check your connection.", "error");
+      addNotification?.(
+        "SEO generation failed. Check your connection.",
+        "error"
+      );
     } finally {
       setIsGenerating(false);
     }
@@ -56,7 +73,9 @@ export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo, add
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
-          <span className="text-[10px] text-neutral-500 font-bold block">WEBTOON SERIES NAME:</span>
+          <span className="text-[10px] text-neutral-500 font-bold block">
+            WEBTOON SERIES NAME:
+          </span>
           <input
             type="text"
             value={seriesName}
@@ -66,7 +85,9 @@ export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo, add
           />
         </div>
         <div className="space-y-1">
-          <span className="text-[10px] text-neutral-500 font-bold block">CHAPTER TITLE / HIGHLIGHT:</span>
+          <span className="text-[10px] text-neutral-500 font-bold block">
+            CHAPTER TITLE / HIGHLIGHT:
+          </span>
           <input
             type="text"
             value={chapterTitle}
@@ -83,20 +104,33 @@ export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo, add
         className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98 disabled:opacity-50"
       >
         <Wand2 className={`w-4 h-4 ${isGenerating ? "animate-spin" : ""}`} />
-        <span>{isGenerating ? "Analyzing Keywords & Generating SEO..." : "Generate AI YouTube Metadata"}</span>
+        <span>
+          {isGenerating
+            ? "Analyzing Keywords & Generating SEO..."
+            : "Generate AI YouTube Metadata"}
+        </span>
       </button>
 
       {result && (
         <div className="p-3.5 bg-neutral-900/60 rounded-xl border border-neutral-850 space-y-2.5 animate-fade-in">
           <div>
-            <span className="text-[10px] text-neutral-500 font-bold block">OPTIMIZED TITLE:</span>
-            <div className="text-xs text-purple-300 font-bold">{result.title}</div>
+            <span className="text-[10px] text-neutral-500 font-bold block">
+              OPTIMIZED TITLE:
+            </span>
+            <div className="text-xs text-purple-300 font-bold">
+              {result.title}
+            </div>
           </div>
           <div>
-            <span className="text-[10px] text-neutral-500 font-bold block">RECOMMENDED TAGS:</span>
+            <span className="text-[10px] text-neutral-500 font-bold block">
+              RECOMMENDED TAGS:
+            </span>
             <div className="flex flex-wrap gap-1 mt-1">
               {result.tags?.map((tag: string) => (
-                <span key={tag} className="px-2 py-0.5 bg-neutral-950 border border-neutral-800 rounded text-[10px] text-neutral-400">
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 bg-neutral-950 border border-neutral-800 rounded text-[10px] text-neutral-400"
+                >
                   #{tag}
                 </span>
               ))}
@@ -104,8 +138,15 @@ export default function YouTubeSeoOptimizer({ initialTitle = "", onApplySeo, add
           </div>
           <button
             onClick={() => {
-              onApplySeo({ title: result.title, description: result.description, tags: result.tags });
-              addNotification?.("SEO metadata applied to upload form!", "success");
+              onApplySeo({
+                title: result.title,
+                description: result.description,
+                tags: result.tags,
+              });
+              addNotification?.(
+                "SEO metadata applied to upload form!",
+                "success"
+              );
             }}
             className="w-full py-2 bg-purple-950/40 hover:bg-purple-950/80 border border-purple-800/40 text-purple-300 rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
           >

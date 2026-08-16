@@ -24,7 +24,9 @@ export const ModelSelect: React.FC<ModelSelectProps> = ({
   const { models, loading } = useAIModels();
 
   const filteredModels = filterProvider
-    ? models.filter((m) => m.provider.toLowerCase() === filterProvider.toLowerCase())
+    ? models.filter(
+        (m) => m.provider.toLowerCase() === filterProvider.toLowerCase()
+      )
     : models;
 
   return (

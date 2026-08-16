@@ -1,6 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Focus, LayoutPanelTop, Save, Menu, Layers, Clock, Wifi, WifiOff, Share2, Bell, BellOff, Zap, Monitor, FolderSync } from "lucide-react";
-import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
+import {
+  Focus,
+  LayoutPanelTop,
+  Save,
+  Menu,
+  Layers,
+  Clock,
+  Wifi,
+  WifiOff,
+  Share2,
+  Bell,
+  BellOff,
+  Zap,
+  Monitor,
+  FolderSync,
+} from "lucide-react";
+import {
+  getUserAvatarUrl,
+  DEFAULT_USER_AVATAR_DATA_URI,
+} from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import { Notification } from "@/features/app_notification";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
@@ -68,8 +86,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   user,
   addNotification,
 }) => {
-  const isPlayerOpen = useImageEditorStore((state) => state.playerSettings.isPlayerOpen);
-  const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
+  const isPlayerOpen = useImageEditorStore(
+    (state) => state.playerSettings.isPlayerOpen
+  );
+  const { activeProjectId, activeProjectData, setDrawerOpen } =
+    useProjectStore();
 
   // Smoothly slide out of view if the mobile/drawer sidebar is open
   const headerVisibilityClass = isSidebarOpen
@@ -122,10 +143,16 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
         setShowNotifications(false);
       }
-      if (creditsRef.current && !creditsRef.current.contains(event.target as Node)) {
+      if (
+        creditsRef.current &&
+        !creditsRef.current.contains(event.target as Node)
+      ) {
         setShowCreditsPopover(false);
       }
     }
@@ -135,8 +162,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-white/8 bg-[#06060c]/80 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${className || ""
-        }`}
+      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-white/8 bg-[#06060c]/80 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+        className || ""
+      }`}
       style={style}
     >
       {/* Left Section - Menu Icon + Title */}
@@ -188,13 +216,18 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       {/* Center: Live Stats Chips */}
       <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
         {/* Backend status */}
-        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${backendOnline
-          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-          : "bg-red-500/10 border-red-500/20 text-red-400"
-          }`}>
-          {backendOnline
-            ? <Wifi className="h-2.5 w-2.5" />
-            : <WifiOff className="h-2.5 w-2.5" />}
+        <div
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${
+            backendOnline
+              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+              : "bg-red-500/10 border-red-500/20 text-red-400"
+          }`}
+        >
+          {backendOnline ? (
+            <Wifi className="h-2.5 w-2.5" />
+          ) : (
+            <WifiOff className="h-2.5 w-2.5" />
+          )}
           {backendOnline ? "Online" : "Offline"}
         </div>
 
@@ -224,10 +257,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${credits < 20
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+                credits < 20
                   ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
                   : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
-                }`}
+              }`}
             >
               <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
               {credits.toLocaleString()}
@@ -254,8 +288,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         <button
           type="button"
           onClick={() => {
-            const current = useImageEditorStore.getState().playerSettings.isPlayerOpen;
-            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: !current });
+            const current =
+              useImageEditorStore.getState().playerSettings.isPlayerOpen;
+            useImageEditorStore
+              .getState()
+              .setPlayerSettings({ isPlayerOpen: !current });
           }}
           title="Toggle Floating Player"
           className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
@@ -287,14 +324,23 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           onClick={onSave}
           disabled={isSaving}
           title={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"}
-          className={`flex items-center gap-1.5 px-3.5 h-11 rounded-2xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${isSaving
+          className={`flex items-center gap-1.5 px-3.5 h-11 rounded-2xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${
+            isSaving
               ? "bg-purple-600/30 border-purple-500/40 text-purple-200 cursor-wait opacity-80"
               : isDirty
-                ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-400/50 shadow-lg shadow-purple-900/40 animate-pulse"
-                : "bg-neutral-800 hover:bg-neutral-750 border-neutral-700 text-neutral-300 hover:text-white"
-            }`}
+              ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-400/50 shadow-lg shadow-purple-900/40 animate-pulse"
+              : "bg-neutral-800 hover:bg-neutral-750 border-neutral-700 text-neutral-300 hover:text-white"
+          }`}
         >
-          <Save className={`h-4 w-4 ${isSaving ? "animate-spin text-purple-200" : isDirty ? "text-purple-300" : "text-neutral-400"}`} />
+          <Save
+            className={`h-4 w-4 ${
+              isSaving
+                ? "animate-spin text-purple-200"
+                : isDirty
+                ? "text-purple-300"
+                : "text-neutral-400"
+            }`}
+          />
           <span className="hidden sm:inline font-sans">
             {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
           </span>
@@ -340,7 +386,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             className="w-11 h-11 rounded-2xl border border-white/8 bg-white/[0.03] text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
             title={
               activeProjectId && activeProjectData
-                ? `Active Project: ${activeProjectData.project?.title || "Active"} — Click to switch`
+                ? `Active Project: ${
+                    activeProjectData.project?.title || "Active"
+                  } — Click to switch`
                 : "Select Active Project"
             }
           >
@@ -359,7 +407,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           aria-label="Open User profile"
         >
           <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
-            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "User")}
+            {user?.full_name ||
+              user?.username ||
+              (user?.email ? user.email.split("@")[0] : "User")}
           </span>
           <img
             key={user?.avatar_url || user?.full_name || "avatar"}

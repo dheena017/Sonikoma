@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { X, ChevronLeft, ChevronRight, Play, Pause, Maximize2, Minimize2, BookOpen } from "lucide-react";
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Pause,
+  Maximize2,
+  Minimize2,
+  BookOpen,
+} from "lucide-react";
 import type { Project } from "../hooks/ProjectTypes";
 
 interface SeriesReaderModalProps {
@@ -43,9 +52,12 @@ export default function SeriesReaderModal({
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white leading-tight">{seriesTitle}</h2>
+            <h2 className="text-base font-bold text-white leading-tight">
+              {seriesTitle}
+            </h2>
             <p className="text-xs text-neutral-400 font-mono">
-              {currentChapter.title} ({currentChapterIdx + 1} of {chapters.length})
+              {currentChapter.title} ({currentChapterIdx + 1} of{" "}
+              {chapters.length})
             </p>
           </div>
         </div>
@@ -59,7 +71,11 @@ export default function SeriesReaderModal({
                 : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
             }`}
           >
-            {isPlayingAudio ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 fill-current" />}
+            {isPlayingAudio ? (
+              <Pause className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4 fill-current" />
+            )}
             {isPlayingAudio ? "Pause Audio" : "Play Narration"}
           </button>
 
@@ -96,15 +112,20 @@ export default function SeriesReaderModal({
             ) : (
               <div className="w-96 h-96 flex flex-col items-center justify-center gap-3 bg-neutral-900 text-neutral-500">
                 <BookOpen className="w-12 h-12 text-purple-500/40" />
-                <span className="text-xs font-mono">No Panel Preview Available</span>
+                <span className="text-xs font-mono">
+                  No Panel Preview Available
+                </span>
               </div>
             )}
           </div>
 
           <div className="text-center space-y-1">
-            <h3 className="text-lg font-bold text-white">{currentChapter.title}</h3>
+            <h3 className="text-lg font-bold text-white">
+              {currentChapter.title}
+            </h3>
             <p className="text-xs text-neutral-400 font-mono">
-              {currentChapter.panels_count || 0} Panels · Status: {currentChapter.status || "Draft"}
+              {currentChapter.panels_count || 0} Panels · Status:{" "}
+              {currentChapter.status || "Draft"}
             </p>
           </div>
         </div>
@@ -132,7 +153,11 @@ export default function SeriesReaderModal({
             }`}
           >
             {chap.cover_image ? (
-              <img src={chap.cover_image} alt={chap.title} className="w-full h-full object-cover" />
+              <img
+                src={chap.cover_image}
+                alt={chap.title}
+                className="w-full h-full object-cover"
+              />
             ) : (
               <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-[10px] font-mono text-neutral-400">
                 Ch. {idx + 1}

@@ -1,6 +1,9 @@
 import React from "react";
 import { Move, RefreshCw, Layers } from "lucide-react";
-import { CropCanvas, CanvasMultiLayer } from "@/features/editor_image/components";
+import {
+  CropCanvas,
+  CanvasMultiLayer,
+} from "@/features/editor_image/components";
 import { GeneratedPanel } from "@/types";
 import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
 
@@ -215,7 +218,11 @@ export default function ImageEditorCanvasContainer({
           setSelectedSliceId={setSelectedSliceId}
           activeTab={activeTab}
           aspectRatio={
-            aspectRatio === "9:16" ? 9 / 16 : aspectRatio === "16:9" ? 16 / 9 : 0
+            aspectRatio === "9:16"
+              ? 9 / 16
+              : aspectRatio === "16:9"
+              ? 16 / 9
+              : 0
           }
         />
       )}

@@ -23,6 +23,7 @@ Your primary goal is to **detect and segment EVERY distinct narrative panel imag
 # 2. Bounding Box Coordinate System
 
 Return every detected panel as percentage coordinates (0.0 to 100.0) relative to the total image dimensions:
+
 - `cropTop`: Top boundary coordinate of the panel (0.0 = top edge of image, 100.0 = bottom edge)
 - `cropBottom`: Bottom boundary coordinate of the panel (0.0 = top edge of image, 100.0 = bottom edge)
 - `cropLeft`: Left boundary coordinate of the panel (0.0 = left edge of image, 100.0 = right edge)
@@ -33,22 +34,27 @@ Return every detected panel as percentage coordinates (0.0 to 100.0) relative to
 # 3. Panel Types & Boundary Guidelines
 
 ### A. Bordered Panels
+
 - Detect outer frame border lines.
 - Add ~1% safe padding around the frame so border lines and internal artwork are never clipped.
 
 ### B. Borderless & Webtoon Panels
+
 - For Webtoons without solid borders, identify horizontal gutters (white, dark, or gradient spaces) separating distinct scenes.
 - If a panel spans across the entire canvas width, set `cropLeft: 0.0` and `cropRight: 100.0`.
 
 ### C. Character Cutouts & Action Bleed
+
 - When character silhouettes, weapons, hair, wings, or speed lines break out of the panel frame into gutter space, expand the bounding box to fully enclose the character and effects.
 - Never crop faces, heads, hands, or speech bubble tails in half.
 
 ### D. Speech Bubbles & Dialogue Protection
+
 - Every speech bubble, narration box, thought bubble, and sound effect (SFX) associated with a panel MUST be completely enclosed inside that panel's crop box.
 - Never split dialogue text or speech bubble tails across crop boundaries.
 
 ### E. Sequential Reading Order
+
 - Output all detected panels strictly in sequential reading order:
   1. Primary order: Top to Bottom.
   2. Secondary order (for side-by-side panels): Left to Right.

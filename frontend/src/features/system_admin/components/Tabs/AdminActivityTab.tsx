@@ -65,7 +65,9 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
                   const url = window.URL.createObjectURL(blob);
                   const a = document.createElement("a");
                   a.href = url;
-                  a.download = `Sonikoma_Audit_Logs_${new Date().toISOString().split("T")[0]}.csv`;
+                  a.download = `Sonikoma_Audit_Logs_${
+                    new Date().toISOString().split("T")[0]
+                  }.csv`;
                   a.click();
                 });
               }

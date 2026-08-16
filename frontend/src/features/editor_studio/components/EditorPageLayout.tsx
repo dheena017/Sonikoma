@@ -171,9 +171,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
         }`}
       >
         <div className="relative flex-1 w-full min-w-0">
-          <div className="w-full flex flex-col min-w-0 pb-36">
-            {children}
-          </div>
+          <div className="w-full flex flex-col min-w-0 pb-36">{children}</div>
         </div>
       </div>
     </div>

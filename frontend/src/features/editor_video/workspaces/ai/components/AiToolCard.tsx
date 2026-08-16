@@ -1,13 +1,37 @@
 import React from "react";
 import {
-  BookOpen, Grid, Film, FileSearch, Scan, Paintbrush, Maximize, Mic,
-  Move, Languages, Crop, Eraser, Sliders, Wand2
+  BookOpen,
+  Grid,
+  Film,
+  FileSearch,
+  Scan,
+  Paintbrush,
+  Maximize,
+  Mic,
+  Move,
+  Languages,
+  Crop,
+  Eraser,
+  Sliders,
+  Wand2,
 } from "lucide-react";
 import { AiEngineTool } from "../../../types/workspace.types";
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  BookOpen, Grid, Film, FileSearch, Scan, Paintbrush, Maximize, Mic,
-  Move, Languages, Crop, Eraser, Sliders, Wand2
+  BookOpen,
+  Grid,
+  Film,
+  FileSearch,
+  Scan,
+  Paintbrush,
+  Maximize,
+  Mic,
+  Move,
+  Languages,
+  Crop,
+  Eraser,
+  Sliders,
+  Wand2,
 };
 
 interface AiToolCardProps {
@@ -25,12 +49,16 @@ export const AiToolCard: React.FC<AiToolCardProps> = ({ tool, onRun }) => {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 mb-0.5">
-          <p className="text-xs font-bold text-white group-hover:text-purple-300 truncate">{tool.title}</p>
+          <p className="text-xs font-bold text-white group-hover:text-purple-300 truncate">
+            {tool.title}
+          </p>
           <span className="text-[8px] font-mono font-bold bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30 shrink-0">
             {tool.badge}
           </span>
         </div>
-        <p className="text-[10px] text-neutral-400 leading-tight">{tool.desc}</p>
+        <p className="text-[10px] text-neutral-400 leading-tight">
+          {tool.desc}
+        </p>
       </div>
       <button
         onClick={() => onRun(tool.title)}

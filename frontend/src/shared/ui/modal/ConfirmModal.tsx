@@ -28,7 +28,9 @@ export default function ConfirmModal({
     try {
       onConfirm();
     } finally {
-      setTimeout(() => { isExecutingRef.current = false; }, 300);
+      setTimeout(() => {
+        isExecutingRef.current = false;
+      }, 300);
     }
   };
 
@@ -43,7 +45,10 @@ export default function ConfirmModal({
   }, []);
 
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" data-modal="true">
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      data-modal="true"
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"

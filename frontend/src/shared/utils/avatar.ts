@@ -22,7 +22,9 @@ export function getUserAvatarUrl(user: any): string {
 
   if (
     !isGenericDefault &&
-    (raw.startsWith("http://") || raw.startsWith("https://") || raw.startsWith("data:"))
+    (raw.startsWith("http://") ||
+      raw.startsWith("https://") ||
+      raw.startsWith("data:"))
   ) {
     return raw;
   }

@@ -106,11 +106,12 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
       />
 
       {/* RIGHT: Cinema Player or Blank Viewport */}
-      <div
-        className="w-full h-[460px] sm:h-[540px] md:h-[600px] lg:h-[660px] max-h-[75vh] rounded-2xl overflow-hidden border border-neutral-800/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative bg-[#09090f] min-w-0"
-      >
+      <div className="w-full h-[460px] sm:h-[540px] md:h-[600px] lg:h-[660px] max-h-[75vh] rounded-2xl overflow-hidden border border-neutral-800/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative bg-[#09090f] min-w-0">
         {activePreviewTab === "editor" ? (
-          <BlankViewport panels={panels} currentPanelIndex={currentPanelIndex} />
+          <BlankViewport
+            panels={panels}
+            currentPanelIndex={currentPanelIndex}
+          />
         ) : (
           <PlaybackMonitor
             panels={panels}
@@ -123,7 +124,9 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
             addNotification={addNotification}
             variant="embedded"
             onCloseFloating={() => {
-              useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+              useImageEditorStore
+                .getState()
+                .setPlayerSettings({ isPlayerOpen: false });
             }}
           />
         )}

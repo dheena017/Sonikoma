@@ -43,8 +43,14 @@ export function LandingAnimeScene({
       currentY += (targetY - currentY) * 0.05;
 
       if (sceneRef.current) {
-        sceneRef.current.style.setProperty("--mouse-x", `${currentX.toFixed(2)}px`);
-        sceneRef.current.style.setProperty("--mouse-y", `${currentY.toFixed(2)}px`);
+        sceneRef.current.style.setProperty(
+          "--mouse-x",
+          `${currentX.toFixed(2)}px`
+        );
+        sceneRef.current.style.setProperty(
+          "--mouse-y",
+          `${currentY.toFixed(2)}px`
+        );
       }
       animationFrameId = requestAnimationFrame(updateParallax);
     };

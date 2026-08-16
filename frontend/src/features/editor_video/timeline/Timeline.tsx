@@ -8,20 +8,20 @@ import React, { useRef, useState, useEffect } from "react";
 import { TimelineProps } from "./types";
 import { useTimelineState } from "./useTimelineState";
 import { useAIPacing } from "./hooks/useAIPacing";
-import TimelineToolbar    from "./components/TimelineToolbar";
-import TimelineRuler      from "./components/TimelineRuler";
-import TimelinePlayhead   from "./components/TimelinePlayhead";
-import TimelineBottomBar  from "./components/TimelineBottomBar";
-import AddTrackRow        from "./components/AddTrackRow";
-import ContextMenuPopup   from "./components/ContextMenuPopup";
-import MediaPickerModal   from "./components/MediaPickerModal";
-import KeyframePanel      from "./components/keyframes/KeyframePanel";
-import VideoTrackV1       from "./components/tracks/VideoTrackV1";
-import VideoTrackV2       from "./components/tracks/VideoTrackV2";
-import VideoTrackV3       from "./components/tracks/VideoTrackV3";
-import AudioTrackA1       from "./components/tracks/AudioTrackA1";
-import AudioTrackA2       from "./components/tracks/AudioTrackA2";
-import AudioTrackA3       from "./components/tracks/AudioTrackA3";
+import TimelineToolbar from "./components/TimelineToolbar";
+import TimelineRuler from "./components/TimelineRuler";
+import TimelinePlayhead from "./components/TimelinePlayhead";
+import TimelineBottomBar from "./components/TimelineBottomBar";
+import AddTrackRow from "./components/AddTrackRow";
+import ContextMenuPopup from "./components/ContextMenuPopup";
+import MediaPickerModal from "./components/MediaPickerModal";
+import KeyframePanel from "./components/keyframes/KeyframePanel";
+import VideoTrackV1 from "./components/tracks/VideoTrackV1";
+import VideoTrackV2 from "./components/tracks/VideoTrackV2";
+import VideoTrackV3 from "./components/tracks/VideoTrackV3";
+import AudioTrackA1 from "./components/tracks/AudioTrackA1";
+import AudioTrackA2 from "./components/tracks/AudioTrackA2";
+import AudioTrackA3 from "./components/tracks/AudioTrackA3";
 import { DEFAULT_PANEL_DURATION } from "./types";
 
 export type { TimelineProps };
@@ -43,14 +43,20 @@ const Timeline: React.FC<TimelineProps> = ({
   const currentPanelIndexRef = useRef(currentPanelIndex);
   const animationFrameRef = useRef<number | null>(null);
   const [rulerHoverPct, setRulerHoverPct] = useState<number | null>(null);
-  const [trackBounds, setTrackBounds] = useState<{ left: number; width: number } | null>(null);
+  const [trackBounds, setTrackBounds] = useState<{
+    left: number;
+    width: number;
+  } | null>(null);
 
   // Always show at least 1 panel slot — empty array = 1 placeholder panel
   const displayPanels = panels.length > 0 ? panels : [{}];
 
-  const totalPanels    = displayPanels.length;
-  const totalDuration  = totalPanels * DEFAULT_PANEL_DURATION;
-  const playheadPct    = totalDuration > 0 ? Math.min(Math.max((timelineTime / totalDuration) * 100, 0), 100) : 0;
+  const totalPanels = displayPanels.length;
+  const totalDuration = totalPanels * DEFAULT_PANEL_DURATION;
+  const playheadPct =
+    totalDuration > 0
+      ? Math.min(Math.max((timelineTime / totalDuration) * 100, 0), 100)
+      : 0;
 
   // Keep ref synced without causing render-loop on animation.
   useEffect(() => {
@@ -71,7 +77,10 @@ const Timeline: React.FC<TimelineProps> = ({
 
       setTimelineTime((prevTime) => {
         const nextTime = Math.min(prevTime + delta, totalDuration);
-        const nextPanelIndex = Math.min(totalPanels - 1, Math.floor(nextTime / DEFAULT_PANEL_DURATION));
+        const nextPanelIndex = Math.min(
+          totalPanels - 1,
+          Math.floor(nextTime / DEFAULT_PANEL_DURATION)
+        );
 
         if (nextPanelIndex !== currentPanelIndexRef.current) {
           currentPanelIndexRef.current = nextPanelIndex;
@@ -106,7 +115,8 @@ const Timeline: React.FC<TimelineProps> = ({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.code !== "Space") return;
       const target = event.target as HTMLElement | null;
-      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)) return;
+      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+        return;
       event.preventDefault();
       togglePlayback();
     };
@@ -117,14 +127,19 @@ const Timeline: React.FC<TimelineProps> = ({
 
   const seekToPosition = (clientX: number) => {
     if (!rulerRef.current) return;
-    const rail = rulerRef.current.querySelector<HTMLDivElement>(".timeline-ruler-track");
+    const rail = rulerRef.current.querySelector<HTMLDivElement>(
+      ".timeline-ruler-track"
+    );
     if (!rail) return;
 
     const rect = rail.getBoundingClientRect();
     const relativeX = clientX - rect.left;
     const pct = Math.max(0, Math.min(1, relativeX / Math.max(1, rect.width)));
     const nextTime = pct * totalDuration;
-    const nextPanelIndex = Math.min(totalPanels - 1, Math.floor(nextTime / DEFAULT_PANEL_DURATION));
+    const nextPanelIndex = Math.min(
+      totalPanels - 1,
+      Math.floor(nextTime / DEFAULT_PANEL_DURATION)
+    );
 
     currentPanelIndexRef.current = nextPanelIndex;
     setCurrentPanelIndex?.(nextPanelIndex);
@@ -133,7 +148,9 @@ const Timeline: React.FC<TimelineProps> = ({
 
   const getTrackBounds = () => {
     if (!rulerRef.current || !s.trackAreaRef.current) return null;
-    const track = rulerRef.current.querySelector<HTMLDivElement>(".timeline-ruler-track");
+    const track = rulerRef.current.querySelector<HTMLDivElement>(
+      ".timeline-ruler-track"
+    );
     if (!track) return null;
 
     const containerRect = s.trackAreaRef.current.getBoundingClientRect();
@@ -185,20 +202,25 @@ const Timeline: React.FC<TimelineProps> = ({
   };
 
   // Selected keyframe for inspector
-  const activeClipKeyframes = s.selectedClip ? s.keyframesState.getKeyframesForClip(s.selectedClip) : [];
-  const selectedKeyframe = activeClipKeyframes.find((k) => k.id === s.keyframesState.selectedKeyframeId) ?? null;
+  const activeClipKeyframes = s.selectedClip
+    ? s.keyframesState.getKeyframesForClip(s.selectedClip)
+    : [];
+  const selectedKeyframe =
+    activeClipKeyframes.find(
+      (k) => k.id === s.keyframesState.selectedKeyframeId
+    ) ?? null;
 
   // ── Shared clip-interaction callbacks ───────────────────────────────────────
   const clipCbs = {
-    onClipClick:   s.handleClipClick,
+    onClipClick: s.handleClipClick,
     onContextMenu: s.openContextMenu,
   };
 
   // ── Shared track-control factory ─────────────────────────────────────────────
   const trackControls = (id: string) => ({
-    locked:       !!s.lockedTracks[id],
-    hidden:       !!s.hiddenTracks[id],
-    muted:        !!s.mutedTracks[id],
+    locked: !!s.lockedTracks[id],
+    hidden: !!s.hiddenTracks[id],
+    muted: !!s.mutedTracks[id],
     onToggleLock: () => s.toggleLock(id),
     onToggleHide: () => s.toggleHide(id),
     onToggleMute: () => s.toggleMute(id),
@@ -208,7 +230,6 @@ const Timeline: React.FC<TimelineProps> = ({
 
   return (
     <div className="w-full bg-[#0c0d16]/80 backdrop-blur-2xl border-t border-white/10 flex flex-col shrink-0 select-none h-[280px] z-20 font-sans relative shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
-
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <TimelineToolbar
         currentPanelIndex={currentPanelIndex}
@@ -235,14 +256,19 @@ const Timeline: React.FC<TimelineProps> = ({
         }}
       />
 
-
       {/* ── Track Workspace ──────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0 relative" ref={s.trackAreaRef}>
-
+      <div
+        className="flex-1 flex flex-col overflow-hidden min-h-0 relative"
+        ref={s.trackAreaRef}
+      >
         {trackBounds && rulerHoverPct !== null && (
           <div
             className="pointer-events-none absolute top-0 bottom-0 w-px bg-white/20 z-10"
-            style={{ left: `${trackBounds.left + (rulerHoverPct / 100) * trackBounds.width}px` }}
+            style={{
+              left: `${
+                trackBounds.left + (rulerHoverPct / 100) * trackBounds.width
+              }px`,
+            }}
           />
         )}
 
@@ -275,7 +301,6 @@ const Timeline: React.FC<TimelineProps> = ({
         >
           {/* Inner wrapper — wide enough to scroll horizontally */}
           <div className="min-w-[max(100%,800px)] min-h-full relative">
-
             {/* V3 — Overlay / Captions (conditional) */}
             {!s.hiddenTracks["V3"] && s.captionsVisible && (
               <VideoTrackV3
@@ -311,7 +336,9 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedKeyframeId={s.keyframesState.selectedKeyframeId}
                 onSelectKeyframe={s.keyframesState.selectKeyframe}
                 onCycleEasing={s.keyframesState.cycleEasing}
-                onAddKeyframe={(clipKey, t) => s.keyframesState.addKeyframe(clipKey, t, "scale", 1.0)}
+                onAddKeyframe={(clipKey, t) =>
+                  s.keyframesState.addKeyframe(clipKey, t, "scale", 1.0)
+                }
                 {...trackControls("V1")}
                 {...clipCbs}
               />
@@ -371,8 +398,19 @@ const Timeline: React.FC<TimelineProps> = ({
         <KeyframePanel
           keyframe={selectedKeyframe}
           onClose={() => s.keyframesState.selectKeyframe(null)}
-          onUpdate={(patch) => s.keyframesState.updateKeyframe(s.selectedClip!, selectedKeyframe.id, patch)}
-          onDelete={() => s.keyframesState.removeKeyframe(s.selectedClip!, selectedKeyframe.id)}
+          onUpdate={(patch) =>
+            s.keyframesState.updateKeyframe(
+              s.selectedClip!,
+              selectedKeyframe.id,
+              patch
+            )
+          }
+          onDelete={() =>
+            s.keyframesState.removeKeyframe(
+              s.selectedClip!,
+              selectedKeyframe.id
+            )
+          }
         />
       )}
 

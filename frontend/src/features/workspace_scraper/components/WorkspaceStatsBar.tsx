@@ -11,7 +11,11 @@ interface WorkspaceStatsBarProps {
   projectId: string | null;
 }
 
-const WorkspaceStatsBar: React.FC<WorkspaceStatsBarProps> = ({ statsLoading, stats, projectId }) => {
+const WorkspaceStatsBar: React.FC<WorkspaceStatsBarProps> = ({
+  statsLoading,
+  stats,
+  projectId,
+}) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {[
@@ -40,13 +44,22 @@ const WorkspaceStatsBar: React.FC<WorkspaceStatsBarProps> = ({ statsLoading, sta
           color: "from-amber-900/20 to-orange-900/20 border-amber-500/20",
         },
       ].map((stat) => (
-        <div key={stat.label} className={`bg-gradient-to-br ${stat.color} border rounded-2xl p-4 flex flex-col gap-2 backdrop-blur-md`}>
+        <div
+          key={stat.label}
+          className={`bg-gradient-to-br ${stat.color} border rounded-2xl p-4 flex flex-col gap-2 backdrop-blur-md`}
+        >
           <div className="flex items-center justify-between">
             {stat.icon}
-            {statsLoading && <Loader className="h-3 w-3 text-neutral-500 animate-spin" />}
+            {statsLoading && (
+              <Loader className="h-3 w-3 text-neutral-500 animate-spin" />
+            )}
           </div>
-          <p className="text-xl font-black text-white font-mono">{stat.value}</p>
-          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{stat.label}</p>
+          <p className="text-xl font-black text-white font-mono">
+            {stat.value}
+          </p>
+          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+            {stat.label}
+          </p>
         </div>
       ))}
     </div>

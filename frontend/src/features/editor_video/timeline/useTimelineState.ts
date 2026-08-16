@@ -3,7 +3,12 @@
 // Centralises all Timeline state and derived handlers.
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { ContextMenuState, DEFAULT_PANEL_DURATION, MediaItem, AISuggestion } from "./types";
+import {
+  ContextMenuState,
+  DEFAULT_PANEL_DURATION,
+  MediaItem,
+  AISuggestion,
+} from "./types";
 import { useKeyframes, KeyframesState } from "./useKeyframes";
 
 export interface TimelineState {
@@ -46,7 +51,11 @@ export interface TimelineState {
 
   // Clip interactions
   handleClipClick: (key: string, panelIdx: number) => void;
-  openContextMenu: (e: React.MouseEvent, clipKey: string, panelIdx: number) => void;
+  openContextMenu: (
+    e: React.MouseEvent,
+    clipKey: string,
+    panelIdx: number
+  ) => void;
   closeContextMenu: () => void;
 
   // Context menu actions
@@ -85,14 +94,32 @@ export function useTimelineState(
   const [captionsVisible, setCaptionsVisible] = useState(false);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [clipboard, setClipboard] = useState<string | null>(null);
-  const [clipDurations, setClipDurations] = useState<Record<string, number>>({});
+  const [clipDurations, setClipDurations] = useState<Record<string, number>>(
+    {}
+  );
 
   // Sub-states
   const keyframesState = useKeyframes();
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([
-    { id: "ai-1", clipKey: "v1-0", time: 0.5, property: "scale", value: 1.2, label: "Zoom Punch", confidence: 0.92 },
-    { id: "ai-2", clipKey: "v1-1", time: 1.0, property: "opacity", value: 0.0, label: "Fade Out", confidence: 0.88 },
+    {
+      id: "ai-1",
+      clipKey: "v1-0",
+      time: 0.5,
+      property: "scale",
+      value: 1.2,
+      label: "Zoom Punch",
+      confidence: 0.92,
+    },
+    {
+      id: "ai-2",
+      clipKey: "v1-1",
+      time: 1.0,
+      property: "opacity",
+      value: 0.0,
+      label: "Fade Out",
+      confidence: 0.88,
+    },
   ]);
 
   const trackAreaRef = useRef<HTMLDivElement>(null);
@@ -112,10 +139,22 @@ export function useTimelineState(
   const hasDuration = hasSelection && getClipDuration(selectedClip!) > 0;
 
   // ── Track controls ──────────────────────────────────────────────────────────
-  const toggleMute = useCallback((id: string) => setMutedTracks((p) => ({ ...p, [id]: !p[id] })), []);
-  const toggleLock = useCallback((id: string) => setLockedTracks((p) => ({ ...p, [id]: !p[id] })), []);
-  const toggleHide = useCallback((id: string) => setHiddenTracks((p) => ({ ...p, [id]: !p[id] })), []);
-  const toggleSolo = useCallback((id: string) => setSoloTrack((p) => (p === id ? null : id)), []);
+  const toggleMute = useCallback(
+    (id: string) => setMutedTracks((p) => ({ ...p, [id]: !p[id] })),
+    []
+  );
+  const toggleLock = useCallback(
+    (id: string) => setLockedTracks((p) => ({ ...p, [id]: !p[id] })),
+    []
+  );
+  const toggleHide = useCallback(
+    (id: string) => setHiddenTracks((p) => ({ ...p, [id]: !p[id] })),
+    []
+  );
+  const toggleSolo = useCallback(
+    (id: string) => setSoloTrack((p) => (p === id ? null : id)),
+    []
+  );
 
   // ── Clip interactions ───────────────────────────────────────────────────────
   const closeContextMenu = useCallback(() => setContextMenu(null), []);
@@ -149,9 +188,14 @@ export function useTimelineState(
   // ── Context-menu dismiss ────────────────────────────────────────────────────
   useEffect(() => {
     if (!contextMenu) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closeContextMenu(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeContextMenu();
+    };
     const onClick = (e: MouseEvent) => {
-      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target as Node))
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(e.target as Node)
+      )
         closeContextMenu();
     };
     window.addEventListener("keydown", onKey);
@@ -208,10 +252,13 @@ export function useTimelineState(
   }, []);
 
   // ── AI Suggestions ──────────────────────────────────────────────────────────
-  const acceptAISuggestion = useCallback((s: AISuggestion) => {
-    keyframesState.addKeyframe(s.clipKey, s.time, s.property, s.value);
-    setAiSuggestions((prev) => prev.filter((item) => item.id !== s.id));
-  }, [keyframesState]);
+  const acceptAISuggestion = useCallback(
+    (s: AISuggestion) => {
+      keyframesState.addKeyframe(s.clipKey, s.time, s.property, s.value);
+      setAiSuggestions((prev) => prev.filter((item) => item.id !== s.id));
+    },
+    [keyframesState]
+  );
 
   const dismissAISuggestion = useCallback((id: string) => {
     setAiSuggestions((prev) => prev.filter((item) => item.id !== id));
@@ -224,7 +271,10 @@ export function useTimelineState(
       if (e.key === "s" || e.key === "S") handleSplit();
       if (e.key === "Delete" || e.key === "Backspace") handleRemoveDuration();
       if ((e.ctrlKey || e.metaKey) && e.key === "c") setClipboard(selectedClip);
-      if ((e.ctrlKey || e.metaKey) && e.key === "d") { e.preventDefault(); handleDuplicate(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+        e.preventDefault();
+        handleDuplicate();
+      }
       if (e.key === "k" || e.key === "K") {
         // Add keyframe at 1.0s on selected clip
         keyframesState.addKeyframe(selectedClip, 1.0, "scale", 1.0);
@@ -232,21 +282,57 @@ export function useTimelineState(
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selectedClip, handleSplit, handleRemoveDuration, handleDuplicate, keyframesState]);
+  }, [
+    selectedClip,
+    handleSplit,
+    handleRemoveDuration,
+    handleDuplicate,
+    keyframesState,
+  ]);
 
   return {
-    zoomLevel, snapEnabled, selectedClip, mutedTracks, soloTrack,
-    lockedTracks, hiddenTracks, captionsVisible, contextMenu, clipboard, clipDurations,
-    keyframesState, isMediaPickerOpen, aiSuggestions,
-    trackAreaRef, contextMenuRef,
-    setZoomLevel, setSnapEnabled, setCaptionsVisible, setSoloTrack,
-    getClipDuration, updateClipDuration,
-    toggleMute, toggleLock, toggleHide, toggleSolo,
-    handleClipClick, openContextMenu, closeContextMenu,
-    handleCopy, handlePaste, handleDuplicate, handleRemoveDuration,
-    handleApplyDurationToAll, handleSplit,
-    openMediaPicker, closeMediaPicker, handleSelectMedia,
-    acceptAISuggestion, dismissAISuggestion,
-    hasSelection, hasDuration, selectedDuration,
+    zoomLevel,
+    snapEnabled,
+    selectedClip,
+    mutedTracks,
+    soloTrack,
+    lockedTracks,
+    hiddenTracks,
+    captionsVisible,
+    contextMenu,
+    clipboard,
+    clipDurations,
+    keyframesState,
+    isMediaPickerOpen,
+    aiSuggestions,
+    trackAreaRef,
+    contextMenuRef,
+    setZoomLevel,
+    setSnapEnabled,
+    setCaptionsVisible,
+    setSoloTrack,
+    getClipDuration,
+    updateClipDuration,
+    toggleMute,
+    toggleLock,
+    toggleHide,
+    toggleSolo,
+    handleClipClick,
+    openContextMenu,
+    closeContextMenu,
+    handleCopy,
+    handlePaste,
+    handleDuplicate,
+    handleRemoveDuration,
+    handleApplyDurationToAll,
+    handleSplit,
+    openMediaPicker,
+    closeMediaPicker,
+    handleSelectMedia,
+    acceptAISuggestion,
+    dismissAISuggestion,
+    hasSelection,
+    hasDuration,
+    selectedDuration,
   };
 }

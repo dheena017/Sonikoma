@@ -101,7 +101,8 @@ export const ImageEditorEmptyState: React.FC<ImageEditorEmptyStateProps> = ({
           No Images in Editor
         </h2>
         <p className="text-xs sm:text-sm text-neutral-400 max-w-md leading-relaxed font-sans mb-8">
-          Import your Webtoon panels, upload image files from your computer, or load a sample panel to test the editor tools right away.
+          Import your Webtoon panels, upload image files from your computer, or
+          load a sample panel to test the editor tools right away.
         </p>
 
         {/* Action Buttons Grid */}

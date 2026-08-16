@@ -63,7 +63,10 @@ export default function YouTubeShortsPlayer({
 
   const handleCopyLink = () => {
     if (currentShort) {
-      navigator.clipboard.writeText(currentShort.youtube_url || `https://youtube.com/shorts/${currentShort.id}`);
+      navigator.clipboard.writeText(
+        currentShort.youtube_url ||
+          `https://youtube.com/shorts/${currentShort.id}`
+      );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -167,7 +170,11 @@ export default function YouTubeShortsPlayer({
               className="p-3 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-white rounded-full shadow-lg transition-all cursor-pointer hover:scale-110"
               title="Copy Short Link"
             >
-              {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Share2 className="w-5 h-5 text-sky-400" />}
+              {copied ? (
+                <Check className="w-5 h-5 text-emerald-400" />
+              ) : (
+                <Share2 className="w-5 h-5 text-sky-400" />
+              )}
             </button>
             <span className="text-[10px] font-mono text-neutral-400">
               {copied ? "Copied!" : "Share"}
@@ -176,7 +183,10 @@ export default function YouTubeShortsPlayer({
 
           {/* Open on YouTube */}
           <a
-            href={currentShort.youtube_url || `https://youtube.com/shorts/${currentShort.id}`}
+            href={
+              currentShort.youtube_url ||
+              `https://youtube.com/shorts/${currentShort.id}`
+            }
             target="_blank"
             rel="noreferrer"
             className="p-3 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-full shadow-lg transition-all"

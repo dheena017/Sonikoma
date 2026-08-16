@@ -264,7 +264,8 @@ export default function YouTubeStudioPage({
 
   // Calculate step completeness
   const isDetailsDone = title.trim().length > 0;
-  const isElementsDone = (safePanels && safePanels.length > 0) || authorName.trim().length > 0;
+  const isElementsDone =
+    (safePanels && safePanels.length > 0) || authorName.trim().length > 0;
   const isChecksDone = seoScore >= 60 || tags.length > 0;
 
   const STEPS = [
@@ -330,7 +331,11 @@ export default function YouTubeStudioPage({
                         : "bg-neutral-800 text-neutral-400 group-hover:bg-neutral-700 group-hover:text-white"
                     }`}
                   >
-                    {isCompleted ? <Check className="w-4 h-4 stroke-[3]" /> : step.num}
+                    {isCompleted ? (
+                      <Check className="w-4 h-4 stroke-[3]" />
+                    ) : (
+                      step.num
+                    )}
                   </div>
                   <div className="text-left hidden sm:block">
                     <span
@@ -500,4 +505,3 @@ export default function YouTubeStudioPage({
     </div>
   );
 }
-

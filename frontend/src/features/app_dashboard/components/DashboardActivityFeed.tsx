@@ -23,7 +23,9 @@ export default function DashboardActivityFeed({
           </div>
           Recent Activity
         </h2>
-        <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-wider">Live Stream</span>
+        <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-wider">
+          Live Stream
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -40,7 +42,9 @@ export default function DashboardActivityFeed({
                 <h4 className="text-xs font-bold text-white mb-0.5 truncate group-hover:text-purple-300 transition-colors">
                   {act.title}
                 </h4>
-                <p className="text-[11px] text-neutral-400 mb-1 leading-relaxed">{act.desc}</p>
+                <p className="text-[11px] text-neutral-400 mb-1 leading-relaxed">
+                  {act.desc}
+                </p>
                 <p className="text-[9px] text-neutral-500 font-mono">
                   {act.time}
                 </p>

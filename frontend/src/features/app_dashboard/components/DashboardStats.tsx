@@ -14,7 +14,10 @@ export default function DashboardStats({
   processingCount,
   totalPanels,
 }: DashboardStatsProps) {
-  const estimatedRuntimeMinutes = Math.max(1, Math.round((totalPanels * 4) / 60));
+  const estimatedRuntimeMinutes = Math.max(
+    1,
+    Math.round((totalPanels * 4) / 60)
+  );
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -24,7 +27,9 @@ export default function DashboardStats({
           <Layers className="w-6 h-6" />
         </div>
         <div>
-          <div className="text-2xl font-black text-white font-sans">{projectsCount}</div>
+          <div className="text-2xl font-black text-white font-sans">
+            {projectsCount}
+          </div>
           <div className="text-xs text-neutral-400 font-mono">
             Total Series ({completedCount} Done · {processingCount} Proc)
           </div>
@@ -37,8 +42,12 @@ export default function DashboardStats({
           <Zap className="w-6 h-6" />
         </div>
         <div>
-          <div className="text-2xl font-black text-white font-sans">{totalPanels.toLocaleString()}</div>
-          <div className="text-xs text-neutral-400 font-mono">Comic Panels Sliced</div>
+          <div className="text-2xl font-black text-white font-sans">
+            {totalPanels.toLocaleString()}
+          </div>
+          <div className="text-xs text-neutral-400 font-mono">
+            Comic Panels Sliced
+          </div>
         </div>
       </div>
 
@@ -48,8 +57,12 @@ export default function DashboardStats({
           <Clock className="w-6 h-6" />
         </div>
         <div>
-          <div className="text-2xl font-black text-white font-sans">~{estimatedRuntimeMinutes}m</div>
-          <div className="text-xs text-neutral-400 font-mono">Estimated Reel Duration</div>
+          <div className="text-2xl font-black text-white font-sans">
+            ~{estimatedRuntimeMinutes}m
+          </div>
+          <div className="text-xs text-neutral-400 font-mono">
+            Estimated Reel Duration
+          </div>
         </div>
       </div>
 
@@ -62,14 +75,21 @@ export default function DashboardStats({
           <div className="flex items-center justify-between text-xs font-mono text-neutral-400 mb-1.5">
             <span>Health Score</span>
             <span className="font-bold text-white">
-              {projectsCount > 0 ? Math.round((completedCount / projectsCount) * 100) : 100}%
+              {projectsCount > 0
+                ? Math.round((completedCount / projectsCount) * 100)
+                : 100}
+              %
             </span>
           </div>
           <div className="w-full bg-neutral-800/80 rounded-full h-1.5 overflow-hidden">
             <div
               className="bg-gradient-to-r from-purple-500 via-indigo-400 to-cyan-400 h-full rounded-full transition-all duration-700"
               style={{
-                width: `${projectsCount > 0 ? Math.round((completedCount / projectsCount) * 100) : 100}%`,
+                width: `${
+                  projectsCount > 0
+                    ? Math.round((completedCount / projectsCount) * 100)
+                    : 100
+                }%`,
               }}
             />
           </div>

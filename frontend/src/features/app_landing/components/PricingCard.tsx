@@ -48,54 +48,74 @@ export function PricingCard({
       )}
       <div className="space-y-6">
         <div>
-          <h3 className={`text-2xl font-black mb-2 transition-colors ${
-            isLight ? "text-slate-900" : "text-white"
-          }`}>
+          <h3
+            className={`text-2xl font-black mb-2 transition-colors ${
+              isLight ? "text-slate-900" : "text-white"
+            }`}
+          >
             {title}
           </h3>
-          <p className={`text-sm transition-colors ${
-            isLight ? "text-slate-500" : "text-neutral-400"
-          }`}>
+          <p
+            className={`text-sm transition-colors ${
+              isLight ? "text-slate-500" : "text-neutral-400"
+            }`}
+          >
             {desc}
           </p>
         </div>
         <div className="flex items-baseline gap-1">
-          <span className={`text-5xl font-black tracking-tight transition-colors ${
-            isLight ? "text-slate-950" : "text-white"
-          }`}>
+          <span
+            className={`text-5xl font-black tracking-tight transition-colors ${
+              isLight ? "text-slate-950" : "text-white"
+            }`}
+          >
             {typeof price === "number" ? `$${price}` : price}
           </span>
-          <span className={`text-sm font-medium transition-colors ${
-            isLight ? "text-slate-400" : "text-neutral-500"
-          }`}>
+          <span
+            className={`text-sm font-medium transition-colors ${
+              isLight ? "text-slate-400" : "text-neutral-500"
+            }`}
+          >
             {billingPeriod}
           </span>
         </div>
-        <div className={`border-t pt-6 space-y-3.5 transition-colors ${
-          isLight ? "border-slate-100" : "border-white/5"
-        }`}>
+        <div
+          className={`border-t pt-6 space-y-3.5 transition-colors ${
+            isLight ? "border-slate-100" : "border-white/5"
+          }`}
+        >
           {features.map((feature, i) => (
             <div key={i} className="flex items-center gap-3">
               <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
                 <Check className="w-3.5 h-3.5 text-emerald-500" />
               </div>
-              <span className={`text-sm font-medium transition-colors ${
-                isLight ? "text-slate-700" : "text-neutral-200"
-              }`}>
+              <span
+                className={`text-sm font-medium transition-colors ${
+                  isLight ? "text-slate-700" : "text-neutral-200"
+                }`}
+              >
                 {feature}
               </span>
             </div>
           ))}
           {excludedFeatures.map((feature, i) => (
             <div key={i} className="flex items-center gap-3 opacity-40">
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                isLight ? "bg-slate-100" : "bg-neutral-800"
-              }`}>
-                <Check className={`w-3.5 h-3.5 ${isLight ? "text-slate-400" : "text-neutral-600"}`} />
+              <div
+                className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                  isLight ? "bg-slate-100" : "bg-neutral-800"
+                }`}
+              >
+                <Check
+                  className={`w-3.5 h-3.5 ${
+                    isLight ? "text-slate-400" : "text-neutral-600"
+                  }`}
+                />
               </div>
-              <span className={`text-sm line-through transition-colors ${
-                isLight ? "text-slate-400" : "text-neutral-500"
-              }`}>
+              <span
+                className={`text-sm line-through transition-colors ${
+                  isLight ? "text-slate-400" : "text-neutral-500"
+                }`}
+              >
                 {feature}
               </span>
             </div>

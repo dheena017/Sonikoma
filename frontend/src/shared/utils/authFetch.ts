@@ -33,8 +33,8 @@ function shouldTrackSkillRequest(input: RequestInfo | URL): boolean {
     typeof input === "string"
       ? input
       : input instanceof URL
-        ? input.toString()
-        : input.url;
+      ? input.toString()
+      : input.url;
   return url.includes("/api/skills/");
 }
 
@@ -161,4 +161,5 @@ window.__sonikomaAbortAllSkillRequests = () => {
   notifySkillRequestState();
 };
 
-window.__sonikomaActiveSkillRequestCount = () => activeSkillAbortControllers.size;
+window.__sonikomaActiveSkillRequestCount = () =>
+  activeSkillAbortControllers.size;

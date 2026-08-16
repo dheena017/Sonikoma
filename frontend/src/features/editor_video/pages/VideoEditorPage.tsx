@@ -34,11 +34,15 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
     setViewportZoom(Math.min(300, Math.max(20, nextZoom)));
   };
 
-  const handleZoomIn = () => setViewportZoom((prev) => Math.min(300, prev + 10));
-  const handleZoomOut = () => setViewportZoom((prev) => Math.max(20, prev - 10));
+  const handleZoomIn = () =>
+    setViewportZoom((prev) => Math.min(300, prev + 10));
+  const handleZoomOut = () =>
+    setViewportZoom((prev) => Math.max(20, prev - 10));
   const handleZoomReset = () => setViewportZoom(100);
 
-  const handleTogglePanel = (panel: "mediaBin" | "rightInspector" | "timeline") => {
+  const handleTogglePanel = (
+    panel: "mediaBin" | "rightInspector" | "timeline"
+  ) => {
     setLayoutConfig((prev) => ({ ...prev, [panel]: !prev[panel] }));
   };
 
@@ -155,8 +159,15 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
       {/* ── Main Workspace Row ───────────────────────────────────────────────── */}
       <div className="flex-1 flex min-h-0 relative">
         {/* Left: Workspace Panel (MiniSidebar + active workspace) */}
-        <div className="h-full flex" style={{ width: layoutConfig.mediaBin ? 380 : 96 }}>
-          <WorkspacePanel defaultWorkspace="story" onBackToApp={handleReturn} showContent={layoutConfig.mediaBin} />
+        <div
+          className="h-full flex"
+          style={{ width: layoutConfig.mediaBin ? 380 : 96 }}
+        >
+          <WorkspacePanel
+            defaultWorkspace="story"
+            onBackToApp={handleReturn}
+            showContent={layoutConfig.mediaBin}
+          />
         </div>
 
         {/* Studio Content Column (Preview Player Top + Timeline Bottom) */}
@@ -197,7 +208,10 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
 
             {/* Right: Inspector Panel */}
             {layoutConfig.rightInspector && (
-              <div className="h-full shrink-0 overflow-hidden" style={{ width: 240 }}>
+              <div
+                className="h-full shrink-0 overflow-hidden"
+                style={{ width: 240 }}
+              >
                 <InspectorPanel />
               </div>
             )}

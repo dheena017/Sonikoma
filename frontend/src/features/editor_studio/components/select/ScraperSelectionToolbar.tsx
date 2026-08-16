@@ -57,7 +57,10 @@ export function ScraperSelectionToolbar({
   align = "up",
 }: ScraperSelectionToolbarProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [coords, setCoords] = React.useState<{ top: number; left: number } | null>(null);
+  const [coords, setCoords] = React.useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const [placement, setPlacement] = React.useState<"up" | "down" | null>(null);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
@@ -92,8 +95,13 @@ export function ScraperSelectionToolbar({
       setPlacement(activePlacement);
       const isRightSide = rect.left + rect.width / 2 > window.innerWidth / 2;
       setCoords({
-        top: activePlacement === "down" ? rect.bottom + window.scrollY + 8 : rect.top + window.scrollY - 8,
-        left: isRightSide ? rect.right + window.scrollX - 256 : rect.left + window.scrollX,
+        top:
+          activePlacement === "down"
+            ? rect.bottom + window.scrollY + 8
+            : rect.top + window.scrollY - 8,
+        left: isRightSide
+          ? rect.right + window.scrollX - 256
+          : rect.left + window.scrollX,
       });
     }
   };
@@ -143,8 +151,13 @@ export function ScraperSelectionToolbar({
         setPlacement(activePlacement);
         const isRightSide = rect.left + rect.width / 2 > window.innerWidth / 2;
         setCoords({
-          top: activePlacement === "down" ? rect.bottom + window.scrollY + 8 : rect.top + window.scrollY - 8,
-          left: isRightSide ? rect.right + window.scrollX - 256 : rect.left + window.scrollX,
+          top:
+            activePlacement === "down"
+              ? rect.bottom + window.scrollY + 8
+              : rect.top + window.scrollY - 8,
+          left: isRightSide
+            ? rect.right + window.scrollX - 256
+            : rect.left + window.scrollX,
         });
       }
     };
@@ -164,7 +177,9 @@ export function ScraperSelectionToolbar({
     setSelectedScraped(selected);
   };
 
-  const selectByAspectRatio = async (type: "Landscape" | "Portrait" | "Tall Strip" | "Too Tall Strip") => {
+  const selectByAspectRatio = async (
+    type: "Landscape" | "Portrait" | "Tall Strip" | "Too Tall Strip"
+  ) => {
     if (!setSelectedScraped) return;
     setIsFilteringRatio(true);
 
@@ -190,7 +205,9 @@ export function ScraperSelectionToolbar({
           return { imgUrl, label };
         })
       );
-      const matches = results.filter((r) => r.label === type).map((r) => r.imgUrl);
+      const matches = results
+        .filter((r) => r.label === type)
+        .map((r) => r.imgUrl);
       setSelectedScraped(matches);
     } catch (err) {
       console.error(err);
@@ -202,11 +219,17 @@ export function ScraperSelectionToolbar({
 
   const handleSelectInStoryboard = () => {
     if (!setSelectedScraped) return;
-    const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+    const activePanels =
+      useProjectStore.getState().activeProjectData?.panels || [];
     const matches = scrapedImages.filter((imgUrl) => {
-      const proxiedUrl = imgUrl?.startsWith("/api/") ? imgUrl : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+      const proxiedUrl = imgUrl?.startsWith("/api/")
+        ? imgUrl
+        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
       return activePanels.some(
-        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+        (p) =>
+          p.image_url === imgUrl ||
+          p.image_url === proxiedUrl ||
+          p.original_url === imgUrl
       );
     });
     setSelectedScraped(matches);
@@ -215,11 +238,17 @@ export function ScraperSelectionToolbar({
 
   const handleSelectNotInStoryboard = () => {
     if (!setSelectedScraped) return;
-    const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+    const activePanels =
+      useProjectStore.getState().activeProjectData?.panels || [];
     const matches = scrapedImages.filter((imgUrl) => {
-      const proxiedUrl = imgUrl?.startsWith("/api/") ? imgUrl : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+      const proxiedUrl = imgUrl?.startsWith("/api/")
+        ? imgUrl
+        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
       return !activePanels.some(
-        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+        (p) =>
+          p.image_url === imgUrl ||
+          p.image_url === proxiedUrl ||
+          p.original_url === imgUrl
       );
     });
     setSelectedScraped(matches);
@@ -237,11 +266,14 @@ export function ScraperSelectionToolbar({
         <ListFilter className="h-3 w-3 text-purple-400" />
         <span>Select Filter</span>
         <ChevronDown
-          className={`h-3 w-3 transition-transform duration-200 text-neutral-500 ${isOpen ? "rotate-180 text-white" : ""}`}
+          className={`h-3 w-3 transition-transform duration-200 text-neutral-500 ${
+            isOpen ? "rotate-180 text-white" : ""
+          }`}
         />
       </button>
 
-      {isOpen && coords &&
+      {isOpen &&
+        coords &&
         createPortal(
           <div
             ref={dropdownRef}
@@ -285,7 +317,9 @@ export function ScraperSelectionToolbar({
               className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-emerald-400 hover:text-emerald-300 hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium flex items-center justify-between"
             >
               <span>Select Panels In Storyboard</span>
-              <span className="text-[9px] bg-emerald-955 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-800/40">✓ Added</span>
+              <span className="text-[9px] bg-emerald-955 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-800/40">
+                ✓ Added
+              </span>
             </button>
             <button
               type="button"
@@ -293,7 +327,9 @@ export function ScraperSelectionToolbar({
               className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-purple-400 hover:text-purple-300 hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium flex items-center justify-between"
             >
               <span>Select Panels Not In Storyboard</span>
-              <span className="text-[9px] bg-purple-955 text-purple-400 px-1.5 py-0.5 rounded border border-purple-800/40">+ Not Added</span>
+              <span className="text-[9px] bg-purple-955 text-purple-400 px-1.5 py-0.5 rounded border border-purple-800/40">
+                + Not Added
+              </span>
             </button>
 
             <div className="px-2 py-1 text-[8px] font-mono font-bold text-neutral-500 uppercase tracking-widest border-b border-neutral-900 my-1 select-none">
@@ -355,16 +391,22 @@ export function ScraperSelectionToolbar({
             </button>
 
             <div className="flex items-center gap-1.5 px-2.5 py-1">
-              <span className="text-[10px] text-neutral-400 font-sans">Every</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                Every
+              </span>
               <input
                 type="number"
                 min="1"
                 max="99"
                 value={everyN}
-                onChange={(e) => setEveryN(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) =>
+                  setEveryN(Math.max(1, parseInt(e.target.value) || 1))
+                }
                 className="w-8 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-purple-500 text-center"
               />
-              <span className="text-[10px] text-neutral-400 font-sans">th panel</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                th panel
+              </span>
               <button
                 type="button"
                 onClick={() => {
@@ -435,7 +477,9 @@ export function ScraperSelectionToolbar({
             </div>
 
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 border-t border-neutral-900 mt-1.5">
-              <span className="text-[10px] text-neutral-400 font-sans">Range</span>
+              <span className="text-[10px] text-neutral-400 font-sans">
+                Range
+              </span>
               <input
                 type="number"
                 min="1"
@@ -470,8 +514,7 @@ export function ScraperSelectionToolbar({
             </div>
           </div>,
           document.body
-        )
-      }
+        )}
     </div>
   );
 }

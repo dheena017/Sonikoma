@@ -6,7 +6,10 @@ import {
   Settings,
   Image as ImageIcon,
 } from "lucide-react";
-import { Category, ShortcutActionDetails } from "@/features/app_shortcuts/components/shortcutTypes";
+import {
+  Category,
+  ShortcutActionDetails,
+} from "@/features/app_shortcuts/components/shortcutTypes";
 
 export const categoryOptions: Category[] = [
   "all",

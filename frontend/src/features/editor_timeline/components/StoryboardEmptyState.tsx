@@ -30,8 +30,14 @@ export default function StoryboardEmptyState({
           </h3>
           <p className="text-xs text-neutral-400 font-sans leading-relaxed font-medium">
             Panels are loaded in the deck below! Select frame cards and click{" "}
-            <span className="text-purple-300 font-semibold font-mono">Insert Selected</span>, or click{" "}
-            <span className="text-cyan-300 font-semibold font-mono">+ Add to Storyboard</span> on any panel to start building your video sequence.
+            <span className="text-purple-300 font-semibold font-mono">
+              Insert Selected
+            </span>
+            , or click{" "}
+            <span className="text-cyan-300 font-semibold font-mono">
+              + Add to Storyboard
+            </span>{" "}
+            on any panel to start building your video sequence.
           </p>
         </div>
 
@@ -59,7 +65,9 @@ export default function StoryboardEmptyState({
           Storyboard Deck Awaiting URL
         </h3>
         <p className="text-xs text-neutral-400 font-sans leading-relaxed font-medium">
-          Enter a valid Webtoon viewer URL in the input above. Sonikoma will automatically extract and parse high-resolution panel images for your project.
+          Enter a valid Webtoon viewer URL in the input above. Sonikoma will
+          automatically extract and parse high-resolution panel images for your
+          project.
         </p>
       </div>
     </div>

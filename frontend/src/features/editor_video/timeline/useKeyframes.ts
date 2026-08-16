@@ -17,16 +17,31 @@ export interface KeyframesState {
   keyframeRowsVisible: boolean;
 
   getKeyframesForClip: (clipKey: string) => Keyframe[];
-  addKeyframe: (clipKey: string, time: number, property: KeyframeProperty, value: number) => void;
+  addKeyframe: (
+    clipKey: string,
+    time: number,
+    property: KeyframeProperty,
+    value: number
+  ) => void;
   removeKeyframe: (clipKey: string, keyframeId: string) => void;
-  updateKeyframe: (clipKey: string, keyframeId: string, patch: Partial<Omit<Keyframe, "id">>) => void;
+  updateKeyframe: (
+    clipKey: string,
+    keyframeId: string,
+    patch: Partial<Omit<Keyframe, "id">>
+  ) => void;
   selectKeyframe: (id: string | null) => void;
   toggleKeyframeRows: () => void;
   cycleEasing: (clipKey: string, keyframeId: string) => void;
   clearClipKeyframes: (clipKey: string) => void;
 }
 
-const EASING_CYCLE: EasingMode[] = ["linear", "ease-in", "ease-out", "ease-in-out", "step"];
+const EASING_CYCLE: EasingMode[] = [
+  "linear",
+  "ease-in",
+  "ease-out",
+  "ease-in-out",
+  "step",
+];
 
 export function useKeyframes(): KeyframesState {
   const [keyframes, setKeyframes] = useState<Record<string, Keyframe[]>>({});
@@ -39,11 +54,24 @@ export function useKeyframes(): KeyframesState {
   );
 
   const addKeyframe = useCallback(
-    (clipKey: string, time: number, property: KeyframeProperty, value: number) => {
-      const kf: Keyframe = { id: uid(), time, property, value, easing: "linear" };
+    (
+      clipKey: string,
+      time: number,
+      property: KeyframeProperty,
+      value: number
+    ) => {
+      const kf: Keyframe = {
+        id: uid(),
+        time,
+        property,
+        value,
+        easing: "linear",
+      };
       setKeyframes((prev) => ({
         ...prev,
-        [clipKey]: [...(prev[clipKey] ?? []), kf].sort((a, b) => a.time - b.time),
+        [clipKey]: [...(prev[clipKey] ?? []), kf].sort(
+          (a, b) => a.time - b.time
+        ),
       }));
       selectKeyframe(kf.id);
     },
@@ -59,7 +87,11 @@ export function useKeyframes(): KeyframesState {
   }, []);
 
   const updateKeyframe = useCallback(
-    (clipKey: string, keyframeId: string, patch: Partial<Omit<Keyframe, "id">>) => {
+    (
+      clipKey: string,
+      keyframeId: string,
+      patch: Partial<Omit<Keyframe, "id">>
+    ) => {
       setKeyframes((prev) => ({
         ...prev,
         [clipKey]: (prev[clipKey] ?? []).map((k) =>
@@ -85,12 +117,22 @@ export function useKeyframes(): KeyframesState {
     setKeyframes((prev) => ({ ...prev, [clipKey]: [] }));
   }, []);
 
-  const toggleKeyframeRows = useCallback(() => setKeyframeRowsVisible((v) => !v), []);
+  const toggleKeyframeRows = useCallback(
+    () => setKeyframeRowsVisible((v) => !v),
+    []
+  );
 
   return {
-    keyframes, selectedKeyframeId, keyframeRowsVisible,
-    getKeyframesForClip, addKeyframe, removeKeyframe,
-    updateKeyframe, selectKeyframe, toggleKeyframeRows,
-    cycleEasing, clearClipKeyframes,
+    keyframes,
+    selectedKeyframeId,
+    keyframeRowsVisible,
+    getKeyframesForClip,
+    addKeyframe,
+    removeKeyframe,
+    updateKeyframe,
+    selectKeyframe,
+    toggleKeyframeRows,
+    cycleEasing,
+    clearClipKeyframes,
   };
 }

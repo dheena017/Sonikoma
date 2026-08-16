@@ -21,7 +21,10 @@ export const MediaWorkspace: React.FC<MediaWorkspaceProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredAssets = MOCK_MEDIA_ASSETS.filter((item) => {
-    if (activeTab !== "All" && item.type.toLowerCase() !== activeTab.toLowerCase()) {
+    if (
+      activeTab !== "All" &&
+      item.type.toLowerCase() !== activeTab.toLowerCase()
+    ) {
       return false;
     }
     if (!searchQuery.trim()) return true;
@@ -44,7 +47,9 @@ export const MediaWorkspace: React.FC<MediaWorkspaceProps> = ({
       <MediaAiToolbar onTriggerFeedback={onTriggerFeedback} />
       <WorkspaceLayout.Content>
         {/* Upload dropzone Component */}
-        <MediaUploadZone onOpenBrowser={() => onTriggerFeedback("File browser opened!")} />
+        <MediaUploadZone
+          onOpenBrowser={() => onTriggerFeedback("File browser opened!")}
+        />
 
         {/* Media Grid Component List */}
         <div className="grid grid-cols-2 gap-2 pt-2">
@@ -52,7 +57,9 @@ export const MediaWorkspace: React.FC<MediaWorkspaceProps> = ({
             <MediaAssetCard
               key={asset.id}
               asset={asset}
-              onSelect={() => onTriggerFeedback(`Added "${asset.title}" to project`)}
+              onSelect={() =>
+                onTriggerFeedback(`Added "${asset.title}" to project`)
+              }
             />
           ))}
         </div>

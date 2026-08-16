@@ -102,7 +102,9 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
 
       <aside
         className={`fixed top-0 bottom-0 left-0 h-screen w-80 shrink-0 bg-[#06060c]/90 border-r border-white/8 z-50 transition-all duration-300 ease-out transform overflow-hidden backdrop-blur-3xl ${
-          isOpen ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(168,85,247,0.06)]" : "-translate-x-full"
+          isOpen
+            ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(168,85,247,0.06)]"
+            : "-translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col justify-between p-5 space-y-4 select-none">
@@ -133,7 +135,9 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
             <div className="space-y-4 overflow-y-auto flex-grow min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1">
               {navSections.map((sec, secIdx) => (
                 <div key={sec.group} className="space-y-1.5">
-                  {secIdx > 0 && <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-3" />}
+                  {secIdx > 0 && (
+                    <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-3" />
+                  )}
                   <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans pl-2">
                     {sec.group}
                   </h4>

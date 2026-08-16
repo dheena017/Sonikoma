@@ -24,10 +24,7 @@ interface ErrorModalProps {
   onClose: () => void;
 }
 
-export default function ErrorModal({
-  error,
-  onClose,
-}: ErrorModalProps) {
+export default function ErrorModal({ error, onClose }: ErrorModalProps) {
   if (!error) return null;
 
   const [expanded, setExpanded] = useState(false);
@@ -52,7 +49,10 @@ export default function ErrorModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" data-modal="true">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      data-modal="true"
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"

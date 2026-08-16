@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Sparkles, Check, Users, Volume2, Wand2, RefreshCw, BookmarkCheck, Play, Square } from "lucide-react";
+import {
+  Sparkles,
+  Check,
+  Users,
+  Volume2,
+  Wand2,
+  RefreshCw,
+  BookmarkCheck,
+  Play,
+  Square,
+} from "lucide-react";
 import * as api from "@/api";
 import { fetchWithAuth } from "@/utils";
 import { GeneratedPanel } from "@/types";
@@ -25,18 +35,78 @@ interface VoiceOption {
 }
 
 const DEFAULT_VOICES: VoiceOption[] = [
-  { code: "en-US-GuyNeural", label: "English (US) — Guy (Male)", gender: "Male", lang: "English" },
-  { code: "en-US-JennyNeural", label: "English (US) — Jenny (Female)", gender: "Female", lang: "English" },
-  { code: "en-US-AriaNeural", label: "English (US) — Aria (Female)", gender: "Female", lang: "English" },
-  { code: "en-GB-SoniaNeural", label: "English (UK) — Sonia (Female)", gender: "Female", lang: "English" },
-  { code: "en-GB-RyanNeural", label: "English (UK) — Ryan (Male)", gender: "Male", lang: "English" },
-  { code: "en-AU-NatashaNeural", label: "English (AU) — Natasha (Female)", gender: "Female", lang: "English" },
-  { code: "ko-KR-SunHiNeural", label: "Korean — SunHi (Female)", gender: "Female", lang: "Korean" },
-  { code: "ko-KR-InJoonNeural", label: "Korean — InJoon (Male)", gender: "Male", lang: "Korean" },
-  { code: "ja-JP-NanamiNeural", label: "Japanese — Nanami (Female)", gender: "Female", lang: "Japanese" },
-  { code: "zh-CN-XiaoxiaoNeural", label: "Chinese (Mandarin) — Xiaoxiao (Female)", gender: "Female", lang: "Chinese" },
-  { code: "ta-IN-PallaviNeural", label: "Tamil (India) — Pallavi (Female)", gender: "Female", lang: "Tamil" },
-  { code: "ta-IN-ValluvarNeural", label: "Tamil (India) — Valluvar (Male)", gender: "Male", lang: "Tamil" },
+  {
+    code: "en-US-GuyNeural",
+    label: "English (US) — Guy (Male)",
+    gender: "Male",
+    lang: "English",
+  },
+  {
+    code: "en-US-JennyNeural",
+    label: "English (US) — Jenny (Female)",
+    gender: "Female",
+    lang: "English",
+  },
+  {
+    code: "en-US-AriaNeural",
+    label: "English (US) — Aria (Female)",
+    gender: "Female",
+    lang: "English",
+  },
+  {
+    code: "en-GB-SoniaNeural",
+    label: "English (UK) — Sonia (Female)",
+    gender: "Female",
+    lang: "English",
+  },
+  {
+    code: "en-GB-RyanNeural",
+    label: "English (UK) — Ryan (Male)",
+    gender: "Male",
+    lang: "English",
+  },
+  {
+    code: "en-AU-NatashaNeural",
+    label: "English (AU) — Natasha (Female)",
+    gender: "Female",
+    lang: "English",
+  },
+  {
+    code: "ko-KR-SunHiNeural",
+    label: "Korean — SunHi (Female)",
+    gender: "Female",
+    lang: "Korean",
+  },
+  {
+    code: "ko-KR-InJoonNeural",
+    label: "Korean — InJoon (Male)",
+    gender: "Male",
+    lang: "Korean",
+  },
+  {
+    code: "ja-JP-NanamiNeural",
+    label: "Japanese — Nanami (Female)",
+    gender: "Female",
+    lang: "Japanese",
+  },
+  {
+    code: "zh-CN-XiaoxiaoNeural",
+    label: "Chinese (Mandarin) — Xiaoxiao (Female)",
+    gender: "Female",
+    lang: "Chinese",
+  },
+  {
+    code: "ta-IN-PallaviNeural",
+    label: "Tamil (India) — Pallavi (Female)",
+    gender: "Female",
+    lang: "Tamil",
+  },
+  {
+    code: "ta-IN-ValluvarNeural",
+    label: "Tamil (India) — Valluvar (Male)",
+    gender: "Male",
+    lang: "Tamil",
+  },
 ];
 
 export default function VoiceSettingsPanel({
@@ -80,7 +150,9 @@ export default function VoiceSettingsPanel({
         if (data.success && data.voices) {
           const mapped = data.voices.map((v: any) => ({
             ...v,
-            gender: v.label?.toLowerCase().includes("female") ? "Female" : "Male",
+            gender: v.label?.toLowerCase().includes("female")
+              ? "Female"
+              : "Male",
             lang: v.label?.split(" ")[0] || "English",
           }));
           setVoices(mapped);
@@ -176,8 +248,9 @@ export default function VoiceSettingsPanel({
       });
 
       if (json.success && json.audio_base64) {
-        const audioSrc = `data:${json.mime_type || "audio/mpeg"};base64,${json.audio_base64
-          }`;
+        const audioSrc = `data:${json.mime_type || "audio/mpeg"};base64,${
+          json.audio_base64
+        }`;
         if (audioRef.current) {
           audioRef.current.pause();
         }
@@ -215,7 +288,10 @@ export default function VoiceSettingsPanel({
         setIsPlaying(true);
         window.speechSynthesis.speak(utter);
       } else {
-        addNotification?.(e.message || "Failed to generate voice preview", "error");
+        addNotification?.(
+          e.message || "Failed to generate voice preview",
+          "error"
+        );
       }
     } finally {
       setIsGenerating(false);
@@ -226,7 +302,8 @@ export default function VoiceSettingsPanel({
     if (filterCategory === "Male") return v.gender === "Male";
     if (filterCategory === "Female") return v.gender === "Female";
     if (filterCategory === "English") return v.code.startsWith("en-");
-    if (filterCategory === "Korean/Japanese") return v.code.startsWith("ko-") || v.code.startsWith("ja-");
+    if (filterCategory === "Korean/Japanese")
+      return v.code.startsWith("ko-") || v.code.startsWith("ja-");
     return true;
   });
 
@@ -243,7 +320,8 @@ export default function VoiceSettingsPanel({
               Voice Actor Casting & Matching
             </h4>
             <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-              Match AI voice actors based on character personality, appearance description, and dialogue tone.
+              Match AI voice actors based on character personality, appearance
+              description, and dialogue tone.
             </p>
           </div>
         </div>
@@ -254,7 +332,11 @@ export default function VoiceSettingsPanel({
             disabled={loading || !name}
             className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
           >
-            {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-purple-200" />}
+            {loading ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4 text-purple-200" />
+            )}
             <span>{loading ? "Searching..." : "✦ Cast Voice"}</span>
           </button>
 
@@ -318,10 +400,12 @@ export default function VoiceSettingsPanel({
           <div className="bg-purple-950/20 p-4 rounded-xl border border-purple-500/40 space-y-2.5 animate-fade-in shadow-lg">
             <div className="flex justify-between items-center border-b border-purple-900/40 pb-2">
               <span className="text-[10px] font-mono text-purple-300 uppercase font-bold tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" /> AI Recommended Voice Actor Match
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" /> AI
+                Recommended Voice Actor Match
               </span>
               <span className="text-[9px] font-mono bg-purple-500/20 text-purple-300 px-2 py-0.5 border border-purple-500/30 rounded-full font-bold">
-                Confidence: {Math.round((castData.match_confidence || 0.9) * 100)}%
+                Confidence:{" "}
+                {Math.round((castData.match_confidence || 0.9) * 100)}%
               </span>
             </div>
             <div className="flex items-start gap-3">
@@ -353,18 +437,21 @@ export default function VoiceSettingsPanel({
 
             {/* Category Filter Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none font-mono">
-              {["All", "Male", "Female", "English", "Korean/Japanese"].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setFilterCategory(cat)}
-                  className={`px-2.5 py-1 rounded-lg text-[9px] font-bold transition-all border cursor-pointer whitespace-nowrap ${filterCategory === cat
-                      ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
-                      : "bg-neutral-950 text-neutral-400 border-neutral-800 hover:text-white"
+              {["All", "Male", "Female", "English", "Korean/Japanese"].map(
+                (cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setFilterCategory(cat)}
+                    className={`px-2.5 py-1 rounded-lg text-[9px] font-bold transition-all border cursor-pointer whitespace-nowrap ${
+                      filterCategory === cat
+                        ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
+                        : "bg-neutral-950 text-neutral-400 border-neutral-800 hover:text-white"
                     }`}
-                >
-                  {cat}
-                </button>
-              ))}
+                  >
+                    {cat}
+                  </button>
+                )
+              )}
             </div>
           </div>
 
@@ -433,10 +520,22 @@ export default function VoiceSettingsPanel({
                 </span>
               </div>
               <div className="flex items-end gap-1 h-4">
-                <span className="w-1 bg-purple-400 rounded-full animate-bounce h-3" style={{ animationDelay: "0.1s" }} />
-                <span className="w-1 bg-purple-400 rounded-full animate-bounce h-4" style={{ animationDelay: "0.2s" }} />
-                <span className="w-1 bg-purple-400 rounded-full animate-bounce h-2" style={{ animationDelay: "0.3s" }} />
-                <span className="w-1 bg-purple-400 rounded-full animate-bounce h-3.5" style={{ animationDelay: "0.4s" }} />
+                <span
+                  className="w-1 bg-purple-400 rounded-full animate-bounce h-3"
+                  style={{ animationDelay: "0.1s" }}
+                />
+                <span
+                  className="w-1 bg-purple-400 rounded-full animate-bounce h-4"
+                  style={{ animationDelay: "0.2s" }}
+                />
+                <span
+                  className="w-1 bg-purple-400 rounded-full animate-bounce h-2"
+                  style={{ animationDelay: "0.3s" }}
+                />
+                <span
+                  className="w-1 bg-purple-400 rounded-full animate-bounce h-3.5"
+                  style={{ animationDelay: "0.4s" }}
+                />
               </div>
             </div>
           )}

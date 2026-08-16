@@ -1,6 +1,7 @@
 # User URL Entry Flow: Initialize New Video Pipeline
 
 ## 📋 Overview
+
 This document visualizes the complete data flow when a user enters a URL in the **"Initialize New Video Pipeline"** section and clicks **Import Images**.
 
 ---
@@ -12,49 +13,49 @@ flowchart TD
     A["👤 User enters URL in input field"] --> B["✍️ URL appears in text input<br/>(ScraperInputToolbar)"]
     B --> C["💾 Optional: Show autocomplete<br/>suggestions from localStorage"]
     C --> D{"User clicks?"}
-    
+
     D -->|"Import Images Button"| E["🔍 User clicks 'Import Images'"]
     D -->|"Episode Scraper Button"| Z["Opens episode selector<br/>(Different flow)"]
-    
+
     E --> F["📍 handleImportClick() executes"]
     F --> G["💾 URL saved to favorites<br/>(FavoritesManager.addEnteredUrl)"]
     G --> H["🚀 handleScrape?.() called"]
-    
+
     H --> I["📤 Frontend sends request"]
     I --> J["API: POST /api/scraper/scrape-images"]
-    
+
     J --> K["🛠️ Backend Processing<br/>(scrape_and_initialize_project)"]
     K --> K1["1️⃣ Normalize URL<br/>(extract_webtoon_url)"]
     K1 --> K2["2️⃣ Check cache<br/>(bypass if force_refresh)"]
     K2 --> K3["3️⃣ Fetch HTML<br/>(Resilient + Playwright)"]
     K3 --> K4["4️⃣ Extract Images<br/>(Multiple strategies)"]
-    
+
     K4 --> K4A["Strategy 1: BeautifulSoup parsing"]
     K4 --> K4B["Strategy 2: Nuxt payload extraction"]
     K4 --> K4C["Strategy 3: Regex pattern matching"]
     K4 --> K4D["Strategy 4: Chapter resolver<br/>(for series pages)"]
-    
+
     K4A --> K5["5️⃣ Filter images<br/>(Remove banners/ads)"]
     K4B --> K5
     K4C --> K5
     K4D --> K5
-    
+
     K5 --> K6["6️⃣ Extract metadata<br/>(title, genre, author)"]
     K6 --> K7["7️⃣ Create/Insert Project<br/>(Database)"]
     K7 --> K8["8️⃣ Insert Panels<br/>(Database)"]
-    
+
     K8 --> K9["9️⃣ Auto-compile video<br/>(Optional: FFmpeg)"]
     K9 --> K10["🎬 Return response<br/>(images, metadata, video_url)"]
-    
+
     K10 --> L["📨 Frontend receives response"]
     L --> L1["✅ Success handler executes"]
     L1 --> L2["🖼️ Panels loaded in state"]
     L2 --> L3["🎨 Video preview shows<br/>with extracted panels"]
     L3 --> L4["📊 Metadata displayed<br/>(title, genre, author)"]
     L4 --> L5["🎯 User can now:<br/>- Edit panels<br/>- Generate video<br/>- Publish to YouTube"]
-    
+
     Z --> Z1["⏹️ Exit to episode scraper<br/>(Different flow)"]
-    
+
     style A fill:#FFD700
     style E fill:#87CEEB
     style J fill:#98FB98
@@ -68,6 +69,7 @@ flowchart TD
 ## 🔄 Step-by-Step Breakdown
 
 ### **1. USER INPUT STAGE** 👤
+
 ```typescript
 // File: ScraperInputToolbar.tsx
 
@@ -84,6 +86,7 @@ flowchart TD
 ```
 
 **What happens:**
+
 - URL input triggers state update
 - Suggestions dropdown appears (if enabled)
 - User can select a previous URL or continue typing
@@ -91,15 +94,16 @@ flowchart TD
 ---
 
 ### **2. USER ACTION - IMPORT IMAGES** 🔍
+
 ```typescript
 // File: ScraperInputToolbar.tsx
 
 const handleImportClick = () => {
   if (!targetUrl.trim()) return;
-  
+
   // Save URL to favorites
   FavoritesManager.addEnteredUrl(targetUrl.trim());
-  
+
   // Trigger scraping
   handleScrape?.();
 };
@@ -107,10 +111,11 @@ const handleImportClick = () => {
 // Button click
 <button onClick={handleImportClick} disabled={isScraping}>
   {isScraping ? "Extracting..." : "Import Images"}
-</button>
+</button>;
 ```
 
 **What happens:**
+
 - URL saved to browser localStorage
 - Loading state activated (button shows "Extracting...")
 - Backend request triggered
@@ -118,21 +123,22 @@ const handleImportClick = () => {
 ---
 
 ### **3. FRONTEND API REQUEST** 📤
+
 ```typescript
 // File: useAppLogic.ts (scrapeImages hook)
 
 const scrapeImages = useCallback(
   async (customUrl?: string) => {
     const activeUrl = customUrl || targetUrl;
-    
+
     // Normalize and validate URL
     const resolvedUrl = convertToViewerUrl(activeUrl, chapterNumber.trim());
     const normalizedTargetUrl = extractWebtoonUrl(resolvedUrl);
-    
+
     // API Call
     const response = await fetch("/api/scraper/scrape-images", {
       method: "POST",
-      headers: { "Authorization": `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({
         url: normalizedTargetUrl,
         source: detectedSource,
@@ -141,12 +147,12 @@ const scrapeImages = useCallback(
         limit: 50,
         proxy_images: true,
         filter_banners: true,
-        include_metadata: true
-      })
+        include_metadata: true,
+      }),
     });
-    
+
     const data = await response.json();
-    
+
     // Update state with results
     setPanels(data.panels);
     setMetadata(data.metadata);
@@ -157,6 +163,7 @@ const scrapeImages = useCallback(
 ```
 
 **What happens:**
+
 - URL normalized (extra whitespace, protocol fixes)
 - Source detected (Webtoon, Manga, etc.)
 - POST request sent to backend
@@ -165,6 +172,7 @@ const scrapeImages = useCallback(
 ---
 
 ### **4. BACKEND PROCESSING** 🛠️
+
 ```python
 # File: backend/app/api/v1/scraper.py
 
@@ -179,7 +187,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
     5. Database insertion
     6. Video compilation (optional)
     """
-    
+
     # Call scraper service
     result = await scrape_and_initialize_project(
         url=body.url,
@@ -192,11 +200,12 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
         filter_banners=body.filter_banners,
         include_metadata=body.include_metadata
     )
-    
+
     return result
 ```
 
 **What happens:**
+
 - URL validation
 - Cache checking (bypassed if force_refresh=true)
 - Scraper service invoked
@@ -204,6 +213,7 @@ async def scrape_images(request: Request, body: ScrapeImagesRequest):
 ---
 
 ### **5. IMAGE EXTRACTION** 🔍
+
 ```python
 # File: backend/app/services/scraper/scraper.py
 
@@ -211,14 +221,14 @@ async def scrape_images_from_url(url, ...):
     """
     Multi-strategy image extraction pipeline
     """
-    
+
     # Step 1: Fetch HTML
     html = await try_fetch_url_resilient(
         fetch_url,
         fetch_headers,
         cookies=merged_cookies
     )
-    
+
     if not html:
         html = await try_fetch_with_playwright(  # Fallback
             fetch_url,
@@ -226,24 +236,24 @@ async def scrape_images_from_url(url, ...):
             referer=fetch_headers["Referer"],
             cookies=merged_cookies
         )
-    
+
     # Step 2: Extract Metadata
     metadata = extract_metadata(html, fetch_url)
     # Returns: title, genre, author, cover_image, etc.
-    
+
     # Step 3: Multi-strategy Image Extraction
     image_dict = {}
-    
+
     # Strategy 1: BeautifulSoup parsing
     bs4_imgs = parse_with_bs4(html, fetch_url)
     for img in bs4_imgs:
         image_dict[img] = True
-    
+
     # Strategy 2: Nuxt payload extraction (modern SPAs)
     nuxt_imgs = extract_images_from_nuxt_payload(html)
     for img in nuxt_imgs:
         image_dict[img] = True
-    
+
     # Strategy 3: Regex pattern matching (as fallback)
     if len(image_dict) < 15:
         loose_regex = [
@@ -252,35 +262,36 @@ async def scrape_images_from_url(url, ...):
             ...
         ]
         # Extract via regex
-    
+
     # Strategy 4: Chapter resolver (for series pages)
     if len(image_dict) < 2:
         # Find chapter links on series page
         # Navigate to first chapter
         # Extract images from chapter
-    
+
     # Step 4: Filter images
     def filter_images(urls):
         UNWANTED_PATTERNS = [
             'logo', 'watermark', 'banner', 'ad', 'advertisement',
             'nav', 'header', 'sidebar', 'comment', 'avatar'
         ]
-        return [url for url in urls 
+        return [url for url in urls
                 if not any(pat in url.lower() for pat in UNWANTED_PATTERNS)]
-    
+
     filtered_images = filter_images(list(image_dict.keys()))
-    
+
     # Step 5: Proxy images (optional)
     if proxy_images:
         filtered_images = [
             f"/api/proxy-image?url={quote(img)}&referer={quote(fetch_url)}"
             for img in filtered_images
         ]
-    
+
     return filtered_images
 ```
 
 **What happens:**
+
 - HTML fetched from URL (with retries and fallbacks)
 - Four different extraction strategies applied
 - Images filtered for quality (remove ads/banners)
@@ -289,6 +300,7 @@ async def scrape_images_from_url(url, ...):
 ---
 
 ### **6. DATABASE OPERATIONS** 💾
+
 ```python
 # File: backend/app/services/scraper/scraper_service.py
 
@@ -296,13 +308,13 @@ async def scrape_and_initialize_project(...):
     """
     Create or update project in database
     """
-    
+
     # Generate project ID or use provided one
     resolved_project_id = project_id or f"proj_{uuid.uuid4().hex[:8]}"
-    
+
     # Get/create project
     existing_project = get_project(resolved_project_id)
-    
+
     if existing_project:
         # Update existing project
         update_project(resolved_project_id, {
@@ -323,7 +335,7 @@ async def scrape_and_initialize_project(...):
             "panels_count": len(panels),
             "created_at": datetime.now()
         })
-    
+
     # Insert all panels
     for idx, panel_url in enumerate(panel_urls):
         insert_panel({
@@ -332,7 +344,7 @@ async def scrape_and_initialize_project(...):
             "image_url": panel_url,
             "imported_at": datetime.now()
         })
-    
+
     # Optional: Auto-compile video
     if not scrape_only:
         video_url = await compile_video_from_panels(
@@ -340,7 +352,7 @@ async def scrape_and_initialize_project(...):
             panels,
             output_dir="/data/media"
         )
-    
+
     return {
         "project_id": resolved_project_id,
         "status": "success",
@@ -352,6 +364,7 @@ async def scrape_and_initialize_project(...):
 ```
 
 **What happens:**
+
 - Project created/updated in database
 - All panels inserted with metadata
 - Video optionally compiled
@@ -360,6 +373,7 @@ async def scrape_and_initialize_project(...):
 ---
 
 ### **7. FRONTEND RESPONSE HANDLING** 📨
+
 ```typescript
 // File: useAppLogic.ts
 
@@ -392,6 +406,7 @@ addNotification(
 ```
 
 **What happens:**
+
 - State updated with panels and metadata
 - Active project set
 - Video preview shows (if available)
@@ -447,6 +462,7 @@ addNotification(
 ## 🎯 Visible User Experience
 
 ### **1. Input Stage**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  📍 Initialize New Video Pipeline                           │
@@ -468,6 +484,7 @@ addNotification(
 ```
 
 ### **2. Loading Stage**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  ⏳ Processing...                                            │
@@ -486,6 +503,7 @@ addNotification(
 ```
 
 ### **3. Success Stage**
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  ✅ Success! 45 panels imported                             │
@@ -521,14 +539,14 @@ addNotification(
 
 ## 🔄 Key File References
 
-| File | Purpose |
-|------|---------|
-| [ScraperInputToolbar.tsx](../frontend/src/features/workspace_scraper/components/panel/ScraperInputToolbar.tsx) | URL input and button UI |
-| [useAppLogic.ts](../frontend/src/shared/hooks/useAppLogic.ts) | scrapeImages hook - orchestrates API call |
-| [scraper.py](../backend/app/services/scraper/scraper.py) | Multi-strategy image extraction engine |
-| [scraper_service.py](../backend/app/services/scraper/scraper_service.py) | Service layer - project creation |
-| [scraper.py (API)](../backend/app/api/v1/scraper.py) | REST endpoint handler |
-| [FavoritesManager](../frontend/src/features/workspace_scraper/episode-scraper/utils/FavoritesManager.ts) | URL history/bookmarks storage |
+| File                                                                                                           | Purpose                                   |
+| -------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| [ScraperInputToolbar.tsx](../frontend/src/features/workspace_scraper/components/panel/ScraperInputToolbar.tsx) | URL input and button UI                   |
+| [useAppLogic.ts](../frontend/src/shared/hooks/useAppLogic.ts)                                                  | scrapeImages hook - orchestrates API call |
+| [scraper.py](../backend/app/services/scraper/scraper.py)                                                       | Multi-strategy image extraction engine    |
+| [scraper_service.py](../backend/app/services/scraper/scraper_service.py)                                       | Service layer - project creation          |
+| [scraper.py (API)](../backend/app/api/v1/scraper.py)                                                           | REST endpoint handler                     |
+| [FavoritesManager](../frontend/src/features/workspace_scraper/episode-scraper/utils/FavoritesManager.ts)       | URL history/bookmarks storage             |
 
 ---
 

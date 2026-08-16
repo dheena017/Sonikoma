@@ -7,7 +7,9 @@ export interface VideoPreviewQuickActionOverlayProps {
   className?: string;
 }
 
-const VideoPreviewQuickActionOverlay: React.FC<VideoPreviewQuickActionOverlayProps> = () => {
+const VideoPreviewQuickActionOverlay: React.FC<
+  VideoPreviewQuickActionOverlayProps
+> = () => {
   return null;
 };
 

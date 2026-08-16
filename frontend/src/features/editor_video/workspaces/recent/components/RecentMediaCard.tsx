@@ -2,7 +2,10 @@ import React from "react";
 import { Image, Clock, RotateCcw } from "lucide-react";
 import { RecentItem } from "../RecentWorkspace";
 
-export const RecentMediaCard: React.FC<{ item: RecentItem; onAction: () => void }> = ({ item, onAction }) => (
+export const RecentMediaCard: React.FC<{
+  item: RecentItem;
+  onAction: () => void;
+}> = ({ item, onAction }) => (
   <div
     onClick={onAction}
     className="p-3 rounded-[1.75rem] bg-[#07060f] border border-white/5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:border-purple-500/25 hover:shadow-[0_18px_48px_rgba(168,85,247,0.22)] transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer"
@@ -19,14 +22,19 @@ export const RecentMediaCard: React.FC<{ item: RecentItem; onAction: () => void 
           <span className="text-[9px] uppercase tracking-[0.18em] bg-purple-500/15 text-purple-200 px-2 py-0.5 rounded-full border border-purple-500/20 font-semibold shrink-0">
             Used {item.usesCount}x
           </span>
-          <span className="flex items-center gap-1 shrink-0"><Clock className="h-3 w-3 text-purple-400" /> {item.timeAgo}</span>
+          <span className="flex items-center gap-1 shrink-0">
+            <Clock className="h-3 w-3 text-purple-400" /> {item.timeAgo}
+          </span>
           {item.badge && <span className="truncate">• {item.badge}</span>}
         </div>
       </div>
     </div>
 
     <button
-      onClick={(e) => { e.stopPropagation(); onAction(); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onAction();
+      }}
       className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-purple-500 via-indigo-500 to-fuchsia-500 text-white text-[10px] font-mono font-bold uppercase tracking-[0.04em] flex items-center gap-1.5 shrink-0 transition-all shadow-[0_0_14px_rgba(168,85,247,0.25)] active:scale-95"
     >
       <RotateCcw className="h-3 w-3" /> Re-use

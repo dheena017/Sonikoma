@@ -17,11 +17,7 @@ import {
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 
 type ProjectCardItem = Project;
-import {
-  getProxiedImageUrl,
-  getSourceIcon,
-  getSourceName,
-} from "@/utils";
+import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/utils";
 import { timeAgo } from "@/utils/dateUtils";
 
 interface ProjectCardProps {
@@ -133,7 +129,9 @@ export default function ProjectCard({
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/20 via-neutral-900 to-neutral-950">
             <FolderOpen className="w-8 h-8 text-purple-500/40" />
-            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">No Cover</span>
+            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
+              No Cover
+            </span>
           </div>
         )}
 
@@ -147,7 +145,9 @@ export default function ProjectCard({
         {/* Top badges row */}
         <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
           {/* Status badge */}
-          <div className={`px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider rounded-full border backdrop-blur-md shadow-md ${statusColor}`}>
+          <div
+            className={`px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider rounded-full border backdrop-blur-md shadow-md ${statusColor}`}
+          >
             {project.status || "Draft"}
           </div>
 
@@ -167,14 +167,15 @@ export default function ProjectCard({
               <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
               <span>{formatEpisodeLabel(project.episode)}</span>
             </div>
-          ) : <div />}
+          ) : (
+            <div />
+          )}
 
           <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-bold text-purple-300 tracking-wider shadow-lg flex items-center gap-1 font-mono">
             <Clock className="w-2.5 h-2.5 text-purple-400" />
             <span>{timeAgo(project.created_at)}</span>
           </div>
         </div>
-
       </div>
 
       {/* Dropdown menu — at card level so thumbnail overflow-hidden doesn't clip it */}
@@ -184,35 +185,53 @@ export default function ProjectCard({
           onClick={(e) => e.stopPropagation()}
         >
           <button
-            onClick={(e) => { onOpenProject(project); onToggleMenu?.(e, project.project_id); }}
+            onClick={(e) => {
+              onOpenProject(project);
+              onToggleMenu?.(e, project.project_id);
+            }}
             className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
           >
             <Play className="w-3.5 h-3.5" /> Resume
           </button>
           {onOpenDetails && (
-            <button onClick={(e) => onOpenDetails(e, project)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button
+              onClick={(e) => onOpenDetails(e, project)}
+              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+            >
               <FolderOpen className="w-3.5 h-3.5" /> Details
             </button>
           )}
           {onRename && (
-            <button onClick={(e) => onRename(e, project)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button
+              onClick={(e) => onRename(e, project)}
+              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+            >
               <Edit2 className="w-3.5 h-3.5" /> Rename
             </button>
           )}
           {onExport && (
-            <button onClick={(e) => onExport(e, project)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button
+              onClick={(e) => onExport(e, project)}
+              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+            >
               <Download className="w-3.5 h-3.5" /> Export
             </button>
           )}
           {onCopyLink && (
-            <button onClick={(e) => onCopyLink(e, project)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button
+              onClick={(e) => onCopyLink(e, project)}
+              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+            >
               <Link className="w-3.5 h-3.5" /> Copy Link
             </button>
           )}
           {onDelete && (
             <>
               <div className="h-px bg-white/5 my-1" />
-              <button onClick={(e) => onDelete(e, project.project_id)} className="w-full text-left px-3.5 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors">
+              <button
+                onClick={(e) => onDelete(e, project.project_id)}
+                className="w-full text-left px-3.5 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors"
+              >
                 <Trash2 className="w-3.5 h-3.5" /> Delete
               </button>
             </>
@@ -237,14 +256,18 @@ export default function ProjectCard({
             defaultValue={titleText}
             onBlur={(e) => onSaveRename?.(project.project_id, e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") onSaveRename?.(project.project_id, e.currentTarget.value);
+              if (e.key === "Enter")
+                onSaveRename?.(project.project_id, e.currentTarget.value);
             }}
             autoFocus
             className="text-sm font-bold text-white bg-neutral-800 border border-neutral-700 rounded-md px-2 py-1 w-full"
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <h3 className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1 group-hover:text-purple-300 transition-colors duration-200" title={titleText}>
+          <h3
+            className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1 group-hover:text-purple-300 transition-colors duration-200"
+            title={titleText}
+          >
             {titleText}
           </h3>
         )}
@@ -277,7 +300,9 @@ export default function ProjectCard({
                 title={`${displayCount} panels`}
               >
                 <Scissors className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-                <span className="font-bold text-white whitespace-nowrap">{displayCount} panels</span>
+                <span className="font-bold text-white whitespace-nowrap">
+                  {displayCount} panels
+                </span>
               </div>
             );
           })()}

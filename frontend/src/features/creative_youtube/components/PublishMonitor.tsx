@@ -15,11 +15,12 @@ import {
   RotateCcw,
   PlusCircle,
 } from "lucide-react";
-import YouTubeChannelSelector, { YouTubeChannel } from "./YouTubeChannelSelector";
+import YouTubeChannelSelector, {
+  YouTubeChannel,
+} from "./YouTubeChannelSelector";
 import YouTubeChannelHeader from "./YouTubeChannelHeader";
 import YouTubeSeoOptimizer from "./YouTubeSeoOptimizer";
 import YouTubeVideoGrid from "./YouTubeVideoGrid";
-
 
 interface PublishMonitorProps {
   activeVideoUrl: string | null;
@@ -86,7 +87,9 @@ export default function PublishMonitor({
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   // Clickbait thumbnail text overlay state
-  const [selectedChannel, setSelectedChannel] = useState<YouTubeChannel | null>(null);
+  const [selectedChannel, setSelectedChannel] = useState<YouTubeChannel | null>(
+    null
+  );
   const [clickbaitText, setClickbaitText] = useState("");
   const [suggestedSlogans, setSuggestedSlogans] = useState<string[]>([]);
 
@@ -160,7 +163,10 @@ export default function PublishMonitor({
   useEffect(() => {
     async function loadActiveChannel() {
       try {
-        const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+        const token =
+          localStorage.getItem("sonikoma_token") ||
+          localStorage.getItem("token") ||
+          "";
         const res = await fetch("/api/export/youtube/active-channel", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -185,7 +191,10 @@ export default function PublishMonitor({
     };
     window.addEventListener("youtube_channel_changed", handleChannelChanged);
     return () => {
-      window.removeEventListener("youtube_channel_changed", handleChannelChanged);
+      window.removeEventListener(
+        "youtube_channel_changed",
+        handleChannelChanged
+      );
     };
   }, []);
 
@@ -433,7 +442,9 @@ export default function PublishMonitor({
             </div>
 
             <div className="space-y-1.5">
-              <span className="text-neutral-500 font-bold text-[10px]">QUICK SLOGANS:</span>
+              <span className="text-neutral-500 font-bold text-[10px]">
+                QUICK SLOGANS:
+              </span>
               <div className="flex flex-wrap gap-1">
                 {suggestedSlogans.map((s) => (
                   <button
@@ -567,20 +578,36 @@ export default function PublishMonitor({
                 </div>
 
                 <div className="space-y-1 md:col-span-2">
-                  <span className="text-neutral-500 block font-bold">FONT STYLE:</span>
+                  <span className="text-neutral-500 block font-bold">
+                    FONT STYLE:
+                  </span>
                   <select
                     value={fontFamily}
                     onChange={(e) => setFontFamily(e.target.value)}
                     className="w-full bg-neutral-955/40 border border-neutral-900 rounded-lg px-2.5 py-1.5 text-[10px] text-neutral-300 focus:outline-none cursor-pointer"
                   >
-                    <option value="Impact, Arial Black, sans-serif" className="bg-neutral-950">
+                    <option
+                      value="Impact, Arial Black, sans-serif"
+                      className="bg-neutral-950"
+                    >
                       Impact (YouTube Classic)
                     </option>
-                    <option value="'Montserrat', sans-serif font-black" className="bg-neutral-950">
+                    <option
+                      value="'Montserrat', sans-serif font-black"
+                      className="bg-neutral-950"
+                    >
                       Montserrat Black
                     </option>
-                    <option value="'Bungee', sans-serif" className="bg-neutral-950">Bungee Bold</option>
-                    <option value="'Comic Sans MS', cursive" className="bg-neutral-950">
+                    <option
+                      value="'Bungee', sans-serif"
+                      className="bg-neutral-950"
+                    >
+                      Bungee Bold
+                    </option>
+                    <option
+                      value="'Comic Sans MS', cursive"
+                      className="bg-neutral-950"
+                    >
                       Comic Meme Style
                     </option>
                   </select>
@@ -588,9 +615,7 @@ export default function PublishMonitor({
 
                 <div className="md:col-span-2 border-t border-neutral-900 pt-2 flex justify-between items-center flex-wrap gap-2">
                   <div className="flex gap-2 items-center">
-                    <span className="text-neutral-500 font-bold">
-                      COLOR:
-                    </span>
+                    <span className="text-neutral-500 font-bold">COLOR:</span>
                     <div className="flex gap-1">
                       {[
                         "#FFFF00",
@@ -773,7 +798,9 @@ export default function PublishMonitor({
                       <div className="space-y-1">
                         <div className="flex justify-between text-neutral-555">
                           <span>HORIZ X:</span>
-                          <span className="text-white font-bold">{arrowLeft}%</span>
+                          <span className="text-white font-bold">
+                            {arrowLeft}%
+                          </span>
                         </div>
                         <input
                           type="range"
@@ -791,7 +818,9 @@ export default function PublishMonitor({
                       <div className="space-y-1">
                         <div className="flex justify-between text-neutral-555">
                           <span>VERT Y:</span>
-                          <span className="text-white font-bold">{arrowTop}%</span>
+                          <span className="text-white font-bold">
+                            {arrowTop}%
+                          </span>
                         </div>
                         <input
                           type="range"
@@ -809,7 +838,9 @@ export default function PublishMonitor({
                       <div className="space-y-1">
                         <div className="flex justify-between text-neutral-555">
                           <span>SIZE:</span>
-                          <span className="text-white font-bold">{arrowSize}px</span>
+                          <span className="text-white font-bold">
+                            {arrowSize}px
+                          </span>
                         </div>
                         <input
                           type="range"
@@ -827,7 +858,9 @@ export default function PublishMonitor({
                       <div className="space-y-1">
                         <div className="flex justify-between text-neutral-555">
                           <span>ROTATION:</span>
-                          <span className="text-white font-bold">{arrowAngle}°</span>
+                          <span className="text-white font-bold">
+                            {arrowAngle}°
+                          </span>
                         </div>
                         <input
                           type="range"
@@ -901,7 +934,6 @@ export default function PublishMonitor({
         </div>
       )}
 
-
       {/* Video properties diagnostics */}
       {activeVideoUrl && (
         <div className="bg-neutral-950/20 backdrop-blur-sm p-3.5 rounded-2xl border border-neutral-900 text-[10.5px] font-mono space-y-2 text-neutral-450 animate-fade-in shadow-inner">
@@ -912,7 +944,9 @@ export default function PublishMonitor({
             </span>
           </div>
           <div className="flex items-center justify-between border-b border-neutral-900/60 pb-1.5">
-            <span className="text-neutral-500 font-bold">Estimated Duration:</span>
+            <span className="text-neutral-500 font-bold">
+              Estimated Duration:
+            </span>
             <span className="font-bold text-neutral-300">
               {videoDuration
                 ? `${videoDuration.toFixed(1)}s`
@@ -920,7 +954,9 @@ export default function PublishMonitor({
             </span>
           </div>
           <div className="flex items-center justify-between border-b border-neutral-900/60 pb-1.5">
-            <span className="text-neutral-500 font-bold">Layout Aspect Ratio:</span>
+            <span className="text-neutral-500 font-bold">
+              Layout Aspect Ratio:
+            </span>
             <span className="font-bold text-neutral-300">
               {videoAspectRatio || "Detecting..."}
             </span>
@@ -974,7 +1010,9 @@ export default function PublishMonitor({
           <div className="text-neutral-500 border-b border-neutral-900/60 pb-1 flex justify-between">
             <span>Publish Process Monitor</span>
             {isPublishing && (
-              <span className="animate-pulse text-purple-405 font-bold">ACTIVE</span>
+              <span className="animate-pulse text-purple-405 font-bold">
+                ACTIVE
+              </span>
             )}
           </div>
           {publishLogs.map((log, idx) => {
@@ -1016,7 +1054,9 @@ export default function PublishMonitor({
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Target Channel
               </div>
-              <div className="font-bold text-white truncate font-sans">{selectedChannel.title}</div>
+              <div className="font-bold text-white truncate font-sans">
+                {selectedChannel.title}
+              </div>
             </div>
           </div>
 
@@ -1105,5 +1145,3 @@ export default function PublishMonitor({
     </div>
   );
 }
-
-

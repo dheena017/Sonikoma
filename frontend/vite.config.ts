@@ -19,39 +19,45 @@ export default defineConfig(({ mode, command }) => {
     process.env.VERCEL !== undefined ||
     !isDevServer;
 
-  const backendPortStr = env.BACKEND_PORT || process.env.BACKEND_PORT || process.env.PORT;
+  const backendPortStr =
+    env.BACKEND_PORT || process.env.BACKEND_PORT || process.env.PORT;
   if (!backendPortStr && isDevServer) {
     throw new Error(
       "Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!\n" +
-      "Please define BACKEND_PORT or PORT in your .env file."
+        "Please define BACKEND_PORT or PORT in your .env file."
     );
   }
   const backendPort = backendPortStr ? parseInt(backendPortStr, 10) : 0;
   if ((isNaN(backendPort) || backendPort <= 0) && isDevServer) {
-    throw new Error(`Configuration Error: BACKEND_PORT/PORT must be a valid positive integer, got "${backendPortStr}"`);
+    throw new Error(
+      `Configuration Error: BACKEND_PORT/PORT must be a valid positive integer, got "${backendPortStr}"`
+    );
   }
 
   const frontendPortStr = env.FRONTEND_PORT || process.env.FRONTEND_PORT;
   if (!frontendPortStr && isDevServer) {
     throw new Error(
       "Configuration Error: FRONTEND_PORT environment variable is missing!\n" +
-      "Please define FRONTEND_PORT in your .env file."
+        "Please define FRONTEND_PORT in your .env file."
     );
   }
   const frontendPort = frontendPortStr ? parseInt(frontendPortStr, 10) : 0;
   if ((isNaN(frontendPort) || frontendPort <= 0) && isDevServer) {
-    throw new Error(`Configuration Error: FRONTEND_PORT must be a valid positive integer, got "${frontendPortStr}"`);
+    throw new Error(
+      `Configuration Error: FRONTEND_PORT must be a valid positive integer, got "${frontendPortStr}"`
+    );
   }
 
   const appUrl = env.APP_URL || process.env.APP_URL;
   if (!appUrl && isProductionBuild) {
     throw new Error(
       "Configuration Error: APP_URL environment variable is missing!\n" +
-      "Please define APP_URL in your .env file."
+        "Please define APP_URL in your .env file."
     );
   }
 
-  const backendTarget = backendPort > 0 ? `http://127.0.0.1:${backendPort}` : "";
+  const backendTarget =
+    backendPort > 0 ? `http://127.0.0.1:${backendPort}` : "";
 
   let lastProxyErrorTime = 0;
   const createProxyErrorHandler = (routeLabel: string) => (proxy: any) => {
@@ -66,7 +72,9 @@ export default defineConfig(({ mode, command }) => {
           url.includes("auth/credits") ||
           url.includes("credits");
 
-        const isConnRefused = err?.code === "ECONNREFUSED" || (err?.message && err.message.includes("ECONNREFUSED"));
+        const isConnRefused =
+          err?.code === "ECONNREFUSED" ||
+          (err?.message && err.message.includes("ECONNREFUSED"));
         const now = Date.now();
 
         if (!isQuietEndpoint) {
@@ -95,8 +103,12 @@ export default defineConfig(({ mode, command }) => {
               error: isConnRefused ? "Backend Offline" : "Proxy Error",
               message: isConnRefused
                 ? `Python backend engine is not running on ${backendTarget}.`
-                : err && err.message ? err.message : String(err),
-              hint: isConnRefused ? "Run 'npm run dev' or 'npm run backend' to start the backend engine." : undefined,
+                : err && err.message
+                ? err.message
+                : String(err),
+              hint: isConnRefused
+                ? "Run 'npm run dev' or 'npm run backend' to start the backend engine."
+                : undefined,
               ...(isHealth ? { status: "offline", backend: false } : {}),
             })
           );
@@ -377,11 +389,12 @@ export default defineConfig(({ mode, command }) => {
     },
     server: {
       port: isDevServer ? frontendPort : undefined,
-      hmr: process.env.DISABLE_HMR !== "true"
-        ? {
-            overlay: true,
-          }
-        : false,
+      hmr:
+        process.env.DISABLE_HMR !== "true"
+          ? {
+              overlay: true,
+            }
+          : false,
       watch:
         process.env.DISABLE_HMR === "true"
           ? null
@@ -437,5 +450,4 @@ export default defineConfig(({ mode, command }) => {
       },
     },
   };
-
 });

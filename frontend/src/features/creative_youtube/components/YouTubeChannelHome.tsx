@@ -78,22 +78,31 @@ export default function YouTubeChannelHome({
   const [channel, setChannel] = useState<ChannelData | null>(null);
   const [playlists, setPlaylists] = useState<PlaylistSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState<"all" | "popular" | "shorts" | "playlists">("all");
+  const [activeFilter, setActiveFilter] = useState<
+    "all" | "popular" | "shorts" | "playlists"
+  >("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [bannerError, setBannerError] = useState(false);
   const [avatarError, setAvatarError] = useState(false);
-const fetchData = async () => {
+  const fetchData = async () => {
     setIsLoading(true);
     setBannerError(false);
     setAvatarError(false);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const headers = { Authorization: `Bearer ${token}` };
       const cacheBust = Date.now();
 
       const [videosRes, channelRes, playlistsRes] = await Promise.all([
-        fetch(`/api/export/youtube/videos?max_results=50&_t=${cacheBust}`, { headers }),
-        fetch(`/api/export/youtube/channel/details?_t=${cacheBust}`, { headers }),
+        fetch(`/api/export/youtube/videos?max_results=50&_t=${cacheBust}`, {
+          headers,
+        }),
+        fetch(`/api/export/youtube/channel/details?_t=${cacheBust}`, {
+          headers,
+        }),
         fetch(`/api/export/youtube/playlists?_t=${cacheBust}`, { headers }),
       ]);
 
@@ -279,7 +288,11 @@ const fetchData = async () => {
               className="p-2.5 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-xl text-neutral-400 hover:text-white transition-all cursor-pointer shadow-md active:scale-95"
               title="Refresh Channel Data"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-red-400" : ""}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${
+                  isLoading ? "animate-spin text-red-400" : ""
+                }`}
+              />
             </button>
           </div>
         </div>
@@ -296,8 +309,12 @@ const fetchData = async () => {
               <Youtube className="w-4 h-4 fill-white" />
             </div>
             <div className="min-w-0">
-              <span className="text-xs font-bold text-white block truncate">Publish Video</span>
-              <span className="text-[10px] font-mono text-neutral-400">Open Studio Flow</span>
+              <span className="text-xs font-bold text-white block truncate">
+                Publish Video
+              </span>
+              <span className="text-[10px] font-mono text-neutral-400">
+                Open Studio Flow
+              </span>
             </div>
           </button>
 
@@ -309,8 +326,12 @@ const fetchData = async () => {
               <FolderPlus className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <span className="text-xs font-bold text-white block truncate">Create Playlist</span>
-              <span className="text-[10px] font-mono text-neutral-400">Curate Series</span>
+              <span className="text-xs font-bold text-white block truncate">
+                Create Playlist
+              </span>
+              <span className="text-[10px] font-mono text-neutral-400">
+                Curate Series
+              </span>
             </div>
           </button>
 
@@ -322,8 +343,12 @@ const fetchData = async () => {
               <BarChart3 className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <span className="text-xs font-bold text-white block truncate">Analytics</span>
-              <span className="text-[10px] font-mono text-neutral-400">Channel Intelligence</span>
+              <span className="text-xs font-bold text-white block truncate">
+                Analytics
+              </span>
+              <span className="text-[10px] font-mono text-neutral-400">
+                Channel Intelligence
+              </span>
             </div>
           </button>
 
@@ -335,8 +360,12 @@ const fetchData = async () => {
               <Sparkles className="w-4 h-4" />
             </div>
             <div className="min-w-0">
-              <span className="text-xs font-bold text-white block truncate">AI SEO Optimizer</span>
-              <span className="text-[10px] font-mono text-neutral-400">Viral Titles & Tags</span>
+              <span className="text-xs font-bold text-white block truncate">
+                AI SEO Optimizer
+              </span>
+              <span className="text-[10px] font-mono text-neutral-400">
+                Viral Titles & Tags
+              </span>
             </div>
           </button>
         </div>
@@ -385,297 +414,346 @@ const fetchData = async () => {
       ) : (
         <>
           {/* ── 4. FEATURED SPOTLIGHT HERO VIDEO ── */}
-          {featuredVideo && (activeFilter === "all" || activeFilter === "popular") && (
-            <div className="relative rounded-3xl bg-gradient-to-r from-red-950/25 via-neutral-900/70 to-neutral-950 border border-red-500/20 p-6 md:p-8 shadow-2xl backdrop-blur-xl overflow-hidden">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
+          {featuredVideo &&
+            (activeFilter === "all" || activeFilter === "popular") && (
+              <div className="relative rounded-3xl bg-gradient-to-r from-red-950/25 via-neutral-900/70 to-neutral-950 border border-red-500/20 p-6 md:p-8 shadow-2xl backdrop-blur-xl overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-3xl pointer-events-none" />
 
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-2.5 w-2.5 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
-                  </span>
-                  <span className="text-xs font-black font-mono text-red-400 uppercase tracking-widest">
-                    Featured Spotlight • Top Story
-                  </span>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-2.5 w-2.5 relative">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                    </span>
+                    <span className="text-xs font-black font-mono text-red-400 uppercase tracking-widest">
+                      Featured Spotlight • Top Story
+                    </span>
+                  </div>
+                  <div className="px-2.5 py-1 rounded-lg bg-neutral-900/80 border border-neutral-800 text-[11px] font-mono text-neutral-400">
+                    HD 1080p
+                  </div>
                 </div>
-                <div className="px-2.5 py-1 rounded-lg bg-neutral-900/80 border border-neutral-800 text-[11px] font-mono text-neutral-400">
-                  HD 1080p
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-                {/* Video Preview with Hover Zoom & Play Button */}
-                <div
-                  className="lg:col-span-6 relative aspect-video bg-black rounded-2xl overflow-hidden cursor-pointer group shadow-2xl border border-white/10"
-                  onClick={() => onWatchVideo(featuredVideo.id, featuredVideo)}
-                >
-                  <img
-                    src={featuredVideo.thumbnail || `https://i.ytimg.com/vi/${featuredVideo.id}/hqdefault.jpg`}
-                    alt={featuredVideo.title}
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${featuredVideo.id}/hqdefault.jpg`;
-                    }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all duration-300">
-                    <div className="p-4 bg-gradient-to-br from-red-600 to-rose-600 rounded-2xl shadow-[0_0_30px_rgba(239,68,68,0.6)] transform group-hover:scale-110 transition-transform duration-300 border border-red-400/40">
-                      <Play className="w-7 h-7 text-white fill-white ml-0.5" />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                  {/* Video Preview with Hover Zoom & Play Button */}
+                  <div
+                    className="lg:col-span-6 relative aspect-video bg-black rounded-2xl overflow-hidden cursor-pointer group shadow-2xl border border-white/10"
+                    onClick={() =>
+                      onWatchVideo(featuredVideo.id, featuredVideo)
+                    }
+                  >
+                    <img
+                      src={
+                        featuredVideo.thumbnail ||
+                        `https://i.ytimg.com/vi/${featuredVideo.id}/hqdefault.jpg`
+                      }
+                      alt={featuredVideo.title}
+                      onError={(e) => {
+                        (
+                          e.currentTarget as HTMLImageElement
+                        ).src = `https://i.ytimg.com/vi/${featuredVideo.id}/hqdefault.jpg`;
+                      }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all duration-300">
+                      <div className="p-4 bg-gradient-to-br from-red-600 to-rose-600 rounded-2xl shadow-[0_0_30px_rgba(239,68,68,0.6)] transform group-hover:scale-110 transition-transform duration-300 border border-red-400/40">
+                        <Play className="w-7 h-7 text-white fill-white ml-0.5" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded bg-black/80 text-[11px] font-mono font-bold text-white backdrop-blur-sm border border-white/10">
+                      Play in Theater
                     </div>
                   </div>
-                  <div className="absolute bottom-3 right-3 px-2 py-0.5 rounded bg-black/80 text-[11px] font-mono font-bold text-white backdrop-blur-sm border border-white/10">
-                    Play in Theater
-                  </div>
-                </div>
 
-                {/* Details Column */}
-                <div className="lg:col-span-6 space-y-4">
-                  <div className="space-y-2">
-                    <h2
-                      className="text-xl sm:text-2xl font-black text-white font-sans leading-tight cursor-pointer hover:text-red-300 transition-colors"
-                      onClick={() => onWatchVideo(featuredVideo.id, featuredVideo)}
-                    >
-                      {featuredVideo.title}
-                    </h2>
-                    {featuredVideo.description && (
-                      <p className="text-xs sm:text-sm text-neutral-400 font-sans line-clamp-3 leading-relaxed">
-                        {featuredVideo.description}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Badges */}
-                  <div className="flex items-center gap-3 flex-wrap text-xs font-mono">
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-300 font-bold">
-                      <Eye className="w-3.5 h-3.5 text-sky-400" /> {featuredVideo.view_count} views
-                    </span>
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-bold">
-                      <ThumbsUp className="w-3.5 h-3.5 text-emerald-400" /> {featuredVideo.like_count} likes
-                    </span>
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400">
-                      <Calendar className="w-3.5 h-3.5 text-neutral-500" /> {formatDate(featuredVideo.published_at)}
-                    </span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-3 pt-2 flex-wrap">
-                    <button
-                      onClick={() => onWatchVideo(featuredVideo.id, featuredVideo)}
-                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 via-red-500 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black font-mono rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all cursor-pointer active:scale-95 border border-red-400/30"
-                    >
-                      <Play className="w-4 h-4 fill-white" />
-                      <span>Watch in Theater</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCopyLink(featuredVideo.youtube_url, featuredVideo.id, e)}
-                      className="flex items-center gap-1.5 px-4 py-3 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-bold font-mono rounded-xl transition-all cursor-pointer shadow-md"
-                    >
-                      {copiedId === featuredVideo.id ? (
-                        <>
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                          <span className="text-emerald-400">Copied Link</span>
-                        </>
-                      ) : (
-                        <>
-                          <Share2 className="w-3.5 h-3.5" />
-                          <span>Share</span>
-                        </>
+                  {/* Details Column */}
+                  <div className="lg:col-span-6 space-y-4">
+                    <div className="space-y-2">
+                      <h2
+                        className="text-xl sm:text-2xl font-black text-white font-sans leading-tight cursor-pointer hover:text-red-300 transition-colors"
+                        onClick={() =>
+                          onWatchVideo(featuredVideo.id, featuredVideo)
+                        }
+                      >
+                        {featuredVideo.title}
+                      </h2>
+                      {featuredVideo.description && (
+                        <p className="text-xs sm:text-sm text-neutral-400 font-sans line-clamp-3 leading-relaxed">
+                          {featuredVideo.description}
+                        </p>
                       )}
-                    </button>
+                    </div>
+
+                    {/* Badges */}
+                    <div className="flex items-center gap-3 flex-wrap text-xs font-mono">
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-300 font-bold">
+                        <Eye className="w-3.5 h-3.5 text-sky-400" />{" "}
+                        {featuredVideo.view_count} views
+                      </span>
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-bold">
+                        <ThumbsUp className="w-3.5 h-3.5 text-emerald-400" />{" "}
+                        {featuredVideo.like_count} likes
+                      </span>
+                      <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400">
+                        <Calendar className="w-3.5 h-3.5 text-neutral-500" />{" "}
+                        {formatDate(featuredVideo.published_at)}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 pt-2 flex-wrap">
+                      <button
+                        onClick={() =>
+                          onWatchVideo(featuredVideo.id, featuredVideo)
+                        }
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 via-red-500 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black font-mono rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all cursor-pointer active:scale-95 border border-red-400/30"
+                      >
+                        <Play className="w-4 h-4 fill-white" />
+                        <span>Watch in Theater</span>
+                      </button>
+                      <button
+                        onClick={(e) =>
+                          handleCopyLink(
+                            featuredVideo.youtube_url,
+                            featuredVideo.id,
+                            e
+                          )
+                        }
+                        className="flex items-center gap-1.5 px-4 py-3 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-bold font-mono rounded-xl transition-all cursor-pointer shadow-md"
+                      >
+                        {copiedId === featuredVideo.id ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className="text-emerald-400">
+                              Copied Link
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <Share2 className="w-3.5 h-3.5" />
+                            <span>Share</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* ── 5. TOP PERFORMING STORIES (LEADERBOARD) ── */}
-          {(activeFilter === "all" || activeFilter === "popular") && topVideos.length > 1 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-amber-500/10 border border-amber-500/25 rounded-xl text-amber-400">
-                    <Trophy className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-black text-white font-sans tracking-tight">
-                      Top Performing Videos
-                    </h3>
-                    <p className="text-[11px] text-neutral-400 font-mono">
-                      Your channel's highest watched and most engaged content
-                    </p>
+          {(activeFilter === "all" || activeFilter === "popular") &&
+            topVideos.length > 1 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-amber-500/10 border border-amber-500/25 rounded-xl text-amber-400">
+                      <Trophy className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-white font-sans tracking-tight">
+                        Top Performing Videos
+                      </h3>
+                      <p className="text-[11px] text-neutral-400 font-mono">
+                        Your channel's highest watched and most engaged content
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {topVideos.map((vid, idx) => (
-                  <div
-                    key={vid.id}
-                    onClick={() => onWatchVideo(vid.id, vid)}
-                    className="group relative bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-amber-500/40 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col"
-                  >
-                    <div className="relative aspect-video bg-black overflow-hidden">
-                      <img
-                        src={vid.thumbnail || `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`}
-                        alt={vid.title}
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
-                        }}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-black/85 backdrop-blur-md text-[10px] font-mono font-black text-amber-400 border border-amber-500/30">
-                        {idx === 0 ? "🥇 #1 Top" : idx === 1 ? "🥈 #2 Top" : idx === 2 ? "🥉 #3 Top" : `#${idx + 1}`}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {topVideos.map((vid, idx) => (
+                    <div
+                      key={vid.id}
+                      onClick={() => onWatchVideo(vid.id, vid)}
+                      className="group relative bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-amber-500/40 hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col"
+                    >
+                      <div className="relative aspect-video bg-black overflow-hidden">
+                        <img
+                          src={
+                            vid.thumbnail ||
+                            `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`
+                          }
+                          alt={vid.title}
+                          onError={(e) => {
+                            (
+                              e.currentTarget as HTMLImageElement
+                            ).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
+                          }}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-black/85 backdrop-blur-md text-[10px] font-mono font-black text-amber-400 border border-amber-500/30">
+                          {idx === 0
+                            ? "🥇 #1 Top"
+                            : idx === 1
+                            ? "🥈 #2 Top"
+                            : idx === 2
+                            ? "🥉 #3 Top"
+                            : `#${idx + 1}`}
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                          <div className="p-3 bg-red-600 rounded-2xl shadow-xl">
+                            <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                          </div>
+                        </div>
                       </div>
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                        <div className="p-3 bg-red-600 rounded-2xl shadow-xl">
-                          <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                      <div className="p-3.5 space-y-2 flex-1 flex flex-col justify-between">
+                        <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug group-hover:text-amber-300 transition-colors">
+                          {vid.title}
+                        </h4>
+                        <div className="flex items-center justify-between text-[10px] font-mono pt-2 border-t border-neutral-800/60">
+                          <span className="text-sky-400 font-bold flex items-center gap-1">
+                            <Eye className="w-3 h-3" /> {vid.view_count}
+                          </span>
+                          <span className="text-emerald-400 font-bold flex items-center gap-1">
+                            <ThumbsUp className="w-3 h-3" /> {vid.like_count}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    <div className="p-3.5 space-y-2 flex-1 flex flex-col justify-between">
-                      <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug group-hover:text-amber-300 transition-colors">
-                        {vid.title}
-                      </h4>
-                      <div className="flex items-center justify-between text-[10px] font-mono pt-2 border-t border-neutral-800/60">
-                        <span className="text-sky-400 font-bold flex items-center gap-1">
-                          <Eye className="w-3 h-3" /> {vid.view_count}
-                        </span>
-                        <span className="text-emerald-400 font-bold flex items-center gap-1">
-                          <ThumbsUp className="w-3 h-3" /> {vid.like_count}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* ── 6. PLAYLISTS & SERIES SHELF ── */}
-          {(activeFilter === "all" || activeFilter === "playlists") && playlists.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-purple-500/10 border border-purple-500/25 rounded-xl text-purple-400">
-                    <ListMusic className="w-4 h-4" />
+          {(activeFilter === "all" || activeFilter === "playlists") &&
+            playlists.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-purple-500/10 border border-purple-500/25 rounded-xl text-purple-400">
+                      <ListMusic className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-white font-sans tracking-tight">
+                        Series &amp; Playlists
+                      </h3>
+                      <p className="text-[11px] text-neutral-400 font-mono">
+                        Curated episode collections on your YouTube channel
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-black text-white font-sans tracking-tight">
-                      Series &amp; Playlists
-                    </h3>
-                    <p className="text-[11px] text-neutral-400 font-mono">
-                      Curated episode collections on your YouTube channel
-                    </p>
-                  </div>
+
+                  {onNavigateTab && (
+                    <button
+                      onClick={() => onNavigateTab("playlists")}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-xs font-mono font-bold text-purple-300 hover:text-white transition-all cursor-pointer"
+                    >
+                      <span>Manage Playlists ({playlists.length})</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
 
-                {onNavigateTab && (
-                  <button
-                    onClick={() => onNavigateTab("playlists")}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-xs font-mono font-bold text-purple-300 hover:text-white transition-all cursor-pointer"
-                  >
-                    <span>Manage Playlists ({playlists.length})</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {playlists.slice(0, 4).map((pl) => (
-                  <div
-                    key={pl.id}
-                    onClick={() => onNavigateTab && onNavigateTab("playlists")}
-                    className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-xl transition-all cursor-pointer flex flex-col"
-                  >
-                    <div className="relative aspect-video bg-neutral-950 flex items-center justify-center overflow-hidden">
-                      {pl.thumbnail ? (
-                        <img
-                          src={pl.thumbnail}
-                          alt={pl.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <ListMusic className="w-10 h-10 text-neutral-600" />
-                      )}
-                      <div className="absolute inset-y-0 right-0 w-24 bg-black/85 backdrop-blur-md border-l border-white/10 flex flex-col items-center justify-center gap-1 text-white">
-                        <Layers className="w-4 h-4 text-purple-300" />
-                        <span className="text-xs font-black font-mono">{pl.item_count ?? "?"}</span>
-                        <span className="text-[8px] font-mono uppercase text-neutral-400">Videos</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {playlists.slice(0, 4).map((pl) => (
+                    <div
+                      key={pl.id}
+                      onClick={() =>
+                        onNavigateTab && onNavigateTab("playlists")
+                      }
+                      className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-xl transition-all cursor-pointer flex flex-col"
+                    >
+                      <div className="relative aspect-video bg-neutral-950 flex items-center justify-center overflow-hidden">
+                        {pl.thumbnail ? (
+                          <img
+                            src={pl.thumbnail}
+                            alt={pl.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <ListMusic className="w-10 h-10 text-neutral-600" />
+                        )}
+                        <div className="absolute inset-y-0 right-0 w-24 bg-black/85 backdrop-blur-md border-l border-white/10 flex flex-col items-center justify-center gap-1 text-white">
+                          <Layers className="w-4 h-4 text-purple-300" />
+                          <span className="text-xs font-black font-mono">
+                            {pl.item_count ?? "?"}
+                          </span>
+                          <span className="text-[8px] font-mono uppercase text-neutral-400">
+                            Videos
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-3.5 space-y-1">
+                        <h4 className="text-xs font-bold text-white truncate group-hover:text-purple-300 transition-colors font-sans">
+                          {pl.title}
+                        </h4>
+                        <p className="text-[10px] font-mono text-neutral-500 capitalize">
+                          {pl.privacy || "public"} series
+                        </p>
                       </div>
                     </div>
-                    <div className="p-3.5 space-y-1">
-                      <h4 className="text-xs font-bold text-white truncate group-hover:text-purple-300 transition-colors font-sans">
-                        {pl.title}
-                      </h4>
-                      <p className="text-[10px] font-mono text-neutral-500 capitalize">
-                        {pl.privacy || "public"} series
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* ── 7. SHORTS SHELF ── */}
-          {(activeFilter === "all" || activeFilter === "shorts") && shorts.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-gradient-to-br from-red-500/20 to-transparent rounded-xl border border-red-500/30">
-                    <Zap className="w-4 h-4 text-red-500 fill-red-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-black text-white font-sans tracking-tight">
-                      YouTube Shorts
-                    </h3>
-                    <p className="text-[11px] text-neutral-400 font-mono">
-                      Vertical micro-episodes generated for mobile discovery
-                    </p>
-                  </div>
-                </div>
-
-                {onNavigateTab && (
-                  <button
-                    onClick={() => onNavigateTab("shorts")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-xs font-mono font-bold text-red-400 hover:text-red-300 transition-all cursor-pointer group shadow-sm"
-                  >
-                    <span>View All ({shorts.length})</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                )}
-              </div>
-
-              {/* Horizontal Scrollable Shorts Reel */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {shorts.slice(0, 6).map((short) => (
-                  <div
-                    key={short.id}
-                    onClick={() => onWatchVideo(short.id, short)}
-                    className="group relative aspect-[9/16] bg-neutral-950 rounded-2xl overflow-hidden border border-neutral-800/80 hover:border-red-500/60 shadow-lg hover:shadow-[0_0_24px_rgba(239,68,68,0.25)] transition-all duration-300 cursor-pointer flex flex-col justify-end"
-                  >
-                    <img
-                      src={short.thumbnail || `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`}
-                      alt={short.title}
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`;
-                      }}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
-                    <div className="relative z-10 p-3 space-y-1">
-                      <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug">
-                        {short.title}
-                      </h4>
-                      <p className="text-[10px] text-neutral-300 font-mono flex items-center gap-1">
-                        <Eye className="w-3 h-3 text-sky-400" /> {short.view_count}
+          {(activeFilter === "all" || activeFilter === "shorts") &&
+            shorts.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-gradient-to-br from-red-500/20 to-transparent rounded-xl border border-red-500/30">
+                      <Zap className="w-4 h-4 text-red-500 fill-red-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-white font-sans tracking-tight">
+                        YouTube Shorts
+                      </h3>
+                      <p className="text-[11px] text-neutral-400 font-mono">
+                        Vertical micro-episodes generated for mobile discovery
                       </p>
                     </div>
                   </div>
-                ))}
+
+                  {onNavigateTab && (
+                    <button
+                      onClick={() => onNavigateTab("shorts")}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-xs font-mono font-bold text-red-400 hover:text-red-300 transition-all cursor-pointer group shadow-sm"
+                    >
+                      <span>View All ({shorts.length})</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Horizontal Scrollable Shorts Reel */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {shorts.slice(0, 6).map((short) => (
+                    <div
+                      key={short.id}
+                      onClick={() => onWatchVideo(short.id, short)}
+                      className="group relative aspect-[9/16] bg-neutral-950 rounded-2xl overflow-hidden border border-neutral-800/80 hover:border-red-500/60 shadow-lg hover:shadow-[0_0_24px_rgba(239,68,68,0.25)] transition-all duration-300 cursor-pointer flex flex-col justify-end"
+                    >
+                      <img
+                        src={
+                          short.thumbnail ||
+                          `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`
+                        }
+                        alt={short.title}
+                        onError={(e) => {
+                          (
+                            e.currentTarget as HTMLImageElement
+                          ).src = `https://i.ytimg.com/vi/${short.id}/hqdefault.jpg`;
+                        }}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent" />
+                      <div className="relative z-10 p-3 space-y-1">
+                        <h4 className="text-xs font-bold text-white line-clamp-2 leading-snug">
+                          {short.title}
+                        </h4>
+                        <p className="text-[10px] text-neutral-300 font-mono flex items-center gap-1">
+                          <Eye className="w-3 h-3 text-sky-400" />{" "}
+                          {short.view_count}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* ── 8. RECENT UPLOADS GRID ── */}
           {(activeFilter === "all" || activeFilter === "popular") && (
@@ -709,9 +787,12 @@ const fetchData = async () => {
               {videos.length === 0 ? (
                 <div className="p-12 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
                   <Youtube className="w-12 h-12 text-neutral-600 mx-auto" />
-                  <h4 className="text-sm font-bold text-white">No videos published yet</h4>
+                  <h4 className="text-sm font-bold text-white">
+                    No videos published yet
+                  </h4>
                   <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
-                    Export your first webtoon animation from the Creative Suite directly to your YouTube channel.
+                    Export your first webtoon animation from the Creative Suite
+                    directly to your YouTube channel.
                   </p>
                   {onNavigateTab && (
                     <button
@@ -735,10 +816,15 @@ const fetchData = async () => {
                         onClick={() => onWatchVideo(vid.id, vid)}
                       >
                         <img
-                          src={vid.thumbnail || `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`}
+                          src={
+                            vid.thumbnail ||
+                            `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`
+                          }
                           alt={vid.title}
                           onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
+                            (
+                              e.currentTarget as HTMLImageElement
+                            ).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
                           }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
@@ -770,7 +856,8 @@ const fetchData = async () => {
                             onClick={() => onViewComments(vid.id)}
                             className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
                           >
-                            <MessageSquare className="w-3 h-3 text-purple-400" /> {vid.comment_count}
+                            <MessageSquare className="w-3 h-3 text-purple-400" />{" "}
+                            {vid.comment_count}
                           </button>
                         </div>
                       </div>

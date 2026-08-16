@@ -8,7 +8,9 @@ import { AutoCropContextWrapper } from "./AutoCropContextWrapper";
 import { AutoCropComplexityAnalysis } from "./AutoCropComplexityAnalysis";
 import { getProxiedImageUrl } from "@/utils";
 
-export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: AutoCropSharedProps) {
+export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(
+  props: AutoCropSharedProps
+) {
   const { activeSlot, applyBuiltInPreset } = useAutoCropPresets(props);
 
   const firstImageUrl =
@@ -19,9 +21,10 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: 
       ? props.scrapedImages[0]
       : null);
 
-  const batchCount = props.selectedScraped.length > 0
-    ? props.selectedScraped.length
-    : props.scrapedImages.length;
+  const batchCount =
+    props.selectedScraped.length > 0
+      ? props.selectedScraped.length
+      : props.scrapedImages.length;
 
   return (
     <AutoCropContextWrapper legacyProps={props}>
@@ -57,7 +60,9 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: 
                 </span>
               </div>
               <span className="text-[9px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-purple-950/60 border border-purple-900/40 text-purple-300">
-                {batchCount > 0 ? `${batchCount} IMAGES QUEUED` : "NO IMAGES QUEUED"}
+                {batchCount > 0
+                  ? `${batchCount} IMAGES QUEUED`
+                  : "NO IMAGES QUEUED"}
               </span>
             </div>
 
@@ -74,14 +79,18 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: 
                     Aspect: {props.aspectRatioLock.toUpperCase()}
                   </span>
                   <span className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded border border-white/10 text-emerald-400">
-                    {props.useLocalCV ? "⚡ OPENCV ACTIVE" : "✨ GEMINI AI ACTIVE"}
+                    {props.useLocalCV
+                      ? "⚡ OPENCV ACTIVE"
+                      : "✨ GEMINI AI ACTIVE"}
                   </span>
                 </div>
               </div>
             ) : (
               <div className="h-32 w-full bg-neutral-950/60 rounded-2xl border border-dashed border-neutral-800 flex flex-col items-center justify-center gap-2 text-neutral-500">
                 <Image className="h-8 w-8 text-neutral-700" />
-                <span className="text-[10px] font-mono">No target image loaded</span>
+                <span className="text-[10px] font-mono">
+                  No target image loaded
+                </span>
               </div>
             )}
 
@@ -89,7 +98,9 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(props: 
             <div className="p-3.5 bg-neutral-950/70 border border-neutral-800/80 rounded-2xl text-[10px] font-mono text-neutral-400 leading-relaxed flex items-start gap-2.5 select-none">
               <Sparkles className="h-4 w-4 shrink-0 text-purple-400 mt-0.5" />
               <p>
-                <strong>Pro Tip:</strong> OpenCV Engine runs 100% locally with zero API limits. For overlapping panels or splash art, switch to Gemini AI Engine on the right.
+                <strong>Pro Tip:</strong> OpenCV Engine runs 100% locally with
+                zero API limits. For overlapping panels or splash art, switch to
+                Gemini AI Engine on the right.
               </p>
             </div>
           </div>

@@ -20,8 +20,8 @@ interface StoryboardHeaderProps {
   totalCount?: number;
   showBulkOps?: boolean;
   setShowBulkOps?:
-  | React.Dispatch<React.SetStateAction<boolean>>
-  | ((v: boolean) => void);
+    | React.Dispatch<React.SetStateAction<boolean>>
+    | ((v: boolean) => void);
   isZipping?: boolean;
   handleDownloadZip?: () => void;
   isAnalyzingAll?: boolean;
@@ -71,7 +71,8 @@ export default function StoryboardHeader({
   viewLayout = "scroll",
   setViewLayout,
 }: StoryboardHeaderProps) {
-  const isAllSelected = selectedCount > 0 && selectedCount === (totalCount || panelsLength);
+  const isAllSelected =
+    selectedCount > 0 && selectedCount === (totalCount || panelsLength);
   const isBusy = isBatchCropping || isCleaningBubbles || isBatchMerging;
 
   // When items are selected, render the unified header selection action bar
@@ -103,7 +104,11 @@ export default function StoryboardHeader({
           onClick={isAllSelected ? clearSelection : selectAllPanels}
           className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
         >
-          {isAllSelected ? <Square className="w-3.5 h-3.5 text-indigo-400" /> : <CheckSquare className="w-3.5 h-3.5 text-indigo-400" />}
+          {isAllSelected ? (
+            <Square className="w-3.5 h-3.5 text-indigo-400" />
+          ) : (
+            <CheckSquare className="w-3.5 h-3.5 text-indigo-400" />
+          )}
           <span>{isAllSelected ? "Deselect All" : "Select All"}</span>
         </button>
 
@@ -128,8 +133,8 @@ export default function StoryboardHeader({
     const selectionRightBlock = (
       <div className="flex items-center gap-2 flex-wrap">
         {/* Analyze Selected */}
-        {handleAnalyzeSelected && (
-          isAnalyzingAll ? (
+        {handleAnalyzeSelected &&
+          (isAnalyzingAll ? (
             <button
               type="button"
               onClick={handleCancelAnalysis}
@@ -147,12 +152,11 @@ export default function StoryboardHeader({
               <Sparkles className="w-3.5 h-3.5 text-indigo-200 animate-pulse" />
               <span>Analyze Selected</span>
             </button>
-          )
-        )}
+          ))}
 
         {/* Auto-Crop */}
-        {handleAutoCropSelected && (
-          isBatchCropping ? (
+        {handleAutoCropSelected &&
+          (isBatchCropping ? (
             <button
               type="button"
               onClick={handleCancelBatch}
@@ -171,12 +175,11 @@ export default function StoryboardHeader({
               <Scissors className="w-3.5 h-3.5 text-indigo-400" />
               <span>Auto-Crop</span>
             </button>
-          )
-        )}
+          ))}
 
         {/* Clean Bubbles */}
-        {handleCleanBubblesSelected && (
-          isCleaningBubbles ? (
+        {handleCleanBubblesSelected &&
+          (isCleaningBubbles ? (
             <button
               type="button"
               onClick={handleCancelBatch}
@@ -195,8 +198,7 @@ export default function StoryboardHeader({
               <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
               <span>Clean Bubbles</span>
             </button>
-          )
-        )}
+          ))}
 
         {/* Stitch */}
         {handleBatchMergeSelected && (
@@ -290,49 +292,65 @@ export default function StoryboardHeader({
     </div>
   ) : null;
 
-  const rightBlock = panelsLength > 0 ? (
-    <div className="flex items-center gap-2">
-      {handleAnalyzeAllPanels && (
-        <button
-          type="button"
-          onClick={handleAnalyzeAllPanels}
-          disabled={isAnalyzingAll}
-          className="text-[11px] font-mono font-bold border border-indigo-500/40 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
-        >
-          <Sparkles className={`w-3.5 h-3.5 ${isAnalyzingAll ? "animate-spin text-amber-300" : "text-indigo-200"}`} />
-          <span>{isAnalyzingAll ? "Generating Narrative..." : "Analyze Full Sequence"}</span>
-        </button>
-      )}
+  const rightBlock =
+    panelsLength > 0 ? (
+      <div className="flex items-center gap-2">
+        {handleAnalyzeAllPanels && (
+          <button
+            type="button"
+            onClick={handleAnalyzeAllPanels}
+            disabled={isAnalyzingAll}
+            className="text-[11px] font-mono font-bold border border-indigo-500/40 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+          >
+            <Sparkles
+              className={`w-3.5 h-3.5 ${
+                isAnalyzingAll
+                  ? "animate-spin text-amber-300"
+                  : "text-indigo-200"
+              }`}
+            />
+            <span>
+              {isAnalyzingAll
+                ? "Generating Narrative..."
+                : "Analyze Full Sequence"}
+            </span>
+          </button>
+        )}
 
-      {handleDownloadZip && (
-        <button
-          type="button"
-          onClick={handleDownloadZip}
-          disabled={isZipping}
-          className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
-        >
-          <Download className="w-3.5 h-3.5 text-neutral-400" />
-          <span>{isZipping ? "Zipping..." : "Download ZIP"}</span>
-        </button>
-      )}
+        {handleDownloadZip && (
+          <button
+            type="button"
+            onClick={handleDownloadZip}
+            disabled={isZipping}
+            className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-neutral-400" />
+            <span>{isZipping ? "Zipping..." : "Download ZIP"}</span>
+          </button>
+        )}
 
-      {setShowBulkOps && (
-        <button
-          type="button"
-          onClick={() => setShowBulkOps(!showBulkOps)}
-          className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
-            showBulkOps
-              ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.2)]"
-              : "border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"
-          }`}
-        >
-          <span>Bulk Actions</span>
-        </button>
-      )}
-    </div>
-  ) : null;
+        {setShowBulkOps && (
+          <button
+            type="button"
+            onClick={() => setShowBulkOps(!showBulkOps)}
+            className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
+              showBulkOps
+                ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+                : "border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"
+            }`}
+          >
+            <span>Bulk Actions</span>
+          </button>
+        )}
+      </div>
+    ) : null;
 
   return (
-    <EditorHeaderFrame left={titleBlock} center={viewToggle} right={rightBlock} className="border-b-0 rounded-2xl bg-[#0c0d16]/70 backdrop-blur-xl border border-white/10 p-2 shadow-lg" />
+    <EditorHeaderFrame
+      left={titleBlock}
+      center={viewToggle}
+      right={rightBlock}
+      className="border-b-0 rounded-2xl bg-[#0c0d16]/70 backdrop-blur-xl border border-white/10 p-2 shadow-lg"
+    />
   );
 }

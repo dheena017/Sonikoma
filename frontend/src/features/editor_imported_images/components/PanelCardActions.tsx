@@ -31,7 +31,10 @@ export function PanelCardActions({
     event.stopPropagation();
 
     // 1. Tell the store which image to edit
-    useImageEditorStore.setState({ editingImageIdx: idx, activeTool: "adjust" });
+    useImageEditorStore.setState({
+      editingImageIdx: idx,
+      activeTool: "adjust",
+    });
 
     // 2. Tell the main layout to switch to the Image Editor tab
     window.dispatchEvent(
@@ -48,7 +51,10 @@ export function PanelCardActions({
     setScrapedImages((prev) => prev.filter((_, i) => i !== idx));
     // Use rawImgUrl so we match the raw URL stored in selectedScraped
     setSelectedScraped((prev) => prev.filter((img) => img !== rawImgUrl));
-    setConsoleLogs((prev) => [`[GUI] Deleted image #${idx + 1} from deck.`, ...prev]);
+    setConsoleLogs((prev) => [
+      `[GUI] Deleted image #${idx + 1} from deck.`,
+      ...prev,
+    ]);
     addNotification(`Deleted image #${idx + 1} from deck.`, "success");
     setShowDeleteConfirm(false);
   };
@@ -135,4 +141,3 @@ export function PanelCardActions({
     </>
   );
 }
-

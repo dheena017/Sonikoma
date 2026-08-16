@@ -81,7 +81,9 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
           <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
             <History className="h-4 w-4 text-purple-400" />
           </div>
-          <h3 className="text-xl font-black text-white tracking-tight">Recent Projects</h3>
+          <h3 className="text-xl font-black text-white tracking-tight">
+            Recent Projects
+          </h3>
           {!loadingProjects && (
             <span className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-full text-[10px] font-black text-purple-400">
               {filteredProjects.length}
@@ -107,7 +109,9 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
             title="Refresh projects"
             className="p-1.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-purple-500/30 hover:bg-purple-500/10 transition-all cursor-pointer text-neutral-500 hover:text-purple-400"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${loadingProjects ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 ${loadingProjects ? "animate-spin" : ""}`}
+            />
           </button>
           <button
             onClick={() => navigateTo?.("/projects")}
@@ -121,7 +125,10 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
       {loadingProjects ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((n) => (
-            <div key={n} className="h-48 bg-neutral-900/50 border border-neutral-800 animate-pulse rounded-2xl" />
+            <div
+              key={n}
+              className="h-48 bg-neutral-900/50 border border-neutral-800 animate-pulse rounded-2xl"
+            />
           ))}
         </div>
       ) : filteredProjects.length === 0 ? (
@@ -129,21 +136,31 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
           {searchQuery ? (
             <>
               <Search className="h-8 w-8 text-neutral-700" />
-              <p className="text-sm font-bold text-neutral-400">No projects match "{searchQuery}"</p>
-              <button onClick={() => setSearchQuery("")} className="text-xs text-purple-400 hover:text-purple-300 font-bold cursor-pointer">
+              <p className="text-sm font-bold text-neutral-400">
+                No projects match "{searchQuery}"
+              </p>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="text-xs text-purple-400 hover:text-purple-300 font-bold cursor-pointer"
+              >
                 Clear search
               </button>
             </>
           ) : (
             <>
               <BookOpenCheck className="h-8 w-8 text-neutral-700" />
-              <p className="text-sm font-bold text-neutral-400">No projects yet</p>
+              <p className="text-sm font-bold text-neutral-400">
+                No projects yet
+              </p>
               <p className="text-xs text-neutral-600 max-w-xs">
-                Scrape a URL above or click Video Studio to create your first webtoon project.
+                Scrape a URL above or click Video Studio to create your first
+                webtoon project.
               </p>
               <button
                 onClick={() => {
-                  const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+                  const tempId = `temp_${Date.now()}_${Math.random()
+                    .toString(36)
+                    .substring(2, 10)}`;
                   navigateTo?.(`/scraper/editor?id=${tempId}`);
                 }}
                 className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
@@ -202,7 +219,8 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
                   </>
                 ) : (
                   <>
-                    <ChevronDown className="h-3.5 w-3.5" /> Show {filteredProjects.length - 6} More Projects
+                    <ChevronDown className="h-3.5 w-3.5" /> Show{" "}
+                    {filteredProjects.length - 6} More Projects
                   </>
                 )}
               </button>

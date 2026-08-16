@@ -1,6 +1,9 @@
 import React from "react";
 import { Star } from "lucide-react";
-import { WorkspaceLayoutTabs, WorkspaceLayoutSearch } from "../../../shared/WorkspaceLayout";
+import {
+  WorkspaceLayoutTabs,
+  WorkspaceLayoutSearch,
+} from "../../../shared/WorkspaceLayout";
 
 interface FavoritesWorkspaceHeaderProps {
   tabs: string[];
@@ -10,13 +13,9 @@ interface FavoritesWorkspaceHeaderProps {
   onSearchChange: (val: string) => void;
 }
 
-export const FavoritesWorkspaceHeader: React.FC<FavoritesWorkspaceHeaderProps> = ({
-  tabs,
-  activeTab,
-  onSelectTab,
-  searchQuery,
-  onSearchChange,
-}) => {
+export const FavoritesWorkspaceHeader: React.FC<
+  FavoritesWorkspaceHeaderProps
+> = ({ tabs, activeTab, onSelectTab, searchQuery, onSearchChange }) => {
   return (
     <div className="shrink-0">
       {/* Title row */}
@@ -35,13 +34,19 @@ export const FavoritesWorkspaceHeader: React.FC<FavoritesWorkspaceHeaderProps> =
           </div>
         </div>
         <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-100 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/25 shadow-sm">
-          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-300/15 text-amber-300">★</span>
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-300/15 text-amber-300">
+            ★
+          </span>
           Saved
         </span>
       </div>
       {/* Tabs row */}
       <div className="px-3.5 pt-3 pb-2">
-        <WorkspaceLayoutTabs tabs={tabs} activeTab={activeTab} onSelectTab={onSelectTab} />
+        <WorkspaceLayoutTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onSelectTab={onSelectTab}
+        />
       </div>
       {/* Search row */}
       <WorkspaceLayoutSearch

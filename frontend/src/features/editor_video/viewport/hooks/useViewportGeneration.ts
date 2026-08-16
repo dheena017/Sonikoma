@@ -207,12 +207,13 @@ export function useVideoPreviewGeneration({
       selectedSource !== "custom" &&
       !allowedHosts[selectedSource]?.some(
         (allowedHost) =>
-          currentHost === allowedHost ||
-          currentHost.endsWith(`.${allowedHost}`)
+          currentHost === allowedHost || currentHost.endsWith(`.${allowedHost}`)
       )
     ) {
       const matchedKey = Object.keys(allowedHosts).find((key) =>
-        allowedHosts[key]?.some((h) => currentHost === h || currentHost.endsWith(`.${h}`))
+        allowedHosts[key]?.some(
+          (h) => currentHost === h || currentHost.endsWith(`.${h}`)
+        )
       );
       if (matchedKey) {
         setSelectedSource?.(matchedKey);
@@ -477,7 +478,10 @@ export function useVideoPreviewGeneration({
             }
           }
 
-          if (statusData.status === "completed" || statusData.status === "COMPLETED") {
+          if (
+            statusData.status === "completed" ||
+            statusData.status === "COMPLETED"
+          ) {
             clearInterval(pollInterval);
             setRenderProgress(100);
             setRenderEtaSeconds(0);
@@ -494,7 +498,10 @@ export function useVideoPreviewGeneration({
                 overrideVideoUrl: statusData.url,
               });
             }
-          } else if (statusData.status === "failed" || statusData.status === "FAILED") {
+          } else if (
+            statusData.status === "failed" ||
+            statusData.status === "FAILED"
+          ) {
             clearInterval(pollInterval);
             throw new Error(statusData.error || "Render failed");
           }

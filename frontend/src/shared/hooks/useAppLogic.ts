@@ -20,118 +20,136 @@ export function useAppLogic() {
   const [isGeneratingStoryboard, setIsGeneratingStoryboard] =
     useState<boolean>(false);
 
-  const handleGenerateStoryboardAI = useCallback(async (overrides?: {
-    title?: string;
-    episode?: string;
-    genre?: string;
-    author?: string;
-    cover_image?: string;
-    synopsis?: string;
-  }) => {
-    if (isGeneratingStoryboard || isGeneratingRef.current) return;
-    isGeneratingRef.current = true;
+  const handleGenerateStoryboardAI = useCallback(
+    async (overrides?: {
+      title?: string;
+      episode?: string;
+      genre?: string;
+      author?: string;
+      cover_image?: string;
+      synopsis?: string;
+    }) => {
+      if (isGeneratingStoryboard || isGeneratingRef.current) return;
+      isGeneratingRef.current = true;
 
-    const activeUrl = targetUrl;
-    const projId = state.projectId;
-    if (!activeUrl || !activeUrl.trim() || !projId) {
-      state.addNotification(
-        "Please ensure target URL is pasted and project is created.",
-        "error"
-      );
-      isGeneratingRef.current = false;
-      return;
-    }
-
-    setIsGeneratingStoryboard(true);
-    state.addNotification("Starting timeline generation...", "info");
-    state.setConsoleLogs((prev) => [
-      `[Smart Timeline] Triggering timeline generation for project: ${projId}...`,
-      `[Smart Timeline] Running OCR Transcription & Panel Slicing...`,
-      ...prev,
-    ]);
-
-    try {
-      const formattedEpisode = overrides?.episode
-        ? overrides.episode
-        : (() => {
-            const num = state.chapterNumber.trim();
-            const name = state.chapterTitle.trim();
-            if (num && name) return `Chapter ${num} - ${name}`;
-            if (num) return `Chapter ${num}`;
-            if (name) return name;
-            return "";
-          })();
-
-      const resolvedUrl = convertToViewerUrl(activeUrl, state.chapterNumber.trim());
-      const data = await api.generateStoryboard(state.fetchWithInterceptor, {
-        url: extractWebtoonUrl(resolvedUrl),
-        project_id: projId,
-        model: selectedModel,
-        narrationStyle: state.narrationStyle,
-        title: overrides?.title?.trim() || (state.seriesTitle ? state.seriesTitle.trim() : undefined),
-        episode: formattedEpisode || undefined,
-        genre: overrides?.genre?.trim() || (state.scrapedGenre ? state.scrapedGenre.trim() : undefined),
-        author: overrides?.author?.trim() || (state.seriesAuthor ? state.seriesAuthor.trim() : undefined),
-        cover_image: overrides?.cover_image?.trim() || (state.seriesCoverImage ? state.seriesCoverImage.trim() : undefined),
-        synopsis: overrides?.synopsis?.trim() || (state.seriesSynopsis ? state.seriesSynopsis.trim() : undefined),
-      });
-
-      if (data.success && data.panels) {
-        const mappedPanels = data.panels.map((p: any, idx: number) => ({
-          ...p,
-          id: p.id || idx + 1,
-          grayscale: p.grayscale === 1 || p.grayscale === true,
-        }));
-        state.setPanels(mappedPanels);
-
-        state.setConsoleLogs((prev) => [
-          `[Smart Timeline] [SUCCESS] Timeline generated successfully with ${mappedPanels.length} panels!`,
-          ...prev,
-        ]);
-
+      const activeUrl = targetUrl;
+      const projId = state.projectId;
+      if (!activeUrl || !activeUrl.trim() || !projId) {
         state.addNotification(
-          `Timeline generated successfully with ${mappedPanels.length} panels!`,
-          "success"
+          "Please ensure target URL is pasted and project is created.",
+          "error"
         );
-      } else {
-        throw new Error(
-          data.message || "Invalid response from System Model Analysis"
-        );
+        isGeneratingRef.current = false;
+        return;
       }
-    } catch (err: any) {
-      console.error("[Smart Timeline] Generation failed:", err);
+
+      setIsGeneratingStoryboard(true);
+      state.addNotification("Starting timeline generation...", "info");
       state.setConsoleLogs((prev) => [
-        `[Smart Timeline] [ERROR] Generation failed: ${
-          err.message || String(err)
-        }`,
+        `[Smart Timeline] Triggering timeline generation for project: ${projId}...`,
+        `[Smart Timeline] Running OCR Transcription & Panel Slicing...`,
         ...prev,
       ]);
-      state.addNotification(
-        `Timeline generation failed: ${err.message || String(err)}`,
-        "error"
-      );
-    } finally {
-      setIsGeneratingStoryboard(false);
-      isGeneratingRef.current = false;
-    }
-  }, [
-    isGeneratingStoryboard,
-    targetUrl,
-    state.projectId,
-    selectedModel,
-    state.narrationStyle,
-    state.seriesTitle,
-    state.chapterNumber,
-    state.chapterTitle,
-    state.scrapedGenre,
-    state.seriesAuthor,
-    state.seriesCoverImage,
-    state.seriesSynopsis,
-    state.fetchWithInterceptor,
-    state.setPanels,
-    state.setConsoleLogs,
-    state.addNotification,
-  ]);
+
+      try {
+        const formattedEpisode = overrides?.episode
+          ? overrides.episode
+          : (() => {
+              const num = state.chapterNumber.trim();
+              const name = state.chapterTitle.trim();
+              if (num && name) return `Chapter ${num} - ${name}`;
+              if (num) return `Chapter ${num}`;
+              if (name) return name;
+              return "";
+            })();
+
+        const resolvedUrl = convertToViewerUrl(
+          activeUrl,
+          state.chapterNumber.trim()
+        );
+        const data = await api.generateStoryboard(state.fetchWithInterceptor, {
+          url: extractWebtoonUrl(resolvedUrl),
+          project_id: projId,
+          model: selectedModel,
+          narrationStyle: state.narrationStyle,
+          title:
+            overrides?.title?.trim() ||
+            (state.seriesTitle ? state.seriesTitle.trim() : undefined),
+          episode: formattedEpisode || undefined,
+          genre:
+            overrides?.genre?.trim() ||
+            (state.scrapedGenre ? state.scrapedGenre.trim() : undefined),
+          author:
+            overrides?.author?.trim() ||
+            (state.seriesAuthor ? state.seriesAuthor.trim() : undefined),
+          cover_image:
+            overrides?.cover_image?.trim() ||
+            (state.seriesCoverImage
+              ? state.seriesCoverImage.trim()
+              : undefined),
+          synopsis:
+            overrides?.synopsis?.trim() ||
+            (state.seriesSynopsis ? state.seriesSynopsis.trim() : undefined),
+        });
+
+        if (data.success && data.panels) {
+          const mappedPanels = data.panels.map((p: any, idx: number) => ({
+            ...p,
+            id: p.id || idx + 1,
+            grayscale: p.grayscale === 1 || p.grayscale === true,
+          }));
+          state.setPanels(mappedPanels);
+
+          state.setConsoleLogs((prev) => [
+            `[Smart Timeline] [SUCCESS] Timeline generated successfully with ${mappedPanels.length} panels!`,
+            ...prev,
+          ]);
+
+          state.addNotification(
+            `Timeline generated successfully with ${mappedPanels.length} panels!`,
+            "success"
+          );
+        } else {
+          throw new Error(
+            data.message || "Invalid response from System Model Analysis"
+          );
+        }
+      } catch (err: any) {
+        console.error("[Smart Timeline] Generation failed:", err);
+        state.setConsoleLogs((prev) => [
+          `[Smart Timeline] [ERROR] Generation failed: ${
+            err.message || String(err)
+          }`,
+          ...prev,
+        ]);
+        state.addNotification(
+          `Timeline generation failed: ${err.message || String(err)}`,
+          "error"
+        );
+      } finally {
+        setIsGeneratingStoryboard(false);
+        isGeneratingRef.current = false;
+      }
+    },
+    [
+      isGeneratingStoryboard,
+      targetUrl,
+      state.projectId,
+      selectedModel,
+      state.narrationStyle,
+      state.seriesTitle,
+      state.chapterNumber,
+      state.chapterTitle,
+      state.scrapedGenre,
+      state.seriesAuthor,
+      state.seriesCoverImage,
+      state.seriesSynopsis,
+      state.fetchWithInterceptor,
+      state.setPanels,
+      state.setConsoleLogs,
+      state.addNotification,
+    ]
+  );
 
   const {
     currentPanelIndex,
@@ -212,9 +230,9 @@ export function useAppLogic() {
         state.setConsoleLogs((prev) => {
           let updated = [...prev];
           for (const item of newEntries) {
-            const itemMsg = typeof item === 'string' ? item : item.message;
+            const itemMsg = typeof item === "string" ? item : item.message;
             const last = updated[updated.length - 1];
-            const lastMsg = typeof last === 'string' ? last : last?.message;
+            const lastMsg = typeof last === "string" ? last : last?.message;
             if (lastMsg && itemMsg && lastMsg === itemMsg) {
               continue; // Drop duplicate repeated log
             }
@@ -352,7 +370,10 @@ export function useAppLogic() {
       const activeUrl = typeof customUrl === "string" ? customUrl : targetUrl;
       if (!activeUrl || !activeUrl.trim()) return;
 
-      const resolvedUrl = convertToViewerUrl(activeUrl, state.chapterNumber.trim());
+      const resolvedUrl = convertToViewerUrl(
+        activeUrl,
+        state.chapterNumber.trim()
+      );
       const normalizedTargetUrl = extractWebtoonUrl(resolvedUrl);
 
       const currentHost = (() => {
@@ -388,8 +409,11 @@ export function useAppLogic() {
             currentHost.endsWith(`.${allowedHost}`)
         )
       ) {
-        const matchedEntry = Object.entries(SOURCE_DOMAINS).find(([key, hosts]) =>
-          hosts.some((h) => currentHost === h || currentHost.endsWith(`.${h}`))
+        const matchedEntry = Object.entries(SOURCE_DOMAINS).find(
+          ([key, hosts]) =>
+            hosts.some(
+              (h) => currentHost === h || currentHost.endsWith(`.${h}`)
+            )
         );
         if (matchedEntry) {
           state.setSelectedSource(matchedEntry[0]);
@@ -487,25 +511,45 @@ export function useAppLogic() {
           state.setScrapedImages(finalImages);
 
           // Update series & chapter state if returned by scraper
-          const returnedTitle = data.series?.title || (state.seriesTitle ? state.seriesTitle.trim() : "");
-          const returnedAuthor = data.series?.author || (state.seriesAuthor ? state.seriesAuthor.trim() : "");
-          const returnedCover = data.series?.cover_image || (state.seriesCoverImage ? state.seriesCoverImage.trim() : "");
-          const returnedSynopsis = data.series?.description || (state.seriesSynopsis ? state.seriesSynopsis.trim() : "");
-          const returnedGenre = (data.series?.genres && data.series.genres.length > 0)
-            ? data.series.genres.join(", ")
-            : (state.scrapedGenre ? state.scrapedGenre.trim() : "");
-          const returnedChapterNum = data.chapter?.number != null
-            ? String(data.chapter.number)
-            : state.chapterNumber.trim();
-          const returnedChapterTitle = data.chapter?.title || state.chapterTitle.trim();
+          const returnedTitle =
+            data.series?.title ||
+            (state.seriesTitle ? state.seriesTitle.trim() : "");
+          const returnedAuthor =
+            data.series?.author ||
+            (state.seriesAuthor ? state.seriesAuthor.trim() : "");
+          const returnedCover =
+            data.series?.cover_image ||
+            (state.seriesCoverImage ? state.seriesCoverImage.trim() : "");
+          const returnedSynopsis =
+            data.series?.description ||
+            (state.seriesSynopsis ? state.seriesSynopsis.trim() : "");
+          const returnedGenre =
+            data.series?.genres && data.series.genres.length > 0
+              ? data.series.genres.join(", ")
+              : state.scrapedGenre
+              ? state.scrapedGenre.trim()
+              : "";
+          const returnedChapterNum =
+            data.chapter?.number != null
+              ? String(data.chapter.number)
+              : state.chapterNumber.trim();
+          const returnedChapterTitle =
+            data.chapter?.title || state.chapterTitle.trim();
 
-          if (returnedTitle && !state.seriesTitle) state.setSeriesTitle(returnedTitle);
-          if (returnedAuthor && !state.seriesAuthor) state.setSeriesAuthor(returnedAuthor);
-          if (returnedCover && !state.seriesCoverImage) state.setSeriesCoverImage(returnedCover);
-          if (returnedSynopsis && !state.seriesSynopsis) state.setSeriesSynopsis(returnedSynopsis);
-          if (returnedGenre && !state.scrapedGenre) state.setScrapedGenre(returnedGenre);
-          if (returnedChapterNum && !state.chapterNumber) state.setChapterNumber(returnedChapterNum);
-          if (returnedChapterTitle && !state.chapterTitle) state.setChapterTitle(returnedChapterTitle);
+          if (returnedTitle && !state.seriesTitle)
+            state.setSeriesTitle(returnedTitle);
+          if (returnedAuthor && !state.seriesAuthor)
+            state.setSeriesAuthor(returnedAuthor);
+          if (returnedCover && !state.seriesCoverImage)
+            state.setSeriesCoverImage(returnedCover);
+          if (returnedSynopsis && !state.seriesSynopsis)
+            state.setSeriesSynopsis(returnedSynopsis);
+          if (returnedGenre && !state.scrapedGenre)
+            state.setScrapedGenre(returnedGenre);
+          if (returnedChapterNum && !state.chapterNumber)
+            state.setChapterNumber(returnedChapterNum);
+          if (returnedChapterTitle && !state.chapterTitle)
+            state.setChapterTitle(returnedChapterTitle);
 
           state.setProjectId(targetProjectId);
 
@@ -539,7 +583,9 @@ export function useAppLogic() {
             });
             return [
               `[Scraper] Extraction completed. Total assets returned: ${totalCount}`,
-              `[API] Adaptive chapter scrape response received — Assets: ${totalCount} | Completeness: ${data.scrape?.completeness || 'COMPLETE'}`,
+              `[API] Adaptive chapter scrape response received — Assets: ${totalCount} | Completeness: ${
+                data.scrape?.completeness || "COMPLETE"
+              }`,
               ...filtered,
             ];
           });
@@ -630,7 +676,11 @@ export function useAppLogic() {
 
       const allImages: string[] = [];
       const origins: Record<string, string> = {};
-      const episodeGroups: Array<{ episodeLabel: string; startIndex: number; count: number }> = [];
+      const episodeGroups: Array<{
+        episodeLabel: string;
+        startIndex: number;
+        count: number;
+      }> = [];
 
       state.setConsoleLogs((prev) => [
         `[Batch Import] Starting batch import for ${episodesList.length} episodes...`,
@@ -643,16 +693,26 @@ export function useAppLogic() {
         const numStr = (ep.number || "").trim();
         const titleStr = (ep.title || "").trim();
         let epLabel = numStr || titleStr || target;
-        if (numStr && titleStr && numStr.toLowerCase() !== titleStr.toLowerCase()) {
+        if (
+          numStr &&
+          titleStr &&
+          numStr.toLowerCase() !== titleStr.toLowerCase()
+        ) {
           const cleanTitle = titleStr.replace(/^[-:\s]+/, "").trim();
-          if (cleanTitle && cleanTitle.toLowerCase() !== numStr.toLowerCase() && !numStr.toLowerCase().includes(cleanTitle.toLowerCase())) {
+          if (
+            cleanTitle &&
+            cleanTitle.toLowerCase() !== numStr.toLowerCase() &&
+            !numStr.toLowerCase().includes(cleanTitle.toLowerCase())
+          ) {
             epLabel = `${numStr} - ${cleanTitle}`;
           }
         }
         const startIndex = allImages.length;
 
         state.setConsoleLogs((prev) => [
-          `[Batch Import] (${i + 1}/${episodesList.length}) Scraping ${epLabel}...`,
+          `[Batch Import] (${i + 1}/${
+            episodesList.length
+          }) Scraping ${epLabel}...`,
           ...prev,
         ]);
 

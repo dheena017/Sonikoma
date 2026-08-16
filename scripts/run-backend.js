@@ -57,33 +57,42 @@ const nodeEnv = (process.env.NODE_ENV || "development").toLowerCase();
 
 const backendPortStr = process.env.BACKEND_PORT || process.env.PORT;
 if (!backendPortStr) {
-  logger.error("Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!");
+  logger.error(
+    "Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!"
+  );
   logger.error("Please configure them in your .env file.");
   process.exit(1);
 }
 const port = parseInt(backendPortStr, 10);
 if (isNaN(port)) {
-  logger.error(`Configuration Error: BACKEND_PORT/PORT must be a valid integer, got "${backendPortStr}"`);
+  logger.error(
+    `Configuration Error: BACKEND_PORT/PORT must be a valid integer, got "${backendPortStr}"`
+  );
   process.exit(1);
 }
 
 const jwtSecretKey = process.env.JWT_SECRET_KEY;
 if (!jwtSecretKey) {
-  logger.error("Configuration Error: JWT_SECRET_KEY environment variable is missing!");
+  logger.error(
+    "Configuration Error: JWT_SECRET_KEY environment variable is missing!"
+  );
   logger.error("Please configure it in your .env file.");
   process.exit(1);
 }
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
 if (!geminiApiKey) {
-  logger.error("Configuration Error: GEMINI_API_KEY environment variable is missing!");
+  logger.error(
+    "Configuration Error: GEMINI_API_KEY environment variable is missing!"
+  );
   logger.error("Please configure it in your .env file.");
   process.exit(1);
 }
 
-const pythonPath = process.platform === "win32"
-  ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
-  : "python3";
+const pythonPath =
+  process.platform === "win32"
+    ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
+    : "python3";
 const backendDir = path.resolve(__dirname, "../backend/app");
 const projectRootDir = path.resolve(__dirname, "../");
 const pythonImportRoot = projectRootDir;
@@ -179,7 +188,7 @@ function killStaleListenerOnPort(port) {
   try {
     const netstatOutput = execSync(`netstat -ano -p tcp | findstr :${port}`, {
       encoding: "utf8",
-      stdio: ["pipe", "pipe", "pipe"]
+      stdio: ["pipe", "pipe", "pipe"],
     });
     const pids = new Set();
     for (const line of netstatOutput.split(/\r?\n/)) {
@@ -190,7 +199,9 @@ function killStaleListenerOnPort(port) {
     }
     if (pids.size === 0) return false;
 
-    logger.warn(`⚠️ Clearing stale listener(s) on port ${port}: ${[...pids].join(", ")}`);
+    logger.warn(
+      `⚠️ Clearing stale listener(s) on port ${port}: ${[...pids].join(", ")}`
+    );
     for (const pid of pids) {
       try {
         spawn("taskkill", ["/F", "/PID", pid]);
@@ -236,7 +247,9 @@ async function init() {
   if (isTaken) {
     const cleared = killStaleListenerOnPort(port);
     if (cleared) {
-      logger.info(`Retrying backend start after clearing stale listener on port ${port}...`);
+      logger.info(
+        `Retrying backend start after clearing stale listener on port ${port}...`
+      );
     } else {
       logger.warn(`⚠️ Port ${port} is already in use.`);
       logger.info(`Waiting for existing process to respond...`);
@@ -247,7 +260,9 @@ async function init() {
 
   const isStillTaken = await isPortTaken(port);
   if (isStillTaken) {
-    logger.warn(`⚠️ Port ${port} remains unavailable after cleanup. Waiting for existing process to respond...`);
+    logger.warn(
+      `⚠️ Port ${port} remains unavailable after cleanup. Waiting for existing process to respond...`
+    );
     checkHealth();
     return;
   }
@@ -345,11 +360,11 @@ fs.watch(backendDir, { recursive: true }, (eventType, filename) => {
 });
 
 function printBackendShutdownBanner() {
-  const CLR_BORDER  = "\x1b[38;5;39m";    // Bright Cyan border
-  const CLR_TITLE   = "\x1b[1;31m";       // Bold Red
-  const CLR_TEXT    = "\x1b[1;37m";       // Bold White
-  const CLR_MUTED   = "\x1b[90m";         // Muted Grey
-  const CLR_RESET   = "\x1b[0m";
+  const CLR_BORDER = "\x1b[38;5;39m"; // Bright Cyan border
+  const CLR_TITLE = "\x1b[1;31m"; // Bold Red
+  const CLR_TEXT = "\x1b[1;37m"; // Bold White
+  const CLR_MUTED = "\x1b[90m"; // Muted Grey
+  const CLR_RESET = "\x1b[0m";
 
   const INNER_WIDTH = 76;
 
@@ -363,14 +378,21 @@ function printBackendShutdownBanner() {
     return `${CLR_BORDER}│${CLR_RESET} ${content}${pad} ${CLR_BORDER}│${CLR_RESET}`;
   }
 
-  const lineTitle  = formatLine(`🛑 ${CLR_TITLE}SONIKOMA COMPUTE ENGINE${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_TEXT}Server Shutdown Complete${CLR_RESET}`);
-  const lineP1     = formatLine(`● Backend process terminated cleanly.`);
-  const lineP2     = formatLine(`● All SQLite database connections & background tasks released.`);
-  const lineP3     = formatLine(`● Have a great session! 👋`);
+  const lineTitle = formatLine(
+    `🛑 ${CLR_TITLE}SONIKOMA COMPUTE ENGINE${CLR_RESET} ${CLR_MUTED}•${CLR_RESET} ${CLR_TEXT}Server Shutdown Complete${CLR_RESET}`
+  );
+  const lineP1 = formatLine(`● Backend process terminated cleanly.`);
+  const lineP2 = formatLine(
+    `● All SQLite database connections & background tasks released.`
+  );
+  const lineP3 = formatLine(`● Have a great session! 👋`);
 
-  const topBorder = `${CLR_BORDER}┌` + "─".repeat(INNER_WIDTH + 2) + `┐${CLR_RESET}`;
-  const midBorder = `${CLR_BORDER}├` + "─".repeat(INNER_WIDTH + 2) + `┤${CLR_RESET}`;
-  const botBorder = `${CLR_BORDER}└` + "─".repeat(INNER_WIDTH + 2) + `┘${CLR_RESET}`;
+  const topBorder =
+    `${CLR_BORDER}┌` + "─".repeat(INNER_WIDTH + 2) + `┐${CLR_RESET}`;
+  const midBorder =
+    `${CLR_BORDER}├` + "─".repeat(INNER_WIDTH + 2) + `┤${CLR_RESET}`;
+  const botBorder =
+    `${CLR_BORDER}└` + "─".repeat(INNER_WIDTH + 2) + `┘${CLR_RESET}`;
 
   const banner = `${topBorder}
 ${lineTitle}

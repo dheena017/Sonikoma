@@ -22,18 +22,18 @@ export interface Keyframe {
   id: string;
   /** Seconds from the clip's own start (not the timeline start). */
   time: number;
-  property: 'opacity' | 'x' | 'y' | 'scale' | 'rotation' | 'blur' | 'volume';
+  property: "opacity" | "x" | "y" | "scale" | "rotation" | "blur" | "volume";
   value: number;
-  easing: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'step';
+  easing: "linear" | "ease-in" | "ease-out" | "ease-in-out" | "step";
 }
 
-export type EasingMode        = Keyframe['easing'];
-export type KeyframeProperty  = Keyframe['property'];
+export type EasingMode = Keyframe["easing"];
+export type KeyframeProperty = Keyframe["property"];
 
 /** An asset that can be dropped onto the timeline. */
 export interface MediaItem {
   id: string;
-  type: 'image' | 'video' | 'audio' | 'blank';
+  type: "image" | "video" | "audio" | "blank";
   name: string;
   url?: string;
   /** Duration in seconds (undefined = user-defined). */
@@ -54,9 +54,8 @@ export interface AISuggestion {
 
 /** Waveform bar heights (%) used for the music track visualisation. */
 export const WAVEFORM: number[] = [
-  40, 70, 30, 90, 55, 100, 62, 80, 42, 88,
-  34, 65, 78, 44, 92, 50, 72, 36, 95, 60,
-  45, 85, 52, 100, 40, 74, 32, 90, 56, 70,
+  40, 70, 30, 90, 55, 100, 62, 80, 42, 88, 34, 65, 78, 44, 92, 50, 72, 36, 95,
+  60, 45, 85, 52, 100, 40, 74, 32, 90, 56, 70,
 ];
 
 /** Default clip duration in seconds when no explicit duration is set. */
@@ -64,11 +63,11 @@ export const DEFAULT_PANEL_DURATION = 2.1;
 
 /** Colour map for keyframe properties — used by diamonds and panel badges. */
 export const KEYFRAME_COLORS: Record<KeyframeProperty, string> = {
-  opacity:  'bg-amber-400  border-amber-300',
-  x:        'bg-blue-400   border-blue-300',
-  y:        'bg-green-400  border-green-300',
-  scale:    'bg-purple-400 border-purple-300',
-  rotation: 'bg-pink-400   border-pink-300',
-  blur:     'bg-cyan-400   border-cyan-300',
-  volume:   'bg-emerald-400 border-emerald-300',
+  opacity: "bg-amber-400  border-amber-300",
+  x: "bg-blue-400   border-blue-300",
+  y: "bg-green-400  border-green-300",
+  scale: "bg-purple-400 border-purple-300",
+  rotation: "bg-pink-400   border-pink-300",
+  blur: "bg-cyan-400   border-cyan-300",
+  volume: "bg-emerald-400 border-emerald-300",
 };

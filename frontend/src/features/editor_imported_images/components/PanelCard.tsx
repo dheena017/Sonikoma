@@ -36,7 +36,12 @@ interface PanelCardProps
     type: "error" | "success" | "info" | "warning"
   ) => void;
   /** Called when the card is clicked. Parent handles selection + shift-range logic. */
-  onCardClick: (idx: number, imgUrl: string, shiftKey: boolean, ctrlOrMeta: boolean) => void;
+  onCardClick: (
+    idx: number,
+    imgUrl: string,
+    shiftKey: boolean,
+    ctrlOrMeta: boolean
+  ) => void;
   onCardDoubleClick?: (idx: number, imgUrl: string) => void;
   className?: string;
   viewLayout?: "scroll" | "grid";
@@ -70,7 +75,10 @@ function PanelCard({
   const isProcessing =
     croppingImgUrl === imgUrl || bubbleCroppingImgUrl === imgUrl || isEditing;
 
-  const [dimensions, setDimensions] = React.useState<{ width: number; height: number } | null>(null);
+  const [dimensions, setDimensions] = React.useState<{
+    width: number;
+    height: number;
+  } | null>(null);
 
   React.useEffect(() => {
     if (!imgUrl) {
@@ -179,7 +187,9 @@ function PanelCard({
       });
 
       updateImageUrl(data.url);
-      addConsoleLog(`[Image Editor] Successfully flipped Panel #${idx + 1} horizontally!`);
+      addConsoleLog(
+        `[Image Editor] Successfully flipped Panel #${idx + 1} horizontally!`
+      );
     } catch (err: any) {
       console.error(err);
       addConsoleLog(`[Image Editor Error] Flipping failed: ${err.message}`);
@@ -191,14 +201,18 @@ function PanelCard({
   const handleUndo = React.useCallback(async () => {
     console.log(`[PanelCard] Undoing last operation for image #${idx + 1}`);
     setIsEditing(true);
-    addConsoleLog(`[Image Editor] Restoring previous state for Panel #${idx + 1}...`);
+    addConsoleLog(
+      `[Image Editor] Restoring previous state for Panel #${idx + 1}...`
+    );
     try {
       const data = await api.undoImageEdit(fetch, { url: rawImgUrl });
 
       if (data.success && data.previous_url) {
         updateImageUrl(data.previous_url);
         addConsoleLog(
-          `[Image Editor] Successfully restored previous state for Panel #${idx + 1}!`
+          `[Image Editor] Successfully restored previous state for Panel #${
+            idx + 1
+          }!`
         );
       } else {
         throw new Error(data.error || "No previous state found");
@@ -270,7 +284,9 @@ function PanelCard({
       aria-pressed={isSelected}
       className={[
         "group relative rounded-[1.5rem] overflow-hidden border p-4 space-y-4 transition-all duration-300 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-purple-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/90 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.65)]",
-        viewLayout === "grid" ? "w-full min-w-0" : "w-[260px] sm:w-[280px] shrink-0",
+        viewLayout === "grid"
+          ? "w-full min-w-0"
+          : "w-[260px] sm:w-[280px] shrink-0",
         isProcessing
           ? "border-2 border-purple-500 bg-purple-950/20 shadow-[0_0_24px_rgba(168,85,247,0.45)] ring-1 ring-purple-500/40 scale-[1.02]"
           : isSelected

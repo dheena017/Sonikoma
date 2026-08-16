@@ -7,11 +7,17 @@ import { DEFAULT_PANEL_DURATION } from "../types";
 export interface AIPacingMetrics {
   avgDuration: number;
   pacingScore: "Fast (Action)" | "Balanced" | "Slow (Dramatic)";
-  suggestedTransitions: Array<{ panelIdx: number; suggestion: "Cut" | "Crossfade" | "Zoom Punch" }>;
+  suggestedTransitions: Array<{
+    panelIdx: number;
+    suggestion: "Cut" | "Crossfade" | "Zoom Punch";
+  }>;
   aiConfidence: number;
 }
 
-export function useAIPacing(panels: any[], clipDurations: Record<string, number>): AIPacingMetrics {
+export function useAIPacing(
+  panels: any[],
+  clipDurations: Record<string, number>
+): AIPacingMetrics {
   return useMemo(() => {
     const total = Math.max(panels.length, 1);
     let sum = 0;
@@ -27,7 +33,11 @@ export function useAIPacing(panels: any[], clipDurations: Record<string, number>
 
     const suggestedTransitions = panels.map((_, idx) => ({
       panelIdx: idx,
-      suggestion: (idx % 3 === 0 ? "Zoom Punch" : idx % 2 === 0 ? "Crossfade" : "Cut") as "Cut" | "Crossfade" | "Zoom Punch",
+      suggestion: (idx % 3 === 0
+        ? "Zoom Punch"
+        : idx % 2 === 0
+        ? "Crossfade"
+        : "Cut") as "Cut" | "Crossfade" | "Zoom Punch",
     }));
 
     return {

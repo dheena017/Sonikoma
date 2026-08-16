@@ -1,11 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
-import {
-  History,
-  ArrowRight,
-  Play,
-  Pause,
-  Download,
-} from "lucide-react";
+import { History, ArrowRight, Play, Pause, Download } from "lucide-react";
 import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
 
 interface MatchingProjectSummary {
@@ -93,11 +87,14 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
               <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
                 <History className="h-4 w-4 text-purple-400" />
               </div>
-              <h3 className="text-xl font-black text-white tracking-tight">Resume Workspace</h3>
+              <h3 className="text-xl font-black text-white tracking-tight">
+                Resume Workspace
+              </h3>
             </div>
             <p className="text-xs text-purple-200/60 font-medium max-w-sm">
               Pick up exactly where you left off with{" "}
-              <span className="text-purple-300 font-bold">"{title}"</span>. Your assets and timeline are ready.
+              <span className="text-purple-300 font-bold">"{title}"</span>. Your
+              assets and timeline are ready.
             </p>
           </div>
         </div>
@@ -108,15 +105,24 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
             const jobId = matchingProject.job_id;
             if (matchingProject.series_slug && matchingProject.chapter_slug) {
               navigateTo?.(
-                `/scraper/editor/series/${matchingProject.series_slug}/chapters/${matchingProject.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
+                `/scraper/editor/series/${
+                  matchingProject.series_slug
+                }/chapters/${matchingProject.chapter_slug}${
+                  jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""
+                }`
               );
             } else {
-              navigateTo?.(`/scraper/editor?project_id=${matchingProject.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`);
+              navigateTo?.(
+                `/scraper/editor?project_id=${matchingProject.project_id}${
+                  jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
+                }`
+              );
             }
           }}
           className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]"
         >
-          Launch Workspace <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          Launch Workspace{" "}
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </button>
       </div>
 
@@ -161,11 +167,17 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
             <div className="w-full lg:w-1/3 space-y-4 self-start lg:self-center bg-neutral-900/30 border border-neutral-800/40 rounded-2xl p-5">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Series Title</span>
-                  <p className="text-xs font-bold text-white line-clamp-1">{title}</p>
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">
+                    Series Title
+                  </span>
+                  <p className="text-xs font-bold text-white line-clamp-1">
+                    {title}
+                  </p>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Chapter</span>
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">
+                    Chapter
+                  </span>
                   <p className="text-xs font-semibold text-neutral-300 line-clamp-1">
                     {matchingProject.episode || "N/A"}
                   </p>
@@ -175,15 +187,25 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
               <div className="grid grid-cols-2 gap-4 border-t border-neutral-800/30 pt-3">
                 {matchingProject.author && (
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Author</span>
-                    <p className="text-xs font-medium text-neutral-350 line-clamp-1">{matchingProject.author}</p>
+                    <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">
+                      Author
+                    </span>
+                    <p className="text-xs font-medium text-neutral-350 line-clamp-1">
+                      {matchingProject.author}
+                    </p>
                   </div>
                 )}
                 {matchingProject.genre && (
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Genre</span>
+                    <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">
+                      Genre
+                    </span>
                     <div className="pt-0.5">
-                      <span className={`text-[9px] font-black px-2 py-0.5 rounded border uppercase tracking-wider ${getGenreStyle(matchingProject.genre)}`}>
+                      <span
+                        className={`text-[9px] font-black px-2 py-0.5 rounded border uppercase tracking-wider ${getGenreStyle(
+                          matchingProject.genre
+                        )}`}
+                      >
                         {matchingProject.genre.split("/")[0]}
                       </span>
                     </div>
@@ -191,12 +213,20 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
                 )}
               </div>
 
-              {((matchingProject.panels_count ?? 0) > 0 || (matchingProject.imported_assets_count ?? 0) > 0) && (
+              {((matchingProject.panels_count ?? 0) > 0 ||
+                (matchingProject.imported_assets_count ?? 0) > 0) && (
                 <div className="space-y-1 border-t border-neutral-800/30 pt-3">
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Structure</span>
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">
+                    Structure
+                  </span>
                   <p className="text-xs font-medium text-neutral-350">
-                    {matchingProject.panels_count || matchingProject.imported_assets_count} panels compiled
-                    {matchingProject.imported_assets_count && matchingProject.panels_count && matchingProject.panels_count !== matchingProject.imported_assets_count
+                    {matchingProject.panels_count ||
+                      matchingProject.imported_assets_count}{" "}
+                    panels compiled
+                    {matchingProject.imported_assets_count &&
+                    matchingProject.panels_count &&
+                    matchingProject.panels_count !==
+                      matchingProject.imported_assets_count
                       ? ` (${matchingProject.imported_assets_count} imported assets)`
                       : ""}
                   </p>
@@ -205,8 +235,13 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
 
               {matchingProject.synopsis && (
                 <div className="space-y-1 border-t border-neutral-800/30 pt-3">
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">Synopsis</span>
-                  <p className="text-[11px] text-neutral-400 leading-relaxed line-clamp-2" title={matchingProject.synopsis}>
+                  <span className="text-[10px] font-bold text-neutral-500 uppercase font-mono">
+                    Synopsis
+                  </span>
+                  <p
+                    className="text-[11px] text-neutral-400 leading-relaxed line-clamp-2"
+                    title={matchingProject.synopsis}
+                  >
                     {matchingProject.synopsis}
                   </p>
                 </div>
@@ -226,7 +261,10 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(videoUrl || "");
-                    addNotification?.("Video link copied to clipboard!", "success");
+                    addNotification?.(
+                      "Video link copied to clipboard!",
+                      "success"
+                    );
                   }}
                   className="w-full bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-white font-bold text-xs py-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-neutral-800 active:scale-95 text-center"
                   title="Copy public link"

@@ -20,7 +20,10 @@ export async function processWithConcurrency<T, R>(
           results[currentIdx] = await fn(items[currentIdx], currentIdx);
         } catch (err) {
           // Do NOT re-throw — log and continue so the rest of the batch finishes
-          console.error(`[processWithConcurrency] Item ${currentIdx} failed:`, err);
+          console.error(
+            `[processWithConcurrency] Item ${currentIdx} failed:`,
+            err
+          );
           results[currentIdx] = null;
         }
       }

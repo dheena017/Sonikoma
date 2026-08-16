@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Zap, Sparkles, Gift, Check, ArrowRight, ShieldCheck, Cpu } from "lucide-react";
+import {
+  Zap,
+  Sparkles,
+  Gift,
+  Check,
+  ArrowRight,
+  ShieldCheck,
+  Cpu,
+} from "lucide-react";
 
 interface HeaderCreditsPopoverProps {
   credits: number;
@@ -42,10 +50,14 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
             <Zap className="w-4 h-4 fill-amber-400" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">AI Credit Balance</div>
+            <div className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+              AI Credit Balance
+            </div>
             <div className="text-xl font-black text-amber-300 font-mono flex items-baseline gap-1">
               {credits.toLocaleString()}
-              <span className="text-xs font-normal text-neutral-400">Credits</span>
+              <span className="text-xs font-normal text-neutral-400">
+                Credits
+              </span>
             </div>
           </div>
         </div>
@@ -65,10 +77,15 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
               <Gift className="w-3.5 h-3.5" />
             </div>
             <div>
-              <div className="text-xs font-bold text-neutral-200">Daily Login Reward</div>
+              <div className="text-xs font-bold text-neutral-200">
+                Daily Login Reward
+              </div>
               <div className="text-[10px] text-neutral-400 flex items-center gap-1">
                 <Sparkles className="w-2.5 h-2.5 text-amber-400 inline" />
-                Streak: <span className="text-purple-400 font-mono font-bold">{streakDays} Day{streakDays > 1 ? "s" : ""}</span>
+                Streak:{" "}
+                <span className="text-purple-400 font-mono font-bold">
+                  {streakDays} Day{streakDays > 1 ? "s" : ""}
+                </span>
               </div>
             </div>
           </div>
@@ -110,10 +127,13 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
               <span className="w-2 h-2 rounded-full bg-amber-400" />
               1. Sonikoma Website Credits
             </span>
-            <span className="font-mono text-amber-300 text-[10px]">{credits} Left</span>
+            <span className="font-mono text-amber-300 text-[10px]">
+              {credits} Left
+            </span>
           </div>
           <p className="text-[10px] text-neutral-400 leading-tight">
-            Used by default when generating with server key (1–3 credits per generation).
+            Used by default when generating with server key (1–3 credits per
+            generation).
           </p>
         </div>
 
@@ -124,10 +144,13 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
               <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
               2. Google Account Quota (BYOK)
             </span>
-            <span className="font-mono text-blue-300 text-[10px] font-extrabold">0 Web Credits</span>
+            <span className="font-mono text-blue-300 text-[10px] font-extrabold">
+              0 Web Credits
+            </span>
           </div>
           <p className="text-[10px] text-blue-200/80 leading-tight">
-            Connect your own Google Gemini API key to use your Google account quota directly without spending website credits.
+            Connect your own Google Gemini API key to use your Google account
+            quota directly without spending website credits.
           </p>
         </div>
       </div>

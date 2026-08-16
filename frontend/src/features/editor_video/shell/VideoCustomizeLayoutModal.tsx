@@ -68,7 +68,9 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
 
   if (!isOpen) return null;
 
-  const updateConfig = (updater: (prev: VideoLayoutConfig) => VideoLayoutConfig) => {
+  const updateConfig = (
+    updater: (prev: VideoLayoutConfig) => VideoLayoutConfig
+  ) => {
     const next = updater(localConfig);
     setLocalConfig(next);
     saveVideoLayoutConfig(next);
@@ -174,10 +176,22 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
 
         <div className="p-4 space-y-1 max-h-[70vh] overflow-y-auto">
           <PanelRow field="previewCanvas" label="Preview Canvas" highlight />
-          <PanelRow field="leftSidebar"   label="Left Sidebar (Tools)"   shortcut="Ctrl + B" />
-          <PanelRow field="mediaBin"       label="Media Bin"              shortcut="Ctrl + M" />
-          <PanelRow field="rightInspector" label="Property Inspector"     shortcut="Ctrl + I" />
-          <PanelRow field="timeline"       label="Multi-Track Timeline"   shortcut="Ctrl + J" />
+          <PanelRow
+            field="leftSidebar"
+            label="Left Sidebar (Tools)"
+            shortcut="Ctrl + B"
+          />
+          <PanelRow field="mediaBin" label="Media Bin" shortcut="Ctrl + M" />
+          <PanelRow
+            field="rightInspector"
+            label="Property Inspector"
+            shortcut="Ctrl + I"
+          />
+          <PanelRow
+            field="timeline"
+            label="Multi-Track Timeline"
+            shortcut="Ctrl + J"
+          />
 
           <div className="pt-3 mt-3 border-t border-neutral-700/60 space-y-2">
             <p className="px-4 text-xs font-semibold text-purple-400 uppercase tracking-widest">

@@ -214,8 +214,7 @@ export function usePanelDetection({
       if (data.success && Array.isArray(data.panels)) {
         if (data.fallback) {
           addNotification(
-            data.message ||
-              "Smart panel detection fell back to local CV.",
+            data.message || "Smart panel detection fell back to local CV.",
             "warning"
           );
           if (setConsoleLogs) {
@@ -272,7 +271,8 @@ export function usePanelDetection({
       }
       console.error("Panel detection failed:", err);
       addNotification(
-        err.message || "Panel detection failed. Please check your settings and try again.",
+        err.message ||
+          "Panel detection failed. Please check your settings and try again.",
         "error"
       );
     } finally {

@@ -1,7 +1,10 @@
 import React from "react";
 import { Edit3, RefreshCw, Trash2 } from "lucide-react";
 import { ShortcutActionDetails } from "@/features/app_shortcuts/components/shortcutTypes";
-import { renderKeyCombo, highlightText } from "@/features/app_shortcuts/components/shortcutUtils";
+import {
+  renderKeyCombo,
+  highlightText,
+} from "@/features/app_shortcuts/components/shortcutUtils";
 
 interface ShortcutItemProps {
   id: string;

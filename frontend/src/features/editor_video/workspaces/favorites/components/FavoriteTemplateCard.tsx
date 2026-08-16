@@ -30,13 +30,19 @@ export const FavoriteTemplateCard: React.FC<{
 
     <div className="flex items-center gap-2 shrink-0">
       <button
-        onClick={(e) => { e.stopPropagation(); onUse(); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onUse();
+        }}
         className="px-3 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-neutral-950 text-[10px] font-mono font-bold uppercase tracking-[0.04em] transition-all shadow-[0_0_14px_rgba(245,158,11,0.25)] active:scale-95"
       >
         Use
       </button>
       <button
-        onClick={(e) => { e.stopPropagation(); onRemove(); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
         className="p-2 rounded-2xl bg-neutral-900/85 border border-neutral-800 hover:border-red-500/40 text-neutral-300 hover:text-red-300 transition-all"
         title="Remove Favorite"
       >

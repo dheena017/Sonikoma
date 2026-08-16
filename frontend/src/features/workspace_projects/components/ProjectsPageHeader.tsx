@@ -1,5 +1,14 @@
 import React from "react";
-import { FolderOpen, Plus, Sparkles, Volume2, Wand2, Layers, Zap, CheckCircle2 } from "lucide-react";
+import {
+  FolderOpen,
+  Plus,
+  Sparkles,
+  Volume2,
+  Wand2,
+  Layers,
+  Zap,
+  CheckCircle2,
+} from "lucide-react";
 
 interface ProjectsPageHeaderProps {
   onNewSeries: () => void;
@@ -19,7 +28,9 @@ export default function ProjectsPageHeader({
       <div className="space-y-2.5 max-w-2xl">
         {/* Breadcrumb trail */}
         <div className="flex items-center gap-1.5 text-[11px] font-mono">
-          <span className="text-neutral-500 font-bold uppercase tracking-wider">Studio Workspace</span>
+          <span className="text-neutral-500 font-bold uppercase tracking-wider">
+            Studio Workspace
+          </span>
           <span className="text-neutral-600 font-bold">&rsaquo;</span>
           <span className="px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 font-bold border border-purple-500/20">
             Projects & Series
@@ -47,7 +58,8 @@ export default function ProjectsPageHeader({
         </div>
 
         <p className="text-neutral-400 text-xs sm:text-sm font-sans max-w-xl">
-          Browse, organize, and manage your manga, webtoon, and video storyboard productions.
+          Browse, organize, and manage your manga, webtoon, and video storyboard
+          productions.
         </p>
 
         {/* Live Stat Chips */}
@@ -73,7 +85,9 @@ export default function ProjectsPageHeader({
       <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center shrink-0">
         <button
           type="button"
-          onClick={() => (window as any).navigateTo?.("/creative-suite/ai-voice")}
+          onClick={() =>
+            (window as any).navigateTo?.("/creative-suite/ai-voice")
+          }
           className="flex items-center gap-1.5 px-3.5 py-2.5 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-white/10 hover:border-purple-500/40 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 shadow-sm"
         >
           <Volume2 className="h-3.5 w-3.5 text-purple-400" />
@@ -82,7 +96,9 @@ export default function ProjectsPageHeader({
 
         <button
           type="button"
-          onClick={() => (window as any).navigateTo?.("/creative-suite/panel-assistant")}
+          onClick={() =>
+            (window as any).navigateTo?.("/creative-suite/panel-assistant")
+          }
           className="flex items-center gap-1.5 px-3.5 py-2.5 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-white/10 hover:border-amber-500/40 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer active:scale-95 shadow-sm"
         >
           <Wand2 className="h-3.5 w-3.5 text-amber-400" />

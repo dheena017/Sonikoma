@@ -1,5 +1,5 @@
-import React from 'react';
-import { Star, ThumbsUp, Eye } from 'lucide-react';
+import React from "react";
+import { Star, ThumbsUp, Eye } from "lucide-react";
 
 interface EpisodeRatingDisplayProps {
   rating?: number;
@@ -52,10 +52,7 @@ export const EpisodeRatingDisplay: React.FC<EpisodeRatingDisplayProps> = ({
 
         {hasHalf && (
           <div className="relative w-4 h-4">
-            <Star
-              size={compact ? 14 : 16}
-              className="text-gray-400 absolute"
-            />
+            <Star size={compact ? 14 : 16} className="text-gray-400 absolute" />
             <div className="overflow-hidden w-1/2">
               <Star
                 size={compact ? 14 : 16}

@@ -9,14 +9,20 @@ interface TemplatesWorkspaceProps {
   onTriggerFeedback: (msg: string) => void;
 }
 
-export const TemplatesWorkspace: React.FC<TemplatesWorkspaceProps> = ({ onTriggerFeedback }) => {
+export const TemplatesWorkspace: React.FC<TemplatesWorkspaceProps> = ({
+  onTriggerFeedback,
+}) => {
   const [activeTab, setActiveTab] = useState("Manga");
   const [searchQuery, setSearchQuery] = useState("");
 
   const activeTabKey = activeTab.toLowerCase().replace(" ", "-");
   const filtered = MOCK_TEMPLATES.filter((t) => {
-    const matchTab = t.category === activeTabKey || !MOCK_TEMPLATES.find((x) => x.category === activeTabKey);
-    const matchSearch = !searchQuery.trim() || t.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchTab =
+      t.category === activeTabKey ||
+      !MOCK_TEMPLATES.find((x) => x.category === activeTabKey);
+    const matchSearch =
+      !searchQuery.trim() ||
+      t.title.toLowerCase().includes(searchQuery.toLowerCase());
     return matchTab && matchSearch;
   });
 
@@ -40,7 +46,9 @@ export const TemplatesWorkspace: React.FC<TemplatesWorkspaceProps> = ({ onTrigge
             <TemplateProjectCard
               key={tpl.id}
               template={tpl}
-              onApply={() => onTriggerFeedback(`Applied template: "${tpl.title}"`)}
+              onApply={() =>
+                onTriggerFeedback(`Applied template: "${tpl.title}"`)
+              }
             />
           ))}
 

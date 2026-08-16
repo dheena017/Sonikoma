@@ -1,5 +1,12 @@
 import React from "react";
-import { Globe, Link as LinkIcon, Lock, Flame, Zap, ChevronLeft } from "lucide-react";
+import {
+  Globe,
+  Link as LinkIcon,
+  Lock,
+  Flame,
+  Zap,
+  ChevronLeft,
+} from "lucide-react";
 
 export interface StudioVisibilityTabProps {
   privacy: string;
@@ -39,7 +46,9 @@ export default function StudioVisibilityTab({
   return (
     <div className="space-y-5 animate-fade-in">
       <div className="border-b border-neutral-800 pb-4">
-        <h3 className="text-base font-black text-white font-sans tracking-tight">Visibility</h3>
+        <h3 className="text-base font-black text-white font-sans tracking-tight">
+          Visibility
+        </h3>
         <p className="text-xs text-neutral-400 font-mono mt-0.5">
           Choose when to publish and who can see your video
         </p>
@@ -50,13 +59,30 @@ export default function StudioVisibilityTab({
         <span className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider block">
           Save or publish
         </span>
-        <p className="text-[10.5px] text-neutral-500 font-mono">Make your video public, unlisted, or private</p>
+        <p className="text-[10.5px] text-neutral-500 font-mono">
+          Make your video public, unlisted, or private
+        </p>
 
         <div className="space-y-2 mt-3">
           {[
-            { id: "public", label: "Public", desc: "Everyone can watch your video", icon: Globe },
-            { id: "unlisted", label: "Unlisted", desc: "Anyone with the video link can watch", icon: LinkIcon },
-            { id: "private", label: "Private", desc: "Only you can watch", icon: Lock },
+            {
+              id: "public",
+              label: "Public",
+              desc: "Everyone can watch your video",
+              icon: Globe,
+            },
+            {
+              id: "unlisted",
+              label: "Unlisted",
+              desc: "Anyone with the video link can watch",
+              icon: LinkIcon,
+            },
+            {
+              id: "private",
+              label: "Private",
+              desc: "Only you can watch",
+              icon: Lock,
+            },
           ].map((item) => {
             const Icon = item.icon;
             const isSel = privacy === item.id;
@@ -78,12 +104,22 @@ export default function StudioVisibilityTab({
                   {isSel && <div className="w-2 h-2 rounded-full bg-red-500" />}
                 </div>
                 <div className="flex items-center gap-2 flex-1">
-                  <Icon className={`w-4 h-4 ${isSel ? "text-red-400" : "text-neutral-500"}`} />
+                  <Icon
+                    className={`w-4 h-4 ${
+                      isSel ? "text-red-400" : "text-neutral-500"
+                    }`}
+                  />
                   <div>
-                    <span className={`text-xs font-bold font-sans ${isSel ? "text-white" : "text-neutral-300"}`}>
+                    <span
+                      className={`text-xs font-bold font-sans ${
+                        isSel ? "text-white" : "text-neutral-300"
+                      }`}
+                    >
                       {item.label}
                     </span>
-                    <p className="text-[10.5px] text-neutral-500 font-mono">{item.desc}</p>
+                    <p className="text-[10.5px] text-neutral-500 font-mono">
+                      {item.desc}
+                    </p>
                   </div>
                 </div>
               </label>
@@ -96,13 +132,19 @@ export default function StudioVisibilityTab({
       <div className="space-y-3 p-4 bg-neutral-950/40 rounded-2xl border border-neutral-800/80">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-white font-sans">Schedule</span>
-            <p className="text-[10.5px] text-neutral-500 font-mono mt-0.5">Select a date to make your video public</p>
+            <span className="text-xs font-bold text-white font-sans">
+              Schedule
+            </span>
+            <p className="text-[10.5px] text-neutral-500 font-mono mt-0.5">
+              Select a date to make your video public
+            </p>
           </div>
           <button
             onClick={() => setIsScheduled(!isScheduled)}
             className={`w-10 h-5.5 flex items-center rounded-full px-0.5 cursor-pointer transition-all duration-300 shrink-0 ${
-              isScheduled ? "bg-red-600 justify-end" : "bg-neutral-700 justify-start"
+              isScheduled
+                ? "bg-red-600 justify-end"
+                : "bg-neutral-700 justify-start"
             }`}
             style={{ height: "22px", width: "40px" }}
           >
@@ -112,7 +154,9 @@ export default function StudioVisibilityTab({
         {isScheduled && (
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="space-y-1">
-              <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">Date</label>
+              <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
+                Date
+              </label>
               <input
                 type="date"
                 value={scheduleDate}
@@ -121,7 +165,9 @@ export default function StudioVisibilityTab({
               />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">Time</label>
+              <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
+                Time
+              </label>
               <input
                 type="time"
                 value={scheduleTime}
@@ -143,7 +189,9 @@ export default function StudioVisibilityTab({
               Vertical
             </span>
           </div>
-          <p className="text-[10.5px] text-neutral-400 font-mono">Append #Shorts and optimize for mobile feeds</p>
+          <p className="text-[10.5px] text-neutral-400 font-mono">
+            Append #Shorts and optimize for mobile feeds
+          </p>
         </div>
         <button
           onClick={() => setIsShort(!isShort)}

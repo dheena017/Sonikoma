@@ -73,7 +73,10 @@ export default function SfxOverlayMixer({ panels }: SfxOverlayMixerProps) {
         <div className="flex items-center gap-2">
           <Volume2 className="h-4.5 w-4.5 text-purple-400" />
           <h4 className="text-xs font-mono font-bold text-white uppercase">
-            AI Sound Mixing Coordinator <span className="text-purple-450 font-bold lowercase text-[10px] ml-1">(Cost: 5 Credits)</span>
+            AI Sound Mixing Coordinator{" "}
+            <span className="text-purple-450 font-bold lowercase text-[10px] ml-1">
+              (Cost: 5 Credits)
+            </span>
           </h4>
         </div>
         <button
@@ -81,7 +84,11 @@ export default function SfxOverlayMixer({ panels }: SfxOverlayMixerProps) {
           disabled={loading || panels.length === 0 || !hasEnoughCredits}
           className="px-3.5 py-1.5 bg-neutral-950 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 cursor-pointer"
         >
-          {loading ? "Mixing..." : !hasEnoughCredits ? "⚠️ Needs 5 Credits" : "✦ Suggest sound overlay mixes"}
+          {loading
+            ? "Mixing..."
+            : !hasEnoughCredits
+            ? "⚠️ Needs 5 Credits"
+            : "✦ Suggest sound overlay mixes"}
         </button>
       </div>
 

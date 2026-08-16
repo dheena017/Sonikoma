@@ -1,5 +1,8 @@
 import React, { useMemo } from "react";
-import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
+import {
+  getUserAvatarUrl,
+  DEFAULT_USER_AVATAR_DATA_URI,
+} from "@/shared/utils/avatar";
 import {
   User,
   FolderGit2,
@@ -26,10 +29,7 @@ import {
   ProfileSecurityTab,
 } from "../components";
 
-import {
-  useProfileState,
-  ProfileTabId,
-} from "../hooks/useProfileState";
+import { useProfileState, ProfileTabId } from "../hooks/useProfileState";
 
 export interface ProfilePageProps {
   user?: any;
@@ -71,16 +71,36 @@ export default function ProfilePage(props: ProfilePageProps) {
 
   const tabsList = useMemo(
     () => [
-      { id: "account" as ProfileTabId, label: "Account", icon: User, badge: null },
-      { id: "analytics" as ProfileTabId, label: "Analytics", icon: BarChart3, badge: null },
+      {
+        id: "account" as ProfileTabId,
+        label: "Account",
+        icon: User,
+        badge: null,
+      },
+      {
+        id: "analytics" as ProfileTabId,
+        label: "Analytics",
+        icon: BarChart3,
+        badge: null,
+      },
       {
         id: "billing" as ProfileTabId,
         label: "Billing & Credits",
         icon: CreditCard,
         badge: `${state.userCredits} CR`,
       },
-      { id: "preferences" as ProfileTabId, label: "Preferences", icon: Settings, badge: null },
-      { id: "security" as ProfileTabId, label: "Security", icon: ShieldCheck, badge: null },
+      {
+        id: "preferences" as ProfileTabId,
+        label: "Preferences",
+        icon: Settings,
+        badge: null,
+      },
+      {
+        id: "security" as ProfileTabId,
+        label: "Security",
+        icon: ShieldCheck,
+        badge: null,
+      },
     ],
     [state.projectsList.length, state.userCredits, state.apiTokens.length]
   );
@@ -104,7 +124,9 @@ export default function ProfilePage(props: ProfilePageProps) {
               <span>Dashboard</span>
             </button>
             <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
-            <span className="text-purple-400 font-semibold">User Profile & Settings</span>
+            <span className="text-purple-400 font-semibold">
+              User Profile & Settings
+            </span>
           </div>
 
           {onLogout && (
@@ -176,7 +198,10 @@ export default function ProfilePage(props: ProfilePageProps) {
                   <span>Credits</span>
                 </div>
                 <p className="text-sm font-bold text-white mt-0.5">
-                  {state.userCredits} <span className="text-[10px] text-purple-400 font-normal">CR</span>
+                  {state.userCredits}{" "}
+                  <span className="text-[10px] text-purple-400 font-normal">
+                    CR
+                  </span>
                 </p>
               </div>
 
@@ -232,22 +257,25 @@ export default function ProfilePage(props: ProfilePageProps) {
                 <button
                   key={tab.id}
                   onClick={() => state.setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl font-medium text-xs transition-all duration-200 ${isActive
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl font-medium text-xs transition-all duration-200 ${
+                    isActive
                       ? "bg-purple-600/20 text-white border border-purple-500/40 shadow-sm font-bold"
                       : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
-                    }`}
+                  }`}
                 >
                   <Icon
-                    className={`w-3.5 h-3.5 ${isActive ? "text-purple-400" : "text-neutral-500"
-                      }`}
+                    className={`w-3.5 h-3.5 ${
+                      isActive ? "text-purple-400" : "text-neutral-500"
+                    }`}
                   />
                   <span>{tab.label}</span>
                   {tab.badge !== null && (
                     <span
-                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${isActive
+                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                        isActive
                           ? "bg-purple-500/30 text-purple-200 border border-purple-500/30"
                           : "bg-white/10 text-neutral-400"
-                        }`}
+                      }`}
                     >
                       {tab.badge}
                     </span>
@@ -305,7 +333,7 @@ export default function ProfilePage(props: ProfilePageProps) {
               privacy={privacy}
               setPrivacy={setPrivacy}
               theme={themeMode || "obsidian"}
-              setTheme={toggleThemeMode || (() => { })}
+              setTheme={toggleThemeMode || (() => {})}
               themeMode={themeMode}
               toggleThemeMode={toggleThemeMode}
               isSaving={false}

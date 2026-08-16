@@ -20,36 +20,51 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   onBackToApp,
   showContent = true,
 }) => {
-  const [activeWorkspace, setActiveWorkspace] = useState<WorkspaceId>(defaultWorkspace);
+  const [activeWorkspace, setActiveWorkspace] =
+    useState<WorkspaceId>(defaultWorkspace);
   const [toasts, setToasts] = useState<FeedbackToast[]>([]);
 
   const triggerFeedback = useCallback((msg: string) => {
     const id = Date.now();
     setToasts((prev) => [...prev, { id, msg }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 2800);
+    setTimeout(
+      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
+      2800
+    );
   }, []);
 
   useEditorEvent("MEDIA_ADDED", (data) => {
-    triggerFeedback(`[EventBus] Media Added: "${data.title}" -> Timeline & Preview refreshed`);
+    triggerFeedback(
+      `[EventBus] Media Added: "${data.title}" -> Timeline & Preview refreshed`
+    );
   });
 
   useEditorEvent("TIMELINE_UPDATED", (data) => {
-    triggerFeedback(`[EventBus] Timeline Sync -> History saved (${data.clipsCount ?? 1} clips)`);
+    triggerFeedback(
+      `[EventBus] Timeline Sync -> History saved (${
+        data.clipsCount ?? 1
+      } clips)`
+    );
   });
 
   useEditorEvent("INSPECTOR_REFRESH", (data) => {
-    triggerFeedback(`[EventBus] Inspector Refresh -> Selected: ${data.layerName ?? "Layer"}`);
+    triggerFeedback(
+      `[EventBus] Inspector Refresh -> Selected: ${data.layerName ?? "Layer"}`
+    );
   });
 
   useEditorEvent("SCENE_CHANGED", (data) => {
-    triggerFeedback(`[EventBus] Scene Changed -> Scene #${data.sceneNumber}: ${data.title}`);
+    triggerFeedback(
+      `[EventBus] Scene Changed -> Scene #${data.sceneNumber}: ${data.title}`
+    );
   });
 
   useEditorEvent("AI_TASK_TRIGGERED", (data) => {
     triggerFeedback(`[EventBus] AI Task Started -> ${data.toolName}`);
   });
 
-  const config = WORKSPACE_REGISTRY[activeWorkspace] || WORKSPACE_REGISTRY["story"];
+  const config =
+    WORKSPACE_REGISTRY[activeWorkspace] || WORKSPACE_REGISTRY["story"];
   const ActiveWorkspaceComponent = config.component;
 
   return (
@@ -80,7 +95,11 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
         >
           <ActiveWorkspaceComponent
             onTriggerFeedback={(msg) => {
-              editorEventBus.publish("MEDIA_ADDED", { assetId: "ast-" + Date.now(), title: msg, type: "generic" });
+              editorEventBus.publish("MEDIA_ADDED", {
+                assetId: "ast-" + Date.now(),
+                title: msg,
+                type: "generic",
+              });
             }}
           />
         </div>

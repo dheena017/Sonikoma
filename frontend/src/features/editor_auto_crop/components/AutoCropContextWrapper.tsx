@@ -1,9 +1,16 @@
-import React, { useEffect } from 'react';
-import { AutoCropProvider, useAutoCrop } from '../contexts/AutoCropContext';
-import { migrateLegacySettings } from '../utils/legacyMigration';
+import React, { useEffect } from "react";
+import { AutoCropProvider, useAutoCrop } from "../contexts/AutoCropContext";
+import { migrateLegacySettings } from "../utils/legacyMigration";
 
-export function AutoCropContextWrapper({ legacyProps, children }: { legacyProps: any; children: React.ReactNode }) {
-  const initialEngine = legacyProps?.useLocalCV === false ? "aiSmart" : "opencv";
+export function AutoCropContextWrapper({
+  legacyProps,
+  children,
+}: {
+  legacyProps: any;
+  children: React.ReactNode;
+}) {
+  const initialEngine =
+    legacyProps?.useLocalCV === false ? "aiSmart" : "opencv";
   return (
     <AutoCropProvider initialEngine={initialEngine}>
       <AutoCropStateSynchronizer legacyProps={legacyProps}>
@@ -13,8 +20,15 @@ export function AutoCropContextWrapper({ legacyProps, children }: { legacyProps:
   );
 }
 
-function AutoCropStateSynchronizer({ legacyProps, children }: { legacyProps: any; children: React.ReactNode }) {
-  const { settings, updateSettings, setActiveEngine, activeEngine } = useAutoCrop();
+function AutoCropStateSynchronizer({
+  legacyProps,
+  children,
+}: {
+  legacyProps: any;
+  children: React.ReactNode;
+}) {
+  const { settings, updateSettings, setActiveEngine, activeEngine } =
+    useAutoCrop();
 
   useEffect(() => {
     if (!legacyProps) return;
@@ -37,11 +51,12 @@ function AutoCropStateSynchronizer({ legacyProps, children }: { legacyProps: any
     legacyProps?.cropCloseKernelSize,
     legacyProps?.aspectRatioLock,
     legacyProps?.cropGuidance,
-    legacyProps?.cropFocusMode
+    legacyProps?.cropFocusMode,
   ]);
 
   useEffect(() => {
-    const targetEngine = legacyProps?.useLocalCV === false ? "aiSmart" : "opencv";
+    const targetEngine =
+      legacyProps?.useLocalCV === false ? "aiSmart" : "opencv";
     if (activeEngine !== targetEngine) {
       setActiveEngine(targetEngine);
     }

@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import { 
-  Filter, 
-  Search, 
-  Heart, 
-  Clock, 
-  Bookmark, 
-  CheckSquare, 
-  FileJson, 
-  Download, 
+import React, { useState } from "react";
+import {
+  Filter,
+  Search,
+  Heart,
+  Clock,
+  Bookmark,
+  CheckSquare,
+  FileJson,
+  Download,
   RefreshCw,
   Star,
   ThumbsUp,
-  CheckCircle2
-} from 'lucide-react';
+  CheckCircle2,
+} from "lucide-react";
 
 interface EpisodeControlsProps {
-  onSortChange: (sortBy: 'latest' | 'oldest' | 'rating' | 'likes') => void;
+  onSortChange: (sortBy: "latest" | "oldest" | "rating" | "likes") => void;
   onSearchChange: (query: string) => void;
   onDateRangeChange: (fromDate: string, toDate: string) => void;
   onToggleFavorites: () => void;
@@ -27,8 +27,8 @@ interface EpisodeControlsProps {
   onMinRatingChange: (val: number) => void;
   minLikes: number;
   onMinLikesChange: (val: number) => void;
-  readStatus: 'all' | 'read' | 'unread';
-  onReadStatusChange: (val: 'all' | 'read' | 'unread') => void;
+  readStatus: "all" | "read" | "unread";
+  onReadStatusChange: (val: "all" | "read" | "unread") => void;
   bookmarksOnly: boolean;
   onBookmarksOnlyToggle: () => void;
 
@@ -79,13 +79,17 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
   onMarkAllRead,
   onMarkAllUnread,
 }) => {
-  const [sortBy, setSortBy] = useState<'latest' | 'oldest' | 'rating' | 'likes'>('latest');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  const [sortBy, setSortBy] = useState<
+    "latest" | "oldest" | "rating" | "likes"
+  >("latest");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const handleSortChange = (value: 'latest' | 'oldest' | 'rating' | 'likes') => {
+  const handleSortChange = (
+    value: "latest" | "oldest" | "rating" | "likes"
+  ) => {
     setSortBy(value);
     onSortChange(value);
   };
@@ -97,21 +101,30 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
   };
 
   const handleReset = () => {
-    setFromDate('');
-    setToDate('');
-    setSearchQuery('');
-    setSortBy('latest');
+    setFromDate("");
+    setToDate("");
+    setSearchQuery("");
+    setSortBy("latest");
     onClearFilters();
   };
 
   const hasAdvancedFilters = Boolean(
-    minRating > 0 || minLikes > 0 || readStatus !== 'all' || fromDate || toDate || startEpisodeNum || endEpisodeNum
+    minRating > 0 ||
+      minLikes > 0 ||
+      readStatus !== "all" ||
+      fromDate ||
+      toDate ||
+      startEpisodeNum ||
+      endEpisodeNum
   );
 
   return (
     <div className="space-y-4 rounded-2xl border border-neutral-800/80 bg-neutral-900/50 p-4 shadow-xl shadow-black/10">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
+        <Search
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+          size={18}
+        />
         <input
           type="text"
           placeholder="Search episodes by title or episode number..."
@@ -123,7 +136,9 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="min-w-[220px] flex-1">
-          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-500">Sort By</label>
+          <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+            Sort By
+          </label>
           <select
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as any)}
@@ -140,8 +155,8 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
           onClick={onToggleMultiSelectMode}
           className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all cursor-pointer active:scale-95 ${
             isMultiSelectMode
-              ? 'border-purple-500/50 bg-purple-600 text-white shadow-lg shadow-purple-600/30'
-              : 'border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-purple-500/40 hover:text-white'
+              ? "border-purple-500/50 bg-purple-600 text-white shadow-lg shadow-purple-600/30"
+              : "border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-purple-500/40 hover:text-white"
           }`}
           title="Enable Multi-Select Mode"
         >
@@ -153,13 +168,17 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
           onClick={() => setShowAdvanced(!showAdvanced)}
           className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all cursor-pointer active:scale-95 ${
             showAdvanced || hasAdvancedFilters
-              ? 'border-purple-500/50 bg-purple-950/50 text-purple-300'
-              : 'border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-purple-500/40 hover:text-white'
+              ? "border-purple-500/50 bg-purple-950/50 text-purple-300"
+              : "border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-purple-500/40 hover:text-white"
           }`}
         >
           <Filter size={16} />
           Advanced Filters
-          {hasAdvancedFilters && <span className="rounded-full bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-200">Active</span>}
+          {hasAdvancedFilters && (
+            <span className="rounded-full bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-200">
+              Active
+            </span>
+          )}
         </button>
       </div>
 
@@ -168,7 +187,8 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label className="text-xs text-gray-400 block mb-1 flex items-center gap-1">
-                <Star size={12} className="text-yellow-400 fill-current" /> Min Rating
+                <Star size={12} className="text-yellow-400 fill-current" /> Min
+                Rating
               </label>
               <select
                 value={minRating}
@@ -202,7 +222,8 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
 
             <div>
               <label className="text-xs text-gray-400 block mb-1 flex items-center gap-1">
-                <CheckCircle2 size={12} className="text-green-400" /> Read Status
+                <CheckCircle2 size={12} className="text-green-400" /> Read
+                Status
               </label>
               <select
                 value={readStatus}
@@ -217,21 +238,25 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-gray-400 block mb-1">Start Ep #</label>
+                <label className="text-xs text-gray-400 block mb-1">
+                  Start Ep #
+                </label>
                 <input
                   type="number"
                   placeholder="e.g. 1"
-                  value={startEpisodeNum || ''}
+                  value={startEpisodeNum || ""}
                   onChange={(e) => onStartEpisodeChange?.(e.target.value)}
                   className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">End Ep #</label>
+                <label className="text-xs text-gray-400 block mb-1">
+                  End Ep #
+                </label>
                 <input
                   type="number"
                   placeholder="e.g. 50"
-                  value={endEpisodeNum || ''}
+                  value={endEpisodeNum || ""}
                   onChange={(e) => onEndEpisodeChange?.(e.target.value)}
                   className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
                 />
@@ -240,7 +265,9 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-gray-400 block mb-1">From Date</label>
+                <label className="text-xs text-gray-400 block mb-1">
+                  From Date
+                </label>
                 <input
                   type="date"
                   value={fromDate}
@@ -252,7 +279,9 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
                 />
               </div>
               <div>
-                <label className="text-xs text-gray-400 block mb-1">To Date</label>
+                <label className="text-xs text-gray-400 block mb-1">
+                  To Date
+                </label>
                 <input
                   type="date"
                   value={toDate}

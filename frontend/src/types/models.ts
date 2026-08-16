@@ -7,8 +7,6 @@ export interface AIModel {
 
 export const AI_MODELS: AIModel[] = [];
 
-
-
 export interface PanelLayers {
   background_url: string;
   character_url: string;

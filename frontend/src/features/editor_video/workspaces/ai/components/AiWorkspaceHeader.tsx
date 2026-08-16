@@ -1,6 +1,9 @@
 import React from "react";
 import { Wand2 } from "lucide-react";
-import { WorkspaceLayoutTabs, WorkspaceLayoutSearch } from "../../../shared/WorkspaceLayout";
+import {
+  WorkspaceLayoutTabs,
+  WorkspaceLayoutSearch,
+} from "../../../shared/WorkspaceLayout";
 
 interface AiWorkspaceHeaderProps {
   activeEngine: string;
@@ -12,7 +15,12 @@ interface AiWorkspaceHeaderProps {
 }
 
 export const AiWorkspaceHeader: React.FC<AiWorkspaceHeaderProps> = ({
-  activeEngine, tabs, activeTab, onSelectTab, searchQuery, onSearchChange,
+  activeEngine,
+  tabs,
+  activeTab,
+  onSelectTab,
+  searchQuery,
+  onSearchChange,
 }) => (
   <div className="shrink-0">
     <div className="px-3.5 py-2.5 border-b border-purple-900/30 bg-neutral-950/80 backdrop-blur-md flex items-center justify-between">
@@ -20,13 +28,23 @@ export const AiWorkspaceHeader: React.FC<AiWorkspaceHeaderProps> = ({
         <div className="h-6 w-6 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center shadow-[0_0_10px_rgba(168,85,247,0.3)]">
           <Wand2 className="h-3.5 w-3.5 text-purple-400" />
         </div>
-        <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">Advanced AI Studio</h2>
+        <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">
+          Advanced AI Studio
+        </h2>
       </div>
       <span className="text-[9px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/30">
         ✨ {activeEngine}
       </span>
     </div>
-    <WorkspaceLayoutTabs tabs={tabs} activeTab={activeTab} onSelectTab={onSelectTab} />
-    <WorkspaceLayoutSearch value={searchQuery} onChange={onSearchChange} placeholder="Search AI tools..." />
+    <WorkspaceLayoutTabs
+      tabs={tabs}
+      activeTab={activeTab}
+      onSelectTab={onSelectTab}
+    />
+    <WorkspaceLayoutSearch
+      value={searchQuery}
+      onChange={onSearchChange}
+      placeholder="Search AI tools..."
+    />
   </div>
 );

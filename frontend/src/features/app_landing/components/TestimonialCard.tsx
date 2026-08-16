@@ -55,40 +55,53 @@ export function TestimonialCard({
           )}
         </div>
 
-        <p className={`text-sm leading-relaxed italic font-medium transition-colors ${
-          isLight ? "text-slate-700" : "text-neutral-300"
-        }`}>
+        <p
+          className={`text-sm leading-relaxed italic font-medium transition-colors ${
+            isLight ? "text-slate-700" : "text-neutral-300"
+          }`}
+        >
           "{quote}"
         </p>
       </div>
 
-      <div className={`flex items-center gap-4 border-t pt-4 transition-colors ${
-        isLight ? "border-slate-100" : "border-white/5"
-      }`}>
+      <div
+        className={`flex items-center gap-4 border-t pt-4 transition-colors ${
+          isLight ? "border-slate-100" : "border-white/5"
+        }`}
+      >
         <img
           src={avatar}
           alt={author}
           onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+            (e.currentTarget as HTMLImageElement).src =
+              "https://lh3.googleusercontent.com/a/default-user";
           }}
           className="w-12 h-12 rounded-2xl object-cover bg-purple-600/10 border border-purple-500/20 shrink-0"
         />
         <div className="space-y-0.5 overflow-hidden">
-          <h4 className={`font-bold text-sm truncate transition-colors ${
-            isLight ? "text-slate-900" : "text-white"
-          }`}>
+          <h4
+            className={`font-bold text-sm truncate transition-colors ${
+              isLight ? "text-slate-900" : "text-white"
+            }`}
+          >
             {author}
           </h4>
           <div className="flex items-center gap-2">
-            <p className={`text-xs transition-colors ${
-              isLight ? "text-purple-600 font-semibold" : "text-purple-400"
-            }`}>
+            <p
+              className={`text-xs transition-colors ${
+                isLight ? "text-purple-600 font-semibold" : "text-purple-400"
+              }`}
+            >
               {handle}
             </p>
-            <span className={isLight ? "text-slate-300" : "text-neutral-700"}>•</span>
-            <p className={`text-xs truncate transition-colors ${
-              isLight ? "text-slate-500" : "text-neutral-500"
-            }`}>
+            <span className={isLight ? "text-slate-300" : "text-neutral-700"}>
+              •
+            </span>
+            <p
+              className={`text-xs truncate transition-colors ${
+                isLight ? "text-slate-500" : "text-neutral-500"
+              }`}
+            >
               {role}
             </p>
           </div>

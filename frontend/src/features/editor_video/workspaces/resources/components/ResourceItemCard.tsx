@@ -32,7 +32,9 @@ export const ResourceItemCard: React.FC<ResourceItemCardProps> = ({
           <p className="text-xs font-bold text-white group-hover:text-purple-300 truncate">
             {resource.title}
           </p>
-          <p className="text-[10px] text-neutral-400 font-mono truncate">{resource.detail}</p>
+          <p className="text-[10px] text-neutral-400 font-mono truncate">
+            {resource.detail}
+          </p>
         </div>
       </div>
 

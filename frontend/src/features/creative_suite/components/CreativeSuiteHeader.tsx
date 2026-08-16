@@ -14,13 +14,15 @@ import {
 } from "lucide-react";
 import * as api from "@/api";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
-import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
+import {
+  getUserAvatarUrl,
+  DEFAULT_USER_AVATAR_DATA_URI,
+} from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useBackendHealth } from "@/shared/hooks";
 import { useProjectStore } from "@/store/useProjectStore";
-
 
 export interface CreativeSuiteHeaderProps {
   currentPath: string;
@@ -63,7 +65,8 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
     user?.credits !== undefined ? user.credits : null
   );
 
-  const { activeProjectId, activeProjectData, projectState, setDrawerOpen } = useProjectStore();
+  const { activeProjectId, activeProjectData, projectState, setDrawerOpen } =
+    useProjectStore();
   const { status: backendStatus } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -129,11 +132,32 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const quickNavItems = [
-    { label: "Creative Dashboard", path: "/creative-suite", keyword: "home dashboard overview creative suite hub" },
-    { label: "AI Video Optimizer", path: "/creative-suite/ai-optimizer", keyword: "video optimizer resolution pacing scenes compile" },
-    { label: "AI Panel Assistant", path: "/creative-suite/panel-assistant", keyword: "panel editing speech bubble clean crop repaint" },
-    { label: "AI Voice & Sound Studio", path: "/creative-suite/ai-voice", keyword: "voice synthesis narrator sound design bgm sfx casting speed pitch" },
-    { label: "YouTube Publisher Studio", path: "/creative-suite/youtube", keyword: "youtube upload publish export draft title" },
+    {
+      label: "Creative Dashboard",
+      path: "/creative-suite",
+      keyword: "home dashboard overview creative suite hub",
+    },
+    {
+      label: "AI Video Optimizer",
+      path: "/creative-suite/ai-optimizer",
+      keyword: "video optimizer resolution pacing scenes compile",
+    },
+    {
+      label: "AI Panel Assistant",
+      path: "/creative-suite/panel-assistant",
+      keyword: "panel editing speech bubble clean crop repaint",
+    },
+    {
+      label: "AI Voice & Sound Studio",
+      path: "/creative-suite/ai-voice",
+      keyword:
+        "voice synthesis narrator sound design bgm sfx casting speed pitch",
+    },
+    {
+      label: "YouTube Publisher Studio",
+      path: "/creative-suite/youtube",
+      keyword: "youtube upload publish export draft title",
+    },
   ];
 
   const filteredNavItems = quickNavItems.filter(
@@ -179,7 +203,10 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
       </div>
 
       {/* Middle side: Search Command Palette */}
-      <div className="hidden md:flex flex-1 max-w-sm lg:max-w-md relative" ref={searchRef}>
+      <div
+        className="hidden md:flex flex-1 max-w-sm lg:max-w-md relative"
+        ref={searchRef}
+      >
         <div className="relative w-full">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-4 w-4 text-neutral-500" />
@@ -333,7 +360,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
             className="icon-pill cursor-pointer transition-all relative hover:bg-purple-500/20 hover:text-purple-300"
             title={
               activeProjectId && activeProjectData
-                ? `Active Project: ${activeProjectData.project?.title || "Active"} — Click to switch`
+                ? `Active Project: ${
+                    activeProjectData.project?.title || "Active"
+                  } — Click to switch`
                 : "Select Active Project"
             }
           >
@@ -352,7 +381,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           aria-label="Open User profile"
         >
           <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
-            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "Creator")}
+            {user?.full_name ||
+              user?.username ||
+              (user?.email ? user.email.split("@")[0] : "Creator")}
           </span>
           <img
             key={user?.avatar_url || user?.full_name || "avatar"}

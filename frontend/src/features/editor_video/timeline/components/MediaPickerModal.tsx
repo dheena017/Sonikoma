@@ -12,14 +12,36 @@ interface MediaPickerModalProps {
 }
 
 const PRESET_ASSETS: MediaItem[] = [
-  { id: "preset-1", type: "image", name: "Webtoon Panel 01", url: "https://placehold.co/120x160/1a1a24/a855f7?text=Panel+1", thumbnail: "https://placehold.co/120x160/1a1a24/a855f7?text=P1" },
-  { id: "preset-2", type: "image", name: "Action FX Splash", url: "https://placehold.co/120x160/2a1a34/ec4899?text=Splash", thumbnail: "https://placehold.co/120x160/2a1a34/ec4899?text=FX" },
-  { id: "preset-3", type: "video", name: "Camera Zoom Cut", url: "", thumbnail: "https://placehold.co/120x160/0f172a/38bdf8?text=Cut" },
+  {
+    id: "preset-1",
+    type: "image",
+    name: "Webtoon Panel 01",
+    url: "https://placehold.co/120x160/1a1a24/a855f7?text=Panel+1",
+    thumbnail: "https://placehold.co/120x160/1a1a24/a855f7?text=P1",
+  },
+  {
+    id: "preset-2",
+    type: "image",
+    name: "Action FX Splash",
+    url: "https://placehold.co/120x160/2a1a34/ec4899?text=Splash",
+    thumbnail: "https://placehold.co/120x160/2a1a34/ec4899?text=FX",
+  },
+  {
+    id: "preset-3",
+    type: "video",
+    name: "Camera Zoom Cut",
+    url: "",
+    thumbnail: "https://placehold.co/120x160/0f172a/38bdf8?text=Cut",
+  },
   { id: "preset-4", type: "audio", name: "Impact Sound", duration: 1.5 },
   { id: "preset-5", type: "blank", name: "Blank Color Card", duration: 2.0 },
 ];
 
-const MediaPickerModal: React.FC<MediaPickerModalProps> = ({ isOpen, onClose, onSelectMedia }) => {
+const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
+  isOpen,
+  onClose,
+  onSelectMedia,
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -30,7 +52,10 @@ const MediaPickerModal: React.FC<MediaPickerModalProps> = ({ isOpen, onClose, on
             <Sparkles className="h-4 w-4" />
             Add Media asset / blank clip
           </h3>
-          <button onClick={onClose} className="p-1 rounded text-neutral-400 hover:text-white hover:bg-white/10">
+          <button
+            onClick={onClose}
+            className="p-1 rounded text-neutral-400 hover:text-white hover:bg-white/10"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -38,13 +63,19 @@ const MediaPickerModal: React.FC<MediaPickerModalProps> = ({ isOpen, onClose, on
         {/* Upload Zone */}
         <div className="border-2 border-dashed border-white/15 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all cursor-pointer">
           <Upload className="h-6 w-6 text-purple-400" />
-          <span className="text-xs text-neutral-300 font-medium">Drag and drop files here, or click to upload</span>
-          <span className="text-[10px] text-neutral-500">Supports PNG, JPG, MP4, WAV, MP3</span>
+          <span className="text-xs text-neutral-300 font-medium">
+            Drag and drop files here, or click to upload
+          </span>
+          <span className="text-[10px] text-neutral-500">
+            Supports PNG, JPG, MP4, WAV, MP3
+          </span>
         </div>
 
         {/* Presets Grid */}
         <div className="space-y-2">
-          <span className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider">Quick Presets</span>
+          <span className="text-[11px] text-neutral-400 font-bold uppercase tracking-wider">
+            Quick Presets
+          </span>
           <div className="grid grid-cols-3 gap-2">
             {PRESET_ASSETS.map((item) => (
               <div
@@ -55,11 +86,21 @@ const MediaPickerModal: React.FC<MediaPickerModalProps> = ({ isOpen, onClose, on
                 }}
                 className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-purple-600/20 hover:border-purple-400 transition-all cursor-pointer flex flex-col items-center gap-1.5 text-center group"
               >
-                {item.type === "image" && <Image className="h-5 w-5 text-purple-400 group-hover:scale-110 transition-transform" />}
-                {item.type === "video" && <Video className="h-5 w-5 text-blue-400 group-hover:scale-110 transition-transform" />}
-                {item.type === "audio" && <Music className="h-5 w-5 text-emerald-400 group-hover:scale-110 transition-transform" />}
-                {item.type === "blank" && <Square className="h-5 w-5 text-neutral-400 group-hover:scale-110 transition-transform" />}
-                <span className="text-[10px] font-medium truncate w-full">{item.name}</span>
+                {item.type === "image" && (
+                  <Image className="h-5 w-5 text-purple-400 group-hover:scale-110 transition-transform" />
+                )}
+                {item.type === "video" && (
+                  <Video className="h-5 w-5 text-blue-400 group-hover:scale-110 transition-transform" />
+                )}
+                {item.type === "audio" && (
+                  <Music className="h-5 w-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                )}
+                {item.type === "blank" && (
+                  <Square className="h-5 w-5 text-neutral-400 group-hover:scale-110 transition-transform" />
+                )}
+                <span className="text-[10px] font-medium truncate w-full">
+                  {item.name}
+                </span>
               </div>
             ))}
           </div>

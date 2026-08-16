@@ -27,13 +27,14 @@ import {
 import { GeneratedPanel } from "@/types";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import { Notification } from "@/features/app_notification";
-import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
-import {  getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
+import {
+  getUserAvatarUrl,
+  DEFAULT_USER_AVATAR_DATA_URI,
+} from "@/shared/utils/avatar";
+import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useProjectStore } from "@/store/useProjectStore";
-
-
 
 interface HeaderProps {
   isProcessing: boolean;
@@ -120,8 +121,14 @@ const HeaderInner = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
-  const { activeProjectId, activeProjectData, projectState, missingProjectInfo, setDrawerOpen, clearActiveProject } = useProjectStore();
-
+  const {
+    activeProjectId,
+    activeProjectData,
+    projectState,
+    missingProjectInfo,
+    setDrawerOpen,
+    clearActiveProject,
+  } = useProjectStore();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
@@ -196,7 +203,6 @@ const HeaderInner = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
-
   // Keyboard shortcut for Command Palette focus (Ctrl/Cmd + K or /)
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -256,8 +262,6 @@ const HeaderInner = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -446,7 +450,6 @@ const HeaderInner = ({
           onClick={() => navigateTo("/dashboard")}
         >
           <img
-
             src="/logo-dark.png"
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
@@ -461,7 +464,6 @@ const HeaderInner = ({
             Sonikoma
           </span>
         </div>
-
       </div>
 
       {/* Center Side: Quick Search / Command Bar */}
@@ -610,14 +612,39 @@ const HeaderInner = ({
             className="bg-transparent text-neutral-200 text-[10px] font-bold font-mono focus:outline-none cursor-pointer pr-1"
             title="Active AI Model"
           >
-            <option value="gemini-2.5-flash" className="bg-neutral-900 text-white">🚀 Gemini 2.5 Flash</option>
-            <option value="gemini-2.0-flash" className="bg-neutral-900 text-white">⚡ Gemini 2.0 Flash</option>
-            <option value="gemini-2.5-flash-lite" className="bg-neutral-900 text-white">🪶 Gemini 2.5 Flash Lite</option>
+            <option
+              value="gemini-2.5-flash"
+              className="bg-neutral-900 text-white"
+            >
+              🚀 Gemini 2.5 Flash
+            </option>
+            <option
+              value="gemini-2.0-flash"
+              className="bg-neutral-900 text-white"
+            >
+              ⚡ Gemini 2.0 Flash
+            </option>
+            <option
+              value="gemini-2.5-flash-lite"
+              className="bg-neutral-900 text-white"
+            >
+              🪶 Gemini 2.5 Flash Lite
+            </option>
           </select>
           {user?.preferences?.api_keys?.gemini ? (
-            <span className="text-[9px] px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 font-sans font-bold" title="Using custom user Google API key">BYOK</span>
+            <span
+              className="text-[9px] px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 font-sans font-bold"
+              title="Using custom user Google API key"
+            >
+              BYOK
+            </span>
           ) : (
-            <span className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-sans font-bold" title="Using system Google API key">DEFAULT</span>
+            <span
+              className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-sans font-bold"
+              title="Using system Google API key"
+            >
+              DEFAULT
+            </span>
           )}
         </div>
 
@@ -682,9 +709,6 @@ const HeaderInner = ({
           </div>
         )}
 
-
-
-
         {/* Playback Volume Widget */}
         <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-850 px-2.5 py-1.5 rounded-xl hover:border-neutral-750 transition-all select-none group h-[34px]">
           <button
@@ -726,9 +750,7 @@ const HeaderInner = ({
               setShowStats(false);
             }}
             className={`icon-pill cursor-pointer relative transition-all ${
-              showNotifications
-                ? "icon-pill--active"
-                : ""
+              showNotifications ? "icon-pill--active" : ""
             }`}
             title="Notifications"
           >
@@ -780,11 +802,15 @@ const HeaderInner = ({
             }`}
             title={
               projectState === "missing"
-                ? `Project Unavailable: ${missingProjectInfo?.missingId || activeProjectId} — Click to resolve`
+                ? `Project Unavailable: ${
+                    missingProjectInfo?.missingId || activeProjectId
+                  } — Click to resolve`
                 : projectState === "loading"
                 ? "Loading project workspace..."
                 : projectState === "active"
-                ? `Active Project: ${activeProjectData?.project?.title || "Active"} — Click to switch`
+                ? `Active Project: ${
+                    activeProjectData?.project?.title || "Active"
+                  } — Click to switch`
                 : "Select Active Project"
             }
           >
@@ -813,7 +839,9 @@ const HeaderInner = ({
           aria-label="Open User profile"
         >
           <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
-            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "User")}
+            {user?.full_name ||
+              user?.username ||
+              (user?.email ? user.email.split("@")[0] : "User")}
           </span>
           <div className="relative w-6 h-6 rounded-full overflow-hidden border border-purple-500/40 bg-purple-950/40 shrink-0 shadow-xs ring-1 ring-white/10 group-hover:border-purple-400 group-hover:ring-purple-500/30 transition-all duration-300">
             <img
@@ -836,7 +864,6 @@ const HeaderInner = ({
             />
           </div>
         </button>
-
       </div>
     </header>
   );

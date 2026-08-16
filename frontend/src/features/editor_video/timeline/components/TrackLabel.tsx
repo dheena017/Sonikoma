@@ -18,9 +18,16 @@ interface TrackLabelProps {
 }
 
 const TrackLabel: React.FC<TrackLabelProps> = ({
-  id, label, color, type,
-  locked, hidden, muted,
-  onToggleLock, onToggleHide, onToggleMute,
+  id,
+  label,
+  color,
+  type,
+  locked,
+  hidden,
+  muted,
+  onToggleLock,
+  onToggleHide,
+  onToggleMute,
 }) => (
   <div className="w-28 shrink-0 h-full flex items-center gap-1.5 px-3 border-r border-white/5 group relative">
     <span className={`text-[10px] font-bold ${color} shrink-0`}>{id}</span>
@@ -29,7 +36,9 @@ const TrackLabel: React.FC<TrackLabelProps> = ({
       <button
         onClick={onToggleLock}
         title={locked ? "Unlock track" : "Lock track"}
-        className={`p-0.5 rounded cursor-pointer ${locked ? "text-amber-400" : "text-neutral-700 hover:text-white"}`}
+        className={`p-0.5 rounded cursor-pointer ${
+          locked ? "text-amber-400" : "text-neutral-700 hover:text-white"
+        }`}
       >
         <Lock className="h-2.5 w-2.5" />
       </button>
@@ -38,15 +47,25 @@ const TrackLabel: React.FC<TrackLabelProps> = ({
         title={hidden ? "Show track" : "Hide track"}
         className="p-0.5 rounded cursor-pointer text-neutral-700 hover:text-white"
       >
-        {hidden ? <EyeOff className="h-2.5 w-2.5" /> : <Eye className="h-2.5 w-2.5" />}
+        {hidden ? (
+          <EyeOff className="h-2.5 w-2.5" />
+        ) : (
+          <Eye className="h-2.5 w-2.5" />
+        )}
       </button>
       {type === "audio" && (
         <button
           onClick={onToggleMute}
           title={muted ? "Unmute" : "Mute"}
-          className={`p-0.5 rounded cursor-pointer ${muted ? "text-red-400" : "text-neutral-700 hover:text-white"}`}
+          className={`p-0.5 rounded cursor-pointer ${
+            muted ? "text-red-400" : "text-neutral-700 hover:text-white"
+          }`}
         >
-          {muted ? <VolumeX className="h-2.5 w-2.5" /> : <Volume2 className="h-2.5 w-2.5" />}
+          {muted ? (
+            <VolumeX className="h-2.5 w-2.5" />
+          ) : (
+            <Volume2 className="h-2.5 w-2.5" />
+          )}
         </button>
       )}
     </div>

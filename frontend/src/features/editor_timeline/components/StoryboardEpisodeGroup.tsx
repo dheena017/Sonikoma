@@ -26,7 +26,12 @@ interface StoryboardEpisodeGroupProps {
   analyzingPanelId: number | null;
   selectedPanelIds: Set<number>;
   togglePanelSelection: (id: number) => void;
-  handlePanelClick: (idx: number, panelId: number, shiftKey: boolean, ctrlOrMeta: boolean) => void;
+  handlePanelClick: (
+    idx: number,
+    panelId: number,
+    shiftKey: boolean,
+    ctrlOrMeta: boolean
+  ) => void;
   handlePanelDoubleClick: (idx: number, panelId: number) => void;
   handleShiftPanel: (idx: number, direction: "left" | "right") => void;
   handleModifySpeechText: (idx: number, value: string) => void;
@@ -175,8 +180,16 @@ const StoryboardEpisodeGroup = ({
     selectedTimelineEp === "all"
       ? sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }))
       : episodeGroups[selectedTimelineEp]
-      ? [{ grp: episodeGroups[selectedTimelineEp], gIdx: selectedTimelineEp as number }]
-      : sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }));
+      ? [
+          {
+            grp: episodeGroups[selectedTimelineEp],
+            gIdx: selectedTimelineEp as number,
+          },
+        ]
+      : sortedGroups.map(({ grp, originalIdx }) => ({
+          grp,
+          gIdx: originalIdx,
+        }));
 
   return (
     <div className="flex-1 w-full min-w-0 space-y-6">
@@ -185,7 +198,10 @@ const StoryboardEpisodeGroup = ({
           if (panel.episode_label) {
             return panel.episode_label === grp.episodeLabel;
           }
-          return globalIdx >= grp.startIndex && globalIdx < grp.startIndex + grp.count;
+          return (
+            globalIdx >= grp.startIndex &&
+            globalIdx < grp.startIndex + grp.count
+          );
         });
 
         return (
@@ -232,7 +248,9 @@ const StoryboardEpisodeGroup = ({
                       handleModifyMotion={handleModifyMotion}
                       handleModifyDuration={handleModifyDuration}
                       handleModifySFX={handleModifySFX}
-                      handleModifyVisualDescription={handleModifyVisualDescription}
+                      handleModifyVisualDescription={
+                        handleModifyVisualDescription
+                      }
                       handleModifyNarrative={handleModifyNarrative}
                       handleAnalyzePanel={handleAnalyzePanel}
                       handleCancelAnalysis={handleCancelAnalysis}
@@ -275,7 +293,9 @@ const StoryboardEpisodeGroup = ({
                       handleModifyMotion={handleModifyMotion}
                       handleModifyDuration={handleModifyDuration}
                       handleModifySFX={handleModifySFX}
-                      handleModifyVisualDescription={handleModifyVisualDescription}
+                      handleModifyVisualDescription={
+                        handleModifyVisualDescription
+                      }
                       handleModifyNarrative={handleModifyNarrative}
                       handleAnalyzePanel={handleAnalyzePanel}
                       handleCancelAnalysis={handleCancelAnalysis}

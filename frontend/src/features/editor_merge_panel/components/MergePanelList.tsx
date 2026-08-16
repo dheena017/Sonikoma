@@ -49,8 +49,13 @@ export default function MergePanelList({
                       if (img.dataset.retried) return;
                       img.dataset.retried = "1";
                       const src = img.src;
-                      if (!src.includes("/api/proxy-image") && !src.includes("/api/image/")) {
-                        img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+                      if (
+                        !src.includes("/api/proxy-image") &&
+                        !src.includes("/api/image/")
+                      ) {
+                        img.src = `/api/proxy-image?url=${encodeURIComponent(
+                          src
+                        )}`;
                       }
                     }}
                   />

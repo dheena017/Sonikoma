@@ -1,6 +1,15 @@
 import * as api from "@/api";
 import React, { useState } from "react";
-import { Sparkles, Copy, Check, Scissors, RefreshCw, Zap, Flame, Clock } from "lucide-react";
+import {
+  Sparkles,
+  Copy,
+  Check,
+  Scissors,
+  RefreshCw,
+  Zap,
+  Flame,
+  Clock,
+} from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { fetchWithAuth } from "@/utils";
 
@@ -32,7 +41,9 @@ export default function ShortsScriptTab({
   const [loading, setLoading] = useState(false);
   const [shortsData, setShortsData] = useState<ShortsData | null>(null);
   const [hookData, setHookData] = useState<HookData | null>(null);
-  const [targetDuration, setTargetDuration] = useState<"30s" | "60s" | "90s">("60s");
+  const [targetDuration, setTargetDuration] = useState<"30s" | "60s" | "90s">(
+    "60s"
+  );
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const handleGenerate = async () => {
@@ -57,7 +68,10 @@ export default function ShortsScriptTab({
         setHookData(hookJson.result);
       }
 
-      addNotification?.(`Generated viral Shorts script for ${targetDuration}!`, "success");
+      addNotification?.(
+        `Generated viral Shorts script for ${targetDuration}!`,
+        "success"
+      );
     } catch (e) {
       console.error(e);
       addNotification?.("Failed to generate Reels & Shorts content.", "error");
@@ -110,13 +124,20 @@ export default function ShortsScriptTab({
               disabled={loading}
               className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
             >
-              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              <span>{loading ? "Adapting..." : "✦ Generate Shorts Script"}</span>
+              {loading ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4" />
+              )}
+              <span>
+                {loading ? "Adapting..." : "✦ Generate Shorts Script"}
+              </span>
             </button>
           </div>
         </div>
         <p className="text-[10px] text-neutral-400 font-mono">
-          Adapt full storyboard for 9:16 short-form video, fast pacing, and viral opening retention hooks.
+          Adapt full storyboard for 9:16 short-form video, fast pacing, and
+          viral opening retention hooks.
         </p>
       </div>
 
@@ -141,17 +162,25 @@ export default function ShortsScriptTab({
                   </span>
                 </div>
                 <button
-                  onClick={() => copyToClipboard(hookData.hook_sentence, "hook")}
+                  onClick={() =>
+                    copyToClipboard(hookData.hook_sentence, "hook")
+                  }
                   className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                 >
-                  {copiedField === "hook" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copiedField === "hook" ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
                 </button>
               </div>
               <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-3 space-y-2">
                 <input
                   type="text"
                   value={hookData.hook_sentence}
-                  onChange={(e) => setHookData({ ...hookData, hook_sentence: e.target.value })}
+                  onChange={(e) =>
+                    setHookData({ ...hookData, hook_sentence: e.target.value })
+                  }
                   className="w-full bg-transparent text-xs font-sans text-white font-bold outline-none leading-relaxed"
                 />
                 <div className="text-[9px] font-mono text-purple-300 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800 inline-block">
@@ -172,15 +201,26 @@ export default function ShortsScriptTab({
                     </span>
                   </div>
                   <button
-                    onClick={() => copyToClipboard(shortsData.voiceover_script, "voiceover")}
+                    onClick={() =>
+                      copyToClipboard(shortsData.voiceover_script, "voiceover")
+                    }
                     className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                   >
-                    {copiedField === "voiceover" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedField === "voiceover" ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
                   </button>
                 </div>
                 <textarea
                   value={shortsData.voiceover_script}
-                  onChange={(e) => setShortsData({ ...shortsData, voiceover_script: e.target.value })}
+                  onChange={(e) =>
+                    setShortsData({
+                      ...shortsData,
+                      voiceover_script: e.target.value,
+                    })
+                  }
                   rows={5}
                   className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-3 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-purple-500/50 resize-y"
                 />
@@ -193,7 +233,10 @@ export default function ShortsScriptTab({
                   </span>
                   <ul className="space-y-2 text-xs text-neutral-300 font-sans pt-1">
                     {shortsData.visual_milestones.map((m, idx) => (
-                      <li key={idx} className="flex items-center gap-2.5 bg-neutral-950 p-2.5 rounded-xl border border-neutral-800">
+                      <li
+                        key={idx}
+                        className="flex items-center gap-2.5 bg-neutral-950 p-2.5 rounded-xl border border-neutral-800"
+                      >
                         <span className="text-purple-400 font-mono font-bold text-xs bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
                           #{idx + 1}
                         </span>
@@ -203,7 +246,10 @@ export default function ShortsScriptTab({
                           onChange={(e) => {
                             const newMiles = [...shortsData.visual_milestones];
                             newMiles[idx] = e.target.value;
-                            setShortsData({ ...shortsData, visual_milestones: newMiles });
+                            setShortsData({
+                              ...shortsData,
+                              visual_milestones: newMiles,
+                            });
                           }}
                           className="w-full bg-transparent text-xs text-neutral-200 font-medium outline-none"
                         />

@@ -5,7 +5,9 @@ interface CharacterAiToolbarProps {
   onTriggerFeedback: (msg: string) => void;
 }
 
-export const CharacterAiToolbar: React.FC<CharacterAiToolbarProps> = ({ onTriggerFeedback }) => {
+export const CharacterAiToolbar: React.FC<CharacterAiToolbarProps> = ({
+  onTriggerFeedback,
+}) => {
   return (
     <div className="px-3 py-2 bg-[#08050e]/95 border-b border-purple-900/25 flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <span className="text-[9px] font-mono font-bold text-purple-300 flex items-center gap-1 shrink-0">
@@ -13,7 +15,9 @@ export const CharacterAiToolbar: React.FC<CharacterAiToolbarProps> = ({ onTrigge
       </span>
       <div className="flex items-center gap-1 shrink-0">
         <button
-          onClick={() => onTriggerFeedback("AI generating new facial expression...")}
+          onClick={() =>
+            onTriggerFeedback("AI generating new facial expression...")
+          }
           className="px-2.5 py-1 rounded-2xl bg-purple-900/45 hover:bg-purple-700 text-purple-100 hover:text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-purple-500/25 transition-all cursor-pointer whitespace-nowrap"
         >
           <Smile className="h-2.5 w-2.5" /> Gen Expression
@@ -25,7 +29,9 @@ export const CharacterAiToolbar: React.FC<CharacterAiToolbarProps> = ({ onTrigge
           <Activity className="h-2.5 w-2.5" /> Gen Pose
         </button>
         <button
-          onClick={() => onTriggerFeedback("AI generating character voice line...")}
+          onClick={() =>
+            onTriggerFeedback("AI generating character voice line...")
+          }
           className="px-2.5 py-1 rounded-2xl bg-purple-900/45 hover:bg-purple-700 text-purple-100 hover:text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-purple-500/25 transition-all cursor-pointer whitespace-nowrap"
         >
           <Volume2 className="h-2.5 w-2.5" /> Gen Voice

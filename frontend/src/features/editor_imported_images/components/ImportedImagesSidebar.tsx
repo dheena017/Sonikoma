@@ -37,17 +37,20 @@ import { EpisodeRatingDisplay } from "@/features/workspace_scraper/episode-scrap
 import { ExtractionSkeletonCard } from "@/shared/ui/loading/ExtractionSkeletonCard";
 import { ImportImagesOverlay } from "@/shared/ui/loading/ImportImagesOverlay";
 
-
 export function formatDisplayEpisodeLabel(label: string): string {
   if (!label) return "Episode";
   const trimmed = label.trim();
-  const duplicateMatch = trimmed.match(/^(Episode\s*\d+|Chapter\s*\d+|Ep\.\s*\d+)\s*[-:]\s*\1(.*)$/i);
+  const duplicateMatch = trimmed.match(
+    /^(Episode\s*\d+|Chapter\s*\d+|Ep\.\s*\d+)\s*[-:]\s*\1(.*)$/i
+  );
   if (duplicateMatch) {
     const main = duplicateMatch[1];
     const rest = duplicateMatch[2]?.replace(/^[-:\s]+/, "").trim();
     return rest ? `${main}: ${rest}` : main;
   }
-  const trailingTruncateMatch = trimmed.match(/^(Episode\s*\d+|Chapter\s*\d+|Ep\.\s*\d+)\s*[-:]\s*E(?:\.\.\.|\s*)$/i);
+  const trailingTruncateMatch = trimmed.match(
+    /^(Episode\s*\d+|Chapter\s*\d+|Ep\.\s*\d+)\s*[-:]\s*E(?:\.\.\.|\s*)$/i
+  );
   if (trailingTruncateMatch) {
     return trailingTruncateMatch[1];
   }
@@ -67,7 +70,9 @@ export function getSortedEpisodeGroups<T extends { episodeLabel: string }>(
     return num ? parseInt(num[0], 10) : 0;
   };
 
-  return mapped.sort((a, b) => parseNum(a.grp.episodeLabel) - parseNum(b.grp.episodeLabel));
+  return mapped.sort(
+    (a, b) => parseNum(a.grp.episodeLabel) - parseNum(b.grp.episodeLabel)
+  );
 }
 
 export const HorizontalScrollContainer: React.FC<{
@@ -103,7 +108,10 @@ export const HorizontalScrollContainer: React.FC<{
         const canScrollRight = el.scrollLeft < maxScroll - 1;
         const canScrollLeft = el.scrollLeft > 1;
 
-        if ((isScrollingRight && canScrollRight) || (isScrollingLeft && canScrollLeft)) {
+        if (
+          (isScrollingRight && canScrollRight) ||
+          (isScrollingLeft && canScrollLeft)
+        ) {
           e.preventDefault(); // Stop whole page from vertical scrolling!
           el.scrollLeft += e.deltaY * 1.2;
         }
@@ -138,7 +146,9 @@ export const HorizontalScrollContainer: React.FC<{
         aria-label="Scroll Left"
         title="Scroll Left"
         className={`shrink-0 w-9 h-9 rounded-full bg-neutral-900/90 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md ${
-          canScrollLeft ? "opacity-90 hover:opacity-100" : "opacity-20 pointer-events-none"
+          canScrollLeft
+            ? "opacity-90 hover:opacity-100"
+            : "opacity-20 pointer-events-none"
         }`}
       >
         <ChevronLeft className="w-5 h-5" />
@@ -159,7 +169,9 @@ export const HorizontalScrollContainer: React.FC<{
         aria-label="Scroll Right"
         title="Scroll Right"
         className={`shrink-0 w-9 h-9 rounded-full bg-neutral-900/90 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md ${
-          canScrollRight ? "opacity-90 hover:opacity-100" : "opacity-20 pointer-events-none"
+          canScrollRight
+            ? "opacity-90 hover:opacity-100"
+            : "opacity-20 pointer-events-none"
         }`}
       >
         <ChevronRight className="w-5 h-5" />
@@ -219,12 +231,18 @@ const ChapterScraperDeck = React.memo(
     );
     const [isBatchMerging, setIsBatchMerging] = useState(false);
     const [viewLayout, setViewLayout] = useState<"scroll" | "grid">("scroll");
-    const [selectedEpisodeIdx, setSelectedEpisodeIdx] = useState<number | "all">("all");
+    const [selectedEpisodeIdx, setSelectedEpisodeIdx] = useState<
+      number | "all"
+    >("all");
     const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
     const [episodeSortAscending, setEpisodeSortAscending] = useState(true);
-    const [hoveredEpisodeIdx, setHoveredEpisodeIdx] = useState<number | null>(null);
+    const [hoveredEpisodeIdx, setHoveredEpisodeIdx] = useState<number | null>(
+      null
+    );
     const isEpisodeCollapsed = useProjectStore((s) => s.isEpisodeCollapsed);
-    const setIsEpisodeCollapsed = useProjectStore((s) => s.setIsEpisodeCollapsed);
+    const setIsEpisodeCollapsed = useProjectStore(
+      (s) => s.setIsEpisodeCollapsed
+    );
     const activeFetch = fetchWithInterceptor || fetch;
 
     useEffect(() => {
@@ -238,12 +256,20 @@ const ChapterScraperDeck = React.memo(
           const lo = Math.min(lastSelectedIndex, idx);
           const hi = Math.max(lastSelectedIndex, idx);
           const rangeUrls = scrapedImages.slice(lo, hi + 1);
-          setSelectedScraped((prev) =>
-            updateSelection(prev, { type: "range", items: rangeUrls }) as string[]
+          setSelectedScraped(
+            (prev) =>
+              updateSelection(prev, {
+                type: "range",
+                items: rangeUrls,
+              }) as string[]
           );
         } else if (ctrlOrMeta) {
-          setSelectedScraped((prev) =>
-            updateSelection(prev, { type: "toggle", item: imgUrl }) as string[]
+          setSelectedScraped(
+            (prev) =>
+              updateSelection(prev, {
+                type: "toggle",
+                item: imgUrl,
+              }) as string[]
           );
           setLastSelectedIndex(idx);
         } else {
@@ -257,8 +283,9 @@ const ChapterScraperDeck = React.memo(
 
     const handleCardDoubleClick = useCallback(
       (idx: number, imgUrl: string) => {
-        setSelectedScraped((prev) =>
-          updateSelection(prev, { type: "double", item: imgUrl }) as string[]
+        setSelectedScraped(
+          (prev) =>
+            updateSelection(prev, { type: "double", item: imgUrl }) as string[]
         );
         setLastSelectedIndex(idx);
       },
@@ -422,33 +449,54 @@ const ChapterScraperDeck = React.memo(
       if (selectedEpisodeIdx === "all" || selectedEpisodeIdx === null) {
         return scrapedImages;
       }
-      const grp = typeof selectedEpisodeIdx === "number" ? episodeGroups[selectedEpisodeIdx] : undefined;
+      const grp =
+        typeof selectedEpisodeIdx === "number"
+          ? episodeGroups[selectedEpisodeIdx]
+          : undefined;
       if (!grp) return scrapedImages;
       return scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
     }, [scrapedImages, episodeGroups, selectedEpisodeIdx]);
 
     const handleClearAll = () => {
-      setSelectedScraped((prev) => prev.filter((img) => !currentActiveImages.includes(img)));
+      setSelectedScraped((prev) =>
+        prev.filter((img) => !currentActiveImages.includes(img))
+      );
       setLastSelectedIndex(null);
     };
 
     const handleSelectAllToggle = () => {
-      const activeSelectedCount = currentActiveImages.filter((img) => selectedScraped.includes(img)).length;
-      if (activeSelectedCount === currentActiveImages.length && currentActiveImages.length > 0) {
-        setSelectedScraped((prev) => prev.filter((img) => !currentActiveImages.includes(img)));
+      const activeSelectedCount = currentActiveImages.filter((img) =>
+        selectedScraped.includes(img)
+      ).length;
+      if (
+        activeSelectedCount === currentActiveImages.length &&
+        currentActiveImages.length > 0
+      ) {
+        setSelectedScraped((prev) =>
+          prev.filter((img) => !currentActiveImages.includes(img))
+        );
         setLastSelectedIndex(null);
         setConsoleLogs((prev) => ["[GUI] Cleared episode selections", ...prev]);
       } else {
-        setSelectedScraped((prev) => Array.from(new Set([...prev, ...currentActiveImages])));
-        setConsoleLogs((prev) => ["[GUI] Selected all episode images", ...prev]);
+        setSelectedScraped((prev) =>
+          Array.from(new Set([...prev, ...currentActiveImages]))
+        );
+        setConsoleLogs((prev) => [
+          "[GUI] Selected all episode images",
+          ...prev,
+        ]);
       }
     };
 
     // Selection / filter helpers (scoped to currentActiveImages)
     const handleInvertSelection = () => {
       setSelectedScraped((prev) => {
-        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
-        const activeInverted = currentActiveImages.filter((img) => !prev.includes(img));
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
+        const activeInverted = currentActiveImages.filter(
+          (img) => !prev.includes(img)
+        );
         return [...otherSelected, ...activeInverted];
       });
       setLastSelectedIndex(null);
@@ -458,7 +506,9 @@ const ChapterScraperDeck = React.memo(
     const handleSelectOdd = () => {
       const oddImages = currentActiveImages.filter((_, idx) => idx % 2 === 0);
       setSelectedScraped((prev) => {
-        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
         return [...otherSelected, ...oddImages];
       });
       setLastSelectedIndex(null);
@@ -468,7 +518,9 @@ const ChapterScraperDeck = React.memo(
     const handleSelectEven = () => {
       const evenImages = currentActiveImages.filter((_, idx) => idx % 2 !== 0);
       setSelectedScraped((prev) => {
-        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
         return [...otherSelected, ...evenImages];
       });
       setLastSelectedIndex(null);
@@ -489,7 +541,9 @@ const ChapterScraperDeck = React.memo(
       const clamped = Math.min(Math.max(1, n), currentActiveImages.length);
       const firstNImages = currentActiveImages.slice(0, clamped);
       setSelectedScraped((prev) => {
-        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
         return [...otherSelected, ...firstNImages];
       });
       setLastSelectedIndex(null);
@@ -503,7 +557,9 @@ const ChapterScraperDeck = React.memo(
       const clamped = Math.min(Math.max(1, n), currentActiveImages.length);
       const lastNImages = currentActiveImages.slice(-clamped);
       setSelectedScraped((prev) => {
-        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
         return [...otherSelected, ...lastNImages];
       });
       setLastSelectedIndex(null);
@@ -518,7 +574,9 @@ const ChapterScraperDeck = React.memo(
       const hi = Math.min(currentActiveImages.length, Math.max(a, b));
       const rangeImages = currentActiveImages.slice(lo, hi);
       setSelectedScraped((prev) => {
-        const otherSelected = prev.filter((img) => !currentActiveImages.includes(img));
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
         return [...otherSelected, ...rangeImages];
       });
       setLastSelectedIndex(null);
@@ -624,7 +682,12 @@ const ChapterScraperDeck = React.memo(
             isEpisodeCollapsed={isEpisodeCollapsed}
             setIsEpisodeCollapsed={setIsEpisodeCollapsed}
             hasMultipleEpisodes={(() => {
-              const headerEpisodeGroups = ((window as any).__scrapeEpisodeGroups as Array<{ episodeLabel: string; startIndex: number; count: number }>) || [];
+              const headerEpisodeGroups =
+                ((window as any).__scrapeEpisodeGroups as Array<{
+                  episodeLabel: string;
+                  startIndex: number;
+                  count: number;
+                }>) || [];
               return headerEpisodeGroups.length > 1;
             })()}
           />
@@ -635,7 +698,6 @@ const ChapterScraperDeck = React.memo(
             <ImportImagesOverlay />
           ) : (
             <div className="space-y-4">
-
               {/* Shift-select hint banner */}
               {scrapedImages.length > 1 && (
                 <p className="text-[9px] text-neutral-600 font-mono px-1">
@@ -664,23 +726,38 @@ const ChapterScraperDeck = React.memo(
 
                   const filteredGroups = sortedGroups.filter(({ grp }) => {
                     if (!episodeSearchQuery.trim()) return true;
-                    const label = formatDisplayEpisodeLabel(grp.episodeLabel).toLowerCase();
+                    const label = formatDisplayEpisodeLabel(
+                      grp.episodeLabel
+                    ).toLowerCase();
                     return label.includes(episodeSearchQuery.toLowerCase());
                   });
 
                   const visibleGroups =
                     selectedEpisodeIdx === "all"
-                      ? sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }))
+                      ? sortedGroups.map(({ grp, originalIdx }) => ({
+                          grp,
+                          gIdx: originalIdx,
+                        }))
                       : episodeGroups[selectedEpisodeIdx]
-                        ? [{ grp: episodeGroups[selectedEpisodeIdx], gIdx: selectedEpisodeIdx as number }]
-                        : sortedGroups.map(({ grp, originalIdx }) => ({ grp, gIdx: originalIdx }));
+                      ? [
+                          {
+                            grp: episodeGroups[selectedEpisodeIdx],
+                            gIdx: selectedEpisodeIdx as number,
+                          },
+                        ]
+                      : sortedGroups.map(({ grp, originalIdx }) => ({
+                          grp,
+                          gIdx: originalIdx,
+                        }));
 
                   return (
                     <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
                       {/* IN-PANEL LEFT SIDEBAR: EPISODE NAVIGATOR */}
                       <aside
                         className={`relative bg-[#0c0d16]/70 border border-white/10 backdrop-blur-xl rounded-2xl shrink-0 shadow-2xl lg:sticky lg:top-24 self-start transition-all duration-300 overflow-hidden ${
-                          isEpisodeCollapsed ? "w-10 p-2" : "w-full lg:w-56 p-4 space-y-3"
+                          isEpisodeCollapsed
+                            ? "w-10 p-2"
+                            : "w-full lg:w-56 p-4 space-y-3"
                         }`}
                       >
                         <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
@@ -696,7 +773,11 @@ const ChapterScraperDeck = React.memo(
                             <PanelLeft className="w-4 h-4 text-purple-400 group-hover:text-purple-300 transition-colors" />
                             <span
                               className="text-[8px] font-black font-mono uppercase text-neutral-500 group-hover:text-purple-400 transition-colors tracking-widest"
-                              style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}
+                              style={{
+                                writingMode: "vertical-rl",
+                                textOrientation: "mixed",
+                                transform: "rotate(180deg)",
+                              }}
                             >
                               Episodes
                             </span>
@@ -708,14 +789,20 @@ const ChapterScraperDeck = React.memo(
                               <div className="min-w-0 flex items-center gap-2">
                                 <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.45)] shrink-0" />
                                 <div className="min-w-0">
-                                  <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono truncate">Episodes</h4>
-                                  <p className="text-[10px] text-neutral-400 font-mono">{episodeGroups.length} loaded</p>
+                                  <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono truncate">
+                                    Episodes
+                                  </h4>
+                                  <p className="text-[10px] text-neutral-400 font-mono">
+                                    {episodeGroups.length} loaded
+                                  </p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-1.5 shrink-0">
                                 <button
                                   type="button"
-                                  onClick={() => setEpisodeSortAscending((prev) => !prev)}
+                                  onClick={() =>
+                                    setEpisodeSortAscending((prev) => !prev)
+                                  }
                                   title="Toggle Sort Order"
                                   className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
                                 >
@@ -733,148 +820,205 @@ const ChapterScraperDeck = React.memo(
                               </div>
                             </div>
 
-                        {/* Search & Filter Bar */}
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={episodeSearchQuery}
-                            onChange={(e) => setEpisodeSearchQuery(e.target.value)}
-                            placeholder="Search episodes..."
-                            className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/60 font-mono transition-all"
-                          />
-                          {episodeSearchQuery && (
-                            <button
-                              type="button"
-                              onClick={() => setEpisodeSearchQuery("")}
-                              className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold"
-                            >
-                              ✕
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Episodes Scroll List */}
-                        <div className="space-y-1.5 max-h-[55vh] overflow-y-auto overflow-x-hidden p-1 pt-2 pb-2 custom-purple-scrollbar">
-                          {/* All Episodes Button */}
-                          {(() => {
-                            const totalScrapedFrames = episodeGroups.length > 0
-                              ? episodeGroups.reduce((acc, g) => acc + g.count, 0)
-                              : scrapedImages.length;
-
-                            return (
-                              <button
-                                type="button"
-                                title={`Show all episodes — ${totalScrapedFrames} frames total`}
-                                onClick={() => setSelectedEpisodeIdx("all")}
-                                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${selectedEpisodeIdx === "all"
-                                    ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                                    : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-850"
-                                  }`}
-                              >
-                                <span className="truncate">All Episodes</span>
-                                <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
-                                  {totalScrapedFrames}f
-                                </span>
-                              </button>
-                            );
-                          })()}
-
-                          {/* Filtered Episode Cards */}
-                          {filteredGroups.map(({ grp, originalIdx }) => {
-                            const isSelected = selectedEpisodeIdx === originalIdx;
-                            const grpImages = scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
-
-                            const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
-                            const timelineCountForGrp = activePanels.filter((p) => {
-                              if (p.episode_label) return p.episode_label === grp.episodeLabel;
-                              return grpImages.includes(p.image_url);
-                            }).length;
-
-                            const seconds = grp.count * 4.0;
-                            const mins = Math.floor(seconds / 60);
-                            const secs = Math.round(seconds % 60);
-                            const durationStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-
-                            return (
-                              <div key={`ep-wrapper-${originalIdx}`} className="relative group/ep">
+                            {/* Search & Filter Bar */}
+                            <div className="relative">
+                              <input
+                                type="text"
+                                value={episodeSearchQuery}
+                                onChange={(e) =>
+                                  setEpisodeSearchQuery(e.target.value)
+                                }
+                                placeholder="Search episodes..."
+                                className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/60 font-mono transition-all"
+                              />
+                              {episodeSearchQuery && (
                                 <button
                                   type="button"
-                                  title={`${formatDisplayEpisodeLabel(grp.episodeLabel)} — ${grp.count} frames · ${durationStr}`}
-                                  onClick={() => setSelectedEpisodeIdx(originalIdx)}
-                                  onMouseEnter={() => setHoveredEpisodeIdx(originalIdx)}
-                                  onMouseLeave={() => setHoveredEpisodeIdx(null)}
-                                  className={`w-full flex flex-col gap-1 px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${isSelected
-                                      ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.25)]"
-                                      : "bg-neutral-900/40 border-neutral-850 text-neutral-350 hover:text-white hover:bg-neutral-850/80"
-                                    }`}
+                                  onClick={() => setEpisodeSearchQuery("")}
+                                  className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold"
                                 >
-                                  <div className="flex items-center justify-between gap-1.5 w-full">
-                                    <div className="flex items-center gap-2 truncate">
-                                      <span
-                                        className={`h-2 w-2 rounded-full shrink-0 ${isSelected ? "bg-purple-400 animate-pulse" : "bg-emerald-500/80"
-                                          }`}
-                                      />
-                                      <span className="truncate">{formatDisplayEpisodeLabel(grp.episodeLabel)}</span>
-                                    </div>
-                                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
-                                      {grp.count}f
-                                    </span>
-                                  </div>
-
-                                  {/* Episode Duration & Status */}
-                                  <div className="flex items-center justify-between text-[9px] text-neutral-400 font-normal pl-4 pt-0.5">
-                                    <span>⏱️ {durationStr}</span>
-                                    <span className="text-emerald-400 font-bold uppercase tracking-wider text-[8px]">✓ Ready</span>
-                                  </div>
+                                  ✕
                                 </button>
+                              )}
+                            </div>
 
-                                {/* AI Summary & Hero Frame Tooltip on Hover */}
-                                {hoveredEpisodeIdx === originalIdx && (
-                                  <div className="absolute left-full top-0 ml-3 z-50 w-56 p-3 bg-neutral-955/95 border border-purple-900/60 rounded-xl shadow-2xl backdrop-blur-md hidden lg:block animate-in fade-in duration-150 pointer-events-none">
-                                    <div className="space-y-1.5">
-                                      <div className="flex items-center justify-between border-b border-neutral-800 pb-1">
-                                        <span className="text-[10px] font-black text-purple-300 uppercase tracking-wider">
-                                          {formatDisplayEpisodeLabel(grp.episodeLabel)}
-                                        </span>
-                                        <span className="text-[8px] bg-purple-950 text-purple-400 px-1.5 py-0.5 rounded border border-purple-800">
-                                          AI Tooltip
+                            {/* Episodes Scroll List */}
+                            <div className="space-y-1.5 max-h-[55vh] overflow-y-auto overflow-x-hidden p-1 pt-2 pb-2 custom-purple-scrollbar">
+                              {/* All Episodes Button */}
+                              {(() => {
+                                const totalScrapedFrames =
+                                  episodeGroups.length > 0
+                                    ? episodeGroups.reduce(
+                                        (acc, g) => acc + g.count,
+                                        0
+                                      )
+                                    : scrapedImages.length;
+
+                                return (
+                                  <button
+                                    type="button"
+                                    title={`Show all episodes — ${totalScrapedFrames} frames total`}
+                                    onClick={() => setSelectedEpisodeIdx("all")}
+                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
+                                      selectedEpisodeIdx === "all"
+                                        ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                                        : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-850"
+                                    }`}
+                                  >
+                                    <span className="truncate">
+                                      All Episodes
+                                    </span>
+                                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
+                                      {totalScrapedFrames}f
+                                    </span>
+                                  </button>
+                                );
+                              })()}
+
+                              {/* Filtered Episode Cards */}
+                              {filteredGroups.map(({ grp, originalIdx }) => {
+                                const isSelected =
+                                  selectedEpisodeIdx === originalIdx;
+                                const grpImages = scrapedImages.slice(
+                                  grp.startIndex,
+                                  grp.startIndex + grp.count
+                                );
+
+                                const activePanels =
+                                  useProjectStore.getState().activeProjectData
+                                    ?.panels || [];
+                                const timelineCountForGrp = activePanels.filter(
+                                  (p) => {
+                                    if (p.episode_label)
+                                      return (
+                                        p.episode_label === grp.episodeLabel
+                                      );
+                                    return grpImages.includes(p.image_url);
+                                  }
+                                ).length;
+
+                                const seconds = grp.count * 4.0;
+                                const mins = Math.floor(seconds / 60);
+                                const secs = Math.round(seconds % 60);
+                                const durationStr =
+                                  mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+                                return (
+                                  <div
+                                    key={`ep-wrapper-${originalIdx}`}
+                                    className="relative group/ep"
+                                  >
+                                    <button
+                                      type="button"
+                                      title={`${formatDisplayEpisodeLabel(
+                                        grp.episodeLabel
+                                      )} — ${
+                                        grp.count
+                                      } frames · ${durationStr}`}
+                                      onClick={() =>
+                                        setSelectedEpisodeIdx(originalIdx)
+                                      }
+                                      onMouseEnter={() =>
+                                        setHoveredEpisodeIdx(originalIdx)
+                                      }
+                                      onMouseLeave={() =>
+                                        setHoveredEpisodeIdx(null)
+                                      }
+                                      className={`w-full flex flex-col gap-1 px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
+                                        isSelected
+                                          ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.25)]"
+                                          : "bg-neutral-900/40 border-neutral-850 text-neutral-350 hover:text-white hover:bg-neutral-850/80"
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between gap-1.5 w-full">
+                                        <div className="flex items-center gap-2 truncate">
+                                          <span
+                                            className={`h-2 w-2 rounded-full shrink-0 ${
+                                              isSelected
+                                                ? "bg-purple-400 animate-pulse"
+                                                : "bg-emerald-500/80"
+                                            }`}
+                                          />
+                                          <span className="truncate">
+                                            {formatDisplayEpisodeLabel(
+                                              grp.episodeLabel
+                                            )}
+                                          </span>
+                                        </div>
+                                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-purple-300 border border-purple-900/40 shrink-0">
+                                          {grp.count}f
                                         </span>
                                       </div>
-                                      <p className="text-[10px] text-neutral-400 leading-tight font-mono">
-                                        Sequence contains {grp.count} frames (~{durationStr}). Full HD panels scanned.
-                                      </p>
-                                      {grpImages[0] && (
-                                        <div className="w-full h-20 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900 mt-1">
-                                          <img src={getProxiedImageUrl(grpImages[0], targetUrl)} alt="Hero Preview" className="w-full h-full object-cover" />
+
+                                      {/* Episode Duration & Status */}
+                                      <div className="flex items-center justify-between text-[9px] text-neutral-400 font-normal pl-4 pt-0.5">
+                                        <span>⏱️ {durationStr}</span>
+                                        <span className="text-emerald-400 font-bold uppercase tracking-wider text-[8px]">
+                                          ✓ Ready
+                                        </span>
+                                      </div>
+                                    </button>
+
+                                    {/* AI Summary & Hero Frame Tooltip on Hover */}
+                                    {hoveredEpisodeIdx === originalIdx && (
+                                      <div className="absolute left-full top-0 ml-3 z-50 w-56 p-3 bg-neutral-955/95 border border-purple-900/60 rounded-xl shadow-2xl backdrop-blur-md hidden lg:block animate-in fade-in duration-150 pointer-events-none">
+                                        <div className="space-y-1.5">
+                                          <div className="flex items-center justify-between border-b border-neutral-800 pb-1">
+                                            <span className="text-[10px] font-black text-purple-300 uppercase tracking-wider">
+                                              {formatDisplayEpisodeLabel(
+                                                grp.episodeLabel
+                                              )}
+                                            </span>
+                                            <span className="text-[8px] bg-purple-950 text-purple-400 px-1.5 py-0.5 rounded border border-purple-800">
+                                              AI Tooltip
+                                            </span>
+                                          </div>
+                                          <p className="text-[10px] text-neutral-400 leading-tight font-mono">
+                                            Sequence contains {grp.count} frames
+                                            (~{durationStr}). Full HD panels
+                                            scanned.
+                                          </p>
+                                          {grpImages[0] && (
+                                            <div className="w-full h-20 rounded-lg overflow-hidden border border-neutral-800 bg-neutral-900 mt-1">
+                                              <img
+                                                src={getProxiedImageUrl(
+                                                  grpImages[0],
+                                                  targetUrl
+                                                )}
+                                                alt="Hero Preview"
+                                                className="w-full h-full object-cover"
+                                              />
+                                            </div>
+                                          )}
                                         </div>
-                                      )}
-                                    </div>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+                                );
+                              })}
+                            </div>
 
-                        {/* Quick Tool Actions at Bottom of Sidebar */}
-                        <div className="pt-2 border-t border-neutral-850">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (selectedScraped.length === scrapedImages.length) {
-                                setSelectedScraped([]);
-                              } else {
-                                setSelectedScraped([...scrapedImages]);
-                              }
-                            }}
-                            className="w-full px-3.5 py-2.5 rounded-2xl bg-neutral-900/80 hover:bg-purple-500/10 text-xs font-sans font-bold text-neutral-200 border border-neutral-800 hover:border-purple-500/30 text-center transition-all glass-interactive active:scale-95 cursor-pointer truncate shadow-sm"
-                          >
-                            ✅ Select All Panels
-                          </button>
-                        </div>
-                        </>
+                            {/* Quick Tool Actions at Bottom of Sidebar */}
+                            <div className="pt-2 border-t border-neutral-850">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (
+                                    selectedScraped.length ===
+                                    scrapedImages.length
+                                  ) {
+                                    setSelectedScraped([]);
+                                  } else {
+                                    setSelectedScraped([...scrapedImages]);
+                                  }
+                                }}
+                                className="w-full px-3.5 py-2.5 rounded-2xl bg-neutral-900/80 hover:bg-purple-500/10 text-xs font-sans font-bold text-neutral-200 border border-neutral-800 hover:border-purple-500/30 text-center transition-all glass-interactive active:scale-95 cursor-pointer truncate shadow-sm"
+                              >
+                                ✅ Select All Panels
+                              </button>
+                            </div>
+                          </>
                         )}
-
                       </aside>
 
                       {/* IN-PANEL RIGHT MAIN AREA: EPISODE IMAGES */}
@@ -895,11 +1039,20 @@ const ChapterScraperDeck = React.memo(
                                 <HorizontalScrollContainer>
                                   {grpImages.map((imgUrl, localIdx) => {
                                     const globalIdx = grp.startIndex + localIdx;
-                                    const isSelected = selectedScraped.includes(imgUrl);
-                                    const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
-                                    const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                                    const isSelected =
+                                      selectedScraped.includes(imgUrl);
+                                    const proxiedUrl = getProxiedImageUrl(
+                                      imgUrl,
+                                      targetUrl
+                                    );
+                                    const activePanels =
+                                      useProjectStore.getState()
+                                        .activeProjectData?.panels || [];
                                     const isInTimeline = activePanels.some(
-                                      (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                                      (p) =>
+                                        p.image_url === imgUrl ||
+                                        p.image_url === proxiedUrl ||
+                                        p.original_url === imgUrl
                                     );
 
                                     return (
@@ -913,17 +1066,25 @@ const ChapterScraperDeck = React.memo(
                                         isInTimeline={isInTimeline}
                                         isBatchCropping={isBatchCropping}
                                         croppingImgUrl={croppingImgUrl}
-                                        bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                                        bubbleCroppingImgUrl={
+                                          bubbleCroppingImgUrl
+                                        }
                                         scrapedImages={scrapedImages}
                                         mergingIndices={mergingIndices}
-                                        handleMergeWithNext={handleMergeWithNext}
+                                        handleMergeWithNext={
+                                          handleMergeWithNext
+                                        }
                                         setScrapedImages={setScrapedImages}
                                         setSelectedScraped={setSelectedScraped}
                                         setConsoleLogs={setConsoleLogs}
-                                        addPanelsToStoryboard={addPanelsToStoryboard}
+                                        addPanelsToStoryboard={
+                                          addPanelsToStoryboard
+                                        }
                                         addNotification={addNotification}
                                         onCardClick={handleCardClick}
-                                        onCardDoubleClick={handleCardDoubleClick}
+                                        onCardDoubleClick={
+                                          handleCardDoubleClick
+                                        }
                                         viewLayout="scroll"
                                       />
                                     );
@@ -933,11 +1094,20 @@ const ChapterScraperDeck = React.memo(
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-3.5 px-1 w-full">
                                   {grpImages.map((imgUrl, localIdx) => {
                                     const globalIdx = grp.startIndex + localIdx;
-                                    const isSelected = selectedScraped.includes(imgUrl);
-                                    const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
-                                    const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                                    const isSelected =
+                                      selectedScraped.includes(imgUrl);
+                                    const proxiedUrl = getProxiedImageUrl(
+                                      imgUrl,
+                                      targetUrl
+                                    );
+                                    const activePanels =
+                                      useProjectStore.getState()
+                                        .activeProjectData?.panels || [];
                                     const isInTimeline = activePanels.some(
-                                      (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                                      (p) =>
+                                        p.image_url === imgUrl ||
+                                        p.image_url === proxiedUrl ||
+                                        p.original_url === imgUrl
                                     );
 
                                     return (
@@ -951,17 +1121,25 @@ const ChapterScraperDeck = React.memo(
                                         isInTimeline={isInTimeline}
                                         isBatchCropping={isBatchCropping}
                                         croppingImgUrl={croppingImgUrl}
-                                        bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                                        bubbleCroppingImgUrl={
+                                          bubbleCroppingImgUrl
+                                        }
                                         scrapedImages={scrapedImages}
                                         mergingIndices={mergingIndices}
-                                        handleMergeWithNext={handleMergeWithNext}
+                                        handleMergeWithNext={
+                                          handleMergeWithNext
+                                        }
                                         setScrapedImages={setScrapedImages}
                                         setSelectedScraped={setSelectedScraped}
                                         setConsoleLogs={setConsoleLogs}
-                                        addPanelsToStoryboard={addPanelsToStoryboard}
+                                        addPanelsToStoryboard={
+                                          addPanelsToStoryboard
+                                        }
                                         addNotification={addNotification}
                                         onCardClick={handleCardClick}
-                                        onCardDoubleClick={handleCardDoubleClick}
+                                        onCardDoubleClick={
+                                          handleCardDoubleClick
+                                        }
                                         viewLayout="grid"
                                       />
                                     );
@@ -983,9 +1161,14 @@ const ChapterScraperDeck = React.memo(
                       const proxiedUrl = imgUrl?.startsWith("/api/")
                         ? imgUrl
                         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
-                      const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                      const activePanels =
+                        useProjectStore.getState().activeProjectData?.panels ||
+                        [];
                       const isInTimeline = activePanels.some(
-                        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                        (p) =>
+                          p.image_url === imgUrl ||
+                          p.image_url === proxiedUrl ||
+                          p.original_url === imgUrl
                       );
 
                       return (
@@ -1017,7 +1200,9 @@ const ChapterScraperDeck = React.memo(
                     {isScraping && scrapedImages.length > 0 && (
                       <div className="shrink-0 flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 w-[140px] text-center gap-2 text-neutral-500">
                         <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
-                        <span className="text-[10px] font-mono uppercase tracking-wider font-medium">Extracting...</span>
+                        <span className="text-[10px] font-mono uppercase tracking-wider font-medium">
+                          Extracting...
+                        </span>
                       </div>
                     )}
                   </HorizontalScrollContainer>
@@ -1028,9 +1213,14 @@ const ChapterScraperDeck = React.memo(
                       const proxiedUrl = imgUrl?.startsWith("/api/")
                         ? imgUrl
                         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
-                      const activePanels = useProjectStore.getState().activeProjectData?.panels || [];
+                      const activePanels =
+                        useProjectStore.getState().activeProjectData?.panels ||
+                        [];
                       const isInTimeline = activePanels.some(
-                        (p) => p.image_url === imgUrl || p.image_url === proxiedUrl || p.original_url === imgUrl
+                        (p) =>
+                          p.image_url === imgUrl ||
+                          p.image_url === proxiedUrl ||
+                          p.original_url === imgUrl
                       );
 
                       return (
@@ -1062,7 +1252,9 @@ const ChapterScraperDeck = React.memo(
                     {isScraping && scrapedImages.length > 0 && (
                       <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 min-h-[200px] text-center gap-2 text-neutral-500">
                         <Loader2 className="w-5 h-5 text-purple-400 animate-spin" />
-                        <span className="text-[10px] font-mono uppercase tracking-wider font-medium">Extracting panel...</span>
+                        <span className="text-[10px] font-mono uppercase tracking-wider font-medium">
+                          Extracting panel...
+                        </span>
                       </div>
                     )}
                   </div>

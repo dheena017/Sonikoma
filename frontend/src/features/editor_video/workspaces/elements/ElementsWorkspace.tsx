@@ -15,7 +15,9 @@ export const ElementsWorkspace: React.FC<ElementsWorkspaceProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   const filtered = MOCK_ELEMENTS.filter((e) => {
-    const matchSearch = !searchQuery.trim() || e.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch =
+      !searchQuery.trim() ||
+      e.title.toLowerCase().includes(searchQuery.toLowerCase());
     return matchSearch;
   });
 

@@ -715,7 +715,9 @@ export default function ProfilePreferencesTab({
                       className="w-full"
                       selectClassName={`w-full bg-black/50 border border-white/10 text-white text-xs font-medium rounded-lg px-3 py-2.5 focus:outline-none ${tc.focusBorder}`}
                       value={ai.defaultModel}
-                      onChange={(val) => handleSelect(setAi, "defaultModel", val)}
+                      onChange={(val) =>
+                        handleSelect(setAi, "defaultModel", val)
+                      }
                     />
                   </div>
                 </div>
@@ -915,80 +917,80 @@ export default function ProfilePreferencesTab({
           {/* PRIVACY & DATA */}
           {privacy && setPrivacy && (
             <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-5 sm:p-6 shadow-2xl relative space-y-6">
-            <div
-              className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent ${tc.via} to-transparent`}
-            />
+              <div
+                className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent ${tc.via} to-transparent`}
+              />
 
-            <div className="space-y-1">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Eye className={`w-5 h-5 ${tc.text}`} />
-                Privacy & Data Options
-              </h3>
-              <p className="text-xs text-neutral-400 font-semibold">
-                Control what you share and how data is utilized
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3 p-4 bg-black/20 rounded-2xl border border-white/5">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 shrink-0 p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
-                    <Globe className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-xs font-bold text-white truncate">
-                      Public Creator Profile
-                    </h4>
-                    <p className="text-[10px] text-neutral-500 font-semibold mt-1">
-                      Allow others to view your profile and public project
-                      gallery.
-                    </p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={privacy.publicProfile}
-                    onChange={() => handleToggle(setPrivacy, "publicProfile")}
-                  />
-                  <div
-                    className={`w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${tc.peerChecked}`}
-                  ></div>
-                </label>
+              <div className="space-y-1">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Eye className={`w-5 h-5 ${tc.text}`} />
+                  Privacy & Data Options
+                </h3>
+                <p className="text-xs text-neutral-400 font-semibold">
+                  Control what you share and how data is utilized
+                </p>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
-                    <LineChart className="w-4 h-4" />
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-3 p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 shrink-0 p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
+                      <Globe className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-xs font-bold text-white truncate">
+                        Public Creator Profile
+                      </h4>
+                      <p className="text-[10px] text-neutral-500 font-semibold mt-1">
+                        Allow others to view your profile and public project
+                        gallery.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-white">
-                      Analytics Telemetry
-                    </h4>
-                    <p className="text-[10px] text-neutral-500 font-semibold mt-1">
-                      Share anonymized app usage data to help us improve the
-                      platform.
-                    </p>
-                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={privacy.publicProfile}
+                      onChange={() => handleToggle(setPrivacy, "publicProfile")}
+                    />
+                    <div
+                      className={`w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${tc.peerChecked}`}
+                    ></div>
+                  </label>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={privacy.analyticsTelemetry}
-                    onChange={() =>
-                      handleToggle(setPrivacy, "analyticsTelemetry")
-                    }
-                  />
-                  <div
-                    className={`w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${tc.peerChecked}`}
-                  ></div>
-                </label>
+
+                <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+                      <LineChart className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-white">
+                        Analytics Telemetry
+                      </h4>
+                      <p className="text-[10px] text-neutral-500 font-semibold mt-1">
+                        Share anonymized app usage data to help us improve the
+                        platform.
+                      </p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={privacy.analyticsTelemetry}
+                      onChange={() =>
+                        handleToggle(setPrivacy, "analyticsTelemetry")
+                      }
+                    />
+                    <div
+                      className={`w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${tc.peerChecked}`}
+                    ></div>
+                  </label>
+                </div>
               </div>
             </div>
-          </div>
           )}
 
           {/* EXPORT SETTINGS */}

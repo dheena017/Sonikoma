@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { useImageEditorStore, ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
+import {
+  useImageEditorStore,
+  ImageTool,
+} from "@/features/editor_image/hooks/useImageEditorState";
 import {
   Menu,
   Film,
@@ -51,33 +54,77 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
     {
       name: "EDITING TOOLS",
       items: [
-        { id: "adjust", label: "Color & Filters", icon: Sparkles, type: "tool" },
-        { id: "edit", label: "Transform & Bounds", icon: Settings2, type: "tool" },
+        {
+          id: "adjust",
+          label: "Color & Filters",
+          icon: Sparkles,
+          type: "tool",
+        },
+        {
+          id: "edit",
+          label: "Transform & Bounds",
+          icon: Settings2,
+          type: "tool",
+        },
         { id: "draw", label: "Retouch & Brush", icon: Brush, type: "tool" },
-        { id: "slice", label: "Horizontal Cutter", icon: Scissors, type: "tool" },
-        { id: "crop", label: "Panel Cuts Registry", icon: Crop, badge: slicesCount > 0 ? slicesCount : undefined, type: "tool" },
+        {
+          id: "slice",
+          label: "Horizontal Cutter",
+          icon: Scissors,
+          type: "tool",
+        },
+        {
+          id: "crop",
+          label: "Panel Cuts Registry",
+          icon: Crop,
+          badge: slicesCount > 0 ? slicesCount : undefined,
+          type: "tool",
+        },
         { id: "merge", label: "Merge Panels", icon: Link2, type: "tool" },
       ],
     },
     {
       name: "AI INTELLIGENCE",
       items: [
-        { id: "separate", label: "Layer Separation", icon: Layers, type: "tool" },
-        { id: "train", label: "YOLO AI Fine-Tuner", icon: Database, type: "tool" },
-        { id: "autocrop-hub", label: "Auto Panel Detection", icon: Brain, type: "modal" },
+        {
+          id: "separate",
+          label: "Layer Separation",
+          icon: Layers,
+          type: "tool",
+        },
+        {
+          id: "train",
+          label: "YOLO AI Fine-Tuner",
+          icon: Database,
+          type: "tool",
+        },
+        {
+          id: "autocrop-hub",
+          label: "Auto Panel Detection",
+          icon: Brain,
+          type: "modal",
+        },
       ],
     },
     {
       name: "PREFERENCES",
       items: [
-        { id: "settings", label: "Editor Settings", icon: Settings, type: "link" },
+        {
+          id: "settings",
+          label: "Editor Settings",
+          icon: Settings,
+          type: "link",
+        },
       ],
     },
   ];
 
   const handleReturnToWorkspace = () => {
     const target = resolveWorkspaceReturnPath({
-      projectId: projectId || new URLSearchParams(window.location.search).get("id") || null,
+      projectId:
+        projectId ||
+        new URLSearchParams(window.location.search).get("id") ||
+        null,
       seriesSlug,
       chapterSlug,
       searchParams: window.location.search,
@@ -96,9 +143,14 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
       {/* Navigation Scroll Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-4 py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {groups.map((group, groupIdx) => (
-          <div key={group.name} className="w-full flex flex-col items-center space-y-1">
+          <div
+            key={group.name}
+            className="w-full flex flex-col items-center space-y-1"
+          >
             {/* Divider between sections */}
-            {groupIdx > 0 && <div className="w-8 h-[1px] bg-neutral-800/80 my-1 rounded-full" />}
+            {groupIdx > 0 && (
+              <div className="w-8 h-[1px] bg-neutral-800/80 my-1 rounded-full" />
+            )}
 
             {/* Section Header */}
             <span className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-neutral-500 font-mono select-none text-center w-full truncate px-1 mb-1">
@@ -110,7 +162,10 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
               const Icon = item.icon;
 
               return (
-                <div key={item.id} className="relative group w-full flex justify-center py-0.5">
+                <div
+                  key={item.id}
+                  className="relative group w-full flex justify-center py-0.5"
+                >
                   {/* Floating Active Pill Ribbon on Left Edge */}
                   <div
                     className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
@@ -125,9 +180,21 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
                       if (item.type === "tool") {
                         setActiveTool(item.id as ImageTool);
                         onOpenToolsPanel?.();
-                      } else if (item.id === "canvas" || item.id === "image-editor") {
-                        const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
-                        const projId = projectId || new URLSearchParams(window.location.search).get("id") || "";
+                      } else if (
+                        item.id === "canvas" ||
+                        item.id === "image-editor"
+                      ) {
+                        const hasValidSlugs =
+                          seriesSlug &&
+                          chapterSlug &&
+                          seriesSlug !== "null" &&
+                          chapterSlug !== "null";
+                        const projId =
+                          projectId ||
+                          new URLSearchParams(window.location.search).get(
+                            "id"
+                          ) ||
+                          "";
                         const target = hasValidSlugs
                           ? `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=0`
                           : `/scraper/editor/image-editor?id=${projId}&idx=0`;
@@ -157,7 +224,9 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
                       <Icon
                         strokeWidth={active ? 2.5 : 2}
                         className={`w-5 h-5 transition-colors duration-300 ${
-                          active ? "text-purple-300" : "text-neutral-400 group-hover:text-purple-300"
+                          active
+                            ? "text-purple-300"
+                            : "text-neutral-400 group-hover:text-purple-300"
                         }`}
                       />
                     </div>
@@ -169,7 +238,11 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
                       </span>
                     )}
                   </button>
-                  <TooltipPortal text={item.label} visible={hoveredItem === item.id} anchorRect={hoveredRect} />
+                  <TooltipPortal
+                    text={item.label}
+                    visible={hoveredItem === item.id}
+                    anchorRect={hoveredRect}
+                  />
                 </div>
               );
             })}
@@ -190,7 +263,11 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
         >
           <ExternalLink className="w-5 h-5 text-white" />
         </button>
-        <TooltipPortal text="Return to Workspace" visible={hoveredItem === "return-workspace"} anchorRect={hoveredRect} />
+        <TooltipPortal
+          text="Return to Workspace"
+          visible={hoveredItem === "return-workspace"}
+          anchorRect={hoveredRect}
+        />
       </div>
     </div>
   );

@@ -34,7 +34,7 @@ export function AdminCreditsTab({
   const [ledgerFilterType, setLedgerFilterType] = useState("all"); // 'all' | 'additions' | 'deductions'
   const [ledgerStartDate, setLedgerStartDate] = useState("");
   const [ledgerEndDate, setLedgerEndDate] = useState("");
-  
+
   // Grant Form state
   const [selectedUserId, setSelectedUserId] = useState("");
   const [amount, setAmount] = useState<number>(100);
@@ -86,9 +86,12 @@ export function AdminCreditsTab({
         const data = await res.json();
         if (data.success && Array.isArray(data.users)) {
           setUsers(data.users);
-          
+
           // Calculate stats
-          const totalBal = data.users.reduce((acc: number, u: any) => acc + (u.credits || 0), 0);
+          const totalBal = data.users.reduce(
+            (acc: number, u: any) => acc + (u.credits || 0),
+            0
+          );
           setStats((prev) => ({
             ...prev,
             totalUsers: data.users.length,
@@ -117,19 +120,22 @@ export function AdminCreditsTab({
             0
           );
           const pageDeducted = data.data.reduce(
-            (acc: number, tx: any) => acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0),
+            (acc: number, tx: any) =>
+              acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0),
             0
           );
           const now = new Date();
           const monthAdded = data.data.reduce((acc: number, tx: any) => {
             const created = new Date(tx.created_at);
-            return created.getFullYear() === now.getFullYear() && created.getMonth() === now.getMonth()
+            return created.getFullYear() === now.getFullYear() &&
+              created.getMonth() === now.getMonth()
               ? acc + (tx.amount > 0 ? tx.amount : 0)
               : acc;
           }, 0);
           const monthDeducted = data.data.reduce((acc: number, tx: any) => {
             const created = new Date(tx.created_at);
-            return created.getFullYear() === now.getFullYear() && created.getMonth() === now.getMonth()
+            return created.getFullYear() === now.getFullYear() &&
+              created.getMonth() === now.getMonth()
               ? acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0)
               : acc;
           }, 0);
@@ -172,11 +178,12 @@ export function AdminCreditsTab({
     }
   };
 
-  const handleSortTransactions = (key: "user_id" | "feature_name" | "amount" | "created_at") => {
+  const handleSortTransactions = (
+    key: "user_id" | "feature_name" | "amount" | "created_at"
+  ) => {
     setTransactionSort((prev) => ({
       key,
-      direction:
-        prev.key === key && prev.direction === "desc" ? "asc" : "desc",
+      direction: prev.key === key && prev.direction === "desc" ? "asc" : "desc",
     }));
   };
 
@@ -202,10 +209,17 @@ export function AdminCreditsTab({
 
     if (bulkMode) {
       if (filteredUsers.length === 0) {
-        addNotification("No users match the search filters for bulk adjustment", "warning");
+        addNotification(
+          "No users match the search filters for bulk adjustment",
+          "warning"
+        );
         return;
       }
-      if (!confirm(`Apply this credit adjustment to ${filteredUsers.length} users?`)) {
+      if (
+        !confirm(
+          `Apply this credit adjustment to ${filteredUsers.length} users?`
+        )
+      ) {
         return;
       }
       setIsSubmitting(true);
@@ -228,7 +242,10 @@ export function AdminCreditsTab({
           console.error("Failed bulk grant for", u.email, err);
         }
       }
-      addNotification(`Bulk adjustment complete: ${successCount}/${filteredUsers.length} succeeded`, "success");
+      addNotification(
+        `Bulk adjustment complete: ${successCount}/${filteredUsers.length} succeeded`,
+        "success"
+      );
       setReason("");
       fetchUsers();
       fetchTransactions();
@@ -257,7 +274,10 @@ export function AdminCreditsTab({
 
       if (res.ok) {
         const data = await res.json();
-        addNotification(data.message || `Successfully adjusted user balance.`, "success");
+        addNotification(
+          data.message || `Successfully adjusted user balance.`,
+          "success"
+        );
         setReason("");
         fetchUsers();
         fetchTransactions();
@@ -275,7 +295,9 @@ export function AdminCreditsTab({
   // Filtered users search mapping
   const filteredUsers = users.filter(
     (u) =>
-      (u.full_name || "").toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+      (u.full_name || "")
+        .toLowerCase()
+        .includes(userSearchQuery.toLowerCase()) ||
       (u.email || "").toLowerCase().includes(userSearchQuery.toLowerCase())
   );
 
@@ -295,18 +317,22 @@ export function AdminCreditsTab({
       (ledgerFilterType === "deductions" && tx.amount < 0);
 
     const matchesSelectedUser =
-      !showSelectedUserOnly ||
-      !selectedUserId ||
-      tx.user_id === selectedUserId;
+      !showSelectedUserOnly || !selectedUserId || tx.user_id === selectedUserId;
 
     const transactionTime = new Date(tx.created_at).getTime();
-    const startTime = ledgerStartDate ? new Date(ledgerStartDate).getTime() : null;
-    const endTime = ledgerEndDate ? new Date(ledgerEndDate).getTime() + 24 * 60 * 60 * 1000 - 1 : null;
+    const startTime = ledgerStartDate
+      ? new Date(ledgerStartDate).getTime()
+      : null;
+    const endTime = ledgerEndDate
+      ? new Date(ledgerEndDate).getTime() + 24 * 60 * 60 * 1000 - 1
+      : null;
     const matchesDateRange =
       (!startTime || transactionTime >= startTime) &&
       (!endTime || transactionTime <= endTime);
 
-    return matchesSearch && matchesType && matchesSelectedUser && matchesDateRange;
+    return (
+      matchesSearch && matchesType && matchesSelectedUser && matchesDateRange
+    );
   });
 
   const sortedTransactions = React.useMemo(() => {
@@ -323,7 +349,9 @@ export function AdminCreditsTab({
       if (transactionSort.key === "created_at") {
         const aTime = new Date(aValue).getTime();
         const bTime = new Date(bValue).getTime();
-        return transactionSort.direction === "asc" ? aTime - bTime : bTime - aTime;
+        return transactionSort.direction === "asc"
+          ? aTime - bTime
+          : bTime - aTime;
       }
 
       return transactionSort.direction === "asc"
@@ -373,7 +401,9 @@ export function AdminCreditsTab({
 
   // At risk users (balance < 20)
   const lowBalanceUsers = React.useMemo(() => {
-    return users.filter((u) => (u.credits !== undefined ? u.credits : u.credit_balance) < 20);
+    return users.filter(
+      (u) => (u.credits !== undefined ? u.credits : u.credit_balance) < 20
+    );
   }, [users]);
 
   // Filtered transactions specific to the currently selected user
@@ -419,7 +449,13 @@ export function AdminCreditsTab({
   // CSV Export utility
   const exportToCSV = () => {
     if (sortedTransactions.length === 0) return;
-    const headers = ["Transaction ID", "User ID", "Feature / Reason", "Amount", "Timestamp"];
+    const headers = [
+      "Transaction ID",
+      "User ID",
+      "Feature / Reason",
+      "Amount",
+      "Timestamp",
+    ];
     const rows = sortedTransactions.map((tx) => [
       tx.id,
       tx.user_id,
@@ -435,7 +471,10 @@ export function AdminCreditsTab({
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `credit_ledger_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute(
+      "download",
+      `credit_ledger_${new Date().toISOString().split("T")[0]}.csv`
+    );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -443,7 +482,13 @@ export function AdminCreditsTab({
 
   const exportSelectedUserCSV = () => {
     if (!selectedUserId || selectedUserTransactions.length === 0) return;
-    const headers = ["Transaction ID", "User ID", "Feature / Reason", "Amount", "Timestamp"];
+    const headers = [
+      "Transaction ID",
+      "User ID",
+      "Feature / Reason",
+      "Amount",
+      "Timestamp",
+    ];
     const rows = selectedUserTransactions.map((tx) => [
       tx.id,
       tx.user_id,
@@ -459,7 +504,9 @@ export function AdminCreditsTab({
     link.setAttribute("href", encodedUri);
     link.setAttribute(
       "download",
-      `credit_ledger_${selectedUserId}_${new Date().toISOString().split("T")[0]}.csv`
+      `credit_ledger_${selectedUserId}_${
+        new Date().toISOString().split("T")[0]
+      }.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -473,7 +520,13 @@ export function AdminCreditsTab({
     );
     if (todayRows.length === 0) return;
 
-    const headers = ["Transaction ID", "User ID", "Feature / Reason", "Amount", "Timestamp"];
+    const headers = [
+      "Transaction ID",
+      "User ID",
+      "Feature / Reason",
+      "Amount",
+      "Timestamp",
+    ];
     const rows = todayRows.map((tx) => [
       tx.id,
       tx.user_id,
@@ -498,7 +551,6 @@ export function AdminCreditsTab({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
-      
       {/* ── Header / Intro ── */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -507,7 +559,8 @@ export function AdminCreditsTab({
             Credits System Management
           </h2>
           <p className="text-xs text-neutral-400 font-semibold mt-1">
-            Global ledger inspection, balance administration, and manual credit grants.
+            Global ledger inspection, balance administration, and manual credit
+            grants.
           </p>
         </div>
       </div>
@@ -519,12 +572,16 @@ export function AdminCreditsTab({
             <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium text-sm">System Users</h3>
+            <h3 className="text-neutral-400 font-medium text-sm">
+              System Users
+            </h3>
           </div>
           <div className="text-2xl font-black text-white">
             {stats.totalUsers.toLocaleString()}
           </div>
-          <p className="text-[10px] text-neutral-500 mt-1">Users registered on ledger</p>
+          <p className="text-[10px] text-neutral-500 mt-1">
+            Users registered on ledger
+          </p>
         </div>
 
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
@@ -532,12 +589,19 @@ export function AdminCreditsTab({
             <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
               <Coins className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium text-sm">Total Balance</h3>
+            <h3 className="text-neutral-400 font-medium text-sm">
+              Total Balance
+            </h3>
           </div>
           <div className="text-2xl font-black text-white">
-            {stats.totalBalance.toLocaleString()} <span className="text-xs text-neutral-500 font-normal">Credits</span>
+            {stats.totalBalance.toLocaleString()}{" "}
+            <span className="text-xs text-neutral-500 font-normal">
+              Credits
+            </span>
           </div>
-          <p className="text-[10px] text-neutral-500 mt-1">Sum of all current user balances</p>
+          <p className="text-[10px] text-neutral-500 mt-1">
+            Sum of all current user balances
+          </p>
         </div>
 
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
@@ -545,12 +609,16 @@ export function AdminCreditsTab({
             <div className="p-2 bg-violet-500/10 rounded-lg text-violet-400">
               <History className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium text-sm">Loaded Operations</h3>
+            <h3 className="text-neutral-400 font-medium text-sm">
+              Loaded Operations
+            </h3>
           </div>
           <div className="text-2xl font-black text-white">
             {transactions.length}
           </div>
-          <p className="text-[10px] text-neutral-500 mt-1">Audit logs loaded in memory</p>
+          <p className="text-[10px] text-neutral-500 mt-1">
+            Audit logs loaded in memory
+          </p>
         </div>
 
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
@@ -561,10 +629,12 @@ export function AdminCreditsTab({
             <h3 className="text-neutral-400 font-medium text-sm">This Month</h3>
           </div>
           <div className="text-2xl font-black text-white">
-            {monthSummary.net >= 0 ? "+" : ""}{monthSummary.net.toLocaleString()}
+            {monthSummary.net >= 0 ? "+" : ""}
+            {monthSummary.net.toLocaleString()}
           </div>
           <p className="text-[10px] text-neutral-500 mt-1">
-            +{monthSummary.added.toLocaleString()} / -{monthSummary.deducted.toLocaleString()}
+            +{monthSummary.added.toLocaleString()} / -
+            {monthSummary.deducted.toLocaleString()}
           </p>
         </div>
 
@@ -576,10 +646,12 @@ export function AdminCreditsTab({
             <h3 className="text-neutral-400 font-medium text-sm">Today</h3>
           </div>
           <div className="text-2xl font-black text-white">
-            {dailySummary.net >= 0 ? "+" : ""}{dailySummary.net.toLocaleString()}
+            {dailySummary.net >= 0 ? "+" : ""}
+            {dailySummary.net.toLocaleString()}
           </div>
           <p className="text-[10px] text-neutral-500 mt-1">
-            +{dailySummary.added.toLocaleString()} / -{dailySummary.deducted.toLocaleString()}
+            +{dailySummary.added.toLocaleString()} / -
+            {dailySummary.deducted.toLocaleString()}
           </p>
         </div>
       </div>
@@ -594,7 +666,9 @@ export function AdminCreditsTab({
           </h3>
           <div className="space-y-3">
             {creditUsageBreakdown.length === 0 ? (
-              <p className="text-xs text-neutral-500 italic text-center py-6">No usage logs loaded.</p>
+              <p className="text-xs text-neutral-500 italic text-center py-6">
+                No usage logs loaded.
+              </p>
             ) : (
               creditUsageBreakdown.map((item) => (
                 <div key={item.name} className="space-y-1.5">
@@ -624,22 +698,29 @@ export function AdminCreditsTab({
           </h3>
           <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
             {lowBalanceUsers.length === 0 ? (
-              <p className="text-xs text-neutral-500 italic text-center py-6">No at-risk users detected!</p>
+              <p className="text-xs text-neutral-500 italic text-center py-6">
+                No at-risk users detected!
+              </p>
             ) : (
               lowBalanceUsers.map((u) => (
                 <div
                   key={u.id}
                   onClick={() => setSelectedUserId(u.id)}
                   className={`flex justify-between items-center bg-[#0b0b0e] border border-neutral-850 rounded-lg p-2.5 hover:bg-neutral-900 transition-all cursor-pointer ${
-                    selectedUserId === u.id ? "ring-1 ring-purple-500/50 border-purple-500/50" : ""
+                    selectedUserId === u.id
+                      ? "ring-1 ring-purple-500/50 border-purple-500/50"
+                      : ""
                   }`}
                 >
                   <div>
-                    <p className="text-xs font-bold text-neutral-200">{u.full_name || "Anonymous"}</p>
+                    <p className="text-xs font-bold text-neutral-200">
+                      {u.full_name || "Anonymous"}
+                    </p>
                     <p className="text-[10px] text-neutral-500">{u.email}</p>
                   </div>
                   <span className="px-2 py-1 rounded bg-rose-500/10 text-rose-400 text-xs font-mono font-black border border-rose-500/20">
-                    {u.credits !== undefined ? u.credits : u.credit_balance} credits
+                    {u.credits !== undefined ? u.credits : u.credit_balance}{" "}
+                    credits
                   </span>
                 </div>
               ))
@@ -649,7 +730,6 @@ export function AdminCreditsTab({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
         {/* ── Column 1 & 2: Global Transaction Log ── */}
         <div className="lg:col-span-2 bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden shadow-xl flex flex-col justify-between">
           <div>
@@ -659,7 +739,7 @@ export function AdminCreditsTab({
                 <History className="w-4 h-4 text-purple-400" />
                 Global Transaction Ledger
               </h3>
-              
+
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-neutral-500" />
@@ -733,7 +813,13 @@ export function AdminCreditsTab({
 
                 <button
                   onClick={exportTodayCSV}
-                  disabled={sortedTransactions.filter((tx) => new Date(tx.created_at).toDateString() === new Date().toDateString()).length === 0}
+                  disabled={
+                    sortedTransactions.filter(
+                      (tx) =>
+                        new Date(tx.created_at).toDateString() ===
+                        new Date().toDateString()
+                    ).length === 0
+                  }
                   className="p-1 px-2.5 bg-sky-700 hover:bg-sky-600 text-white disabled:opacity-50 disabled:cursor-not-allowed rounded text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
                   title="Export today's transactions to CSV"
                 >
@@ -745,13 +831,21 @@ export function AdminCreditsTab({
             <div className="space-y-3 px-4 pb-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] text-neutral-300">
                 <div className="bg-[#111115] border border-neutral-800 rounded-xl p-3">
-                  <p className="text-neutral-500 uppercase tracking-widest mb-1">Matching records</p>
-                  <p className="font-bold text-white">{filteredTransactions.length}</p>
+                  <p className="text-neutral-500 uppercase tracking-widest mb-1">
+                    Matching records
+                  </p>
+                  <p className="font-bold text-white">
+                    {filteredTransactions.length}
+                  </p>
                 </div>
                 <div className="bg-[#111115] border border-neutral-800 rounded-xl p-3">
-                  <p className="text-neutral-500 uppercase tracking-widest mb-1">Net movement</p>
+                  <p className="text-neutral-500 uppercase tracking-widest mb-1">
+                    Net movement
+                  </p>
                   <p className="font-bold text-white">
-                    {transactionSummary.totalAdded - transactionSummary.totalDeducted} credits
+                    {transactionSummary.totalAdded -
+                      transactionSummary.totalDeducted}{" "}
+                    credits
                   </p>
                 </div>
               </div>
@@ -760,52 +854,60 @@ export function AdminCreditsTab({
               <table className="w-full text-left text-xs whitespace-nowrap">
                 <thead className="bg-[#0b0b0e]/50 text-neutral-400 border-b border-neutral-800 uppercase tracking-wider font-semibold sticky top-0 backdrop-blur">
                   <tr>
-                    <th className="px-5 py-3 cursor-pointer" onClick={() => handleSortTransactions("user_id")}> 
+                    <th
+                      className="px-5 py-3 cursor-pointer"
+                      onClick={() => handleSortTransactions("user_id")}
+                    >
                       <div className="flex items-center gap-1">
                         User ID
-                        {transactionSort.key === "user_id" && (
-                          transactionSort.direction === "asc" ? (
+                        {transactionSort.key === "user_id" &&
+                          (transactionSort.direction === "asc" ? (
                             <ChevronUp className="w-3 h-3" />
                           ) : (
                             <ChevronDown className="w-3 h-3" />
-                          )
-                        )}
+                          ))}
                       </div>
                     </th>
-                    <th className="px-5 py-3 cursor-pointer" onClick={() => handleSortTransactions("feature_name")}> 
+                    <th
+                      className="px-5 py-3 cursor-pointer"
+                      onClick={() => handleSortTransactions("feature_name")}
+                    >
                       <div className="flex items-center gap-1">
                         Feature / Reason
-                        {transactionSort.key === "feature_name" && (
-                          transactionSort.direction === "asc" ? (
+                        {transactionSort.key === "feature_name" &&
+                          (transactionSort.direction === "asc" ? (
                             <ChevronUp className="w-3 h-3" />
                           ) : (
                             <ChevronDown className="w-3 h-3" />
-                          )
-                        )}
+                          ))}
                       </div>
                     </th>
-                    <th className="px-5 py-3 cursor-pointer" onClick={() => handleSortTransactions("amount")}> 
+                    <th
+                      className="px-5 py-3 cursor-pointer"
+                      onClick={() => handleSortTransactions("amount")}
+                    >
                       <div className="flex items-center gap-1">
                         Amount
-                        {transactionSort.key === "amount" && (
-                          transactionSort.direction === "asc" ? (
+                        {transactionSort.key === "amount" &&
+                          (transactionSort.direction === "asc" ? (
                             <ChevronUp className="w-3 h-3" />
                           ) : (
                             <ChevronDown className="w-3 h-3" />
-                          )
-                        )}
+                          ))}
                       </div>
                     </th>
-                    <th className="px-5 py-3 cursor-pointer" onClick={() => handleSortTransactions("created_at")}> 
+                    <th
+                      className="px-5 py-3 cursor-pointer"
+                      onClick={() => handleSortTransactions("created_at")}
+                    >
                       <div className="flex items-center gap-1">
                         Timestamp
-                        {transactionSort.key === "created_at" && (
-                          transactionSort.direction === "asc" ? (
+                        {transactionSort.key === "created_at" &&
+                          (transactionSort.direction === "asc" ? (
                             <ChevronUp className="w-3 h-3" />
                           ) : (
                             <ChevronDown className="w-3 h-3" />
-                          )
-                        )}
+                          ))}
                       </div>
                     </th>
                   </tr>
@@ -813,13 +915,19 @@ export function AdminCreditsTab({
                 <tbody className="divide-y divide-neutral-800/50">
                   {loading && transactions.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-neutral-500">
+                      <td
+                        colSpan={4}
+                        className="px-6 py-12 text-center text-neutral-500"
+                      >
                         Loading transaction ledger...
                       </td>
                     </tr>
                   ) : sortedTransactions.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-neutral-500 italic">
+                      <td
+                        colSpan={4}
+                        className="px-6 py-12 text-center text-neutral-500 italic"
+                      >
                         No transactions match search filter.
                       </td>
                     </tr>
@@ -828,7 +936,9 @@ export function AdminCreditsTab({
                       <tr
                         key={tx.id}
                         className={`hover:bg-white/[0.02] transition-colors cursor-pointer ${
-                          selectedUserId === tx.user_id ? "bg-purple-500/10" : ""
+                          selectedUserId === tx.user_id
+                            ? "bg-purple-500/10"
+                            : ""
                         }`}
                         onClick={() => setSelectedUserId(tx.user_id)}
                       >
@@ -889,9 +999,11 @@ export function AdminCreditsTab({
             <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
                 <Coins className="w-4 h-4 text-purple-400" />
-                {bulkMode ? "Bulk Adjustment Console" : "Manual Adjustment Console"}
+                {bulkMode
+                  ? "Bulk Adjustment Console"
+                  : "Manual Adjustment Console"}
               </h3>
-              
+
               {/* Bulk Mode Toggle */}
               <label className="inline-flex items-center gap-2 text-[10px] text-neutral-400 uppercase tracking-wider font-bold cursor-pointer bg-neutral-900 border border-neutral-850 px-2 py-1 rounded-lg hover:text-white transition-all">
                 <input
@@ -940,7 +1052,9 @@ export function AdminCreditsTab({
                   Bulk Mode Active
                 </p>
                 <div className="text-neutral-350 text-[11px] leading-relaxed">
-                  Adjustments will apply to all <strong>{filteredUsers.length} users</strong> currently matching the left-hand search filter.
+                  Adjustments will apply to all{" "}
+                  <strong>{filteredUsers.length} users</strong> currently
+                  matching the left-hand search filter.
                 </div>
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
@@ -965,7 +1079,9 @@ export function AdminCreditsTab({
                   <User className="w-3.5 h-3.5 text-purple-400" />
                   {selectedUserObj.full_name || "Anonymous"}
                 </div>
-                <div className="text-[10px] text-neutral-500">{selectedUserObj.email}</div>
+                <div className="text-[10px] text-neutral-500">
+                  {selectedUserObj.email}
+                </div>
                 <div className="text-emerald-400 font-black pt-1 flex items-center gap-1 font-mono">
                   <Coins className="w-3.5 h-3.5" />
                   {selectedUserObj.credits.toLocaleString()} Credits
@@ -977,13 +1093,21 @@ export function AdminCreditsTab({
                     <div className="grid grid-cols-2 gap-2 border-t border-neutral-800 pt-2.5 mt-2 text-[9px] uppercase font-black text-neutral-500 tracking-wider">
                       <div className="bg-[#111115] border border-neutral-800 rounded-xl p-2">
                         <p className="text-neutral-400">Added</p>
-                        <p className="font-bold text-emerald-400">+{selectedUserActivitySummary.totalAdded}</p>
-                        <p className="text-neutral-500 text-[9px]">{selectedUserActivitySummary.addedCount} tx</p>
+                        <p className="font-bold text-emerald-400">
+                          +{selectedUserActivitySummary.totalAdded}
+                        </p>
+                        <p className="text-neutral-500 text-[9px]">
+                          {selectedUserActivitySummary.addedCount} tx
+                        </p>
                       </div>
                       <div className="bg-[#111115] border border-neutral-800 rounded-xl p-2">
                         <p className="text-neutral-400">Deducted</p>
-                        <p className="font-bold text-red-400">-{selectedUserActivitySummary.totalDeducted}</p>
-                        <p className="text-neutral-500 text-[9px]">{selectedUserActivitySummary.deductedCount} tx</p>
+                        <p className="font-bold text-red-400">
+                          -{selectedUserActivitySummary.totalDeducted}
+                        </p>
+                        <p className="text-neutral-500 text-[9px]">
+                          {selectedUserActivitySummary.deductedCount} tx
+                        </p>
                       </div>
                     </div>
                     <div className="border-t border-neutral-800 pt-2.5 mt-2 space-y-1">
@@ -1001,9 +1125,20 @@ export function AdminCreditsTab({
                       </div>
                       <div className="space-y-1">
                         {selectedUserTransactions.slice(0, 3).map((tx) => (
-                          <div key={tx.id} className="flex justify-between text-[10px] text-neutral-400 font-mono">
-                            <span className="truncate w-24">{tx.feature_name}</span>
-                            <span className={tx.amount >= 0 ? "text-emerald-400" : "text-red-400"}>
+                          <div
+                            key={tx.id}
+                            className="flex justify-between text-[10px] text-neutral-400 font-mono"
+                          >
+                            <span className="truncate w-24">
+                              {tx.feature_name}
+                            </span>
+                            <span
+                              className={
+                                tx.amount >= 0
+                                  ? "text-emerald-400"
+                                  : "text-red-400"
+                              }
+                            >
                               {tx.amount >= 0 ? "+" : ""}
                               {tx.amount}
                             </span>
@@ -1106,25 +1241,30 @@ export function AdminCreditsTab({
           </div>
 
           <div className="pt-4 border-t border-neutral-800 space-y-3">
-            {amount < 0 && selectedUserObj && selectedUserObj.credits < Math.abs(amount) && (
-              <div className="bg-red-500/10 border border-red-500/25 rounded-lg px-3 py-2 flex items-center gap-2 text-[10px] text-red-400">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                Deduction exceeds user balance. User will drop to negative.
-              </div>
-            )}
+            {amount < 0 &&
+              selectedUserObj &&
+              selectedUserObj.credits < Math.abs(amount) && (
+                <div className="bg-red-500/10 border border-red-500/25 rounded-lg px-3 py-2 flex items-center gap-2 text-[10px] text-red-400">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  Deduction exceeds user balance. User will drop to negative.
+                </div>
+              )}
 
             <button
               onClick={handleGrantCredits}
-              disabled={isSubmitting || (!bulkMode && !selectedUserId) || amount === 0}              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:from-neutral-800 disabled:to-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-900/10"
+              disabled={
+                isSubmitting || (!bulkMode && !selectedUserId) || amount === 0
+              }
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:from-neutral-800 disabled:to-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-900/10"
             >
-              {isSubmitting ? "Processing..." : `Execute Adjustment (${amount >= 0 ? "+" : ""}${amount})`}
+              {isSubmitting
+                ? "Processing..."
+                : `Execute Adjustment (${amount >= 0 ? "+" : ""}${amount})`}
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
-
       </div>
-
     </div>
   );
 }

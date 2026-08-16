@@ -28,16 +28,34 @@ interface VideoTrackV1Props {
 }
 
 const VideoTrackV1: React.FC<VideoTrackV1Props> = ({
-  panels, currentPanelIndex, selectedClip,
-  locked, hidden, keyframesVisible = false, keyframesByClip = {}, selectedKeyframeId = null,
-  onToggleLock, onToggleHide, onClipClick, onContextMenu,
-  getClipDuration, onDurationChange, onSelectKeyframe, onCycleEasing, onAddKeyframe,
+  panels,
+  currentPanelIndex,
+  selectedClip,
+  locked,
+  hidden,
+  keyframesVisible = false,
+  keyframesByClip = {},
+  selectedKeyframeId = null,
+  onToggleLock,
+  onToggleHide,
+  onClipClick,
+  onContextMenu,
+  getClipDuration,
+  onDurationChange,
+  onSelectKeyframe,
+  onCycleEasing,
+  onAddKeyframe,
 }) => (
   <div className="flex flex-col border-b border-white/[0.04]">
     <div className="h-14 flex items-center">
       <TrackLabel
-        id="V1" label="Video" color="text-white" type="video"
-        locked={locked} hidden={hidden} muted={false}
+        id="V1"
+        label="Video"
+        color="text-white"
+        type="video"
+        locked={locked}
+        hidden={hidden}
+        muted={false}
         onToggleLock={onToggleLock}
         onToggleHide={onToggleHide}
         onToggleMute={() => {}}
@@ -80,7 +98,9 @@ const VideoTrackV1: React.FC<VideoTrackV1Props> = ({
                   <span className="absolute bottom-0.5 left-0.5 text-[7px] font-mono font-black bg-black/60 text-purple-300 px-0.5 rounded leading-tight">
                     #{idx + 1}
                   </span>
-                  {isActive && <div className="absolute inset-0 bg-purple-500/10" />}
+                  {isActive && (
+                    <div className="absolute inset-0 bg-purple-500/10" />
+                  )}
                   <span className="absolute top-0.5 right-0.5 text-[7px] font-mono bg-black/80 text-white px-0.5 rounded leading-tight font-bold">
                     {dur.toFixed(1)}s
                   </span>

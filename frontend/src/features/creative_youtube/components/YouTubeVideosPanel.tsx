@@ -41,15 +41,22 @@ export default function YouTubeVideosPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [privacyFilter, setPrivacyFilter] = useState<string>("all");
-  const [formatFilter, setFormatFilter] = useState<"all" | "videos" | "shorts">("all");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "views" | "likes" | "comments">("newest");
+  const [formatFilter, setFormatFilter] = useState<"all" | "videos" | "shorts">(
+    "all"
+  );
+  const [sortBy, setSortBy] = useState<
+    "newest" | "oldest" | "views" | "likes" | "comments"
+  >("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fetchVideos = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const res = await fetch("/api/export/youtube/videos?max_results=50", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -90,14 +97,18 @@ export default function YouTubeVideosPanel({
 
     // Privacy Filter
     if (privacyFilter !== "all") {
-      list = list.filter((v) => v.privacy_status?.toLowerCase() === privacyFilter);
+      list = list.filter(
+        (v) => v.privacy_status?.toLowerCase() === privacyFilter
+      );
     }
 
     // Search filter
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
-        (v) => v.title?.toLowerCase().includes(q) || v.description?.toLowerCase().includes(q)
+        (v) =>
+          v.title?.toLowerCase().includes(q) ||
+          v.description?.toLowerCase().includes(q)
       );
     }
 
@@ -119,10 +130,16 @@ export default function YouTubeVideosPanel({
         return bc - ac;
       }
       if (sortBy === "oldest") {
-        return new Date(a.published_at || 0).getTime() - new Date(b.published_at || 0).getTime();
+        return (
+          new Date(a.published_at || 0).getTime() -
+          new Date(b.published_at || 0).getTime()
+        );
       }
       // default: newest
-      return new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime();
+      return (
+        new Date(b.published_at || 0).getTime() -
+        new Date(a.published_at || 0).getTime()
+      );
     });
 
     return list;
@@ -130,11 +147,17 @@ export default function YouTubeVideosPanel({
 
   // Aggregated stats
   const totalViews = useMemo(() => {
-    return videos.reduce((acc, v) => acc + (parseInt(v.view_count?.replace(/,/g, "") || "0") || 0), 0);
+    return videos.reduce(
+      (acc, v) => acc + (parseInt(v.view_count?.replace(/,/g, "") || "0") || 0),
+      0
+    );
   }, [videos]);
 
   const totalLikes = useMemo(() => {
-    return videos.reduce((acc, v) => acc + (parseInt(v.like_count?.replace(/,/g, "") || "0") || 0), 0);
+    return videos.reduce(
+      (acc, v) => acc + (parseInt(v.like_count?.replace(/,/g, "") || "0") || 0),
+      0
+    );
   }, [videos]);
 
   const formatDate = (iso?: string) => {
@@ -179,7 +202,8 @@ export default function YouTubeVideosPanel({
               </span>
             </div>
             <p className="text-xs text-neutral-400 font-mono">
-              Manage, analyze, search, and watch your published YouTube video catalog
+              Manage, analyze, search, and watch your published YouTube video
+              catalog
             </p>
           </div>
         </div>
@@ -214,7 +238,11 @@ export default function YouTubeVideosPanel({
             className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm"
             title="Refresh Videos"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-red-400" : ""}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${
+                isLoading ? "animate-spin text-red-400" : ""
+              }`}
+            />
           </button>
         </div>
       </div>
@@ -256,7 +284,9 @@ export default function YouTubeVideosPanel({
                   key={f.id}
                   onClick={() => setFormatFilter(f.id as any)}
                   className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
-                    isSel ? "bg-red-600 text-white shadow-sm" : "text-neutral-400 hover:text-neutral-200"
+                    isSel
+                      ? "bg-red-600 text-white shadow-sm"
+                      : "text-neutral-400 hover:text-neutral-200"
                   }`}
                 >
                   <Icon className="w-3 h-3" />
@@ -322,8 +352,9 @@ export default function YouTubeVideosPanel({
         {/* Status Bar */}
         <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 pt-2 border-t border-neutral-800/60">
           <span>
-            Showing <strong className="text-white">{filteredAndSorted.length}</strong> of{" "}
-            <strong>{videos.length}</strong> videos
+            Showing{" "}
+            <strong className="text-white">{filteredAndSorted.length}</strong>{" "}
+            of <strong>{videos.length}</strong> videos
           </span>
           {(search || privacyFilter !== "all" || formatFilter !== "all") && (
             <button
@@ -344,14 +375,19 @@ export default function YouTubeVideosPanel({
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
-          <p className="text-xs text-neutral-400 font-mono">Loading channel videos catalog…</p>
+          <p className="text-xs text-neutral-400 font-mono">
+            Loading channel videos catalog…
+          </p>
         </div>
       ) : filteredAndSorted.length === 0 ? (
         <div className="p-16 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
           <Video className="w-12 h-12 text-neutral-600 mx-auto" />
-          <h3 className="text-sm font-bold text-white">No matching videos found</h3>
+          <h3 className="text-sm font-bold text-white">
+            No matching videos found
+          </h3>
           <p className="text-xs text-neutral-500 font-mono max-w-sm mx-auto">
-            Try adjusting your search terms or filters above to find published videos.
+            Try adjusting your search terms or filters above to find published
+            videos.
           </p>
         </div>
       ) : viewMode === "grid" ? (
@@ -370,10 +406,15 @@ export default function YouTubeVideosPanel({
                   onClick={() => onWatchVideo(vid.id, vid)}
                 >
                   <img
-                    src={vid.thumbnail || `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`}
+                    src={
+                      vid.thumbnail ||
+                      `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`
+                    }
                     alt={vid.title}
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
+                      (
+                        e.currentTarget as HTMLImageElement
+                      ).src = `https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`;
                     }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -442,7 +483,8 @@ export default function YouTubeVideosPanel({
                         className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
                         title="View Comments"
                       >
-                        <MessageSquare className="w-3 h-3 text-purple-400" /> {vid.comment_count}
+                        <MessageSquare className="w-3 h-3 text-purple-400" />{" "}
+                        {vid.comment_count}
                       </button>
                     </div>
 
@@ -540,7 +582,8 @@ export default function YouTubeVideosPanel({
                       onClick={() => onViewComments(vid.id)}
                       className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
                     >
-                      <MessageSquare className="w-3.5 h-3.5 text-purple-400" /> {vid.comment_count}
+                      <MessageSquare className="w-3.5 h-3.5 text-purple-400" />{" "}
+                      {vid.comment_count}
                     </button>
                   </div>
 

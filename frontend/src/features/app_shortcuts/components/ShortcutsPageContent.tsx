@@ -1,6 +1,9 @@
 import React from "react";
 import { Keyboard, RefreshCw, Download, Upload, ArrowLeft } from "lucide-react";
-import { ShortcutSearch, ShortcutCategoryTabs } from "@/features/app_shortcuts/components/ShortcutFilters";
+import {
+  ShortcutSearch,
+  ShortcutCategoryTabs,
+} from "@/features/app_shortcuts/components/ShortcutFilters";
 import ShortcutList from "@/features/app_shortcuts/components/ShortcutList";
 import ShortcutRecordingModal from "@/features/app_shortcuts/components/ShortcutRecordingModal";
 import { getActionDetails } from "@/features/app_shortcuts/components/shortcutUtils";
@@ -62,7 +65,8 @@ const ShortcutsPageContent = React.memo(
               Shortcuts & Macros
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Boost your productivity with custom keybindings. Control the editor, navigate the workspace, and trigger AI workflows
+              Boost your productivity with custom keybindings. Control the
+              editor, navigate the workspace, and trigger AI workflows
             </p>
           </div>
 

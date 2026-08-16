@@ -1,6 +1,14 @@
 import { create } from "zustand";
 
-export type EditorTool = "adjust" | "edit" | "slice" | "crop" | "merge" | "draw" | "separate" | "train";
+export type EditorTool =
+  | "adjust"
+  | "edit"
+  | "slice"
+  | "crop"
+  | "merge"
+  | "draw"
+  | "separate"
+  | "train";
 
 interface PlayerSettings {
   isPlayerOpen: boolean;
@@ -15,8 +23,19 @@ interface EditorGlobalState {
   setSlicesCount: (count: number) => void;
   playerSettings: PlayerSettings;
   setPlayerSettings: (settings: Partial<PlayerSettings>) => void;
-  selectedFocalPoint: "TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR";
-  setSelectedFocalPoint: (point: "TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR") => void;
+  selectedFocalPoint:
+    | "TL"
+    | "TC"
+    | "TR"
+    | "ML"
+    | "MC"
+    | "MR"
+    | "BL"
+    | "BC"
+    | "BR";
+  setSelectedFocalPoint: (
+    point: "TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR"
+  ) => void;
   showSafeZones: boolean;
   setShowSafeZones: (value: boolean) => void;
   lineSharpen: boolean;
@@ -30,7 +49,16 @@ interface EditorGlobalState {
 const getTabFromPathName = () => {
   const segments = window.location.pathname.split("/");
   const tabSegment = segments[2];
-  const validTabs = ["adjust", "edit", "eraser", "slice", "crop", "merge", "draw", "separate"];
+  const validTabs = [
+    "adjust",
+    "edit",
+    "eraser",
+    "slice",
+    "crop",
+    "merge",
+    "draw",
+    "separate",
+  ];
 
   if (tabSegment && validTabs.includes(tabSegment)) {
     return tabSegment as EditorTool;
@@ -38,10 +66,12 @@ const getTabFromPathName = () => {
   return null;
 };
 
-export const useImageEditorStore = create<EditorGlobalState & {
-  editingImageIdx: number | null;
-  setEditingImageIdx: (idx: number | null) => void;
-}>((set) => ({
+export const useImageEditorStore = create<
+  EditorGlobalState & {
+    editingImageIdx: number | null;
+    setEditingImageIdx: (idx: number | null) => void;
+  }
+>((set) => ({
   playerSettings: {
     isPlayerOpen: true,
     playerPos: { x: 50, y: 150 },
@@ -59,13 +89,17 @@ export const useImageEditorStore = create<EditorGlobalState & {
   setActiveTool: (tool) => {
     set({ activeTool: tool });
 
-    const isLegacyEditorRoute = window.location.pathname.startsWith("/editor/") || window.location.pathname.startsWith("/image-editor");
+    const isLegacyEditorRoute =
+      window.location.pathname.startsWith("/editor/") ||
+      window.location.pathname.startsWith("/image-editor");
     if (!isLegacyEditorRoute) return;
 
     const params = new URLSearchParams(window.location.search);
     const idx = params.get("idx") || "0";
     const newPath = window.location.pathname.startsWith("/image-editor")
-      ? `/image-editor?idx=${idx}&series=${params.get("series") || ""}&chapter=${params.get("chapter") || ""}`
+      ? `/image-editor?idx=${idx}&series=${
+          params.get("series") || ""
+        }&chapter=${params.get("chapter") || ""}`
       : `/editor/${tool}?idx=${idx}`;
     if (window.location.pathname + window.location.search !== newPath) {
       window.history.pushState({}, "", newPath);

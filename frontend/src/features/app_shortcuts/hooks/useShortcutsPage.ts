@@ -8,7 +8,10 @@ import type {
 import { useShortcutFilters } from "@/features/app_shortcuts/hooks/useShortcutFilters";
 import { useShortcutRecording } from "@/features/app_shortcuts/hooks/useShortcutRecording";
 import { useShortcutPersistence } from "@/features/app_shortcuts/hooks/useShortcutPersistence";
-import { Category, ShortcutsPageProps } from "@/features/app_shortcuts/components/shortcutTypes";
+import {
+  Category,
+  ShortcutsPageProps,
+} from "@/features/app_shortcuts/components/shortcutTypes";
 
 export interface UseShortcutsPageResult {
   searchQuery: string;

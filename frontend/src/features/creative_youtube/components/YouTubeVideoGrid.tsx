@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Film, Eye, ThumbsUp, MessageSquare, ExternalLink, RefreshCw, MessageCircle } from "lucide-react";
+import {
+  Film,
+  Eye,
+  ThumbsUp,
+  MessageSquare,
+  ExternalLink,
+  RefreshCw,
+  MessageCircle,
+} from "lucide-react";
 import { YouTubeCommentsViewer } from "./YouTubeCommentsViewer";
 
 export interface YouTubeVideoItem {
@@ -18,12 +26,17 @@ export interface YouTubeVideoItem {
 export default function YouTubeVideoGrid() {
   const [videos, setVideos] = useState<YouTubeVideoItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [activeCommentVideoId, setActiveCommentVideoId] = useState<string | null>(null);
+  const [activeCommentVideoId, setActiveCommentVideoId] = useState<
+    string | null
+  >(null);
 
   const fetchVideos = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const res = await fetch("/api/export/youtube/videos", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -49,7 +62,9 @@ export default function YouTubeVideoGrid() {
       <div className="flex items-center justify-between border-b border-neutral-900 pb-3 font-mono">
         <div className="flex items-center gap-2">
           <Film className="w-4.5 h-4.5 text-purple-400" />
-          <span className="text-white font-bold text-xs font-sans">Published Webtoon Recaps & Shorts</span>
+          <span className="text-white font-bold text-xs font-sans">
+            Published Webtoon Recaps & Shorts
+          </span>
           <span className="px-2 py-0.5 rounded text-[10px] bg-neutral-900 text-neutral-400 font-bold">
             {videos.length} Videos
           </span>
@@ -59,7 +74,11 @@ export default function YouTubeVideoGrid() {
           disabled={isLoading}
           className="p-1.5 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg border border-neutral-800 cursor-pointer"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-purple-400" : ""}`} />
+          <RefreshCw
+            className={`w-3.5 h-3.5 ${
+              isLoading ? "animate-spin text-purple-400" : ""
+            }`}
+          />
         </button>
       </div>
 
@@ -79,7 +98,11 @@ export default function YouTubeVideoGrid() {
               className="bg-neutral-900/60 border border-neutral-850 rounded-2xl overflow-hidden group hover:border-purple-500/40 transition-all duration-200 flex flex-col justify-between"
             >
               <div className="relative aspect-video bg-black">
-                <img src={vid.thumbnail} alt={vid.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <img
+                  src={vid.thumbnail}
+                  alt={vid.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
                 <span className="absolute top-2 left-2 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-black/80 text-emerald-400 border border-emerald-900/40 uppercase">
                   {vid.privacy_status}
                 </span>
@@ -95,13 +118,19 @@ export default function YouTubeVideoGrid() {
                     <Eye className="w-3 h-3 text-purple-400" /> {vid.view_count}
                   </span>
                   <span className="flex items-center gap-1">
-                    <ThumbsUp className="w-3 h-3 text-emerald-400" /> {vid.like_count}
+                    <ThumbsUp className="w-3 h-3 text-emerald-400" />{" "}
+                    {vid.like_count}
                   </span>
                   <button
-                    onClick={() => setActiveCommentVideoId(activeCommentVideoId === vid.id ? null : vid.id)}
+                    onClick={() =>
+                      setActiveCommentVideoId(
+                        activeCommentVideoId === vid.id ? null : vid.id
+                      )
+                    }
                     className="flex items-center gap-1 hover:text-purple-300 cursor-pointer font-bold text-purple-400"
                   >
-                    <MessageSquare className="w-3 h-3" /> {vid.comment_count} Comments
+                    <MessageSquare className="w-3 h-3" /> {vid.comment_count}{" "}
+                    Comments
                   </button>
                   <a
                     href={vid.youtube_url}
@@ -115,7 +144,10 @@ export default function YouTubeVideoGrid() {
                 </div>
 
                 {activeCommentVideoId === vid.id && (
-                  <YouTubeCommentsViewer videoId={vid.id} onClose={() => setActiveCommentVideoId(null)} />
+                  <YouTubeCommentsViewer
+                    videoId={vid.id}
+                    onClose={() => setActiveCommentVideoId(null)}
+                  />
                 )}
               </div>
             </div>

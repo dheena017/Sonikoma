@@ -1,6 +1,17 @@
 import React, { useMemo, useCallback } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
-import { Sparkles, Film, Scissors, Users, Globe, Music, Mic, BarChart3, Youtube, Settings } from "lucide-react";
+import {
+  Sparkles,
+  Film,
+  Scissors,
+  Users,
+  Globe,
+  Music,
+  Mic,
+  BarChart3,
+  Youtube,
+  Settings,
+} from "lucide-react";
 import CreativeSuiteDashboardStats from "@/features/creative_suite/components/CreativeSuiteDashboardStats";
 import CreativeSuiteDashboardTools from "@/features/creative_suite/components/CreativeSuiteDashboardTools";
 import CreativeSuiteDashboardActiveProject from "@/features/creative_suite/components/CreativeSuiteDashboardActiveProject";
@@ -30,7 +41,9 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   addNotification = () => {},
 }) => {
   const activeProjectData = useProjectStore((state) => state.activeProjectData);
-  const clearActiveProject = useProjectStore((state) => state.clearActiveProject);
+  const clearActiveProject = useProjectStore(
+    (state) => state.clearActiveProject
+  );
   const activeProject = activeProjectData?.project || null;
   const activePanels = useMemo(() => {
     if (activeProjectData?.panels && activeProjectData.panels.length > 0) {
@@ -71,13 +84,17 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   const totalPanelsCount = activePanels.length;
   const totalAudioSeconds = useMemo(() => {
     if (activePanels.length === 0) return 0;
-    return activePanels.reduce((acc, panel) => acc + (panel.duration || 3.0), 0);
+    return activePanels.reduce(
+      (acc, panel) => acc + (panel.duration || 3.0),
+      0
+    );
   }, [activePanels]);
 
   const statsRibbon = [
     {
       label: "Audio Compiled",
-      value: totalAudioSeconds > 0 ? `${totalAudioSeconds.toFixed(1)}s` : "0.0s",
+      value:
+        totalAudioSeconds > 0 ? `${totalAudioSeconds.toFixed(1)}s` : "0.0s",
       desc: "Soundtrack & Voice tracks",
       icon: Music,
       color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
@@ -169,13 +186,12 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
 
   return (
     <div className="flex-1 w-full space-y-6 animate-fade-in text-left">
-      
       {/* Welcome Hero Panel */}
       <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-neutral-900/60 to-neutral-950/70 backdrop-blur-md p-6 sm:p-8 shadow-xl">
         <div className="absolute top-0 right-0 p-8 opacity-15 pointer-events-none">
           <Sparkles className="w-36 h-36 text-purple-400" />
         </div>
-        
+
         <div className="relative z-10 max-w-xl">
           <span className="px-3 py-1 bg-purple-500/15 border border-purple-500/30 text-[10px] text-purple-300 font-bold uppercase tracking-wider rounded-full font-mono mb-3 inline-block">
             CREATOR STUDIO HUB
@@ -187,7 +203,9 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
             </span>
           </h1>
           <p className="text-neutral-300 mt-2 text-xs leading-relaxed font-mono">
-            Fine-tune visual boundaries, compose orchestral backings, cast AI narrators, translate speech dialogues, and evaluate engagement ratings in a single location.
+            Fine-tune visual boundaries, compose orchestral backings, cast AI
+            narrators, translate speech dialogues, and evaluate engagement
+            ratings in a single location.
           </p>
         </div>
       </div>

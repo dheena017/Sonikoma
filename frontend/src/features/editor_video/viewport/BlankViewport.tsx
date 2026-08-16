@@ -50,11 +50,19 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
 
   // Layer drag state
   const [isDraggingBackground, setIsDraggingBackground] = useState(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
 
   // Transforms per layer
   const [layerTransforms, setLayerTransforms] = useState<{
-    [key in LayerType]: { x: number; y: number; scale: number; rotation: number; opacity: number };
+    [key in LayerType]: {
+      x: number;
+      y: number;
+      scale: number;
+      rotation: number;
+      opacity: number;
+    };
   }>({
     background: { x: 0, y: 0, scale: 100, rotation: 0, opacity: 100 },
     character: { x: 0, y: 0, scale: 100, rotation: 0, opacity: 100 },
@@ -103,7 +111,9 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
     setLayerLock((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleBackgroundPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleBackgroundPointerDown = (
+    e: React.PointerEvent<HTMLDivElement>
+  ) => {
     if (layerLock.background) return;
     setSelectedLayer("background");
     setIsDraggingBackground(true);
@@ -111,7 +121,9 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
     e.currentTarget.setPointerCapture(e.pointerId);
   };
 
-  const handleBackgroundPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+  const handleBackgroundPointerMove = (
+    e: React.PointerEvent<HTMLDivElement>
+  ) => {
     if (!isDraggingBackground || !dragStart) return;
     e.preventDefault();
     const dx = e.clientX - dragStart.x;
@@ -197,7 +209,6 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
 
         {/* Canvas Frame — Slate container with distinct purple border & shadow */}
         <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-[#0e0a20]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl border border-purple-500/35 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] flex items-center justify-center">
-
           {/* Layer 1: Background Plate */}
           {layerVisibility.background && (
             <div
@@ -205,13 +216,21 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
               onPointerDown={handleBackgroundPointerDown}
               onPointerMove={handleBackgroundPointerMove}
               onPointerUp={handleBackgroundPointerUp}
-              onPointerLeave={() => isDraggingBackground && setIsDraggingBackground(false)}
+              onPointerLeave={() =>
+                isDraggingBackground && setIsDraggingBackground(false)
+              }
               onWheel={handleBackgroundWheel}
               className={`absolute inset-0 w-full h-full cursor-grab transition-all ${
-                selectedLayer === "background" ? "ring-2 ring-inset ring-indigo-500 z-10" : "z-0"
+                selectedLayer === "background"
+                  ? "ring-2 ring-inset ring-indigo-500 z-10"
+                  : "z-0"
               } ${isDraggingBackground ? "cursor-grabbing" : ""}`}
               style={{
-                transform: `translate(${layerTransforms.background.x}px, ${layerTransforms.background.y}px) scale(${actualZoom / 100}) rotate(${layerTransforms.background.rotation}deg)`,
+                transform: `translate(${layerTransforms.background.x}px, ${
+                  layerTransforms.background.y
+                }px) scale(${actualZoom / 100}) rotate(${
+                  layerTransforms.background.rotation
+                }deg)`,
                 opacity: layerTransforms.background.opacity / 100,
               }}
             >
@@ -226,8 +245,12 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
                   <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
                     <Film className="w-5 h-5" />
                   </div>
-                  <span className="font-bold text-neutral-300 tracking-wider">Video Viewport Canvas</span>
-                  <span className="text-[10px] text-neutral-500">Select a storyboard panel or import media to start playback</span>
+                  <span className="font-bold text-neutral-300 tracking-wider">
+                    Video Viewport Canvas
+                  </span>
+                  <span className="text-[10px] text-neutral-500">
+                    Select a storyboard panel or import media to start playback
+                  </span>
                 </div>
               )}
             </div>
@@ -243,7 +266,11 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
                   : ""
               }`}
               style={{
-                transform: `translate(${layerTransforms.character.x}px, ${layerTransforms.character.y}px) scale(${layerTransforms.character.scale / 100}) rotate(${layerTransforms.character.rotation}deg)`,
+                transform: `translate(${layerTransforms.character.x}px, ${
+                  layerTransforms.character.y
+                }px) scale(${layerTransforms.character.scale / 100}) rotate(${
+                  layerTransforms.character.rotation
+                }deg)`,
                 opacity: layerTransforms.character.opacity / 100,
               }}
             >
@@ -266,7 +293,6 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
               )}
             </div>
           )}
-
         </div>
       </div>
     </div>

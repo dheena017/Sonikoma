@@ -23,9 +23,13 @@ export function LandingFooter() {
   const { themeMode } = useThemeMode();
   const isLight = themeMode === "light";
   return (
-    <footer className={`py-20 px-6 border-t transition-colors duration-300 ${
-      isLight ? "border-slate-200 bg-white" : "border-white/5 bg-neutral-950/20"
-    }`}>
+    <footer
+      className={`py-20 px-6 border-t transition-colors duration-300 ${
+        isLight
+          ? "border-slate-200 bg-white"
+          : "border-white/5 bg-neutral-950/20"
+      }`}
+    >
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         <div className="col-span-1 md:col-span-2 space-y-6">
           <div className="flex items-center gap-3">
@@ -37,15 +41,19 @@ export function LandingFooter() {
               className="w-8 h-8 rounded-lg bg-white"
               alt="Sonikoma Logo"
             />
-            <span className={`text-lg font-black tracking-tighter uppercase transition-colors ${
-              isLight ? "text-slate-900" : "text-white"
-            }`}>
+            <span
+              className={`text-lg font-black tracking-tighter uppercase transition-colors ${
+                isLight ? "text-slate-900" : "text-white"
+              }`}
+            >
               Sonikoma
             </span>
           </div>
-          <p className={`text-sm leading-relaxed transition-colors ${
-            isLight ? "text-slate-600" : "text-neutral-500"
-          }`}>
+          <p
+            className={`text-sm leading-relaxed transition-colors ${
+              isLight ? "text-slate-600" : "text-neutral-500"
+            }`}
+          >
             Turn your favorite comics into fully voiced, animated videos that
             are ready to share.
           </p>
@@ -57,12 +65,18 @@ export function LandingFooter() {
         </div>
 
         <div>
-          <h4 className={`font-black text-sm uppercase mb-6 transition-colors ${
-            isLight ? "text-slate-900" : "text-white"
-          }`}>Product</h4>
-          <ul className={`space-y-3 text-sm transition-colors ${
-            isLight ? "text-slate-500" : "text-neutral-500"
-          }`}>
+          <h4
+            className={`font-black text-sm uppercase mb-6 transition-colors ${
+              isLight ? "text-slate-900" : "text-white"
+            }`}
+          >
+            Product
+          </h4>
+          <ul
+            className={`space-y-3 text-sm transition-colors ${
+              isLight ? "text-slate-500" : "text-neutral-500"
+            }`}
+          >
             <li>
               <a
                 href="#"
@@ -97,12 +111,18 @@ export function LandingFooter() {
         </div>
 
         <div>
-          <h4 className={`font-black text-sm uppercase mb-6 transition-colors ${
-            isLight ? "text-slate-900" : "text-white"
-          }`}>Company</h4>
-          <ul className={`space-y-3 text-sm transition-colors ${
-            isLight ? "text-slate-500" : "text-neutral-500"
-          }`}>
+          <h4
+            className={`font-black text-sm uppercase mb-6 transition-colors ${
+              isLight ? "text-slate-900" : "text-white"
+            }`}
+          >
+            Company
+          </h4>
+          <ul
+            className={`space-y-3 text-sm transition-colors ${
+              isLight ? "text-slate-500" : "text-neutral-500"
+            }`}
+          >
             <li>
               <a
                 href="#"
@@ -137,14 +157,18 @@ export function LandingFooter() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto pt-20 flex flex-col md:flex-row items-center justify-between gap-6">
-        <p className={`text-xs font-mono transition-colors ${
-          isLight ? "text-slate-400" : "text-neutral-600"
-        }`}>
+        <p
+          className={`text-xs font-mono transition-colors ${
+            isLight ? "text-slate-400" : "text-neutral-600"
+          }`}
+        >
           &copy; 2026 Sonikoma Technologies. All rights reserved.
         </p>
-        <p className={`text-[10px] uppercase font-black tracking-widest transition-colors ${
-          isLight ? "text-slate-400" : "text-neutral-700"
-        }`}>
+        <p
+          className={`text-[10px] uppercase font-black tracking-widest transition-colors ${
+            isLight ? "text-slate-400" : "text-neutral-700"
+          }`}
+        >
           Built for the future of comics
         </p>
       </div>

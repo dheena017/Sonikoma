@@ -21,12 +21,14 @@ function formatTime(secs: number): string {
 }
 
 const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
-  currentPanelIndex, totalDuration, snapEnabled, soloTrack,
+  currentPanelIndex,
+  totalDuration,
+  snapEnabled,
+  soloTrack,
   pacingScore = "Balanced (2.1s avg)",
   onOpenMediaPicker,
 }) => (
   <div className="h-8 px-3 border-t border-white/[0.05] bg-[#0d0d12] flex items-center justify-between shrink-0">
-
     {/* Add audio */}
     <div className="flex items-center gap-2">
       <button
@@ -46,7 +48,9 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
 
     {/* Timecode */}
     <div className="flex items-center gap-1.5 text-[10px] font-mono text-neutral-500">
-      {soloTrack && <span className="text-amber-400/70 font-bold">SOLO: {soloTrack}</span>}
+      {soloTrack && (
+        <span className="text-amber-400/70 font-bold">SOLO: {soloTrack}</span>
+      )}
       <span className="text-neutral-600">
         {formatTime((currentPanelIndex + 0.5) * DEFAULT_PANEL_DURATION)}
       </span>

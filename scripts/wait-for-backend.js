@@ -51,26 +51,34 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const backendPortStr = process.env.BACKEND_PORT || process.env.PORT;
 if (!backendPortStr) {
-  logger.error("Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!");
+  logger.error(
+    "Configuration Error: Neither BACKEND_PORT nor PORT environment variables are defined!"
+  );
   logger.error("Please configure them in your .env file.");
   process.exit(1);
 }
 const port = parseInt(backendPortStr, 10);
 if (isNaN(port)) {
-  logger.error(`Configuration Error: BACKEND_PORT/PORT must be a valid integer, got "${backendPortStr}"`);
+  logger.error(
+    `Configuration Error: BACKEND_PORT/PORT must be a valid integer, got "${backendPortStr}"`
+  );
   process.exit(1);
 }
 
 const jwtSecretKey = process.env.JWT_SECRET_KEY;
 if (!jwtSecretKey) {
-  logger.error("Configuration Error: JWT_SECRET_KEY environment variable is missing!");
+  logger.error(
+    "Configuration Error: JWT_SECRET_KEY environment variable is missing!"
+  );
   logger.error("Please configure it in your .env file.");
   process.exit(1);
 }
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
 if (!geminiApiKey) {
-  logger.error("Configuration Error: GEMINI_API_KEY environment variable is missing!");
+  logger.error(
+    "Configuration Error: GEMINI_API_KEY environment variable is missing!"
+  );
   logger.error("Please configure it in your .env file.");
   process.exit(1);
 }

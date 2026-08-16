@@ -9,7 +9,9 @@ interface CreativeSuiteDashboardActiveProjectProps {
   navigateTo: (path: string) => void;
 }
 
-const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActiveProjectProps> = ({
+const CreativeSuiteDashboardActiveProject: React.FC<
+  CreativeSuiteDashboardActiveProjectProps
+> = ({
   activeProject,
   panels = [],
   activePanelsCount,
@@ -17,13 +19,18 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
   navigateTo,
 }) => {
   const projectIdVal = activeProject?.project_id ?? null;
-  const projectStatus = activeProject?.status ? activeProject.status.toString() : "Draft";
+  const projectStatus = activeProject?.status
+    ? activeProject.status.toString()
+    : "Draft";
   const projectStatusClass = projectStatus.toLowerCase().includes("publish")
     ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
     : "bg-purple-500/10 border-purple-500/20 text-purple-300";
   const seriesTitleVal = activeProject?.title ?? "Untitled Series";
   const seriesCoverImageVal = activeProject?.cover_image ?? null;
-  const chapterTitleVal = activeProject?.episode ? (activeProject.episode.split(" - ").slice(1).join(" - ") || "Untitled Chapter") : "Untitled Chapter";
+  const chapterTitleVal = activeProject?.episode
+    ? activeProject.episode.split(" - ").slice(1).join(" - ") ||
+      "Untitled Chapter"
+    : "Untitled Chapter";
   const projectIdLabel = projectIdVal ? `${projectIdVal.slice(0, 7)}…` : "—";
   const authorLabel = activeProject?.author || "Unknown Creator";
   const genreLabel = activeProject?.genre || "No genre";
@@ -69,7 +76,9 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
                   <h4 className="text-base font-extrabold text-white truncate">
                     {seriesTitleVal}
                   </h4>
-                  <span className={`text-[10px] font-bold px-2 py-1 rounded-full border ${projectStatusClass}`}>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-1 rounded-full border ${projectStatusClass}`}
+                  >
                     {projectStatus}
                   </span>
                 </div>
@@ -80,11 +89,15 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
 
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   <div className="text-[10px] text-neutral-400 font-mono bg-neutral-950 border border-neutral-850 px-2.5 py-1 rounded-full inline-flex items-center gap-2">
-                    <span className="text-purple-300 font-bold">{activePanelsCount}</span>
+                    <span className="text-purple-300 font-bold">
+                      {activePanelsCount}
+                    </span>
                     <span className="text-neutral-400">panels</span>
                   </div>
                   <div className="text-[10px] text-neutral-400 font-mono bg-neutral-950 border border-neutral-850 px-2.5 py-1 rounded-full inline-flex items-center gap-2">
-                    <span className="text-purple-300 font-bold">{authorLabel}</span>
+                    <span className="text-purple-300 font-bold">
+                      {authorLabel}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -95,13 +108,17 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
                 <div className="text-[9px] uppercase tracking-[0.24em] text-neutral-500 mb-1">
                   Genre
                 </div>
-                <div className="text-[11px] font-bold text-white">{genreLabel}</div>
+                <div className="text-[11px] font-bold text-white">
+                  {genreLabel}
+                </div>
               </div>
               <div className="text-[10px] font-mono text-neutral-400 bg-neutral-950 border border-neutral-850 px-3 py-2 rounded-2xl">
                 <div className="text-[9px] uppercase tracking-[0.24em] text-neutral-500 mb-1">
                   Project ID
                 </div>
-                <div className="text-[11px] font-bold text-white">{projectIdLabel}</div>
+                <div className="text-[11px] font-bold text-white">
+                  {projectIdLabel}
+                </div>
               </div>
             </div>
 
@@ -113,7 +130,8 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest flex items-center gap-1.5">
-                  <Film className="w-3.5 h-3.5 text-purple-400" /> Active Panel Frames ({safePanels.length})
+                  <Film className="w-3.5 h-3.5 text-purple-400" /> Active Panel
+                  Frames ({safePanels.length})
                 </span>
                 {safePanels.length > 0 && (
                   <span className="text-[9px] font-mono text-neutral-400">
@@ -125,17 +143,35 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
               {safePanels.length > 0 ? (
                 <div className="flex gap-2.5 overflow-x-auto pb-2 pt-1 scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent">
                   {safePanels.map((p, idx) => {
-                    const imgUrl = p?.image_url || p?.url || p?.src || p?.image || p?.image_path || null;
+                    const imgUrl =
+                      p?.image_url ||
+                      p?.url ||
+                      p?.src ||
+                      p?.image ||
+                      p?.image_path ||
+                      null;
                     return (
                       <div
                         key={p?.id || idx}
                         onClick={() => {
-                          const seriesSlug = activeProject?.series_slug || localStorage.getItem("active_series_slug") || "active";
-                          const chapterSlug = activeProject?.chapter_slug || localStorage.getItem("active_chapter_slug") || "active";
-                          navigateTo(`/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}?panel=${idx + 1}`);
+                          const seriesSlug =
+                            activeProject?.series_slug ||
+                            localStorage.getItem("active_series_slug") ||
+                            "active";
+                          const chapterSlug =
+                            activeProject?.chapter_slug ||
+                            localStorage.getItem("active_chapter_slug") ||
+                            "active";
+                          navigateTo(
+                            `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}?panel=${
+                              idx + 1
+                            }`
+                          );
                         }}
                         className="relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-950 hover:border-purple-500/60 transition-all cursor-pointer group shadow-md"
-                        title={`Panel #${idx + 1}: ${p?.speech_text || p?.visual_description || 'Frame'}`}
+                        title={`Panel #${idx + 1}: ${
+                          p?.speech_text || p?.visual_description || "Frame"
+                        }`}
                       >
                         {imgUrl ? (
                           <img
@@ -146,7 +182,9 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center p-1 text-center bg-neutral-950 text-neutral-500">
                             <Sparkles className="w-4 h-4 text-purple-400/50 mb-1" />
-                            <span className="text-[9px] font-mono">Frame #{idx + 1}</span>
+                            <span className="text-[9px] font-mono">
+                              Frame #{idx + 1}
+                            </span>
                           </div>
                         )}
                         <div className="absolute top-1 left-1 bg-black/80 backdrop-blur-xs px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-sm">
@@ -173,13 +211,22 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
             <div className="space-y-3">
               <button
                 onClick={() => {
-                  const seriesSlug = activeProject?.series_slug || localStorage.getItem("active_series_slug") || "active";
-                  const chapterSlug = activeProject?.chapter_slug || localStorage.getItem("active_chapter_slug") || "active";
-                  navigateTo(`/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
+                  const seriesSlug =
+                    activeProject?.series_slug ||
+                    localStorage.getItem("active_series_slug") ||
+                    "active";
+                  const chapterSlug =
+                    activeProject?.chapter_slug ||
+                    localStorage.getItem("active_chapter_slug") ||
+                    "active";
+                  navigateTo(
+                    `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`
+                  );
                 }}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-purple-950/50 cursor-pointer"
               >
-                <Play className="w-4 h-4 fill-white" /> <span>Resume Editing</span>
+                <Play className="w-4 h-4 fill-white" />{" "}
+                <span>Resume Editing</span>
               </button>
 
               <button
@@ -197,7 +244,8 @@ const CreativeSuiteDashboardActiveProject: React.FC<CreativeSuiteDashboardActive
               📁
             </div>
             <p className="text-xs text-neutral-400 font-mono leading-normal">
-              No active project is selected. Choose a project from the Projects page to unlock full Creative features.
+              No active project is selected. Choose a project from the Projects
+              page to unlock full Creative features.
             </p>
             <button
               onClick={() => navigateTo("/projects")}

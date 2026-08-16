@@ -7,7 +7,10 @@ interface MediaAssetCardProps {
   onSelect: () => void;
 }
 
-export const MediaAssetCard: React.FC<MediaAssetCardProps> = ({ asset, onSelect }) => {
+export const MediaAssetCard: React.FC<MediaAssetCardProps> = ({
+  asset,
+  onSelect,
+}) => {
   return (
     <div
       onClick={onSelect}
@@ -26,8 +29,14 @@ export const MediaAssetCard: React.FC<MediaAssetCardProps> = ({ asset, onSelect 
         <Star className="h-3.5 w-3.5 text-neutral-400 hover:text-amber-300 cursor-pointer transition-colors" />
       </div>
       <div className="relative z-10">
-        <p className="text-[10px] font-semibold text-white truncate drop-shadow-sm">{asset.title}</p>
-        {asset.duration && <span className="text-[9px] text-neutral-300 font-mono">{asset.duration}</span>}
+        <p className="text-[10px] font-semibold text-white truncate drop-shadow-sm">
+          {asset.title}
+        </p>
+        {asset.duration && (
+          <span className="text-[9px] text-neutral-300 font-mono">
+            {asset.duration}
+          </span>
+        )}
       </div>
     </div>
   );

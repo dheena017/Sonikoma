@@ -5,7 +5,10 @@ interface CharacterPoseCardProps {
   onApply: () => void;
 }
 
-export const CharacterPoseCard: React.FC<CharacterPoseCardProps> = ({ pose, onApply }) => {
+export const CharacterPoseCard: React.FC<CharacterPoseCardProps> = ({
+  pose,
+  onApply,
+}) => {
   return (
     <div
       onClick={onApply}

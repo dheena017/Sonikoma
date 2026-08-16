@@ -44,8 +44,10 @@ export default function CanvasMultiLayer({
     bgImgElement.onload = async () => {
       if (!canvasEl.current || !containerRef.current) return;
 
-      const canvasWidth = bgImgElement.naturalWidth || bgImgElement.width || 800;
-      const canvasHeight = bgImgElement.naturalHeight || bgImgElement.height || 600;
+      const canvasWidth =
+        bgImgElement.naturalWidth || bgImgElement.width || 800;
+      const canvasHeight =
+        bgImgElement.naturalHeight || bgImgElement.height || 600;
 
       // Set native pixel resolution of the canvas to match original asset dimensions
       canvasEl.current.width = canvasWidth;
@@ -64,7 +66,9 @@ export default function CanvasMultiLayer({
       fabricCanvas.current = fCanvas;
 
       // Create Background layer (locked)
-      const fabBg = await fabric.Image.fromURL(layers.background_url, { crossOrigin: "anonymous" });
+      const fabBg = await fabric.Image.fromURL(layers.background_url, {
+        crossOrigin: "anonymous",
+      });
       fabBg.set({
         left: 0,
         top: 0,
@@ -76,11 +80,18 @@ export default function CanvasMultiLayer({
       bgImgRef.current = fabBg;
 
       // Create Character layer (draggable & resizable)
-      const fabChar = await fabric.Image.fromURL(layers.character_url, { crossOrigin: "anonymous" });
+      const fabChar = await fabric.Image.fromURL(layers.character_url, {
+        crossOrigin: "anonymous",
+      });
       // Scale to match background dimensions initially or restore saved coordinates
-      const hasSavedChar = layers.char_x !== undefined && layers.char_y !== undefined;
-      const charScaleX = hasSavedChar ? layers.char_scale_x! : (canvasWidth / fabChar.width!);
-      const charScaleY = hasSavedChar ? layers.char_scale_y! : (canvasHeight / fabChar.height!);
+      const hasSavedChar =
+        layers.char_x !== undefined && layers.char_y !== undefined;
+      const charScaleX = hasSavedChar
+        ? layers.char_scale_x!
+        : canvasWidth / fabChar.width!;
+      const charScaleY = hasSavedChar
+        ? layers.char_scale_y!
+        : canvasHeight / fabChar.height!;
       fabChar.set({
         left: hasSavedChar ? layers.char_x! : 0,
         top: hasSavedChar ? layers.char_y! : 0,
@@ -99,11 +110,18 @@ export default function CanvasMultiLayer({
       charImgRef.current = fabChar;
 
       // Create Text layer (draggable & resizable)
-      const fabText = await fabric.Image.fromURL(layers.text_url, { crossOrigin: "anonymous" });
+      const fabText = await fabric.Image.fromURL(layers.text_url, {
+        crossOrigin: "anonymous",
+      });
       // Scale to match background dimensions initially or restore saved coordinates
-      const hasSavedText = layers.text_x !== undefined && layers.text_y !== undefined;
-      const textScaleX = hasSavedText ? layers.text_scale_x! : (canvasWidth / fabText.width!);
-      const textScaleY = hasSavedText ? layers.text_scale_y! : (canvasHeight / fabText.height!);
+      const hasSavedText =
+        layers.text_x !== undefined && layers.text_y !== undefined;
+      const textScaleX = hasSavedText
+        ? layers.text_scale_x!
+        : canvasWidth / fabText.width!;
+      const textScaleY = hasSavedText
+        ? layers.text_scale_y!
+        : canvasHeight / fabText.height!;
       fabText.set({
         left: hasSavedText ? layers.text_x! : 0,
         top: hasSavedText ? layers.text_y! : 0,

@@ -16,7 +16,10 @@ import {
 } from "lucide-react";
 import * as api from "@/api";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
-import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
+import {
+  getUserAvatarUrl,
+  DEFAULT_USER_AVATAR_DATA_URI,
+} from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
@@ -74,7 +77,8 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
     user?.credits !== undefined ? user.credits : null
   );
 
-  const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
+  const { activeProjectId, activeProjectData, setDrawerOpen } =
+    useProjectStore();
   const { status: backendStatus } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -165,15 +169,51 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const quickNavItems = [
-    { label: "Dashboard", path: "/admin", keyword: "home index dashboard overview" },
-    { label: "Announcements", path: "/admin/announcements", keyword: "announcements broadcast email message" },
-    { label: "User Accounts", path: "/admin/users", keyword: "users accounts creators login" },
-    { label: "Scrapers Configuration", path: "/admin/scrapers", keyword: "scrapers webtoon scraping episode" },
-    { label: "System settings", path: "/admin/settings", keyword: "settings parameters config reset cache" },
-    { label: "Database Explorer", path: "/admin/explorer", keyword: "database query table explorer sql" },
-    { label: "System Health", path: "/admin/health", keyword: "health server uptime cpu memory latency" },
-    { label: "Audit Logs", path: "/admin/activity", keyword: "audit logs security activity actions" },
-    { label: "Interactive Console", path: "/admin/console", keyword: "console terminal prompt execute" },
+    {
+      label: "Dashboard",
+      path: "/admin",
+      keyword: "home index dashboard overview",
+    },
+    {
+      label: "Announcements",
+      path: "/admin/announcements",
+      keyword: "announcements broadcast email message",
+    },
+    {
+      label: "User Accounts",
+      path: "/admin/users",
+      keyword: "users accounts creators login",
+    },
+    {
+      label: "Scrapers Configuration",
+      path: "/admin/scrapers",
+      keyword: "scrapers webtoon scraping episode",
+    },
+    {
+      label: "System settings",
+      path: "/admin/settings",
+      keyword: "settings parameters config reset cache",
+    },
+    {
+      label: "Database Explorer",
+      path: "/admin/explorer",
+      keyword: "database query table explorer sql",
+    },
+    {
+      label: "System Health",
+      path: "/admin/health",
+      keyword: "health server uptime cpu memory latency",
+    },
+    {
+      label: "Audit Logs",
+      path: "/admin/activity",
+      keyword: "audit logs security activity actions",
+    },
+    {
+      label: "Interactive Console",
+      path: "/admin/console",
+      keyword: "console terminal prompt execute",
+    },
   ];
 
   const filteredNavItems = quickNavItems.filter(
@@ -218,7 +258,10 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
       </div>
 
       {/* Middle side: Search Command Palette */}
-      <div className="hidden md:flex flex-1 max-w-sm lg:max-w-md relative" ref={searchRef}>
+      <div
+        className="hidden md:flex flex-1 max-w-sm lg:max-w-md relative"
+        ref={searchRef}
+      >
         <div className="relative w-full">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Search className="h-4 w-4 text-neutral-500" />
@@ -367,7 +410,9 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
             className="icon-pill cursor-pointer transition-all relative hover:bg-purple-500/20 hover:text-purple-300"
             title={
               activeProjectId && activeProjectData
-                ? `Active Project: ${activeProjectData.project?.title || "Active"} — Click to switch`
+                ? `Active Project: ${
+                    activeProjectData.project?.title || "Active"
+                  } — Click to switch`
                 : "Select Active Project"
             }
           >
@@ -386,7 +431,9 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           aria-label="Open User profile"
         >
           <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
-            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "Admin")}
+            {user?.full_name ||
+              user?.username ||
+              (user?.email ? user.email.split("@")[0] : "Admin")}
           </span>
           <div className="relative w-6 h-6 rounded-full overflow-hidden border border-purple-500/40 bg-purple-950/40 shrink-0 shadow-xs ring-1 ring-white/10 group-hover:border-purple-400 group-hover:ring-purple-500/30 transition-all duration-300">
             <img

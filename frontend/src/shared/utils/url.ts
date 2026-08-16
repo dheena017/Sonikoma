@@ -236,9 +236,50 @@ export function getSourceName(urlStr: string): string {
     const parts = host
       .replace(/^www\./, "")
       .split(".")
-      .filter((p) => !["com", "net", "org", "io", "co", "kr", "app", "fan", "mobi", "tv", "cc", "us", "me", "xyz", "top", "site", "online", "store"].includes(p));
+      .filter(
+        (p) =>
+          ![
+            "com",
+            "net",
+            "org",
+            "io",
+            "co",
+            "kr",
+            "app",
+            "fan",
+            "mobi",
+            "tv",
+            "cc",
+            "us",
+            "me",
+            "xyz",
+            "top",
+            "site",
+            "online",
+            "store",
+          ].includes(p)
+      );
 
-    const nameParts = parts.filter((p) => !["m", "api", "cdn", "static", "assets", "v1", "v2", "v3", "en", "kr", "jp", "cn", "fr", "es", "de"].includes(p));
+    const nameParts = parts.filter(
+      (p) =>
+        ![
+          "m",
+          "api",
+          "cdn",
+          "static",
+          "assets",
+          "v1",
+          "v2",
+          "v3",
+          "en",
+          "kr",
+          "jp",
+          "cn",
+          "fr",
+          "es",
+          "de",
+        ].includes(p)
+    );
     const activeParts = nameParts.length > 0 ? nameParts : parts;
 
     if (activeParts.length > 0) {
@@ -277,7 +318,10 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
   if (url.startsWith("data:") || url.startsWith("blob:")) {
     return url;
   }
-  if (url.includes("/api/proxy-image?url=data") || url.includes("/api/proxy-image?url=blob")) {
+  if (
+    url.includes("/api/proxy-image?url=data") ||
+    url.includes("/api/proxy-image?url=blob")
+  ) {
     try {
       const match = url.match(/url=([^&]+)/);
       if (match && match[1]) {
@@ -296,7 +340,11 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
       decoded.includes("/api/proxy-image") ||
       decoded.includes("/api/proxy/image")
     ) {
-      if (referer && !url.includes("referer=") && !decoded.includes("referer=")) {
+      if (
+        referer &&
+        !url.includes("referer=") &&
+        !decoded.includes("referer=")
+      ) {
         const sep = url.includes("?") ? "&" : "?";
         return `${url}${sep}referer=${encodeURIComponent(referer)}`;
       }
@@ -326,17 +374,27 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
 
 export function convertToViewerUrl(url: string, chapterNum: string): string {
   if (!url) return url;
-  const targetChapter = (chapterNum && chapterNum.trim()) ? chapterNum.trim() : "1";
+  const targetChapter =
+    chapterNum && chapterNum.trim() ? chapterNum.trim() : "1";
   try {
     const cleanUrl = url.trim();
-    if ((cleanUrl.includes("webtoons.com") || cleanUrl.includes("webtoon.com")) && cleanUrl.includes("title_no=")) {
-      const urlObj = new URL(cleanUrl.startsWith("http") ? cleanUrl : "https://" + cleanUrl);
+    if (
+      (cleanUrl.includes("webtoons.com") || cleanUrl.includes("webtoon.com")) &&
+      cleanUrl.includes("title_no=")
+    ) {
+      const urlObj = new URL(
+        cleanUrl.startsWith("http") ? cleanUrl : "https://" + cleanUrl
+      );
       const titleNo = urlObj.searchParams.get("title_no");
-      const hasEpisodeNo = urlObj.searchParams.has("episode_no") || urlObj.searchParams.has("episode");
-      
+      const hasEpisodeNo =
+        urlObj.searchParams.has("episode_no") ||
+        urlObj.searchParams.has("episode");
+
       if (titleNo && !hasEpisodeNo) {
         if (urlObj.pathname.endsWith("/list")) {
-          urlObj.pathname = urlObj.pathname.substring(0, urlObj.pathname.length - 5) + "/viewer";
+          urlObj.pathname =
+            urlObj.pathname.substring(0, urlObj.pathname.length - 5) +
+            "/viewer";
         } else if (!urlObj.pathname.endsWith("/viewer")) {
           urlObj.pathname = urlObj.pathname.replace(/\/$/, "") + "/viewer";
         }
@@ -349,4 +407,3 @@ export function convertToViewerUrl(url: string, chapterNum: string): string {
   }
   return url;
 }
-

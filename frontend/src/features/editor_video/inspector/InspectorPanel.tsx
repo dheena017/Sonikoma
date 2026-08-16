@@ -1,7 +1,20 @@
 import React, { useState } from "react";
 import {
-  ChevronDown, ChevronUp, Layers, Move, Palette, Settings,
-  Type, Gauge, ZoomIn, Lock, Eye, EyeOff, RotateCcw, Film, Sliders,
+  ChevronDown,
+  ChevronUp,
+  Layers,
+  Move,
+  Palette,
+  Settings,
+  Type,
+  Gauge,
+  ZoomIn,
+  Lock,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  Film,
+  Sliders,
 } from "lucide-react";
 
 // ──────────────────────────────────────────────────────────────
@@ -18,7 +31,9 @@ export interface InspectorSectionConfig {
 // ──────────────────────────────────────────────────────────────
 // Accordion Section — exported so plugins can compose custom sections
 // ──────────────────────────────────────────────────────────────
-export const InspectorSection: React.FC<{ section: InspectorSectionConfig }> = ({ section }) => {
+export const InspectorSection: React.FC<{
+  section: InspectorSectionConfig;
+}> = ({ section }) => {
   const [open, setOpen] = useState(section.defaultOpen ?? false);
   const { Icon } = section;
   return (
@@ -31,11 +46,19 @@ export const InspectorSection: React.FC<{ section: InspectorSectionConfig }> = (
           <div className="h-5 w-5 rounded-lg bg-purple-900/40 border border-purple-500/30 flex items-center justify-center">
             <Icon className="h-3 w-3 text-purple-400" />
           </div>
-          <span className="text-[10px] font-mono font-bold text-neutral-200 uppercase tracking-widest">{section.label}</span>
+          <span className="text-[10px] font-mono font-bold text-neutral-200 uppercase tracking-widest">
+            {section.label}
+          </span>
         </div>
-        {open ? <ChevronUp className="h-3 w-3 text-neutral-400" /> : <ChevronDown className="h-3 w-3 text-neutral-500" />}
+        {open ? (
+          <ChevronUp className="h-3 w-3 text-neutral-400" />
+        ) : (
+          <ChevronDown className="h-3 w-3 text-neutral-500" />
+        )}
       </button>
-      {open && <div className="px-3 pb-3 pt-1 space-y-2.5">{section.children}</div>}
+      {open && (
+        <div className="px-3 pb-3 pt-1 space-y-2.5">{section.children}</div>
+      )}
     </div>
   );
 };
@@ -43,14 +66,23 @@ export const InspectorSection: React.FC<{ section: InspectorSectionConfig }> = (
 // ──────────────────────────────────────────────────────────────
 // Reusable field controls — also exported for plugin use
 // ──────────────────────────────────────────────────────────────
-export const NumberField: React.FC<{ label: string; value: number; min?: number; max?: number; step?: number }> = ({
-  label, value, min = 0, max = 100, step = 1,
-}) => {
+export const NumberField: React.FC<{
+  label: string;
+  value: number;
+  min?: number;
+  max?: number;
+  step?: number;
+}> = ({ label, value, min = 0, max = 100, step = 1 }) => {
   const [val, setVal] = useState(value);
   return (
     <div className="flex items-center justify-between">
       <span className="text-[9px] font-mono text-neutral-400">{label}</span>
-      <input type="number" min={min} max={max} step={step} value={val}
+      <input
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={val}
         onChange={(e) => setVal(Number(e.target.value))}
         className="w-16 bg-neutral-900/90 border border-neutral-800 focus:border-purple-500/80 rounded-lg text-right text-[10px] text-purple-300 font-mono px-2 py-0.5 outline-none transition-all shadow-inner"
       />
@@ -58,48 +90,76 @@ export const NumberField: React.FC<{ label: string; value: number; min?: number;
   );
 };
 
-export const SliderField: React.FC<{ label: string; value: number; min?: number; max?: number }> = ({
-  label, value, min = 0, max = 100,
-}) => {
+export const SliderField: React.FC<{
+  label: string;
+  value: number;
+  min?: number;
+  max?: number;
+}> = ({ label, value, min = 0, max = 100 }) => {
   const [val, setVal] = useState(value);
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-center">
         <span className="text-[9px] font-mono text-neutral-400">{label}</span>
-        <span className="text-[9px] font-mono text-purple-300 font-bold">{val}%</span>
+        <span className="text-[9px] font-mono text-purple-300 font-bold">
+          {val}%
+        </span>
       </div>
-      <input type="range" min={min} max={max} value={val} onChange={(e) => setVal(Number(e.target.value))}
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={val}
+        onChange={(e) => setVal(Number(e.target.value))}
         className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
       />
     </div>
   );
 };
 
-export const ColorField: React.FC<{ label: string; value: string }> = ({ label, value }) => {
+export const ColorField: React.FC<{ label: string; value: string }> = ({
+  label,
+  value,
+}) => {
   const [val, setVal] = useState(value);
   return (
     <div className="flex items-center justify-between">
       <span className="text-[9px] font-mono text-neutral-400">{label}</span>
       <div className="flex items-center gap-2">
-        <input type="color" value={val} onChange={(e) => setVal(e.target.value)}
+        <input
+          type="color"
+          value={val}
+          onChange={(e) => setVal(e.target.value)}
           className="h-5 w-5 rounded-md cursor-pointer border border-neutral-700 bg-transparent p-0 overflow-hidden"
           style={{ WebkitAppearance: "none" }}
         />
-        <span className="text-[9px] font-mono text-neutral-300 font-bold uppercase">{val}</span>
+        <span className="text-[9px] font-mono text-neutral-300 font-bold uppercase">
+          {val}
+        </span>
       </div>
     </div>
   );
 };
 
-export const SelectField: React.FC<{ label: string; options: string[]; value: string }> = ({ label, options, value }) => {
+export const SelectField: React.FC<{
+  label: string;
+  options: string[];
+  value: string;
+}> = ({ label, options, value }) => {
   const [val, setVal] = useState(value);
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[9px] font-mono text-neutral-400 shrink-0">{label}</span>
-      <select value={val} onChange={(e) => setVal(e.target.value)}
+      <span className="text-[9px] font-mono text-neutral-400 shrink-0">
+        {label}
+      </span>
+      <select
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
         className="flex-1 bg-neutral-900/90 border border-neutral-800 rounded-lg text-[9px] font-mono text-purple-200 px-2 py-1 outline-none focus:border-purple-500 cursor-pointer"
       >
-        {options.map((o) => <option key={o}>{o}</option>)}
+        {options.map((o) => (
+          <option key={o}>{o}</option>
+        ))}
       </select>
     </div>
   );
@@ -117,7 +177,10 @@ export const InspectorPanel: React.FC<{
 
   const builtinSections: InspectorSectionConfig[] = [
     {
-      id: "transform", label: "Transform", Icon: Move, defaultOpen: true,
+      id: "transform",
+      label: "Transform",
+      Icon: Move,
+      defaultOpen: true,
       children: (
         <>
           <NumberField label="X Position" value={0} min={-4000} max={4000} />
@@ -131,11 +194,25 @@ export const InspectorPanel: React.FC<{
       ),
     },
     {
-      id: "appearance", label: "Appearance", Icon: Palette, defaultOpen: true,
+      id: "appearance",
+      label: "Appearance",
+      Icon: Palette,
+      defaultOpen: true,
       children: (
         <>
           <SliderField label="Opacity" value={100} />
-          <SelectField label="Blend Mode" options={["Normal", "Multiply", "Screen", "Overlay", "Soft Light", "Difference"]} value="Normal" />
+          <SelectField
+            label="Blend Mode"
+            options={[
+              "Normal",
+              "Multiply",
+              "Screen",
+              "Overlay",
+              "Soft Light",
+              "Difference",
+            ]}
+            value="Normal"
+          />
           <ColorField label="Tint Color" value="#a855f7" />
           <SliderField label="Brightness" value={100} />
           <SliderField label="Contrast" value={100} />
@@ -144,13 +221,34 @@ export const InspectorPanel: React.FC<{
       ),
     },
     {
-      id: "typography", label: "Typography", Icon: Type, defaultOpen: false,
+      id: "typography",
+      label: "Typography",
+      Icon: Type,
+      defaultOpen: false,
       children: (
         <>
-          <SelectField label="Font" options={["Bangers", "ComicSans MS", "Manga Temple", "Inter", "Anton"]} value="Bangers" />
+          <SelectField
+            label="Font"
+            options={[
+              "Bangers",
+              "ComicSans MS",
+              "Manga Temple",
+              "Inter",
+              "Anton",
+            ]}
+            value="Bangers"
+          />
           <NumberField label="Font Size" value={32} min={6} max={300} />
-          <SelectField label="Weight" options={["Regular", "Medium", "Bold", "Black"]} value="Bold" />
-          <SelectField label="Align" options={["Left", "Center", "Right", "Justify"]} value="Center" />
+          <SelectField
+            label="Weight"
+            options={["Regular", "Medium", "Bold", "Black"]}
+            value="Bold"
+          />
+          <SelectField
+            label="Align"
+            options={["Left", "Center", "Right", "Justify"]}
+            value="Center"
+          />
           <ColorField label="Text Color" value="#ffffff" />
           <SliderField label="Letter Spacing" value={0} min={-20} max={40} />
           <SliderField label="Line Height" value={120} min={60} max={300} />
@@ -158,21 +256,54 @@ export const InspectorPanel: React.FC<{
       ),
     },
     {
-      id: "clip", label: "Clip Settings", Icon: Film, defaultOpen: false,
+      id: "clip",
+      label: "Clip Settings",
+      Icon: Film,
+      defaultOpen: false,
       children: (
         <>
-          <NumberField label="Start (s)" value={0} min={0} max={3600} step={0.1} />
-          <NumberField label="End (s)" value={5} min={0} max={3600} step={0.1} />
+          <NumberField
+            label="Start (s)"
+            value={0}
+            min={0}
+            max={3600}
+            step={0.1}
+          />
+          <NumberField
+            label="End (s)"
+            value={5}
+            min={0}
+            max={3600}
+            step={0.1}
+          />
           <NumberField label="Speed %" value={100} min={10} max={1000} />
-          <SelectField label="Easing" options={["Linear", "Ease In", "Ease Out", "Ease In Out"]} value="Ease In Out" />
+          <SelectField
+            label="Easing"
+            options={["Linear", "Ease In", "Ease Out", "Ease In Out"]}
+            value="Ease In Out"
+          />
         </>
       ),
     },
     {
-      id: "filters", label: "Filters", Icon: Gauge, defaultOpen: false,
+      id: "filters",
+      label: "Filters",
+      Icon: Gauge,
+      defaultOpen: false,
       children: (
         <>
-          <SelectField label="Preset" options={["None", "Manga B&W", "Anime Vivid", "Cyberpunk", "Vintage", "Night"]} value="None" />
+          <SelectField
+            label="Preset"
+            options={[
+              "None",
+              "Manga B&W",
+              "Anime Vivid",
+              "Cyberpunk",
+              "Vintage",
+              "Night",
+            ]}
+            value="None"
+          />
           <SliderField label="Blur" value={0} />
           <SliderField label="Sharpen" value={0} />
           <SliderField label="Vignette" value={0} />
@@ -180,15 +311,31 @@ export const InspectorPanel: React.FC<{
       ),
     },
     {
-      id: "layers", label: "Layers", Icon: Layers, defaultOpen: false,
+      id: "layers",
+      label: "Layers",
+      Icon: Layers,
+      defaultOpen: false,
       children: (
         <div className="space-y-1">
-          {["Background", "Panel 01", "Character A", "FX Overlay", "Dialogue"].map((layer, i) => (
-            <div key={layer} className="flex items-center gap-2 p-1.5 rounded-lg bg-neutral-900/60 border border-neutral-800/80 hover:border-purple-500/50 cursor-pointer transition-all">
+          {[
+            "Background",
+            "Panel 01",
+            "Character A",
+            "FX Overlay",
+            "Dialogue",
+          ].map((layer, i) => (
+            <div
+              key={layer}
+              className="flex items-center gap-2 p-1.5 rounded-lg bg-neutral-900/60 border border-neutral-800/80 hover:border-purple-500/50 cursor-pointer transition-all"
+            >
               <Eye className="h-3 w-3 text-purple-400 hover:text-white" />
               <Lock className="h-3 w-3 text-neutral-600 hover:text-white" />
-              <span className="text-[10px] text-white font-mono flex-1">{layer}</span>
-              <span className="text-[8px] text-purple-300 font-mono bg-purple-500/20 px-1 rounded">L{i + 1}</span>
+              <span className="text-[10px] text-white font-mono flex-1">
+                {layer}
+              </span>
+              <span className="text-[8px] text-purple-300 font-mono bg-purple-500/20 px-1 rounded">
+                L{i + 1}
+              </span>
             </div>
           ))}
         </div>
@@ -204,18 +351,37 @@ export const InspectorPanel: React.FC<{
       <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-purple-900/20 bg-neutral-950/70 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-2">
           <Sliders className="h-3.5 w-3.5 text-purple-400" />
-          <span className="text-xs font-mono font-bold text-white uppercase tracking-widest">Inspector</span>
+          <span className="text-xs font-mono font-bold text-white uppercase tracking-widest">
+            Inspector
+          </span>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={() => setLocked((v) => !v)} title={locked ? "Unlock" : "Lock"}
-            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
-            <Lock className={`h-3.5 w-3.5 ${locked ? "text-amber-400" : "text-neutral-500"}`} />
+          <button
+            onClick={() => setLocked((v) => !v)}
+            title={locked ? "Unlock" : "Lock"}
+            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <Lock
+              className={`h-3.5 w-3.5 ${
+                locked ? "text-amber-400" : "text-neutral-500"
+              }`}
+            />
           </button>
-          <button title="Reset All" className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+          <button
+            title="Reset All"
+            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+          >
             <RotateCcw className="h-3.5 w-3.5 text-neutral-500 hover:text-white" />
           </button>
-          <button onClick={() => setVisible((v) => !v)} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
-            {visible ? <Eye className="h-3.5 w-3.5 text-purple-400" /> : <EyeOff className="h-3.5 w-3.5 text-neutral-500" />}
+          <button
+            onClick={() => setVisible((v) => !v)}
+            className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            {visible ? (
+              <Eye className="h-3.5 w-3.5 text-purple-400" />
+            ) : (
+              <EyeOff className="h-3.5 w-3.5 text-neutral-500" />
+            )}
           </button>
         </div>
       </div>
@@ -224,7 +390,11 @@ export const InspectorPanel: React.FC<{
       {!visible && (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center p-4">
           <ZoomIn className="h-6 w-6 text-purple-400/50 animate-pulse" />
-          <p className="text-[10px] font-mono text-neutral-400">Select a layer on timeline<br />to inspect properties</p>
+          <p className="text-[10px] font-mono text-neutral-400">
+            Select a layer on timeline
+            <br />
+            to inspect properties
+          </p>
         </div>
       )}
 

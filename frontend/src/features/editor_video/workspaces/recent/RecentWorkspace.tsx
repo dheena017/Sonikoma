@@ -11,7 +11,12 @@ import { RecentAudioCard } from "./components/RecentAudioCard";
 export interface RecentItem {
   id: string;
   title: string;
-  category: "Recent Media" | "Recent AI" | "Recent Templates" | "Recent Fonts" | "Recent Audio";
+  category:
+    | "Recent Media"
+    | "Recent AI"
+    | "Recent Templates"
+    | "Recent Fonts"
+    | "Recent Audio";
   timeAgo: string;
   usesCount: number;
   badge?: string;
@@ -29,20 +34,47 @@ export const RecentWorkspace: React.FC<RecentWorkspaceProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   const filtered = MOCK_RECENT_ITEMS.filter((item) => {
-    const matchTab = activeTab === "All" || item.category.toLowerCase() === activeTab.toLowerCase();
-    const matchSearch = !searchQuery.trim() || item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchTab =
+      activeTab === "All" ||
+      item.category.toLowerCase() === activeTab.toLowerCase();
+    const matchSearch =
+      !searchQuery.trim() ||
+      item.title.toLowerCase().includes(searchQuery.toLowerCase());
     return matchTab && matchSearch;
   });
 
   const renderCard = (item: RecentItem) => {
-    const handleAction = () => onTriggerFeedback(`Re-used "${item.title}" in project`);
+    const handleAction = () =>
+      onTriggerFeedback(`Re-used "${item.title}" in project`);
     switch (item.iconName) {
-      case "image":    return <RecentMediaCard    key={item.id} item={item} onAction={handleAction} />;
-      case "ai":       return <RecentAiCard       key={item.id} item={item} onAction={handleAction} />;
-      case "template": return <RecentTemplateCard key={item.id} item={item} onAction={handleAction} />;
-      case "font":     return <RecentFontCard     key={item.id} item={item} onAction={handleAction} />;
-      case "audio":    return <RecentAudioCard    key={item.id} item={item} onAction={handleAction} />;
-      default:         return <RecentMediaCard    key={item.id} item={item} onAction={handleAction} />;
+      case "image":
+        return (
+          <RecentMediaCard key={item.id} item={item} onAction={handleAction} />
+        );
+      case "ai":
+        return (
+          <RecentAiCard key={item.id} item={item} onAction={handleAction} />
+        );
+      case "template":
+        return (
+          <RecentTemplateCard
+            key={item.id}
+            item={item}
+            onAction={handleAction}
+          />
+        );
+      case "font":
+        return (
+          <RecentFontCard key={item.id} item={item} onAction={handleAction} />
+        );
+      case "audio":
+        return (
+          <RecentAudioCard key={item.id} item={item} onAction={handleAction} />
+        );
+      default:
+        return (
+          <RecentMediaCard key={item.id} item={item} onAction={handleAction} />
+        );
     }
   };
 

@@ -7,7 +7,10 @@ interface MarketplacePackCardProps {
   onPurchase: () => void;
 }
 
-export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({ pack, onPurchase }) => {
+export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({
+  pack,
+  onPurchase,
+}) => {
   const isFree = pack.price === "Free";
 
   return (
@@ -22,7 +25,13 @@ export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({ pack, 
         <span className="absolute top-2 left-2 text-[8px] font-mono font-bold bg-black/80 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30">
           {pack.badge}
         </span>
-        <span className={`absolute top-2 right-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded ${isFree ? "bg-green-500/80 text-white" : "bg-purple-600/80 text-white"}`}>
+        <span
+          className={`absolute top-2 right-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded ${
+            isFree
+              ? "bg-green-500/80 text-white"
+              : "bg-purple-600/80 text-white"
+          }`}
+        >
           {pack.price}
         </span>
       </div>

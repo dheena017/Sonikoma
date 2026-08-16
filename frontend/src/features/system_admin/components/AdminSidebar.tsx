@@ -54,7 +54,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     {
       name: "Core",
       items: [
-        { id: "dashboard", label: "Dashboard", icon: LayoutGrid, path: "/admin" },
+        {
+          id: "dashboard",
+          label: "Dashboard",
+          icon: LayoutGrid,
+          path: "/admin",
+        },
         {
           id: "announcements",
           label: "Announcements",
@@ -139,7 +144,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   const isActive = (path: string) => {
     if (path === "/admin") {
-      return currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard";
+      return (
+        currentPath === "/admin" ||
+        currentPath === "/admin/" ||
+        currentPath === "/admin-dashboard"
+      );
     }
     return currentPath.startsWith(path);
   };
@@ -269,7 +278,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       {/* Sidebar Drawer */}
       <aside
         className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[320px] bg-neutral-950/85 backdrop-blur-2xl border-r border-white/10 z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
-          isOpen ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]" : "-translate-x-full"
+          isOpen
+            ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]"
+            : "-translate-x-full"
         }`}
       >
         {sidebarContent}

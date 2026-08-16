@@ -26,10 +26,16 @@ export function YouTubeCommentsViewer({ videoId }: YouTubeCommentsViewerProps) {
       setIsLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
-        const res = await fetch(`/api/export/youtube/videos/${videoId}/comments`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const token =
+          localStorage.getItem("sonikoma_token") ||
+          localStorage.getItem("token") ||
+          "";
+        const res = await fetch(
+          `/api/export/youtube/videos/${videoId}/comments`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
@@ -64,7 +70,9 @@ export function YouTubeCommentsViewer({ videoId }: YouTubeCommentsViewerProps) {
     return (
       <div className="flex flex-col items-center justify-center py-10 gap-2">
         <Loader2 className="w-5 h-5 text-red-500 animate-spin" />
-        <span className="text-xs font-mono text-neutral-500">Loading comments...</span>
+        <span className="text-xs font-mono text-neutral-500">
+          Loading comments...
+        </span>
       </div>
     );
   }
@@ -106,7 +114,9 @@ export function YouTubeCommentsViewer({ videoId }: YouTubeCommentsViewerProps) {
                   <User className="w-3 h-3 text-neutral-400" />
                 </div>
               )}
-              <span className="text-xs font-bold text-white font-sans">{c.author}</span>
+              <span className="text-xs font-bold text-white font-sans">
+                {c.author}
+              </span>
             </div>
             {c.published_at && (
               <span className="text-[10px] text-neutral-500 font-mono">
@@ -114,7 +124,9 @@ export function YouTubeCommentsViewer({ videoId }: YouTubeCommentsViewerProps) {
               </span>
             )}
           </div>
-          <p className="text-xs text-neutral-300 font-sans leading-relaxed pl-7">{c.text}</p>
+          <p className="text-xs text-neutral-300 font-sans leading-relaxed pl-7">
+            {c.text}
+          </p>
           {typeof c.like_count === "number" && c.like_count > 0 && (
             <div className="flex items-center gap-1 text-[10px] font-mono text-neutral-400 pl-7 pt-1">
               <ThumbsUp className="w-3 h-3" />

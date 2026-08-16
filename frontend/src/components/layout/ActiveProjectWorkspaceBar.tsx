@@ -23,10 +23,9 @@ interface ActiveProjectWorkspaceBarProps {
   fetchWithInterceptor?: any;
 }
 
-export const ActiveProjectWorkspaceBar: React.FC<ActiveProjectWorkspaceBarProps> = ({
-  navigateTo,
-  fetchWithInterceptor,
-}) => {
+export const ActiveProjectWorkspaceBar: React.FC<
+  ActiveProjectWorkspaceBarProps
+> = ({ navigateTo, fetchWithInterceptor }) => {
   const {
     activeProjectId,
     activeProjectData,
@@ -55,16 +54,22 @@ export const ActiveProjectWorkspaceBar: React.FC<ActiveProjectWorkspaceBarProps>
     setIsSaving(true);
     try {
       const fetcher = fetchWithInterceptor || window.fetch;
-      const res = await fetcher(`/api/projects/${encodeURIComponent(activeProjectId)}/promote`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await fetcher(
+        `/api/projects/${encodeURIComponent(activeProjectId)}/promote`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       const data = await res.json();
       if (data.success || data.already_permanent) {
         if (activeProjectData) {
           useProjectStore.getState().setActiveProject({
             ...activeProjectData,
-            project: { ...activeProjectData.project, project_type: "permanent" },
+            project: {
+              ...activeProjectData.project,
+              project_type: "permanent",
+            },
           });
         }
       }
@@ -100,7 +105,9 @@ export const ActiveProjectWorkspaceBar: React.FC<ActiveProjectWorkspaceBarProps>
 
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => hydrateActiveProject(missingId, fetchWithInterceptor)}
+              onClick={() =>
+                hydrateActiveProject(missingId, fetchWithInterceptor)
+              }
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800/80 hover:bg-neutral-700 text-neutral-200 border border-white/10 transition-all text-xs font-medium"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -161,7 +168,8 @@ export const ActiveProjectWorkspaceBar: React.FC<ActiveProjectWorkspaceBarProps>
                 No Active Project Selected
               </span>
               <span className="hidden md:inline text-neutral-400 ml-2">
-                — Activate a project to work seamlessly across Video Editor &amp; Creative Suite.
+                — Activate a project to work seamlessly across Video Editor
+                &amp; Creative Suite.
               </span>
             </div>
           </div>
@@ -188,11 +196,10 @@ export const ActiveProjectWorkspaceBar: React.FC<ActiveProjectWorkspaceBarProps>
     ? `Ep. ${project.episode}`
     : "";
   const coverImage =
-    project?.cover_image ||
-    project?.first_panel_image ||
-    panels[0]?.image_url;
+    project?.cover_image || project?.first_panel_image || panels[0]?.image_url;
   const projectStatus = project?.status || "Ready";
-  const isTemp = project?.project_type === "temp" || activeProjectId.startsWith("temp_");
+  const isTemp =
+    project?.project_type === "temp" || activeProjectId.startsWith("temp_");
 
   const totalDurationSeconds = panels.reduce(
     (acc: number, p: any) => acc + (p.duration || p.audio_duration || 3),
@@ -200,8 +207,7 @@ export const ActiveProjectWorkspaceBar: React.FC<ActiveProjectWorkspaceBarProps>
   );
   const minutes = Math.floor(totalDurationSeconds / 60);
   const seconds = Math.round(totalDurationSeconds % 60);
-  const durationText =
-    minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  const durationText = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 
   const renderStatusBadge = () => {
     switch (projectStatus.toLowerCase()) {
@@ -243,13 +249,19 @@ export const ActiveProjectWorkspaceBar: React.FC<ActiveProjectWorkspaceBarProps>
     }
   };
 
-  const editorUrl = `/scraper/editor?project_id=${encodeURIComponent(activeProjectId)}`;
-  const creativeSuiteUrl = `/creative-suite?project_id=${encodeURIComponent(activeProjectId)}`;
+  const editorUrl = `/scraper/editor?project_id=${encodeURIComponent(
+    activeProjectId
+  )}`;
+  const creativeSuiteUrl = `/creative-suite?project_id=${encodeURIComponent(
+    activeProjectId
+  )}`;
 
   return (
-    <div className={`w-full bg-[#0b0c10]/95 border-b backdrop-blur-md px-4 py-2 text-xs transition-all shadow-lg ${
-      isTemp ? "border-amber-500/30" : "border-white/10"
-    }`}>
+    <div
+      className={`w-full bg-[#0b0c10]/95 border-b backdrop-blur-md px-4 py-2 text-xs transition-all shadow-lg ${
+        isTemp ? "border-amber-500/30" : "border-white/10"
+      }`}
+    >
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         {/* Left: Project identity */}
         <div className="flex items-center gap-3 min-w-0">
@@ -374,4 +386,3 @@ export const ActiveProjectWorkspaceBar: React.FC<ActiveProjectWorkspaceBarProps>
 };
 
 export default ActiveProjectWorkspaceBar;
-

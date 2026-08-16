@@ -42,11 +42,17 @@ export function AdminScrapersTab({
 
   const handlePurgeProxyCache = async () => {
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/settings/purge-cache", {
-        method: "POST",
-      });
+      const res = await fetchWithInterceptor(
+        "/api/auth/admin/settings/purge-cache",
+        {
+          method: "POST",
+        }
+      );
       if (res.ok) {
-        addNotification("Scraper sessions cache purged successfully", "success");
+        addNotification(
+          "Scraper sessions cache purged successfully",
+          "success"
+        );
         fetchScraperSessions();
       } else {
         addNotification("Failed to purge proxy cache", "error");

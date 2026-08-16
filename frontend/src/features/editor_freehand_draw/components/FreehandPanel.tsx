@@ -19,7 +19,7 @@ import {
   AlignRight,
   Sparkles,
   RefreshCw,
-  Wand2
+  Wand2,
 } from "lucide-react";
 
 interface FreehandPanelProps {
@@ -94,13 +94,18 @@ export default function FreehandPanel({
   const [localOpacity, setLocalOpacity] = useState(opacity);
   const [localFont, setLocalFont] = useState(fontFamily);
   const [localStroke, setLocalStroke] = useState(textStrokeColor);
-  const [localAlign, setLocalAlign] = useState<"left" | "center" | "right">(textAlign);
+  const [localAlign, setLocalAlign] = useState<"left" | "center" | "right">(
+    textAlign
+  );
   const [localFilled, setLocalFilled] = useState(isFilled);
   const [isAiCleaning, setIsAiCleaning] = useState(false);
 
   const handleEyedropper = async () => {
     if (!("EyeDropper" in window)) {
-      addNotification?.("Eyedropper API is not supported in this browser.", "warning");
+      addNotification?.(
+        "Eyedropper API is not supported in this browser.",
+        "warning"
+      );
       return;
     }
     try {
@@ -117,12 +122,18 @@ export default function FreehandPanel({
 
   const handleAiBubbleClean = async () => {
     if (!activeStoryboardPanel?.image_url) {
-      addNotification?.("No active panel selected for AI Speech Bubble Clean.", "warning");
+      addNotification?.(
+        "No active panel selected for AI Speech Bubble Clean.",
+        "warning"
+      );
       return;
     }
 
     setIsAiCleaning(true);
-    addNotification?.("Running AI Speech Bubble Removal & Inpainting...", "info");
+    addNotification?.(
+      "Running AI Speech Bubble Removal & Inpainting...",
+      "info"
+    );
 
     try {
       const data = await api.removeSpeechBubbles(fetchWithInterceptor, {
@@ -131,7 +142,9 @@ export default function FreehandPanel({
       });
 
       if (!data?.success || !data?.url) {
-        throw new Error(data?.message || "AI inpaint did not return an updated image.");
+        throw new Error(
+          data?.message || "AI inpaint did not return an updated image."
+        );
       }
 
       setPanels?.((prev) =>
@@ -414,7 +427,9 @@ export default function FreehandPanel({
                   setTextAlign?.("left");
                 }}
                 className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                  localAlign === "left" ? "bg-purple-600 text-white" : "text-neutral-500 hover:text-neutral-300"
+                  localAlign === "left"
+                    ? "bg-purple-600 text-white"
+                    : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 <AlignLeft className="h-3.5 w-3.5" />
@@ -426,7 +441,9 @@ export default function FreehandPanel({
                   setTextAlign?.("center");
                 }}
                 className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                  localAlign === "center" ? "bg-purple-600 text-white" : "text-neutral-500 hover:text-neutral-300"
+                  localAlign === "center"
+                    ? "bg-purple-600 text-white"
+                    : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 <AlignCenter className="h-3.5 w-3.5" />
@@ -438,7 +455,9 @@ export default function FreehandPanel({
                   setTextAlign?.("right");
                 }}
                 className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
-                  localAlign === "right" ? "bg-purple-600 text-white" : "text-neutral-500 hover:text-neutral-300"
+                  localAlign === "right"
+                    ? "bg-purple-600 text-white"
+                    : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
                 <AlignRight className="h-3.5 w-3.5" />
@@ -452,7 +471,9 @@ export default function FreehandPanel({
       <div className="space-y-3 pt-1">
         <div className="space-y-1">
           <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider">
-            <span>{brushAction === "text" ? "Font Size" : "Stroke / Tool Size"}</span>
+            <span>
+              {brushAction === "text" ? "Font Size" : "Stroke / Tool Size"}
+            </span>
             <span className="text-purple-400 font-bold">{brushSize}px</span>
           </div>
           <input
@@ -562,7 +583,11 @@ export default function FreehandPanel({
           ) : (
             <Wand2 className="h-3.5 w-3.5 text-purple-400" />
           )}
-          <span>{isAiCleaning ? "AI Inpainting Speech..." : "AI Clean Speech & Inpaint"}</span>
+          <span>
+            {isAiCleaning
+              ? "AI Inpainting Speech..."
+              : "AI Clean Speech & Inpaint"}
+          </span>
         </button>
       </div>
 

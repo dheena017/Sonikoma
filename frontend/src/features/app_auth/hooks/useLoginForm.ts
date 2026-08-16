@@ -1,5 +1,10 @@
 import React from "react";
-import { THEMES, ThemeKey, TOUR_STEPS, TRANSLATIONS } from "@/features/app_auth/components/constants";
+import {
+  THEMES,
+  ThemeKey,
+  TOUR_STEPS,
+  TRANSLATIONS,
+} from "@/features/app_auth/components/constants";
 
 export type Language = "en" | "ko" | "ja";
 
@@ -23,7 +28,6 @@ export default function useLoginForm(props: LoginFormProps) {
   const [isTourOpen, setIsTourOpen] = React.useState(false);
   const [tourStep, setTourStep] = React.useState(0);
 
-
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlError = params.get("error");
@@ -31,8 +35,6 @@ export default function useLoginForm(props: LoginFormProps) {
       setError(urlError);
     }
   }, []);
-
-
 
   const isEmailValid = React.useMemo(() => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -70,8 +72,6 @@ export default function useLoginForm(props: LoginFormProps) {
       setError(`OAuth sign in with ${provider} is not configured yet.`);
     }
   };
-
-
 
   const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
     setIsCapsLockOn(e.getModifierState("CapsLock"));

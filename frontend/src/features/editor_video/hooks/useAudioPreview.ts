@@ -14,7 +14,10 @@ export const useAudioPreview = () => {
       }
       setPlayingTrackId(trackId);
       // Fallback demo chime if no url provided
-      const dummyAudio = new Audio(audioUrl || "https://actions.google.com/sounds/v1/cartoon/clink_clank.ogg");
+      const dummyAudio = new Audio(
+        audioUrl ||
+          "https://actions.google.com/sounds/v1/cartoon/clink_clank.ogg"
+      );
       audioRef.current = dummyAudio;
       dummyAudio.play().catch(() => {});
       dummyAudio.onended = () => setPlayingTrackId(null);

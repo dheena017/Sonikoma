@@ -50,7 +50,11 @@ export default function ProjectsFilters({
             className="bg-transparent text-white text-xs font-mono outline-none cursor-pointer w-full"
           >
             {genres.map((g) => (
-              <option key={g} value={g} className="bg-neutral-900 text-neutral-200">
+              <option
+                key={g}
+                value={g}
+                className="bg-neutral-900 text-neutral-200"
+              >
                 {g === "All" ? "All Genres" : g}
               </option>
             ))}
@@ -59,16 +63,29 @@ export default function ProjectsFilters({
 
         {/* Sort Selector */}
         <div className="flex items-center gap-2 bg-black/40 border border-neutral-800 hover:border-neutral-700 rounded-xl px-3 py-2 transition-colors">
-          <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">Sort:</span>
+          <span className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">
+            Sort:
+          </span>
           <select
             value={sortBy}
             onChange={(e) => onSortChange(e.target.value)}
             className="bg-transparent text-white text-xs font-mono outline-none cursor-pointer w-full"
           >
-            <option value="Newest" className="bg-neutral-900 text-neutral-200">Newest First</option>
-            <option value="Oldest" className="bg-neutral-900 text-neutral-200">Oldest First</option>
-            <option value="Most Panels" className="bg-neutral-900 text-neutral-200">Most Panels</option>
-            <option value="A-Z" className="bg-neutral-900 text-neutral-200">Title (A-Z)</option>
+            <option value="Newest" className="bg-neutral-900 text-neutral-200">
+              Newest First
+            </option>
+            <option value="Oldest" className="bg-neutral-900 text-neutral-200">
+              Oldest First
+            </option>
+            <option
+              value="Most Panels"
+              className="bg-neutral-900 text-neutral-200"
+            >
+              Most Panels
+            </option>
+            <option value="A-Z" className="bg-neutral-900 text-neutral-200">
+              Title (A-Z)
+            </option>
           </select>
         </div>
 

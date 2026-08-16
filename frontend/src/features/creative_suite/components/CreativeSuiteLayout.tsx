@@ -41,26 +41,27 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   const activeProjectData = useProjectStore((state) => state.activeProjectData);
   const activePanels = activeProjectData?.panels ?? panels ?? [];
 
-
-
-
   useEffect(() => {
     const updateActiveSkillRequests = () => {
       setActiveSkillRequests(window.__sonikomaActiveSkillRequestCount?.() ?? 0);
     };
 
     updateActiveSkillRequests();
-    window.addEventListener("sonikoma-skill-request-count", updateActiveSkillRequests);
+    window.addEventListener(
+      "sonikoma-skill-request-count",
+      updateActiveSkillRequests
+    );
 
     return () => {
-      window.removeEventListener("sonikoma-skill-request-count", updateActiveSkillRequests);
+      window.removeEventListener(
+        "sonikoma-skill-request-count",
+        updateActiveSkillRequests
+      );
     };
   }, []);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
-
-
 
   // Normalize sub-route path naming for breadcrumbs
   const getBreadcrumbName = () => {
@@ -136,7 +137,8 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
               </span>
             </h2>
             <p className="text-xs text-neutral-400 font-sans mt-0.5">
-              Access AI-assisted video editing, neural voice acting, translations, and publisher tools
+              Access AI-assisted video editing, neural voice acting,
+              translations, and publisher tools
             </p>
           </div>
         </div>
@@ -265,7 +267,6 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       <div className="flex-1 flex flex-col pt-16 lg:pl-20 min-h-screen transition-all duration-300">
         <main className="flex-1 px-6 pb-6 pt-6 md:px-8 md:pb-8 md:pt-8">
           <div className="w-full animate-[fadeIn_0.3s_ease-out]">
-
             {!currentPath.includes("/youtube") && renderHeader()}
             {children}
           </div>

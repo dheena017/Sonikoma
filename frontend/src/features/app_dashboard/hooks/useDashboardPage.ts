@@ -184,56 +184,9 @@ export default function useDashboardPage() {
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      const res = await fetch(`/api/projects/${project.project_id}`, { headers });
-      if (res.ok) {
-        const data = await res.json();
-          const loadedSettings = data.project.audio_settings || {};
-          const savedScrapedImages =
-            Array.isArray(data.scraped_images) && data.scraped_images.length > 0
-              ? data.scraped_images
-              : loadedSettings.scraped_images;
-          const scrapedImages =
-            Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0
-              ? savedScrapedImages
-              : (data.panels || []).map((p: any) => p.image_url).filter(Boolean);
-
-          useProjectStore.getState().setActiveProject({
-            project: data.project,
-            panels: data.panels || [],
-            scrapedImages,
-          });
-      }
-    } catch (err) {
-      console.error("Failed to pre-fetch project data on dashboard click:", err);
-    }
-
-    const nav = (window as any).navigateTo;
-    const jobId = project.job_id;
-    const target =
-      project.series_slug && project.chapter_slug
-        ? `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
-        : `/scraper?project_id=${project.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`;
-
-    if (typeof nav === "function") {
-      nav(target);
-    } else {
-      window.history.pushState({}, "", target);
-      window.dispatchEvent(new Event("popstate"));
-    }
-  }, []);
-
-  const handleOpenCreativeSuite = useCallback(async (e: React.MouseEvent, project: Project) => {
-    e.stopPropagation();
-    try {
-      const token =
-        localStorage.getItem("sonikoma_token") ||
-        sessionStorage.getItem("sonikoma_token") ||
-        "";
-      const headers: Record<string, string> = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-      const res = await fetch(`/api/projects/${project.project_id}`, { headers });
+      const res = await fetch(`/api/projects/${project.project_id}`, {
+        headers,
+      });
       if (res.ok) {
         const data = await res.json();
         const loadedSettings = data.project.audio_settings || {};
@@ -253,17 +206,80 @@ export default function useDashboardPage() {
         });
       }
     } catch (err) {
-      console.error("Failed to load project for Creative Suite:", err);
+      console.error(
+        "Failed to pre-fetch project data on dashboard click:",
+        err
+      );
     }
 
     const nav = (window as any).navigateTo;
+    const jobId = project.job_id;
+    const target =
+      project.series_slug && project.chapter_slug
+        ? `/scraper/editor/series/${project.series_slug}/chapters/${
+            project.chapter_slug
+          }${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
+        : `/scraper?project_id=${project.project_id}${
+            jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
+          }`;
+
     if (typeof nav === "function") {
-      nav("/creative-suite");
+      nav(target);
     } else {
-      window.history.pushState({}, "", "/creative-suite");
+      window.history.pushState({}, "", target);
       window.dispatchEvent(new Event("popstate"));
     }
   }, []);
+
+  const handleOpenCreativeSuite = useCallback(
+    async (e: React.MouseEvent, project: Project) => {
+      e.stopPropagation();
+      try {
+        const token =
+          localStorage.getItem("sonikoma_token") ||
+          sessionStorage.getItem("sonikoma_token") ||
+          "";
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        const res = await fetch(`/api/projects/${project.project_id}`, {
+          headers,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const loadedSettings = data.project.audio_settings || {};
+          const savedScrapedImages =
+            Array.isArray(data.scraped_images) && data.scraped_images.length > 0
+              ? data.scraped_images
+              : loadedSettings.scraped_images;
+          const scrapedImages =
+            Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0
+              ? savedScrapedImages
+              : (data.panels || [])
+                  .map((p: any) => p.image_url)
+                  .filter(Boolean);
+
+          useProjectStore.getState().setActiveProject({
+            project: data.project,
+            panels: data.panels || [],
+            scrapedImages,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load project for Creative Suite:", err);
+      }
+
+      const nav = (window as any).navigateTo;
+      if (typeof nav === "function") {
+        nav("/creative-suite");
+      } else {
+        window.history.pushState({}, "", "/creative-suite");
+        window.dispatchEvent(new Event("popstate"));
+      }
+    },
+    []
+  );
 
   const handleDeleteProject = useCallback(
     async (e: React.MouseEvent, projectId: string) => {
@@ -350,7 +366,11 @@ export default function useDashboardPage() {
   );
 
   const totalPanels = useMemo(
-    () => projects.reduce((acc, p) => acc + (p.panels_count || p.imported_assets_count || 0), 0),
+    () =>
+      projects.reduce(
+        (acc, p) => acc + (p.panels_count || p.imported_assets_count || 0),
+        0
+      ),
     [projects]
   );
 
@@ -360,7 +380,9 @@ export default function useDashboardPage() {
         prev.map((t) => (t.id === 1 ? { ...t, completed: true } : t))
       );
     }
-    const hasAnalyzed = projects.some((p) => (p.panels_count || p.imported_assets_count || 0) > 0);
+    const hasAnalyzed = projects.some(
+      (p) => (p.panels_count || p.imported_assets_count || 0) > 0
+    );
     if (hasAnalyzed) {
       setOnboardingTasks((prev) =>
         prev.map((t) => (t.id === 2 ? { ...t, completed: true } : t))

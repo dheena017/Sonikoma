@@ -669,7 +669,9 @@ export default function ProfileSecurityTab({
                     <td className="py-3 px-2 font-mono text-[10px] text-neutral-400 truncate">
                       {log.ip}
                     </td>
-                    <td className="py-3 px-2 text-neutral-500 whitespace-nowrap">{log.date}</td>
+                    <td className="py-3 px-2 text-neutral-500 whitespace-nowrap">
+                      {log.date}
+                    </td>
                     <td className="py-3 px-2 text-right">
                       <span
                         className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${

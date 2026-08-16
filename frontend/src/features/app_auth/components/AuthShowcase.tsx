@@ -14,7 +14,11 @@ import {
   X,
   Maximize2,
 } from "lucide-react";
-import { ThemeKey, THEMES, SHOWCASE_SLIDES } from "@/features/app_auth/components/constants";
+import {
+  ThemeKey,
+  THEMES,
+  SHOWCASE_SLIDES,
+} from "@/features/app_auth/components/constants";
 
 interface AuthShowcaseProps {
   activeTheme: ThemeKey;
@@ -291,7 +295,9 @@ export default function AuthShowcase({
         {/* Live indicator badge */}
         <div className="flex items-center gap-1.5 bg-white/[0.04] border border-white/8 rounded-full px-3 py-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase">Live Studio</span>
+          <span className="text-[9px] font-bold tracking-wider text-neutral-400 uppercase">
+            Live Studio
+          </span>
         </div>
       </div>
 
@@ -334,7 +340,9 @@ export default function AuthShowcase({
               {/* DYNAMIC INTERACTIVE VISUAL MOCKUP CARD FOR EACH SLIDE */}
               <div className="my-5 w-full bg-[#0c0d16]/80 backdrop-blur-2xl rounded-2xl border border-white/10 p-4 shadow-[0_12px_32px_rgba(0,0,0,0.5)] relative overflow-hidden">
                 {/* Subtle top laser glow */}
-                <div className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${slide.color} opacity-60`} />
+                <div
+                  className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${slide.color} opacity-60`}
+                />
 
                 {idx === 0 && (
                   /* Slide 0: AI Webtoon Slicer Mockup with Real Panel Artwork */
@@ -357,11 +365,17 @@ export default function AuthShowcase({
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-                          <div className="absolute top-1 right-1 text-[8px] font-mono bg-purple-600 text-white font-bold px-1.5 py-0.5 rounded shadow">P1</div>
+                          <div className="absolute top-1 right-1 text-[8px] font-mono bg-purple-600 text-white font-bold px-1.5 py-0.5 rounded shadow">
+                            P1
+                          </div>
                         </div>
                         <div className="p-1.5 text-center bg-[#0d0f1a]">
-                          <span className="text-[10px] font-bold text-neutral-200 block truncate">Hero Entry</span>
-                          <span className="text-[8px] font-mono text-purple-400">1080×1920</span>
+                          <span className="text-[10px] font-bold text-neutral-200 block truncate">
+                            Hero Entry
+                          </span>
+                          <span className="text-[8px] font-mono text-purple-400">
+                            1080×1920
+                          </span>
                         </div>
                       </div>
                       <div className="bg-neutral-900/90 border border-indigo-500/50 rounded-xl overflow-hidden flex flex-col relative group shadow-md">
@@ -372,11 +386,17 @@ export default function AuthShowcase({
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-                          <div className="absolute top-1 right-1 text-[8px] font-mono bg-indigo-600 text-white font-bold px-1.5 py-0.5 rounded shadow">P2</div>
+                          <div className="absolute top-1 right-1 text-[8px] font-mono bg-indigo-600 text-white font-bold px-1.5 py-0.5 rounded shadow">
+                            P2
+                          </div>
                         </div>
                         <div className="p-1.5 text-center bg-[#0d0f1a]">
-                          <span className="text-[10px] font-bold text-neutral-200 block truncate">Dialogue Close</span>
-                          <span className="text-[8px] font-mono text-indigo-400">OCR Detected</span>
+                          <span className="text-[10px] font-bold text-neutral-200 block truncate">
+                            Dialogue Close
+                          </span>
+                          <span className="text-[8px] font-mono text-indigo-400">
+                            OCR Detected
+                          </span>
                         </div>
                       </div>
                       <div className="bg-neutral-900/90 border border-cyan-500/50 rounded-xl overflow-hidden flex flex-col relative group shadow-md">
@@ -387,11 +407,17 @@ export default function AuthShowcase({
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-                          <div className="absolute top-1 right-1 text-[8px] font-mono bg-cyan-600 text-white font-bold px-1.5 py-0.5 rounded shadow">P3</div>
+                          <div className="absolute top-1 right-1 text-[8px] font-mono bg-cyan-600 text-white font-bold px-1.5 py-0.5 rounded shadow">
+                            P3
+                          </div>
                         </div>
                         <div className="p-1.5 text-center bg-[#0d0f1a]">
-                          <span className="text-[10px] font-bold text-neutral-200 block truncate">Action Climax</span>
-                          <span className="text-[8px] font-mono text-cyan-400">Auto Gutter</span>
+                          <span className="text-[10px] font-bold text-neutral-200 block truncate">
+                            Action Climax
+                          </span>
+                          <span className="text-[8px] font-mono text-cyan-400">
+                            Auto Gutter
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -423,13 +449,21 @@ export default function AuthShowcase({
                             <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                           </div>
                           <div>
-                            <p className="text-[11px] font-bold text-white drop-shadow">Ken-Burns Pan Sequence</p>
-                            <p className="text-[9px] font-mono text-cyan-300">Duration: 4.5s • Smooth Cubic</p>
+                            <p className="text-[11px] font-bold text-white drop-shadow">
+                              Ken-Burns Pan Sequence
+                            </p>
+                            <p className="text-[9px] font-mono text-cyan-300">
+                              Duration: 4.5s • Smooth Cubic
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-1.5 font-mono text-[9px]">
-                          <span className="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-neutral-200 border border-white/20">✦ Zoom In</span>
-                          <span className="px-2 py-1 rounded bg-cyan-600/80 text-white font-bold border border-cyan-400/50 shadow">✦ 4K 60FPS</span>
+                          <span className="px-2 py-1 rounded bg-black/60 backdrop-blur-md text-neutral-200 border border-white/20">
+                            ✦ Zoom In
+                          </span>
+                          <span className="px-2 py-1 rounded bg-cyan-600/80 text-white font-bold border border-cyan-400/50 shadow">
+                            ✦ 4K 60FPS
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -451,8 +485,12 @@ export default function AuthShowcase({
                     <div className="grid grid-cols-2 gap-2">
                       <div className="bg-neutral-950/70 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
                         <div>
-                          <p className="text-[10px] font-bold text-white">Akira (Narrator)</p>
-                          <p className="text-[8px] font-mono text-neutral-400">Japanese • Dramatic</p>
+                          <p className="text-[10px] font-bold text-white">
+                            Akira (Narrator)
+                          </p>
+                          <p className="text-[8px] font-mono text-neutral-400">
+                            Japanese • Dramatic
+                          </p>
                         </div>
                         <div className="flex items-end gap-0.5 h-5">
                           <span className="w-1 bg-pink-500 h-3 rounded-full animate-pulse" />
@@ -463,8 +501,12 @@ export default function AuthShowcase({
                       </div>
                       <div className="bg-neutral-950/70 border border-white/5 rounded-xl p-2.5 flex items-center justify-between">
                         <div>
-                          <p className="text-[10px] font-bold text-white">Ambient SFX Track</p>
-                          <p className="text-[8px] font-mono text-neutral-400">⚡ Thunder Rumble</p>
+                          <p className="text-[10px] font-bold text-white">
+                            Ambient SFX Track
+                          </p>
+                          <p className="text-[8px] font-mono text-neutral-400">
+                            ⚡ Thunder Rumble
+                          </p>
                         </div>
                         <span className="text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
                           Synced
@@ -488,16 +530,26 @@ export default function AuthShowcase({
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-[10px] font-mono">
-                        <span className="text-neutral-300">Compiling 4K UHD Storyboard...</span>
-                        <span className="text-amber-400 font-bold">96% Complete</span>
+                        <span className="text-neutral-300">
+                          Compiling 4K UHD Storyboard...
+                        </span>
+                        <span className="text-amber-400 font-bold">
+                          96% Complete
+                        </span>
                       </div>
                       <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden border border-white/5">
                         <div className="h-full bg-gradient-to-r from-amber-500 to-orange-500 w-[96%] rounded-full shadow-sm" />
                       </div>
                       <div className="flex items-center gap-1.5 pt-1">
-                        <span className="text-[9px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">4K 60FPS</span>
-                        <span className="text-[9px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">H.265 / HEVC</span>
-                        <span className="text-[9px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">14+ Languages</span>
+                        <span className="text-[9px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                          4K 60FPS
+                        </span>
+                        <span className="text-[9px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                          H.265 / HEVC
+                        </span>
+                        <span className="text-[9px] font-mono text-neutral-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                          14+ Languages
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -541,7 +593,11 @@ export default function AuthShowcase({
           <div className="flex items-center gap-1 ml-2">
             <button
               type="button"
-              onClick={() => setCurrentSlide((prev) => (prev === 0 ? SHOWCASE_SLIDES.length - 1 : prev - 1))}
+              onClick={() =>
+                setCurrentSlide((prev) =>
+                  prev === 0 ? SHOWCASE_SLIDES.length - 1 : prev - 1
+                )
+              }
               className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-mono font-bold px-2"
               title="Previous slide"
             >
@@ -549,7 +605,9 @@ export default function AuthShowcase({
             </button>
             <button
               type="button"
-              onClick={() => setCurrentSlide((prev) => (prev + 1) % SHOWCASE_SLIDES.length)}
+              onClick={() =>
+                setCurrentSlide((prev) => (prev + 1) % SHOWCASE_SLIDES.length)
+              }
               className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-mono font-bold px-2"
               title="Next slide"
             >

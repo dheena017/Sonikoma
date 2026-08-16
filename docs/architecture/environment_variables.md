@@ -8,22 +8,22 @@ All configuration variables are defined in the workspace `.env` file (copied fro
 
 ## 📋 Configurable Settings
 
-| Variable Name             | Required | Default Value | Description                                                                                  |
-| :------------------------ | :------: | :------------ | :------------------------------------------------------------------------------------------- |
-| **`GEMINI_API_KEY`**      |  ✅ Yes  | None          | Google AI Studio API key. Essential for vision panel detection, image descriptions, and OCR. |
-| **`HUGGINGFACE_API_KEY`** | Optional | None          | API token for fallback open-source translation/detection models.                             |
-| **`BACKEND_PORT`**        |  ✅ Yes  | None          | Port the unified FastAPI backend runs on (e.g. `5173`). Secondary fallback is `PORT` (for PaaS environments). |
+| Variable Name             | Required | Default Value | Description                                                                                                                                         |
+| :------------------------ | :------: | :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`GEMINI_API_KEY`**      |  ✅ Yes  | None          | Google AI Studio API key. Essential for vision panel detection, image descriptions, and OCR.                                                        |
+| **`HUGGINGFACE_API_KEY`** | Optional | None          | API token for fallback open-source translation/detection models.                                                                                    |
+| **`BACKEND_PORT`**        |  ✅ Yes  | None          | Port the unified FastAPI backend runs on (e.g. `5173`). Secondary fallback is `PORT` (for PaaS environments).                                       |
 | **`FRONTEND_PORT`**       |  ✅ Yes  | None          | Port the React/Vite development server runs on (e.g. `3000`). Required for local development; optional in production. Must be numeric, never a URL. |
-| **`APP_URL`**             |  ✅ Yes  | None          | Public URL of the hosted frontend (e.g. `http://localhost:3000` or `https://sonikoma.vercel.app`). Required in production. |
-| **`NODE_ENV`**            | Optional | `development` | Deployment environment state: `development` or `production`.                                 |
-| **`SLOW_REQ_MS`**         | Optional | `3000`        | Alert threshold (in ms) before requests are flagged as slow logs.                            |
-| **`RATE_LIMIT_RPM`**      | Optional | `120`         | Maximum request allocation count per minute per IP address.                                  |
-| **`REQ_TIMEOUT_MS`**      | Optional | `30000`       | Hard timeout limit for client HTTP calls before killing execution.                           |
-| **`API_VERSION`**         | Optional | None          | Version indicator injected into Express response headers.                                    |
-| **`MAINTENANCE_MODE`**    | Optional | `false`       | Set to `true` to immediately block all routes with a `503 Service Unavailable`.              |
-| **`STANDALONE_SERVER`**   | Optional | `false`       | Run as an API-only server without starting the Vite asset bundling pipeline.                 |
-| **`DISABLE_HMR`**         | Optional | `false`       | Disables Hot Module Replacement in the Vite development UI.                                  |
-| **`DATABASE_URL`**        | Optional | Auto-created  | Custom directory target path override for SQLite DB mapping.                                 |
+| **`APP_URL`**             |  ✅ Yes  | None          | Public URL of the hosted frontend (e.g. `http://localhost:3000` or `https://sonikoma.vercel.app`). Required in production.                          |
+| **`NODE_ENV`**            | Optional | `development` | Deployment environment state: `development` or `production`.                                                                                        |
+| **`SLOW_REQ_MS`**         | Optional | `3000`        | Alert threshold (in ms) before requests are flagged as slow logs.                                                                                   |
+| **`RATE_LIMIT_RPM`**      | Optional | `120`         | Maximum request allocation count per minute per IP address.                                                                                         |
+| **`REQ_TIMEOUT_MS`**      | Optional | `30000`       | Hard timeout limit for client HTTP calls before killing execution.                                                                                  |
+| **`API_VERSION`**         | Optional | None          | Version indicator injected into Express response headers.                                                                                           |
+| **`MAINTENANCE_MODE`**    | Optional | `false`       | Set to `true` to immediately block all routes with a `503 Service Unavailable`.                                                                     |
+| **`STANDALONE_SERVER`**   | Optional | `false`       | Run as an API-only server without starting the Vite asset bundling pipeline.                                                                        |
+| **`DISABLE_HMR`**         | Optional | `false`       | Disables Hot Module Replacement in the Vite development UI.                                                                                         |
+| **`DATABASE_URL`**        | Optional | Auto-created  | Custom directory target path override for SQLite DB mapping.                                                                                        |
 
 ---
 

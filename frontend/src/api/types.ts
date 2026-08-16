@@ -180,7 +180,12 @@ export interface ScrapeChapterPayload {
 // Unified Job Types
 // ============================================================================
 
-export type JobStatus = "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED" | "CANCELLED";
+export type JobStatus =
+  | "QUEUED"
+  | "RUNNING"
+  | "COMPLETED"
+  | "FAILED"
+  | "CANCELLED";
 
 export type JobType =
   // Scraping
@@ -256,5 +261,3 @@ export interface JobRecord<T = any> {
   } | null;
   metadata?: Record<string, any>;
 }
-
-

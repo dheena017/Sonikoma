@@ -1,6 +1,7 @@
 # 🎯 Strategic Refactoring & Milestone Plan
 
 ## Executive Summary
+
 This document outlines a structured, risk-mitigated plan for refactoring the **Sonikoma** enterprise codebase.
 
 The primary goals of this plan are to reduce technical debt, improve code maintainability, and enhance developer velocity—all while strictly preserving current business logic, database integrity, and API contracts.
@@ -10,8 +11,9 @@ The primary goals of this plan are to reduce technical debt, improve code mainta
 ## 📊 Overall Repository Score: 8.0 / 10
 
 The Sonikoma repository is highly mature, feature-rich, and stable. Its score is driven by:
-* **Strengths**: A robust, containerizable multi-layer rendering architecture; advanced Web Audio & HTML5 canvas synchronizations; and a clean data segregation strategy.
-* **Opportunities**: The primary opportunities for improvement lie in decomposing monolithic files (such as `db.py`, `ai_routes.py`, and `App.tsx`) and standardizing service patterns.
+
+- **Strengths**: A robust, containerizable multi-layer rendering architecture; advanced Web Audio & HTML5 canvas synchronizations; and a clean data segregation strategy.
+- **Opportunities**: The primary opportunities for improvement lie in decomposing monolithic files (such as `db.py`, `ai_routes.py`, and `App.tsx`) and standardizing service patterns.
 
 ---
 
@@ -20,6 +22,7 @@ The Sonikoma repository is highly mature, feature-rich, and stable. Its score is
 The following high-impact refactorings can be completed with minimal risk and effort:
 
 ### 🚀 Codebase Simplifications (1–15)
+
 1. Delete the unreferenced file `frontend/src/utils/supabase.ts`.
 2. Move developer-specific validation scripts from `backend/python/scripts/*` to `scratch/` or `tests/`.
 3. Consolidate duplicative logos `logo.png` and `logo-dark.png` under a single image.
@@ -37,6 +40,7 @@ The following high-impact refactorings can be completed with minimal risk and ef
 15. Standardize API success response formats across all Python routes.
 
 ### 🎨 Frontend Layout Cleanups (16–35)
+
 16. Move the sub-sections of `ProfilePage.tsx` into modular tab components.
 17. Isolate the profile billing and invoice ledger components into their own files.
 18. Extract modal dialog overlays from `App.tsx` into a modular `DialogProvider`.
@@ -59,6 +63,7 @@ The following high-impact refactorings can be completed with minimal risk and ef
 35. Move sound outro configurations out of the AI Optimizer panel.
 
 ### 🛡️ Security & Performance Enhancements (36–50)
+
 36. Enforce strict type checking on the FastAPI request validation schema.
 37. Set secure HTTP-only options on session cookie declarations.
 38. Add a request rate-limiting header block on all static media requests.
@@ -131,24 +136,28 @@ We recommend executing this refactoring in **four structured milestones** to ens
 ```
 
 ### Milestone 1: Environment & Tooling (Week 1)
+
 - **Objective**: Standardize build steps and ensure the test suite passes out-of-the-box.
 - **Tasks**:
   - Isolate and lock python dependencies using `pip-tools`.
   - Add CPU-only mock layers to the unittest suite to enable continuous integration (CI) execution without specialized deep-learning hardware.
 
 ### Milestone 2: Frontend Layout Modularization (Week 2)
+
 - **Objective**: Decompose large files (App.tsx, ProfilePage.tsx) to improve readability and build performance.
 - **Tasks**:
   - Extract child views and tabs out of `ProfilePage.tsx` and `AIModelsPage.tsx`.
   - Migrate inline modal dialog definitions in `App.tsx` to a global, state-driven dialog manager.
 
 ### Milestone 3: Route & Logic Decoupling (Week 3)
+
 - **Objective**: Separate API route handling from business and processing logic.
 - **Tasks**:
   - Extract processing logic out of `ai_routes.py` and `image_routes.py` into dedicated service files.
   - Standardize error responses and path-validation context managers across all routers.
 
 ### Milestone 4: Database Repository Migration (Week 4)
+
 - **Objective**: Improve database type-safety and eliminate dual SQL maintenance overhead.
 - **Tasks**:
   - Transition from raw SQL queries in `db.py` to type-safe **SQLAlchemy** or **SQLModel** structures.

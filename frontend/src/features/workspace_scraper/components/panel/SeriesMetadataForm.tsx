@@ -59,7 +59,15 @@ export const SeriesMetadataForm: React.FC<SeriesMetadataFormProps> = ({
         if (item.genre) genres.add(item.genre.trim());
       });
       if (genres.size === 0) {
-        ["Action", "Fantasy", "Romance", "Comedy", "Drama", "Thriller", "Slice of Life"].forEach((g) => genres.add(g));
+        [
+          "Action",
+          "Fantasy",
+          "Romance",
+          "Comedy",
+          "Drama",
+          "Thriller",
+          "Slice of Life",
+        ].forEach((g) => genres.add(g));
       }
       return Array.from(genres).slice(0, 8);
     } catch {
@@ -69,10 +77,16 @@ export const SeriesMetadataForm: React.FC<SeriesMetadataFormProps> = ({
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (titleContainerRef.current && !titleContainerRef.current.contains(event.target as Node)) {
+      if (
+        titleContainerRef.current &&
+        !titleContainerRef.current.contains(event.target as Node)
+      ) {
         setShowTitleSuggestions(false);
       }
-      if (genreContainerRef.current && !genreContainerRef.current.contains(event.target as Node)) {
+      if (
+        genreContainerRef.current &&
+        !genreContainerRef.current.contains(event.target as Node)
+      ) {
         setShowGenreSuggestions(false);
       }
     };
@@ -110,11 +124,15 @@ export const SeriesMetadataForm: React.FC<SeriesMetadataFormProps> = ({
                   type="button"
                   onClick={() => {
                     setSeriesTitle?.(series.title);
-                    if (setScrapedGenre && series.genre) setScrapedGenre(series.genre);
+                    if (setScrapedGenre && series.genre)
+                      setScrapedGenre(series.genre);
                     if (setTargetUrl && series.url) setTargetUrl(series.url);
-                    if (setSeriesCoverImage && series.cover_image) setSeriesCoverImage(series.cover_image);
-                    if (setSeriesAuthor && series.author) setSeriesAuthor(series.author);
-                    if (setSeriesSynopsis && series.synopsis) setSeriesSynopsis(series.synopsis);
+                    if (setSeriesCoverImage && series.cover_image)
+                      setSeriesCoverImage(series.cover_image);
+                    if (setSeriesAuthor && series.author)
+                      setSeriesAuthor(series.author);
+                    if (setSeriesSynopsis && series.synopsis)
+                      setSeriesSynopsis(series.synopsis);
                     setShowTitleSuggestions(false);
                   }}
                   className="w-full px-4 py-2.5 hover:bg-neutral-900/60 flex items-center gap-2 transition-colors text-left text-xs font-bold text-neutral-350 cursor-pointer"
@@ -132,7 +150,11 @@ export const SeriesMetadataForm: React.FC<SeriesMetadataFormProps> = ({
                   )}
                   <div className="flex-grow min-w-0">
                     <div className="truncate">{series.title}</div>
-                    {series.genre && <div className="text-[9px] text-neutral-500 font-mono">{series.genre}</div>}
+                    {series.genre && (
+                      <div className="text-[9px] text-neutral-500 font-mono">
+                        {series.genre}
+                      </div>
+                    )}
                   </div>
                 </button>
               ))}

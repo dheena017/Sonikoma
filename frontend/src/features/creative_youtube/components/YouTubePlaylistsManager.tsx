@@ -49,7 +49,11 @@ export interface PlaylistData {
 }
 
 interface YouTubePlaylistsManagerProps {
-  onWatchVideo?: (videoId: string, video: YouTubeVideoItem, playlistId?: string) => void;
+  onWatchVideo?: (
+    videoId: string,
+    video: YouTubeVideoItem,
+    playlistId?: string
+  ) => void;
   onNavigateStudio?: () => void;
 }
 
@@ -64,16 +68,22 @@ export default function YouTubePlaylistsManager({
   const [sortBy, setSortBy] = useState<"items" | "newest" | "alpha">("items");
 
   // View state: "gallery" | "detail" | "create"
-  const [currentView, setCurrentView] = useState<"gallery" | "detail" | "create">("gallery");
+  const [currentView, setCurrentView] = useState<
+    "gallery" | "detail" | "create"
+  >("gallery");
 
   // Selected Playlist for Dedicated Detail View
-  const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistData | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<PlaylistData | null>(
+    null
+  );
   const [selectedVideos, setSelectedVideos] = useState<PlaylistItem[]>([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const getToken = () =>
-    localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+    localStorage.getItem("sonikoma_token") ||
+    localStorage.getItem("token") ||
+    "";
 
   const fetchPlaylists = async () => {
     setIsLoading(true);
@@ -103,9 +113,12 @@ export default function YouTubePlaylistsManager({
     setCurrentView("detail");
     setLoadingVideos(true);
     try {
-      const res = await fetch(`/api/export/youtube/playlist/${playlist.id}/items`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
+      const res = await fetch(
+        `/api/export/youtube/playlist/${playlist.id}/items`,
+        {
+          headers: { Authorization: `Bearer ${getToken()}` },
+        }
+      );
       if (res.ok) {
         const data = await res.json();
         setSelectedVideos(data.items || []);
@@ -172,17 +185,24 @@ export default function YouTubePlaylistsManager({
   const filteredPlaylists = useMemo(() => {
     let list = [...playlists];
     if (privacyFilter !== "all") {
-      list = list.filter((p) => (p.privacy || "public").toLowerCase() === privacyFilter);
+      list = list.filter(
+        (p) => (p.privacy || "public").toLowerCase() === privacyFilter
+      );
     }
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter(
-        (p) => p.title?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
+        (p) =>
+          p.title?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q)
       );
     }
     list.sort((a, b) => {
       if (sortBy === "newest") {
-        return new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime();
+        return (
+          new Date(b.published_at || 0).getTime() -
+          new Date(a.published_at || 0).getTime()
+        );
       }
       if (sortBy === "alpha") {
         return (a.title || "").localeCompare(b.title || "");
@@ -346,11 +366,15 @@ export default function YouTubePlaylistsManager({
           {loadingVideos ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
               <Loader2 className="w-7 h-7 text-purple-400 animate-spin" />
-              <p className="text-xs text-neutral-400 font-mono">Loading playlist items…</p>
+              <p className="text-xs text-neutral-400 font-mono">
+                Loading playlist items…
+              </p>
             </div>
           ) : selectedVideos.length === 0 ? (
             <div className="p-12 text-center border border-neutral-800/60 rounded-2xl bg-neutral-950/40">
-              <p className="text-xs text-neutral-500 font-mono">No videos found in this playlist.</p>
+              <p className="text-xs text-neutral-500 font-mono">
+                No videos found in this playlist.
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -365,7 +389,11 @@ export default function YouTubePlaylistsManager({
                   </span>
 
                   <div className="relative w-24 sm:w-28 aspect-video bg-black rounded-xl overflow-hidden shrink-0 border border-neutral-800">
-                    <img src={vid.thumbnail} alt={vid.title} className="w-full h-full object-cover" />
+                    <img
+                      src={vid.thumbnail}
+                      alt={vid.title}
+                      className="w-full h-full object-cover"
+                    />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
                       <Play className="w-4 h-4 text-white fill-white" />
                     </div>
@@ -420,7 +448,8 @@ export default function YouTubePlaylistsManager({
               </span>
             </div>
             <p className="text-xs text-neutral-400 font-mono">
-              Curate, organize, and publish binge-worthy episode playlists on YouTube
+              Curate, organize, and publish binge-worthy episode playlists on
+              YouTube
             </p>
           </div>
         </div>
@@ -428,7 +457,8 @@ export default function YouTubePlaylistsManager({
         {/* Actions & Stats */}
         <div className="flex items-center gap-3 flex-wrap">
           <div className="px-4 py-2 bg-neutral-950/80 border border-neutral-800 rounded-2xl text-xs font-mono text-purple-300 font-bold">
-            <span className="text-white">{totalVideosInPlaylists}</span> total curated videos
+            <span className="text-white">{totalVideosInPlaylists}</span> total
+            curated videos
           </div>
 
           <button
@@ -445,7 +475,11 @@ export default function YouTubePlaylistsManager({
             className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm"
             title="Refresh Playlists"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin text-purple-400" : ""}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${
+                isLoading ? "animate-spin text-purple-400" : ""
+              }`}
+            />
           </button>
         </div>
       </div>
@@ -503,8 +537,9 @@ export default function YouTubePlaylistsManager({
 
         <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 pt-2 border-t border-neutral-800/60">
           <span>
-            Showing <strong className="text-white">{filteredPlaylists.length}</strong> of{" "}
-            <strong>{playlists.length}</strong> playlists
+            Showing{" "}
+            <strong className="text-white">{filteredPlaylists.length}</strong>{" "}
+            of <strong>{playlists.length}</strong> playlists
           </span>
           {(search || privacyFilter !== "all") && (
             <button
@@ -524,14 +559,17 @@ export default function YouTubePlaylistsManager({
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-          <p className="text-xs text-neutral-400 font-mono">Loading playlists from YouTube…</p>
+          <p className="text-xs text-neutral-400 font-mono">
+            Loading playlists from YouTube…
+          </p>
         </div>
       ) : filteredPlaylists.length === 0 ? (
         <div className="p-16 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
           <ListVideo className="w-12 h-12 text-neutral-600 mx-auto" />
           <h3 className="text-sm font-bold text-white">No playlists found</h3>
           <p className="text-xs text-neutral-500 font-mono max-w-sm mx-auto">
-            Organize your episodes into bingeable playlists to increase channel watch time and SEO rankings.
+            Organize your episodes into bingeable playlists to increase channel
+            watch time and SEO rankings.
           </p>
           <button
             onClick={() => setCurrentView("create")}
@@ -564,7 +602,9 @@ export default function YouTubePlaylistsManager({
                 {/* Video Count Sidebar Overlay */}
                 <div className="absolute inset-y-0 right-0 w-24 bg-black/85 backdrop-blur-md border-l border-white/10 flex flex-col items-center justify-center gap-1 text-white">
                   <Layers className="w-4 h-4 text-purple-400" />
-                  <span className="text-xs font-black font-mono">{pl.item_count ?? "?"}</span>
+                  <span className="text-xs font-black font-mono">
+                    {pl.item_count ?? "?"}
+                  </span>
                   <span className="text-[8px] font-mono uppercase tracking-wider text-neutral-400">
                     Videos
                   </span>
@@ -614,7 +654,11 @@ export default function YouTubePlaylistsManager({
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={(e) =>
-                        handleCopyLink(`https://youtube.com/playlist?list=${pl.id}`, pl.id, e)
+                        handleCopyLink(
+                          `https://youtube.com/playlist?list=${pl.id}`,
+                          pl.id,
+                          e
+                        )
                       }
                       className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
                       title="Copy Playlist URL"

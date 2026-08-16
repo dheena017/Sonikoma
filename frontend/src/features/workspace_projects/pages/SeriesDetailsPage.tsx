@@ -51,8 +51,12 @@ export default function SeriesDetailsPage({
 
   // Filter, Search, Sort & View states
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "ready">("all");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "panels" | "alphabetical">("newest");
+  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "ready">(
+    "all"
+  );
+  const [sortBy, setSortBy] = useState<
+    "newest" | "oldest" | "panels" | "alphabetical"
+  >("newest");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -65,7 +69,8 @@ export default function SeriesDetailsPage({
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [isReaderModalOpen, setIsReaderModalOpen] = useState(false);
 
-  const seriesSlug = window.location.pathname.split("/projects/")[1]?.split("/")[0] || "";
+  const seriesSlug =
+    window.location.pathname.split("/projects/")[1]?.split("/")[0] || "";
 
   const actions = useProjectsActions();
 
@@ -87,7 +92,10 @@ export default function SeriesDetailsPage({
         const allSeries = groupProjectsIntoSeries(allProjects);
 
         const foundSeries = allSeries.find(
-          (s) => s.slug === seriesSlug || s.id === seriesSlug || s.slug.toLowerCase() === seriesSlug.toLowerCase()
+          (s) =>
+            s.slug === seriesSlug ||
+            s.id === seriesSlug ||
+            s.slug.toLowerCase() === seriesSlug.toLowerCase()
         );
 
         if (foundSeries) {
@@ -97,7 +105,9 @@ export default function SeriesDetailsPage({
         }
       } catch (err: any) {
         console.error("Failed to fetch series details", err);
-        setError(err.message || "An error occurred while loading series details.");
+        setError(
+          err.message || "An error occurred while loading series details."
+        );
       } finally {
         setLoading(false);
       }
@@ -119,7 +129,9 @@ export default function SeriesDetailsPage({
 
   const readyChaptersCount = useMemo(() => {
     if (!series) return 0;
-    return series.chapters.filter((c) => c.status && c.status.toLowerCase() !== "draft").length;
+    return series.chapters.filter(
+      (c) => c.status && c.status.toLowerCase() !== "draft"
+    ).length;
   }, [series]);
 
   const draftChaptersCount = useMemo(() => {
@@ -145,7 +157,9 @@ export default function SeriesDetailsPage({
 
     // Status filter
     if (statusFilter === "draft") {
-      list = list.filter((c) => !c.status || c.status.toLowerCase() === "draft");
+      list = list.filter(
+        (c) => !c.status || c.status.toLowerCase() === "draft"
+      );
     } else if (statusFilter === "ready") {
       list = list.filter((c) => c.status && c.status.toLowerCase() !== "draft");
     }
@@ -153,10 +167,14 @@ export default function SeriesDetailsPage({
     // Sorting
     list.sort((a, b) => {
       if (sortBy === "newest") {
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
       }
       if (sortBy === "oldest") {
-        return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        return (
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
       }
       if (sortBy === "panels") {
         return (b.panels_count || 0) - (a.panels_count || 0);
@@ -188,17 +206,20 @@ export default function SeriesDetailsPage({
     if (!series || series.chapters.length === 0) return;
     const firstChapterId = series.chapters[0].project_id;
     try {
-      const res = await fetchWithInterceptor(`/api/projects/${firstChapterId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: updated.title,
-          author: updated.author,
-          genre: updated.genre,
-          synopsis: updated.synopsis,
-          cover_image: updated.cover,
-        }),
-      });
+      const res = await fetchWithInterceptor(
+        `/api/projects/${firstChapterId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: updated.title,
+            author: updated.author,
+            genre: updated.genre,
+            synopsis: updated.synopsis,
+            cover_image: updated.cover,
+          }),
+        }
+      );
       if (res.ok) {
         setSeries((prev) =>
           prev
@@ -221,7 +242,9 @@ export default function SeriesDetailsPage({
   // Toggle selection for batch operations
   const toggleSelectChapter = (projectId: string) => {
     setSelectedProjectIds((prev) =>
-      prev.includes(projectId) ? prev.filter((id) => id !== projectId) : [...prev, projectId]
+      prev.includes(projectId)
+        ? prev.filter((id) => id !== projectId)
+        : [...prev, projectId]
     );
   };
 
@@ -244,8 +267,12 @@ export default function SeriesDetailsPage({
         <div className="w-16 h-16 rounded-3xl bg-rose-950/40 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 shadow-xl">
           <AlertCircle className="h-8 w-8" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">Unable to load this series</h3>
-        <p className="text-neutral-400 mb-6 font-mono max-w-md text-center text-xs">{error}</p>
+        <h3 className="text-xl font-bold text-white mb-2">
+          Unable to load this series
+        </h3>
+        <p className="text-neutral-400 mb-6 font-mono max-w-md text-center text-xs">
+          {error}
+        </p>
         <div className="flex gap-4">
           <button
             onClick={() => window.location.reload()}
@@ -293,7 +320,11 @@ export default function SeriesDetailsPage({
                 : "bg-neutral-900/80 border-white/10 text-neutral-400 hover:text-white hover:bg-neutral-850"
             }`}
           >
-            <Star className={`w-3.5 h-3.5 ${isFavorite ? "fill-amber-400 text-amber-400" : ""}`} />
+            <Star
+              className={`w-3.5 h-3.5 ${
+                isFavorite ? "fill-amber-400 text-amber-400" : ""
+              }`}
+            />
             <span>{isFavorite ? "Favorited" : "Favorite"}</span>
           </button>
 
@@ -331,7 +362,9 @@ export default function SeriesDetailsPage({
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-955">
                 <FolderOpen className="w-12 h-12 text-purple-400/50" />
-                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">No Cover</span>
+                <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
+                  No Cover
+                </span>
               </div>
             )}
             <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[9px] font-extrabold font-mono text-purple-300 uppercase tracking-wider">
@@ -434,9 +467,12 @@ export default function SeriesDetailsPage({
             <Layers className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-black text-white font-sans">{series.chapterCount}</div>
+            <div className="text-2xl font-black text-white font-sans">
+              {series.chapterCount}
+            </div>
             <div className="text-xs text-neutral-400 font-mono">
-              Total Chapters ({readyChaptersCount} Ready · {draftChaptersCount} Draft)
+              Total Chapters ({readyChaptersCount} Ready · {draftChaptersCount}{" "}
+              Draft)
             </div>
           </div>
         </div>
@@ -446,8 +482,12 @@ export default function SeriesDetailsPage({
             <Zap className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-black text-white font-sans">{totalPanels}</div>
-            <div className="text-xs text-neutral-400 font-mono">Comic Panels Extracted</div>
+            <div className="text-2xl font-black text-white font-sans">
+              {totalPanels}
+            </div>
+            <div className="text-xs text-neutral-400 font-mono">
+              Comic Panels Extracted
+            </div>
           </div>
         </div>
 
@@ -456,8 +496,12 @@ export default function SeriesDetailsPage({
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-2xl font-black text-white font-sans">~{estimatedRuntimeMinutes}m</div>
-            <div className="text-xs text-neutral-400 font-mono">Estimated Reel Duration</div>
+            <div className="text-2xl font-black text-white font-sans">
+              ~{estimatedRuntimeMinutes}m
+            </div>
+            <div className="text-xs text-neutral-400 font-mono">
+              Estimated Reel Duration
+            </div>
           </div>
         </div>
 
@@ -467,9 +511,14 @@ export default function SeriesDetailsPage({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-xs text-neutral-400 font-mono">Health Score</span>
+              <span className="text-xs text-neutral-400 font-mono">
+                Health Score
+              </span>
               <span className="text-xs font-bold text-indigo-400 font-mono">
-                {Math.round((readyChaptersCount / Math.max(1, series.chapterCount)) * 100)}%
+                {Math.round(
+                  (readyChaptersCount / Math.max(1, series.chapterCount)) * 100
+                )}
+                %
               </span>
             </div>
             <div className="w-full h-2 rounded-full bg-neutral-955 overflow-hidden border border-neutral-800">
@@ -477,7 +526,8 @@ export default function SeriesDetailsPage({
                 className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
                 style={{
                   width: `${Math.round(
-                    (readyChaptersCount / Math.max(1, series.chapterCount)) * 100
+                    (readyChaptersCount / Math.max(1, series.chapterCount)) *
+                      100
                   )}%`,
                 }}
               />
@@ -546,7 +596,9 @@ export default function SeriesDetailsPage({
             <button
               onClick={() => setViewMode("grid")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === "grid" ? "bg-neutral-800 text-white" : "text-neutral-500 hover:text-white"
+                viewMode === "grid"
+                  ? "bg-neutral-800 text-white"
+                  : "text-neutral-500 hover:text-white"
               }`}
               title="Grid View"
             >
@@ -555,7 +607,9 @@ export default function SeriesDetailsPage({
             <button
               onClick={() => setViewMode("list")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-                viewMode === "list" ? "bg-neutral-800 text-white" : "text-neutral-500 hover:text-white"
+                viewMode === "list"
+                  ? "bg-neutral-800 text-white"
+                  : "text-neutral-500 hover:text-white"
               }`}
               title="List View"
             >
@@ -594,7 +648,12 @@ export default function SeriesDetailsPage({
                       () => {
                         setSeries((prev) =>
                           prev
-                            ? { ...prev, chapters: prev.chapters.filter((c) => c.project_id !== pid) }
+                            ? {
+                                ...prev,
+                                chapters: prev.chapters.filter(
+                                  (c) => c.project_id !== pid
+                                ),
+                              }
                             : null
                         );
                       },
@@ -629,7 +688,11 @@ export default function SeriesDetailsPage({
                   )}
                   <div className="w-14 h-14 rounded-xl overflow-hidden bg-neutral-955 border border-neutral-800 shrink-0">
                     {chapter.cover_image ? (
-                      <img src={chapter.cover_image} alt={chapter.title} className="w-full h-full object-cover" />
+                      <img
+                        src={chapter.cover_image}
+                        alt={chapter.title}
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-neutral-600 font-mono text-[10px]">
                         N/A
@@ -678,7 +741,9 @@ export default function SeriesDetailsPage({
           <div className="w-16 h-16 rounded-3xl bg-neutral-900 border border-white/5 flex items-center justify-center text-neutral-500 mb-4">
             <FolderOpen className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-2">No chapters match criteria</h3>
+          <h3 className="text-lg font-bold text-white mb-2">
+            No chapters match criteria
+          </h3>
           <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
             Try adjusting your search query or status filter.
           </p>

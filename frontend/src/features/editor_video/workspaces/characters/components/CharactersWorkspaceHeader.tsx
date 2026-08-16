@@ -1,6 +1,9 @@
 import React from "react";
 import { Users, Plus } from "lucide-react";
-import { WorkspaceLayoutTabs, WorkspaceLayoutSearch } from "../../../shared/WorkspaceLayout";
+import {
+  WorkspaceLayoutTabs,
+  WorkspaceLayoutSearch,
+} from "../../../shared/WorkspaceLayout";
 
 interface CharactersWorkspaceHeaderProps {
   characterCount: number;
@@ -12,7 +15,9 @@ interface CharactersWorkspaceHeaderProps {
   onSearchChange: (val: string) => void;
 }
 
-export const CharactersWorkspaceHeader: React.FC<CharactersWorkspaceHeaderProps> = ({
+export const CharactersWorkspaceHeader: React.FC<
+  CharactersWorkspaceHeaderProps
+> = ({
   characterCount,
   onAddCharacter,
   tabs,
@@ -29,7 +34,9 @@ export const CharactersWorkspaceHeader: React.FC<CharactersWorkspaceHeaderProps>
             <Users className="h-4.5 w-4.5 text-indigo-300" />
           </div>
           <div className="min-w-0 space-y-0.5">
-            <h2 className="text-[11px] font-black text-white uppercase tracking-[0.28em] font-mono truncate">Characters Roster</h2>
+            <h2 className="text-[11px] font-black text-white uppercase tracking-[0.28em] font-mono truncate">
+              Characters Roster
+            </h2>
             <p className="text-[10px] text-neutral-300 font-mono truncate max-w-xs">
               Manage your cast, expressions, and pose presets.
             </p>
@@ -44,9 +51,17 @@ export const CharactersWorkspaceHeader: React.FC<CharactersWorkspaceHeaderProps>
         </button>
       </div>
       <div className="px-3.5 pt-3 pb-2">
-        <WorkspaceLayoutTabs tabs={tabs} activeTab={activeTab} onSelectTab={onSelectTab} />
+        <WorkspaceLayoutTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onSelectTab={onSelectTab}
+        />
       </div>
-      <WorkspaceLayoutSearch value={searchQuery} onChange={onSearchChange} placeholder="Search characters..." />
+      <WorkspaceLayoutSearch
+        value={searchQuery}
+        onChange={onSearchChange}
+        placeholder="Search characters..."
+      />
     </div>
   );
 };

@@ -39,11 +39,17 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
 
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}?project_id=${encodeURIComponent(project.project_id)}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${
+          project.chapter_slug
+        }?project_id=${encodeURIComponent(project.project_id)}${
+          jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
+        }`
       );
     } else if (jobId) {
       (window as any).navigateTo?.(
-        `/scraper/editor?project_id=${encodeURIComponent(project.project_id)}&job_id=${encodeURIComponent(jobId)}`
+        `/scraper/editor?project_id=${encodeURIComponent(
+          project.project_id
+        )}&job_id=${encodeURIComponent(jobId)}`
       );
     } else {
       (window as any).navigateTo?.(
@@ -59,7 +65,9 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
       await useProjectStore.getState().hydrateActiveProject(project.project_id);
 
       const nav = (window as any).navigateTo;
-      const targetUrl = `/creative-suite?project_id=${encodeURIComponent(project.project_id)}`;
+      const targetUrl = `/creative-suite?project_id=${encodeURIComponent(
+        project.project_id
+      )}`;
       if (typeof nav === "function") {
         nav(targetUrl);
       } else {
@@ -75,11 +83,15 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
     const jobId = project.job_id;
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${
+          project.chapter_slug
+        }${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
       );
     } else {
       (window as any).navigateTo?.(
-        `/scraper/editor?project_id=${project.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`
+        `/scraper/editor?project_id=${project.project_id}${
+          jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
+        }`
       );
     }
   }, []);
@@ -97,10 +109,16 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
     const jobId = project.job_id;
     if (project.series_slug && project.chapter_slug) {
       (window as any).navigateTo?.(
-        `/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
+        `/scraper/editor/series/${project.series_slug}/chapters/${
+          project.chapter_slug
+        }${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
       );
     } else {
-      (window as any).navigateTo?.(`/scraper/editor?project_id=${project.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`);
+      (window as any).navigateTo?.(
+        `/scraper/editor?project_id=${project.project_id}${
+          jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
+        }`
+      );
     }
   }, []);
 
@@ -109,8 +127,14 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
     const jobId = project.job_id;
     const url =
       project.series_slug && project.chapter_slug
-        ? `${window.location.origin}/scraper/editor/series/${project.series_slug}/chapters/${project.chapter_slug}${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
-        : `${window.location.origin}/scraper?project_id=${project.project_id}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`;
+        ? `${window.location.origin}/scraper/editor/series/${
+            project.series_slug
+          }/chapters/${project.chapter_slug}${
+            jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""
+          }`
+        : `${window.location.origin}/scraper?project_id=${project.project_id}${
+            jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
+          }`;
     navigator.clipboard.writeText(url);
     (window as any).alertAsync?.(
       "Link copied to clipboard!",

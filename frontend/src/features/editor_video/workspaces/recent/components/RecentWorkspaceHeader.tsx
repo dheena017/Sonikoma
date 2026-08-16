@@ -1,6 +1,9 @@
 import React from "react";
 import { History } from "lucide-react";
-import { WorkspaceLayoutTabs, WorkspaceLayoutSearch } from "../../../shared/WorkspaceLayout";
+import {
+  WorkspaceLayoutTabs,
+  WorkspaceLayoutSearch,
+} from "../../../shared/WorkspaceLayout";
 
 interface RecentWorkspaceHeaderProps {
   tabs: string[];
@@ -35,16 +38,26 @@ export const RecentWorkspaceHeader: React.FC<RecentWorkspaceHeaderProps> = ({
           </div>
         </div>
         <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-purple-100 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/25 shadow-sm">
-          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-purple-300/15 text-purple-300">🕒</span>
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-purple-300/15 text-purple-300">
+            🕒
+          </span>
           Log
         </span>
       </div>
       {/* Tabs row */}
       <div className="px-3.5 pt-3 pb-2">
-        <WorkspaceLayoutTabs tabs={tabs} activeTab={activeTab} onSelectTab={onSelectTab} />
+        <WorkspaceLayoutTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onSelectTab={onSelectTab}
+        />
       </div>
       {/* Search row */}
-      <WorkspaceLayoutSearch value={searchQuery} onChange={onSearchChange} placeholder="Search recent assets..." />
+      <WorkspaceLayoutSearch
+        value={searchQuery}
+        onChange={onSearchChange}
+        placeholder="Search recent assets..."
+      />
     </div>
   );
 };

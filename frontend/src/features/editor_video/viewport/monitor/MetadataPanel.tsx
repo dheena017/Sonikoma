@@ -73,7 +73,8 @@ const VideoPreviewMetadataPanel = React.memo(
         if (
           btnRef.current?.contains(e.target as Node) ||
           dropdownRef.current?.contains(e.target as Node)
-        ) return;
+        )
+          return;
         setShowMore(false);
       }
       document.addEventListener("mousedown", handleClick);
@@ -148,16 +149,22 @@ const VideoPreviewMetadataPanel = React.memo(
               {/* SECTION 0: Track Specs & Info Card (for repositioned/hidden header badges) */}
               <div className="px-2.5 pt-1 text-[9px] font-black uppercase tracking-wider text-purple-400 font-mono flex items-center justify-between">
                 <span>Media Specs & Info</span>
-                <span className="text-[8px] text-neutral-500 font-normal">Track Details</span>
+                <span className="text-[8px] text-neutral-500 font-normal">
+                  Track Details
+                </span>
               </div>
 
               <div className="bg-neutral-900/90 rounded-xl p-2.5 border border-neutral-800/90 space-y-2">
                 {musicTheme && (
                   <div className="flex items-center justify-between gap-2 text-[11px]">
                     <span className="text-neutral-400 font-medium flex items-center gap-1.5 shrink-0">
-                      <Music className="h-3.5 w-3.5 text-purple-400" /> Soundtrack:
+                      <Music className="h-3.5 w-3.5 text-purple-400" />{" "}
+                      Soundtrack:
                     </span>
-                    <span className="font-mono text-purple-200 font-semibold truncate max-w-[140px]" title={musicTheme}>
+                    <span
+                      className="font-mono text-purple-200 font-semibold truncate max-w-[140px]"
+                      title={musicTheme}
+                    >
                       {musicTheme}
                     </span>
                   </div>
@@ -166,9 +173,13 @@ const VideoPreviewMetadataPanel = React.memo(
                 {voiceActor && (
                   <div className="flex items-center justify-between gap-2 text-[11px]">
                     <span className="text-neutral-400 font-medium flex items-center gap-1.5 shrink-0">
-                      <Mic className="h-3.5 w-3.5 text-indigo-400" /> Voice Actor:
+                      <Mic className="h-3.5 w-3.5 text-indigo-400" /> Voice
+                      Actor:
                     </span>
-                    <span className="font-mono text-indigo-200 font-semibold truncate max-w-[140px]" title={voiceActor}>
+                    <span
+                      className="font-mono text-indigo-200 font-semibold truncate max-w-[140px]"
+                      title={voiceActor}
+                    >
                       {voiceActor}
                     </span>
                   </div>
@@ -176,7 +187,8 @@ const VideoPreviewMetadataPanel = React.memo(
 
                 <div className="flex items-center justify-between gap-2 text-[11px]">
                   <span className="text-neutral-400 font-medium flex items-center gap-1.5 shrink-0">
-                    <Clapperboard className="h-3.5 w-3.5 text-cyan-400" /> Codec:
+                    <Clapperboard className="h-3.5 w-3.5 text-cyan-400" />{" "}
+                    Codec:
                   </span>
                   <span className="font-mono text-cyan-300 font-bold text-[10px] uppercase">
                     {codec}
@@ -205,7 +217,9 @@ const VideoPreviewMetadataPanel = React.memo(
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span>Download MP4</span>
-                  <span className="text-[9px] text-neutral-500 font-mono truncate">{downloadFilename}</span>
+                  <span className="text-[9px] text-neutral-500 font-mono truncate">
+                    {downloadFilename}
+                  </span>
                 </div>
               </a>
 
@@ -223,7 +237,9 @@ const VideoPreviewMetadataPanel = React.memo(
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span>Download Audio</span>
-                  <span className="text-[9px] text-neutral-500 font-mono truncate">{audioFilename}</span>
+                  <span className="text-[9px] text-neutral-500 font-mono truncate">
+                    {audioFilename}
+                  </span>
                 </div>
               </a>
 
@@ -248,8 +264,12 @@ const VideoPreviewMetadataPanel = React.memo(
                   )}
                 </span>
                 <div className="flex flex-col min-w-0">
-                  <span>{copiedUrl ? "Copied to Clipboard!" : "Copy Stream URL"}</span>
-                  <span className="text-[9px] text-neutral-500 font-mono truncate">{videoUrl}</span>
+                  <span>
+                    {copiedUrl ? "Copied to Clipboard!" : "Copy Stream URL"}
+                  </span>
+                  <span className="text-[9px] text-neutral-500 font-mono truncate">
+                    {videoUrl}
+                  </span>
                 </div>
               </button>
 
@@ -266,7 +286,9 @@ const VideoPreviewMetadataPanel = React.memo(
                     <Share2 className="h-3 w-3 text-emerald-400" />
                   )}
                 </span>
-                <span>{copiedShare ? "Project Link Copied!" : "Share Project Link"}</span>
+                <span>
+                  {copiedShare ? "Project Link Copied!" : "Share Project Link"}
+                </span>
               </button>
 
               {/* 5. Open Source in New Tab */}
@@ -300,7 +322,9 @@ const VideoPreviewMetadataPanel = React.memo(
                       <Youtube className="h-3 w-3 text-red-400" />
                     )}
                   </span>
-                  <span>{isPublishing ? "Publishing..." : "Publish to YouTube"}</span>
+                  <span>
+                    {isPublishing ? "Publishing..." : "Publish to YouTube"}
+                  </span>
                 </button>
               ) : (
                 <a

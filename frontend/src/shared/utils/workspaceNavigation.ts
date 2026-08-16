@@ -41,14 +41,19 @@ export interface ResolvedWorkspaceParams {
 
 export function parseWorkspaceParams(
   searchParams?: URLSearchParams | string | null,
-  options?: { projectId?: string | null; jobId?: string | null; storage?: Pick<Storage, "getItem"> | null }
+  options?: {
+    projectId?: string | null;
+    jobId?: string | null;
+    storage?: Pick<Storage, "getItem"> | null;
+  }
 ): ResolvedWorkspaceParams {
   const params =
     searchParams instanceof URLSearchParams
       ? searchParams
       : new URLSearchParams(searchParams || "");
 
-  const storage = options?.storage ??
+  const storage =
+    options?.storage ??
     (typeof window !== "undefined" ? window.localStorage : null);
 
   const explicitProjectId =
@@ -59,10 +64,7 @@ export function parseWorkspaceParams(
     null;
 
   const explicitJobId =
-    options?.jobId ??
-    params.get("job_id") ??
-    params.get("jobId") ??
-    null;
+    options?.jobId ?? params.get("job_id") ?? params.get("jobId") ?? null;
 
   let projectId: string | null = null;
   let jobId: string | null = null;
@@ -87,32 +89,35 @@ export function parseWorkspaceParams(
 export function resolveWorkspaceReturnPath(
   options: WorkspaceReturnPathOptions = {}
 ): string {
-  const { projectId: activeProjectId, jobId: activeJobId } = parseWorkspaceParams(
-    options.searchParams,
-    { projectId: options.projectId, jobId: options.jobId, storage: options.storage }
-  );
+  const { projectId: activeProjectId, jobId: activeJobId } =
+    parseWorkspaceParams(options.searchParams, {
+      projectId: options.projectId,
+      jobId: options.jobId,
+      storage: options.storage,
+    });
 
-  const storage = options.storage ??
+  const storage =
+    options.storage ??
     (typeof window !== "undefined" ? window.localStorage : null);
 
   const activeSeriesSlug =
-    options.seriesSlug ??
-    storage?.getItem("active_series_slug") ??
-    null;
+    options.seriesSlug ?? storage?.getItem("active_series_slug") ?? null;
 
   const activeChapterSlug =
-    options.chapterSlug ??
-    storage?.getItem("active_chapter_slug") ??
-    null;
+    options.chapterSlug ?? storage?.getItem("active_chapter_slug") ?? null;
 
   if (activeSeriesSlug && activeChapterSlug) {
-    const jobQuery = activeJobId ? `?job_id=${encodeURIComponent(activeJobId)}` : "";
+    const jobQuery = activeJobId
+      ? `?job_id=${encodeURIComponent(activeJobId)}`
+      : "";
     return `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}${jobQuery}`;
   }
 
   if (activeProjectId) {
     const query = activeJobId
-      ? `project_id=${encodeURIComponent(activeProjectId)}&job_id=${encodeURIComponent(activeJobId)}`
+      ? `project_id=${encodeURIComponent(
+          activeProjectId
+        )}&job_id=${encodeURIComponent(activeJobId)}`
       : `id=${encodeURIComponent(activeProjectId)}`;
 
     return activeProjectId.startsWith("temp_")

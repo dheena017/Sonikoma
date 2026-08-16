@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
-import { MARKETPLACE_SUB_TABS, MOCK_MARKETPLACE_PACKS } from "../../data/marketplaceData";
+import {
+  MARKETPLACE_SUB_TABS,
+  MOCK_MARKETPLACE_PACKS,
+} from "../../data/marketplaceData";
 import { MarketplaceWorkspaceHeader } from "./components/MarketplaceWorkspaceHeader";
 import { MarketplacePackCard } from "./components/MarketplacePackCard";
 import { MarketplaceFeaturedBanner } from "./components/MarketplaceFeaturedBanner";
@@ -9,7 +12,9 @@ interface MarketplaceWorkspaceProps {
   onTriggerFeedback: (msg: string) => void;
 }
 
-export const MarketplaceWorkspace: React.FC<MarketplaceWorkspaceProps> = ({ onTriggerFeedback }) => {
+export const MarketplaceWorkspace: React.FC<MarketplaceWorkspaceProps> = ({
+  onTriggerFeedback,
+}) => {
   const [activeTab, setActiveTab] = useState("Comic Packs");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -37,7 +42,11 @@ export const MarketplaceWorkspace: React.FC<MarketplaceWorkspaceProps> = ({ onTr
               key={pack.id}
               pack={pack}
               onPurchase={() =>
-                onTriggerFeedback(`${pack.price === "Free" ? "Downloaded" : "Purchased"}: ${pack.title}`)
+                onTriggerFeedback(
+                  `${pack.price === "Free" ? "Downloaded" : "Purchased"}: ${
+                    pack.title
+                  }`
+                )
               }
             />
           ))}

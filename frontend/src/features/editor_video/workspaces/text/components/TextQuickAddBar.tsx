@@ -4,7 +4,9 @@ interface TextQuickAddBarProps {
   onAddText: (type: string) => void;
 }
 
-export const TextQuickAddBar: React.FC<TextQuickAddBarProps> = ({ onAddText }) => {
+export const TextQuickAddBar: React.FC<TextQuickAddBarProps> = ({
+  onAddText,
+}) => {
   return (
     <div className="grid grid-cols-3 gap-1.5 pb-2 border-b border-neutral-800">
       <button

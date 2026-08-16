@@ -5,7 +5,7 @@ import {
   ChapterResult,
   ScrapeChapterPayload,
   JobRecord,
-  JobStatus
+  JobStatus,
 } from "../types";
 
 // ============================================================================
@@ -87,7 +87,9 @@ export const pollJobUntilComplete = async <T = any>(
  */
 export const createChapterScrapeJob = async (
   fetchWithInterceptor: FetchClient,
-  data: ScrapeChapterPayload | { url: string; project_id?: string; job_id?: string; [key: string]: any },
+  data:
+    | ScrapeChapterPayload
+    | { url: string; project_id?: string; job_id?: string; [key: string]: any },
   options?: RequestInit
 ): Promise<ApiResponse<JobRecord<ChapterResult>>> => {
   return apiRequest(fetchWithInterceptor, "/api/v1/scraper/chapter", {
@@ -104,12 +106,18 @@ export const createChapterScrapeJob = async (
  */
 export const scrapeChapter = async (
   fetchWithInterceptor: FetchClient,
-  data: ScrapeChapterPayload | { url: string; project_id?: string; job_id?: string; [key: string]: any },
+  data:
+    | ScrapeChapterPayload
+    | { url: string; project_id?: string; job_id?: string; [key: string]: any },
   onProgress?: (progress: number, stage: string) => void,
   options?: RequestInit
 ): Promise<ApiResponse<ChapterResult>> => {
   // 1. Submit Chapter Scrape Job
-  const jobResponse = await createChapterScrapeJob(fetchWithInterceptor, data, options);
+  const jobResponse = await createChapterScrapeJob(
+    fetchWithInterceptor,
+    data,
+    options
+  );
   const jobId = jobResponse.job_id;
 
   // 2. Poll until background extraction finishes
@@ -187,7 +195,11 @@ export const getSeriesEpisodes = async (
   data: SeriesEpisodesPayload,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  const job = await createEpisodeDiscoveryJob(fetchWithInterceptor, data, options);
+  const job = await createEpisodeDiscoveryJob(
+    fetchWithInterceptor,
+    data,
+    options
+  );
   if (job.status === "COMPLETED" && job.result) {
     return job.result;
   }
@@ -207,10 +219,19 @@ export const scrapeEpisodesAdvanced = async (
 
 export const scrapeEpisodesPaginated = async (
   fetchWithInterceptor: FetchClient,
-  data: { title_no: string; max_episodes?: number; project_id?: string; job_id?: string },
+  data: {
+    title_no: string;
+    max_episodes?: number;
+    project_id?: string;
+    job_id?: string;
+  },
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return getSeriesEpisodes(fetchWithInterceptor, { ...data, auto_paginate: true }, options);
+  return getSeriesEpisodes(
+    fetchWithInterceptor,
+    { ...data, auto_paginate: true },
+    options
+  );
 };
 
 export const batchScrapeSeriesAPI = async (
@@ -223,12 +244,16 @@ export const batchScrapeSeriesAPI = async (
   },
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  const job = await apiRequest<JobRecord>(fetchWithInterceptor, "/api/v1/scraper/series/batch", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
+  const job = await apiRequest<JobRecord>(
+    fetchWithInterceptor,
+    "/api/v1/scraper/series/batch",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      ...options,
+    }
+  );
   const finished = await pollJobUntilComplete(fetchWithInterceptor, job.job_id);
   return finished.result || finished;
 };
@@ -271,7 +296,12 @@ export const getBatchScrapeStatus = async (
 
 export const createPanelSplitJob = async (
   fetchWithInterceptor: FetchClient,
-  data: { url: string; project_id?: string; job_id?: string; min_panel_height?: number },
+  data: {
+    url: string;
+    project_id?: string;
+    job_id?: string;
+    min_panel_height?: number;
+  },
   options?: RequestInit
 ): Promise<ApiResponse<JobRecord>> => {
   return apiRequest(fetchWithInterceptor, "/api/v1/panels/split", {
@@ -284,7 +314,12 @@ export const createPanelSplitJob = async (
 
 export const splitVerticalStrip = async (
   fetchWithInterceptor: FetchClient,
-  data: { url: string; project_id?: string; job_id?: string; min_panel_height?: number },
+  data: {
+    url: string;
+    project_id?: string;
+    job_id?: string;
+    min_panel_height?: number;
+  },
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const job = await createPanelSplitJob(fetchWithInterceptor, data, options);
@@ -325,7 +360,13 @@ export const extractPanelDialogue = async (
 
 export const createExportJob = async (
   fetchWithInterceptor: FetchClient,
-  data: { url: string; project_id?: string; job_id?: string; format?: "cbz" | "zip"; limit?: number },
+  data: {
+    url: string;
+    project_id?: string;
+    job_id?: string;
+    format?: "cbz" | "zip";
+    limit?: number;
+  },
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   return apiRequest(fetchWithInterceptor, "/api/scraper/tools/export", {

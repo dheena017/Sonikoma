@@ -14,13 +14,9 @@ export interface VideoPreviewChaptersMenuProps {
   formatTime: (sec: number) => string;
 }
 
-export const VideoPreviewChaptersMenu: React.FC<VideoPreviewChaptersMenuProps> = ({
-  show,
-  chapters,
-  activeChapter,
-  onSelectChapter,
-  formatTime,
-}) => {
+export const VideoPreviewChaptersMenu: React.FC<
+  VideoPreviewChaptersMenuProps
+> = ({ show, chapters, activeChapter, onSelectChapter, formatTime }) => {
   if (!show) return null;
 
   return (

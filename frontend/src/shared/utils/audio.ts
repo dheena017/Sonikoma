@@ -52,7 +52,10 @@ export function stopAmbientBackgroundMusic() {
   }
 }
 
-export function duckAmbientBackgroundMusic(duck: boolean = true, duckRatio = 0.3) {
+export function duckAmbientBackgroundMusic(
+  duck: boolean = true,
+  duckRatio = 0.3
+) {
   if (!ambientGain || !audioCtx) return;
   const currentVal = ambientGain.gain.value;
   const target = duck ? currentVal * duckRatio : currentVal;

@@ -80,7 +80,9 @@ export default function ProjectsStats({
       {showTabs && (
         <div className="flex items-center gap-1.5 p-1.5 bg-[#0c0d16]/80 border border-white/10 rounded-full w-fit backdrop-blur-2xl">
           {statusTabs.map((tab) => {
-            const isActive = (statusFilter.toLowerCase() === tab.toLowerCase()) || (tab === "All" && !statusFilter);
+            const isActive =
+              statusFilter.toLowerCase() === tab.toLowerCase() ||
+              (tab === "All" && !statusFilter);
             return (
               <button
                 key={tab}

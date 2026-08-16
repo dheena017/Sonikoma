@@ -70,17 +70,23 @@ export default function YouTubeCreatePlaylistPanel({
 }: YouTubeCreatePlaylistPanelProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [privacy, setPrivacy] = useState<"public" | "unlisted" | "private">("public");
+  const [privacy, setPrivacy] = useState<"public" | "unlisted" | "private">(
+    "public"
+  );
 
   // Video Selection & Ordering
-  const [availableVideos, setAvailableVideos] = useState<YouTubeVideoItem[]>([]);
+  const [availableVideos, setAvailableVideos] = useState<YouTubeVideoItem[]>(
+    []
+  );
   const [loadingVideos, setLoadingVideos] = useState(true);
   const [selectedVideoIds, setSelectedVideoIds] = useState<string[]>([]);
   const [coverVideoId, setCoverVideoId] = useState<string | null>(null);
 
   // Search & Filter
   const [searchVideo, setSearchVideo] = useState("");
-  const [privacyFilter, setPrivacyFilter] = useState<"all" | "public" | "unlisted" | "private">("all");
+  const [privacyFilter, setPrivacyFilter] = useState<
+    "all" | "public" | "unlisted" | "private"
+  >("all");
 
   // AI Generation & Processing
   const [isAiGenerating, setIsAiGenerating] = useState(false);
@@ -89,7 +95,9 @@ export default function YouTubeCreatePlaylistPanel({
   const [createdResult, setCreatedResult] = useState<any | null>(null);
 
   const getToken = () =>
-    localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+    localStorage.getItem("sonikoma_token") ||
+    localStorage.getItem("token") ||
+    "";
 
   // Fetch channel videos for the picker
   useEffect(() => {
@@ -115,7 +123,10 @@ export default function YouTubeCreatePlaylistPanel({
 
   // Set default cover thumbnail to first selected video
   useEffect(() => {
-    if (selectedVideoIds.length > 0 && (!coverVideoId || !selectedVideoIds.includes(coverVideoId))) {
+    if (
+      selectedVideoIds.length > 0 &&
+      (!coverVideoId || !selectedVideoIds.includes(coverVideoId))
+    ) {
       setCoverVideoId(selectedVideoIds[0]);
     } else if (selectedVideoIds.length === 0) {
       setCoverVideoId(null);
@@ -176,8 +187,12 @@ export default function YouTubeCreatePlaylistPanel({
   const sortByViews = (order: "desc" | "asc") => {
     const videoMap = new Map(availableVideos.map((v) => [v.id, v]));
     const sorted = [...selectedVideoIds].sort((idA, idB) => {
-      const vA = parseInt(videoMap.get(idA)?.view_count?.replace(/,/g, "") || "0");
-      const vB = parseInt(videoMap.get(idB)?.view_count?.replace(/,/g, "") || "0");
+      const vA = parseInt(
+        videoMap.get(idA)?.view_count?.replace(/,/g, "") || "0"
+      );
+      const vB = parseInt(
+        videoMap.get(idB)?.view_count?.replace(/,/g, "") || "0"
+      );
       return order === "desc" ? vB - vA : vA - vB;
     });
     setSelectedVideoIds(sorted);
@@ -201,7 +216,9 @@ export default function YouTubeCreatePlaylistPanel({
   // Selected videos detailed items
   const selectedVideoObjects = useMemo(() => {
     const videoMap = new Map(availableVideos.map((v) => [v.id, v]));
-    return selectedVideoIds.map((id) => videoMap.get(id)).filter(Boolean) as YouTubeVideoItem[];
+    return selectedVideoIds
+      .map((id) => videoMap.get(id))
+      .filter(Boolean) as YouTubeVideoItem[];
   }, [selectedVideoIds, availableVideos]);
 
   // Aggregated analytics of selected videos
@@ -219,7 +236,8 @@ export default function YouTubeCreatePlaylistPanel({
     setIsAiGenerating(true);
     setErrorMsg("");
     try {
-      const promptToSend = customTopic || aiPrompt || title || "Series recaps and top highlights";
+      const promptToSend =
+        customTopic || aiPrompt || title || "Series recaps and top highlights";
       const payload = {
         prompt: promptToSend,
         videos: availableVideos.map((v) => ({
@@ -247,27 +265,43 @@ export default function YouTubeCreatePlaylistPanel({
         if (data.model_used) setAiModelUsed(data.model_used);
 
         // Auto-select the matching video IDs recommended by the AI
-        if (data.suggested_video_ids && Array.isArray(data.suggested_video_ids) && data.suggested_video_ids.length > 0) {
+        if (
+          data.suggested_video_ids &&
+          Array.isArray(data.suggested_video_ids) &&
+          data.suggested_video_ids.length > 0
+        ) {
           setSelectedVideoIds(data.suggested_video_ids);
-        } else if (selectedVideoIds.length === 0 && availableVideos.length > 0) {
+        } else if (
+          selectedVideoIds.length === 0 &&
+          availableVideos.length > 0
+        ) {
           selectTopViews(Math.min(5, availableVideos.length));
         }
       } else {
         const err = await res.json().catch(() => ({}));
-        console.warn("AI generation endpoint error, applying smart template:", err);
+        console.warn(
+          "AI generation endpoint error, applying smart template:",
+          err
+        );
         // Fallback to random preset if server error
-        const randomTemplate = PRESET_TEMPLATES[Math.floor(Math.random() * PRESET_TEMPLATES.length)];
+        const randomTemplate =
+          PRESET_TEMPLATES[Math.floor(Math.random() * PRESET_TEMPLATES.length)];
         setTitle(randomTemplate.title);
-        setDescription(`${randomTemplate.desc}\n\n${randomTemplate.tags.join(" ")}`);
+        setDescription(
+          `${randomTemplate.desc}\n\n${randomTemplate.tags.join(" ")}`
+        );
         if (selectedVideoIds.length === 0 && availableVideos.length > 0) {
           selectTopViews(Math.min(5, availableVideos.length));
         }
       }
     } catch (err) {
       console.warn("Network error during AI auto-fill:", err);
-      const randomTemplate = PRESET_TEMPLATES[Math.floor(Math.random() * PRESET_TEMPLATES.length)];
+      const randomTemplate =
+        PRESET_TEMPLATES[Math.floor(Math.random() * PRESET_TEMPLATES.length)];
       setTitle(randomTemplate.title);
-      setDescription(`${randomTemplate.desc}\n\n${randomTemplate.tags.join(" ")}`);
+      setDescription(
+        `${randomTemplate.desc}\n\n${randomTemplate.tags.join(" ")}`
+      );
       if (selectedVideoIds.length === 0 && availableVideos.length > 0) {
         selectTopViews(Math.min(5, availableVideos.length));
       }
@@ -276,7 +310,7 @@ export default function YouTubeCreatePlaylistPanel({
     }
   };
 
-  const applyTemplate = (template: typeof PRESET_TEMPLATES[0]) => {
+  const applyTemplate = (template: (typeof PRESET_TEMPLATES)[0]) => {
     setAiPrompt(template.title);
     handleAiAutoFill(template.title);
   };
@@ -286,7 +320,6 @@ export default function YouTubeCreatePlaylistPanel({
       setDescription((prev) => (prev ? `${prev.trim()} ${tag}` : tag));
     }
   };
-
 
   // Submit Playlist to YouTube
   const handleCreate = async (e?: React.FormEvent) => {
@@ -304,7 +337,10 @@ export default function YouTubeCreatePlaylistPanel({
       // Reorder selected videos with cover video first if specified
       let orderedIds = [...selectedVideoIds];
       if (coverVideoId && orderedIds.includes(coverVideoId)) {
-        orderedIds = [coverVideoId, ...orderedIds.filter((id) => id !== coverVideoId)];
+        orderedIds = [
+          coverVideoId,
+          ...orderedIds.filter((id) => id !== coverVideoId),
+        ];
       }
 
       const res = await fetch("/api/export/youtube/playlists", {
@@ -347,7 +383,9 @@ export default function YouTubeCreatePlaylistPanel({
     setErrorMsg("");
   };
 
-  const coverVideo = availableVideos.find((v) => v.id === coverVideoId) || selectedVideoObjects[0];
+  const coverVideo =
+    availableVideos.find((v) => v.id === coverVideoId) ||
+    selectedVideoObjects[0];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -367,7 +405,8 @@ export default function YouTubeCreatePlaylistPanel({
               </span>
             </div>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Curate, sequence, and publish custom series playlists directly to your YouTube channel
+              Curate, sequence, and publish custom series playlists directly to
+              your YouTube channel
             </p>
           </div>
         </div>
@@ -378,7 +417,11 @@ export default function YouTubeCreatePlaylistPanel({
             disabled={isAiGenerating}
             className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-red-600/20 to-rose-600/20 border border-red-500/40 hover:border-red-500 text-red-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-sm"
           >
-            <Sparkles className={`w-3.5 h-3.5 ${isAiGenerating ? "animate-spin" : "animate-pulse text-red-400"}`} />
+            <Sparkles
+              className={`w-3.5 h-3.5 ${
+                isAiGenerating ? "animate-spin" : "animate-pulse text-red-400"
+              }`}
+            />
             <span>{isAiGenerating ? "Generating..." : "AI Auto-Fill"}</span>
           </button>
           {onNavigatePlaylists && (
@@ -404,7 +447,9 @@ export default function YouTubeCreatePlaylistPanel({
                   Playlist Created Successfully on YouTube!
                 </h3>
                 <p className="text-xs text-emerald-300/80 font-mono mt-0.5">
-                  &ldquo;{createdResult.title}&rdquo; with {createdResult.item_count || selectedVideoIds.length} videos is live.
+                  &ldquo;{createdResult.title}&rdquo; with{" "}
+                  {createdResult.item_count || selectedVideoIds.length} videos
+                  is live.
                 </p>
               </div>
             </div>
@@ -419,7 +464,10 @@ export default function YouTubeCreatePlaylistPanel({
 
           <div className="flex items-center gap-3 pt-1">
             <a
-              href={createdResult.url || `https://youtube.com/playlist?list=${createdResult.id}`}
+              href={
+                createdResult.url ||
+                `https://youtube.com/playlist?list=${createdResult.id}`
+              }
               target="_blank"
               rel="noreferrer"
               className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold font-mono shadow-md transition-all"
@@ -453,7 +501,9 @@ export default function YouTubeCreatePlaylistPanel({
                   Playlist Details
                 </h2>
               </div>
-              <span className="text-[10px] font-mono text-neutral-500">Step 1 of 2</span>
+              <span className="text-[10px] font-mono text-neutral-500">
+                Step 1 of 2
+              </span>
             </div>
 
             {/* AI Generator Input Bar */}
@@ -474,7 +524,12 @@ export default function YouTubeCreatePlaylistPanel({
                   type="text"
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAiAutoFill(); } }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAiAutoFill();
+                    }
+                  }}
                   placeholder="e.g. Solo Leveling Season 1 fight highlights & recaps..."
                   className="flex-1 bg-neutral-950 border border-neutral-800 focus:border-red-500/60 rounded-xl px-3 py-2 text-xs text-white placeholder:text-neutral-500 font-sans focus:outline-none"
                 />
@@ -484,7 +539,11 @@ export default function YouTubeCreatePlaylistPanel({
                   disabled={isAiGenerating}
                   className="px-3.5 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shrink-0 shadow-md shadow-red-600/30"
                 >
-                  {isAiGenerating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Generate"}
+                  {isAiGenerating ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    "Generate"
+                  )}
                 </button>
               </div>
             </div>
@@ -493,7 +552,9 @@ export default function YouTubeCreatePlaylistPanel({
             <div className="space-y-1.5">
               <label className="text-[10px] font-mono text-neutral-400 uppercase font-bold flex items-center justify-between">
                 <span>Quick Prompt Ideas</span>
-                <span className="text-[9px] text-neutral-600">Click to generate with AI</span>
+                <span className="text-[9px] text-neutral-600">
+                  Click to generate with AI
+                </span>
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {PRESET_TEMPLATES.map((p) => (
@@ -515,7 +576,11 @@ export default function YouTubeCreatePlaylistPanel({
                 <label className="text-[10px] font-mono text-neutral-300 font-bold uppercase tracking-wider">
                   Playlist Title <span className="text-red-400">*</span>
                 </label>
-                <span className={`text-[10px] font-mono ${title.length > 90 ? "text-amber-400" : "text-neutral-500"}`}>
+                <span
+                  className={`text-[10px] font-mono ${
+                    title.length > 90 ? "text-amber-400" : "text-neutral-500"
+                  }`}
+                >
                   {title.length}/100
                 </span>
               </div>
@@ -537,9 +602,24 @@ export default function YouTubeCreatePlaylistPanel({
               <div className="grid grid-cols-3 gap-2">
                 {(
                   [
-                    { id: "public", label: "Public", icon: Globe, desc: "Searchable by all" },
-                    { id: "unlisted", label: "Unlisted", icon: Link, desc: "Direct link only" },
-                    { id: "private", label: "Private", icon: Lock, desc: "Only you" },
+                    {
+                      id: "public",
+                      label: "Public",
+                      icon: Globe,
+                      desc: "Searchable by all",
+                    },
+                    {
+                      id: "unlisted",
+                      label: "Unlisted",
+                      icon: Link,
+                      desc: "Direct link only",
+                    },
+                    {
+                      id: "private",
+                      label: "Private",
+                      icon: Lock,
+                      desc: "Only you",
+                    },
                   ] as const
                 ).map((opt) => {
                   const Icon = opt.icon;
@@ -556,8 +636,12 @@ export default function YouTubeCreatePlaylistPanel({
                       }`}
                     >
                       <Icon className="w-4 h-4" />
-                      <span className="text-[11px] capitalize">{opt.label}</span>
-                      <span className="text-[9px] text-neutral-500">{opt.desc}</span>
+                      <span className="text-[11px] capitalize">
+                        {opt.label}
+                      </span>
+                      <span className="text-[9px] text-neutral-500">
+                        {opt.desc}
+                      </span>
                     </button>
                   );
                 })}
@@ -570,7 +654,13 @@ export default function YouTubeCreatePlaylistPanel({
                 <label className="text-[10px] font-mono text-neutral-300 font-bold uppercase tracking-wider">
                   Description
                 </label>
-                <span className={`text-[10px] font-mono ${description.length > 4800 ? "text-amber-400" : "text-neutral-500"}`}>
+                <span
+                  className={`text-[10px] font-mono ${
+                    description.length > 4800
+                      ? "text-amber-400"
+                      : "text-neutral-500"
+                  }`}
+                >
                   {description.length}/5000
                 </span>
               </div>
@@ -588,7 +678,15 @@ export default function YouTubeCreatePlaylistPanel({
                   <Hash className="w-3 h-3 text-red-400" />
                   Add tags:
                 </span>
-                {["#Webtoon", "#Manhwa", "#Recap", "#Anime", "#Manga", "#OST", "#Action"].map((tag) => (
+                {[
+                  "#Webtoon",
+                  "#Manhwa",
+                  "#Recap",
+                  "#Anime",
+                  "#Manga",
+                  "#OST",
+                  "#Action",
+                ].map((tag) => (
                   <button
                     key={tag}
                     type="button"
@@ -670,7 +768,9 @@ export default function YouTubeCreatePlaylistPanel({
                   {title.trim() || "Untitled Playlist Draft"}
                 </h4>
                 <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500">
-                  <span className="capitalize text-neutral-400">{privacy} Series</span>
+                  <span className="capitalize text-neutral-400">
+                    {privacy} Series
+                  </span>
                   <span className="flex items-center gap-1 text-sky-400">
                     <TrendingUp className="w-3 h-3" />
                     {totalSelectedViews.toLocaleString()} combined views
@@ -689,7 +789,8 @@ export default function YouTubeCreatePlaylistPanel({
               <div className="flex items-center gap-2">
                 <Video className="w-4 h-4 text-red-400" />
                 <h2 className="text-xs font-black text-white font-mono uppercase tracking-wider">
-                  Select & Sequence Videos ({selectedVideoIds.length}/{availableVideos.length})
+                  Select & Sequence Videos ({selectedVideoIds.length}/
+                  {availableVideos.length})
                 </h2>
               </div>
               <p className="text-[10.5px] text-neutral-500 font-mono">
@@ -795,12 +896,16 @@ export default function YouTubeCreatePlaylistPanel({
           {loadingVideos ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3">
               <Loader2 className="w-7 h-7 text-red-500 animate-spin" />
-              <p className="text-xs text-neutral-400 font-mono">Loading your channel videos…</p>
+              <p className="text-xs text-neutral-400 font-mono">
+                Loading your channel videos…
+              </p>
             </div>
           ) : filteredVideos.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-2 text-center border border-neutral-800/60 rounded-2xl bg-neutral-950/40">
               <Video className="w-8 h-8 text-neutral-500" />
-              <p className="text-xs text-neutral-400 font-mono">No matching videos found</p>
+              <p className="text-xs text-neutral-400 font-mono">
+                No matching videos found
+              </p>
             </div>
           ) : (
             <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
@@ -828,7 +933,9 @@ export default function YouTubeCreatePlaylistPanel({
                           : "border-neutral-700 bg-neutral-900 hover:border-neutral-500"
                       }`}
                     >
-                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                      {isSelected && (
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      )}
                     </button>
 
                     {/* Order Sequence Badge */}
@@ -857,7 +964,9 @@ export default function YouTubeCreatePlaylistPanel({
                       <h4
                         onClick={() => toggleSelectVideo(vid.id)}
                         className={`text-xs font-bold font-sans line-clamp-1 cursor-pointer ${
-                          isSelected ? "text-white" : "text-neutral-300 hover:text-white"
+                          isSelected
+                            ? "text-white"
+                            : "text-neutral-300 hover:text-white"
                         }`}
                       >
                         {vid.title}
@@ -868,10 +977,15 @@ export default function YouTubeCreatePlaylistPanel({
                           {vid.view_count}
                         </span>
                         <span>•</span>
-                        <span className={`capitalize ${
-                          vid.privacy_status === "public" ? "text-emerald-400" :
-                          vid.privacy_status === "unlisted" ? "text-amber-400" : "text-neutral-500"
-                        }`}>
+                        <span
+                          className={`capitalize ${
+                            vid.privacy_status === "public"
+                              ? "text-emerald-400"
+                              : vid.privacy_status === "unlisted"
+                              ? "text-amber-400"
+                              : "text-neutral-500"
+                          }`}
+                        >
                           {vid.privacy_status}
                         </span>
                       </div>

@@ -89,13 +89,16 @@ export default function SeriesCard({
     }
   };
 
-  const isProcessing = series.latestChapter?.status?.toLowerCase() === "processing";
+  const isProcessing =
+    series.latestChapter?.status?.toLowerCase() === "processing";
 
   return (
     <div
       onClick={() => onOpenSeries(series)}
       className={`group relative flex flex-col bg-neutral-900/70 backdrop-blur-xl border ${
-        isSelected ? "border-purple-500 shadow-lg shadow-purple-500/25 ring-1 ring-purple-500/50" : "border-white/10 hover:border-purple-500/40 hover:shadow-[0_12px_36px_rgba(168,85,247,0.18)]"
+        isSelected
+          ? "border-purple-500 shadow-lg shadow-purple-500/25 ring-1 ring-purple-500/50"
+          : "border-white/10 hover:border-purple-500/40 hover:shadow-[0_12px_36px_rgba(168,85,247,0.18)]"
       } rounded-3xl overflow-hidden transition-all duration-300 cursor-pointer shadow-xl`}
     >
       {/* ─── Thumbnail / Header Section ────────────────── */}
@@ -141,7 +144,9 @@ export default function SeriesCard({
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/20 via-neutral-900 to-neutral-950">
             <FolderOpen className="w-8 h-8 text-purple-500/40" />
-            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">No Cover</span>
+            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
+              No Cover
+            </span>
           </div>
         )}
 
@@ -155,7 +160,9 @@ export default function SeriesCard({
         {/* Top badges row */}
         <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
           {/* Status badge */}
-          <div className={`px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider rounded-full border backdrop-blur-md shadow-md ${statusColor}`}>
+          <div
+            className={`px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider rounded-full border backdrop-blur-md shadow-md ${statusColor}`}
+          >
             {seriesStatus}
           </div>
 
@@ -172,15 +179,17 @@ export default function SeriesCard({
         <div className="absolute bottom-2 inset-x-2 z-10 flex items-center justify-between pointer-events-none">
           <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1 font-mono">
             <Layers className="w-2.5 h-2.5 text-purple-400" />
-            <span>{series.chapterCount} {series.chapterCount === 1 ? 'Chapter' : 'Chapters'}</span>
+            <span>
+              {series.chapterCount}{" "}
+              {series.chapterCount === 1 ? "Chapter" : "Chapters"}
+            </span>
           </div>
 
           <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-bold text-purple-300 tracking-wider shadow-lg flex items-center gap-1 font-mono">
             <Clock className="w-2.5 h-2.5 text-purple-400" />
-            <span>{timeAgo(series.latestUpdatedAt || '')}</span>
+            <span>{timeAgo(series.latestUpdatedAt || "")}</span>
           </div>
         </div>
-
       </div>
 
       {/* Dropdown menu — at card level so thumbnail overflow-hidden doesn't clip it */}
@@ -190,35 +199,53 @@ export default function SeriesCard({
           onClick={(e) => e.stopPropagation()}
         >
           <button
-            onClick={(e) => { onOpenSeries(series); onToggleMenu?.(e, series.id); }}
+            onClick={(e) => {
+              onOpenSeries(series);
+              onToggleMenu?.(e, series.id);
+            }}
             className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
           >
             <Play className="w-3.5 h-3.5" /> Open Series
           </button>
           {onOpenDetails && (
-            <button onClick={(e) => onOpenDetails(e, series)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button
+              onClick={(e) => onOpenDetails(e, series)}
+              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+            >
               <FolderOpen className="w-3.5 h-3.5" /> Details
             </button>
           )}
           {onRename && (
-            <button onClick={(e) => onRename(e, series)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button
+              onClick={(e) => onRename(e, series)}
+              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+            >
               <Edit2 className="w-3.5 h-3.5" /> Rename
             </button>
           )}
           {onExport && (
-            <button onClick={(e) => onExport(e, series)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button
+              onClick={(e) => onExport(e, series)}
+              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+            >
               <Download className="w-3.5 h-3.5" /> Export
             </button>
           )}
           {onCopyLink && (
-            <button onClick={(e) => onCopyLink(e, series)} className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors">
+            <button
+              onClick={(e) => onCopyLink(e, series)}
+              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+            >
               <Link className="w-3.5 h-3.5" /> Copy Link
             </button>
           )}
           {onDelete && (
             <>
               <div className="h-px bg-white/5 my-1" />
-              <button onClick={(e) => onDelete(e, series.id)} className="w-full text-left px-3.5 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors">
+              <button
+                onClick={(e) => onDelete(e, series.id)}
+                className="w-full text-left px-3.5 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors"
+              >
                 <Trash2 className="w-3.5 h-3.5" /> Delete
               </button>
             </>
@@ -243,14 +270,18 @@ export default function SeriesCard({
             defaultValue={titleText}
             onBlur={(e) => onSaveRename?.(series.id, e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") onSaveRename?.(series.id, e.currentTarget.value);
+              if (e.key === "Enter")
+                onSaveRename?.(series.id, e.currentTarget.value);
             }}
             autoFocus
             className="text-sm font-bold text-white bg-neutral-800 border border-neutral-700 rounded-md px-2 py-1 w-full"
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <h3 className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1 group-hover:text-purple-300 transition-colors duration-200" title={titleText}>
+          <h3
+            className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1 group-hover:text-purple-300 transition-colors duration-200"
+            title={titleText}
+          >
             {titleText}
           </h3>
         )}
@@ -273,8 +304,14 @@ export default function SeriesCard({
         <div className="pt-1.5 mt-auto flex items-center justify-between gap-2">
           {/* Panels Count */}
           {(() => {
-            const totalPanels = series.chapters.reduce((acc, c) => acc + (c.panels_count || 0), 0);
-            const totalImported = series.chapters.reduce((acc, c) => acc + (c.imported_assets_count || 0), 0);
+            const totalPanels = series.chapters.reduce(
+              (acc, c) => acc + (c.panels_count || 0),
+              0
+            );
+            const totalImported = series.chapters.reduce(
+              (acc, c) => acc + (c.imported_assets_count || 0),
+              0
+            );
             const displayCount = totalPanels || totalImported || 0;
 
             return (
@@ -283,7 +320,9 @@ export default function SeriesCard({
                 title={`${displayCount} total panels`}
               >
                 <Scissors className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-                <span className="font-bold text-white whitespace-nowrap">{displayCount} panels</span>
+                <span className="font-bold text-white whitespace-nowrap">
+                  {displayCount} panels
+                </span>
               </div>
             );
           })()}

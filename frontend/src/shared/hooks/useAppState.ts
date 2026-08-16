@@ -3,10 +3,7 @@ import { GeneratedPanel, CharacterBio } from "@/types";
 import { AI_MODELS } from "@/types/models";
 import { createFetchWithInterceptor } from "@/api/client/fetchWithInterceptor";
 import * as api from "@/api";
-import {
-  Notification,
-  NotificationType,
-} from "@/features/app_notification";
+import { Notification, NotificationType } from "@/features/app_notification";
 import { ErrorModalDetail } from "@/shared/ui/modal/ErrorModal";
 import { parseWebtoonUrl } from "@/shared/utils/url";
 import { useAudioFeedback } from "@/features/editor_audio/hooks/useAudioFeedback";
@@ -72,16 +69,24 @@ export function useAppState() {
 
   const activeProjectData = useProjectStore((state) => state.activeProjectData);
 
-  const panels = useMemo(() => activeProjectData?.panels ?? [], [activeProjectData]);
-  const setPanels = useCallback((val: GeneratedPanel[] | ((prev: GeneratedPanel[]) => GeneratedPanel[])) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    const currentPanels = cur?.panels ?? [];
-    const nextPanels = typeof val === "function" ? val(currentPanels) : val;
-    useProjectStore.getState().setActiveProject({
-      project: cur?.project ?? { project_id: "", title: "", url: "" },
-      panels: nextPanels,
-    });
-  }, []);
+  const panels = useMemo(
+    () => activeProjectData?.panels ?? [],
+    [activeProjectData]
+  );
+  const setPanels = useCallback(
+    (
+      val: GeneratedPanel[] | ((prev: GeneratedPanel[]) => GeneratedPanel[])
+    ) => {
+      const cur = useProjectStore.getState().activeProjectData;
+      const currentPanels = cur?.panels ?? [];
+      const nextPanels = typeof val === "function" ? val(currentPanels) : val;
+      useProjectStore.getState().setActiveProject({
+        project: cur?.project ?? { project_id: "", title: "", url: "" },
+        panels: nextPanels,
+      });
+    },
+    []
+  );
 
   const projectId = activeProjectData?.project?.project_id ?? null;
   const jobId = activeProjectData?.project?.job_id ?? null;
@@ -96,9 +101,9 @@ export function useAppState() {
       project: {
         ...(cur?.project ?? { title: "", url: "" }),
         project_id: val,
-        job_id: projectChanged ? null : (cur?.project?.job_id ?? null),
+        job_id: projectChanged ? null : cur?.project?.job_id ?? null,
       },
-      panels: projectChanged ? [] : (cur?.panels ?? []),
+      panels: projectChanged ? [] : cur?.panels ?? [],
     });
   }, []);
 
@@ -144,13 +149,14 @@ export function useAppState() {
 
   // Refs removed: useAppState popstate handler relies on Zustand reads to avoid batching/race issues.
 
-
   const [scrapedImages, setScrapedImages] = useState<string[]>(() => {
     try {
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
         if (params.get("idx") !== null) {
-          return ["https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800"];
+          return [
+            "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800",
+          ];
         }
       }
     } catch (e) {}
@@ -180,11 +186,11 @@ export function useAppState() {
   const [bubbleEraseMethod, setBubbleEraseMethod] = useState<
     "auto" | "inpaint" | "blur" | "solid_white" | "solid_black"
   >("auto");
-  const [bubbleSensitivity, setBubbleSensitivity] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_bubble_sensitivity") || "50", 10)
+  const [bubbleSensitivity, setBubbleSensitivity] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_bubble_sensitivity") || "50", 10)
   );
-  const [bubbleDilation, setBubbleDilation] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_bubble_dilation") || "-1", 10)
+  const [bubbleDilation, setBubbleDilation] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_bubble_dilation") || "-1", 10)
   );
   const [bubbleInpaintRadius, setBubbleInpaintRadius] = useState<number>(3);
   const [activeBubbleTab, setActiveBubbleTab] = useState<string>("general");
@@ -199,11 +205,11 @@ export function useAppState() {
 
   // Auto crop states
   const [showAutoCropModal, setShowAutoCropModal] = useState<boolean>(false);
-  const [cropSensitivity, setCropSensitivity] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_crop_sensitivity") || "30", 10)
+  const [cropSensitivity, setCropSensitivity] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_crop_sensitivity") || "30", 10)
   );
-  const [cropPaddingPx, setCropPaddingPx] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_crop_padding") || "10", 10)
+  const [cropPaddingPx, setCropPaddingPx] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_crop_padding") || "10", 10)
   );
   const [cropBackgroundMode, setCropBackgroundMode] = useState<string>(
     () => localStorage.getItem("ai_crop_bg_mode") || "auto"
@@ -216,8 +222,8 @@ export function useAppState() {
   const [aspectRatioLock, setAspectRatioLock] = useState<string>(
     () => localStorage.getItem("ai_crop_aspect_ratio") || "free"
   );
-  const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(
-    () => parseFloat(localStorage.getItem("ai_crop_min_area") || "2.0")
+  const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(() =>
+    parseFloat(localStorage.getItem("ai_crop_min_area") || "2.0")
   );
   const [overlapMergeThreshold, setOverlapMergeThreshold] = useState<number>(
     () => parseInt(localStorage.getItem("ai_crop_merge_thresh") || "20", 10)
@@ -234,17 +240,17 @@ export function useAppState() {
   const [cropModel, setCropModel] = useState<string>(
     () => localStorage.getItem("ai_crop_model") || ""
   );
-  const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_crop_min_height") || "60", 10)
+  const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_crop_min_height") || "60", 10)
   );
-  const [cropCannyLow, setCropCannyLow] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_crop_canny_low") || "20", 10)
+  const [cropCannyLow, setCropCannyLow] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_crop_canny_low") || "20", 10)
   );
-  const [cropCannyHigh, setCropCannyHigh] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_crop_canny_high") || "100", 10)
+  const [cropCannyHigh, setCropCannyHigh] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_crop_canny_high") || "100", 10)
   );
-  const [cropCloseKernelSize, setCropCloseKernelSize] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_crop_close_kernel") || "15", 10)
+  const [cropCloseKernelSize, setCropCloseKernelSize] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_crop_close_kernel") || "15", 10)
   );
   const [activeAutoCropTab, setActiveAutoCropTab] = useState<string>("general");
   const [cropGuidance, setCropGuidance] = useState<string>(
@@ -264,7 +270,10 @@ export function useAppState() {
       localStorage.setItem("ai_crop_auto_split", String(autoSplitTallStrips));
       localStorage.setItem("ai_crop_aspect_ratio", aspectRatioLock);
       localStorage.setItem("ai_crop_min_area", String(minPanelAreaPct));
-      localStorage.setItem("ai_crop_merge_thresh", String(overlapMergeThreshold));
+      localStorage.setItem(
+        "ai_crop_merge_thresh",
+        String(overlapMergeThreshold)
+      );
       localStorage.setItem("ai_crop_model", cropModel);
       localStorage.setItem("ai_crop_min_height", String(cropMinHeightPx));
       localStorage.setItem("ai_crop_canny_low", String(cropCannyLow));
@@ -328,18 +337,20 @@ export function useAppState() {
   const [errorPopup, setErrorPopup] = useState<ErrorModalDetail | null>(null);
 
   // Settings — all useState MUST come before any useCallback/useEffect
-  const targetUrl = activeProjectData?.project?.url ?? (() => {
-    try {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("idx") !== null) {
-          return "https://www.webtoons.com/en/fantasy/tower-of-god/season-3-ep-1/viewer?title_no=95&episode_no=418";
+  const targetUrl =
+    activeProjectData?.project?.url ??
+    (() => {
+      try {
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get("idx") !== null) {
+            return "https://www.webtoons.com/en/fantasy/tower-of-god/season-3-ep-1/viewer?title_no=95&episode_no=418";
+          }
         }
-      }
-    } catch (e) {}
-    return localStorage.getItem("ai_comic_url") || "";
-  })();
-  
+      } catch (e) {}
+      return localStorage.getItem("ai_comic_url") || "";
+    })();
+
   const setTargetUrl = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
@@ -356,8 +367,10 @@ export function useAppState() {
   );
   const [aspectRatio, setAspectRatio] = useState<"auto" | "9:16" | "16:9">(
     () =>
-      (localStorage.getItem("ai_comic_aspectRatio") as "auto" | "9:16" | "16:9") ||
-      "9:16"
+      (localStorage.getItem("ai_comic_aspectRatio") as
+        | "auto"
+        | "9:16"
+        | "16:9") || "9:16"
   );
   const [selectedModel, setSelectedModel] = useState<string>(
     () => localStorage.getItem("ai_comic_model") || ""
@@ -385,34 +398,38 @@ export function useAppState() {
     () => localStorage.getItem("app-autoplay-audio") === "true"
   );
 
-  const [narrationVolume, setNarrationVolume] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_comic_narration_volume") || "90", 10)
+  const [narrationVolume, setNarrationVolume] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_comic_narration_volume") || "90", 10)
   );
-  const [bgmVolume, setBgmVolume] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_comic_bgm_volume") || "50", 10)
+  const [bgmVolume, setBgmVolume] = useState<number>(() =>
+    parseInt(localStorage.getItem("ai_comic_bgm_volume") || "50", 10)
   );
   const [audioDucking, setAudioDucking] = useState<boolean>(
     () => localStorage.getItem("ai_comic_audio_ducking") !== "false"
   );
-  const [speechRate, setSpeechRate] = useState<number>(
-    () => parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0")
+  const [speechRate, setSpeechRate] = useState<number>(() =>
+    parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0")
   );
-  const [speechPitch, setSpeechPitch] = useState<number>(
-    () => parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0")
+  const [speechPitch, setSpeechPitch] = useState<number>(() =>
+    parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0")
   );
   const [audioReactiveShake, setAudioReactiveShake] = useState<boolean>(
     () => localStorage.getItem("ai_video_shake") === "true"
   );
-  const [shakeIntensity, setShakeIntensity] = useState<"low" | "medium" | "high" | "extreme">(
+  const [shakeIntensity, setShakeIntensity] = useState<
+    "low" | "medium" | "high" | "extreme"
+  >(
     () => (localStorage.getItem("ai_video_shake_intensity") as any) || "medium"
   );
   const [videoFormat, setVideoFormat] = useState<"mp4" | "webm" | "mkv">(
     () => (localStorage.getItem("ai_video_format") as any) || "mp4"
   );
-  const [backgroundStyle, setBackgroundStyle] = useState<"black" | "white" | "transparent" | "blurred">(
-    () => (localStorage.getItem("ai_video_bg_style") as any) || "black"
-  );
-  const [subtitlesStyle, setSubtitlesStyle] = useState<"none" | "burn-in" | "soft">("none");
+  const [backgroundStyle, setBackgroundStyle] = useState<
+    "black" | "white" | "transparent" | "blurred"
+  >(() => (localStorage.getItem("ai_video_bg_style") as any) || "black");
+  const [subtitlesStyle, setSubtitlesStyle] = useState<
+    "none" | "burn-in" | "soft"
+  >("none");
 
   const audioFeedback = useAudioFeedback(sfxVolume, !sfxEnabled);
 
@@ -435,7 +452,8 @@ export function useAppState() {
     () => localStorage.getItem("ai_comic_smart_slice") !== "false"
   );
 
-  const scrapedTitle = activeProjectData?.project?.title || "Overpowered S-Rank Recap";
+  const scrapedTitle =
+    activeProjectData?.project?.title || "Overpowered S-Rank Recap";
   const setScrapedTitle = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
@@ -448,7 +466,10 @@ export function useAppState() {
   const setScrapedGenre = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), genre: val },
+      project: {
+        ...(cur?.project ?? { project_id: "", title: "", url: "" }),
+        genre: val,
+      },
       panels: cur?.panels ?? [],
     });
   }, []);
@@ -466,7 +487,10 @@ export function useAppState() {
   const setChapterNumber = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), chapterNumber: val },
+      project: {
+        ...(cur?.project ?? { project_id: "", title: "", url: "" }),
+        chapterNumber: val,
+      },
       panels: cur?.panels ?? [],
     });
   }, []);
@@ -475,7 +499,10 @@ export function useAppState() {
   const setChapterTitle = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), chapterTitle: val },
+      project: {
+        ...(cur?.project ?? { project_id: "", title: "", url: "" }),
+        chapterTitle: val,
+      },
       panels: cur?.panels ?? [],
     });
   }, []);
@@ -484,7 +511,10 @@ export function useAppState() {
   const setSeriesAuthor = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), author: val },
+      project: {
+        ...(cur?.project ?? { project_id: "", title: "", url: "" }),
+        author: val,
+      },
       panels: cur?.panels ?? [],
     });
   }, []);
@@ -493,7 +523,10 @@ export function useAppState() {
   const setSeriesCoverImage = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), cover_image: val },
+      project: {
+        ...(cur?.project ?? { project_id: "", title: "", url: "" }),
+        cover_image: val,
+      },
       panels: cur?.panels ?? [],
     });
   }, []);
@@ -502,7 +535,10 @@ export function useAppState() {
   const setSeriesSynopsis = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
-      project: { ...(cur?.project ?? { project_id: "", title: "", url: "" }), synopsis: val },
+      project: {
+        ...(cur?.project ?? { project_id: "", title: "", url: "" }),
+        synopsis: val,
+      },
       panels: cur?.panels ?? [],
     });
   }, []);
@@ -534,8 +570,6 @@ export function useAppState() {
   }, [targetUrl, projectId]);
 
   // ── Callbacks & effects AFTER all useState declarations ──────────────────
-
-
 
   const setConsoleLogs = useCallback((val: React.SetStateAction<any[]>) => {
     setRawConsoleLogs((prev) => {
@@ -750,7 +784,9 @@ export function useAppState() {
               setUser(userPayload);
               setIsAuthenticated(true);
               addNotification("Signed in with Google!", "success", {
-                details: `Welcome back, ${userPayload.full_name || userPayload.email || ""}!`,
+                details: `Welcome back, ${
+                  userPayload.full_name || userPayload.email || ""
+                }!`,
               });
 
               // Auto-refresh YouTube avatar in background (fire-and-forget)
@@ -775,7 +811,9 @@ export function useAppState() {
                       }));
                     }
                   })
-                  .catch(() => {/* silent */});
+                  .catch(() => {
+                    /* silent */
+                  });
               }
 
               // Navigate to dashboard after OAuth login
@@ -811,7 +849,6 @@ export function useAppState() {
     },
     [getToken, fetchWithInterceptor, addNotification]
   );
-
 
   const forgotPassword = useCallback(
     async (email: string) => {
@@ -887,7 +924,9 @@ export function useAppState() {
       // ── Guard: if the URL contains a job_ ID as project_id, clean it up
       // immediately and delegate to loadProject which will set the missing state.
       if (urlProjectId && urlProjectId.startsWith("job_")) {
-        console.warn(`[AppState] job_ ID found in URL project param: "${urlProjectId}". Stripping and setting missing state.`);
+        console.warn(
+          `[AppState] job_ ID found in URL project param: "${urlProjectId}". Stripping and setting missing state.`
+        );
         const cleanUrl = new URL(window.location.href);
         cleanUrl.searchParams.delete("project_id");
         cleanUrl.searchParams.delete("id");
@@ -901,7 +940,7 @@ export function useAppState() {
       const match = path.match(
         /(?:\/scraper\/editor)?\/series\/[^\/]+\/chapters\/([^\/]+)/
       );
-      const chapterSlug = match ? match[1] : (params.get("chapter") || null);
+      const chapterSlug = match ? match[1] : params.get("chapter") || null;
 
       if (!urlProjectId && !chapterSlug) {
         // If we cleared the state (navigated to clean /scraper), reset workspace
@@ -945,7 +984,9 @@ export function useAppState() {
       }
 
       if (lookupId.startsWith("temp_")) {
-        const rawPersisted = sessionStorage.getItem("sonikoma-active-project-store");
+        const rawPersisted = sessionStorage.getItem(
+          "sonikoma-active-project-store"
+        );
         if (rawPersisted) {
           try {
             const persisted = JSON.parse(rawPersisted);
@@ -971,7 +1012,10 @@ export function useAppState() {
               return;
             }
           } catch (e) {
-            console.warn("[AppState] Failed to parse persisted project store", e);
+            console.warn(
+              "[AppState] Failed to parse persisted project store",
+              e
+            );
           }
         }
 
@@ -1013,13 +1057,20 @@ export function useAppState() {
       // Short-circuit immediately — no network call needed, the server would
       // always 404 on these and we already know the correct error state.
       if (lookupId.startsWith("job_")) {
-        console.warn(`[AppState] Detected job ID in URL: "${lookupId}". Entering missing state without API call.`);
-        useProjectStore.getState().setProjectMissing(lookupId, { isJobId: true });
+        console.warn(
+          `[AppState] Detected job ID in URL: "${lookupId}". Entering missing state without API call.`
+        );
+        useProjectStore
+          .getState()
+          .setProjectMissing(lookupId, { isJobId: true });
         if (addNotification) {
           addNotification(
             `Processing Job ID "${lookupId}" is not a project reference.`,
             "warning",
-            { details: "Open the project selector to pick an active project or clear the workspace." }
+            {
+              details:
+                "Open the project selector to pick an active project or clear the workspace.",
+            }
           );
         }
         // Also clean the stale job ID out of the URL so it can't loop
@@ -1031,7 +1082,11 @@ export function useAppState() {
       }
 
       try {
-        const data = await api.getProject(fetchWithInterceptor, lookupId, jobId);
+        const data = await api.getProject(
+          fetchWithInterceptor,
+          lookupId,
+          jobId
+        );
         if (data.success && data.project) {
           localStorage.setItem("active_project_id", data.project.project_id);
           if (data.project.job_id) {
@@ -1115,7 +1170,10 @@ export function useAppState() {
           if (loadedSettings.activePreviewTab) {
             setActivePreviewTab(loadedSettings.activePreviewTab);
           }
-          if (loadedSettings.selectedScraped && Array.isArray(loadedSettings.selectedScraped)) {
+          if (
+            loadedSettings.selectedScraped &&
+            Array.isArray(loadedSettings.selectedScraped)
+          ) {
             setSelectedScraped(loadedSettings.selectedScraped);
           }
           if (loadedSettings.autoPlayAudio !== undefined) {
@@ -1143,25 +1201,31 @@ export function useAppState() {
             loadedChapterTitle = epParts.slice(1).join(" - ").trim();
           }
 
-          const mappedPanels = data.panels ? data.panels.map((p: any) => {
-            const img = p.image_url;
-            const proxiedImg =
-              img && img.startsWith("http") && !api.isApiUrl(img)
-                ? api.getProxyImageUrl(img)
-                : img;
-            return {
-              ...p,
-              image_url: proxiedImg,
-              grayscale: p.grayscale === 1 || p.grayscale === true,
-            };
-          }) : [];
+          const mappedPanels = data.panels
+            ? data.panels.map((p: any) => {
+                const img = p.image_url;
+                const proxiedImg =
+                  img && img.startsWith("http") && !api.isApiUrl(img)
+                    ? api.getProxyImageUrl(img)
+                    : img;
+                return {
+                  ...p,
+                  image_url: proxiedImg,
+                  grayscale: p.grayscale === 1 || p.grayscale === true,
+                };
+              })
+            : [];
 
           // Populate scraped images list: prefer saved raw scraped_images, fallback to panel images
-          const savedScrapedImages = (Array.isArray(data.scraped_images) && data.scraped_images.length > 0)
-            ? data.scraped_images
-            : loadedSettings.scraped_images;
+          const savedScrapedImages =
+            Array.isArray(data.scraped_images) && data.scraped_images.length > 0
+              ? data.scraped_images
+              : loadedSettings.scraped_images;
           let proxiedScraped: string[] = [];
-          if (Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0) {
+          if (
+            Array.isArray(savedScrapedImages) &&
+            savedScrapedImages.length > 0
+          ) {
             proxiedScraped = savedScrapedImages.map((img: string) =>
               img && img.startsWith("http") && !api.isApiUrl(img)
                 ? api.getProxyImageUrl(img)
@@ -1205,7 +1269,11 @@ export function useAppState() {
           err.status === 404;
 
         const isJobId = lookupId.startsWith("job_");
-        console.warn(`[AppState] Project ${lookupId} ${is404 ? "not found" : "load error"}. Setting missing state.`);
+        console.warn(
+          `[AppState] Project ${lookupId} ${
+            is404 ? "not found" : "load error"
+          }. Setting missing state.`
+        );
 
         useProjectStore.getState().setProjectMissing(lookupId, { isJobId });
 
@@ -1216,7 +1284,8 @@ export function useAppState() {
               : `Project "${lookupId}" could not be found or loaded.`,
             "warning",
             {
-              details: "Open the project selector in the header to pick another project or clear the workspace.",
+              details:
+                "Open the project selector in the header to pick another project or clear the workspace.",
             }
           );
         }
@@ -1289,7 +1358,10 @@ export function useAppState() {
   }, [sfxVolume]);
 
   useEffect(() => {
-    localStorage.setItem("ai_comic_narration_volume", narrationVolume.toString());
+    localStorage.setItem(
+      "ai_comic_narration_volume",
+      narrationVolume.toString()
+    );
   }, [narrationVolume]);
 
   useEffect(() => {

@@ -33,7 +33,8 @@ export function cleanDialogueDisplay(rawText?: string): CleanDialogue {
         parsed.line ||
         "";
       const tone = parsed.voice_tone || parsed.tone || parsed.emotion || "";
-      const character = parsed.character || parsed.speaker || parsed.character_name || "";
+      const character =
+        parsed.character || parsed.speaker || parsed.character_name || "";
       if (speech) {
         return {
           speech: String(speech).trim(),
@@ -42,8 +43,12 @@ export function cleanDialogueDisplay(rawText?: string): CleanDialogue {
         };
       }
     } catch (e) {
-      const matchLine = trimmed.match(/"(?:narrator_line|speech|dialogue|speech_text|text)":\s*"([^"]+)"/);
-      const matchTone = trimmed.match(/"(?:voice_tone|tone|emotion)":\s*"([^"]+)"/);
+      const matchLine = trimmed.match(
+        /"(?:narrator_line|speech|dialogue|speech_text|text)":\s*"([^"]+)"/
+      );
+      const matchTone = trimmed.match(
+        /"(?:voice_tone|tone|emotion)":\s*"([^"]+)"/
+      );
       if (matchLine) {
         return {
           speech: matchLine[1].trim(),

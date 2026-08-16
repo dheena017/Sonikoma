@@ -15,7 +15,9 @@ export default function EngineStatus({ latency }: EngineStatusProps) {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between text-xs font-mono">
-          <span className="text-neutral-350 font-medium">Computational Server</span>
+          <span className="text-neutral-350 font-medium">
+            Computational Server
+          </span>
           <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
             Online
@@ -23,7 +25,9 @@ export default function EngineStatus({ latency }: EngineStatusProps) {
         </div>
 
         <div className="flex items-center justify-between text-xs font-mono">
-          <span className="text-neutral-350 font-medium">API Health Latency</span>
+          <span className="text-neutral-350 font-medium">
+            API Health Latency
+          </span>
           <span className="text-neutral-200 font-bold">
             {latency !== null ? `${latency}ms` : "Checking..."}
           </span>

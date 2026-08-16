@@ -6,7 +6,10 @@ interface SystemResourcesProps {
   analytics: any;
 }
 
-export default function SystemResources({ metrics, analytics }: SystemResourcesProps) {
+export default function SystemResources({
+  metrics,
+  analytics,
+}: SystemResourcesProps) {
   return (
     <div className="bg-[#0b0b0e]/90 border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-md hover:border-purple-500/20 transition-all duration-300">
       <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-wider font-mono flex items-center gap-2">
@@ -56,9 +59,7 @@ export default function SystemResources({ metrics, analytics }: SystemResourcesP
             </span>
             <span className="text-xs font-mono text-neutral-200 font-bold">
               {metrics?.storage?.usedBytes
-                ? `${(metrics.storage.usedBytes / (1024 * 1024)).toFixed(
-                    1
-                  )} MB`
+                ? `${(metrics.storage.usedBytes / (1024 * 1024)).toFixed(1)} MB`
                 : "---"}
             </span>
           </div>
@@ -68,8 +69,7 @@ export default function SystemResources({ metrics, analytics }: SystemResourcesP
               style={{
                 width: `${
                   metrics?.storage?.usedBytes && metrics?.storage?.limitBytes
-                    ? (metrics.storage.usedBytes /
-                        metrics.storage.limitBytes) *
+                    ? (metrics.storage.usedBytes / metrics.storage.limitBytes) *
                       100
                     : 0
                 }%`,

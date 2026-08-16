@@ -1,5 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Sparkles, BookOpenText, ChevronLeft, ChevronRight, Languages } from "lucide-react";
+import {
+  Sparkles,
+  BookOpenText,
+  ChevronLeft,
+  ChevronRight,
+  Languages,
+} from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { cleanDialogueDisplay } from "@/utils";
 
@@ -21,9 +27,16 @@ const PanelAssistantPage = React.memo(
     onNavigateHome = () => {},
     addNotification,
   }: PanelAssistantPageProps) => {
-    const activeProjectData = useProjectStore((state) => state.activeProjectData);
+    const activeProjectData = useProjectStore(
+      (state) => state.activeProjectData
+    );
     const storePanels = activeProjectData?.panels || [];
-    const safePanels = (panels && panels.length > 0) ? panels : (Array.isArray(storePanels) ? storePanels : []);
+    const safePanels =
+      panels && panels.length > 0
+        ? panels
+        : Array.isArray(storePanels)
+        ? storePanels
+        : [];
     const [selectedIdx, setSelectedIdx] = useState(0);
 
     const filmstripRef = useRef<HTMLDivElement>(null);
@@ -31,7 +44,10 @@ const PanelAssistantPage = React.memo(
     const scrollFilmstrip = (direction: "left" | "right") => {
       if (filmstripRef.current) {
         const scrollAmount = direction === "left" ? -240 : 240;
-        filmstripRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+        filmstripRef.current.scrollBy({
+          left: scrollAmount,
+          behavior: "smooth",
+        });
       }
     };
 
@@ -55,7 +71,8 @@ const PanelAssistantPage = React.memo(
             No Panels Available
           </h3>
           <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
-            Please import a series or add panels to your storyboard timeline to start editing.
+            Please import a series or add panels to your storyboard timeline to
+            start editing.
           </p>
         </div>
       );
@@ -86,13 +103,16 @@ const PanelAssistantPage = React.memo(
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 border border-purple-500/20">
                   VISUAL STUDIO • TRANSLATION
                 </span>
-                <span className="text-xs text-purple-400 font-mono">• Panel #{selectedIdx + 1} Selected</span>
+                <span className="text-xs text-purple-400 font-mono">
+                  • Panel #{selectedIdx + 1} Selected
+                </span>
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                 Translation Studio
               </h1>
               <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Multi-language dialogue translator and narrative editor per comic panel frame.
+                Multi-language dialogue translator and narrative editor per
+                comic panel frame.
               </p>
             </div>
           </div>
@@ -161,7 +181,6 @@ const PanelAssistantPage = React.memo(
 
         {/* TWO-COLUMN STUDIO WORKSPACE GRID (4 : 8) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-
           {/* COLUMN 1 (LEFT - 4 COLS / 33% WIDTH): ACTIVE PANEL DETAILS */}
           <div className="lg:col-span-4 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 space-y-4 shadow-xl">
             <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
@@ -177,7 +196,9 @@ const PanelAssistantPage = React.memo(
               ) : (
                 <div className="flex flex-col items-center gap-2 text-neutral-600">
                   <Sparkles className="w-8 h-8" />
-                  <span className="text-[10px] font-mono">No image rendered</span>
+                  <span className="text-[10px] font-mono">
+                    No image rendered
+                  </span>
                 </div>
               )}
               <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-md">
@@ -194,13 +215,18 @@ const PanelAssistantPage = React.memo(
                   <div className="space-y-1.5">
                     {cleanDialogueDisplay(activePanel?.speech_text).tone && (
                       <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                        Tone: {cleanDialogueDisplay(activePanel?.speech_text).tone}
+                        Tone:{" "}
+                        {cleanDialogueDisplay(activePanel?.speech_text).tone}
                       </span>
                     )}
-                    <p>{cleanDialogueDisplay(activePanel?.speech_text).speech}</p>
+                    <p>
+                      {cleanDialogueDisplay(activePanel?.speech_text).speech}
+                    </p>
                   </div>
                 ) : (
-                  <span className="text-neutral-600 italic">No speech text recorded for this panel.</span>
+                  <span className="text-neutral-600 italic">
+                    No speech text recorded for this panel.
+                  </span>
                 )}
               </div>
             </div>
@@ -211,7 +237,9 @@ const PanelAssistantPage = React.memo(
               </span>
               <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
                 {activePanel?.visual_description || (
-                  <span className="text-neutral-600 italic">No narrative text recorded for this panel.</span>
+                  <span className="text-neutral-600 italic">
+                    No narrative text recorded for this panel.
+                  </span>
                 )}
               </div>
             </div>
@@ -225,10 +253,12 @@ const PanelAssistantPage = React.memo(
                   ACTIVE WORKFLOW
                 </p>
                 <h4 className="text-base font-bold text-white mt-0.5 flex items-center gap-2">
-                  <BookOpenText className="w-4 h-4 text-purple-400" /> Translation & Localization Studio
+                  <BookOpenText className="w-4 h-4 text-purple-400" />{" "}
+                  Translation & Localization Studio
                 </h4>
                 <p className="mt-0.5 text-xs text-neutral-400 font-mono">
-                  Translate dialogue and narrative text to target languages with 1-click batch processing.
+                  Translate dialogue and narrative text to target languages with
+                  1-click batch processing.
                 </p>
               </div>
               <div className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-[9px] font-mono font-bold uppercase tracking-widest text-purple-300">
@@ -245,7 +275,6 @@ const PanelAssistantPage = React.memo(
               />
             </div>
           </div>
-
         </div>
       </div>
     );

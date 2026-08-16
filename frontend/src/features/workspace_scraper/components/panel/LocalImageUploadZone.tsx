@@ -5,7 +5,10 @@ export interface LocalImageUploadZoneProps {
   selectedFiles: File[];
   setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
   onUploadImages?: (files: FileList | File[]) => void;
-  addNotification: (message: string, type: "error" | "info" | "success" | "warning") => void;
+  addNotification: (
+    message: string,
+    type: "error" | "info" | "success" | "warning"
+  ) => void;
 }
 
 export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
@@ -18,7 +21,9 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const filesArray = Array.from(e.target.files).filter((f) => f.type.startsWith("image/"));
+      const filesArray = Array.from(e.target.files).filter((f) =>
+        f.type.startsWith("image/")
+      );
       setSelectedFiles((prev) => [...prev, ...filesArray]);
     }
   };
@@ -27,7 +32,9 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
     e.preventDefault();
     setIsDraggingOver(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const filesArray = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
+      const filesArray = Array.from(e.dataTransfer.files).filter((f) =>
+        f.type.startsWith("image/")
+      );
       if (filesArray.length > 0) {
         setSelectedFiles((prev) => [...prev, ...filesArray]);
       }
@@ -71,10 +78,12 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
           <UploadCloud className="w-7 h-7" />
         </div>
         <h3 className="text-base font-bold text-white mb-1 font-sans">
-          Drag & drop your images here, or <span className="text-purple-400 underline">click to browse</span>
+          Drag & drop your images here, or{" "}
+          <span className="text-purple-400 underline">click to browse</span>
         </h3>
         <p className="text-xs text-neutral-400 max-w-md font-sans">
-          Supports PNG, JPG, JPEG, WEBP, GIF, and SVG files. Multiple files allowed.
+          Supports PNG, JPG, JPEG, WEBP, GIF, and SVG files. Multiple files
+          allowed.
         </p>
       </div>
 
@@ -109,7 +118,9 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedFiles((prev) => prev.filter((_, i) => i !== idx));
+                      setSelectedFiles((prev) =>
+                        prev.filter((_, i) => i !== idx)
+                      );
                     }}
                     className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 hover:bg-red-600 text-white flex items-center justify-center transition-colors"
                   >
@@ -127,7 +138,8 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
             onClick={handleExecuteUpload}
             className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg active:scale-98 flex items-center justify-center gap-2"
           >
-            <Plus className="w-4 h-4" /> Import {selectedFiles.length} Image(s) into Imported Assets
+            <Plus className="w-4 h-4" /> Import {selectedFiles.length} Image(s)
+            into Imported Assets
           </button>
         </div>
       )}

@@ -43,12 +43,16 @@ const VoiceStudioPage = React.memo(
     scrapedGenre,
     setMusicTheme,
   }: VoiceStudioPageProps) => {
-    const activeProjectData = useProjectStore((state) => state.activeProjectData);
+    const activeProjectData = useProjectStore(
+      (state) => state.activeProjectData
+    );
     const storePanels = activeProjectData?.panels || [];
-    const safePanels = (panels && panels.length > 0) ? panels : storePanels;
+    const safePanels = panels && panels.length > 0 ? panels : storePanels;
 
     const [selectedIdx, setSelectedIdx] = useState(0);
-    const [activeTab, setActiveTab] = useState<"dramatize" | "cast" | "sound">("dramatize");
+    const [activeTab, setActiveTab] = useState<"dramatize" | "cast" | "sound">(
+      "dramatize"
+    );
     const [selectedModel, setSelectedModel] = useState<string>(
       () => localStorage.getItem("ai_comic_model") || ""
     );
@@ -90,15 +94,26 @@ const VoiceStudioPage = React.memo(
         const audio = new Audio(targetUrl);
         speechAudioRef.current = audio;
         audio.onended = () => setIsPlayingSpeech(false);
-        audio.play().then(() => setIsPlayingSpeech(true)).catch(() => {
-          if (parsedSpeech.speech && typeof window !== "undefined" && "speechSynthesis" in window) {
-            const utter = new SpeechSynthesisUtterance(parsedSpeech.speech);
-            utter.onend = () => setIsPlayingSpeech(false);
-            window.speechSynthesis.speak(utter);
-            setIsPlayingSpeech(true);
-          }
-        });
-      } else if (parsedSpeech.speech && typeof window !== "undefined" && "speechSynthesis" in window) {
+        audio
+          .play()
+          .then(() => setIsPlayingSpeech(true))
+          .catch(() => {
+            if (
+              parsedSpeech.speech &&
+              typeof window !== "undefined" &&
+              "speechSynthesis" in window
+            ) {
+              const utter = new SpeechSynthesisUtterance(parsedSpeech.speech);
+              utter.onend = () => setIsPlayingSpeech(false);
+              window.speechSynthesis.speak(utter);
+              setIsPlayingSpeech(true);
+            }
+          });
+      } else if (
+        parsedSpeech.speech &&
+        typeof window !== "undefined" &&
+        "speechSynthesis" in window
+      ) {
         const utter = new SpeechSynthesisUtterance(parsedSpeech.speech);
         utter.onend = () => setIsPlayingSpeech(false);
         window.speechSynthesis.speak(utter);
@@ -117,16 +132,31 @@ const VoiceStudioPage = React.memo(
         const audio = new Audio(targetUrl);
         narrativeAudioRef.current = audio;
         audio.onended = () => setIsPlayingNarrative(false);
-        audio.play().then(() => setIsPlayingNarrative(true)).catch(() => {
-          if (activePanel?.visual_description && typeof window !== "undefined" && "speechSynthesis" in window) {
-            const utter = new SpeechSynthesisUtterance(activePanel.visual_description);
-            utter.onend = () => setIsPlayingNarrative(false);
-            window.speechSynthesis.speak(utter);
-            setIsPlayingNarrative(true);
-          }
-        });
-      } else if (activePanel?.visual_description && typeof window !== "undefined" && "speechSynthesis" in window) {
-        const utter = new SpeechSynthesisUtterance(activePanel.visual_description);
+        audio
+          .play()
+          .then(() => setIsPlayingNarrative(true))
+          .catch(() => {
+            if (
+              activePanel?.visual_description &&
+              typeof window !== "undefined" &&
+              "speechSynthesis" in window
+            ) {
+              const utter = new SpeechSynthesisUtterance(
+                activePanel.visual_description
+              );
+              utter.onend = () => setIsPlayingNarrative(false);
+              window.speechSynthesis.speak(utter);
+              setIsPlayingNarrative(true);
+            }
+          });
+      } else if (
+        activePanel?.visual_description &&
+        typeof window !== "undefined" &&
+        "speechSynthesis" in window
+      ) {
+        const utter = new SpeechSynthesisUtterance(
+          activePanel.visual_description
+        );
         utter.onend = () => setIsPlayingNarrative(false);
         window.speechSynthesis.speak(utter);
         setIsPlayingNarrative(true);
@@ -136,7 +166,10 @@ const VoiceStudioPage = React.memo(
     const scrollFilmstrip = (direction: "left" | "right") => {
       if (filmstripRef.current) {
         const scrollAmount = direction === "left" ? -240 : 240;
-        filmstripRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+        filmstripRef.current.scrollBy({
+          left: scrollAmount,
+          behavior: "smooth",
+        });
       }
     };
 
@@ -154,7 +187,8 @@ const VoiceStudioPage = React.memo(
             No Panels Available
           </h3>
           <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
-            Please import a series or add panels to your storyboard timeline to start voice dramaturgy.
+            Please import a series or add panels to your storyboard timeline to
+            start voice dramaturgy.
           </p>
         </div>
       );
@@ -173,13 +207,16 @@ const VoiceStudioPage = React.memo(
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 border border-purple-500/20">
                   AUDIO PRODUCTION
                 </span>
-                <span className="text-xs text-neutral-400 font-mono">• {safePanels.length} panels for TTS</span>
+                <span className="text-xs text-neutral-400 font-mono">
+                  • {safePanels.length} panels for TTS
+                </span>
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                 Voice Studio
               </h1>
               <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Character voice actor casting, script dramatization, emotional inflection, and neural audio synthesis.
+                Character voice actor casting, script dramatization, emotional
+                inflection, and neural audio synthesis.
               </p>
             </div>
           </div>
@@ -268,7 +305,9 @@ const VoiceStudioPage = React.memo(
               ) : (
                 <div className="flex flex-col items-center gap-2 text-neutral-600">
                   <Film className="w-8 h-8" />
-                  <span className="text-[10px] font-mono">No image rendered</span>
+                  <span className="text-[10px] font-mono">
+                    No image rendered
+                  </span>
                 </div>
               )}
               <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-md">
@@ -291,8 +330,14 @@ const VoiceStudioPage = React.memo(
                         : "bg-neutral-900 text-purple-300 border-purple-500/30 hover:bg-neutral-850 hover:text-white"
                     }`}
                   >
-                    {isPlayingSpeech ? <Square className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
-                    <span>{isPlayingSpeech ? "Stop Audio" : "Play Speech"}</span>
+                    {isPlayingSpeech ? (
+                      <Square className="w-3 h-3 fill-current" />
+                    ) : (
+                      <Play className="w-3 h-3 fill-current" />
+                    )}
+                    <span>
+                      {isPlayingSpeech ? "Stop Audio" : "Play Speech"}
+                    </span>
                   </button>
                 )}
               </div>
@@ -304,10 +349,14 @@ const VoiceStudioPage = React.memo(
                         Tone: {parsedSpeech.tone}
                       </span>
                     )}
-                    <p className="text-xs text-neutral-200 font-sans leading-relaxed">{parsedSpeech.speech}</p>
+                    <p className="text-xs text-neutral-200 font-sans leading-relaxed">
+                      {parsedSpeech.speech}
+                    </p>
                   </div>
                 ) : (
-                  <span className="text-neutral-600 italic">No speech text recorded for this panel.</span>
+                  <span className="text-neutral-600 italic">
+                    No speech text recorded for this panel.
+                  </span>
                 )}
               </div>
             </div>
@@ -327,8 +376,14 @@ const VoiceStudioPage = React.memo(
                         : "bg-neutral-900 text-purple-300 border-purple-500/30 hover:bg-neutral-850 hover:text-white"
                     }`}
                   >
-                    {isPlayingNarrative ? <Square className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 fill-current" />}
-                    <span>{isPlayingNarrative ? "Stop Audio" : "Play Narrative"}</span>
+                    {isPlayingNarrative ? (
+                      <Square className="w-3 h-3 fill-current" />
+                    ) : (
+                      <Play className="w-3 h-3 fill-current" />
+                    )}
+                    <span>
+                      {isPlayingNarrative ? "Stop Audio" : "Play Narrative"}
+                    </span>
                   </button>
                 )}
               </div>
@@ -336,7 +391,9 @@ const VoiceStudioPage = React.memo(
                 {activePanel?.visual_description ? (
                   <p>{activePanel.visual_description}</p>
                 ) : (
-                  <span className="text-neutral-600 italic">No narrative text recorded for this panel.</span>
+                  <span className="text-neutral-600 italic">
+                    No narrative text recorded for this panel.
+                  </span>
                 )}
               </div>
             </div>
@@ -344,17 +401,35 @@ const VoiceStudioPage = React.memo(
             {/* Panel Metrics Pills */}
             <div className="grid grid-cols-3 gap-2 pt-1 border-t border-neutral-850">
               <div className="bg-neutral-950 border border-neutral-850 rounded-xl p-2 text-center">
-                <p className="text-[9px] font-mono text-neutral-500 uppercase">Duration</p>
-                <p className="text-xs font-black text-white mt-0.5">{(activePanel?.duration ?? 3.0).toFixed(1)}s</p>
+                <p className="text-[9px] font-mono text-neutral-500 uppercase">
+                  Duration
+                </p>
+                <p className="text-xs font-black text-white mt-0.5">
+                  {(activePanel?.duration ?? 3.0).toFixed(1)}s
+                </p>
               </div>
               <div className="bg-neutral-950 border border-neutral-850 rounded-xl p-2 text-center">
-                <p className="text-[9px] font-mono text-neutral-500 uppercase">Frame</p>
-                <p className="text-xs font-black text-white mt-0.5">{selectedIdx + 1}/{safePanels.length}</p>
+                <p className="text-[9px] font-mono text-neutral-500 uppercase">
+                  Frame
+                </p>
+                <p className="text-xs font-black text-white mt-0.5">
+                  {selectedIdx + 1}/{safePanels.length}
+                </p>
               </div>
               <div className="bg-neutral-950 border border-neutral-850 rounded-xl p-2 text-center">
-                <p className="text-[9px] font-mono text-neutral-500 uppercase">Audio Track</p>
-                <p className={`text-xs font-black mt-0.5 ${activePanel?.audio_url || activePanel?.speech_audio_url ? "text-emerald-400" : "text-purple-300"}`}>
-                  {activePanel?.audio_url || activePanel?.speech_audio_url ? "TTS Ready" : "TTS Ready"}
+                <p className="text-[9px] font-mono text-neutral-500 uppercase">
+                  Audio Track
+                </p>
+                <p
+                  className={`text-xs font-black mt-0.5 ${
+                    activePanel?.audio_url || activePanel?.speech_audio_url
+                      ? "text-emerald-400"
+                      : "text-purple-300"
+                  }`}
+                >
+                  {activePanel?.audio_url || activePanel?.speech_audio_url
+                    ? "TTS Ready"
+                    : "TTS Ready"}
                 </p>
               </div>
             </div>
@@ -422,7 +497,10 @@ const VoiceStudioPage = React.memo(
                   <AmbientSoundPicker
                     onSelectMusicTheme={(theme) => {
                       if (setMusicTheme) setMusicTheme(theme);
-                      addNotification?.(`Applied soundtrack theme: "${theme}"`, "success");
+                      addNotification?.(
+                        `Applied soundtrack theme: "${theme}"`,
+                        "success"
+                      );
                     }}
                   />
                   <SfxOverlayMixer panels={panels} />

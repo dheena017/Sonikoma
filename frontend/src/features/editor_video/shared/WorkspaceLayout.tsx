@@ -1,5 +1,17 @@
 import React, { useState } from "react";
-import { Search, Filter, Maximize2, X, Check, Play, Pause, Star, Sparkles, ChevronRight, ChevronLeft } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Maximize2,
+  X,
+  Check,
+  Play,
+  Pause,
+  Star,
+  Sparkles,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
@@ -41,7 +53,9 @@ export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
     <div className="px-3.5 py-2.5 border-b border-purple-900/20 bg-neutral-950/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-sm">
       <div className="flex items-center gap-2">
         <span className="h-2 w-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-        <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">{title}</h2>
+        <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">
+          {title}
+        </h2>
         <button
           onClick={() => {
             const next = !isStarred;
@@ -53,7 +67,9 @@ export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
         >
           <Star
             className={`h-3.5 w-3.5 transition-all ${
-              isStarred ? "text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" : "text-neutral-500 hover:text-amber-300"
+              isStarred
+                ? "text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]"
+                : "text-neutral-500 hover:text-amber-300"
             }`}
           />
         </button>
@@ -152,7 +168,7 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
               onClick={() => onSelectTab(tab)}
               className={`relative px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 flex items-center gap-1.5 ${
                 isActive
-                ? "bg-gradient-to-r from-purple-600/60 to-indigo-600/60 text-white border border-purple-400/80 shadow-[0_0_16px_rgba(168,85,247,0.6)]"
+                  ? "bg-gradient-to-r from-purple-600/60 to-indigo-600/60 text-white border border-purple-400/80 shadow-[0_0_16px_rgba(168,85,247,0.6)]"
                   : "bg-neutral-900/60 text-neutral-300 border border-neutral-800/80 hover:text-white hover:bg-white/10 hover:border-purple-500/30"
               }`}
             >
@@ -195,7 +211,9 @@ export const WorkspaceLayoutSearch: React.FC<SearchProps> = ({
   className = "",
 }) => {
   return (
-    <div className={`px-3 py-2 bg-[#110d22]/95 border-b border-purple-900/20 flex items-center gap-2 shrink-0 ${className}`}>
+    <div
+      className={`px-3 py-2 bg-[#110d22]/95 border-b border-purple-900/20 flex items-center gap-2 shrink-0 ${className}`}
+    >
       <div className="flex-1 relative">
         <input
           type="text"
@@ -253,9 +271,9 @@ export const WorkspaceLayoutPromptBox: React.FC<PromptBoxProps> = ({
 };
 
 // ── Content Area Block ───────────────────────────────────────────────────────
-export const WorkspaceLayoutContent: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const WorkspaceLayoutContent: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   return (
     <div className="flex-1 min-h-0 relative overflow-y-auto p-3 space-y-3 [scrollbar-width:none]">
       {children}

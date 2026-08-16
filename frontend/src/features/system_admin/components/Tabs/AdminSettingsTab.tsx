@@ -57,7 +57,12 @@ export function AdminSettingsTab({
   };
 
   const handleReset = async () => {
-    if (!window.confirm("Are you sure you want to reset all settings to defaults?")) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to reset all settings to defaults?"
+      )
+    )
+      return;
     setResetting(true);
     try {
       const res = await fetchWithInterceptor("/api/auth/admin/settings/reset", {
@@ -80,14 +85,25 @@ export function AdminSettingsTab({
   };
 
   const handlePurgeCache = async () => {
-    if (!window.confirm("Are you sure you want to purge the global scraped image cache?")) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to purge the global scraped image cache?"
+      )
+    )
+      return;
     setPurging(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/settings/purge-cache", {
-        method: "POST",
-      });
+      const res = await fetchWithInterceptor(
+        "/api/auth/admin/settings/purge-cache",
+        {
+          method: "POST",
+        }
+      );
       if (res.ok) {
-        addNotification("Global scraped image cache purged successfully", "success");
+        addNotification(
+          "Global scraped image cache purged successfully",
+          "success"
+        );
       } else {
         addNotification("Failed to purge global cache", "error");
       }
@@ -287,14 +303,16 @@ export function AdminSettingsTab({
                 disabled={resetting}
                 className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 disabled:opacity-50 rounded-lg text-sm font-medium border border-red-500/20 transition-colors flex items-center gap-2"
               >
-                <RotateCcw className="w-4 h-4" /> {resetting ? "Resetting..." : "Reset All Settings"}
+                <RotateCcw className="w-4 h-4" />{" "}
+                {resetting ? "Resetting..." : "Reset All Settings"}
               </button>
               <button
                 onClick={handlePurgeCache}
                 disabled={purging}
                 className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 disabled:opacity-50 rounded-lg text-sm font-medium border border-red-500/20 transition-colors flex items-center gap-2"
               >
-                <Trash2 className="w-4 h-4" /> {purging ? "Purging..." : "Purge Global Cache"}
+                <Trash2 className="w-4 h-4" />{" "}
+                {purging ? "Purging..." : "Purge Global Cache"}
               </button>
             </div>
           </div>

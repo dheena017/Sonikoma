@@ -4,7 +4,9 @@ interface YouTubeTopProgressBarProps {
   isLoading: boolean;
 }
 
-export default function YouTubeTopProgressBar({ isLoading }: YouTubeTopProgressBarProps) {
+export default function YouTubeTopProgressBar({
+  isLoading,
+}: YouTubeTopProgressBarProps) {
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(false);
 

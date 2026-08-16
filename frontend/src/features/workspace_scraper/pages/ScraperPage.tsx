@@ -98,12 +98,23 @@ interface StoredProject {
   synopsis?: string | null;
 }
 
-const STATUS_COLORS: Record<string, { dot: string; text: string; label: string }> = {
-  completed:  { dot: "bg-emerald-500",               text: "text-emerald-400", label: "Completed"  },
-  processing: { dot: "bg-amber-500 animate-pulse",   text: "text-amber-400",   label: "Processing" },
-  pending:    { dot: "bg-sky-500",                   text: "text-sky-400",     label: "Pending"    },
-  failed:     { dot: "bg-red-500",                   text: "text-red-400",     label: "Failed"     },
-  ready:      { dot: "bg-emerald-500",               text: "text-emerald-400", label: "Ready"      },
+const STATUS_COLORS: Record<
+  string,
+  { dot: string; text: string; label: string }
+> = {
+  completed: {
+    dot: "bg-emerald-500",
+    text: "text-emerald-400",
+    label: "Completed",
+  },
+  processing: {
+    dot: "bg-amber-500 animate-pulse",
+    text: "text-amber-400",
+    label: "Processing",
+  },
+  pending: { dot: "bg-sky-500", text: "text-sky-400", label: "Pending" },
+  failed: { dot: "bg-red-500", text: "text-red-400", label: "Failed" },
+  ready: { dot: "bg-emerald-500", text: "text-emerald-400", label: "Ready" },
 };
 
 function getStatusInfo(status?: string) {
@@ -114,29 +125,32 @@ function getStatusInfo(status?: string) {
 function formatRelativeTime(dateStr?: string): string {
   if (!dateStr) return "";
   const date = new Date(dateStr);
-  const now  = new Date();
+  const now = new Date();
   const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (diff < 60)     return "just now";
-  if (diff < 3600)   return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400)  return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
   return date.toLocaleDateString();
 }
 
 const GENRE_COLORS: Record<string, string> = {
-  action:    "bg-red-500/15 text-red-400 border-red-500/20",
-  fantasy:   "bg-purple-500/15 text-purple-400 border-purple-500/20",
-  romance:   "bg-pink-500/15 text-pink-400 border-pink-500/20",
-  horror:    "bg-orange-500/15 text-orange-400 border-orange-500/20",
-  comedy:    "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
-  drama:     "bg-blue-500/15 text-blue-400 border-blue-500/20",
-  shonen:    "bg-indigo-500/15 text-indigo-400 border-indigo-500/20",
+  action: "bg-red-500/15 text-red-400 border-red-500/20",
+  fantasy: "bg-purple-500/15 text-purple-400 border-purple-500/20",
+  romance: "bg-pink-500/15 text-pink-400 border-pink-500/20",
+  horror: "bg-orange-500/15 text-orange-400 border-orange-500/20",
+  comedy: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
+  drama: "bg-blue-500/15 text-blue-400 border-blue-500/20",
+  shonen: "bg-indigo-500/15 text-indigo-400 border-indigo-500/20",
   superhero: "bg-amber-500/15 text-amber-400 border-amber-500/20",
 };
 
 function getGenreStyle(genre?: string): string {
   const key = (genre || "").toLowerCase().split("/")[0];
-  return GENRE_COLORS[key] || "bg-neutral-800/60 text-neutral-400 border-neutral-700/40";
+  return (
+    GENRE_COLORS[key] ||
+    "bg-neutral-800/60 text-neutral-400 border-neutral-700/40"
+  );
 }
 
 export type AppWorkspaceProps = ScraperPageProps;
@@ -145,13 +159,21 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   const [recentProjects, setRecentProjects] = useState<StoredProject[]>([]);
   const [loadingProjects, setLoadingProjects] = useState<boolean>(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [renamingProjectId, setRenamingProjectId] = useState<string | null>(null);
+  const [renamingProjectId, setRenamingProjectId] = useState<string | null>(
+    null
+  );
   const [activeGuideTab, setActiveGuideTab] = useState<string>("general");
-  const [searchQuery,    setSearchQuery]    = useState<string>("");
-  const [showAll,        setShowAll]        = useState<boolean>(false);
-  const [statsLoading,   setStatsLoading]   = useState<boolean>(false);
-  const [stats, setStats] = useState<{ totalProjects: number; totalPanels: number; completedProjects: number }>({
-    totalProjects: 0, totalPanels: 0, completedProjects: 0,
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [showAll, setShowAll] = useState<boolean>(false);
+  const [statsLoading, setStatsLoading] = useState<boolean>(false);
+  const [stats, setStats] = useState<{
+    totalProjects: number;
+    totalPanels: number;
+    completedProjects: number;
+  }>({
+    totalProjects: 0,
+    totalPanels: 0,
+    completedProjects: 0,
   });
 
   const handleOpenProject = (project: Project) => {
@@ -197,16 +219,22 @@ const ScraperPageInner = (props: ScraperPageProps) => {
       console.error("Failed to rename project:", err);
     }
     setRecentProjects((prev) =>
-      prev.map((p) => (p.project_id === projectId ? { ...p, title: newName } : p))
+      prev.map((p) =>
+        p.project_id === projectId ? { ...p, title: newName } : p
+      )
     );
     setRenamingProjectId(null);
     props.addNotification?.(`Renamed project to "${newName}"`, "success");
   };
 
-  const handleDeleteProject = async (e: React.MouseEvent, projectId: string) => {
+  const handleDeleteProject = async (
+    e: React.MouseEvent,
+    projectId: string
+  ) => {
     e.stopPropagation();
     setOpenMenuId(null);
-    if (!window.confirm("Are you sure you want to delete this project?")) return;
+    if (!window.confirm("Are you sure you want to delete this project?"))
+      return;
     try {
       const token =
         localStorage.getItem("sonikoma_token") ||
@@ -320,13 +348,25 @@ const ScraperPageInner = (props: ScraperPageProps) => {
       if (res.ok) {
         const data = await res.json();
         if (data.projects) {
-          const sorted = [...data.projects].sort((a: any, b: any) =>
-            new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+          const sorted = [...data.projects].sort(
+            (a: any, b: any) =>
+              new Date(b.created_at || 0).getTime() -
+              new Date(a.created_at || 0).getTime()
           );
           setRecentProjects(sorted);
-          const totalPanels  = sorted.reduce((acc: number, p: any) => acc + (p.panels_count || p.imported_assets_count || 0), 0);
-          const completed    = sorted.filter((p: any) => (p.status || "").toLowerCase() === "completed").length;
-          setStats({ totalProjects: sorted.length, totalPanels, completedProjects: completed });
+          const totalPanels = sorted.reduce(
+            (acc: number, p: any) =>
+              acc + (p.panels_count || p.imported_assets_count || 0),
+            0
+          );
+          const completed = sorted.filter(
+            (p: any) => (p.status || "").toLowerCase() === "completed"
+          ).length;
+          setStats({
+            totalProjects: sorted.length,
+            totalPanels,
+            completedProjects: completed,
+          });
         }
       }
     } catch (err) {
@@ -337,16 +377,19 @@ const ScraperPageInner = (props: ScraperPageProps) => {
     }
   };
 
-  useEffect(() => { fetchProjects(); }, []);
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
   const filteredProjects = useMemo(() => {
     if (!searchQuery.trim()) return recentProjects;
     const q = searchQuery.toLowerCase();
-    return recentProjects.filter((p) =>
-      (p.title  || "").toLowerCase().includes(q) ||
-      (p.genre  || "").toLowerCase().includes(q) ||
-      (p.author || "").toLowerCase().includes(q) ||
-      (p.episode|| "").toLowerCase().includes(q)
+    return recentProjects.filter(
+      (p) =>
+        (p.title || "").toLowerCase().includes(q) ||
+        (p.genre || "").toLowerCase().includes(q) ||
+        (p.author || "").toLowerCase().includes(q) ||
+        (p.episode || "").toLowerCase().includes(q)
     );
   }, [recentProjects, searchQuery]);
 
@@ -441,16 +484,23 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   const matchingProject = useMemo<StoredProject | null>(() => {
     if (!targetUrl || !targetUrl.trim()) return null;
     const targetUrlNormalized = normalizeUrl(targetUrl);
-    return recentProjects.find(
-      (p) => p.url && normalizeUrl(p.url) === targetUrlNormalized
-    ) || null;
+    return (
+      recentProjects.find(
+        (p) => p.url && normalizeUrl(p.url) === targetUrlNormalized
+      ) || null
+    );
   }, [recentProjects, targetUrl]);
 
   const handleUploadLocalImages = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
-    const fileArray = Array.from(files).filter((file) => file.type.startsWith("image/"));
+    const fileArray = Array.from(files).filter((file) =>
+      file.type.startsWith("image/")
+    );
     if (fileArray.length === 0) {
-      addNotification("Please select valid image files (PNG, JPG, WEBP, GIF, SVG).", "error");
+      addNotification(
+        "Please select valid image files (PNG, JPG, WEBP, GIF, SVG).",
+        "error"
+      );
       return;
     }
 
@@ -463,18 +513,24 @@ const ScraperPageInner = (props: ScraperPageProps) => {
       });
     };
 
-    const imageUrls = await Promise.all(fileArray.map((file) => readFileAsDataUrl(file)));
+    const imageUrls = await Promise.all(
+      fileArray.map((file) => readFileAsDataUrl(file))
+    );
 
     const currentStore = useProjectStore.getState();
-    const existingProjectData = currentStore.activeProjectData as
-      | {
-          project?: { project_id: string; title: string; url: string; created_at?: string };
-          panels?: any[];
-          scrapedImages?: string[];
-        }
-      | null;
+    const existingProjectData = currentStore.activeProjectData as {
+      project?: {
+        project_id: string;
+        title: string;
+        url: string;
+        created_at?: string;
+      };
+      panels?: any[];
+      scrapedImages?: string[];
+    } | null;
 
-    const pid = existingProjectData?.project?.project_id || `proj_upload_${Date.now()}`;
+    const pid =
+      existingProjectData?.project?.project_id || `proj_upload_${Date.now()}`;
     const fallbackProject = {
       project_id: pid,
       title: seriesTitle.trim() || "Custom Image Project",
@@ -491,7 +547,10 @@ const ScraperPageInner = (props: ScraperPageProps) => {
       scrapedImages: updatedScraped,
     });
 
-    addNotification(`Successfully imported ${fileArray.length} image(s) to Imported Assets!`, "success");
+    addNotification(
+      `Successfully imported ${fileArray.length} image(s) to Imported Assets!`,
+      "success"
+    );
 
     const nav = navigateTo || (window as any).navigateTo;
     const targetPath = `/scraper/editor?id=${pid}`;
@@ -519,9 +578,11 @@ const ScraperPageInner = (props: ScraperPageProps) => {
         )}
 
         {/* ── STATS BAR ── */}
-        <WorkspaceStatsBar statsLoading={statsLoading} stats={stats} projectId={projectId} />
-
-
+        <WorkspaceStatsBar
+          statsLoading={statsLoading}
+          stats={stats}
+          projectId={projectId}
+        />
 
         <div className="relative z-50">
           <UrlInputPanel
@@ -563,7 +624,9 @@ const ScraperPageInner = (props: ScraperPageProps) => {
             onOpenEpisodeScraper={(url) => {
               // Store URL and navigate to workspace nested scraper route
               const nav = navigateTo || (window as any).navigateTo;
-              const targetPath = `/scraper/episode-scraper?url=${encodeURIComponent(url)}`;
+              const targetPath = `/scraper/episode-scraper?url=${encodeURIComponent(
+                url
+              )}`;
               if (typeof nav === "function") {
                 nav(targetPath);
               } else {
@@ -573,12 +636,6 @@ const ScraperPageInner = (props: ScraperPageProps) => {
             }}
           />
         </div>
-
-
-
-
-
-
 
         {/* ── RECENT PROJECTS ── */}
         <RecentProjectsSection
@@ -608,8 +665,6 @@ const ScraperPageInner = (props: ScraperPageProps) => {
           activeGuideTab={activeGuideTab}
           setActiveGuideTab={setActiveGuideTab}
         />
-
-
       </div>
     </main>
   );

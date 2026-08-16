@@ -31,7 +31,9 @@ export const TextWorkspace: React.FC<TextWorkspaceProps> = ({
       <TextAiToolbar onTriggerFeedback={onTriggerFeedback} />
       <WorkspaceLayout.Content>
         {/* Quick Add Buttons Component */}
-        <TextQuickAddBar onAddText={(type) => onTriggerFeedback(`Added ${type}`)} />
+        <TextQuickAddBar
+          onAddText={(type) => onTriggerFeedback(`Added ${type}`)}
+        />
 
         {/* Text Presets List using TextPresetCard Component */}
         <div className="space-y-2 pt-2">
@@ -39,7 +41,9 @@ export const TextWorkspace: React.FC<TextWorkspaceProps> = ({
             <TextPresetCard
               key={preset.id}
               preset={preset}
-              onSelect={() => onTriggerFeedback(`Added "${preset.title}" lockup`)}
+              onSelect={() =>
+                onTriggerFeedback(`Added "${preset.title}" lockup`)
+              }
             />
           ))}
         </div>

@@ -52,7 +52,6 @@ export function AdminUsersTab({
   const [grantReason, setGrantReason] = useState("");
   const [isGranting, setIsGranting] = useState(false);
 
-
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -593,7 +592,8 @@ export function AdminUsersTab({
               <h3 className="font-bold text-white">Grant / Adjust Credits</h3>
             </div>
             <p className="text-sm text-neutral-400 mb-4">
-              Adjust credits for <strong>{grantCreditsUser.email}</strong>. Use positive numbers to add, or negative numbers to deduct.
+              Adjust credits for <strong>{grantCreditsUser.email}</strong>. Use
+              positive numbers to add, or negative numbers to deduct.
             </p>
             <div className="space-y-4">
               <div>
@@ -603,7 +603,9 @@ export function AdminUsersTab({
                 <input
                   type="number"
                   value={grantAmount}
-                  onChange={(e) => setGrantAmount(parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    setGrantAmount(parseInt(e.target.value) || 0)
+                  }
                   className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm focus:border-purple-500/50 outline-none"
                 />
               </div>
@@ -650,12 +652,18 @@ export function AdminUsersTab({
                       }
                     );
                     if (res.ok) {
-                      addNotification("Credits updated successfully", "success");
+                      addNotification(
+                        "Credits updated successfully",
+                        "success"
+                      );
                       setGrantCreditsUser(null);
                       fetchUsers();
                     } else {
                       const err = await res.json();
-                      addNotification(err.detail || "Failed to update credits", "error");
+                      addNotification(
+                        err.detail || "Failed to update credits",
+                        "error"
+                      );
                     }
                   } catch (err) {
                     addNotification("Failed to update credits", "error");

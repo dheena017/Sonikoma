@@ -10,7 +10,10 @@ interface TimelineRulerProps {
   onHoverPctChange?: (pct: number | null) => void;
 }
 
-function buildTicks(totalDuration: number): { ticks: number[]; interval: number } {
+function buildTicks(totalDuration: number): {
+  ticks: number[];
+  interval: number;
+} {
   const interval = totalDuration <= 15 ? 1 : totalDuration <= 60 ? 5 : 10;
   const ticks: number[] = [];
   if (totalDuration <= 0) {
@@ -31,7 +34,10 @@ function buildTicks(totalDuration: number): { ticks: number[]; interval: number 
 
 const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
   ({ totalDuration, onScrubStart, onHoverPctChange }, ref) => {
-    const { ticks, interval } = useMemo(() => buildTicks(totalDuration), [totalDuration]);
+    const { ticks, interval } = useMemo(
+      () => buildTicks(totalDuration),
+      [totalDuration]
+    );
     const [hoverPct, setHoverPct] = React.useState<number | null>(null);
 
     const trackRef = useRef<HTMLDivElement | null>(null);
@@ -65,13 +71,20 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
           <div className="flex items-center gap-2">
             <Clock className="h-3.5 w-3.5 text-purple-300" />
             <div>
-              <div className="text-[10px] font-semibold text-white">Timeline</div>
-              <div className="text-[9px] text-neutral-500">{totalDuration.toFixed(1)}s</div>
+              <div className="text-[10px] font-semibold text-white">
+                Timeline
+              </div>
+              <div className="text-[9px] text-neutral-500">
+                {totalDuration.toFixed(1)}s
+              </div>
             </div>
           </div>
         </div>
 
-        <div ref={trackRef} className="flex-1 relative overflow-hidden pt-1 timeline-ruler-track">
+        <div
+          ref={trackRef}
+          className="flex-1 relative overflow-hidden pt-1 timeline-ruler-track"
+        >
           {hoverPct !== null && (
             <div
               className="pointer-events-none absolute inset-y-0 w-px bg-white/20"
@@ -90,12 +103,19 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
               <div
                 key={t}
                 className="absolute top-0 flex flex-col items-center"
-                style={{ left: `${pct}%`, transform: `translateX(${translateX})` }}
+                style={{
+                  left: `${pct}%`,
+                  transform: `translateX(${translateX})`,
+                }}
               >
                 <span className="text-[9px] font-mono text-neutral-400 mb-1 whitespace-nowrap select-none group-hover/ruler:text-purple-300 transition-colors">
                   {t === 0 ? "0s" : `${t}s`}
                 </span>
-                <div className={`w-px ${isMinor ? "h-1.5 bg-white/10" : "h-2.5 bg-white/20"}`} />
+                <div
+                  className={`w-px ${
+                    isMinor ? "h-1.5 bg-white/10" : "h-2.5 bg-white/20"
+                  }`}
+                />
               </div>
             );
           })}

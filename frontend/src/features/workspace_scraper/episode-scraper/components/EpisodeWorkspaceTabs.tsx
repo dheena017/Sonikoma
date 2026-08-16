@@ -47,7 +47,11 @@ const EpisodeWorkspaceTabs: React.FC<EpisodeWorkspaceTabsProps> = ({
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           } w-full justify-center`}
         >
-          {isLoading ? <Loader size={14} className="animate-spin" /> : <List size={14} />}
+          {isLoading ? (
+            <Loader size={14} className="animate-spin" />
+          ) : (
+            <List size={14} />
+          )}
           Episodes List ({isLoading ? 0 : filteredEpisodeCount})
         </button>
         <button
@@ -68,7 +72,10 @@ const EpisodeWorkspaceTabs: React.FC<EpisodeWorkspaceTabsProps> = ({
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           } w-full justify-center`}
         >
-          <Bookmark size={12} className={activeTab === "bookmarks" ? "fill-current" : ""} />
+          <Bookmark
+            size={12}
+            className={activeTab === "bookmarks" ? "fill-current" : ""}
+          />
           Bookmarks
         </button>
         <button
@@ -93,7 +100,6 @@ const EpisodeWorkspaceTabs: React.FC<EpisodeWorkspaceTabsProps> = ({
           Recent
         </button>
       </div>
-
     </div>
   );
 };

@@ -23,8 +23,11 @@ export default function QuickStartGuide({
   onboardingTasks = [],
   onNavigate,
 }: QuickStartGuideProps) {
-  const completedCount = onboardingTasks.filter((task) => task.completed).length;
-  const allCompleted = onboardingTasks.length > 0 && completedCount === onboardingTasks.length;
+  const completedCount = onboardingTasks.filter(
+    (task) => task.completed
+  ).length;
+  const allCompleted =
+    onboardingTasks.length > 0 && completedCount === onboardingTasks.length;
 
   const handleTaskClick = (taskId: number) => {
     const path = taskNavigationMap[taskId];
@@ -51,7 +54,10 @@ export default function QuickStartGuide({
           </div>
         ) : (
           onboardingTasks.map((task) => {
-            const isClickable = !task.completed && Boolean(onNavigate) && Boolean(taskNavigationMap[task.id]);
+            const isClickable =
+              !task.completed &&
+              Boolean(onNavigate) &&
+              Boolean(taskNavigationMap[task.id]);
 
             return (
               <button

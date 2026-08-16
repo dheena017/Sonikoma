@@ -69,7 +69,9 @@ export interface VideoPreviewBottomControlsProps {
   addNotification?: (msg: string, type: any) => void;
 }
 
-export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProps> = ({
+export const VideoPreviewBottomControls: React.FC<
+  VideoPreviewBottomControlsProps
+> = ({
   visible,
   progressBarRef,
   handleProgressBarInteraction,
@@ -109,8 +111,11 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
 }) => {
   return (
     <div
-      className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-12 pb-6 px-6 z-30 transition-all duration-300 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-        }`}
+      className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent pt-12 pb-6 px-6 z-30 transition-all duration-300 ${
+        visible
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-4 pointer-events-none"
+      }`}
     >
       {/* PROGRESS SCRUBBER ROW WITH HOVER TIMELINE MARKS & CHIPS */}
       <div className="relative group/scrub mb-4">
@@ -119,7 +124,9 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
           <div
             className="absolute bottom-6 flex flex-col items-center z-45 transition-all duration-75 pointer-events-none w-[150px]"
             style={{
-              left: `clamp(0px, calc(${hoverProgress.percent * 100}% - 75px), calc(100% - 150px))`,
+              left: `clamp(0px, calc(${
+                hoverProgress.percent * 100
+              }% - 75px), calc(100% - 150px))`,
             }}
           >
             <div className="bg-neutral-900 border border-neutral-800/80 rounded-2xl p-1.5 shadow-2xl backdrop-blur-md flex flex-col gap-1 w-full overflow-hidden">
@@ -173,7 +180,11 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
             <div
               className="w-2.5 h-2.5 bg-neutral-900 border-r border-b border-neutral-800/80 -mt-1 shadow-md relative z-10"
               style={{
-                transform: `translateX(clamp(-63px, calc(${hoverProgress.percent * 100}% - clamp(75px, ${hoverProgress.percent * 100}%, calc(100% - 75px))), 63px)) rotate(45deg)`,
+                transform: `translateX(clamp(-63px, calc(${
+                  hoverProgress.percent * 100
+                }% - clamp(75px, ${
+                  hoverProgress.percent * 100
+                }%, calc(100% - 75px))), 63px)) rotate(45deg)`,
               }}
             />
           </div>
@@ -189,7 +200,8 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
         >
           {chapters.map((chapter, idx) => {
             if (idx === 0) return null;
-            const markerPercent = totalDuration > 0 ? (chapter.startTime / totalDuration) * 100 : 0;
+            const markerPercent =
+              totalDuration > 0 ? (chapter.startTime / totalDuration) * 100 : 0;
             return (
               <div
                 key={idx}
@@ -201,14 +213,21 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
 
           <div
             className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full z-10"
-            style={{ width: `${totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0}%` }}
+            style={{
+              width: `${
+                totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0
+              }%`,
+            }}
           />
 
           <div
             className="absolute top-1/2 -translate-y-1/2 h-0 w-0 bg-white rounded-full opacity-0 group-hover/scrub:opacity-100 group-hover/scrub:h-3.5 group-hover/scrub:w-3.5 pointer-events-none transition-all duration-200 z-30"
             style={{
-              left: `calc(${totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0}% - 7px)`,
-              boxShadow: "0 0 0 2px rgba(168,85,247,0.4), 0 0 16px rgba(168,85,247,0.8)",
+              left: `calc(${
+                totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0
+              }% - 7px)`,
+              boxShadow:
+                "0 0 0 2px rgba(168,85,247,0.4), 0 0 16px rgba(168,85,247,0.8)",
             }}
           />
         </div>
@@ -230,7 +249,11 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
             onClick={togglePlay}
             className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
           >
-            {isPlaying ? <Pause className="h-4 w-4 fill-white" /> : <Play className="h-4 w-4 fill-white translate-x-px" />}
+            {isPlaying ? (
+              <Pause className="h-4 w-4 fill-white" />
+            ) : (
+              <Play className="h-4 w-4 fill-white translate-x-px" />
+            )}
           </button>
 
           <button
@@ -247,7 +270,11 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
               onClick={() => setIsMuted(!isMuted)}
               className="h-8 w-8 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
             >
-              {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              {isMuted ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
             </button>
 
             <div className="flex items-center overflow-hidden transition-all duration-200 max-w-0 opacity-0 group-hover/volume:max-w-44 group-hover/volume:opacity-100">
@@ -270,7 +297,9 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
           {/* TIMERS INDICATORS */}
           <div className="flex items-center gap-2 px-1">
             <span className="text-xs font-mono font-medium text-neutral-200 tabular-nums select-none">
-              {formatTime(currentTime)} <span className="text-neutral-600">/</span> {formatTime(totalDuration)}
+              {formatTime(currentTime)}{" "}
+              <span className="text-neutral-600">/</span>{" "}
+              {formatTime(totalDuration)}
             </span>
           </div>
 
@@ -283,7 +312,9 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
               }}
               className="flex items-center gap-1 px-3 py-1.5 bg-neutral-900/80 hover:bg-neutral-800 rounded-xl border border-white/10 text-[11px] font-mono text-neutral-300 transition-all cursor-pointer"
             >
-              <span className="font-bold text-purple-400 capitalize">{activeChapter.title}</span>
+              <span className="font-bold text-purple-400 capitalize">
+                {activeChapter.title}
+              </span>
               <ChevronRight className="h-3 w-3 shrink-0" />
             </button>
           </div>
@@ -294,12 +325,19 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
           <button
             onClick={() => {
               setIsLooping(!isLooping);
-              if (addNotification) addNotification(isLooping ? "Loop Playback Disabled" : "Loop Playback Enabled", "info");
+              if (addNotification)
+                addNotification(
+                  isLooping
+                    ? "Loop Playback Disabled"
+                    : "Loop Playback Enabled",
+                  "info"
+                );
             }}
-            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${isLooping
+            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
+              isLooping
                 ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
-              }`}
+            }`}
             title="Loop Playback (L)"
           >
             <RotateCcw className="h-4 w-4" />
@@ -308,12 +346,17 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
           <button
             onClick={() => {
               setShowSubtitles(!showSubtitles);
-              if (addNotification) addNotification(showSubtitles ? "Subtitles Disabled" : "Subtitles Enabled", "info");
+              if (addNotification)
+                addNotification(
+                  showSubtitles ? "Subtitles Disabled" : "Subtitles Enabled",
+                  "info"
+                );
             }}
-            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${showSubtitles
+            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
+              showSubtitles
                 ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
-              }`}
+            }`}
             title="Toggle Subtitles"
           >
             <Subtitles className="h-4 w-4" />
@@ -332,10 +375,11 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
               setShowSettings(!showSettings);
               setShowChaptersMenu(false);
             }}
-            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${showSettings
+            className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
+              showSettings
                 ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
-              }`}
+            }`}
             title="Playback Settings"
           >
             <Settings className="h-4 w-4" />
@@ -344,10 +388,11 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
           {variant !== "floating" && (
             <button
               onClick={() => setIsTheaterMode(!isTheaterMode)}
-              className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${isTheaterMode
+              className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
+                isTheaterMode
                   ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
                   : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
-                }`}
+              }`}
               title="Toggle Theater Mode (T)"
             >
               <Sliders className="h-4 w-4" />
@@ -359,7 +404,11 @@ export const VideoPreviewBottomControls: React.FC<VideoPreviewBottomControlsProp
             className="h-8 w-8 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-white/10 text-neutral-400 hover:text-white flex items-center justify-center transition-all cursor-pointer"
             title="Toggle Fullscreen (F)"
           >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
           </button>
         </div>
       </div>

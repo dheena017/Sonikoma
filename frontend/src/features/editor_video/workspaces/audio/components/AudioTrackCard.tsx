@@ -25,14 +25,22 @@ export const AudioTrackCard: React.FC<AudioTrackCardProps> = ({
             : "bg-neutral-800 border-neutral-700 text-neutral-400 group-hover:text-white"
         }`}
       >
-        {isPlaying ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+        {isPlaying ? (
+          <Pause className="h-3.5 w-3.5" />
+        ) : (
+          <Play className="h-3.5 w-3.5" />
+        )}
       </button>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-white truncate">{track.title}</p>
         <div className="flex items-center gap-2 text-[9px] font-mono text-neutral-400">
           <span>{track.duration}</span>
-          {track.mood && <span className="text-purple-400">• {track.mood}</span>}
-          {track.badge && <span className="text-amber-400">• {track.badge}</span>}
+          {track.mood && (
+            <span className="text-purple-400">• {track.mood}</span>
+          )}
+          {track.badge && (
+            <span className="text-amber-400">• {track.badge}</span>
+          )}
         </div>
       </div>
       <button

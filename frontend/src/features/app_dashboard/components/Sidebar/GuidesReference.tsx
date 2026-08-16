@@ -1,5 +1,11 @@
 import React from "react";
-import { BookOpen, ChevronRight, FileText, Settings, Sliders } from "lucide-react";
+import {
+  BookOpen,
+  ChevronRight,
+  FileText,
+  Settings,
+  Sliders,
+} from "lucide-react";
 
 interface GuidesReferenceProps {
   onNavigate: (path: string) => void;

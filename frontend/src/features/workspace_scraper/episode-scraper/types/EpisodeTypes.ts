@@ -10,4 +10,3 @@ export interface Episode {
   likes?: string;
   views?: number;
 }
-

@@ -50,13 +50,19 @@ export interface ProjectStoreState {
   isDrawerOpen: boolean;
   isDirty: boolean;
   isHydrating: boolean;
-  
+
   setActiveProjectId: (id: string | null) => void;
   setActiveProject: (data: ActiveProjectData | null) => void;
   setProjectLoading: () => void;
-  setProjectMissing: (missingId: string, options?: { isJobId?: boolean }) => void;
+  setProjectMissing: (
+    missingId: string,
+    options?: { isJobId?: boolean }
+  ) => void;
   setWorkspaceContext: (ctx: WorkspaceContext) => void;
-  hydrateActiveProject: (id?: string | null, fetchClient?: any) => Promise<void>;
+  hydrateActiveProject: (
+    id?: string | null,
+    fetchClient?: any
+  ) => Promise<void>;
   clearActiveProject: () => void;
   setDrawerOpen: (open: boolean) => void;
   setIsDirty: (dirty: boolean) => void;
@@ -88,7 +94,10 @@ export const useProjectStore = create<ProjectStoreState>()(
           }
           return {
             activeProjectId: id,
-            projectState: state.activeProjectData?.project?.project_id === id ? "active" : "loading",
+            projectState:
+              state.activeProjectData?.project?.project_id === id
+                ? "active"
+                : "loading",
           };
         }),
 
@@ -100,9 +109,7 @@ export const useProjectStore = create<ProjectStoreState>()(
                 project: {
                   ...data.project,
                   panels_count:
-                    data.project?.panels_count ??
-                    data.panels?.length ??
-                    0,
+                    data.project?.panels_count ?? data.panels?.length ?? 0,
                   imported_assets_count:
                     data.project?.imported_assets_count ??
                     data.scrapedImages?.length ??
@@ -150,16 +157,24 @@ export const useProjectStore = create<ProjectStoreState>()(
                 project_id: ctx.projectId,
                 job_id: ctx.jobId ?? null,
               },
-              panels: projectChanged ? [] : (cur?.panels ?? []),
-              scrapedImages: projectChanged ? [] : (cur?.scrapedImages ?? []),
+              panels: projectChanged ? [] : cur?.panels ?? [],
+              scrapedImages: projectChanged ? [] : cur?.scrapedImages ?? [],
             },
           };
         }),
 
-      hydrateActiveProject: async (targetId?: string | null, fetchClient?: any) => {
+      hydrateActiveProject: async (
+        targetId?: string | null,
+        fetchClient?: any
+      ) => {
         const idToHydrate = targetId ?? get().activeProjectId;
         if (!idToHydrate) {
-          set({ activeProjectData: null, projectState: "idle", missingProjectInfo: null, isHydrating: false });
+          set({
+            activeProjectData: null,
+            projectState: "idle",
+            missingProjectInfo: null,
+            isHydrating: false,
+          });
           return;
         }
 
@@ -175,13 +190,20 @@ export const useProjectStore = create<ProjectStoreState>()(
             sessionStorage.getItem("sonikoma_token") ||
             "";
 
-          const res = await fetcher(`/api/projects/${encodeURIComponent(idToHydrate)}`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
+          const res = await fetcher(
+            `/api/projects/${encodeURIComponent(idToHydrate)}`,
+            {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            }
+          );
 
           if (!res.ok) {
-            console.error(`Failed to hydrate project ${idToHydrate}: status ${res.status}`);
-            get().setProjectMissing(idToHydrate, { isJobId: idToHydrate.startsWith("job_") });
+            console.error(
+              `Failed to hydrate project ${idToHydrate}: status ${res.status}`
+            );
+            get().setProjectMissing(idToHydrate, {
+              isJobId: idToHydrate.startsWith("job_"),
+            });
             return;
           }
 
@@ -191,12 +213,13 @@ export const useProjectStore = create<ProjectStoreState>()(
             json.project ?? json.data ?? json;
 
           if (!projectRaw || (!projectRaw.project_id && !projectRaw.title)) {
-            get().setProjectMissing(idToHydrate, { isJobId: idToHydrate.startsWith("job_") });
+            get().setProjectMissing(idToHydrate, {
+              isJobId: idToHydrate.startsWith("job_"),
+            });
             return;
           }
 
-          const panelsRaw: any[] =
-            json.panels ?? projectRaw.panels ?? [];
+          const panelsRaw: any[] = json.panels ?? projectRaw.panels ?? [];
           const scrapedImagesRaw: string[] =
             json.scraped_images ?? json.scrapedImages ?? [];
 
@@ -224,13 +247,15 @@ export const useProjectStore = create<ProjectStoreState>()(
               projectRaw.first_panel_image ||
               panelsRaw[0]?.image_url ||
               null,
-            first_panel_image: projectRaw.first_panel_image || panelsRaw[0]?.image_url || null,
+            first_panel_image:
+              projectRaw.first_panel_image || panelsRaw[0]?.image_url || null,
             synopsis: projectRaw.synopsis || null,
             genre: projectRaw.genre || null,
             episode: projectRaw.episode || null,
             audio_settings: projectRaw.audio_settings || null,
             status: projectRaw.status || "Ready",
-            created_at: projectRaw.created_at || projectRaw.updated_at || undefined,
+            created_at:
+              projectRaw.created_at || projectRaw.updated_at || undefined,
             panels_count: projectRaw.panels_count ?? panelsRaw.length ?? 0,
             imported_assets_count: importedCount,
           };
@@ -248,7 +273,9 @@ export const useProjectStore = create<ProjectStoreState>()(
           });
         } catch (err) {
           console.error("Error in hydrateActiveProject:", err);
-          get().setProjectMissing(idToHydrate, { isJobId: idToHydrate.startsWith("job_") });
+          get().setProjectMissing(idToHydrate, {
+            isJobId: idToHydrate.startsWith("job_"),
+          });
         }
       },
 
@@ -285,4 +312,3 @@ export const useProjectStore = create<ProjectStoreState>()(
     }
   )
 );
-

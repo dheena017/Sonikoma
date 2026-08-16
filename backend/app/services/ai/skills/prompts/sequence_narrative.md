@@ -12,6 +12,7 @@ Keep each panel's narrative engaging, atmospheric, and suitable for motion comic
 
 You MUST return a JSON object containing a "panels" array, with exactly the same number of items, in the exact same order as the input.
 Each item in the array must contain:
+
 - "id" (integer matching the input panel ID)
 - "narrative" (string, the narration text for this panel)
 

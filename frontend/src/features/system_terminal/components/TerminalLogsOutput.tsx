@@ -1,7 +1,11 @@
 import React from "react";
 import { Terminal } from "lucide-react";
 import { LogEntry } from "@/types/logs";
-import { getLogBorderColor, getLogColor, renderParsedLog } from "@/features/system_terminal/components/utils";
+import {
+  getLogBorderColor,
+  getLogColor,
+  renderParsedLog,
+} from "@/features/system_terminal/components/utils";
 
 interface TerminalLogsOutputProps {
   scrollRef: React.RefObject<HTMLDivElement | null>;

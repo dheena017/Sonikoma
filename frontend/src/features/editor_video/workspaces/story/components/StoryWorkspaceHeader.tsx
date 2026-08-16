@@ -1,6 +1,9 @@
 import React from "react";
 import { BookOpen } from "lucide-react";
-import { WorkspaceLayoutTabs, WorkspaceLayoutSearch } from "../../../shared/WorkspaceLayout";
+import {
+  WorkspaceLayoutTabs,
+  WorkspaceLayoutSearch,
+} from "../../../shared/WorkspaceLayout";
 
 interface StoryWorkspaceHeaderProps {
   tabs: string[];
@@ -11,7 +14,11 @@ interface StoryWorkspaceHeaderProps {
 }
 
 export const StoryWorkspaceHeader: React.FC<StoryWorkspaceHeaderProps> = ({
-  tabs, activeTab, onSelectTab, searchQuery, onSearchChange,
+  tabs,
+  activeTab,
+  onSelectTab,
+  searchQuery,
+  onSearchChange,
 }) => (
   <div className="shrink-0">
     <div className="px-4 py-3 border-b border-purple-500/15 bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
@@ -29,13 +36,23 @@ export const StoryWorkspaceHeader: React.FC<StoryWorkspaceHeaderProps> = ({
         </div>
       </div>
       <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-pink-100 bg-pink-500/10 px-3 py-1 rounded-full border border-pink-500/25 shadow-sm">
-        <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-pink-300/15 text-pink-300">❤️</span>
+        <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-pink-300/15 text-pink-300">
+          ❤️
+        </span>
         Heart of Sonikoma
       </span>
     </div>
     <div className="px-3.5 pt-3 pb-2">
-      <WorkspaceLayoutTabs tabs={tabs} activeTab={activeTab} onSelectTab={onSelectTab} />
+      <WorkspaceLayoutTabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onSelectTab={onSelectTab}
+      />
     </div>
-    <WorkspaceLayoutSearch value={searchQuery} onChange={onSearchChange} placeholder="Search scenes & acts..." />
+    <WorkspaceLayoutSearch
+      value={searchQuery}
+      onChange={onSearchChange}
+      placeholder="Search scenes & acts..."
+    />
   </div>
 );

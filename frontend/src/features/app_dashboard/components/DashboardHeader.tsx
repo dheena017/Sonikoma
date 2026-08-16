@@ -51,7 +51,8 @@ export default function DashboardHeader({
             </span>
           </h1>
           <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed max-w-xl mt-1">
-            Convert webtoons and manga into cinematic narrated anime videos with OCR speech bubbles and 2.5D camera motions.
+            Convert webtoons and manga into cinematic narrated anime videos with
+            OCR speech bubbles and 2.5D camera motions.
           </p>
         </div>
 

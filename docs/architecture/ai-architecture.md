@@ -30,6 +30,7 @@ Sonikoma utilizes structured **Multimodal AI Markdown Skills** to interact with 
 ```
 
 ### Key Skill Modules:
+
 - **`panel_analyzer`:** Analyzes panel visual content. Runs EasyOCR on speech bubbles first, and blends text with image visuals to generate natural speech texts and camera direction ideas.
 - **`panel_storyteller` (Silent Fallback):** Engaged when OCR reads zero dialogue characters. Operates as a storyteller narrator, converting silent comic panels into descriptive audio scripts.
 - **`sequence_analyzer`:** Coordinates sequential panel analysis. It reads multiple downscaled panels (up to 20 images) in a single pass, ensuring narrative continuity and cohesive storytelling across panel boundaries.

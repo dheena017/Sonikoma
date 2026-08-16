@@ -19,7 +19,9 @@ export interface VideoPreviewSettingsMenuProps {
   baseSpeedRef: React.MutableRefObject<number>;
 }
 
-export const VideoPreviewSettingsMenu: React.FC<VideoPreviewSettingsMenuProps> = ({
+export const VideoPreviewSettingsMenu: React.FC<
+  VideoPreviewSettingsMenuProps
+> = ({
   show,
   onClose,
   isLooping,
@@ -55,7 +57,9 @@ export const VideoPreviewSettingsMenu: React.FC<VideoPreviewSettingsMenuProps> =
       <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-neutral-400">
         {/* Loop Toggle */}
         <div className="flex flex-col gap-1 bg-neutral-900/60 p-2 rounded-lg border border-white/5">
-          <span className="font-bold text-[9px] uppercase text-neutral-500">Loop</span>
+          <span className="font-bold text-[9px] uppercase text-neutral-500">
+            Loop
+          </span>
           <button
             onClick={() => setIsLooping(!isLooping)}
             className={`py-1 rounded text-[9px] font-bold border transition-all ${
@@ -70,7 +74,9 @@ export const VideoPreviewSettingsMenu: React.FC<VideoPreviewSettingsMenuProps> =
 
         {/* Widescreen bars */}
         <div className="flex flex-col gap-1 bg-neutral-900/60 p-2 rounded-lg border border-white/5">
-          <span className="font-bold text-[9px] uppercase text-neutral-500">Widescreen</span>
+          <span className="font-bold text-[9px] uppercase text-neutral-500">
+            Widescreen
+          </span>
           <button
             onClick={() => setCinematicBars(!cinematicBars)}
             className={`py-1 rounded text-[9px] font-bold border transition-all ${
@@ -87,7 +93,9 @@ export const VideoPreviewSettingsMenu: React.FC<VideoPreviewSettingsMenuProps> =
       {/* Selects */}
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[10px] text-neutral-400 font-bold font-mono">Speed</span>
+          <span className="text-[10px] text-neutral-400 font-bold font-mono">
+            Speed
+          </span>
           <select
             value={playbackSpeed}
             onChange={(e) => {
@@ -105,7 +113,9 @@ export const VideoPreviewSettingsMenu: React.FC<VideoPreviewSettingsMenuProps> =
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[10px] text-neutral-400 font-bold font-mono">Sub Size</span>
+          <span className="text-[10px] text-neutral-400 font-bold font-mono">
+            Sub Size
+          </span>
           <select
             value={subtitleSize}
             onChange={(e) => setSubtitleSize(e.target.value as any)}
@@ -118,7 +128,9 @@ export const VideoPreviewSettingsMenu: React.FC<VideoPreviewSettingsMenuProps> =
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[10px] text-neutral-400 font-bold font-mono">Quality</span>
+          <span className="text-[10px] text-neutral-400 font-bold font-mono">
+            Quality
+          </span>
           <select
             value={videoQuality}
             onChange={(e) => setVideoQuality(e.target.value)}
@@ -131,7 +143,9 @@ export const VideoPreviewSettingsMenu: React.FC<VideoPreviewSettingsMenuProps> =
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          <span className="text-[10px] text-neutral-400 font-bold font-mono">Sub Format</span>
+          <span className="text-[10px] text-neutral-400 font-bold font-mono">
+            Sub Format
+          </span>
           <select
             value={subtitlesStyle}
             onChange={(e) => setSubtitlesStyle(e.target.value)}

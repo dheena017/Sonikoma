@@ -39,7 +39,9 @@ export const StorySceneCard: React.FC<StorySceneCardProps> = ({
           <span>“{scene.dialogue}”</span>
         </div>
         <div className="flex items-start gap-1 text-neutral-400 leading-tight">
-          <span className="text-neutral-500 font-mono font-bold shrink-0">Action:</span>
+          <span className="text-neutral-500 font-mono font-bold shrink-0">
+            Action:
+          </span>
           <span>{scene.narration}</span>
         </div>
       </div>

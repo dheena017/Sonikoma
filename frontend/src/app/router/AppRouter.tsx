@@ -10,35 +10,88 @@ import PageNotFound from "@/components/feedback/PageNotFound";
 import LoadingPage from "@/components/feedback/LoadingPage";
 
 // --- Authentication & Landing Views (Lazy Loaded) ---
-const LandingPage = React.lazy(() => import("@/features/app_landing/pages/LandingPage"));
-const LoginPage = React.lazy(() => import("@/features/app_auth/pages/LoginPage"));
-const RegisterPage = React.lazy(() => import("@/features/app_auth/pages/RegisterPage"));
-const ForgotPasswordPage = React.lazy(() => import("@/features/app_auth/pages/ForgotPasswordPage"));
+const LandingPage = React.lazy(
+  () => import("@/features/app_landing/pages/LandingPage")
+);
+const LoginPage = React.lazy(
+  () => import("@/features/app_auth/pages/LoginPage")
+);
+const RegisterPage = React.lazy(
+  () => import("@/features/app_auth/pages/RegisterPage")
+);
+const ForgotPasswordPage = React.lazy(
+  () => import("@/features/app_auth/pages/ForgotPasswordPage")
+);
 
 // --- Lazy Loaded Feature Pages & Modals ---
-const ScraperPage = React.lazy(() => import("@/features/workspace_scraper/pages/ScraperPage"));
-const EditorPage = React.lazy(() => import("@/features/editor_studio/pages/EditorPage"));
-const AutoCropModal = React.lazy(() => import("@/features/editor_auto_crop/components/AutoCropModal"));
-const ProjectsPage = React.lazy(() => import("@/features/workspace_projects/pages/ProjectsPage"));
-const SeriesDetailsPage = React.lazy(() => import("@/features/workspace_projects/pages/SeriesDetailsPage"));
-const ShortcutsPage = React.lazy(() => import("@/features/app_shortcuts/pages/ShortcutsPage"));
-const CreativeSuiteLayout = React.lazy(() => import("@/features/creative_suite/components/CreativeSuiteLayout"));
-const DashboardPage = React.lazy(() => import("@/features/app_dashboard/pages/DashboardPage"));
-const ImageEditorPage = React.lazy(() => import("@/features/editor_image/pages/ImageEditorPage"));
-const YouTubePage = React.lazy(() => import("@/features/creative_youtube/pages/YouTubePage"));
-const VoiceStudioPage = React.lazy(() => import("@/features/creative_voice/pages/VoiceStudioPage"));
-const AIOptimizerPage = React.lazy(() => import("@/features/creative_optimizer/pages/AIOptimizerPage"));
-const PanelAssistantPage = React.lazy(() => import("@/features/creative_panel_assistant/pages/PanelAssistantPage"));
-const ProfilePage = React.lazy(() => import("@/features/user_profile/pages/ProfilePage"));
-const SettingsAccountPage = React.lazy(() => import("@/features/user_settings/pages/SettingsAccountPage"));
-const AudioSettingsPage = React.lazy(() => import("@/features/editor_audio/pages/AudioSettingsPage"));
-const NotificationsPage = React.lazy(() => import("@/features/app_notification/pages/NotificationsPage"));
-const CreativeSuiteDashboardPage = React.lazy(() => import("@/features/creative_suite/pages/CreativeSuiteDashboardPage"));
-const EpisodeScraperPage = React.lazy(() => import("@/features/workspace_scraper/episode-scraper/pages/EpisodeScraperPage").then(m => ({ default: m.EpisodeScraperPage })));
-const AdminPage = React.lazy(() => import("@/features/system_admin/pages/AdminPage"));
-const AdminDashboardPage = React.lazy(() => import("@/features/system_admin/pages/AdminDashboardPage"));
-const VideoEditorPage = React.lazy(() => import("@/features/editor_video/pages/VideoEditorPage"));
-
+const ScraperPage = React.lazy(
+  () => import("@/features/workspace_scraper/pages/ScraperPage")
+);
+const EditorPage = React.lazy(
+  () => import("@/features/editor_studio/pages/EditorPage")
+);
+const AutoCropModal = React.lazy(
+  () => import("@/features/editor_auto_crop/components/AutoCropModal")
+);
+const ProjectsPage = React.lazy(
+  () => import("@/features/workspace_projects/pages/ProjectsPage")
+);
+const SeriesDetailsPage = React.lazy(
+  () => import("@/features/workspace_projects/pages/SeriesDetailsPage")
+);
+const ShortcutsPage = React.lazy(
+  () => import("@/features/app_shortcuts/pages/ShortcutsPage")
+);
+const CreativeSuiteLayout = React.lazy(
+  () => import("@/features/creative_suite/components/CreativeSuiteLayout")
+);
+const DashboardPage = React.lazy(
+  () => import("@/features/app_dashboard/pages/DashboardPage")
+);
+const ImageEditorPage = React.lazy(
+  () => import("@/features/editor_image/pages/ImageEditorPage")
+);
+const YouTubePage = React.lazy(
+  () => import("@/features/creative_youtube/pages/YouTubePage")
+);
+const VoiceStudioPage = React.lazy(
+  () => import("@/features/creative_voice/pages/VoiceStudioPage")
+);
+const AIOptimizerPage = React.lazy(
+  () => import("@/features/creative_optimizer/pages/AIOptimizerPage")
+);
+const PanelAssistantPage = React.lazy(
+  () => import("@/features/creative_panel_assistant/pages/PanelAssistantPage")
+);
+const ProfilePage = React.lazy(
+  () => import("@/features/user_profile/pages/ProfilePage")
+);
+const SettingsAccountPage = React.lazy(
+  () => import("@/features/user_settings/pages/SettingsAccountPage")
+);
+const AudioSettingsPage = React.lazy(
+  () => import("@/features/editor_audio/pages/AudioSettingsPage")
+);
+const NotificationsPage = React.lazy(
+  () => import("@/features/app_notification/pages/NotificationsPage")
+);
+const CreativeSuiteDashboardPage = React.lazy(
+  () => import("@/features/creative_suite/pages/CreativeSuiteDashboardPage")
+);
+const EpisodeScraperPage = React.lazy(() =>
+  import(
+    "@/features/workspace_scraper/episode-scraper/pages/EpisodeScraperPage"
+  ).then((m) => ({ default: m.EpisodeScraperPage }))
+);
+const AdminPage = React.lazy(
+  () => import("@/features/system_admin/pages/AdminPage")
+);
+const AdminDashboardPage = React.lazy(
+  () => import("@/features/system_admin/pages/AdminDashboardPage")
+);
+const VideoEditorPage = React.lazy(
+  () => import("@/features/editor_video/pages/VideoEditorPage")
+);
 
 import MainLayout from "@/components/layout/MainLayout";
 
@@ -498,7 +551,10 @@ export default function AppRouter(props: AppRouterProps) {
 
   // --- Guard: Session Initialization loading state ---
   // Only show full-screen initializing loader if we are on a protected route or have a saved token being validated
-  if ((isInitializing || authLoading) && (!isPublicAuthRoute || hasSavedToken)) {
+  if (
+    (isInitializing || authLoading) &&
+    (!isPublicAuthRoute || hasSavedToken)
+  ) {
     const loadingStatus = isInitializing
       ? "Initializing App..."
       : "Checking Authentication...";
@@ -513,7 +569,11 @@ export default function AppRouter(props: AppRouterProps) {
     currentPath === "/index.html"
   ) {
     return (
-      <React.Suspense fallback={<LoadingPage status="Loading Sonikoma..." themeMode={themeMode} />}>
+      <React.Suspense
+        fallback={
+          <LoadingPage status="Loading Sonikoma..." themeMode={themeMode} />
+        }
+      >
         <LandingPage
           onGetStarted={() => navigateTo("/register")}
           onLogin={() => navigateTo("/login")}
@@ -527,7 +587,11 @@ export default function AppRouter(props: AppRouterProps) {
   // --- Guard: Login Screen ---
   if (currentPath === "/login") {
     return (
-      <React.Suspense fallback={<LoadingPage status="Loading Login..." themeMode={themeMode} />}>
+      <React.Suspense
+        fallback={
+          <LoadingPage status="Loading Login..." themeMode={themeMode} />
+        }
+      >
         <LoginPage
           onLogin={login}
           onNavigateToRegister={() => navigateTo("/register")}
@@ -541,7 +605,11 @@ export default function AppRouter(props: AppRouterProps) {
   // --- Guard: Registration Screen ---
   if (currentPath === "/register") {
     return (
-      <React.Suspense fallback={<LoadingPage status="Loading Registration..." themeMode={themeMode} />}>
+      <React.Suspense
+        fallback={
+          <LoadingPage status="Loading Registration..." themeMode={themeMode} />
+        }
+      >
         <RegisterPage
           onRegister={register}
           onNavigateToLogin={() => navigateTo("/login")}
@@ -554,7 +622,11 @@ export default function AppRouter(props: AppRouterProps) {
   // --- Guard: Password Recovery Screen ---
   if (currentPath === "/forgot-password") {
     return (
-      <React.Suspense fallback={<LoadingPage status="Loading Recovery..." themeMode={themeMode} />}>
+      <React.Suspense
+        fallback={
+          <LoadingPage status="Loading Recovery..." themeMode={themeMode} />
+        }
+      >
         <ForgotPasswordPage
           onForgotPassword={forgotPassword}
           onNavigateToLogin={() => navigateTo("/login")}
@@ -604,17 +676,22 @@ export default function AppRouter(props: AppRouterProps) {
       isDetailsMode,
       isWorkspacePath,
       isWorkspaceOnly: isWorkspacePath,
-      isDashboardOverviewPath: currentPath === "/dashboard" || currentPath === "/",
-      isProjectsPath: currentPath === "/projects",      isSettingsAccountPath:
+      isDashboardOverviewPath:
+        currentPath === "/dashboard" || currentPath === "/",
+      isProjectsPath: currentPath === "/projects",
+      isSettingsAccountPath:
         currentPath === "/settings/account" ||
         currentPath === "/settings/account/",
       isAutoCropPath: currentPath === "/auto-crop",
-      isEpisodeScraperPath: currentPath === "/episode-scraper" || currentPath === "/scraper/episode-scraper",
+      isEpisodeScraperPath:
+        currentPath === "/episode-scraper" ||
+        currentPath === "/scraper/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
         currentPath === "/scraper/editor" ||
         currentPath === "/scraper/editor/" ||
-        currentPath.startsWith("/scraper/editor/"),      isShortcutsPath: currentPath === "/shortcuts",
+        currentPath.startsWith("/scraper/editor/"),
+      isShortcutsPath: currentPath === "/shortcuts",
       isAudioSettingsPath: currentPath === "/scraper/audio-settings",
       isOptimizerPath:
         currentPath === "/creative-suite/ai-optimizer" ||
@@ -653,7 +730,8 @@ export default function AppRouter(props: AppRouterProps) {
       isChapterDetailsPath: false,
       isProjectEditorPath: false,
       isSeriesDetailsPath:
-        currentPath.startsWith("/projects/") && !currentPath.includes("/chapter/"),
+        currentPath.startsWith("/projects/") &&
+        !currentPath.includes("/chapter/"),
       isCreativeSuiteDashboardPath:
         currentPath === "/creative-suite" ||
         currentPath === "/creative-suite/" ||
@@ -684,10 +762,12 @@ export default function AppRouter(props: AppRouterProps) {
     isWorkspacePath,
     isWorkspaceOnly,
     isDashboardOverviewPath,
-    isProjectsPath,    isSettingsAccountPath,
+    isProjectsPath,
+    isSettingsAccountPath,
     isAutoCropPath,
     isEpisodeScraperPath,
-    isEditorPath,    isShortcutsPath,
+    isEditorPath,
+    isShortcutsPath,
     isAudioSettingsPath,
     isOptimizerPath,
     isPanelAssistantPath,
@@ -729,8 +809,10 @@ export default function AppRouter(props: AppRouterProps) {
       currentPath.startsWith("/scraper/editor/")) &&
     !pathFlags.isImageEditorPage;
 
-  const editorSeriesSlug = pathFlags.editorRouteMatch?.[1] || seriesSlugState || null;
-  const editorChapterSlug = pathFlags.editorRouteMatch?.[2] || chapterSlugState || null;
+  const editorSeriesSlug =
+    pathFlags.editorRouteMatch?.[1] || seriesSlugState || null;
+  const editorChapterSlug =
+    pathFlags.editorRouteMatch?.[2] || chapterSlugState || null;
 
   const detailsProjectId = React.useMemo(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -909,459 +991,470 @@ export default function AppRouter(props: AppRouterProps) {
       showAutoCropModal={showAutoCropModal}
       showBubbleModal={showBubbleModal}
     >
-      <React.Suspense fallback={<LoadingPage status="Loading Studio..." themeMode={themeMode} />}>
+      <React.Suspense
+        fallback={
+          <LoadingPage status="Loading Studio..." themeMode={themeMode} />
+        }
+      >
         {/* PAGE VIEW 1: Main Editor Workspace */}
         <div
-        className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
-        style={{ display: isWorkspacePath ? "flex" : "none" }}
-      >
-        <ScraperPage
-          isDashboardOnly={isWorkspaceOnly}
-          projectId={projectId}
-          seriesSlug={seriesSlugState}
-          chapterSlug={chapterSlugState}
-          isGeneratingStoryboard={appLogic.isGeneratingStoryboard}
-          handleGenerateStoryboardAI={appLogic.handleGenerateStoryboardAI}
-          panels={panels}
-          setPanels={setPanels}
-          saveProject={saveProject}
-          videoUrl={videoUrl}
-          consoleLogs={consoleLogs}
-          setConsoleLogs={setConsoleLogs}
-          scrapedImages={scrapedImages}
-          setScrapedImages={appLogic.setScrapedImages}
-          selectedScraped={selectedScraped}
-          setSelectedScraped={setSelectedScraped}
-          activePreviewTab={activePreviewTab}
-          setActivePreviewTab={setActivePreviewTab}
-          setEditingImageIdx={setEditingImageIdx}
-          setEditCropTop={setEditCropTop}
-          setEditCropBottom={setEditCropBottom}
-          setEditCropLeft={setEditCropLeft}
-          setEditCropRight={setEditCropRight}
-          isRendering={isRendering}
-          renderProgress={renderProgress}
-          handleRenderFinalVideo={handleRenderFinalVideo}
-          setEditAutoTrim={setEditAutoTrim}
-          showBubbleModal={showBubbleModal}
-          setShowBubbleModal={setShowBubbleModal}
-          playStoryboardAudio={playStoryboardAudio}
-          isCleaningBubbles={isCleaningBubbles}
-          cleanProgress={cleanProgress}
-          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-          showAutoCropModal={showAutoCropModal}
-          setShowAutoCropModal={setShowAutoCropModal}
-          isBatchCropping={isBatchCropping}
-          batchProgress={batchProgress}
-          croppingImgUrl={croppingImgUrl}
-          resetWorkspace={resetWorkspace}
-          handleAutoCropSelected={handleAutoCropSelected}
-          handleCleanBubblesSelected={handleCleanBubblesSelected}
-          scrapeImages={scrapeImages}
-          videoPlayerRef={videoPlayerRef}
-          addNotification={addNotification}
-          setErrorPopup={setErrorPopup}
-          fetchWithInterceptor={fetchWithInterceptor}
-          targetUrl={targetUrl}
-          setTargetUrl={setTargetUrl}
-          selectedSource={selectedSource}
-          setSelectedSource={setSelectedSource}
-          seriesTitle={seriesTitle}
-          setSeriesTitle={setSeriesTitle}
-          chapterNumber={chapterNumber}
-          setChapterNumber={setChapterNumber}
-          chapterTitle={chapterTitle}
-          setChapterTitle={setChapterTitle}
-          scrapedGenre={scrapedGenre}
-          setScrapedGenre={setScrapedGenre}
-          seriesAuthor={seriesAuthor}
-          setSeriesAuthor={setSeriesAuthor}
-          seriesCoverImage={seriesCoverImage}
-          setSeriesCoverImage={setSeriesCoverImage}
-          seriesSynopsis={seriesSynopsis}
-          setSeriesSynopsis={setSeriesSynopsis}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          isProcessing={isProcessing}
-          handleGenerateVideo={handleGenerateVideo}
-          isScraping={isScraping}
-          mergingIndices={mergingIndices}
-          handleStitchWithNext={handleStitchWithNext}
-          addPanelsToStoryboard={addPanelsToStoryboard}
-          progressStatus={progressStatus}
-          setVideoUrl={setVideoUrl}
-          aspectRatio={aspectRatio}
-          currentPanelIndex={currentPanelIndex}
-          setCurrentPanelIndex={setCurrentPanelIndex}
-          playbackTime={playbackTime}
-          setPlaybackTime={setPlaybackTime}
-          reprocessingPanelId={reprocessingPanelId}
-          storyboardPlaying={storyboardPlaying}
-          toggleStoryboardPlayback={toggleStoryboardPlayback}
-          resetStoryboardPlayback={resetStoryboardPlayback}
-          isMuted={isMuted}
-          setIsMuted={setIsMuted}
-          volume={volume}
-          setVolume={setVolume}
-          musicTheme={musicTheme}
-          voiceActor={voiceActor}
-          narrationStyle={narrationStyle}
-          setNarrationStyle={setNarrationStyle}
-          smartSlice={smartSlice}
-          setSmartSlice={setSmartSlice}
-          bubbleSensitivity={bubbleSensitivity}
-          bubbleDetectionStyle={bubbleDetectionStyle}
-          bubbleEraseMethod={bubbleEraseMethod}
-          bubbleDilation={bubbleDilation}
-          bubbleInpaintRadius={bubbleInpaintRadius}
-          cropSensitivity={cropSensitivity}
-          cropBackgroundMode={cropBackgroundMode}
-          aspectRatioLock={aspectRatioLock}
-          minPanelAreaPct={minPanelAreaPct}
-          overlapMergeThreshold={overlapMergeThreshold}
-          useLocalCV={useLocalCV}
-          autoSplitTallStrips={autoSplitTallStrips}
-          cropModel={cropModel}
-          cropMinHeightPx={cropMinHeightPx}
-          cropCannyLow={cropCannyLow}
-          cropCannyHigh={cropCannyHigh}
-          cropCloseKernelSize={cropCloseKernelSize}
-          showScrapeConfirmModal={showScrapeConfirmModal}
-          setShowScrapeConfirmModal={setShowScrapeConfirmModal}
-          navigateTo={navigateTo}
-          audioFeedback={audioFeedback}
-        />
-      </div>
-
-      {/* PAGE VIEW 1.5: Dashboard Overview */}
-      {(isDashboardOverviewPath || currentPath === "/") && (
-        <div className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]">
-          <DashboardPage />
-        </div>
-      )}
-
-      {/* PAGE VIEW 1.75: Projects Overview */}
-      {isProjectsPath && (
-        <div className="page-transition w-full flex-1 flex flex-col">
-          <ProjectsPage />
-        </div>
-      )}
-
-
-
-      {/* PAGE VIEW 2.25: SaaS Profile & Account Settings */}
-      {isSettingsAccountPath && (
-        <ProfilePage
-          user={user}
-          projects={[]}
-          onLogout={logout}
-          onNavigateHome={handleNavigateHome}
-          onRefreshUser={checkAuth}
-          themeMode={themeMode}
-          toggleThemeMode={toggleThemeMode}
-          navigateTo={navigateTo}
-          addNotification={addNotification}
-          fetchWithInterceptor={fetchWithInterceptor}
-          initialTab="account"
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-        />
-      )}
-
-      {/* PAGE VIEW 2.5: Dedicated Audio & TTS Mixer Settings */}
-      {isAudioSettingsPath && (
-        <div className="page-transition w-full flex-1 flex flex-col">
-          <AudioSettingsPage
+          className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
+          style={{ display: isWorkspacePath ? "flex" : "none" }}
+        >
+          <ScraperPage
+            isDashboardOnly={isWorkspaceOnly}
             projectId={projectId}
-            onNavigateHome={handleNavigateHome}
+            seriesSlug={seriesSlugState}
+            chapterSlug={chapterSlugState}
+            isGeneratingStoryboard={appLogic.isGeneratingStoryboard}
+            handleGenerateStoryboardAI={appLogic.handleGenerateStoryboardAI}
+            panels={panels}
+            setPanels={setPanels}
+            saveProject={saveProject}
+            videoUrl={videoUrl}
+            consoleLogs={consoleLogs}
+            setConsoleLogs={setConsoleLogs}
+            scrapedImages={scrapedImages}
+            setScrapedImages={appLogic.setScrapedImages}
+            selectedScraped={selectedScraped}
+            setSelectedScraped={setSelectedScraped}
+            activePreviewTab={activePreviewTab}
+            setActivePreviewTab={setActivePreviewTab}
+            setEditingImageIdx={setEditingImageIdx}
+            setEditCropTop={setEditCropTop}
+            setEditCropBottom={setEditCropBottom}
+            setEditCropLeft={setEditCropLeft}
+            setEditCropRight={setEditCropRight}
+            isRendering={isRendering}
+            renderProgress={renderProgress}
+            handleRenderFinalVideo={handleRenderFinalVideo}
+            setEditAutoTrim={setEditAutoTrim}
+            showBubbleModal={showBubbleModal}
+            setShowBubbleModal={setShowBubbleModal}
+            playStoryboardAudio={playStoryboardAudio}
+            isCleaningBubbles={isCleaningBubbles}
+            cleanProgress={cleanProgress}
+            bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+            showAutoCropModal={showAutoCropModal}
+            setShowAutoCropModal={setShowAutoCropModal}
+            isBatchCropping={isBatchCropping}
+            batchProgress={batchProgress}
+            croppingImgUrl={croppingImgUrl}
+            resetWorkspace={resetWorkspace}
+            handleAutoCropSelected={handleAutoCropSelected}
+            handleCleanBubblesSelected={handleCleanBubblesSelected}
+            scrapeImages={scrapeImages}
+            videoPlayerRef={videoPlayerRef}
             addNotification={addNotification}
+            setErrorPopup={setErrorPopup}
             fetchWithInterceptor={fetchWithInterceptor}
+            targetUrl={targetUrl}
+            setTargetUrl={setTargetUrl}
+            selectedSource={selectedSource}
+            setSelectedSource={setSelectedSource}
+            seriesTitle={seriesTitle}
+            setSeriesTitle={setSeriesTitle}
+            chapterNumber={chapterNumber}
+            setChapterNumber={setChapterNumber}
+            chapterTitle={chapterTitle}
+            setChapterTitle={setChapterTitle}
+            scrapedGenre={scrapedGenre}
+            setScrapedGenre={setScrapedGenre}
+            seriesAuthor={seriesAuthor}
+            setSeriesAuthor={setSeriesAuthor}
+            seriesCoverImage={seriesCoverImage}
+            setSeriesCoverImage={setSeriesCoverImage}
+            seriesSynopsis={seriesSynopsis}
+            setSeriesSynopsis={setSeriesSynopsis}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+            isProcessing={isProcessing}
+            handleGenerateVideo={handleGenerateVideo}
+            isScraping={isScraping}
+            mergingIndices={mergingIndices}
+            handleStitchWithNext={handleStitchWithNext}
+            addPanelsToStoryboard={addPanelsToStoryboard}
+            progressStatus={progressStatus}
+            setVideoUrl={setVideoUrl}
+            aspectRatio={aspectRatio}
+            currentPanelIndex={currentPanelIndex}
+            setCurrentPanelIndex={setCurrentPanelIndex}
+            playbackTime={playbackTime}
+            setPlaybackTime={setPlaybackTime}
+            reprocessingPanelId={reprocessingPanelId}
+            storyboardPlaying={storyboardPlaying}
+            toggleStoryboardPlayback={toggleStoryboardPlayback}
+            resetStoryboardPlayback={resetStoryboardPlayback}
+            isMuted={isMuted}
+            setIsMuted={setIsMuted}
             volume={volume}
             setVolume={setVolume}
-            narrationVolume={narrationVolume}
-            setNarrationVolume={setNarrationVolume}
-            bgmVolume={bgmVolume}
-            setBgmVolume={setBgmVolume}
-            sfxVolume={sfxVolume}
-            setSfxVolume={setSfxVolume}
-            speechRate={speechRate}
-            setSpeechRate={setSpeechRate}
-            speechPitch={speechPitch}
-            setSpeechPitch={setSpeechPitch}
-            voiceActor={voiceActor}
-            setVoiceActor={setVoiceActor}
             musicTheme={musicTheme}
-            setMusicTheme={setMusicTheme}
-            audioDucking={audioDucking}
-            setAudioDucking={setAudioDucking}
-          />
-        </div>
-      )}
-
-
-
-
-
-
-
-
-
-      {/* PAGE VIEW 5: Global Shortcuts Configuration */}
-      {isShortcutsPath && (
-        <div className="page-transition w-full flex-1 flex flex-col">
-          <ShortcutsPage
-            shortcuts={shortcuts}
-            setShortcuts={setShortcuts}
-            defaultShortcuts={DEFAULT_SHORTCUTS}
-            onNavigateHome={handleNavigateHome}
-            addNotification={addNotification}
+            voiceActor={voiceActor}
+            narrationStyle={narrationStyle}
+            setNarrationStyle={setNarrationStyle}
+            smartSlice={smartSlice}
+            setSmartSlice={setSmartSlice}
+            bubbleSensitivity={bubbleSensitivity}
+            bubbleDetectionStyle={bubbleDetectionStyle}
+            bubbleEraseMethod={bubbleEraseMethod}
+            bubbleDilation={bubbleDilation}
+            bubbleInpaintRadius={bubbleInpaintRadius}
+            cropSensitivity={cropSensitivity}
+            cropBackgroundMode={cropBackgroundMode}
+            aspectRatioLock={aspectRatioLock}
+            minPanelAreaPct={minPanelAreaPct}
+            overlapMergeThreshold={overlapMergeThreshold}
+            useLocalCV={useLocalCV}
+            autoSplitTallStrips={autoSplitTallStrips}
+            cropModel={cropModel}
+            cropMinHeightPx={cropMinHeightPx}
+            cropCannyLow={cropCannyLow}
+            cropCannyHigh={cropCannyHigh}
+            cropCloseKernelSize={cropCloseKernelSize}
+            showScrapeConfirmModal={showScrapeConfirmModal}
+            setShowScrapeConfirmModal={setShowScrapeConfirmModal}
+            navigateTo={navigateTo}
             audioFeedback={audioFeedback}
           />
         </div>
-      )}
 
-      {/* PAGE VIEW 6: Creative Suite Unified Views */}
-      {isCreativeSuitePath && (
-        <CreativeSuiteLayout
-          hideSidebarAndHeader={true}
-          currentPath={currentPath}
-          navigateTo={navigateTo}
-          fetchWithInterceptor={fetchWithInterceptor}
-          panels={panels}
-        >
-          {isCreativeSuiteDashboardPath ? (
-            <CreativeSuiteDashboardPage navigateTo={navigateTo} panels={panels} setPanels={setPanels} />
-          ) : isOptimizerPath ? (
-            <AIOptimizerPage
-              panels={panels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-              scrapedTitle={seriesTitle}
-              scrapedGenre={scrapedGenre}
-              videoUrl={videoUrl}
-            />
-          ) : isPanelAssistantPath ? (
-            <PanelAssistantPage
-              panels={panels}
-              setPanels={setPanels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
-          ) : isVoicePath ? (
-            <VoiceStudioPage
-              panels={panels}
-              setPanels={setPanels}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-              scrapedGenre={scrapedGenre}
-              setMusicTheme={setMusicTheme}
-            />
-          ) : isYouTubePath ? (
-            <YouTubePage
-              panels={panels}
-              videoUrl={videoUrl}
-              scrapedTitle={seriesTitle}
-              scrapedGenre={scrapedGenre}
-              onNavigateHome={handleNavigateHome}
-              addNotification={addNotification}
-            />
-          ) : null}
-        </CreativeSuiteLayout>
-      )}
+        {/* PAGE VIEW 1.5: Dashboard Overview */}
+        {(isDashboardOverviewPath || currentPath === "/") && (
+          <div className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]">
+            <DashboardPage />
+          </div>
+        )}
 
-      {/* PAGE VIEW 15: User Profile & Account Settings */}
-      {isProfilePath && (
-        <ProfilePage
-          user={user}
-          projects={[]}
-          onLogout={logout}
-          onNavigateHome={handleNavigateHome}
-          onRefreshUser={checkAuth}
-          themeMode={themeMode}
-          toggleThemeMode={toggleThemeMode}
-          navigateTo={navigateTo}
-          addNotification={addNotification}
-          fetchWithInterceptor={fetchWithInterceptor}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-        />
-      )}
+        {/* PAGE VIEW 1.75: Projects Overview */}
+        {isProjectsPath && (
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <ProjectsPage />
+          </div>
+        )}
 
-      {/* PAGE VIEW 16: Notification Center Hub */}
-      {isNotificationsPath && (
-        <NotificationsPage
-          notifications={notifications}
-          onNavigateHome={handleNavigateHome}
-          onMarkAsRead={markNotificationAsRead as any}
-          onMarkAllAsRead={markAllNotificationsAsRead}
-          onDelete={deleteNotification as any}
-          onClearAll={clearAllNotifications}
-          notificationsMuted={notificationsMuted}
-          onToggleMute={() => setNotificationsMuted(!notificationsMuted)}
-        />
-      )}
-
-      {/* PAGE VIEW 16.5: Dedicated WEBTOON Episode Scraper Page */}
-      {isEpisodeScraperPath && (
-        <React.Suspense
-          fallback={
-            <LoadingPage status="Loading Episode Scraper..." themeMode={themeMode} />
-          }
-        >
-          <EpisodeScraperPage
+        {/* PAGE VIEW 2.25: SaaS Profile & Account Settings */}
+        {isSettingsAccountPath && (
+          <ProfilePage
+            user={user}
+            projects={[]}
+            onLogout={logout}
+            onNavigateHome={handleNavigateHome}
+            onRefreshUser={checkAuth}
+            themeMode={themeMode}
+            toggleThemeMode={toggleThemeMode}
+            navigateTo={navigateTo}
             addNotification={addNotification}
             fetchWithInterceptor={fetchWithInterceptor}
-            navigateTo={navigateTo}
-            lastEditorPath={lastEditorPath}
+            initialTab="account"
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
           />
-        </React.Suspense>
-      )}
-
-      {/* PAGE VIEW 17.5: Series Landing Page */}
-      {isSeriesDetailsPath && (
-        <SeriesDetailsPage
-          onNavigateHome={handleNavigateHome}
-          navigateTo={navigateTo}
-          fetchWithInterceptor={fetchWithInterceptor}
-        />
-      )}
-
-      {/* PAGE VIEW 18: Batch Panel Auto Crop Page */}
-      {isAutoCropPath && (
-        <AutoCropModal
-          isPage={true}
-          onClose={handleAutoCropClose}
-          onApply={handleAutoCropApply}
-          sensitivity={cropSensitivity}
-          setSensitivity={setCropSensitivity}
-          padding={cropPaddingPx}
-          setPadding={setCropPaddingPx}
-          backgroundColorMode={cropBackgroundMode}
-          setBackgroundColorMode={setCropBackgroundMode}
-          autoSplitTallStrips={autoSplitTallStrips}
-          setAutoSplitTallStrips={setAutoSplitTallStrips}
-          aspectRatioLock={aspectRatioLock}
-          setAspectRatioLock={setAspectRatioLock}
-          minPanelAreaPct={minPanelAreaPct}
-          setMinPanelAreaPct={setMinPanelAreaPct}
-          overlapMergeThreshold={overlapMergeThreshold}
-          setOverlapMergeThreshold={setOverlapMergeThreshold}
-          useLocalCV={useLocalCV}
-          setUseLocalCV={setUseLocalCV}
-          cropModel={cropModel}
-          setCropModel={setCropModel}
-          cropMinHeightPx={cropMinHeightPx}
-          setCropMinHeightPx={setCropMinHeightPx}
-          cropCannyLow={cropCannyLow}
-          setCropCannyLow={setCropCannyLow}
-          cropCannyHigh={cropCannyHigh}
-          setCropCannyHigh={setCropCannyHigh}
-          cropCloseKernelSize={cropCloseKernelSize}
-          setCropCloseKernelSize={setCropCloseKernelSize}
-          activeTab={activeAutoCropTab}
-          setActiveTab={setActiveAutoCropTab}
-          selectedCount={selectedScraped.length}
-          isApplying={isBatchCropping}
-          scrapedImages={scrapedImages}
-          selectedScraped={selectedScraped}
-          setSelectedScraped={setSelectedScraped}
-          setConsoleLogs={setConsoleLogs}
-          addNotification={addNotification}
-          cropGuidance={cropGuidance}
-          setCropGuidance={setCropGuidance}
-          cropFocusMode={cropFocusMode}
-          setCropFocusMode={setCropFocusMode}
-        />
-      )}
-
-      {/* PAGE VIEW 19: Full Editor Page */}
-      {isEditorPath && !isPipMode && isProEditorPage && !isImageEditorPage && (
-        <EditorPage
-          appLogic={memoizedAppLogic}
-          navigateTo={navigateTo}
-          onRequestProjectConfirmation={headerOnSave}
-          seriesSlug={editorSeriesSlug}
-          chapterSlug={editorChapterSlug}
-          rating={scrapedRating}
-          likes={scrapedLikes}
-          views={scrapedViews}
-        />
-      )}
-
-      {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
-      {(isImageEditorPage || (isEditorPath && !isProEditorPage)) && !isPipMode && (
-        <ImageEditorPage
-          appLogic={memoizedAppLogic}
-          themeMode={themeMode as any}
-          toggleThemeMode={toggleThemeMode}
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-          navigateTo={navigateTo}
-          seriesSlug={editorSeriesSlug}
-          chapterSlug={editorChapterSlug}
-        />
-      )}
-
-      {/* PAGE VIEW 21: Admin Dashboard */}
-      {isAdminPath && (
-        <AdminPage
-          user={user}
-          navigateTo={navigateTo}
-          currentPath={currentPath}
-          isAuthenticated={isAuthenticated}
-          fetchWithInterceptor={fetchWithInterceptor}
-          addNotification={addNotification}
-          audioFeedback={audioFeedback}
-        />
-      )}
-
-      {/* PAGE VIEW 22: New Standalone Admin Dashboard Page */}
-      {isAdminDashboardPath && (
-        <AdminDashboardPage
-          user={user}
-          navigateTo={navigateTo}
-          isAuthenticated={isAuthenticated}
-          fetchWithInterceptor={fetchWithInterceptor}
-          addNotification={addNotification}
-          audioFeedback={audioFeedback}
-        />
-      )}
-
-      {/* PAGE VIEW 23: Video Editor Studio */}
-      {isVideoEditorPath && (
-        <React.Suspense fallback={<div className="flex-1 flex items-center justify-center bg-[#050507] text-neutral-400 text-sm">Loading Video Editor...</div>}>
-          <VideoEditorPage
-            appLogic={memoizedAppLogic}
-            navigateTo={navigateTo}
-            onBackToApp={handleNavigateHome}
-          />
-        </React.Suspense>
-      )}
-
-      {/* FALLBACK VIEW: 404 Route Not Found */}
-      {!isWorkspacePath &&
-        !isDashboardOverviewPath &&
-        !isProjectsPath &&
-        !isAutoCropPath &&
-        !isEditorPath &&
-        !isShortcutsPath &&
-        !isAudioSettingsPath &&
-        !isOptimizerPath &&
-        !isPanelAssistantPath &&
-        !isCharacterPath &&
-        !isVoicePath &&
-        !isYouTubePath &&
-        !isProfilePath &&
-        !isNotificationsPath &&
-        !isAdminPath &&
-        !isAdminDashboardPath &&
-        !isSeriesDetailsPath &&
-        !isEpisodeScraperPath &&
-        !isCreativeSuitePath &&
-        !isCreativeSuiteDashboardPath &&
-        !isVideoEditorPath && (
-          <PageNotFound onNavigateHome={() => navigateTo("/")} />
         )}
+
+        {/* PAGE VIEW 2.5: Dedicated Audio & TTS Mixer Settings */}
+        {isAudioSettingsPath && (
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <AudioSettingsPage
+              projectId={projectId}
+              onNavigateHome={handleNavigateHome}
+              addNotification={addNotification}
+              fetchWithInterceptor={fetchWithInterceptor}
+              volume={volume}
+              setVolume={setVolume}
+              narrationVolume={narrationVolume}
+              setNarrationVolume={setNarrationVolume}
+              bgmVolume={bgmVolume}
+              setBgmVolume={setBgmVolume}
+              sfxVolume={sfxVolume}
+              setSfxVolume={setSfxVolume}
+              speechRate={speechRate}
+              setSpeechRate={setSpeechRate}
+              speechPitch={speechPitch}
+              setSpeechPitch={setSpeechPitch}
+              voiceActor={voiceActor}
+              setVoiceActor={setVoiceActor}
+              musicTheme={musicTheme}
+              setMusicTheme={setMusicTheme}
+              audioDucking={audioDucking}
+              setAudioDucking={setAudioDucking}
+            />
+          </div>
+        )}
+
+        {/* PAGE VIEW 5: Global Shortcuts Configuration */}
+        {isShortcutsPath && (
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <ShortcutsPage
+              shortcuts={shortcuts}
+              setShortcuts={setShortcuts}
+              defaultShortcuts={DEFAULT_SHORTCUTS}
+              onNavigateHome={handleNavigateHome}
+              addNotification={addNotification}
+              audioFeedback={audioFeedback}
+            />
+          </div>
+        )}
+
+        {/* PAGE VIEW 6: Creative Suite Unified Views */}
+        {isCreativeSuitePath && (
+          <CreativeSuiteLayout
+            hideSidebarAndHeader={true}
+            currentPath={currentPath}
+            navigateTo={navigateTo}
+            fetchWithInterceptor={fetchWithInterceptor}
+            panels={panels}
+          >
+            {isCreativeSuiteDashboardPath ? (
+              <CreativeSuiteDashboardPage
+                navigateTo={navigateTo}
+                panels={panels}
+                setPanels={setPanels}
+              />
+            ) : isOptimizerPath ? (
+              <AIOptimizerPage
+                panels={panels}
+                onNavigateHome={handleNavigateHome}
+                addNotification={addNotification}
+                scrapedTitle={seriesTitle}
+                scrapedGenre={scrapedGenre}
+                videoUrl={videoUrl}
+              />
+            ) : isPanelAssistantPath ? (
+              <PanelAssistantPage
+                panels={panels}
+                setPanels={setPanels}
+                onNavigateHome={handleNavigateHome}
+                addNotification={addNotification}
+              />
+            ) : isVoicePath ? (
+              <VoiceStudioPage
+                panels={panels}
+                setPanels={setPanels}
+                onNavigateHome={handleNavigateHome}
+                addNotification={addNotification}
+                scrapedGenre={scrapedGenre}
+                setMusicTheme={setMusicTheme}
+              />
+            ) : isYouTubePath ? (
+              <YouTubePage
+                panels={panels}
+                videoUrl={videoUrl}
+                scrapedTitle={seriesTitle}
+                scrapedGenre={scrapedGenre}
+                onNavigateHome={handleNavigateHome}
+                addNotification={addNotification}
+              />
+            ) : null}
+          </CreativeSuiteLayout>
+        )}
+
+        {/* PAGE VIEW 15: User Profile & Account Settings */}
+        {isProfilePath && (
+          <ProfilePage
+            user={user}
+            projects={[]}
+            onLogout={logout}
+            onNavigateHome={handleNavigateHome}
+            onRefreshUser={checkAuth}
+            themeMode={themeMode}
+            toggleThemeMode={toggleThemeMode}
+            navigateTo={navigateTo}
+            addNotification={addNotification}
+            fetchWithInterceptor={fetchWithInterceptor}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+          />
+        )}
+
+        {/* PAGE VIEW 16: Notification Center Hub */}
+        {isNotificationsPath && (
+          <NotificationsPage
+            notifications={notifications}
+            onNavigateHome={handleNavigateHome}
+            onMarkAsRead={markNotificationAsRead as any}
+            onMarkAllAsRead={markAllNotificationsAsRead}
+            onDelete={deleteNotification as any}
+            onClearAll={clearAllNotifications}
+            notificationsMuted={notificationsMuted}
+            onToggleMute={() => setNotificationsMuted(!notificationsMuted)}
+          />
+        )}
+
+        {/* PAGE VIEW 16.5: Dedicated WEBTOON Episode Scraper Page */}
+        {isEpisodeScraperPath && (
+          <React.Suspense
+            fallback={
+              <LoadingPage
+                status="Loading Episode Scraper..."
+                themeMode={themeMode}
+              />
+            }
+          >
+            <EpisodeScraperPage
+              addNotification={addNotification}
+              fetchWithInterceptor={fetchWithInterceptor}
+              navigateTo={navigateTo}
+              lastEditorPath={lastEditorPath}
+            />
+          </React.Suspense>
+        )}
+
+        {/* PAGE VIEW 17.5: Series Landing Page */}
+        {isSeriesDetailsPath && (
+          <SeriesDetailsPage
+            onNavigateHome={handleNavigateHome}
+            navigateTo={navigateTo}
+            fetchWithInterceptor={fetchWithInterceptor}
+          />
+        )}
+
+        {/* PAGE VIEW 18: Batch Panel Auto Crop Page */}
+        {isAutoCropPath && (
+          <AutoCropModal
+            isPage={true}
+            onClose={handleAutoCropClose}
+            onApply={handleAutoCropApply}
+            sensitivity={cropSensitivity}
+            setSensitivity={setCropSensitivity}
+            padding={cropPaddingPx}
+            setPadding={setCropPaddingPx}
+            backgroundColorMode={cropBackgroundMode}
+            setBackgroundColorMode={setCropBackgroundMode}
+            autoSplitTallStrips={autoSplitTallStrips}
+            setAutoSplitTallStrips={setAutoSplitTallStrips}
+            aspectRatioLock={aspectRatioLock}
+            setAspectRatioLock={setAspectRatioLock}
+            minPanelAreaPct={minPanelAreaPct}
+            setMinPanelAreaPct={setMinPanelAreaPct}
+            overlapMergeThreshold={overlapMergeThreshold}
+            setOverlapMergeThreshold={setOverlapMergeThreshold}
+            useLocalCV={useLocalCV}
+            setUseLocalCV={setUseLocalCV}
+            cropModel={cropModel}
+            setCropModel={setCropModel}
+            cropMinHeightPx={cropMinHeightPx}
+            setCropMinHeightPx={setCropMinHeightPx}
+            cropCannyLow={cropCannyLow}
+            setCropCannyLow={setCropCannyLow}
+            cropCannyHigh={cropCannyHigh}
+            setCropCannyHigh={setCropCannyHigh}
+            cropCloseKernelSize={cropCloseKernelSize}
+            setCropCloseKernelSize={setCropCloseKernelSize}
+            activeTab={activeAutoCropTab}
+            setActiveTab={setActiveAutoCropTab}
+            selectedCount={selectedScraped.length}
+            isApplying={isBatchCropping}
+            scrapedImages={scrapedImages}
+            selectedScraped={selectedScraped}
+            setSelectedScraped={setSelectedScraped}
+            setConsoleLogs={setConsoleLogs}
+            addNotification={addNotification}
+            cropGuidance={cropGuidance}
+            setCropGuidance={setCropGuidance}
+            cropFocusMode={cropFocusMode}
+            setCropFocusMode={setCropFocusMode}
+          />
+        )}
+
+        {/* PAGE VIEW 19: Full Editor Page */}
+        {isEditorPath &&
+          !isPipMode &&
+          isProEditorPage &&
+          !isImageEditorPage && (
+            <EditorPage
+              appLogic={memoizedAppLogic}
+              navigateTo={navigateTo}
+              onRequestProjectConfirmation={headerOnSave}
+              seriesSlug={editorSeriesSlug}
+              chapterSlug={editorChapterSlug}
+              rating={scrapedRating}
+              likes={scrapedLikes}
+              views={scrapedViews}
+            />
+          )}
+
+        {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
+        {(isImageEditorPage || (isEditorPath && !isProEditorPage)) &&
+          !isPipMode && (
+            <ImageEditorPage
+              appLogic={memoizedAppLogic}
+              themeMode={themeMode as any}
+              toggleThemeMode={toggleThemeMode}
+              isSidebarOpen={isSidebarOpen}
+              setIsSidebarOpen={setIsSidebarOpen}
+              navigateTo={navigateTo}
+              seriesSlug={editorSeriesSlug}
+              chapterSlug={editorChapterSlug}
+            />
+          )}
+
+        {/* PAGE VIEW 21: Admin Dashboard */}
+        {isAdminPath && (
+          <AdminPage
+            user={user}
+            navigateTo={navigateTo}
+            currentPath={currentPath}
+            isAuthenticated={isAuthenticated}
+            fetchWithInterceptor={fetchWithInterceptor}
+            addNotification={addNotification}
+            audioFeedback={audioFeedback}
+          />
+        )}
+
+        {/* PAGE VIEW 22: New Standalone Admin Dashboard Page */}
+        {isAdminDashboardPath && (
+          <AdminDashboardPage
+            user={user}
+            navigateTo={navigateTo}
+            isAuthenticated={isAuthenticated}
+            fetchWithInterceptor={fetchWithInterceptor}
+            addNotification={addNotification}
+            audioFeedback={audioFeedback}
+          />
+        )}
+
+        {/* PAGE VIEW 23: Video Editor Studio */}
+        {isVideoEditorPath && (
+          <React.Suspense
+            fallback={
+              <div className="flex-1 flex items-center justify-center bg-[#050507] text-neutral-400 text-sm">
+                Loading Video Editor...
+              </div>
+            }
+          >
+            <VideoEditorPage
+              appLogic={memoizedAppLogic}
+              navigateTo={navigateTo}
+              onBackToApp={handleNavigateHome}
+            />
+          </React.Suspense>
+        )}
+
+        {/* FALLBACK VIEW: 404 Route Not Found */}
+        {!isWorkspacePath &&
+          !isDashboardOverviewPath &&
+          !isProjectsPath &&
+          !isAutoCropPath &&
+          !isEditorPath &&
+          !isShortcutsPath &&
+          !isAudioSettingsPath &&
+          !isOptimizerPath &&
+          !isPanelAssistantPath &&
+          !isCharacterPath &&
+          !isVoicePath &&
+          !isYouTubePath &&
+          !isProfilePath &&
+          !isNotificationsPath &&
+          !isAdminPath &&
+          !isAdminDashboardPath &&
+          !isSeriesDetailsPath &&
+          !isEpisodeScraperPath &&
+          !isCreativeSuitePath &&
+          !isCreativeSuiteDashboardPath &&
+          !isVideoEditorPath && (
+            <PageNotFound onNavigateHome={() => navigateTo("/")} />
+          )}
       </React.Suspense>
     </MainLayout>
   );

@@ -2,7 +2,15 @@ import { useState, useEffect } from "react";
 import { Slice } from "@/features/editor_image/components";
 import { create } from "zustand";
 
-export type ImageTool = "adjust" | "edit" | "slice" | "crop" | "merge" | "draw" | "separate" | "train";
+export type ImageTool =
+  | "adjust"
+  | "edit"
+  | "slice"
+  | "crop"
+  | "merge"
+  | "draw"
+  | "separate"
+  | "train";
 
 interface PlayerSettings {
   isPlayerOpen: boolean;
@@ -17,8 +25,19 @@ interface ImageEditorGlobalState {
   setSlicesCount: (count: number) => void;
   playerSettings: PlayerSettings;
   setPlayerSettings: (settings: Partial<PlayerSettings>) => void;
-  selectedFocalPoint: "TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR";
-  setSelectedFocalPoint: (point: "TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR") => void;
+  selectedFocalPoint:
+    | "TL"
+    | "TC"
+    | "TR"
+    | "ML"
+    | "MC"
+    | "MR"
+    | "BL"
+    | "BC"
+    | "BR";
+  setSelectedFocalPoint: (
+    point: "TL" | "TC" | "TR" | "ML" | "MC" | "MR" | "BL" | "BC" | "BR"
+  ) => void;
   showSafeZones: boolean;
   setShowSafeZones: (value: boolean) => void;
   lineSharpen: boolean;
@@ -29,11 +48,19 @@ interface ImageEditorGlobalState {
   setPopColorBoost: (value: boolean) => void;
 }
 
-
 const getTabFromPathName = () => {
   const segments = window.location.pathname.split("/");
   const tabSegment = segments[2];
-  const validTabs = ["adjust", "edit", "eraser", "slice", "crop", "merge", "draw", "separate"];
+  const validTabs = [
+    "adjust",
+    "edit",
+    "eraser",
+    "slice",
+    "crop",
+    "merge",
+    "draw",
+    "separate",
+  ];
 
   if (tabSegment && validTabs.includes(tabSegment)) {
     return tabSegment as ImageTool;
@@ -41,12 +68,12 @@ const getTabFromPathName = () => {
   return null;
 };
 
-
-
-export const useImageEditorStore = create<ImageEditorGlobalState & {
-  editingImageIdx: number | null;
-  setEditingImageIdx: (idx: number | null) => void;
-}>((set) => ({
+export const useImageEditorStore = create<
+  ImageEditorGlobalState & {
+    editingImageIdx: number | null;
+    setEditingImageIdx: (idx: number | null) => void;
+  }
+>((set) => ({
   playerSettings: {
     isPlayerOpen: true,
     playerPos: { x: 50, y: 150 },
@@ -66,13 +93,17 @@ export const useImageEditorStore = create<ImageEditorGlobalState & {
 
     // Preserve the current workspace URL.
     // Only update the browser URL when we're already inside the legacy /editor/* routes.
-    const isLegacyEditorRoute = window.location.pathname.startsWith("/editor/") || window.location.pathname.startsWith("/image-editor");
+    const isLegacyEditorRoute =
+      window.location.pathname.startsWith("/editor/") ||
+      window.location.pathname.startsWith("/image-editor");
     if (!isLegacyEditorRoute) return;
 
     const params = new URLSearchParams(window.location.search);
     const idx = params.get("idx") || "0";
     const newPath = window.location.pathname.startsWith("/image-editor")
-      ? `/image-editor?idx=${idx}&series=${params.get("series") || ""}&chapter=${params.get("chapter") || ""}`
+      ? `/image-editor?idx=${idx}&series=${
+          params.get("series") || ""
+        }&chapter=${params.get("chapter") || ""}`
       : `/editor/${tool}?idx=${idx}`;
     if (window.location.pathname + window.location.search !== newPath) {
       window.history.pushState({}, "", newPath);

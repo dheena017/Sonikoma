@@ -13,10 +13,15 @@ interface KeyframeDiamondProps {
 }
 
 const KeyframeDiamond: React.FC<KeyframeDiamondProps> = ({
-  keyframe, clipDuration, selected, onSelect, onCycleEasing,
+  keyframe,
+  clipDuration,
+  selected,
+  onSelect,
+  onCycleEasing,
 }) => {
   const leftPct = clipDuration > 0 ? (keyframe.time / clipDuration) * 100 : 0;
-  const colorClass = KEYFRAME_COLORS[keyframe.property] || "bg-purple-400 border-purple-300";
+  const colorClass =
+    KEYFRAME_COLORS[keyframe.property] || "bg-purple-400 border-purple-300";
 
   return (
     <div
@@ -35,7 +40,9 @@ const KeyframeDiamond: React.FC<KeyframeDiamondProps> = ({
     >
       <div
         className={`w-2.5 h-2.5 rotate-45 border shadow-sm transition-transform ${colorClass} ${
-          selected ? "ring-2 ring-white scale-125 shadow-[0_0_8px_rgba(255,255,255,0.9)]" : "hover:scale-110"
+          selected
+            ? "ring-2 ring-white scale-125 shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+            : "hover:scale-110"
         }`}
       />
       {/* Tooltip on hover */}

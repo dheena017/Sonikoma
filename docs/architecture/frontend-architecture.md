@@ -38,10 +38,11 @@ The Cinema Player (**`CinemaPlayer.tsx`**) acts as a client-side layout player t
 ```
 
 ### Key Technologies & Features:
-* **Aspect-Lock Scaling:** Wraps the composite viewport in a container that detects sizing via `ResizeObserver`. It automatically computes a scale factor and applies `transform: scale(scaleFactor)` to ensure layers render at pixel-perfect coordinate models on any mobile, tablet, or widescreen viewport.
-* **HTML5 Live Audio Mixer:** Integrates an active pool of HTML5 audio elements synchronized to the timeline scrubber. It plays narration tracks (`audio_url`) and overlays sound effects (`sfx`) dynamically on panel transitions.
-* **Framer Motion Wiggles & Pops:** Character layers execute a soft, continuous 2D breathe hover animation using `motion/react` wiggles. Speech bubbles scale in with a spring-based elastic bounce.
-* **Widescreen HUD Control Overlay:** Embedded controls provide Picture-in-Picture toggles, skip pills, seek buttons, and keybinding listeners (e.g., Space to Play/Pause, L to Loop, Numeric percentage jumps).
+
+- **Aspect-Lock Scaling:** Wraps the composite viewport in a container that detects sizing via `ResizeObserver`. It automatically computes a scale factor and applies `transform: scale(scaleFactor)` to ensure layers render at pixel-perfect coordinate models on any mobile, tablet, or widescreen viewport.
+- **HTML5 Live Audio Mixer:** Integrates an active pool of HTML5 audio elements synchronized to the timeline scrubber. It plays narration tracks (`audio_url`) and overlays sound effects (`sfx`) dynamically on panel transitions.
+- **Framer Motion Wiggles & Pops:** Character layers execute a soft, continuous 2D breathe hover animation using `motion/react` wiggles. Speech bubbles scale in with a spring-based elastic bounce.
+- **Widescreen HUD Control Overlay:** Embedded controls provide Picture-in-Picture toggles, skip pills, seek buttons, and keybinding listeners (e.g., Space to Play/Pause, L to Loop, Numeric percentage jumps).
 
 ---
 

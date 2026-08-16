@@ -71,7 +71,8 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
                 </span>
               </h2>
               <p className="text-xs text-neutral-400 font-sans mt-0.5">
-                Browse episodes, manage bookmarks, filter chapters, and batch import panels into your workspace.
+                Browse episodes, manage bookmarks, filter chapters, and batch
+                import panels into your workspace.
               </p>
             </div>
           </div>
@@ -99,20 +100,29 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
               .toString(36)
               .substring(2, 10)}`;
             localStorage.setItem("auto_import_url", episode.url);
-            
+
             // Save visual metadata to localStorage
             if (episode.rating !== undefined && episode.rating !== null) {
-              localStorage.setItem("active_episode_rating", String(episode.rating));
+              localStorage.setItem(
+                "active_episode_rating",
+                String(episode.rating)
+              );
             } else {
               localStorage.removeItem("active_episode_rating");
             }
             if (episode.likes !== undefined && episode.likes !== null) {
-              localStorage.setItem("active_episode_likes", String(episode.likes));
+              localStorage.setItem(
+                "active_episode_likes",
+                String(episode.likes)
+              );
             } else {
               localStorage.removeItem("active_episode_likes");
             }
             if (episode.views !== undefined && episode.views !== null) {
-              localStorage.setItem("active_episode_views", String(episode.views));
+              localStorage.setItem(
+                "active_episode_views",
+                String(episode.views)
+              );
             } else {
               localStorage.removeItem("active_episode_views");
             }
@@ -124,22 +134,34 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
               const temporaryProjectId = `temp_${Date.now()}_${Math.random()
                 .toString(36)
                 .substring(2, 10)}`;
-              localStorage.setItem("auto_import_batch", JSON.stringify(episodes));
+              localStorage.setItem(
+                "auto_import_batch",
+                JSON.stringify(episodes)
+              );
               localStorage.setItem("auto_import_url", episodes[0].url);
 
               const episode = episodes[0];
               if (episode.rating !== undefined && episode.rating !== null) {
-                localStorage.setItem("active_episode_rating", String(episode.rating));
+                localStorage.setItem(
+                  "active_episode_rating",
+                  String(episode.rating)
+                );
               } else {
                 localStorage.removeItem("active_episode_rating");
               }
               if (episode.likes !== undefined && episode.likes !== null) {
-                localStorage.setItem("active_episode_likes", String(episode.likes));
+                localStorage.setItem(
+                  "active_episode_likes",
+                  String(episode.likes)
+                );
               } else {
                 localStorage.removeItem("active_episode_likes");
               }
               if (episode.views !== undefined && episode.views !== null) {
-                localStorage.setItem("active_episode_views", String(episode.views));
+                localStorage.setItem(
+                  "active_episode_views",
+                  String(episode.views)
+                );
               } else {
                 localStorage.removeItem("active_episode_views");
               }

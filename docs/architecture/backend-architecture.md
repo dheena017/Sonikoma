@@ -31,38 +31,49 @@ graph TD
 ## 2. Layer Definitions & Boundaries
 
 ### 2.1 API Layer (`backend/app/api/`)
+
 **Responsibility:** Handling HTTP requests, routing, parameter validation, and formatting JSON responses.
 **Rules:**
+
 - Must only use FastAPI primitives (`APIRouter`, `Depends`, `HTTPException`).
 - Must not contain business logic.
 - Must delegate processing to the Service Layer.
 
 ### 2.2 Service Layer (`backend/app/services/`)
+
 **Responsibility:** Orchestrating business logic and complex workflows (e.g., video compilation pipeline).
 **Rules:**
+
 - Coordinates calls between Repositories, Providers, and Engines.
 - Must not execute SQL directly.
 - Must not format HTTP responses.
 - Raises Domain Exceptions (`SonikomaException`), not `HTTPException`.
 
 ### 2.3 Repository Layer (`backend/app/repositories/`)
+
 **Responsibility:** Abstracting data persistence and retrieval.
 **Rules:**
-- The *only* layer permitted to interact with the database engine.
+
+- The _only_ layer permitted to interact with the database engine.
 - Translates domain models to database schemas.
 
 ### 2.4 Provider Layer (`backend/app/providers/`)
+
 **Responsibility:** Abstracting interactions with external third-party APIs (e.g., Google Gemini, Text-to-Speech APIs).
 **Rules:**
+
 - Exposes generic interfaces to the Service Layer, hiding vendor-specific implementation details.
 
 ### 2.5 Engine Layer (`backend/app/engines/`)
+
 **Responsibility:** Encapsulating low-level, resource-intensive computational logic.
 **Rules:**
+
 - Manages subprocesses for tools like `ffmpeg`.
 - Handles complex mathematical or matrix operations (e.g., OpenCV, Librosa).
 
 ### 2.6 Core Layer (`backend/app/core/`)
+
 **Responsibility:** Application-wide configuration, security settings, custom exceptions, and middleware.
 
 ---

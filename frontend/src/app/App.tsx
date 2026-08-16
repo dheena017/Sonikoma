@@ -147,17 +147,23 @@ export default function App() {
   // --- Main Application Logic & Hook ---
   const appLogic = useAppLogic();
 
-  const [scrapedRating, setScrapedRating] = React.useState<number | undefined>(() => {
-    const val = localStorage.getItem("active_episode_rating");
-    return val ? parseFloat(val) : undefined;
-  });
-  const [scrapedLikes, setScrapedLikes] = React.useState<string | undefined>(() => {
-    return localStorage.getItem("active_episode_likes") || undefined;
-  });
-  const [scrapedViews, setScrapedViews] = React.useState<number | undefined>(() => {
-    const val = localStorage.getItem("active_episode_views");
-    return val ? parseInt(val) : undefined;
-  });
+  const [scrapedRating, setScrapedRating] = React.useState<number | undefined>(
+    () => {
+      const val = localStorage.getItem("active_episode_rating");
+      return val ? parseFloat(val) : undefined;
+    }
+  );
+  const [scrapedLikes, setScrapedLikes] = React.useState<string | undefined>(
+    () => {
+      return localStorage.getItem("active_episode_likes") || undefined;
+    }
+  );
+  const [scrapedViews, setScrapedViews] = React.useState<number | undefined>(
+    () => {
+      const val = localStorage.getItem("active_episode_views");
+      return val ? parseInt(val) : undefined;
+    }
+  );
 
   React.useEffect(() => {
     const ratingVal = localStorage.getItem("active_episode_rating");
@@ -495,7 +501,8 @@ export default function App() {
 
     const params = new URLSearchParams(window.location.search);
     const importBatchRaw = localStorage.getItem("auto_import_batch");
-    const importUrl = params.get("importUrl") || localStorage.getItem("auto_import_url");
+    const importUrl =
+      params.get("importUrl") || localStorage.getItem("auto_import_url");
     const projId = params.get("id") || params.get("project_id");
 
     if (projId && projId.startsWith("temp_")) {
@@ -503,7 +510,8 @@ export default function App() {
       const newParams = new URLSearchParams(window.location.search);
       newParams.delete("importUrl");
       const newSearch = newParams.toString();
-      const newUrl = window.location.pathname + (newSearch ? "?" + newSearch : "");
+      const newUrl =
+        window.location.pathname + (newSearch ? "?" + newSearch : "");
       window.history.replaceState(null, "", newUrl);
 
       if (importBatchRaw) {
@@ -512,7 +520,9 @@ export default function App() {
         try {
           const episodesList = JSON.parse(importBatchRaw);
           if (Array.isArray(episodesList) && episodesList.length > 0) {
-            console.log(`[Auto Scrape] Triggering batch import for ${episodesList.length} episodes on project: ${projId}`);
+            console.log(
+              `[Auto Scrape] Triggering batch import for ${episodesList.length} episodes on project: ${projId}`
+            );
             if (scrapeBatchEpisodes) {
               scrapeBatchEpisodes(episodesList, projId);
             }
@@ -524,7 +534,9 @@ export default function App() {
       }
 
       if (importUrl) {
-        console.log(`[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`);
+        console.log(
+          `[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`
+        );
         localStorage.removeItem("auto_import_url");
         setTargetUrl(importUrl);
         scrapeImages(importUrl, projId).catch((err) => {
@@ -532,7 +544,15 @@ export default function App() {
         });
       }
     }
-  }, [isAuthenticated, authLoading, isInitializing, scrapeImages, scrapeBatchEpisodes, setTargetUrl, currentPath]);
+  }, [
+    isAuthenticated,
+    authLoading,
+    isInitializing,
+    scrapeImages,
+    scrapeBatchEpisodes,
+    setTargetUrl,
+    currentPath,
+  ]);
 
   // --- Global Keyboard Shortcuts Hook ---
   const { shortcuts, setShortcuts } = useGlobalShortcuts({
@@ -593,20 +613,24 @@ export default function App() {
       setSeriesSynopsis(details.seriesSynopsis);
 
       // Always save full project state: metadata, timeline panels, imported images, and production details.
-      const saved = await saveProject(undefined, {
-        savingMessage: "Saving project...",
-        successMessage: "Project saved successfully!",
-        errorMessage: "Failed to save project.",
-      }, {
-        title: details.seriesTitle,
-        genre: details.scrapedGenre,
-        chapterNumber: details.chapterNumber,
-        chapterTitle: details.chapterTitle,
-        author: details.seriesAuthor,
-        cover_image: details.seriesCoverImage || null,
-        synopsis: details.seriesSynopsis || null,
-        status: details.status,
-      });
+      const saved = await saveProject(
+        undefined,
+        {
+          savingMessage: "Saving project...",
+          successMessage: "Project saved successfully!",
+          errorMessage: "Failed to save project.",
+        },
+        {
+          title: details.seriesTitle,
+          genre: details.scrapedGenre,
+          chapterNumber: details.chapterNumber,
+          chapterTitle: details.chapterTitle,
+          author: details.seriesAuthor,
+          cover_image: details.seriesCoverImage || null,
+          synopsis: details.seriesSynopsis || null,
+          status: details.status,
+        }
+      );
 
       if (!saved) {
         return false;
@@ -642,7 +666,10 @@ export default function App() {
             try {
               addNotification("Running script extraction...", "info");
               const seq = await api.analyzeAllPanels(fetchWithInterceptor, {
-                panels: currentPanels.map((p: any) => ({ id: p.id, url: p.image_url })),
+                panels: currentPanels.map((p: any) => ({
+                  id: p.id,
+                  url: p.image_url,
+                })),
                 model: selectedModel,
                 narrationStyle,
                 voice: voiceActor,
@@ -658,7 +685,8 @@ export default function App() {
                         duration: Number(res.analysis.duration) || p.duration,
                         motion_type: res.analysis.motion_type || p.motion_type,
                         visual_description:
-                          res.analysis.visual_description || p.visual_description,
+                          res.analysis.visual_description ||
+                          p.visual_description,
                         audio_url: res.audio_url || p.audio_url,
                       }
                     : p;
@@ -810,7 +838,14 @@ export default function App() {
     } else {
       setShowAutoCropModal(false);
     }
-  }, [currentPath, projectId, seriesSlugState, chapterSlugState, navigateTo, setShowAutoCropModal]);
+  }, [
+    currentPath,
+    projectId,
+    seriesSlugState,
+    chapterSlugState,
+    navigateTo,
+    setShowAutoCropModal,
+  ]);
 
   return (
     <AppRouter
@@ -1022,8 +1057,13 @@ export default function App() {
       registerProjectDetailsSaveHandler={registerProjectDetailsSaveHandler}
       projectDetailsSaveRef={projectDetailsSaveRef}
       saveStatus={saveStatus}
-      isDirty={isDirty} editingImageIdx={0} setFrameRate={function (rate: number | null): void {
+      isDirty={isDirty}
+      editingImageIdx={0}
+      setFrameRate={function (rate: number | null): void {
         throw new Error("Function not implemented.");
-      } } bubbleCroppingImgUrl={""} croppingImgUrl={""}    />
+      }}
+      bubbleCroppingImgUrl={""}
+      croppingImgUrl={""}
+    />
   );
 }

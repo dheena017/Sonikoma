@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { X, Play } from "lucide-react";
 import { useNotificationCountdown } from "@/features/app_notification/hooks";
-import { getToastStyles, getToastIcon, getToastTitle } from "@/features/app_notification/utils";
+import {
+  getToastStyles,
+  getToastIcon,
+  getToastTitle,
+} from "@/features/app_notification/utils";
 import { Notification } from "@/features/app_notification/components/types";
 
 interface NotificationStackProps {

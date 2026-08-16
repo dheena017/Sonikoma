@@ -285,11 +285,15 @@ export function useAutoSave(state: AutoSaveState) {
 
       const title = overrides?.title?.trim() ?? state.seriesTitle.trim();
       const genre = overrides?.genre?.trim() ?? state.scrapedGenre.trim();
-      const chapterNumber = overrides?.chapterNumber?.trim() ?? state.chapterNumber.trim();
-      const chapterTitle = overrides?.chapterTitle?.trim() ?? state.chapterTitle.trim();
+      const chapterNumber =
+        overrides?.chapterNumber?.trim() ?? state.chapterNumber.trim();
+      const chapterTitle =
+        overrides?.chapterTitle?.trim() ?? state.chapterTitle.trim();
       const author = overrides?.author?.trim() ?? state.seriesAuthor.trim();
-      const coverImage = overrides?.cover_image?.trim() ?? state.seriesCoverImage.trim();
-      const synopsis = overrides?.synopsis?.trim() ?? state.seriesSynopsis.trim();
+      const coverImage =
+        overrides?.cover_image?.trim() ?? state.seriesCoverImage.trim();
+      const synopsis =
+        overrides?.synopsis?.trim() ?? state.seriesSynopsis.trim();
       const overrideStatus = overrides?.status;
 
       const currentStateStr = JSON.stringify({
@@ -321,8 +325,12 @@ export function useAutoSave(state: AutoSaveState) {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      const finalVideoUrl = options?.overrideVideoUrl !== undefined ? options.overrideVideoUrl : (state.videoUrl || null);
-      const statusValue = overrideStatus ?? (finalVideoUrl ? "completed" : "pending");
+      const finalVideoUrl =
+        options?.overrideVideoUrl !== undefined
+          ? options.overrideVideoUrl
+          : state.videoUrl || null;
+      const statusValue =
+        overrideStatus ?? (finalVideoUrl ? "completed" : "pending");
 
       const saveIdentity = `${targetProjectId}:${state.jobId || ""}`;
 

@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { ListMusic, Loader2, Plus, RefreshCw, Check, FolderPlus, X } from "lucide-react";
+import {
+  ListMusic,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Check,
+  FolderPlus,
+  X,
+} from "lucide-react";
 
 interface Playlist {
   id: string;
@@ -34,7 +42,10 @@ export default function PlaylistSelector({
   const fetchPlaylists = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const res = await fetch("/api/export/youtube/playlists", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -59,7 +70,10 @@ export default function PlaylistSelector({
 
     setIsCreating(true);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const res = await fetch("/api/export/youtube/playlists", {
         method: "POST",
         headers: {
@@ -83,13 +97,19 @@ export default function PlaylistSelector({
           setNewTitle("");
           setNewDescription("");
           if (addNotification) {
-            addNotification(`Created playlist "${created.title}" successfully!`, "success");
+            addNotification(
+              `Created playlist "${created.title}" successfully!`,
+              "success"
+            );
           }
         }
       } else {
         const err = await res.json().catch(() => ({}));
         if (addNotification) {
-          addNotification(err.detail || "Failed to create playlist on YouTube", "error");
+          addNotification(
+            err.detail || "Failed to create playlist on YouTube",
+            "error"
+          );
         }
       }
     } catch (err) {
@@ -117,7 +137,11 @@ export default function PlaylistSelector({
             className="text-[11px] font-mono text-neutral-400 hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
             title="Refresh playlists from YouTube"
           >
-            <RefreshCw className={`w-3 h-3 ${isLoading ? "animate-spin text-red-400" : ""}`} />
+            <RefreshCw
+              className={`w-3 h-3 ${
+                isLoading ? "animate-spin text-red-400" : ""
+              }`}
+            />
             <span>Sync</span>
           </button>
           <span className="text-neutral-700">·</span>
@@ -142,13 +166,23 @@ export default function PlaylistSelector({
             -- No Playlist (Upload as Standalone Video) --
           </option>
           {playlists.map((pl) => (
-            <option key={pl.id} value={pl.id} className="bg-neutral-950 text-white">
-              {pl.title} {pl.item_count !== undefined ? `(${pl.item_count} videos)` : ""}
+            <option
+              key={pl.id}
+              value={pl.id}
+              className="bg-neutral-950 text-white"
+            >
+              {pl.title}{" "}
+              {pl.item_count !== undefined ? `(${pl.item_count} videos)` : ""}
             </option>
           ))}
           {playlists.length === 0 && !isLoading && (
-            <option value="none_available" disabled className="bg-neutral-950 text-neutral-500">
-              (No playlists found on YouTube channel - Click "New Playlist" to create one)
+            <option
+              value="none_available"
+              disabled
+              className="bg-neutral-950 text-neutral-500"
+            >
+              (No playlists found on YouTube channel - Click "New Playlist" to
+              create one)
             </option>
           )}
         </select>
@@ -223,7 +257,9 @@ export default function PlaylistSelector({
                   onChange={(e) => setNewPrivacy(e.target.value)}
                   className="w-full bg-neutral-950/70 border border-neutral-700 focus:border-red-500/70 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none font-mono cursor-pointer"
                 >
-                  <option value="public">Public - Anyone can find and view</option>
+                  <option value="public">
+                    Public - Anyone can find and view
+                  </option>
                   <option value="unlisted">Unlisted - Only with link</option>
                   <option value="private">Private - Only you</option>
                 </select>

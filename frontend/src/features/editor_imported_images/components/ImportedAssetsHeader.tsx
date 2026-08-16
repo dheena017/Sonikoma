@@ -71,7 +71,8 @@ export default function ImportedAssetsHeader({
   setIsEpisodeCollapsed,
   hasMultipleEpisodes = false,
 }: ImportedAssetsHeaderProps) {
-  const isAllSelected = selectedScrapedLength > 0 && selectedScrapedLength === scrapedImagesLength;
+  const isAllSelected =
+    selectedScrapedLength > 0 && selectedScrapedLength === scrapedImagesLength;
   const isBusy = isBatchCropping || isCleaningBubbles || isBatchMerging;
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -176,8 +177,8 @@ export default function ImportedAssetsHeader({
         )}
 
         {/* Auto-Crop */}
-        {handleAutoCropSelected && (
-          isBatchCropping ? (
+        {handleAutoCropSelected &&
+          (isBatchCropping ? (
             <button
               type="button"
               onClick={handleCancelBatch}
@@ -196,12 +197,11 @@ export default function ImportedAssetsHeader({
               <Scissors className="w-3.5 h-3.5 text-emerald-400" />
               <span>Auto-Crop</span>
             </button>
-          )
-        )}
+          ))}
 
         {/* Clean Bubbles */}
-        {handleCleanBubblesSelected && (
-          isCleaningBubbles ? (
+        {handleCleanBubblesSelected &&
+          (isCleaningBubbles ? (
             <button
               type="button"
               onClick={handleCancelBatch}
@@ -220,8 +220,7 @@ export default function ImportedAssetsHeader({
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
               <span>Clean Bubbles</span>
             </button>
-          )
-        )}
+          ))}
 
         {/* Stitch */}
         {handleBatchMergeSelected && (
@@ -272,7 +271,10 @@ export default function ImportedAssetsHeader({
       <div className="w-px h-4 bg-neutral-800" />
       <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
         <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)] shrink-0" />
-        <h3 className="font-black text-[10px] sm:text-[11px] text-white uppercase tracking-widest font-mono truncate" title="Imported Assets Pool">
+        <h3
+          className="font-black text-[10px] sm:text-[11px] text-white uppercase tracking-widest font-mono truncate"
+          title="Imported Assets Pool"
+        >
           Asset Pool Deck
         </h3>
         <span className="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono font-bold shrink-0">
@@ -320,7 +322,11 @@ export default function ImportedAssetsHeader({
         <button
           type="button"
           onClick={() => setIsEpisodeCollapsed(!isEpisodeCollapsed)}
-          title={isEpisodeCollapsed ? "Show Episode Navigator" : "Hide Episode Navigator"}
+          title={
+            isEpisodeCollapsed
+              ? "Show Episode Navigator"
+              : "Hide Episode Navigator"
+          }
           className={`h-7 px-2.5 rounded-lg text-[10px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
             isEpisodeCollapsed
               ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-emerald-300 hover:border-emerald-700"

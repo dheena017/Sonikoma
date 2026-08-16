@@ -39,11 +39,15 @@ export const alignDialogue = async (
   panelId: string,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/audio/align-dialogue/${panelId}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/audio/align-dialogue/${panelId}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }
+  );
 };
 
 export const getVoices = async (
@@ -68,27 +72,49 @@ export const runBgmVibeSkill = (fetchWithInterceptor: FetchClient, data: any) =>
   runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.BGM_VIBE, data);
 export const runSfxMixSkill = (fetchWithInterceptor: FetchClient, data: any) =>
   runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.SFX_MIX, data);
-export const runThumbnailVisualSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.THUMBNAIL_VISUAL, data);
-export const runThumbnailLayoutSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.THUMBNAIL_LAYOUT, data);
-export const runThumbnailSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.THUMBNAIL, data);
-export const runDramatizeSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.DRAMATIZE, data);
-export const runVoiceCastSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.VOICE_CAST, data);
+export const runThumbnailVisualSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.THUMBNAIL_VISUAL, data);
+export const runThumbnailLayoutSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.THUMBNAIL_LAYOUT, data);
+export const runThumbnailSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.THUMBNAIL, data);
+export const runDramatizeSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.DRAMATIZE, data);
+export const runVoiceCastSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.VOICE_CAST, data);
 export const runSeoSkill = (fetchWithInterceptor: FetchClient, data: any) =>
   runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.SEO, data);
-export const runShortsScriptSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.SHORTS_SCRIPT, data);
-export const runShortsHookSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.SHORTS_HOOK, data);
-export const runTranslateSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.TRANSLATE, data);
-export const runCopyrightScrubSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.COPYRIGHT_SCRUB, data);
-export const runSfxAudioSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.SFX_AUDIO, data);
-export const runMidrollsSkill = (fetchWithInterceptor: FetchClient, data: any) =>
-  runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.MIDROLLS, data);
+export const runShortsScriptSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.SHORTS_SCRIPT, data);
+export const runShortsHookSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.SHORTS_HOOK, data);
+export const runTranslateSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.TRANSLATE, data);
+export const runCopyrightScrubSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.COPYRIGHT_SCRUB, data);
+export const runSfxAudioSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.SFX_AUDIO, data);
+export const runMidrollsSkill = (
+  fetchWithInterceptor: FetchClient,
+  data: any
+) => runSkill(fetchWithInterceptor, SKILL_ENDPOINTS.MIDROLLS, data);

@@ -37,7 +37,9 @@ export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
   return (
     <div
       className={`absolute top-0 inset-x-0 h-20 bg-gradient-to-b from-black/80 to-transparent flex items-center justify-between px-6 z-30 transition-all duration-300 ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
+        visible
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 -translate-y-4 pointer-events-none"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -54,7 +56,9 @@ export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
           </span>
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-neutral-200">
-              {activeChapter ? `${activeChapter.title} Segment` : "Preview Track"}
+              {activeChapter
+                ? `${activeChapter.title} Segment`
+                : "Preview Track"}
             </span>
             {/* PANEL/SCENE COUNTER CHIP */}
             <span className="bg-neutral-900/90 border border-neutral-800/80 rounded px-2 py-0.5 text-[9px] font-mono font-bold text-purple-300 tracking-wider">

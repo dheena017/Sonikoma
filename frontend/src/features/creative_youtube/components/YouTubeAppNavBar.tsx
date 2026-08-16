@@ -90,7 +90,8 @@ export default function YouTubeAppNavBar({
                   alt={channelTitle}
                   referrerPolicy="no-referrer"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                    (e.currentTarget as HTMLImageElement).style.display =
+                      "none";
                   }}
                   className="w-6 h-6 rounded-full object-cover border border-neutral-700 group-hover:border-red-500/50 transition-colors shadow-sm"
                 />

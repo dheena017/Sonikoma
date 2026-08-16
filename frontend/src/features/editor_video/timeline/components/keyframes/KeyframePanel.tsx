@@ -2,7 +2,12 @@
 // Canonical location: timeline/components/keyframes/KeyframePanel.tsx
 
 import React from "react";
-import { Keyframe, KeyframeProperty, EasingMode, KEYFRAME_COLORS } from "../../types";
+import {
+  Keyframe,
+  KeyframeProperty,
+  EasingMode,
+  KEYFRAME_COLORS,
+} from "../../types";
 import { Diamond, Trash2, X } from "lucide-react";
 
 interface KeyframePanelProps {
@@ -12,11 +17,28 @@ interface KeyframePanelProps {
   onDelete: () => void;
 }
 
-const PROPERTIES: KeyframeProperty[] = ["opacity", "x", "y", "scale", "rotation", "blur", "volume"];
-const EASINGS: EasingMode[] = ["linear", "ease-in", "ease-out", "ease-in-out", "step"];
+const PROPERTIES: KeyframeProperty[] = [
+  "opacity",
+  "x",
+  "y",
+  "scale",
+  "rotation",
+  "blur",
+  "volume",
+];
+const EASINGS: EasingMode[] = [
+  "linear",
+  "ease-in",
+  "ease-out",
+  "ease-in-out",
+  "step",
+];
 
 const KeyframePanel: React.FC<KeyframePanelProps> = ({
-  keyframe, onClose, onUpdate, onDelete,
+  keyframe,
+  onClose,
+  onUpdate,
+  onDelete,
 }) => {
   if (!keyframe) return null;
 
@@ -27,7 +49,10 @@ const KeyframePanel: React.FC<KeyframePanelProps> = ({
           <Diamond className="h-3.5 w-3.5 fill-amber-400" />
           <span>Keyframe Inspector</span>
         </div>
-        <button onClick={onClose} className="p-0.5 rounded text-neutral-400 hover:text-white hover:bg-white/10">
+        <button
+          onClick={onClose}
+          className="p-0.5 rounded text-neutral-400 hover:text-white hover:bg-white/10"
+        >
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -42,7 +67,9 @@ const KeyframePanel: React.FC<KeyframePanelProps> = ({
               step="0.1"
               min="0"
               value={keyframe.time}
-              onChange={(e) => onUpdate({ time: parseFloat(e.target.value) || 0 })}
+              onChange={(e) =>
+                onUpdate({ time: parseFloat(e.target.value) || 0 })
+              }
               className="w-16 bg-black/40 border border-white/10 rounded px-1.5 py-0.5 text-right font-mono text-white text-[11px]"
             />
             <span className="text-neutral-500 font-mono text-[10px]">s</span>
@@ -51,14 +78,20 @@ const KeyframePanel: React.FC<KeyframePanelProps> = ({
 
         {/* Property */}
         <div className="flex items-center justify-between">
-          <label className="text-neutral-400 text-[10px]">Target Property</label>
+          <label className="text-neutral-400 text-[10px]">
+            Target Property
+          </label>
           <select
             value={keyframe.property}
-            onChange={(e) => onUpdate({ property: e.target.value as KeyframeProperty })}
+            onChange={(e) =>
+              onUpdate({ property: e.target.value as KeyframeProperty })
+            }
             className="bg-black/40 border border-white/10 rounded px-1.5 py-0.5 text-white text-[11px]"
           >
             {PROPERTIES.map((p) => (
-              <option key={p} value={p}>{p}</option>
+              <option key={p} value={p}>
+                {p}
+              </option>
             ))}
           </select>
         </div>
@@ -70,7 +103,9 @@ const KeyframePanel: React.FC<KeyframePanelProps> = ({
             type="number"
             step="0.05"
             value={keyframe.value}
-            onChange={(e) => onUpdate({ value: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              onUpdate({ value: parseFloat(e.target.value) || 0 })
+            }
             className="w-20 bg-black/40 border border-white/10 rounded px-1.5 py-0.5 text-right font-mono text-white text-[11px]"
           />
         </div>
@@ -84,7 +119,9 @@ const KeyframePanel: React.FC<KeyframePanelProps> = ({
             className="bg-black/40 border border-white/10 rounded px-1.5 py-0.5 text-white text-[11px]"
           >
             {EASINGS.map((e) => (
-              <option key={e} value={e}>{e}</option>
+              <option key={e} value={e}>
+                {e}
+              </option>
             ))}
           </select>
         </div>

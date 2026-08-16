@@ -1,6 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AutoCropSettings, OpenCVSettings, AISmartSettings } from '@/features/editor_auto_crop/types';
-import { EngineRegistry } from '@/features/editor_auto_crop/services/EngineRegistry';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import {
+  AutoCropSettings,
+  OpenCVSettings,
+  AISmartSettings,
+} from "@/features/editor_auto_crop/types";
+import { EngineRegistry } from "@/features/editor_auto_crop/services/EngineRegistry";
 
 const defaultOpenCVSettings: OpenCVSettings = {
   sensitivity: 30,
@@ -31,16 +35,21 @@ export const defaultAutoCropSettings: AutoCropSettings = {
 interface AutoCropContextProps {
   settings: AutoCropSettings;
   updateSettings: (newSettings: Partial<AutoCropSettings>) => void;
-  updateEngineSettings: (engine: "opencv" | "aiSmart", engineSettings: Partial<OpenCVSettings | AISmartSettings>) => void;
+  updateEngineSettings: (
+    engine: "opencv" | "aiSmart",
+    engineSettings: Partial<OpenCVSettings | AISmartSettings>
+  ) => void;
   activeEngine: string;
   setActiveEngine: (engineId: "opencv" | "aiSmart") => void;
 }
 
-const AutoCropContext = createContext<AutoCropContextProps | undefined>(undefined);
+const AutoCropContext = createContext<AutoCropContextProps | undefined>(
+  undefined
+);
 
 export function AutoCropProvider({
   children,
-  initialEngine = "opencv"
+  initialEngine = "opencv",
 }: {
   children: React.ReactNode;
   initialEngine?: "opencv" | "aiSmart";
@@ -54,7 +63,10 @@ export function AutoCropProvider({
     setSettings((prev) => ({ ...prev, ...newSettings }));
   };
 
-  const updateEngineSettings = (engine: "opencv" | "aiSmart", engineSettings: Partial<OpenCVSettings | AISmartSettings>) => {
+  const updateEngineSettings = (
+    engine: "opencv" | "aiSmart",
+    engineSettings: Partial<OpenCVSettings | AISmartSettings>
+  ) => {
     setSettings((prev) => ({
       ...prev,
       [engine]: {

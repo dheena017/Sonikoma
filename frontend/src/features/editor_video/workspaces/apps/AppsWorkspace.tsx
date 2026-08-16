@@ -8,7 +8,9 @@ interface AppsWorkspaceProps {
   onTriggerFeedback: (msg: string) => void;
 }
 
-export const AppsWorkspace: React.FC<AppsWorkspaceProps> = ({ onTriggerFeedback }) => {
+export const AppsWorkspace: React.FC<AppsWorkspaceProps> = ({
+  onTriggerFeedback,
+}) => {
   const [activeTab, setActiveTab] = useState("Cloud");
   const [searchQuery, setSearchQuery] = useState("");
   const [installed, setInstalled] = useState<Record<string, boolean>>(
@@ -18,7 +20,9 @@ export const AppsWorkspace: React.FC<AppsWorkspaceProps> = ({ onTriggerFeedback 
   const tabKey = activeTab.toLowerCase();
   const visibleApps = MOCK_APP_EXTENSIONS.filter((app) => {
     const matchTab = app.category === tabKey;
-    const matchSearch = !searchQuery.trim() || app.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch =
+      !searchQuery.trim() ||
+      app.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchTab && matchSearch;
   });
 

@@ -122,7 +122,10 @@ export function useSceneModifier({
         ...prev,
       ]);
     }
-    addNotification?.(`Panel #${panelId} duration set to ${durVal}s. Unsaved changes — click "Save Project" to save.`, "warning");
+    addNotification?.(
+      `Panel #${panelId} duration set to ${durVal}s. Unsaved changes — click "Save Project" to save.`,
+      "warning"
+    );
     audioFeedback?.playTick();
   };
 
@@ -169,8 +172,6 @@ export function useSceneModifier({
     }
     audioFeedback?.playTick();
   };
-
-
 
   const handleShiftPanel = (index: number, direction: "left" | "right") => {
     audioFeedback?.playTick();

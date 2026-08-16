@@ -126,7 +126,10 @@ export default function ProjectConfirmModal({
   const [transitionPace, setTransitionPace] = useState("Standard (4.0s)");
   const [cameraMotion, setCameraMotion] = useState("2.5D Parallax Motion");
   const [renderQuality, setRenderQuality] = useState("1080p Standard");
-  const [targetPlatforms, setTargetPlatforms] = useState<string[]>(["YouTube Shorts", "TikTok"]);
+  const [targetPlatforms, setTargetPlatforms] = useState<string[]>([
+    "YouTube Shorts",
+    "TikTok",
+  ]);
 
   // Accordion State
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -152,7 +155,9 @@ export default function ProjectConfirmModal({
 
   const togglePlatform = (platform: string) => {
     setTargetPlatforms((prev) =>
-      prev.includes(platform) ? prev.filter((p) => p !== platform) : [...prev, platform]
+      prev.includes(platform)
+        ? prev.filter((p) => p !== platform)
+        : [...prev, platform]
     );
   };
 
@@ -161,14 +166,23 @@ export default function ProjectConfirmModal({
     if (scrapedGenre) {
       scrapedGenre.split(",").forEach((g) => {
         const clean = g.trim().toLowerCase().replace(/\s+/g, "");
-        if (clean && !generated.includes(`#${clean}`)) generated.push(`#${clean}`);
+        if (clean && !generated.includes(`#${clean}`))
+          generated.push(`#${clean}`);
       });
     }
     if (seriesTitle) {
       const titleTag = seriesTitle.trim().toLowerCase().replace(/\s+/g, "");
-      if (titleTag && !generated.includes(`#${titleTag}`)) generated.push(`#${titleTag}`);
+      if (titleTag && !generated.includes(`#${titleTag}`))
+        generated.push(`#${titleTag}`);
     }
-    const defaults = ["#manhwa", "#webtoon", "#recap", "#anime", "#comic", "#shorts"];
+    const defaults = [
+      "#manhwa",
+      "#webtoon",
+      "#recap",
+      "#anime",
+      "#comic",
+      "#shorts",
+    ];
     defaults.forEach((d) => {
       if (!generated.includes(d)) generated.push(d);
     });
@@ -227,7 +241,6 @@ export default function ProjectConfirmModal({
       if (container) container.style.overflow = "";
     };
   }, [isOpen, initialDetails]);
-
 
   if (!isOpen) return null;
 
@@ -315,7 +328,10 @@ export default function ProjectConfirmModal({
   if (typeof document === "undefined") return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex project-confirm-modal-overlay" data-modal="true">
+    <div
+      className="fixed inset-0 z-[100] flex project-confirm-modal-overlay"
+      data-modal="true"
+    >
       <div
         className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
         onClick={onClose}
@@ -340,7 +356,8 @@ export default function ProjectConfirmModal({
                 </span>
               </div>
               <p className="text-[10px] text-neutral-400 font-mono tracking-wide mt-0.5">
-                Configure metadata, AI voice actor, motion pacing & target platforms
+                Configure metadata, AI voice actor, motion pacing & target
+                platforms
               </p>
             </div>
           </div>
@@ -398,7 +415,11 @@ export default function ProjectConfirmModal({
                 <BookOpen className="h-4 w-4 text-purple-400" />
                 1. Core Metadata
               </div>
-              {openSections.core ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {openSections.core ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </h3>
             {openSections.core && (
               <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -489,7 +510,11 @@ export default function ProjectConfirmModal({
                 <ImageIcon className="h-4 w-4 text-purple-400" />
                 2. Media & Details
               </div>
-              {openSections.media ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {openSections.media ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </h3>
             {openSections.media && (
               <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -523,7 +548,9 @@ export default function ProjectConfirmModal({
                             src={localCoverImage || seriesCoverImage}
                             alt="Cover Preview"
                             className="w-full h-full object-cover"
-                            onError={(e) => (e.currentTarget.style.display = "none")}
+                            onError={(e) =>
+                              (e.currentTarget.style.display = "none")
+                            }
                           />
                           {isExtractingCover && (
                             <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
@@ -580,7 +607,9 @@ export default function ProjectConfirmModal({
                           />
                         </label>
                         {localCoverImage && (
-                          <span className="text-[10px] text-emerald-400 font-mono">File selected</span>
+                          <span className="text-[10px] text-emerald-400 font-mono">
+                            File selected
+                          </span>
                         )}
                       </div>
                     </div>
@@ -614,7 +643,11 @@ export default function ProjectConfirmModal({
                 <Video className="h-4 w-4 text-purple-400" />
                 3. Video & Layout
               </div>
-              {openSections.video ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {openSections.video ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </h3>
             {openSections.video && (
               <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -663,7 +696,11 @@ export default function ProjectConfirmModal({
                 <Mic className="h-4 w-4 text-purple-400" />
                 4. AI Voice & Sound Pipeline
               </div>
-              {openSections.ai_audio ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {openSections.ai_audio ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </h3>
             {openSections.ai_audio && (
               <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -680,10 +717,16 @@ export default function ProjectConfirmModal({
                   >
                     <div className="flex items-center justify-between mb-1">
                       <FileText className="w-4 h-4" />
-                      {aiTasks.generateScript && <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />}
+                      {aiTasks.generateScript && (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                      )}
                     </div>
-                    <p className="text-xs font-bold leading-tight">Extract Script</p>
-                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5">OCR dialogue</p>
+                    <p className="text-xs font-bold leading-tight">
+                      Extract Script
+                    </p>
+                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
+                      OCR dialogue
+                    </p>
                   </button>
 
                   <button
@@ -697,10 +740,16 @@ export default function ProjectConfirmModal({
                   >
                     <div className="flex items-center justify-between mb-1">
                       <Mic className="w-4 h-4" />
-                      {aiTasks.generateVoice && <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />}
+                      {aiTasks.generateVoice && (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                      )}
                     </div>
-                    <p className="text-xs font-bold leading-tight">AI Voiceover</p>
-                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5">TTS Narration</p>
+                    <p className="text-xs font-bold leading-tight">
+                      AI Voiceover
+                    </p>
+                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
+                      TTS Narration
+                    </p>
                   </button>
 
                   <button
@@ -714,10 +763,14 @@ export default function ProjectConfirmModal({
                   >
                     <div className="flex items-center justify-between mb-1">
                       <Music className="w-4 h-4" />
-                      {aiTasks.generateSFX && <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />}
+                      {aiTasks.generateSFX && (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                      )}
                     </div>
                     <p className="text-xs font-bold leading-tight">SFX & BGM</p>
-                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5">Audio FX</p>
+                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
+                      Audio FX
+                    </p>
                   </button>
                 </div>
 
@@ -732,11 +785,21 @@ export default function ProjectConfirmModal({
                       onChange={(e) => setVoiceActor(e.target.value)}
                       className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
                     >
-                      <option value="Epic Trailer Narrator">🎙️ Epic Trailer Narrator (Deep Male)</option>
-                      <option value="Anime Protagonist (Male)">🔥 Anime Protagonist (Hype Male)</option>
-                      <option value="Deep Fantasy Narrator">🏰 Deep Fantasy Narrator (Cinematic)</option>
-                      <option value="Soft Female Storyteller">🌸 Soft Female Storyteller</option>
-                      <option value="Cinematic Male">🎬 Cinematic Male (Standard)</option>
+                      <option value="Epic Trailer Narrator">
+                        🎙️ Epic Trailer Narrator (Deep Male)
+                      </option>
+                      <option value="Anime Protagonist (Male)">
+                        🔥 Anime Protagonist (Hype Male)
+                      </option>
+                      <option value="Deep Fantasy Narrator">
+                        🏰 Deep Fantasy Narrator (Cinematic)
+                      </option>
+                      <option value="Soft Female Storyteller">
+                        🌸 Soft Female Storyteller
+                      </option>
+                      <option value="Cinematic Male">
+                        🎬 Cinematic Male (Standard)
+                      </option>
                     </select>
                   </div>
 
@@ -750,10 +813,16 @@ export default function ProjectConfirmModal({
                       onChange={(e) => setBgmStyle(e.target.value)}
                       className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
                     >
-                      <option value="Dark Action Hybrid">⚡ Dark Action Hybrid (Manhwa Hype)</option>
-                      <option value="Epic Orchestral">🎻 Epic Orchestral (Symphonic)</option>
+                      <option value="Dark Action Hybrid">
+                        ⚡ Dark Action Hybrid (Manhwa Hype)
+                      </option>
+                      <option value="Epic Orchestral">
+                        🎻 Epic Orchestral (Symphonic)
+                      </option>
                       <option value="Lo-Fi Recaps">🎧 Lo-Fi Chill Recap</option>
-                      <option value="Cyberpunk Synthwave">🌆 Cyberpunk Synthwave</option>
+                      <option value="Cyberpunk Synthwave">
+                        🌆 Cyberpunk Synthwave
+                      </option>
                       <option value="None">🔇 None (Voice Only)</option>
                     </select>
                   </div>
@@ -772,7 +841,11 @@ export default function ProjectConfirmModal({
                 <Camera className="h-4 w-4 text-purple-400" />
                 5. Visual Motion & Rendering
               </div>
-              {openSections.visual_motion ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {openSections.visual_motion ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </h3>
             {openSections.visual_motion && (
               <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -786,9 +859,15 @@ export default function ProjectConfirmModal({
                       onChange={(e) => setTransitionPace(e.target.value)}
                       className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
                     >
-                      <option value="Fast (2.5s)">⚡ Fast Paced (2.5s / panel - TikTok)</option>
-                      <option value="Standard (4.0s)">🎯 Standard Paced (4.0s / panel)</option>
-                      <option value="Cinematic Slow (6.0s)">🎥 Cinematic Slow (6.0s / panel)</option>
+                      <option value="Fast (2.5s)">
+                        ⚡ Fast Paced (2.5s / panel - TikTok)
+                      </option>
+                      <option value="Standard (4.0s)">
+                        🎯 Standard Paced (4.0s / panel)
+                      </option>
+                      <option value="Cinematic Slow (6.0s)">
+                        🎥 Cinematic Slow (6.0s / panel)
+                      </option>
                     </select>
                   </div>
 
@@ -801,9 +880,15 @@ export default function ProjectConfirmModal({
                       onChange={(e) => setCameraMotion(e.target.value)}
                       className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
                     >
-                      <option value="2.5D Parallax Motion">✨ 2.5D Parallax Depth Motion</option>
-                      <option value="Pan & Zoom Dynamic">🔍 Dynamic Pan & Zoom</option>
-                      <option value="Static Clean">📷 Static Clean Frame</option>
+                      <option value="2.5D Parallax Motion">
+                        ✨ 2.5D Parallax Depth Motion
+                      </option>
+                      <option value="Pan & Zoom Dynamic">
+                        🔍 Dynamic Pan & Zoom
+                      </option>
+                      <option value="Static Clean">
+                        📷 Static Clean Frame
+                      </option>
                     </select>
                   </div>
 
@@ -816,10 +901,18 @@ export default function ProjectConfirmModal({
                       onChange={(e) => setArtStyle(e.target.value)}
                       className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
                     >
-                      <option value="Manhwa Vibrant">💥 Manhwa Vibrant Glow</option>
-                      <option value="Anime Studio">🎨 Anime Studio Crisp</option>
-                      <option value="Dark Fantasy">🌙 Dark Fantasy Contrast</option>
-                      <option value="Manga Monochrome">✒️ Manga Ink Black & White</option>
+                      <option value="Manhwa Vibrant">
+                        💥 Manhwa Vibrant Glow
+                      </option>
+                      <option value="Anime Studio">
+                        🎨 Anime Studio Crisp
+                      </option>
+                      <option value="Dark Fantasy">
+                        🌙 Dark Fantasy Contrast
+                      </option>
+                      <option value="Manga Monochrome">
+                        ✒️ Manga Ink Black & White
+                      </option>
                     </select>
                   </div>
 
@@ -832,8 +925,12 @@ export default function ProjectConfirmModal({
                       onChange={(e) => setRenderQuality(e.target.value)}
                       className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
                     >
-                      <option value="1080p Standard">⚡ 1080p Standard (Fast Export)</option>
-                      <option value="4K Ultra Precision">🌟 4K Ultra Precision Studio</option>
+                      <option value="1080p Standard">
+                        ⚡ 1080p Standard (Fast Export)
+                      </option>
+                      <option value="4K Ultra Precision">
+                        🌟 4K Ultra Precision Studio
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -851,7 +948,11 @@ export default function ProjectConfirmModal({
                 <Crop className="h-4 w-4 text-purple-400" />
                 6. Panel Crop & Segmentation
               </div>
-              {openSections.processing ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {openSections.processing ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </h3>
             {openSections.processing && (
               <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -865,9 +966,13 @@ export default function ProjectConfirmModal({
                       onChange={(e) => setCropSensitivity(e.target.value)}
                       className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
                     >
-                      <option value="Conservative">Conservative (Preserve full panels)</option>
+                      <option value="Conservative">
+                        Conservative (Preserve full panels)
+                      </option>
                       <option value="Balanced">Balanced (Recommended)</option>
-                      <option value="Aggressive">Aggressive (Tight on speech bubbles)</option>
+                      <option value="Aggressive">
+                        Aggressive (Tight on speech bubbles)
+                      </option>
                     </select>
                   </div>
                   <div className="space-y-1.5 flex flex-col justify-center pt-5">
@@ -890,7 +995,9 @@ export default function ProjectConfirmModal({
                           }`}
                         ></div>
                       </div>
-                      <span className="text-sm text-neutral-300">Auto-split long tall strips</span>
+                      <span className="text-sm text-neutral-300">
+                        Auto-split long tall strips
+                      </span>
                     </label>
                   </div>
                 </div>
@@ -908,7 +1015,11 @@ export default function ProjectConfirmModal({
                 <Globe className="h-4 w-4 text-purple-400" />
                 7. Tags & Target Audience
               </div>
-              {openSections.audience ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {openSections.audience ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </h3>
             {openSections.audience && (
               <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -993,7 +1104,9 @@ export default function ProjectConfirmModal({
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleTagKeyDown}
-                      placeholder={customTags.length === 0 ? "e.g. #manhwa, #action" : ""}
+                      placeholder={
+                        customTags.length === 0 ? "e.g. #manhwa, #action" : ""
+                      }
                       className="bg-transparent border-none outline-none text-sm text-neutral-200 flex-1 min-w-[120px]"
                     />
                   </div>
@@ -1012,7 +1125,11 @@ export default function ProjectConfirmModal({
                 <FolderTree className="h-4 w-4 text-purple-400" />
                 8. Workspace & Publishing Destinations
               </div>
-              {openSections.organization ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {openSections.organization ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </h3>
             {openSections.organization && (
               <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -1048,7 +1165,12 @@ export default function ProjectConfirmModal({
                     Target Distribution Platforms
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {["YouTube Shorts", "TikTok", "Instagram Reels", "YouTube Video"].map((platform) => (
+                    {[
+                      "YouTube Shorts",
+                      "TikTok",
+                      "Instagram Reels",
+                      "YouTube Video",
+                    ].map((platform) => (
                       <button
                         key={platform}
                         type="button"

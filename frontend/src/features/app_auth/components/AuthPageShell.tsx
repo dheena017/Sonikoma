@@ -53,7 +53,6 @@ export default function AuthPageShell({
           </div>
         </div>
       </div>
-
     </div>
   );
 }

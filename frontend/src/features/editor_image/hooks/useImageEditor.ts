@@ -1,7 +1,10 @@
 import { normalizeLog } from "@/types/logs";
 import { useRef, useEffect, useCallback } from "react";
 import { Slice, Slot, DetectedPanel } from "@/features/editor_image/components";
-import { useImageEditorState, useImageEditorStore } from "@/features/editor_image/hooks/useImageEditorState";
+import {
+  useImageEditorState,
+  useImageEditorStore,
+} from "@/features/editor_image/hooks/useImageEditorState";
 import { useCropEditorHistory } from "@/features/editor_image/hooks/useCropEditorHistory";
 import { useCropEditorDrag } from "@/features/editor_image/hooks/useCropEditorDrag";
 import { useCropEditorPipelines } from "@/features/editor_image/hooks/useCropEditorPipelines";
@@ -270,17 +273,31 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
       if (!dataUrl) return;
 
       if (!setScrapedImages) {
-        addNotification("No active image list available to apply drawing.", "warning");
+        addNotification(
+          "No active image list available to apply drawing.",
+          "warning"
+        );
         return;
       }
 
       let targetIdx = editingImageIdx;
-      if ((targetIdx === null || targetIdx < 0) && state.imageUrl && scrapedImages?.length > 0) {
-        const foundIdx = scrapedImages.findIndex((img) => img === state.imageUrl);
+      if (
+        (targetIdx === null || targetIdx < 0) &&
+        state.imageUrl &&
+        scrapedImages?.length > 0
+      ) {
+        const foundIdx = scrapedImages.findIndex(
+          (img) => img === state.imageUrl
+        );
         if (foundIdx !== -1) targetIdx = foundIdx;
       }
 
-      if (targetIdx !== null && targetIdx >= 0 && scrapedImages && targetIdx < scrapedImages.length) {
+      if (
+        targetIdx !== null &&
+        targetIdx >= 0 &&
+        scrapedImages &&
+        targetIdx < scrapedImages.length
+      ) {
         const oldUrl = scrapedImages[targetIdx];
 
         // 1. Update image in Imported Images deck (scrapedImages)
@@ -302,17 +319,23 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
         // 3. Update timeline storyboard panels in-place
         if (setPanels && oldUrl) {
           setPanels((prevPanels) =>
-            prevPanels.map((p) => (p.image_url === oldUrl ? { ...p, image_url: dataUrl } : p))
+            prevPanels.map((p) =>
+              p.image_url === oldUrl ? { ...p, image_url: dataUrl } : p
+            )
           );
         }
 
         // 4. Update window globals for scrape image origins
-        const origins: Record<string, string> = (window as any).__scrapeImageOrigins || {};
+        const origins: Record<string, string> =
+          (window as any).__scrapeImageOrigins || {};
         if (oldUrl && origins[oldUrl]) {
           origins[dataUrl] = origins[oldUrl];
         }
 
-        addNotification("Drawing saved & applied to Imported Images successfully!", "success");
+        addNotification(
+          "Drawing saved & applied to Imported Images successfully!",
+          "success"
+        );
         if (appLogic.audioFeedback?.playTick) {
           appLogic.audioFeedback.playTick();
         }
@@ -320,13 +343,19 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
         // Clear fabric drawing objects after applying
         window.dispatchEvent(new Event("FABRIC_CLEAR_REQUEST"));
       } else {
-        addNotification("No active panel selected to apply drawing.", "warning");
+        addNotification(
+          "No active panel selected to apply drawing.",
+          "warning"
+        );
       }
     };
 
     window.addEventListener("FABRIC_SAVE_COMPLETE", handleFabricSaveComplete);
     return () => {
-      window.removeEventListener("FABRIC_SAVE_COMPLETE", handleFabricSaveComplete);
+      window.removeEventListener(
+        "FABRIC_SAVE_COMPLETE",
+        handleFabricSaveComplete
+      );
     };
   }, [
     editingImageIdx,
@@ -457,7 +486,8 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
   };
 
   const handleResetCropBounds = () => {
-    const currentImageNumber = editingImageIdx !== null ? editingImageIdx + 1 : 1;
+    const currentImageNumber =
+      editingImageIdx !== null ? editingImageIdx + 1 : 1;
     console.log(
       `[Image Editor] Resetting crop bounds for image #${currentImageNumber}`
     );
@@ -472,7 +502,9 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
   const handlePrevImage = () => {
     if (editingImageIdx === null || editingImageIdx <= 0) return;
     const nextIdx = editingImageIdx - 1;
-    const isProjectScoped = window.location.pathname.includes("/scraper/editor/series/");
+    const isProjectScoped = window.location.pathname.includes(
+      "/scraper/editor/series/"
+    );
     let target = "";
     if (isProjectScoped) {
       target = `${window.location.pathname}?idx=${nextIdx}`;
@@ -488,7 +520,9 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     if (editingImageIdx === null || editingImageIdx >= scrapedImages.length - 1)
       return;
     const nextIdx = editingImageIdx + 1;
-    const isProjectScoped = window.location.pathname.includes("/scraper/editor/series/");
+    const isProjectScoped = window.location.pathname.includes(
+      "/scraper/editor/series/"
+    );
     let target = "";
     if (isProjectScoped) {
       target = `${window.location.pathname}?idx=${nextIdx}`;
@@ -582,7 +616,10 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     }
 
     if (!hasDrawing) {
-      addNotification("Please highlight text or speech bubbles on the image first.", "warning");
+      addNotification(
+        "Please highlight text or speech bubbles on the image first.",
+        "warning"
+      );
       return;
     }
 
@@ -600,11 +637,14 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
       // Fetch original panel as blob via proxy to avoid CORS
       const proxyUrl = api.getProxyImageUrl(originalUrl);
       const imgRes = await fetch(proxyUrl);
-      if (!imgRes.ok) throw new Error(`Failed to fetch original panel: ${imgRes.statusText}`);
+      if (!imgRes.ok)
+        throw new Error(`Failed to fetch original panel: ${imgRes.statusText}`);
       const originalBlob = await imgRes.blob();
 
       // Determine natural dimensions from alt='Preview' image
-      const imgElement = document.querySelector("img[alt='Preview']") as HTMLImageElement;
+      const imgElement = document.querySelector(
+        "img[alt='Preview']"
+      ) as HTMLImageElement;
       const naturalWidth = imgElement?.naturalWidth || canvas.width;
       const naturalHeight = imgElement?.naturalHeight || canvas.height;
 
@@ -644,9 +684,16 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
       });
 
       // Submit to backend
-      const res = await api.saveTrainingData(activeFetch, originalBlob, maskBlob);
+      const res = await api.saveTrainingData(
+        activeFetch,
+        originalBlob,
+        maskBlob
+      );
       if (res.success) {
-        addNotification("Correction pair successfully saved to the dataset inside training_data/!", "success");
+        addNotification(
+          "Correction pair successfully saved to the dataset inside training_data/!",
+          "success"
+        );
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
             `[Data Flywheel] [SUCCESS] Saved correction pair!`,
@@ -700,8 +747,18 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     const match = path.match(
       /^\/(?:scraper|workspace)\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
     );
-    const series = match && match[1] !== "null" ? match[1] : (params.get("series") && params.get("series") !== "null" ? params.get("series") : null);
-    const chapter = match && match[2] !== "null" ? match[2] : (params.get("chapter") && params.get("chapter") !== "null" ? params.get("chapter") : null);
+    const series =
+      match && match[1] !== "null"
+        ? match[1]
+        : params.get("series") && params.get("series") !== "null"
+        ? params.get("series")
+        : null;
+    const chapter =
+      match && match[2] !== "null"
+        ? match[2]
+        : params.get("chapter") && params.get("chapter") !== "null"
+        ? params.get("chapter")
+        : null;
     if (series && chapter) {
       const target = `/scraper/editor/series/${series}/chapters/${chapter}`;
       if ((window as any).navigateTo) {

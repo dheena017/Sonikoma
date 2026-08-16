@@ -64,5 +64,4 @@ export interface ScraperDeckProps {
   resetWorkspace?: () => void;
 }
 
-
 export type ChapterScraperDeckProps = ScraperDeckProps;

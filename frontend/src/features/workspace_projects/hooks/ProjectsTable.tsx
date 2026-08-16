@@ -12,11 +12,7 @@ import {
   Square,
   Trash2,
 } from "lucide-react";
-import {
-  getProxiedImageUrl,
-  getSourceIcon,
-  getSourceName,
-} from "@/utils";
+import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/utils";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 
 interface ProjectsTableProps {
@@ -169,7 +165,9 @@ export default function ProjectsTable({
                   <div className="font-bold text-white">
                     {project.panels_count || project.imported_assets_count || 0}
                   </div>
-                  {project.imported_assets_count && project.panels_count && project.panels_count !== project.imported_assets_count ? (
+                  {project.imported_assets_count &&
+                  project.panels_count &&
+                  project.panels_count !== project.imported_assets_count ? (
                     <div className="text-[10px] text-neutral-500 font-normal">
                       {project.imported_assets_count} imported
                     </div>

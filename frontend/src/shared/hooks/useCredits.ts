@@ -18,7 +18,10 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getUserCreditsPayload, type CreditsPayload } from "@/api/endpoints/auth";
+import {
+  getUserCreditsPayload,
+  type CreditsPayload,
+} from "@/api/endpoints/auth";
 
 const POLL_INTERVAL_MS = 30_000;
 const LOW_BALANCE_THRESHOLD = 20; // mirrors backend db.LOW_BALANCE_THRESHOLD
@@ -67,7 +70,9 @@ export function useCredits(fetchWithInterceptor: any): UseCreditsResult {
   }, [fetchCredits]);
 
   const credits = payload?.credits ?? null;
-  const lowBalance = payload?.low_balance ?? (credits !== null && credits < LOW_BALANCE_THRESHOLD);
+  const lowBalance =
+    payload?.low_balance ??
+    (credits !== null && credits < LOW_BALANCE_THRESHOLD);
   const threshold = payload?.threshold ?? LOW_BALANCE_THRESHOLD;
 
   const hasSufficientCredits = useCallback(

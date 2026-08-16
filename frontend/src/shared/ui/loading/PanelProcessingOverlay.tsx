@@ -1,7 +1,10 @@
 import React from "react";
 import { Sparkles, Loader2 } from "lucide-react";
 
-export type ProcessingMode = "auto-cropping" | "cleaning-bubbles" | "processing";
+export type ProcessingMode =
+  | "auto-cropping"
+  | "cleaning-bubbles"
+  | "processing";
 
 interface PanelProcessingOverlayProps {
   /** The resolved label to display (e.g. "Auto-Cropping", "Cleaning Bubbles") */
@@ -15,7 +18,10 @@ interface PanelProcessingOverlayProps {
  * during any background processing operation (Auto-Crop, Bubble Cleaning, Image Edit).
  * Styled with sleek dark backdrop and clean status indicators (no harsh neon glows).
  */
-export function PanelProcessingOverlay({ label, overlayId }: PanelProcessingOverlayProps) {
+export function PanelProcessingOverlay({
+  label,
+  overlayId,
+}: PanelProcessingOverlayProps) {
   const isAutoCrop = label.toLowerCase().includes("crop");
 
   return (

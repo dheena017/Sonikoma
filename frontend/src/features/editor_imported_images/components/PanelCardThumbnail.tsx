@@ -51,7 +51,6 @@ const getScrapedImageStatus = (url: string) => {
   return null;
 };
 
-
 export function PanelCardThumbnail({
   imgUrl,
   idx,
@@ -110,7 +109,6 @@ export function PanelCardThumbnail({
           key={`${imgUrl}-${retryKey}`}
           src={resolvedImgSrc}
           alt={`Panel #${resolvedDisplayIdx + 1}`}
-
           className={`w-full h-full object-contain transition-all duration-500 ease-out ${
             isProcessing
               ? "opacity-20 scale-95 blur-[3px]"
@@ -123,7 +121,11 @@ export function PanelCardThumbnail({
             const currentSrc = img.src;
 
             // Never proxy local data or blob URIs
-            if (!currentSrc || currentSrc.startsWith("data:") || currentSrc.startsWith("blob:")) {
+            if (
+              !currentSrc ||
+              currentSrc.startsWith("data:") ||
+              currentSrc.startsWith("blob:")
+            ) {
               setHasError(true);
               return;
             }
@@ -135,7 +137,10 @@ export function PanelCardThumbnail({
             img.dataset.retried = "1";
 
             // If already using the proxy or internal API path, don't wrap again
-            if (currentSrc.includes("/api/proxy-image") || currentSrc.includes("/api/")) {
+            if (
+              currentSrc.includes("/api/proxy-image") ||
+              currentSrc.includes("/api/")
+            ) {
               setHasError(true);
               return;
             }
@@ -146,11 +151,14 @@ export function PanelCardThumbnail({
         />
       )}
 
-
       {/* Processing overlay — imported from shared/ui/loading */}
       {isProcessing && (
         <PanelProcessingOverlay
-          label={getPanelProcessingLabel(isBatchCropping, bubbleCroppingImgUrl, imgUrl)}
+          label={getPanelProcessingLabel(
+            isBatchCropping,
+            bubbleCroppingImgUrl,
+            imgUrl
+          )}
           overlayId={`loading_overlay_${idx}`}
         />
       )}

@@ -72,7 +72,12 @@
   left: 20vw;
   width: 50vw;
   height: 45vh;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.45) 0%, rgba(99, 102, 241, 0.2) 60%, transparent 80%);
+  background: radial-gradient(
+    circle,
+    rgba(168, 85, 247, 0.45) 0%,
+    rgba(99, 102, 241, 0.2) 60%,
+    transparent 80%
+  );
   animation-delay: 0s;
 }
 
@@ -81,7 +86,12 @@
   right: 15vw;
   width: 55vw;
   height: 50vh;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.35) 0%, rgba(147, 51, 234, 0.2) 60%, transparent 80%);
+  background: radial-gradient(
+    circle,
+    rgba(236, 72, 153, 0.35) 0%,
+    rgba(147, 51, 234, 0.2) 60%,
+    transparent 80%
+  );
   animation-delay: -4s;
 }
 
@@ -90,7 +100,12 @@
   right: -10vw;
   width: 40vw;
   height: 40vh;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.3) 0%, rgba(99, 102, 241, 0.15) 60%, transparent 80%);
+  background: radial-gradient(
+    circle,
+    rgba(34, 211, 238, 0.3) 0%,
+    rgba(99, 102, 241, 0.15) 60%,
+    transparent 80%
+  );
   animation-delay: -8s;
 }
 
@@ -106,13 +121,26 @@
   position: absolute;
   border-radius: 9999px;
   border: 1px solid rgba(168, 85, 247, 0.4);
-  box-shadow: 0 0 30px rgba(168, 85, 247, 0.2), inset 0 0 30px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.2),
+    inset 0 0 30px rgba(99, 102, 241, 0.2);
   animation: anime-ring-expand 16s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
-.anime-ring.ring-1 { width: 300px; height: 300px; animation-delay: 0s; }
-.anime-ring.ring-2 { width: 600px; height: 600px; animation-delay: -5.3s; }
-.anime-ring.ring-3 { width: 900px; height: 900px; animation-delay: -10.6s; }
+.anime-ring.ring-1 {
+  width: 300px;
+  height: 300px;
+  animation-delay: 0s;
+}
+.anime-ring.ring-2 {
+  width: 600px;
+  height: 600px;
+  animation-delay: -5.3s;
+}
+.anime-ring.ring-3 {
+  width: 900px;
+  height: 900px;
+  animation-delay: -10.6s;
+}
 
 /* 3. Floating Hologram Manga Panels */
 .anime-hero-holograms {
@@ -123,9 +151,14 @@
   position: absolute;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(168, 85, 247, 0.08));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(168, 85, 247, 0.08)
+  );
   backdrop-filter: blur(3px);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 0 15px rgba(168, 85, 247, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37),
+    inset 0 0 15px rgba(168, 85, 247, 0.2);
   animation: anime-holo-float 14s ease-in-out infinite alternate;
 }
 
@@ -162,48 +195,104 @@
   position: absolute;
   width: 14px;
   height: 14px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(192, 132, 252, 0.6), rgba(34, 211, 238, 0.4));
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(192, 132, 252, 0.6),
+    rgba(34, 211, 238, 0.4)
+  );
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
   filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.8));
   animation: anime-crystal-tumble 12s ease-in-out infinite;
 }
 
-.crystal-1 { top: 25vh; left: 22vw; animation-delay: 0s; transform: scale(1.1); }
-.crystal-2 { top: 68vh; right: 28vw; animation-delay: -3.5s; transform: scale(0.8); }
-.crystal-3 { top: 40vh; right: 18vw; animation-delay: -7s; transform: scale(1.3); }
-.crystal-4 { top: 82vh; left: 35vw; animation-delay: -9.5s; transform: scale(0.9); }
+.crystal-1 {
+  top: 25vh;
+  left: 22vw;
+  animation-delay: 0s;
+  transform: scale(1.1);
+}
+.crystal-2 {
+  top: 68vh;
+  right: 28vw;
+  animation-delay: -3.5s;
+  transform: scale(0.8);
+}
+.crystal-3 {
+  top: 40vh;
+  right: 18vw;
+  animation-delay: -7s;
+  transform: scale(1.3);
+}
+.crystal-4 {
+  top: 82vh;
+  left: 35vw;
+  animation-delay: -9.5s;
+  transform: scale(0.9);
+}
 
 /* Vignette Depth */
 .anime-hero-vignette {
-  background:
-    radial-gradient(circle at 80% 40%, transparent 0 35%, rgba(8, 8, 13, 0.12) 65%, rgba(8, 8, 13, 0.4) 100%),
+  background: radial-gradient(
+      circle at 80% 40%,
+      transparent 0 35%,
+      rgba(8, 8, 13, 0.12) 65%,
+      rgba(8, 8, 13, 0.4) 100%
+    ),
     linear-gradient(180deg, rgba(8, 8, 13, 0.2), rgba(8, 8, 13, 0.6));
 }
 
 .anime-hero-scene-light .anime-hero-vignette {
-  background:
-    radial-gradient(circle at 80% 40%, transparent 0 35%, rgba(248, 250, 252, 0.12) 65%, rgba(248, 250, 252, 0.6) 100%),
+  background: radial-gradient(
+      circle at 80% 40%,
+      transparent 0 35%,
+      rgba(248, 250, 252, 0.12) 65%,
+      rgba(248, 250, 252, 0.6) 100%
+    ),
     linear-gradient(180deg, rgba(248, 250, 252, 0.2), rgba(248, 250, 252, 0.75));
 }
 
 /* Readability Gradients */
 .anime-hero-readability {
-  background:
-    linear-gradient(90deg, rgba(8, 8, 13, 0.88) 0%, rgba(8, 8, 13, 0.55) 35%, rgba(8, 8, 13, 0.18) 65%, transparent 100%),
-    linear-gradient(180deg, rgba(8, 8, 13, 0.6) 0%, transparent 35%, rgba(8, 8, 13, 0.8) 100%);
+  background: linear-gradient(
+      90deg,
+      rgba(8, 8, 13, 0.88) 0%,
+      rgba(8, 8, 13, 0.55) 35%,
+      rgba(8, 8, 13, 0.18) 65%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(8, 8, 13, 0.6) 0%,
+      transparent 35%,
+      rgba(8, 8, 13, 0.8) 100%
+    );
 }
 
 .anime-hero-scene-light .anime-hero-readability {
-  background:
-    linear-gradient(90deg, rgba(248, 250, 252, 0.9) 0%, rgba(248, 250, 252, 0.6) 35%, rgba(248, 250, 252, 0.2) 65%, transparent 100%),
-    linear-gradient(180deg, rgba(248, 250, 252, 0.68) 0%, transparent 35%, rgba(248, 250, 252, 0.85) 100%);
+  background: linear-gradient(
+      90deg,
+      rgba(248, 250, 252, 0.9) 0%,
+      rgba(248, 250, 252, 0.6) 35%,
+      rgba(248, 250, 252, 0.2) 65%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(248, 250, 252, 0.68) 0%,
+      transparent 35%,
+      rgba(248, 250, 252, 0.85) 100%
+    );
 }
 
 /* Subtle Cyber / Manhwa Grid */
 .anime-hero-grid {
   opacity: 0.035;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+  background-image: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.2) 1px,
+      transparent 1px
+    ),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
   background-size: 32px 32px;
   animation: grid-drift 30s linear infinite;
@@ -211,8 +300,11 @@
 
 .anime-hero-scene-light .anime-hero-grid {
   opacity: 0.025;
-  background-image: 
-    linear-gradient(to right, rgba(0, 0, 0, 0.2) 1px, transparent 1px),
+  background-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.2) 1px,
+      transparent 1px
+    ),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 1px, transparent 1px);
 }
 
@@ -228,17 +320,46 @@
   left: -30vw;
   width: 38vw;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.88), rgba(34, 211, 238, 0.62), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.88),
+    rgba(34, 211, 238, 0.62),
+    transparent
+  );
   box-shadow: 0 0 18px rgba(34, 211, 238, 0.56);
   animation: anime-hero-speed 5.8s linear infinite;
 }
 
-.anime-hero-speed-lines span:nth-child(1) { top: 15vh; animation-delay: -0.8s; }
-.anime-hero-speed-lines span:nth-child(2) { top: 32vh; width: 28vw; animation-delay: -3.4s; }
-.anime-hero-speed-lines span:nth-child(3) { top: 52vh; width: 46vw; animation-delay: -1.9s; }
-.anime-hero-speed-lines span:nth-child(4) { top: 68vh; height: 1px; animation-delay: -4.6s; }
-.anime-hero-speed-lines span:nth-child(5) { top: 82vh; width: 34vw; animation-delay: -2.7s; }
-.anime-hero-speed-lines span:nth-child(6) { top: 92vh; width: 22vw; animation-delay: -5.1s; }
+.anime-hero-speed-lines span:nth-child(1) {
+  top: 15vh;
+  animation-delay: -0.8s;
+}
+.anime-hero-speed-lines span:nth-child(2) {
+  top: 32vh;
+  width: 28vw;
+  animation-delay: -3.4s;
+}
+.anime-hero-speed-lines span:nth-child(3) {
+  top: 52vh;
+  width: 46vw;
+  animation-delay: -1.9s;
+}
+.anime-hero-speed-lines span:nth-child(4) {
+  top: 68vh;
+  height: 1px;
+  animation-delay: -4.6s;
+}
+.anime-hero-speed-lines span:nth-child(5) {
+  top: 82vh;
+  width: 34vw;
+  animation-delay: -2.7s;
+}
+.anime-hero-speed-lines span:nth-child(6) {
+  top: 92vh;
+  width: 22vw;
+  animation-delay: -5.1s;
+}
 
 /* Filmstrip Elements */
 .anime-hero-filmstrip {
@@ -247,7 +368,12 @@
   left: 0;
   right: 0;
   height: clamp(36px, 5vw, 58px);
-  background: linear-gradient(90deg, transparent, rgba(15, 23, 42, 0.24), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(15, 23, 42, 0.24),
+    transparent
+  );
   transform: skewY(-2deg);
   opacity: 0.42;
   animation: anime-film-drift-horizontal 20s ease-in-out infinite;
@@ -259,17 +385,42 @@
   width: clamp(42px, 7vw, 98px);
   height: 64%;
   border: 1px solid rgba(255, 255, 255, 0.34);
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.24), rgba(34, 211, 238, 0.16));
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.24),
+    rgba(34, 211, 238, 0.16)
+  );
   animation: anime-film-shimmer 7s ease-in-out infinite;
 }
 
-.anime-hero-filmstrip span:nth-child(1) { left: 10%; animation-delay: -0.4s; }
-.anime-hero-filmstrip span:nth-child(2) { left: 22%; animation-delay: -1.6s; }
-.anime-hero-filmstrip span:nth-child(3) { left: 36%; animation-delay: -2.8s; }
-.anime-hero-filmstrip span:nth-child(4) { left: 50%; animation-delay: -4s; }
-.anime-hero-filmstrip span:nth-child(5) { left: 64%; animation-delay: -5.2s; }
-.anime-hero-filmstrip span:nth-child(6) { left: 78%; animation-delay: -1.2s; }
-.anime-hero-filmstrip span:nth-child(7) { left: 90%; animation-delay: -3.6s; }
+.anime-hero-filmstrip span:nth-child(1) {
+  left: 10%;
+  animation-delay: -0.4s;
+}
+.anime-hero-filmstrip span:nth-child(2) {
+  left: 22%;
+  animation-delay: -1.6s;
+}
+.anime-hero-filmstrip span:nth-child(3) {
+  left: 36%;
+  animation-delay: -2.8s;
+}
+.anime-hero-filmstrip span:nth-child(4) {
+  left: 50%;
+  animation-delay: -4s;
+}
+.anime-hero-filmstrip span:nth-child(5) {
+  left: 64%;
+  animation-delay: -5.2s;
+}
+.anime-hero-filmstrip span:nth-child(6) {
+  left: 78%;
+  animation-delay: -1.2s;
+}
+.anime-hero-filmstrip span:nth-child(7) {
+  left: 90%;
+  animation-delay: -3.6s;
+}
 
 /* Sparkles & Embers */
 .anime-hero-sparkles span {
@@ -278,22 +429,86 @@
   height: 4px;
   border-radius: 999px;
   background: #ffffff;
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.85), 0 0 24px rgba(34, 211, 238, 0.5);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.85),
+    0 0 24px rgba(34, 211, 238, 0.5);
   animation: anime-sparkle-rise 6s ease-in-out infinite;
 }
 
-.anime-hero-sparkles span:nth-child(1) { left: 12%; top: 22%; animation-delay: -0.6s; }
-.anime-hero-sparkles span:nth-child(2) { left: 25%; top: 15%; animation-delay: -2.1s; }
-.anime-hero-sparkles span:nth-child(3) { left: 45%; top: 31%; animation-delay: -4.8s; }
-.anime-hero-sparkles span:nth-child(4) { left: 60%; top: 58%; animation-delay: -1.4s; }
-.anime-hero-sparkles span:nth-child(5) { left: 29%; top: 72%; animation-delay: -3.3s; }
-.anime-hero-sparkles span:nth-child(6) { left: 86%; top: 19%; animation-delay: -5.1s; }
-.anime-hero-sparkles span:nth-child(7) { left: 52%; top: 80%; width: 5px; height: 5px; box-shadow: 0 0 20px rgba(168, 85, 247, 0.8); animation-delay: -3.9s; }
-.anime-hero-sparkles span:nth-child(8) { left: 91%; top: 45%; width: 3px; height: 3px; animation-delay: -1.1s; }
-.anime-hero-sparkles span:nth-child(9) { left: 70%; top: 12%; width: 4px; height: 4px; box-shadow: 0 0 18px rgba(236, 72, 153, 0.9); animation-delay: -2.5s; }
-.anime-hero-sparkles span:nth-child(10) { left: 38%; top: 48%; width: 3px; height: 3px; animation-delay: -4.2s; }
-.anime-hero-sparkles span:nth-child(11) { left: 18%; top: 85%; width: 5px; height: 5px; box-shadow: 0 0 22px rgba(99, 102, 241, 0.85); animation-delay: -0.9s; }
-.anime-hero-sparkles span:nth-child(12) { left: 82%; top: 75%; width: 4px; height: 4px; animation-delay: -3.7s; }
+.anime-hero-sparkles span:nth-child(1) {
+  left: 12%;
+  top: 22%;
+  animation-delay: -0.6s;
+}
+.anime-hero-sparkles span:nth-child(2) {
+  left: 25%;
+  top: 15%;
+  animation-delay: -2.1s;
+}
+.anime-hero-sparkles span:nth-child(3) {
+  left: 45%;
+  top: 31%;
+  animation-delay: -4.8s;
+}
+.anime-hero-sparkles span:nth-child(4) {
+  left: 60%;
+  top: 58%;
+  animation-delay: -1.4s;
+}
+.anime-hero-sparkles span:nth-child(5) {
+  left: 29%;
+  top: 72%;
+  animation-delay: -3.3s;
+}
+.anime-hero-sparkles span:nth-child(6) {
+  left: 86%;
+  top: 19%;
+  animation-delay: -5.1s;
+}
+.anime-hero-sparkles span:nth-child(7) {
+  left: 52%;
+  top: 80%;
+  width: 5px;
+  height: 5px;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+  animation-delay: -3.9s;
+}
+.anime-hero-sparkles span:nth-child(8) {
+  left: 91%;
+  top: 45%;
+  width: 3px;
+  height: 3px;
+  animation-delay: -1.1s;
+}
+.anime-hero-sparkles span:nth-child(9) {
+  left: 70%;
+  top: 12%;
+  width: 4px;
+  height: 4px;
+  box-shadow: 0 0 18px rgba(236, 72, 153, 0.9);
+  animation-delay: -2.5s;
+}
+.anime-hero-sparkles span:nth-child(10) {
+  left: 38%;
+  top: 48%;
+  width: 3px;
+  height: 3px;
+  animation-delay: -4.2s;
+}
+.anime-hero-sparkles span:nth-child(11) {
+  left: 18%;
+  top: 85%;
+  width: 5px;
+  height: 5px;
+  box-shadow: 0 0 22px rgba(99, 102, 241, 0.85);
+  animation-delay: -0.9s;
+}
+.anime-hero-sparkles span:nth-child(12) {
+  left: 82%;
+  top: 75%;
+  width: 4px;
+  height: 4px;
+  animation-delay: -3.7s;
+}
 /* ==========================================================================
    PAGE-SPECIFIC VARIANT CONFIGURATIONS (DISTINCTIVE PER-PAGE ATMOSPHERES)
    ========================================================================== */
@@ -301,16 +516,24 @@
 /* Smooth page-to-page background transition */
 .anime-hero-scene {
   transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    background 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* 1. DASHBOARD VARIANT: Wide panoramic ambient purple aurora & floating embers */
 .anime-hero-scene-dashboard {
   opacity: 0.85;
-  background: radial-gradient(circle at 80% 25%, rgba(147, 51, 234, 0.22) 0%, transparent 60%),
-              radial-gradient(circle at 20% 75%, rgba(99, 102, 241, 0.18) 0%, transparent 55%),
-              linear-gradient(115deg, #07070c 0%, #111528 50%, #0a1728 100%);
+  background: radial-gradient(
+      circle at 80% 25%,
+      rgba(147, 51, 234, 0.22) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 20% 75%,
+      rgba(99, 102, 241, 0.18) 0%,
+      transparent 55%
+    ),
+    linear-gradient(115deg, #07070c 0%, #111528 50%, #0a1728 100%);
 }
 .anime-hero-scene-dashboard .anime-hero-art {
   animation: anime-art-drift 22s ease-in-out infinite;
@@ -324,9 +547,17 @@
 /* 2. PROJECTS & SERIES VARIANT: Deep cyber-amethyst with floating manga filmstrip cells */
 .anime-hero-scene-projects {
   opacity: 0.88;
-  background: radial-gradient(circle at 75% 35%, rgba(168, 85, 247, 0.28) 0%, transparent 55%),
-              radial-gradient(circle at 25% 65%, rgba(192, 132, 252, 0.16) 0%, transparent 60%),
-              linear-gradient(115deg, #090710 0%, #150f26 48%, #0d1226 100%);
+  background: radial-gradient(
+      circle at 75% 35%,
+      rgba(168, 85, 247, 0.28) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 25% 65%,
+      rgba(192, 132, 252, 0.16) 0%,
+      transparent 60%
+    ),
+    linear-gradient(115deg, #090710 0%, #150f26 48%, #0d1226 100%);
 }
 .anime-hero-scene-projects .anime-hero-art {
   animation: anime-art-drift-slow 20s ease-in-out infinite;
@@ -338,15 +569,27 @@
 }
 .anime-hero-scene-projects .anime-hero-filmstrip span {
   border-color: rgba(192, 132, 252, 0.5);
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(236, 72, 153, 0.22));
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.35),
+    rgba(236, 72, 153, 0.22)
+  );
 }
 
 /* 3. WORKSPACE / SCRAPER VARIANT: Electric cyan & action speed lines */
 .anime-hero-scene-workspace {
   opacity: 0.9;
-  background: radial-gradient(circle at 70% 20%, rgba(6, 182, 212, 0.26) 0%, transparent 55%),
-              radial-gradient(circle at 20% 80%, rgba(168, 85, 247, 0.2) 0%, transparent 50%),
-              linear-gradient(115deg, #050810 0%, #0b1a2e 50%, #0d2238 100%);
+  background: radial-gradient(
+      circle at 70% 20%,
+      rgba(6, 182, 212, 0.26) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(168, 85, 247, 0.2) 0%,
+      transparent 50%
+    ),
+    linear-gradient(115deg, #050810 0%, #0b1a2e 50%, #0d2238 100%);
 }
 .anime-hero-scene-workspace .anime-hero-art {
   animation: anime-art-drift-dynamic 16s ease-in-out infinite;
@@ -362,23 +605,36 @@
 /* 4. CREATIVE SUITE & AI TOOLS: Synthwave magenta & neon indigo vibes */
 .anime-hero-scene-creative {
   opacity: 0.88;
-  background: radial-gradient(circle at 60% 15%, rgba(236, 72, 153, 0.28) 0%, transparent 60%),
-              radial-gradient(circle at 30% 70%, rgba(147, 51, 234, 0.24) 0%, transparent 55%),
-              linear-gradient(115deg, #0d0614 0%, #200f2e 50%, #120e26 100%);
+  background: radial-gradient(
+      circle at 60% 15%,
+      rgba(236, 72, 153, 0.28) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 30% 70%,
+      rgba(147, 51, 234, 0.24) 0%,
+      transparent 55%
+    ),
+    linear-gradient(115deg, #0d0614 0%, #200f2e 50%, #120e26 100%);
 }
 .anime-hero-scene-creative .anime-hero-art {
   animation: anime-art-drift-dynamic 18s ease-in-out infinite;
   filter: saturate(1.28) contrast(1.12) hue-rotate(25deg) brightness(0.94);
 }
 .anime-hero-scene-creative .anime-hero-sparkles span {
-  box-shadow: 0 0 22px rgba(236, 72, 153, 0.95), 0 0 35px rgba(168, 85, 247, 0.7);
+  box-shadow: 0 0 22px rgba(236, 72, 153, 0.95),
+    0 0 35px rgba(168, 85, 247, 0.7);
 }
 
 /* 5. EDITOR STUDIO / CANVAS: Minimalist focused high-contrast background */
 .anime-hero-scene-editor {
   opacity: 0.65;
-  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.14) 0%, transparent 65%),
-              linear-gradient(180deg, #07070a 0%, #0a0b12 100%);
+  background: radial-gradient(
+      circle at 50% 50%,
+      rgba(99, 102, 241, 0.14) 0%,
+      transparent 65%
+    ),
+    linear-gradient(180deg, #07070a 0%, #0a0b12 100%);
 }
 .anime-hero-scene-editor .anime-hero-art {
   animation: anime-art-drift-slow 28s ease-in-out infinite;
@@ -394,9 +650,17 @@
 /* 6. PROFILE & SETTINGS: Soft celestial gold-purple stardust */
 .anime-hero-scene-profile {
   opacity: 0.82;
-  background: radial-gradient(circle at 75% 25%, rgba(245, 158, 11, 0.18) 0%, transparent 55%),
-              radial-gradient(circle at 25% 75%, rgba(168, 85, 247, 0.22) 0%, transparent 50%),
-              linear-gradient(115deg, #0c0812 0%, #181224 50%, #0d1222 100%);
+  background: radial-gradient(
+      circle at 75% 25%,
+      rgba(245, 158, 11, 0.18) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 25% 75%,
+      rgba(168, 85, 247, 0.22) 0%,
+      transparent 50%
+    ),
+    linear-gradient(115deg, #0c0812 0%, #181224 50%, #0d1222 100%);
 }
 .anime-hero-scene-profile .anime-hero-art {
   animation: anime-art-drift-slow 24s ease-in-out infinite;
@@ -409,8 +673,12 @@
 /* 7. SYSTEM ADMIN: Cyber-tech telemetry scan matrix */
 .anime-hero-scene-admin {
   opacity: 0.85;
-  background: radial-gradient(circle at 70% 30%, rgba(139, 92, 246, 0.28) 0%, transparent 60%),
-              linear-gradient(115deg, #070512 0%, #120e28 50%, #0a0818 100%);
+  background: radial-gradient(
+      circle at 70% 30%,
+      rgba(139, 92, 246, 0.28) 0%,
+      transparent 60%
+    ),
+    linear-gradient(115deg, #070512 0%, #120e28 50%, #0a0818 100%);
 }
 .anime-hero-scene-admin .anime-hero-art {
   animation: anime-art-drift 20s ease-in-out infinite;
@@ -431,8 +699,20 @@
 
 .anime-hero-scene-landing {
   opacity: 0.95;
-  mask-image: linear-gradient(to bottom, black 0%, black 500px, rgba(0, 0, 0, 0.35) 750px, transparent 950px);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 500px, rgba(0, 0, 0, 0.35) 750px, transparent 950px);
+  mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 500px,
+    rgba(0, 0, 0, 0.35) 750px,
+    transparent 950px
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 500px,
+    rgba(0, 0, 0, 0.35) 750px,
+    transparent 950px
+  );
 }
 .anime-hero-scene-landing .anime-hero-art {
   animation: anime-art-drift 16s ease-in-out infinite;

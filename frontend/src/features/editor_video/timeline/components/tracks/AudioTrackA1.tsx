@@ -20,15 +20,31 @@ interface AudioTrackA1Props {
 }
 
 const AudioTrackA1: React.FC<AudioTrackA1Props> = ({
-  musicTheme, totalDuration, selectedClip,
-  muted, locked, hidden,
-  onToggleMute, onToggleLock, onToggleHide,
-  onClipClick, onContextMenu,
+  musicTheme,
+  totalDuration,
+  selectedClip,
+  muted,
+  locked,
+  hidden,
+  onToggleMute,
+  onToggleLock,
+  onToggleHide,
+  onClipClick,
+  onContextMenu,
 }) => (
-  <div className={`h-10 border-b border-white/[0.04] flex items-center ${muted ? "opacity-40" : ""}`}>
+  <div
+    className={`h-10 border-b border-white/[0.04] flex items-center ${
+      muted ? "opacity-40" : ""
+    }`}
+  >
     <TrackLabel
-      id="A1" label="Music" color="text-emerald-400" type="audio"
-      locked={locked} hidden={hidden} muted={muted}
+      id="A1"
+      label="Music"
+      color="text-emerald-400"
+      type="audio"
+      locked={locked}
+      hidden={hidden}
+      muted={muted}
       onToggleMute={onToggleMute}
       onToggleLock={onToggleLock}
       onToggleHide={onToggleHide}
@@ -45,18 +61,25 @@ const AudioTrackA1: React.FC<AudioTrackA1Props> = ({
         style={{
           left: "0%",
           right: "2%",
-          background: "linear-gradient(90deg, #064e3b 0%, #065f46 50%, #047857 100%)",
+          background:
+            "linear-gradient(90deg, #064e3b 0%, #065f46 50%, #047857 100%)",
         }}
       >
         {/* Waveform bars */}
         <div className="absolute inset-0 flex items-center gap-[1.5px] px-2 opacity-60 pointer-events-none">
           {WAVEFORM.map((h, i) => (
-            <div key={i} className="flex-1 bg-emerald-400 rounded-full" style={{ height: `${h}%` }} />
+            <div
+              key={i}
+              className="flex-1 bg-emerald-400 rounded-full"
+              style={{ height: `${h}%` }}
+            />
           ))}
         </div>
         {/* Label + duration */}
         <div className="relative z-10 h-full flex items-center px-2 gap-2">
-          <span className="text-emerald-200 text-[10px] font-semibold truncate">{musicTheme}</span>
+          <span className="text-emerald-200 text-[10px] font-semibold truncate">
+            {musicTheme}
+          </span>
           <span className="ml-auto text-[8px] font-mono text-emerald-400/60 shrink-0">
             {totalDuration.toFixed(1)}s
           </span>

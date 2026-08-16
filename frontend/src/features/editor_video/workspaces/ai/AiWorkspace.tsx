@@ -8,7 +8,9 @@ interface AiWorkspaceProps {
   onTriggerFeedback: (msg: string) => void;
 }
 
-export const AiWorkspace: React.FC<AiWorkspaceProps> = ({ onTriggerFeedback }) => {
+export const AiWorkspace: React.FC<AiWorkspaceProps> = ({
+  onTriggerFeedback,
+}) => {
   const [activeTab, setActiveTab] = useState("Generate");
   const [prompt, setPrompt] = useState("");
 
@@ -34,7 +36,9 @@ export const AiWorkspace: React.FC<AiWorkspaceProps> = ({ onTriggerFeedback }) =
           value={prompt}
           onChange={setPrompt}
           onSubmit={() => {
-            onTriggerFeedback(`AI generating from: "${prompt.slice(0, 40)}..."`);
+            onTriggerFeedback(
+              `AI generating from: "${prompt.slice(0, 40)}..."`
+            );
             setPrompt("");
           }}
           placeholder='Describe your scene, e.g. "Shadow Monarch reveals his army to the shocked A-rank hunters..."'
@@ -45,7 +49,9 @@ export const AiWorkspace: React.FC<AiWorkspaceProps> = ({ onTriggerFeedback }) =
         {/* Tools Grid */}
         <div className="space-y-2">
           {activeTools.length === 0 && (
-            <div className="text-center py-8 text-neutral-500 text-xs">No tools for this engine yet.</div>
+            <div className="text-center py-8 text-neutral-500 text-xs">
+              No tools for this engine yet.
+            </div>
           )}
           {activeTools.map((tool) => (
             <AiToolCard

@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 import { WorkspaceId } from "../types/workspace.types";
-import { getGroupedWorkspaces, WorkspaceConfig } from "../registry/workspaceRegistry";
+import {
+  getGroupedWorkspaces,
+  WorkspaceConfig,
+} from "../registry/workspaceRegistry";
 
 const SidebarItem: React.FC<{
   item: WorkspaceConfig;
@@ -44,7 +47,9 @@ const SidebarItem: React.FC<{
         >
           <Icon
             className={`w-5 h-5 transition-all duration-300 ${
-              isActive ? "text-purple-300 drop-shadow-[0_0_6px_rgba(192,132,252,0.9)]" : "text-neutral-400 group-hover:text-purple-200"
+              isActive
+                ? "text-purple-300 drop-shadow-[0_0_6px_rgba(192,132,252,0.9)]"
+                : "text-neutral-400 group-hover:text-purple-200"
             }`}
           />
         </div>
@@ -75,10 +80,16 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
     <aside className="w-16 sm:w-20 shrink-0 bg-[#06060c]/80 border-r border-white/10 backdrop-blur-3xl shadow-[4px_0_34px_rgba(0,0,0,0.45)] flex flex-col items-center py-3.5 z-30 select-none h-full overflow-hidden">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center gap-1.5 mini-sidebar-scrollbar pt-3 px-0.5">
         {groupedWorkspaces.map((group, groupIdx) => (
-          <div key={group.name} className="w-full flex flex-col items-center pb-1.5">
+          <div
+            key={group.name}
+            className="w-full flex flex-col items-center pb-1.5"
+          >
             <div
               className="w-full flex flex-col items-center"
-              style={{ marginTop: groupIdx > 0 ? "0.375rem" : "0", marginBottom: "0.25rem" }}
+              style={{
+                marginTop: groupIdx > 0 ? "0.375rem" : "0",
+                marginBottom: "0.25rem",
+              }}
             >
               {groupIdx > 0 && (
                 <div className="w-6 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent rounded-full mb-1" />
@@ -114,7 +125,11 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
           >
             <ArrowLeft className="w-4 h-4 shrink-0" />
           </button>
-          <TooltipPortal text="Return to Storyboard" visible={returnHover} anchorRect={returnRect} />
+          <TooltipPortal
+            text="Return to Storyboard"
+            visible={returnHover}
+            anchorRect={returnRect}
+          />
         </div>
       </div>
     </aside>

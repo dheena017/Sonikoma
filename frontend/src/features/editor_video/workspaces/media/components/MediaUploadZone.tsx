@@ -5,7 +5,9 @@ interface MediaUploadZoneProps {
   onOpenBrowser: () => void;
 }
 
-export const MediaUploadZone: React.FC<MediaUploadZoneProps> = ({ onOpenBrowser }) => {
+export const MediaUploadZone: React.FC<MediaUploadZoneProps> = ({
+  onOpenBrowser,
+}) => {
   return (
     <div
       onClick={onOpenBrowser}
@@ -16,7 +18,9 @@ export const MediaUploadZone: React.FC<MediaUploadZoneProps> = ({ onOpenBrowser 
       </div>
       <div>
         <p className="text-xs font-bold text-white">Upload MP4 · PNG · MP3</p>
-        <span className="text-[9px] text-neutral-400 font-mono">Drag &amp; drop or click to browse</span>
+        <span className="text-[9px] text-neutral-400 font-mono">
+          Drag &amp; drop or click to browse
+        </span>
       </div>
     </div>
   );

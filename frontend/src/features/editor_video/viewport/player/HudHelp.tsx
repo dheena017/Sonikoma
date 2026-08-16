@@ -5,7 +5,9 @@ export interface VideoPreviewHudHelpProps {
   show: boolean;
 }
 
-export const VideoPreviewHudHelp: React.FC<VideoPreviewHudHelpProps> = ({ show }) => {
+export const VideoPreviewHudHelp: React.FC<VideoPreviewHudHelpProps> = ({
+  show,
+}) => {
   if (!show) return null;
 
   return (
@@ -18,35 +20,51 @@ export const VideoPreviewHudHelp: React.FC<VideoPreviewHudHelpProps> = ({ show }
       </h4>
       <div className="grid grid-cols-2 gap-4 max-w-2xl text-left text-[10px] font-mono text-neutral-400">
         <div className="flex items-center gap-2">
-          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">Space</span>
+          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">
+            Space
+          </span>
           <span>Play/Pause / Hold to 2x FF</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">L</span>
+          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">
+            L
+          </span>
           <span>Toggle Loop Playback</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">P</span>
+          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">
+            P
+          </span>
           <span>Toggle Picture-in-Picture</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">0-9</span>
+          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">
+            0-9
+          </span>
           <span>Jump to % of Duration (e.g. 5 is 50%)</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">,</span>
+          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">
+            ,
+          </span>
           <span>Step Frame Back</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">.</span>
+          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">
+            .
+          </span>
           <span>Step Frame Forward</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">Shift</span>
+          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">
+            Shift
+          </span>
           <span>Snap to Chapter Boundaries</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">? / /</span>
+          <span className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-white">
+            ? / /
+          </span>
           <span>Show This HUD Overlay</span>
         </div>
       </div>

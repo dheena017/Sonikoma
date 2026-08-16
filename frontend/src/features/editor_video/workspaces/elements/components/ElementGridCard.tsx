@@ -6,7 +6,10 @@ interface ElementGridCardProps {
   onAdd: () => void;
 }
 
-export const ElementGridCard: React.FC<ElementGridCardProps> = ({ element, onAdd }) => {
+export const ElementGridCard: React.FC<ElementGridCardProps> = ({
+  element,
+  onAdd,
+}) => {
   return (
     <div
       onClick={onAdd}
@@ -33,8 +36,12 @@ export const ElementGridCard: React.FC<ElementGridCardProps> = ({ element, onAdd
         )}
       </div>
       <div className="relative z-10">
-        <p className="text-[10px] font-bold text-white truncate drop-shadow">{element.title}</p>
-        {element.desc && <p className="text-[8px] text-neutral-300 truncate">{element.desc}</p>}
+        <p className="text-[10px] font-bold text-white truncate drop-shadow">
+          {element.title}
+        </p>
+        {element.desc && (
+          <p className="text-[8px] text-neutral-300 truncate">{element.desc}</p>
+        )}
       </div>
     </div>
   );

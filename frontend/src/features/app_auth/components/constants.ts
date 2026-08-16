@@ -32,7 +32,8 @@ export const THEMES: Record<
     accentText: "text-purple-400",
     accentBg: "bg-purple-500/10",
     accentBorder: "border-purple-500/20",
-    button: "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-lg shadow-purple-900/30",
+    button:
+      "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-lg shadow-purple-900/30",
     focus: "focus:border-purple-500/50 focus:ring-purple-600/20",
     dot: "bg-purple-500",
     cardBorder: "from-purple-500/30 via-indigo-500/20 to-transparent",
@@ -44,7 +45,8 @@ export const THEMES: Record<
     accentText: "text-blue-400",
     accentBg: "bg-blue-500/10",
     accentBorder: "border-blue-500/20",
-    button: "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-lg shadow-blue-900/30",
+    button:
+      "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-lg shadow-blue-900/30",
     focus: "focus:border-blue-500/50 focus:ring-blue-600/20",
     dot: "bg-blue-500",
     cardBorder: "from-blue-500/30 via-cyan-500/20 to-transparent",
@@ -56,7 +58,8 @@ export const THEMES: Record<
     accentText: "text-emerald-400",
     accentBg: "bg-emerald-500/10",
     accentBorder: "border-emerald-500/20",
-    button: "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-900/30",
+    button:
+      "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-900/30",
     focus: "focus:border-emerald-500/50 focus:ring-emerald-600/20",
     dot: "bg-emerald-500",
     cardBorder: "from-emerald-500/30 via-teal-500/20 to-transparent",
@@ -68,7 +71,8 @@ export const THEMES: Record<
     accentText: "text-amber-400",
     accentBg: "bg-amber-500/10",
     accentBorder: "border-amber-500/20",
-    button: "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-lg shadow-amber-900/30",
+    button:
+      "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-lg shadow-amber-900/30",
     focus: "focus:border-amber-500/50 focus:ring-amber-600/20",
     dot: "bg-amber-500",
     cardBorder: "from-amber-500/30 via-orange-500/20 to-transparent",

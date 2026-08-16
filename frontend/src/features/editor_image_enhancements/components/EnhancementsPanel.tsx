@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Sparkles, Wand2, Layers, ChevronUp, ChevronDown, Eye, EyeOff, RefreshCw } from "lucide-react";
+import {
+  Sparkles,
+  Wand2,
+  Layers,
+  ChevronUp,
+  ChevronDown,
+  Eye,
+  EyeOff,
+  RefreshCw,
+} from "lucide-react";
 import { EnhancementsPresets } from "@/features/editor_image_enhancements/components/EnhancementsPresets";
 import { EnhancementsColors } from "@/features/editor_image_enhancements/components/EnhancementsColors";
 import { EnhancementsCinematic } from "@/features/editor_image_enhancements/components/EnhancementsCinematic";
@@ -52,18 +61,24 @@ export default function EnhancementsPanel({
 
   const handleAnalyzeImage = async () => {
     if (!activeStoryboardPanel) {
-      addNotification?.("No active panel selected for image analysis.", "warning");
+      addNotification?.(
+        "No active panel selected for image analysis.",
+        "warning"
+      );
       return;
     }
     setIsAnalyzing(true);
     addNotification?.("Running AI analysis on image...", "info");
     try {
       if (fetchWithInterceptor) {
-        await fetchWithInterceptor(`/api/image/analyze-panel/${activeStoryboardPanel.id}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: activeStoryboardPanel.image_url }),
-        }).catch(() => {});
+        await fetchWithInterceptor(
+          `/api/image/analyze-panel/${activeStoryboardPanel.id}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: activeStoryboardPanel.image_url }),
+          }
+        ).catch(() => {});
       }
       addNotification?.("Image analysis completed!", "success");
     } catch (err: any) {
@@ -74,24 +89,34 @@ export default function EnhancementsPanel({
   };
 
   const handleOpenPanelAssistant = () => {
-    window.history.pushState({}, "", `/creative-suite/panel-assistant?idx=${editingImageIdx}`);
+    window.history.pushState(
+      {},
+      "",
+      `/creative-suite/panel-assistant?idx=${editingImageIdx}`
+    );
     window.dispatchEvent(new Event("popstate"));
   };
 
   const handleMagicMotion = async () => {
     if (!activeStoryboardPanel) {
-      addNotification?.("No active panel selected for Magic Motion.", "warning");
+      addNotification?.(
+        "No active panel selected for Magic Motion.",
+        "warning"
+      );
       return;
     }
     setIsMagicProcessing(true);
     addNotification?.("Starting Magic Motion Macro...", "info");
     try {
       if (fetchWithInterceptor && activeStoryboardPanel.id) {
-        await fetchWithInterceptor(`/api/image/process-layers/${activeStoryboardPanel.id}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: activeStoryboardPanel.image_url }),
-        }).catch(() => {});
+        await fetchWithInterceptor(
+          `/api/image/process-layers/${activeStoryboardPanel.id}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: activeStoryboardPanel.image_url }),
+          }
+        ).catch(() => {});
       }
       addNotification?.("Magic Motion processing complete!", "success");
     } catch (err: any) {
@@ -172,7 +197,9 @@ export default function EnhancementsPanel({
           ) : (
             <Wand2 className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
           )}
-          <span>{isMagicProcessing ? "Applying Magic..." : "Magic Motion"}</span>
+          <span>
+            {isMagicProcessing ? "Applying Magic..." : "Magic Motion"}
+          </span>
         </button>
       </div>
 
@@ -188,7 +215,11 @@ export default function EnhancementsPanel({
               <Layers className="h-3.5 w-3.5" />
               <span>Multi-Layer Tracks</span>
             </div>
-            {isTracksExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            {isTracksExpanded ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
           </button>
 
           {isTracksExpanded && (
@@ -203,7 +234,9 @@ export default function EnhancementsPanel({
                       className="h-8 w-8 object-contain rounded border border-white/10 bg-neutral-950 flex-shrink-0"
                     />
                   )}
-                  <span className="text-[10px] font-mono text-neutral-300">Background</span>
+                  <span className="text-[10px] font-mono text-neutral-300">
+                    Background
+                  </span>
                 </div>
                 <button
                   type="button"
@@ -216,7 +249,8 @@ export default function EnhancementsPanel({
                               ...p,
                               layers: {
                                 ...p.layers!,
-                                bg_visible: p.layers!.bg_visible !== false ? false : true,
+                                bg_visible:
+                                  p.layers!.bg_visible !== false ? false : true,
                               },
                             }
                           : p
@@ -224,10 +258,16 @@ export default function EnhancementsPanel({
                     );
                   }}
                   className={`p-1 rounded hover:bg-white/5 transition-colors cursor-pointer ${
-                    activeStoryboardPanel?.layers?.bg_visible !== false ? "text-purple-400" : "text-neutral-600"
+                    activeStoryboardPanel?.layers?.bg_visible !== false
+                      ? "text-purple-400"
+                      : "text-neutral-600"
                   }`}
                 >
-                  {activeStoryboardPanel?.layers?.bg_visible !== false ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  {activeStoryboardPanel?.layers?.bg_visible !== false ? (
+                    <Eye className="h-3.5 w-3.5" />
+                  ) : (
+                    <EyeOff className="h-3.5 w-3.5" />
+                  )}
                 </button>
               </div>
 
@@ -241,7 +281,9 @@ export default function EnhancementsPanel({
                       className="h-8 w-8 object-contain rounded border border-white/10 bg-neutral-950 flex-shrink-0"
                     />
                   )}
-                  <span className="text-[10px] font-mono text-neutral-300">Character</span>
+                  <span className="text-[10px] font-mono text-neutral-300">
+                    Character
+                  </span>
                 </div>
                 <button
                   type="button"
@@ -254,7 +296,10 @@ export default function EnhancementsPanel({
                               ...p,
                               layers: {
                                 ...p.layers!,
-                                char_visible: p.layers!.char_visible !== false ? false : true,
+                                char_visible:
+                                  p.layers!.char_visible !== false
+                                    ? false
+                                    : true,
                               },
                             }
                           : p
@@ -262,10 +307,16 @@ export default function EnhancementsPanel({
                     );
                   }}
                   className={`p-1 rounded hover:bg-white/5 transition-colors cursor-pointer ${
-                    activeStoryboardPanel?.layers?.char_visible !== false ? "text-purple-400" : "text-neutral-600"
+                    activeStoryboardPanel?.layers?.char_visible !== false
+                      ? "text-purple-400"
+                      : "text-neutral-600"
                   }`}
                 >
-                  {activeStoryboardPanel?.layers?.char_visible !== false ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  {activeStoryboardPanel?.layers?.char_visible !== false ? (
+                    <Eye className="h-3.5 w-3.5" />
+                  ) : (
+                    <EyeOff className="h-3.5 w-3.5" />
+                  )}
                 </button>
               </div>
 
@@ -279,7 +330,9 @@ export default function EnhancementsPanel({
                       className="h-8 w-8 object-contain rounded border border-white/10 bg-neutral-950 flex-shrink-0"
                     />
                   )}
-                  <span className="text-[10px] font-mono text-neutral-300">Text Bubbles</span>
+                  <span className="text-[10px] font-mono text-neutral-300">
+                    Text Bubbles
+                  </span>
                 </div>
                 <button
                   type="button"
@@ -292,7 +345,10 @@ export default function EnhancementsPanel({
                               ...p,
                               layers: {
                                 ...p.layers!,
-                                text_visible: p.layers!.text_visible !== false ? false : true,
+                                text_visible:
+                                  p.layers!.text_visible !== false
+                                    ? false
+                                    : true,
                               },
                             }
                           : p
@@ -300,10 +356,16 @@ export default function EnhancementsPanel({
                     );
                   }}
                   className={`p-1 rounded hover:bg-white/5 transition-colors cursor-pointer ${
-                    activeStoryboardPanel?.layers?.text_visible !== false ? "text-purple-400" : "text-neutral-600"
+                    activeStoryboardPanel?.layers?.text_visible !== false
+                      ? "text-purple-400"
+                      : "text-neutral-600"
                   }`}
                 >
-                  {activeStoryboardPanel?.layers?.text_visible !== false ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                  {activeStoryboardPanel?.layers?.text_visible !== false ? (
+                    <Eye className="h-3.5 w-3.5" />
+                  ) : (
+                    <EyeOff className="h-3.5 w-3.5" />
+                  )}
                 </button>
               </div>
             </div>

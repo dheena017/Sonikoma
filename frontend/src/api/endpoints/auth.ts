@@ -102,13 +102,9 @@ export const terminateSession = async (
   fetchWithInterceptor: FetchClient,
   sessionId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(
-    fetchWithInterceptor,
-    `/api/auth/sessions/${sessionId}`,
-    {
-      method: "DELETE",
-    }
-  );
+  return apiRequest(fetchWithInterceptor, `/api/auth/sessions/${sessionId}`, {
+    method: "DELETE",
+  });
 };
 
 export const claimCredits = async (
@@ -239,7 +235,10 @@ export const getUserCredits = async (
   fetchWithInterceptor: FetchClient
 ): Promise<number | null> => {
   try {
-    const data = await apiRequest<any>(fetchWithInterceptor, "/api/auth/credits");
+    const data = await apiRequest<any>(
+      fetchWithInterceptor,
+      "/api/auth/credits"
+    );
     if (data.success && typeof data.credits === "number") {
       return data.credits;
     }
@@ -254,7 +253,10 @@ export const getUserCreditsPayload = async (
   fetchWithInterceptor: FetchClient
 ): Promise<CreditsPayload | null> => {
   try {
-    const data = await apiRequest<any>(fetchWithInterceptor, "/api/auth/credits");
+    const data = await apiRequest<any>(
+      fetchWithInterceptor,
+      "/api/auth/credits"
+    );
     if (data.success && typeof data.credits === "number") {
       return {
         credits: data.credits,
@@ -293,4 +295,3 @@ export const claimDailyCredits = async (
     method: "POST",
   });
 };
-

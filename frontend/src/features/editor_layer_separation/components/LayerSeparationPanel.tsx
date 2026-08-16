@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Layers, Volume2, RefreshCw, CheckCircle2, AlertCircle, Eye, X } from "lucide-react";
+import {
+  Layers,
+  Volume2,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  X,
+} from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import * as api from "@/api";
 
@@ -30,12 +38,18 @@ export default function LayerSeparationPanel({
         URL.revokeObjectURL(debugImageUrl);
         setDebugImageUrl(null);
       }
-      const url = await api.debugYolo(fetchWithInterceptor, activeStoryboardPanel.image_url);
+      const url = await api.debugYolo(
+        fetchWithInterceptor,
+        activeStoryboardPanel.image_url
+      );
       setDebugImageUrl(url);
       addNotification("YOLO detections rendered successfully!", "success");
     } catch (err: any) {
       console.error("[Debug YOLO] Error:", err);
-      addNotification(`Failed to render YOLO detections: ${err.message}`, "error");
+      addNotification(
+        `Failed to render YOLO detections: ${err.message}`,
+        "error"
+      );
     } finally {
       setIsDebuggingYolo(false);
     }
@@ -50,7 +64,10 @@ export default function LayerSeparationPanel({
 
   const handleSeparateLayers = async () => {
     if (!activeStoryboardPanel?.id) {
-      addNotification("No active panel selected for layer separation.", "warning");
+      addNotification(
+        "No active panel selected for layer separation.",
+        "warning"
+      );
       return;
     }
     setIsProcessingLayers(true);
@@ -95,7 +112,10 @@ export default function LayerSeparationPanel({
 
   const handleAlignDialogue = async () => {
     if (!activeStoryboardPanel?.audio_url) {
-      addNotification("Generate or set an audio file for this panel first.", "warning");
+      addNotification(
+        "Generate or set an audio file for this panel first.",
+        "warning"
+      );
       return;
     }
 
@@ -103,18 +123,27 @@ export default function LayerSeparationPanel({
     addNotification("Aligning speech text with audio track...", "info");
 
     const ocr_texts = activeStoryboardPanel.speech_text
-      ? activeStoryboardPanel.speech_text.split("\n").map((s) => s.trim()).filter(Boolean)
+      ? activeStoryboardPanel.speech_text
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean)
       : [];
 
     try {
-      const res = await fetchWithInterceptor(`/api/audio/align-dialogue/${activeStoryboardPanel.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          audio_url: activeStoryboardPanel.audio_url,
-          ocr_texts: ocr_texts.length > 0 ? ocr_texts : [activeStoryboardPanel.speech_text],
-        }),
-      });
+      const res = await fetchWithInterceptor(
+        `/api/audio/align-dialogue/${activeStoryboardPanel.id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            audio_url: activeStoryboardPanel.audio_url,
+            ocr_texts:
+              ocr_texts.length > 0
+                ? ocr_texts
+                : [activeStoryboardPanel.speech_text],
+          }),
+        }
+      );
       const data = await res.json();
 
       if (data.success && data.dialogue_map) {
@@ -132,7 +161,10 @@ export default function LayerSeparationPanel({
               : p
           )
         );
-        addNotification("Dialogue alignment sync mapped successfully!", "success");
+        addNotification(
+          "Dialogue alignment sync mapped successfully!",
+          "success"
+        );
       } else {
         throw new Error(data.detail || "Dialogue alignment failed");
       }
@@ -155,7 +187,9 @@ export default function LayerSeparationPanel({
           AI Motion Prep Suite
         </h4>
         <p className="text-[10px] text-neutral-400 font-sans leading-relaxed">
-          Unlock 3D parallax effects and smart dialogue timing. Separation splits the panel into background, character, and text bubble transparent layers.
+          Unlock 3D parallax effects and smart dialogue timing. Separation
+          splits the panel into background, character, and text bubble
+          transparent layers.
         </p>
       </div>
 
@@ -178,7 +212,9 @@ export default function LayerSeparationPanel({
           ) : (
             <Layers className="h-3.5 w-3.5" />
           )}
-          <span>{hasLayers ? "Re-Run Layer Separation" : "Run AI Layer Separation"}</span>
+          <span>
+            {hasLayers ? "Re-Run Layer Separation" : "Run AI Layer Separation"}
+          </span>
         </button>
 
         {/* Dialogue Alignment Trigger */}
@@ -198,7 +234,9 @@ export default function LayerSeparationPanel({
           ) : (
             <Volume2 className="h-3.5 w-3.5" />
           )}
-          <span>{hasSyncMap ? "Re-Align Dialogue Sync" : "Align Dialogue Sync"}</span>
+          <span>
+            {hasSyncMap ? "Re-Align Dialogue Sync" : "Align Dialogue Sync"}
+          </span>
         </button>
         {/* Debug YOLO Trigger */}
         <button
@@ -236,20 +274,40 @@ export default function LayerSeparationPanel({
               <div className="text-[9px] font-mono text-neutral-500 space-y-1 pl-5">
                 <div className="truncate">
                   <span className="text-neutral-450">BG: </span>
-                  <a href={activeStoryboardPanel.layers?.background_url} target="_blank" rel="noreferrer" className="text-purple-400 underline hover:text-purple-300">
-                    {activeStoryboardPanel.layers?.background_url?.split('/').pop() || 'bg.png'}
+                  <a
+                    href={activeStoryboardPanel.layers?.background_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-purple-400 underline hover:text-purple-300"
+                  >
+                    {activeStoryboardPanel.layers?.background_url
+                      ?.split("/")
+                      .pop() || "bg.png"}
                   </a>
                 </div>
                 <div className="truncate">
                   <span className="text-neutral-450">Char: </span>
-                  <a href={activeStoryboardPanel.layers?.character_url} target="_blank" rel="noreferrer" className="text-purple-400 underline hover:text-purple-300">
-                    {activeStoryboardPanel.layers?.character_url?.split('/').pop() || 'char.png'}
+                  <a
+                    href={activeStoryboardPanel.layers?.character_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-purple-400 underline hover:text-purple-300"
+                  >
+                    {activeStoryboardPanel.layers?.character_url
+                      ?.split("/")
+                      .pop() || "char.png"}
                   </a>
                 </div>
                 <div className="truncate">
                   <span className="text-neutral-450">Text: </span>
-                  <a href={activeStoryboardPanel.layers?.text_url} target="_blank" rel="noreferrer" className="text-purple-400 underline hover:text-purple-300">
-                    {activeStoryboardPanel.layers?.text_url?.split('/').pop() || 'text.png'}
+                  <a
+                    href={activeStoryboardPanel.layers?.text_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-purple-400 underline hover:text-purple-300"
+                  >
+                    {activeStoryboardPanel.layers?.text_url?.split("/").pop() ||
+                      "text.png"}
                   </a>
                 </div>
               </div>
@@ -266,11 +324,16 @@ export default function LayerSeparationPanel({
               <div className="text-[9px] font-mono text-neutral-500 space-y-1 pl-5">
                 <div>
                   <span className="text-neutral-450">Synced Bubbles: </span>
-                  <span className="text-emerald-400">{activeStoryboardPanel.syncMap?.dialogue_map.length} detected</span>
+                  <span className="text-emerald-400">
+                    {activeStoryboardPanel.syncMap?.dialogue_map.length}{" "}
+                    detected
+                  </span>
                 </div>
                 <div>
                   <span className="text-neutral-450">RMS Peaks: </span>
-                  <span className="text-emerald-400">{activeStoryboardPanel.syncMap?.audio_peaks.length} frames</span>
+                  <span className="text-emerald-400">
+                    {activeStoryboardPanel.syncMap?.audio_peaks.length} frames
+                  </span>
                 </div>
               </div>
             </div>
@@ -283,7 +346,9 @@ export default function LayerSeparationPanel({
         <div className="bg-amber-950/20 border border-amber-850/40 rounded-xl p-3 flex items-start gap-2 text-amber-400 text-[9px] font-sans">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <p className="leading-relaxed">
-            Generate panel speech audio in the <strong>Timeline</strong> or <strong>Adjust</strong> tabs to enable full word-level dialogue sync alignment.
+            Generate panel speech audio in the <strong>Timeline</strong> or{" "}
+            <strong>Adjust</strong> tabs to enable full word-level dialogue sync
+            alignment.
           </p>
         </div>
       )}
@@ -302,7 +367,7 @@ export default function LayerSeparationPanel({
                 <X className="h-4 w-4" />
               </button>
             </div>
-            
+
             <div className="flex-1 overflow-auto flex items-center justify-center bg-neutral-900 rounded-2xl p-2 border border-white/5 min-h-[300px]">
               <img
                 src={debugImageUrl}
@@ -310,10 +375,12 @@ export default function LayerSeparationPanel({
                 className="max-h-[60vh] object-contain rounded-lg"
               />
             </div>
-            
+
             <div className="text-[10px] text-neutral-400 font-sans leading-relaxed bg-[#111115] border border-white/5 rounded-xl p-3">
-              💡 <strong>Overlay Legend:</strong> Green filled areas represent YOLO segmented speech bubbles. 
-              If the detection is incorrect, you can manually override it using the <strong>Eraser</strong> tool or add corrections.
+              💡 <strong>Overlay Legend:</strong> Green filled areas represent
+              YOLO segmented speech bubbles. If the detection is incorrect, you
+              can manually override it using the <strong>Eraser</strong> tool or
+              add corrections.
             </div>
           </div>
         </div>

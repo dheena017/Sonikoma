@@ -79,7 +79,10 @@ export default function PanelTranslationTool({
         setPanels(translatedPanels);
       }
       if (addNotification) {
-        addNotification(`Translated ${translatedPanels.length} panels`, "success");
+        addNotification(
+          `Translated ${translatedPanels.length} panels`,
+          "success"
+        );
       }
     } catch (error) {
       console.error(error);
@@ -154,7 +157,11 @@ export default function PanelTranslationTool({
                 title="Translate this panel"
                 className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 disabled:opacity-40 text-white transition-all cursor-pointer"
               >
-                {translating ? <Sparkles className="h-4 w-4 animate-pulse" /> : <Sparkles className="h-4 w-4" />}
+                {translating ? (
+                  <Sparkles className="h-4 w-4 animate-pulse" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
               </button>
               <button
                 onClick={handleBatchTranslate}
@@ -162,7 +169,11 @@ export default function PanelTranslationTool({
                 title="Translate all panels"
                 className="flex h-9 w-9 items-center justify-center rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 disabled:opacity-40 transition-all cursor-pointer"
               >
-                {batchTranslating ? <Layers3 className="h-4 w-4 animate-pulse" /> : <Layers3 className="h-4 w-4" />}
+                {batchTranslating ? (
+                  <Layers3 className="h-4 w-4 animate-pulse" />
+                ) : (
+                  <Layers3 className="h-4 w-4" />
+                )}
               </button>
             </div>
           </div>
@@ -212,7 +223,8 @@ export default function PanelTranslationTool({
               <div className="flex items-center gap-1.5">
                 {scrubResult.contains_violation ? (
                   <span className="text-[10px] font-mono font-bold text-rose-400 flex items-center gap-1">
-                    <AlertTriangle className="h-3.5 w-3.5" /> Flagged: {scrubResult.violation_type}
+                    <AlertTriangle className="h-3.5 w-3.5" /> Flagged:{" "}
+                    {scrubResult.violation_type}
                   </span>
                 ) : (
                   <span className="text-[10px] font-mono font-bold text-emerald-400">

@@ -4,7 +4,8 @@
 
 /* Universal Breathing & Drifting */
 @keyframes anime-art-drift {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1.05) translate3d(0, 0, 0);
   }
   50% {
@@ -13,7 +14,8 @@
 }
 
 @keyframes anime-art-drift-slow {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1.04) translate3d(0, 0, 0);
   }
   50% {
@@ -38,7 +40,8 @@
 
 /* Floating & Floating with Rotation */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
@@ -47,7 +50,8 @@
 }
 
 @keyframes float-subtle {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -86,7 +90,8 @@
 
 /* Filmstrip & Comic Cell Shimmer */
 @keyframes anime-film-shimmer {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.35;
     transform: translateY(0) rotate(0deg);
   }
@@ -110,7 +115,8 @@
 
 /* Sparkles, Embers & Constellations */
 @keyframes anime-sparkle-rise {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
     transform: translateY(16px) scale(0.6);
   }
@@ -160,7 +166,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
   }
   50% {
@@ -170,7 +177,8 @@
 
 /* Audio & Creative Waves */
 @keyframes wave-bar-dance {
-  0%, 100% {
+  0%,
+  100% {
     transform: scaleY(0.3);
   }
   50% {
@@ -281,7 +289,8 @@
 }
 
 @keyframes anime-aura-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
     opacity: 0.45;
     filter: blur(80px);
@@ -316,7 +325,8 @@
 
 /* Loading Stages */
 @keyframes loading-background-breathe {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.68;
     transform: scale(0.96);
   }
@@ -327,7 +337,8 @@
 }
 
 @keyframes loading-light-sweep {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate3d(-18%, 0, 0);
   }
   50% {
@@ -345,7 +356,8 @@
 }
 
 @keyframes loading-stage-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.46;
     transform: scale(0.96);
   }
@@ -356,7 +368,8 @@
 }
 
 @keyframes loading-panel-orbit {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate3d(0, 0, 0) rotate(-4deg) scale(0.96);
   }
   50% {
@@ -365,11 +378,13 @@
 }
 
 @keyframes loading-panel-scan {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
     transform: translateY(0);
   }
-  18%, 74% {
+  18%,
+  74% {
     opacity: 1;
   }
   82% {
@@ -379,7 +394,8 @@
 }
 
 @keyframes loading-logo-breathe {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) scale(1);
   }
   50% {
@@ -464,4 +480,3 @@
     opacity: 0.6;
   }
 }
-

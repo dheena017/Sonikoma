@@ -143,8 +143,7 @@ export function useAppRouter({
       setCurrentPath(path);
 
       const isLegacyChapterDetailsPath =
-        path.startsWith("/scraper/editor/series/") &&
-        path.endsWith("/details");
+        path.startsWith("/scraper/editor/series/") && path.endsWith("/details");
 
       if (isLegacyChapterDetailsPath) {
         const normalizedPath = path.replace(/\/details$/, "");
@@ -208,11 +207,14 @@ export function useAppRouter({
             path === "/creative-suite/" ||
             path === "/creative-suite-dashboard" ||
             path.startsWith("/creative-suite/") ||
-            path === "/scraper" ||            path === "/settings/account" ||
-            path === "/settings/account/" ||            path === "/shortcuts" ||
+            path === "/scraper" ||
+            path === "/settings/account" ||
+            path === "/settings/account/" ||
+            path === "/shortcuts" ||
             path === "/ai-optimizer" ||
             path === "/panel-assistant" ||
-            path === "/ai-characters" ||            path === "/ai-voice" ||
+            path === "/ai-characters" ||
+            path === "/ai-voice" ||
             path === "/youtube" ||
             path === "/profile" ||
             path === "/notifications" ||
@@ -245,8 +247,6 @@ export function useAppRouter({
             return;
           }
         } else {
-
-
           if (
             path === "/" ||
             path === "" ||
@@ -307,12 +307,14 @@ export function useAppRouter({
       const isWorkspacePath =
         path === "/scraper" || (isSeriesPath && !isChapterDetails);
 
-      if (        path === "/settings/account" ||
+      if (
+        path === "/settings/account" ||
         path === "/settings/account/" ||
         path === "/creative-suite" ||
         path === "/creative-suite/" ||
         path === "/creative-suite-dashboard" ||
-        path.startsWith("/creative-suite/") ||        path === "/shortcuts" ||
+        path.startsWith("/creative-suite/") ||
+        path === "/shortcuts" ||
         path === "/profile" ||
         path === "/notifications" ||
         path === "/projects" ||
@@ -356,7 +358,8 @@ export function useAppRouter({
         const params = new URLSearchParams(window.location.search);
 
         // Skip editor redirects or checks if this is the theater player mode
-        const isTheaterRoute = /^\/scraper\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
+        const isTheaterRoute =
+          /^\/scraper\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
         if (isTheaterRoute) {
           setIsPipMode(false);
           setShowAutoCropModal(false);
@@ -364,7 +367,7 @@ export function useAppRouter({
           setEditingImageIdx(null);
           return;
         }
-// Redirect /editor?importUrl=... to /scraper/editor?id=temp_...
+        // Redirect /editor?importUrl=... to /scraper/editor?id=temp_...
         if (params.has("importUrl") && !params.has("id")) {
           const importUrl = params.get("importUrl");
           if (importUrl) {
@@ -380,7 +383,8 @@ export function useAppRouter({
         // Upgrade temp_ URLs to clean series/chapter routes if slugs exist in storage
         const activeSeriesSlug = localStorage.getItem("active_series_slug");
         const activeChapterSlug = localStorage.getItem("active_chapter_slug");
-        const activeProjId = localStorage.getItem("active_project_id") || projectId;
+        const activeProjId =
+          localStorage.getItem("active_project_id") || projectId;
 
         if (
           params.get("id")?.startsWith("temp_") &&
@@ -395,7 +399,12 @@ export function useAppRouter({
 
         // Auto-upgrade plain routes (/editor, /image-editor, /video-editor) if active series/chapter or project exists in storage
         if ((path === "/editor" || path === "/editor/") && !params.has("id")) {
-          if (activeSeriesSlug && activeChapterSlug && activeSeriesSlug !== "null" && activeChapterSlug !== "null") {
+          if (
+            activeSeriesSlug &&
+            activeChapterSlug &&
+            activeSeriesSlug !== "null" &&
+            activeChapterSlug !== "null"
+          ) {
             const target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
             window.history.replaceState({}, "", target);
             setCurrentPath(target);
@@ -406,8 +415,16 @@ export function useAppRouter({
             setCurrentPath(target);
             return;
           }
-        } else if ((path === "/image-editor" || path === "/image-editor/") && !params.has("id")) {
-          if (activeSeriesSlug && activeChapterSlug && activeSeriesSlug !== "null" && activeChapterSlug !== "null") {
+        } else if (
+          (path === "/image-editor" || path === "/image-editor/") &&
+          !params.has("id")
+        ) {
+          if (
+            activeSeriesSlug &&
+            activeChapterSlug &&
+            activeSeriesSlug !== "null" &&
+            activeChapterSlug !== "null"
+          ) {
             const target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}/image-editor`;
             window.history.replaceState({}, "", target);
             setCurrentPath(target);
@@ -418,7 +435,10 @@ export function useAppRouter({
             setCurrentPath(target);
             return;
           }
-        } else if ((path === "/video-editor" || path === "/video-editor/") && !params.has("id")) {
+        } else if (
+          (path === "/video-editor" || path === "/video-editor/") &&
+          !params.has("id")
+        ) {
           if (activeProjId && activeProjId !== "null") {
             const target = `/video-editor?id=${activeProjId}`;
             window.history.replaceState({}, "", target);

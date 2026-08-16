@@ -1,5 +1,14 @@
 import React from "react";
-import { X, Film, Sparkles, Loader2, PanelLeftClose, PanelLeftOpen, Layout, Video } from "lucide-react";
+import {
+  X,
+  Film,
+  Sparkles,
+  Loader2,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Layout,
+  Video,
+} from "lucide-react";
 import VideoPreviewMetadataPanel from "./MetadataPanel";
 import ProcessBar from "@/shared/ui/loading/ProcessBar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
@@ -60,7 +69,9 @@ const getPreviewDisplayLabel = (
   const sanitizedUrl = videoUrl.split("?")[0];
   const fileName = sanitizedUrl.split("/").filter(Boolean).pop() ?? "";
   const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
-  return (nameWithoutExt.replace(/[_-]+/g, " ").trim() || "VIDEO PREVIEW PLAYER").toUpperCase();
+  return (
+    nameWithoutExt.replace(/[_-]+/g, " ").trim() || "VIDEO PREVIEW PLAYER"
+  ).toUpperCase();
 };
 
 const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
@@ -90,7 +101,12 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   onZoomOut,
   onZoomReset,
 }) => {
-  const previewLabel = getPreviewDisplayLabel(videoUrl, seriesTitle, chapterTitle, chapterNumber);
+  const previewLabel = getPreviewDisplayLabel(
+    videoUrl,
+    seriesTitle,
+    chapterTitle,
+    chapterNumber
+  );
   const isFloating = variant !== "embedded";
 
   const leftBlock = (
@@ -98,16 +114,20 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
       <button
         type="button"
         onClick={onToggleSidebar}
-        title={isSidebarOpen ? "Hide Playback Monitor" : "Show Playback Monitor"}
+        title={
+          isSidebarOpen ? "Hide Playback Monitor" : "Show Playback Monitor"
+        }
         className={`h-7 w-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
           isSidebarOpen
             ? "bg-purple-500/15 border-purple-500/40 text-purple-300 hover:bg-purple-500/25"
             : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-white hover:border-neutral-700"
         }`}
       >
-        {isSidebarOpen
-          ? <PanelLeftClose className="h-3.5 w-3.5" />
-          : <PanelLeftOpen className="h-3.5 w-3.5" />}
+        {isSidebarOpen ? (
+          <PanelLeftClose className="h-3.5 w-3.5" />
+        ) : (
+          <PanelLeftOpen className="h-3.5 w-3.5" />
+        )}
       </button>
 
       <div className="w-px h-4 bg-neutral-800" />
@@ -148,14 +168,22 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
               : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
           }`}
         >
-          <Layout className={`h-3 w-3 ${activePreviewTab === "timeline" ? "text-purple-400" : "text-neutral-500"}`} />
+          <Layout
+            className={`h-3 w-3 ${
+              activePreviewTab === "timeline"
+                ? "text-purple-400"
+                : "text-neutral-500"
+            }`}
+          />
           <span>Storyboard Live</span>
           {panelsCount > 0 && (
-            <span className={`text-[8px] px-1 py-0.2 rounded font-black border ${
-              activePreviewTab === "timeline"
-                ? "bg-purple-500/30 text-purple-200 border-purple-500/40"
-                : "bg-neutral-900 text-neutral-500 border-neutral-800"
-            }`}>
+            <span
+              className={`text-[8px] px-1 py-0.2 rounded font-black border ${
+                activePreviewTab === "timeline"
+                  ? "bg-purple-500/30 text-purple-200 border-purple-500/40"
+                  : "bg-neutral-900 text-neutral-500 border-neutral-800"
+              }`}
+            >
               {panelsCount}p
             </span>
           )}
@@ -172,13 +200,21 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
               : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
           }`}
         >
-          <Sparkles className={`h-3 w-3 ${activePreviewTab === "editor" ? "text-indigo-400" : "text-neutral-500"}`} />
+          <Sparkles
+            className={`h-3 w-3 ${
+              activePreviewTab === "editor"
+                ? "text-indigo-400"
+                : "text-neutral-500"
+            }`}
+          />
           <span>Video Editor Live</span>
-          <span className={`text-[8px] px-1 py-0.2 rounded font-black border ${
-            activePreviewTab === "editor"
-              ? "bg-indigo-500/25 text-indigo-200 border-indigo-500/40"
-              : "bg-neutral-900 text-neutral-500 border-neutral-800"
-          }`}>
+          <span
+            className={`text-[8px] px-1 py-0.2 rounded font-black border ${
+              activePreviewTab === "editor"
+                ? "bg-indigo-500/25 text-indigo-200 border-indigo-500/40"
+                : "bg-neutral-900 text-neutral-500 border-neutral-800"
+            }`}
+          >
             CANVAS
           </span>
         </button>
@@ -193,13 +229,21 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
             : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
         }`}
       >
-        <Video className={`h-3 w-3 ${activePreviewTab === "video" ? "text-emerald-400" : "text-neutral-500"}`} />
+        <Video
+          className={`h-3 w-3 ${
+            activePreviewTab === "video"
+              ? "text-emerald-400"
+              : "text-neutral-500"
+          }`}
+        />
         <span>Final Video</span>
-        <span className={`text-[8px] px-1 py-0.2 rounded font-black border ${
-          activePreviewTab === "video"
-            ? "bg-emerald-500/25 text-emerald-200 border-emerald-500/40"
-            : "bg-neutral-900 text-neutral-500 border-neutral-800"
-        }`}>
+        <span
+          className={`text-[8px] px-1 py-0.2 rounded font-black border ${
+            activePreviewTab === "video"
+              ? "bg-emerald-500/25 text-emerald-200 border-emerald-500/40"
+              : "bg-neutral-900 text-neutral-500 border-neutral-800"
+          }`}
+        >
           MP4
         </span>
       </button>
@@ -214,7 +258,11 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         videoUrl={videoUrl}
         navigateTo={navigateTo}
         seriesTitle={seriesTitle}
-        chapterNumber={chapterNumber !== undefined && chapterNumber !== null ? String(chapterNumber) : undefined}
+        chapterNumber={
+          chapterNumber !== undefined && chapterNumber !== null
+            ? String(chapterNumber)
+            : undefined
+        }
         chapterTitle={chapterTitle}
         targetUrl={targetUrl}
       />
@@ -237,7 +285,11 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
               type="button"
               onClick={handleRenderFinalVideo}
               disabled={!hasEnoughCredits}
-              title={!hasEnoughCredits ? "Not enough credits to export" : "Export final video"}
+              title={
+                !hasEnoughCredits
+                  ? "Not enough credits to export"
+                  : "Export final video"
+              }
               className={`relative overflow-hidden h-7 px-3.5 rounded-lg font-black text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border shrink-0 ${
                 !hasEnoughCredits
                   ? "bg-neutral-900/50 text-neutral-600 cursor-not-allowed border-neutral-800"
@@ -255,7 +307,9 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         <button
           type="button"
           onClick={() => {
-            useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: false });
+            useImageEditorStore
+              .getState()
+              .setPlayerSettings({ isPlayerOpen: false });
           }}
           className="h-7 w-7 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
           title="Hide Preview Player"
@@ -267,7 +321,11 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   );
 
   return (
-    <EditorHeaderFrame left={leftBlock} center={centerBlock} right={rightBlock} />
+    <EditorHeaderFrame
+      left={leftBlock}
+      center={centerBlock}
+      right={rightBlock}
+    />
   );
 };
 export default React.memo(VideoPreviewHeader);

@@ -12,15 +12,22 @@ interface AudioWorkspaceProps {
   onTriggerFeedback: (msg: string) => void;
 }
 
-export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({ onTriggerFeedback }) => {
+export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
+  onTriggerFeedback,
+}) => {
   const [activeTab, setActiveTab] = useState("Music");
   const [searchQuery, setSearchQuery] = useState("");
   const { playingTrackId, togglePlayTrack } = useAudioPreview();
-  const { isRecording, recordTime, startRecording, stopRecording } = useVoiceRecorder();
+  const { isRecording, recordTime, startRecording, stopRecording } =
+    useVoiceRecorder();
 
   const filteredTracks = MOCK_AUDIO_TRACKS.filter((t) => {
-    const tabMatch = activeTab === "All" || t.category.replace("-", " ") === activeTab.toLowerCase();
-    const searchMatch = !searchQuery.trim() || t.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const tabMatch =
+      activeTab === "All" ||
+      t.category.replace("-", " ") === activeTab.toLowerCase();
+    const searchMatch =
+      !searchQuery.trim() ||
+      t.title.toLowerCase().includes(searchQuery.toLowerCase());
     return tabMatch && searchMatch;
   });
 
@@ -41,31 +48,45 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({ onTriggerFeedbac
         {/* Recorder Panel */}
         {activeTab === "Recorder" && (
           <div className="rounded-2xl bg-neutral-900/60 border border-purple-900/30 p-4 space-y-4 shadow-sm">
-            <h4 className="text-xs font-bold text-white font-mono uppercase">Voiceover Recorder</h4>
+            <h4 className="text-xs font-bold text-white font-mono uppercase">
+              Voiceover Recorder
+            </h4>
             {/* Waveform visualizer */}
             <div className="h-14 rounded-xl bg-black/60 border border-neutral-800 flex items-center justify-center gap-0.5 overflow-hidden px-3">
               {Array.from({ length: 32 }).map((_, i) => (
                 <div
                   key={i}
-                  className={`w-1 rounded-full transition-all duration-75 ${isRecording ? "bg-purple-500" : "bg-neutral-700"}`}
-                  style={{ height: isRecording ? `${20 + Math.random() * 80}%` : "20%" }}
+                  className={`w-1 rounded-full transition-all duration-75 ${
+                    isRecording ? "bg-purple-500" : "bg-neutral-700"
+                  }`}
+                  style={{
+                    height: isRecording ? `${20 + Math.random() * 80}%` : "20%",
+                  }}
                 />
               ))}
             </div>
             <div className="flex items-center justify-between text-xs font-mono text-neutral-400">
-              <span>{isRecording ? `🔴 Recording ${recordTime}` : "Ready to Record"}</span>
+              <span>
+                {isRecording ? `🔴 Recording ${recordTime}` : "Ready to Record"}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               {!isRecording ? (
                 <button
-                  onClick={() => { startRecording(); onTriggerFeedback("Recording started!"); }}
+                  onClick={() => {
+                    startRecording();
+                    onTriggerFeedback("Recording started!");
+                  }}
                   className="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
                 >
                   <Mic className="h-3.5 w-3.5" /> Start Recording
                 </button>
               ) : (
                 <button
-                  onClick={() => { stopRecording(); onTriggerFeedback("Recording saved to timeline!"); }}
+                  onClick={() => {
+                    stopRecording();
+                    onTriggerFeedback("Recording saved to timeline!");
+                  }}
                   className="flex-1 py-2 rounded-xl bg-neutral-700 hover:bg-neutral-600 text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
                 >
                   <Square className="h-3.5 w-3.5" /> Stop & Save
@@ -78,27 +99,37 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({ onTriggerFeedbac
         {/* AI Voice */}
         {activeTab === "AI Voice" && (
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-white font-mono uppercase">Neural Voice Actors</h4>
-            {MOCK_AUDIO_TRACKS.filter((t) => t.category === "ai-voice").map((voice) => (
-              <div
-                key={voice.id}
-                className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/60 flex items-center justify-between cursor-pointer shadow-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <Wand2 className="h-4 w-4 text-purple-400 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-white">{voice.title}</p>
-                    <p className="text-[9px] text-neutral-400 font-mono">{voice.badge} · {voice.duration}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => onTriggerFeedback(`Applied ${voice.title} to narration`)}
-                  className="px-2 py-1 rounded-lg bg-purple-600 text-white text-[9px] font-mono font-bold cursor-pointer"
+            <h4 className="text-xs font-bold text-white font-mono uppercase">
+              Neural Voice Actors
+            </h4>
+            {MOCK_AUDIO_TRACKS.filter((t) => t.category === "ai-voice").map(
+              (voice) => (
+                <div
+                  key={voice.id}
+                  className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/60 flex items-center justify-between cursor-pointer shadow-sm"
                 >
-                  Apply
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center gap-2">
+                    <Wand2 className="h-4 w-4 text-purple-400 shrink-0" />
+                    <div>
+                      <p className="text-xs font-bold text-white">
+                        {voice.title}
+                      </p>
+                      <p className="text-[9px] text-neutral-400 font-mono">
+                        {voice.badge} · {voice.duration}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() =>
+                      onTriggerFeedback(`Applied ${voice.title} to narration`)
+                    }
+                    className="px-2 py-1 rounded-lg bg-purple-600 text-white text-[9px] font-mono font-bold cursor-pointer"
+                  >
+                    Apply
+                  </button>
+                </div>
+              )
+            )}
           </div>
         )}
 
@@ -110,10 +141,15 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({ onTriggerFeedbac
               <div key={track} className="space-y-1">
                 <div className="flex justify-between text-neutral-400">
                   <span>{track}</span>
-                  <span className="text-white font-bold">{[80, 50, 70, 30][i]}%</span>
+                  <span className="text-white font-bold">
+                    {[80, 50, 70, 30][i]}%
+                  </span>
                 </div>
                 <input
-                  type="range" min={0} max={100} defaultValue={[80, 50, 70, 30][i]}
+                  type="range"
+                  min={0}
+                  max={100}
+                  defaultValue={[80, 50, 70, 30][i]}
                   onChange={() => onTriggerFeedback(`${track} volume updated`)}
                   className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
                 />
@@ -131,7 +167,9 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({ onTriggerFeedbac
                 track={track}
                 isPlaying={playingTrackId === track.id}
                 onTogglePlay={() => togglePlayTrack(track.id, undefined)}
-                onAddTrack={() => onTriggerFeedback(`Added "${track.title}" to audio track`)}
+                onAddTrack={() =>
+                  onTriggerFeedback(`Added "${track.title}" to audio track`)
+                }
               />
             ))}
           </div>

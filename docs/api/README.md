@@ -17,6 +17,7 @@ Authorization: Bearer <your_jwt_token>
 ## Error Handling
 
 The API uses standard HTTP status codes. Common codes include:
+
 - `200 OK`: Successful request.
 - `400 Bad Request`: Validation error in the request payload.
 - `401 Unauthorized`: Missing or invalid JWT token.
@@ -25,6 +26,7 @@ The API uses standard HTTP status codes. Common codes include:
 - `500 Internal Server Error`: An unexpected failure occurred on the server.
 
 Error responses typically follow this JSON structure:
+
 ```json
 {
   "detail": "Descriptive error message here."

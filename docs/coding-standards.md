@@ -18,12 +18,14 @@ This document establishes the repository-wide engineering standards and architec
 ## 🏗️ 2. Frontend Conventions (React & TypeScript)
 
 ### Naming Conventions
+
 - **Components:** PascalCase (e.g., `CinemaPlayer.tsx`, `TimelineCard.tsx`).
 - **Hooks:** camelCase prefixed with `use` (e.g., `usePlaybackEngine.ts`, `useImageEditor.ts`).
 - **Utilities & Services:** camelCase (e.g., `youtubePublisherService.ts`, `imageUtils.ts`).
 - **Constants:** UPPER_SNAKE_CASE (e.g., `DEFAULT_BUBBLE_DILATION = 5`).
 
 ### Directory & Import Conventions
+
 - **Feature-First Organization:** Components must be organized into features where appropriate. Global shared UI elements belong in `/components/`.
 - **Import Ordering:** Maintain consistent import blocks to improve readability:
   1. React core hooks and libraries.
@@ -42,11 +44,13 @@ This document establishes the repository-wide engineering standards and architec
 ## 🐍 3. Backend Conventions (Python & FastAPI)
 
 ### Coding & File Style
+
 - Follow PEP 8 guidelines.
 - Use explicit type hints for all function parameters and return values (e.g., `def run_inpainting(image_path: str, radius: int) -> str:`).
 - Always use platform-agnostic file path manipulation utilities (`os.path.join`, `Path` objects) instead of hardcoding slash dividers to guarantee cross-compatibility between Unix and Windows runtimes.
 
 ### Resource & Exception Safety
+
 - **Uploads and Temporary Files:** Routes handling file uploads or temporary operations must write files inside nested `try...finally` blocks. This ensures all temporary disk artifacts are deleted on successful resolution OR exceptions, completely preventing server storage leak accumulation.
 - **Concurrency & Resource Recovery:** For CPU/VRAM intensive tasks (such as batch YOLO detections, EasyOCR pipelines, or MoviePy composite compilation loops), explicitly trigger python garbage collection (`gc.collect()`) and release PyTorch CUDA caches (`torch.cuda.empty_cache()`) immediately upon task termination to protect system stability.
 - **SSE Connection Lifecycles:** Real-time log/event streaming endpoints must catch `asyncio.CancelledError` and `GeneratorExit` exceptions. This ensures that custom SSE log listeners and underlying network resources are cleanly disposed of and unregistered when a client disconnects.

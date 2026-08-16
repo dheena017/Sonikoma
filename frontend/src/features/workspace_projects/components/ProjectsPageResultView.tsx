@@ -125,12 +125,32 @@ export default function ProjectsPageResultView({
                 key={series.id}
                 series={series}
                 onOpenSeries={onOpenSeries}
-                onOpenCreativeSuite={(e, seriesItem) => seriesItem.latestChapter ? onOpenCreativeSuite(e, seriesItem.latestChapter) : null}
-                onRename={(e, seriesItem) => seriesItem.latestChapter ? onRename(e, seriesItem.latestChapter) : null}
-                onExport={(e, seriesItem) => seriesItem.latestChapter ? onExport(e, seriesItem.latestChapter) : null}
-                onOpenDetails={(e, seriesItem) => seriesItem.latestChapter ? onOpenDetails(e, seriesItem.latestChapter) : null}
+                onOpenCreativeSuite={(e, seriesItem) =>
+                  seriesItem.latestChapter
+                    ? onOpenCreativeSuite(e, seriesItem.latestChapter)
+                    : null
+                }
+                onRename={(e, seriesItem) =>
+                  seriesItem.latestChapter
+                    ? onRename(e, seriesItem.latestChapter)
+                    : null
+                }
+                onExport={(e, seriesItem) =>
+                  seriesItem.latestChapter
+                    ? onExport(e, seriesItem.latestChapter)
+                    : null
+                }
+                onOpenDetails={(e, seriesItem) =>
+                  seriesItem.latestChapter
+                    ? onOpenDetails(e, seriesItem.latestChapter)
+                    : null
+                }
                 onDelete={(e, seriesId) => onDelete(e, seriesId)}
-                onCopyLink={(e, seriesItem) => seriesItem.latestChapter ? onCopyLink(e, seriesItem.latestChapter) : null}
+                onCopyLink={(e, seriesItem) =>
+                  seriesItem.latestChapter
+                    ? onCopyLink(e, seriesItem.latestChapter)
+                    : null
+                }
                 isSelected={isSelected}
                 onToggleSelect={(e, seriesId) => toggleSelection(e, seriesId)}
                 showSelection
@@ -153,7 +173,9 @@ export default function ProjectsPageResultView({
           toggleSelectAll={toggleSelectAll}
           toggleSelection={toggleSelection}
           onOpenProject={(p) => {
-            const series = filteredSeries.find(s => s.chapters.some(c => c.project_id === p.project_id));
+            const series = filteredSeries.find((s) =>
+              s.chapters.some((c) => c.project_id === p.project_id)
+            );
             if (series) onOpenSeries(series);
           }}
           onOpenDetails={onOpenDetails}

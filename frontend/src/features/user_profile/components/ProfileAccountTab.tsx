@@ -157,8 +157,6 @@ export default function ProfileAccountTab({
     }
   };
 
-
-
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
       {/* Main Account details Form Card */}

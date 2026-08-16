@@ -98,11 +98,17 @@ export default function YouTubeTheaterPlayer({
               <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-neutral-400">
                 <span className="flex items-center gap-1.5">
                   <Eye className="w-3.5 h-3.5 text-sky-400" />
-                  <strong className="text-white">{video.view_count}</strong> views
+                  <strong className="text-white">
+                    {video.view_count}
+                  </strong>{" "}
+                  views
                 </span>
                 <span className="flex items-center gap-1.5">
                   <ThumbsUp className="w-3.5 h-3.5 text-emerald-400" />
-                  <strong className="text-white">{video.like_count}</strong> likes
+                  <strong className="text-white">
+                    {video.like_count}
+                  </strong>{" "}
+                  likes
                 </span>
                 {video.published_at && (
                   <span className="flex items-center gap-1.5">
@@ -130,7 +136,10 @@ export default function YouTubeTheaterPlayer({
                   Comments ({video.comment_count})
                 </button>
                 <a
-                  href={video.youtube_url || `https://youtube.com/watch?v=${video.id}`}
+                  href={
+                    video.youtube_url ||
+                    `https://youtube.com/watch?v=${video.id}`
+                  }
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-300 rounded-xl text-xs font-mono transition-colors"

@@ -49,6 +49,7 @@ The transformation of a static comic series into a high-fidelity widescreen cine
 ```
 
 ### Detailed Pipeline Stages:
+
 1. **Ingestion (Scraping):** The ingestion module crawls the webtoon chapter URL or extracts a local ZIP. Raw strip images are cached in the data repository, and metadata is populated.
 2. **Segmentation (Layout Extraction):** Large multi-panel vertical strip images are automatically sliced into distinct individual panel files using advanced horizontal/vertical splitters and OpenCV boundary scans.
 3. **Enrichment (AI Analysis):** Gemini 2.5 models execute a context-aware sequential analysis of all panels in a single pass to produce a unified Chapter Narrative. From this, speech texts, descriptions, and audio instructions are synchronized back to individual panels.
@@ -73,6 +74,7 @@ To facilitate zero-configuration local execution and robust state persistence, a
 ## 🚀 4. System Architectural Reference Maps
 
 For specific deeper layer mappings, refer to:
-* **[Frontend Architecture](./frontend-architecture.md):** Client-side Canvas rendering, timeline coordination, and responsive layouts.
-* **[Backend Architecture](./backend-architecture.md):** Relational schema structures, FastAPI router-service architectures, and compilation details.
-* **[AI Subsystem Architecture](./ai-architecture.md):** Multimodal prompt-engineering skills, TTS provider abstractions, and local computer vision pipelines.
+
+- **[Frontend Architecture](./frontend-architecture.md):** Client-side Canvas rendering, timeline coordination, and responsive layouts.
+- **[Backend Architecture](./backend-architecture.md):** Relational schema structures, FastAPI router-service architectures, and compilation details.
+- **[AI Subsystem Architecture](./ai-architecture.md):** Multimodal prompt-engineering skills, TTS provider abstractions, and local computer vision pipelines.

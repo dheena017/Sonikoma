@@ -1,5 +1,10 @@
 import React from "react";
-import { QuickStartGuide, EngineStatus, SystemResources, GuidesReference } from "@/features/app_dashboard/components/Sidebar/index";
+import {
+  QuickStartGuide,
+  EngineStatus,
+  SystemResources,
+  GuidesReference,
+} from "@/features/app_dashboard/components/Sidebar/index";
 import { OnboardingTask } from "@/features/app_dashboard/components/Sidebar/QuickStartGuide";
 
 interface DashboardSidebarProps {
@@ -19,7 +24,10 @@ export default function DashboardSidebar({
 }: DashboardSidebarProps) {
   return (
     <div className="space-y-6">
-      <QuickStartGuide onboardingTasks={onboardingTasks} onNavigate={onNavigate} />
+      <QuickStartGuide
+        onboardingTasks={onboardingTasks}
+        onNavigate={onNavigate}
+      />
       <EngineStatus latency={latency} />
       <SystemResources metrics={metrics} analytics={analytics} />
       <GuidesReference onNavigate={onNavigate} />

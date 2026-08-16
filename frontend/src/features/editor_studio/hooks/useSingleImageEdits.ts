@@ -74,7 +74,9 @@ export function useSingleImageEdits({
       const proxiedOriginalUrl = getProxiedImageUrl(originalUrl);
 
       // Replace original image with cropped image in asset list & update panel in Timeline in-place
-      setScrapedImages((prev) => prev.map((img) => (img === originalUrl ? croppedUrl : img)));
+      setScrapedImages((prev) =>
+        prev.map((img) => (img === originalUrl ? croppedUrl : img))
+      );
       if (setPanels) {
         setPanels((prevPanels) =>
           prevPanels.map((p) => {
@@ -102,16 +104,12 @@ export function useSingleImageEdits({
         )}...`,
         ...prev,
       ]);
-      console.log(
-        `[Image Editor] Cropped Frame #${
-          editingImageIdx + 1
-        }:`,
-        { original: originalUrl, cropped: croppedUrl }
-      );
+      console.log(`[Image Editor] Cropped Frame #${editingImageIdx + 1}:`, {
+        original: originalUrl,
+        cropped: croppedUrl,
+      });
       addNotification(
-        `Frame #${
-          editingImageIdx + 1
-        } cropped successfully!`,
+        `Frame #${editingImageIdx + 1} cropped successfully!`,
         "success"
       );
       audioFeedback?.playTick();

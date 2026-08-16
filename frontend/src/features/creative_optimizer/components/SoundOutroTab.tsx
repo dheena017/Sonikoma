@@ -40,7 +40,10 @@ export default function SoundOutroTab({
 
       if (bgmJson.success && bgmJson.result) {
         setBgm(bgmJson.result);
-        addNotification?.("Re-recommended background soundtrack vibe!", "success");
+        addNotification?.(
+          "Re-recommended background soundtrack vibe!",
+          "success"
+        );
       }
     } catch (e) {
       console.error(e);
@@ -64,7 +67,8 @@ export default function SoundOutroTab({
             </h4>
           </div>
           <p className="text-[11px] text-neutral-400 font-mono pl-8">
-            Analyze story arc tension to recommend optimal background music BPM, mood tags, and track cues.
+            Analyze story arc tension to recommend optimal background music BPM,
+            mood tags, and track cues.
           </p>
         </div>
         <button
@@ -72,7 +76,11 @@ export default function SoundOutroTab({
           disabled={loading}
           className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
         >
-          {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          {loading ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
+            <Sparkles className="w-4 h-4" />
+          )}
           <span>{loading ? "Analyzing Vibe..." : "✦ Analyze BGM Vibe"}</span>
         </button>
       </div>
@@ -94,7 +102,9 @@ export default function SoundOutroTab({
                 Recommended Music Genre
               </span>
               <p className="text-sm font-black text-white">{bgm.music_genre}</p>
-              <p className="text-xs font-mono text-purple-300">Target BPM: {bgm.bpm} BPM</p>
+              <p className="text-xs font-mono text-purple-300">
+                Target BPM: {bgm.bpm} BPM
+              </p>
             </div>
 
             <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-2 shadow-lg">
@@ -103,7 +113,10 @@ export default function SoundOutroTab({
               </span>
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {bgm.mood_keywords?.map((k, idx) => (
-                  <span key={idx} className="text-[9px] font-mono bg-neutral-950 px-2.5 py-1 rounded-lg border border-neutral-800 text-purple-200">
+                  <span
+                    key={idx}
+                    className="text-[9px] font-mono bg-neutral-950 px-2.5 py-1 rounded-lg border border-neutral-800 text-purple-200"
+                  >
                     {k}
                   </span>
                 ))}
@@ -118,9 +131,14 @@ export default function SoundOutroTab({
               </span>
               <ul className="space-y-2 text-xs text-neutral-300 font-sans pt-1">
                 {bgm.suggested_tracks.map((track, idx) => (
-                  <li key={idx} className="flex items-center gap-3 bg-neutral-950 p-3 rounded-xl border border-neutral-800">
+                  <li
+                    key={idx}
+                    className="flex items-center gap-3 bg-neutral-950 p-3 rounded-xl border border-neutral-800"
+                  >
                     <Volume2 className="w-4 h-4 text-purple-400 shrink-0" />
-                    <span className="text-xs text-neutral-200 font-medium">{track}</span>
+                    <span className="text-xs text-neutral-200 font-medium">
+                      {track}
+                    </span>
                   </li>
                 ))}
               </ul>

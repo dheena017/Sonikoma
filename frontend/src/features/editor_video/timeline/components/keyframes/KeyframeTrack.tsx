@@ -16,8 +16,13 @@ interface KeyframeTrackProps {
 }
 
 const KeyframeTrack: React.FC<KeyframeTrackProps> = ({
-  clipKey, clipDuration, keyframes, selectedKeyframeId,
-  onSelectKeyframe, onCycleEasing, onAddKeyframe,
+  clipKey,
+  clipDuration,
+  keyframes,
+  selectedKeyframeId,
+  onSelectKeyframe,
+  onCycleEasing,
+  onAddKeyframe,
 }) => (
   <div
     onClick={(e) => {

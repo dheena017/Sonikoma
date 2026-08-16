@@ -18,7 +18,10 @@ import { VideoPreviewChaptersMenu } from "../player/ChaptersMenu";
 import { VideoPreviewTopBar } from "../player/TopBar";
 import { VideoPreviewBottomControls } from "../player/BottomControls";
 import VideoPreviewQuickActionOverlay from "../overlays/QuickActionOverlay";
-import { formatDisplayEpisodeLabel, getSortedEpisodeGroups } from "@/features/editor_imported_images/components/ImportedImagesSidebar";
+import {
+  formatDisplayEpisodeLabel,
+  getSortedEpisodeGroups,
+} from "@/features/editor_imported_images/components/ImportedImagesSidebar";
 import {
   startAmbientBackgroundMusic,
   stopAmbientBackgroundMusic,
@@ -60,11 +63,15 @@ export default function VideoPreviewCinemaPlayer({
   // Calculate total duration strictly from loaded video or panel track durations
   const isMock = !videoUrl && panels.length === 0;
   const [videoDuration, setVideoDuration] = useState<number>(0);
-  const totalDuration = videoUrl && videoDuration > 0
-    ? videoDuration
-    : panels.length > 0
-    ? panels.reduce((acc, p) => acc + (p.duration || (p as any).duration_sec || 3.0), 0)
-    : 0;
+  const totalDuration =
+    videoUrl && videoDuration > 0
+      ? videoDuration
+      : panels.length > 0
+      ? panels.reduce(
+          (acc, p) => acc + (p.duration || (p as any).duration_sec || 3.0),
+          0
+        )
+      : 0;
 
   // Define Chapters dynamically from scraped episode groups or scene panels
   const chapters: Chapter[] = useMemo(() => {
@@ -78,12 +85,19 @@ export default function VideoPreviewCinemaPlayer({
     if (rawGroups.length > 0) {
       const sorted = getSortedEpisodeGroups(rawGroups);
       return sorted.map(({ grp }) => {
-        const startIdx = Math.max(0, Math.min(grp.startIndex || 0, panels.length));
+        const startIdx = Math.max(
+          0,
+          Math.min(grp.startIndex || 0, panels.length)
+        );
         const count = grp.count || 0;
         const endIdx = Math.min(startIdx + count, panels.length);
 
-        const startTime = panels.slice(0, startIdx).reduce((acc, p) => acc + (p.duration ?? 0), 0);
-        const episodeDuration = panels.slice(startIdx, endIdx).reduce((acc, p) => acc + (p.duration ?? 0), 0);
+        const startTime = panels
+          .slice(0, startIdx)
+          .reduce((acc, p) => acc + (p.duration ?? 0), 0);
+        const episodeDuration = panels
+          .slice(startIdx, endIdx)
+          .reduce((acc, p) => acc + (p.duration ?? 0), 0);
         const endTime = startTime + episodeDuration;
 
         return {
@@ -95,7 +109,9 @@ export default function VideoPreviewCinemaPlayer({
     }
 
     if (panels.length === 0) {
-      return [{ title: "Full Video", startTime: 0, endTime: totalDuration || 10 }];
+      return [
+        { title: "Full Video", startTime: 0, endTime: totalDuration || 10 },
+      ];
     }
 
     // Single episode / un-grouped panels: split into logical scene chapters (e.g. Scene 1, Scene 2...)
@@ -105,7 +121,10 @@ export default function VideoPreviewCinemaPlayer({
 
     for (let i = 0; i < panels.length; i += sceneChunkSize) {
       const chunk = panels.slice(i, i + sceneChunkSize);
-      const chunkDuration = chunk.reduce((acc, p) => acc + (p.duration ?? 0), 0);
+      const chunkDuration = chunk.reduce(
+        (acc, p) => acc + (p.duration ?? 0),
+        0
+      );
       const sceneNum = Math.floor(i / sceneChunkSize) + 1;
 
       result.push({
@@ -137,7 +156,9 @@ export default function VideoPreviewCinemaPlayer({
   const [videoQuality, setVideoQuality] = useState("1080p");
   const [subtitlesStyle, setSubtitlesStyle] = useState("classic");
   const [isLooping, setIsLooping] = useState(false);
-  const [subtitleSize, setSubtitleSize] = useState<"small" | "normal" | "large">("normal");
+  const [subtitleSize, setSubtitleSize] = useState<
+    "small" | "normal" | "large"
+  >("normal");
   const [cinematicBars, setCinematicBars] = useState(false);
   const [isPiPActive, setIsPiPActive] = useState(false);
 
@@ -183,26 +204,40 @@ export default function VideoPreviewCinemaPlayer({
           speechRate:
             p.speechRate !== undefined
               ? p.speechRate
-              : parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0") || 1.0,
+              : parseFloat(
+                  localStorage.getItem("ai_comic_speech_rate") || "1.0"
+                ) || 1.0,
           speechPitch:
             p.speechPitch !== undefined
               ? p.speechPitch
-              : parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0") || 1.0,
+              : parseFloat(
+                  localStorage.getItem("ai_comic_speech_pitch") || "1.0"
+                ) || 1.0,
           bgmVolume: p.bgmVolume !== undefined ? p.bgmVolume : 50,
           audioDucking: p.audioDucking !== undefined ? p.audioDucking : true,
-          musicTheme: p.musicTheme || localStorage.getItem("ai_comic_music_theme") || "Cinematic Tension",
+          musicTheme:
+            p.musicTheme ||
+            localStorage.getItem("ai_comic_music_theme") ||
+            "Cinematic Tension",
         };
       }
     } catch (e) {
-      console.warn("[AdaptationPlayer] Error loading audio settings profile:", e);
+      console.warn(
+        "[AdaptationPlayer] Error loading audio settings profile:",
+        e
+      );
     }
     return {
       voiceActor:
         localStorage.getItem("ai_comic_voice_actor") ||
         localStorage.getItem("ai_comic_narrator_voice") ||
         "en-US-ChristopherNeural",
-      speechRate: parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0") || 1.0,
-      speechPitch: parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0") || 1.0,
+      speechRate:
+        parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0") ||
+        1.0,
+      speechPitch:
+        parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0") ||
+        1.0,
       bgmVolume: 50,
       audioDucking: true,
       musicTheme: "Cinematic Tension",
@@ -212,13 +247,19 @@ export default function VideoPreviewCinemaPlayer({
   // Unlock browser audio restrictions on user interaction
   const unlockAudioContext = React.useCallback(() => {
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext || (window as any).webkitAudioContext;
       if (AudioCtx) {
         const ctx = new AudioCtx();
         if (ctx.state === "suspended") {
-          ctx.resume().catch((err) =>
-            console.warn("[AdaptationPlayer] AudioContext resume warning:", err)
-          );
+          ctx
+            .resume()
+            .catch((err) =>
+              console.warn(
+                "[AdaptationPlayer] AudioContext resume warning:",
+                err
+              )
+            );
         }
       }
       if (typeof window !== "undefined" && window.speechSynthesis) {
@@ -230,7 +271,9 @@ export default function VideoPreviewCinemaPlayer({
   }, []);
 
   // SpeechSynthesis voice loader awaiting onvoiceschanged
-  const getSpeechVoices = React.useCallback((): Promise<SpeechSynthesisVoice[]> => {
+  const getSpeechVoices = React.useCallback((): Promise<
+    SpeechSynthesisVoice[]
+  > => {
     return new Promise((resolve) => {
       if (typeof window === "undefined" || !window.speechSynthesis) {
         return resolve([]);
@@ -251,7 +294,14 @@ export default function VideoPreviewCinemaPlayer({
   // Speak narration/dialogue via Web Speech API
   const speakPanelSpeech = React.useCallback(
     async (text: string) => {
-      if (!text || !text.trim() || isMuted || typeof window === "undefined" || !window.speechSynthesis) return;
+      if (
+        !text ||
+        !text.trim() ||
+        isMuted ||
+        typeof window === "undefined" ||
+        !window.speechSynthesis
+      )
+        return;
 
       try {
         window.speechSynthesis.cancel();
@@ -280,11 +330,18 @@ export default function VideoPreviewCinemaPlayer({
           duckAmbientBackgroundMusic(true);
           utt.onend = () => duckAmbientBackgroundMusic(false);
           utt.onerror = (e) => {
-            console.error("[AdaptationPlayer] SpeechSynthesis utterance error:", e);
+            console.error(
+              "[AdaptationPlayer] SpeechSynthesis utterance error:",
+              e
+            );
             duckAmbientBackgroundMusic(false);
           };
         } else {
-          utt.onerror = (e) => console.error("[AdaptationPlayer] SpeechSynthesis utterance error:", e);
+          utt.onerror = (e) =>
+            console.error(
+              "[AdaptationPlayer] SpeechSynthesis utterance error:",
+              e
+            );
         }
 
         window.speechSynthesis.speak(utt);
@@ -305,8 +362,13 @@ export default function VideoPreviewCinemaPlayer({
 
   useEffect(() => {
     if (currentPanelIndex !== undefined && panels && panels.length > 0) {
-      const targetIdx = Math.min(Math.max(0, currentPanelIndex), panels.length - 1);
-      const targetTime = panels.slice(0, targetIdx).reduce((acc, p) => acc + (p.duration ?? 0), 0);
+      const targetIdx = Math.min(
+        Math.max(0, currentPanelIndex),
+        panels.length - 1
+      );
+      const targetTime = panels
+        .slice(0, targetIdx)
+        .reduce((acc, p) => acc + (p.duration ?? 0), 0);
       setCurrentTime(targetTime);
       if (videoRef.current) {
         videoRef.current.currentTime = targetTime;
@@ -387,7 +449,14 @@ export default function VideoPreviewCinemaPlayer({
         clearInterval(playbackIntervalRef.current);
       }
     };
-  }, [isPlaying, videoUrl, videoHasError, playbackSpeed, totalDuration, isLooping]);
+  }, [
+    isPlaying,
+    videoUrl,
+    videoHasError,
+    playbackSpeed,
+    totalDuration,
+    isLooping,
+  ]);
 
   // Sync real HTML5 video state to React state
   useEffect(() => {
@@ -469,7 +538,8 @@ export default function VideoPreviewCinemaPlayer({
       if (!panels || panels.length === 0) return 0;
       let accumulatedTime = 0;
       for (let i = 0; i < panels.length; i++) {
-        const duration = panels[i].duration || (panels[i] as any).duration_sec || 3.0;
+        const duration =
+          panels[i].duration || (panels[i] as any).duration_sec || 3.0;
         if (time >= accumulatedTime && time < accumulatedTime + duration) {
           return i + 1;
         }
@@ -481,11 +551,19 @@ export default function VideoPreviewCinemaPlayer({
   );
   // Synchronize playback timeline whenever a storyboard panel is selected / clicked
   useEffect(() => {
-    if (currentPanelIndex !== undefined && panels && panels.length > 0 && !isPlaying) {
-      const validIdx = Math.max(0, Math.min(currentPanelIndex, panels.length - 1));
+    if (
+      currentPanelIndex !== undefined &&
+      panels &&
+      panels.length > 0 &&
+      !isPlaying
+    ) {
+      const validIdx = Math.max(
+        0,
+        Math.min(currentPanelIndex, panels.length - 1)
+      );
       let accTime = 0;
       for (let i = 0; i < validIdx; i++) {
-        accTime += (panels[i].duration || (panels[i] as any).duration_sec || 3.0);
+        accTime += panels[i].duration || (panels[i] as any).duration_sec || 3.0;
       }
       setCurrentTime(accTime);
       if (videoRef.current) {
@@ -496,8 +574,14 @@ export default function VideoPreviewCinemaPlayer({
 
   const activePanelForHover = getPanelAtTime(hoverProgress.time);
   const activePanelNow = isPlaying
-    ? (getPanelAtTime(currentTime) || (currentPanelIndex !== undefined && panels[currentPanelIndex]) || panels[0] || null)
-    : ((currentPanelIndex !== undefined && panels[currentPanelIndex]) || getPanelAtTime(currentTime) || panels[0] || null);
+    ? getPanelAtTime(currentTime) ||
+      (currentPanelIndex !== undefined && panels[currentPanelIndex]) ||
+      panels[0] ||
+      null
+    : (currentPanelIndex !== undefined && panels[currentPanelIndex]) ||
+      getPanelAtTime(currentTime) ||
+      panels[0] ||
+      null;
 
   const activePanelImg = useMemo(() => {
     if (!activePanelNow) return null;
@@ -511,7 +595,11 @@ export default function VideoPreviewCinemaPlayer({
       activePanelNow.layers?.background_url ||
       null;
     if (!raw) return null;
-    if (raw.startsWith("data:") || raw.startsWith("blob:") || raw.startsWith("/api/")) {
+    if (
+      raw.startsWith("data:") ||
+      raw.startsWith("blob:") ||
+      raw.startsWith("/api/")
+    ) {
       return raw;
     }
     return `/api/proxy-image?url=${encodeURIComponent(raw)}`;
@@ -548,7 +636,8 @@ export default function VideoPreviewCinemaPlayer({
       activeAudioRef.current = null;
     }
 
-    const audioUrl = activePanelNow.audio_url || activePanelNow.speech_audio_url;
+    const audioUrl =
+      activePanelNow.audio_url || activePanelNow.speech_audio_url;
     if (audioUrl && !isMuted) {
       try {
         const audio = new Audio(audioUrl);
@@ -562,7 +651,10 @@ export default function VideoPreviewCinemaPlayer({
         }
 
         audio.play().catch((err) => {
-          console.warn("[AdaptationPlayer] Audio file blocked/failed, falling back to speech synthesis:", err);
+          console.warn(
+            "[AdaptationPlayer] Audio file blocked/failed, falling back to speech synthesis:",
+            err
+          );
           const speech = activePanelNow.speech_text || activePanelNow.narrative;
           if (speech) speakPanelSpeech(speech);
         });
@@ -581,11 +673,21 @@ export default function VideoPreviewCinemaPlayer({
     if (activePanelNow.sfx && !isMuted) {
       playComicSoundEffect(activePanelNow.sfx, Math.max(0.5, volume));
     }
-  }, [isPlaying, videoUrl, activePanelNow, isMuted, volume, speakPanelSpeech, savedAudioSettings]);
+  }, [
+    isPlaying,
+    videoUrl,
+    activePanelNow,
+    isMuted,
+    volume,
+    speakPanelSpeech,
+    savedAudioSettings,
+  ]);
 
   // Find active chapter by current time
   const getActiveChapter = (time: number): Chapter => {
-    const active = chapters.find((c) => time >= c.startTime && time <= c.endTime);
+    const active = chapters.find(
+      (c) => time >= c.startTime && time <= c.endTime
+    );
     return active || chapters[0];
   };
 
@@ -608,7 +710,9 @@ export default function VideoPreviewCinemaPlayer({
   };
 
   // Dragging and scrubbing progress click/drag handler
-  const handleProgressBarInteraction = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleProgressBarInteraction = (
+    e: React.MouseEvent<HTMLDivElement>
+  ) => {
     if (!progressBarRef.current) return;
     const rect = progressBarRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -630,7 +734,8 @@ export default function VideoPreviewCinemaPlayer({
 
       const startDiff = Math.abs(closestChapter.startTime - targetTime);
       const endDiff = Math.abs(closestChapter.endTime - targetTime);
-      targetTime = startDiff < endDiff ? closestChapter.startTime : closestChapter.endTime;
+      targetTime =
+        startDiff < endDiff ? closestChapter.startTime : closestChapter.endTime;
     }
 
     setCurrentTime(targetTime);
@@ -704,12 +809,17 @@ export default function VideoPreviewCinemaPlayer({
           await v.requestPictureInPicture();
           setIsPiPActive(true);
         } else {
-          if (addNotification) addNotification("Picture-in-Picture not supported on this browser.", "warning");
+          if (addNotification)
+            addNotification(
+              "Picture-in-Picture not supported on this browser.",
+              "warning"
+            );
         }
       }
     } catch (err: any) {
       console.error("PiP Toggle error:", err);
-      if (addNotification) addNotification("Picture-in-Picture initiation failed.", "error");
+      if (addNotification)
+        addNotification("Picture-in-Picture initiation failed.", "error");
     }
   };
 
@@ -747,7 +857,11 @@ export default function VideoPreviewCinemaPlayer({
       } else if (e.code === "KeyL") {
         setIsLooping((prev) => {
           const next = !prev;
-          if (addNotification) addNotification(next ? "Looping Enabled" : "Looping Disabled", "info");
+          if (addNotification)
+            addNotification(
+              next ? "Looping Enabled" : "Looping Disabled",
+              "info"
+            );
           return next;
         });
       } else if (e.code === "KeyP") {
@@ -758,7 +872,8 @@ export default function VideoPreviewCinemaPlayer({
         const targetTime = percent * totalDuration;
         setCurrentTime(targetTime);
         if (videoRef.current) videoRef.current.currentTime = targetTime;
-        if (addNotification) addNotification(`Jumped to ${digit * 10}%`, "info");
+        if (addNotification)
+          addNotification(`Jumped to ${digit * 10}%`, "info");
       } else if (e.key === "," || e.key === "<") {
         e.preventDefault();
         const prev = Math.max(0, parseFloat((currentTime - 0.1).toFixed(1)));
@@ -766,7 +881,10 @@ export default function VideoPreviewCinemaPlayer({
         if (videoRef.current) videoRef.current.currentTime = prev;
       } else if (e.key === "." || e.key === ">") {
         e.preventDefault();
-        const next = Math.min(totalDuration, parseFloat((currentTime + 0.1).toFixed(1)));
+        const next = Math.min(
+          totalDuration,
+          parseFloat((currentTime + 0.1).toFixed(1))
+        );
         setCurrentTime(next);
         if (videoRef.current) videoRef.current.currentTime = next;
       } else if (e.key === "?" || e.key === "/") {
@@ -801,7 +919,14 @@ export default function VideoPreviewCinemaPlayer({
       window.removeEventListener("keyup", handleKeyUp);
       if (spaceTimerRef.current) clearTimeout(spaceTimerRef.current);
     };
-  }, [currentTime, totalDuration, isMuted, isTheaterMode, isFastForwarding, isLooping]);
+  }, [
+    currentTime,
+    totalDuration,
+    isMuted,
+    isTheaterMode,
+    isFastForwarding,
+    isLooping,
+  ]);
 
   const getQualityVideoUrl = (url: string | null, quality: string) => {
     if (!url) return null;
@@ -823,11 +948,14 @@ export default function VideoPreviewCinemaPlayer({
     if (!containerRef.current) return;
 
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().then(() => {
-        setIsFullscreen(true);
-      }).catch((err) => {
-        console.error("Fullscreen request failed:", err);
-      });
+      containerRef.current
+        .requestFullscreen()
+        .then(() => {
+          setIsFullscreen(true);
+        })
+        .catch((err) => {
+          console.error("Fullscreen request failed:", err);
+        });
     } else {
       document.exitFullscreen();
       setIsFullscreen(false);
@@ -839,7 +967,8 @@ export default function VideoPreviewCinemaPlayer({
       setIsFullscreen(!!document.fullscreenElement);
     };
     document.addEventListener("fullscreenchange", onFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
   const panelCounterText = useMemo(() => {
@@ -854,7 +983,9 @@ export default function VideoPreviewCinemaPlayer({
 
   const handleClose = () => {
     if (seriesSlug && chapterSlug) {
-      navigateTo(`/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`);
+      navigateTo(
+        `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`
+      );
     } else {
       navigateTo("/dashboard");
     }
@@ -868,13 +999,20 @@ export default function VideoPreviewCinemaPlayer({
 
   const isIntroActive = useMemo(() => {
     if (variant === "floating") return false;
-    const introChapter = chapters.find((c) => c.title.toLowerCase() === "intro");
+    const introChapter = chapters.find(
+      (c) => c.title.toLowerCase() === "intro"
+    );
     if (!introChapter) return false;
-    return currentTime >= introChapter.startTime && currentTime < introChapter.endTime;
+    return (
+      currentTime >= introChapter.startTime &&
+      currentTime < introChapter.endTime
+    );
   }, [currentTime, chapters, variant]);
 
   const handleSkipIntro = () => {
-    const introChapter = chapters.find((c) => c.title.toLowerCase() === "intro");
+    const introChapter = chapters.find(
+      (c) => c.title.toLowerCase() === "intro"
+    );
     if (introChapter) {
       const targetTime = introChapter.endTime;
       setCurrentTime(targetTime);
@@ -972,7 +1110,9 @@ export default function VideoPreviewCinemaPlayer({
                 )}
               </div>
             ) : (
-              <span className="text-[10px] font-mono text-neutral-500">Preview Stream</span>
+              <span className="text-[10px] font-mono text-neutral-500">
+                Preview Stream
+              </span>
             )}
             <div className="absolute bottom-2 inset-x-2 bg-black/85 text-center py-1 rounded text-[8px] font-mono text-neutral-300">
               {formatTime(currentTime)} / {formatTime(totalDuration)}
@@ -1003,15 +1143,23 @@ export default function VideoPreviewCinemaPlayer({
               <video
                 ref={videoRef}
                 src={getQualityVideoUrl(videoUrl, videoQuality) || undefined}
-                onLoadedMetadata={(e) => setVideoDuration(e.currentTarget.duration)}
+                onLoadedMetadata={(e) =>
+                  setVideoDuration(e.currentTarget.duration)
+                }
                 onError={(e) => {
                   const vid = e.currentTarget;
-                  if (videoUrl && vid.src !== videoUrl && !vid.dataset.masterFallback) {
+                  if (
+                    videoUrl &&
+                    vid.src !== videoUrl &&
+                    !vid.dataset.masterFallback
+                  ) {
                     vid.dataset.masterFallback = "1";
                     vid.src = videoUrl;
                     return;
                   }
-                  console.warn("[CinemaPlayer] Video failed to load, falling back to simulated mode.");
+                  console.warn(
+                    "[CinemaPlayer] Video failed to load, falling back to simulated mode."
+                  );
                   setVideoHasError(true);
                 }}
                 className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950"
@@ -1032,15 +1180,19 @@ export default function VideoPreviewCinemaPlayer({
                     <span>Compiled MP4 Stream</span>
                   </div>
                   <div className="space-y-1.5">
-                    <h2 className="text-xl font-black text-white">No Compiled Video Yet</h2>
+                    <h2 className="text-xl font-black text-white">
+                      No Compiled Video Yet
+                    </h2>
                     <p className="text-xs text-neutral-400 max-w-xs leading-relaxed font-mono">
-                      Export your storyboard cut sequence to generate the final rendered MP4 video file.
+                      Export your storyboard cut sequence to generate the final
+                      rendered MP4 video file.
                     </p>
                   </div>
                 </div>
               </div>
             )
-          ) : activePanelNow && (activePanelImg || activePanelNow.layers?.background_url) ? (
+          ) : activePanelNow &&
+            (activePanelImg || activePanelNow.layers?.background_url) ? (
             <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-purple-500/35 rounded-2xl shadow-2xl bg-[#14141f]">
               {activePanelNow.layers ? (
                 <div className="relative w-full h-full flex items-center justify-center">
@@ -1074,7 +1226,9 @@ export default function VideoPreviewCinemaPlayer({
                         height: "auto",
                         transform: isPlaying
                           ? subtitlesStyle === "karaoke"
-                            ? `scale(${1 + (currentTime % 4.5) * 0.035}) translateY(-4px)`
+                            ? `scale(${
+                                1 + (currentTime % 4.5) * 0.035
+                              }) translateY(-4px)`
                             : "scale(1.08) translateY(-6px)"
                           : "scale(1)",
                         transition: "transform 100ms linear",
@@ -1100,8 +1254,14 @@ export default function VideoPreviewCinemaPlayer({
                       if (img.dataset.retried) return;
                       img.dataset.retried = "1";
                       const src = img.src;
-                      if (src && !src.includes("/api/proxy-image") && !src.includes("/api/image/")) {
-                        img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+                      if (
+                        src &&
+                        !src.includes("/api/proxy-image") &&
+                        !src.includes("/api/image/")
+                      ) {
+                        img.src = `/api/proxy-image?url=${encodeURIComponent(
+                          src
+                        )}`;
                       }
                     }}
                     className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
@@ -1148,14 +1308,17 @@ export default function VideoPreviewCinemaPlayer({
                     Cinema Studio Ready
                   </h2>
                   <p className="text-xs text-neutral-400 max-w-xs leading-relaxed font-mono">
-                    Select any panel on the timeline below to stream interactive cuts, voice narration, and motion effects live.
+                    Select any panel on the timeline below to stream interactive
+                    cuts, voice narration, and motion effects live.
                   </p>
                 </div>
 
                 {/* Footer Hint */}
                 <div className="w-full pt-3 flex items-center justify-center gap-2 text-[10px] font-mono text-neutral-500 border-t border-neutral-800/80">
                   <Sparkles className="h-3 w-3 text-purple-400" />
-                  <span className="text-purple-300/90 font-semibold">Live playback ready · {panels.length} panel cuts available</span>
+                  <span className="text-purple-300/90 font-semibold">
+                    Live playback ready · {panels.length} panel cuts available
+                  </span>
                 </div>
               </div>
             </div>
@@ -1163,23 +1326,29 @@ export default function VideoPreviewCinemaPlayer({
         </div>
 
         {/* Subtitles Overlay */}
-        {showSubtitles && activePanelNow && (activePanelNow.speech_text || activePanelNow.narrative) && (
-          <div className="absolute bottom-8 inset-x-0 flex flex-col items-center justify-center z-30 pointer-events-none px-4 select-none animate-in fade-in duration-200">
-            <div className="flex flex-col gap-1.5 max-w-xl text-center">
-              {activePanelNow.narrative && (
-                <p className="bg-black/80 text-neutral-200 text-[10px] md:text-xs font-sans px-3.5 py-1.5 rounded-xl border border-white/5 backdrop-blur-sm tracking-wide leading-relaxed shadow-lg">
-                  <span className="text-purple-400 font-mono text-[8.5px] uppercase tracking-wider block mb-0.5 font-black">NARRATOR</span>
-                  {activePanelNow.narrative}
-                </p>
-              )}
-              {activePanelNow.speech_text && (
-                <p className={`bg-black/90 text-white font-bold font-sans px-4 py-2 rounded-xl border border-purple-500/20 backdrop-blur-sm tracking-wide leading-relaxed shadow-lg ${subtitleSizeClass}`}>
-                  {activePanelNow.speech_text}
-                </p>
-              )}
+        {showSubtitles &&
+          activePanelNow &&
+          (activePanelNow.speech_text || activePanelNow.narrative) && (
+            <div className="absolute bottom-8 inset-x-0 flex flex-col items-center justify-center z-30 pointer-events-none px-4 select-none animate-in fade-in duration-200">
+              <div className="flex flex-col gap-1.5 max-w-xl text-center">
+                {activePanelNow.narrative && (
+                  <p className="bg-black/80 text-neutral-200 text-[10px] md:text-xs font-sans px-3.5 py-1.5 rounded-xl border border-white/5 backdrop-blur-sm tracking-wide leading-relaxed shadow-lg">
+                    <span className="text-purple-400 font-mono text-[8.5px] uppercase tracking-wider block mb-0.5 font-black">
+                      NARRATOR
+                    </span>
+                    {activePanelNow.narrative}
+                  </p>
+                )}
+                {activePanelNow.speech_text && (
+                  <p
+                    className={`bg-black/90 text-white font-bold font-sans px-4 py-2 rounded-xl border border-purple-500/20 backdrop-blur-sm tracking-wide leading-relaxed shadow-lg ${subtitleSizeClass}`}
+                  >
+                    {activePanelNow.speech_text}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
 
       {/* SUB-COMPONENT: Top Bar Overlay */}

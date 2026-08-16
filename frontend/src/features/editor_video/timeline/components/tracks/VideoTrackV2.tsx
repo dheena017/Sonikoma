@@ -18,19 +18,32 @@ interface VideoTrackV2Props {
 
 function clipClass(key: string, selectedClip: string | null, base: string) {
   return `absolute flex items-center cursor-pointer truncate transition-all rounded-lg border text-[10px] font-semibold px-2 ${base} ${
-    selectedClip === key ? "ring-2 ring-white/50 brightness-115 z-10" : "hover:brightness-110"
+    selectedClip === key
+      ? "ring-2 ring-white/50 brightness-115 z-10"
+      : "hover:brightness-110"
   }`;
 }
 
 const VideoTrackV2: React.FC<VideoTrackV2Props> = ({
-  panels, totalPanels, selectedClip,
-  locked, hidden,
-  onToggleLock, onToggleHide, onClipClick, onContextMenu,
+  panels,
+  totalPanels,
+  selectedClip,
+  locked,
+  hidden,
+  onToggleLock,
+  onToggleHide,
+  onClipClick,
+  onContextMenu,
 }) => (
   <div className="h-10 border-b border-white/[0.04] flex items-center">
     <TrackLabel
-      id="V2" label="Effects" color="text-indigo-400" type="video"
-      locked={locked} hidden={hidden} muted={false}
+      id="V2"
+      label="Effects"
+      color="text-indigo-400"
+      type="video"
+      locked={locked}
+      hidden={hidden}
+      muted={false}
       onToggleLock={onToggleLock}
       onToggleHide={onToggleHide}
       onToggleMute={() => {}}
@@ -44,8 +57,15 @@ const VideoTrackV2: React.FC<VideoTrackV2Props> = ({
             key={key}
             onClick={() => onClipClick(key, idx)}
             onContextMenu={(e) => onContextMenu(e, key, idx)}
-            className={clipClass(key, selectedClip, "bg-indigo-800/60 border-indigo-500/30 text-indigo-200 h-full")}
-            style={{ left: `${(idx / totalPanels) * 85}%`, width: `${(1 / totalPanels) * 85 - 0.5}%` }}
+            className={clipClass(
+              key,
+              selectedClip,
+              "bg-indigo-800/60 border-indigo-500/30 text-indigo-200 h-full"
+            )}
+            style={{
+              left: `${(idx / totalPanels) * 85}%`,
+              width: `${(1 / totalPanels) * 85 - 0.5}%`,
+            }}
           >
             {fx}
           </div>

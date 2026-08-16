@@ -8,7 +8,10 @@ interface ClipResizeHandleProps {
   side?: "left" | "right";
 }
 
-const ClipResizeHandle: React.FC<ClipResizeHandleProps> = ({ onResizeStart, side = "right" }) => (
+const ClipResizeHandle: React.FC<ClipResizeHandleProps> = ({
+  onResizeStart,
+  side = "right",
+}) => (
   <div
     onMouseDown={(e) => {
       e.stopPropagation();

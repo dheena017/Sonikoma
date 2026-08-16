@@ -1,10 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Play, Loader, AlertTriangle, ArrowRight, Minimize2, Maximize2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  X,
+  Play,
+  Loader,
+  AlertTriangle,
+  ArrowRight,
+  Minimize2,
+  Maximize2,
+} from "lucide-react";
 import { getProxiedImageUrl } from "@/shared/utils/url";
 import { scrapeChapter } from "@/api";
 
 import type { Episode } from "../types/EpisodeTypes";
-
 
 interface EpisodePreviewModalProps {
   episode: Episode | null;
@@ -12,7 +19,6 @@ interface EpisodePreviewModalProps {
   onImport: (episode: Episode) => void;
   fetchWithInterceptor: typeof fetch;
 }
-
 
 export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
   episode,
@@ -32,7 +38,9 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
 
   useEffect(() => {
     const root = document.documentElement;
-    const mainScrollContainer = document.getElementById("main-scroll-container");
+    const mainScrollContainer = document.getElementById(
+      "main-scroll-container"
+    );
     const previousRootOverflow = root.style.overflow;
     const previousOverflow = document.body.style.overflow;
     const previousMainOverflow = mainScrollContainer?.style.overflow;
@@ -71,11 +79,17 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
           );
           setImages(imageUrls);
         } else {
-          throw new Error(data.error?.message || (data as any).message || 'No images found on this Webtoon page.');
+          throw new Error(
+            data.error?.message ||
+              (data as any).message ||
+              "No images found on this Webtoon page."
+          );
         }
       } catch (err) {
-        console.error('[Preview Scraper Error] ', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch episode panels.');
+        console.error("[Preview Scraper Error] ", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch episode panels."
+        );
       } finally {
         setLoading(false);
       }
@@ -182,12 +196,16 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-8 py-2.5 border-b border-neutral-800/60 bg-neutral-900/40 backdrop-blur-md text-xs text-neutral-300 shrink-0 z-20">
             {/* Auto Scroll Speed Controls */}
             <div className="flex items-center gap-2">
-              <span className="font-mono text-neutral-400 uppercase tracking-wider text-[10px] font-bold">Auto-Scroll:</span>
+              <span className="font-mono text-neutral-400 uppercase tracking-wider text-[10px] font-bold">
+                Auto-Scroll:
+              </span>
               <div className="flex items-center bg-neutral-950 border border-neutral-800 rounded-xl p-0.5">
                 <button
                   onClick={() => setAutoScrollSpeed(0)}
                   className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                    autoScrollSpeed === 0 ? 'bg-purple-600 text-white shadow-sm' : 'hover:bg-neutral-800 text-neutral-400 hover:text-white'
+                    autoScrollSpeed === 0
+                      ? "bg-purple-600 text-white shadow-sm"
+                      : "hover:bg-neutral-800 text-neutral-400 hover:text-white"
                   }`}
                 >
                   Off
@@ -197,7 +215,9 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
                     key={speed}
                     onClick={() => setAutoScrollSpeed(speed)}
                     className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                      autoScrollSpeed === speed ? 'bg-purple-600 text-white shadow-sm' : 'hover:bg-neutral-800 text-neutral-400 hover:text-white'
+                      autoScrollSpeed === speed
+                        ? "bg-purple-600 text-white shadow-sm"
+                        : "hover:bg-neutral-800 text-neutral-400 hover:text-white"
                     }`}
                     title={`Auto Scroll Speed ${speed}px`}
                   >
@@ -209,7 +229,9 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
 
             {/* Zoom / Width Adjustments */}
             <div className="flex items-center gap-2">
-              <span className="font-mono text-neutral-400 uppercase tracking-wider text-[10px] font-bold">Reader Width:</span>
+              <span className="font-mono text-neutral-400 uppercase tracking-wider text-[10px] font-bold">
+                Reader Width:
+              </span>
               <div className="flex items-center gap-2 bg-neutral-950 border border-neutral-800 rounded-xl p-0.5">
                 <button
                   onClick={() => setZoom(Math.max(50, zoom - 10))}
@@ -218,7 +240,9 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
                 >
                   -
                 </button>
-                <span className="min-w-[50px] text-center font-mono text-purple-300 text-[11px] font-bold">{stripWidthPx}px</span>
+                <span className="min-w-[50px] text-center font-mono text-purple-300 text-[11px] font-bold">
+                  {stripWidthPx}px
+                </span>
                 <button
                   onClick={() => setZoom(Math.min(180, zoom + 10))}
                   className="px-2.5 py-1 hover:bg-neutral-800 hover:text-white text-neutral-400 rounded-lg font-bold transition-colors cursor-pointer"
@@ -239,7 +263,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
         {/* Reading Progress Top Bar Indicator */}
         {!loading && !error && images.length > 0 && (
           <div className="w-full bg-neutral-900 h-1 relative z-20 shrink-0">
-            <div 
+            <div
               className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 transition-all duration-75 shadow-[0_0_8px_rgba(168,85,247,0.8)]"
               style={{ width: `${scrollProgress}%` }}
             />
@@ -247,7 +271,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
         )}
 
         {/* Main Full Page Scrollable Reader Container */}
-        <div 
+        <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
           className="min-h-0 flex-1 overflow-y-scroll overflow-x-hidden overscroll-contain bg-neutral-950 flex flex-col items-center justify-start relative scrollbar-thin scrollbar-thumb-purple-900 scrollbar-track-neutral-950 p-0"
@@ -259,8 +283,12 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
                 <Loader className="w-7 h-7 text-purple-400 absolute top-3.5 left-3.5 animate-pulse" />
               </div>
               <div className="text-center space-y-1">
-                <p className="text-base font-bold text-white">Scraping panels live...</p>
-                <p className="text-xs text-neutral-400">Connecting via secure image proxy & Playwright renderer</p>
+                <p className="text-base font-bold text-white">
+                  Scraping panels live...
+                </p>
+                <p className="text-xs text-neutral-400">
+                  Connecting via secure image proxy & Playwright renderer
+                </p>
               </div>
             </div>
           )}
@@ -269,9 +297,14 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8 text-center bg-neutral-950 z-10">
               <AlertTriangle className="w-14 h-14 text-rose-500 animate-bounce" />
               <div className="max-w-md space-y-2">
-                <h3 className="text-lg font-bold text-white">Failed to Preview Panels</h3>
+                <h3 className="text-lg font-bold text-white">
+                  Failed to Preview Panels
+                </h3>
                 <p className="text-sm text-neutral-400">{error}</p>
-                <p className="text-xs text-neutral-500">The server might be rate-limited, or the Webtoon slug is private/restricted.</p>
+                <p className="text-xs text-neutral-500">
+                  The server might be rate-limited, or the Webtoon slug is
+                  private/restricted.
+                </p>
               </div>
               <div className="flex gap-3 mt-4">
                 <button
@@ -292,7 +325,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
 
           {/* Webtoon Panels Continuous Strip */}
           {!loading && !error && images.length > 0 && (
-            <div 
+            <div
               className="w-full flex flex-col items-center space-y-0 transition-all duration-300 py-4"
               style={{ maxWidth: `${stripWidthPx}px` }}
             >
@@ -303,10 +336,12 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
                   alt={`Panel ${idx + 1}`}
                   className="w-full h-auto select-none pointer-events-none block m-0 p-0 min-h-[300px] bg-neutral-900/20 shadow-2xl"
                   style={{ width: "100%" }}
-                  loading={idx < 5 ? 'eager' : 'lazy'}
+                  loading={idx < 5 ? "eager" : "lazy"}
                   onError={(e) => {
                     (e.target as HTMLImageElement).src =
-                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='150'%3E%3Crect fill='%23171717' width='400' height='150'/%3E%3Ctext fill='%236b7280' font-family='sans-serif' font-size='14' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3EFailed to load panel %23" + (idx + 1) + "%3C/text%3E%3C/svg%3E";
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='150'%3E%3Crect fill='%23171717' width='400' height='150'/%3E%3Ctext fill='%236b7280' font-family='sans-serif' font-size='14' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3EFailed to load panel %23" +
+                      (idx + 1) +
+                      "%3C/text%3E%3C/svg%3E";
                   }}
                 />
               ))}

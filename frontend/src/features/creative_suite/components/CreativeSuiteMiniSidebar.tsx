@@ -22,12 +22,9 @@ interface CreativeSuiteMiniSidebarProps {
   onOpenSidebar?: () => void;
 }
 
-const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = ({
-  currentPath,
-  navigateTo,
-  panels = [],
-  onOpenSidebar,
-}) => {
+const CreativeSuiteMiniSidebarInner: React.FC<
+  CreativeSuiteMiniSidebarProps
+> = ({ currentPath, navigateTo, panels = [], onOpenSidebar }) => {
   const groups = [
     {
       name: "Hub",
@@ -116,7 +113,11 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
         currentPath === "/creative-suite-dashboard"
       );
     }
-    return currentPath === path || currentPath.startsWith(path + "?") || currentPath.startsWith(path + "/");
+    return (
+      currentPath === path ||
+      currentPath.startsWith(path + "?") ||
+      currentPath.startsWith(path + "/")
+    );
   };
 
   const SidebarItem: React.FC<{ item: any }> = ({ item }) => {
@@ -186,8 +187,16 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
             className="w-full flex flex-col items-center pb-2"
           >
             {/* Section divider (only between groups) + label for every group */}
-            <div className="w-full flex flex-col items-center" style={{ marginTop: groupIdx > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
-              {groupIdx > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+            <div
+              className="w-full flex flex-col items-center"
+              style={{
+                marginTop: groupIdx > 0 ? "0.5rem" : "0",
+                marginBottom: "0.375rem",
+              }}
+            >
+              {groupIdx > 0 && (
+                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />
+              )}
               <span className="text-[9px] font-black uppercase tracking-[0.16em] text-purple-400/80 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
                 {group.name}
               </span>
@@ -209,7 +218,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<CreativeSuiteMiniSidebarProps> = (
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           </button>
-          
+
           <div className="absolute left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 -translate-x-2 group-hover:translate-x-0 bg-neutral-900 border border-white/10 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-2xl font-medium tracking-wide">
             Main Dashboard
           </div>

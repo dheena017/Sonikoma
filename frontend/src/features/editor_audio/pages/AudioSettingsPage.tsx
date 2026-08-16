@@ -15,7 +15,10 @@ import {
 interface AudioSettingsPageProps {
   projectId?: string | null;
   onNavigateHome?: () => void;
-  addNotification?: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  addNotification?: (
+    msg: string,
+    type: "success" | "info" | "warning" | "error"
+  ) => void;
   fetchWithInterceptor?: any;
   isEmbed?: boolean;
   onVoiceActorChange?: (val: string) => void;
@@ -37,10 +40,13 @@ const DEFAULT_AUDIO_SETTINGS = {
 interface AudioSettingsPageProps {
   projectId?: string | null;
   onNavigateHome?: () => void;
-  addNotification?: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  addNotification?: (
+    msg: string,
+    type: "success" | "info" | "warning" | "error"
+  ) => void;
   fetchWithInterceptor?: any;
   isEmbed?: boolean;
-  
+
   volume: number;
   setVolume: (val: number) => void;
   narrationVolume: number;
@@ -98,11 +104,15 @@ export default function AudioSettingsPage({
   const setMasterVolume = setVolume;
 
   // Available Voices
-  const [availableVoices, setAvailableVoices] = useState<Array<{ code: string; label: string }>>([]);
+  const [availableVoices, setAvailableVoices] = useState<
+    Array<{ code: string; label: string }>
+  >([]);
   const [loadingVoices, setLoadingVoices] = useState(false);
 
   const [localNarratorVoice, setLocalNarratorVoice] = useState<string>(
-    () => localStorage.getItem("ai_comic_narrator_voice") || "Sultry Narrative Tone (Female)"
+    () =>
+      localStorage.getItem("ai_comic_narrator_voice") ||
+      "Sultry Narrative Tone (Female)"
   );
 
   // 1. Resolve projectId from URL query parameters if not passed as prop
@@ -161,9 +171,15 @@ export default function AudioSettingsPage({
         musicTheme,
         audioDucking,
       };
-      localStorage.setItem("global_audio_settings", JSON.stringify(localSettings));
+      localStorage.setItem(
+        "global_audio_settings",
+        JSON.stringify(localSettings)
+      );
       if (addNotification) {
-        addNotification("Saved global audio fallback profile to browser cache.", "success");
+        addNotification(
+          "Saved global audio fallback profile to browser cache.",
+          "success"
+        );
       }
       return;
     }
@@ -195,7 +211,10 @@ export default function AudioSettingsPage({
       const data = await res.json();
       if (data?.success) {
         if (addNotification) {
-          addNotification("Successfully compiled and persisted project audio settings!", "success");
+          addNotification(
+            "Successfully compiled and persisted project audio settings!",
+            "success"
+          );
         }
       } else {
         throw new Error(data?.detail || "Unsuccessful update response");
@@ -203,7 +222,10 @@ export default function AudioSettingsPage({
     } catch (e: any) {
       console.error("Failed to save audio settings:", e);
       if (addNotification) {
-        addNotification(`Error saving audio profile: ${e.message || String(e)}`, "error");
+        addNotification(
+          `Error saving audio profile: ${e.message || String(e)}`,
+          "error"
+        );
       }
     } finally {
       setSaving(false);
@@ -217,10 +239,17 @@ export default function AudioSettingsPage({
     { code: "en-GB-SoniaNeural", label: "English (UK) — Sonia (Female)" },
   ];
 
-  const displayVoices = availableVoices.length > 0 ? availableVoices : defaultVoices;
+  const displayVoices =
+    availableVoices.length > 0 ? availableVoices : defaultVoices;
 
   return (
-    <div className={isEmbed ? "w-full space-y-6 pt-2" : "flex-1 w-full max-w-7xl mx-auto py-6 space-y-6"}>
+    <div
+      className={
+        isEmbed
+          ? "w-full space-y-6 pt-2"
+          : "flex-1 w-full max-w-7xl mx-auto py-6 space-y-6"
+      }
+    >
       {/* HEADER SECTION */}
       {!isEmbed && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
@@ -242,7 +271,8 @@ export default function AudioSettingsPage({
               Audio & TTS Settings
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Synchronize narration character, configure pitch and rate, and mix sound loop presets
+              Synchronize narration character, configure pitch and rate, and mix
+              sound loop presets
             </p>
           </div>
           <button
@@ -258,7 +288,9 @@ export default function AudioSettingsPage({
       {loading ? (
         <div className="h-64 flex flex-col items-center justify-center space-y-3">
           <div className="animate-spin h-8 w-8 border-4 border-purple-500 border-t-transparent rounded-full" />
-          <span className="text-xs font-mono text-neutral-400">Loading audio profiles...</span>
+          <span className="text-xs font-mono text-neutral-400">
+            Loading audio profiles...
+          </span>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -284,7 +316,9 @@ export default function AudioSettingsPage({
                     <Volume2 className="h-4 w-4 text-purple-400" />
                     Master Volume Gain
                   </span>
-                  <span className="text-xs font-mono text-purple-400 font-bold">{masterVolume}%</span>
+                  <span className="text-xs font-mono text-purple-400 font-bold">
+                    {masterVolume}%
+                  </span>
                 </label>
                 <input
                   type="range"
@@ -303,7 +337,9 @@ export default function AudioSettingsPage({
                     <Mic className="h-4 w-4 text-purple-400" />
                     Narration / Voice Track Gain
                   </span>
-                  <span className="text-xs font-mono text-neutral-200 font-bold">{narrationVolume}%</span>
+                  <span className="text-xs font-mono text-neutral-200 font-bold">
+                    {narrationVolume}%
+                  </span>
                 </label>
                 <input
                   type="range"
@@ -322,7 +358,9 @@ export default function AudioSettingsPage({
                     <Music className="h-4 w-4 text-purple-400" />
                     Thematic Background Music Gain
                   </span>
-                  <span className="text-xs font-mono text-neutral-200 font-bold">{bgmVolume}%</span>
+                  <span className="text-xs font-mono text-neutral-200 font-bold">
+                    {bgmVolume}%
+                  </span>
                 </label>
                 <input
                   type="range"
@@ -341,7 +379,9 @@ export default function AudioSettingsPage({
                     <Volume1 className="h-4 w-4 text-purple-400" />
                     Atmospheric Sound Effects Gain
                   </span>
-                  <span className="text-xs font-mono text-neutral-200 font-bold">{sfxVolume}%</span>
+                  <span className="text-xs font-mono text-neutral-200 font-bold">
+                    {sfxVolume}%
+                  </span>
                 </label>
                 <input
                   type="range"
@@ -366,7 +406,8 @@ export default function AudioSettingsPage({
                     Voice Actor & Speech Synthesizer Controls
                   </h3>
                   <p className="text-[10px] text-neutral-400 font-mono">
-                    Select active vocal profiles and modify speech pace properties
+                    Select active vocal profiles and modify speech pace
+                    properties
                   </p>
                 </div>
               </div>
@@ -431,7 +472,9 @@ export default function AudioSettingsPage({
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between font-mono">
                     <span>Vocal Playback Speech Rate (Speed)</span>
-                    <span className="text-xs font-mono text-neutral-200 font-bold">{speechRate}x</span>
+                    <span className="text-xs font-mono text-neutral-200 font-bold">
+                      {speechRate}x
+                    </span>
                   </label>
                   <input
                     type="range"
@@ -448,7 +491,9 @@ export default function AudioSettingsPage({
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between font-mono">
                     <span>Vocal Resonance Pitch Frequency</span>
-                    <span className="text-xs font-mono text-neutral-200 font-bold">{speechPitch}x</span>
+                    <span className="text-xs font-mono text-neutral-200 font-bold">
+                      {speechPitch}x
+                    </span>
                   </label>
                   <input
                     type="range"

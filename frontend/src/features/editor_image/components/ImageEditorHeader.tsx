@@ -17,7 +17,10 @@ import {
   FolderSync,
 } from "lucide-react";
 import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState"; // Adjust path if needed
-import { getUserAvatarUrl, DEFAULT_USER_AVATAR_DATA_URI } from "@/shared/utils/avatar";
+import {
+  getUserAvatarUrl,
+  DEFAULT_USER_AVATAR_DATA_URI,
+} from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
@@ -65,7 +68,7 @@ interface ImageEditorHeaderProps {
   addNotification?: (message: string, type?: string) => void;
 }
 
-export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({ 
+export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   editingImageIdx,
   scrapedImages,
   handlePrevImage,
@@ -109,7 +112,8 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
     user?.credits !== undefined ? user.credits : null
   );
 
-  const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
+  const { activeProjectId, activeProjectData, setDrawerOpen } =
+    useProjectStore();
   const { status: backendStatus } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
@@ -243,7 +247,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
           />
           <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans">
-            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "User")}
+            {user?.full_name ||
+              user?.username ||
+              (user?.email ? user.email.split("@")[0] : "User")}
           </span>
         </button>
 
@@ -253,7 +259,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
         {hasMultipleImages && (
           <div className="flex items-center space-x-1 bg-gray-900/50 rounded-lg p-1 border border-gray-800">
-            <button 
+            <button
               onClick={handlePrevImage}
               className="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition"
               title="Previous Image"
@@ -261,9 +267,10 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               <ChevronLeft className="w-4 h-4" />
             </button>
             <span className="text-xs font-medium text-gray-400 min-w-[3rem] text-center">
-              {editingImageIdx !== null ? editingImageIdx + 1 : 0} / {scrapedImages.length}
+              {editingImageIdx !== null ? editingImageIdx + 1 : 0} /{" "}
+              {scrapedImages.length}
             </span>
-            <button 
+            <button
               onClick={handleNextImage}
               className="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition"
               title="Next Image"
@@ -279,7 +286,11 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <button
           onClick={handleUndo}
           disabled={historyLength === 0}
-          className={`p-2 rounded-md transition ${historyLength > 0 ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 cursor-not-allowed'}`}
+          className={`p-2 rounded-md transition ${
+            historyLength > 0
+              ? "text-gray-300 hover:text-white hover:bg-gray-800"
+              : "text-gray-600 cursor-not-allowed"
+          }`}
           title="Undo"
         >
           <Undo className="w-4 h-4" />
@@ -287,7 +298,11 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <button
           onClick={handleRedo}
           disabled={redoHistoryLength === 0}
-          className={`p-2 rounded-md transition ${redoHistoryLength > 0 ? 'text-gray-300 hover:text-white hover:bg-gray-800' : 'text-gray-600 cursor-not-allowed'}`}
+          className={`p-2 rounded-md transition ${
+            redoHistoryLength > 0
+              ? "text-gray-300 hover:text-white hover:bg-gray-800"
+              : "text-gray-600 cursor-not-allowed"
+          }`}
           title="Redo"
         >
           <Redo className="w-4 h-4" />
@@ -320,9 +335,17 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <button
           onClick={() => setIsToolsPanelOpen((prev) => !prev)}
           className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition border border-transparent hover:border-gray-700"
-          title={isToolsPanelOpen ? "Close Properties Panel" : "Open Properties Panel"}
+          title={
+            isToolsPanelOpen
+              ? "Close Properties Panel"
+              : "Open Properties Panel"
+          }
         >
-          {isToolsPanelOpen ? <PanelRightClose className="w-5 h-5" /> : <PanelRightOpen className="w-5 h-5" />}
+          {isToolsPanelOpen ? (
+            <PanelRightClose className="w-5 h-5" />
+          ) : (
+            <PanelRightOpen className="w-5 h-5" />
+          )}
         </button>
 
         {/* ⚡ Credits Pill & Popover */}
@@ -413,7 +436,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             className="p-2 text-gray-400 hover:text-purple-300 rounded-lg hover:bg-purple-500/10 transition border border-transparent hover:border-purple-500/20 relative"
             title={
               activeProjectId && activeProjectData
-                ? `Active Project: ${activeProjectData.project?.title || "Active"} — Click to switch`
+                ? `Active Project: ${
+                    activeProjectData.project?.title || "Active"
+                  } — Click to switch`
                 : "Select Active Project"
             }
           >
@@ -432,20 +457,26 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           aria-label="Open User profile"
         >
           <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
-            {user?.full_name || user?.username || (user?.email ? user.email.split("@")[0] : "User")}
+            {user?.full_name ||
+              user?.username ||
+              (user?.email ? user.email.split("@")[0] : "User")}
           </span>
           <img
-            src={
-              (() => {
-                const raw = user?.avatar_url || user?.picture || user?.photo_url;
-                if (raw && typeof raw === "string" && !raw.includes("dicebear") && !raw.includes("avataaars")) {
-                  return raw;
-                }
-                return "https://lh3.googleusercontent.com/a/default-user";
-              })()
-            }
+            src={(() => {
+              const raw = user?.avatar_url || user?.picture || user?.photo_url;
+              if (
+                raw &&
+                typeof raw === "string" &&
+                !raw.includes("dicebear") &&
+                !raw.includes("avataaars")
+              ) {
+                return raw;
+              }
+              return "https://lh3.googleusercontent.com/a/default-user";
+            })()}
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "https://lh3.googleusercontent.com/a/default-user";
+              (e.currentTarget as HTMLImageElement).src =
+                "https://lh3.googleusercontent.com/a/default-user";
             }}
             alt="User Avatar"
             className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
@@ -454,7 +485,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
         <div className="w-px h-6 bg-gray-800 mx-1"></div>
 
-        <button 
+        <button
           onClick={() => {
             const target = resolveWorkspaceReturnPath({
               seriesSlug,
@@ -472,8 +503,8 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         >
           <X className="w-4 h-4 mr-1.5" /> Cancel
         </button>
-        
-        <button 
+
+        <button
           onClick={() => {
             if (handleExecuteSave) {
               handleExecuteSave();

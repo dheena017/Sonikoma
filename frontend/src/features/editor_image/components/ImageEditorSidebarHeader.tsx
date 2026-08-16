@@ -22,11 +22,19 @@ export const ImageEditorSidebarHeader: React.FC<Props> = ({ activeTab }) => {
       case "adjust":
         return { title: "Color & Filters", icon: Sparkles, badge: "ENHANCE" };
       case "edit":
-        return { title: "Transform & Bounds", icon: Settings2, badge: "CANVAS" };
+        return {
+          title: "Transform & Bounds",
+          icon: Settings2,
+          badge: "CANVAS",
+        };
       case "draw":
         return { title: "Retouch & Brush", icon: Brush, badge: "INPAINT" };
       case "slice":
-        return { title: "Horizontal Cutter", icon: Scissors, badge: "SPLITTER" };
+        return {
+          title: "Horizontal Cutter",
+          icon: Scissors,
+          badge: "SPLITTER",
+        };
       case "crop":
         return { title: "Panel Cuts Registry", icon: Crop, badge: "AUTO-CROP" };
       case "merge":
@@ -34,9 +42,17 @@ export const ImageEditorSidebarHeader: React.FC<Props> = ({ activeTab }) => {
       case "separate":
         return { title: "Layer Separation", icon: Layers, badge: "AI VISION" };
       case "train":
-        return { title: "YOLO AI Fine-Tuner", icon: Database, badge: "NEURAL MODEL" };
+        return {
+          title: "YOLO AI Fine-Tuner",
+          icon: Database,
+          badge: "NEURAL MODEL",
+        };
       default:
-        return { title: "Studio Controls", icon: SlidersHorizontal, badge: "ACTIVE" };
+        return {
+          title: "Studio Controls",
+          icon: SlidersHorizontal,
+          badge: "ACTIVE",
+        };
     }
   };
 

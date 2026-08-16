@@ -47,7 +47,9 @@ export interface VideoPreviewAdvancedSettingsProps {
   videoFormat: "mp4" | "webm" | "mkv";
   setVideoFormat: (val: "mp4" | "webm" | "mkv") => void;
   backgroundStyle: "black" | "white" | "transparent" | "blurred";
-  setBackgroundStyle: (val: "black" | "white" | "transparent" | "blurred") => void;
+  setBackgroundStyle: (
+    val: "black" | "white" | "transparent" | "blurred"
+  ) => void;
   subtitlesStyle: "none" | "burn-in" | "soft";
   setSubtitlesStyle: (val: "none" | "burn-in" | "soft") => void;
 
@@ -148,7 +150,9 @@ const VideoPreviewAdvancedSettings = React.memo(
     const [presetName, setPresetName] = React.useState("");
 
     // Dynamic Voices Loader
-    const [availableVoices, setAvailableVoices] = React.useState<Array<{ code: string; label: string }>>([]);
+    const [availableVoices, setAvailableVoices] = React.useState<
+      Array<{ code: string; label: string }>
+    >([]);
     const [loadingVoices, setLoadingVoices] = React.useState(false);
 
     React.useEffect(() => {
@@ -175,20 +179,39 @@ const VideoPreviewAdvancedSettings = React.memo(
     }, [fetchWithInterceptor]);
 
     const defaultVoices = [
-      { code: "Standard Comic Narrator (Male)", label: "Standard Comic Narrator (Male)" },
-      { code: "Sultry Narrative Tone (Female)", label: "Sultry Narrative Tone (Female)" },
-      { code: "Shonen Protagonist (Energetic Male)", label: "Shonen Protagonist (Energetic Male)" },
-      { code: "Dark Anti-Hero voice (Raspy Deep)", label: "Dark Anti-Hero voice (Raspy Deep)" },
+      {
+        code: "Standard Comic Narrator (Male)",
+        label: "Standard Comic Narrator (Male)",
+      },
+      {
+        code: "Sultry Narrative Tone (Female)",
+        label: "Sultry Narrative Tone (Female)",
+      },
+      {
+        code: "Shonen Protagonist (Energetic Male)",
+        label: "Shonen Protagonist (Energetic Male)",
+      },
+      {
+        code: "Dark Anti-Hero voice (Raspy Deep)",
+        label: "Dark Anti-Hero voice (Raspy Deep)",
+      },
     ];
 
-    const displayVoices = availableVoices.length > 0 ? availableVoices : defaultVoices;
+    const displayVoices =
+      availableVoices.length > 0 ? availableVoices : defaultVoices;
 
     // Local states fallback if callbacks are not provided
-    const [localCropSensitivity, setLocalCropSensitivity] = React.useState(
-      () => parseInt(localStorage.getItem("ai_crop_sensitivity") || String(cropSensitivity), 10)
+    const [localCropSensitivity, setLocalCropSensitivity] = React.useState(() =>
+      parseInt(
+        localStorage.getItem("ai_crop_sensitivity") || String(cropSensitivity),
+        10
+      )
     );
-    const [localCropPaddingPx, setLocalCropPaddingPx] = React.useState(
-      () => parseInt(localStorage.getItem("ai_crop_padding") || String(cropPaddingPx), 10)
+    const [localCropPaddingPx, setLocalCropPaddingPx] = React.useState(() =>
+      parseInt(
+        localStorage.getItem("ai_crop_padding") || String(cropPaddingPx),
+        10
+      )
     );
     const [localCropFocusMode, setLocalCropFocusMode] = React.useState<string>(
       () => localStorage.getItem("ai_crop_focus_mode") || cropFocusMode
@@ -197,17 +220,27 @@ const VideoPreviewAdvancedSettings = React.memo(
       () => localStorage.getItem("ai_crop_model") || cropModel
     );
 
-    const [localBubbleSensitivity, setLocalBubbleSensitivity] = React.useState(bubbleSensitivity);
-    const [localBubbleDilation, setLocalBubbleDilation] = React.useState(bubbleDilation > 0 ? bubbleDilation : 5);
-    const [localBubbleEraseMethod, setLocalBubbleEraseMethod] = React.useState<string>(
-      () => localStorage.getItem("ai_bubble_erase_method") || bubbleEraseMethod
+    const [localBubbleSensitivity, setLocalBubbleSensitivity] =
+      React.useState(bubbleSensitivity);
+    const [localBubbleDilation, setLocalBubbleDilation] = React.useState(
+      bubbleDilation > 0 ? bubbleDilation : 5
     );
-    const [localBubbleDetectionStyle, setLocalBubbleDetectionStyle] = React.useState<string>(
-      () => localStorage.getItem("ai_bubble_detection_style") || bubbleDetectionStyle
-    );
+    const [localBubbleEraseMethod, setLocalBubbleEraseMethod] =
+      React.useState<string>(
+        () =>
+          localStorage.getItem("ai_bubble_erase_method") || bubbleEraseMethod
+      );
+    const [localBubbleDetectionStyle, setLocalBubbleDetectionStyle] =
+      React.useState<string>(
+        () =>
+          localStorage.getItem("ai_bubble_detection_style") ||
+          bubbleDetectionStyle
+      );
 
     const [localNarratorVoice, setLocalNarratorVoice] = React.useState<string>(
-      () => localStorage.getItem("ai_comic_narrator_voice") || "Sultry Narrative Tone (Female)"
+      () =>
+        localStorage.getItem("ai_comic_narrator_voice") ||
+        "Sultry Narrative Tone (Female)"
     );
 
     const handleNarratorVoiceChange = (val: string) => {
@@ -237,7 +270,10 @@ const VideoPreviewAdvancedSettings = React.memo(
 
     // Persist Bubble settings to localStorage
     React.useEffect(() => {
-      localStorage.setItem("ai_bubble_sensitivity", String(localBubbleSensitivity));
+      localStorage.setItem(
+        "ai_bubble_sensitivity",
+        String(localBubbleSensitivity)
+      );
     }, [localBubbleSensitivity]);
 
     React.useEffect(() => {
@@ -249,10 +285,11 @@ const VideoPreviewAdvancedSettings = React.memo(
     }, [localBubbleEraseMethod]);
 
     React.useEffect(() => {
-      localStorage.setItem("ai_bubble_detection_style", localBubbleDetectionStyle);
+      localStorage.setItem(
+        "ai_bubble_detection_style",
+        localBubbleDetectionStyle
+      );
     }, [localBubbleDetectionStyle]);
-
-
 
     // Sync state changes back to parent setters if they exist
     const handleCropSensitivityChange = (val: number) => {
@@ -395,21 +432,33 @@ const VideoPreviewAdvancedSettings = React.memo(
       setFrameRate(preset.frameRate);
       setActiveTheme(preset.activeTheme);
 
-      if (preset.audioReactiveShake !== undefined) setAudioReactiveShake(preset.audioReactiveShake);
-      if (preset.shakeIntensity !== undefined) setShakeIntensity(preset.shakeIntensity);
+      if (preset.audioReactiveShake !== undefined)
+        setAudioReactiveShake(preset.audioReactiveShake);
+      if (preset.shakeIntensity !== undefined)
+        setShakeIntensity(preset.shakeIntensity);
       if (preset.videoFormat !== undefined) setVideoFormat(preset.videoFormat);
-      if (preset.backgroundStyle !== undefined) setBackgroundStyle(preset.backgroundStyle);
-      if (preset.subtitlesStyle !== undefined) setSubtitlesStyle(preset.subtitlesStyle);
+      if (preset.backgroundStyle !== undefined)
+        setBackgroundStyle(preset.backgroundStyle);
+      if (preset.subtitlesStyle !== undefined)
+        setSubtitlesStyle(preset.subtitlesStyle);
 
-      if (preset.cropSensitivity !== undefined) handleCropSensitivityChange(preset.cropSensitivity);
-      if (preset.cropPaddingPx !== undefined) handleCropPaddingChange(preset.cropPaddingPx);
-      if (preset.cropFocusMode !== undefined) handleCropFocusChange(preset.cropFocusMode);
-      if (preset.cropModel !== undefined) handleCropModelChange(preset.cropModel);
+      if (preset.cropSensitivity !== undefined)
+        handleCropSensitivityChange(preset.cropSensitivity);
+      if (preset.cropPaddingPx !== undefined)
+        handleCropPaddingChange(preset.cropPaddingPx);
+      if (preset.cropFocusMode !== undefined)
+        handleCropFocusChange(preset.cropFocusMode);
+      if (preset.cropModel !== undefined)
+        handleCropModelChange(preset.cropModel);
 
-      if (preset.bubbleSensitivity !== undefined) handleBubbleSensitivityChange(preset.bubbleSensitivity);
-      if (preset.bubbleDilation !== undefined) handleBubbleDilationChange(preset.bubbleDilation);
-      if (preset.bubbleEraseMethod !== undefined) handleBubbleEraseChange(preset.bubbleEraseMethod);
-      if (preset.bubbleDetectionStyle !== undefined) handleBubbleDetectionChange(preset.bubbleDetectionStyle);
+      if (preset.bubbleSensitivity !== undefined)
+        handleBubbleSensitivityChange(preset.bubbleSensitivity);
+      if (preset.bubbleDilation !== undefined)
+        handleBubbleDilationChange(preset.bubbleDilation);
+      if (preset.bubbleEraseMethod !== undefined)
+        handleBubbleEraseChange(preset.bubbleEraseMethod);
+      if (preset.bubbleDetectionStyle !== undefined)
+        handleBubbleDetectionChange(preset.bubbleDetectionStyle);
 
       if (addNotification) {
         addNotification(`Loaded preset "${name}"`, "info");
@@ -607,19 +656,21 @@ const VideoPreviewAdvancedSettings = React.memo(
                 </div>
                 {audioReactiveShake && (
                   <div className="grid grid-cols-4 gap-1 pt-1">
-                    {(["low", "medium", "high", "extreme"] as const).map((intensity) => (
-                      <button
-                        key={intensity}
-                        onClick={() => setShakeIntensity(intensity)}
-                        className={`py-1 rounded-lg border text-[10px] uppercase font-bold font-mono text-center transition-all cursor-pointer ${
-                          shakeIntensity === intensity
-                            ? "bg-purple-950/40 border-purple-500 text-purple-300"
-                            : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
-                        }`}
-                      >
-                        {intensity}
-                      </button>
-                    ))}
+                    {(["low", "medium", "high", "extreme"] as const).map(
+                      (intensity) => (
+                        <button
+                          key={intensity}
+                          onClick={() => setShakeIntensity(intensity)}
+                          className={`py-1 rounded-lg border text-[10px] uppercase font-bold font-mono text-center transition-all cursor-pointer ${
+                            shakeIntensity === intensity
+                              ? "bg-purple-950/40 border-purple-500 text-purple-300"
+                              : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
+                          }`}
+                        >
+                          {intensity}
+                        </button>
+                      )
+                    )}
                   </div>
                 )}
               </div>
@@ -720,7 +771,8 @@ const VideoPreviewAdvancedSettings = React.memo(
                   AI Panel Segmentation & Smart Crop Settings
                 </h3>
                 <p className="text-[10px] text-neutral-400 font-mono">
-                  Fine-tune automated panel boundary detection and visual reframing focus
+                  Fine-tune automated panel boundary detection and visual
+                  reframing focus
                 </p>
               </div>
             </div>
@@ -739,7 +791,9 @@ const VideoPreviewAdvancedSettings = React.memo(
                     max={90}
                     step={5}
                     value={localCropSensitivity}
-                    onChange={(e) => handleCropSensitivityChange(Number(e.target.value))}
+                    onChange={(e) =>
+                      handleCropSensitivityChange(Number(e.target.value))
+                    }
                     className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
                   />
                   <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold w-10 text-right">
@@ -761,7 +815,9 @@ const VideoPreviewAdvancedSettings = React.memo(
                     max={50}
                     step={2}
                     value={localCropPaddingPx}
-                    onChange={(e) => handleCropPaddingChange(Number(e.target.value))}
+                    onChange={(e) =>
+                      handleCropPaddingChange(Number(e.target.value))
+                    }
                     className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
                   />
                   <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold w-10 text-right">
@@ -823,7 +879,8 @@ const VideoPreviewAdvancedSettings = React.memo(
                   Speech Bubble Detection & Text Eraser Settings
                 </h3>
                 <p className="text-[10px] text-neutral-400 font-mono">
-                  Configure text inpainting models and dialogue translation thresholds
+                  Configure text inpainting models and dialogue translation
+                  thresholds
                 </p>
               </div>
             </div>
@@ -843,7 +900,9 @@ const VideoPreviewAdvancedSettings = React.memo(
                   ].map((balloonItem) => (
                     <button
                       key={balloonItem.id}
-                      onClick={() => handleBubbleDetectionChange(balloonItem.id)}
+                      onClick={() =>
+                        handleBubbleDetectionChange(balloonItem.id)
+                      }
                       className={`py-1.5 px-1 rounded-xl border text-[10px] text-center font-bold font-mono transition-all cursor-pointer ${
                         localBubbleDetectionStyle === balloonItem.id
                           ? "bg-purple-950/20 border-purple-500 text-purple-300"
@@ -869,7 +928,9 @@ const VideoPreviewAdvancedSettings = React.memo(
                     max={90}
                     step={5}
                     value={localBubbleSensitivity}
-                    onChange={(e) => handleBubbleSensitivityChange(Number(e.target.value))}
+                    onChange={(e) =>
+                      handleBubbleSensitivityChange(Number(e.target.value))
+                    }
                     className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
                   />
                   <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold w-10 text-right">
@@ -891,7 +952,9 @@ const VideoPreviewAdvancedSettings = React.memo(
                     max={15}
                     step={1}
                     value={localBubbleDilation}
-                    onChange={(e) => handleBubbleDilationChange(Number(e.target.value))}
+                    onChange={(e) =>
+                      handleBubbleDilationChange(Number(e.target.value))
+                    }
                     className="w-full accent-purple-500 bg-neutral-800 cursor-pointer"
                   />
                   <span className="text-xs font-mono text-[#dcdcdc] shrink-0 font-semibold w-10 text-right">
@@ -941,7 +1004,8 @@ const VideoPreviewAdvancedSettings = React.memo(
                   Themes, Presets & Session Sharing
                 </h3>
                 <p className="text-[10px] text-neutral-400 font-mono">
-                  Manage interface skins, load workspace bundles and export config hashes
+                  Manage interface skins, load workspace bundles and export
+                  config hashes
                 </p>
               </div>
             </div>
@@ -954,8 +1018,16 @@ const VideoPreviewAdvancedSettings = React.memo(
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { id: "obsidian", name: "Obsidian", color: "bg-purple-600" },
-                    { id: "cyberpunk", name: "Cyberpunk", color: "bg-cyan-500" },
+                    {
+                      id: "obsidian",
+                      name: "Obsidian",
+                      color: "bg-purple-600",
+                    },
+                    {
+                      id: "cyberpunk",
+                      name: "Cyberpunk",
+                      color: "bg-cyan-500",
+                    },
                     { id: "slate", name: "Slate", color: "bg-zinc-400" },
                     { id: "indigo", name: "Indigo", color: "bg-indigo-500" },
                   ].map((theme) => (
@@ -968,7 +1040,9 @@ const VideoPreviewAdvancedSettings = React.memo(
                           : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-neutral-200"
                       }`}
                     >
-                      <span className={`h-2.5 w-2.5 rounded-full ${theme.color} shrink-0`} />
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${theme.color} shrink-0`}
+                      />
                       <span className="font-mono">{theme.name}</span>
                     </button>
                   ))}

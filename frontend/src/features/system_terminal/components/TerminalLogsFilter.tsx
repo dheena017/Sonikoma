@@ -31,7 +31,9 @@ export function TerminalLogsFilter({
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-neutral-950/40 p-2 rounded-xl border border-transparent shadow-inner shadow-black/10">
       {/* Filter Dropdown */}
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider">Filter:</span>
+        <span className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider">
+          Filter:
+        </span>
         <select
           value={activeFilter}
           onChange={(e) => setActiveFilter(e.target.value as any)}

@@ -22,25 +22,66 @@ function parseVoiceCharacteristics(voiceActor: string) {
   let targetLangPrefix = "en";
   let targetFullLang = "en-US";
 
-  if (actorLower.includes("korean") || actorLower.includes("ko-kr") || actorLower.includes("sunhi") || actorLower.includes("injoon")) {
+  if (
+    actorLower.includes("korean") ||
+    actorLower.includes("ko-kr") ||
+    actorLower.includes("sunhi") ||
+    actorLower.includes("injoon")
+  ) {
     targetLangPrefix = "ko";
     targetFullLang = "ko-KR";
-  } else if (actorLower.includes("japanese") || actorLower.includes("ja-jp") || actorLower.includes("nanami")) {
+  } else if (
+    actorLower.includes("japanese") ||
+    actorLower.includes("ja-jp") ||
+    actorLower.includes("nanami")
+  ) {
     targetLangPrefix = "ja";
     targetFullLang = "ja-JP";
-  } else if (actorLower.includes("chinese") || actorLower.includes("mandarin") || actorLower.includes("zh-cn") || actorLower.includes("xiaoxiao")) {
+  } else if (
+    actorLower.includes("chinese") ||
+    actorLower.includes("mandarin") ||
+    actorLower.includes("zh-cn") ||
+    actorLower.includes("xiaoxiao")
+  ) {
     targetLangPrefix = "zh";
     targetFullLang = "zh-CN";
-  } else if (actorLower.includes("tamil") || actorLower.includes("ta-in") || actorLower.includes("pallavi") || actorLower.includes("valluvar")) {
+  } else if (
+    actorLower.includes("tamil") ||
+    actorLower.includes("ta-in") ||
+    actorLower.includes("pallavi") ||
+    actorLower.includes("valluvar")
+  ) {
     targetLangPrefix = "ta";
     targetFullLang = "ta-IN";
-  } else if (actorLower.includes("en-gb") || actorLower.includes("sonia") || actorLower.includes("ryan") || actorLower.includes("uk") || actorLower.includes("english (uk)")) {
+  } else if (
+    actorLower.includes("en-gb") ||
+    actorLower.includes("sonia") ||
+    actorLower.includes("ryan") ||
+    actorLower.includes("uk") ||
+    actorLower.includes("english (uk)")
+  ) {
     targetLangPrefix = "en";
     targetFullLang = "en-GB";
-  } else if (actorLower.includes("en-au") || actorLower.includes("natasha") || actorLower.includes("australia") || actorLower.includes("english (au)")) {
+  } else if (
+    actorLower.includes("en-au") ||
+    actorLower.includes("natasha") ||
+    actorLower.includes("australia") ||
+    actorLower.includes("english (au)")
+  ) {
     targetLangPrefix = "en";
     targetFullLang = "en-AU";
-  } else if (actorLower.includes("en-us") || actorLower.includes("guy") || actorLower.includes("jenny") || actorLower.includes("aria") || actorLower.includes("jason") || actorLower.includes("tony") || actorLower.includes("narrator") || actorLower.includes("shonen") || actorLower.includes("sultry") || actorLower.includes("anti-hero")) {
+  } else if (
+    actorLower.includes("en-us") ||
+    actorLower.includes("guy") ||
+    actorLower.includes("jenny") ||
+    actorLower.includes("aria") ||
+    actorLower.includes("jason") ||
+    actorLower.includes("tony") ||
+    actorLower.includes("narrator") ||
+    actorLower.includes("shonen") ||
+    actorLower.includes("sultry") ||
+    actorLower.includes("anti-hero")
+  ) {
     targetLangPrefix = "en";
     targetFullLang = "en-US";
   } else {
@@ -86,13 +127,18 @@ function parseVoiceCharacteristics(voiceActor: string) {
 }
 
 const matchVoice = (voices: SpeechSynthesisVoice[], voiceActor: string) => {
-  const { targetLangPrefix, targetFullLang, targetGender } = parseVoiceCharacteristics(voiceActor);
+  const { targetLangPrefix, targetFullLang, targetGender } =
+    parseVoiceCharacteristics(voiceActor);
 
   // Filter voices by the target language prefix (e.g. "ko", "ja", "ta", "zh", "en")
   // We normalize the voice language tags to lowercase and replace underscores with hyphens
   const langFiltered = voices.filter((v) => {
     const vLang = v.lang.toLowerCase().replace("_", "-");
-    return vLang === targetFullLang.toLowerCase() || vLang.startsWith(targetLangPrefix + "-") || vLang === targetLangPrefix;
+    return (
+      vLang === targetFullLang.toLowerCase() ||
+      vLang.startsWith(targetLangPrefix + "-") ||
+      vLang === targetLangPrefix
+    );
   });
 
   // Fallback: if absolutely no voice matches targetLangPrefix (e.g., Korean or Tamil voice is not installed),
@@ -113,7 +159,7 @@ const matchVoice = (voices: SpeechSynthesisVoice[], voiceActor: string) => {
     if (vLang === targetFullLang.toLowerCase()) {
       score += 100; // Perfect full language & region match (e.g. ko-KR -> ko-KR)
     } else if (vLang.startsWith(targetLangPrefix)) {
-      score += 50;  // Matching language prefix (e.g. en-GB -> en)
+      score += 50; // Matching language prefix (e.g. en-GB -> en)
     }
 
     // 2. Gender matching (max score: 50)
@@ -178,7 +224,8 @@ const matchVoice = (voices: SpeechSynthesisVoice[], voiceActor: string) => {
     }
 
     // 3. Exact voice actor name matching (extra bonus 10)
-    const voiceActorPart = voiceActor.split(/[-—]/).pop()?.trim().toLowerCase() || "";
+    const voiceActorPart =
+      voiceActor.split(/[-—]/).pop()?.trim().toLowerCase() || "";
     if (voiceActorPart && vName.includes(voiceActorPart)) {
       score += 10;
     }
@@ -362,7 +409,13 @@ export function usePlaybackEngine({
 
   useEffect(() => {
     if (storyboardPlaying) {
-      startAmbientBackgroundMusic(musicTheme, volume, isMuted, bgmVolume, audioDucking);
+      startAmbientBackgroundMusic(
+        musicTheme,
+        volume,
+        isMuted,
+        bgmVolume,
+        audioDucking
+      );
     } else {
       stopAmbientBackgroundMusic();
     }
@@ -372,11 +425,17 @@ export function usePlaybackEngine({
   }, [storyboardPlaying, musicTheme, volume, bgmVolume, audioDucking, isMuted]);
 
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent("storyboard-time-update", { detail: playbackTime }));
+    window.dispatchEvent(
+      new CustomEvent("storyboard-time-update", { detail: playbackTime })
+    );
   }, [playbackTime]);
 
   useEffect(() => {
-    if (storyboardPlaying && panels.length > 0 && activePreviewTab !== "video") {
+    if (
+      storyboardPlaying &&
+      panels.length > 0 &&
+      activePreviewTab !== "video"
+    ) {
       const activePanel = panels[currentPanelIndex];
       const stepMs = 100;
 

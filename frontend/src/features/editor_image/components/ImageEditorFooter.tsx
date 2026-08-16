@@ -13,7 +13,6 @@ interface ImageEditorFooterProps {
   handleDeleteCurrentImage: () => void;
   activeTab: ImageTool;
 
-
   isTransforming: boolean;
   addNotification: (msg: string, type: any) => void;
   handleExecuteHorizontalSplit: () => void;

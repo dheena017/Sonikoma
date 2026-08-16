@@ -1,5 +1,12 @@
 import React from "react";
-import { Book, Loader2, ImageIcon, Zap, MoreVertical, Clock } from "lucide-react";
+import {
+  Book,
+  Loader2,
+  ImageIcon,
+  Zap,
+  MoreVertical,
+  Clock,
+} from "lucide-react";
 import { parseWebtoonUrl, extractWebtoonUrl } from "@/shared/utils/url";
 import { FavoritesManager } from "@/features/workspace_scraper/episode-scraper/utils/FavoritesManager";
 
@@ -33,7 +40,9 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
   setChapterTitle,
 }) => {
   const [showSuggestions, setShowSuggestions] = React.useState(false);
-  const [openSuggestionMenuIdx, setOpenSuggestionMenuIdx] = React.useState<number | null>(null);
+  const [openSuggestionMenuIdx, setOpenSuggestionMenuIdx] = React.useState<
+    number | null
+  >(null);
   const [suggestions, setSuggestions] = React.useState<any[]>([]);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -70,7 +79,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
         setShowSuggestions(false);
       }
     };
@@ -106,7 +118,9 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
       onOpenEpisodeScraper(url);
     } else {
       const nav = (window as any).navigateTo;
-      const targetPath = `/scraper/episode-scraper?url=${encodeURIComponent(url)}`;
+      const targetPath = `/scraper/episode-scraper?url=${encodeURIComponent(
+        url
+      )}`;
       if (typeof nav === "function") {
         nav(targetPath);
       } else {
@@ -158,10 +172,13 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             <div className="max-h-72 overflow-y-auto divide-y divide-neutral-800/30 bg-neutral-950/60">
               {suggestions.map((series, idx) => {
                 const parsed = parseWebtoonUrl(series.url);
-                const seriesTitleText = parsed.title || series.title || "Webtoon Series";
+                const seriesTitleText =
+                  parsed.title || series.title || "Webtoon Series";
                 const chapterText =
                   parsed.chapterTitle ||
-                  (parsed.chapterNumber ? `Chapter ${parsed.chapterNumber}` : "Chapter 1");
+                  (parsed.chapterNumber
+                    ? `Chapter ${parsed.chapterNumber}`
+                    : "Chapter 1");
 
                 return (
                   <div
@@ -175,8 +192,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                         setTargetUrl(normalized);
                         if (setSeriesTitle) setSeriesTitle(parsed.title);
                         if (setScrapedGenre) setScrapedGenre(parsed.genre);
-                        if (setChapterNumber) setChapterNumber(parsed.chapterNumber);
-                        if (setChapterTitle && parsed.chapterTitle) setChapterTitle(parsed.chapterTitle);
+                        if (setChapterNumber)
+                          setChapterNumber(parsed.chapterNumber);
+                        if (setChapterTitle && parsed.chapterTitle)
+                          setChapterTitle(parsed.chapterTitle);
                       }
                       setShowSuggestions(false);
                     }}
@@ -206,7 +225,9 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setOpenSuggestionMenuIdx(openSuggestionMenuIdx === idx ? null : idx);
+                          setOpenSuggestionMenuIdx(
+                            openSuggestionMenuIdx === idx ? null : idx
+                          );
                         }}
                         className="w-7 h-7 rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-neutral-400 hover:text-purple-300 border border-purple-500/20 flex items-center justify-center transition-all cursor-pointer active:scale-95"
                       >

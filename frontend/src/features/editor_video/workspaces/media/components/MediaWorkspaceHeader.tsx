@@ -1,6 +1,9 @@
 import React from "react";
 import { Image, UploadCloud } from "lucide-react";
-import { WorkspaceLayoutTabs, WorkspaceLayoutSearch } from "../../../shared/WorkspaceLayout";
+import {
+  WorkspaceLayoutTabs,
+  WorkspaceLayoutSearch,
+} from "../../../shared/WorkspaceLayout";
 
 interface MediaWorkspaceHeaderProps {
   onUpload: () => void;
@@ -12,7 +15,12 @@ interface MediaWorkspaceHeaderProps {
 }
 
 export const MediaWorkspaceHeader: React.FC<MediaWorkspaceHeaderProps> = ({
-  onUpload, tabs, activeTab, onSelectTab, searchQuery, onSearchChange,
+  onUpload,
+  tabs,
+  activeTab,
+  onSelectTab,
+  searchQuery,
+  onSearchChange,
 }) => (
   <div className="shrink-0">
     <div className="px-4 py-3 border-b border-purple-900/20 bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
@@ -21,7 +29,9 @@ export const MediaWorkspaceHeader: React.FC<MediaWorkspaceHeaderProps> = ({
           <Image className="h-4.5 w-4.5 text-purple-300" />
         </div>
         <div className="min-w-0 space-y-0.5">
-          <h2 className="text-[11px] font-black text-white uppercase tracking-[0.28em] font-mono truncate">Media Bin</h2>
+          <h2 className="text-[11px] font-black text-white uppercase tracking-[0.28em] font-mono truncate">
+            Media Bin
+          </h2>
           <p className="text-[10px] text-neutral-300 font-mono truncate max-w-xs">
             Browse and manage your visual assets with instant previews.
           </p>
@@ -36,8 +46,16 @@ export const MediaWorkspaceHeader: React.FC<MediaWorkspaceHeaderProps> = ({
       </button>
     </div>
     <div className="px-3.5 pt-3 pb-2">
-      <WorkspaceLayoutTabs tabs={tabs} activeTab={activeTab} onSelectTab={onSelectTab} />
+      <WorkspaceLayoutTabs
+        tabs={tabs}
+        activeTab={activeTab}
+        onSelectTab={onSelectTab}
+      />
     </div>
-    <WorkspaceLayoutSearch value={searchQuery} onChange={onSearchChange} placeholder="Search media assets..." />
+    <WorkspaceLayoutSearch
+      value={searchQuery}
+      onChange={onSearchChange}
+      placeholder="Search media assets..."
+    />
   </div>
 );

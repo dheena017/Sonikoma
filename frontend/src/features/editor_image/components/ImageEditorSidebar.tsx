@@ -17,7 +17,10 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { useImageEditorStore, ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
+import {
+  useImageEditorStore,
+  ImageTool,
+} from "@/features/editor_image/hooks/useImageEditorState";
 
 export interface ImageEditorSidebarProps {
   isCollapsed: boolean;
@@ -172,9 +175,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
         onClick={() => setIsCollapsed(true)}
       />
 
-      <aside
-        className="fixed top-0 bottom-0 left-0 h-screen w-[280px] bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(168,85,247,0.06)] overflow-hidden select-none"
-      >
+      <aside className="fixed top-0 bottom-0 left-0 h-screen w-[280px] bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(168,85,247,0.06)] overflow-hidden select-none">
         {/* Top Header / Close Area */}
         <div
           className={`flex items-center border-b border-neutral-800/60 transition-all duration-300 shrink-0 ${
@@ -193,7 +194,8 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                   <img
                     src="/logo-dark.png"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+                      (e.currentTarget as HTMLImageElement).src =
+                        "/logo-dark.png";
                     }}
                     className="relative h-11 w-11 rounded-full border border-purple-500/30 shrink-0 object-cover bg-black"
                     alt="Sonikoma Logo"
@@ -240,7 +242,8 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
               <div className="space-y-1.5">
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = item.type === "tool" && activeTool === item.id;
+                  const isActive =
+                    item.type === "tool" && activeTool === item.id;
 
                   return (
                     <div key={item.id} className="relative flex justify-center">
@@ -257,11 +260,26 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                         onClick={() => {
                           if (item.type === "tool" && setActiveTool) {
                             setActiveTool(item.id as ImageTool);
-                          } else if (item.id === "autocrop-hub" && onOpenAutoCropModal) {
+                          } else if (
+                            item.id === "autocrop-hub" &&
+                            onOpenAutoCropModal
+                          ) {
                             onOpenAutoCropModal();
-                          } else if (item.id === "canvas" || item.id === "image-editor") {
-                            const hasValidSlugs = seriesSlug && chapterSlug && seriesSlug !== "null" && chapterSlug !== "null";
-                            const projId = projectId || new URLSearchParams(window.location.search).get("id") || "";
+                          } else if (
+                            item.id === "canvas" ||
+                            item.id === "image-editor"
+                          ) {
+                            const hasValidSlugs =
+                              seriesSlug &&
+                              chapterSlug &&
+                              seriesSlug !== "null" &&
+                              chapterSlug !== "null";
+                            const projId =
+                              projectId ||
+                              new URLSearchParams(window.location.search).get(
+                                "id"
+                              ) ||
+                              "";
                             const target = hasValidSlugs
                               ? `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}/image-editor?idx=0`
                               : `/scraper/editor/image-editor?id=${projId}&idx=0`;
@@ -297,7 +315,9 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                             <Icon
                               strokeWidth={isActive ? 2.5 : 2}
                               className={`w-5 h-5 transition-colors duration-300 ${
-                                isActive ? "text-purple-300" : "text-neutral-400 group-hover:text-purple-300"
+                                isActive
+                                  ? "text-purple-300"
+                                  : "text-neutral-400 group-hover:text-purple-300"
                               }`}
                             />
                           </div>
@@ -313,7 +333,9 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                         {item.badge !== undefined && (
                           <span
                             className={`absolute ${
-                              isCollapsed ? "-top-1 -right-1" : "relative top-0 right-0"
+                              isCollapsed
+                                ? "-top-1 -right-1"
+                                : "relative top-0 right-0"
                             } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${
                               isActive
                                 ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
@@ -337,7 +359,9 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           <button
             onClick={handleReturnToWorkspace}
             className={`flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white transition-all active:scale-95 border border-purple-400/30 cursor-pointer shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] ${
-              isCollapsed ? "w-11 h-11 p-0" : "w-full py-3.5 px-4 gap-3 text-xs font-black tracking-widest uppercase"
+              isCollapsed
+                ? "w-11 h-11 p-0"
+                : "w-full py-3.5 px-4 gap-3 text-xs font-black tracking-widest uppercase"
             }`}
             title="Return to Workspace"
           >

@@ -34,7 +34,12 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
     {
       name: "Core",
       items: [
-        { id: "dashboard", label: "Dashboard", icon: LayoutGrid, path: "/admin" },
+        {
+          id: "dashboard",
+          label: "Dashboard",
+          icon: LayoutGrid,
+          path: "/admin",
+        },
         {
           id: "announcements",
           label: "Announcements",
@@ -119,7 +124,11 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
 
   const isActive = (path: string) => {
     if (path === "/admin") {
-      return currentPath === "/admin" || currentPath === "/admin/" || currentPath === "/admin-dashboard";
+      return (
+        currentPath === "/admin" ||
+        currentPath === "/admin/" ||
+        currentPath === "/admin-dashboard"
+      );
     }
     return currentPath.startsWith(path);
   };
@@ -160,7 +169,9 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-300 ${
-                active ? "text-purple-300" : "text-neutral-400 group-hover:text-purple-300"
+                active
+                  ? "text-purple-300"
+                  : "text-neutral-400 group-hover:text-purple-300"
               }`}
             />
           </div>
@@ -180,8 +191,16 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             className="w-full flex flex-col items-center pb-2"
           >
             {/* Section divider (only between groups) + label for every group */}
-            <div className="w-full flex flex-col items-center" style={{ marginTop: groupIdx > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
-              {groupIdx > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+            <div
+              className="w-full flex flex-col items-center"
+              style={{
+                marginTop: groupIdx > 0 ? "0.5rem" : "0",
+                marginBottom: "0.375rem",
+              }}
+            >
+              {groupIdx > 0 && (
+                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />
+              )}
               <span className="text-[9px] font-black uppercase tracking-[0.16em] text-violet-400/80 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
                 {group.name}
               </span>

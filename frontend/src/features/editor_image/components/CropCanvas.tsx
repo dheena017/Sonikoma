@@ -1,7 +1,10 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { Trash2, Image as ImageIcon } from "lucide-react";
 import { Slice } from "@/features/editor_image/components";
-import { ImageTool, useImageEditorStore } from "@/features/editor_image/hooks/useImageEditorState";
+import {
+  ImageTool,
+  useImageEditorStore,
+} from "@/features/editor_image/hooks/useImageEditorState";
 import CanvasBrushLayer from "@/features/editor_image/components/CanvasBrushLayer";
 import CanvasBubbleBoxes from "@/features/editor_image/components/CanvasBubbleBoxes";
 import CanvasSplitLines from "@/features/editor_image/components/CanvasSplitLines";
@@ -28,12 +31,12 @@ interface CropCanvasProps {
   handleDeleteSlice: (id: string, e: React.MouseEvent) => void;
   handleRemoveSplitLine: (yVal: number) => void;
   dragType:
-  | "draw"
-  | "move"
-  | "split"
-  | "drag-split-line"
-  | `resize-${string}`
-  | null;
+    | "draw"
+    | "move"
+    | "split"
+    | "drag-split-line"
+    | `resize-${string}`
+    | null;
   onResizeStart: (handle: string, clientX: number, clientY: number) => void;
   handleSelectAndDragSlice: (
     slice: Slice,
@@ -129,7 +132,9 @@ export default function CropCanvas({
   setSelectedSliceId,
   aspectRatio = 0,
 }: CropCanvasProps) {
-  const selectedFocalPoint = useImageEditorStore((state) => state.selectedFocalPoint);
+  const selectedFocalPoint = useImageEditorStore(
+    (state) => state.selectedFocalPoint
+  );
   const showSafeZones = useImageEditorStore((state) => state.showSafeZones);
   const lineSharpen = useImageEditorStore((state) => state.lineSharpen);
   const mangaContrast = useImageEditorStore((state) => state.mangaContrast);
@@ -296,17 +301,20 @@ export default function CropCanvas({
 
   const handleCanvasMouseUp = () => setIsDrawing(false);
 
-  const focalPointPositions = useMemo(() => ({
-    TL: { top: "10%", left: "10%" },
-    TC: { top: "10%", left: "50%" },
-    TR: { top: "10%", left: "90%" },
-    ML: { top: "50%", left: "10%" },
-    MC: { top: "50%", left: "50%" },
-    MR: { top: "50%", left: "90%" },
-    BL: { top: "90%", left: "10%" },
-    BC: { top: "90%", left: "50%" },
-    BR: { top: "90%", left: "90%" },
-  }), [selectedFocalPoint]);
+  const focalPointPositions = useMemo(
+    () => ({
+      TL: { top: "10%", left: "10%" },
+      TC: { top: "10%", left: "50%" },
+      TR: { top: "10%", left: "90%" },
+      ML: { top: "50%", left: "10%" },
+      MC: { top: "50%", left: "50%" },
+      MR: { top: "50%", left: "90%" },
+      BL: { top: "90%", left: "10%" },
+      BC: { top: "90%", left: "50%" },
+      BR: { top: "90%", left: "90%" },
+    }),
+    [selectedFocalPoint]
+  );
 
   const previewFilter = useMemo(() => {
     const filters: string[] = [];
@@ -334,8 +342,9 @@ export default function CropCanvas({
   return (
     <div
       ref={scrollParentRef}
-      className={`relative border border-white/10 hover:border-purple-500/30 rounded-2xl bg-gradient-to-br from-[#0c0a1a]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl ${zoom > 1 ? "overflow-auto" : "overflow-hidden"
-        } flex-1 h-0 flex items-center justify-center select-none transition-all shadow-[0_10px_40px_rgba(0,0,0,0.7)]`}
+      className={`relative border border-white/10 hover:border-purple-500/30 rounded-2xl bg-gradient-to-br from-[#0c0a1a]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl ${
+        zoom > 1 ? "overflow-auto" : "overflow-hidden"
+      } flex-1 h-0 flex items-center justify-center select-none transition-all shadow-[0_10px_40px_rgba(0,0,0,0.7)]`}
     >
       <div
         style={{
@@ -402,8 +411,9 @@ export default function CropCanvas({
             if (isManualBrushActive) return;
             handleEnd();
           }}
-          className={`relative inline-flex flex-col ${activeTab === "crop" ? "cursor-crosshair" : ""
-            }`}
+          className={`relative inline-flex flex-col ${
+            activeTab === "crop" ? "cursor-crosshair" : ""
+          }`}
           style={{
             userSelect: "none",
             touchAction: "none",
@@ -548,10 +558,11 @@ export default function CropCanvas({
                       handleSelectAndDragSlice(slice, e.clientX, e.clientY);
                     }
                   }}
-                  className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${isSelected
+                  className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
+                    isSelected
                       ? "border-purple-400 bg-purple-500/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]"
                       : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
-                    }`}
+                  }`}
                   style={{
                     top: `${slice.cropTop}%`,
                     bottom: `${slice.cropBottom}%`,
@@ -561,10 +572,11 @@ export default function CropCanvas({
                 >
                   <div className="p-1">
                     <span
-                      className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${isSelected
+                      className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${
+                        isSelected
                           ? "bg-purple-950 text-purple-300 border border-purple-500/30"
                           : "bg-purple-950/90 text-purple-300"
-                        }`}
+                      }`}
                     >
                       Cut #{index + 1}
                     </span>

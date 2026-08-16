@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Youtube, RefreshCw, CheckCircle2, User, ChevronDown } from "lucide-react";
+import {
+  Youtube,
+  RefreshCw,
+  CheckCircle2,
+  User,
+  ChevronDown,
+} from "lucide-react";
 
 export interface YouTubeChannel {
   id: string;
@@ -14,7 +20,10 @@ export interface YouTubeChannel {
 interface YouTubeChannelSelectorProps {
   selectedChannelId?: string;
   onSelectChannel: (channel: YouTubeChannel) => void;
-  addNotification?: (msg: string, type: "info" | "success" | "error" | "warning") => void;
+  addNotification?: (
+    msg: string,
+    type: "info" | "success" | "error" | "warning"
+  ) => void;
 }
 
 export default function YouTubeChannelSelector({
@@ -31,11 +40,14 @@ export default function YouTubeChannelSelector({
     setIsLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const res = await fetch("/api/export/youtube/channels", {
         headers: {
-          "Accept": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -49,13 +61,19 @@ export default function YouTubeChannelSelector({
       setChannels(channelList);
       if (channelList.length > 0) {
         // If none selected, default to the first channel
-        const current = channelList.find((c) => c.id === selectedChannelId) || channelList[0];
+        const current =
+          channelList.find((c) => c.id === selectedChannelId) || channelList[0];
         onSelectChannel(current);
         if (addNotification) {
-          addNotification(`Loaded ${channelList.length} YouTube channel(s).`, "success");
+          addNotification(
+            `Loaded ${channelList.length} YouTube channel(s).`,
+            "success"
+          );
         }
       } else {
-        setError("No YouTube channels found. Please connect your YouTube account.");
+        setError(
+          "No YouTube channels found. Please connect your YouTube account."
+        );
       }
     } catch (err: any) {
       console.warn("YouTube channel fetch notice:", err.message);
@@ -70,7 +88,8 @@ export default function YouTubeChannelSelector({
     fetchChannels();
   }, []);
 
-  const activeChannel = channels.find((c) => c.id === selectedChannelId) || channels[0];
+  const activeChannel =
+    channels.find((c) => c.id === selectedChannelId) || channels[0];
 
   return (
     <div className="bg-neutral-950/50 backdrop-blur-md p-5 border border-neutral-900 rounded-2xl space-y-3 font-mono text-xs text-neutral-300 transition-all duration-300 hover:border-neutral-800 shadow-xl">
@@ -95,7 +114,11 @@ export default function YouTubeChannelSelector({
           className="p-2 bg-neutral-900 hover:bg-neutral-850 text-neutral-400 hover:text-white border border-neutral-800 rounded-xl transition-all duration-200 cursor-pointer disabled:opacity-50"
           title="Refresh connected YouTube channels"
         >
-          <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin text-purple-400" : ""}`} />
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${
+              isLoading ? "animate-spin text-purple-400" : ""
+            }`}
+          />
         </button>
       </div>
 
@@ -142,7 +165,11 @@ export default function YouTubeChannelSelector({
                 </div>
               </div>
             </div>
-            <ChevronDown className={`h-4 w-4 text-neutral-400 group-hover:text-white transition-transform ${isOpen ? "rotate-180" : ""}`} />
+            <ChevronDown
+              className={`h-4 w-4 text-neutral-400 group-hover:text-white transition-transform ${
+                isOpen ? "rotate-180" : ""
+              }`}
+            />
           </button>
 
           {isOpen && (
@@ -160,7 +187,9 @@ export default function YouTubeChannelSelector({
                       setIsOpen(false);
                     }}
                     className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
-                      isSelected ? "bg-purple-950/20 text-purple-200" : "hover:bg-neutral-900 text-neutral-300"
+                      isSelected
+                        ? "bg-purple-950/20 text-purple-200"
+                        : "hover:bg-neutral-900 text-neutral-300"
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -176,7 +205,9 @@ export default function YouTubeChannelSelector({
                         </div>
                       )}
                       <div className="min-w-0">
-                        <div className="font-bold text-xs truncate">{ch.title}</div>
+                        <div className="font-bold text-xs truncate">
+                          {ch.title}
+                        </div>
                         <div className="text-[10px] text-neutral-500 truncate">
                           {ch.custom_url || ch.id}
                         </div>

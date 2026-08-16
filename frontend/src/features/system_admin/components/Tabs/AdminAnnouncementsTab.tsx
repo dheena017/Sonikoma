@@ -99,7 +99,8 @@ export function AdminAnnouncementsTab({
             Active Platform Broadcasts
           </h3>
           <p className="text-xs text-neutral-400 font-sans mt-0.5">
-            Broadcast messages to all creators. Active announcements will appear as a banner across their workspace.
+            Broadcast messages to all creators. Active announcements will appear
+            as a banner across their workspace.
           </p>
         </div>
         {!isCreating && (
@@ -166,7 +167,9 @@ export function AdminAnnouncementsTab({
                     onChange={(e) => setNewType(e.target.value)}
                     className="accent-purple-500 cursor-pointer"
                   />
-                  <span className="text-xs font-bold text-blue-400">💡 Information</span>
+                  <span className="text-xs font-bold text-blue-400">
+                    💡 Information
+                  </span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer bg-neutral-950/60 border border-white/10 px-3.5 py-1.5 rounded-xl hover:border-amber-500/40 transition-all">
                   <input
@@ -177,7 +180,9 @@ export function AdminAnnouncementsTab({
                     onChange={(e) => setNewType(e.target.value)}
                     className="accent-purple-500 cursor-pointer"
                   />
-                  <span className="text-xs font-bold text-amber-400">⚠️ Warning</span>
+                  <span className="text-xs font-bold text-amber-400">
+                    ⚠️ Warning
+                  </span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer bg-neutral-950/60 border border-white/10 px-3.5 py-1.5 rounded-xl hover:border-emerald-500/40 transition-all">
                   <input
@@ -188,7 +193,9 @@ export function AdminAnnouncementsTab({
                     onChange={(e) => setNewType(e.target.value)}
                     className="accent-purple-500 cursor-pointer"
                   />
-                  <span className="text-xs font-bold text-emerald-400">✅ Feature Launch</span>
+                  <span className="text-xs font-bold text-emerald-400">
+                    ✅ Feature Launch
+                  </span>
                 </label>
               </div>
             </div>
@@ -282,7 +289,8 @@ export function AdminAnnouncementsTab({
           ))}
           {announcements.length === 0 && (
             <div className="text-center py-16 text-neutral-500 font-mono text-sm bg-neutral-900/40 border border-white/5 rounded-2xl">
-              No platform announcements active. Click "New Announcement" to publish a broadcast.
+              No platform announcements active. Click "New Announcement" to
+              publish a broadcast.
             </div>
           )}
         </div>

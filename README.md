@@ -22,19 +22,21 @@
 
 Sonikoma features dynamic dual-mode theme support (Dark / Light) built with Tailwind CSS & custom CSS design tokens:
 
-| Dark Mode (Default) | Light Mode |
-| :---: | :---: |
+|                            Dark Mode (Default)                            |                                 Light Mode                                  |
+| :-----------------------------------------------------------------------: | :-------------------------------------------------------------------------: |
 | <img src="./public/logo-dark.png" width="240" alt="Sonikoma Dark Logo" /> | <img src="./public/logo-light.png" width="240" alt="Sonikoma Light Logo" /> |
-| Modern Sleek Dark (`#09090b`) | Pristine Clean Light (`#f4f4f5`) |
+|                       Modern Sleek Dark (`#09090b`)                       |                      Pristine Clean Light (`#f4f4f5`)                       |
 
 ---
 
 ## 📸 Application Interface Previews
 
 ### 1. Interactive Studio & AI Panel Editor
+
 ![Sonikoma AI Storyboard & Video Editor](./public/editor-preview.png)
 
 ### 2. Creator Dashboard & Project Analytics
+
 ![Sonikoma Creator Dashboard & Analytics](./public/dashboard-preview.png)
 
 ---
@@ -86,13 +88,14 @@ frontend/src/
 
 ### Prerequisites
 
-| Component | Minimum Version | Download Link |
-| :--- | :--- | :--- |
-| **Node.js** | 20.x or higher | [nodejs.org](https://nodejs.org/) |
-| **Python** | 3.11.x or higher | [python.org](https://www.python.org/) |
-| **FFmpeg** | Latest stable | [ffmpeg.org](https://ffmpeg.org/download.html) |
+| Component   | Minimum Version  | Download Link                                  |
+| :---------- | :--------------- | :--------------------------------------------- |
+| **Node.js** | 20.x or higher   | [nodejs.org](https://nodejs.org/)              |
+| **Python**  | 3.11.x or higher | [python.org](https://www.python.org/)          |
+| **FFmpeg**  | Latest stable    | [ffmpeg.org](https://ffmpeg.org/download.html) |
 
 > 💡 **FFmpeg Installation**:
+>
 > - **Windows**: `winget install ffmpeg`
 > - **macOS**: `brew install ffmpeg`
 > - **Linux**: `sudo apt install ffmpeg`
@@ -149,12 +152,12 @@ npm run dev
 
 ## 🤖 Supported AI Models
 
-| Model Name | Provider | Primary Use Case |
-| :--- | :--- | :--- |
-| **Gemini 2.5 Flash** | Google AI | Default — Fast, multimodal vision & panel detection |
-| **Gemini 2.0 Pro** | Google AI | High-precision text synthesis & prompt analysis |
-| **Llama 3 70B** | HuggingFace | Open-source privacy-focused script generation |
-| **Mistral 7B** | HuggingFace | Lightweight open-source model inference |
+| Model Name           | Provider    | Primary Use Case                                    |
+| :------------------- | :---------- | :-------------------------------------------------- |
+| **Gemini 2.5 Flash** | Google AI   | Default — Fast, multimodal vision & panel detection |
+| **Gemini 2.0 Pro**   | Google AI   | High-precision text synthesis & prompt analysis     |
+| **Llama 3 70B**      | HuggingFace | Open-source privacy-focused script generation       |
+| **Mistral 7B**       | HuggingFace | Lightweight open-source model inference             |
 
 ---
 

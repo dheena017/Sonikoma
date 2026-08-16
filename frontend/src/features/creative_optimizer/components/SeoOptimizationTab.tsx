@@ -1,6 +1,20 @@
 import * as api from "@/api";
 import React, { useState } from "react";
-import { Sparkles, Copy, Check, AlertTriangle, Flame, Hash, Clock, FileText, RefreshCw, ThumbsUp, Plus, X, Edit3 } from "lucide-react";
+import {
+  Sparkles,
+  Copy,
+  Check,
+  AlertTriangle,
+  Flame,
+  Hash,
+  Clock,
+  FileText,
+  RefreshCw,
+  ThumbsUp,
+  Plus,
+  X,
+  Edit3,
+} from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { fetchWithAuth } from "@/utils";
 
@@ -42,7 +56,8 @@ export default function SeoOptimizationTab({
       const json = await api.runSeoSkill(fetchWithAuth, {
         title: title || "My Webtoon Recap",
         genre: genre || "Action",
-        storyboard_summary: storyboardSummary || "The story summary details go here.",
+        storyboard_summary:
+          storyboardSummary || "The story summary details go here.",
         model: localStorage.getItem("ai_comic_model") || undefined,
       });
 
@@ -57,7 +72,10 @@ export default function SeoOptimizationTab({
           ],
         });
         setSelectedTitleIdx(0);
-        addNotification?.("Successfully compiled SEO Metadata & Title Variants!", "success");
+        addNotification?.(
+          "Successfully compiled SEO Metadata & Title Variants!",
+          "success"
+        );
       }
     } catch (e) {
       console.error(e);
@@ -91,7 +109,8 @@ export default function SeoOptimizationTab({
     });
   };
 
-  const currentTitle = data?.title_variants?.[selectedTitleIdx] || data?.youtube_title || "";
+  const currentTitle =
+    data?.title_variants?.[selectedTitleIdx] || data?.youtube_title || "";
 
   return (
     <div className="space-y-4 w-full animate-fade-in">
@@ -107,7 +126,8 @@ export default function SeoOptimizationTab({
             </h4>
           </div>
           <p className="text-[11px] text-neutral-400 font-mono pl-8">
-            Generate high-CTR titles, target search tags, video chapters, and algorithm descriptions.
+            Generate high-CTR titles, target search tags, video chapters, and
+            algorithm descriptions.
           </p>
         </div>
         <button
@@ -115,7 +135,11 @@ export default function SeoOptimizationTab({
           disabled={loading}
           className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
         >
-          {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+          {loading ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
+            <Sparkles className="w-4 h-4" />
+          )}
           <span>{loading ? "Compiling Meta..." : "✦ Generate SEO Specs"}</span>
         </button>
       </div>
@@ -124,7 +148,9 @@ export default function SeoOptimizationTab({
         <div className="bg-amber-950/20 border border-amber-900/40 rounded-xl p-3 flex gap-3 text-amber-250 animate-fade-in">
           <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
           <p className="text-[11px] text-neutral-400 font-sans">
-            <strong className="text-amber-300 font-mono">Note:</strong> Video duration metadata will be synchronized once a video preview is compiled on the main timeline.
+            <strong className="text-amber-300 font-mono">Note:</strong> Video
+            duration metadata will be synchronized once a video preview is
+            compiled on the main timeline.
           </p>
         </div>
       )}
@@ -133,14 +159,14 @@ export default function SeoOptimizationTab({
         <div className="bg-neutral-900/60 border border-neutral-850 rounded-2xl p-10 text-center animate-pulse space-y-3 shadow-xl">
           <Sparkles className="h-8 w-8 text-purple-400 animate-spin mx-auto" />
           <p className="text-xs font-mono text-purple-300">
-            Analyzing narrative beats & building YouTube algorithm SEO metadata...
+            Analyzing narrative beats & building YouTube algorithm SEO
+            metadata...
           </p>
         </div>
       )}
 
       {data && !loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
-
           {/* 1. VIRAL TITLE CARD WITH 3 VARIANTS */}
           <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
             <div>
@@ -160,7 +186,11 @@ export default function SeoOptimizationTab({
                     className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                     title="Copy Active Title"
                   >
-                    {copiedField === "title" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedField === "title" ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -190,9 +220,15 @@ export default function SeoOptimizationTab({
                   value={currentTitle}
                   onChange={(e) => {
                     const newTitle = e.target.value;
-                    const updated = [...(data.title_variants || [data.youtube_title])];
+                    const updated = [
+                      ...(data.title_variants || [data.youtube_title]),
+                    ];
                     updated[selectedTitleIdx] = newTitle;
-                    setData({ ...data, youtube_title: newTitle, title_variants: updated });
+                    setData({
+                      ...data,
+                      youtube_title: newTitle,
+                      title_variants: updated,
+                    });
                   }}
                   className="w-full bg-transparent text-xs font-sans text-white font-bold outline-none leading-relaxed tracking-wide"
                 />
@@ -200,7 +236,12 @@ export default function SeoOptimizationTab({
             </div>
             <div className="flex items-center justify-between pt-1">
               <span className="text-[9px] font-mono text-emerald-400 flex items-center gap-1">
-                <ThumbsUp className="w-3 h-3" /> Predicted CTR Score: {selectedTitleIdx === 0 ? "9.6/10" : selectedTitleIdx === 1 ? "9.3/10" : "9.1/10"}
+                <ThumbsUp className="w-3 h-3" /> Predicted CTR Score:{" "}
+                {selectedTitleIdx === 0
+                  ? "9.6/10"
+                  : selectedTitleIdx === 1
+                  ? "9.3/10"
+                  : "9.1/10"}
               </span>
               <span className="text-[9px] font-mono text-neutral-500 flex items-center gap-1">
                 <Edit3 className="w-3 h-3" /> Editable
@@ -223,11 +264,17 @@ export default function SeoOptimizationTab({
                     {data.tags.length} Tags
                   </span>
                   <button
-                    onClick={() => copyToClipboard(data.tags.join(", "), "tags")}
+                    onClick={() =>
+                      copyToClipboard(data.tags.join(", "), "tags")
+                    }
                     className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                     title="Copy All Tags"
                   >
-                    {copiedField === "tags" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedField === "tags" ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -278,7 +325,9 @@ export default function SeoOptimizationTab({
               </div>
             </div>
             <div className="flex items-center justify-between pt-1">
-              <span className="text-[9px] font-mono text-neutral-400">Click × to remove, + to append custom tag</span>
+              <span className="text-[9px] font-mono text-neutral-400">
+                Click × to remove, + to append custom tag
+              </span>
             </div>
           </div>
 
@@ -296,17 +345,25 @@ export default function SeoOptimizationTab({
                   {data.timestamps.length} Chapters
                 </span>
                 <button
-                  onClick={() => copyToClipboard(data.timestamps.join("\n"), "timestamps")}
+                  onClick={() =>
+                    copyToClipboard(data.timestamps.join("\n"), "timestamps")
+                  }
                   className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                   title="Copy Timestamps"
                 >
-                  {copiedField === "timestamps" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copiedField === "timestamps" ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
                 </button>
               </div>
             </div>
             <textarea
               value={data.timestamps.join("\n")}
-              onChange={(e) => setData({ ...data, timestamps: e.target.value.split("\n") })}
+              onChange={(e) =>
+                setData({ ...data, timestamps: e.target.value.split("\n") })
+              }
               rows={4}
               className="w-full text-[11px] font-mono text-cyan-100 bg-neutral-950 p-4 rounded-xl border border-neutral-800 leading-relaxed shadow-inner outline-none focus:border-cyan-500/50 resize-none"
             />
@@ -326,22 +383,29 @@ export default function SeoOptimizationTab({
                   {data.youtube_description.length}/5000 Chars
                 </span>
                 <button
-                  onClick={() => copyToClipboard(data.youtube_description, "description")}
+                  onClick={() =>
+                    copyToClipboard(data.youtube_description, "description")
+                  }
                   className="p-1.5 hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-lg transition-all cursor-pointer border border-neutral-800"
                   title="Copy Description"
                 >
-                  {copiedField === "description" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copiedField === "description" ? (
+                    <Check className="h-3.5 w-3.5 text-emerald-400" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
                 </button>
               </div>
             </div>
             <textarea
               value={data.youtube_description}
-              onChange={(e) => setData({ ...data, youtube_description: e.target.value })}
+              onChange={(e) =>
+                setData({ ...data, youtube_description: e.target.value })
+              }
               rows={6}
               className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-4 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-purple-500/50 resize-y"
             />
           </div>
-
         </div>
       )}
     </div>

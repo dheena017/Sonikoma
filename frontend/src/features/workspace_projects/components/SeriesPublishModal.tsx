@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { X, Film, Download, FileText, Music, Sparkles, Check, Loader2, Play } from "lucide-react";
+import {
+  X,
+  Film,
+  Download,
+  FileText,
+  Music,
+  Sparkles,
+  Check,
+  Loader2,
+  Play,
+} from "lucide-react";
 
 interface SeriesPublishModalProps {
   isOpen: boolean;
@@ -16,7 +26,9 @@ export default function SeriesPublishModal({
   chapterCount,
   totalPanels,
 }: SeriesPublishModalProps) {
-  const [activeTab, setActiveTab] = useState<"video" | "archive" | "pdf" | "audio">("video");
+  const [activeTab, setActiveTab] = useState<
+    "video" | "archive" | "pdf" | "audio"
+  >("video");
   const [resolution, setResolution] = useState<"1080p" | "4k">("1080p");
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16">("9:16");
   const [isExporting, setIsExporting] = useState(false);
@@ -43,7 +55,9 @@ export default function SeriesPublishModal({
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white leading-tight">Publish & Export Hub</h2>
+              <h2 className="text-lg font-bold text-white leading-tight">
+                Publish & Export Hub
+              </h2>
               <p className="text-xs text-neutral-400 font-mono">
                 {seriesTitle} · {chapterCount} Chapters · {totalPanels} Panels
               </p>
@@ -60,7 +74,10 @@ export default function SeriesPublishModal({
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 px-6 pt-4 border-b border-neutral-800/60 bg-neutral-950">
           <button
-            onClick={() => { setActiveTab("video"); setExportComplete(false); }}
+            onClick={() => {
+              setActiveTab("video");
+              setExportComplete(false);
+            }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
               activeTab === "video"
                 ? "border-purple-500 text-purple-400 bg-neutral-900"
@@ -70,7 +87,10 @@ export default function SeriesPublishModal({
             <Film className="w-4 h-4" /> Full Video Reel (MP4)
           </button>
           <button
-            onClick={() => { setActiveTab("archive"); setExportComplete(false); }}
+            onClick={() => {
+              setActiveTab("archive");
+              setExportComplete(false);
+            }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
               activeTab === "archive"
                 ? "border-purple-500 text-purple-400 bg-neutral-900"
@@ -80,7 +100,10 @@ export default function SeriesPublishModal({
             <Download className="w-4 h-4" /> Comic Archive (CBZ/ZIP)
           </button>
           <button
-            onClick={() => { setActiveTab("pdf"); setExportComplete(false); }}
+            onClick={() => {
+              setActiveTab("pdf");
+              setExportComplete(false);
+            }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
               activeTab === "pdf"
                 ? "border-purple-500 text-purple-400 bg-neutral-900"
@@ -90,7 +113,10 @@ export default function SeriesPublishModal({
             <FileText className="w-4 h-4" /> PDF Storyboard
           </button>
           <button
-            onClick={() => { setActiveTab("audio"); setExportComplete(false); }}
+            onClick={() => {
+              setActiveTab("audio");
+              setExportComplete(false);
+            }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
               activeTab === "audio"
                 ? "border-purple-500 text-purple-400 bg-neutral-900"
@@ -107,12 +133,15 @@ export default function SeriesPublishModal({
             <div className="space-y-5">
               <div className="p-4 bg-neutral-955 rounded-2xl border border-neutral-800 space-y-4">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono">
-                  <Film className="w-4 h-4 text-purple-400" /> Video Render Settings
+                  <Film className="w-4 h-4 text-purple-400" /> Video Render
+                  Settings
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs text-neutral-400 font-mono mb-1.5 block">Resolution</label>
+                    <label className="text-xs text-neutral-400 font-mono mb-1.5 block">
+                      Resolution
+                    </label>
                     <div className="flex gap-2">
                       {(["1080p", "4k"] as const).map((res) => (
                         <button
@@ -132,7 +161,9 @@ export default function SeriesPublishModal({
                   </div>
 
                   <div>
-                    <label className="text-xs text-neutral-400 font-mono mb-1.5 block">Aspect Ratio</label>
+                    <label className="text-xs text-neutral-400 font-mono mb-1.5 block">
+                      Aspect Ratio
+                    </label>
                     <div className="flex gap-2">
                       {(["9:16", "16:9"] as const).map((ratio) => (
                         <button
@@ -145,7 +176,9 @@ export default function SeriesPublishModal({
                               : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
                           }`}
                         >
-                          {ratio === "9:16" ? "9:16 (Shorts/TikTok)" : "16:9 (YouTube)"}
+                          {ratio === "9:16"
+                            ? "9:16 (Shorts/TikTok)"
+                            : "16:9 (YouTube)"}
                         </button>
                       ))}
                     </div>
@@ -160,8 +193,12 @@ export default function SeriesPublishModal({
                       <Check className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-white">Full Series Video Ready!</h4>
-                      <p className="text-xs text-neutral-400 font-mono">{seriesTitle}_Reel_{resolution}.mp4</p>
+                      <h4 className="text-sm font-bold text-white">
+                        Full Series Video Ready!
+                      </h4>
+                      <p className="text-xs text-neutral-400 font-mono">
+                        {seriesTitle}_Reel_{resolution}.mp4
+                      </p>
                     </div>
                   </div>
                   <button
@@ -184,7 +221,8 @@ export default function SeriesPublishModal({
                     </>
                   ) : (
                     <>
-                      <Play className="w-4 h-4 fill-current" /> Compile & Render Series Reel
+                      <Play className="w-4 h-4 fill-current" /> Compile & Render
+                      Series Reel
                     </>
                   )}
                 </button>
@@ -196,13 +234,18 @@ export default function SeriesPublishModal({
             <div className="p-6 bg-neutral-955 rounded-2xl border border-neutral-800 text-center space-y-4">
               <Download className="w-10 h-10 text-purple-400 mx-auto" />
               <div>
-                <h3 className="text-base font-bold text-white">Export CBZ / ZIP Package</h3>
+                <h3 className="text-base font-bold text-white">
+                  Export CBZ / ZIP Package
+                </h3>
                 <p className="text-xs text-neutral-400 font-mono max-w-md mx-auto mt-1">
-                  Downloads all sliced comic panels across {chapterCount} chapters in structured folders for offline reading.
+                  Downloads all sliced comic panels across {chapterCount}{" "}
+                  chapters in structured folders for offline reading.
                 </p>
               </div>
               <button
-                onClick={() => alert(`Packaging CBZ archive for ${seriesTitle}...`)}
+                onClick={() =>
+                  alert(`Packaging CBZ archive for ${seriesTitle}...`)
+                }
                 className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download CBZ Archive
@@ -214,13 +257,18 @@ export default function SeriesPublishModal({
             <div className="p-6 bg-neutral-955 rounded-2xl border border-neutral-800 text-center space-y-4">
               <FileText className="w-10 h-10 text-purple-400 mx-auto" />
               <div>
-                <h3 className="text-base font-bold text-white">Printable PDF Storyboard</h3>
+                <h3 className="text-base font-bold text-white">
+                  Printable PDF Storyboard
+                </h3>
                 <p className="text-xs text-neutral-400 font-mono max-w-md mx-auto mt-1">
-                  Generates a clean PDF document containing all storyboard panels, dialogues, and timestamps.
+                  Generates a clean PDF document containing all storyboard
+                  panels, dialogues, and timestamps.
                 </p>
               </div>
               <button
-                onClick={() => alert(`Generating PDF storyboard for ${seriesTitle}...`)}
+                onClick={() =>
+                  alert(`Generating PDF storyboard for ${seriesTitle}...`)
+                }
                 className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Generate PDF Sheet
@@ -232,13 +280,18 @@ export default function SeriesPublishModal({
             <div className="p-6 bg-neutral-955 rounded-2xl border border-neutral-800 text-center space-y-4">
               <Music className="w-10 h-10 text-purple-400 mx-auto" />
               <div>
-                <h3 className="text-base font-bold text-white">Synthesized Audio Track</h3>
+                <h3 className="text-base font-bold text-white">
+                  Synthesized Audio Track
+                </h3>
                 <p className="text-xs text-neutral-400 font-mono max-w-md mx-auto mt-1">
-                  Exports the complete audio track with AI voice narration, sound effects (SFX), and background music (BGM).
+                  Exports the complete audio track with AI voice narration,
+                  sound effects (SFX), and background music (BGM).
                 </p>
               </div>
               <button
-                onClick={() => alert(`Exporting audio track for ${seriesTitle}...`)}
+                onClick={() =>
+                  alert(`Exporting audio track for ${seriesTitle}...`)
+                }
                 className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download MP3 Track

@@ -6,12 +6,27 @@ import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayo
 import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
 import { useBackendHealth } from "@/shared/hooks/useBackendHealth";
 import { getUserCredits } from "@/api/endpoints/auth";
-import { Sliders, X, Mic, Tv, Eye, Film, Images, Sparkles, Layers, PlaySquare, MonitorPlay } from "lucide-react";
+import {
+  Sliders,
+  X,
+  Mic,
+  Tv,
+  Eye,
+  Film,
+  Images,
+  Sparkles,
+  Layers,
+  PlaySquare,
+  MonitorPlay,
+} from "lucide-react";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 
-const AudioSettingsPage = React.lazy(() => import("@/features/editor_audio/pages/AudioSettingsPage"));
-const VideoEditorPage = React.lazy(() => import("@/features/editor_video/pages/VideoEditorPage"));
-
+const AudioSettingsPage = React.lazy(
+  () => import("@/features/editor_audio/pages/AudioSettingsPage")
+);
+const VideoEditorPage = React.lazy(
+  () => import("@/features/editor_video/pages/VideoEditorPage")
+);
 
 interface EditorPageProps {
   appLogic: any;
@@ -65,7 +80,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
     const params = new URLSearchParams(window.location.search);
     params.delete("tab");
     const searchStr = params.toString();
-    const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""}`;
+    const newPath = `${window.location.pathname}${
+      searchStr ? "?" + searchStr : ""
+    }`;
     if (navigateTo) {
       navigateTo(newPath);
     } else {
@@ -183,8 +200,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
     handleRenderFinalVideo,
   } = appLogic;
 
-
-
   const [selectedPanelIds, setSelectedPanelIds] = React.useState<Set<number>>(
     new Set()
   );
@@ -193,7 +208,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
   const handleSetSelectedScraped = React.useCallback(
     (value: React.SetStateAction<string[]>) => {
       setSelectedScraped(value);
-      if (typeof value === "function" || (Array.isArray(value) && value.length > 0)) {
+      if (
+        typeof value === "function" ||
+        (Array.isArray(value) && value.length > 0)
+      ) {
         setSelectedPanelIds(new Set());
       }
     },
@@ -236,7 +254,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
     };
   }, [fetchWithInterceptor]);
 
-
   const handleSave = () => {
     onRequestProjectConfirmation();
   };
@@ -252,12 +269,18 @@ const EditorPage: React.FC<EditorPageProps> = ({
 
   // SCROLL RESTORATION: Restore the scroll position when returning from the Image Editor
   React.useEffect(() => {
-    const savedWindowScroll = sessionStorage.getItem("editor_page_scroll_top_window");
-    const savedContainerScroll = sessionStorage.getItem("editor_page_scroll_top_container");
+    const savedWindowScroll = sessionStorage.getItem(
+      "editor_page_scroll_top_window"
+    );
+    const savedContainerScroll = sessionStorage.getItem(
+      "editor_page_scroll_top_container"
+    );
     if (!savedWindowScroll && !savedContainerScroll) return;
 
     const windowVal = savedWindowScroll ? parseInt(savedWindowScroll, 10) : 0;
-    const containerVal = savedContainerScroll ? parseInt(savedContainerScroll, 10) : 0;
+    const containerVal = savedContainerScroll
+      ? parseInt(savedContainerScroll, 10)
+      : 0;
 
     const restoreScroll = () => {
       if (savedWindowScroll) {
@@ -303,13 +326,22 @@ const EditorPage: React.FC<EditorPageProps> = ({
       if (!detail) return;
 
       if (detail === "image-editor") {
-        sessionStorage.setItem("editor_page_scroll_top_window", String(window.scrollY));
+        sessionStorage.setItem(
+          "editor_page_scroll_top_window",
+          String(window.scrollY)
+        );
         const container = document.getElementById("main-scroll-container");
         if (container) {
-          sessionStorage.setItem("editor_page_scroll_top_container", String(container.scrollTop));
+          sessionStorage.setItem(
+            "editor_page_scroll_top_container",
+            String(container.scrollTop)
+          );
         }
 
-        const idx = useImageEditorStore.getState().editingImageIdx ?? appLogic.editingImageIdx ?? 0;
+        const idx =
+          useImageEditorStore.getState().editingImageIdx ??
+          appLogic.editingImageIdx ??
+          0;
         navigateTo(`/image-editor?idx=${idx}`);
       } else if (detail === "video-editor") {
         navigateTo("/video-editor");
@@ -388,18 +420,24 @@ const EditorPage: React.FC<EditorPageProps> = ({
       clearAllNotifications={appLogic.clearAllNotifications}
       notificationsMuted={appLogic.notificationsMuted}
       setNotificationsMuted={appLogic.setNotificationsMuted}
-      onNavigateToAll={() => window.dispatchEvent(new CustomEvent('navigate', { detail: { path: '/notifications' } }))}
+      onNavigateToAll={() =>
+        window.dispatchEvent(
+          new CustomEvent("navigate", { detail: { path: "/notifications" } })
+        )
+      }
       fetchWithInterceptor={fetchWithInterceptor}
       locationSearch={window.location.search}
     >
       <main className="flex-1 w-full relative bg-transparent min-w-0">
         {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
         <div
-          className={`relative z-10 bg-transparent min-h-0 min-w-0 ${activeTab === "settings" || activeTab === "audio-settings"
+          className={`relative z-10 bg-transparent min-h-0 min-w-0 ${
+            activeTab === "settings" || activeTab === "audio-settings"
               ? "px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8 w-full max-w-[1720px] mx-auto"
-              : `border-t border-white/5 px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10 w-full max-w-[1720px] mx-auto ${isFocusMode ? "hidden" : "block"
-              }`
-            }`}
+              : `border-t border-white/5 px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10 w-full max-w-[1720px] mx-auto ${
+                  isFocusMode ? "hidden" : "block"
+                }`
+          }`}
         >
           {activeTab === "settings" ? (
             <div className="w-full space-y-6">
@@ -410,9 +448,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     <Sliders className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-white tracking-wide">Video Settings</h2>
+                    <h2 className="text-lg font-bold text-white tracking-wide">
+                      Video Settings
+                    </h2>
                     <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                      Configure canvas aspect ratios, audio-reactive camera shake, and render output codecs
+                      Configure canvas aspect ratios, audio-reactive camera
+                      shake, and render output codecs
                     </p>
                   </div>
                 </div>
@@ -437,13 +478,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   frameRate={frameRate}
                   setFrameRate={appLogic.setFrameRate}
                   activeTheme={appLogic.activeTheme || "obsidian"}
-                  setActiveTheme={appLogic.setActiveTheme || (() => { })}
+                  setActiveTheme={appLogic.setActiveTheme || (() => {})}
                   targetUrl={targetUrl}
                   selectedModel={selectedModel}
                   selectedSource={selectedSource}
                   addNotification={addNotification}
                   fetchWithInterceptor={fetchWithInterceptor}
-
                   audioReactiveShake={appLogic.audioReactiveShake}
                   setAudioReactiveShake={appLogic.setAudioReactiveShake}
                   shakeIntensity={appLogic.shakeIntensity}
@@ -454,7 +494,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   setBackgroundStyle={appLogic.setBackgroundStyle}
                   subtitlesStyle={appLogic.subtitlesStyle}
                   setSubtitlesStyle={appLogic.setSubtitlesStyle}
-
                   // Crop Settings
                   cropSensitivity={cropSensitivity}
                   setCropSensitivity={setCropSensitivity}
@@ -464,7 +503,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   setCropFocusMode={setCropFocusMode}
                   cropModel={cropModel}
                   setCropModel={setCropModel}
-
                   // Bubble Settings
                   bubbleSensitivity={bubbleSensitivity}
                   setBubbleSensitivity={setBubbleSensitivity}
@@ -486,9 +524,12 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     <Mic className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-white tracking-wide">Audio Settings</h2>
+                    <h2 className="text-lg font-bold text-white tracking-wide">
+                      Audio Settings
+                    </h2>
                     <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                      Synchronize narration character, configure pitch and rate, and mix sound loop presets
+                      Synchronize narration character, configure pitch and rate,
+                      and mix sound loop presets
                     </p>
                   </div>
                 </div>
@@ -553,7 +594,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                             </span>
                           </div>
                           <p className="text-[11px] text-neutral-400 font-mono mt-0.5 truncate">
-                            Real-time compositor, camera-motion playback & program monitor
+                            Real-time compositor, camera-motion playback &
+                            program monitor
                           </p>
                         </div>
                       </div>
@@ -593,7 +635,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: true });
+                      useImageEditorStore
+                        .getState()
+                        .setPlayerSettings({ isPlayerOpen: true });
                     }}
                     className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/80 to-purple-950/30 hover:from-neutral-850 hover:to-purple-900/40 border border-purple-500/30 hover:border-purple-500/60 text-purple-300 hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
                   >
@@ -606,7 +650,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           Program Monitor Viewport
                         </span>
                         <span className="text-[10px] text-neutral-400 font-mono">
-                          Click to expand video preview player & visual canvas monitor
+                          Click to expand video preview player & visual canvas
+                          monitor
                         </span>
                       </div>
                     </div>
@@ -637,11 +682,13 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           </h3>
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-[10px] font-bold text-indigo-300 font-mono">
                             <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                            {panels.length} {panels.length === 1 ? "Scene" : "Scenes"}
+                            {panels.length}{" "}
+                            {panels.length === 1 ? "Scene" : "Scenes"}
                           </span>
                         </div>
                         <p className="text-[11px] text-neutral-400 font-mono mt-0.5 truncate">
-                          Motion sequence timeline, speech transcript alignment & audio-sync
+                          Motion sequence timeline, speech transcript alignment
+                          & audio-sync
                         </p>
                       </div>
                     </div>
@@ -666,7 +713,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   targetUrl={targetUrl}
                   fetchWithInterceptor={fetchWithInterceptor}
                   selectedModel={selectedModel}
-                  setConsoleLogs={() => { }}
+                  setConsoleLogs={() => {}}
                   voiceActor={voiceActor}
                   musicTheme={musicTheme}
                   speechRate={appLogic.speechRate}
@@ -720,11 +767,13 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           </h3>
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-300 font-mono">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            {scrapedImages.length} {scrapedImages.length === 1 ? "Asset" : "Assets"}
+                            {scrapedImages.length}{" "}
+                            {scrapedImages.length === 1 ? "Asset" : "Assets"}
                           </span>
                         </div>
                         <p className="text-[11px] text-neutral-400 font-mono mt-0.5 truncate">
-                          Scraped image pool, OCR speech bubble extractor & AI smart-crop deck
+                          Scraped image pool, OCR speech bubble extractor & AI
+                          smart-crop deck
                         </p>
                       </div>
                     </div>
@@ -744,7 +793,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     setSelectedScraped={handleSetSelectedScraped}
                     setScrapedImages={setScrapedImages}
                     mergingIndices={mergingIndices}
-                    setConsoleLogs={() => { }}
+                    setConsoleLogs={() => {}}
                     panels={panels}
                     setPanels={setPanels}
                     currentPanelIndex={currentPanelIndex}
@@ -786,10 +835,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     likes={likes}
                     views={views}
                   />
-
                 </div>
               </div>
-
             </>
           )}
         </div>

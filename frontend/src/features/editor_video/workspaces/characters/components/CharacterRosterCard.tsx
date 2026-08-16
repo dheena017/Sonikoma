@@ -7,7 +7,10 @@ interface CharacterRosterCardProps {
   onSelect: () => void;
 }
 
-export const CharacterRosterCard: React.FC<CharacterRosterCardProps> = ({ character, onSelect }) => {
+export const CharacterRosterCard: React.FC<CharacterRosterCardProps> = ({
+  character,
+  onSelect,
+}) => {
   return (
     <div
       onClick={onSelect}
@@ -21,7 +24,9 @@ export const CharacterRosterCard: React.FC<CharacterRosterCardProps> = ({ charac
         />
         <div className="min-w-0">
           <div className="flex items-center gap-2 min-w-0">
-            <h4 className="text-sm font-semibold text-white group-hover:text-purple-100 truncate">{character.name}</h4>
+            <h4 className="text-sm font-semibold text-white group-hover:text-purple-100 truncate">
+              {character.name}
+            </h4>
             <span className="text-[9px] font-semibold font-mono bg-purple-500/12 text-purple-200 px-2 py-0.5 rounded-full border border-purple-500/20 shrink-0">
               {character.role}
             </span>

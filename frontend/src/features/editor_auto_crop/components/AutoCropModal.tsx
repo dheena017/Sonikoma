@@ -167,7 +167,9 @@ export default function AutoCropModal({
               Dashboard
             </span>
             <span>&gt;</span>
-            <span className="text-purple-400 font-semibold">Auto Panel Detection Hub</span>
+            <span className="text-purple-400 font-semibold">
+              Auto Panel Detection Hub
+            </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.35)] flex items-center justify-center shrink-0">
@@ -176,7 +178,8 @@ export default function AutoCropModal({
             Auto Panel Detection Hub
           </h2>
           <p className="text-xs sm:text-sm text-neutral-400 font-mono mt-1">
-            Configure OpenCV contour segmentation, AI vision models, and comic panel auto-crop parameters.
+            Configure OpenCV contour segmentation, AI vision models, and comic
+            panel auto-crop parameters.
           </p>
         </div>
 
@@ -188,11 +191,14 @@ export default function AutoCropModal({
                 Active System Strategy
               </span>
               <span className="text-white font-bold block mt-0.5">
-                {useLocalCV ? "OPENCV LOCAL ENGINE" : `AI VISION (${cropModel.toUpperCase() || "GEMINI"})`}
+                {useLocalCV
+                  ? "OPENCV LOCAL ENGINE"
+                  : `AI VISION (${cropModel.toUpperCase() || "GEMINI"})`}
               </span>
             </div>
             <span className="bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 text-[9px] font-bold px-2.5 py-1 rounded-xl uppercase flex items-center gap-1 shadow-sm">
-              <Zap className="h-3 w-3 text-emerald-400 fill-emerald-400" /> ACTIVE
+              <Zap className="h-3 w-3 text-emerald-400 fill-emerald-400" />{" "}
+              ACTIVE
             </span>
           </div>
 
@@ -244,7 +250,10 @@ export default function AutoCropModal({
         {/* Right: Quick Controls */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
           {/* Quick Engine Switcher Pills */}
-          <div className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner" title="Engine Strategy Mode">
+          <div
+            className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner"
+            title="Engine Strategy Mode"
+          >
             <button
               type="button"
               onClick={() => setUseLocalCV(true)}
@@ -270,7 +279,10 @@ export default function AutoCropModal({
           </div>
 
           {/* Background Gutter Mode Pills */}
-          <div className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner" title="Background Gutter Mode">
+          <div
+            className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner"
+            title="Background Gutter Mode"
+          >
             {(["auto", "white", "black"] as const).map((mode) => (
               <button
                 key={mode}
@@ -288,7 +300,10 @@ export default function AutoCropModal({
           </div>
 
           {/* Aspect Ratio Lock Pills */}
-          <div className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner" title="Aspect Ratio Lock Mode">
+          <div
+            className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner"
+            title="Aspect Ratio Lock Mode"
+          >
             {(["free", "1:1", "16:9"] as const).map((ratio) => (
               <button
                 key={ratio}
@@ -379,8 +394,6 @@ export default function AutoCropModal({
           Settings apply to all current and future auto-crop jobs.
         </p>
         <div className="flex items-center gap-3.5 ml-auto">
-
-
           <button
             type="button"
             onClick={() => {

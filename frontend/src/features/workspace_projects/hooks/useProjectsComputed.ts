@@ -1,6 +1,9 @@
 import { useMemo } from "react";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
-import { groupProjectsIntoSeries, Series } from "@/features/workspace_projects/utils/seriesGrouping";
+import {
+  groupProjectsIntoSeries,
+  Series,
+} from "@/features/workspace_projects/utils/seriesGrouping";
 
 export interface UseProjectsComputedState {
   stats: {
@@ -20,9 +23,11 @@ export function useProjectsComputed(
   genreFilter: string,
   sortBy: string
 ): UseProjectsComputedState {
-
   // Group all projects into series first
-  const allSeries = useMemo(() => groupProjectsIntoSeries(projects), [projects]);
+  const allSeries = useMemo(
+    () => groupProjectsIntoSeries(projects),
+    [projects]
+  );
 
   const stats = useMemo(() => {
     // Stats apply to series now, but we can maintain total panels correctly
@@ -55,14 +60,15 @@ export function useProjectsComputed(
           (s.title || "").toLowerCase().includes(q) ||
           (s.author || "").toLowerCase().includes(q) ||
           // Also search within chapter titles
-          s.chapters.some(c => (c.title || "").toLowerCase().includes(q))
+          s.chapters.some((c) => (c.title || "").toLowerCase().includes(q))
       );
     }
 
     if (statusFilter !== "All") {
       result = result.filter(
         (s) =>
-          (s.latestChapter?.status || "Draft").toLowerCase() === statusFilter.toLowerCase()
+          (s.latestChapter?.status || "Draft").toLowerCase() ===
+          statusFilter.toLowerCase()
       );
     }
 
@@ -82,8 +88,14 @@ export function useProjectsComputed(
           (b.latestUpdatedAt ? new Date(b.latestUpdatedAt).getTime() : 0)
         );
       if (sortBy === "Most Panels") {
-        const countA = a.chapters.reduce((acc, c) => acc + (c.panels_count || c.imported_assets_count || 0), 0);
-        const countB = b.chapters.reduce((acc, c) => acc + (c.panels_count || c.imported_assets_count || 0), 0);
+        const countA = a.chapters.reduce(
+          (acc, c) => acc + (c.panels_count || c.imported_assets_count || 0),
+          0
+        );
+        const countB = b.chapters.reduce(
+          (acc, c) => acc + (c.panels_count || c.imported_assets_count || 0),
+          0
+        );
         return countB - countA;
       }
       if (sortBy === "A-Z") return (a.title || "").localeCompare(b.title || "");
@@ -95,8 +107,8 @@ export function useProjectsComputed(
 
   // Keep filtered projects for compatibility where needed (like select all)
   const filteredProjects = useMemo(() => {
-      // Flatten filtered series back to projects for select all, etc.
-      return filteredSeries.flatMap(s => s.chapters);
+    // Flatten filtered series back to projects for select all, etc.
+    return filteredSeries.flatMap((s) => s.chapters);
   }, [filteredSeries]);
 
   return {

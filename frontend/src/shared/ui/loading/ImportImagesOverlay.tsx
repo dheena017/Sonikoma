@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Zap, Loader2, Sparkles, CheckCircle2, ShieldCheck, Image as ImageIcon } from "lucide-react";
+import {
+  Zap,
+  Loader2,
+  Sparkles,
+  CheckCircle2,
+  ShieldCheck,
+  Image as ImageIcon,
+} from "lucide-react";
 
 interface ImportImagesOverlayProps {
   /** Optional custom title or message */
@@ -57,7 +64,8 @@ export function ImportImagesOverlay({
           {message}
         </h3>
         <p className="text-xs text-neutral-400 font-sans font-medium leading-relaxed">
-          Resolving high-resolution Webtoon frames, bypassing CDN protection, and parsing panel structures...
+          Resolving high-resolution Webtoon frames, bypassing CDN protection,
+          and parsing panel structures...
         </p>
       </div>
 

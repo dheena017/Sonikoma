@@ -282,31 +282,43 @@ export function AdminAnalyticsTab({
           <div className="space-y-4">
             {analytics.top_creators && analytics.top_creators.length > 0 ? (
               analytics.top_creators.map((creator: any, idx: number) => {
-                const name = creator.full_name || creator.username || "Unknown User";
+                const name =
+                  creator.full_name || creator.username || "Unknown User";
                 const colors = [
                   "bg-purple-500/20 text-purple-400",
                   "bg-blue-500/20 text-blue-400",
                   "bg-emerald-500/20 text-emerald-400",
                   "bg-amber-500/20 text-amber-400",
-                  "bg-rose-500/20 text-rose-400"
+                  "bg-rose-500/20 text-rose-400",
                 ];
                 const badgeColor = colors[idx % colors.length];
                 return (
-                  <div key={idx} className="flex justify-between items-center bg-[#0b0b0e] p-3 rounded-lg border border-neutral-800">
+                  <div
+                    key={idx}
+                    className="flex justify-between items-center bg-[#0b0b0e] p-3 rounded-lg border border-neutral-800"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full ${badgeColor} flex items-center justify-center font-bold`}>
+                      <div
+                        className={`w-8 h-8 rounded-full ${badgeColor} flex items-center justify-center font-bold`}
+                      >
                         {idx + 1}
                       </div>
                       <span className="text-neutral-200">{name}</span>
                     </div>
-                    <span className={`text-sm font-medium ${badgeColor.split(" ")[1]}`}>
+                    <span
+                      className={`text-sm font-medium ${
+                        badgeColor.split(" ")[1]
+                      }`}
+                    >
                       {creator.count} Projects
                     </span>
                   </div>
                 );
               })
             ) : (
-              <div className="text-xs text-neutral-500 py-4 text-center">No creator data available</div>
+              <div className="text-xs text-neutral-500 py-4 text-center">
+                No creator data available
+              </div>
             )}
           </div>
         </div>
@@ -319,15 +331,21 @@ export function AdminAnalyticsTab({
           <div className="space-y-4">
             <div className="flex justify-between items-center p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
               <span className="text-neutral-400">Avg Render Time</span>
-              <span className="font-mono text-white text-lg">{formatAvgDuration(analytics.avg_duration_sec)}</span>
+              <span className="font-mono text-white text-lg">
+                {formatAvgDuration(analytics.avg_duration_sec)}
+              </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
               <span className="text-neutral-400">Avg Scenes per Project</span>
-              <span className="font-mono text-white text-lg">{(analytics.avg_scenes_per_project || 0).toFixed(1)}</span>
+              <span className="font-mono text-white text-lg">
+                {(analytics.avg_scenes_per_project || 0).toFixed(1)}
+              </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg">
               <span className="text-neutral-400">Avg Credit Spend / User</span>
-              <span className="font-mono text-white text-lg">{Math.round(analytics.avg_credit_spend || 0)}</span>
+              <span className="font-mono text-white text-lg">
+                {Math.round(analytics.avg_credit_spend || 0)}
+              </span>
             </div>
           </div>
         </div>

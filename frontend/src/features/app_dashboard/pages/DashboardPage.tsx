@@ -6,7 +6,9 @@ import DashboardProjectSection from "@/features/app_dashboard/components/Dashboa
 import DashboardActivityFeed from "@/features/app_dashboard/components/DashboardActivityFeed";
 import DashboardAIPipeline from "@/features/app_dashboard/components/DashboardAIPipeline";
 import DashboardSidebar from "@/features/app_dashboard/components/DashboardSidebar";
-import useDashboardPage, { Project } from "@/features/app_dashboard/hooks/useDashboardPage";
+import useDashboardPage, {
+  Project,
+} from "@/features/app_dashboard/hooks/useDashboardPage";
 
 export default function DashboardPage() {
   const {
@@ -37,7 +39,6 @@ export default function DashboardPage() {
     saveProjectName,
   } = useDashboardPage();
 
-
   return (
     <div className="w-full flex-1 flex flex-col text-neutral-100 animate-fade-in relative z-10 py-6 max-w-7xl mx-auto">
       <DashboardHeader
@@ -56,8 +57,11 @@ export default function DashboardPage() {
 
       <DashboardQuickLinks
         onGoToWorkspace={handleNewSeries}
-        onGoToAudioLab={() => (window as any).navigateTo?.("/creative-suite/ai-voice")}
-        onGoToCharacters={() => (window as any).navigateTo?.("/characters")}      />
+        onGoToAudioLab={() =>
+          (window as any).navigateTo?.("/creative-suite/ai-voice")
+        }
+        onGoToCharacters={() => (window as any).navigateTo?.("/characters")}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-10">

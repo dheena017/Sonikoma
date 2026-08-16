@@ -65,7 +65,10 @@ const EditorMiniSidebarInner = ({
   locationSearch,
 }: EditorMiniSidebarProps) => {
   const params = new URLSearchParams(locationSearch || window.location.search);
-  const isEditing = (window.location.pathname.startsWith("/editor") || window.location.pathname.startsWith("/image-editor")) && params.get("idx") !== null;
+  const isEditing =
+    (window.location.pathname.startsWith("/editor") ||
+      window.location.pathname.startsWith("/image-editor")) &&
+    params.get("idx") !== null;
 
   const activeTool = useImageEditorStore((state) => state.activeTool);
   const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
@@ -98,15 +101,27 @@ const EditorMiniSidebarInner = ({
     return (
       <aside
         style={{ top: `${topOffsetPx}px` }}
-        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
-          }`}
+        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
+          isCollapsed ? "w-20" : "w-24"
+        }`}
       >
         <div className="flex-1 w-full flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-4">
           {cropToolGroups.map((group, gi) => (
-            <div key={group.label} className="w-full flex flex-col items-center">
+            <div
+              key={group.label}
+              className="w-full flex flex-col items-center"
+            >
               {/* Section divider (only between groups) + label for every group */}
-              <div className="w-full flex flex-col items-center" style={{ marginTop: gi > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
-                {gi > 0 && <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />}
+              <div
+                className="w-full flex flex-col items-center"
+                style={{
+                  marginTop: gi > 0 ? "0.5rem" : "0",
+                  marginBottom: "0.375rem",
+                }}
+              >
+                {gi > 0 && (
+                  <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />
+                )}
                 <span className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
                   {group.label}
                 </span>
@@ -118,19 +133,27 @@ const EditorMiniSidebarInner = ({
                   const isHovered = hoveredTool === tool.key;
 
                   return (
-                    <div key={tool.key} className="relative group w-full flex justify-center py-1">
+                    <div
+                      key={tool.key}
+                      className="relative group w-full flex justify-center py-1"
+                    >
                       {/* Active Pill */}
                       <div
-                        className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
-                          ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
-                          : "h-0 bg-transparent opacity-0"
-                          }`}
+                        className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+                          isActive
+                            ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
+                            : "h-0 bg-transparent opacity-0"
+                        }`}
                       />
 
                       <button
-                        onClick={() => { setActiveTool(tool.key); }}
+                        onClick={() => {
+                          setActiveTool(tool.key);
+                        }}
                         onMouseEnter={(e) => {
-                          setHoveredRect(e.currentTarget.getBoundingClientRect());
+                          setHoveredRect(
+                            e.currentTarget.getBoundingClientRect()
+                          );
                           setHoveredTool(tool.key);
                         }}
                         onMouseLeave={() => setHoveredTool(null)}
@@ -138,16 +161,18 @@ const EditorMiniSidebarInner = ({
                       >
                         {/* Icon pill */}
                         <div
-                          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
-                            ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                            : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
-                            }`}
+                          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+                            isActive
+                              ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                              : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+                          }`}
                         >
                           <Icon
-                            className={`w-5 h-5 transition-colors duration-300 ${isActive
-                              ? "text-purple-400"
-                              : "text-neutral-400 group-hover:text-purple-300"
-                              }`}
+                            className={`w-5 h-5 transition-colors duration-300 ${
+                              isActive
+                                ? "text-purple-400"
+                                : "text-neutral-400 group-hover:text-purple-300"
+                            }`}
                           />
                         </div>
 
@@ -158,7 +183,11 @@ const EditorMiniSidebarInner = ({
                           </span>
                         )}
                       </button>
-                      <TooltipPortal text={tool.label} visible={isHovered} anchorRect={hoveredRect} />
+                      <TooltipPortal
+                        text={tool.label}
+                        visible={isHovered}
+                        anchorRect={hoveredRect}
+                      />
                     </div>
                   );
                 })}
@@ -258,7 +287,9 @@ const EditorMiniSidebarInner = ({
     const [hover, setHover] = useState(false);
     const [rect, setRect] = useState<DOMRect | null>(null);
 
-    const params = new URLSearchParams(locationSearch || window.location.search);
+    const params = new URLSearchParams(
+      locationSearch || window.location.search
+    );
     const activeTab = params.get("tab");
     const isActive =
       item.id === "settings" || item.id === "audio-settings"
@@ -271,10 +302,11 @@ const EditorMiniSidebarInner = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Active Pill */}
         <div
-          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
-            ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
-            : "h-0 bg-transparent opacity-0"
-            }`}
+          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+            isActive
+              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
+              : "h-0 bg-transparent opacity-0"
+          }`}
         />
 
         <button
@@ -285,7 +317,9 @@ const EditorMiniSidebarInner = ({
               if (p.has("tab")) {
                 p.delete("tab");
                 const searchStr = p.toString();
-                const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""}`;
+                const newPath = `${window.location.pathname}${
+                  searchStr ? "?" + searchStr : ""
+                }`;
                 if (navigateTo) {
                   navigateTo(newPath);
                 } else {
@@ -325,7 +359,9 @@ const EditorMiniSidebarInner = ({
               }
             } else {
               if (item.id === "monitor") {
-                useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: true });
+                useImageEditorStore
+                  .getState()
+                  .setPlayerSettings({ isPlayerOpen: true });
               }
               setCurrentSection(item.id);
               const el = document.getElementById(`section-${item.id}`);
@@ -341,16 +377,18 @@ const EditorMiniSidebarInner = ({
         >
           {/* Icon pill */}
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
-              ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-              : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
-              }`}
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+              isActive
+                ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+            }`}
           >
             <Icon
-              className={`w-5 h-5 transition-colors duration-300 ${isActive
-                ? "text-purple-400"
-                : "text-neutral-400 group-hover:text-purple-300"
-                }`}
+              className={`w-5 h-5 transition-colors duration-300 ${
+                isActive
+                  ? "text-purple-400"
+                  : "text-neutral-400 group-hover:text-purple-300"
+              }`}
             />
           </div>
 
@@ -385,16 +423,25 @@ const EditorMiniSidebarInner = ({
     // Premium Glassmorphism Container
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className={`hidden md:flex fixed bottom-0 left-0 bg-[#06060c]/85 backdrop-blur-3xl border-r border-white/8 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[90] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.5),inset_-1px_0_0_rgba(168,85,247,0.05)] ${isCollapsed ? "w-20" : "w-24"
-        }`}
+      className={`hidden md:flex fixed bottom-0 left-0 bg-[#06060c]/85 backdrop-blur-3xl border-r border-white/8 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[90] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.5),inset_-1px_0_0_rgba(168,85,247,0.05)] ${
+        isCollapsed ? "w-20" : "w-24"
+      }`}
     >
       {/* Scrollable Tools Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {menuGroups.map((group, gi) => (
           <div key={group.label} className="w-full flex flex-col items-center">
             {/* Section divider (only between groups) + label for every group */}
-            <div className="w-full flex flex-col items-center" style={{ marginTop: gi > 0 ? '0.5rem' : '0', marginBottom: '0.375rem' }}>
-              {gi > 0 && <div className="w-8 h-px bg-white/10 rounded-full mb-1.5" />}
+            <div
+              className="w-full flex flex-col items-center"
+              style={{
+                marginTop: gi > 0 ? "0.5rem" : "0",
+                marginBottom: "0.375rem",
+              }}
+            >
+              {gi > 0 && (
+                <div className="w-8 h-px bg-white/10 rounded-full mb-1.5" />
+              )}
               <span className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
                 {group.label}
               </span>

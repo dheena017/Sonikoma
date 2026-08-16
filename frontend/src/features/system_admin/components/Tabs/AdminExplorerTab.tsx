@@ -295,7 +295,9 @@ export function AdminExplorerTab({
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
-                    a.download = `Sonikoma_Record_${selectedObject.id || "export"}_${new Date().toISOString().split("T")[0]}.json`;
+                    a.download = `Sonikoma_Record_${
+                      selectedObject.id || "export"
+                    }_${new Date().toISOString().split("T")[0]}.json`;
                     a.click();
                   }}
                   className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
