@@ -85,6 +85,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             context.record_level("Level 1: Static HTTP", EscalationStatus.FAILED, 0.0, 0, l1_dur, reason=f"Status {status_code}")
 
         # ---------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # Level 2: DOM & Embedded State (Next.js / Nuxt / JSON)
         # ---------------------------------------------------------------------
         if context.raw_html:
@@ -94,20 +95,25 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             context.selected_reader = best_reader
 
             dom_images = []
-            if best_reader:
+            soup = DomExtractor.get_soup(context.raw_html)
+            if best_reader and soup:
                 context.checklist.reader_found = True
-                soup = DomExtractor.get_soup(context.raw_html)
-                if soup:
-                    selected_node = soup.select_one(best_reader.selector)
-                    if selected_node:
-                        dom_images = DomExtractor.extract_images_from_container(selected_node, url, best_reader.selector)
-                        context.evidence.record(
-                            source_type=EvidenceSource.DOM_READER,
-                            source_url=url,
-                            reader_context=best_reader.selector,
-                            confidence=best_reader.score / 100.0,
-                            discovered_images_count=len(dom_images)
-                        )
+                selected_node = soup.select_one(best_reader.selector)
+                if selected_node:
+                    dom_images = DomExtractor.extract_images_from_container(selected_node, url, best_reader.selector)
+                if not dom_images:
+                    dom_images = DomExtractor.extract_manga_images_fallback(soup, url)
+
+                if dom_images:
+                    context.evidence.record(
+                        source_type=EvidenceSource.DOM_READER,
+                        source_url=url,
+                        reader_context=best_reader.selector,
+                        confidence=best_reader.score / 100.0,
+                        discovered_images_count=len(dom_images)
+                    )
+            elif soup:
+                dom_images = DomExtractor.extract_manga_images_fallback(soup, url)
 
             # Embedded state extraction (__NEXT_DATA__, __NUXT__)
             embedded_images = EmbeddedStateExtractor.extract_from_html(context.raw_html, url)
@@ -123,12 +129,13 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             context.candidate_images.extend(l2_images)
             l2_dur = (time.time() - t0) * 1000.0
 
-            # Evaluated check: Did Level 2 achieve high confidence and complete reader?
-            if best_reader and best_reader.score >= 70.0 and len(dom_images) >= 1:
+            # Evaluated check: Did Level 2 discover valid chapter images?
+            if len(dom_images) >= 1:
+                score = best_reader.score if best_reader else 80.0
                 context.checklist.reader_end_reached = True
                 context.checklist.lazy_loading_finished = True
                 context.completeness = ScrapeCompleteness.COMPLETE
-                context.record_level("Level 2: DOM & Embedded State", EscalationStatus.SUCCESS, best_reader.score, len(dom_images), l2_dur)
+                context.record_level("Level 2: DOM & Embedded State", EscalationStatus.SUCCESS, score, len(dom_images), l2_dur)
                 return self._finalize_result(context)
             elif embedded_images and len(embedded_images) >= 1:
                 context.completeness = ScrapeCompleteness.COMPLETE
@@ -164,15 +171,23 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
 
                 # Re-scan rendered DOM
                 candidates_pw, best_reader_pw = ReaderDetector.detect_reader(pw_html)
+                soup_pw = DomExtractor.get_soup(pw_html)
                 if best_reader_pw:
                     context.selected_reader = best_reader_pw
                     context.checklist.reader_found = True
-                    soup_pw = DomExtractor.get_soup(pw_html)
                     if soup_pw:
                         sel_node = soup_pw.select_one(best_reader_pw.selector)
                         if sel_node:
                             pw_dom_images = DomExtractor.extract_images_from_container(sel_node, url, best_reader_pw.selector)
+                            if not pw_dom_images:
+                                pw_dom_images = DomExtractor.extract_manga_images_fallback(soup_pw, url)
                             context.candidate_images.extend(pw_dom_images)
+                        else:
+                            pw_dom_images = DomExtractor.extract_manga_images_fallback(soup_pw, url)
+                            context.candidate_images.extend(pw_dom_images)
+                elif soup_pw:
+                    pw_dom_images = DomExtractor.extract_manga_images_fallback(soup_pw, url)
+                    context.candidate_images.extend(pw_dom_images)
 
                 # Correlate network intercepted images
                 dom_urls = {c.url for c in context.candidate_images}

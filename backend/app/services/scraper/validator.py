@@ -67,6 +67,13 @@ class ImageValidator:
             # 3. Secondary defensive keyword filter
             if filter_banners:
                 lower_url = url.lower()
+                # Check for WordPress/manga thumbnail resized files (e.g., image-75x106.jpg)
+                if re.search(r'-\d{2,4}x\d{2,4}\.(?:jpe?g|png|webp|avif)', lower_url):
+                    if not any(good in lower_url for good in ["/chapter", "/ch-", "/ep-", "/episode"]):
+                        rejections.append({"url": url, "reason": "thumbnail_resized_image"})
+                        ScraperDiagnosticsLogger.log_rejection(url, "thumbnail_resized_image")
+                        continue
+
                 # Check for explicit unwanted keywords unless marked as direct API/DOM reader item
                 is_blacklisted = False
                 for pat in UNWANTED_PATTERNS:

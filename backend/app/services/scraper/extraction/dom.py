@@ -52,89 +52,155 @@ class DomExtractor:
         candidates: List[CandidateImage] = []
         seen_urls = set()
 
-        def _to_str(val: Any) -> str:
+        def _clean_url(val: Any) -> Optional[str]:
             if val is None:
-                return ""
-            if isinstance(val, list):
-                return " ".join(str(v) for v in val).strip()
-            return str(val).strip()
+                return None
+            s = (" ".join(str(v) for v in val) if isinstance(val, list) else str(val)).strip()
+            if not s:
+                return None
+            if "," in s:
+                s = s.split(",")[0].strip()
+            if " " in s and not s.startswith(("http://", "https://", "//")):
+                s = s.split()[0].strip()
+            if s.startswith("//"):
+                s = f"https:{s}"
+            if any(ext in s.lower() for ext in ["1x1.gif", "spacer.gif", "blank.gif", "loading.gif", "pixel.gif"]):
+                return None
+            return s
+
+        def _try_add(src_raw: Any, node_elem: Any, idx: int):
+            cleaned = _clean_url(src_raw)
+            if not cleaned:
+                return
+            abs_src = urljoin(base_url, cleaned)
+            if abs_src and abs_src not in seen_urls:
+                seen_urls.add(abs_src)
+                candidates.append(CandidateImage(
+                    url=abs_src,
+                    source_type=ImageSourceType.DOM,
+                    dom_index=idx,
+                    container_selector=container_selector,
+                    is_inside_reader=True,
+                    raw_attributes=dict(node_elem.attrs) if hasattr(node_elem, "attrs") else {}
+                ))
+
+        # Check if container_node itself is an image
+        if getattr(container_node, "name", "") in ["img", "source"]:
+            src = (
+                container_node.get("data-url") or
+                container_node.get("data-src") or
+                container_node.get("data-original") or
+                container_node.get("data-original-src") or
+                container_node.get("data-lazy-src") or
+                container_node.get("data-raw-src") or
+                container_node.get("data-cdn") or
+                container_node.get("data-image") or
+                container_node.get("data-echo") or
+                container_node.get("srcset") or
+                container_node.get("src")
+            )
+            _try_add(src, container_node, 0)
+            return candidates
 
         # 1. Inspect <img> and <source> tags
         for idx, img in enumerate(container_node.find_all(["img", "source"])):
             src = (
-                _to_str(img.get("data-url")) or
-                _to_str(img.get("data-src")) or
-                _to_str(img.get("data-original")) or
-                _to_str(img.get("data-original-src")) or
-                _to_str(img.get("data-lazy-src")) or
-                _to_str(img.get("data-raw-src")) or
-                _to_str(img.get("data-cdn")) or
-                _to_str(img.get("data-image")) or
-                _to_str(img.get("data-bg")) or
-                _to_str(img.get("data-echo")) or
-                _to_str(img.get("origin-src")) or
-                _to_str(img.get("lazy-src")) or
-                _to_str(img.get("srcset")) or
-                _to_str(img.get("src"))
+                img.get("data-url") or
+                img.get("data-src") or
+                img.get("data-original") or
+                img.get("data-original-src") or
+                img.get("data-lazy-src") or
+                img.get("data-raw-src") or
+                img.get("data-cdn") or
+                img.get("data-image") or
+                img.get("data-bg") or
+                img.get("data-echo") or
+                img.get("origin-src") or
+                img.get("lazy-src") or
+                img.get("srcset") or
+                img.get("src")
             )
-            if src:
-                if "," in src:
-                    src = src.split(",")[0].strip()
-                if " " in src:
-                    src = src.split()[0].strip()
+            _try_add(src, img, idx)
 
-                if "1x1.gif" in src or "spacer.gif" in src or "blank.gif" in src:
-                    continue
+        # 2. Inspect elements with data-src or background-image styles
+        for idx, elem in enumerate(container_node.find_all(["div", "picture", "section", "a"])):
+            data_src = (
+                elem.get("data-src") or
+                elem.get("data-original") or
+                elem.get("data-url") or
+                elem.get("data-image")
+            )
+            if data_src:
+                _try_add(data_src, elem, len(candidates))
 
-                abs_src = urljoin(base_url, src)
+            style = str(elem.get("style", "") or "")
+            if "url(" in style:
+                bg_m = re.search(r'url\s*\(\s*["\']?([^"\'\)]+)["\']?\s*\)', style, re.IGNORECASE)
+                if bg_m:
+                    _try_add(bg_m.group(1), elem, len(candidates))
+
+        return candidates
+
+    @classmethod
+    def extract_manga_images_fallback(cls, soup: Any, base_url: str) -> List[CandidateImage]:
+        """Fallback extraction for manga panels across the entire DOM when container detection is ambiguous."""
+        if not soup:
+            return []
+
+        candidates: List[CandidateImage] = []
+        seen_urls = set()
+
+        def _clean_url(val: Any) -> Optional[str]:
+            if val is None:
+                return None
+            s = (" ".join(str(v) for v in val) if isinstance(val, list) else str(val)).strip()
+            if not s or any(ext in s.lower() for ext in ["1x1.gif", "spacer.gif", "blank.gif", "loading.gif", "pixel.gif"]):
+                return None
+            if "," in s:
+                s = s.split(",")[0].strip()
+            if " " in s and not s.startswith(("http://", "https://", "//")):
+                s = s.split()[0].strip()
+            if s.startswith("//"):
+                s = f"https:{s}"
+            return s
+
+        # Scan all images in DOM
+        for idx, img in enumerate(soup.find_all(["img", "source"])):
+            # Ignore images in unwanted parent containers (headers, footers, comments)
+            if img.find_parent(["header", "footer", "nav", "aside", "#cList", ".area_comment", ".comment_area"]):
+                continue
+
+            src = (
+                img.get("data-url") or
+                img.get("data-src") or
+                img.get("data-original") or
+                img.get("data-original-src") or
+                img.get("data-lazy-src") or
+                img.get("data-raw-src") or
+                img.get("data-cdn") or
+                img.get("data-image") or
+                img.get("data-echo") or
+                img.get("srcset") or
+                img.get("src")
+            )
+            cleaned = _clean_url(src)
+            if not cleaned:
+                continue
+
+            # Prioritize images matching manga chapter path conventions
+            clean_lower = cleaned.lower()
+            if any(term in clean_lower for term in ["chapter", "wp-manga", "manga", "upload", "page", "data/"]):
+                abs_src = urljoin(base_url, cleaned)
                 if abs_src and abs_src not in seen_urls:
                     seen_urls.add(abs_src)
                     candidates.append(CandidateImage(
                         url=abs_src,
                         source_type=ImageSourceType.DOM,
                         dom_index=idx,
-                        container_selector=container_selector,
+                        container_selector="body (manga fallback)",
                         is_inside_reader=True,
-                        raw_attributes=dict(img.attrs) if hasattr(img, "attrs") else {}
+                        confidence=0.85
                     ))
-
-        # 2. Inspect elements with data-src or background-image styles
-        for idx, elem in enumerate(container_node.find_all(["div", "picture", "section", "a"])):
-            data_src = (
-                _to_str(elem.get("data-src")) or
-                _to_str(elem.get("data-original")) or
-                _to_str(elem.get("data-url")) or
-                _to_str(elem.get("data-image"))
-            )
-            if data_src:
-                abs_src = urljoin(base_url, data_src)
-                if abs_src and abs_src not in seen_urls and not any(ext in abs_src for ext in ["1x1.gif", "spacer.gif"]):
-                    seen_urls.add(abs_src)
-                    candidates.append(CandidateImage(
-                        url=abs_src,
-                        source_type=ImageSourceType.DOM,
-                        dom_index=len(candidates),
-                        container_selector=container_selector,
-                        is_inside_reader=True,
-                        raw_attributes=dict(elem.attrs) if hasattr(elem, "attrs") else {}
-                    ))
-
-            style = _to_str(elem.get("style"))
-            if "url(" in style:
-                bg_m = re.search(r'url\s*\(\s*["\']?([^"\'\)]+)["\']?\s*\)', style, re.IGNORECASE)
-                if bg_m:
-                    bg_url = bg_m.group(1).strip()
-                    if bg_url and not bg_url.startswith("data:"):
-                        abs_bg = urljoin(base_url, bg_url)
-                        if abs_bg not in seen_urls:
-                            seen_urls.add(abs_bg)
-                            candidates.append(CandidateImage(
-                                url=abs_bg,
-                                source_type=ImageSourceType.DOM,
-                                dom_index=len(candidates),
-                                container_selector=container_selector,
-                                is_inside_reader=True
-                            ))
 
         return candidates
 

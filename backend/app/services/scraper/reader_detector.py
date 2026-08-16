@@ -18,6 +18,7 @@ except ImportError:
 from .models import ReaderCandidate
 from .constants import (
     READER_CONTAINER_SELECTORS,
+    KNOWN_MANGA_IMAGE_SELECTORS,
     UNWANTED_CONTAINERS,
     MIN_READER_CONFIDENCE_THRESHOLD
 )
@@ -45,14 +46,14 @@ class ReaderDetector:
         candidates: List[ReaderCandidate] = []
         tested_nodes = set()
 
-        # 1. Test standard known selectors
+        # 1. Test standard known reader container selectors
         for sel in READER_CONTAINER_SELECTORS:
             try:
                 matched_elements = soup.select(sel)
                 for el in matched_elements:
                     # If selector matched an <img> directly, evaluate its parent container
                     node = el.parent if el.name == "img" else el
-                    if id(node) in tested_nodes:
+                    if not node or id(node) in tested_nodes:
                         continue
                     tested_nodes.add(id(node))
 
@@ -62,7 +63,33 @@ class ReaderDetector:
             except Exception:
                 continue
 
-        # 2. Universal density scan on structural elements (div, main, article, section)
+        # 2. Test leaf manga image selectors and evaluate their common container
+        for leaf_sel in KNOWN_MANGA_IMAGE_SELECTORS:
+            try:
+                matched_leafs = soup.select(leaf_sel)
+                if len(matched_leafs) >= 2:
+                    # Find common parent/ancestor container for matched manga images
+                    parent_container = matched_leafs[0].parent
+                    while parent_container and parent_container.name not in ["body", "html", "[document]"]:
+                        imgs_in_p = parent_container.find_all(["img", "source"])
+                        if len(imgs_in_p) >= len(matched_leafs):
+                            break
+                        parent_container = parent_container.parent
+
+                    if parent_container and id(parent_container) not in tested_nodes and parent_container.name != "body":
+                        tested_nodes.add(id(parent_container))
+                        cls_name = parent_container.get("class", [])
+                        cls_str = ".".join(cls_name) if isinstance(cls_name, list) else str(cls_name)
+                        elem_id = parent_container.get("id")
+                        inferred_sel = f"#{elem_id}" if elem_id else (f".{cls_str.split()[0]}" if cls_str else parent_container.name)
+
+                        candidate = cls._score_container_node(parent_container, selector=inferred_sel)
+                        if candidate.image_count > 0:
+                            candidates.append(candidate)
+            except Exception:
+                continue
+
+        # 3. Universal density scan on structural elements (div, main, article, section)
         if soup.body:
             for elem in soup.body.find_all(["div", "main", "article", "section"]):
                 if id(elem) in tested_nodes:
@@ -80,8 +107,8 @@ class ReaderDetector:
                     if candidate.image_count > 0:
                         candidates.append(candidate)
 
-        # Sort candidates descending by score
-        candidates.sort(key=lambda c: c.score, reverse=True)
+        # Sort candidates descending by score, prioritizing higher image count density
+        candidates.sort(key=lambda c: (c.score, c.image_count), reverse=True)
 
         best = None
         if candidates and candidates[0].score >= MIN_READER_CONFIDENCE_THRESHOLD:
@@ -100,15 +127,15 @@ class ReaderDetector:
 
         score = 0.0
 
-        # Factor 1: Image count density
+        # Factor 1: Image count density (Crucial: real readers contain multiple images)
         if img_count >= 15:
             score += 45.0
         elif img_count >= 5:
-            score += 30.0
-        elif img_count >= 3:
-            score += 15.0
-        elif img_count >= 1:
-            score += 5.0
+            score += 35.0
+        elif img_count >= 2:
+            score += 20.0
+        elif img_count == 1:
+            score -= 20.0  # Penalize single-image wrappers
 
         # Factor 2: Text-to-image ratio (readers have high image density, low text)
         if img_count > 0:
@@ -121,8 +148,11 @@ class ReaderDetector:
                 score -= 30.0  # Article or sidebar with many thumbnails
 
         # Factor 3: Known reader selector match
-        if any(known in selector.lower() for known in ["viewer", "reader", "_imagelist", "wp-manga", "chapter-content", "read-container"]):
+        sel_lower = selector.lower()
+        if any(known in sel_lower for known in ["_imagelist", "readerarea", "reading-content", "entry-content", "chapter-content", "wt_viewer", "viewer_lst"]):
             score += 35.0
+        elif any(known in sel_lower for known in ["viewer", "reader", "comic", "episode"]):
+            score += 20.0
 
         # Factor 4: Negative penalty for unwanted container names
         node_class_str = str(node.get("class", "")).lower()

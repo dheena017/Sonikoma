@@ -17,23 +17,30 @@ USER_AGENTS = [
     "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36"
 ]
 
-# Standard reader candidate selectors to inspect during DOM scanning
+# Standard reader container selectors to inspect during DOM scanning (container elements only)
 READER_CONTAINER_SELECTORS = [
+    # Dedicated Webtoons / Naver selectors
     "#_imageList", "._img_viewer_area", ".viewer_lst", ".wt_viewer", "._imageList",
-    "#readerarea", ".readerarea", "#reader-area", ".reader-area-wrap", ".reader-area",
-    ".read-container", ".reader-page", ".gc-reader", "[data-gc-page]", "#reader",
-    ".wp-manga-chapter-img", ".rd-page", ".page-break", ".reading-content", ".main-col",
-    ".entry-content", ".reading-detail", ".chapter-content", ".episode-view", ".comic-content",
-    ".panel-container", "#comic_view_area", "#comic-image", "#comic-view", ".ep-contents",
-    ".chapter-img", ".page-content", ".comic-page-img", ".chapter-images", ".viewer-images",
-    ".comic-pages", ".manga-reader", "#chapter-reader", "#manga-reader", ".vng-reader",
-    ".reader-image-list", ".reader-content", ".reading-area", ".chapter-area",
-    ".viewer-cnt", ".viewer-wrap", "#viewer-container", ".manga-image", ".read-img",
-    ".chapter-img-list", ".chapter-image", ".reader-images", "#chapter-images", ".page-img",
-    "#pages", "#images-container", "#pages-container", ".canvas-container", ".manga-page",
-    "[data-page]", "[data-page-id]", "[class*='reader-content']", "[class*='chapter-content']",
-    "[class*='reader-area']", "[class*='viewer-area']", "[class*='comic-view']",
-    ".viewer", ".reader", ".webtoon-viewer", ".chapter-viewer"
+    # Dedicated Manga / Manhwa reader containers
+    "#readerarea", ".readerarea", "#reader-area", ".reader-area-wrap",
+    ".reading-content", ".reading-content-wrap", ".entry-content", ".entry-content_wrap",
+    ".chapter-content", ".c-blog-post", ".read-container", ".reading-detail",
+    ".chapter-images", ".viewer-images", ".comic-pages", ".manga-reader",
+    "#chapter-reader", "#manga-reader", ".vng-reader", ".reader-image-list",
+    ".reader-content", ".reading-area", ".chapter-area", ".viewer-cnt", ".viewer-wrap",
+    "#viewer-container", ".chapter-img-list", ".reader-images", "#chapter-images",
+    "#pages", "#images-container", "#pages-container", ".canvas-container",
+    ".episode-view", ".comic-content", ".panel-container", "#comic_view_area",
+    "#comic-image", "#comic-view", ".ep-contents", ".page-content",
+    "[class*='reader-content']", "[class*='chapter-content']", "[class*='reader-area']",
+    "[class*='viewer-area']", "[class*='comic-view']", ".webtoon-viewer", ".chapter-viewer"
+]
+
+# Leaf / item-level image selectors used for fallback discovery and common-ancestor resolution
+KNOWN_MANGA_IMAGE_SELECTORS = [
+    ".wp-manga-chapter-img", ".page-break img", ".rd-page img", ".chapter-img",
+    ".manga-image", ".read-img", ".page-img", ".chapter-image", ".manga-page",
+    "[data-page] img", "[data-page-id] img", "img.lazyload-ordered"
 ]
 
 # Containers and tags that should receive negative scoring or exclusion
@@ -53,7 +60,8 @@ UNWANTED_PATTERNS = [
     "tracking", "pixel", "1x1", "spacer", "placeholder", "spinner", "facebook.com",
     "google-analytics", "googletagmanager", "/tr?", "doubleclick", "analytics",
     "age_all_white", "agerate", "defaultuser", "android-chrome", "apple-touch-icon",
-    "membership-", "avatar", "share_btn", "icon_", "banner", "promo", "thumb"
+    "membership-", "avatar", "share_btn", "icon_", "banner", "promo", "thumb",
+    "read-manga-", "read-manhua-", "read-manhwa-", "-75x106", "-150x150"
 ]
 
 # Image extensions
