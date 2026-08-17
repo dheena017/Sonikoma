@@ -690,3 +690,103 @@ class YouTubeService:
             "theme": clean_prompt,
         }
 
+    async def generate_thumbnail_ai_concept(
+        self,
+        title: Optional[str] = None,
+        synopsis: Optional[str] = None,
+        style: Optional[str] = "cinematic_anime",
+        keywords: Optional[str] = None,
+        aspect_ratio: Optional[str] = "16:9",
+    ) -> Dict[str, Any]:
+        """
+        Synthesizes high-CTR YouTube thumbnail concepts, prompt descriptions,
+        punchy text overlays, and color palettes based on the video context.
+        """
+        import json
+        import re
+        from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+
+        v_title = (title or "Epic Webtoon Action Recap").strip()
+        v_synopsis = (synopsis or "").strip()
+        v_keywords = (keywords or "").strip()
+
+        style_descriptions = {
+            "cinematic_anime": "high-budget cinematic anime, Ufotable / Makoto Shinkai style, dramatic rim lighting, vibrant volumetric glow, 8k resolution masterwork",
+            "manhwa_action": "korean manhwa webtoon art style, intense dynamic action lines, solo leveling aura, expressive eyes, ultra sharp ink lines, high saturation",
+            "hyper_clickbait": "high CTR youtube thumbnail style, extreme facial reaction, hyper-saturated contrast, glowing focal point, dark vignetted backdrop, 3D render depth",
+            "cyberpunk_neon": "futuristic cyberpunk neon glow, holographic glints, high contrast dark blues and hot pinks, lens flare, intricate details",
+            "dark_fantasy": "dark gothic fantasy, glowing magical runes, menacing red and obsidian color grade, cinematic atmosphere",
+        }
+
+        chosen_style = style_descriptions.get(style, style_descriptions["cinematic_anime"])
+
+        system_instruction = (
+            "You are a master YouTube thumbnail artist and viral growth strategist.\n"
+            "Generate a high-CTR YouTube thumbnail prompt for AI image generation, "
+            "a punchy 2-4 word uppercase headline for text overlay, a recommended color theme, and negative prompt.\n\n"
+            "Respond ONLY with a JSON object in this exact schema:\n"
+            "{\n"
+            '  "prompt": "Detailed AI image prompt describing subject, dynamic pose, lighting, atmosphere, and visual style (under 300 words)",\n'
+            '  "negative_prompt": "blurry, low quality, bad anatomy, deformed face, watermark, text, signature, grainy",\n'
+            '  "headline_text": "2 to 4 words punchy uppercase text (e.g. \'SHOCKING REVEAL!\', \'HE AWAKENED?!\')",\n'
+            '  "headline_style": "bold_red_badge | yellow_glow | neon_cyan | gold_impact",\n'
+            '  "color_palette": ["#FF0055", "#00E5FF", "#FFE600"],\n'
+            '  "focal_subject": "Brief description of the main focal character/element",\n'
+            '  "composition_tip": "High-impact thumbnail layout advice"\n'
+            "}"
+        )
+
+        user_content = (
+            f"Video Title: {v_title}\n"
+            f"Video Synopsis: {v_synopsis}\n"
+            f"Additional Keywords: {v_keywords}\n"
+            f"Visual Style Preset: {chosen_style}\n"
+            f"Target Aspect Ratio: {aspect_ratio}"
+        )
+
+        if ai_initialized and genai_client:
+            models_to_try = [GEMINI_MODEL_PRIMARY] + [m for m in GEMINI_FALLBACK_MODELS if m != GEMINI_MODEL_PRIMARY]
+            for model_name in models_to_try:
+                try:
+                    async def _call():
+                        return await asyncio.to_thread(
+                            genai_client.models.generate_content,
+                            model=model_name,
+                            contents=[{"role": "user", "parts": [{"text": f"{system_instruction}\n\n{user_content}"}]}],
+                        )
+                    response = await call_gemini_with_retry(_call)
+                    raw_text = response.text if hasattr(response, "text") else ""
+                    m = re.search(r"\{.*\}", raw_text, re.DOTALL)
+                    if m:
+                        parsed = json.loads(m.group(0))
+                        return {
+                            "success": True,
+                            "model_used": model_name,
+                            "prompt": parsed.get("prompt", f"{v_title}, {chosen_style}"),
+                            "negative_prompt": parsed.get("negative_prompt", "blurry, low quality, deformed, text, watermark"),
+                            "headline_text": parsed.get("headline_text", "EPIC MOMENT!").upper(),
+                            "headline_style": parsed.get("headline_style", "bold_red_badge"),
+                            "color_palette": parsed.get("color_palette", ["#FF0055", "#FFE600", "#00E5FF"]),
+                            "focal_subject": parsed.get("focal_subject", v_title),
+                            "composition_tip": parsed.get("composition_tip", "Place main character on the left, high-contrast overlay text on the right."),
+                        }
+                except Exception as e:
+                    logger.warning(f"[YouTube AI Thumbnail] Gemini thumbnail prompt synthesis failed with {model_name}: {e}")
+
+        # Intelligent Fallback
+        headline_candidates = ["EPIC RECAP!", "SHOCKING TWIST!", "UNSTOPPABLE!", "HE AWAKENED!", "MUST WATCH!"]
+        import random
+        chosen_hl = random.choice(headline_candidates)
+
+        return {
+            "success": True,
+            "model_used": "heuristic_fallback",
+            "prompt": f"Masterpiece anime artwork of {v_title}, {chosen_style}, dramatic lighting, cinematic atmosphere, 8k resolution, highly detailed, expressive character, high contrast, perfect face and eyes",
+            "negative_prompt": "blurry, bad anatomy, low resolution, watermark, deformed, ugly, cropped, signature",
+            "headline_text": chosen_hl,
+            "headline_style": "bold_red_badge",
+            "color_palette": ["#EF4444", "#F59E0B", "#8B5CF6"],
+            "focal_subject": v_title,
+            "composition_tip": "Keep the main character focalized on the right 2/3 and position high-contrast bold typography in the top-left.",
+        }
+

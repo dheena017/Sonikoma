@@ -797,30 +797,45 @@ export function useYouTubePublisher({
     ]);
   };
 
-  const handleThumbnailSelect = async (url: string) => {
-    // If it's a cached local URL, we might want to fetch it as a File for multipart upload
-    try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const file = new File([blob], "ai_thumbnail.jpg", { type: "image/jpeg" });
-      setSelectedThumbnail(file);
-      setThumbnailPreviewUrl(url);
+  const handleThumbnailSelect = async (
+    fileOrUrl: File | string,
+    previewUrl?: string
+  ) => {
+    if (typeof fileOrUrl === "string") {
+      try {
+        const res = await fetch(fileOrUrl);
+        const blob = await res.blob();
+        const file = new File([blob], "ai_thumbnail.jpg", { type: "image/jpeg" });
+        setSelectedThumbnail(file);
+        if (thumbnailPreviewUrl && thumbnailPreviewUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(thumbnailPreviewUrl);
+        }
+        setThumbnailPreviewUrl(fileOrUrl);
+        setPublishLogs((prev) => [
+          ...prev,
+          `[Thumbnail] Selected AI generated thumbnail from project library.`,
+        ]);
+        if (addNotification)
+          addNotification("🖼️ AI thumbnail selected!", "success");
+      } catch (e) {
+        console.error("Failed to load thumbnail URL", e);
+        if (addNotification)
+          addNotification("Failed to load thumbnail from URL", "error");
+      }
+    } else {
+      setSelectedThumbnail(fileOrUrl);
+      if (thumbnailPreviewUrl && thumbnailPreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(thumbnailPreviewUrl);
+      }
+      const finalUrl = previewUrl || URL.createObjectURL(fileOrUrl);
+      setThumbnailPreviewUrl(finalUrl);
       setPublishLogs((prev) => [
         ...prev,
-        `[Thumbnail] Selected AI generated thumbnail from project library.`,
+        `[Thumbnail Studio] Set custom AI generated thumbnail: ${fileOrUrl.name}`,
       ]);
-      if (addNotification)
-        addNotification(
-          "🖼️ AI thumbnail selected from project library!",
-          "success"
-        );
-    } catch (e) {
-      console.error("Failed to select AI thumbnail", e);
-      if (addNotification)
-        addNotification(
-          "Failed to load AI thumbnail. Please try another.",
-          "error"
-        );
+      if (addNotification) {
+        addNotification("🖼️ High-CTR AI Thumbnail applied to video details!", "success");
+      }
     }
   };
 

@@ -48,7 +48,7 @@ def _build_youtube_client(credentials: Any) -> Any:
         )
 
 
-async def get_authenticated_service(user_id: Optional[str] = None) -> Any:
+async def get_authenticated_service(user_id: Optional[str] = None, allow_interactive: bool = False) -> Any:
     """Authenticates using stored YouTube OAuth tokens or client_secrets and returns a YouTube service object."""
     if not _GOOGLE_API_AVAILABLE:
         raise ServiceException(
@@ -112,6 +112,12 @@ async def get_authenticated_service(user_id: Optional[str] = None) -> Any:
                     }
                 )
                 logger.info(f"Using user custom credentials from database for user_id: {user_id}")
+
+        if not allow_interactive and not custom_secrets:
+            raise ServiceException(
+                status_code=401,
+                message="No active YouTube credentials stored for this user."
+            )
 
         PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
 
@@ -419,7 +425,10 @@ async def fetch_user_youtube_channels(user_id: Optional[str] = None) -> list[dic
 
             for item in items:
                 cid = item.get("id")
-                if cid and cid not in unlinked_ids:
+                if cid:
+                    # If this channel was previously marked unlinked, user is now explicitly authorized/using it
+                    unlinked_ids.discard(cid)
+                    
                     snippet = item.get("snippet", {})
                     stats = item.get("statistics", {})
                     branding = item.get("brandingSettings", {}).get("image", {})
@@ -443,12 +452,12 @@ async def fetch_user_youtube_channels(user_id: Optional[str] = None) -> list[dic
                         "subscriber_count": f"{int(sub_count):,}" if sub_count else "--",
                         "view_count": f"{int(view_count):,}" if view_count else "--",
                         "video_count": str(vid_count),
-                        "type": "personal",
+                        "type": "brand" if (snippet.get("customUrl") or branding.get("bannerExternalUrl")) else "personal",
                         "is_selected": 1 if (user_id and cid in channel_map and channel_map[cid].get("is_selected")) else 0,
                     }
                     channel_map[cid] = norm_ch
 
-                    # Persist newly retrieved channel details to database
+                    # Persist newly retrieved channel details to database (also clears unlinked table)
                     if user_id:
                         try:
                             from repositories.youtube import save_user_youtube_channel
@@ -522,8 +531,8 @@ async def lookup_youtube_channel_by_handle(user_id: Optional[str], query: str) -
         elif "/channel/" in clean_q:
             clean_q = clean_q.split("/channel/")[-1].split("/")[0].split("?")[0]
 
-    try:
-        youtube = await get_authenticated_service(user_id=user_id)
+    async def _try_api_lookup():
+        youtube = await get_authenticated_service(user_id=user_id, allow_interactive=False)
 
         # 1. Try by channel ID if it starts with 'UC'
         if clean_q.startswith("UC") and len(clean_q) >= 20:
@@ -621,8 +630,157 @@ async def lookup_youtube_channel_by_handle(user_id: Optional[str], query: str) -
         except Exception as un_err:
             logger.debug(f"[YouTube Channels] Username lookup '{username_str}' note: {un_err}")
 
+        # 4. Try API Search by Channel Name/Topic
+        try:
+            req_search = youtube.search().list(part="snippet", q=clean_q, type="channel", maxResults=1)
+            res_search = await asyncio.to_thread(req_search.execute)
+            items_search = res_search.get("items", [])
+            if items_search:
+                cid = items_search[0].get("id", {}).get("channelId")
+                if cid:
+                    req_detail = youtube.channels().list(part="snippet,statistics", id=cid)
+                    res_detail = await asyncio.to_thread(req_detail.execute)
+                    items_detail = res_detail.get("items", [])
+                    if items_detail:
+                        item = items_detail[0]
+                        snippet = item.get("snippet", {})
+                        stats = item.get("statistics", {})
+                        sub_count = stats.get("subscriberCount")
+                        norm_ch = {
+                            "id": cid,
+                            "title": snippet.get("title") or clean_q,
+                            "description": snippet.get("description", ""),
+                            "custom_url": snippet.get("customUrl") or f"@{clean_q.replace(' ', '')}",
+                            "thumbnail": (
+                                snippet.get("thumbnails", {}).get("high", {}).get("url")
+                                or snippet.get("thumbnails", {}).get("default", {}).get("url")
+                                or ""
+                            ),
+                            "subscriber_count": f"{int(sub_count):,}" if sub_count else "--",
+                            "view_count": f"{int(stats.get('viewCount', 0)):,}" if stats.get("viewCount") else "--",
+                            "video_count": str(stats.get("videoCount", "0")),
+                            "type": "brand",
+                        }
+                        if user_id:
+                            from repositories.youtube import save_user_youtube_channel
+                            save_user_youtube_channel(user_id, norm_ch)
+                        return norm_ch
+        except Exception as search_err:
+            logger.debug(f"[YouTube Channels] API Search error for '{clean_q}': {search_err}")
+
+        return None
+
+    try:
+        api_result = await asyncio.wait_for(_try_api_lookup(), timeout=3.0)
+        if api_result:
+            return api_result
     except Exception as e:
-        logger.warning(f"[YouTube Channels] Lookup failed for '{clean_q}': {e}")
+        logger.debug(f"[YouTube Channels] API Lookup note for '{clean_q}': {e}. Using fast public lookup...")
+
+    # 5. Fallback: Parse public YouTube channel page
+    try:
+        import urllib.request
+        import urllib.parse
+        import re
+        import json
+
+        clean_handle = clean_q if clean_q.startswith("@") else f"@{clean_q}"
+        if clean_q.startswith("UC") and len(clean_q) >= 20:
+            target_url = f"https://www.youtube.com/channel/{clean_q}"
+        else:
+            target_url = f"https://www.youtube.com/{clean_handle}"
+
+        def _fetch_public():
+            req_pub = urllib.request.Request(
+                target_url,
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+            )
+            return urllib.request.urlopen(req_pub, timeout=8).read().decode("utf-8")
+
+        html = await asyncio.to_thread(_fetch_public)
+        title_m = re.search(r'<meta property="og:title" content="(.*?)">', html)
+        img_m = re.search(r'<meta property="og:image" content="(.*?)">', html)
+        cid_m = re.search(r'"channelId":"(UC[a-zA-Z0-9_-]{22})"', html) or re.search(r'<meta itemprop="channelId" content="(.*?)">', html)
+        sub_m = re.search(r'"subscriberCountText":\{"accessibility":\{"accessibilityData":\{"label":"(.*?)"\}\},"simpleText":"(.*?)"\}', html)
+        vid_m = re.search(r'([0-9,]+)\s+videos', html, re.IGNORECASE)
+
+        if title_m or cid_m:
+            resolved_title = title_m.group(1) if title_m else clean_q
+            resolved_id = cid_m.group(1) if cid_m else (clean_q if clean_q.startswith("UC") else f"UC_{clean_q.replace('@', '')}")
+            resolved_subs = sub_m.group(2) if sub_m else "--"
+            resolved_vids = vid_m.group(1) if vid_m else "0"
+
+            norm_ch = {
+                "id": resolved_id,
+                "title": resolved_title,
+                "description": "",
+                "custom_url": clean_handle,
+                "thumbnail": img_m.group(1) if img_m else "",
+                "subscriber_count": resolved_subs,
+                "view_count": "--",
+                "video_count": str(resolved_vids),
+                "type": "brand",
+            }
+            if user_id:
+                from repositories.youtube import save_user_youtube_channel
+                save_user_youtube_channel(user_id, norm_ch)
+            logger.info(f"[YouTube Channels] Successfully resolved public channel '{resolved_title}' ({resolved_id})")
+            return norm_ch
+    except Exception as fallback_err:
+        logger.debug(f"[YouTube Channels] Direct page lookup note for '{clean_q}': {fallback_err}")
+
+    # 6. Fallback: Search YouTube public search results for channel name
+    try:
+        import urllib.request
+        import urllib.parse
+        import re
+        import json
+
+        encoded_q = urllib.parse.quote(clean_q)
+        search_url = f"https://www.youtube.com/results?search_query={encoded_q}&sp=EgIQAg%253D%253D"
+
+        def _fetch_search():
+            req_s = urllib.request.Request(
+                search_url,
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+            )
+            return urllib.request.urlopen(req_s, timeout=8).read().decode("utf-8")
+
+        html_s = await asyncio.to_thread(_fetch_search)
+        m = re.search(r'var ytInitialData = ({.*?});</script>', html_s)
+        if m:
+            data = json.loads(m.group(1))
+            contents = data.get("contents", {}).get("twoColumnSearchResultsRenderer", {}).get("primaryContents", {}).get("sectionListRenderer", {}).get("contents", [])
+            for section in contents:
+                item_section = section.get("itemSectionRenderer", {}).get("contents", [])
+                for item in item_section:
+                    if "channelRenderer" in item:
+                        cr = item["channelRenderer"]
+                        cid = cr.get("channelId")
+                        title = cr.get("title", {}).get("simpleText") or cr.get("title", {}).get("runs", [{}])[0].get("text")
+                        canonical = cr.get("navigationEndpoint", {}).get("browseEndpoint", {}).get("canonicalBaseUrl", "")
+                        thumb = cr.get("thumbnail", {}).get("thumbnails", [{}])[-1].get("url")
+                        video_count = cr.get("videoCountText", {}).get("runs", [{}])[0].get("text", "0") if "videoCountText" in cr else "0"
+                        subscribers = cr.get("subscriberCountText", {}).get("simpleText", "--")
+                        if cid and title:
+                            norm_ch = {
+                                "id": cid,
+                                "title": title,
+                                "description": "",
+                                "custom_url": canonical or f"@{clean_q.replace(' ', '')}",
+                                "thumbnail": thumb if (thumb and thumb.startswith("http")) else (f"https:{thumb}" if thumb else ""),
+                                "subscriber_count": subscribers,
+                                "view_count": "--",
+                                "video_count": str(video_count),
+                                "type": "brand",
+                            }
+                            if user_id:
+                                from repositories.youtube import save_user_youtube_channel
+                                save_user_youtube_channel(user_id, norm_ch)
+                            logger.info(f"[YouTube Channels] Resolved channel via search for '{clean_q}': {title} ({cid})")
+                            return norm_ch
+    except Exception as search_scrape_err:
+        logger.warning(f"[YouTube Channels] Search scrape fallback failed for '{clean_q}': {search_scrape_err}")
 
     return None
 

@@ -128,7 +128,7 @@ interface YouTubeStudioPageProps {
   onClearThumbnail: () => void;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onThumbnailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onThumbnailSelect: (url: string) => void;
+  onThumbnailSelect: (fileOrUrl: File | string, previewUrl?: string) => void;
   onPublish: () => void;
   onResetUploadState?: () => void;
   handleGenerateMetadata: () => void;
@@ -424,6 +424,9 @@ export default function YouTubeStudioPage({
               setMadeForKids={setMadeForKids}
               thumbnailPreviewUrl={thumbnailPreviewUrl}
               onThumbnailChange={onThumbnailChange}
+              onThumbnailDirectSelect={(file, previewUrl) =>
+                onThumbnailSelect(previewUrl)
+              }
               onClearThumbnail={onClearThumbnail}
               hasCustomCredentials={hasCustomCredentials}
               isAiGenerating={isAiGenerating}

@@ -1,6 +1,7 @@
-import React from "react";
-import { Sparkles, UploadCloud, ChevronRight } from "lucide-react";
+import React, { useState } from "react";
+import { Sparkles, UploadCloud, ChevronRight, Wand2, Image as ImageIcon } from "lucide-react";
 import PlaylistSelector from "../PlaylistSelector";
+import YouTubeThumbnailModal from "../YouTubeThumbnailModal";
 
 // Full YouTube category list (official IDs)
 const YOUTUBE_CATEGORIES = [
@@ -116,6 +117,7 @@ export interface StudioDetailsTabProps {
   setMadeForKids: (val: string) => void;
   thumbnailPreviewUrl: string | null;
   onThumbnailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onThumbnailDirectSelect?: (fileOrUrl: File | string, previewUrl?: string) => void;
   onClearThumbnail: () => void;
   hasCustomCredentials: boolean;
   isAiGenerating: boolean;
@@ -143,6 +145,7 @@ export default function StudioDetailsTab({
   setMadeForKids,
   thumbnailPreviewUrl,
   onThumbnailChange,
+  onThumbnailDirectSelect,
   onClearThumbnail,
   hasCustomCredentials,
   isAiGenerating,
@@ -154,8 +157,31 @@ export default function StudioDetailsTab({
   onNext,
   addNotification,
 }: StudioDetailsTabProps) {
+  const [isAiThumbnailModalOpen, setIsAiThumbnailModalOpen] = useState(false);
+
   return (
     <div className="space-y-5 animate-fade-in">
+      {/* AI Thumbnail Studio Modal */}
+      <YouTubeThumbnailModal
+        isOpen={isAiThumbnailModalOpen}
+        onClose={() => setIsAiThumbnailModalOpen(false)}
+        initialTitle={title}
+        initialSynopsis={description}
+        onThumbnailSelected={(file, previewUrl) => {
+          if (onThumbnailDirectSelect) {
+            onThumbnailDirectSelect(file, previewUrl);
+          } else {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            const syntheticEvent = {
+              target: { files: dataTransfer.files },
+            } as unknown as React.ChangeEvent<HTMLInputElement>;
+            onThumbnailChange(syntheticEvent);
+          }
+        }}
+        addNotification={addNotification}
+      />
+
       {/* Step Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-800 pb-4">
         <div>
@@ -246,34 +272,72 @@ export default function StudioDetailsTab({
         </div>
       </div>
 
-      {/* THUMBNAIL */}
-      <div className="space-y-2">
-        <label className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider block">
-          Thumbnail
-        </label>
+      {/* THUMBNAIL STUDIO */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider block">
+            Video Thumbnail
+          </label>
+          <button
+            type="button"
+            onClick={() => setIsAiThumbnailModalOpen(true)}
+            className="flex items-center gap-1.5 text-xs font-mono font-bold text-red-400 hover:text-red-300 bg-red-950/40 border border-red-800/50 hover:border-red-600 px-3 py-1 rounded-xl transition-all cursor-pointer shadow-sm"
+          >
+            <Wand2 className="w-3.5 h-3.5" />
+            <span>Launch AI Thumbnail Studio</span>
+          </button>
+        </div>
+
         <p className="text-[11px] text-neutral-500 font-mono">
-          Upload a picture that shows what's in your video. A good thumbnail
-          stands out and draws viewers' attention.{" "}
+          Upload a picture or generate a high-CTR visual with our AI Studio.{" "}
           <span className="text-neutral-400">
-            JPG, GIF, or PNG recommended · Max 2MB
+            JPG or PNG recommended · 1280x720 (16:9) · Max 2MB
           </span>
         </p>
-        <div className="grid grid-cols-2 gap-3">
-          {/* Upload button */}
-          <label className="flex flex-col items-center justify-center gap-2 h-24 border-2 border-dashed border-neutral-700 hover:border-red-500/60 rounded-xl cursor-pointer transition-all bg-neutral-950/40 group">
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Option 1: AI Generator Button */}
+          <button
+            type="button"
+            onClick={() => setIsAiThumbnailModalOpen(true)}
+            className="flex flex-col items-center justify-center gap-2 h-28 border border-neutral-700 hover:border-red-500/80 rounded-2xl cursor-pointer transition-all bg-gradient-to-b from-neutral-900/90 to-red-950/20 hover:from-neutral-900 hover:to-red-950/40 group p-3 text-center"
+          >
+            <div className="p-2 bg-red-600/20 rounded-xl group-hover:scale-110 transition-transform">
+              <Sparkles className="w-5 h-5 text-red-400" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-white font-sans flex items-center justify-center gap-1">
+                <span>AI Thumbnail Studio</span>
+              </div>
+              <div className="text-[10px] font-mono text-neutral-400">
+                Prompt + Viral Stickers
+              </div>
+            </div>
+          </button>
+
+          {/* Option 2: Upload File */}
+          <label className="flex flex-col items-center justify-center gap-2 h-28 border-2 border-dashed border-neutral-700 hover:border-red-500/60 rounded-2xl cursor-pointer transition-all bg-neutral-950/40 group p-3 text-center">
             <input
               type="file"
               accept="image/*"
               onChange={onThumbnailChange}
               className="hidden"
             />
-            <UploadCloud className="w-6 h-6 text-neutral-500 group-hover:text-red-400 transition-colors" />
-            <span className="text-xs font-mono text-neutral-500 group-hover:text-neutral-300 transition-colors">
-              Upload thumbnail
-            </span>
+            <div className="p-2 bg-neutral-800 rounded-xl group-hover:bg-neutral-700 transition-colors">
+              <UploadCloud className="w-5 h-5 text-neutral-400 group-hover:text-white" />
+            </div>
+            <div>
+              <div className="text-xs font-bold text-neutral-300 group-hover:text-white font-sans">
+                Upload from PC
+              </div>
+              <div className="text-[10px] font-mono text-neutral-500">
+                PNG, JPG under 2MB
+              </div>
+            </div>
           </label>
-          {/* Preview */}
-          <div className="h-24 rounded-xl border border-neutral-800 overflow-hidden bg-neutral-950/40 flex items-center justify-center">
+
+          {/* Option 3: Live Preview Box */}
+          <div className="h-28 rounded-2xl border border-neutral-800 overflow-hidden bg-neutral-950/60 flex items-center justify-center relative group">
             {thumbnailPreviewUrl ? (
               <div className="relative w-full h-full">
                 <img
@@ -283,15 +347,22 @@ export default function StudioDetailsTab({
                 />
                 <button
                   onClick={onClearThumbnail}
-                  className="absolute top-1 right-1 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer"
+                  className="absolute top-1.5 right-1.5 w-6 h-6 bg-black/80 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors cursor-pointer shadow-lg"
+                  title="Remove thumbnail"
                 >
                   ×
                 </button>
+                <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/75 rounded text-[9px] font-mono text-emerald-400 font-bold">
+                  Active Thumbnail
+                </div>
               </div>
             ) : (
-              <span className="text-[10px] text-neutral-600 font-mono text-center px-2">
-                Preview appears here
-              </span>
+              <div className="flex flex-col items-center justify-center gap-1 text-center px-2">
+                <ImageIcon className="w-5 h-5 text-neutral-600" />
+                <span className="text-[10px] text-neutral-500 font-mono">
+                  No thumbnail set
+                </span>
+              </div>
             )}
           </div>
         </div>
