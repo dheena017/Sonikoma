@@ -21,7 +21,7 @@ import VoiceSettingsPanel from "@/features/creative_voice/components/VoiceSettin
 import AmbientSoundPicker from "@/features/editor_audio/components/AmbientSoundPicker";
 import SfxOverlayMixer from "@/features/editor_audio/components/SfxOverlayMixer";
 
-import ModelSelect from "@/features/ai_core/components/ModelSelect";
+import ModelSelect from "@/features/ai_core/ModelSelect";
 
 import { useProjectStore } from "@/store/useProjectStore";
 

@@ -275,7 +275,13 @@ const SidebarInner = ({
           onClick: () => navigateTo("/creative-suite"),
           enabled: true,
         },
-
+        {
+          label: "AI Core & Multi-Engine",
+          icon: Brain,
+          active: currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
+          onClick: () => navigateTo("/ai-core"),
+          enabled: true,
+        },
         {
           label: "Image Editor",
           icon: Image,

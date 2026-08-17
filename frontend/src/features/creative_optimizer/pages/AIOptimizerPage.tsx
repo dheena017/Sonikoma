@@ -25,7 +25,7 @@ import ShortsScriptTab from "@/features/creative_optimizer/components/ShortsScri
 import SoundOutroTab from "@/features/creative_optimizer/components/SoundOutroTab";
 import AdPlacementTab from "@/features/creative_optimizer/components/AdPlacementTab";
 import ThumbnailStudioTab from "@/features/creative_optimizer/components/ThumbnailStudioTab";
-import ModelSelect from "@/features/ai_core/components/ModelSelect";
+import ModelSelect from "@/features/ai_core/ModelSelect";
 
 import { useProjectStore } from "@/store/useProjectStore";
 

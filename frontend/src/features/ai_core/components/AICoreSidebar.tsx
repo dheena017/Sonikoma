@@ -2,21 +2,18 @@ import React, { useEffect } from "react";
 import {
   Sparkles,
   LayoutGrid,
-  Film,
-  Scissors,
-  Users,
-  Globe,
-  Music,
-  MessageSquare,
-  Mic,
+  Key,
   BarChart3,
-  Youtube,
+  CreditCard,
+  Sliders,
+  ShieldCheck,
+  Cpu,
   ArrowLeft,
   X,
-  Settings,
   Zap,
   FolderOpen,
   FolderSync,
+  Workflow,
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { useProjectStore } from "@/store/useProjectStore";
@@ -30,7 +27,7 @@ const ActiveProjectSidebarWidget: React.FC<{
     <div className="p-3 rounded-2xl bg-[#0e0f17] border border-white/10 text-xs shadow-md my-2">
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1">
-          <Zap className="w-3 h-3 text-purple-400" /> Active Project
+          <Zap className="w-3 h-3 text-purple-400" /> Active Context
         </span>
         {activeProjectId ? (
           <span className="text-[9px] text-emerald-400 font-medium px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
@@ -96,20 +93,18 @@ const ActiveProjectSidebarWidget: React.FC<{
   );
 };
 
-interface CreativeSuiteSidebarProps {
+interface AICoreSidebarProps {
   currentPath: string;
   navigateTo: (path: string) => void;
   isOpen: boolean;
   onClose: () => void;
-  panels?: any[];
 }
 
-const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
+const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
   currentPath,
   navigateTo,
   isOpen,
   onClose,
-  panels = [],
 }) => {
   const { themeMode } = useThemeMode();
 
@@ -127,101 +122,75 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
 
   const groups = [
     {
-      name: "Hub",
+      name: "Intelligence Hub",
       items: [
         {
-          id: "dashboard",
-          label: "Overview Hub",
-          icon: LayoutGrid,
-          path: "/creative-suite",
-          requiresPanels: false,
-        },
-      ],
-    },
-    {
-      name: "Visual Studio",
-      items: [
-        {
-          id: "optimizer",
-          label: "Video Optimizer",
-          icon: Film,
-          path: "/creative-suite/ai-optimizer",
-          requiresPanels: true,
-        },
-        {
-          id: "assistant",
-          label: "Translation Studio",
-          icon: Globe,
-          path: "/creative-suite/panel-assistant",
-          requiresPanels: true,
-        },
-      ],
-    },
-    {
-      name: "Audio Production",
-      items: [
-        {
-          id: "voice",
-          label: "Voice & Sound Studio",
-          icon: Mic,
-          path: "/creative-suite/ai-voice",
-          requiresPanels: true,
-        },
-      ],
-    },
-    {
-      name: "Distribution",
-      items: [
-        {
-          id: "youtube",
-          label: "YouTube Publisher",
-          icon: Youtube,
-          path: "/creative-suite/youtube",
-          requiresPanels: false,
-        },
-      ],
-    },
-    {
-      name: "AI & API Engine Hub",
-      items: [
-        {
-          id: "ai_core",
+          id: "overview",
           label: "AI Command Center",
-          icon: Sparkles,
+          icon: LayoutGrid,
           path: "/ai-core",
-          requiresPanels: false,
         },
+      ],
+    },
+    {
+      name: "Engines & Providers",
+      items: [
         {
           id: "api_keys",
-          label: "API Keys & Models",
-          icon: Settings,
+          label: "API Keys & Provider Vault",
+          icon: Key,
           path: "/ai-core/api-keys",
-          requiresPanels: false,
         },
         {
-          id: "ai_analytics",
-          label: "AI Token Analytics",
+          id: "models",
+          label: "Model Routing & Fallbacks",
+          icon: Workflow,
+          path: "/ai-core/models",
+        },
+      ],
+    },
+    {
+      name: "Operations & Costs",
+      items: [
+        {
+          id: "tokens",
+          label: "Tokens by Model & Key",
+          icon: Cpu,
+          path: "/ai-core/tokens",
+        },
+        {
+          id: "analytics",
+          label: "AI Analytics & Ledger",
           icon: BarChart3,
           path: "/ai-core/analytics",
-          requiresPanels: false,
         },
         {
-          id: "ai_billing",
-          label: "Billing & Credits",
-          icon: Zap,
+          id: "billing",
+          label: "Billing & Credit Wallet",
+          icon: CreditCard,
           path: "/ai-core/billing",
-          requiresPanels: false,
+        },
+      ],
+    },
+    {
+      name: "Governance & Safety",
+      items: [
+        {
+          id: "safety_quotas",
+          label: "Safety & Quota Limits",
+          icon: ShieldCheck,
+          path: "/ai-core/safety-quotas",
         },
       ],
     },
   ];
 
   const isActive = (path: string) => {
-    if (path === "/creative-suite") {
+    if (path === "/ai-core") {
       return (
-        currentPath === "/creative-suite" ||
-        currentPath === "/creative-suite/" ||
-        currentPath === "/creative-suite-dashboard"
+        currentPath === "/ai-core" ||
+        currentPath === "/ai-core/" ||
+        currentPath === "/ai-core/overview"
       );
     }
     return (
@@ -237,7 +206,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
       <div className="h-16 flex items-center justify-between px-5 border-b border-neutral-900/80 shrink-0">
         <div className="flex items-center gap-3.5">
           <div className="relative">
-            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
+            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-400 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
             <img
               src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
               onError={(e) => {
@@ -250,14 +219,14 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-sm tracking-tight text-white font-sans">
-                Creative Suite
+                AI Core Suite
               </span>
               <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md font-mono">
-                SUITE
+                MULTI-AI
               </span>
             </div>
             <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
-              AI Creative Workspace
+              Neural Orchestrator
             </p>
           </div>
         </div>
@@ -270,7 +239,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
         </button>
       </div>
 
-      {/* Active Project Widget in CreativeSuiteSidebar */}
+      {/* Active Project Widget in AICoreSidebar */}
       <div className="px-4 pt-3">
         <ActiveProjectSidebarWidget
           setDrawerOpen={(open) =>
@@ -294,7 +263,6 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
             <ul className="space-y-1">
               {group.items.map((item) => {
                 const active = isActive(item.path);
-                const isLocked = false;
 
                 return (
                   <li key={item.id} className="relative">
@@ -315,36 +283,21 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
                       className={`w-full flex items-center justify-between gap-3.5 px-4 py-2.5 rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
                         active
                           ? "bg-purple-500/10 text-neutral-100 shadow-[inset_0_0_16px_rgba(168,85,247,0.08)] border border-purple-500/20"
-                          : isLocked
-                          ? "text-neutral-600 hover:text-neutral-450 border border-transparent"
                           : "text-neutral-500 hover:text-neutral-250 hover:bg-neutral-900 border border-transparent"
                       }`}
-                      title={
-                        isLocked
-                          ? "Requires timeline panels to unlock"
-                          : undefined
-                      }
                     >
                       <div className="flex items-center gap-3">
                         <item.icon
                           className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${
                             active
                               ? "text-purple-400"
-                              : isLocked
-                              ? "text-neutral-700"
                               : "text-neutral-500 group-hover:scale-110 group-hover:text-neutral-400"
                           }`}
                         />
-                        <span className="text-xs font-bold tracking-wide">
+                        <span className="text-xs font-bold tracking-wide font-sans">
                           {item.label}
                         </span>
                       </div>
-
-                      {isLocked && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-black/60 border border-neutral-900 text-neutral-600 scale-90">
-                          🔒 LCK
-                        </span>
-                      )}
                     </button>
                   </li>
                 );
@@ -354,17 +307,20 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
         ))}
       </div>
 
-      {/* Sidebar Footer: Return to App */}
-      <div className="p-5 border-t border-neutral-900">
+      {/* Footer Info Pill */}
+      <div className="p-4 border-t border-neutral-900 shrink-0 bg-neutral-950/40">
         <button
           onClick={() => {
-            navigateTo("/dashboard");
+            navigateTo("/creative-suite");
             onClose();
           }}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-black tracking-widest transition-all shadow-[0_4px_14px_rgba(168,85,247,0.3)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.5)] active:scale-95 border border-purple-400/30 cursor-pointer"
+          className="w-full py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-mono text-neutral-300 hover:text-white transition-all flex items-center justify-between cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4 shrink-0" />
-          <span>MAIN DASHBOARD</span>
+          <span className="flex items-center gap-2">
+            <ArrowLeft className="w-3.5 h-3.5 text-purple-400" />
+            <span>Creative Suite</span>
+          </span>
+          <span className="text-[10px] text-neutral-500 font-bold">Return →</span>
         </button>
       </div>
     </div>
@@ -372,24 +328,29 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-fade-in"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md transition-opacity duration-300"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar Drawer */}
-      <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[300px] z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
+      <div
+        id="ai_core_sidebar_pane"
+        className={`fixed inset-y-0 left-0 z-50 w-72 lg:w-80 transform transition-transform duration-300 ease-out shadow-2xl ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="AI Core Navigation"
       >
         {sidebarContent}
-      </aside>
+      </div>
     </>
   );
 };
 
-export default CreativeSuiteSidebar;
+export default AICoreSidebar;

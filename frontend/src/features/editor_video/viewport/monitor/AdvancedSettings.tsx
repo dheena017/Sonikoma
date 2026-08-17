@@ -18,7 +18,7 @@ import {
   MessageSquare,
   Sparkle,
 } from "lucide-react";
-import ModelSelect from "@/features/ai_core/components/ModelSelect";
+import ModelSelect from "@/features/ai_core/ModelSelect";
 
 export interface VideoPreviewAdvancedSettingsProps {
   voiceActor: string;

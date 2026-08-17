@@ -3,16 +3,21 @@ import {
   Search,
   Bell,
   BellOff,
-  Shield,
+  Sparkles,
   Zap,
   Menu,
-  Cpu,
-  Database,
-  Activity,
-  Settings,
-  Volume2,
-  VolumeX,
+  FolderOpen,
   FolderSync,
+  Activity,
+  Key,
+  CreditCard,
+  BarChart3,
+  Sliders,
+  ShieldCheck,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
+  X,
 } from "lucide-react";
 import * as api from "@/api";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
@@ -21,12 +26,12 @@ import {
   DEFAULT_USER_AVATAR_DATA_URI,
 } from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
-import { HeaderCreditsPopover } from "@/features/ai_core";
+import HeaderCreditsPopover from "./HeaderCreditsPopover";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useBackendHealth } from "@/shared/hooks";
 import { useProjectStore } from "@/store/useProjectStore";
 
-export interface AdminHeaderPageProps {
+export interface AICoreHeaderProps {
   currentPath: string;
   navigateTo: (path: string) => void;
   fetchWithInterceptor: any;
@@ -43,7 +48,7 @@ export interface AdminHeaderPageProps {
   addNotification?: (message: string, type?: string) => void;
 }
 
-const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
+export default function AICoreHeader({
   currentPath,
   navigateTo,
   fetchWithInterceptor,
@@ -58,31 +63,19 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
   isSidebarOpen = false,
   user,
   addNotification,
-}) => {
-  const [stats, setStats] = useState<any>({
-    cpu: 0,
-    memory: "0MB",
-    dbLatency: 0,
-    gpu: { total: 0, busy: 0, idle: 0 },
-    uptime: "",
-  });
+}: AICoreHeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showTelemetryPopover, setShowTelemetryPopover] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
-  const [volume, setVolume] = useState(80);
-  const [isMuted, setIsMuted] = useState(false);
   const [credits, setCredits] = useState<number | null>(
     user?.credits !== undefined ? user.credits : null
   );
 
-  const { activeProjectId, activeProjectData, setDrawerOpen } =
-    useProjectStore();
+  const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
   const { status: backendStatus } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
-  const telemetryRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -122,27 +115,6 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
     }
   }, [user?.credits]);
 
-  const fetchStats = async () => {
-    try {
-      const data = await api.getMetrics(fetchWithInterceptor);
-      setStats({
-        cpu: data.memory?.cpuPct || 0,
-        memory: `${data.memory?.rssMB || 0}MB`,
-        dbLatency: data.database?.dbLatencyMs || 0,
-        gpu: data.database?.gpuWorkers || { total: 0, busy: 0, idle: 0 },
-        uptime: data.server?.uptime || "",
-      });
-    } catch (err) {
-      console.error("Failed to fetch header stats:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-    const interval = setInterval(fetchStats, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node;
@@ -151,9 +123,6 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
         !notificationsRef.current.contains(target)
       ) {
         setShowNotifications(false);
-      }
-      if (telemetryRef.current && !telemetryRef.current.contains(target)) {
-        setShowTelemetryPopover(false);
       }
       if (creditsRef.current && !creditsRef.current.contains(target)) {
         setShowCreditsPopover(false);
@@ -170,49 +139,39 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
 
   const quickNavItems = [
     {
-      label: "Dashboard",
-      path: "/admin",
-      keyword: "home index dashboard overview",
+      label: "AI Command Center",
+      path: "/ai-core",
+      keyword: "home dashboard overview ai core hub intelligence",
     },
     {
-      label: "Announcements",
-      path: "/admin/announcements",
-      keyword: "announcements broadcast email message",
+      label: "API Keys & Provider Vault",
+      path: "/ai-core/api-keys",
+      keyword: "keys gemini openai claude elevenlabs huggingface groq deepseek",
     },
     {
-      label: "User Accounts",
-      path: "/admin/users",
-      keyword: "users accounts creators login",
+      label: "Model Routing & Fallbacks",
+      path: "/ai-core/models",
+      keyword: "routing models fallback hyperparameters temperature",
     },
     {
-      label: "Scrapers Configuration",
-      path: "/admin/scrapers",
-      keyword: "scrapers webtoon scraping episode",
+      label: "Tokens by Model & API Key",
+      path: "/ai-core/tokens",
+      keyword: "tokens models quotas tpm rpm limits pricing calculation",
     },
     {
-      label: "System settings",
-      path: "/admin/settings",
-      keyword: "settings parameters config reset cache",
+      label: "AI Token Analytics & Ledger",
+      path: "/ai-core/analytics",
+      keyword: "analytics tokens telemetry prompt output latency cost",
     },
     {
-      label: "Database Explorer",
-      path: "/admin/explorer",
-      keyword: "database query table explorer sql",
+      label: "Billing & Credit Wallet",
+      path: "/ai-core/billing",
+      keyword: "billing wallet credits topup rates packages",
     },
     {
-      label: "System Health",
-      path: "/admin/health",
-      keyword: "health server uptime cpu memory latency",
-    },
-    {
-      label: "Audit Logs",
-      path: "/admin/activity",
-      keyword: "audit logs security activity actions",
-    },
-    {
-      label: "Interactive Console",
-      path: "/admin/console",
-      keyword: "console terminal prompt execute",
+      label: "Safety & Quota Limits",
+      path: "/ai-core/safety-quotas",
+      keyword: "safety rpm quota content id copyright filter",
     },
   ];
 
@@ -224,8 +183,8 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
 
   return (
     <header
-      id="header_pane"
-      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 shadow-md shadow-black/20"
+      id="ai_core_header_pane"
+      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 selection:bg-purple-600/30 shadow-md shadow-black/20"
     >
       {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-3 shrink-0 h-full">
@@ -233,7 +192,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           <button
             onClick={onToggleSidebar}
             className="icon-pill cursor-pointer hover:icon-pill--purple transition-all"
-            title="Toggle Navigation Menu"
+            title="Toggle AI Core Menu"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -241,7 +200,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
 
         <div
           className="flex items-center gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
-          onClick={() => navigateTo("/admin")}
+          onClick={() => navigateTo("/ai-core")}
         >
           <img
             src="/logo-dark.png"
@@ -249,11 +208,17 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
               (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
             }}
             className="h-10 w-10 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
+            style={{ background: "#000000" }}
             alt="Sonikoma Logo"
           />
-          <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
-            Sonikoma
-          </span>
+          <div className="hidden sm:flex flex-col">
+            <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 group-hover/brand:brightness-110 transition-all duration-300 font-sans leading-none">
+              AI Core Suite
+            </span>
+            <span className="text-[9px] font-mono text-neutral-400 font-bold uppercase tracking-wider mt-0.5">
+              Multi-Engine Orchestrator
+            </span>
+          </div>
         </div>
       </div>
 
@@ -268,14 +233,14 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           </div>
           <input
             type="text"
-            placeholder="Quick Find (Ctrl+K or /)"
+            placeholder="Search AI Engines & Tools (Ctrl+K or /)"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setShowSearchDropdown(true);
             }}
             onFocus={() => setShowSearchDropdown(true)}
-            className="w-full bg-neutral-900 text-xs text-neutral-205 pl-9 pr-8 py-2 rounded-xl border border-neutral-850 focus:border-purple-500/60 focus:bg-neutral-900/90 focus:outline-none transition-all placeholder:text-neutral-500 font-sans shadow-inner shadow-black/45"
+            className="w-full bg-neutral-900 text-xs text-neutral-200 pl-9 pr-8 py-2 rounded-xl border border-neutral-850 focus:border-purple-500/60 focus:bg-neutral-900/90 focus:outline-none transition-all placeholder:text-neutral-500 font-sans shadow-inner shadow-black/45"
           />
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[9px] font-mono font-bold text-neutral-500 bg-neutral-950 border border-neutral-850 rounded">
@@ -288,7 +253,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto scrollbar-thin">
             <div className="p-2 border-b border-neutral-850/60">
               <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
-                Jump To Page
+                Launch AI Module
               </span>
               <div className="space-y-0.5">
                 {filteredNavItems.map((item) => (
@@ -311,13 +276,18 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
                     </span>
                   </button>
                 ))}
+                {filteredNavItems.length === 0 && (
+                  <div className="px-3 py-4 text-center text-xs text-neutral-500 font-mono">
+                    No matching AI tools found
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Right side: Controls matching main header layout */}
+      {/* Right side: Standardized Controls Suite */}
       <div className="flex items-center gap-2 lg:gap-3 shrink-0">
         {/* Server Status Indicator */}
         <ServerStatusIndicator status={backendStatus} />
@@ -350,7 +320,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
                   onClaimDaily={handleClaimDailyBonus}
                   onNavigateToBilling={() => {
                     setShowCreditsPopover(false);
-                    navigateTo("/profile?tab=billing");
+                    navigateTo("/ai-core/billing");
                   }}
                 />
               </div>
@@ -371,7 +341,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
             title="Notifications"
           >
             {notificationsMuted ? (
-              <BellOff className="h-4 w-4 text-rose-455" />
+              <BellOff className="h-4 w-4 text-rose-500" />
             ) : (
               <Bell className="h-4 w-4" />
             )}
@@ -423,7 +393,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           </button>
         </div>
 
-        {/* User Profile Pill at Far Right End (Image 3 Style) */}
+        {/* User Profile Pill at Far Right End */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
           className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95"
@@ -433,32 +403,22 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
             {user?.full_name ||
               user?.username ||
-              (user?.email ? user.email.split("@")[0] : "Admin")}
+              (user?.email ? user.email.split("@")[0] : "Creator")}
           </span>
-          <div className="relative w-6 h-6 rounded-full overflow-hidden border border-purple-500/40 bg-purple-950/40 shrink-0 shadow-xs ring-1 ring-white/10 group-hover:border-purple-400 group-hover:ring-purple-500/30 transition-all duration-300">
-            <img
-              key={user?.avatar_url || user?.full_name || "avatar"}
-              src={getUserAvatarUrl(user)}
-              referrerPolicy="no-referrer"
-              onLoad={(e) => {
-                e.currentTarget.classList.remove("opacity-0");
-                e.currentTarget.classList.add("opacity-100");
-              }}
-              onError={(e) => {
-                const target = e.currentTarget as HTMLImageElement;
-                target.onerror = null;
-                target.src = DEFAULT_USER_AVATAR_DATA_URI;
-                target.classList.remove("opacity-0");
-                target.classList.add("opacity-100");
-              }}
-              alt="User Avatar"
-              className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
-            />
-          </div>
+          <img
+            key={user?.avatar_url || user?.full_name || "avatar"}
+            src={getUserAvatarUrl(user)}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              target.onerror = null;
+              target.src = DEFAULT_USER_AVATAR_DATA_URI;
+            }}
+            alt="User Avatar"
+            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
+          />
         </button>
       </div>
     </header>
   );
-};
-
-export default AdminHeaderPage;
+}

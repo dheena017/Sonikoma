@@ -123,7 +123,12 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             currentPath === "/youtube",
           onClick: () => navigateTo("/creative-suite"),
         },
-
+        {
+          label: "AI Core & Multi-Engine",
+          icon: Brain,
+          active: currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
+          onClick: () => navigateTo("/ai-core"),
+        },
         {
           label: "Image Editor",
           icon: Image,

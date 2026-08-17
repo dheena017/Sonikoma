@@ -13,6 +13,7 @@ from api.v1.ai.narration import router as narration_router
 from api.v1.ai.chat import router as chat_router
 from api.v1.ai.translation import router as translation_router
 from api.v1.ai.prompts import router as prompts_router
+from app.api.v1.ai.analytics import router as analytics_router
 
 ai_router = APIRouter()
 
@@ -22,6 +23,7 @@ ai_router.include_router(narration_router)
 ai_router.include_router(chat_router)
 ai_router.include_router(translation_router)
 ai_router.include_router(prompts_router)
+ai_router.include_router(analytics_router)
 
 # Legacy / empty router expected by stable-diffusion mount
 stable_diffusion_router = APIRouter()

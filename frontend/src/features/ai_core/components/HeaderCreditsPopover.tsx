@@ -9,7 +9,7 @@ import {
   Cpu,
 } from "lucide-react";
 
-interface HeaderCreditsPopoverProps {
+export interface HeaderCreditsPopoverProps {
   credits: number;
   hasClaimedToday?: boolean;
   streakDays?: number;

@@ -321,6 +321,9 @@ export default function ProfilePage(props: ProfilePageProps) {
               onUpdateCard={state.handleUpdateCard}
               onUpgradePlan={state.handleUpgradePlan}
               onPurchaseCredits={state.handlePurchaseCredits}
+              user={user}
+              fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={props.addNotification}
             />
           )}
 

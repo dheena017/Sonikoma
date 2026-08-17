@@ -39,6 +39,15 @@ const CreativeSuiteSidebar = React.lazy(
 const CreativeSuiteMiniSidebar = React.lazy(
   () => import("@/features/creative_suite/components/CreativeSuiteMiniSidebar")
 );
+const AICoreHeader = React.lazy(
+  () => import("@/features/ai_core/components/AICoreHeader")
+);
+const AICoreSidebar = React.lazy(
+  () => import("@/features/ai_core/components/AICoreSidebar")
+);
+const AICoreMiniSidebar = React.lazy(
+  () => import("@/features/ai_core/components/AICoreMiniSidebar")
+);
 const ActiveProjectSelectorDrawer = React.lazy(
   () => import("@/components/layout/ActiveProjectSelectorDrawer")
 );
@@ -52,6 +61,7 @@ export interface MainLayoutProps {
   navigateTo: (path: string) => void;
   isAnyAdmin: boolean;
   isCreativeSuitePath: boolean;
+  isAICorePath?: boolean;
   isImageEditorPage: boolean;
   isProEditorPage: boolean;
   isVideoEditorPage: boolean;
@@ -182,6 +192,7 @@ export default function MainLayout(props: MainLayoutProps) {
     navigateTo,
     isAnyAdmin,
     isCreativeSuitePath,
+    isAICorePath = false,
     isImageEditorPage,
     isProEditorPage,
     isVideoEditorPage,
@@ -336,7 +347,7 @@ export default function MainLayout(props: MainLayoutProps) {
 
   const pageSceneVariant: AnimeSceneVariant = React.useMemo(() => {
     if (isAnyAdmin) return "admin";
-    if (isCreativeSuitePath) return "creative";
+    if (isCreativeSuitePath || isAICorePath) return "creative";
     if (isImageEditorPage || isProEditorPage || isVideoEditorPage)
       return "editor";
     if (
@@ -368,6 +379,7 @@ export default function MainLayout(props: MainLayoutProps) {
   }, [
     isAnyAdmin,
     isCreativeSuitePath,
+    isAICorePath,
     isImageEditorPage,
     isProEditorPage,
     isVideoEditorPage,
@@ -412,6 +424,22 @@ export default function MainLayout(props: MainLayoutProps) {
             />
             {!isSidebarOpen && !isDrawerOpen && (
               <AdminMiniSidebar
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                onOpenSidebar={handleOpenSidebar}
+              />
+            )}
+          </>
+        ) : isAICorePath ? (
+          <>
+            <AICoreSidebar
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              isOpen={isSidebarOpen}
+              onClose={handleCloseSidebar}
+            />
+            {!isSidebarOpen && !isDrawerOpen && (
+              <AICoreMiniSidebar
                 currentPath={currentPath}
                 navigateTo={navigateTo}
                 onOpenSidebar={handleOpenSidebar}
@@ -509,6 +537,23 @@ export default function MainLayout(props: MainLayoutProps) {
           <React.Suspense fallback={null}>
             {isAnyAdmin ? (
               <AdminHeaderPage
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                fetchWithInterceptor={fetchWithInterceptor}
+                onToggleSidebar={handleToggleSidebar}
+                notifications={notifications}
+                markNotificationAsRead={markNotificationAsRead as any}
+                markAllNotificationsAsRead={markAllNotificationsAsRead}
+                deleteNotification={deleteNotification as any}
+                clearAllNotifications={clearAllNotifications}
+                notificationsMuted={notificationsMuted}
+                setNotificationsMuted={setNotificationsMuted}
+                isSidebarOpen={isSidebarOpen}
+                user={user}
+                addNotification={addNotification}
+              />
+            ) : isAICorePath ? (
+              <AICoreHeader
                 currentPath={currentPath}
                 navigateTo={navigateTo}
                 fetchWithInterceptor={fetchWithInterceptor}

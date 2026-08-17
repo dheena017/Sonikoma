@@ -22,7 +22,7 @@ import {
   DEFAULT_USER_AVATAR_DATA_URI,
 } from "@/shared/utils/avatar";
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
-import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
+import { HeaderCreditsPopover } from "@/features/ai_core";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useBackendHealth } from "@/shared/hooks";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";

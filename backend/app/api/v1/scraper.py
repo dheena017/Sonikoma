@@ -7,7 +7,6 @@ parses authorization tokens, and delegates logic to scraper services.
 """
 
 import logging
-import asyncio
 import jwt
 from typing import Dict, Optional
 from fastapi import APIRouter, HTTPException, Request, Depends

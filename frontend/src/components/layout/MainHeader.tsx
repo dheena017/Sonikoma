@@ -32,7 +32,7 @@ import {
   DEFAULT_USER_AVATAR_DATA_URI,
 } from "@/shared/utils/avatar";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
-import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
+import { HeaderCreditsPopover } from "@/features/ai_core";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useProjectStore } from "@/store/useProjectStore";
 

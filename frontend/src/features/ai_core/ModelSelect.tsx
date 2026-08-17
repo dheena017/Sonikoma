@@ -2,7 +2,7 @@ import React from "react";
 import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import { Cpu } from "lucide-react";
 
-interface ModelSelectProps {
+export interface ModelSelectProps {
   value: string;
   onChange: (modelId: string) => void;
   className?: string;

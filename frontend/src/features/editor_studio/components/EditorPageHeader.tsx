@@ -22,7 +22,7 @@ import {
 import NotificationDropdown from "@/features/app_notification/components/NotificationDropdown";
 import { Notification } from "@/features/app_notification";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
-import HeaderCreditsPopover from "@/features/user_billing/components/HeaderCreditsPopover";
+import { HeaderCreditsPopover } from "@/features/ai_core";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import { useProjectStore } from "@/store/useProjectStore";
 

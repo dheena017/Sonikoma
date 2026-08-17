@@ -27,7 +27,7 @@ import {
   Square,
   ZapOff,
 } from "lucide-react";
-import ModelSelect from "@/features/ai_core/components/ModelSelect";
+import ModelSelect from "@/features/ai_core/ModelSelect";
 
 interface ProfilePreferencesTabProps {
   notifications: {

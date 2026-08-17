@@ -93,6 +93,32 @@ const VideoEditorPage = React.lazy(
   () => import("@/features/editor_video/pages/VideoEditorPage")
 );
 
+// --- AI Core Suite (Lazy Loaded) ---
+const AICoreLayout = React.lazy(
+  () => import("@/features/ai_core/components/AICoreLayout")
+);
+const AICoreDashboardPage = React.lazy(
+  () => import("@/features/ai_core/pages/AICoreDashboardPage")
+);
+const AIAPIManagementPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIAPIManagementPage")
+);
+const AIAnalyticsPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIAnalyticsPage")
+);
+const AIBillingPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIBillingPage")
+);
+const AIModelsRoutingPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIModelsRoutingPage")
+);
+const AISafetyQuotasPage = React.lazy(
+  () => import("@/features/ai_core/pages/AISafetyQuotasPage")
+);
+const AITokenModelsPage = React.lazy(
+  () => import("@/features/ai_core/pages/AITokenModelsPage")
+);
+
 import MainLayout from "@/components/layout/MainLayout";
 
 export interface AppRouterProps {
@@ -747,8 +773,24 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/ai-characters" ||
         currentPath === "/ai-thumbnails" ||
         currentPath === "/ai-voice" ||
-        currentPath === "/ai-analytics" ||
         currentPath === "/youtube",
+      isAICorePath:
+        currentPath === "/ai-core" ||
+        currentPath === "/ai-core/" ||
+        currentPath.startsWith("/ai-core/"),
+      isAICoreDashboardPath:
+        currentPath === "/ai-core" ||
+        currentPath === "/ai-core/" ||
+        currentPath === "/ai-core/overview",
+      isAIAPIKeysPath: currentPath === "/ai-core/api-keys",
+      isAITokensPath:
+        currentPath === "/ai-core/tokens" ||
+        currentPath === "/ai-core/tokens/" ||
+        currentPath.startsWith("/ai-core/tokens"),
+      isAIAnalyticsPath: currentPath === "/ai-core/analytics",
+      isAIBillingPath: currentPath === "/ai-core/billing",
+      isAIModelsPath: currentPath === "/ai-core/models",
+      isAISafetyQuotasPath: currentPath === "/ai-core/safety-quotas",
       editorRouteMatch,
       isImageEditorPage,
       isVideoEditorPath:
@@ -783,6 +825,14 @@ export default function AppRouter(props: AppRouterProps) {
     isCreativeSuitePath,
     isCreativeSuiteDashboardPath,
     isCreativeSuiteSettingsPath,
+    isAICorePath,
+    isAICoreDashboardPath,
+    isAIAPIKeysPath,
+    isAITokensPath,
+    isAIAnalyticsPath,
+    isAIBillingPath,
+    isAIModelsPath,
+    isAISafetyQuotasPath,
     isImageEditorPage,
     isVideoEditorPath,
   } = pathFlags;
@@ -884,6 +934,7 @@ export default function AppRouter(props: AppRouterProps) {
       navigateTo={navigateTo}
       isAnyAdmin={isAnyAdmin}
       isCreativeSuitePath={isCreativeSuitePath}
+      isAICorePath={isAICorePath}
       isImageEditorPage={isImageEditorPage}
       isProEditorPage={isProEditorPage}
       isSidebarOpen={isSidebarOpen}
@@ -1249,6 +1300,37 @@ export default function AppRouter(props: AppRouterProps) {
           </CreativeSuiteLayout>
         )}
 
+        {/* ── AI CORE SUITE (STANDALONE DEDICATED WORKSPACE) ── */}
+        {isAICorePath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8">
+            <div className="max-w-7xl mx-auto w-full space-y-6">
+              {isAIAPIKeysPath ? (
+                <AIAPIManagementPage addNotification={addNotification} />
+              ) : isAITokensPath ? (
+                <AITokenModelsPage addNotification={addNotification} />
+              ) : isAIAnalyticsPath ? (
+                <AIAnalyticsPage addNotification={addNotification} />
+              ) : isAIBillingPath ? (
+                <AIBillingPage
+                  user={user}
+                  fetchWithInterceptor={fetchWithInterceptor}
+                  addNotification={addNotification}
+                />
+              ) : isAIModelsPath ? (
+                <AIModelsRoutingPage addNotification={addNotification} />
+              ) : isAISafetyQuotasPath ? (
+                <AISafetyQuotasPage addNotification={addNotification} />
+              ) : (
+                <AICoreDashboardPage
+                  navigateTo={navigateTo}
+                  addNotification={addNotification}
+                  user={user}
+                />
+              )}
+            </div>
+          </div>
+        )}
+
         {/* PAGE VIEW 15: User Profile & Account Settings */}
         {isProfilePath && (
           <ProfilePage
@@ -1452,6 +1534,7 @@ export default function AppRouter(props: AppRouterProps) {
           !isEpisodeScraperPath &&
           !isCreativeSuitePath &&
           !isCreativeSuiteDashboardPath &&
+          !isAICorePath &&
           !isVideoEditorPath && (
             <PageNotFound onNavigateHome={() => navigateTo("/")} />
           )}
