@@ -33,6 +33,7 @@ import {
 } from "@/shared/utils/avatar";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { HeaderCreditsPopover } from "@/features/ai_core";
+import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useProjectStore } from "@/store/useProjectStore";
 
@@ -135,6 +136,8 @@ const HeaderInner = ({
   const creditsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const { modelsByProvider } = useAIModels();
 
   // Credits state — polled from server every 30 s and on mount
   const [credits, setCredits] = useState<number | null>(
@@ -609,29 +612,26 @@ const HeaderInner = ({
           <select
             value={selectedModel}
             onChange={(e) => setSelectedModel?.(e.target.value)}
-            className="bg-transparent text-neutral-200 text-[10px] font-bold font-mono focus:outline-none cursor-pointer pr-1"
+            className="bg-transparent text-neutral-200 text-[10px] font-bold font-mono focus:outline-none cursor-pointer pr-1 max-w-[160px] truncate"
             title="Active AI Model"
           >
-            <option
-              value="gemini-2.5-flash"
-              className="bg-neutral-900 text-white"
-            >
-              🚀 Gemini 2.5 Flash
-            </option>
-            <option
-              value="gemini-2.0-flash"
-              className="bg-neutral-900 text-white"
-            >
-              ⚡ Gemini 2.0 Flash
-            </option>
-            <option
-              value="gemini-2.5-flash-lite"
-              className="bg-neutral-900 text-white"
-            >
-              🪶 Gemini 2.5 Flash Lite
-            </option>
+            {Object.keys(modelsByProvider).length === 0 ? (
+              <option value="" disabled className="bg-neutral-900 text-amber-400">
+                ⚠️ No API Key Configured
+              </option>
+            ) : (
+              Object.entries(modelsByProvider).map(([providerName, providerModels]) => (
+                <optgroup key={providerName} label={providerName} className="bg-neutral-900 text-purple-300 font-bold">
+                  {providerModels.map((m) => (
+                    <option key={m.id} value={m.id} className="bg-neutral-900 text-white font-normal">
+                      {m.name || m.id}
+                    </option>
+                  ))}
+                </optgroup>
+              ))
+            )}
           </select>
-          {user?.preferences?.api_keys?.gemini ? (
+          {user?.preferences?.api_keys?.gemini || localStorage.getItem("user_gemini_key") ? (
             <span
               className="text-[9px] px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 font-sans font-bold"
               title="Using custom user Google API key"
@@ -643,7 +643,7 @@ const HeaderInner = ({
               className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-sans font-bold"
               title="Using system Google API key"
             >
-              DEFAULT
+              System
             </span>
           )}
         </div>

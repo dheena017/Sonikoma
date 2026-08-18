@@ -73,9 +73,19 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
 
 
 async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str, Any]:
-    """Exposes available models for the given provider."""
+    """Exposes available models for the given provider from user key or server .env."""
     if not api_key:
-        return {"success": False, "error": f"No API key was provided for {provider}."}
+        if provider == "gemini":
+            api_key = os.getenv("GEMINI_API_KEY")
+        elif provider == "openai":
+            api_key = os.getenv("OPENAI_API_KEY")
+        elif provider == "anthropic":
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+        elif provider == "huggingface":
+            api_key = os.getenv("HUGGINGFACE_API_KEY")
+
+    if not api_key:
+        return {"success": False, "error": f"No API key was provided for {provider} (check website vault or server .env)."}
 
     if provider == "gemini":
         from google import genai

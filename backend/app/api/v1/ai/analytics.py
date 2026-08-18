@@ -697,147 +697,20 @@ async def record_client_ai_log(
 # 4. MODEL CATALOG & DYNAMIC ROUTING ENDPOINTS
 # ─────────────────────────────────────────────────────────────────────────────
 
-MODEL_CATALOG_DETAILED = [
-    {
-        "id": "gemini-2.5-flash",
-        "provider": "google",
-        "name": "Google Gemini 2.5 Flash",
-        "category": "Vision & Multimodal",
-        "context_window": 1048576,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 0.075,
-        "completion_price_per_1m": 0.30,
-        "speed_rating": "Ultra Fast (<300ms)",
-        "capabilities": ["vision", "json_mode", "streaming", "multilingual", "function_calling"],
-        "recommended_for": ["YouTube SEO", "Panel Narration", "Story Scripting"],
-    },
-    {
-        "id": "gemini-2.5-pro",
-        "provider": "google",
-        "name": "Google Gemini 2.5 Pro",
-        "category": "Deep Reasoning & Multimodal",
-        "context_window": 2097152,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 1.25,
-        "completion_price_per_1m": 5.00,
-        "speed_rating": "High (~800ms)",
-        "capabilities": ["vision", "complex_reasoning", "json_mode", "code_generation"],
-        "recommended_for": ["Deep Story Analysis", "Complex Panel Layout Planning"],
-    },
-    {
-        "id": "gemini-2.0-flash",
-        "provider": "google",
-        "name": "Google Gemini 2.0 Flash",
-        "category": "Fast Multimodal Backup",
-        "context_window": 1048576,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 0.10,
-        "completion_price_per_1m": 0.40,
-        "speed_rating": "Ultra Fast (~250ms)",
-        "capabilities": ["vision", "json_mode", "streaming"],
-        "recommended_for": ["Panel OCR", "Bubble Text Extraction"],
-    },
-    {
-        "id": "gpt-4o",
-        "provider": "openai",
-        "name": "OpenAI GPT-4o",
-        "category": "Omni Intelligence",
-        "context_window": 128000,
-        "max_output_tokens": 4096,
-        "prompt_price_per_1m": 2.50,
-        "completion_price_per_1m": 10.00,
-        "speed_rating": "Fast (~450ms)",
-        "capabilities": ["vision", "json_mode", "structured_outputs"],
-        "recommended_for": ["Nuanced Script Polishing", "Character Dialogue"],
-    },
-    {
-        "id": "gpt-4o-mini",
-        "provider": "openai",
-        "name": "OpenAI GPT-4o Mini",
-        "category": "Fast General Intelligence",
-        "context_window": 128000,
-        "max_output_tokens": 4096,
-        "prompt_price_per_1m": 0.15,
-        "completion_price_per_1m": 0.60,
-        "speed_rating": "Ultra Fast (~300ms)",
-        "capabilities": ["json_mode", "speed_optimized"],
-        "recommended_for": ["High-volume metadata", "Summary Generation"],
-    },
-    {
-        "id": "claude-3-5-sonnet-20241022",
-        "provider": "anthropic",
-        "name": "Anthropic Claude 3.5 Sonnet",
-        "category": "State-of-the-Art Reasoning",
-        "context_window": 200000,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 3.00,
-        "completion_price_per_1m": 15.00,
-        "speed_rating": "Standard (~650ms)",
-        "capabilities": ["creative_writing", "vision", "complex_narrative"],
-        "recommended_for": ["Creative Manga Dramatization", "Epic Script Writing"],
-    },
-    {
-        "id": "claude-3-5-haiku-20241022",
-        "provider": "anthropic",
-        "name": "Anthropic Claude 3.5 Haiku",
-        "category": "High Speed Reasoning",
-        "context_window": 200000,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 0.80,
-        "completion_price_per_1m": 4.00,
-        "speed_rating": "Ultra Fast (~280ms)",
-        "capabilities": ["fast_reasoning", "creative_dialogue"],
-        "recommended_for": ["Fast Narration Iterations"],
-    },
-    {
-        "id": "eleven_multilingual_v2",
-        "provider": "elevenlabs",
-        "name": "ElevenLabs Multilingual v2",
-        "category": "Neural Speech & Emotion",
-        "context_window": 5000,
-        "max_output_tokens": 5000,
-        "prompt_price_per_1m": 0.0,
-        "completion_price_per_1m": 0.0,
-        "speed_rating": "Streaming Audio (~400ms TTFB)",
-        "capabilities": ["voice_cloning", "multilingual_audio", "emotion_control"],
-        "recommended_for": ["Character Voice Acting", "Studio Narration"],
-    },
-    {
-        "id": "FLUX.1-schnell",
-        "provider": "huggingface",
-        "name": "Black Forest Labs FLUX.1 Schnell",
-        "category": "Diffusion Artwork & Thumbnails",
-        "context_window": 512,
-        "max_output_tokens": 1,
-        "prompt_price_per_1m": 0.0,
-        "completion_price_per_1m": 0.0,
-        "speed_rating": "Fast GPU (~1.4s)",
-        "capabilities": ["high_res_image", "anime_fidelity", "fast_steps"],
-        "recommended_for": ["YouTube Thumbnail Base Artwork", "Poster Design"],
-    },
-    {
-        "id": "deepseek-chat",
-        "provider": "deepseek",
-        "name": "DeepSeek V3 Chat",
-        "category": "Deep Reasoning & Coding",
-        "context_window": 64000,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 0.14,
-        "completion_price_per_1m": 0.28,
-        "speed_rating": "Fast (~380ms)",
-        "capabilities": ["deep_reasoning", "long_context", "json_mode"],
-        "recommended_for": ["Complex Manga Lore Structuring"],
-    },
-]
+from services.model_catalog.registry import ModelRegistry, MODEL_CATALOG_DETAILED
 
 
 @router.get("/models/catalog", summary="Get comprehensive model catalog with capabilities and token pricing")
-async def get_models_catalog():
-    """Returns the full catalog of available models across all providers."""
+async def get_models_catalog(provider: Optional[str] = None):
+    """Returns the full catalog of available models across all providers or filtered by provider."""
+    if provider:
+        models = ModelRegistry.get_catalog_for_providers([provider])
+    else:
+        models = ModelRegistry.get_catalog()
     return {
         "success": True,
-        "models": MODEL_CATALOG_DETAILED,
-        "total_models": len(MODEL_CATALOG_DETAILED),
+        "models": models,
+        "total_models": len(models),
         "primary_model": GEMINI_MODEL_PRIMARY,
     }
 

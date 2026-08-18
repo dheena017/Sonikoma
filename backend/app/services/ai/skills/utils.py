@@ -84,6 +84,14 @@ def resolve_api_key(provider: str, user_api_key: Any = None, user_keys: Optional
         return os.getenv("ANTHROPIC_API_KEY")
     elif provider == "huggingface":
         return os.getenv("HUGGINGFACE_API_KEY")
+    elif provider == "elevenlabs":
+        return os.getenv("ELEVENLABS_API_KEY")
+    elif provider == "deepl":
+        return os.getenv("DEEPL_API_KEY")
+    elif provider == "deepseek":
+        return os.getenv("DEEPSEEK_API_KEY")
+    elif provider == "replicate":
+        return os.getenv("REPLICATE_API_TOKEN")
     else:
         return os.getenv("GEMINI_API_KEY")
 

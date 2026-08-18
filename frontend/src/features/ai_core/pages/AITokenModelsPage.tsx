@@ -17,12 +17,14 @@ import {
   ExternalLink,
   Sparkles,
 } from "lucide-react";
+import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 
 interface AITokenModelsPageProps {
   addNotification?: (msg: string, type?: string) => void;
 }
 
 export default function AITokenModelsPage({ addNotification }: AITokenModelsPageProps) {
+  const { models } = useAIModels();
   const [modelsBreakdown, setModelsBreakdown] = useState<any[]>([]);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -302,9 +304,9 @@ export default function AITokenModelsPage({ addNotification }: AITokenModelsPage
             onChange={(e) => setCalcModel(e.target.value)}
             className="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-1.5 text-xs text-purple-300 font-mono focus:outline-none cursor-pointer"
           >
-            {modelsBreakdown.map((m) => (
+            {(modelsBreakdown.length > 0 ? modelsBreakdown : models).map((m) => (
               <option key={m.id} value={m.id}>
-                {m.name} ({m.provider_name})
+                {m.name} ({m.provider_name || m.provider})
               </option>
             ))}
           </select>

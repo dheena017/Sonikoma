@@ -88,8 +88,11 @@ def get_all_user_keys(
     x_user_openai_key: str = Header(None, alias="X-User-OpenAI-Key"),
     x_user_anthropic_key: str = Header(None, alias="X-User-Anthropic-Key"),
     x_user_huggingface_key: str = Header(None, alias="X-User-HuggingFace-Key"),
+    x_user_elevenlabs_key: str = Header(None, alias="X-User-Elevenlabs-Key"),
+    x_user_deepl_key: str = Header(None, alias="X-User-Deepl-Key"),
+    x_user_deepseek_key: str = Header(None, alias="X-User-Deepseek-Key"),
 ):
-    """Extract and sanitize all user-provided API keys from headers, user preferences DB, or env vars."""
+    """Extract and sanitize all user-provided API keys from headers (website page), user DB preferences, or server .env vars."""
     import json
     user_db_keys = {}
     try:
@@ -108,5 +111,9 @@ def get_all_user_keys(
         "openai": clean_api_key(x_user_openai_key) or clean_api_key(user_db_keys.get("openai")) or clean_api_key(os.getenv("OPENAI_API_KEY")),
         "anthropic": clean_api_key(x_user_anthropic_key) or clean_api_key(user_db_keys.get("anthropic")) or clean_api_key(os.getenv("ANTHROPIC_API_KEY")),
         "huggingface": clean_api_key(x_user_huggingface_key) or clean_api_key(user_db_keys.get("huggingface")) or clean_api_key(os.getenv("HUGGINGFACE_API_KEY")),
+        "elevenlabs": clean_api_key(x_user_elevenlabs_key) or clean_api_key(user_db_keys.get("elevenlabs")) or clean_api_key(os.getenv("ELEVENLABS_API_KEY")),
+        "deepl": clean_api_key(x_user_deepl_key) or clean_api_key(user_db_keys.get("deepl")) or clean_api_key(os.getenv("DEEPL_API_KEY")),
+        "deepseek": clean_api_key(x_user_deepseek_key) or clean_api_key(user_db_keys.get("deepseek")) or clean_api_key(os.getenv("DEEPSEEK_API_KEY")),
+        "replicate": clean_api_key(user_db_keys.get("replicate")) or clean_api_key(os.getenv("REPLICATE_API_TOKEN")),
     }
 

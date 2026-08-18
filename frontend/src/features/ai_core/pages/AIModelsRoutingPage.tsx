@@ -17,12 +17,15 @@ import {
   Send,
   SlidersHorizontal,
 } from "lucide-react";
+import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 
 interface AIModelsRoutingPageProps {
   addNotification?: (msg: string, type?: string) => void;
 }
 
 export default function AIModelsRoutingPage({ addNotification }: AIModelsRoutingPageProps) {
+  const { models, visionModels, textModels, modelsByProvider } = useAIModels();
+
   const [primaryVisionModel, setPrimaryVisionModel] = useState("gemini-2.5-flash");
   const [primaryScriptModel, setPrimaryScriptModel] = useState("gemini-2.5-flash");
   const [primaryVoiceModel, setPrimaryVoiceModel] = useState("eleven_multilingual_v2");
@@ -135,7 +138,7 @@ export default function AIModelsRoutingPage({ addNotification }: AIModelsRouting
               Model Routing &amp; Failover Chains
             </h1>
             <p className="text-xs sm:text-sm text-neutral-400 max-w-2xl font-mono leading-relaxed">
-              Design fallback routing rules across Google Gemini, OpenAI, Anthropic Claude, Groq, and ElevenLabs.
+              Design fallback routing rules across Google Gemini, OpenAI, Anthropic Claude, and HuggingFace.
             </p>
           </div>
 
@@ -211,10 +214,17 @@ export default function AIModelsRoutingPage({ addNotification }: AIModelsRouting
               onChange={(e) => setPrimaryVisionModel(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-200 font-mono focus:border-purple-500 focus:outline-none cursor-pointer"
             >
-              <option value="gemini-2.5-flash">Google Gemini 2.5 Flash (Fastest / Recommended)</option>
-              <option value="gemini-2.5-pro">Google Gemini 2.5 Pro (Deep Multimodal)</option>
-              <option value="gpt-4o">OpenAI GPT-4o Vision</option>
-              <option value="claude-3-5-sonnet">Anthropic Claude 3.5 Sonnet</option>
+              {Object.entries(modelsByProvider).map(([providerName, pModels]) => (
+                <optgroup key={providerName} label={providerName}>
+                  {pModels
+                    .filter((m) => m.capabilities?.includes("vision") || m.id.includes("flash") || m.id.includes("pro") || m.id.includes("4o"))
+                    .map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name || m.id} ({m.speed_rating || "Fast"})
+                      </option>
+                    ))}
+                </optgroup>
+              ))}
             </select>
           </div>
         </div>
@@ -238,10 +248,15 @@ export default function AIModelsRoutingPage({ addNotification }: AIModelsRouting
               onChange={(e) => setPrimaryScriptModel(e.target.value)}
               className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3.5 py-2.5 text-xs text-neutral-200 font-mono focus:border-purple-500 focus:outline-none cursor-pointer"
             >
-              <option value="gemini-2.5-flash">Google Gemini 2.5 Flash (Ultra Fast)</option>
-              <option value="deepseek-v3">DeepSeek V3 (Reasoning)</option>
-              <option value="gpt-4o-mini">OpenAI GPT-4o-mini</option>
-              <option value="claude-3-5-haiku">Anthropic Claude 3.5 Haiku</option>
+              {Object.entries(modelsByProvider).map(([providerName, pModels]) => (
+                <optgroup key={providerName} label={providerName}>
+                  {pModels.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name || m.id} ({m.speed_rating || "Fast"})
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
           </div>
         </div>
@@ -263,10 +278,11 @@ export default function AIModelsRoutingPage({ addNotification }: AIModelsRouting
               onChange={(e) => setPlaygroundModel(e.target.value)}
               className="bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-1.5 text-xs text-purple-300 font-mono focus:outline-none cursor-pointer"
             >
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-              <option value="gpt-4o-mini">GPT-4o-mini</option>
-              <option value="claude-3-5-haiku">Claude 3.5 Haiku</option>
+              {models.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name || m.id}
+                </option>
+              ))}
             </select>
           </div>
         </div>

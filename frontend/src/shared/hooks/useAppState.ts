@@ -373,7 +373,7 @@ export function useAppState() {
         | "16:9") || "9:16"
   );
   const [selectedModel, setSelectedModel] = useState<string>(
-    () => localStorage.getItem("ai_comic_model") || ""
+    () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
   );
   const [selectedSource, setSelectedSource] = useState<string>(
     () => localStorage.getItem("ai_comic_source") || "webtoons"

@@ -125,7 +125,9 @@ export default function AIAPIManagementPage({
   useEffect(() => {
     const loaded: Record<string, string> = {};
     PROVIDERS.forEach((p) => {
-      const saved = localStorage.getItem(`sonikoma_key_${p.id}`);
+      const saved =
+        localStorage.getItem(`sonikoma_key_${p.id}`) ||
+        localStorage.getItem(`user_${p.id}_key`);
       // Filter out accidental password123 autofill if present
       if (saved && saved !== "password123") {
         loaded[p.id] = saved;
@@ -146,16 +148,22 @@ export default function AIAPIManagementPage({
     const val = (keys[providerId] || "").trim();
     if (val) {
       localStorage.setItem(`sonikoma_key_${providerId}`, val);
+      localStorage.setItem(`user_${providerId}_key`, val);
+      window.dispatchEvent(new Event("sonikoma-keys-updated"));
       addNotification?.(`Saved API key for ${providerId.toUpperCase()}`, "success");
     } else {
       localStorage.removeItem(`sonikoma_key_${providerId}`);
+      localStorage.removeItem(`user_${providerId}_key`);
+      window.dispatchEvent(new Event("sonikoma-keys-updated"));
       addNotification?.(`Cleared API key for ${providerId.toUpperCase()}`, "info");
     }
   };
 
   const handleClearKey = (providerId: string) => {
     localStorage.removeItem(`sonikoma_key_${providerId}`);
+    localStorage.removeItem(`user_${providerId}_key`);
     setKeys((prev) => ({ ...prev, [providerId]: "" }));
+    window.dispatchEvent(new Event("sonikoma-keys-updated"));
     addNotification?.(`Cleared API key for ${providerId.toUpperCase()}`, "info");
   };
 
