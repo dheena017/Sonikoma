@@ -13,14 +13,19 @@ from api.dependencies.auth import get_current_user
 from schemas.scraper import ExtractScriptRequest
 from services.scraper.service import scrape_and_initialize_project
 from services.scraper.ocr import extract_script_from_panels
-from services.jobs import job_manager, JobType, JobStage
+from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 logger = logging.getLogger("sonikoma.api.ocr")
 
 ocr_router = APIRouter()
 
 
-@ocr_router.post("/extract", summary="Extract speech bubble dialogue script via OCR (Creates OCR Job)")
+@ocr_router.post(
+    "/extract",
+    response_model=JobStatusResponse,
+    summary="Extract speech bubble dialogue script via OCR (Creates OCR Job)",
+    description="Asynchronously runs OCR vision processing across manga/webtoon panels to extract speech dialogue lines and text bounding boxes."
+)
 async def extract_ocr_endpoint(body: ExtractScriptRequest, current_user: dict = Depends(get_current_user)):
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Webtoon URL is required.")
@@ -65,4 +70,4 @@ async def extract_ocr_endpoint(body: ExtractScriptRequest, current_user: dict = 
         }
 
     job_manager.run_in_background(job.job_id, _ocr_coro)
-    return job.model_dump()
+    return job.to_status_response()

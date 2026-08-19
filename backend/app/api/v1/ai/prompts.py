@@ -6,7 +6,8 @@ AI prompt optimization, model list fetching, and latency test routes.
 """
 
 import logging
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.dependencies.auth import clean_api_key, get_all_user_keys
 from schemas.ai import ListModelsRequest, EnhancePromptRequest, TestModelLatencyRequest
@@ -16,21 +17,27 @@ logger = logging.getLogger("sonikoma.api.ai.prompts")
 router = APIRouter()
 
 
-@router.post("/list-models", summary="List available Gemini/HuggingFace models and token limits for any API key")
-@router.get("/list-models", summary="List available Gemini/HuggingFace models and token limits using server config key")
-async def api_list_models(
-    body: ListModelsRequest = None,
+@router.get("/list-models", summary="List available Gemini/HuggingFace models and token limits using server config or query key")
+async def api_list_models_get(
+    provider: Optional[str] = Query("gemini", description="AI Provider: gemini, openai, anthropic, huggingface, groq"),
+    api_key: Optional[str] = Query(None, description="Optional override API key for model discovery"),
     user_keys: dict = Depends(get_all_user_keys)
 ):
-    provider = "gemini"
-    api_key = None
-    if body:
-        provider = body.provider or "gemini"
-        api_key = clean_api_key(body.apiKey)
+    target_key = clean_api_key(api_key) or user_keys.get(provider or "gemini")
+    result = await facade_list_models(provider=provider or "gemini", api_key=target_key)
+    if not result.get("success"):
+        status_code = result.get("status_code", 400)
+        raise HTTPException(status_code=status_code, detail=result.get("error"))
+    return result
 
-    if not api_key:
-        api_key = user_keys.get(provider)
 
+@router.post("/list-models", summary="List available models and token limits for specific custom payload API key")
+async def api_list_models_post(
+    body: ListModelsRequest,
+    user_keys: dict = Depends(get_all_user_keys)
+):
+    provider = body.provider or "gemini"
+    api_key = clean_api_key(body.apiKey) or user_keys.get(provider)
     result = await facade_list_models(provider=provider, api_key=api_key)
     if not result.get("success"):
         status_code = result.get("status_code", 400)

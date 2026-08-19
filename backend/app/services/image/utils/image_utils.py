@@ -157,6 +157,24 @@ def crop_auto_borders(
         return {"data": img_data, "content_type": "image/jpeg"}
 
 
+def save_image_to_cache(data: bytes, filename: str, content_type: str = "image/png") -> str:
+    """
+    Saves raw image bytes to the persistent cache directory and registers with cache store.
+    Returns the absolute path to the saved file.
+    """
+    import os
+    from app.core.cache import PERSISTENT_CACHE_DIR, stitched_cache
+    os.makedirs(PERSISTENT_CACHE_DIR, exist_ok=True)
+    out_path = os.path.join(PERSISTENT_CACHE_DIR, filename)
+    with open(out_path, "wb") as f:
+        f.write(data)
+    try:
+        stitched_cache[filename] = f"/api/cache-image/{filename}"
+    except Exception:
+        pass
+    logger.debug(f"[image_utils] Saved {len(data)} bytes to image cache: {out_path}")
+    return out_path
+
 
 __all__ = [
     "resolve_image_to_buffer",
@@ -165,6 +183,7 @@ __all__ = [
     "stack_vertical",
     "compute_brightness",
     "crop_auto_borders",
+    "save_image_to_cache",
 ]
 
 

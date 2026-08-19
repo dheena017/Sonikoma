@@ -18,7 +18,7 @@ export function groupProjectsIntoSeries(projects: Project[]): Series[] {
   const seriesMap = new Map<string, Project[]>();
 
   for (const project of projects) {
-    const key = project.series_slug || project.project_id;
+    const key = project.series_id || project.series_slug || project.project_id;
     if (!seriesMap.has(key)) {
       seriesMap.set(key, []);
     }

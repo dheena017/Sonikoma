@@ -28,6 +28,7 @@ import { useBackendHealth } from "@/shared/hooks";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { useProjectStore } from "@/store/useProjectStore";
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
+import { AIModelSelector } from "@/features/ai_core";
 
 interface ImageEditorHeaderProps {
   editingImageIdx: number | null;
@@ -347,6 +348,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             <PanelRightOpen className="w-5 h-5" />
           )}
         </button>
+
+        {/* 🤖 Global AI Model Selector */}
+        <AIModelSelector className="hidden sm:inline-flex" />
 
         {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (

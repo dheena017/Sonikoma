@@ -12,14 +12,19 @@ from api.dependencies.auth import get_current_user
 
 from schemas.scraper import SmartSplitRequest
 from services.scraper.splitter import split_vertical_strip_into_panels
-from services.jobs import job_manager, JobType, JobStage
+from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 logger = logging.getLogger("sonikoma.api.panels")
 
 panels_router = APIRouter()
 
 
-@panels_router.post("/split", summary="Split tall vertical strip into discrete panels (Creates PANEL_SPLIT Job)")
+@panels_router.post(
+    "/split",
+    response_model=JobStatusResponse,
+    summary="Split tall vertical strip into discrete panels (Creates PANEL_SPLIT Job)",
+    description="Asynchronously downloads and segments a continuous webtoon/manhwa strip into individual panel images."
+)
 async def split_panels_endpoint(body: SmartSplitRequest, current_user: dict = Depends(get_current_user)):
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target image URL is required.")
@@ -53,4 +58,4 @@ async def split_panels_endpoint(body: SmartSplitRequest, current_user: dict = De
         }
 
     job_manager.run_in_background(job.job_id, _split_coro)
-    return job.model_dump()
+    return job.to_status_response()

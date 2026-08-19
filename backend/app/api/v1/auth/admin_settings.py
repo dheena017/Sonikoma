@@ -10,7 +10,8 @@ import datetime
 from datetime import timedelta
 import logging
 import jwt
-from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import Optional, List
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from fastapi.responses import StreamingResponse
 
 from app.core.security import SECRET_KEY
@@ -54,10 +55,33 @@ logger = logging.getLogger("sonikoma.auth.settings")
 router = APIRouter()
 
 
-@router.get("/admin/users")
-async def get_admin_users(current_user: dict = Depends(get_admin_user)):
+@router.get("/admin/users", summary="Get all platform users with filtering and pagination")
+async def get_admin_users(
+    search: Optional[str] = Query(None, description="Search users by email, username, or full name"),
+    role: Optional[str] = Query(None, description="Filter by creator role (e.g. admin, creator, pro)"),
+    is_locked: Optional[bool] = Query(None, description="Filter by account lock state"),
+    limit: int = Query(50, ge=1, le=500, description="Max users to return"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    current_user: dict = Depends(get_admin_user),
+):
     users = get_all_users()
-    return {"success": True, "users": users}
+    if search:
+        q = search.lower()
+        users = [
+            u for u in users
+            if q in (u.get("email") or "").lower()
+            or q in (u.get("username") or "").lower()
+            or q in (u.get("full_name") or "").lower()
+        ]
+    if role:
+        users = [u for u in users if (u.get("creator_role") or "").lower() == role.lower()]
+    if is_locked is not None:
+        target_locked = 1 if is_locked else 0
+        users = [u for u in users if u.get("is_locked", 0) == target_locked]
+
+    total = len(users)
+    paginated = users[offset:offset + limit]
+    return {"success": True, "total": total, "users": paginated}
 
 
 @router.put("/admin/users/{user_id}")
@@ -256,10 +280,34 @@ async def admin_export_activity(current_user: dict = Depends(get_admin_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get('/admin/projects')
-async def admin_get_projects(current_user: dict = Depends(get_admin_user)):
+@router.get('/admin/projects', summary="Get all system projects with filtering and pagination")
+async def admin_get_projects(
+    search: Optional[str] = Query(None, description="Search projects by title, author, or genre"),
+    status: Optional[str] = Query(None, description="Filter by status"),
+    is_flagged: Optional[bool] = Query(None, description="Filter by flagged state"),
+    limit: int = Query(50, ge=1, le=500, description="Max projects to return"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    current_user: dict = Depends(get_admin_user),
+):
     try:
-        return {'success': True, 'projects': get_all_projects_admin()}
+        projects = get_all_projects_admin()
+        if search:
+            q = search.lower()
+            projects = [
+                p for p in projects
+                if q in (p.get("title") or "").lower()
+                or q in (p.get("author") or "").lower()
+                or q in (p.get("genre") or "").lower()
+            ]
+        if status:
+            projects = [p for p in projects if (p.get("status") or "").lower() == status.lower()]
+        if is_flagged is not None:
+            target_flagged = 1 if is_flagged else 0
+            projects = [p for p in projects if p.get("is_flagged", 0) == target_flagged]
+
+        total = len(projects)
+        paginated = projects[offset:offset + limit]
+        return {'success': True, 'total': total, 'projects': paginated}
     except Exception as e:
         logger.error(f'Failed to fetch projects: {e}')
         raise HTTPException(status_code=500, detail=str(e))
@@ -327,7 +375,7 @@ async def admin_get_announcements(current_user: dict = Depends(get_admin_user)):
 async def admin_create_announcement(body: AnnouncementCreateRequest, request: Request, current_user: dict = Depends(get_admin_user)):
     ip_addr = request.client.host if request.client else '127.0.0.1'
     try:
-        announcement = create_announcement(body.title, body.message, body.type)
+        announcement = create_announcement(body.title, body.message, body.type or 'info')
         write_audit_log(current_user['user_id'], f'Admin created announcement {body.title}', ip_addr, 'Success')
         return {'success': True, 'announcement': announcement}
     except Exception as e:
@@ -348,3 +396,65 @@ async def admin_delete_announcement(announcement_id: int, request: Request, curr
     except Exception as e:
         logger.error(f'Failed to delete announcement: {e}')
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Admin Background Job Management ──────────────────────────────────────────
+
+from services.jobs import job_manager, JobListResponse, JobStatusResponse
+
+
+@router.get('/admin/jobs', response_model=JobListResponse, summary="Get all background jobs across the system (Admin only)")
+async def admin_get_all_jobs(
+    user_id: Optional[str] = Query(None, description="Filter by user ID"),
+    project_id: Optional[str] = Query(None, description="Filter by project ID"),
+    chapter_id: Optional[str] = Query(None, description="Filter by chapter ID"),
+    status: Optional[str] = Query(None, description="Filter by status"),
+    job_type: Optional[str] = Query(None, description="Filter by job type"),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    current_user: dict = Depends(get_admin_user)
+):
+    """Retrieves all background jobs in the system."""
+    jobs = job_manager.list_all_jobs_admin(
+        user_id=user_id,
+        project_id=project_id,
+        chapter_id=chapter_id,
+        status=status,
+        job_type=job_type,
+        limit=limit,
+        offset=offset
+    )
+    return JobListResponse(
+        success=True,
+        total=len(jobs),
+        jobs=[j.to_status_response() for j in jobs]
+    )
+
+
+@router.post('/admin/jobs/{job_id}/cancel', response_model=JobStatusResponse, summary="Admin cancel a job")
+async def admin_cancel_job(job_id: str, request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    job = job_manager.cancel_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    write_audit_log(current_user['user_id'], f'Admin cancelled job {job_id}', ip_addr, 'Success')
+    return job.to_status_response()
+
+
+@router.delete('/admin/jobs/{job_id}', summary="Admin delete a job record")
+async def admin_delete_job(job_id: str, request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    success = job_manager.delete_job_admin(job_id)
+    if not success:
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    write_audit_log(current_user['user_id'], f'Admin deleted job {job_id}', ip_addr, 'Success')
+    return {'success': True, 'message': f"Job '{job_id}' deleted successfully"}
+
+
+@router.post('/admin/jobs/purge-completed', summary="Admin purge completed/failed jobs")
+async def admin_purge_completed_jobs(request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    count = job_manager.purge_completed_jobs_admin()
+    write_audit_log(current_user['user_id'], f'Admin purged {count} completed/failed jobs', ip_addr, 'Success')
+    return {'success': True, 'purged_count': count, 'message': f'Successfully purged {count} finished jobs.'}
+

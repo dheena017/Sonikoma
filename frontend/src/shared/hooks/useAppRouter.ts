@@ -226,6 +226,9 @@ export function useAppRouter({
             path === "/admin" ||
             path === "/admin-dashboard" ||
             path.startsWith("/admin/") ||
+            path === "/ai-core" ||
+            path === "/ai-core/" ||
+            path.startsWith("/ai-core/") ||
             path.startsWith("/series/") ||
             path === "/scraper/editor" ||
             path === "/scraper/editor/" ||

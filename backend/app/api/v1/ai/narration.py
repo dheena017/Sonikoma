@@ -79,11 +79,38 @@ async def generate_sequence_narrative(
 @router.post("/skills/sfx-audio", summary="Generate SFX audio prompt")
 async def get_sfx_audio(body: SFXAudioRequest, user_api_key: dict = Depends(get_user_gemini_key)):
     try:
+        # 1. Batch panels workflow
+        if body.panels and len(body.panels) > 0:
+            logger.info(f"[SFX Audio Skill] Mapping SFX for {len(body.panels)} panels...")
+            results = []
+            default_tags = ["[Impact]", "[Whoosh]", "[Rumble]", "[Clang]", "[Wind Echo]", "[Action Boom]"]
+            for idx, p in enumerate(body.panels):
+                desc = (p.visual_description or f"Panel {idx + 1} scene").strip()
+                sfx_suggestion = default_tags[idx % len(default_tags)]
+                try:
+                    res = await run_md_skill("sfx_audio_prompt", body.model, api_key=user_api_key,
+                                             visual_description=desc, sfx_tag=p.sfx or sfx_suggestion)
+                    if isinstance(res, dict) and "sfx" in res:
+                        sfx_suggestion = res["sfx"]
+                    elif isinstance(res, dict) and "prompt" in res:
+                        sfx_suggestion = f"[{res['prompt'][:30]}]"
+                except Exception as skill_err:
+                    logger.debug(f"[SFX Audio Skill] Fallback tag for panel {p.id}: {skill_err}")
+
+                results.append({
+                    "id": p.id,
+                    "sfx": sfx_suggestion,
+                    "visual_description": desc
+                })
+            return {"success": True, "panels": results}
+
+        # 2. Single panel request workflow
         desc = body.visual_description.strip() if body.visual_description else "Action panel visual"
         sfx = body.sfx_tag.strip() if body.sfx_tag else "[Action SFX]"
         logger.info(f"[SFX Audio Skill] Generating prompt for sfx_tag='{sfx}'...")
-        return await run_md_skill("sfx_audio_prompt", body.model, api_key=user_api_key,
-                                  visual_description=desc, sfx_tag=sfx)
+        res = await run_md_skill("sfx_audio_prompt", body.model, api_key=user_api_key,
+                                 visual_description=desc, sfx_tag=sfx)
+        return {"success": True, "result": res}
     except Exception as e:
         logger.error(f"[SFX Audio Skill Error]: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

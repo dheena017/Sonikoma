@@ -21,7 +21,7 @@ import VoiceSettingsPanel from "@/features/creative_voice/components/VoiceSettin
 import AmbientSoundPicker from "@/features/editor_audio/components/AmbientSoundPicker";
 import SfxOverlayMixer from "@/features/editor_audio/components/SfxOverlayMixer";
 
-import ModelSelect from "@/features/ai_core/ModelSelect";
+import { AIModelSelector } from "@/features/ai_core";
 
 import { useProjectStore } from "@/store/useProjectStore";
 
@@ -223,7 +223,7 @@ const VoiceStudioPage = React.memo(
 
           <div className="flex items-center gap-3 self-start md:self-center">
             {/* Inline AI Model Switcher */}
-            <ModelSelect value={selectedModel} onChange={handleModelChange} />
+            <AIModelSelector value={selectedModel} onChange={handleModelChange} />
 
             <div className="px-3.5 py-1.5 rounded-full bg-neutral-950 border border-neutral-850 text-neutral-300 text-xs font-mono flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />

@@ -131,14 +131,89 @@ class UnifiedJobManager:
                 return None
             return _job_record_from_row(dict(row))
 
-    def list_jobs(self, user_id: str, project_id: Optional[str] = None) -> List[JobRecord]:
-        """Lists jobs for a user, optionally filtered by project ID."""
+    def list_jobs(
+        self,
+        user_id: str,
+        project_id: Optional[str] = None,
+        chapter_id: Optional[str] = None,
+        status: Optional[str] = None,
+        job_type: Optional[str] = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> List[JobRecord]:
+        """Lists jobs for a user, optionally filtered by project ID, chapter ID, status, and job type."""
         with get_db_connection() as conn:
+            query = "SELECT * FROM jobs WHERE user_id = ?"
+            params: list = [user_id]
+
             if project_id:
-                rows = conn.execute("SELECT * FROM jobs WHERE user_id = ? AND project_id = ? ORDER BY created_at DESC", (user_id, project_id)).fetchall()
-            else:
-                rows = conn.execute("SELECT * FROM jobs WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
+                query += " AND project_id = ?"
+                params.append(project_id)
+            if chapter_id:
+                query += " AND chapter_id = ?"
+                params.append(chapter_id)
+            if status:
+                query += " AND UPPER(status) = ?"
+                params.append(status.upper())
+            if job_type:
+                query += " AND UPPER(type) = ?"
+                params.append(job_type.upper())
+
+            query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+            params.extend([max(1, min(200, limit)), max(0, offset)])
+
+            rows = conn.execute(query, tuple(params)).fetchall()
             return [_job_record_from_row(dict(r)) for r in rows]
+
+    def list_all_jobs_admin(
+        self,
+        user_id: Optional[str] = None,
+        project_id: Optional[str] = None,
+        chapter_id: Optional[str] = None,
+        status: Optional[str] = None,
+        job_type: Optional[str] = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> List[JobRecord]:
+        """Lists all system jobs across users for administration."""
+        with get_db_connection() as conn:
+            query = "SELECT * FROM jobs WHERE 1=1"
+            params: list = []
+            if user_id:
+                query += " AND user_id = ?"
+                params.append(user_id)
+            if project_id:
+                query += " AND project_id = ?"
+                params.append(project_id)
+            if chapter_id:
+                query += " AND chapter_id = ?"
+                params.append(chapter_id)
+            if status:
+                query += " AND UPPER(status) = ?"
+                params.append(status.upper())
+            if job_type:
+                query += " AND UPPER(type) = ?"
+                params.append(job_type.upper())
+
+            query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+            params.extend([max(1, min(500, limit)), max(0, offset)])
+
+            rows = conn.execute(query, tuple(params)).fetchall()
+            return [_job_record_from_row(dict(r)) for r in rows]
+
+    def delete_job_admin(self, job_id: str) -> bool:
+        """Deletes a job record from the database."""
+        with get_db_connection() as conn:
+            res = conn.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
+            conn.commit()
+            return res.rowcount > 0
+
+    def purge_completed_jobs_admin(self) -> int:
+        """Purges all terminal (COMPLETED, FAILED, CANCELLED) jobs."""
+        with get_db_connection() as conn:
+            res = conn.execute("DELETE FROM jobs WHERE status IN ('COMPLETED', 'FAILED', 'CANCELLED')")
+            conn.commit()
+            return res.rowcount
 
     def update_progress(
         self,

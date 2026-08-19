@@ -128,8 +128,7 @@ export default function AIAPIManagementPage({
       const saved =
         localStorage.getItem(`sonikoma_key_${p.id}`) ||
         localStorage.getItem(`user_${p.id}_key`);
-      // Filter out accidental password123 autofill if present
-      if (saved && saved !== "password123") {
+      if (saved && saved.trim()) {
         loaded[p.id] = saved;
       }
     });

@@ -44,33 +44,56 @@ else:
 PUBLIC_ROUTE_SET = {
     "/api/health",
     "/api/py/health",
+    "/api/v1/health",
+    "/api/v1/system/health",
     "/api/health/ffmpeg",
     "/api/py/health/ffmpeg",
+    "/api/v1/system/metrics",
     "/api/auth/register",
+    "/api/v1/auth/register",
     "/api/auth/login",
+    "/api/v1/auth/login",
     "/api/auth/forgot-password",
+    "/api/v1/auth/forgot-password",
     "/api/auth/google/login",
+    "/api/v1/auth/google/login",
     "/api/auth/google/callback",
+    "/api/v1/auth/google/callback",
     "/api/export/youtube/oauth/callback",
+    "/api/v1/export/youtube/oauth/callback",
     "/api/auth/token",             # Swagger Authorize button
+    "/api/v1/auth/token",
+    "/api/ai/models/catalog",      # AI Model Catalog metadata
+    "/api/v1/ai/models/catalog",
+    "/api/ai/models/routing",      # AI Task-to-Model Routing configuration
+    "/api/v1/ai/models/routing",
+    "/api/list-models",            # Multi-provider dynamic model inspector
+    "/api/v1/ai/list-models",
     "/api/proxy-image",
     "/api/proxy/image",
+    "/api/v1/proxy/image",
     "/api/docs",
+    "/api/redoc",
     "/openapi.json",
     "/api/openapi.json",
 }
 
 PUBLIC_ROUTE_PREFIXES = (
+    "/api/openapi/",   # Category-filtered OpenAPI JSONs (/api/openapi/projects.json, etc.)
+    "/api/v1/openapi/",
     "/api/projects/public/",
+    "/api/v1/projects/public/",
     "/static/",        # Swagger UI local CSS/JS assets
-    "/api/docs/",      # Swagger sub-paths (e.g. /api/docs/oauth2-redirect)
+    "/api/docs/",      # Swagger sub-paths (e.g. /api/docs/projects, /api/docs/jobs, etc.)
     "/api/image/cached/",
+    "/api/v1/images/cached/",
     "/api/merge-images/cached/",
     "/api/stitch-images/cached/",
     "/videos/",        # Generated videos serving
     "/media/",         # Local processed panel layers served via <img src="/media/...">
     "/media",          # Defensive: allow the exact mount path too
     "/api/export/youtube/", # YouTube publisher routes (uses get_optional_current_user in router)
+    "/api/v1/export/youtube/",
 )
 
 # Admin-only endpoints (require creator_role/admin)

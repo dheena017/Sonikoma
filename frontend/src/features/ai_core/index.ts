@@ -1,14 +1,15 @@
-// Export ModelSelect from AI Core
-export { default as ModelSelect, ModelSelect as NamedModelSelect } from "./ModelSelect";
-export type { ModelSelectProps } from "./ModelSelect";
+// Export Single Canonical AI Model Selector from AI Core
+export { default as AIModelSelector, AIModelSelector as NamedAIModelSelector } from "./components/AIModelSelector";
+export type { AIModelSelectorProps } from "./components/AIModelSelector";
 
 // Export HeaderCreditsPopover
 export { default as HeaderCreditsPopover } from "./components/HeaderCreditsPopover";
 export type { HeaderCreditsPopoverProps } from "./components/HeaderCreditsPopover";
 
-// Export Hooks
+// Export Hooks & Stores
 export * from "./hooks/useAIModels";
 export * from "./hooks/useAutoAnalysis";
+export * from "./hooks/useAIModelStore";
 
 // Export Components
 export * from "./components";

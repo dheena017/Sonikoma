@@ -22,6 +22,7 @@ from app.core.config import call_gemini_with_retry
 from app.core.config import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
+from services.ai.orchestrator import AIOrchestrator, AIErrorCode
 from services.image.utils.panel_box_utils import PanelBounds
 from core.cache import stitched_cache, edit_history
 from services.audio import generate_panel_audio
@@ -529,13 +530,8 @@ async def facade_smart_crop(
                 except Exception:
                     pass
 
-    # 2. Otherwise execute AI detection with skill (with automatic free model fallback on quota limit)
-    requested_model = model or GEMINI_MODEL_PRIMARY
-    fallback_models = [requested_model] + GEMINI_FALLBACK_MODELS
-    models_to_try = []
-    for m in fallback_models:
-        if m not in models_to_try:
-            models_to_try.append(m)
+    # 2. Otherwise execute AI detection with skill (with automatic provider/model fallback)
+    provider, target_model, models_to_try = AIOrchestrator.resolve_execution_plan("smart_crop", requested_model=model)
 
     panels_raw = []
     last_exc = None
@@ -555,15 +551,15 @@ async def facade_smart_crop(
             if panels:
                 panels_raw = panels
                 successful_model = m
-                logger.info(f"[facade_smart_crop] Successfully detected panels using model: {m}")
+                logger.info(f"[facade_smart_crop] Successfully detected panels using model '{m}' ({provider})")
                 break
         except Exception as exc:
             last_exc = exc
-            logger.warning(f"[facade_smart_crop] Gemini model '{m}' failed: {exc}. Trying next free model fallback...")
+            logger.warning(f"[facade_smart_crop] Model '{m}' ({provider}) failed: {exc}. Trying next fallback model...")
             continue
 
     if not panels_raw:
-        logger.warning(f"[facade_smart_crop] Gemini AI detection failed/returned 0 panels ({last_exc}). Falling back to local OpenCV panel detection...")
+        logger.warning(f"[facade_smart_crop] AI detection returned 0 panels ({last_exc}). Falling back to local OpenCV panel detection...")
         tmp_in_path = None
         try:
             with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_in:

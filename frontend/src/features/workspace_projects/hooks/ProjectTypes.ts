@@ -1,6 +1,8 @@
 export interface Project {
   job_id?: string | null;
   project_id: string;
+  series_id?: string | null;
+  chapter_id?: string | null;
   title: string;
   url: string;
   created_at: string;

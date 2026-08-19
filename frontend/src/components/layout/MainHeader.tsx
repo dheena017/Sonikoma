@@ -36,6 +36,7 @@ import { HeaderCreditsPopover } from "@/features/ai_core";
 import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useProjectStore } from "@/store/useProjectStore";
+import { AIModelSelector } from "@/features/ai_core";
 
 interface HeaderProps {
   isProcessing: boolean;
@@ -606,47 +607,8 @@ const HeaderInner = ({
         {/* Server Status Pill */}
         <ServerStatusIndicator status={backendStatus} />
 
-        {/* 🤖 AI Model Selector Pill */}
-        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-neutral-900 border border-neutral-850 text-[10px] font-mono select-none hover:border-purple-500/40 transition-all">
-          <Cpu className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel?.(e.target.value)}
-            className="bg-transparent text-neutral-200 text-[10px] font-bold font-mono focus:outline-none cursor-pointer pr-1 max-w-[160px] truncate"
-            title="Active AI Model"
-          >
-            {Object.keys(modelsByProvider).length === 0 ? (
-              <option value="" disabled className="bg-neutral-900 text-amber-400">
-                ⚠️ No API Key Configured
-              </option>
-            ) : (
-              Object.entries(modelsByProvider).map(([providerName, providerModels]) => (
-                <optgroup key={providerName} label={providerName} className="bg-neutral-900 text-purple-300 font-bold">
-                  {providerModels.map((m) => (
-                    <option key={m.id} value={m.id} className="bg-neutral-900 text-white font-normal">
-                      {m.name || m.id}
-                    </option>
-                  ))}
-                </optgroup>
-              ))
-            )}
-          </select>
-          {user?.preferences?.api_keys?.gemini || localStorage.getItem("user_gemini_key") ? (
-            <span
-              className="text-[9px] px-1 py-0.5 rounded bg-blue-500/20 text-blue-300 font-sans font-bold"
-              title="Using custom user Google API key"
-            >
-              BYOK
-            </span>
-          ) : (
-            <span
-              className="text-[9px] px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-sans font-bold"
-              title="Using system Google API key"
-            >
-              System
-            </span>
-          )}
-        </div>
+        {/* 🤖 Global AI Model Selector */}
+        <AIModelSelector className="hidden sm:inline-flex" />
 
         {/* 🧼 Speech Bubble Cleaning Processing Pill */}
         {isCleaningBubbles && (

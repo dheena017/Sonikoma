@@ -110,7 +110,7 @@ export const saveScrapedImages = async (
   fetchWithInterceptor: FetchClient,
   data: SaveScrapedImagesPayload
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/save-scraped-images", {
+  return apiRequest(fetchWithInterceptor, "/api/scraper/cache/session", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

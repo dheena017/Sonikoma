@@ -7,7 +7,7 @@ Aggregates all v1 sub-routers, mounts media directories, and handles SPA fallbac
 """
 
 import os
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 
@@ -33,40 +33,49 @@ from api.v1.storyboard.router import storyboard_router
 
 api_router = APIRouter()
 
-# Include all sub-routers with exact prefixes matching application contracts.
-# Each sub-router defines relative paths only; the mount prefix is the single place
-# where the domain namespace is applied.
-api_router.include_router(jobs_router,           prefix="/api/v1/jobs", tags=["Jobs (v1)"])
-api_router.include_router(jobs_router,           prefix="/api/jobs", tags=["Jobs (Legacy)"])
-api_router.include_router(scraper_router,        prefix="/api/scraper", tags=["Scraper (Legacy)"])
-api_router.include_router(scraper_router,        prefix="/api/v1/scraper", tags=["Scraper (v1)"])
-api_router.include_router(panels_router,         prefix="/api/panels", tags=["Panels (Legacy)"])
-api_router.include_router(panels_router,         prefix="/api/v1/panels", tags=["Panels (v1)"])
-api_router.include_router(ocr_router,            prefix="/api/ocr", tags=["OCR (Legacy)"])
-api_router.include_router(ocr_router,            prefix="/api/v1/ocr", tags=["OCR (v1)"])
-api_router.include_router(storyboard_router,     prefix="/api/storyboard", tags=["Storyboard (Legacy)"])
-api_router.include_router(storyboard_router,     prefix="/api/v1/storyboard", tags=["Storyboard (v1)"])
-api_router.include_router(health_router,         prefix="/api", tags=["Health & System"])
-api_router.include_router(auth_router,           prefix="/api/auth")
-api_router.include_router(project_router,        prefix="/api/projects", tags=["Projects"])
-api_router.include_router(panel_router,          prefix="/api/panels", tags=["Panel Detection"])
-api_router.include_router(proxy_router,          prefix="/api", tags=["Proxy"])
-api_router.include_router(image_router,          prefix="/api/image", tags=["Image Editing"])
-api_router.include_router(cleaner_router,        prefix="/api/image", tags=["Image Editing"])
-api_router.include_router(ai_router,             prefix="/api", tags=["AI Processing"])
-api_router.include_router(audio_router,          prefix="/api/audio", tags=["Audio Synthesis"])
-api_router.include_router(video_router,          prefix="/api/video", tags=["Video Rendering"])
-api_router.include_router(ffmpeg_router,         prefix="/api/ffmpeg", tags=["FFmpeg Video"])
-api_router.include_router(librosa_router,        prefix="/api/librosa", tags=["Librosa Audio"])
-api_router.include_router(whisper_router,        prefix="/api/whisper", tags=["Whisper Speech-to-Text"])
-api_router.include_router(imagemagick_router,    prefix="/api/imagemagick", tags=["ImageMagick Image"])
-api_router.include_router(stable_diffusion_router, prefix="/api/stable-diffusion", tags=["Stable Diffusion"])
-api_router.include_router(compound_router,       prefix="/api/compound", tags=["Compound Workflows"])
-api_router.include_router(export_router,         prefix="/api/export", tags=["Export"])
+# ── Canonical Versioned Endpoints (Single Source of Truth in OpenAPI Docs) ───
+api_router.include_router(auth_router,           prefix="/api/v1/auth")
+api_router.include_router(project_router,        prefix="/api/v1/projects", tags=["02. Projects & Workspace"])
+api_router.include_router(scraper_router,        prefix="/api/v1/scraper", tags=["03. Webtoon Scraping"])
+api_router.include_router(proxy_router,          prefix="/api/v1/proxy", tags=["03. Webtoon Scraping"])
+api_router.include_router(panels_router,         prefix="/api/v1/panels", tags=["04. Panel Splitting"])
+api_router.include_router(ocr_router,            prefix="/api/v1/ocr", tags=["05. OCR & Speech Extraction"])
+api_router.include_router(storyboard_router,     prefix="/api/v1/storyboard", tags=["06. Storyboard AI"])
+api_router.include_router(ai_router,             prefix="/api/v1/ai")
+api_router.include_router(image_router,          prefix="/api/v1/images", tags=["08. Image Canvas & Editing"])
+api_router.include_router(cleaner_router,        prefix="/api/v1/images/cleaner", tags=["08. Image Canvas & Editing"])
+api_router.include_router(imagemagick_router,    prefix="/api/v1/images/imagemagick", tags=["08. Image Canvas & Editing"])
+api_router.include_router(stable_diffusion_router, prefix="/api/v1/images/stable-diffusion", tags=["08. Image Canvas & Editing"])
+api_router.include_router(audio_router,          prefix="/api/v1/audio", tags=["09. Audio Synthesis"])
+api_router.include_router(librosa_router,        prefix="/api/v1/audio/librosa", tags=["09. Audio Synthesis"])
+api_router.include_router(whisper_router,        prefix="/api/v1/audio/whisper", tags=["09. Audio Synthesis"])
+api_router.include_router(video_router,          prefix="/api/v1/video", tags=["10. Video Rendering Engine"])
+api_router.include_router(ffmpeg_router,         prefix="/api/v1/video/ffmpeg", tags=["10. Video Rendering Engine"])
+api_router.include_router(compound_router,       prefix="/api/v1/video/compound", tags=["10. Video Rendering Engine"])
+api_router.include_router(jobs_router,           prefix="/api/v1/jobs", tags=["11. Background Jobs"])
+api_router.include_router(export_router,         prefix="/api/v1/export", tags=["12. Export & Archiving"])
+api_router.include_router(health_router,         prefix="/api/v1/system", tags=["13. System Health & Telemetry"])
 
-# Legacy /api/py endpoints for backward compatibility
-api_router.include_router(health_router,         prefix="/api/py", tags=["Health & System (Legacy)"])
-api_router.include_router(audio_router,          prefix="/api/py/audio", tags=["Audio Synthesis (Legacy)"])
+# ── Compatibility Aliases (Hidden from Swagger Docs to Eliminate Duplication) ──
+api_router.include_router(auth_router,           prefix="/api/auth", include_in_schema=False)
+api_router.include_router(project_router,        prefix="/api/projects", include_in_schema=False)
+api_router.include_router(jobs_router,           prefix="/api/jobs", include_in_schema=False)
+api_router.include_router(scraper_router,        prefix="/api/scraper", include_in_schema=False)
+api_router.include_router(scraper_router,        prefix="/api", include_in_schema=False)
+api_router.include_router(panels_router,         prefix="/api/panels", include_in_schema=False)
+api_router.include_router(ocr_router,            prefix="/api/ocr", include_in_schema=False)
+api_router.include_router(storyboard_router,     prefix="/api/storyboard", include_in_schema=False)
+api_router.include_router(panel_router,          prefix="/api/panels", include_in_schema=False)
+api_router.include_router(ai_router,             prefix="/api/ai", include_in_schema=False)
+api_router.include_router(ai_router,             prefix="/api", include_in_schema=False)
+api_router.include_router(image_router,          prefix="/api/image", include_in_schema=False)
+api_router.include_router(audio_router,          prefix="/api/audio", include_in_schema=False)
+api_router.include_router(video_router,          prefix="/api/video", include_in_schema=False)
+api_router.include_router(export_router,         prefix="/api/export", include_in_schema=False)
+api_router.include_router(proxy_router,          prefix="/api", include_in_schema=False)
+api_router.include_router(health_router,         prefix="/api", include_in_schema=False)
+api_router.include_router(health_router,         prefix="/api/py", include_in_schema=False)
+api_router.include_router(audio_router,          prefix="/api/py/audio", include_in_schema=False)
 
 
 def register_routers(app: FastAPI):
@@ -108,22 +117,26 @@ def register_routers(app: FastAPI):
 
     # Root redirect
     @app.get("/", include_in_schema=False)
-    async def root_redirect():
+    async def root_redirect(request: Request):
+        accept_header = request.headers.get("accept", "")
+        if "text/html" in accept_header:
+            return RedirectResponse(url="/api/docs")
         return RedirectResponse(url="/api/health")
 
     # SPA Fallback Route for client-side routing
     @app.get("/{fallback_path:path}", include_in_schema=False)
-    async def spa_fallback(fallback_path: str):
+    async def spa_fallback(request: Request, fallback_path: str):
+        # 1. If static production build exists, serve index.html
         index_file = None
-        if IS_PRODUCTION:
-            if os.path.exists(os.path.join(dist_path, "index.html")):
-                index_file = os.path.join(dist_path, "index.html")
-            elif os.path.exists(os.path.join(frontend_dist_path, "index.html")):
-                index_file = os.path.join(frontend_dist_path, "index.html")
+        if os.path.exists(os.path.join(dist_path, "index.html")):
+            index_file = os.path.join(dist_path, "index.html")
+        elif os.path.exists(os.path.join(frontend_dist_path, "index.html")):
+            index_file = os.path.join(frontend_dist_path, "index.html")
 
         if index_file:
             return FileResponse(index_file)
 
+        # 2. Return structured 404 JSON for missing backend routes
         return JSONResponse(
             status_code=404,
             content={

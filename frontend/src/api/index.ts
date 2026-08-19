@@ -15,3 +15,4 @@ export * from "./endpoints/scraper";
 export * from "./endpoints/skills";
 export * from "./endpoints/system";
 export * from "./endpoints/video";
+export * from "./endpoints/jobs";

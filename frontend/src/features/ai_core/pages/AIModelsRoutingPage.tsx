@@ -54,6 +54,30 @@ export default function AIModelsRoutingPage({ addNotification }: AIModelsRouting
         if (data.models) setCatalog(data.models);
       })
       .catch(() => {});
+
+    fetch("/api/ai/models/routing")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.routing) {
+          if (data.routing.vision_narration?.primary)
+            setPrimaryVisionModel(data.routing.vision_narration.primary);
+          if (data.routing.story_scripting?.primary)
+            setPrimaryScriptModel(data.routing.story_scripting.primary);
+          if (data.routing.voiceover_audio?.primary)
+            setPrimaryVoiceModel(data.routing.voiceover_audio.primary);
+          if (data.routing.image_synthesis?.primary)
+            setPrimaryImageModel(data.routing.image_synthesis.primary);
+        }
+        if (data.hyperparameters) {
+          if (data.hyperparameters.temperature !== undefined)
+            setTemperature(data.hyperparameters.temperature);
+          if (data.hyperparameters.top_p !== undefined)
+            setTopP(data.hyperparameters.top_p);
+          if (data.hyperparameters.max_output_tokens !== undefined)
+            setMaxTokens(data.hyperparameters.max_output_tokens);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const handleRunBenchmark = async () => {

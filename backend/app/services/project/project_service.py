@@ -85,7 +85,12 @@ class ProjectService:
                 "synopsis": body.synopsis,
             }
         )
-        return {"success": True, "project_id": body.project_id}
+        return {
+            "success": True,
+            "project_id": body.project_id,
+            "chapter_id": getattr(body, "chapter_id", body.project_id),
+            "job_id": getattr(body, "job_id", None),
+        }
 
     def promote_project(self, project_id: str, current_user_id: str) -> Dict[str, Any]:
         """

@@ -148,7 +148,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     try:
         if user_id:
             rows = conn.execute("""
-                SELECT c.id AS project_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+                SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
@@ -160,7 +160,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
             """, (user_id,)).fetchall()
         else:
             rows = conn.execute("""
-                SELECT c.id AS project_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+                SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
@@ -179,7 +179,7 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         row = conn.execute("""
-            SELECT c.id AS project_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+            SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                    s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
@@ -198,7 +198,7 @@ def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         row = conn.execute("""
-            SELECT c.id AS project_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+            SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                    s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,

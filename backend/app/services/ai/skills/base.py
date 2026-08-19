@@ -27,6 +27,10 @@ from services.ai.skills.schemas import (
     SCHEMA_MAP
 )
 
+# Import model registry & orchestrator
+from services.model_catalog.registry import ModelRegistry
+from services.ai.orchestrator import AIOrchestrator, classify_error
+
 # Import utils
 from services.ai.skills.utils import (
     parse_simple_yaml,
@@ -104,8 +108,8 @@ class BaseAISkill:
         start_time = time.monotonic()
         target_model = model or self.default_model
 
-        provider, clean_model_id = get_provider_and_model(target_model)
-        logger.debug(f"[base.py] Resolved skill execution request to provider={provider}, model={clean_model_id}")
+        provider, clean_model_id = ModelRegistry.resolve_model_provider(target_model)
+        logger.debug(f"[base.py] Resolved skill '{self.name}' execution request to provider={provider}, model={clean_model_id}")
 
         prompt = self.build_prompt(**kwargs)
         last_exception = None
@@ -400,9 +404,12 @@ class BaseAISkill:
                 url = f"https://api-inference.huggingface.co/models/{clean_model_id}"
 
                 def make_request():
-                    return requests.post(url, json=payload, headers=headers, timeout=60)
+                    return requests.post(url, json=payload, headers=headers, timeout=15)
 
-                response = await loop.run_in_executor(None, make_request)
+                try:
+                    response = await loop.run_in_executor(None, make_request)
+                except Exception as net_err:
+                    raise RuntimeError(f"Hugging Face network resolution failed for '{clean_model_id}': {net_err}")
 
                 if response.status_code != 200:
                     raise RuntimeError(f"Hugging Face request failed (HTTP {response.status_code}): {response.text}")
@@ -426,6 +433,7 @@ class BaseAISkill:
                     cleaned_json_text = raw_text
 
                 elapsed_ms = int((time.monotonic() - start_time) * 1000)
+                AIOrchestrator.log_execution_attempt(self.name, provider, clean_model_id, 1, "success", elapsed_ms)
                 self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, self.last_input_tokens, self.last_output_tokens)
                 return cleaned_json_text
 
@@ -434,9 +442,15 @@ class BaseAISkill:
 
         if last_exception:
             elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            logger.error(f"Skill '{self.name}' execution failed: {last_exception}", exc_info=True)
+            classified = classify_error(last_exception, provider=provider, model=clean_model_id)
+            AIOrchestrator.log_execution_attempt(self.name, provider, clean_model_id, 1, "failed", elapsed_ms, error=classified)
+            logger.warning(f"Skill '{self.name}' ({provider}/{clean_model_id}) failed: [{classified.error_code}] {last_exception}. Invoking deterministic fallback.")
 
             fallback = FallbackCoordinator.get_programmatic_fallback(self.name, **kwargs)
+            fallback.setdefault("success", False)
+            fallback.setdefault("source", "fallback:error")
+            fallback["error"] = classified.message
+            fallback["error_code"] = classified.error_code.value
             self.logger.log_execution(self.name, elapsed_ms, False, kwargs, fallback)
 
             return json.dumps(fallback)

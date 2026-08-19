@@ -24,14 +24,17 @@ from app.core.logging import ColoredFormatter, setup_logging, logger
 from app.core.exceptions import global_exception_handler
 from app.core.middleware import setup_middleware
 from app.api.router import register_routers
+from app.openapi.config import OPENAPI_TAGS, API_DESCRIPTION
+from app.openapi.router import register_docs_routes
 from app.lifespan import lifespan
 
 # Create FastAPI app instance
 app = FastAPI(
     title="Sonikoma API Engine",
-    description="Unified computational and API backend for Webtoon-to-Video compiler.",
+    description=API_DESCRIPTION,
     version=API_VERSION,
-    docs_url="/api/docs",
+    openapi_tags=OPENAPI_TAGS,
+    docs_url=None,  # Custom Swagger documentation console mounted via docs router
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json",
     lifespan=lifespan,
@@ -43,7 +46,10 @@ setup_middleware(app)
 # Register exception handlers
 app.add_exception_handler(Exception, global_exception_handler)
 
-# Register routes & SPA fallback
+# Register interactive docs & category-filtered OpenAPI schemas
+register_docs_routes(app)
+
+# Register API routes, static media mounts & SPA fallback
 register_routers(app)
 
 

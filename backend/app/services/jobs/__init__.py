@@ -5,7 +5,16 @@ Unified Job Processing service package exports.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from .models import JobRecord, JobStatus, JobType, JobStage
+from .models import (
+    JobRecord,
+    JobStatus,
+    JobType,
+    JobStage,
+    JobStatusResponse,
+    JobListResponse,
+    JobExecutionInfo,
+    JobErrorInfo,
+)
 from .manager import UnifiedJobManager, job_manager
 
 __all__ = [
@@ -13,6 +22,10 @@ __all__ = [
     "JobStatus",
     "JobType",
     "JobStage",
+    "JobStatusResponse",
+    "JobListResponse",
+    "JobExecutionInfo",
+    "JobErrorInfo",
     "UnifiedJobManager",
     "job_manager"
 ]

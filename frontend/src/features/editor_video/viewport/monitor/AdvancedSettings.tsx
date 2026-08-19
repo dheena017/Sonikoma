@@ -18,7 +18,7 @@ import {
   MessageSquare,
   Sparkle,
 } from "lucide-react";
-import ModelSelect from "@/features/ai_core/ModelSelect";
+import { AIModelSelector } from "@/features/ai_core";
 
 export interface VideoPreviewAdvancedSettingsProps {
   voiceActor: string;
@@ -859,10 +859,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                   <Sparkle className="h-3.5 w-3.5 text-purple-400" />
                   AI Segmentation Backend Vision Engine
                 </label>
-                <ModelSelect
-                  showIcon={false}
-                  className="w-full"
-                  selectClassName="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none font-mono"
+                <AIModelSelector
                   value={localCropModel}
                   onChange={handleCropModelChange}
                 />

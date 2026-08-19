@@ -14,7 +14,7 @@ from core.security import SECRET_KEY
 from app.core.config import GEMINI_MODEL_PRIMARY
 from schemas.scraper import GenerateStoryboardOnlyRequest, GenerateStoryboardRequest
 from services.scraper.service import generate_storyboard_only_service, generate_storyboard_and_video
-from services.jobs import job_manager, JobType, JobStage
+from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 logger = logging.getLogger("sonikoma.api.storyboard")
 
@@ -22,7 +22,12 @@ storyboard_router = APIRouter()
 ALGORITHM = "HS256"
 
 
-@storyboard_router.post("/generate", summary="Generate AI storyboard script (Creates GENERATE_STORYBOARD Job)")
+@storyboard_router.post(
+    "/generate",
+    response_model=JobStatusResponse,
+    summary="Generate AI storyboard script (Creates GENERATE_STORYBOARD Job)",
+    description="Asynchronously analyzes chapter panel images with LLM vision to extract scene descriptions, narrative flow, voiceover scripts, and audio cues."
+)
 async def generate_storyboard_endpoint(
     request: Request,
     body: GenerateStoryboardOnlyRequest,
@@ -59,6 +64,6 @@ async def generate_storyboard_endpoint(
         return result
 
     job_manager.run_in_background(job.job_id, _storyboard_coro)
-    return job.model_dump()
+    return job.to_status_response()
 
 

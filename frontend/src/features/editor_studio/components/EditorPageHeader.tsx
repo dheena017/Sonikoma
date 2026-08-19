@@ -25,6 +25,7 @@ import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { HeaderCreditsPopover } from "@/features/ai_core";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import { useProjectStore } from "@/store/useProjectStore";
+import { AIModelSelector } from "@/features/ai_core";
 
 interface EditorPageHeaderProps {
   title: string;
@@ -248,6 +249,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
       {/* Right Section - Action Buttons */}
       <div className="flex flex-wrap items-center gap-2">
+        {/* 🤖 Global AI Model Selector */}
+        <AIModelSelector className="hidden sm:inline-flex" />
         {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>

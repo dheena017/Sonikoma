@@ -206,6 +206,8 @@ async def scrape_and_initialize_project(
     active_project_id = project_id or generate_project_id()
     project_payload = {
         "id": active_project_id,
+        "project_id": active_project_id,
+        "job_id": job_id,
         "title": final_title,
         "episode": final_episode,
         "genre": final_genre,
@@ -231,6 +233,8 @@ async def scrape_and_initialize_project(
     return {
         "success": True,
         "project_id": active_project_id,
+        "chapter_id": active_project_id,
+        "job_id": job_id,
         "title": final_title,
         "episode": final_episode,
         "genre": final_genre,
@@ -343,35 +347,60 @@ async def generate_storyboard_only_service(
     **kwargs: Any
 ) -> Dict[str, Any]:
     """Generates storyboard panel scripts from URL without compiling video."""
-    scrape_res = await scrape_and_initialize_project(
-        url=url,
-        project_id=project_id,
-        job_id=job_id,
-        user_id=user_id,
-        title=title,
-        episode=episode or episode_id,
-        genre=genre,
-        author=author,
-        cover_image=cover_image,
-        synopsis=synopsis
-    )
-    if not scrape_res.get("success"):
-        return scrape_res
+    try:
+        scrape_res = await scrape_and_initialize_project(
+            url=url,
+            project_id=project_id,
+            job_id=job_id,
+            user_id=user_id,
+            title=title,
+            episode=episode or episode_id,
+            genre=genre,
+            author=author,
+            cover_image=cover_image,
+            synopsis=synopsis
+        )
+        if not scrape_res.get("success"):
+            return scrape_res
 
-    images = scrape_res.get("images", [])
-    generated_panels = await generate_dynamic_panels(
-        title=scrape_res.get("title") or title or "Comic Recap",
-        genre=scrape_res.get("genre") or genre or "Action",
-        episode=scrape_res.get("episode") or episode or episode_id or "Episode 1",
-        img_urls=images,
-        synopsis=scrape_res.get("synopsis", "") or synopsis or "",
-        narration_style=narration_style,
-        model=model,
-        user_keys=user_keys
-    )
+        images = scrape_res.get("images", [])
+        generated_panels = await generate_dynamic_panels(
+            title=scrape_res.get("title") or title or "Comic Recap",
+            genre=scrape_res.get("genre") or genre or "Action",
+            episode=scrape_res.get("episode") or episode or episode_id or "Episode 1",
+            img_urls=images,
+            synopsis=scrape_res.get("synopsis", "") or synopsis or "",
+            narration_style=narration_style,
+            model=model,
+            user_keys=user_keys
+        )
 
-    return {
-        "success": True,
-        "project_id": project_id,
-        "storyboard": generated_panels
-    }
+        result_payload = {
+            "success": True,
+            "project_id": project_id,
+            "storyboard": generated_panels
+        }
+
+        if job_id:
+            from services.jobs.manager import job_manager
+            await job_manager.complete_job(job_id, result_payload)
+
+        return result_payload
+    except Exception as e:
+        logger.error(f"[Storyboard Only Service] Execution failed: {e}", exc_info=True)
+        from services.ai.orchestrator import classify_error
+        classified = classify_error(e, model=model)
+        err_dict = classified.to_dict()
+        err_dict["failed_stage"] = "storyboard_generation"
+
+        if job_id:
+            from services.jobs.manager import job_manager
+            await job_manager.fail_job(job_id, error=err_dict)
+
+        return {
+            "success": False,
+            "error": err_dict["error_message"],
+            "error_code": err_dict["error_code"],
+            "failed_stage": "storyboard_generation",
+            "project_id": project_id
+        }

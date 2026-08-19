@@ -17,6 +17,7 @@ import {
   X,
   ExternalLink,
   Coins,
+  Activity,
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 
@@ -78,6 +79,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     {
       name: "Monitoring",
       items: [
+        { id: "jobs", label: "Background Jobs", icon: Activity, path: "/admin/jobs" },
         { id: "health", label: "Health", icon: Server, path: "/admin/health" },
         {
           id: "activity",

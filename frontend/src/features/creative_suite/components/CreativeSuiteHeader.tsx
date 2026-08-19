@@ -23,6 +23,7 @@ import { HeaderCreditsPopover } from "@/features/ai_core";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useBackendHealth } from "@/shared/hooks";
 import { useProjectStore } from "@/store/useProjectStore";
+import { AIModelSelector } from "@/features/ai_core";
 
 export interface CreativeSuiteHeaderProps {
   currentPath: string;
@@ -271,6 +272,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
       <div className="flex items-center gap-2 lg:gap-3 shrink-0">
         {/* Server Status Indicator */}
         <ServerStatusIndicator status={backendStatus} />
+
+        {/* 🤖 Global AI Model Selector */}
+        <AIModelSelector className="hidden sm:inline-flex" />
 
         {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (

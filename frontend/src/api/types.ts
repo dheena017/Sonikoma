@@ -250,6 +250,8 @@ export interface JobRecord<T = any> {
   progress: number;
   stage: string;
   project_id?: string;
+  series_id?: string | null;
+  chapter_id?: string | null;
   created_at: number;
   started_at?: number | null;
   completed_at?: number | null;

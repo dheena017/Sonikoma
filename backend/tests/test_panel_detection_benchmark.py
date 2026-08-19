@@ -8,7 +8,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "app")))
 
 from services.image.panel_detection.panel_detector import run_cv_detection
-from tests.datasets.webtoon.generate_benchmark_dataset import generate_webtoon_benchmark_dataset
+try:
+    from tests.datasets.webtoon.generate_benchmark_dataset import generate_webtoon_benchmark_dataset
+except ImportError:
+    generate_webtoon_benchmark_dataset = None
 
 
 def compute_box_iou(boxA, boxB):

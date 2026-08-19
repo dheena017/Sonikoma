@@ -17,13 +17,13 @@ from app.api.v1.ai.analytics import router as analytics_router
 
 ai_router = APIRouter()
 
-# Include all sub-routers under ai_router
-ai_router.include_router(image_router)
-ai_router.include_router(narration_router)
-ai_router.include_router(chat_router)
-ai_router.include_router(translation_router)
-ai_router.include_router(prompts_router)
-ai_router.include_router(analytics_router)
+# Include all sub-routers under specialized AI categories
+ai_router.include_router(prompts_router, tags=["07A. AI Model Catalog & Routing"])
+ai_router.include_router(analytics_router, tags=["07A. AI Model Catalog & Routing"])
+ai_router.include_router(image_router, tags=["07B. AI Vision & Panel Analysis"])
+ai_router.include_router(narration_router, tags=["07C. AI Dialogue & Script Writing"])
+ai_router.include_router(chat_router, tags=["07C. AI Dialogue & Script Writing"])
+ai_router.include_router(translation_router, tags=["07D. AI Translation & Localization"])
 
 # Legacy / empty router expected by stable-diffusion mount
 stable_diffusion_router = APIRouter()

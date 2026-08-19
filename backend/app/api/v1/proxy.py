@@ -109,7 +109,8 @@ async def fetch_with_retry(
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
-@router.get("/proxy-image", summary="Spoofed referrer image bypass proxy")
+@router.get("/image", summary="Spoofed referrer image bypass proxy")
+@router.get("/proxy-image", summary="Spoofed referrer image bypass proxy (alias)", include_in_schema=False)
 @router.get("/proxy/image", include_in_schema=False)
 async def proxy_image(
     request: Request,
@@ -361,12 +362,14 @@ async def proxy_image(
         )
 
 
-@router.get("/proxy-cache/stats", summary="Get proxy cache metrics")
+@router.get("/cache/stats", summary="Get proxy cache metrics")
+@router.get("/proxy-cache/stats", summary="Get proxy cache metrics (alias)", include_in_schema=False)
 async def get_proxy_cache_stats():
     return {"success": True, **proxy_cache.stats()}
 
 
-@router.delete("/proxy-cache", summary="Clear proxy cache in-memory entries")
+@router.delete("/cache", summary="Clear proxy cache in-memory entries")
+@router.delete("/proxy-cache", summary="Clear proxy cache in-memory entries (alias)", include_in_schema=False)
 async def clear_proxy_cache():
     size = proxy_cache.size
     proxy_cache.clear()

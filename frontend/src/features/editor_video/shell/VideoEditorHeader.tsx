@@ -26,6 +26,7 @@ import { HeaderCreditsPopover } from "@/features/ai_core";
 import { Notification } from "@/features/app_notification";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { useProjectStore } from "@/store/useProjectStore";
+import { AIModelSelector } from "@/features/ai_core";
 
 interface VideoEditorHeaderProps {
   seriesTitle?: string;
@@ -237,6 +238,9 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
         <div className="flex items-center gap-2.5">
           {/* ⚡ Credits Pill & Popover */}
+          {/* 🤖 Global AI Model Selector */}
+          <AIModelSelector className="hidden sm:inline-flex" />
+
           {credits !== null && (
             <div className="relative" ref={creditsRef}>
               <button

@@ -13,7 +13,7 @@ import uuid
 import asyncio
 import logging
 from typing import Dict, Any, Optional, List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Path
 import httpx
 
 from app.api.dependencies.auth import get_optional_current_user, clean_api_key
@@ -29,7 +29,7 @@ from database.engine import get_db_connection
 from app.services.user.credit_service import get_available_credits, get_credit_transactions
 
 logger = logging.getLogger("sonikoma.api.ai.analytics")
-router = APIRouter(prefix="/ai", tags=["AI Core Telemetry & Diagnostics"])
+router = APIRouter()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -701,17 +701,37 @@ from services.model_catalog.registry import ModelRegistry, MODEL_CATALOG_DETAILE
 
 
 @router.get("/models/catalog", summary="Get comprehensive model catalog with capabilities and token pricing")
-async def get_models_catalog(provider: Optional[str] = None):
-    """Returns the full catalog of available models across all providers or filtered by provider."""
+async def get_models_catalog(
+    provider: Optional[str] = Query(None, description="Filter models by provider (e.g. gemini, openai, anthropic, groq)"),
+    capability: Optional[str] = Query(None, description="Filter models by capability (e.g. vision, chat, code, fast)"),
+    search: Optional[str] = Query(None, description="Search models by name or id"),
+    limit: int = Query(50, ge=1, le=200, description="Max models to return"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+):
+    """Returns the full catalog of available models across all providers or filtered by provider and capability."""
     if provider:
         models = ModelRegistry.get_catalog_for_providers([provider])
     else:
         models = ModelRegistry.get_catalog()
+
+    if capability:
+        cap = capability.lower()
+        models = [m for m in models if cap in [c.lower() for c in m.get("capabilities", [])] or cap in m.get("category", "").lower()]
+
+    if search:
+        q = search.lower()
+        models = [m for m in models if q in m.get("id", "").lower() or q in m.get("name", "").lower()]
+
+    total = len(models)
+    paginated = models[offset:offset + limit]
+
     return {
         "success": True,
-        "models": models,
-        "total_models": len(models),
+        "total_models": total,
+        "models": paginated,
         "primary_model": GEMINI_MODEL_PRIMARY,
+        "limit": limit,
+        "offset": offset,
     }
 
 
@@ -945,7 +965,10 @@ async def playground_completion(payload: dict, current_user: Optional[dict] = De
 
 
 @router.get("/analytics/export", summary="Export full AI token ledger as structured JSON or CSV")
-async def export_ai_analytics_ledger(format: str = "json", current_user: Optional[dict] = Depends(get_optional_current_user)):
+async def export_ai_analytics_ledger(
+    format: str = Query("json", description="Export format: 'json' or 'csv'"),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
     """Exports all token ledger records."""
     conn = get_db_connection()
     try:

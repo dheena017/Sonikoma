@@ -19,30 +19,112 @@ logger = logging.getLogger("sonikoma.auth.login")
 router = APIRouter()
 
 
-@router.post("/token", include_in_schema=False)
-async def login_for_swagger_access_token(
+@router.post("/token", summary="Obtain OAuth2/JWT access token")
+async def login_for_access_token(
     request: Request,
-    form_data: OAuth2PasswordRequestForm = Depends(),
 ):
-    user = get_user_by_email(form_data.username)
     ip_addr = request.client.host if request and request.client else "127.0.0.1"
+    content_type = request.headers.get("content-type", "")
+
+    username = ""
+    password = ""
+
+    if "application/json" in content_type:
+        try:
+            body = await request.json()
+            username = body.get("username") or body.get("email") or ""
+            password = body.get("password") or ""
+        except Exception:
+            pass
+    else:
+        try:
+            form = await request.form()
+            username = form.get("username") or form.get("email") or ""
+            password = form.get("password") or ""
+        except Exception:
+            pass
+
+    if not username or not password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username/email and password are required.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = get_user_by_email(username)
 
     if (
         not user
         or not user.get("hashed_password")
-        or not verify_password(form_data.password, user["hashed_password"])
+        or not verify_password(password, user["hashed_password"])
     ):
         if user:
-            write_audit_log(user["user_id"], "Swagger UI failed login attempt", ip_addr, "Failed")
+            write_audit_log(user["user_id"], "Token failed login attempt", ip_addr, "Failed")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    write_audit_log(user["user_id"], "Swagger UI Login", ip_addr, "Success")
+    write_audit_log(user["user_id"], "Token Login", ip_addr, "Success")
     access_token = create_access_token(data={"sub": user["user_id"]})
-    return {"access_token": access_token, "token_type": "bearer"}
+    user_info = {
+        "user_id": user["user_id"],
+        "email": user["email"],
+        "full_name": user.get("full_name"),
+        "avatar_url": user.get("avatar_url")
+    }
+    return {
+        "success": True,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user_info
+    }
+
+
+@router.get("/token", summary="Verify active authentication token")
+async def verify_token(request: Request):
+    auth_header = request.headers.get("authorization", "")
+    token = None
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:].strip()
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing Authorization token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    import jwt
+    from app.core.security import SECRET_KEY, ALGORITHM
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        if not user_id:
+            raise ValueError("Invalid token payload")
+        from repositories.user import get_user_by_id
+        user = get_user_by_id(user_id)
+        if not user:
+            raise ValueError("User not found")
+        return {
+            "success": True,
+            "valid": True,
+            "user_id": user_id,
+            "user": {
+                "user_id": user["user_id"],
+                "email": user["email"],
+                "full_name": user.get("full_name"),
+                "avatar_url": user.get("avatar_url"),
+                "creator_role": user.get("creator_role", "creator"),
+            }
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid token: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @router.post("/login")

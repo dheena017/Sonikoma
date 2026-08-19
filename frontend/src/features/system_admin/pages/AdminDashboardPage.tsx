@@ -1021,6 +1021,21 @@ const AdminDashboardPage = React.memo(
               </button>
 
               <button
+                onClick={() => navigateTo("/admin/jobs")}
+                className="p-4 border border-neutral-800 rounded-xl hover:border-purple-500 hover:bg-purple-500/5 transition-all text-left group cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <h4 className="text-neutral-200 font-bold text-xs group-hover:text-purple-400 transition-colors">
+                    Manage Background Jobs
+                  </h4>
+                  <Activity className="w-3.5 h-3.5 text-neutral-600 group-hover:text-purple-400" />
+                </div>
+                <p className="text-[10px] text-neutral-500 mt-1">
+                  Monitor live tasks, cancel queued workers, and purge completed jobs.
+                </p>
+              </button>
+
+              <button
                 onClick={handleEmergencyStop}
                 disabled={processingAction === "stop"}
                 className="p-4 bg-rose-500/5 border border-rose-500/20 rounded-xl hover:bg-rose-500/10 hover:border-rose-500/40 transition-all text-left group disabled:opacity-50 cursor-pointer"

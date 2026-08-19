@@ -7,6 +7,7 @@ export * from "./AdminCreditsTab";
 export * from "./AdminExplorerTab";
 export * from "./AdminFinanceTab";
 export * from "./AdminHealthTab";
+export * from "./AdminJobsTab";
 export * from "./AdminScrapersTab";
 export * from "./AdminSettingsTab";
 export * from "./AdminUsageTab";

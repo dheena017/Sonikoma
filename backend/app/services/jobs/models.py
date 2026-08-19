@@ -135,6 +135,40 @@ class JobStage(str, Enum):
     PUBLISHING = "PUBLISHING"
 
 
+class JobExecutionInfo(BaseModel):
+    provider: Optional[str] = None
+    model: Optional[str] = None
+    attempt: int = 1
+
+
+class JobErrorInfo(BaseModel):
+    code: str
+    message: str
+    stage: Optional[str] = None
+    provider: Optional[str] = None
+    model: Optional[str] = None
+
+
+class JobStatusResponse(BaseModel):
+    job_id: str
+    job_type: str
+    capability: Optional[str] = None
+    status: str
+    progress: int
+    stage: str
+    project_id: Optional[str] = None
+    chapter_id: Optional[str] = None
+    execution: Optional[JobExecutionInfo] = None
+    result: Optional[Any] = None
+    error: Optional[JobErrorInfo] = None
+
+
+class JobListResponse(BaseModel):
+    success: bool = True
+    total: int
+    jobs: List[JobStatusResponse]
+
+
 class JobRecord(BaseModel):
     """Authoritative representation of an asynchronous processing job."""
     job_id: str
@@ -152,3 +186,61 @@ class JobRecord(BaseModel):
     result: Optional[Any] = None
     error: Optional[Dict[str, Any]] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
+
+    def to_status_response(self) -> JobStatusResponse:
+        """Converts internal JobRecord into the canonical JobStatusResponse contract."""
+        meta = self.metadata or {}
+        
+        # Determine execution info
+        provider = meta.get("provider")
+        model = meta.get("model")
+        attempt = int(meta.get("attempt", 1))
+
+        if self.error and isinstance(self.error, dict):
+            provider = self.error.get("provider") or provider
+            model = self.error.get("model") or model
+            attempt = int(self.error.get("attempt") or attempt)
+
+        execution = None
+        if provider or model:
+            execution = JobExecutionInfo(
+                provider=provider,
+                model=model,
+                attempt=attempt
+            )
+
+        # Determine error info
+        error_info = None
+        if self.error and isinstance(self.error, dict):
+            error_info = JobErrorInfo(
+                code=self.error.get("code") or self.error.get("error_code") or "INTERNAL_ERROR",
+                message=self.error.get("message") or self.error.get("error_message") or "Job encountered an unexpected failure.",
+                stage=self.error.get("stage") or self.error.get("failed_stage") or self.stage.lower(),
+                provider=self.error.get("provider") or provider,
+                model=self.error.get("model") or model,
+            )
+        elif self.error:
+            error_info = JobErrorInfo(
+                code="INTERNAL_ERROR",
+                message=str(self.error),
+                stage=self.stage.lower(),
+                provider=provider,
+                model=model,
+            )
+
+        job_type_str = self.type.value.lower() if isinstance(self.type, JobType) else str(self.type).lower()
+        capability_str = meta.get("capability") or job_type_str
+
+        return JobStatusResponse(
+            job_id=self.job_id,
+            job_type=job_type_str,
+            capability=capability_str,
+            status=self.status.value.lower() if isinstance(self.status, JobStatus) else str(self.status).lower(),
+            progress=int(round(self.progress)),
+            stage=self.stage.lower(),
+            project_id=self.project_id,
+            chapter_id=self.chapter_id,
+            execution=execution,
+            result=self.result,
+            error=error_info,
+        )

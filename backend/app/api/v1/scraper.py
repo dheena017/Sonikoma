@@ -374,6 +374,7 @@ async def process_url(body: ProcessUrlRequest):
 
 
 @router.put("/cache/session", summary="Update scraped images session cache (Canonical)")
+@router.put("/save-scraped-images", summary="Legacy alias for update scraped images session cache")
 async def save_scraped_images(body: SaveScrapedImagesRequest):
     try:
         save_scrape_session(extract_webtoon_url(body.url), body.images)

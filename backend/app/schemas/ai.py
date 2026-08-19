@@ -6,7 +6,7 @@ Pydantic request/response schemas for AI models, analysis, skills, crop, and gen
 """
 
 from pydantic import BaseModel, Field, root_validator
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 
 
 # =============================================================================
@@ -19,6 +19,8 @@ class AnalyzeImageRequest(BaseModel):
     model: Optional[str] = None
     narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
     voice: Optional[str] = "en-US-GuyNeural"
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class AnalyzeBatchRequest(BaseModel):
@@ -27,6 +29,8 @@ class AnalyzeBatchRequest(BaseModel):
     model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
     voice: Optional[str] = "en-US-GuyNeural"
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class AnalyzeSequenceRequest(BaseModel):
@@ -36,6 +40,8 @@ class AnalyzeSequenceRequest(BaseModel):
     model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
     voice: Optional[str] = "en-US-GuyNeural"
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
     @root_validator(pre=True)
     def require_urls_or_visual_descriptions(cls, values):
@@ -56,6 +62,8 @@ class AnalyzePanelSequenceRequest(BaseModel):
     model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
     voice: Optional[str] = "en-US-GuyNeural"
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class AnalyzeNarrativeSequenceRequest(BaseModel):
@@ -63,6 +71,8 @@ class AnalyzeNarrativeSequenceRequest(BaseModel):
     visual_descriptions: List[str]
     model: Optional[str] = None
     voice: Optional[str] = "en-US-GuyNeural"
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class PanelDescriptionItem(BaseModel):
@@ -76,6 +86,8 @@ class GenerateSequenceNarrativeRequest(BaseModel):
     panels: List[PanelDescriptionItem]
     model: Optional[str] = None
     voice: Optional[str] = "en-US-GuyNeural"
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 # =============================================================================
@@ -90,12 +102,16 @@ class DramatizeRequest(BaseModel):
     genre: str
     scene_context: str
     model: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class ShortsScriptRequest(BaseModel):
     """Generates a vertical YouTube Shorts / TikTok script."""
     storyboard_summary: str
     model: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class ShortsHookRequest(BaseModel):
@@ -103,14 +119,23 @@ class ShortsHookRequest(BaseModel):
     title: str
     key_event: str
     model: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
-# --- Audio & Sound ---
+class PanelSFXInput(BaseModel):
+    id: Optional[Union[int, str]] = None
+    image_url: Optional[str] = None
+    visual_description: Optional[str] = None
+    sfx: Optional[str] = None
+
 
 class SFXAudioRequest(BaseModel):
-    """Suggests sound effect tags for scene descriptions."""
-    visual_description: str
-    sfx_tag: str
+    """Suggests sound effect tags for scene descriptions or batch panels."""
+    visual_description: Optional[str] = None
+    sfx_tag: Optional[str] = None
+    project_id: Optional[str] = None
+    panels: Optional[List[PanelSFXInput]] = None
     model: Optional[str] = None
 
 
@@ -160,6 +185,8 @@ class SEORequest(BaseModel):
     genre: str
     storyboard_summary: str
     model: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class MidrollPlacementRequest(BaseModel):
@@ -167,6 +194,8 @@ class MidrollPlacementRequest(BaseModel):
     compiled_script: str
     max_ads: Optional[int] = 3
     model: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 # --- Character & Direction ---
@@ -177,6 +206,8 @@ class VoiceCastingRequest(BaseModel):
     dialogue_sample: str
     visual_description: str
     model: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 # --- Utility ---
@@ -186,12 +217,16 @@ class TranslationRequest(BaseModel):
     text: str
     target_lang: str
     model: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class CopyrightScrubRequest(BaseModel):
     """Scrubs copyrighted or protected terms from text."""
     text: str
     model: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class EnhancePromptRequest(BaseModel):
@@ -244,6 +279,8 @@ class SmartCropRequest(BaseModel):
     targetHeight: Optional[int] = None
     guidanceInstructions: Optional[str] = None
     focusMode: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class SmartCropBatchRequest(BaseModel):
@@ -267,6 +304,8 @@ class SmartCropBatchRequest(BaseModel):
     targetHeight: Optional[int] = None
     guidanceInstructions: Optional[str] = None
     focusMode: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 # =============================================================================
@@ -284,6 +323,8 @@ class GenerateAIRequest(BaseModel):
     num_inference_steps: Optional[int] = Field(50, ge=1, le=150)
     seed: Optional[int] = None
     output_dir: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class InpaintRequest(BaseModel):
@@ -296,6 +337,8 @@ class InpaintRequest(BaseModel):
     guidance_scale: Optional[float] = Field(7.5, ge=1.0, le=20.0)
     num_inference_steps: Optional[int] = Field(50, ge=1, le=150)
     strength: Optional[float] = Field(0.8, ge=0.1, le=1.0)
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class UpscaleRequest(BaseModel):
@@ -303,11 +346,16 @@ class UpscaleRequest(BaseModel):
     image_path: str
     scale_factor: Optional[int] = Field(2, ge=2, le=4)
     output_path: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
 
 
 class StyleTransferRequest(BaseModel):
     """Transfers visual styles onto existing images."""
     image_path: str
+    style_path: Optional[str] = None
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None
     style_prompt: str
     output_path: Optional[str] = None
     guidance_scale: Optional[float] = Field(7.5, ge=1.0, le=20.0)

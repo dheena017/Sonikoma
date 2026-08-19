@@ -56,21 +56,50 @@ project_service = ProjectService()
 
 # ── List & read ───────────────────────────────────────────────────────────
 
-@project_router.get("", summary="Get all projects")
-async def get_projects(current_user: dict = Depends(get_current_user)):
+@project_router.get("", summary="Get all projects with filtering and pagination")
+async def get_projects(
+    search: Optional[str] = Query(None, description="Search projects by title, author, or genre"),
+    status: Optional[str] = Query(None, description="Filter by status (Draft, Ready, etc.)"),
+    series_id: Optional[str] = Query(None, description="Filter by parent series/project ID"),
+    limit: int = Query(50, ge=1, le=200, description="Maximum number of projects to return"),
+    offset: int = Query(0, ge=0, description="Offset for pagination"),
+    sort_by: str = Query("created_at", description="Sort column: created_at, title, episode, panels_count"),
+    order: str = Query("desc", description="Sort direction: asc or desc"),
+    current_user: dict = Depends(get_current_user),
+):
     try:
         logger.info(
             f"[Database] Fetching project histories for user "
             f"{current_user['user_id']} from local SQLite..."
         )
         projects = get_all_projects(user_id=current_user["user_id"])
-        for proj in projects:
+        if search:
+            q = search.lower()
+            projects = [
+                p for p in projects
+                if q in (p.get("title") or "").lower()
+                or q in (p.get("author") or "").lower()
+                or q in (p.get("genre") or "").lower()
+            ]
+        if status:
+            projects = [p for p in projects if (p.get("status") or "").lower() == status.lower()]
+        if series_id:
+            projects = [p for p in projects if p.get("series_id") == series_id or p.get("project_id") == series_id]
+
+        reverse = order.lower() == "desc"
+        if sort_by in ("created_at", "title", "episode", "panels_count"):
+            projects.sort(key=lambda x: str(x.get(sort_by) or ""), reverse=reverse)
+
+        total = len(projects)
+        paginated = projects[offset:offset + limit]
+
+        for proj in paginated:
             if proj.get("cover_image"):
                 proj["cover_image"] = wrap_proxy_url(proj["cover_image"])
             elif proj.get("first_panel_image"):
                 proj["cover_image"] = wrap_proxy_url(proj["first_panel_image"])
-        logger.info(f"[Database] Retrieved {len(projects)} projects.")
-        return {"success": True, "projects": projects}
+        logger.info(f"[Database] Retrieved {len(paginated)} of {total} projects.")
+        return {"success": True, "total": total, "projects": paginated}
     except Exception as e:
         logger.error(f"Failed to fetch projects: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to fetch projects: {e}")
@@ -104,7 +133,7 @@ async def get_public_project(project_id: str = Path(..., description="Project ID
                     scraped_images = [wrap_proxy_url(img) for img in sess["image_urls"] if img]
             except Exception:
                 pass
-        public_project = {k: v for k, v in project.items() if k != "job_id"}
+        public_project = dict(project)
         return {"success": True, "project": public_project, "panels": panels, "scraped_images": scraped_images}
     except HTTPException:
         raise
@@ -113,19 +142,28 @@ async def get_public_project(project_id: str = Path(..., description="Project ID
         raise HTTPException(status_code=500, detail=f"Failed to fetch public project: {e}")
 
 
-@project_router.get("/analytics/tokens", summary="Get token usage history")
-async def get_token_analytics(current_user: dict = Depends(get_current_user)):
+@project_router.get("/analytics/tokens", summary="Get token usage history with pagination")
+async def get_token_analytics(
+    project_id: Optional[str] = Query(None, description="Filter logs by project ID"),
+    limit: int = Query(50, ge=1, le=500, description="Max logs to return"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    current_user: dict = Depends(get_current_user),
+):
     try:
         logs = get_token_logs(current_user["user_id"])
-        return {"success": True, "token_logs": logs}
+        if project_id:
+            logs = [l for l in logs if l.get("project_id") == project_id]
+        total = len(logs)
+        paginated = logs[offset:offset + limit]
+        return {"success": True, "total": total, "token_logs": paginated}
     except Exception as e:
         logger.error(f"Failed to fetch token analytics: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to fetch token analytics")
 
 
-@project_router.get("/series/{series_id_or_slug}", summary="Get series details")
+@project_router.get("/series/{series_id_or_slug}", summary="Get parent series details")
 async def get_series_route(
-    series_id_or_slug: str = Path(...),
+    series_id_or_slug: str = Path(..., description="Parent series ID or URL slug"),
     current_user: dict = Depends(get_current_user),
 ):
     try:
@@ -164,7 +202,7 @@ async def create_project(
 @project_router.post("/{projectId}/panels", summary="Save storyboard panels for a project")
 async def save_project_panels(
     request: Request,
-    projectId: str = Path(...),
+    projectId: str = Path(..., description="Target Chapter/Episode Project ID"),
     body: PanelsSaveRequest = Body(...),
     job_id: Optional[str] = Query(None, description="Workspace Job ID for ownership verification"),
     current_user: dict = Depends(get_current_user),
@@ -210,7 +248,7 @@ async def save_project_panels(
 
 @project_router.post("/{projectId}/tokens", summary="Increment project token usage")
 async def increment_project_tokens_route(
-    projectId: str = Path(...),
+    projectId: str = Path(..., description="Target Project ID"),
     body: TokenIncrementRequest = Body(...),
     current_user: dict = Depends(get_current_user),
 ):
@@ -250,7 +288,7 @@ async def increment_project_tokens_route(
 
 @project_router.put("/{projectId}", summary="Update project metadata and panels")
 async def update_project_details(
-    projectId: str = Path(...),
+    projectId: str = Path(..., description="Target Project ID"),
     body: ProjectUpdateRequest = Body(...),
     current_user: dict = Depends(get_current_user),
 ):
@@ -298,7 +336,7 @@ async def batch_delete_projects(
 
 @project_router.delete("/series/{seriesId}", summary="Delete a series and its chapters")
 async def delete_series_route(
-    seriesId: str = Path(...),
+    seriesId: str = Path(..., description="Target parent series ID to delete"),
     current_user: dict = Depends(get_current_user),
 ):
     try:
@@ -320,7 +358,7 @@ async def delete_series_route(
 
 @project_router.delete("/{projectId}", summary="Delete a project and its panels")
 async def delete_single_project(
-    projectId: str = Path(...),
+    projectId: str = Path(..., description="Target Project ID to delete"),
     current_user: dict = Depends(get_current_user),
 ):
     try:

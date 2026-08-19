@@ -58,6 +58,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
     {
       name: "Monitoring",
       items: [
+        { id: "jobs", label: "Background Jobs", icon: ActivitySquare, path: "/admin/jobs" },
         { id: "health", label: "Health", icon: Server, path: "/admin/health" },
         {
           id: "activity",

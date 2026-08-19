@@ -25,7 +25,7 @@ import ShortsScriptTab from "@/features/creative_optimizer/components/ShortsScri
 import SoundOutroTab from "@/features/creative_optimizer/components/SoundOutroTab";
 import AdPlacementTab from "@/features/creative_optimizer/components/AdPlacementTab";
 import ThumbnailStudioTab from "@/features/creative_optimizer/components/ThumbnailStudioTab";
-import ModelSelect from "@/features/ai_core/ModelSelect";
+import { AIModelSelector } from "@/features/ai_core";
 
 import { useProjectStore } from "@/store/useProjectStore";
 
@@ -205,7 +205,7 @@ const AIOptimizerPage = React.memo(
 
           <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
             {/* Inline AI Model Switcher */}
-            <ModelSelect value={selectedModel} onChange={handleModelChange} />
+            <AIModelSelector value={selectedModel} onChange={handleModelChange} />
 
             {/* Quick Copy YouTube Package Button */}
             <button

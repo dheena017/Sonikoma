@@ -12,6 +12,7 @@ from typing import List, Dict, Any, Optional
 
 from app.core.config import ai_initialized
 from services.ai.skills.registry import registry
+from services.ai.orchestrator import AIOrchestrator
 
 logger = logging.getLogger("sonikoma.services.storyboard_ai")
 
@@ -90,102 +91,52 @@ async def generate_dynamic_panels(
 
     # Construct the prompt arguments
     prompt_args = {
-        "title": title,
-        "genre": genre,
-        "episode": episode,
+        "title": title or "Comic Story",
+        "genre": genre or "Action",
+        "episode": episode or "Episode 1",
         "active_slices_count": active_slices_count,
         "narrative_length_hint": narrative_length_hint
     }
 
-    # Resolve keys prioritizing user keys over environment variables
-    user_keys = user_keys or {}
-    gemini_key = user_keys.get("gemini") or os.getenv("GEMINI_API_KEY")
-    hf_key = user_keys.get("huggingface") or os.getenv("HUGGINGFACE_API_KEY")
+    provider, target_model, models_to_try = AIOrchestrator.resolve_execution_plan(
+        "storyboard_narrative",
+        mode="manual" if model else "system",
+        requested_model=model
+    )
+    logger.info(f"[Storyboard AI] Executing storyboard narrative capability with provider={provider}, model={target_model}")
 
-    resolved_model = model or "gemini"
-    # 1. HuggingFace Fallback check
-    if resolved_model.startswith('huggingface') and hf_key:
+    skill = registry.get("storyboard_narrative")
+    response_text = await skill.execute(model=target_model, user_keys=user_keys, **prompt_args)
+
+    if response_text and response_text.strip():
         try:
-            logger.info(f"[HuggingFace] Creating storyboard using Mistral 7B for \"{title}\" (using resolved HF key)")
-            from huggingface_hub import InferenceClient
-            client_to_use = InferenceClient(token=hf_key)
-            skill = registry.get("storyboard_narrative")
-            prompt = skill.build_prompt(**prompt_args)
-
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: client_to_use.chat_completion(
-                    model='mistralai/Mistral-7B-Instruct-v0.3',
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.7,
-                    max_tokens=1000
-                )
-            )
-            response_text = response.choices[0].message.content or ""
-            clean_json = response_text.replace("```json", "").replace("```", "").strip()
-            parsed = json.loads(clean_json)
-            if parsed and isinstance(parsed.get('panels'), list):
+            parsed = json.loads(response_text)
+            if parsed and isinstance(parsed.get('panels'), list) and len(parsed['panels']) > 0:
                 result = []
                 for idx, p in enumerate(parsed['panels'][:active_slices_count]):
-                    duration_val = p.get("duration", 5.0)
+                    duration_val = p.get("duration", 4.5)
                     try:
                         duration_val = float(duration_val)
                     except (ValueError, TypeError):
-                        duration_val = 5.0
+                        duration_val = 4.5
 
                     result.append({
                         "id": idx + 1,
                         "image_url": resolved_urls[idx],
                         "original_image_url": resolved_urls[idx],
-                        "speech_text": p.get("speech_text") or f"Scene {idx + 1}",
-                        "sfx": p.get("sfx") or "[Action]",
+                        "speech_text": p.get("speech_text") or f"Scene {idx + 1} of {title}",
+                        "sfx": p.get("sfx") or "[Action Sounds]",
                         "duration": duration_val,
                         "motion_type": p.get("motion_type") or "zoom_in",
-                        "visual_description": p.get("visual_description") or f"Recap storyboard illustration panel {idx + 1}."
+                        "visual_description": p.get("visual_description") or f"Recap scene for {title} showing {genre} themed illustration panel."
                     })
+                logger.info(f"[Storyboard AI] Storyboard narration generated successfully for {len(result)} slices.")
                 return result
-        except Exception as e:
-            logger.warning(f"[HuggingFace] Storyboard generation failed: {e}. Falling back to Gemini.")
+        except Exception as parse_err:
+            logger.warning(f"[Storyboard AI] Failed to parse skill output: {parse_err}. Using programmatic fallback.")
 
-    # 2. Gemini generation using storyboard_narrative skill
-    if gemini_key or ai_initialized:
-        try:
-            from app.core.config import GEMINI_MODEL_PRIMARY
-            target_model_name = model or GEMINI_MODEL_PRIMARY
-            logger.info(f"[Gemini] Storyboard narrative generation using: {target_model_name}")
-
-            skill = registry.get("storyboard_narrative")
-            response_text = await skill.execute(model=target_model_name, api_key=gemini_key, **prompt_args)
-
-            if response_text.strip():
-                parsed = json.loads(response_text)
-                if parsed and isinstance(parsed.get('panels'), list) and len(parsed['panels']) > 0:
-                    result = []
-                    for idx, p in enumerate(parsed['panels'][:active_slices_count]):
-                        duration_val = p.get("duration", 4.5)
-                        try:
-                            duration_val = float(duration_val)
-                        except (ValueError, TypeError):
-                            duration_val = 4.5
-
-                        result.append({
-                            "id": idx + 1,
-                            "image_url": resolved_urls[idx],
-                            "original_image_url": resolved_urls[idx],
-                            "speech_text": p.get("speech_text") or f"Scene {idx + 1} of {title}",
-                            "sfx": p.get("sfx") or "[Action Sounds]",
-                            "duration": duration_val,
-                            "motion_type": p.get("motion_type") or "zoom_in",
-                            "visual_description": p.get("visual_description") or f"Recap scene for {title} showing {genre} themed illustration panel."
-                        })
-                    logger.info(f"[Gemini] Storyboard narration generated successfully for {len(result)} slices.")
-                    return result
-        except Exception as e:
-            logger.warning(f"[Gemini] Storyboard generation failed: {e}")
-            raise e
-
-    raise RuntimeError("AI Storyboard generation failed: No active providers resolved the storyboard narrative script.")
+    logger.info(f"[Storyboard AI] Generating programmatic panels for {active_slices_count} slices.")
+    return get_programmatic_panels(title, genre, episode, resolved_urls, active_slices_count)
 
 
 # Alias for backward compatibility

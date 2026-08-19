@@ -40,3 +40,45 @@ def test_filter_models():
     models = ModelRegistry.get_catalog()
     filtered = ModelRegistry.filter_models(models, "gemini", filter_query="pro")
     assert any("pro" in (m.get("id") or "").lower() for m in filtered)
+
+
+def test_resolve_model_provider():
+    # 1. Qwen / Hugging Face models should NEVER resolve to Gemini
+    provider, model = ModelRegistry.resolve_model_provider("Qwen/Qwen3-0.6B")
+    assert provider == "huggingface"
+    assert model == "Qwen/Qwen3-0.6B"
+
+    # 2. Explicit provider prefixes
+    p, m = ModelRegistry.resolve_model_provider("openai/gpt-4o")
+    assert p == "openai"
+    assert m == "gpt-4o"
+
+    p, m = ModelRegistry.resolve_model_provider("anthropic/claude-3-5-sonnet-20241022")
+    assert p == "anthropic"
+    assert m == "claude-3-5-sonnet-20241022"
+
+    # 3. Standard Gemini
+    p, m = ModelRegistry.resolve_model_provider("gemini-2.5-flash")
+    assert p == "gemini"
+    assert m == "gemini-2.5-flash"
+
+
+def test_orchestrator_planning():
+    from services.ai.orchestrator import AIOrchestrator, AIErrorCode, classify_error
+
+    provider, target, fallbacks = AIOrchestrator.resolve_execution_plan(
+        "storyboard_narrative", mode="system"
+    )
+    assert provider == "gemini"
+    assert target == "gemini-2.5-flash"
+    assert len(fallbacks) >= 2
+
+    # Verify error classification
+    err_503 = Exception("503 Service Unavailable")
+    classified = classify_error(err_503, provider="gemini", model="gemini-2.5-flash")
+    assert classified.error_code == AIErrorCode.PROVIDER_UNAVAILABLE
+
+    err_404 = Exception("404 Not Found")
+    classified_404 = classify_error(err_404, provider="gemini", model="Qwen/Qwen3-0.6B")
+    assert classified_404.error_code == AIErrorCode.MODEL_NOT_FOUND
+

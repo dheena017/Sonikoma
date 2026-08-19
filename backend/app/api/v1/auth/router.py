@@ -21,18 +21,16 @@ from api.v1.auth.oauth import router as oauth_router
 auth_router = APIRouter()
 
 # ── Authentication & session ─────────────────────────────────────────────────
-auth_router.include_router(login_router, tags=["Auth - Login"])
-auth_router.include_router(register_router, tags=["Auth - Register"])
+auth_router.include_router(login_router, tags=["01A. Authentication & Security"])
+auth_router.include_router(register_router, tags=["01A. Authentication & Security"])
+auth_router.include_router(password_router, tags=["01A. Authentication & Security"])
+auth_router.include_router(oauth_router, prefix="/google", tags=["01A. Authentication & Security"])
 
-# ── Password management ───────────────────────────────────────────────────────
-auth_router.include_router(password_router, tags=["Auth - Password"])
+# ── User profile & settings ──────────────────────────────────────────────────
+auth_router.include_router(profile_router, tags=["01B. Creator Profile & API Keys"])
+auth_router.include_router(avatar_router, tags=["01B. Creator Profile & API Keys"])
+auth_router.include_router(preferences_router, tags=["01B. Creator Profile & API Keys"])
+auth_router.include_router(api_keys_router, tags=["01B. Creator Profile & API Keys"])
 
-# ── User profile, admin & settings ───────────────────────────────────────────
-auth_router.include_router(profile_router, tags=["Auth - Profile"])
-auth_router.include_router(avatar_router, tags=["Auth - Avatar"])
-auth_router.include_router(preferences_router, tags=["Auth - Preferences"])
-auth_router.include_router(api_keys_router, tags=["Auth - API Keys"])
-auth_router.include_router(settings_router, tags=["Auth - Settings"])
-
-# ── OAuth (Google) ────────────────────────────────────────────────────────────
-auth_router.include_router(oauth_router, prefix="/google", tags=["Auth - OAuth"])
+# ── Superuser Admin Console ──────────────────────────────────────────────────
+auth_router.include_router(settings_router, tags=["14. Superuser Admin Console"])

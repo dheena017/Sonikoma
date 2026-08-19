@@ -114,7 +114,13 @@ def get_chapters_for_series(series_id: str) -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         rows = conn.execute("SELECT * FROM chapters WHERE series_id = ? ORDER BY created_at ASC", (series_id,)).fetchall()
-        return [dict(r) for r in rows]
+        results = []
+        for r in rows:
+            d = dict(r)
+            d["chapter_id"] = d.get("id")
+            d["project_id"] = d.get("id")
+            results.append(d)
+        return results
     finally:
         conn.close()
 

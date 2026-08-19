@@ -3,11 +3,15 @@ import { persist, createJSONStorage } from "zustand/middleware";
 
 export interface WorkspaceContext {
   projectId: string | null;
+  seriesId?: string | null;
+  chapterId?: string | null;
   jobId: string | null;
 }
 
 export interface ProjectMetadata {
   project_id: string;
+  series_id?: string | null;
+  chapter_id?: string | null;
   job_id?: string | null;
   title: string;
   url: string;
@@ -155,6 +159,8 @@ export const useProjectStore = create<ProjectStoreState>()(
               project: {
                 ...(cur?.project ?? { title: "", url: "" }),
                 project_id: ctx.projectId,
+                series_id: ctx.seriesId ?? cur?.project?.series_id ?? null,
+                chapter_id: ctx.chapterId ?? cur?.project?.chapter_id ?? null,
                 job_id: ctx.jobId ?? null,
               },
               panels: projectChanged ? [] : cur?.panels ?? [],
@@ -235,6 +241,8 @@ export const useProjectStore = create<ProjectStoreState>()(
 
           const projectMeta: ProjectMetadata = {
             project_id: projectRaw.project_id || idToHydrate,
+            series_id: projectRaw.series_id || null,
+            chapter_id: projectRaw.chapter_id || projectRaw.project_id || null,
             job_id: projectRaw.job_id ?? null,
             title: projectRaw.title || "Untitled Project",
             url: projectRaw.url || "",

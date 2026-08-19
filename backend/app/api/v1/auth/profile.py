@@ -8,7 +8,8 @@ User Profile, Sessions, Invoices, and Account Deletion endpoints.
 import json
 import datetime
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Request
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, Request, Query, Path
 
 from api.dependencies.auth import get_current_user
 from schemas.auth import ProfileUpdate
@@ -185,24 +186,39 @@ async def delete_my_account(request: Request, current_user: dict = Depends(get_c
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/sessions")
-async def get_sessions(current_user: dict = Depends(get_current_user)):
+@router.get("/sessions", summary="Get active device sessions for current user")
+async def get_sessions(
+    limit: int = Query(20, ge=1, le=100, description="Max sessions to return"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    current_user: dict = Depends(get_current_user)
+):
     sessions = get_user_sessions(current_user["user_id"])
-    return {"success": True, "sessions": sessions}
+    total = len(sessions)
+    paginated = sessions[offset:offset + limit]
+    return {"success": True, "total": total, "sessions": paginated}
 
 
-@router.delete("/sessions/{session_id}")
-async def delete_session(session_id: str, request: Request, current_user: dict = Depends(get_current_user)):
-    ip_addr = request.client.host if request.client else "127.0.0.1"
+@router.delete("/sessions/{session_id}", summary="Terminate a specific device session")
+async def delete_session(
+    session_id: str = Path(..., description="Unique device session ID to terminate"),
+    request: Request = None,
+    current_user: dict = Depends(get_current_user)
+):
+    ip_addr = request.client.host if request and request.client else "127.0.0.1"
     terminate_user_session(current_user["user_id"], session_id)
     write_audit_log(current_user["user_id"], f"Terminated Device Session: {session_id}", ip_addr, "Success")
     return {"success": True, "message": "Session terminated successfully."}
 
 
-@router.get("/audit-logs")
-async def get_user_logs(query: str = "", page: int = 1, limit: int = 3, current_user: dict = Depends(get_current_user)):
+@router.get("/audit-logs", summary="Get personal security audit logs with pagination")
+async def get_user_logs(
+    query: Optional[str] = Query("", description="Search term for action log entries"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=100, description="Page size limit"),
+    current_user: dict = Depends(get_current_user)
+):
     offset = (page - 1) * limit
-    logs, total = get_audit_logs(current_user["user_id"], query=query, limit=limit, offset=offset)
+    logs, total = get_audit_logs(current_user["user_id"], query=query or "", limit=limit, offset=offset)
     return {
         "success": True,
         "logs": logs,
@@ -212,8 +228,14 @@ async def get_user_logs(query: str = "", page: int = 1, limit: int = 3, current_
     }
 
 
-@router.get("/invoices")
-async def get_invoices(current_user: dict = Depends(get_current_user)):
+@router.get("/invoices", summary="Get billing invoices and receipt history")
+async def get_invoices(
+    limit: int = Query(20, ge=1, le=100, description="Max invoices to return"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    current_user: dict = Depends(get_current_user)
+):
     seed_default_invoices_if_empty(current_user["user_id"])
     invoices = get_user_invoices(current_user["user_id"])
-    return {"success": True, "invoices": invoices}
+    total = len(invoices)
+    paginated = invoices[offset:offset + limit]
+    return {"success": True, "total": total, "invoices": paginated}

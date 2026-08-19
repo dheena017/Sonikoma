@@ -27,7 +27,7 @@ import {
   Square,
   ZapOff,
 } from "lucide-react";
-import ModelSelect from "@/features/ai_core/ModelSelect";
+import { AIModelSelector } from "@/features/ai_core";
 
 interface ProfilePreferencesTabProps {
   notifications: {
@@ -710,11 +710,8 @@ export default function ProfilePreferencesTab({
                     </div>
                   </div>
                   <div className="w-full">
-                    <ModelSelect
-                      showIcon={false}
-                      className="w-full"
-                      selectClassName={`w-full bg-black/50 border border-white/10 text-white text-xs font-medium rounded-lg px-3 py-2.5 focus:outline-none ${tc.focusBorder}`}
-                      value={ai.defaultModel}
+                    <AIModelSelector
+                      selectedModel={ai.defaultModel}
                       onChange={(val) =>
                         handleSelect(setAi, "defaultModel", val)
                       }

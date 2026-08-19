@@ -10,6 +10,7 @@ import {
   AdminExplorerTab,
   AdminFinanceTab,
   AdminHealthTab,
+  AdminJobsTab,
   AdminScrapersTab,
   AdminSettingsTab,
   AdminUsageTab,
@@ -194,6 +195,11 @@ const AdminPage = React.memo(
         desc: "Inspect public and private storyboards, project status, and storage quotas",
         badge: "Assets",
       },
+      jobs: {
+        title: "Background Jobs & Task Execution",
+        desc: "Monitor live processing queues, cancel hung tasks, and audit completed workers",
+        badge: "Workers",
+      },
       scrapers: {
         title: "Webtoon Engine Configuration",
         desc: "Tune scraper workers, domain proxies, selectors, and rate limiting",
@@ -298,6 +304,13 @@ const AdminPage = React.memo(
         case "scrapers":
           return (
             <AdminScrapersTab
+              fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={addNotification}
+            />
+          );
+        case "jobs":
+          return (
+            <AdminJobsTab
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
             />

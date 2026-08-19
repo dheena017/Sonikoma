@@ -255,3 +255,61 @@ class ModelRegistry:
                 filtered = []
 
         return filtered
+
+    @staticmethod
+    def resolve_model_provider(model_name: Optional[str]) -> tuple[str, str]:
+        """
+        Authoritative mapping: resolves exact (provider, clean_model_id).
+        Guarantees that a Qwen/HF model is never routed to Gemini, and OpenAI/Anthropic
+        models are strictly isolated to their respective adapters.
+        """
+        if not model_name:
+            return "gemini", "gemini-2.5-flash"
+
+        m = model_name.strip()
+        m_lower = m.lower()
+
+        # Explicit provider prefixes
+        if m_lower.startswith("openai/"):
+            return "openai", m[len("openai/"):]
+        if m_lower.startswith("anthropic/"):
+            return "anthropic", m[len("anthropic/"):]
+        if m_lower.startswith("huggingface/"):
+            return "huggingface", m[len("huggingface/"):]
+        if m_lower.startswith("gemini/") or m_lower.startswith("google/"):
+            return "gemini", m.split("/", 1)[1]
+
+        # Check registered catalog
+        for entry in MODEL_CATALOG_DETAILED:
+            if entry["id"].lower() == m_lower:
+                return entry.get("provider", "gemini").lower(), entry["id"]
+
+        # Known provider model prefixes
+        if m_lower.startswith(("gpt-", "o1-", "o3-", "text-embedding-", "dall-e-", "chatgpt-")):
+            return "openai", m
+        if m_lower.startswith(("claude-", "anthropic-")):
+            return "anthropic", m
+        if m_lower.startswith(("gemini-", "models/gemini-")):
+            clean = m.replace("models/", "")
+            return "gemini", clean
+        if m_lower.startswith(("flux.", "sdxl", "stabilityai/", "qwen", "meta-llama/", "mistralai/")):
+            return "huggingface", m
+        if "/" in m:
+            return "huggingface", m
+
+        return "gemini", m
+
+    @staticmethod
+    def get_fallback_models_for_provider(provider: str) -> List[str]:
+        """Returns the safe fallback chain strictly for the given provider."""
+        p = provider.lower()
+        if p == "gemini":
+            return ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"]
+        elif p == "openai":
+            return ["gpt-4o", "gpt-4o-mini"]
+        elif p == "anthropic":
+            return ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"]
+        elif p == "huggingface":
+            return ["mistralai/Mistral-7B-Instruct-v0.3", "FLUX.1-schnell"]
+        return ["gemini-2.5-flash"]
+
