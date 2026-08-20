@@ -53,7 +53,7 @@ def _check_capability(module_name: str) -> bool:
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("/health", summary="Health check and capability probe")
-async def health(
+async def get_health_status_endpoint(
     x_user_gemini_key: str = Header(None, alias="X-User-Gemini-Key"),
     x_user_huggingface_key: str = Header(None, alias="X-User-Huggingface-Key"),
     x_user_openai_key: str = Header(None, alias="X-User-Openai-Key"),
@@ -105,8 +105,26 @@ async def health(
     )
 
 
-@router.get("/system-logs", summary="Diagnostic logs retrieval with historical support")
-async def system_logs(
+@router.get("/health/ffmpeg", summary="FFmpeg binary health probe")
+async def get_ffmpeg_health_endpoint():
+    try:
+        proc = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True, check=True)
+        version_line = proc.stdout.split("\n")[0] if proc.stdout else "unknown"
+        return {
+            "success": True,
+            "status": "ok",
+            "version": version_line
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"FFmpeg is not accessible on the server path: {e}"
+        )
+
+
+@router.get("/logs", summary="Diagnostic logs retrieval with historical support")
+@router.get("/system-logs", summary="Diagnostic logs retrieval (alias)", include_in_schema=False)
+async def get_system_logs_endpoint(
     since: int = Query(0, description="Fetch ephemeral logs generated after this sequence ID"),
     limit: int = Query(200, description="Max records to return for historical query"),
     offset: int = Query(0, description="Offset for historical query"),
@@ -126,8 +144,9 @@ async def system_logs(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/system-logs", summary="Wipe all persistent system logs")
-async def clear_system_logs():
+@router.delete("/logs", summary="Wipe all persistent system logs")
+@router.delete("/system-logs", summary="Wipe all persistent system logs (alias)", include_in_schema=False)
+async def clear_system_logs_endpoint():
     try:
         wipe_system_logs()
         return {"success": True, "message": "Persistent system logs wiped successfully."}
@@ -136,8 +155,9 @@ async def clear_system_logs():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/system-logs/log", summary="Post a custom log entry to system logs")
-async def add_custom_log(payload: CustomLogPayload):
+@router.post("/logs", summary="Post a custom log entry to system logs")
+@router.post("/system-logs/log", summary="Post a custom log entry (alias)", include_in_schema=False)
+async def add_custom_log_endpoint(payload: CustomLogPayload):
     try:
         vite_logger = logging.getLogger("sonikoma.vite")
         lvl = payload.level.upper()
@@ -153,8 +173,9 @@ async def add_custom_log(payload: CustomLogPayload):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/system-logs/stream", summary="Server-Sent Events (SSE) real-time console log stream")
-async def system_logs_stream(request: Request):
+@router.get("/logs/stream", summary="Server-Sent Events (SSE) real-time console log stream")
+@router.get("/system-logs/stream", summary="SSE log stream (alias)", include_in_schema=False)
+async def system_logs_stream_endpoint(request: Request):
     loop = asyncio.get_running_loop()
 
     async def log_generator():
@@ -194,7 +215,7 @@ async def system_logs_stream(request: Request):
 
 
 @router.get("/metrics", summary="Live server performance and cache metrics")
-async def server_metrics():
+async def get_server_metrics_endpoint():
     uptime_sec = round(time.time() - START_TIME, 1)
     h = int(uptime_sec // 3600)
     m = int((uptime_sec % 3600) // 60)
@@ -286,8 +307,9 @@ async def server_metrics():
     }
 
 
-@router.post("/metrics/purge-cache", summary="Force clear all backend LRU caches")
-async def purge_server_caches():
+@router.post("/cache/purge", summary="Force clear all backend LRU caches")
+@router.post("/metrics/purge-cache", summary="Force clear all backend LRU caches (alias)", include_in_schema=False)
+async def purge_server_caches_endpoint():
     try:
         from core.cache import stitched_cache, edit_history, zip_cache, proxy_cache
         stitched_cache.clear()
@@ -301,8 +323,9 @@ async def purge_server_caches():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/metrics/flush-temp", dependencies=[Depends(get_admin_user)], summary="Delete all temporary export and worker files")
-async def flush_temp_files():
+@router.post("/temp/flush", dependencies=[Depends(get_admin_user)], summary="Delete all temporary export and worker files")
+@router.post("/metrics/flush-temp", dependencies=[Depends(get_admin_user)], summary="Flush temp files (alias)", include_in_schema=False)
+async def flush_temp_files_endpoint():
     try:
         import shutil
         dirs_to_clean = ["data/media", "data/temp", "public/exports"]
@@ -322,8 +345,9 @@ async def flush_temp_files():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/metrics/emergency-stop", summary="Kill all background child processes (like FFmpeg)")
-async def emergency_stop():
+@router.post("/emergency-stop", summary="Kill all background child processes (like FFmpeg)")
+@router.post("/metrics/emergency-stop", summary="Emergency stop (alias)", include_in_schema=False)
+async def emergency_stop_endpoint():
     killed_count = 0
     try:
         try:

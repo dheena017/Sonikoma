@@ -22,7 +22,7 @@ jobs_router = APIRouter()
     summary="Get job status, progress, stage, execution, and result",
     description="Returns the full execution state of a specific job including provider, model, attempt, stage, progress, project_id, and chapter_id."
 )
-async def get_job_status(job_id: str, current_user: dict = Depends(get_current_user)):
+async def get_job_status_endpoint(job_id: str, current_user: dict = Depends(get_current_user)):
     """Canonical job status retrieval endpoint."""
     job = job_manager.get_job(job_id)
     if not job:
@@ -37,7 +37,7 @@ async def get_job_status(job_id: str, current_user: dict = Depends(get_current_u
     summary="Cancel a running or queued job",
     description="Cancels an active background execution task."
 )
-async def cancel_job_route(job_id: str, current_user: dict = Depends(get_current_user)):
+async def cancel_job_endpoint(job_id: str, current_user: dict = Depends(get_current_user)):
     """Cancels a running or queued job."""
     job = job_manager.get_job(job_id)
     if not job:
@@ -53,7 +53,7 @@ async def cancel_job_route(job_id: str, current_user: dict = Depends(get_current
     summary="List jobs with filtering and pagination",
     description="Retrieves a paginated list of background execution jobs for the authenticated user, filterable by project_id, chapter_id, status, and job_type."
 )
-async def list_jobs_route(
+async def list_jobs_endpoint(
     project_id: Optional[str] = Query(None, description="Filter by parent Project/Series ID"),
     chapter_id: Optional[str] = Query(None, description="Filter by Chapter/Episode ID"),
     status: Optional[str] = Query(None, description="Filter by status: QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED"),

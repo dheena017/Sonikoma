@@ -130,8 +130,58 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     }
   };
 
+  const domainInfo = React.useMemo(() => {
+    const trimmed = targetUrl.trim();
+    if (!trimmed) return null;
+    try {
+      const urlObj = new URL(
+        trimmed.startsWith("http") ? trimmed : `https://${trimmed}`
+      );
+      const host = urlObj.hostname.toLowerCase().replace(/^www\./, "");
+      if (!host || !host.includes(".")) return null;
+
+      const knownPlatforms: Record<string, string[]> = {
+        WebComics: ["webcomicsapp.com"],
+        "Line Webtoon": ["webtoons.com", "webtoon.com", "naver.com"],
+        MangaDex: ["mangadex.org", "mangadex.cc", "mangadex.com"],
+        "Bato.to": ["bato.to", "mangatoto.com", "battwo.com", "batocomic.com", "readtoto.com"],
+        "Asura Scans": ["asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com"],
+        "Flame Comics": ["flamecomics.xyz", "flamecomics.com", "flamescans.org"],
+        "Reaper Scans": ["reaperscans.com"],
+        "WP-Manga (Madara)": ["mangaclash.com", "manhuaus.com", "topmanhua.com", "manhuaplus.org", "manhuaplus.com", "1stkissmanga.io", "manganato.com", "mangakakalot.com"],
+        Toomics: ["toomics.com"],
+        Tapas: ["tapas.io"],
+        Tappytoon: ["tappytoon.com"],
+        Lezhin: ["lezhin.com", "lezhinus.com"],
+      };
+
+      for (const [platform, domains] of Object.entries(knownPlatforms)) {
+        if (domains.some((d) => host === d || host.endsWith(`.${d}`))) {
+          return {
+            domain: host,
+            platform,
+            isKnown: true,
+            badge: "🟢 Verified Platform",
+            details: `Dedicated ${platform} High-Speed Adapter Active`,
+          };
+        }
+      }
+
+      return {
+        domain: host,
+        platform: "Novel / Custom Website",
+        isKnown: false,
+        badge: "✨ Novel Domain Detected",
+        details: `Antigravity AI Engine will autonomously analyze '${host}' DOM & extract comic panels`,
+      };
+    } catch {
+      return null;
+    }
+  }, [targetUrl]);
+
   return (
-    <div className="flex flex-col sm:flex-row gap-4">
+    <div className="flex flex-col gap-2.5 w-full">
+      <div className="flex flex-col sm:flex-row gap-4">
       <div className="relative group flex-grow z-30" ref={containerRef}>
         <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-500" />
         <input
@@ -272,6 +322,33 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             <Zap className="h-4 w-4 text-purple-400" />
             Open in Episode Scraper
           </button>
+        </div>
+      )}
+      </div>
+
+      {domainInfo && (
+        <div className="flex flex-wrap items-center gap-2 px-1 text-xs animate-in fade-in slide-in-from-top-1 duration-200">
+          {domainInfo.isKnown ? (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-emerald-300 font-medium shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span>
+                {domainInfo.badge}: <strong>{domainInfo.platform}</strong>
+              </span>
+              <span className="text-emerald-400/70 hidden sm:inline">
+                ({domainInfo.details})
+              </span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/70 border border-indigo-500/30 text-indigo-300 font-medium shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-indigo-400 shrink-0" />
+              <span>
+                {domainInfo.badge}: <strong>{domainInfo.domain}</strong>
+              </span>
+              <span className="text-indigo-300/70 hidden sm:inline">
+                — {domainInfo.details}
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -20,7 +20,12 @@ for p in [APP_DIR, BACKEND_DIR, PROJECT_ROOT]:
         sys.path.insert(0, p)
 
 from app.core.config import API_VERSION, IS_PRODUCTION, BACKEND_PORT
-from app.core.logging import ColoredFormatter, setup_logging, logger
+try:
+    from app.core.logging import ColoredFormatter, setup_logging, logger
+    from app.core.logging.filters import EndpointFilter
+except ImportError:
+    from core.logging import ColoredFormatter, setup_logging, logger
+    from core.logging.filters import EndpointFilter
 from app.core.exceptions import global_exception_handler
 from app.core.middleware import setup_middleware
 from app.api.router import register_routers
@@ -62,6 +67,11 @@ if __name__ == "__main__":
     custom_log_config = {
         "version": 1,
         "disable_existing_loggers": False,
+        "filters": {
+            "endpoint_filter": {
+                "()": EndpointFilter,
+            },
+        },
         "formatters": {
             "default": {
                 "()": ColoredFormatter,
@@ -77,6 +87,7 @@ if __name__ == "__main__":
                 "class": "logging.StreamHandler",
                 "formatter": "default",
                 "stream": "ext://sys.stdout",
+                "filters": ["endpoint_filter"],
             },
         },
         "loggers": {

@@ -12,7 +12,7 @@ from api.dependencies.auth import get_current_user
 
 from schemas.scraper import ExtractScriptRequest
 from services.scraper.service import scrape_and_initialize_project
-from services.scraper.ocr import extract_script_from_panels
+from services.image.ocr.ocr_service import extract_script_from_panels
 from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 logger = logging.getLogger("sonikoma.api.ocr")

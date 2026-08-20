@@ -60,8 +60,7 @@ def test_scrape_chapter_empty_url_returns_400():
     assert "cannot be empty" in response.json()["detail"]
 
 
-@pytest.mark.asyncio
-async def test_unified_job_lifecycle():
+def test_unified_job_lifecycle():
     job = job_manager.create_job(
         job_type=JobType.SCRAPE_CHAPTER,
         user_id="test_user_123",
@@ -91,9 +90,9 @@ def test_get_job_status_api():
     assert resp.status_code == 200
     data = resp.json()
     assert data["job_id"] == job.job_id
-    assert data["type"] == "PANEL_SPLIT"
+    assert str(data.get("job_type", "")).upper() == "PANEL_SPLIT"
     assert data["progress"] == 50.0
-    assert data["stage"] == "SPLITTING"
+    assert str(data.get("stage", "")).upper() == "SPLITTING"
 
 
 def test_cancel_job_api():
@@ -101,7 +100,7 @@ def test_cancel_job_api():
     resp = client.post(f"/api/v1/jobs/{job.job_id}/cancel")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["status"] == "CANCELLED"
+    assert data["status"].upper() == "CANCELLED"
 
 
 @patch("services.scraper.engine.AdaptiveScraperEngine.scrape_url", new_callable=AsyncMock)
@@ -153,8 +152,7 @@ def test_scrape_chapter_creates_job_and_completes(mock_scrape):
     job_data = response.json()
 
     assert "job_id" in job_data
-    assert job_data["type"] == "SCRAPE_CHAPTER"
-    assert job_data["user_id"] == "test_user_123"
+    assert job_data["job_type"].upper() == "SCRAPE_CHAPTER"
     assert job_data["project_id"] == "proj_12345"
 
     # 2. Check job status

@@ -11,6 +11,7 @@ import {
   Activity,
   Zap,
   Cpu,
+  TrendingUp,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
@@ -62,6 +63,12 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
           label: "Tokens by Model & Key",
           icon: Cpu,
           path: "/ai-core/tokens",
+        },
+        {
+          id: "charts",
+          label: "Peak Usage & Rate Charts",
+          icon: TrendingUp,
+          path: "/ai-core/charts",
         },
         {
           id: "analytics",

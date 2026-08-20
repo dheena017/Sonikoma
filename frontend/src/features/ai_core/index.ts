@@ -20,5 +20,6 @@ export { default as AIAPIManagementPage } from "./pages/AIAPIManagementPage";
 export { default as AIModelsRoutingPage } from "./pages/AIModelsRoutingPage";
 export { default as AITokenModelsPage } from "./pages/AITokenModelsPage";
 export { default as AIAnalyticsPage } from "./pages/AIAnalyticsPage";
+export { default as AIChartsPage } from "./pages/AIChartsPage";
 export { default as AIBillingPage } from "./pages/AIBillingPage";
 export { default as AISafetyQuotasPage } from "./pages/AISafetyQuotasPage";

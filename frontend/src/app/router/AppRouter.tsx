@@ -118,6 +118,9 @@ const AISafetyQuotasPage = React.lazy(
 const AITokenModelsPage = React.lazy(
   () => import("@/features/ai_core/pages/AITokenModelsPage")
 );
+const AIChartsPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIChartsPage")
+);
 
 import MainLayout from "@/components/layout/MainLayout";
 
@@ -562,8 +565,8 @@ export default function AppRouter(props: AppRouterProps) {
   // Detect whether we have a saved auth token in local or session storage
   const hasSavedToken = Boolean(
     typeof window !== "undefined" &&
-      (localStorage.getItem("sonikoma_token") ||
-        sessionStorage.getItem("sonikoma_token"))
+    (localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token"))
   );
 
   const isPublicAuthRoute =
@@ -787,6 +790,10 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/ai-core/tokens" ||
         currentPath === "/ai-core/tokens/" ||
         currentPath.startsWith("/ai-core/tokens"),
+      isAIChartsPath:
+        currentPath === "/ai-core/charts" ||
+        currentPath === "/ai-core/charts/" ||
+        currentPath.startsWith("/ai-core/charts"),
       isAIAnalyticsPath: currentPath === "/ai-core/analytics",
       isAIBillingPath: currentPath === "/ai-core/billing",
       isAIModelsPath: currentPath === "/ai-core/models",
@@ -829,6 +836,7 @@ export default function AppRouter(props: AppRouterProps) {
     isAICoreDashboardPath,
     isAIAPIKeysPath,
     isAITokensPath,
+    isAIChartsPath,
     isAIAnalyticsPath,
     isAIBillingPath,
     isAIModelsPath,
@@ -1308,6 +1316,8 @@ export default function AppRouter(props: AppRouterProps) {
                 <AIAPIManagementPage addNotification={addNotification} />
               ) : isAITokensPath ? (
                 <AITokenModelsPage addNotification={addNotification} />
+              ) : isAIChartsPath ? (
+                <AIChartsPage addNotification={addNotification} />
               ) : isAIAnalyticsPath ? (
                 <AIAnalyticsPage addNotification={addNotification} />
               ) : isAIBillingPath ? (

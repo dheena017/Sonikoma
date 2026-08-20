@@ -38,7 +38,7 @@ def test_stitching():
 
 import pytest
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_merge_images_service():
     from services.image.processing.compose import merge_images_service
     from core.cache import stitched_cache

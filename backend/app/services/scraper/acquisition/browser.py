@@ -82,12 +82,18 @@ class BrowserFetcher:
                 page.on("response", interceptor.handle_response)
 
                 try:
-                    await page.goto(url, wait_until="domcontentloaded", timeout=int(timeout_seconds * 500))
+                    await page.goto(url, wait_until="networkidle", timeout=15000)
                 except Exception:
                     try:
-                        await page.goto(url, wait_until="commit", timeout=int(timeout_seconds * 300))
-                    except Exception as e:
-                        logger.debug(f"[BrowserFetcher] Navigation exception: {e}")
+                        await page.goto(url, wait_until="load", timeout=10000)
+                    except Exception:
+                        try:
+                            await page.goto(url, wait_until="domcontentloaded", timeout=6000)
+                        except Exception as e:
+                            logger.debug(f"[BrowserFetcher] Navigation exception: {e}")
+
+                # Allow SPA dynamic hydration & API dispatch
+                await asyncio.sleep(1.5)
 
                 # Interactive clickers (age gate, consent dialogs, load more)
                 if interactive:
@@ -102,38 +108,72 @@ class BrowserFetcher:
                             buttons = await page.query_selector_all(sel)
                             for btn in buttons:
                                 if await btn.is_visible():
-                                    await btn.click()
-                                    await asyncio.sleep(0.3)
+                                    await btn.click(timeout=1000)
+                                    await asyncio.sleep(0.1)
                     except Exception as e:
                         logger.debug(f"[BrowserFetcher] Interactive click warning: {e}")
 
-                # Progressive auto-scrolling for lazy-loaded assets
+                # Comprehensive progressive auto-scrolling for 100% lazy-loaded asset discovery
                 if auto_scroll:
                     try:
                         await page.evaluate("""async () => {
-                            await new Promise((resolve) => {
-                                let lastScrollTop = -1;
-                                let sameCount = 0;
-                                let maxTicks = 150;
-                                let tick = 0;
-                                const timer = setInterval(() => {
-                                    window.scrollBy(0, 3000);
-                                    const currentScrollTop = window.scrollY || document.documentElement.scrollTop || 0;
-                                    tick++;
-                                    if (currentScrollTop === lastScrollTop) {
-                                        sameCount++;
-                                    } else {
-                                        sameCount = 0;
-                                        lastScrollTop = currentScrollTop;
+                            window.__scraped_accumulated_images = window.__scraped_accumulated_images || [];
+                            const scanImages = () => {
+                                const els = document.querySelectorAll('img, source, [data-src], [data-original], [data-lazy-src], [data-url], [data-bg], [data-raw-src]');
+                                els.forEach(el => {
+                                    let raw = el.getAttribute('data-src') ||
+                                              el.getAttribute('data-original') ||
+                                              el.getAttribute('data-lazy-src') ||
+                                              el.getAttribute('data-url') ||
+                                              el.getAttribute('data-bg') ||
+                                              el.getAttribute('data-cdn') ||
+                                              el.src;
+                                    if (raw && typeof raw === 'string') {
+                                        let src = raw.trim();
+                                        if (src.includes(' ') && !src.startsWith('data:')) {
+                                            src = src.split(/\s+/)[0];
+                                        }
+                                        if (src && !src.startsWith('data:image/svg') && !src.includes('1x1') && !src.includes('spacer') && !window.__scraped_accumulated_images.includes(src)) {
+                                            window.__scraped_accumulated_images.push(src);
+                                        }
                                     }
-                                    if (sameCount >= 6 || tick >= maxTicks) {
+                                });
+                            };
+
+                            scanImages();
+
+                            await new Promise((resolve) => {
+                                let totalHeight = 0;
+                                let distance = 1500;
+                                let maxLoops = 100;
+                                let loops = 0;
+                                let lastHeight = document.body.scrollHeight;
+                                let sameHeightCount = 0;
+
+                                const timer = setInterval(() => {
+                                    window.scrollBy(0, distance);
+                                    window.dispatchEvent(new Event('scroll'));
+                                    totalHeight += distance;
+                                    loops++;
+                                    scanImages();
+
+                                    const currentHeight = document.body.scrollHeight;
+                                    if (currentHeight <= lastHeight && totalHeight >= currentHeight) {
+                                        sameHeightCount++;
+                                    } else {
+                                        sameHeightCount = 0;
+                                        lastHeight = Math.max(lastHeight, currentHeight);
+                                    }
+
+                                    if (sameHeightCount >= 16 || loops >= maxLoops) {
                                         clearInterval(timer);
+                                        scanImages();
                                         resolve();
                                     }
                                 }, 100);
                             });
                         }""")
-                        await page.wait_for_timeout(1500)
+                        await asyncio.sleep(1.0)
                     except Exception as e:
                         logger.debug(f"[BrowserFetcher] Auto-scroll warning: {e}")
 
@@ -164,12 +204,22 @@ class BrowserFetcher:
                     });
                 }""")
 
+                # Extract accumulated images during scroll
+                accumulated_images = []
+                try:
+                    accumulated_images = await page.evaluate("() => window.__scraped_accumulated_images || []")
+                except Exception as e:
+                    logger.debug(f"[BrowserFetcher] Accumulated images extract notice: {e}")
+
                 # Extract storage
                 storage_data = await BrowserStorageExtractor.extract_storage(page)
 
                 html = await page.content()
                 await browser.close()
-                return html, interceptor.get_image_urls(), storage_data
+
+                net_urls = interceptor.get_image_urls()
+                all_combined_images = list(dict.fromkeys(net_urls + [img for img in accumulated_images if isinstance(img, str) and img.startswith("http")]))
+                return html, all_combined_images, storage_data
 
         except Exception as e:
             logger.error(f"[BrowserFetcher] Browser task failed: {e}")

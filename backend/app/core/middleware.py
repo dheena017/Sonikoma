@@ -49,6 +49,9 @@ PUBLIC_ROUTE_SET = {
     "/api/health/ffmpeg",
     "/api/py/health/ffmpeg",
     "/api/v1/system/metrics",
+    "/api/v1/system/logs",            # Diagnostic log polling (system terminal panel)
+    "/api/v1/system/system-logs",     # Alias
+    "/api/system/logs",               # Legacy alias
     "/api/auth/register",
     "/api/v1/auth/register",
     "/api/auth/login",
@@ -59,6 +62,8 @@ PUBLIC_ROUTE_SET = {
     "/api/v1/auth/google/login",
     "/api/auth/google/callback",
     "/api/v1/auth/google/callback",
+    "/api/auth/google/session",
+    "/api/v1/auth/google/session",
     "/api/export/youtube/oauth/callback",
     "/api/v1/export/youtube/oauth/callback",
     "/api/auth/token",             # Swagger Authorize button
@@ -94,6 +99,8 @@ PUBLIC_ROUTE_PREFIXES = (
     "/media",          # Defensive: allow the exact mount path too
     "/api/export/youtube/", # YouTube publisher routes (uses get_optional_current_user in router)
     "/api/v1/export/youtube/",
+    "/api/v1/system/logs/",   # SSE real-time log stream (/api/v1/system/logs/stream)
+    "/api/system/logs/",      # Legacy SSE alias
 )
 
 # Admin-only endpoints (require creator_role/admin)
@@ -164,7 +171,7 @@ async def rate_limiting_middleware(request: Request, call_next):
         return await call_next(request)
 
     client_ip = request.client.host if request.client else "unknown"
-    if client_ip in ("127.0.0.1", "localhost", "::1"):
+    if client_ip in ("127.0.0.1", "localhost", "::1", "testclient") or os.getenv("TESTING") == "1":
         return await call_next(request)
 
     now = time.time()

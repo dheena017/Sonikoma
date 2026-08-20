@@ -21,7 +21,7 @@ from repositories.project.project import get_project, insert_project
 from repositories.project.tokens import insert_token_log
 from services.project.project_service import ProjectService
 from schemas.project import ProjectUpdateRequest
-from api.v1.projects.router import project_router, get_single_project
+from api.v1.projects.router import project_router, get_single_project_endpoint
 from api.dependencies.auth import get_current_user
 
 

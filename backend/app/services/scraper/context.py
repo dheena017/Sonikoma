@@ -129,6 +129,11 @@ class ScrapeContext:
         )
         self.level_history.append(rec)
 
+    @property
+    def levels(self) -> List[EscalationLevelRecord]:
+        """Alias for level_history."""
+        return self.level_history
+
     def to_chapter_result(self) -> ChapterResult:
         """Builds the final authoritative ChapterResult from this context."""
         elapsed_ms = (time.time() - self.start_time) * 1000.0
@@ -146,6 +151,14 @@ class ScrapeContext:
             confidence = self.selected_reader.score
         elif self.validated_images:
             confidence = 80.0
+
+        # Apply proxy URLs if requested
+        if self.config.proxy_images and self.validated_images:
+            from urllib.parse import quote
+            canonical_ref = self.canonical_url or self.normalized_url or self.url
+            for img in self.validated_images:
+                if not img.proxy_url:
+                    img.proxy_url = f"/api/proxy-image?url={quote(img.url)}&referer={quote(canonical_ref)}"
 
         new_count = sum(1 for img in self.validated_images if img.is_new)
 
@@ -170,6 +183,7 @@ class ScrapeContext:
             success=success,
             project_id=self.project_id or self.config.project_id,
             job_id=self.job_id or self.config.job_id,
+            total_images=len(self.validated_images),
             source=src,
             series=self.series_info,
             chapter=self.chapter_info,

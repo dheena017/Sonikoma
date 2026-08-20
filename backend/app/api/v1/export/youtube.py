@@ -51,9 +51,8 @@ router = APIRouter()
 # Cookie name for tracking YouTube OAuth state (separate from Sonikoma login cookie)
 YT_OAUTH_STATE_COOKIE = "yt_oauth_state"
 
-# Scopes for full YouTube channel management, statistics & video publishing
+# Scopes for YouTube channel management, statistics & video publishing
 YOUTUBE_SCOPES = [
-    "https://www.googleapis.com/auth/youtube",
     "https://www.googleapis.com/auth/youtube.readonly",
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube.force-ssl",

@@ -162,7 +162,7 @@ async def download_zip_service(urls: List[str], referer_url: Optional[str] = Non
         "filename": "sonikoma_export.zip"
     }
 
-from services.scraper.splitter import split_vertical_strip_into_panels
+from .panel_splitter import split_vertical_strip_into_panels
 
 __all__ = [
     "merge_images_service",

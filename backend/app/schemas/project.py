@@ -100,3 +100,22 @@ class DetectPanelsBase64Request(BaseModel):
     canny_high: int = Field(100, ge=0, le=255)
     close_kernel_size: int = Field(15, ge=1, le=99)
     auto_split: bool = Field(True, description="Automatically split tall strips at gutters")
+
+
+class PanelBoundingBox(BaseModel):
+    """Detected comic panel bounding box coordinates."""
+    x: int = Field(..., description="X pixel coordinate")
+    y: int = Field(..., description="Y pixel coordinate")
+    w: int = Field(..., description="Width in pixels")
+    h: int = Field(..., description="Height in pixels")
+    confidence: Optional[float] = Field(1.0, description="Detection confidence score")
+    label: Optional[str] = Field("panel", description="Detected entity label")
+    type: Optional[str] = Field("panel", description="Entity type: panel, bubble, character")
+
+
+class PanelDetectionResponse(BaseModel):
+    """Result of comic panel and bubble detection."""
+    success: bool
+    panels: List[PanelBoundingBox] = []
+    count: int = 0
+    message: Optional[str] = None

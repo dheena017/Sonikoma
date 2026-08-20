@@ -70,14 +70,24 @@ def _create_test_user(role: str = "creator", starting_credits: int = 100) -> str
     return user_id
 
 
-class TestCreditHappyPath(unittest.TestCase):
+class BaseCreditTest(unittest.TestCase):
     def setUp(self):
+        self.orig_db_path = config.DB_PATH
+        self.orig_is_postgres = config.is_postgres
         self.db_path = _make_isolated_db()
         _setup_db(self.db_path)
-        self.user_id = _create_test_user(starting_credits=50)
 
     def tearDown(self):
         shutil.rmtree(os.path.dirname(self.db_path), ignore_errors=True)
+        config.DB_PATH = self.orig_db_path
+        config.is_postgres = self.orig_is_postgres
+        bootstrap._db_initialized = False
+
+
+class TestCreditHappyPath(BaseCreditTest):
+    def setUp(self):
+        super().setUp()
+        self.user_id = _create_test_user(starting_credits=50)
 
     def test_deduct_reduces_balance(self):
         new_bal = record_credit_transaction(self.user_id, -10, "sd_generate")
@@ -102,14 +112,10 @@ class TestCreditHappyPath(unittest.TestCase):
         self.assertEqual(txs[0]["balance_after"], 40)
 
 
-class TestCreditInsufficientBalance(unittest.TestCase):
+class TestCreditInsufficientBalance(BaseCreditTest):
     def setUp(self):
-        self.db_path = _make_isolated_db()
-        _setup_db(self.db_path)
+        super().setUp()
         self.user_id = _create_test_user(starting_credits=10)
-
-    def tearDown(self):
-        shutil.rmtree(os.path.dirname(self.db_path), ignore_errors=True)
 
     def test_raises_value_error(self):
         with self.assertRaises(ValueError) as ctx:
@@ -141,14 +147,10 @@ class TestCreditInsufficientBalance(unittest.TestCase):
             self.assertIn("have 10", str(exc))
 
 
-class TestAdminBypass(unittest.TestCase):
+class TestAdminBypass(BaseCreditTest):
     def setUp(self):
-        self.db_path = _make_isolated_db()
-        _setup_db(self.db_path)
+        super().setUp()
         self.admin_id = _create_test_user(role="admin", starting_credits=5)
-
-    def tearDown(self):
-        shutil.rmtree(os.path.dirname(self.db_path), ignore_errors=True)
 
     def test_admin_can_go_negative(self):
         new_bal = record_credit_transaction(self.admin_id, -20, "admin_action")
@@ -160,18 +162,14 @@ class TestAdminBypass(unittest.TestCase):
         self.assertEqual(len(txs), 1)
 
 
-class TestConcurrentDeductions(unittest.TestCase):
+class TestConcurrentDeductions(BaseCreditTest):
     """Two threads simultaneously try to spend the same last 10 credits."""
 
     def setUp(self):
-        self.db_path = _make_isolated_db()
-        _setup_db(self.db_path)
+        super().setUp()
         self.user_id = _create_test_user(starting_credits=10)
         self.results = []
         self.errors = []
-
-    def tearDown(self):
-        shutil.rmtree(os.path.dirname(self.db_path), ignore_errors=True)
 
     def _try_deduct(self):
         try:
@@ -195,16 +193,12 @@ class TestConcurrentDeductions(unittest.TestCase):
         self.assertEqual(len(txs), 1)
 
 
-class TestAtomicRollbackOnLedgerFailure(unittest.TestCase):
+class TestAtomicRollbackOnLedgerFailure(BaseCreditTest):
     """If the ledger INSERT fails, the balance update must also roll back."""
 
     def setUp(self):
-        self.db_path = _make_isolated_db()
-        _setup_db(self.db_path)
+        super().setUp()
         self.user_id = _create_test_user(starting_credits=50)
-
-    def tearDown(self):
-        shutil.rmtree(os.path.dirname(self.db_path), ignore_errors=True)
 
     def test_balance_unchanged_when_ledger_fails(self):
         """
@@ -231,7 +225,7 @@ class TestAtomicRollbackOnLedgerFailure(unittest.TestCase):
         self.assertEqual(get_available_credits(self.user_id), 50)
 
 
-class TestLowBalanceThreshold(unittest.TestCase):
+class TestLowBalanceThreshold(BaseCreditTest):
     def test_threshold_constant_defined(self):
         self.assertTrue(hasattr(config, "LOW_BALANCE_THRESHOLD"))
         self.assertIsInstance(config.LOW_BALANCE_THRESHOLD, int)
@@ -240,25 +234,15 @@ class TestLowBalanceThreshold(unittest.TestCase):
         self.assertEqual(config.LOW_BALANCE_THRESHOLD, 20)
 
     def test_new_balance_below_threshold_after_deduction(self):
-        db_path = _make_isolated_db()
-        _setup_db(db_path)
         user_id = _create_test_user(starting_credits=25)
-        try:
-            new_bal = record_credit_transaction(user_id, -10, "sd_generate")
-            self.assertEqual(new_bal, 15)
-            self.assertLess(new_bal, config.LOW_BALANCE_THRESHOLD)
-        finally:
-            shutil.rmtree(os.path.dirname(db_path), ignore_errors=True)
+        new_bal = record_credit_transaction(user_id, -10, "sd_generate")
+        self.assertEqual(new_bal, 15)
+        self.assertLess(new_bal, config.LOW_BALANCE_THRESHOLD)
 
     def test_new_balance_above_threshold_after_deduction(self):
-        db_path = _make_isolated_db()
-        _setup_db(db_path)
         user_id = _create_test_user(starting_credits=100)
-        try:
-            new_bal = record_credit_transaction(user_id, -10, "sd_generate")
-            self.assertGreaterEqual(new_bal, config.LOW_BALANCE_THRESHOLD)
-        finally:
-            shutil.rmtree(os.path.dirname(db_path), ignore_errors=True)
+        new_bal = record_credit_transaction(user_id, -10, "sd_generate")
+        self.assertGreaterEqual(new_bal, config.LOW_BALANCE_THRESHOLD)
 
 
 if __name__ == "__main__":

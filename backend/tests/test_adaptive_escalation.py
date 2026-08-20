@@ -20,7 +20,7 @@ def _read_fixture(name: str) -> str:
         return f.read()
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_escalation_early_terminates_on_static_html():
     html = _read_fixture("html_reader.html")
 
@@ -39,7 +39,7 @@ async def test_escalation_early_terminates_on_static_html():
         mock_browser.assert_not_called()
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_escalation_early_terminates_on_nextjs_payload():
     html = _read_fixture("nextjs_reader.html")
 

@@ -14,6 +14,7 @@ import {
   FolderOpen,
   FolderSync,
   Workflow,
+  TrendingUp,
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { useProjectStore } from "@/store/useProjectStore";
@@ -157,6 +158,12 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
           label: "Tokens by Model & Key",
           icon: Cpu,
           path: "/ai-core/tokens",
+        },
+        {
+          id: "charts",
+          label: "Peak Usage & Rate Charts",
+          icon: TrendingUp,
+          path: "/ai-core/charts",
         },
         {
           id: "analytics",

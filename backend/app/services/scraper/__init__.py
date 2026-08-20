@@ -2,7 +2,7 @@
 backend/app/services/scraper/__init__.py
 ─────────────────────────────────────────────────────────────────────────────
 Adaptive Webtoon / Chapter Scraper Package.
-Exports core engine, models, workflows, and service compatibility facades.
+Exports core engine, models, workflows, and modular site adapters.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -33,9 +33,17 @@ from .workflow import (
     scrape_webtoon_episodes_paginated,
     batch_scrape_series
 )
-from .ocr import extract_script_from_panels
-from .export import create_comic_archive
-from .splitter import split_vertical_strip_into_panels
+from .adapters import (
+    BaseSiteAdapter,
+    GenericAdaptiveAdapter,
+    WebtoonsAdapter,
+    WebComicsAdapter,
+    MangaDexAdapter,
+    MadaraCmsAdapter,
+    MangaStreamAdapter,
+    BatoAdapter,
+    AdapterRegistry
+)
 
 __all__ = [
     "AdaptiveScraperEngine",
@@ -61,7 +69,13 @@ __all__ = [
     "scrape_webtoon_episodes_advanced",
     "scrape_webtoon_episodes_paginated",
     "batch_scrape_series",
-    "extract_script_from_panels",
-    "create_comic_archive",
-    "split_vertical_strip_into_panels"
+    "BaseSiteAdapter",
+    "GenericAdaptiveAdapter",
+    "WebtoonsAdapter",
+    "WebComicsAdapter",
+    "MangaDexAdapter",
+    "MadaraCmsAdapter",
+    "MangaStreamAdapter",
+    "BatoAdapter",
+    "AdapterRegistry"
 ]

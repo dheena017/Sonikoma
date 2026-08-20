@@ -21,7 +21,7 @@ def _read_fixture(name: str) -> str:
         return f.read()
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_failure_on_cover_and_ads_page_never_uses_cover_as_panels():
     html = _read_fixture("cover_and_ads_reader.html")
 
@@ -41,7 +41,7 @@ async def test_failure_on_cover_and_ads_page_never_uses_cover_as_panels():
         assert result.scrape.completeness == ScrapeCompleteness.FAILED
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_failure_on_empty_non_reader_page():
     html = _read_fixture("no_reader.html")
 

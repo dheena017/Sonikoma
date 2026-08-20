@@ -57,6 +57,22 @@ class AdaptiveScraperEngine:
                 )
             )
 
+        # Check domain approval status
+        from .ai.domain_memory import DomainMemory
+        domain_status = DomainMemory.get_domain_status(normalized_url)
+        if domain_status == "blocked":
+            return ChapterResult(
+                success=False,
+                project_id=project_id,
+                job_id=job_id,
+                source=SiteAnalyzer.analyze(url or ""),
+                error=ScrapeError(
+                    code=ScrapeErrorCode.CONTENT_NOT_ACCESSIBLE,
+                    message="This website domain has been blocked by administrator policy.",
+                    details={"domain": DomainMemory.get_domain_from_url(normalized_url)}
+                )
+            )
+
         # Build execution configuration
         config = ScrapeConfiguration(
             bypass_cache=bypass_cache,
@@ -92,12 +108,46 @@ class AdaptiveScraperEngine:
         # Execute scrape workflow
         try:
             result = await adapter.scrape(context)
+            if result.success:
+                DomainMemory.record_success(normalized_url)
+            elif adapter.__class__.__name__ == "GenericAdaptiveAdapter":
+                # Unknown / unmapped website that could not be parsed
+                domain = DomainMemory.get_domain_from_url(normalized_url)
+                if not result.error:
+                    result.error = ScrapeError(
+                        code=ScrapeErrorCode.READER_NOT_FOUND,
+                        message=f"Could not automatically extract chapter panels from unknown website '{domain}'.",
+                    )
+                if not result.error.details:
+                    result.error.details = {}
+                result.error.details.update({
+                    "domain": domain,
+                    "is_unmapped_website": True,
+                    "can_request_domain": True,
+                    "request_url": "/api/v1/scraper/admin/domains/request",
+                    "suggestion": f"Website '{domain}' is not yet officially mapped. A support request has been logged for review."
+                })
+                # Auto-enqueue to pending domain requests for admin review
+                try:
+                    DomainMemory.request_domain(
+                        url=normalized_url,
+                        requested_by="auto-user-request",
+                        notes=f"Auto-requested: Scrape attempt failed on unmapped website {domain}"
+                    )
+                except Exception:
+                    pass
             return result
         except Exception as e:
             logger.error(f"[AdaptiveScraperEngine] Unexpected scraper execution failure: {e}", exc_info=True)
+            domain = DomainMemory.get_domain_from_url(normalized_url)
             context.error = ScrapeError(
                 code=ScrapeErrorCode.INTERNAL_ERROR,
-                message=f"Internal scraper engine error: {str(e)}"
+                message=f"Internal scraper engine error: {str(e)}",
+                details={
+                    "domain": domain,
+                    "can_request_domain": True,
+                    "request_url": "/api/v1/scraper/admin/domains/request"
+                }
             )
             context.completeness = ScrapeCompleteness.FAILED
             return context.to_chapter_result()

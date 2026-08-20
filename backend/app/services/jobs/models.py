@@ -25,6 +25,7 @@ class JobType(str, Enum):
     BATCH_SCRAPE = "BATCH_SCRAPE"               # Multiple chapter URLs batch
     BATCH_SERIES = "BATCH_SERIES"               # Multiple series batch
     PROCESS_URL = "PROCESS_URL"                 # Generic URL metadata resolution
+    AI_SCRAPER_ANALYZE = "ai_scraper_analyze"   # AI Comic Blueprint structural analysis
 
     # ── Panel Processing ─────────────────────────────────────────────────────
     PANEL_SPLIT = "PANEL_SPLIT"                 # Vertical strip → discrete panels
@@ -150,17 +151,21 @@ class JobErrorInfo(BaseModel):
 
 
 class JobStatusResponse(BaseModel):
-    job_id: str
-    job_type: str
-    capability: Optional[str] = None
-    status: str
-    progress: int
-    stage: str
-    project_id: Optional[str] = None
-    chapter_id: Optional[str] = None
-    execution: Optional[JobExecutionInfo] = None
-    result: Optional[Any] = None
-    error: Optional[JobErrorInfo] = None
+    job_id: str = Field(..., description="Unique background job identifier")
+    job_type: str = Field(..., description="Job execution type: e.g. scrape_chapter, panel_split, generate_storyboard, render_video")
+    capability: Optional[str] = Field(None, description="System capability associated with this job")
+    status: str = Field(..., description="Execution status: queued, running, completed, failed, cancelled")
+    progress: int = Field(0, description="Progress percentage from 0 to 100")
+    stage: str = Field(..., description="Current execution stage label")
+    project_id: Optional[str] = Field(None, description="Associated Project ID")
+    chapter_id: Optional[str] = Field(None, description="Associated Chapter/Episode ID")
+    user_id: Optional[str] = Field(None, description="Initiating User ID")
+    created_at: Optional[str] = Field(None, description="Job creation timestamp (ISO 8601)")
+    started_at: Optional[str] = Field(None, description="Job start timestamp (ISO 8601)")
+    completed_at: Optional[str] = Field(None, description="Job completion timestamp (ISO 8601)")
+    execution: Optional[JobExecutionInfo] = Field(None, description="Hardware/AI provider execution telemetry")
+    result: Optional[Any] = Field(None, description="Result payload produced upon successful completion")
+    error: Optional[JobErrorInfo] = Field(None, description="Error details if execution failed")
 
 
 class JobListResponse(BaseModel):
@@ -229,7 +234,7 @@ class JobRecord(BaseModel):
             )
 
         job_type_str = self.type.value.lower() if isinstance(self.type, JobType) else str(self.type).lower()
-        capability_str = meta.get("capability") or job_type_str
+        capability_str = meta.get("capability") or None
 
         return JobStatusResponse(
             job_id=self.job_id,
@@ -240,6 +245,10 @@ class JobRecord(BaseModel):
             stage=self.stage.lower(),
             project_id=self.project_id,
             chapter_id=self.chapter_id,
+            user_id=self.user_id,
+            created_at=self.created_at,
+            started_at=self.started_at,
+            completed_at=self.completed_at,
             execution=execution,
             result=self.result,
             error=error_info,

@@ -22,9 +22,14 @@ from .normalizer import UrlNormalizer
 from .constants import SCRAPER_VERSION
 
 import services.image.utils.image_utils as img_utils
-from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
-from app.core.cache import stitched_cache, edit_history
-from app.core.utils.id_utils import generate_project_id
+try:
+    from core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+    from core.cache import stitched_cache, edit_history
+    from core.utils.id_utils import generate_project_id
+except ImportError:
+    from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+    from app.core.cache import stitched_cache, edit_history
+    from app.core.utils.id_utils import generate_project_id
 from services.ai.pipelines.storyboard_ai import generate_dynamic_panels
 from services.video.video import compile_video_from_panels
 from repositories.scraper import save_scrape_session, get_latest_scrape_session
@@ -383,7 +388,7 @@ async def generate_storyboard_only_service(
 
         if job_id:
             from services.jobs.manager import job_manager
-            await job_manager.complete_job(job_id, result_payload)
+            job_manager.complete_job(job_id, result_payload)
 
         return result_payload
     except Exception as e:
@@ -395,7 +400,12 @@ async def generate_storyboard_only_service(
 
         if job_id:
             from services.jobs.manager import job_manager
-            await job_manager.fail_job(job_id, error=err_dict)
+            job_manager.fail_job(
+                job_id,
+                error_message=err_dict.get("error_message") or str(e),
+                error_code=err_dict.get("error_code"),
+                details=err_dict
+            )
 
         return {
             "success": False,

@@ -16,7 +16,7 @@ export const startBackend = async (): Promise<ApiResponse<any>> => {
 };
 
 export const checkHealth = async (): Promise<ApiResponse<any>> => {
-  const res = await fetch("/api/health");
+  const res = await fetch("/api/v1/system/health");
   if (!res.ok) throw new Error("Health check failed");
   return res.json();
 };
@@ -24,27 +24,27 @@ export const checkHealth = async (): Promise<ApiResponse<any>> => {
 export const getSystemLogs = async (
   since?: string
 ): Promise<ApiResponse<any>> => {
-  const url = since ? `/api/system-logs?since=${since}` : "/api/system-logs";
+  const url = since ? `/api/v1/system/logs?since=${since}` : "/api/v1/system/logs";
   const res = await fetch(url, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error("Failed to fetch system logs");
   return res.json();
 };
 
 export const getSystemLogsStreamUrl = (): string => {
-  return "/api/system-logs/stream";
+  return "/api/v1/system/logs/stream";
 };
 
 export const getPySystemLogsStreamUrl = (): string => {
-  return "/api/py/health/system-logs/stream";
+  return "/api/v1/system/logs/stream";
 };
 
 export const getMetrics = async (
   fetchWithInterceptor?: FetchClient
 ): Promise<ApiResponse<any>> => {
   if (fetchWithInterceptor) {
-    return apiRequest(fetchWithInterceptor, "/api/metrics");
+    return apiRequest(fetchWithInterceptor, "/api/v1/system/metrics");
   }
-  const res = await fetch("/api/metrics", { headers: getAuthHeaders() });
+  const res = await fetch("/api/v1/system/metrics", { headers: getAuthHeaders() });
   if (!res.ok) throw new Error("Failed to fetch metrics");
   return res.json();
 };

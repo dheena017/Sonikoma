@@ -70,6 +70,32 @@ class SplitImagesRequest(BaseModel):
     format: Optional[str] = "jpeg"
 
 
+class StitchImagesResponse(BaseModel):
+    """Result of stitching multiple images."""
+    success: bool
+    url: str
+    supabase_url: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+
+
+class SplitSliceItem(BaseModel):
+    """Single slice segment produced by image splitting."""
+    index: int
+    url: str
+    y_start: Optional[int] = None
+    y_end: Optional[int] = None
+    height: Optional[int] = None
+
+
+class SplitImagesResponse(BaseModel):
+    """Result of splitting an image into slices."""
+    success: bool
+    slices: List[SplitSliceItem] = []
+    urls: List[str] = []
+    count: int = 0
+
+
 class BatchResizeRequest(BaseModel):
     """Resizes multiple images at once."""
     image_paths: List[str]

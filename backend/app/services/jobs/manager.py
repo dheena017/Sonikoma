@@ -11,7 +11,7 @@ import json
 import asyncio
 import logging
 import datetime
-from typing import Dict, Any, Optional, Callable, Coroutine, List
+from typing import Dict, Any, Optional, Callable, Coroutine, List, Union
 
 from database.engine import get_db_connection
 from .models import JobRecord, JobStatus, JobType, JobStage
@@ -91,8 +91,62 @@ class UnifiedJobManager:
                 conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_project_id ON jobs(project_id)")
                 conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
                 conn.commit()
+            self._cleanup_zombie_jobs()
         except Exception as e:
             logger.warning(f"[JobManager] Failed to verify jobs table: {e}")
+
+    def _cleanup_zombie_jobs(self):
+        """Marks any running/queued jobs from previous server lifetimes as CANCELLED/FAILED."""
+        try:
+            with get_db_connection() as conn:
+                now = datetime.datetime.now().isoformat()
+                import json
+                err_payload = json.dumps({
+                    "code": "SERVER_RESTARTED",
+                    "message": "Job was interrupted by backend server restart"
+                })
+                res = conn.execute(
+                    """
+                    UPDATE jobs
+                    SET status = 'CANCELLED',
+                        stage = 'cancelled',
+                        cancelled_at = ?,
+                        error = ?
+                    WHERE status IN ('RUNNING', 'QUEUED')
+                    """,
+                    (now, err_payload)
+                )
+                conn.commit()
+                if res.rowcount > 0:
+                    logger.info(f"[JobManager] Cleaned up {res.rowcount} orphaned zombie jobs from previous server sessions.")
+        except Exception as e:
+            logger.warning(f"[JobManager] Zombie job cleanup notice: {e}")
+
+    def cancel_all_active_admin(self) -> int:
+        """Cancels all active (RUNNING or QUEUED) jobs across the system."""
+        for job_id, task in list(self._tasks.items()):
+            if not task.done():
+                task.cancel()
+        with get_db_connection() as conn:
+            now = datetime.datetime.now().isoformat()
+            import json
+            err_payload = json.dumps({
+                "code": "ADMIN_CANCELLED_ALL",
+                "message": "Job was batch cancelled by system administrator"
+            })
+            res = conn.execute(
+                """
+                UPDATE jobs
+                SET status = 'CANCELLED',
+                    stage = 'cancelled',
+                    cancelled_at = ?,
+                    error = ?
+                WHERE status IN ('RUNNING', 'QUEUED')
+                """,
+                (now, err_payload)
+            )
+            conn.commit()
+            return res.rowcount
 
     def create_job(
         self,
@@ -229,7 +283,7 @@ class UnifiedJobManager:
 
         # Protect terminal states
         if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
-            logger.warning(f"[JobManager] Cannot update progress for terminal job {job_id} ({job.status})")
+            logger.debug(f"[JobManager] Ignoring progress update for terminal job {job_id} ({job.status})")
             return job
 
         new_progress = max(0.0, min(100.0, progress))
@@ -256,7 +310,7 @@ class UnifiedJobManager:
             )
             conn.commit()
             if cursor.rowcount == 0:
-                logger.warning(f"[JobManager] update_progress failed for job {job_id}. Possible race condition or already terminal.")
+                logger.debug(f"[JobManager] update_progress skipped for job {job_id} (already terminal)")
                 return self.get_job(job_id)
 
         logger.debug(f"[JobManager] Job {job_id} progress: {new_progress:.1f}% | stage={new_stage}")
@@ -269,24 +323,31 @@ class UnifiedJobManager:
             return None
 
         if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
-            logger.warning(f"[JobManager] Cannot complete terminal job {job_id} ({job.status})")
+            logger.debug(f"[JobManager] Ignoring complete call for terminal job {job_id} ({job.status})")
             return job
 
         now = datetime.datetime.now().isoformat()
         result_json = json.dumps(result) if result is not None else None
 
+        # Auto-resolve chapter_id from result if not already assigned
+        resolved_chapter_id = job.chapter_id
+        if not resolved_chapter_id and isinstance(result, dict):
+            ch_data = result.get("chapter")
+            if isinstance(ch_data, dict):
+                resolved_chapter_id = ch_data.get("episode") or (f"Episode {ch_data['number']}" if ch_data.get("number") is not None else None) or ch_data.get("title")
+
         with get_db_connection() as conn:
             cursor = conn.execute(
                 """
                 UPDATE jobs
-                SET status = ?, progress = ?, stage = ?, completed_at = ?, result = ?
+                SET status = ?, progress = ?, stage = ?, completed_at = ?, result = ?, chapter_id = COALESCE(chapter_id, ?)
                 WHERE id = ? AND status NOT IN ('COMPLETED', 'FAILED', 'CANCELLED')
                 """,
-                (JobStatus.COMPLETED.value, 100.0, JobStage.COMPLETED.value, now, result_json, job_id)
+                (JobStatus.COMPLETED.value, 100.0, JobStage.COMPLETED.value, now, result_json, resolved_chapter_id, job_id)
             )
             conn.commit()
             if cursor.rowcount == 0:
-                logger.warning(f"[JobManager] complete_job failed for job {job_id}. Possible race condition.")
+                logger.debug(f"[JobManager] complete_job skipped for job {job_id} (already terminal)")
                 return self.get_job(job_id)
 
         logger.info(f"[JobManager] Job {job_id} COMPLETED successfully")
@@ -295,9 +356,10 @@ class UnifiedJobManager:
     def fail_job(
         self,
         job_id: str,
-        error_message: str,
+        error_message: Optional[str] = None,
         error_code: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
+        error: Optional[Union[str, Dict[str, Any]]] = None
     ) -> Optional[JobRecord]:
         """Marks a job as FAILED with error payload."""
         job = self.get_job(job_id)
@@ -305,8 +367,19 @@ class UnifiedJobManager:
             return None
 
         if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
-            logger.warning(f"[JobManager] Cannot fail terminal job {job_id} ({job.status})")
+            logger.debug(f"[JobManager] Ignoring fail call for terminal job {job_id} ({job.status})")
             return job
+
+        # Fallback / compatibility handling if error keyword or dict was passed
+        if error_message is None and error is not None:
+            if isinstance(error, dict):
+                error_message = error.get("error_message") or error.get("message") or str(error)
+                error_code = error_code or error.get("error_code") or error.get("code")
+                details = details or error
+            else:
+                error_message = str(error)
+
+        error_message = error_message or "Unknown error occurred"
 
         now = datetime.datetime.now().isoformat()
         error_payload = {

@@ -20,7 +20,7 @@ router = APIRouter()
 
 
 @router.post("/token", summary="Obtain OAuth2/JWT access token")
-async def login_for_access_token(
+async def login_for_access_token_endpoint(
     request: Request,
 ):
     ip_addr = request.client.host if request and request.client else "127.0.0.1"
@@ -83,7 +83,7 @@ async def login_for_access_token(
 
 
 @router.get("/token", summary="Verify active authentication token")
-async def verify_token(request: Request):
+async def verify_token_endpoint(request: Request):
     auth_header = request.headers.get("authorization", "")
     token = None
     if auth_header.startswith("Bearer "):
@@ -127,8 +127,8 @@ async def verify_token(request: Request):
         )
 
 
-@router.post("/login")
-async def login(user_data: UserLogin, request: Request):
+@router.post("/login", summary="Authenticate user email and password")
+async def login_endpoint(user_data: UserLogin, request: Request):
     ip_addr = request.client.host if request.client else "127.0.0.1"
 
     user = get_user_by_email(user_data.email)

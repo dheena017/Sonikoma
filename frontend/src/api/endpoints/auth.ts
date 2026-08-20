@@ -20,7 +20,7 @@ export const login = async (
   fetchWithInterceptor: FetchClient,
   credentials: LoginCredentials
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/login", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
@@ -31,7 +31,7 @@ export const register = async (
   fetchWithInterceptor: FetchClient,
   userData: RegisterUserData
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/register", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(userData),
@@ -41,14 +41,14 @@ export const register = async (
 export const getCurrentUser = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/me");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/me");
 };
 
 export const forgotPassword = async (
   fetchWithInterceptor: FetchClient,
   email: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/forgot-password", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/forgot-password", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
@@ -59,7 +59,7 @@ export const googleLogin = async (
   fetchWithInterceptor: FetchClient,
   token: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/google", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/google", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token }),
@@ -70,7 +70,7 @@ export const updateProfile = async (
   fetchWithInterceptor: FetchClient,
   data: UpdateProfilePayload
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/profile", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/profile", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -83,7 +83,7 @@ export const updatePassword = async (
   fetchWithInterceptor: FetchClient,
   data: UpdatePasswordPayload
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/password", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/password", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -95,14 +95,14 @@ export const updatePassword = async (
 export const getSessions = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/sessions");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/sessions");
 };
 
 export const terminateSession = async (
   fetchWithInterceptor: FetchClient,
   sessionId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/auth/sessions/${sessionId}`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/auth/sessions/${sessionId}`, {
     method: "DELETE",
   });
 };
@@ -110,7 +110,7 @@ export const terminateSession = async (
 export const claimCredits = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/claim-credits", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/claim-daily-credits", {
     method: "POST",
   });
 };
@@ -118,7 +118,7 @@ export const claimCredits = async (
 export const upgradePlan = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/upgrade-plan", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/upgrade-plan", {
     method: "POST",
   });
 };
@@ -127,7 +127,7 @@ export const saveCard = async (
   fetchWithInterceptor: FetchClient,
   card: CardData
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/save-card", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/save-card", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -140,7 +140,7 @@ export const purchaseCredits = async (
   fetchWithInterceptor: FetchClient,
   data: PurchaseCreditsPayload
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/purchase-credits", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/purchase-credits", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -152,14 +152,14 @@ export const purchaseCredits = async (
 export const getApiKeys = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/api-keys");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/api-keys");
 };
 
 export const createApiKey = async (
   fetchWithInterceptor: FetchClient,
   data: CreateApiKeyPayload
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/api-keys", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/api-keys", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -172,7 +172,7 @@ export const deleteApiKey = async (
   fetchWithInterceptor: FetchClient,
   keyId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/auth/api-keys/${keyId}`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/auth/api-keys/${keyId}`, {
     method: "DELETE",
   });
 };
@@ -180,14 +180,14 @@ export const deleteApiKey = async (
 export const getInvoices = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/invoices");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/invoices");
 };
 
 export const updateMfa = async (
   fetchWithInterceptor: FetchClient,
   enabled: boolean
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/mfa", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/mfa", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -200,7 +200,7 @@ export const redeemReward = async (
   fetchWithInterceptor: FetchClient,
   data: RedeemRewardPayload
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/redeem-points", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/redeem-points", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -217,7 +217,7 @@ export const getAuditLogs = async (
 ): Promise<ApiResponse<any>> => {
   return apiRequest(
     fetchWithInterceptor,
-    `/api/auth/audit-logs?query=${encodeURIComponent(
+    `/api/v1/auth/audit-logs?query=${encodeURIComponent(
       query
     )}&page=${page}&limit=${limit}`
   );
@@ -226,7 +226,7 @@ export const getAuditLogs = async (
 export const deleteAccount = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/me", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/me", {
     method: "DELETE",
   });
 };
@@ -237,7 +237,7 @@ export const getUserCredits = async (
   try {
     const data = await apiRequest<any>(
       fetchWithInterceptor,
-      "/api/auth/credits"
+      "/api/v1/auth/credits"
     );
     if (data.success && typeof data.credits === "number") {
       return data.credits;
@@ -255,7 +255,7 @@ export const getUserCreditsPayload = async (
   try {
     const data = await apiRequest<any>(
       fetchWithInterceptor,
-      "/api/auth/credits"
+      "/api/v1/auth/credits"
     );
     if (data.success && typeof data.credits === "number") {
       return {
@@ -277,7 +277,7 @@ export const getTransactions = async (
   try {
     const data = await apiRequest<any>(
       fetchWithInterceptor,
-      `/api/auth/transactions?limit=${limit}`
+      `/api/v1/auth/transactions?limit=${limit}`
     );
     if (data.success && Array.isArray(data.transactions)) {
       return data.transactions;
@@ -291,7 +291,7 @@ export const getTransactions = async (
 export const claimDailyCredits = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/claim-daily-credits", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/claim-daily-credits", {
     method: "POST",
   });
 };

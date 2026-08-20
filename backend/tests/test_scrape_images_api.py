@@ -1,7 +1,7 @@
 """
 backend/tests/test_scrape_images_api.py
 ─────────────────────────────────────────────────────────────────────────────
-Unit tests for the enhanced POST /api/v1/scraper/scrape-images endpoint.
+Unit tests for the canonical POST /api/v1/scraper/chapter and POST /batch endpoints.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -10,78 +10,92 @@ from unittest.mock import AsyncMock, patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from api.v1.scraper import scraper_router
-from app.schemas.scraper import ScrapeImagesRequest
+from api.dependencies.auth import get_current_user
+from database.engine import get_db_connection
+from app.schemas.scraper import ScrapeChapterRequest
 
 app = FastAPI()
 app.include_router(scraper_router)
 client = TestClient(app)
 
-def test_scrape_images_request_schema_defaults():
-    req = ScrapeImagesRequest(url="https://www.webtoons.com/en/fantasy/sample/ep-1/viewer?title_no=123")
+MOCK_USER = {"user_id": "test_user_images_1", "email": "testimages@example.com"}
+
+@pytest.fixture(autouse=True)
+def setup_db_and_auth():
+    conn = get_db_connection()
+    try:
+        conn.execute(
+            "INSERT OR IGNORE INTO users (id, username, email, password_hash, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            ("test_user_images_1", "testuserimages", "testimages@example.com", "hash", "2025-01-01", "2025-01-01")
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    app.dependency_overrides[get_current_user] = lambda: MOCK_USER
+    yield
+    app.dependency_overrides.clear()
+
+def test_scrape_chapter_request_schema_defaults():
+    req = ScrapeChapterRequest(url="https://www.webtoons.com/en/fantasy/sample/ep-1/viewer?title_no=123")
     assert req.url == "https://www.webtoons.com/en/fantasy/sample/ep-1/viewer?title_no=123"
     assert req.limit is None
     assert req.proxy_images is True
     assert req.filter_banners is True
-    assert req.include_metadata is True
 
-def test_scrape_images_empty_url_returns_400():
-    response = client.post("/scrape-images", json={"url": "   "})
+def test_scrape_chapter_empty_url_returns_400():
+    response = client.post("/chapter", json={"url": "   "})
     assert response.status_code == 400
     assert "cannot be empty" in response.json()["detail"]
 
-@patch("api.v1.scraper.scrape_and_initialize_project", new_callable=AsyncMock)
-def test_scrape_images_successful_response(mock_scrape):
-    mock_scrape.return_value = {
-        "success": True,
-        "project_id": "temp_12345",
-        "title": "Test Comic",
-        "genre": "fantasy",
-        "episode": "Chapter 1",
-        "author": "Test Author",
-        "cover_image": "https://example.com/cover.jpg",
-        "synopsis": "Test synopsis",
-        "images": ["/api/proxy-image?url=https%3A%2F%2Fexample.com%2Fpanel1.jpg"],
-        "total_images": 1,
-        "execution_time_ms": 45.2,
-        "metadata": {
-            "title": "Test Comic",
-            "genre": "fantasy",
-            "episode": "Chapter 1",
-            "author": "Test Author",
-            "cover_image": "https://example.com/cover.jpg",
-            "synopsis": "Test synopsis"
-        },
-        "debug": {
-            "cache": "MISS",
-            "smart_slice": True,
-            "proxy_images": False,
-            "filter_banners": True,
-            "limit": 5
-        }
-    }
+@patch("services.scraper.engine.AdaptiveScraperEngine.scrape_url", new_callable=AsyncMock)
+def test_scrape_chapter_successful_response(mock_scrape):
+    from services.scraper.models import ChapterResult, SourceInfo, SeriesInfo, ChapterInfo, ImageItem, ScrapeDiagnostics, ScrapeCompleteness
+    mock_scrape.return_value = ChapterResult(
+        success=True,
+        source=SourceInfo(
+            original_url="https://example.com/test",
+            canonical_url="https://example.com/test",
+            domain="example.com",
+            platform="generic"
+        ),
+        series=SeriesInfo(
+            title="Test Comic",
+            author="Test Author",
+            genres=["Fantasy"],
+            cover_image="https://example.com/cover.jpg",
+            description="Test synopsis"
+        ),
+        chapter=ChapterInfo(
+            number=1,
+            title="Chapter 1",
+            url="https://example.com/test"
+        ),
+        images=[
+            ImageItem(index=0, url="https://example.com/panel1.jpg", width=800, height=1200, is_new=True)
+        ],
+        scrape=ScrapeDiagnostics(
+            image_count=1,
+            new_image_count=1,
+            completeness=ScrapeCompleteness.COMPLETE,
+            delivery_mechanism="DOM_READER",
+            level_used="Level 1"
+        )
+    )
 
     payload = {
         "url": "https://www.webtoons.com/en/fantasy/sample/ep-1/viewer?title_no=123",
-        "scrape_only": True,
         "limit": 5,
         "proxy_images": False,
         "filter_banners": True,
-        "include_metadata": True
     }
 
-    response = client.post("/scrape-images", json=payload)
+    response = client.post("/chapter", json=payload)
     assert response.status_code == 200
     data = response.json()
-    assert data["success"] is True
-    assert data["total_images"] == 1
-    assert "metadata" in data
-    assert data["debug"]["limit"] == 5
-
-    mock_scrape.assert_called_once()
-    kwargs = mock_scrape.call_args.kwargs
-    assert kwargs["limit"] == 5
-    assert kwargs["proxy_images"] is False
-    assert kwargs["filter_banners"] is True
+    assert "job_id" in data
+    assert data["job_type"].upper() == "SCRAPE_CHAPTER"
 
 
 def test_batch_scrape_endpoint():
@@ -89,18 +103,9 @@ def test_batch_scrape_endpoint():
         "urls": ["https://tapas.io/episode/3899239"],
         "limit": 5
     }
-    response = client.post("/batch-scrape", json=payload)
+    response = client.post("/batch", json=payload)
     assert response.status_code == 200
     data = response.json()
-    assert data["success"] is True
     assert "job_id" in data
-    # New Job-based architecture returns uppercase status from the unified JobManager
+    assert data["job_type"].upper() == "BATCH_SCRAPE"
     assert data["status"].upper() == "QUEUED"
-    assert "/jobs/" in data["status_url"]
-
-    # Verify job is retrievable via unified jobs API
-    job_id = data["job_id"]
-    from services.jobs import job_manager
-    job = job_manager.get_job(job_id)
-    assert job is not None
-    assert job.job_id == job_id

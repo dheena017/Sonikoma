@@ -17,6 +17,7 @@ class ScrapeChapterRequest(BaseModel):
     """Canonical request for scraping a single chapter URL via AdaptiveScraperEngine."""
     url: str
     project_id: Optional[str] = None
+    chapter_id: Optional[str] = None
     force_refresh: Optional[bool] = False
     bypass_cache: Optional[bool] = False
     limit: Optional[int] = None
@@ -102,6 +103,9 @@ class BatchScrapeRequest(BaseModel):
     proxy_images: Optional[bool] = True
     filter_banners: Optional[bool] = True
     include_metadata: Optional[bool] = True
+    cookies: Optional[str] = None
+    headers: Optional[Dict[str, str]] = None
+    bypass_cache: Optional[bool] = False
 
 
 # =============================================================================
@@ -164,3 +168,63 @@ class ExportArchiveRequest(BaseModel):
     project_id: Optional[str] = None
     format: Optional[str] = "cbz"
     limit: Optional[int] = None
+
+
+# =============================================================================
+# 4. AI Scraper Intelligence & Blueprint Schemas
+# =============================================================================
+
+class ScraperAIAnalyzeRequest(BaseModel):
+    """Request to directly test or invoke the AI Scraper Orchestrator on a comic URL or raw HTML."""
+    url: str
+    html: Optional[str] = None
+    bypass_cache: Optional[bool] = False
+    cookies: Optional[str] = None
+    headers: Optional[Dict[str, str]] = None
+
+
+class ScraperAIAnalyzeResponse(BaseModel):
+    """Direct response containing AI-extracted UniversalComicBlueprint and performance telemetry."""
+    success: bool
+    job_id: Optional[str] = None
+    url: str
+    is_cached: bool
+    latency_ms: float
+    total_images: int = 0
+    blueprint: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+
+class DomainRecord(BaseModel):
+    """Configuration and approval record for a comic scraping domain."""
+    domain: str
+    status: str = "approved"  # "approved", "pending", "blocked"
+    blueprint: Optional[Dict[str, Any]] = None
+    success_count: int = 0
+    failure_count: int = 0
+    requested_by: Optional[str] = None
+    sample_url: Optional[str] = None
+    notes: Optional[str] = None
+    last_success_at: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+
+class DomainListResponse(BaseModel):
+    """Paginated or filtered list of domain approval records."""
+    domains: List[DomainRecord]
+    total: int
+
+
+class DomainUpdateRequest(BaseModel):
+    """Admin payload to update domain blueprint, status, or notes."""
+    status: Optional[str] = None  # "approved", "pending", "blocked"
+    blueprint: Optional[Dict[str, Any]] = None
+    notes: Optional[str] = None
+    sample_url: Optional[str] = None
+
+
+class DomainRequestSubmission(BaseModel):
+    """User submission to request onboarding of an unapproved comic website."""
+    url: str
+    notes: Optional[str] = None

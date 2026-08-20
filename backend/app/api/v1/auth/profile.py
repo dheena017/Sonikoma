@@ -12,7 +12,12 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, Query, Path
 
 from api.dependencies.auth import get_current_user
-from schemas.auth import ProfileUpdate
+from schemas.auth import (
+    ProfileUpdate,
+    UserProfileResponse,
+    StandardMessageResponse,
+    ClaimDailyCreditsResponse
+)
 from repositories.user import (
     update_user,
     get_user_sessions,
@@ -29,8 +34,8 @@ logger = logging.getLogger("sonikoma.auth.profile")
 router = APIRouter()
 
 
-@router.get("/me")
-async def get_me(current_user: dict = Depends(get_current_user)):
+@router.get("/me", response_model=UserProfileResponse, operation_id="get_my_profile", summary="Get authenticated user profile details")
+async def get_current_user_profile_endpoint(current_user: dict = Depends(get_current_user)):
     seed_default_invoices_if_empty(current_user["user_id"])
 
     try:
@@ -95,8 +100,8 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     }
 
 
-@router.put("/profile")
-async def update_profile(body: ProfileUpdate, request: Request, current_user: dict = Depends(get_current_user)):
+@router.put("/profile", summary="Update user profile metadata")
+async def update_user_profile_endpoint(body: ProfileUpdate, request: Request, current_user: dict = Depends(get_current_user)):
     updates = {}
     if body.full_name is not None:
         updates["full_name"] = body.full_name
@@ -132,8 +137,8 @@ async def update_profile(body: ProfileUpdate, request: Request, current_user: di
     return {"success": True, "message": "Profile updated successfully."}
 
 
-@router.post("/claim-daily-credits")
-async def claim_daily_credits(request: Request, current_user: dict = Depends(get_current_user)):
+@router.post("/claim-daily-credits", response_model=ClaimDailyCreditsResponse, operation_id="claim_daily_credits", summary="Claim daily login streak bonus credits")
+async def claim_daily_credits_endpoint(request: Request, current_user: dict = Depends(get_current_user)):
     from services.user.credit_service import record_credit_transaction
     today_str = datetime.datetime.now().strftime("%Y-%m-%d")
     user_id = current_user["user_id"]
@@ -171,9 +176,8 @@ async def claim_daily_credits(request: Request, current_user: dict = Depends(get
     }
 
 
-
-@router.delete("/me")
-async def delete_my_account(request: Request, current_user: dict = Depends(get_current_user)):
+@router.delete("/me", response_model=StandardMessageResponse, operation_id="delete_my_account", summary="Permanently delete current user account")
+async def delete_user_account_endpoint(request: Request, current_user: dict = Depends(get_current_user)):
     ip_addr = request.client.host if request.client else '127.0.0.1'
     user_id = current_user['user_id']
     try:
@@ -187,7 +191,7 @@ async def delete_my_account(request: Request, current_user: dict = Depends(get_c
 
 
 @router.get("/sessions", summary="Get active device sessions for current user")
-async def get_sessions(
+async def get_user_sessions_endpoint(
     limit: int = Query(20, ge=1, le=100, description="Max sessions to return"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     current_user: dict = Depends(get_current_user)
@@ -199,7 +203,7 @@ async def get_sessions(
 
 
 @router.delete("/sessions/{session_id}", summary="Terminate a specific device session")
-async def delete_session(
+async def delete_user_session_endpoint(
     session_id: str = Path(..., description="Unique device session ID to terminate"),
     request: Request = None,
     current_user: dict = Depends(get_current_user)
@@ -211,7 +215,7 @@ async def delete_session(
 
 
 @router.get("/audit-logs", summary="Get personal security audit logs with pagination")
-async def get_user_logs(
+async def get_user_audit_logs_endpoint(
     query: Optional[str] = Query("", description="Search term for action log entries"),
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(10, ge=1, le=100, description="Page size limit"),
@@ -229,7 +233,7 @@ async def get_user_logs(
 
 
 @router.get("/invoices", summary="Get billing invoices and receipt history")
-async def get_invoices(
+async def get_user_invoices_endpoint(
     limit: int = Query(20, ge=1, le=100, description="Max invoices to return"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     current_user: dict = Depends(get_current_user)

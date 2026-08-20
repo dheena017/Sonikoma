@@ -28,6 +28,10 @@ export interface JobStatusResponse<T = any> {
   stage: string;
   project_id?: string | null;
   chapter_id?: string | null;
+  user_id?: string | null;
+  created_at?: string | null;
+  started_at?: string | null;
+  completed_at?: string | null;
   execution?: JobExecutionInfo | null;
   result?: T | null;
   error?: JobErrorInfo | null;

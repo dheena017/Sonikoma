@@ -82,19 +82,15 @@ class EmbeddedStateExtractor:
             for img in img_matches:
                 _add(img, ImageSourceType.EMBEDDED_STATE)
 
-        # 4. JSON-LD schema objects
-        json_ld_matches = re.findall(r'<script\s+type="application/ld\+json"[^>]*>(.*?)</script>', html, re.DOTALL)
-        for ld_text in json_ld_matches:
+        # 5. Generic <script type="application/json"> payloads
+        app_json_matches = re.findall(r'<script\s+type="application/json"[^>]*>(.*?)</script>', html, re.DOTALL)
+        for aj_text in app_json_matches:
             try:
-                ld_data = json.loads(ld_text)
-                if isinstance(ld_data, dict):
-                    img = ld_data.get("image")
-                    if isinstance(img, str):
-                        _add(img, ImageSourceType.EMBEDDED_STATE)
-                    elif isinstance(img, list):
-                        for item in img:
-                            if isinstance(item, str):
-                                _add(item, ImageSourceType.EMBEDDED_STATE)
+                aj_data = json.loads(aj_text)
+                aj_str = json.dumps(aj_data)
+                img_matches = re.findall(r'https?://[^\s"\']+\.(?:png|jpg|jpeg|webp|avif)(?:\?[^\s"\']*)?', aj_str, re.IGNORECASE)
+                for img in img_matches:
+                    _add(img, ImageSourceType.EMBEDDED_STATE)
             except Exception:
                 pass
 

@@ -152,6 +152,16 @@ export function useAppState() {
   const [scrapedImages, setScrapedImages] = useState<string[]>(() => {
     try {
       if (typeof window !== "undefined") {
+        const raw =
+          localStorage.getItem("sonikoma-active-project-store") ||
+          sessionStorage.getItem("sonikoma-active-project-store");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const imgs = parsed?.state?.activeProjectData?.scrapedImages;
+          if (Array.isArray(imgs) && imgs.length > 0) {
+            return imgs;
+          }
+        }
         const params = new URLSearchParams(window.location.search);
         if (params.get("idx") !== null) {
           return [
@@ -984,9 +994,9 @@ export function useAppState() {
       }
 
       if (lookupId.startsWith("temp_")) {
-        const rawPersisted = sessionStorage.getItem(
-          "sonikoma-active-project-store"
-        );
+        const rawPersisted =
+          localStorage.getItem("sonikoma-active-project-store") ||
+          sessionStorage.getItem("sonikoma-active-project-store");
         if (rawPersisted) {
           try {
             const persisted = JSON.parse(rawPersisted);
@@ -1020,16 +1030,19 @@ export function useAppState() {
         }
 
         // A temp_ route is a direct URL-backed draft. During a refresh, the app may
-        // reach this branch before the persisted store has hydrated, and the old logic
-        // would overwrite the live workspace with an empty draft object. That causes the
-        // editor context to vanish. Preserve the existing store value and keep the URL
-        // ID alive until a real scrape/import payload can populate it.
+        // reach this branch before the persisted store has hydrated.
+        // Preserve existing store value and restore images.
         const alreadyHasActiveProject = Boolean(
           useProjectStore.getState().activeProjectData?.project?.project_id
         );
         if (alreadyHasActiveProject) {
           const activeProject = useProjectStore.getState().activeProjectData;
           if (activeProject?.project?.project_id === lookupId) {
+            if (Array.isArray(activeProject.scrapedImages) && activeProject.scrapedImages.length > 0) {
+              setScrapedImages((prev) =>
+                prev.length === 0 ? activeProject.scrapedImages! : prev
+              );
+            }
             localStorage.setItem("active_project_id", lookupId);
             if (urlJobId) {
               localStorage.setItem("active_job_id", urlJobId);

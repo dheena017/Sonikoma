@@ -63,6 +63,51 @@ class MfaUpdate(BaseModel):
     mfa_enabled: bool
 
 
+class UserProfileResponse(BaseModel):
+    """Detailed authenticated user profile response."""
+    user_id: str
+    email: str
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+    creator_role: Optional[str] = "creator"
+    bio: Optional[str] = ""
+    newsletter: Optional[bool] = False
+    language: Optional[str] = "en"
+    portfolio_links: Optional[List[str]] = []
+    credits: Optional[int] = 0
+    unlocked_rewards: Optional[List[str]] = []
+    mfa_enabled: Optional[bool] = False
+    social_connections: Optional[Dict[str, bool]] = None
+    has_claimed_today: Optional[bool] = False
+    streak_days: Optional[int] = 1
+    subscription_tier: Optional[str] = "free"
+    preferences: Optional[Dict[str, Any]] = None
+    unlocked_achievements: Optional[List[str]] = []
+    achievement_points: Optional[int] = 0
+
+
+class StandardMessageResponse(BaseModel):
+    """Standard success/message response."""
+    success: bool
+    message: str
+
+
+class ClaimDailyCreditsResponse(BaseModel):
+    """Daily bonus claim transaction response."""
+    success: bool
+    message: str
+    new_balance: Optional[int] = None
+    streak_days: Optional[int] = 1
+
+
+class CreditsBalanceResponse(BaseModel):
+    """User credit balance response schema."""
+    success: bool
+    credits: int
+    low_balance: bool = False
+    threshold: int = 20
+
+
 # =============================================================================
 # 2. Billing, Credits & API Keys
 # =============================================================================

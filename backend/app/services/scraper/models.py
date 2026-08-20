@@ -106,6 +106,7 @@ class ImageItem(BaseModel):
     """Individual chapter image item with validation and ordering info."""
     index: int
     url: str
+    proxy_url: Optional[str] = None
     source: str = "dom"
     width: Optional[int] = None
     height: Optional[int] = None
@@ -147,6 +148,7 @@ class ChapterResult(BaseModel):
     success: bool = True
     project_id: Optional[str] = None
     job_id: Optional[str] = None
+    total_images: int = 0
     source: SourceInfo
     series: SeriesInfo = Field(default_factory=SeriesInfo)
     chapter: ChapterInfo = Field(default_factory=ChapterInfo)

@@ -22,8 +22,8 @@ logger = logging.getLogger("sonikoma.api.video.render")
 router = APIRouter()
 
 
-@router.post("/render")
-async def render_video(
+@router.post("/render", summary="Render comic panels into an MP4 motion comic video")
+async def render_video_endpoint(
     request: RenderRequest,
     background_tasks: BackgroundTasks,
     current_user: dict = Depends(get_current_user)
@@ -37,6 +37,8 @@ async def render_video(
             raise HTTPException(status_code=404, detail=f"Project '{request.project_id}' not found.")
         if project.get("user_id") and project.get("user_id") != current_user.get("user_id"):
             raise HTTPException(status_code=403, detail=f"Access denied for project '{request.project_id}'.")
+        if project.get("job_id") and request.job_id and project.get("job_id") != request.job_id:
+            raise HTTPException(status_code=400, detail=f"Job ID mismatch for project '{request.project_id}'.")
 
     COST = 20
     if get_available_credits(current_user["user_id"]) < COST:
@@ -85,7 +87,9 @@ async def render_video(
     return {
         "success": True,
         "job_id": job.job_id,
+        "execution_id": job.job_id,
         "project_id": request.project_id,
+        "workspace_job_id": request.job_id,
         "low_balance": new_balance < LOW_BALANCE_THRESHOLD,
     }
 

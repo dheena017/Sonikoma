@@ -113,8 +113,6 @@ SUPPORTED_PROVIDERS = [
         "id": "gemini",
         "name": "Google Gemini",
         "category": "Multimodal & Vision",
-        "models": ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"],
-        "default_model": "gemini-2.5-flash",
         "badge": "Primary LLM",
         "docs_url": "https://aistudio.google.com/",
     },
@@ -122,8 +120,6 @@ SUPPORTED_PROVIDERS = [
         "id": "openai",
         "name": "OpenAI",
         "category": "General Intelligence & GPT",
-        "models": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "dall-e-3", "whisper-1", "tts-1"],
-        "default_model": "gpt-4o-mini",
         "badge": "GPT & DALL-E",
         "docs_url": "https://platform.openai.com/api-keys",
     },
@@ -131,8 +127,6 @@ SUPPORTED_PROVIDERS = [
         "id": "anthropic",
         "name": "Anthropic Claude",
         "category": "Reasoning & Writing",
-        "models": ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022", "claude-3-opus-20240229"],
-        "default_model": "claude-3-5-sonnet-20241022",
         "badge": "High Accuracy",
         "docs_url": "https://console.anthropic.com/",
     },
@@ -140,8 +134,6 @@ SUPPORTED_PROVIDERS = [
         "id": "elevenlabs",
         "name": "ElevenLabs Voice AI",
         "category": "Voice & Speech Synthesis",
-        "models": ["eleven_multilingual_v2", "eleven_turbo_v2_5", "eleven_monolingual_v1"],
-        "default_model": "eleven_multilingual_v2",
         "badge": "Studio Voice",
         "docs_url": "https://elevenlabs.io/",
     },
@@ -149,8 +141,6 @@ SUPPORTED_PROVIDERS = [
         "id": "huggingface",
         "name": "Hugging Face Hub",
         "category": "Open Source & Diffusers",
-        "models": ["FLUX.1-schnell", "stable-diffusion-xl-base-1.0", "meta-llama/Llama-3.3-70B-Instruct"],
-        "default_model": "FLUX.1-schnell",
         "badge": "Open Weights",
         "docs_url": "https://huggingface.co/settings/tokens",
     },
@@ -158,8 +148,6 @@ SUPPORTED_PROVIDERS = [
         "id": "groq",
         "name": "Groq LPU",
         "category": "Ultra Fast Inference",
-        "models": ["llama-3.3-70b-versatile", "deepseek-r1-distill-llama-70b", "mixtral-8x7b-32768"],
-        "default_model": "llama-3.3-70b-versatile",
         "badge": "500+ Tok/s",
         "docs_url": "https://console.groq.com/keys",
     },
@@ -167,8 +155,6 @@ SUPPORTED_PROVIDERS = [
         "id": "deepseek",
         "name": "DeepSeek AI",
         "category": "Deep Reasoning & Coding",
-        "models": ["deepseek-chat", "deepseek-reasoner"],
-        "default_model": "deepseek-chat",
         "badge": "Reasoning Engine",
         "docs_url": "https://platform.deepseek.com/",
     },
@@ -176,8 +162,6 @@ SUPPORTED_PROVIDERS = [
         "id": "deepl",
         "name": "DeepL Pro",
         "category": "Manga & Webtoon Translation",
-        "models": ["DeepL-API-v2"],
-        "default_model": "DeepL-API-v2",
         "badge": "Neural Translation",
         "docs_url": "https://www.deepl.com/pro-api",
     },
@@ -185,8 +169,6 @@ SUPPORTED_PROVIDERS = [
         "id": "stable_diffusion",
         "name": "Local Stable Diffusion",
         "category": "Local Image & Inpainting",
-        "models": ["sdxl-base", "sd15-anime-finetune", "comfyui-pipe"],
-        "default_model": "sdxl-base",
         "badge": "Local GPU",
         "docs_url": "http://127.0.0.1:7860",
     },
@@ -995,173 +977,6 @@ async def export_ai_analytics_ledger(
             "format": "json",
             "records": data,
             "records_count": len(data),
-        }
-    finally:
-        conn.close()
-
-
-@router.get("/tokens/models-breakdown", summary="Get comprehensive token consumption broken down by AI model and provider API key")
-async def get_tokens_models_breakdown(current_user: Optional[dict] = Depends(get_optional_current_user)):
-    """
-    Returns granular per-model and per-provider token telemetry, comparing consumed tokens vs provider rate limits (TPM / RPM).
-    """
-    conn = get_db_connection()
-    try:
-        # Group tokens by provider and model from database
-        rows = conn.execute("""
-            SELECT 
-                provider, 
-                model, 
-                COUNT(id) as call_count,
-                SUM(prompt_tokens) as total_prompt,
-                SUM(completion_tokens) as total_completion,
-                SUM(total_tokens) as total_tokens,
-                AVG(latency_ms) as avg_latency,
-                SUM(cost_estimate_usd) as total_cost
-            FROM ai_token_usage_ledger
-            GROUP BY provider, model
-        """).fetchall()
-
-        db_model_map = {}
-        for r in rows:
-            db_model_map[r["model"]] = dict(r)
-
-        # Standard provider model definitions with default quotas
-        MODEL_DEFINITIONS = [
-            {
-                "id": "gemini-2.5-flash",
-                "name": "Gemini 2.5 Flash",
-                "provider": "gemini",
-                "provider_name": "Google Gemini",
-                "api_key_configured": bool(GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")),
-                "category": "Multimodal Vision & SEO",
-                "limit_tpm": 1_000_000,
-                "limit_rpm": 15,
-                "cost_per_1m_prompt": 0.075,
-                "cost_per_1m_completion": 0.30,
-                "context_window": "1,048,576 tokens",
-            },
-            {
-                "id": "gemini-2.5-pro",
-                "name": "Gemini 2.5 Pro",
-                "provider": "gemini",
-                "provider_name": "Google Gemini",
-                "api_key_configured": bool(GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")),
-                "category": "Deep Reasoning & OCR",
-                "limit_tpm": 2_000_000,
-                "limit_rpm": 5,
-                "cost_per_1m_prompt": 1.25,
-                "cost_per_1m_completion": 5.00,
-                "context_window": "2,097,152 tokens",
-            },
-            {
-                "id": "gpt-4o",
-                "name": "OpenAI GPT-4o",
-                "provider": "openai",
-                "provider_name": "OpenAI",
-                "api_key_configured": bool(OPENAI_API_KEY or os.getenv("OPENAI_API_KEY")),
-                "category": "High-Speed Flagship",
-                "limit_tpm": 30_000,
-                "limit_rpm": 500,
-                "cost_per_1m_prompt": 2.50,
-                "cost_per_1m_completion": 10.00,
-                "context_window": "128,000 tokens",
-            },
-            {
-                "id": "gpt-4o-mini",
-                "name": "OpenAI GPT-4o-mini",
-                "provider": "openai",
-                "provider_name": "OpenAI",
-                "api_key_configured": bool(OPENAI_API_KEY or os.getenv("OPENAI_API_KEY")),
-                "category": "Lightweight Failover",
-                "limit_tpm": 200_000,
-                "limit_rpm": 500,
-                "cost_per_1m_prompt": 0.15,
-                "cost_per_1m_completion": 0.60,
-                "context_window": "128,000 tokens",
-            },
-            {
-                "id": "claude-3-5-sonnet",
-                "name": "Claude 3.5 Sonnet",
-                "provider": "anthropic",
-                "provider_name": "Anthropic",
-                "api_key_configured": bool(ANTHROPIC_API_KEY or os.getenv("ANTHROPIC_API_KEY")),
-                "category": "Nuanced Story Dramatization",
-                "limit_tpm": 40_000,
-                "limit_rpm": 50,
-                "cost_per_1m_prompt": 3.00,
-                "cost_per_1m_completion": 15.00,
-                "context_window": "200,000 tokens",
-            },
-            {
-                "id": "deepseek-v3",
-                "name": "DeepSeek V3",
-                "provider": "deepseek",
-                "provider_name": "DeepSeek",
-                "api_key_configured": bool(os.getenv("DEEPSEEK_API_KEY")),
-                "category": "Chain-of-Thought Scripting",
-                "limit_tpm": 100_000,
-                "limit_rpm": 60,
-                "cost_per_1m_prompt": 0.14,
-                "cost_per_1m_completion": 0.28,
-                "context_window": "64,000 tokens",
-            },
-            {
-                "id": "groq-llama-3-70b",
-                "name": "Groq LLaMA 3.3 70B",
-                "provider": "groq",
-                "provider_name": "Groq LPU",
-                "api_key_configured": bool(os.getenv("GROQ_API_KEY")),
-                "category": "Ultra-Low Latency (500+ tok/s)",
-                "limit_tpm": 6_000,
-                "limit_rpm": 30,
-                "cost_per_1m_prompt": 0.59,
-                "cost_per_1m_completion": 0.79,
-                "context_window": "8,192 tokens",
-            },
-            {
-                "id": "eleven_multilingual_v2",
-                "name": "ElevenLabs Voice V2",
-                "provider": "elevenlabs",
-                "provider_name": "ElevenLabs",
-                "api_key_configured": bool(os.getenv("ELEVENLABS_API_KEY")),
-                "category": "Neural Character Voice Acting",
-                "limit_tpm": 10_000,
-                "limit_rpm": 10,
-                "cost_per_1m_prompt": 10.00,
-                "cost_per_1m_completion": 30.00,
-                "context_window": "Audio Characters",
-            },
-        ]
-
-        breakdown = []
-        for defn in MODEL_DEFINITIONS:
-            m_id = defn["id"]
-            db_data = db_model_map.get(m_id, {})
-            p_tok = int(db_data.get("total_prompt") or 0)
-            c_tok = int(db_data.get("total_completion") or 0)
-            tot_tok = int(db_data.get("total_tokens") or (p_tok + c_tok))
-            calls = int(db_data.get("call_count") or 0)
-            lat = round(float(db_data.get("avg_latency") or 0), 1)
-            cost = round(float(db_data.get("total_cost") or 0), 6)
-
-            pct_tpm_used = min(100.0, round((tot_tok / defn["limit_tpm"]) * 100, 2)) if defn["limit_tpm"] else 0.0
-
-            breakdown.append({
-                **defn,
-                "calls_count": calls,
-                "prompt_tokens_used": p_tok,
-                "completion_tokens_used": c_tok,
-                "total_tokens_used": tot_tok,
-                "avg_latency_ms": lat,
-                "total_cost_usd": cost,
-                "quota_percent_used": pct_tpm_used,
-            })
-
-        return {
-            "success": True,
-            "models_breakdown": breakdown,
-            "total_models_tracked": len(breakdown),
         }
     finally:
         conn.close()

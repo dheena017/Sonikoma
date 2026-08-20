@@ -14,22 +14,21 @@ from fastapi.responses import FileResponse, RedirectResponse, JSONResponse
 from app.core.config import PROJECT_ROOT, IS_PRODUCTION
 from app.core.logging import logger
 
-# Import all specific sub-routers directly from their router modules
+# Import all specific sub-routers directly from their modules
 from api.v1.auth.router import auth_router
-from api.v1.projects.router import project_router, panel_router
-from api.v1.images.router import image_router, cleaner_router, imagemagick_router
-from api.v1.video.router import video_router, ffmpeg_router
-from api.v1.ai.router import ai_router, stable_diffusion_router
+from api.v1.projects.router import project_router
 from api.v1.scraper import scraper_router
-from api.v1.export.router import export_router
-from api.v1.health import health_router
 from api.v1.proxy import proxy_router
-from api.v1.audio import audio_router, librosa_router, whisper_router
-from api.v1.compound import compound_router
-from api.v1.jobs import jobs_router
 from api.v1.panels.router import panels_router
 from api.v1.ocr.router import ocr_router
 from api.v1.storyboard.router import storyboard_router
+from api.v1.ai.router import ai_router
+from api.v1.images.router import image_router
+from api.v1.audio import audio_router
+from api.v1.video.router import video_router
+from api.v1.jobs import jobs_router
+from api.v1.export.router import export_router
+from api.v1.health import health_router
 
 api_router = APIRouter()
 
@@ -43,15 +42,8 @@ api_router.include_router(ocr_router,            prefix="/api/v1/ocr", tags=["05
 api_router.include_router(storyboard_router,     prefix="/api/v1/storyboard", tags=["06. Storyboard AI"])
 api_router.include_router(ai_router,             prefix="/api/v1/ai")
 api_router.include_router(image_router,          prefix="/api/v1/images", tags=["08. Image Canvas & Editing"])
-api_router.include_router(cleaner_router,        prefix="/api/v1/images/cleaner", tags=["08. Image Canvas & Editing"])
-api_router.include_router(imagemagick_router,    prefix="/api/v1/images/imagemagick", tags=["08. Image Canvas & Editing"])
-api_router.include_router(stable_diffusion_router, prefix="/api/v1/images/stable-diffusion", tags=["08. Image Canvas & Editing"])
 api_router.include_router(audio_router,          prefix="/api/v1/audio", tags=["09. Audio Synthesis"])
-api_router.include_router(librosa_router,        prefix="/api/v1/audio/librosa", tags=["09. Audio Synthesis"])
-api_router.include_router(whisper_router,        prefix="/api/v1/audio/whisper", tags=["09. Audio Synthesis"])
 api_router.include_router(video_router,          prefix="/api/v1/video", tags=["10. Video Rendering Engine"])
-api_router.include_router(ffmpeg_router,         prefix="/api/v1/video/ffmpeg", tags=["10. Video Rendering Engine"])
-api_router.include_router(compound_router,       prefix="/api/v1/video/compound", tags=["10. Video Rendering Engine"])
 api_router.include_router(jobs_router,           prefix="/api/v1/jobs", tags=["11. Background Jobs"])
 api_router.include_router(export_router,         prefix="/api/v1/export", tags=["12. Export & Archiving"])
 api_router.include_router(health_router,         prefix="/api/v1/system", tags=["13. System Health & Telemetry"])
@@ -65,7 +57,6 @@ api_router.include_router(scraper_router,        prefix="/api", include_in_schem
 api_router.include_router(panels_router,         prefix="/api/panels", include_in_schema=False)
 api_router.include_router(ocr_router,            prefix="/api/ocr", include_in_schema=False)
 api_router.include_router(storyboard_router,     prefix="/api/storyboard", include_in_schema=False)
-api_router.include_router(panel_router,          prefix="/api/panels", include_in_schema=False)
 api_router.include_router(ai_router,             prefix="/api/ai", include_in_schema=False)
 api_router.include_router(ai_router,             prefix="/api", include_in_schema=False)
 api_router.include_router(image_router,          prefix="/api/image", include_in_schema=False)

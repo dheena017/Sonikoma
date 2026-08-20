@@ -24,7 +24,7 @@ router = APIRouter()
 
 
 @router.get("/api-keys", summary="List developer API keys with filtering and pagination")
-async def get_keys(
+async def get_api_keys_endpoint(
     search: Optional[str] = Query(None, description="Search API keys by name"),
     limit: int = Query(50, ge=1, le=200, description="Max keys to return"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
@@ -40,7 +40,7 @@ async def get_keys(
 
 
 @router.post("/api-keys", summary="Generate a new developer API key")
-async def generate_key(body: ApiKeyCreate, request: Request, current_user: dict = Depends(get_current_user)):
+async def generate_api_key_endpoint(body: ApiKeyCreate, request: Request, current_user: dict = Depends(get_current_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
 
     hex_str = secrets.token_hex(24)
@@ -63,7 +63,7 @@ async def generate_key(body: ApiKeyCreate, request: Request, current_user: dict 
 
 
 @router.delete("/api-keys/{key_id}", summary="Revoke a developer API key by ID")
-async def revoke_key(
+async def revoke_api_key_endpoint(
     key_id: str = Path(..., description="Unique developer API Key ID to revoke"),
     request: Request = None,
     current_user: dict = Depends(get_current_user)

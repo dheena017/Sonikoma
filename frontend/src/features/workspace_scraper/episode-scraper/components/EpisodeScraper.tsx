@@ -221,7 +221,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       delete body.max_episodes;
     }
 
-    const res = await fetchWithInterceptor("/api/scrape-episodes-advanced", {
+    const res = await fetchWithInterceptor("/api/v1/scraper/series", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

@@ -16,8 +16,8 @@ logger = logging.getLogger("sonikoma.auth.avatar")
 router = APIRouter()
 
 
-@router.post("/avatar/upload")
-async def upload_avatar(
+@router.post("/avatar/upload", summary="Upload custom avatar image")
+async def upload_avatar_endpoint(
     request: Request,
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user)
@@ -39,8 +39,8 @@ async def upload_avatar(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/avatar/youtube-refresh")
-async def refresh_youtube_avatar(
+@router.post("/avatar/youtube-refresh", summary="Refresh YouTube channel avatar logo")
+async def refresh_youtube_avatar_endpoint(
     request: Request,
     current_user: dict = Depends(get_current_user)
 ):

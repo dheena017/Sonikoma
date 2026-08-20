@@ -47,12 +47,11 @@ def test_youtube_oauth_scopes_minimization():
     assert 'https://www.googleapis.com/auth/youtube' not in YOUTUBE_SCOPES
 
 def test_youtube_oauth_token_persistence():
-    user_id = 'test_user_db_123'
-    try:
-        delete_user(user_id)
-    except Exception:
-        pass
-    create_user_relational(user_id=user_id, username='testuser', email='test@example.com', password_hash='hash123')
+    import uuid
+    uid_hex = uuid.uuid4().hex[:8]
+    user_id = f'test_user_db_{uid_hex}'
+    email = f'test_yt_{uid_hex}@example.com'
+    create_user_relational(user_id=user_id, username=f'testuser_{uid_hex}', email=email, password_hash='hash123')
 
     try:
         save_youtube_oauth_tokens(

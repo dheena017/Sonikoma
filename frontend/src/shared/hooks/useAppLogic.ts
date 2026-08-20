@@ -336,15 +336,15 @@ export function useAppLogic() {
   }, [state.setConsoleLogs]);
 
   const SOURCE_DOMAINS: Record<string, string[]> = {
-    webtoons: ["webtoons.com", "webtoon.com"],
+    webtoons: ["webtoons.com", "webtoon.com", "naver.com"],
     webcomicsapp: ["webcomicsapp.com"],
-    mangadex: ["mangadex.org", "mangadex.com"],
+    mangadex: ["mangadex.org", "mangadex.com", "mangadex.cc"],
     toomics: ["toomics.com"],
-    linewebtoon: ["webtoon.com", "webtoons.com"],
-    asurascans: ["asurascans.com"],
+    linewebtoon: ["webtoon.com", "webtoons.com", "naver.com"],
+    asurascans: ["asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com"],
     manhuato: ["manhuato.com"],
     reaperscans: ["reaperscans.com"],
-    flamecomics: ["flamecomics.com", "flamescans.org"],
+    flamecomics: ["flamecomics.xyz", "flamecomics.com", "flamecomics.me", "flamescans.org"],
     voidscans: ["voidscans.com", "void-scans.com"],
     luminousscans: ["luminousscans.com"],
     tapas: ["tapas.io"],
@@ -355,12 +355,12 @@ export function useAppLogic() {
     bilibilicomics: ["bilibilicomics.com"],
     mangatoon: ["mangatoon.mobi"],
     webnovel: ["webnovel.com"],
-    manhuaplus: ["manhuaplus.com"],
+    manhuaplus: ["manhuaplus.com", "manhuaplus.org"],
     manhwaclan: ["manhwaclan.com"],
-    "1stkissmanga": ["1stkissmanga.io", "1stkissmanga.com"],
-    manganato: ["manganato.com", "readmanganato.com"],
-    mangakakalot: ["mangakakalot.com"],
-    batoto: ["bato.to"],
+    "1stkissmanga": ["1stkissmanga.io", "1stkissmanga.com", "1stkissmanga.me"],
+    manganato: ["manganato.com", "readmanganato.com", "chapmanganato.to", "chapmanganato.com"],
+    mangakakalot: ["mangakakalot.com", "mangakakalot.tv", "readmangakakalot.com"],
+    batoto: ["bato.to", "mangatoto.com", "battwo.com", "batocomic.com", "readtoto.com"],
     custom: [],
   };
 
@@ -509,6 +509,7 @@ export function useAppLogic() {
           (window as any).__scrapeEpisodeGroups = [];
 
           state.setScrapedImages(finalImages);
+          state.setSelectedScraped([]);
 
           // Update series & chapter state if returned by scraper
           const returnedTitle =
@@ -569,6 +570,7 @@ export function useAppLogic() {
               chapterTitle: returnedChapterTitle,
             },
             panels: [],
+            scrapedImages: finalImages,
           });
 
           setCurrentPanelIndex(0);
@@ -593,19 +595,43 @@ export function useAppLogic() {
           state.setIsScraping(false);
         } else {
           state.setIsScraping(false);
-          const errMsg =
-            data.error?.message ||
-            data.message ||
-            "Connected but no native comic elements identified on page.";
           state.setScrapedImages([]);
           state.setPanels([]);
-          state.addNotification(
-            `Failed to find comic panels: ${errMsg} Please check the URL and try again.`,
-            "error",
-            {
-              details: `Error Response Message: ${errMsg}\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}\nHost: ${currentHost}`,
-            }
-          );
+
+          const errorDetails = data.error?.details ?? {};
+          const isUnmappedWebsite = errorDetails.is_unmapped_website === true;
+
+          if (isUnmappedWebsite) {
+            const domain = errorDetails.domain || currentHost || "this website";
+            const suggestion =
+              errorDetails.suggestion ||
+              `Website '${domain}' is not yet officially supported. A scraper support request has been logged for admin review.`;
+            state.addNotification(
+              `⚠️ Unsupported Website: '${domain}' is not yet mapped.\n${suggestion}`,
+              "warning",
+              {
+                details: [
+                  `Domain: ${domain}`,
+                  `Status: Unmapped / No dedicated adapter`,
+                  `Action Taken: Support request auto-logged for admin review.`,
+                  `What Happens Next: Admins will inspect '${domain}' in the Scraper Admin Panel and configure a dedicated adapter or custom selectors.`,
+                  `Target URL: ${normalizedTargetUrl}`,
+                ].join("\n"),
+              }
+            );
+          } else {
+            const errMsg =
+              data.error?.message ||
+              data.message ||
+              "Connected but no native comic elements identified on page.";
+            state.addNotification(
+              `Failed to find comic panels: ${errMsg} Please check the URL and try again.`,
+              "error",
+              {
+                details: `Error Response Message: ${errMsg}\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}\nHost: ${currentHost}`,
+              }
+            );
+          }
         }
       } catch (err: any) {
         state.setIsScraping(false);

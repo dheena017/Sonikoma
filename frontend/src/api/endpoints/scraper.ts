@@ -7,6 +7,7 @@ import {
   JobRecord,
   JobStatus,
 } from "../types";
+import { getJobStatus, type JobStatusResponse } from "./jobs";
 
 // ============================================================================
 // 1. Unified Job Management & Polling
@@ -15,11 +16,11 @@ import {
 /**
  * Retrieves the status, progress, stage, and result of any background Job.
  */
-export const getJobStatus = async <T = any>(
+export const getScraperJobStatus = async <T = any>(
   fetchWithInterceptor: FetchClient,
   jobId: string,
   options?: RequestInit
-): Promise<ApiResponse<JobRecord<T>>> => {
+): Promise<JobStatusResponse<T>> => {
   return apiRequest(fetchWithInterceptor, `/api/v1/jobs/${jobId}`, {
     method: "GET",
     ...options,
@@ -29,11 +30,11 @@ export const getJobStatus = async <T = any>(
 /**
  * Cancels an active or queued background Job.
  */
-export const cancelJob = async (
+export const cancelScraperJob = async (
   fetchWithInterceptor: FetchClient,
   jobId: string,
   options?: RequestInit
-): Promise<ApiResponse<JobRecord>> => {
+): Promise<JobStatusResponse> => {
   return apiRequest(fetchWithInterceptor, `/api/v1/jobs/${jobId}/cancel`, {
     method: "POST",
     ...options,
@@ -46,28 +47,29 @@ export const cancelJob = async (
 export const pollJobUntilComplete = async <T = any>(
   fetchWithInterceptor: FetchClient,
   jobId: string,
-  onProgress?: (progress: number, stage: string, job: JobRecord<T>) => void,
+  onProgress?: (progress: number, stage: string, job: JobStatusResponse<T>) => void,
   intervalMs: number = 1000,
   timeoutMs: number = 180000
-): Promise<JobRecord<T>> => {
+): Promise<JobStatusResponse<T>> => {
   const startTime = Date.now();
 
   while (Date.now() - startTime < timeoutMs) {
-    const job = await getJobStatus<T>(fetchWithInterceptor, jobId);
+    const job = await getScraperJobStatus<T>(fetchWithInterceptor, jobId);
     if (onProgress) {
-      onProgress(job.progress ?? 0, job.stage ?? "RUNNING", job);
+      onProgress(job.progress ?? 0, job.stage ?? "running", job);
     }
 
-    if (job.status === "COMPLETED") {
+    const st = (job.status || "").toLowerCase();
+    if (st === "completed") {
       return job;
     }
 
-    if (job.status === "FAILED") {
+    if (st === "failed") {
       const errMsg = job.error?.message || "Job execution failed.";
       throw new Error(`[Job ${jobId} FAILED] ${errMsg}`);
     }
 
-    if (job.status === "CANCELLED") {
+    if (st === "cancelled") {
       throw new Error(`[Job ${jobId}] Job was cancelled.`);
     }
 
@@ -75,7 +77,7 @@ export const pollJobUntilComplete = async <T = any>(
   }
 
   console.warn(`[Job ${jobId}] Polling timed out. Returning last known state.`);
-  return await getJobStatus<T>(fetchWithInterceptor, jobId);
+  return await getScraperJobStatus<T>(fetchWithInterceptor, jobId);
 };
 
 // ============================================================================
@@ -179,7 +181,7 @@ export const createEpisodeDiscoveryJob = async (
   data: SeriesEpisodesPayload,
   options?: RequestInit
 ): Promise<ApiResponse<JobRecord>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/series/episodes", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/series", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -286,8 +288,8 @@ export const getBatchScrapeStatus = async (
   fetchWithInterceptor: FetchClient,
   jobId: string,
   options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return getJobStatus(fetchWithInterceptor, jobId, options);
+): Promise<JobStatusResponse<any>> => {
+  return getScraperJobStatus(fetchWithInterceptor, jobId, options);
 };
 
 // ============================================================================
@@ -369,7 +371,7 @@ export const createExportJob = async (
   },
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/scraper/tools/export", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/export/archive", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -379,13 +381,13 @@ export const createExportJob = async (
 
 export const exportComicArchive = createExportJob;
 
-// Legacy Panel Tool Aliases
+// Panel Tool Endpoints
 export const detectPanelsBatch = async (
   fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/detect-panels-batch", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -398,7 +400,7 @@ export const detectPanels = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/detect-panels", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -411,7 +413,7 @@ export const detectPanelsB64 = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/py/panels/detect-b64", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -424,7 +426,7 @@ export const extractOcrB64 = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/py/ocr/extract-full-b64", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/ocr/extract", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -464,7 +466,7 @@ export const generateStoryboardVideo = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/scraper/storyboard/video", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/video/pipeline", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -483,10 +485,72 @@ export const updateScraperCache = async (
   data: { url: string; images: string[]; project_id?: string; job_id?: string },
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/scraper/cache/session", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/session", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
 };
+
+// ============================================================================
+// 10. Admin Domain Management
+// ============================================================================
+
+export interface DomainRecord {
+  domain: string;
+  status: "approved" | "pending" | "blocked";
+  blueprint?: Record<string, any> | null;
+  success_count: number;
+  failure_count: number;
+  requested_by?: string | null;
+  sample_url?: string | null;
+  notes?: string | null;
+  last_success_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export const listAdminDomains = async (
+  fetchWithInterceptor: FetchClient,
+  status?: string
+): Promise<{ domains: DomainRecord[]; total: number }> => {
+  const qs = status ? `?status=${status}` : "";
+  return apiRequest(fetchWithInterceptor, `/api/v1/scraper/admin/domains${qs}`, {
+    method: "GET",
+  });
+};
+
+export const requestDomainOnboarding = async (
+  fetchWithInterceptor: FetchClient,
+  url: string,
+  notes?: string
+): Promise<{ success: boolean; domain: string; status: string; message: string }> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/admin/domains/request", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url, notes }),
+  });
+};
+
+export const updateDomainStatus = async (
+  fetchWithInterceptor: FetchClient,
+  domain: string,
+  payload: { status?: string; blueprint?: Record<string, any>; notes?: string; sample_url?: string }
+): Promise<{ success: boolean; domain: string; status: string; message: string }> => {
+  return apiRequest(fetchWithInterceptor, `/api/v1/scraper/admin/domains/${domain}/status`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+};
+
+export const deleteAdminDomain = async (
+  fetchWithInterceptor: FetchClient,
+  domain: string
+): Promise<{ success: boolean; domain: string; message: string }> => {
+  return apiRequest(fetchWithInterceptor, `/api/v1/scraper/admin/domains/${domain}`, {
+    method: "DELETE",
+  });
+};
+

@@ -44,20 +44,18 @@ from services.project.project_service import (
 )
 from database.engine import get_db_connection
 from api.v1.projects._helpers import wrap_proxy_url
-from api.v1.projects.files import _detect
 
 logger = logging.getLogger("sonikoma.routes.projects.router")
 
 # ── Routers ───────────────────────────────────────────────────────────────
 project_router = APIRouter()
-panel_router = APIRouter()
 project_service = ProjectService()
 
 
 # ── List & read ───────────────────────────────────────────────────────────
 
 @project_router.get("", summary="Get all projects with filtering and pagination")
-async def get_projects(
+async def get_projects_endpoint(
     search: Optional[str] = Query(None, description="Search projects by title, author, or genre"),
     status: Optional[str] = Query(None, description="Filter by status (Draft, Ready, etc.)"),
     series_id: Optional[str] = Query(None, description="Filter by parent series/project ID"),
@@ -106,7 +104,7 @@ async def get_projects(
 
 
 @project_router.get("/public/{project_id}", summary="Get a project publicly (no auth)")
-async def get_public_project(project_id: str = Path(..., description="Project ID")):
+async def get_public_project_endpoint(project_id: str = Path(..., description="Project ID")):
     try:
         project = get_project(project_id) or get_project_by_slug(project_id)
         if not project:
@@ -134,6 +132,7 @@ async def get_public_project(project_id: str = Path(..., description="Project ID
             except Exception:
                 pass
         public_project = dict(project)
+        public_project.pop("job_id", None)
         return {"success": True, "project": public_project, "panels": panels, "scraped_images": scraped_images}
     except HTTPException:
         raise
@@ -143,7 +142,7 @@ async def get_public_project(project_id: str = Path(..., description="Project ID
 
 
 @project_router.get("/analytics/tokens", summary="Get token usage history with pagination")
-async def get_token_analytics(
+async def get_token_analytics_endpoint(
     project_id: Optional[str] = Query(None, description="Filter logs by project ID"),
     limit: int = Query(50, ge=1, le=500, description="Max logs to return"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
@@ -162,7 +161,7 @@ async def get_token_analytics(
 
 
 @project_router.get("/series/{series_id_or_slug}", summary="Get parent series details")
-async def get_series_route(
+async def get_series_endpoint(
     series_id_or_slug: str = Path(..., description="Parent series ID or URL slug"),
     current_user: dict = Depends(get_current_user),
 ):
@@ -184,7 +183,7 @@ async def get_series_route(
 # ── Create ────────────────────────────────────────────────────────────────
 
 @project_router.post("", summary="Create a new project entry")
-async def create_project(
+async def create_project_endpoint(
     body: ProjectCreateRequest,
     current_user: dict = Depends(get_current_user),
 ):
@@ -200,7 +199,7 @@ async def create_project(
 # ── Update ────────────────────────────────────────────────────────────────
 
 @project_router.post("/{projectId}/panels", summary="Save storyboard panels for a project")
-async def save_project_panels(
+async def save_project_panels_endpoint(
     request: Request,
     projectId: str = Path(..., description="Target Chapter/Episode Project ID"),
     body: PanelsSaveRequest = Body(...),
@@ -247,7 +246,7 @@ async def save_project_panels(
 
 
 @project_router.post("/{projectId}/tokens", summary="Increment project token usage")
-async def increment_project_tokens_route(
+async def increment_project_tokens_endpoint(
     projectId: str = Path(..., description="Target Project ID"),
     body: TokenIncrementRequest = Body(...),
     current_user: dict = Depends(get_current_user),
@@ -287,7 +286,7 @@ async def increment_project_tokens_route(
 
 
 @project_router.put("/{projectId}", summary="Update project metadata and panels")
-async def update_project_details(
+async def update_project_details_endpoint(
     projectId: str = Path(..., description="Target Project ID"),
     body: ProjectUpdateRequest = Body(...),
     current_user: dict = Depends(get_current_user),
@@ -317,7 +316,7 @@ async def update_project_details(
 # ── Delete ────────────────────────────────────────────────────────────────
 
 @project_router.post("/batch-delete", summary="Bulk delete multiple projects")
-async def batch_delete_projects(
+async def batch_delete_projects_endpoint(
     body: BatchDeleteRequest,
     current_user: dict = Depends(get_current_user),
 ):
@@ -335,7 +334,7 @@ async def batch_delete_projects(
 
 
 @project_router.delete("/series/{seriesId}", summary="Delete a series and its chapters")
-async def delete_series_route(
+async def delete_series_endpoint(
     seriesId: str = Path(..., description="Target parent series ID to delete"),
     current_user: dict = Depends(get_current_user),
 ):
@@ -357,7 +356,7 @@ async def delete_series_route(
 
 
 @project_router.delete("/{projectId}", summary="Delete a project and its panels")
-async def delete_single_project(
+async def delete_single_project_endpoint(
     projectId: str = Path(..., description="Target Project ID to delete"),
     current_user: dict = Depends(get_current_user),
 ):
@@ -384,7 +383,7 @@ async def delete_single_project(
 # ── Wildcard single-project read (must be LAST) ───────────────────────────
 
 @project_router.get("/{project_id_or_slug}", summary="Get a project and its panels")
-async def get_single_project(
+async def get_single_project_endpoint(
     project_id_or_slug: str = Path(..., description="Project ID or Slug"),
     job_id: Optional[str] = Query(None, description="Optional Workspace Job ID context"),
     current_user: dict = Depends(get_current_user),
@@ -430,66 +429,3 @@ async def get_single_project(
         logger.error(f"Failed to fetch project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to fetch project: {e}")
 
-
-# ── Panel detection ───────────────────────────────────────────────────────
-# Imported and re-exported from files.py via the panel_router
-
-import os
-import base64
-import tempfile
-
-@panel_router.post("/detect", summary="Detect panel bounding boxes (file upload)")
-async def detect_panels_upload(
-    file: UploadFile = File(..., description="Comic/webtoon image file"),
-    sensitivity: float = Form(30.0),
-    background_mode: str = Form("auto"),
-    min_width_pct: float = Form(0.15),
-    min_height_px: int = Form(60),
-    merge_threshold: int = Form(20),
-    aspect_ratio: str = Form("free"),
-    canny_low: int = Form(20),
-    canny_high: int = Form(100),
-    close_kernel_size: int = Form(15),
-    auto_split: bool = Form(True),
-):
-    image_path = None
-    params = dict(
-        sensitivity=sensitivity, background_mode=background_mode,
-        min_width_pct=min_width_pct, min_height_px=min_height_px,
-        merge_threshold=merge_threshold, aspect_ratio=aspect_ratio,
-        canny_low=canny_low, canny_high=canny_high,
-        close_kernel_size=close_kernel_size, auto_split=auto_split,
-    )
-    try:
-        suffix = os.path.splitext(file.filename or ".png")[1] or ".png"
-        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-            tmp.write(await file.read())
-            image_path = tmp.name
-        panels = _detect(image_path, params)
-        return JSONResponse(content={"success": True, "panels": panels, "count": len(panels), "message": f"Detected {len(panels)} panel(s)."})
-    except Exception as exc:
-        logger.error(f"Panel detection failed: {exc}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(exc))
-    finally:
-        delete_temp_file(image_path)
-
-
-@panel_router.post("/detect-b64", summary="Detect panel bounding boxes (base64)")
-async def detect_panels_base64(body: DetectPanelsBase64Request):
-    try:
-        raw = base64.b64decode(body.image_base64)
-    except Exception:
-        raise HTTPException(status_code=422, detail="Invalid base64 image data.")
-    image_path = None
-    params = body.model_dump(exclude={"image_base64"})
-    try:
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-            tmp.write(raw)
-            image_path = tmp.name
-        panels = _detect(image_path, params)
-        return JSONResponse(content={"success": True, "panels": panels, "count": len(panels), "message": f"Detected {len(panels)} panel(s)."})
-    except Exception as exc:
-        logger.error(f"Panel detection (base64) failed: {exc}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(exc))
-    finally:
-        delete_temp_file(image_path)

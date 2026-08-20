@@ -121,7 +121,7 @@ class TestAutomaticTraining(unittest.TestCase):
         self.assertFalse(triggered)
         mock_trigger.assert_not_called()
 
-    @patch("media.image.train_yolo._train_worker")
+    @patch("services.image.panel_detection.speech_bubble_detector._train_worker")
     def test_trigger_fine_tuning_lock_and_spawn_behavior(self, mock_worker):
         # Patch the join function to force path resolution to use the temp test_dir
         orig_join = os.path.join
@@ -130,7 +130,7 @@ class TestAutomaticTraining(unittest.TestCase):
                 return self.test_dir
             return orig_join(*args)
 
-        with patch("media.image.train_yolo.os.path.join", side_effect=mock_join):
+        with patch("services.image.panel_detection.speech_bubble_detector.os.path.join", side_effect=mock_join):
             # Start first run
             triggered_first = trigger_fine_tuning()
             self.assertTrue(triggered_first)

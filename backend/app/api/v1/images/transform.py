@@ -16,7 +16,9 @@ from services.image.processing.imagemagick import ResizeMode, FilterType
 from schemas.image import (
     TransformImageRequest,
     StitchImagesRequest,
+    StitchImagesResponse,
     SplitImagesRequest,
+    SplitImagesResponse,
     DownloadZipRequest,
     ProcessLayersRequest,
     BatchResizeRequest,
@@ -91,7 +93,12 @@ async def transform_image(body: TransformImageRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/merge", summary="Stitch a series of panel segments vertically or horizontally")
+@router.post(
+    "/merge",
+    response_model=StitchImagesResponse,
+    operation_id="merge_comic_panels",
+    summary="Stitch a series of panel segments vertically or horizontally"
+)
 async def merge_images(body: StitchImagesRequest):
     urls = body.urls or []
     if not urls:
@@ -141,7 +148,12 @@ async def get_cached_stitch(request: Request, cache_id: str = Path(...)):
         raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.post("/split", summary="Split a webtoon strip vertically into individual panel files")
+@router.post(
+    "/split",
+    response_model=SplitImagesResponse,
+    operation_id="split_comic_strip",
+    summary="Split a webtoon strip vertically into individual panel files"
+)
 async def split_strip(body: SplitImagesRequest):
     try:
         split_points = body.split_points if body.split_points is not None else (body.splitLines or [])

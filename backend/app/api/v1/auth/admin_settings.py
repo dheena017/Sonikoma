@@ -458,3 +458,11 @@ async def admin_purge_completed_jobs(request: Request, current_user: dict = Depe
     write_audit_log(current_user['user_id'], f'Admin purged {count} completed/failed jobs', ip_addr, 'Success')
     return {'success': True, 'purged_count': count, 'message': f'Successfully purged {count} finished jobs.'}
 
+
+@router.post('/admin/jobs/cancel-all-active', summary="Admin cancel all currently active/queued jobs")
+async def admin_cancel_all_active_jobs(request: Request, current_user: dict = Depends(get_admin_user)):
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    count = job_manager.cancel_all_active_admin()
+    write_audit_log(current_user['user_id'], f'Admin cancelled all {count} active jobs', ip_addr, 'Success')
+    return {'success': True, 'cancelled_count': count, 'message': f'Successfully cancelled {count} active jobs.'}
+

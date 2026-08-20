@@ -1,8 +1,18 @@
 """
-backend/app/services/scraper/ocr.py
+backend/app/services/scraper/ai/__init__.py
 ─────────────────────────────────────────────────────────────────────────────
-Re-exports OCR script extraction from services.image.ocr.ocr_service.
+AI Intelligence Module for Sonikoma Universal Scraper.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from services.image.ocr.ocr_service import *
+from .orchestrator_scraper import ScraperAIOrchestrator, UniversalComicBlueprint, ReadingDirection
+from .domain_memory import DomainMemory
+from .stitcher_descrambler import StitcherDescrambler
+
+__all__ = [
+    "ScraperAIOrchestrator",
+    "UniversalComicBlueprint",
+    "ReadingDirection",
+    "DomainMemory",
+    "StitcherDescrambler"
+]

@@ -14,6 +14,11 @@ import {
   Zap,
   Monitor,
   FolderSync,
+  Globe,
+  User,
+  Tag,
+  ExternalLink,
+  BookOpen,
 } from "lucide-react";
 import {
   getUserAvatarUrl,
@@ -161,6 +166,41 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const project = activeProjectData?.project;
+  const projectUrl = project?.url;
+  const projectAuthor = project?.author;
+  const projectGenre = project?.genre;
+  const coverImage = project?.cover_image;
+
+  const websiteInfo = (() => {
+    if (!projectUrl) return null;
+    try {
+      const host = new URL(
+        projectUrl.startsWith("http") ? projectUrl : `https://${projectUrl}`
+      ).hostname
+        .toLowerCase()
+        .replace(/^www\./, "");
+
+      if (!host) return null;
+
+      // Dynamically format clean display name from root domain (e.g. webcomicsapp -> Webcomicsapp)
+      const domainParts = host.split(".");
+      const mainName = domainParts.length > 1 ? domainParts[domainParts.length - 2] : domainParts[0];
+      const displayName = mainName
+        .split(/[-_]/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+
+      return {
+        name: displayName,
+        domain: host,
+        badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+      };
+    } catch {
+      return null;
+    }
+  })();
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-white/8 bg-[#06060c]/80 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
@@ -168,7 +208,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       }`}
       style={style}
     >
-      {/* Left Section - Menu Icon + Title */}
+      {/* Left Section - Menu Icon + Title + Metadata */}
       <div className="flex items-center shrink-0 h-full">
         {/* PREMIUM ALIGNMENT FIX: w-20 wrapper perfectly aligns the menu button above the mini-sidebar */}
         <div className="w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-4">
@@ -187,29 +227,74 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           className="flex items-center gap-3 cursor-pointer"
           onClick={onBackToApp}
         >
-          <img
-            src="/logo-dark.png"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-            }}
-            alt="Sonikoma Logo"
-            className="h-9 w-9 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover border border-white/5"
-          />
-          <div className="min-w-0 hidden sm:block">
-            <p className="font-mono text-[9px] font-black uppercase tracking-[0.25em] text-purple-400/80 leading-none">
-              Editor Workspace
-            </p>
-            <div className="mt-1 flex items-center gap-2">
-              <LayoutPanelTop className="h-3.5 w-3.5 text-purple-400" />
+          {coverImage ? (
+            <img
+              src={coverImage}
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+              }}
+              alt={title}
+              className="h-10 w-10 rounded-xl bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover border border-white/10 shrink-0"
+            />
+          ) : (
+            <img
+              src="/logo-dark.png"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+              }}
+              alt="Sonikoma Logo"
+              className="h-10 w-10 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover border border-white/5 shrink-0"
+            />
+          )}
+
+          <div className="min-w-0 hidden sm:block max-w-[340px] md:max-w-[420px] lg:max-w-[500px]">
+            {/* Top Workspace & Source Website Badge */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-purple-400/90 leading-none">
+                Editor Workspace
+              </span>
+
+              {websiteInfo && (
+                <a
+                  href={projectUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold tracking-wide transition-colors ${websiteInfo.badgeColor} hover:brightness-125`}
+                  title={`Source: ${websiteInfo.domain}`}
+                >
+                  <Globe className="w-2.5 h-2.5" />
+                  <span>{websiteInfo.name}</span>
+                  <ExternalLink className="w-2 h-2 opacity-60" />
+                </a>
+              )}
+
+              {projectGenre && (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/50 text-[9px] font-medium text-neutral-300">
+                  <Tag className="w-2.5 h-2.5 text-neutral-400" />
+                  {projectGenre.split(",")[0].trim()}
+                </span>
+              )}
+            </div>
+
+            {/* Title & Layout Icon */}
+            <div className="mt-1 flex items-center gap-1.5">
+              <LayoutPanelTop className="h-3.5 w-3.5 text-purple-400 shrink-0" />
               <h2 className="truncate text-sm font-bold text-white leading-none tracking-wide">
                 {title}
               </h2>
             </div>
-            {subtitle ? (
-              <p className="mt-1 truncate text-[10px] text-neutral-400 font-mono leading-none">
-                {subtitle}
-              </p>
-            ) : null}
+
+            {/* Subtitle & Author */}
+            <div className="mt-1 flex items-center gap-2 truncate text-[10px] text-neutral-400 font-mono leading-none">
+              {subtitle && <span className="truncate">{subtitle}</span>}
+              {projectAuthor && (
+                <span className="inline-flex items-center gap-1 text-neutral-500 shrink-0">
+                  <User className="w-2.5 h-2.5 text-neutral-500" />
+                  {projectAuthor}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>

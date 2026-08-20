@@ -11,7 +11,10 @@ import sys
 import platform
 import re
 
-from app.core.config import IS_PRODUCTION, API_VERSION, BACKEND_PORT, APP_URL, RATE_LIMIT_RPM, MAX_PROXY_MB
+try:
+    from core.config import IS_PRODUCTION, API_VERSION, BACKEND_PORT, APP_URL, RATE_LIMIT_RPM, MAX_PROXY_MB
+except ImportError:
+    from app.core.config import IS_PRODUCTION, API_VERSION, BACKEND_PORT, APP_URL, RATE_LIMIT_RPM, MAX_PROXY_MB
 
 
 def _check_pkg(mod_name: str) -> bool:

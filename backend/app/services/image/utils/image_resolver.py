@@ -12,8 +12,12 @@ import asyncio
 from typing import Dict, Any, Optional
 from urllib.parse import urlparse, parse_qs
 
-from app.core.cache import stitched_cache
-from app.core.config import BACKEND_PORT
+try:
+    from core.cache import stitched_cache
+    from core.config import BACKEND_PORT
+except ImportError:
+    from app.core.cache import stitched_cache
+    from app.core.config import BACKEND_PORT
 
 try:
     from curl_cffi.requests import AsyncSession as CurlAsyncSession

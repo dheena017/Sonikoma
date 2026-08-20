@@ -312,7 +312,7 @@ export const useProjectStore = create<ProjectStoreState>()(
     }),
     {
       name: "sonikoma-active-project-store",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         activeProjectId: state.activeProjectId,
         activeProjectData: state.activeProjectData,

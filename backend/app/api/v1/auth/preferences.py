@@ -6,16 +6,17 @@ User settings, preferences, credits, billing, and gamification endpoints.
 """
 
 import json
-import datetime
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 
 from api.dependencies.auth import get_current_user
+from database.config import LOW_BALANCE_THRESHOLD
 from schemas.auth import (
     RedeemPointsRequest,
     MfaUpdate,
     SaveCardRequest,
-    PurchaseCreditsRequest
+    PurchaseCreditsRequest,
+    CreditsBalanceResponse
 )
 from repositories.user import (
     update_user,
@@ -33,56 +34,8 @@ router = APIRouter()
 LOW_BALANCE_THRESHOLD = 100
 
 
-@router.post("/claim-credits")
-async def claim_credits(request: Request, current_user: dict = Depends(get_current_user)):
-    ip_addr = request.client.host if request.client else "127.0.0.1"
-    today = datetime.datetime.now()
-    today_str = today.strftime("%Y-%m-%d")
-    yesterday_str = (today - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
-
-    if current_user.get("last_claimed_date") == today_str:
-        raise HTTPException(status_code=400, detail="Daily credits already claimed for today.")
-
-    pref_str = current_user.get("preferences") or "{}"
-    try:
-        prefs = json.loads(pref_str)
-    except Exception:
-        prefs = {}
-
-    streak = prefs.get("claim_streak", 1)
-    if not isinstance(streak, int) or streak < 1 or streak > 7:
-        streak = 1
-
-    last_claimed = current_user.get("last_claimed_date")
-    if last_claimed == yesterday_str:
-        current_streak_day = streak
-    else:
-        current_streak_day = 1
-
-    REWARDS = {1: 50, 2: 60, 3: 75, 4: 90, 5: 110, 6: 130, 7: 150}
-    reward = REWARDS.get(current_streak_day, 50)
-
-    new_credits = record_credit_transaction(current_user["user_id"], reward, "daily_claim")
-
-    next_streak_day = (current_streak_day % 7) + 1
-    prefs["claim_streak"] = next_streak_day
-
-    update_user(current_user["user_id"], {
-        "last_claimed_date": today_str,
-        "preferences": json.dumps(prefs)
-    })
-
-    write_audit_log(current_user["user_id"], f"Claimed Daily Bonus Credits (+{reward})", ip_addr, "Success")
-    return {
-        "success": True,
-        "credits": new_credits,
-        "streak_days": next_streak_day,
-        "message": f"Successfully claimed Day {current_streak_day} reward (+{reward} credits)!"
-    }
-
-
-@router.post("/redeem-points")
-async def redeem_points(body: RedeemPointsRequest, request: Request, current_user: dict = Depends(get_current_user)):
+@router.post("/redeem-points", summary="Redeem achievement points for credits or badges")
+async def redeem_points_endpoint(body: RedeemPointsRequest, request: Request, current_user: dict = Depends(get_current_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
 
     if body.reward_type == "credits":
@@ -118,8 +71,8 @@ async def redeem_points(body: RedeemPointsRequest, request: Request, current_use
     raise HTTPException(status_code=400, detail="Invalid reward type specified.")
 
 
-@router.put("/mfa")
-async def toggle_mfa(body: MfaUpdate, request: Request, current_user: dict = Depends(get_current_user)):
+@router.put("/mfa", summary="Toggle Two-Factor Authentication (2FA/MFA)")
+async def toggle_mfa_endpoint(body: MfaUpdate, request: Request, current_user: dict = Depends(get_current_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
     val = 1 if body.mfa_enabled else 0
     update_user(current_user["user_id"], {"mfa_enabled": val})
@@ -130,8 +83,8 @@ async def toggle_mfa(body: MfaUpdate, request: Request, current_user: dict = Dep
     return {"success": True, "mfa_enabled": body.mfa_enabled, "message": f"2FA status set to {body.mfa_enabled}"}
 
 
-@router.post("/save-card")
-async def save_card(body: SaveCardRequest, request: Request, current_user: dict = Depends(get_current_user)):
+@router.post("/save-card", summary="Save credit card payment details")
+async def save_card_endpoint(body: SaveCardRequest, request: Request, current_user: dict = Depends(get_current_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
     pref_str = current_user.get("preferences") or "{}"
     try:
@@ -152,8 +105,8 @@ async def save_card(body: SaveCardRequest, request: Request, current_user: dict 
     return {"success": True, "message": "Card details saved successfully."}
 
 
-@router.post("/upgrade-plan")
-async def upgrade_plan(request: Request, current_user: dict = Depends(get_current_user)):
+@router.post("/upgrade-plan", summary="Upgrade creator account to Studio Pro tier")
+async def upgrade_plan_endpoint(request: Request, current_user: dict = Depends(get_current_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
 
     pref_str = current_user.get("preferences") or "{}"
@@ -181,8 +134,8 @@ async def upgrade_plan(request: Request, current_user: dict = Depends(get_curren
     return {"success": True, "message": "Successfully upgraded to Studio Pro."}
 
 
-@router.post("/purchase-credits")
-async def purchase_credits(body: PurchaseCreditsRequest, request: Request, current_user: dict = Depends(get_current_user)):
+@router.post("/purchase-credits", summary="Purchase additional compute credits")
+async def purchase_credits_endpoint(body: PurchaseCreditsRequest, request: Request, current_user: dict = Depends(get_current_user)):
     ip_addr = request.client.host if request.client else "127.0.0.1"
 
     new_credits = record_credit_transaction(current_user["user_id"], body.credits, "purchase")
@@ -196,8 +149,8 @@ async def purchase_credits(body: PurchaseCreditsRequest, request: Request, curre
     }
 
 
-@router.get("/credits")
-async def get_credits(current_user: dict = Depends(get_current_user)):
+@router.get("/credits", response_model=CreditsBalanceResponse, operation_id="get_credit_balance", summary="Get remaining compute credit balance")
+async def get_credits_endpoint(current_user: dict = Depends(get_current_user)):
     balance = get_available_credits(current_user["user_id"])
     return {
         "success": True,
@@ -207,8 +160,8 @@ async def get_credits(current_user: dict = Depends(get_current_user)):
     }
 
 
-@router.get("/transactions")
-async def get_transactions(
+@router.get("/transactions", summary="Get recent credit transaction history")
+async def get_transactions_endpoint(
     limit: int = 100,
     current_user: dict = Depends(get_current_user)
 ):
@@ -217,7 +170,7 @@ async def get_transactions(
     return {"success": True, "transactions": txs, "count": len(txs)}
 
 
-@router.get("/analytics")
-async def get_analytics(current_user: dict = Depends(get_current_user)):
+@router.get("/analytics", summary="Get creator performance analytics")
+async def get_creator_analytics_endpoint(current_user: dict = Depends(get_current_user)):
     data = get_creator_analytics(current_user["user_id"])
     return {"success": True, "analytics": data}

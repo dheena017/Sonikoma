@@ -30,16 +30,18 @@ class TestEndpointFilter(unittest.TestCase):
 
     def test_noisy_paths_are_filtered(self):
         noisy_messages = [
-            'GET /system-logs HTTP/1.1',
+            'GET /system/logs?since=0 HTTP/1.1" 200',
+            'GET /api/v1/system/logs?since=0 HTTP/1.1" 200',
+            'GET /system-logs HTTP/1.1" 200',
             'GET /api/system-logs 200 OK',
-            'GET /api/v1/system-logs/stream HTTP/1.1',
+            'GET /api/v1/system/logs/stream HTTP/1.1" 200',
             'GET /api/health 200',
             'GET /api/v1/health 200',
             'GET /healthz 200',
             'GET /metrics 200',
             'GET /api/status 200',
             'OPTIONS / 200',
-            'GET /favicon.ico 404',
+            'GET /favicon.ico 200',
         ]
         for msg in noisy_messages:
             record = logging.LogRecord(
@@ -56,6 +58,8 @@ class TestEndpointFilter(unittest.TestCase):
             'GET /api/auth/me 200 OK',
             'User logged in successfully',
             '[Startup] Pre-warming rembg U-2-Net session...',
+            'GET /api/health 500 Internal Server Error',  # Errors on health checks MUST pass through!
+            'GET /api/v1/system/logs 500',               # Failures must be visible!
         ]
         for msg in valid_messages:
             record = logging.LogRecord(

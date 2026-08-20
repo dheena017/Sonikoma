@@ -5,13 +5,14 @@ Logging setup, custom levels configuration, and helper functions.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import os
 import sys
 import logging
 from typing import List, Dict, Any, Callable
 
-from app.core.logging.formatters import ColoredFormatter
-from app.core.logging.filters import EndpointFilter
-from app.core.logging.handlers import (
+from .formatters import ColoredFormatter
+from .filters import EndpointFilter
+from .handlers import (
     UIStreamLogHandler,
     log_buffer,
     listeners
@@ -56,7 +57,9 @@ logger = logging.getLogger("sonikoma.api")
 
 def setup_logging():
     """Initializes the global logging configuration."""
-    from app.startup.bootstrap import LOG_LEVEL
+    log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+    log_level = getattr(logging, log_level_name, logging.INFO)
+
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))
     console_handler.addFilter(EndpointFilter())
@@ -75,9 +78,14 @@ def setup_logging():
         root_logger.addHandler(ui_handler)
 
     root_logger.addHandler(console_handler)
-    root_logger.setLevel(LOG_LEVEL)
+    root_logger.setLevel(log_level)
     
-    logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
+    endpoint_filter = EndpointFilter()
+    for uvicorn_log_name in ("uvicorn", "uvicorn.access", "uvicorn.error", "uvicorn.asgi"):
+        u_log = logging.getLogger(uvicorn_log_name)
+        u_log.addFilter(endpoint_filter)
+        for h in u_log.handlers:
+            h.addFilter(endpoint_filter)
 
 
 def get_logs(since: int = 0) -> List[Dict[str, Any]]:

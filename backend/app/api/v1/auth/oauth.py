@@ -367,13 +367,15 @@ async def google_session(request: Request):
         raise HTTPException(status_code=401, detail="OAuth session cookie is invalid or expired.")
 
     return JSONResponse({
+        "success": True,
         "access_token": cookie_token,
         "token_type": "bearer",
         "user": {
             "user_id": user.get("user_id"),
             "email": user.get("email"),
-            "full_name": user.get("full_name"),
+            "full_name": user.get("full_name") or user.get("username"),
             "avatar_url": user.get("avatar_url"),
+            "creator_role": user.get("creator_role", "creator"),
         },
     })
 

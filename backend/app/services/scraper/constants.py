@@ -61,7 +61,10 @@ UNWANTED_PATTERNS = [
     "google-analytics", "googletagmanager", "/tr?", "doubleclick", "analytics",
     "age_all_white", "agerate", "defaultuser", "android-chrome", "apple-touch-icon",
     "membership-", "avatar", "share_btn", "icon_", "banner", "promo", "thumb",
-    "read-manga-", "read-manhua-", "read-manhwa-", "-75x106", "-150x150"
+    "read-manga-", "read-manhua-", "read-manhwa-", "-75x106", "-150x150",
+    "pocketcomics", "pocket_comics", "app_icon", "app-icon", "appstore", "googleplay",
+    "playstore", "download_app", "web_app", "app_banner", "site_logo", "/_nuxt/",
+    "img_app_", "img_app", "app_comico", "original_image."
 ]
 
 # Image extensions
@@ -72,6 +75,6 @@ IMAGE_EXTENSIONS = (
 # Minimum threshold for reader candidate validation
 MIN_READER_CONFIDENCE_THRESHOLD = 40.0
 
-# Minimum image dimensions for validation
-DEFAULT_MIN_IMAGE_WIDTH = 80
-DEFAULT_MIN_IMAGE_HEIGHT = 80
+# Minimum image dimensions for comic panels (eliminates 100x150 thumbnail cards)
+DEFAULT_MIN_IMAGE_WIDTH = 250
+DEFAULT_MIN_IMAGE_HEIGHT = 250

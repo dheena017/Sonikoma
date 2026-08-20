@@ -27,8 +27,13 @@ class NetworkInterceptor:
 
             headers = response.headers
             ct = (headers.get("content-type") or "").lower()
+            url_clean = url.lower().split("?")[0]
 
-            if "image/" in ct and not any(ign in ct for ign in ["svg", "gif", "icon"]):
+            is_image = (
+                ("image/" in ct and not any(ign in ct for ign in ["svg", "gif", "icon"])) or
+                any(url_clean.endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp", ".avif"])
+            )
+            if is_image and not any(ign in url_clean for ign in ["1x1", "spacer", "blank", "loading", "pixel", "avatar", "logo", "spinner"]):
                 if url not in self.intercepted_images:
                     self.intercepted_images.append(url)
             elif "application/json" in ct or "text/json" in ct:

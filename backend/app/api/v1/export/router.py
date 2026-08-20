@@ -25,7 +25,7 @@ export_router.include_router(credentials_router, prefix="/youtube")
 
 
 @export_router.get("/youtube/history", summary="Get YouTube video upload history")
-async def api_get_youtube_history(current_user: dict = Depends(get_current_user)):
+async def get_youtube_history_endpoint(current_user: dict = Depends(get_current_user)):
     user_id = current_user.get("id")
     try:
         history = get_youtube_publications(user_id)

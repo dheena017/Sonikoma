@@ -17,8 +17,8 @@ logger = logging.getLogger("sonikoma.auth.register")
 router = APIRouter()
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserRegister):
+@router.post("/register", status_code=status.HTTP_201_CREATED, summary="Register a new user account")
+async def register_endpoint(user_data: UserRegister):
     existing_user = get_user_by_email(user_data.email)
     if existing_user:
         raise HTTPException(

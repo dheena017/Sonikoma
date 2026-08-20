@@ -2,7 +2,7 @@
 backend/app/api/v1/audio.py
 ─────────────────────────────────────────────────────────────────────────────
 FastAPI routes for TTS generation, dialogue-OCR alignment, Whisper STT,
-and Librosa audio analysis. Acts as a thin controller delegating logic to services.
+and audio waveform analysis. Acts as a thin controller delegating logic to services.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -44,10 +44,6 @@ logger = logging.getLogger("sonikoma.api.audio")
 audio_router = APIRouter()
 router = audio_router
 
-# Aliases expected by api/router.py
-librosa_router = APIRouter()
-whisper_router = APIRouter()
-
 
 class AudioAnalyzeRequest(AudioPathRequest):
     pass
@@ -57,18 +53,10 @@ def _default_output_path(suffix: str) -> str:
     return os.path.join(tempfile.gettempdir(), f"whisper_{os.urandom(4).hex()}{suffix}")
 
 
-@router.post("/align-dialogue/{panel_id}", summary="Align OCR text to Whisper transcript and extract audio peaks")
-async def align_dialogue(panel_id: str, body: AlignDialogueRequest):
-    try:
-        result = await align_dialogue_service(panel_id=panel_id, audio_url=body.audio_url, ocr_texts=body.ocr_texts)
-        return result
-    except Exception as e:
-        logger.error(f"[Dialogue Alignment API Error] failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+# ─── 1. Text-To-Speech Synthesis ─────────────────────────────────────────────
 
-
-@router.post("/generate", summary="Generate TTS panel audio")
-async def generate_audio(body: AudioGenerateRequest):
+@router.post("/tts", summary="Generate TTS panel audio")
+async def generate_tts_endpoint(body: AudioGenerateRequest):
     try:
         result = await generate_tts_audio(
             dialogue_list=body.dialogue_list,
@@ -84,14 +72,28 @@ async def generate_audio(body: AudioGenerateRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.get("/voices", summary="List available Edge-TTS voices (subset)")
-async def list_voices():
+@router.get("/voices", summary="List available Edge-TTS voices")
+async def list_voices_endpoint():
     voices = get_available_voices()
     return JSONResponse(content={"success": True, "voices": voices})
 
 
-@router.post("/analyze", summary="Extract audio summary statistics")
-async def analyze_audio(body: AudioAnalyzeRequest):
+# ─── 2. Dialogue & Waveform Alignment ────────────────────────────────────────
+
+@router.post("/align/{panel_id}", summary="Align OCR text to Whisper transcript and extract audio peaks")
+async def align_dialogue_endpoint(panel_id: str, body: AlignDialogueRequest):
+    try:
+        result = await align_dialogue_service(panel_id=panel_id, audio_url=body.audio_url, ocr_texts=body.ocr_texts)
+        return result
+    except Exception as e:
+        logger.error(f"[Dialogue Alignment API Error] failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 3. Audio Analysis & Segmentation ────────────────────────────────────────
+
+@router.post("/analyze", summary="Extract audio waveform summary statistics")
+async def analyze_audio_endpoint(body: AudioAnalyzeRequest):
     try:
         stats = await analyze_audio_service(body.audio_path)
         return {"success": True, "analysis": stats}
@@ -102,8 +104,8 @@ async def analyze_audio(body: AudioAnalyzeRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/detect-silence", summary="Detect silence segments in audio")
-async def detect_silence(body: SilenceDetectRequest):
+@router.post("/silence", summary="Detect silence segments in audio")
+async def detect_silence_endpoint(body: SilenceDetectRequest):
     try:
         segments = await detect_silence_service(
             body.audio_path,
@@ -118,8 +120,8 @@ async def detect_silence(body: SilenceDetectRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/segment-by-energy", summary="Segment audio by energy levels")
-async def segment_by_energy(body: EnergySegmentRequest):
+@router.post("/segments", summary="Segment audio by energy levels")
+async def segment_audio_by_energy_endpoint(body: EnergySegmentRequest):
     try:
         segments = await segment_by_energy_service(
             body.audio_path,
@@ -134,25 +136,10 @@ async def segment_by_energy(body: EnergySegmentRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/load", summary="Load audio metadata and shape")
-async def load_audio(body: AudioPathRequest):
-    try:
-        result = await load_audio_service(body.audio_path)
-        return {
-            "success": True,
-            "duration_seconds": result["duration_seconds"],
-            "sample_rate": result["sample_rate"],
-            "samples": result["samples"]
-        }
-    except ValueError as val_err:
-        raise HTTPException(status_code=503, detail=str(val_err))
-    except Exception as exc:
-        logger.error(f"Load audio failed: {exc}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(exc))
+# ─── 4. Whisper STT Transcription & Subtitles ────────────────────────────────
 
-
-@router.post("/transcribe", summary="Transcribe audio to text")
-async def transcribe(body: TranscribeRequest):
+@router.post("/transcribe", summary="Transcribe audio to text via Whisper")
+async def transcribe_audio_endpoint(body: TranscribeRequest):
     try:
         result = await transcribe_audio_service(
             body.audio_path,
@@ -176,8 +163,24 @@ async def transcribe(body: TranscribeRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/generate-srt", summary="Generate SRT subtitle file")
-async def generate_srt(body: SubtitleRequest):
+@router.post("/transcribe/batch", summary="Transcribe multiple audio files")
+async def batch_transcribe_audio_endpoint(body: BatchTranscribeRequest):
+    try:
+        results = await batch_transcribe_service(
+            body.audio_paths,
+            model_name=body.model_name,
+            language=body.language
+        )
+        return {"success": True, "results": results}
+    except ValueError as val_err:
+        raise HTTPException(status_code=503, detail=str(val_err))
+    except Exception as exc:
+        logger.error(f"Batch transcribe failed: {exc}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/subtitles/srt", summary="Generate SRT subtitle file")
+async def generate_srt_subtitles_endpoint(body: SubtitleRequest):
     output_path = body.output_path or _default_output_path(".srt")
     try:
         result_path = await generate_srt_service(
@@ -194,8 +197,8 @@ async def generate_srt(body: SubtitleRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/generate-vtt", summary="Generate WebVTT subtitle file")
-async def generate_vtt(body: SubtitleRequest):
+@router.post("/subtitles/vtt", summary="Generate WebVTT subtitle file")
+async def generate_vtt_subtitles_endpoint(body: SubtitleRequest):
     output_path = body.output_path or _default_output_path(".vtt")
     try:
         result_path = await generate_vtt_service(
@@ -212,8 +215,8 @@ async def generate_vtt(body: SubtitleRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/extract-words", summary="Extract word-level timestamps from audio")
-async def extract_words(body: ExtractWordsRequest):
+@router.post("/timestamps", summary="Extract word-level timestamps from audio")
+async def extract_word_timestamps_endpoint(body: ExtractWordsRequest):
     try:
         words = await extract_words_service(
             body.audio_path,
@@ -225,20 +228,4 @@ async def extract_words(body: ExtractWordsRequest):
         raise HTTPException(status_code=503, detail=str(val_err))
     except Exception as exc:
         logger.error(f"Extract words failed: {exc}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(exc))
-
-
-@router.post("/batch-transcribe", summary="Transcribe multiple audio files")
-async def batch_transcribe(body: BatchTranscribeRequest):
-    try:
-        results = await batch_transcribe_service(
-            body.audio_paths,
-            model_name=body.model_name,
-            language=body.language
-        )
-        return {"success": True, "results": results}
-    except ValueError as val_err:
-        raise HTTPException(status_code=503, detail=str(val_err))
-    except Exception as exc:
-        logger.error(f"Batch transcribe failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(exc))
