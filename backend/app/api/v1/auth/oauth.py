@@ -13,6 +13,7 @@ import hmac
 import logging
 import urllib.parse
 import requests
+from typing import Optional
 from fastapi import APIRouter, HTTPException, Request, Query
 from fastapi.responses import RedirectResponse
 

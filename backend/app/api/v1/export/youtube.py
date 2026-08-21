@@ -911,7 +911,7 @@ async def select_youtube_channel(
     needs_auth = False
     auth_url = None
     try:
-        from services.export.youtube.oauth import get_authenticated_service, YOUTUBE_SCOPES
+        from services.export.youtube.oauth import get_authenticated_service
         youtube_service = await get_authenticated_service(user_id=user_id)
         active_token_req = youtube_service.channels().list(part="snippet", mine=True)
         active_token_resp = await asyncio.to_thread(active_token_req.execute)
