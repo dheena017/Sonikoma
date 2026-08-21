@@ -39,7 +39,7 @@ def _detect_helper(image_path: str, params: dict) -> List[dict]:
     except Exception:
         pass
 
-    return run_cv_detection(
+    panels = run_cv_detection(
         image_path=image_path,
         sensitivity=params.get("sensitivity", 30.0),
         bg_mode=params.get("background_mode", "auto"),
@@ -53,6 +53,16 @@ def _detect_helper(image_path: str, params: dict) -> List[dict]:
         auto_split=params.get("auto_split", True),
         use_yolo=params.get("use_yolo", True),
     )
+    for p in panels:
+        if "w" not in p and "width" in p:
+            p["w"] = p["width"]
+        if "h" not in p and "height" in p:
+            p["h"] = p["height"]
+        if "width" not in p and "w" in p:
+            p["width"] = p["w"]
+        if "height" not in p and "h" in p:
+            p["height"] = p["h"]
+    return panels
 
 
 # ─── 1. Vertical Strip Splitting (Background Job) ────────────────────────────
@@ -101,23 +111,63 @@ async def split_strip_panels_endpoint(body: SmartSplitRequest, current_user: dic
 
 # ─── 2. Unified Panel Bounding Box Detection (File Upload & Base64 JSON) ──────
 
+def _extract_params(data: dict) -> dict:
+    """Extract and normalize panel detection parameters from dict or form."""
+    def _get(keys, default):
+        for k in keys:
+            if k in data and data[k] is not None:
+                return data[k]
+        return default
+
+    def _to_float(v, default: float) -> float:
+        try:
+            return float(v)
+        except (ValueError, TypeError):
+            return default
+
+    def _to_int(v, default: int) -> int:
+        try:
+            return int(v)
+        except (ValueError, TypeError):
+            return default
+
+    def _to_bool(v, default: bool) -> bool:
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, (int, float)):
+            return bool(v)
+        if isinstance(v, str):
+            return v.lower() in ("true", "1", "yes")
+        return default
+
+    return {
+        "sensitivity": _to_float(_get(["sensitivity"], 30.0), 30.0),
+        "background_mode": str(_get(["background_mode", "backgroundColorMode", "backgroundMode"], "auto")),
+        "min_width_pct": _to_float(_get(["min_width_pct", "minAreaPct", "min_area_pct"], 0.15), 0.15),
+        "min_height_px": _to_int(_get(["min_height_px", "minHeightPx"], 60), 60),
+        "merge_threshold": _to_int(_get(["merge_threshold", "mergeThreshold"], 20), 20),
+        "aspect_ratio": str(_get(["aspect_ratio", "aspectRatio"], "free")),
+        "canny_low": _to_int(_get(["canny_low", "cannyLow"], 20), 20),
+        "canny_high": _to_int(_get(["canny_high", "cannyHigh"], 100), 100),
+        "close_kernel_size": _to_int(_get(["close_kernel_size", "closeKernelSize"], 15), 15),
+        "auto_split": _to_bool(_get(["auto_split", "autoSplit"], True), True),
+        "use_yolo": _to_bool(_get(["use_yolo", "useYolo"], True), True),
+    }
+
+
 @panels_router.post(
     "/detect",
-    response_model=PanelDetectionResponse,
     operation_id="detect_panels_in_image",
-    summary="Detect panel bounding boxes in a comic image (Unified File Upload & Base64 JSON)",
-    description="Analyzes uploaded webtoon page or base64 JSON payload and detects individual panel bounding boxes via OpenCV and YOLO."
+    summary="Detect panel bounding boxes in a comic image (Unified File Upload & Base64/URL JSON)",
+    description="Analyzes uploaded webtoon page, URL, or base64 JSON payload and detects individual panel bounding boxes via OpenCV and YOLO."
 )
-async def detect_panels_upload_endpoint(
-    request: Request,
-    body: Optional[DetectPanelsBase64Request] = None,
-):
-    image_path = None
+async def detect_panels_upload_endpoint(request: Request):
     content_type = request.headers.get("content-type", "").lower()
 
-    try:
-        # Scenario A: Multipart Form Upload
-        if "multipart/form-data" in content_type:
+    # Scenario A: Multipart Form Upload
+    if "multipart/form-data" in content_type:
+        image_path = None
+        try:
             form = await request.form()
             file = form.get("file")
             if file and hasattr(file, "read"):
@@ -126,57 +176,94 @@ async def detect_panels_upload_endpoint(
                     tmp.write(await file.read())
                     image_path = tmp.name
 
-            def _get_float(key: str, default: float) -> float:
-                val = form.get(key)
-                if not isinstance(val, (str, int, float)):
-                    return default
-                try:
-                    return float(val)
-                except (ValueError, TypeError):
-                    return default
+            if not image_path:
+                raise HTTPException(status_code=400, detail="No image file provided in form data.")
 
-            def _get_int(key: str, default: int) -> int:
-                val = form.get(key)
-                if not isinstance(val, (str, int)):
-                    return default
-                try:
-                    return int(val)
-                except (ValueError, TypeError):
-                    return default
-
-            def _get_str(key: str, default: str) -> str:
-                val = form.get(key)
-                if not isinstance(val, str):
-                    return default
-                return val
-
-            def _get_bool(key: str, default: bool) -> bool:
-                val = form.get(key)
-                if not isinstance(val, str):
-                    return default
-                return val.lower() in ("true", "1", "yes")
-
-            params = {
-                "sensitivity": _get_float("sensitivity", 30.0),
-                "background_mode": _get_str("background_mode", "auto"),
-                "min_width_pct": _get_float("min_width_pct", 0.15),
-                "min_height_px": _get_int("min_height_px", 60),
-                "merge_threshold": _get_int("merge_threshold", 20),
-                "aspect_ratio": _get_str("aspect_ratio", "free"),
-                "canny_low": _get_int("canny_low", 20),
-                "canny_high": _get_int("canny_high", 100),
-                "close_kernel_size": _get_int("close_kernel_size", 15),
-                "auto_split": _get_bool("auto_split", True),
-                "use_yolo": _get_bool("use_yolo", True),
-            }
-        # Scenario B: JSON Payload (Base64 or URL)
-        else:
+            params = _extract_params(dict(form))
+            panels = _detect_helper(image_path, params)
+            
+            img_w, img_h = 0, 0
             try:
-                body_dict = await request.json()
+                from PIL import Image
+                with Image.open(image_path) as im:
+                    img_w, img_h = im.size
             except Exception:
-                body_bytes = await request.body()
-                body_dict = json.loads(body_bytes.decode("utf-8")) if body_bytes else {}
+                pass
 
+            return JSONResponse(content={
+                "success": True,
+                "panels": panels,
+                "count": len(panels),
+                "total_panels": len(panels),
+                "imageWidth": img_w,
+                "imageHeight": img_h,
+                "isTallStrip": (img_h > img_w * 2) if img_w else False,
+                "fallback": False,
+                "message": f"Detected {len(panels)} panel(s).",
+            })
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error(f"Panel detection failed: {exc}", exc_info=True)
+            raise HTTPException(status_code=500, detail=str(exc))
+        finally:
+            if image_path and os.path.exists(image_path):
+                try:
+                    os.remove(image_path)
+                except OSError:
+                    pass
+
+    # Scenario B: JSON Payload (Base64, URL, or batch URLs)
+    else:
+        try:
+            body_dict = await request.json()
+        except Exception:
+            body_bytes = await request.body()
+            body_dict = json.loads(body_bytes.decode("utf-8")) if body_bytes else {}
+
+        params = _extract_params(body_dict)
+
+        # Batch handling if 'urls' is provided
+        urls = body_dict.get("urls")
+        if isinstance(urls, list) and urls:
+            results = []
+            for url in urls:
+                single_tmp = None
+                try:
+                    res = await resolve_image_to_buffer(url)
+                    raw = res.get("data")
+                    if not raw:
+                        results.append({"url": url, "success": False, "error": "Failed to resolve image data.", "panels": []})
+                        continue
+                    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                        tmp.write(raw)
+                        single_tmp = tmp.name
+                    panels = _detect_helper(single_tmp, params)
+                    results.append({
+                        "url": url,
+                        "success": True,
+                        "panels": panels,
+                        "count": len(panels),
+                        "total_panels": len(panels),
+                        "data": {
+                            "success": True,
+                            "panels": panels,
+                            "count": len(panels),
+                        }
+                    })
+                except Exception as e:
+                    results.append({"url": url, "success": False, "error": str(e), "panels": []})
+                finally:
+                    if single_tmp and os.path.exists(single_tmp):
+                        try:
+                            os.remove(single_tmp)
+                        except OSError:
+                            pass
+            return JSONResponse(content={"success": True, "results": results, "count": len(results)})
+
+        # Single image detection (base64 or URL)
+        image_path = None
+        try:
             b64_str = body_dict.get("image_base64") or body_dict.get("base64") or body_dict.get("image")
             img_url = body_dict.get("image_url") or body_dict.get("url")
 
@@ -206,42 +293,39 @@ async def detect_panels_upload_endpoint(
                     logger.error(f"[Panel Detection] Failed to resolve image URL '{img_url}': {e}")
                     raise HTTPException(status_code=400, detail=f"Failed to fetch image: {str(e)}")
             else:
-                raise HTTPException(status_code=422, detail="Must provide 'image_base64', 'image_url', or multipart 'file'.")
+                raise HTTPException(status_code=422, detail="Must provide 'image_base64', 'image_url', 'url', or multipart 'file'.")
 
-            params = {
-                "sensitivity": float(body_dict.get("sensitivity", 30.0)),
-                "background_mode": str(body_dict.get("background_mode", "auto")),
-                "min_width_pct": float(body_dict.get("min_width_pct", 0.15)),
-                "min_height_px": int(body_dict.get("min_height_px", 60)),
-                "merge_threshold": int(body_dict.get("merge_threshold", 20)),
-                "aspect_ratio": str(body_dict.get("aspect_ratio", "free")),
-                "canny_low": int(body_dict.get("canny_low", 20)),
-                "canny_high": int(body_dict.get("canny_high", 100)),
-                "close_kernel_size": int(body_dict.get("close_kernel_size", 15)),
-                "auto_split": bool(body_dict.get("auto_split", True)),
-                "use_yolo": bool(body_dict.get("use_yolo", True)),
-            }
+            logger.info(f"[Panel Detection] Processing panel detection")
+            panels = _detect_helper(image_path, params)
+            logger.info(f"[Panel Detection] Successfully detected {len(panels)} panels.")
 
-        if not image_path:
-            raise HTTPException(status_code=400, detail="No image file or image data provided.")
-
-        logger.info(f"[Panel Detection] Processing panel detection")
-        panels = _detect_helper(image_path, params)
-        logger.info(f"[Panel Detection] Successfully detected {len(panels)} panels.")
-        return JSONResponse(content={
-            "success": True,
-            "panels": panels,
-            "count": len(panels),
-            "message": f"Detected {len(panels)} panel(s).",
-        })
-    except HTTPException:
-        raise
-    except Exception as exc:
-        logger.error(f"Panel detection failed: {exc}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(exc))
-    finally:
-        if image_path and os.path.exists(image_path):
+            img_w, img_h = 0, 0
             try:
-                os.remove(image_path)
-            except OSError:
+                from PIL import Image
+                with Image.open(image_path) as im:
+                    img_w, img_h = im.size
+            except Exception:
                 pass
+
+            return JSONResponse(content={
+                "success": True,
+                "panels": panels,
+                "count": len(panels),
+                "total_panels": len(panels),
+                "imageWidth": img_w,
+                "imageHeight": img_h,
+                "isTallStrip": (img_h > img_w * 2) if img_w else False,
+                "fallback": False,
+                "message": f"Detected {len(panels)} panel(s).",
+            })
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error(f"Panel detection failed: {exc}", exc_info=True)
+            raise HTTPException(status_code=500, detail=str(exc))
+        finally:
+            if image_path and os.path.exists(image_path):
+                try:
+                    os.remove(image_path)
+                except OSError:
+                    pass
