@@ -247,8 +247,11 @@ async def admin_get_analytics(current_user: dict = Depends(get_admin_user)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get('/admin/activity/export')
-async def admin_export_activity(current_user: dict = Depends(get_admin_user)):
+@router.get('/admin/activity/export', summary="Export platform audit activity logs")
+async def admin_export_activity(
+    format: str = Query("csv", description="Export file format: csv or json"),
+    current_user: dict = Depends(get_admin_user),
+):
     try:
         import io
         import csv

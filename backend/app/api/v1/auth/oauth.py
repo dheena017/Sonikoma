@@ -13,7 +13,7 @@ import hmac
 import logging
 import urllib.parse
 import requests
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Query
 from fastapi.responses import RedirectResponse
 
 from app.core.config import APP_URL
@@ -158,8 +158,12 @@ async def google_login(request: Request):
 
 
 @router.get("/callback", summary="Google OAuth2 authentication callback")
-async def google_callback(request: Request):
-    state = request.query_params.get("state")
+async def google_callback(
+    request: Request,
+    state: Optional[str] = Query(None, description="Google OAuth state token for CSRF protection"),
+    code: Optional[str] = Query(None, description="Google OAuth authorization code"),
+):
+    state = state or request.query_params.get("state")
     if not state:
         raise HTTPException(status_code=400, detail="Missing OAuth state parameter")
 
@@ -170,7 +174,7 @@ async def google_callback(request: Request):
     if not hmac.compare_digest(state, cookie_state):
         raise HTTPException(status_code=400, detail="Invalid OAuth state parameter")
 
-    code = request.query_params.get("code")
+    code = code or request.query_params.get("code")
     if not code:
         raise HTTPException(status_code=400, detail="Missing authorization code")
 

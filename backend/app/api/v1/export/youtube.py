@@ -19,7 +19,7 @@ import aiohttp
 import requests
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Request
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Request, Query, Path
 from fastapi.responses import RedirectResponse, JSONResponse
 
 from api.dependencies.auth import get_current_user, get_optional_current_user
@@ -678,16 +678,21 @@ async def youtube_oauth_connect(
 
 
 @router.get("/youtube/oauth/callback", summary="YouTube OAuth callback — saves tokens, redirects to channel selector")
-async def youtube_oauth_callback(request: Request):
+async def youtube_oauth_callback(
+    request: Request,
+    state: Optional[str] = Query(None, description="YouTube OAuth state token for verification"),
+    code: Optional[str] = Query(None, description="Google/YouTube OAuth authorization code"),
+    error: Optional[str] = Query(None, description="OAuth error code if authorization failed"),
+):
     """
     Handles the Google OAuth callback specifically for YouTube channel authorization.
     Verifies the HMAC signature of state to extract and validate the authenticated user_id.
     Does NOT create a Sonikoma login session or JWT.
     Redirects back to /creative-suite/youtube?select_channel=true.
     """
-    state = request.query_params.get("state")
-    code = request.query_params.get("code")
-    error = request.query_params.get("error")
+    state = state or request.query_params.get("state")
+    code = code or request.query_params.get("code")
+    error = error or request.query_params.get("error")
 
     # Determine frontend URL dynamically (never hardcode localhost)
     if APP_URL:
