@@ -873,9 +873,13 @@ const StoryboardTimeline = React.memo(
       return (
         <div
           id="panels_timeline_section"
-          className="bg-neutral-900/60 rounded-2xl border border-neutral-800 p-4 sm:p-6 space-y-4"
+          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-6 space-y-4 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[500px] flex-1 flex flex-col"
         >
-          <StoryboardHeader panelsLength={0} />
+          <StoryboardHeader
+            panelsLength={0}
+            viewLayout={storyboardViewLayout}
+            setViewLayout={setStoryboardViewLayout}
+          />
           <StoryboardEmptyState hasScrapedImages={hasScrapedImages} />
         </div>
       );
@@ -886,7 +890,7 @@ const StoryboardTimeline = React.memo(
     return (
       <div
         id="panels_timeline_section"
-        className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-6 space-y-4 transition-all pb-24 relative shadow-[0_10px_40px_rgba(0,0,0,0.6)]"
+        className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-6 space-y-4 transition-all pb-24 relative shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[500px] flex-1 flex flex-col"
       >
         <StoryboardAnalysisBanner
           isAnalyzingAll={isAnalyzingAll}
@@ -897,6 +901,8 @@ const StoryboardTimeline = React.memo(
           setShowBulkOps={setShowBulkOps}
           isZipping={isZipping}
           panelsLength={panels.length}
+          viewLayout={storyboardViewLayout}
+          setViewLayout={setStoryboardViewLayout}
           selectedCount={selectedCount}
           totalCount={panels.length}
           handleDownloadZip={handleDownloadZip}
@@ -918,8 +924,6 @@ const StoryboardTimeline = React.memo(
           isBatchMerging={isBatchMerging}
           handleCancelBatch={handleCancelBatch}
           handleCancelAnalysis={handleCancelAnalysis}
-          viewLayout={storyboardViewLayout}
-          setViewLayout={setStoryboardViewLayout}
         />
 
         {/* Bulk Operations Menu */}

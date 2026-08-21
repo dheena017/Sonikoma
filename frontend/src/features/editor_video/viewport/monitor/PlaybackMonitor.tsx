@@ -67,11 +67,11 @@ export default function VideoPreviewCinemaPlayer({
     videoUrl && videoDuration > 0
       ? videoDuration
       : panels.length > 0
-      ? panels.reduce(
+        ? panels.reduce(
           (acc, p) => acc + (p.duration || (p as any).duration_sec || 3.0),
           0
         )
-      : 0;
+        : 0;
 
   // Define Chapters dynamically from scraped episode groups or scene panels
   const chapters: Chapter[] = useMemo(() => {
@@ -205,14 +205,14 @@ export default function VideoPreviewCinemaPlayer({
             p.speechRate !== undefined
               ? p.speechRate
               : parseFloat(
-                  localStorage.getItem("ai_comic_speech_rate") || "1.0"
-                ) || 1.0,
+                localStorage.getItem("ai_comic_speech_rate") || "1.0"
+              ) || 1.0,
           speechPitch:
             p.speechPitch !== undefined
               ? p.speechPitch
               : parseFloat(
-                  localStorage.getItem("ai_comic_speech_pitch") || "1.0"
-                ) || 1.0,
+                localStorage.getItem("ai_comic_speech_pitch") || "1.0"
+              ) || 1.0,
           bgmVolume: p.bgmVolume !== undefined ? p.bgmVolume : 50,
           audioDucking: p.audioDucking !== undefined ? p.audioDucking : true,
           musicTheme:
@@ -437,7 +437,7 @@ export default function VideoPreviewCinemaPlayer({
         v.loop = isLooping;
         v.playbackRate = playbackSpeed;
         if (isPlaying) {
-          v.play().catch(() => {});
+          v.play().catch(() => { });
         } else {
           v.pause();
         }
@@ -575,13 +575,13 @@ export default function VideoPreviewCinemaPlayer({
   const activePanelForHover = getPanelAtTime(hoverProgress.time);
   const activePanelNow = isPlaying
     ? getPanelAtTime(currentTime) ||
-      (currentPanelIndex !== undefined && panels[currentPanelIndex]) ||
-      panels[0] ||
-      null
+    (currentPanelIndex !== undefined && panels[currentPanelIndex]) ||
+    panels[0] ||
+    null
     : (currentPanelIndex !== undefined && panels[currentPanelIndex]) ||
-      getPanelAtTime(currentTime) ||
-      panels[0] ||
-      null;
+    getPanelAtTime(currentTime) ||
+    panels[0] ||
+    null;
 
   const activePanelImg = useMemo(() => {
     if (!activePanelNow) return null;
@@ -1037,27 +1037,24 @@ export default function VideoPreviewCinemaPlayer({
         setShowSettings(false);
         setShowChaptersMenu(false);
       }}
-      className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${
-        variant === "floating" || variant === "embedded"
+      className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${variant === "floating" || variant === "embedded"
           ? "w-full h-full rounded-xl"
           : isTheaterMode
-          ? "w-full h-[85vh] lg:h-[90vh]"
-          : "fixed inset-0 z-50 w-screen h-screen"
-      }`}
+            ? "w-full h-[85vh] lg:h-[90vh]"
+            : "fixed inset-0 z-50 w-screen h-screen"
+        }`}
     >
       {/* BACKGROUND OVERLAY */}
       <div className="absolute inset-0 bg-radial-gradient from-purple-950/20 via-black to-black opacity-95 pointer-events-none z-0" />
 
       {/* CINEMATIC LETTERBOX BARS */}
       <div
-        className={`absolute top-0 inset-x-0 bg-black z-40 transition-all duration-500 pointer-events-none ${
-          cinematicBars ? "h-[10%] opacity-100" : "h-0 opacity-0"
-        }`}
+        className={`absolute top-0 inset-x-0 bg-black z-40 transition-all duration-500 pointer-events-none ${cinematicBars ? "h-[10%] opacity-100" : "h-0 opacity-0"
+          }`}
       />
       <div
-        className={`absolute bottom-0 inset-x-0 bg-black z-40 transition-all duration-500 pointer-events-none ${
-          cinematicBars ? "h-[10%] opacity-100" : "h-0 opacity-0"
-        }`}
+        className={`absolute bottom-0 inset-x-0 bg-black z-40 transition-all duration-500 pointer-events-none ${cinematicBars ? "h-[10%] opacity-100" : "h-0 opacity-0"
+          }`}
       />
 
       {/* SUB-COMPONENT: Keyboard HUD Shortcuts */}
@@ -1167,45 +1164,46 @@ export default function VideoPreviewCinemaPlayer({
                 playsInline
               />
             ) : (
-              <div className="relative flex flex-col items-center justify-center text-center px-6 py-8 max-w-md my-auto select-none">
-                <div className="absolute -inset-6 bg-gradient-to-r from-emerald-600/20 via-teal-600/15 to-cyan-600/15 rounded-3xl blur-3xl opacity-75 animate-pulse pointer-events-none" />
-                <div className="relative w-full bg-neutral-900/80 backdrop-blur-2xl border border-emerald-500/30 rounded-3xl p-7 shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col items-center space-y-4 overflow-hidden">
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
-                  <div className="relative pt-1">
-                    <div className="relative h-14 w-14 rounded-2xl bg-neutral-950/90 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                      <Video className="h-7 w-7 text-emerald-400" />
-                    </div>
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-black uppercase tracking-widest">
-                    <span>Compiled MP4 Stream</span>
-                  </div>
-                  <div className="space-y-1.5">
-                    <h2 className="text-xl font-black text-white">
-                      No Compiled Video Yet
-                    </h2>
-                    <p className="text-xs text-neutral-400 max-w-xs leading-relaxed font-mono">
-                      Export your storyboard cut sequence to generate the final
-                      rendered MP4 video file.
-                    </p>
-                  </div>
+              <div className="flex flex-col items-center justify-center text-center p-6 space-y-3 select-none my-auto">
+                <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+                  <Video className="h-5 w-5" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-xs sm:text-sm font-bold text-white font-mono uppercase tracking-wider">
+                    No Compiled Video Yet
+                  </h3>
+                  <p className="text-[11px] sm:text-xs text-neutral-400 font-mono max-w-xs leading-relaxed">
+                    Export your storyboard cut sequence above to generate the final rendered MP4 video file.
+                  </p>
                 </div>
               </div>
             )
           ) : activePanelNow &&
             (activePanelImg || activePanelNow.layers?.background_url) ? (
-            <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-purple-500/35 rounded-2xl shadow-2xl bg-[#14141f]">
+            <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-purple-500/35 rounded-2xl shadow-2xl bg-[#080811]">
+              {/* Ambient Blurred Backdrop */}
+              <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
+                <img
+                  src={activePanelNow.layers?.background_url || activePanelImg || ""}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-full h-full object-cover object-center filter blur-3xl opacity-30 scale-125 saturate-150 transition-all duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/40" />
+              </div>
+
               {activePanelNow.layers ? (
-                <div className="relative w-full h-full flex items-center justify-center">
-                  <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                <div className="relative w-full h-full flex items-center justify-center z-10 p-2 sm:p-4">
+                  <div className="relative w-full h-full flex items-center justify-center">
                     <img
                       src={activePanelNow.layers.background_url}
-                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
+                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] rounded-lg"
                       style={{ width: "auto", height: "auto" }}
                       alt="Background"
                     />
                     <img
                       src={activePanelNow.layers.background_url}
-                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
+                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] rounded-lg"
                       style={{
                         width: "auto",
                         height: "auto",
@@ -1220,15 +1218,14 @@ export default function VideoPreviewCinemaPlayer({
                     />
                     <img
                       src={activePanelNow.layers.character_url}
-                      className="absolute w-auto h-auto max-w-full max-h-full object-contain z-10 player-panel-image"
+                      className="absolute w-auto h-auto max-w-full max-h-full object-contain z-10 player-panel-image drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] rounded-lg"
                       style={{
                         width: "auto",
                         height: "auto",
                         transform: isPlaying
                           ? subtitlesStyle === "karaoke"
-                            ? `scale(${
-                                1 + (currentTime % 4.5) * 0.035
-                              }) translateY(-4px)`
+                            ? `scale(${1 + (currentTime % 4.5) * 0.035
+                            }) translateY(-4px)`
                             : "scale(1.08) translateY(-6px)"
                           : "scale(1)",
                         transition: "transform 100ms linear",
@@ -1246,7 +1243,7 @@ export default function VideoPreviewCinemaPlayer({
                   </div>
                 </div>
               ) : (
-                <div className="absolute inset-0 w-full h-full flex items-center justify-center">
+                <div className="absolute inset-0 w-full h-full flex items-center justify-center z-10 p-2 sm:p-4">
                   <img
                     src={activePanelImg}
                     onError={(e) => {
@@ -1264,7 +1261,7 @@ export default function VideoPreviewCinemaPlayer({
                         )}`;
                       }
                     }}
-                    className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image"
+                    className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)] rounded-lg"
                     style={{
                       width: "auto",
                       height: "auto",
@@ -1279,47 +1276,19 @@ export default function VideoPreviewCinemaPlayer({
               )}
             </div>
           ) : (
-            <div className="relative flex flex-col items-center justify-center text-center px-6 py-8 max-w-md my-auto select-none">
-              {/* Ambient Glowing Background Radial */}
-              <div className="absolute -inset-6 bg-gradient-to-r from-purple-600/25 via-indigo-600/15 to-cyan-600/20 rounded-3xl blur-3xl opacity-75 animate-pulse pointer-events-none" />
-
-              {/* Card Container */}
-              <div className="relative w-full bg-neutral-900/70 backdrop-blur-2xl border border-purple-500/25 rounded-3xl p-7 shadow-[0_25px_70px_rgba(0,0,0,0.85)] flex flex-col items-center space-y-4 overflow-hidden">
-                {/* Gradient Top Accent Bar */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500" />
-
-                {/* Animated Glowing Icon Badge */}
-                <div className="relative pt-1">
-                  <div className="absolute -inset-3 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl blur-lg opacity-40 animate-pulse" />
-                  <div className="relative h-14 w-14 rounded-2xl bg-neutral-950/90 border border-purple-500/40 flex items-center justify-center text-purple-300 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                    <Film className="h-7 w-7 text-purple-300 animate-pulse" />
-                  </div>
-                </div>
-
-                {/* Live Mode Pill Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 font-mono text-[10px] font-black uppercase tracking-widest shadow-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping" />
-                  <span>Adaptation Program Monitor</span>
-                </div>
-
-                {/* Title & Description */}
-                <div className="space-y-1.5">
-                  <h2 className="text-xl sm:text-2xl font-black font-sans text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-100 to-indigo-200 tracking-tight">
-                    Cinema Studio Ready
-                  </h2>
-                  <p className="text-xs text-neutral-400 max-w-xs leading-relaxed font-mono">
-                    Select any panel on the timeline below to stream interactive
-                    cuts, voice narration, and motion effects live.
-                  </p>
-                </div>
-
-                {/* Footer Hint */}
-                <div className="w-full pt-3 flex items-center justify-center gap-2 text-[10px] font-mono text-neutral-500 border-t border-neutral-800/80">
-                  <Sparkles className="h-3 w-3 text-purple-400" />
-                  <span className="text-purple-300/90 font-semibold">
-                    Live playback ready · {panels.length} panel cuts available
-                  </span>
-                </div>
+            <div className="flex flex-col items-center justify-center text-center p-6 space-y-3 select-none my-auto">
+              <div className="h-12 w-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+                <Film className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xs sm:text-sm font-bold text-white font-mono uppercase tracking-wider">
+                  Cinema Monitor Standby
+                </h3>
+                <p className="text-[11px] sm:text-xs text-neutral-400 font-mono max-w-xs leading-relaxed">
+                  {panels.length > 0
+                    ? `Select any panel below to start playback · ${panels.length} cuts ready`
+                    : "No storyboard panels yet · Add or crop panels below to preview"}
+                </p>
               </div>
             </div>
           )}

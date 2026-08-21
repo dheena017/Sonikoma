@@ -28,10 +28,11 @@ from .service import (
     generate_storyboard_only_service
 )
 from .workflow import (
-    scrape_webtoon_episodes,
-    scrape_webtoon_episodes_advanced,
-    scrape_webtoon_episodes_paginated,
-    batch_scrape_series
+    scrape_series_episodes,
+    scrape_series_episodes_advanced,
+    scrape_series_episodes_paginated,
+    batch_scrape_series,
+    batch_scrape_chapters_with_checkpoint
 )
 from .adapters import (
     BaseSiteAdapter,
@@ -65,10 +66,11 @@ __all__ = [
     "scrape_and_initialize_project",
     "generate_storyboard_and_video",
     "generate_storyboard_only_service",
-    "scrape_webtoon_episodes",
-    "scrape_webtoon_episodes_advanced",
-    "scrape_webtoon_episodes_paginated",
+    "scrape_series_episodes",
+    "scrape_series_episodes_advanced",
+    "scrape_series_episodes_paginated",
     "batch_scrape_series",
+    "batch_scrape_chapters_with_checkpoint",
     "BaseSiteAdapter",
     "GenericAdaptiveAdapter",
     "WebtoonsAdapter",

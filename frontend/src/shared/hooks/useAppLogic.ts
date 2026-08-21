@@ -444,6 +444,27 @@ export function useAppLogic() {
         );
       }
 
+      // Semantic URL separation check
+      try {
+        const sep = await api.separateComicUrl(state.fetchWithInterceptor, normalizedTargetUrl);
+        if (sep && sep.success) {
+          if (sep.platform && sep.platform !== "unknown") {
+            state.setSelectedSource(sep.platform);
+          }
+          if (sep.title_slug && !state.seriesTitle) {
+            const formatted = sep.title_slug
+              .replace(/[-_]+/g, " ")
+              .replace(/\b\w/g, (c) => c.toUpperCase());
+            state.setScrapedTitle(formatted);
+          }
+          if (sep.chapter_number && !state.chapterNumber) {
+            state.setChapterNumber(sep.chapter_number);
+          }
+        }
+      } catch (err) {
+        console.debug("[useAppLogic] URL separation background check:", err);
+      }
+
       state.setPanels([]);
       state.setScrapedImages([]);
       state.setSelectedScraped([]);

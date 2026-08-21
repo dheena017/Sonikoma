@@ -150,3 +150,6 @@ class AdaptiveScraperEngine:
             )
             context.completeness = ScrapeCompleteness.FAILED
             return context.to_chapter_result()
+
+    # Alias for convenience
+    scrape = scrape_url

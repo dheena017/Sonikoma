@@ -791,47 +791,7 @@ export default function MainLayout(props: MainLayoutProps) {
           />
         )}
 
-        {/* --- Terminal Floating Interface --- */}
-        <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
-          {isTerminalOpen && (
-            <div className="w-[90vw] md:w-[600px] max-h-[70vh] bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
-              <div className="p-2">
-                <TerminalLogs
-                  consoleLogs={consoleLogs}
-                  setConsoleLogs={setConsoleLogs}
-                />
-              </div>
-            </div>
-          )}
 
-          <button
-            onClick={() => setIsTerminalOpen(!isTerminalOpen)}
-            className={`h-14 w-14 rounded-full flex items-center justify-center shadow-2xl transition-all active:scale-95 cursor-pointer border ${
-              isTerminalOpen
-                ? "bg-rose-600 border-rose-500 text-white rotate-90"
-                : "bg-purple-600 border-purple-500 text-white hover:bg-purple-500"
-            }`}
-            title={isTerminalOpen ? "Close Terminal" : "Open System Terminal"}
-          >
-            {isTerminalOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
 
         {/* Global Active Project Activation Drawer */}
         <ActiveProjectSelectorDrawer

@@ -1,9 +1,18 @@
 """
 backend/app/services/scraper/adapters/generic.py
 ─────────────────────────────────────────────────────────────────────────────
-Autonomous AI-Centric Universal Scraper Adapter (Zero Hardcoded Logic)
-Coordinates Self-Healing Domain Memory, Gemini 2.5 Flash Autonomous Analysis,
-Dynamic State AST Parsers, and Targeted Browser Workers.
+Reason-Driven Self-Adaptive Universal Scraper Adapter.
+Implements the 10-tier architecture:
+  1. L5 Idempotency Cache Check (0ms hit)
+  2. AccessEvaluator (Cloudflare/Bot/403/429 detection)
+  3. Deterministic DOM & Embedded State Extraction
+  4. ExtractionEvaluator (Quantitative Confidence Scoring)
+  5. Self-Healing DomainStrategy Memory
+  6. Gemini 2.5 Flash as Planner via DOMReductionEngine (1-3 KB digest)
+  7. BlueprintValidator (DOM verification before persistence)
+  8. BrowserPool Fallback (Bounded Playwright concurrency with auto-scroll)
+  9. Content Validator, Order Resolver, and Deduplication
+  10. Multi-Level Cache Persistence & Strategy Health Tracking
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -29,30 +38,28 @@ from ..evidence import EvidenceSource
 from ..acquisition import HttpFetcher, BrowserFetcher
 from ..extraction import DomExtractor, EmbeddedStateExtractor, ApiExtractor
 from ..reader_detector import ReaderDetector
-from ..validator import ImageValidator
-from ..order_resolver import OrderResolver
 from ..cache_manager import ScraperCacheManager
 from ..diagnostics import ScraperDiagnosticsLogger
 from ..ai import ScraperAIOrchestrator, UniversalComicBlueprint, DomainMemory
+from ..evaluator import AccessEvaluator, AccessStatus, ExtractionEvaluator, EscalationReason
 
 logger = logging.getLogger("sonikoma.services.scraper.adapters.generic")
 
 
 class GenericAdaptiveAdapter(BaseSiteAdapter):
-    """Universal AI-driven adaptive extraction engine for any webtoon, manga, or comic reader."""
+    """Universal reason-driven, self-healing adaptive extraction engine."""
 
     name: str = "Universal Adaptive Fallback"
     icon: str = "🧭"
-    description: str = "Universal 2-step HTTP + Playwright fallback for any novel or unmapped comic reader."
+    description: str = "Universal self-adaptive scraper with confidence evaluation, AI planning, and browser pooling."
     supported_domains: list = []
 
     @classmethod
     def matches(cls, source_info: SourceInfo) -> bool:
-        """Fallback adapter for all standard sites."""
         return True
 
     def _apply_blueprint_metadata(self, context: ScrapeContext, bp: UniversalComicBlueprint, url: str):
-        """Applies comprehensive AI blueprint metadata onto ScrapeContext."""
+        """Applies blueprint metadata onto ScrapeContext."""
         if bp.series_title: context.series_info.title = bp.series_title
         if bp.series_slug: context.series_info.slug = bp.series_slug
         if bp.author: context.series_info.author = bp.author
@@ -73,40 +80,63 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
         context.checklist.chapter_found = bool(context.chapter_info.title or context.chapter_info.number is not None)
 
     async def scrape(self, context: ScrapeContext) -> ChapterResult:
-        """Executes AI-directed universal extraction on the context."""
+        """Executes the complete self-adaptive extraction workflow."""
         url = context.normalized_url or context.url
         start_time = time.time()
         ScraperDiagnosticsLogger.log_scraper_start(url)
 
         # ---------------------------------------------------------------------
-        # Step 0: Check Self-Healing Domain Memory
+        # Tier 0: L5 Result / Idempotency Cache Check (0ms)
         # ---------------------------------------------------------------------
-        cached_bp = DomainMemory.get_blueprint(url)
-        if cached_bp:
-            logger.info(f"[GenericAdaptiveAdapter] Domain memory cache hit for {url}: strategy={cached_bp.worker_strategy}")
-            self._apply_blueprint_metadata(context, cached_bp, url)
+        cached_result = ScraperCacheManager.get_cached_chapter_result(
+            context.canonical_url,
+            bypass_cache=context.config.bypass_cache or context.config.force_refresh
+        )
+        if cached_result:
+            cached_result.project_id = context.project_id
+            cached_result.job_id = context.job_id
+            return cached_result
+
+        # Check existing learned strategy in DomainMemory
+        active_strategy = DomainMemory.get_strategy(url)
+        if active_strategy and active_strategy.blueprint:
+            logger.info(f"[GenericAdaptiveAdapter] DomainMemory strategy hit for {url}: {active_strategy.strategy_id} (confidence: {active_strategy.confidence})")
+            self._apply_blueprint_metadata(context, active_strategy.blueprint, url)
 
         # ---------------------------------------------------------------------
-        # Step 1: Static HTTP Acquisition (~300ms)
+        # Tier 1: Static HTTP Acquisition
         # ---------------------------------------------------------------------
         t0 = time.time()
-        html, status_code, fetch_dur = await HttpFetcher.fetch_html(
-            url,
-            headers=context.config.headers,
-            cookies=context.config.cookies,
-            timeout=context.config.timeout_seconds
-        )
+        # Check L1 HTML cache
+        html = ScraperCacheManager.get_l1_html(url) if not context.config.bypass_cache else None
+        status_code = 200 if html else None
+
+        if not html:
+            html, status_code, fetch_dur = await HttpFetcher.fetch_html(
+                url,
+                headers=context.config.headers,
+                cookies=context.config.cookies,
+                timeout=context.config.timeout_seconds
+            )
+            if html and status_code == 200:
+                ScraperCacheManager.set_l1_html(url, html)
+
         context.raw_html = html
         l1_dur = (time.time() - t0) * 1000.0
 
+        # Access Evaluation
+        access_status = AccessEvaluator.evaluate_response(status_code, html, context.config.headers)
+        logger.info(f"[GenericAdaptiveAdapter] Access status for {url}: {access_status.value} (HTTP {status_code})")
+
+        # ---------------------------------------------------------------------
+        # Reason-Based Branch: Bot Challenge -> Go directly to BrowserPool
+        # ---------------------------------------------------------------------
+        if access_status in (AccessStatus.BOT_CHALLENGE, AccessStatus.RATE_LIMITED):
+            logger.info(f"[GenericAdaptiveAdapter] {access_status.value} detected. Escalating directly to BrowserPool.")
+            return await self._execute_browser_worker(context, url, start_time, reason=access_status.value)
+
+        # Extract metadata from static HTML if available
         if html:
-            context.evidence.record(
-                source_type=EvidenceSource.STATIC_HTML,
-                source_url=url,
-                payload_summary=f"HTTP status {status_code}, length {len(html)} bytes",
-                confidence=0.9
-            )
-            # Local microdata extraction fallback
             series, chapter = DomExtractor.extract_metadata(html, url)
             if not context.series_info.title and series.title: context.series_info.title = series.title
             if not context.series_info.description and series.description: context.series_info.description = series.description
@@ -116,217 +146,173 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             if context.chapter_info.number is None and chapter.number is not None: context.chapter_info.number = chapter.number
             if not context.chapter_info.previous and chapter.previous: context.chapter_info.previous = chapter.previous
             if not context.chapter_info.next and chapter.next: context.chapter_info.next = chapter.next
-            context.checklist.chapter_found = bool(context.chapter_info.title or context.chapter_info.number is not None)
-
-            context.record_level("Level 1: Static HTTP", EscalationStatus.SUCCESS, 0.9, 0, l1_dur)
-        else:
-            context.record_level("Level 1: Static HTTP", EscalationStatus.FAILED, 0.0, 0, l1_dur, reason=f"Status {status_code}")
 
         # ---------------------------------------------------------------------
-        # Step 2: AI Central Brain Analysis (Gemini 2.5 Flash ~350ms)
+        # Tier 2: Deterministic Extraction (DOM + State)
         # ---------------------------------------------------------------------
-        active_bp = cached_bp
-        if not active_bp and context.raw_html:
-            ai_bp = await ScraperAIOrchestrator.analyze_page(context.raw_html, url)
-            if ai_bp:
-                active_bp = ai_bp
-                self._apply_blueprint_metadata(context, ai_bp, url)
-                DomainMemory.save_blueprint(url, ai_bp)
+        if html:
+            soup = DomExtractor.get_soup(html)
 
-        # ---------------------------------------------------------------------
-        # Step 3: Dynamic Extraction (DOM + Universal JSON State)
-        # ---------------------------------------------------------------------
-        if context.raw_html:
-            t0 = time.time()
-            dom_images: List[CandidateImage] = []
-            soup = DomExtractor.get_soup(context.raw_html)
-
-            # A. If AI Blueprint identified a targeted container selector
-            if active_bp and active_bp.container_selector and soup:
-                ai_node = soup.select_one(active_bp.container_selector)
-                if ai_node:
-                    dom_images = DomExtractor.extract_images_from_container(
-                        ai_node, url, active_bp.container_selector
-                    )
-
-            # B. Standard heuristic container detection (runs if AI container missing or returned < 3 images)
-            if len(dom_images) < 3:
-                candidates_all, best_reader = ReaderDetector.detect_reader(context.raw_html)
-                context.reader_candidates = candidates_all
-                context.selected_reader = best_reader
-
-                if best_reader and soup:
-                    context.checklist.reader_found = True
-                    selected_node = soup.select_one(best_reader.selector)
-                    if selected_node:
-                        detector_images = DomExtractor.extract_images_from_container(selected_node, url, best_reader.selector)
-                        if len(detector_images) > len(dom_images):
-                            dom_images = detector_images
-
-                # If still under threshold, use full DOM density clustering fallback
-                if len(dom_images) < 3 and soup:
-                    fallback_images = DomExtractor.extract_manga_images_fallback(soup, url)
-                    if len(fallback_images) > len(dom_images):
-                        dom_images = fallback_images
-
-            # C. Universal Dynamic State AST Extraction (Next.js / Nuxt / JSON)
-            embedded_images: List[CandidateImage] = EmbeddedStateExtractor.extract_from_html(context.raw_html, url)
-
-            l2_images: List[CandidateImage] = dom_images if len(dom_images) >= len(embedded_images) else embedded_images
-            l2_dur = (time.time() - t0) * 1000.0
-
-            if (active_bp and len(dom_images) >= 3) or len(l2_images) >= 15:
-                context.candidate_images.extend(l2_images)
-                context.checklist.reader_found = True
-                context.checklist.reader_end_reached = True
-                context.checklist.lazy_loading_finished = True
-                context.completeness = ScrapeCompleteness.COMPLETE
-                context.record_level("Level 2: AI & DOM Extraction", EscalationStatus.SUCCESS, 95.0, len(l2_images), l2_dur)
-                return self._finalize_result(context, active_bp)
-            elif embedded_images and len(embedded_images) >= 15:
-                context.candidate_images.extend(embedded_images)
-                context.completeness = ScrapeCompleteness.COMPLETE
-                context.record_level("Level 2: Dynamic JSON State", EscalationStatus.SUCCESS, 95.0, len(embedded_images), l2_dur)
-                return self._finalize_result(context, active_bp)
-            elif not context.config.enable_browser_fallback and (len(l2_images) >= 3 or len(embedded_images) >= 3):
-                # If browser is disabled, return whatever static panels we found
-                context.candidate_images.extend(l2_images or embedded_images)
-                context.completeness = ScrapeCompleteness.PARTIAL
-                context.record_level("Level 2: DOM & State (Static Fallback)", EscalationStatus.PARTIAL, 70.0, len(context.candidate_images), l2_dur)
-                return self._finalize_result(context, active_bp)
-            else:
-                context.record_level("Level 2: DOM & State", EscalationStatus.PARTIAL, 0.0, len(l2_images), l2_dur)
-
-        # ---------------------------------------------------------------------
-        # Step 4: Targeted Fast Playwright Browser (Dynamic SPAs & Cloudflare)
-        # ---------------------------------------------------------------------
-        if context.config.enable_browser_fallback:
-            t0 = time.time()
-            # Clear any partial single-image artifacts from earlier levels
-            context.candidate_images.clear()
-
-            pw_html, net_images, storage = await BrowserFetcher.render_page(
-                url,
-                cookies=context.config.cookies,
-                headers=context.config.headers,
-                timeout_seconds=context.config.timeout_seconds
-            )
-            context.browser_html = pw_html
-            context.intercepted_network_urls = net_images
-            context.local_storage_data = storage.get("local_storage", {})
-            context.session_storage_data = storage.get("session_storage", {})
-            l4_dur = (time.time() - t0) * 1000.0
-
-            if pw_html:
-                context.evidence.record(
-                    source_type=EvidenceSource.BROWSER_RENDER,
-                    source_url=url,
-                    payload_summary=f"Playwright rendered {len(pw_html)} bytes, {len(net_images)} network assets",
-                    confidence=0.95
+            # Strategy A: Learned blueprint if available
+            if active_strategy and active_strategy.blueprint and active_strategy.blueprint.container_selector:
+                bp_candidates = DomExtractor.extract_with_selector(
+                    soup,
+                    active_strategy.blueprint.container_selector,
+                    active_strategy.blueprint.image_src_attribute or "src",
+                    url
                 )
+                for cand in bp_candidates:
+                    context.candidate_images.append(cand)
 
-                soup_pw = DomExtractor.get_soup(pw_html)
-                pw_dom_images: List[CandidateImage] = []
+            # Strategy B: Reader container scan
+            if not context.candidate_images:
+                reader_info = ReaderDetector.detect_reader(soup, url)
+                if reader_info.is_valid and reader_info.container_element:
+                    dom_candidates = DomExtractor.extract_from_container(reader_info.container_element, url, reader_info.primary_attribute)
+                    for cand in dom_candidates:
+                        context.candidate_images.append(cand)
 
-                # Use AI blueprint selector if available
-                if active_bp and active_bp.container_selector and soup_pw:
-                    ai_node = soup_pw.select_one(active_bp.container_selector)
-                    if ai_node:
-                        pw_dom_images = DomExtractor.extract_images_from_container(ai_node, url, active_bp.container_selector)
+            # Strategy C: Universal DOM Candidate sweep
+            if not context.candidate_images:
+                all_dom = DomExtractor.extract_candidates(soup, url)
+                for cand in all_dom:
+                    context.candidate_images.append(cand)
 
-                if not pw_dom_images or len(pw_dom_images) < 3:
-                    candidates_pw, best_reader_pw = ReaderDetector.detect_reader(pw_html)
-                    if best_reader_pw and soup_pw:
-                        context.selected_reader = best_reader_pw
-                        context.checklist.reader_found = True
-                        sel_node = soup_pw.select_one(best_reader_pw.selector)
-                        if sel_node:
-                            pw_dom_images = DomExtractor.extract_images_from_container(sel_node, url, best_reader_pw.selector)
-                    if (not pw_dom_images or len(pw_dom_images) < 3) and soup_pw:
-                        pw_dom_images = DomExtractor.extract_manga_images_fallback(soup_pw, url)
-
-                context.candidate_images.extend(pw_dom_images)
-
-                # Correlate network intercepted images (clean CDN filtering)
-                dom_urls = {c.url for c in context.candidate_images}
-                for net_url in net_images:
-                    if net_url not in dom_urls and not any(ign in net_url.lower() for ign in ["logo", "avatar", "banner", "ad/", "ads/", "pixel", "icon"]):
-                        context.candidate_images.append(CandidateImage(
-                            url=net_url,
-                            source_type=ImageSourceType.NETWORK,
-                            dom_index=len(context.candidate_images),
-                            is_inside_reader=True,
-                            confidence=0.85
-                        ))
-
-                if len(context.candidate_images) >= 3:
-                    context.checklist.reader_end_reached = True
-                    context.checklist.lazy_loading_finished = True
-                    context.checklist.network_set_complete = True
-                    context.completeness = ScrapeCompleteness.COMPLETE
-                    context.record_level("Level 4-7: Browser & Network", EscalationStatus.SUCCESS, 95.0, len(context.candidate_images), l4_dur)
-                    return self._finalize_result(context)
-                else:
-                    DomainMemory.record_failure(url)
-                    context.record_level("Level 4-7: Browser & Network", EscalationStatus.FAILED, 0.0, len(context.candidate_images), l4_dur, reason=f"Only {len(context.candidate_images)} panels discovered (minimum 3 required)")
-            else:
-                DomainMemory.record_failure(url)
-                context.record_level("Level 4-7: Browser & Network", EscalationStatus.FAILED, 0.0, 0, l4_dur, reason="Browser failed to render")
+            # Strategy D: Embedded State extraction
+            state_candidates = EmbeddedStateExtractor.extract_state_images(html, url)
+            for cand in state_candidates:
+                context.candidate_images.append(cand)
 
         # ---------------------------------------------------------------------
-        # Finalization & Fallback Guard
+        # Tier 3: Extraction Confidence Evaluation
         # ---------------------------------------------------------------------
-        if len(context.candidate_images) < 3:
+        eval_report = ExtractionEvaluator.evaluate(
+            context.candidate_images,
+            html_content=html,
+            source_info=context.source_info
+        )
+        logger.info(f"[GenericAdaptiveAdapter] Confidence evaluation: score={eval_report.confidence:.2f}, reason={eval_report.escalation_reason.value}, acceptable={eval_report.is_acceptable}")
+
+        # High Confidence: Complete deterministic scrape
+        if eval_report.is_acceptable:
+            DomainMemory.record_success(url)
+            return self._finalize_and_cache(context, start_time)
+
+        # ---------------------------------------------------------------------
+        # Tier 4: Low Confidence -> AI Planning Engine (Gemini 2.5 Flash)
+        # ---------------------------------------------------------------------
+        # If an existing strategy failed, record failure to self-heal
+        if active_strategy:
             DomainMemory.record_failure(url)
+
+        if html and eval_report.escalation_reason not in (EscalationReason.DYNAMIC_JS_REQUIRED, EscalationReason.BOT_CHALLENGE_DETECTED):
+            logger.info(f"[GenericAdaptiveAdapter] Low confidence ({eval_report.confidence:.2f}). Invoking Gemini Planner with DOM digest.")
+            new_blueprint = await ScraperAIOrchestrator.analyze_page(html, url)
+
+            if new_blueprint:
+                self._apply_blueprint_metadata(context, new_blueprint, url)
+                DomainMemory.save_blueprint(url, new_blueprint)
+
+                # Re-extract using validated blueprint
+                soup = DomExtractor.get_soup(html)
+                if new_blueprint.container_selector and soup:
+                    re_candidates = DomExtractor.extract_with_selector(
+                        soup,
+                        new_blueprint.container_selector,
+                        new_blueprint.image_src_attribute or "src",
+                        url
+                    )
+                    if re_candidates:
+                        context.candidate_images.clear()
+                        for c in re_candidates:
+                            context.candidate_images.append(c)
+
+                        # Re-evaluate
+                        re_eval = ExtractionEvaluator.evaluate(context.candidate_images, html_content=html)
+                        if re_eval.is_acceptable:
+                            DomainMemory.record_success(url)
+                            return self._finalize_and_cache(context, start_time)
+
+        # ---------------------------------------------------------------------
+        # Tier 5: BrowserPool Worker Fallback (Playwright with Auto-Scroll)
+        # ---------------------------------------------------------------------
+        logger.info(f"[GenericAdaptiveAdapter] Escalating to BrowserPool Playwright worker for: {url}")
+        return await self._execute_browser_worker(context, url, start_time, reason=eval_report.escalation_reason.value)
+
+    async def _execute_browser_worker(
+        self,
+        context: ScrapeContext,
+        url: str,
+        start_time: float,
+        reason: str
+    ) -> ChapterResult:
+        """Executes pooled browser worker with progressive auto-scroll and network capture."""
+        t0 = time.time()
+        browser_html, intercepted_urls, storage = await BrowserFetcher.render_page(
+            url=url,
+            cookies=context.config.cookies,
+            headers=context.config.headers,
+            auto_scroll=True,
+            timeout_seconds=30.0
+        )
+        browser_dur = (time.time() - t0) * 1000.0
+
+        if not browser_html:
+            context.record_level("Level 3: Headless Browser", EscalationStatus.FAILED, 0.0, 0, browser_dur, reason="Browser returned empty content")
             context.completeness = ScrapeCompleteness.FAILED
             context.error = ScrapeError(
                 code=ScrapeErrorCode.READER_NOT_FOUND,
-                message=f"Insufficient comic panels found ({len(context.candidate_images)} discovered, minimum 3 required). The comic page may be paywalled or require regional login.",
-                details={"levels_attempted": [l.level_name for l in context.levels]}
+                message=f"Could not render or access content from {url}. Reason: {reason}"
             )
-            return self._finalize_result(context, active_bp)
+            return self._finalize(context, start_time)
 
-        return self._finalize_result(context, active_bp)
+        context.raw_html = browser_html
+        context.record_level("Level 3: Headless Browser", EscalationStatus.SUCCESS, 0.95, len(intercepted_urls), browser_dur)
 
-    def _finalize_result(self, context: ScrapeContext, active_bp: Optional[UniversalComicBlueprint] = None) -> ChapterResult:
-        """Validates, deduplicates, and produces the finalized ChapterResult."""
-        total_time = (time.time() - context.start_time) * 1000.0
+        # Extract metadata from rendered page
+        series, chapter = DomExtractor.extract_metadata(browser_html, url)
+        if not context.series_info.title and series.title: context.series_info.title = series.title
+        if not context.series_info.cover and series.cover: context.series_info.cover = series.cover
+        if not context.chapter_info.title and chapter.title: context.chapter_info.title = chapter.title
 
-        # 1. Deduplicate while preserving order
-        unique_candidates: list = []
-        seen_urls: set = set()
-        for cand in context.candidate_images:
-            if cand.url not in seen_urls:
-                seen_urls.add(cand.url)
-                unique_candidates.append(cand)
+        # Collect candidate images from rendered DOM
+        b_soup = DomExtractor.get_soup(browser_html)
+        b_candidates = DomExtractor.extract_candidates(b_soup, url)
 
-        # 2. Filter banners & validate using Autonomous AI directives
-        dynamic_unwanted = active_bp.unwanted_patterns if (active_bp and hasattr(active_bp, "unwanted_patterns")) else None
-        url_pat = active_bp.image_url_pattern if (active_bp and hasattr(active_bp, "image_url_pattern")) else None
+        # Combine with intercepted network images
+        combined_cands = list(b_candidates)
+        seen_urls = {c.url for c in b_candidates if c.url}
+        for idx, i_url in enumerate(intercepted_urls):
+            if i_url not in seen_urls:
+                seen_urls.add(i_url)
+                combined_cands.append(CandidateImage(
+                    url=i_url,
+                    source_type=ImageSourceType.NETWORK_INTERCEPTED,
+                    index=len(combined_cands),
+                    is_inside_reader=True,
+                    confidence=0.9
+                ))
 
-        validated, rejections = ImageValidator.validate_candidates(
-            unique_candidates,
-            filter_banners=context.config.filter_banners,
-            dynamic_unwanted_patterns=dynamic_unwanted,
-            url_pattern=url_pat
-        )
-        context.rejections.extend(rejections)
-        context.validated_images = OrderResolver.resolve_order(validated)
+        context.candidate_images.clear()
+        for cand in combined_cands:
+            context.candidate_images.append(cand)
 
-        # Check if validation left fewer than 3 valid panels
-        if len(context.validated_images) < 3 and not context.error:
-            context.completeness = ScrapeCompleteness.FAILED
-            context.error = ScrapeError(
-                code=ScrapeErrorCode.READER_NOT_FOUND,
-                message=f"Panel validation discarded non-chapter assets, leaving only {len(context.validated_images)} images.",
-                details={"rejected_count": len(context.rejections)}
-            )
+        # Final evaluation of browser extraction
+        b_eval = ExtractionEvaluator.evaluate(context.candidate_images, html_content=browser_html)
+        if b_eval.is_acceptable:
+            DomainMemory.record_success(url)
+        else:
+            DomainMemory.record_failure(url)
 
-        ScraperDiagnosticsLogger.log_result(
-            chapter_number=context.chapter_info.number,
-            images_count=len(context.validated_images),
-            new_images_count=0,
-            completeness=context.completeness.value,
-            execution_time_ms=total_time
-        )
-        return context.to_chapter_result()
+        return self._finalize_and_cache(context, start_time)
+
+    def _finalize_and_cache(self, context: ScrapeContext, start_time: float) -> ChapterResult:
+        """Runs L5 cache persistence on top of the inherited _finalize flow."""
+        # Delegate validation + order resolution + ChapterResult construction
+        # to the shared _finalize defined in BaseSiteAdapter.
+        res = self._finalize(context, start_time)
+
+        # Persist to L5 result cache when successful
+        if res.success:
+            ScraperCacheManager.set_cached_chapter_result(context.canonical_url, res)
+        return res

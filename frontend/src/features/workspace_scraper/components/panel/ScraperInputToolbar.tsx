@@ -9,9 +9,11 @@ import {
   CheckCircle2,
   AlertCircle,
   Globe,
+  Layers,
 } from "lucide-react";
 import { parseWebtoonUrl, extractWebtoonUrl } from "@/shared/utils/url";
 import { FavoritesManager } from "@/features/workspace_scraper/episode-scraper/utils/FavoritesManager";
+import { separateComicUrl, type SeparateUrlResult } from "@/api/endpoints/scraper";
 
 export interface ScraperInputToolbarProps {
   targetUrl: string;
@@ -26,6 +28,7 @@ export interface ScraperInputToolbarProps {
   setScrapedGenre?: (genre: string) => void;
   setChapterNumber?: (num: string) => void;
   setChapterTitle?: (title: string) => void;
+  fetchWithInterceptor?: typeof fetch;
 }
 
 export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
@@ -41,13 +44,71 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
   setScrapedGenre,
   setChapterNumber,
   setChapterTitle,
+  fetchWithInterceptor,
 }) => {
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [openSuggestionMenuIdx, setOpenSuggestionMenuIdx] = React.useState<
     number | null
   >(null);
   const [suggestions, setSuggestions] = React.useState<any[]>([]);
+  const [separatedData, setSeparatedData] = React.useState<SeparateUrlResult | null>(null);
+  const [isSeparating, setIsSeparating] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
+
+  // Debounced URL separation via backend /api/v1/scraper/separate-url
+  React.useEffect(() => {
+    const trimmed = targetUrl.trim();
+    if (!trimmed) {
+      setSeparatedData(null);
+      setIsSeparating(false);
+      return;
+    }
+
+    let isMounted = true;
+    const timer = setTimeout(async () => {
+      try {
+        setIsSeparating(true);
+        const fetchClient = fetchWithInterceptor || (window.fetch.bind(window) as any);
+        const result = await separateComicUrl(fetchClient, trimmed);
+        if (isMounted && result && result.success) {
+          setSeparatedData(result);
+
+          // Auto-populate series title if not already populated
+          if (result.title_slug && setSeriesTitle) {
+            const formattedTitle = result.title_slug
+              .replace(/[-_]+/g, " ")
+              .replace(/\b\w/g, (c) => c.toUpperCase());
+            setSeriesTitle(formattedTitle);
+          }
+
+          // Auto-populate chapter number
+          if (result.chapter_number && setChapterNumber) {
+            setChapterNumber(result.chapter_number);
+          }
+
+          // Auto-populate chapter title
+          if (result.chapter_slug && setChapterTitle) {
+            const formattedCh = result.chapter_slug
+              .replace(/[-_]+/g, " ")
+              .replace(/\b\w/g, (c) => c.toUpperCase());
+            setChapterTitle(formattedCh);
+          }
+        }
+      } catch (err) {
+        // Fallback gracefully without breaking UI
+        if (isMounted) {
+          console.debug("[ScraperInputToolbar] URL separation background fetch:", err);
+        }
+      } finally {
+        if (isMounted) setIsSeparating(false);
+      }
+    }, 300);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [targetUrl, fetchWithInterceptor, setSeriesTitle, setChapterNumber, setChapterTitle]);
 
   React.useEffect(() => {
     try {
@@ -116,13 +177,15 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     if (!targetUrl.trim()) return;
     const url = targetUrl.trim();
     FavoritesManager.addEnteredUrl(url);
-    localStorage.setItem("episode_scraper_url", url);
+    // Use separated parent series URL if this was a single chapter URL
+    const destinationUrl = separatedData?.series_url || url;
+    localStorage.setItem("episode_scraper_url", destinationUrl);
     if (onOpenEpisodeScraper) {
-      onOpenEpisodeScraper(url);
+      onOpenEpisodeScraper(destinationUrl);
     } else {
       const nav = (window as any).navigateTo;
       const targetPath = `/scraper/episode-scraper?url=${encodeURIComponent(
-        url
+        destinationUrl
       )}`;
       if (typeof nav === "function") {
         nav(targetPath);
@@ -136,6 +199,22 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
   const urlStatus = React.useMemo(() => {
     const trimmed = targetUrl.trim();
     if (!trimmed) return null;
+
+    if (separatedData && separatedData.success) {
+      const platformDisplay =
+        separatedData.platform && separatedData.platform !== "unknown"
+          ? separatedData.platform.toUpperCase()
+          : separatedData.domain;
+      const typeLabel = separatedData.is_chapter_url
+        ? (separatedData.chapter_number ? `Chapter ${separatedData.chapter_number}` : "Chapter Viewer")
+        : "Series Catalog";
+
+      return {
+        type: "verified",
+        text: `${platformDisplay} • ${typeLabel}`,
+        isChapter: separatedData.is_chapter_url,
+      };
+    }
 
     try {
       const urlObj = new URL(
@@ -151,7 +230,6 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         };
       }
 
-      // Non-comic domains check
       const nonComicDomains = [
         "chatgpt.com", "openai.com", "google.com", "youtube.com", "youtu.be",
         "facebook.com", "twitter.com", "x.com", "instagram.com", "reddit.com",
@@ -164,42 +242,9 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         };
       }
 
-      // Known comic platforms
-      const knownPlatforms: Record<string, string[]> = {
-        "Line Webtoon": ["webtoons.com", "webtoon.com", "naver.com"],
-        "MangaDex": ["mangadex.org", "mangadex.cc", "mangadex.com"],
-        "Bato.to": ["bato.to", "mangatoto.com", "battwo.com", "batocomic.com", "readtoto.com"],
-        "ManhuaTop": ["manhuatop.org"],
-        "Asura Scans": ["asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com"],
-        "Flame Comics": ["flamecomics.xyz", "flamecomics.com", "flamescans.org"],
-        "Reaper Scans": ["reaperscans.com"],
-        "INKR Comics": ["comics.inkr.com", "inkr.com"],
-        "WebComics": ["webcomicsapp.com"],
-        "Tapas": ["tapas.io"],
-        "Tappytoon": ["tappytoon.com"],
-        "Toomics": ["toomics.com"],
-        "Lezhin": ["lezhin.com", "lezhinus.com"],
-        "WP-Manga / Scanlation": [
-          "mangaclash.com", "manhuaus.com", "topmanhua.com", "manhuaplus.org",
-          "manhuaplus.com", "1stkissmanga.io", "1stkissmanga.com", "manganato.com",
-          "readmanganato.com", "mangakakalot.com", "readmangakakalot.com",
-          "manhwa18.cc", "mangatx.com", "kunmanga.com", "harimanga.com",
-          "zinmanga.com", "manhuato.com", "manhwaclan.com", "manhwaden.com", "manga68.com"
-        ],
-      };
-
-      for (const [platform, domains] of Object.entries(knownPlatforms)) {
-        if (domains.some((d) => host === d || host.endsWith(`.${d}`))) {
-          return {
-            type: "verified",
-            text: `Supported Platform: ${platform}`,
-          };
-        }
-      }
-
       return {
         type: "custom",
-        text: `Custom Source: ${host}`,
+        text: `Source: ${host}`,
       };
     } catch {
       return {
@@ -207,7 +252,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         text: "Please enter a valid comic URL",
       };
     }
-  }, [targetUrl]);
+  }, [targetUrl, separatedData]);
 
   return (
     <div className="flex flex-col gap-2.5 w-full">
@@ -328,7 +373,11 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             type="button"
             onClick={handleImportClick}
             disabled={isScraping || !targetUrl.trim()}
-            className="relative px-6 py-3.5 bg-purple-600 hover:bg-purple-500 border border-purple-500/50 rounded-2xl text-xs sm:text-sm font-bold text-white transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+            className={`relative px-6 py-3.5 border rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer ${
+              separatedData?.is_chapter_url || !separatedData?.is_series_url
+                ? "bg-purple-600 hover:bg-purple-500 border-purple-500/50 text-white shadow-purple-900/20"
+                : "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
+            }`}
           >
             {isScraping ? (
               <>
@@ -337,7 +386,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               </>
             ) : (
               <>
-                <ImageIcon className="h-4 w-4" /> Import Images
+                <ImageIcon className="h-4 w-4" /> Import chapter Images
               </>
             )}
           </button>
@@ -346,11 +395,15 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             type="button"
             onClick={handleOpenEpisodeScraperClick}
             disabled={!targetUrl.trim()}
-            className="relative px-5 py-3.5 bg-neutral-950 hover:bg-neutral-900 border border-purple-500/30 hover:border-purple-500/60 rounded-2xl text-xs sm:text-sm font-bold text-purple-300 hover:text-purple-200 transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer"
+            className={`relative px-5 py-3.5 border rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer ${
+              separatedData?.is_series_url && !separatedData?.is_chapter_url
+                ? "bg-purple-600 hover:bg-purple-500 border-purple-500/50 text-white shadow-purple-900/20"
+                : "bg-neutral-950 hover:bg-neutral-900 border-purple-500/30 hover:border-purple-500/60 text-purple-300 hover:text-purple-200"
+            }`}
             title="Browse and select specific episodes for this series URL"
           >
             <Zap className="h-4 w-4 text-purple-400" />
-            Open in Episode Scraper
+            Import Episode Scraper
           </button>
         </div>
       )}
@@ -380,6 +433,12 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/80 border border-neutral-700/50 text-neutral-300 font-medium shadow-sm">
               <Globe className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
               <span>{urlStatus.text}</span>
+            </div>
+          )}
+          {isSeparating && (
+            <div className="inline-flex items-center gap-1 text-[10px] text-neutral-500">
+              <Loader2 className="w-3 h-3 animate-spin text-purple-400" />
+              <span>Analyzing URL...</span>
             </div>
           )}
         </div>

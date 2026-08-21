@@ -673,6 +673,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
             autoSplitTallStrips={autoSplitTallStrips}
             setAutoSplitTallStrips={setAutoSplitTallStrips}
             onUploadImages={handleUploadLocalImages}
+            fetchWithInterceptor={props.fetchWithInterceptor}
             onOpenEpisodeScraper={(url) => {
               // Store URL and navigate to workspace nested scraper route
               const nav = navigateTo || (window as any).navigateTo;

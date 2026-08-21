@@ -316,10 +316,25 @@ const EditorSidebar = ({
                               .setPlayerSettings({ isPlayerOpen: true });
                           }
                           setCurrentSection(item.id);
-                          const el = document.getElementById(
-                            `section-${item.id}`
-                          );
-                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                          requestAnimationFrame(() => {
+                            setTimeout(() => {
+                              const targetMap: Record<string, string[]> = {
+                                monitor: ["section-monitor", "section-monitor-placeholder"],
+                                storyboard: ["section-storyboard", "section-timeline", "panels_timeline_section"],
+                                timeline: ["section-storyboard", "section-timeline", "panels_timeline_section"],
+                                assets: ["section-assets", "section-raw-images"],
+                                autocrop: ["section-storyboard", "section-timeline", "panels_timeline_section"],
+                              };
+                              const candidateIds = targetMap[item.id] || [`section-${item.id}`, item.id];
+                              for (const id of candidateIds) {
+                                const el = document.getElementById(id);
+                                if (el) {
+                                  el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  break;
+                                }
+                              }
+                            }, 60);
+                          });
                         }
                         setIsCollapsed(true);
                       }}

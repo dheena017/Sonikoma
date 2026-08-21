@@ -554,3 +554,38 @@ export const deleteAdminDomain = async (
   });
 };
 
+export interface SeparateUrlResult {
+  success: boolean;
+  raw_url: string;
+  canonical_url: string;
+  series_url: string;
+  chapter_url?: string | null;
+  is_chapter_url: boolean;
+  is_series_url: boolean;
+  platform: string;
+  domain: string;
+  title_slug?: string | null;
+  title_id?: string | null;
+  chapter_slug?: string | null;
+  chapter_number?: string | null;
+  title_no?: string | null;
+  recommended_action: "scrape_series" | "scrape_chapter" | "none" | string;
+  supported_actions: string[];
+}
+
+/**
+ * Decomposes and separates any comic/manga/webtoon URL into constituent entities
+ * (series URL, chapter URL, domain, platform, title/chapter slug, number, recommended action).
+ */
+export const separateComicUrl = async (
+  fetchWithInterceptor: FetchClient,
+  url: string
+): Promise<SeparateUrlResult> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/separate-url", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+  });
+};
+
+

@@ -43,6 +43,7 @@ import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
 import { EpisodeReaderModal } from "./EpisodeReaderModal";
 import { EpisodeScraperEmptyState } from "./EpisodeScraperEmptyState";
 import { NotificationType } from "@/features/app_notification";
+import { getSeriesEpisodes, separateComicUrl } from "@/api/endpoints/scraper";
 import type { Episode } from "../types/EpisodeTypes";
 import { isKnownSite, addCustomSite } from "@/shared/utils/url";
 import { makeSafeFilename } from "@/shared/utils/downloadNaming";
@@ -216,18 +217,12 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     sort_by?: string;
     bypass_cache?: boolean;
   }) => {
-    const body = { ...data };
+    const body: any = { ...data };
     if (body.max_episodes === null) {
       delete body.max_episodes;
     }
 
-    const res = await fetchWithInterceptor("/api/v1/scraper/series", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-
-    return res.json();
+    return await getSeriesEpisodes(fetchWithInterceptor, body);
   };
 
   useEffect(() => {
@@ -333,10 +328,36 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     setSeriesMetadata(null);
     setSelectedUrls([]);
 
+    let targetSeriesUrl = activeUrl;
+    let targetTitleNo = activeTitleNo;
+
+    if (activeUrl && activeUrl.trim()) {
+      try {
+        const sep = await separateComicUrl(fetchWithInterceptor, activeUrl.trim());
+        if (sep && sep.success) {
+          if (sep.series_url) {
+            targetSeriesUrl = sep.series_url;
+          }
+          if (sep.title_no && !targetTitleNo) {
+            targetTitleNo = sep.title_no;
+            setTitleNoInput(sep.title_no);
+          }
+          if (sep.is_chapter_url) {
+            addNotification(
+              `Resolved parent series from chapter link (${sep.domain})`,
+              "info"
+            );
+          }
+        }
+      } catch (e) {
+        console.debug("[EpisodeScraper] URL separation note:", e);
+      }
+    }
+
     try {
       const result = await scrapeEpisodesAPI({
-        url: activeUrl || undefined,
-        title_no: activeTitleNo || undefined,
+        url: targetSeriesUrl || undefined,
+        title_no: targetTitleNo || undefined,
         max_episodes: maxEpisodes,
         sort_by: sortBy,
         bypass_cache: bypassCache,
@@ -346,7 +367,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
         setEpisodes(result.episodes || []);
         setSeriesMetadata(
           result.series
-            ? { ...result.series, url: result.url || activeUrl }
+            ? { ...result.series, url: result.url || targetSeriesUrl || activeUrl }
             : null
         );
 

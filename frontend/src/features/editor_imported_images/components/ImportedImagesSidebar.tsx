@@ -651,7 +651,7 @@ const ChapterScraperDeck = React.memo(
       <>
         <div
           id="scraped_strips_deck"
-          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 lg:p-6 space-y-4 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-w-0 w-full overflow-hidden"
+          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 lg:p-6 space-y-4 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-w-0 w-full min-h-[500px] flex-1 flex flex-col overflow-hidden"
         >
           <ImportedAssetsHeader
             scrapedImagesLength={scrapedImages.length}
@@ -694,17 +694,6 @@ const ChapterScraperDeck = React.memo(
             <ImportImagesOverlay />
           ) : (
             <div className="space-y-4">
-              {/* Shift-select hint banner */}
-              {scrapedImages.length > 1 && (
-                <p className="text-[9px] text-neutral-600 font-mono px-1">
-                  💡 Tip: Hold{" "}
-                  <kbd className="px-1 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono text-[8px]">
-                    Shift
-                  </kbd>{" "}
-                  and click a card to select a range of panels.
-                </p>
-              )}
-
               {/* Grid list of extracted cards */}
               {(() => {
                 const episodeGroups =

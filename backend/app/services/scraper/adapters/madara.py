@@ -239,20 +239,4 @@ class MadaraCmsAdapter(BaseSiteAdapter):
         if chapter.next and not context.chapter_info.next:
             context.chapter_info.next = chapter.next
 
-    def _finalize(self, context: ScrapeContext, start_time: float) -> ChapterResult:
-        total_ms = (time.time() - start_time) * 1000
-        validated, rejections = ImageValidator.validate_candidates(
-            context.candidate_images,
-            filter_banners=context.config.filter_banners
-        )
-        context.rejections.extend(rejections)
-        context.validated_images = OrderResolver.resolve_order(validated)
-
-        ScraperDiagnosticsLogger.log_result(
-            chapter_number=context.chapter_info.number,
-            images_count=len(context.validated_images),
-            new_images_count=0,
-            completeness=context.completeness.value,
-            execution_time_ms=total_ms,
-        )
-        return context.to_chapter_result()
+    # _finalize is inherited from BaseSiteAdapter

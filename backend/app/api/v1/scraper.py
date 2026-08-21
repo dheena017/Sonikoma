@@ -16,6 +16,8 @@ from schemas.scraper import (
     ScrapeEpisodesRequest,
     BatchScrapeRequest,
     SaveScrapedImagesRequest,
+    SeparateUrlRequest,
+    SeparateUrlResponse,
     ScraperAIAnalyzeRequest,
     ScraperAIAnalyzeResponse,
     DomainRecord,
@@ -30,7 +32,7 @@ from services.scraper.ai.domain_memory import DomainMemory
 from services.scraper.ai.orchestrator_scraper import ScraperAIOrchestrator, UniversalComicBlueprint
 from services.scraper.acquisition.http import HttpFetcher
 from services.scraper.acquisition.browser import BrowserFetcher
-from services.scraper.workflow import scrape_webtoon_episodes_advanced
+from services.scraper.workflow import scrape_series_episodes_advanced
 from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
 from repositories.scraper import save_scrape_session
 
@@ -54,6 +56,41 @@ def parse_cookie_string(raw: Optional[str]) -> Optional[Dict[str, str]]:
         if name:
             cookies[name] = value
     return cookies if cookies else None
+
+
+# ─── 0. URL Separation & Semantic Analysis ──────────────────────────────────
+
+@router.post(
+    "/separate-url",
+    response_model=SeparateUrlResponse,
+    summary="Decompose & separate any comic URL into constituent parts",
+    description="Analyzes any raw comic/manga/webtoon URL and extracts its parent series URL, chapter URL, domain, platform, slugs, numbers, and recommended action."
+)
+@router.post("/parse-url", response_model=SeparateUrlResponse, include_in_schema=False)
+async def separate_url_endpoint(
+    payload: SeparateUrlRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    if not payload.url or not payload.url.strip():
+        raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
+    result = UrlNormalizer.separate_url(payload.url)
+    return SeparateUrlResponse(**result)
+
+
+@router.get(
+    "/separate-url",
+    response_model=SeparateUrlResponse,
+    summary="Decompose & separate any comic URL via query parameter"
+)
+@router.get("/parse-url", response_model=SeparateUrlResponse, include_in_schema=False)
+async def separate_url_get_endpoint(
+    url: str,
+    current_user: dict = Depends(get_current_user)
+):
+    if not url or not url.strip():
+        raise HTTPException(status_code=400, detail="Target URL parameter 'url' cannot be empty.")
+    result = UrlNormalizer.separate_url(url)
+    return SeparateUrlResponse(**result)
 
 
 # ─── 1. Canonical Single Chapter Scraper ─────────────────────────────────────
@@ -191,12 +228,13 @@ async def scrape_series_endpoint(
             else:
                 raise Exception("Either url or title_no must be provided for episode discovery.")
 
-            result = await scrape_webtoon_episodes_advanced(
+            result = await scrape_series_episodes_advanced(
                 series_url=target_url,
                 title_no=body.title_no,
-                max_episodes=body.max_episodes or 50,
+                max_episodes=body.max_episodes if (body.max_episodes and body.max_episodes > 0) else None,
                 sort_by=body.sort_by or "latest",
                 page=body.page or 1,
+                per_page=body.per_page or 100,
                 include_ratings=body.include_ratings if body.include_ratings is not None else False,
                 bypass_cache=body.bypass_cache if body.bypass_cache is not None else False,
             )

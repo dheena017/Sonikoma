@@ -143,7 +143,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               }`}
             >
               <Book className="w-3.5 h-3.5" />
-              <span>Scrape Webtoon URL</span>
+              <span>Scrape Comic / Manhwa URL</span>
             </button>
             <button
               type="button"
@@ -186,6 +186,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             setScrapedGenre={setScrapedGenre}
             setChapterNumber={setChapterNumber}
             setChapterTitle={setChapterTitle}
+            fetchWithInterceptor={props.fetchWithInterceptor}
           />
         )}
       </div>

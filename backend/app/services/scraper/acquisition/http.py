@@ -28,12 +28,13 @@ except ImportError:
 
 from .session import SessionManager
 from ..diagnostics import ScraperDiagnosticsLogger
+from ..rate_limiter import rate_limiter
 
 logger = logging.getLogger("sonikoma.services.scraper.http")
 
 
 class HttpFetcher:
-    """Performs resilient asynchronous HTTP requests."""
+    """Performs resilient asynchronous HTTP requests with rate pacing."""
 
     @classmethod
     async def fetch_html(
@@ -45,9 +46,24 @@ class HttpFetcher:
         timeout: float = 25.0
     ) -> Tuple[Optional[str], Optional[int], float]:
         """
-        Fetches HTML from a URL with retry backoff and client failovers.
+        Fetches HTML from a URL with retry backoff, client failovers, and domain rate limiting.
         Returns (html_content, status_code, duration_ms).
         """
+        await rate_limiter.acquire_slot(url)
+        try:
+            return await cls._fetch_html_internal(url, headers, cookies, retries, timeout)
+        finally:
+            rate_limiter.release_slot(url)
+
+    @classmethod
+    async def _fetch_html_internal(
+        cls,
+        url: str,
+        headers: Optional[Dict[str, str]] = None,
+        cookies: Optional[Dict[str, str]] = None,
+        retries: int = 2,
+        timeout: float = 25.0
+    ) -> Tuple[Optional[str], Optional[int], float]:
         start_time = time.time()
         final_headers = SessionManager.build_headers(url, headers)
         final_cookies = SessionManager.build_cookies(cookies)

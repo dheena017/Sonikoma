@@ -56,6 +56,31 @@ class ProcessUrlRequest(BaseModel):
     project_id: Optional[str] = None
 
 
+class SeparateUrlRequest(BaseModel):
+    """Request to decompose and analyze any comic URL into constituent parts."""
+    url: str
+
+
+class SeparateUrlResponse(BaseModel):
+    """Structured breakdown of an entered comic/manga URL."""
+    success: bool = True
+    raw_url: str
+    canonical_url: str
+    series_url: str
+    chapter_url: Optional[str] = None
+    is_chapter_url: bool
+    is_series_url: bool
+    platform: str
+    domain: str
+    title_slug: Optional[str] = None
+    title_id: Optional[str] = None
+    chapter_slug: Optional[str] = None
+    chapter_number: Optional[str] = None
+    title_no: Optional[str] = None
+    recommended_action: str
+    supported_actions: List[str]
+
+
 class SaveScrapedImagesRequest(BaseModel):
     """Persists scraped images to storage."""
     url: str
@@ -69,6 +94,8 @@ class ScrapeEpisodesRequest(BaseModel):
     title_no: Optional[str] = None
     max_episodes: Optional[int] = None
     page: Optional[int] = 1
+    per_page: Optional[int] = 100
+    language: Optional[str] = "en"
     sort_by: Optional[str] = "latest"  # latest, oldest, rating, likes
     include_ratings: Optional[bool] = True
     auto_paginate: Optional[bool] = False

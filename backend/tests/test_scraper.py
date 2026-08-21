@@ -8,7 +8,7 @@ Unit tests for the new Adaptive Webtoon / Chapter Scraper facade and parser.
 import pytest
 from services.scraper.extraction.dom import DomExtractor
 from services.scraper.reader_detector import ReaderDetector
-from services.scraper.workflow import scrape_webtoon_episodes
+from services.scraper.workflow import scrape_series_episodes
 
 
 def test_dom_extractor_empty_soup():

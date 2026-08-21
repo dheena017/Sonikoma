@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  Image as ImageIcon,
+  Images,
   LayoutGrid,
   Rows,
   Save,
@@ -255,7 +255,7 @@ export default function ImportedAssetsHeader({
       <EditorHeaderFrame
         left={selectionLeft}
         right={selectionRight}
-        className="border-b-0 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-neutral-950/95 to-neutral-950/95 border border-emerald-500/35 p-2 shadow-lg"
+        className="border-b-0 rounded-2xl bg-gradient-to-r from-emerald-950/80 via-neutral-950/95 to-neutral-950/95 border border-emerald-500/35 p-3 shadow-lg"
       />
     );
   }
@@ -264,52 +264,54 @@ export default function ImportedAssetsHeader({
   // Standard Deck Header Mode (Nothing Selected)
   // ──────────────────────────────────────────────────────────────────────────
   const titleBlock = (
-    <div className="flex items-center gap-2.5 shrink-0">
-      <div className="h-7 w-7 rounded-lg flex items-center justify-center border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-        <ImageIcon className="h-4 w-4" />
+    <div className="flex items-center gap-3 min-w-0">
+      <div className="h-9 w-9 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center text-emerald-300 shadow-[0_0_16px_rgba(52,211,153,0.3)] shrink-0">
+        <Images className="h-4.5 w-4.5 text-emerald-400" />
       </div>
-      <div className="w-px h-4 bg-neutral-800" />
-      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.9)] shrink-0" />
-        <h3
-          className="font-black text-[10px] sm:text-[11px] text-white uppercase tracking-widest font-mono truncate"
-          title="Imported Assets Pool"
-        >
-          Asset Pool Deck
-        </h3>
-        <span className="text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-mono font-bold shrink-0">
-          {scrapedImagesLength} {scrapedImagesLength === 1 ? "asset" : "assets"}
-        </span>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate">
+            Imported Assets
+          </h3>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-300 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            {scrapedImagesLength}{" "}
+            {scrapedImagesLength === 1 ? "Asset" : "Assets"}
+          </span>
+        </div>
+        <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden lg:block">
+          Scraped image pool, OCR speech bubble extractor & AI smart-crop deck
+        </p>
       </div>
     </div>
   );
 
   const viewToggle = (
-    <div className="flex items-center bg-neutral-950/80 p-0.5 rounded-xl border border-neutral-800/80 shrink-0">
+    <div className="flex items-center bg-neutral-950/90 p-0.5 rounded-xl border border-neutral-800 shadow-inner">
       <button
         type="button"
         onClick={() => setViewLayout("scroll")}
         title="Horizontal Scroll View"
-        className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${
+        className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
           viewLayout === "scroll"
             ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(52,211,153,0.4)]"
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
         }`}
       >
-        <Rows className="w-3 h-3" />
+        <Rows className="w-3.5 h-3.5" />
         <span>Scroll</span>
       </button>
       <button
         type="button"
         onClick={() => setViewLayout("grid")}
         title="Grid View"
-        className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer ${
+        className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
           viewLayout === "grid"
             ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(52,211,153,0.4)]"
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
         }`}
       >
-        <LayoutGrid className="w-3 h-3" />
+        <LayoutGrid className="w-3.5 h-3.5" />
         <span>Grid</span>
       </button>
     </div>
@@ -317,6 +319,35 @@ export default function ImportedAssetsHeader({
 
   const rightBlock = (
     <div className="flex items-center gap-2 shrink-0">
+      {/* Shift+Click Range Selection Tip */}
+      {scrapedImagesLength > 1 && (
+        <span className="hidden xl:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 text-[10px] text-neutral-400 font-mono">
+          <span className="text-amber-400">💡</span>
+          <span>Hold</span>
+          <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-neutral-300 font-mono text-[9px] leading-none">
+            Shift
+          </kbd>
+          <span>for range</span>
+        </span>
+      )}
+
+      {/* Select All Quick Action */}
+      {scrapedImagesLength > 0 && (
+        <button
+          type="button"
+          onClick={handleSelectAllToggle}
+          className="text-[11px] font-mono font-bold border border-emerald-500/35 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 hover:text-emerald-100 rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(52,211,153,0.15)] active:scale-95 cursor-pointer"
+        >
+          <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Select All</span>
+        </button>
+      )}
+
+      {/* Resource Pool Badge */}
+      <span className="hidden sm:inline-flex px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-emerald-500/25 text-emerald-300 text-[10px] font-bold uppercase tracking-wider font-mono shadow-inner">
+        Resource Pool
+      </span>
+
       {/* Episode sidebar toggle — only when multiple episodes loaded */}
       {hasMultipleEpisodes && setIsEpisodeCollapsed && (
         <button
@@ -327,7 +358,7 @@ export default function ImportedAssetsHeader({
               ? "Show Episode Navigator"
               : "Hide Episode Navigator"
           }
-          className={`h-7 px-2.5 rounded-lg text-[10px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
+          className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
             isEpisodeCollapsed
               ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-emerald-300 hover:border-emerald-700"
               : "bg-emerald-600/20 border-emerald-600/50 text-emerald-300 hover:bg-emerald-600/30"
@@ -351,9 +382,9 @@ export default function ImportedAssetsHeader({
         <button
           type="button"
           onClick={handleSaveAssets}
-          className="relative overflow-hidden h-7 px-3.5 rounded-lg font-black text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-white/10 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
+          className="relative overflow-hidden h-8 px-3.5 rounded-xl font-black text-[11px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-purple-500/30 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
         >
-          <Save className="w-3 h-3 text-purple-200" />
+          <Save className="w-3.5 h-3.5 text-purple-200" />
           <span>Save</span>
         </button>
       )}
@@ -365,7 +396,7 @@ export default function ImportedAssetsHeader({
       left={titleBlock}
       center={viewToggle}
       right={rightBlock}
-      className="border-b-0 rounded-2xl bg-[#0c0d16]/70 backdrop-blur-xl border border-white/10 p-2 shadow-lg"
+      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-emerald-950/40 border border-emerald-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
     />
   );
 }

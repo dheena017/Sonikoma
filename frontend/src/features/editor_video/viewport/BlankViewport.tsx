@@ -220,17 +220,14 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
                 isDraggingBackground && setIsDraggingBackground(false)
               }
               onWheel={handleBackgroundWheel}
-              className={`absolute inset-0 w-full h-full cursor-grab transition-all ${
-                selectedLayer === "background"
+              className={`absolute inset-0 w-full h-full cursor-grab transition-all ${selectedLayer === "background"
                   ? "ring-2 ring-inset ring-indigo-500 z-10"
                   : "z-0"
-              } ${isDraggingBackground ? "cursor-grabbing" : ""}`}
+                } ${isDraggingBackground ? "cursor-grabbing" : ""}`}
               style={{
-                transform: `translate(${layerTransforms.background.x}px, ${
-                  layerTransforms.background.y
-                }px) scale(${actualZoom / 100}) rotate(${
-                  layerTransforms.background.rotation
-                }deg)`,
+                transform: `translate(${layerTransforms.background.x}px, ${layerTransforms.background.y
+                  }px) scale(${actualZoom / 100}) rotate(${layerTransforms.background.rotation
+                  }deg)`,
                 opacity: layerTransforms.background.opacity / 100,
               }}
             >
@@ -260,17 +257,14 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
           {layerVisibility.character && charUrl && (
             <div
               onClick={() => setSelectedLayer("character")}
-              className={`absolute max-w-[85%] max-h-[85%] cursor-pointer transition-all z-20 ${
-                selectedLayer === "character"
+              className={`absolute max-w-[85%] max-h-[85%] cursor-pointer transition-all z-20 ${selectedLayer === "character"
                   ? "ring-2 ring-purple-400 border border-purple-500/60 shadow-[0_0_25px_rgba(168,85,247,0.5)]"
                   : ""
-              }`}
+                }`}
               style={{
-                transform: `translate(${layerTransforms.character.x}px, ${
-                  layerTransforms.character.y
-                }px) scale(${layerTransforms.character.scale / 100}) rotate(${
-                  layerTransforms.character.rotation
-                }deg)`,
+                transform: `translate(${layerTransforms.character.x}px, ${layerTransforms.character.y
+                  }px) scale(${layerTransforms.character.scale / 100}) rotate(${layerTransforms.character.rotation
+                  }deg)`,
                 opacity: layerTransforms.character.opacity / 100,
               }}
             >

@@ -107,6 +107,58 @@ async def fetch_with_retry(
     raise last_err or RuntimeError("Max retries reached")
 
 
+import ipaddress
+import socket
+
+# ─── SSRF Security Protection ────────────────────────────────────────────────
+BLOCKED_SUBNETS = [
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("169.254.0.0/16"),  # Cloud metadata IP (169.254.169.254)
+    ipaddress.ip_network("::1/128"),
+    ipaddress.ip_network("fc00::/7"),
+    ipaddress.ip_network("fe80::/10"),
+]
+
+BLOCKED_HOSTNAMES = {"localhost", "127.0.0.1", "0.0.0.0", "backend", "frontend", "internal", "local"}
+
+
+def is_safe_proxy_url(target_url: str) -> tuple[bool, str]:
+    """Validates that a URL is a legitimate public web URL and not an SSRF attack vector."""
+    if not target_url or not target_url.strip():
+        return False, "Target URL is empty"
+    try:
+        parsed = urlparse(target_url.strip())
+        if parsed.scheme.lower() not in ("http", "https"):
+            return False, f"Invalid URL scheme '{parsed.scheme}'. Only HTTP and HTTPS are permitted."
+
+        host = (parsed.hostname or "").lower()
+        if not host:
+            return False, "Missing hostname in target URL"
+
+        if host in BLOCKED_HOSTNAMES or host.endswith(".local") or host.endswith(".internal"):
+            return False, f"Access to private/local hostname '{host}' is strictly forbidden."
+
+        # Resolve hostname to IP and check against blacklisted private subnets
+        try:
+            ip_str = socket.gethostbyname(host)
+            ip_obj = ipaddress.ip_address(ip_str)
+            for subnet in BLOCKED_SUBNETS:
+                if ip_obj in subnet:
+                    return False, f"Access to private subnet IP address '{ip_str}' is strictly forbidden."
+        except socket.gaierror:
+            # If DNS resolution fails, allow httpx to handle or reject
+            pass
+        except Exception:
+            pass
+
+        return True, "Safe"
+    except Exception as e:
+        return False, f"Invalid URL format: {e}"
+
+
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("/image", summary="Spoofed referrer image bypass proxy")
@@ -135,37 +187,15 @@ async def proxy_image_stream_endpoint(
     if fetch_url.startswith("data:") or fetch_url.startswith("blob:") or "data:image/svg" in fetch_url:
         raise HTTPException(status_code=400, detail="Data and Blob URLs are browser-local and not supported by the server image proxy")
 
+    # SSRF Security Validation
+    is_safe, sec_reason = is_safe_proxy_url(fetch_url)
+    if not is_safe:
+        logger.warning(f"[Proxy SSRF Blocked] {fetch_url}: {sec_reason}")
+        raise HTTPException(status_code=403, detail=f"SSRF Security Restriction: {sec_reason}")
+
     tighter = request.query_params.get("tighter") == "true"
     crop_padding_str = request.query_params.get("crop_padding")
     crop_padding = int(crop_padding_str) if crop_padding_str is not None and crop_padding_str.isdigit() else None
-
-    # Validate URL format and handle local/internal URLs by redirecting directly
-    try:
-        parsed_url = urlparse(fetch_url)
-        is_local = False
-        if not parsed_url.scheme:
-            is_local = fetch_url.startswith("/")
-        else:
-            host = (parsed_url.hostname or "").lower()
-            if host in ("localhost", "127.0.0.1") or parsed_url.path.startswith("/api/"):
-                is_local = True
-
-        if is_local:
-            if "/api/proxy-image" in parsed_url.path:
-                raise HTTPException(status_code=400, detail="Local proxy redirect loop is not allowed")
-            redirect_url = parsed_url.path
-            if parsed_url.query:
-                redirect_url += f"?{parsed_url.query}"
-            from fastapi.responses import RedirectResponse
-            logger.info(f"[Proxy] Redirecting local/internal URL directly to: {redirect_url}")
-            return RedirectResponse(url=redirect_url)
-
-        if parsed_url.scheme not in ('http', 'https'):
-            raise HTTPException(status_code=400, detail="Only HTTP/HTTPS URLs are supported.")
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid URL format: {e}")
 
     # Cache lookup
     cache_key_str = f"{fetch_url}_{tighter}_{crop_padding}"
@@ -245,11 +275,15 @@ async def proxy_image_stream_endpoint(
             except Exception:
                 pass
 
-        logger.debug(f"[Proxy] Fetching remote image: {fetch_url[:70]} | referer_candidates={referer_candidates}")
+        # Dynamic derivation of origin and parent domain
+        try:
+            target_parsed = urlparse(fetch_url)
+            if target_parsed.scheme and target_parsed.netloc:
+                _add_ref(f"{target_parsed.scheme}://{target_parsed.netloc}/")
+        except Exception:
+            pass
 
-        # 4. Common manhua/manga reader origins
-        for popular in ["https://www.topmanhua.fan/", "https://topmanhua.fan/", "https://manhwatop.com/", "https://manhuato.com/"]:
-            _add_ref(popular)
+        logger.debug(f"[Proxy] Fetching remote image: {fetch_url[:70]} | referer_candidates={referer_candidates}")
 
         headers_base = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -265,7 +299,7 @@ async def proxy_image_stream_endpoint(
         }
 
         response = None
-        first_ref = referer_candidates[0] if referer_candidates else "https://www.webtoons.com/"
+        first_ref = referer_candidates[0] if referer_candidates else spoof_referer(fetch_url)
         response = await fetch_with_retry(fetch_url, {**headers_base, 'Referer': first_ref})
 
         if response.status_code in (403, 401):

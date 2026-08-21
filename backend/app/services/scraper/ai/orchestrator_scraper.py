@@ -1,9 +1,12 @@
 """
 backend/app/services/scraper/ai/orchestrator_scraper.py
 ─────────────────────────────────────────────────────────────────────────────
-Autonomous AI Comic Intelligence & Scraper Orchestrator
-Uses Gemini 2.5 Flash to extract complete series/chapter metadata and generate
-a dynamic, zero-hardcoding execution blueprint in ~300ms.
+Autonomous AI Comic Intelligence & Scraper Orchestrator.
+Positioned strictly as an architectural Planner (not raw scraper) via Gemini 2.5 Flash.
+Features:
+  1. DOMReductionEngine: Distills 500 KB - 2 MB HTML into a 1-3 KB structural digest.
+  2. BlueprintValidator: Tests proposed AI selectors against actual DOM before persistence.
+  3. AI Circuit Breaker: Automatically prevents cascading failures with rate-limiting cooldown.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -78,298 +81,260 @@ class UniversalComicBlueprint(BaseModel):
         if not isinstance(data, dict):
             return data
         d = dict(data)
-        if not d.get("reading_direction"):
-            d["reading_direction"] = "VERTICAL_SCROLL"
-        if not d.get("worker_strategy"):
-            d["worker_strategy"] = "DOM_DIRECT"
-        if not d.get("image_src_attribute"):
-            d["image_src_attribute"] = "src"
-        if not d.get("status"):
-            d["status"] = "Ongoing"
-        if not d.get("original_language"):
-            d["original_language"] = "en"
-        if d.get("genres") is None:
-            d["genres"] = []
-        if d.get("tags") is None:
-            d["tags"] = []
-        if d.get("sample_image_urls") is None:
-            d["sample_image_urls"] = []
+        if not d.get("reading_direction"): d["reading_direction"] = "VERTICAL_SCROLL"
+        if not d.get("worker_strategy"): d["worker_strategy"] = "DOM_DIRECT"
+        if not d.get("image_src_attribute"): d["image_src_attribute"] = "src"
+        if not d.get("status"): d["status"] = "Ongoing"
+        if not d.get("original_language"): d["original_language"] = "en"
+        if d.get("genres") is None: d["genres"] = []
+        if d.get("tags") is None: d["tags"] = []
+        if d.get("sample_image_urls") is None: d["sample_image_urls"] = []
         d["total_sample_images"] = len(d.get("sample_image_urls", []))
-        if d.get("unwanted_patterns") is None:
-            d["unwanted_patterns"] = []
-        if d.get("ad_banner_selectors") is None:
-            d["ad_banner_selectors"] = []
-        if d.get("requires_anti_hotlink_proxy") is None:
-            d["requires_anti_hotlink_proxy"] = True
+        if d.get("unwanted_patterns") is None: d["unwanted_patterns"] = []
+        if d.get("ad_banner_selectors") is None: d["ad_banner_selectors"] = []
+        if d.get("requires_anti_hotlink_proxy") is None: d["requires_anti_hotlink_proxy"] = True
         if d.get("requires_headless_browser") is None:
             d["requires_headless_browser"] = d.get("worker_strategy") in ("PLAYWRIGHT_FAST", "VISION_SLICER")
-        if d.get("is_tile_scrambled") is None:
-            d["is_tile_scrambled"] = False
-        if d.get("is_infinite_scroll") is None:
-            d["is_infinite_scroll"] = True
-        if d.get("is_canvas_or_slice_rendered") is None:
-            d["is_canvas_or_slice_rendered"] = False
+        if d.get("is_tile_scrambled") is None: d["is_tile_scrambled"] = False
+        if d.get("is_infinite_scroll") is None: d["is_infinite_scroll"] = True
+        if d.get("is_canvas_or_slice_rendered") is None: d["is_canvas_or_slice_rendered"] = False
         return d
+
+
+class DOMReductionEngine:
+    """
+    Compresses raw 500 KB - 2 MB HTML documents into a 1-3 KB structural digest
+    containing only relevant reader candidate regions, image attributes, and script keys.
+    Dramatically reduces Gemini token consumption and latency.
+    """
+
+    @classmethod
+    def build_structural_digest(cls, html: str, url: str, max_chars: int = 4000) -> str:
+        if not html:
+            return f"URL: {url}\n(Empty HTML)"
+
+        soup = BeautifulSoup(html[:120000], "html.parser")
+
+        # Decompose non-relevant markup
+        for tag in soup(["style", "svg", "noscript", "iframe", "footer", "nav", "header", "form"]):
+            tag.decompose()
+
+        # 1. Meta / OpenGraph metadata
+        meta_items = []
+        if soup.head:
+            title_el = soup.head.find("title")
+            if title_el:
+                meta_items.append(f"Title: {title_el.get_text(strip=True)}")
+            for m in soup.head.find_all("meta"):
+                p = m.get("property") or m.get("name") or ""
+                c = m.get("content") or ""
+                if any(k in p.lower() for k in ("og:title", "og:image", "og:description", "author", "comic", "chapter")):
+                    meta_items.append(f"{p}: {c[:100]}")
+
+        # 2. Embedded State Scripts
+        script_summaries = []
+        for s in soup.find_all("script"):
+            s_id = s.get("id", "")
+            s_text = s.get_text() or ""
+            if any(k in s_text for k in ("__NEXT_DATA__", "__NUXT__", "window.__INITIAL_STATE__", "chapter_images", "picture_list")):
+                keys = re.findall(r'"([a-zA-Z0-9_-]+)":', s_text[:1000])[:15]
+                script_summaries.append(f"Script #{s_id}: keys={keys}")
+
+        # 3. Candidate Reader Containers
+        candidate_containers = []
+        for el in soup.find_all(["div", "section", "main", "article", "ul"], limit=40):
+            el_id = el.get("id", "")
+            el_class = ".".join(el.get("class", [])) if isinstance(el.get("class"), list) else str(el.get("class", ""))
+            imgs = el.find_all(["img", "source", "canvas"], limit=6)
+            if len(imgs) >= 1 or any(k in f"{el_id} {el_class}".lower() for k in ("read", "chapter", "viewer", "comic", "manga", "content", "page", "image", "panel")):
+                # Collect attributes present on the images
+                sample_attrs = set()
+                sample_srcs = []
+                for im in imgs:
+                    for attr_name in im.attrs:
+                        if attr_name in ("src", "data-src", "data-lazy-src", "data-original", "nitro-lazy-src", "data-url", "data-echo"):
+                            sample_attrs.add(attr_name)
+                            val = im.attrs[attr_name]
+                            if val and val.startswith("http") and len(sample_srcs) < 3:
+                                sample_srcs.append(val[:80])
+
+                tag_id_str = f"#{el_id}" if el_id else ""
+                tag_cls_str = f".{el_class}" if el_class else ""
+                selector_hint = f"{el.name}{tag_id_str}{tag_cls_str}"
+                candidate_containers.append(
+                    f"Container: {selector_hint} | Images inside: {len(imgs)} | Image attrs: {list(sample_attrs)} | Sample URLs: {sample_srcs}"
+                )
+
+        digest = (
+            f"=== TARGET URL ===\n{url}\n\n"
+            f"=== META ===\n" + "\n".join(meta_items[:6]) + "\n\n"
+            f"=== STATE SCRIPTS ===\n" + ("\n".join(script_summaries[:3]) if script_summaries else "None") + "\n\n"
+            f"=== CANDIDATE READER CONTAINERS ===\n" + ("\n".join(candidate_containers[:10]) if candidate_containers else "None")
+        )
+        return digest[:max_chars]
+
+
+class BlueprintValidator:
+    """
+    Validates proposed AI blueprints against the actual DOM to prevent
+    hallucinated selectors, non-existent attributes, or empty extraction results.
+    """
+
+    @classmethod
+    def validate_blueprint(
+        cls,
+        blueprint: UniversalComicBlueprint,
+        html: str
+    ) -> Tuple[bool, str, int]:
+        """
+        Tests blueprint selectors on the HTML.
+        Returns (is_valid, reason, discovered_images_count).
+        """
+        if not html:
+            return False, "HTML is empty", 0
+
+        soup = BeautifulSoup(html[:150000], "html.parser")
+        selector = blueprint.container_selector
+        src_attr = blueprint.image_src_attribute or "src"
+
+        # 1. Test Container Selector
+        container = None
+        if selector:
+            try:
+                container = soup.select_one(selector)
+            except Exception as e:
+                return False, f"Invalid CSS selector syntax '{selector}': {e}", 0
+
+        if not container:
+            # Fallback test: check if image_url_pattern or sample images match directly in HTML
+            if blueprint.sample_image_urls and len(blueprint.sample_image_urls) > 0:
+                valid_samples = [u for u in blueprint.sample_image_urls if u in html and u.startswith("http")]
+                if len(valid_samples) > 0:
+                    return True, "Accepted via verified sample URL matches", len(valid_samples)
+            return False, f"Container selector '{selector}' not found in DOM", 0
+
+        # 2. Count image nodes inside container
+        img_nodes = container.find_all(["img", "source", "canvas"])
+        if not img_nodes:
+            return False, f"Container '{selector}' exists but contains 0 <img> or <source> elements", 0
+
+        valid_urls = []
+        for im in img_nodes:
+            raw_url = im.get(src_attr) or im.get("data-src") or im.get("data-original") or im.get("data-lazy-src") or im.get("src")
+            if raw_url and isinstance(raw_url, str) and raw_url.startswith("http") and not raw_url.startswith("data:image/svg"):
+                valid_urls.append(raw_url)
+
+        if not valid_urls and not blueprint.is_canvas_or_slice_rendered:
+            return False, f"Container '{selector}' has {len(img_nodes)} image tags, but none have valid URLs under attribute '{src_attr}'", 0
+
+        return True, "Blueprint verified against DOM", len(valid_urls)
 
 
 class ScraperAIOrchestrator:
     """
-    Central AI Intelligence Engine for Universal Scraper.
-    Transforms raw HTML snippets and URLs into comprehensive comic metadata & dynamic blueprints.
+    Central AI Planning Engine for the Universal Scraper.
+    Uses Gemini 2.5 Flash strictly as an Architectural Planner to produce validated blueprints.
     """
 
+    _consecutive_failures: int = 0
+    _circuit_open_until: float = 0.0
+
     @classmethod
-    def extract_token_optimized_snippet(cls, html: str, max_chars: int = 25000) -> str:
-        """
-        Extracts high-information HTML tokens (<head> meta, Schema.org, OpenGraph, reader containers, script hydration data)
-        while stripping noisy inline CSS, SVGs, and base64 noise.
-        """
-        if not html:
-            return ""
+    def is_circuit_open(cls) -> bool:
+        return time.time() < cls._circuit_open_until
 
-        soup = BeautifulSoup(html[:150000], "html.parser")
-        
-        # Remove noisy elements
-        for tag in soup(["style", "svg", "noscript", "iframe"]):
-            tag.decompose()
+    @classmethod
+    def record_gemini_success(cls):
+        cls._consecutive_failures = 0
 
-        # 1. Collect <head> metadata (Meta, OpenGraph, JSON-LD)
-        head_parts = []
-        if soup.head:
-            for meta in soup.head.find_all(["meta", "title", "link", "script"]):
-                if meta.name == "script" and meta.get("type") == "application/ld+json":
-                    head_parts.append(f"<script type='application/ld+json'>{meta.get_text()[:3000]}</script>")
-                elif meta.name in ("meta", "title"):
-                    head_parts.append(str(meta))
-
-        # 2. Collect hydration / JSON state scripts & comic state data
-        state_parts = []
-        for script in soup.find_all("script"):
-            s_type = script.get("type", "")
-            s_id = script.get("id", "")
-            text = script.get_text()
-            if not text:
-                continue
-
-            # Target key state signals
-            is_json_state = (
-                "__NEXT_DATA__" in s_id
-                or "__NUXT__" in text
-                or "window.__INITIAL_STATE__" in text
-                or "window.__DATA__" in text
-                or "window._comic_data" in text
-                or "window.__pinia" in text
-                or "application/json" in s_type
-            )
-            has_comic_image_signals = any(k in text.lower() for k in ["chapter", "pages", "images", "chapter_images", "picture_list", "img_list", "pagelist"])
-
-            if is_json_state or (has_comic_image_signals and len(text) < 10000):
-                state_parts.append(f"<script id='{s_id}' type='{s_type}'>{text[:5000]}</script>")
-
-        # 3. Collect reader candidate container outlines & navigation links
-        body_parts = []
-        if soup.body:
-            # Look for navigation links (Next/Prev/Chapters)
-            for a in soup.body.find_all("a", limit=30):
-                href = a.get("href", "")
-                text = a.get_text(strip=True).lower()
-                cls_id = f"{a.get('class', '')} {a.get('id', '')}".lower()
-                if any(kw in f"{text} {cls_id} {href}" for kw in ["next", "prev", "chapter", "episode", "nav", "btn-next", "btn-prev"]):
-                    body_parts.append(f"<a href='{href}' class='{a.get('class', '')}'>{a.get_text(strip=True)[:50]}</a>")
-
-            # Collect candidate reader containers and sample images
-            for div in soup.body.find_all(["div", "section", "main", "article", "ul", "picture"], limit=60):
-                d_id = div.get("id", "")
-                d_class = " ".join(div.get("class", [])) if isinstance(div.get("class"), list) else str(div.get("class", ""))
-                imgs = div.find_all(["img", "source", "canvas"], limit=8)
-                is_candidate = bool(imgs) or any(k in f"{d_id} {d_class}".lower() for k in [
-                    "read", "chapter", "viewer", "comic", "manga", "image", "content", "list", "page", "panel", "webtoon"
-                ])
-                if is_candidate:
-                    img_attrs = []
-                    for im in imgs:
-                        if im.name == "canvas":
-                            img_attrs.append(f"<canvas id='{im.get('id', '')}' class='{im.get('class', '')}' />")
-                            continue
-                        attrs = {
-                            k: v for k, v in im.attrs.items()
-                            if k in (
-                                "src", "data-url", "data-src", "data-original", "data-original-src",
-                                "data-lazy-src", "nitro-lazy-src", "data-cfsrc", "data-actualsrc",
-                                "data-echo", "data-srcset", "srcset", "class", "alt", "data-page"
-                            )
-                        }
-                        img_attrs.append(f"<{im.name} {attrs} />")
-                    body_parts.append(f"<div id='{d_id}' class='{d_class}'>{''.join(img_attrs)}</div>")
-
-        combined = "\n".join(head_parts + state_parts + body_parts)
-        return combined[:max_chars]
+    @classmethod
+    def record_gemini_failure(cls):
+        cls._consecutive_failures += 1
+        if cls._consecutive_failures >= 3:
+            cls._circuit_open_until = time.time() + 60.0  # 60 second circuit breaker cooldown
+            logger.warning(f"[ScraperAIOrchestrator] Circuit breaker OPEN for 60s due to {cls._consecutive_failures} consecutive Gemini failures.")
 
     @classmethod
     async def analyze_page(cls, html: str, url: str) -> Optional[UniversalComicBlueprint]:
         """
-        Calls Gemini 2.5 Flash to analyze page structure and output a zero-hardcoding UniversalComicBlueprint.
+        Generates a token-reduced digest and prompts Gemini 2.5 Flash for extraction directives.
+        Validates the generated blueprint before returning.
         """
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            logger.debug("[ScraperAIOrchestrator] GEMINI_API_KEY not configured. Skipping AI blueprint.")
+        if cls.is_circuit_open():
+            logger.info("[ScraperAIOrchestrator] AI Circuit is open (cooling down). Skipping Gemini call.")
             return None
 
-        snippet = cls.extract_token_optimized_snippet(html)
-        if not snippet:
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return None
+
+        # Build compact 1-3 KB structural digest
+        digest = DOMReductionEngine.build_structural_digest(html, url)
+        if not digest:
             return None
 
         prompt = f"""
-You are the Sonikoma Comic Web Architecture Intelligence Engine.
-Analyze this webpage HTML snippet from comic URL: {url}
+You are the Sonikoma Comic Web Architecture Planner.
+Analyze this compact structural digest of a comic webpage ({url}):
 
-Your mission:
-1. Extract complete Series & Chapter metadata (Title, Slug, Author, Artist, Publisher, Genres, Tags, Synopsis, Cover Poster, Chapter Number, Chapter Title, Next/Prev links, Total Pages if noted).
-2. Autonomously discover the exact Comic Reader Architecture with ZERO hardcoding:
-   - Identify the CSS selector for the PARENT comic panel container (e.g. '#_imageList', '#readerarea', '.reading-content', 'div.comic-view', '.viewer-cnt', 'div#app-root', '.page-break').
-     CRITICAL: Must be the container wrapping multiple panels (e.g. 'div#_imageList' or '#readerarea'), NEVER an individual <img> element.
-   - Identify the exact image URL attribute where high-res panels are stored (e.g. 'data-url', 'data-original', 'data-src', 'nitro-lazy-src', 'data-srcset', 'src').
-   - Identify the image URL regex pattern or domain pattern matching the story panels (e.g. 'https://webtoon-phinf\\.pstatic\\.net/.*\\.(?:jpg|png|webp)', 'https://cdn\\..*/chapters/.*').
-   - Provide 1 to 5 sample full image URLs found in the snippet.
-   - If embedded JSON state (Next.js __NEXT_DATA__, Nuxt, etc.) contains image URLs, provide the exact JSONPath query (e.g. '$.props.pageProps.chapter.images[*].url', '$.state.reader.images[*].url').
-   - Determine reading direction: 'VERTICAL_SCROLL', 'RIGHT_TO_LEFT', 'LEFT_TO_RIGHT', or 'SLIDESHOW'.
-   - Determine optimal worker strategy: 'DOM_DIRECT' (static HTML), 'STATE_JSON' (Next.js/Nuxt state), 'PLAYWRIGHT_FAST' (heavy dynamic SPA / Cloudflare), or 'VISION_SLICER' (encrypted canvas).
-   - Indicate if headless browser execution is required in 'requires_headless_browser'.
-3. Image Filtering & Autonomous Noise Exclusion Rules:
-   - Valid comic image extensions: {', '.join(IMAGE_EXTENSIONS)}
-   - Identify site-specific UI icons, app store banners, or tracking noise keywords to drop in 'unwanted_patterns' (e.g. ['pocketcomics', 'app_store', '_nuxt', 'thumb', 'promo', 'banner', 'logo']).
-   - NEVER select promotional banners or recommended carousels as the comic reader container.
-   - If promotional ads or app store banners are present, list their CSS selectors in 'ad_banner_selectors'.
-   - Indicate if the reader is infinite vertical scroll in 'is_infinite_scroll' (true for Webtoons/Comico/Tapas/Manhwa).
-   - Indicate if panels are delivered via dynamic sliced strips or canvas in 'is_canvas_or_slice_rendered'.
+{digest}
 
-Respond ONLY with a valid JSON object strictly matching this schema:
-{{
-  "series_title": string or null,
-  "series_slug": string or null,
-  "author": string or null,
-  "artist": string or null,
-  "publisher": string or null,
-  "status": "Ongoing" | "Completed" | "Hiatus",
-  "genres": string[],
-  "tags": string[],
-  "synopsis": string or null,
-  "cover_image_url": string or null,
-  "original_language": string,
-  "chapter_number": number or null,
-  "chapter_title": string or null,
-  "publication_date": string or null,
-  "previous_chapter_url": string or null,
-  "next_chapter_url": string or null,
-  "total_estimated_pages": number or null,
-  "reading_direction": "VERTICAL_SCROLL" | "RIGHT_TO_LEFT" | "LEFT_TO_RIGHT" | "SLIDESHOW",
-  "worker_strategy": "DOM_DIRECT" | "STATE_JSON" | "PLAYWRIGHT_FAST" | "VISION_SLICER",
-  "container_selector": string or null,
-  "image_src_attribute": string,
-  "image_url_pattern": string or null,
-  "sample_image_urls": string[],
-  "total_sample_images": number,
-  "unwanted_patterns": string[],
-  "json_path_query": string or null,
-  "is_infinite_scroll": boolean,
-  "is_canvas_or_slice_rendered": boolean,
-  "is_tile_scrambled": boolean,
-  "requires_anti_hotlink_proxy": boolean,
-  "requires_headless_browser": boolean,
-  "ad_banner_selectors": string[]
-}}
+Your task: Return a JSON extraction plan answering:
+1. Series & Chapter Metadata: series_title, series_slug, author, genres, synopsis, cover_image_url, chapter_number, chapter_title.
+2. Reader Architecture:
+   - 'container_selector': CSS selector for the main reader container wrapping panels (e.g. '#readerarea', '.reading-content', '#_imageList', 'div.comic-view').
+   - 'image_src_attribute': the primary attribute holding high-res image URLs ('data-src', 'data-original', 'src', 'nitro-lazy-src', 'data-url').
+   - 'reading_direction': 'VERTICAL_SCROLL', 'RIGHT_TO_LEFT', 'LEFT_TO_RIGHT', or 'SLIDESHOW'.
+   - 'worker_strategy': 'DOM_DIRECT', 'STATE_JSON', 'PLAYWRIGHT_FAST', or 'VISION_SLICER'.
+   - 'sample_image_urls': 1 to 5 sample image URLs verified in the digest.
+   - 'unwanted_patterns': noise keywords to reject (e.g. ['logo', 'banner', 'thumb', 'promo']).
+   - 'is_infinite_scroll': true or false.
 
-HTML Snippet:
-{snippet}
+Respond ONLY with a valid JSON object matching the UniversalComicBlueprint schema.
 """
-        try:
-            from services.ai.orchestrator import AIOrchestrator
-            from services.ai.skills.utils import extract_json
 
-            selected_model = "gemini-2.5-flash"
-            t0 = time.time()
-            res = await AIOrchestrator.execute_capability(
-                capability="scraper_blueprint",
-                prompt=prompt,
-                model=selected_model,
-                api_key=api_key,
+        t0 = time.time()
+        try:
+            from google import genai
+            from google.genai import types
+
+            client = genai.Client(api_key=api_key)
+            response = await asyncio.to_thread(
+                client.models.generate_content,
+                model="gemini-2.5-flash",
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.1,
+                    max_output_tokens=1500,
+                )
             )
 
-            data = res.get("result", {})
-            if isinstance(data, dict) and "raw_output" in data and len(data) == 1:
-                raw_text = str(data["raw_output"])
-                try:
-                    data = json.loads(raw_text)
-                except Exception:
-                    data = json.loads(extract_json(raw_text))
-            elif isinstance(data, str):
-                try:
-                    data = json.loads(data)
-                except Exception:
-                    data = json.loads(extract_json(data))
+            raw_json = response.text.strip()
+            if raw_json.startswith("```json"):
+                raw_json = raw_json[7:]
+            if raw_json.startswith("```"):
+                raw_json = raw_json[3:]
+            if raw_json.endswith("```"):
+                raw_json = raw_json[:-3]
 
-            sanitized = UniversalComicBlueprint.sanitize_data(data)
+            parsed_data = json.loads(raw_json.strip())
+            sanitized = UniversalComicBlueprint.sanitize_data(parsed_data)
             blueprint = UniversalComicBlueprint(**sanitized)
 
+            # Validate blueprint against real DOM
+            is_valid, val_reason, val_count = BlueprintValidator.validate_blueprint(blueprint, html)
+            duration_ms = (time.time() - t0) * 1000.0
 
-            # Auto-fill sample image URLs from HTML if AI did not copy them directly
-            if len(blueprint.sample_image_urls) == 0 and html:
-                try:
-                    samples: List[str] = []
-                    attr_name = blueprint.image_src_attribute or "src"
-                    
-                    # 1. Try container selector with target attribute
-                    if blueprint.container_selector:
-                        soup_dom = BeautifulSoup(html[:150000], "html.parser")
-                        container_el = soup_dom.select_one(blueprint.container_selector)
-                        if container_el:
-                            for img_tag in container_el.find_all(["img", "source"]):
-                                candidate_u = img_tag.get(attr_name) or img_tag.get("data-url") or img_tag.get("data-src") or img_tag.get("src")
-                                if candidate_u and candidate_u.startswith("http") and not any(u in candidate_u.lower() for u in blueprint.unwanted_patterns):
-                                    if candidate_u not in samples:
-                                        samples.append(candidate_u)
-                                if len(samples) >= 3:
-                                    break
-                    
-                    # 2. Try regex pattern match across HTML
-                    if len(samples) < 3 and blueprint.image_url_pattern:
-                        pat = re.compile(blueprint.image_url_pattern, re.IGNORECASE)
-                        for match in pat.finditer(html):
-                            m_url = match.group(0)
-                            if m_url.startswith("http") and not any(u in m_url.lower() for u in blueprint.unwanted_patterns):
-                                if m_url not in samples:
-                                    samples.append(m_url)
-                            if len(samples) >= 3:
-                                break
-
-                    if samples:
-                        blueprint.sample_image_urls = samples
-                        blueprint.total_sample_images = len(samples)
-                except Exception as ex:
-                    logger.debug(f"[ScraperAIOrchestrator] Sample image auto-fill notice: {ex}")
-
-            latency_ms = int((time.time() - t0) * 1000)
-            
-            logger.info(
-                f"\n{'='*70}\n"
-                f"🤖 [AI COMIC INTELLIGENCE REPORT] ({selected_model} • {latency_ms}ms)\n"
-                f"{'='*70}\n"
-                f"📖 Series Title    : {blueprint.series_title or 'Unknown'}\n"
-                f"📑 Chapter Number  : {blueprint.chapter_number} ({blueprint.chapter_title or 'Untitled'})\n"
-                f"✍️  Author / Studio : {blueprint.author or 'Unknown'} / {blueprint.publisher or 'Unknown'}\n"
-                f"🏷️  Genres & Tags   : {', '.join(blueprint.genres or [])} | {', '.join(blueprint.tags or [])}\n"
-                f"🧭 Reading Flow    : {blueprint.reading_direction}\n"
-                f"⚙️  Worker Strategy : {blueprint.worker_strategy}\n"
-                f"🎯 Container Target: {blueprint.container_selector or 'Auto-detected'}\n"
-                f"🖼️  Image Attribute : {blueprint.image_src_attribute}\n"
-                f"🔍 Image Pattern   : {blueprint.image_url_pattern or 'None'}\n"
-                f"📸 Sample Panels   : {len(blueprint.sample_image_urls)} found\n"
-                f"🔗 JSONPath Query  : {blueprint.json_path_query or 'None'}\n"
-                f"{'='*70}\n"
-            )
-            logger.debug(f"[ScraperAIOrchestrator] Full Raw AI Output JSON:\n{json.dumps(data, indent=2)}")
-            return blueprint
+            if is_valid:
+                cls.record_gemini_success()
+                logger.info(f"[ScraperAIOrchestrator] Generated validated blueprint for {url} in {duration_ms:.1f}ms: {val_reason} ({val_count} images)")
+                return blueprint
+            else:
+                logger.warning(f"[ScraperAIOrchestrator] Gemini blueprint rejected by BlueprintValidator: {val_reason}")
+                return None
 
         except Exception as e:
-            logger.warning(f"[ScraperAIOrchestrator] AI analysis failed: {e}")
+            cls.record_gemini_failure()
+            logger.warning(f"[ScraperAIOrchestrator] Gemini analysis error for {url}: {e}")
             return None

@@ -4,8 +4,6 @@ import {
   Film,
   Sparkles,
   Loader2,
-  PanelLeftClose,
-  PanelLeftOpen,
   Layout,
   Video,
 } from "lucide-react";
@@ -110,50 +108,40 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   const isFloating = variant !== "embedded";
 
   const leftBlock = (
-    <>
-      <button
-        type="button"
-        onClick={onToggleSidebar}
-        title={
-          isSidebarOpen ? "Hide Playback Monitor" : "Show Playback Monitor"
-        }
-        className={`h-7 w-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer ${
-          isSidebarOpen
-            ? "bg-purple-500/15 border-purple-500/40 text-purple-300 hover:bg-purple-500/25"
-            : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-white hover:border-neutral-700"
-        }`}
-      >
-        {isSidebarOpen ? (
-          <PanelLeftClose className="h-3.5 w-3.5" />
-        ) : (
-          <PanelLeftOpen className="h-3.5 w-3.5" />
-        )}
-      </button>
-
-      <div className="w-px h-4 bg-neutral-800" />
-
-      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-[160px] sm:max-w-[220px] xl:max-w-[300px]">
-        <span className="h-2 w-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.9)] shrink-0" />
-        <h3
-          className="font-black text-[10px] sm:text-[11px] text-white uppercase tracking-widest font-mono truncate"
-          title={previewLabel}
-        >
-          {previewLabel}
-        </h3>
+    <div className="flex items-center gap-3 min-w-0">
+      <div className="h-9 w-9 rounded-xl bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
+        <Film className="h-4.5 w-4.5 text-purple-400" />
+      </div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3
+            className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate"
+            title={previewLabel}
+          >
+            {previewLabel}
+          </h3>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[10px] font-bold text-purple-300 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+            Program Monitor
+          </span>
+        </div>
+        <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden lg:block">
+          Video preview player, real-time animation canvas & composition
+        </p>
       </div>
 
       {isFloating && onOpenVideoEditor && (
         <button
           type="button"
           onClick={onOpenVideoEditor}
-          className="hidden md:flex items-center gap-1.5 px-2.5 h-7 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 text-purple-300 text-[10px] font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)]"
+          className="hidden md:flex items-center gap-1.5 px-2.5 h-7 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 text-purple-300 text-[10px] font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)] shrink-0"
           title="Open Video Studio"
         >
           <Film className="h-3 w-3 text-purple-400" />
           <span>Video Studio</span>
         </button>
       )}
-    </>
+    </div>
   );
 
   const centerBlock = (
@@ -325,6 +313,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
       left={leftBlock}
       center={centerBlock}
       right={rightBlock}
+      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
     />
   );
 };

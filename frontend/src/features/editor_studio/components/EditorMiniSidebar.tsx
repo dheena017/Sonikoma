@@ -347,6 +347,15 @@ const EditorMiniSidebarInner = ({
               }
             } else if (item.id === "autocrop" || item.id === "bubbles") {
               setCurrentSection(item.id);
+              requestAnimationFrame(() => {
+                setTimeout(() => {
+                  const el =
+                    document.getElementById("section-storyboard") ||
+                    document.getElementById("section-timeline") ||
+                    document.getElementById("panels_timeline_section");
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 60);
+              });
             } else if (item.id === "settings" || item.id === "audio-settings") {
               const p = new URLSearchParams(window.location.search);
               p.set("tab", item.id);
@@ -364,8 +373,24 @@ const EditorMiniSidebarInner = ({
                   .setPlayerSettings({ isPlayerOpen: true });
               }
               setCurrentSection(item.id);
-              const el = document.getElementById(`section-${item.id}`);
-              if (el) el.scrollIntoView({ behavior: "smooth" });
+              requestAnimationFrame(() => {
+                setTimeout(() => {
+                  const targetMap: Record<string, string[]> = {
+                    monitor: ["section-monitor", "section-monitor-placeholder"],
+                    storyboard: ["section-storyboard", "section-timeline", "panels_timeline_section"],
+                    timeline: ["section-storyboard", "section-timeline", "panels_timeline_section"],
+                    assets: ["section-assets", "section-raw-images"],
+                  };
+                  const candidateIds = targetMap[item.id] || [`section-${item.id}`, item.id];
+                  for (const id of candidateIds) {
+                    const el = document.getElementById(id);
+                    if (el) {
+                      el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      break;
+                    }
+                  }
+                }, 60);
+              });
             }
           }}
           onMouseEnter={(e) => {

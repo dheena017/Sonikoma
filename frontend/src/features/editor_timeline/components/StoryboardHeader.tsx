@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Film,
   LayoutGrid,
   Rows,
   Sparkles,
@@ -243,24 +244,24 @@ export default function StoryboardHeader({
 
   // Standard Mode Left Title Block
   const titleBlock = (
-    <div className="flex items-center gap-2.5 min-w-0">
-      <div className="h-7 w-7 rounded-lg flex items-center justify-center border border-indigo-500/30 bg-indigo-500/10 text-indigo-400 shrink-0">
-        <Sparkles className="h-4 w-4" />
+    <div className="flex items-center gap-3 min-w-0">
+      <div className="h-9 w-9 rounded-xl bg-indigo-500/15 border border-indigo-500/35 flex items-center justify-center text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.3)] shrink-0">
+        <Film className="h-4.5 w-4.5 text-indigo-400" />
       </div>
-      <div className="w-px h-4 bg-neutral-800 shrink-0" />
-      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-        <span className="h-2 w-2 rounded-full bg-indigo-400 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.9)] shrink-0" />
-        <h4 className="font-mono font-black text-xs text-white uppercase tracking-wider truncate">
-          Sequence Workspace
-        </h4>
-        <span className="text-[10px] bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono font-bold shrink-0">
-          {panelsLength} {panelsLength === 1 ? "scene card" : "scene cards"}
-        </span>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate">
+            Storyboard
+          </h3>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-[10px] font-bold text-indigo-300 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+            {panelsLength} {panelsLength === 1 ? "Scene" : "Scenes"}
+          </span>
+        </div>
+        <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden lg:block">
+          Motion sequence timeline, speech transcript alignment & audio-sync
+        </p>
       </div>
-      <span className="hidden lg:inline text-neutral-600 text-xs">·</span>
-      <p className="hidden lg:block text-[11px] text-neutral-400 font-mono truncate">
-        Choreography, transcripts & timing
-      </p>
     </div>
   );
 
@@ -295,65 +296,69 @@ export default function StoryboardHeader({
     </div>
   ) : null;
 
-  const rightBlock =
-    panelsLength > 0 ? (
-      <div className="flex items-center gap-2">
-        {handleAnalyzeAllPanels && (
-          <button
-            type="button"
-            onClick={handleAnalyzeAllPanels}
-            disabled={isAnalyzingAll}
-            className="text-[11px] font-mono font-bold border border-indigo-500/40 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
-          >
-            <Sparkles
-              className={`w-3.5 h-3.5 ${
-                isAnalyzingAll
-                  ? "animate-spin text-amber-300"
-                  : "text-indigo-200"
-              }`}
-            />
-            <span>
-              {isAnalyzingAll
-                ? "Generating Narrative..."
-                : "Analyze Full Sequence"}
-            </span>
-          </button>
-        )}
-
-        {handleDownloadZip && (
-          <button
-            type="button"
-            onClick={handleDownloadZip}
-            disabled={isZipping}
-            className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
-          >
-            <Download className="w-3.5 h-3.5 text-neutral-400" />
-            <span>{isZipping ? "Zipping..." : "Download ZIP"}</span>
-          </button>
-        )}
-
-        {setShowBulkOps && (
-          <button
-            type="button"
-            onClick={() => setShowBulkOps(!showBulkOps)}
-            className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
-              showBulkOps
-                ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.2)]"
-                : "border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"
+  const rightBlock = (
+    <div className="flex items-center gap-2">
+      {panelsLength > 0 && handleAnalyzeAllPanels && (
+        <button
+          type="button"
+          onClick={handleAnalyzeAllPanels}
+          disabled={isAnalyzingAll}
+          className="text-[11px] font-mono font-bold border border-indigo-500/40 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+        >
+          <Sparkles
+            className={`w-3.5 h-3.5 ${
+              isAnalyzingAll
+                ? "animate-spin text-amber-300"
+                : "text-indigo-200"
             }`}
-          >
-            <span>Bulk Actions</span>
-          </button>
-        )}
-      </div>
-    ) : null;
+          />
+          <span>
+            {isAnalyzingAll
+              ? "Generating Narrative..."
+              : "Analyze Full Sequence"}
+          </span>
+        </button>
+      )}
+
+      {panelsLength > 0 && handleDownloadZip && (
+        <button
+          type="button"
+          onClick={handleDownloadZip}
+          disabled={isZipping}
+          className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+        >
+          <Download className="w-3.5 h-3.5 text-neutral-400" />
+          <span>{isZipping ? "Zipping..." : "Download ZIP"}</span>
+        </button>
+      )}
+
+      {panelsLength > 0 && setShowBulkOps && (
+        <button
+          type="button"
+          onClick={() => setShowBulkOps(!showBulkOps)}
+          className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
+            showBulkOps
+              ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+              : "border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"
+          }`}
+        >
+          <span>Bulk Actions</span>
+        </button>
+      )}
+
+      {/* Timeline Sequencer Badge */}
+      <span className="hidden sm:inline-flex px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-indigo-500/25 text-indigo-300 text-[10px] font-bold uppercase tracking-wider font-mono shadow-inner">
+        Timeline Sequencer
+      </span>
+    </div>
+  );
 
   return (
     <EditorHeaderFrame
       left={titleBlock}
       center={viewToggle}
       right={rightBlock}
-      className="border-b-0 rounded-2xl bg-[#0c0d16]/70 backdrop-blur-xl border border-white/10 p-2 shadow-lg"
+      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-indigo-950/40 border border-indigo-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
     />
   );
 }

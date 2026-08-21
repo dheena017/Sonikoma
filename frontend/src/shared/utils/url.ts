@@ -10,7 +10,7 @@ export function extractWebtoonUrl(urlStr: string): string {
   return duplicateAware ? duplicateAware[0] : trimmed;
 }
 
-// Removes any webtoons language/region code (like en, fr, es, th, id, zh-hans etc.) from the URL path to keep it region-free
+// Removes webtoons language/region code (like en, fr, es, th, id, zh-hans etc.) ONLY from Webtoons URLs
 export function stripRegionFromUrl(urlStr: string): string {
   if (!urlStr) return "";
   let workingUrl = extractWebtoonUrl(urlStr);
@@ -19,15 +19,16 @@ export function stripRegionFromUrl(urlStr: string): string {
   }
   try {
     const urlObj = new URL(workingUrl);
-    const parts = urlObj.pathname.split("/").filter(Boolean);
-    if (parts.length > 0) {
-      const rxRegion = /^[a-z]{2}(-[a-z]{2,4})?$/i;
-      if (rxRegion.test(parts[0])) {
-        parts.shift(); // discard language/region prefix
-        urlObj.pathname = "/" + parts.join("/");
+    if (urlObj.hostname.toLowerCase().includes("webtoons.com")) {
+      const parts = urlObj.pathname.split("/").filter(Boolean);
+      if (parts.length > 0) {
+        const rxRegion = /^[a-z]{2}(-[a-z]{2,4})?$/i;
+        if (rxRegion.test(parts[0])) {
+          parts.shift(); // discard language/region prefix only for webtoons
+          urlObj.pathname = "/" + parts.join("/");
+        }
       }
     }
-    // Return with original prefix style if user didn't enter https yet
     let result = urlObj.toString();
     if (
       !urlStr.trim().startsWith("http://") &&

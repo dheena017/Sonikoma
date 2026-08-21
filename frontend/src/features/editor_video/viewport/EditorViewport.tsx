@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import PlaybackMonitor from "./monitor/PlaybackMonitor";
 import BlankViewport from "./BlankViewport";
 import { VideoPreviewHeader as MonitorHeader } from "./monitor/MonitorHeader";
-import { VideoPreviewSidebar as MonitorSidebar } from "./monitor/MonitorSidebar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 
 export interface EditorViewportProps {
@@ -70,12 +69,11 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
   onZoomReset,
 }) => {
   const isEmbedded = variant === "embedded";
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <div
       id="section-monitor"
-      className="w-full bg-[#0c0d16]/70 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 space-y-4 mb-4 scroll-mt-24 shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex flex-col min-w-0"
+      className="w-full bg-[#0c0d16]/70 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 space-y-4 mb-4 scroll-mt-20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex flex-col min-w-0 min-h-[calc(100vh-6rem)]"
     >
       <MonitorHeader
         videoUrl={videoUrl}
@@ -93,8 +91,6 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
         hasEnoughCredits={hasEnoughCredits}
         onOpenVideoEditor={onOpenVideoEditor ?? (() => {})}
         variant={variant}
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={() => setIsSidebarOpen((v) => !v)}
         activePreviewTab={activePreviewTab}
         setActivePreviewTab={setActivePreviewTab}
         panelsCount={panels?.length || 0}
