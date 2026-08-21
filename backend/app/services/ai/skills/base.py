@@ -103,354 +103,44 @@ class BaseAISkill:
             logger.error(f"Failed to compile prompt template for '{self.name}': {e}")
             return safe_template
 
-    async def execute(self, model: Optional[str] = None, image_bytes: Optional[bytes] = None, api_key: Optional[str] = None, user_keys: Optional[dict] = None, **kwargs) -> Any:
-        """Invokes the chosen provider model (Gemini, OpenAI, Anthropic, or HF) for skill execution."""
+    async def execute(
+        self,
+        model: Optional[str] = None,
+        image_bytes: Optional[bytes] = None,
+        api_key: Optional[str] = None,
+        user_keys: Optional[dict] = None,
+        user_id: Optional[str] = None,
+        project_id: Optional[str] = None,
+        job_id: Optional[str] = None,
+        **kwargs
+    ) -> Any:
+        """Invokes AIOrchestrator (Central AI Core) for unified rate limiting, quota validation, and execution."""
         start_time = time.monotonic()
         target_model = model or self.default_model
-
-        provider, clean_model_id = ModelRegistry.resolve_model_provider(target_model)
-        logger.debug(f"[base.py] Resolved skill '{self.name}' execution request to provider={provider}, model={clean_model_id}")
-
         prompt = self.build_prompt(**kwargs)
-        last_exception = None
 
-        try:
-            if provider == "gemini":
-                key_to_use = resolve_api_key("gemini", api_key, user_keys)
-                if not ai_initialized and not key_to_use:
-                    raise RuntimeError("Gemini is not initialized and no API key was provided.")
+        res = await AIOrchestrator.execute_capability(
+            capability=self.name,
+            prompt=prompt,
+            model=target_model,
+            image_bytes=image_bytes,
+            api_key=api_key,
+            user_keys=user_keys,
+            user_id=user_id,
+            project_id=project_id,
+            job_id=job_id,
+            skill_obj=self,
+            **kwargs
+        )
 
-                if types is None:
-                    raise RuntimeError(
-                        "google-genai package is not installed or failed to import. "
-                        "Run: pip install google-genai"
-                    )
+        parsed_data = res.get("result", {})
+        if isinstance(parsed_data, dict) and "raw_output" in parsed_data and len(parsed_data) == 1:
+            raw_output = str(parsed_data["raw_output"])
+        elif isinstance(parsed_data, (dict, list)):
+            raw_output = json.dumps(parsed_data)
+        else:
+            raw_output = str(parsed_data)
 
-                config_args = {}
-                schema = self.response_schema
-                if schema:
-                    config_args["response_mime_type"] = "application/json"
-                    config_args["response_schema"] = schema
-
-                config = types.GenerateContentConfig(**config_args)
-
-                contents = []
-                if image_bytes:
-                    mime_type = "image/jpeg"
-                    if image_bytes.startswith(b"\x89PNG"):
-                        mime_type = "image/png"
-                    elif image_bytes.startswith(b"RIFF") and b"WEBP" in image_bytes[:16]:
-                        mime_type = "image/webp"
-                    elif image_bytes.startswith(b"GIF8"):
-                        mime_type = "image/gif"
-                    contents.append(types.Part.from_bytes(data=image_bytes, mime_type=mime_type))
-                contents.append(prompt)
-
-                from google import genai
-                client_to_use = genai.Client(api_key=key_to_use) if key_to_use else genai_client
-
-                if not client_to_use:
-                    raise RuntimeError("Gemini client is not initialized and no API key was provided.")
-
-                fallback_candidates = [clean_model_id] + GEMINI_FALLBACK_MODELS
-                models_to_try = []
-                for m in fallback_candidates:
-                    if m and m not in models_to_try:
-                        models_to_try.append(m)
-
-                response = None
-                last_exc = None
-                for target_m in models_to_try:
-                    try:
-                        response = await call_gemini_with_retry(
-                            lambda m_name=target_m: client_to_use.models.generate_content(
-                                model=m_name,
-                                contents=contents,
-                                config=config
-                            )
-                        )
-                        if response:
-                            break
-                    except Exception as exc:
-                        last_exc = exc
-                        logger.warning(
-                            f"[base.py] Skill '{self.name}' model '{target_m}' failed ({exc}). Trying next fallback model..."
-                        )
-                        continue
-
-                if not response:
-                    fallback_payload = FallbackCoordinator.get_programmatic_fallback(self.name, **kwargs)
-                    fallback_payload.setdefault("success", False)
-                    fallback_payload.setdefault("source", "fallback:error")
-                    fallback_payload["error"] = str(last_exc or RuntimeError(f"All Gemini fallback models failed for skill '{self.name}'."))
-                    raw_text = json.dumps(fallback_payload)
-                    self.last_input_tokens = 0
-                    self.last_output_tokens = 0
-                    self.logger.log_execution(self.name, int((time.monotonic() - start_time) * 1000), False, kwargs, fallback_payload, 0, 0)
-                    return raw_text
-
-                elapsed_ms = int((time.monotonic() - start_time) * 1000)
-                raw_text = response.text or "{}"
-
-                try:
-                    parsed_json = json.loads(raw_text)
-                except Exception:
-                    parsed_json = {"raw_text": raw_text}
-
-                usage = getattr(response, 'usage_metadata', None)
-                p_tokens = getattr(usage, 'prompt_token_count', 0) if usage else 0
-                c_tokens = getattr(usage, 'candidates_token_count', 0) if usage else 0
-
-                self.last_input_tokens = p_tokens
-                self.last_output_tokens = c_tokens
-                self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, p_tokens, c_tokens)
-                return raw_text
-
-            elif provider == "openai":
-                import requests
-                import base64
-
-                key_to_use = resolve_api_key("openai", api_key, user_keys)
-                if not key_to_use:
-                    raise RuntimeError("Missing OpenAI API Key.")
-
-                headers = {
-                    "Authorization": f"Bearer {key_to_use}",
-                    "Content-Type": "application/json"
-                }
-
-                messages = []
-                if image_bytes:
-                    base64_image = base64.b64encode(image_bytes).decode("utf-8")
-                    messages = [
-                        {
-                            "role": "user",
-                            "content": [
-                                {"type": "text", "text": prompt},
-                                {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": f"data:image/jpeg;base64,{base64_image}"
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                else:
-                    messages = [
-                        {"role": "user", "content": prompt}
-                    ]
-
-                payload: dict[str, Any] = {
-                    "model": clean_model_id,
-                    "messages": messages,
-                }
-
-                schema = self.response_schema
-                if schema:
-                    try:
-                        if hasattr(schema, "model_json_schema"):
-                            schema_dict = schema.model_json_schema()
-                        else:
-                            schema_dict = getattr(schema, "schema")()
-
-                        payload["response_format"] = {
-                            "type": "json_schema",
-                            "json_schema": {
-                                "name": schema.__name__,
-                                "strict": True,
-                                "schema": schema_dict
-                            }
-                        }
-                    except Exception as schema_err:
-                        logger.warning(f"Failed to generate JSON schema for OpenAI: {schema_err}")
-
-                loop = asyncio.get_running_loop()
-                url = "https://api.openai.com/v1/chat/completions"
-
-                def make_request():
-                    return requests.post(url, json=payload, headers=headers, timeout=60)
-
-                response = await loop.run_in_executor(None, make_request)
-
-                if response.status_code != 200:
-                    raise RuntimeError(f"OpenAI API request failed (HTTP {response.status_code}): {response.text}")
-
-                res_data = response.json()
-                raw_text = res_data["choices"][0]["message"]["content"]
-
-                usage = res_data.get("usage", {})
-                self.last_input_tokens = usage.get("prompt_tokens", 0)
-                self.last_output_tokens = usage.get("completion_tokens", 0)
-
-                cleaned_json_text = extract_json(raw_text)
-                try:
-                    parsed_json = json.loads(cleaned_json_text)
-                except Exception:
-                    parsed_json = {"raw_text": raw_text}
-                    cleaned_json_text = raw_text
-
-                elapsed_ms = int((time.monotonic() - start_time) * 1000)
-                self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, self.last_input_tokens, self.last_output_tokens)
-                return cleaned_json_text
-
-            elif provider == "anthropic":
-                import requests
-                import base64
-
-                key_to_use = resolve_api_key("anthropic", api_key, user_keys)
-                if not key_to_use:
-                    raise RuntimeError("Missing Anthropic API Key.")
-
-                headers = {
-                    "x-api-key": key_to_use,
-                    "anthropic-version": "2023-06-01",
-                    "Content-Type": "application/json"
-                }
-
-                system_prompt = "You are a helpful AI assistant."
-                schema = self.response_schema
-                if schema:
-                    try:
-                        if hasattr(schema, "model_json_schema"):
-                            schema_dict = schema.model_json_schema()
-                        else:
-                            schema_dict = getattr(schema, "schema")()
-                        system_prompt = f"You MUST return ONLY a valid JSON object matching this schema:\n{json.dumps(schema_dict)}\nNo other conversational text, no explanations, no wrapping except clean JSON."
-                    except Exception:
-                        pass
-
-                messages = []
-                if image_bytes:
-                    base64_image = base64.b64encode(image_bytes).decode("utf-8")
-                    messages = [
-                        {
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "image",
-                                    "source": {
-                                        "type": "base64",
-                                        "media_type": "image/jpeg",
-                                        "data": base64_image
-                                    }
-                                },
-                                {
-                                    "type": "text",
-                                    "text": prompt
-                                }
-                            ]
-                        }
-                    ]
-                else:
-                    messages = [
-                        {"role": "user", "content": prompt}
-                    ]
-
-                payload = {
-                    "model": clean_model_id,
-                    "max_tokens": 4096,
-                    "system": system_prompt,
-                    "messages": messages,
-                }
-
-                loop = asyncio.get_running_loop()
-                url = "https://api.anthropic.com/v1/messages"
-
-                def make_request():
-                    return requests.post(url, json=payload, headers=headers, timeout=60)
-
-                response = await loop.run_in_executor(None, make_request)
-
-                if response.status_code != 200:
-                    raise RuntimeError(f"Anthropic API request failed (HTTP {response.status_code}): {response.text}")
-
-                res_data = response.json()
-                raw_text = res_data["content"][0]["text"]
-
-                usage = res_data.get("usage", {})
-                self.last_input_tokens = usage.get("input_tokens", 0)
-                self.last_output_tokens = usage.get("output_tokens", 0)
-
-                cleaned_json_text = extract_json(raw_text)
-                try:
-                    parsed_json = json.loads(cleaned_json_text)
-                except Exception:
-                    parsed_json = {"raw_text": raw_text}
-                    cleaned_json_text = raw_text
-
-                elapsed_ms = int((time.monotonic() - start_time) * 1000)
-                self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, self.last_input_tokens, self.last_output_tokens)
-                return cleaned_json_text
-
-            elif provider == "huggingface":
-                import requests
-
-                key_to_use = resolve_api_key("huggingface", api_key, user_keys)
-                if not key_to_use:
-                    raise RuntimeError("Missing Hugging Face Token.")
-
-                headers = {
-                    "Authorization": f"Bearer {key_to_use}",
-                    "Content-Type": "application/json"
-                }
-
-                payload = {
-                    "inputs": prompt,
-                    "parameters": {"max_new_tokens": 1000}
-                }
-
-                loop = asyncio.get_running_loop()
-                url = f"https://api-inference.huggingface.co/models/{clean_model_id}"
-
-                def make_request():
-                    return requests.post(url, json=payload, headers=headers, timeout=15)
-
-                try:
-                    response = await loop.run_in_executor(None, make_request)
-                except Exception as net_err:
-                    raise RuntimeError(f"Hugging Face network resolution failed for '{clean_model_id}': {net_err}")
-
-                if response.status_code != 200:
-                    raise RuntimeError(f"Hugging Face request failed (HTTP {response.status_code}): {response.text}")
-
-                res_data = response.json()
-                if isinstance(res_data, list) and len(res_data) > 0:
-                    raw_text = res_data[0].get("generated_text", str(res_data))
-                elif isinstance(res_data, dict):
-                    raw_text = res_data.get("generated_text", str(res_data))
-                else:
-                    raw_text = str(res_data)
-
-                self.last_input_tokens = len(prompt) // 4
-                self.last_output_tokens = len(raw_text) // 4
-
-                cleaned_json_text = extract_json(raw_text)
-                try:
-                    parsed_json = json.loads(cleaned_json_text)
-                except Exception:
-                    parsed_json = {"raw_text": raw_text}
-                    cleaned_json_text = raw_text
-
-                elapsed_ms = int((time.monotonic() - start_time) * 1000)
-                AIOrchestrator.log_execution_attempt(self.name, provider, clean_model_id, 1, "success", elapsed_ms)
-                self.logger.log_execution(self.name, elapsed_ms, True, kwargs, parsed_json, self.last_input_tokens, self.last_output_tokens)
-                return cleaned_json_text
-
-        except Exception as e:
-            last_exception = e
-
-        if last_exception:
-            elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            classified = classify_error(last_exception, provider=provider, model=clean_model_id)
-            AIOrchestrator.log_execution_attempt(self.name, provider, clean_model_id, 1, "failed", elapsed_ms, error=classified)
-            logger.warning(f"Skill '{self.name}' ({provider}/{clean_model_id}) failed: [{classified.error_code}] {last_exception}. Invoking deterministic fallback.")
-
-            fallback = FallbackCoordinator.get_programmatic_fallback(self.name, **kwargs)
-            fallback.setdefault("success", False)
-            fallback.setdefault("source", "fallback:error")
-            fallback["error"] = classified.message
-            fallback["error_code"] = classified.error_code.value
-            self.logger.log_execution(self.name, elapsed_ms, False, kwargs, fallback)
-
-            return json.dumps(fallback)
+        elapsed_ms = int((time.monotonic() - start_time) * 1000)
+        self.logger.log_execution(self.name, elapsed_ms, res.get("success", False), kwargs, parsed_data if isinstance(parsed_data, dict) else {}, self.last_input_tokens, self.last_output_tokens)
+        return raw_output

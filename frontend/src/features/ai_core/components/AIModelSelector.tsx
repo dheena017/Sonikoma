@@ -39,11 +39,16 @@ export const AIModelSelector: React.FC<AIModelSelectorProps> = ({
     selectedModel: storeSelectedModel,
     selectionMode,
     configuredProviders,
+    loadCatalogFromBackend,
     setSelectedModel,
     resetToSystemDefault,
     getCurrentModelInfo,
     getAvailableModels,
   } = useAIModelStore();
+
+  useEffect(() => {
+    loadCatalogFromBackend();
+  }, [loadCatalogFromBackend]);
 
   const activeModelId =
     value !== undefined
@@ -52,9 +57,7 @@ export const AIModelSelector: React.FC<AIModelSelectorProps> = ({
       ? propSelectedModel
       : storeSelectedModel;
 
-  const currentModel =
-    AVAILABLE_AI_MODELS.find((m) => m.id === activeModelId) ||
-    getCurrentModelInfo();
+  const currentModel = getCurrentModelInfo();
 
   const handleSelectModel = (modelId: string) => {
     if (onChange) {
@@ -93,23 +96,32 @@ export const AIModelSelector: React.FC<AIModelSelectorProps> = ({
     const q = searchQuery.toLowerCase();
     return (
       m.name.toLowerCase().includes(q) ||
+      m.id.toLowerCase().includes(q) ||
       m.provider.toLowerCase().includes(q) ||
       m.capabilities.some((c) => c.toLowerCase().includes(q))
     );
   });
 
   const getProviderIcon = (provider: string) => {
-    switch (provider) {
+    switch (provider.toLowerCase()) {
       case "gemini":
-        return <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />;
+        return <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse" />;
       case "openai":
         return <Bot className="w-3.5 h-3.5 text-emerald-400" />;
       case "anthropic":
         return <Cpu className="w-3.5 h-3.5 text-amber-400" />;
-      case "huggingface":
+      case "groq":
         return <Zap className="w-3.5 h-3.5 text-orange-400" />;
+      case "deepseek":
+        return <Cpu className="w-3.5 h-3.5 text-blue-400" />;
+      case "elevenlabs":
+        return <Sparkles className="w-3.5 h-3.5 text-pink-400" />;
+      case "deepl":
+        return <Layers className="w-3.5 h-3.5 text-cyan-400" />;
+      case "huggingface":
+        return <Zap className="w-3.5 h-3.5 text-yellow-400" />;
       default:
-        return <Layers className="w-3.5 h-3.5 text-purple-400" />;
+        return <Layers className="w-3.5 h-3.5 text-neutral-400" />;
     }
   };
 

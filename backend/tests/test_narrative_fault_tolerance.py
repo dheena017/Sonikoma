@@ -50,30 +50,25 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
 
     @patch("api.v1.ai.image.get_available_credits")
     @patch("api.v1.ai.image.record_credit_transaction")
-    @patch("services.ai.facade.call_gemini_with_retry")
+    @patch("services.ai.skills.coordinator.execute_provider_call")
     @patch("services.ai.facade.generate_panel_audio")
-    @patch("google.genai.Client")
     def test_tts_fault_tolerance_during_sequence_analysis(
         self,
-        mock_client_class,
         mock_generate_audio,
-        mock_gemini_retry,
+        mock_exec_call,
         mock_record_credits,
         mock_get_credits
     ):
         mock_get_credits.return_value = 100
-
-        mock_response = MagicMock()
-        mock_response.text = json.dumps([
+        mock_exec_call.return_value = json.dumps([
             "Scene 1 narrative description text.",
             "Scene 2 narrative description text.",
             "Scene 3 narrative description text (failed TTS audio).",
             "Scene 4 narrative description text.",
             "Scene 5 narrative description text."
         ])
-        mock_gemini_retry.return_value = mock_response
 
-        async def side_effect_generate_audio(dialogue_list, target_duration, output_path, voice, force_duration):
+        async def side_effect_generate_audio(dialogue_list, target_duration, output_path, voice, force_duration=False):
             text = dialogue_list[0] if dialogue_list else ""
             if "failed TTS audio" in text:
                 raise RuntimeError("Simulated transient Edge-TTS network/timeout exception!")
@@ -105,20 +100,18 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
 
     @patch("api.v1.ai.image.get_available_credits")
     @patch("api.v1.ai.image.record_credit_transaction")
-    @patch("services.ai.skills.base.call_gemini_with_retry")
+    @patch("services.ai.skills.coordinator.execute_provider_call")
     @patch("services.ai.facade.generate_panel_audio")
     @patch("services.image.ocr.ocr_engine.extract_dialogue_from_panel")
     @patch("services.image.utils.image_utils.compute_brightness")
     @patch("services.image.utils.image_utils.resolve_image_to_buffer")
-    @patch("google.genai.Client")
     def test_image_analyze_sequence_returns_parallel_results(
         self,
-        mock_client_class,
         mock_resolve_buffer,
         mock_compute_brightness,
         mock_extract_dialogue,
         mock_generate_audio,
-        mock_gemini_retry,
+        mock_exec_call,
         mock_record_credits,
         mock_get_credits
     ):
@@ -127,17 +120,15 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
         mock_compute_brightness.return_value = 120
         mock_extract_dialogue.return_value = ["Panel dialogue text."]
 
-        mock_response = MagicMock()
-        mock_response.text = json.dumps({
+        mock_exec_call.return_value = json.dumps({
             "speech_text": "Test narration.",
             "sfx": "",
             "visual_description": "A test panel.",
             "motion_type": "zoom_in",
             "duration": 5
         })
-        mock_gemini_retry.return_value = mock_response
 
-        async def side_effect_generate_audio(dialogue_list, target_duration, output_path, voice, force_duration):
+        async def side_effect_generate_audio(dialogue_list, target_duration, output_path, voice, force_duration=False):
             with open(output_path, "wb") as f:
                 f.write(b"dummy mp3")
             return output_path, float(target_duration or 5)
@@ -163,6 +154,7 @@ class TestNarrativeFaultTolerance(unittest.TestCase):
         self.assertEqual(len(results), 3)
         self.assertTrue(all(item.get("success", False) for item in results))
         self.assertEqual(mock_record_credits.call_count, 1)
+
 
 
 if __name__ == "__main__":

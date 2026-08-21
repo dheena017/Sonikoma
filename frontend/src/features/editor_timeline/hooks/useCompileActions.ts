@@ -469,13 +469,10 @@ export function useCompileActions({
                   result.analysis?.narrative ||
                   result.analysis?.narrativeText ||
                   p.narrative,
-                narrative_audio_url:
-                  result.narrative_audio_url ||
-                  result.analysis?.narrative_audio_url ||
-                  p.narrative_audio_url,
+                isAnalyzing: false,
               };
             }
-            return p;
+            return { ...p, isAnalyzing: false };
           })
         );
 
@@ -520,9 +517,9 @@ export function useCompileActions({
           );
         }
       }
-      setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
     } finally {
       setIsAnalyzingAll(false);
+      setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
     }
   };
 

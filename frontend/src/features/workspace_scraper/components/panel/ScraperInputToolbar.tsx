@@ -6,6 +6,9 @@ import {
   Zap,
   MoreVertical,
   Clock,
+  CheckCircle2,
+  AlertCircle,
+  Globe,
 } from "lucide-react";
 import { parseWebtoonUrl, extractWebtoonUrl } from "@/shared/utils/url";
 import { FavoritesManager } from "@/features/workspace_scraper/episode-scraper/utils/FavoritesManager";
@@ -130,52 +133,79 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     }
   };
 
-  const domainInfo = React.useMemo(() => {
+  const urlStatus = React.useMemo(() => {
     const trimmed = targetUrl.trim();
     if (!trimmed) return null;
+
     try {
       const urlObj = new URL(
-        trimmed.startsWith("http") ? trimmed : `https://${trimmed}`
+        trimmed.startsWith("http://") || trimmed.startsWith("https://")
+          ? trimmed
+          : `https://${trimmed}`
       );
       const host = urlObj.hostname.toLowerCase().replace(/^www\./, "");
-      if (!host || !host.includes(".")) return null;
+      if (!host || !host.includes(".")) {
+        return {
+          type: "invalid",
+          text: "Please enter a valid comic URL (e.g. https://domain.com/chapter-1)",
+        };
+      }
 
+      // Non-comic domains check
+      const nonComicDomains = [
+        "chatgpt.com", "openai.com", "google.com", "youtube.com", "youtu.be",
+        "facebook.com", "twitter.com", "x.com", "instagram.com", "reddit.com",
+        "github.com", "linkedin.com", "wikipedia.org", "yahoo.com", "bing.com", "amazon.com"
+      ];
+      if (nonComicDomains.some((d) => host === d || host.endsWith(`.${d}`))) {
+        return {
+          type: "warning",
+          text: `'${host}' is not a comic reader website`,
+        };
+      }
+
+      // Known comic platforms
       const knownPlatforms: Record<string, string[]> = {
-        WebComics: ["webcomicsapp.com"],
         "Line Webtoon": ["webtoons.com", "webtoon.com", "naver.com"],
-        MangaDex: ["mangadex.org", "mangadex.cc", "mangadex.com"],
+        "MangaDex": ["mangadex.org", "mangadex.cc", "mangadex.com"],
         "Bato.to": ["bato.to", "mangatoto.com", "battwo.com", "batocomic.com", "readtoto.com"],
+        "ManhuaTop": ["manhuatop.org"],
         "Asura Scans": ["asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com"],
         "Flame Comics": ["flamecomics.xyz", "flamecomics.com", "flamescans.org"],
         "Reaper Scans": ["reaperscans.com"],
-        "WP-Manga (Madara)": ["mangaclash.com", "manhuaus.com", "topmanhua.com", "manhuaplus.org", "manhuaplus.com", "1stkissmanga.io", "manganato.com", "mangakakalot.com"],
-        Toomics: ["toomics.com"],
-        Tapas: ["tapas.io"],
-        Tappytoon: ["tappytoon.com"],
-        Lezhin: ["lezhin.com", "lezhinus.com"],
+        "INKR Comics": ["comics.inkr.com", "inkr.com"],
+        "WebComics": ["webcomicsapp.com"],
+        "Tapas": ["tapas.io"],
+        "Tappytoon": ["tappytoon.com"],
+        "Toomics": ["toomics.com"],
+        "Lezhin": ["lezhin.com", "lezhinus.com"],
+        "WP-Manga / Scanlation": [
+          "mangaclash.com", "manhuaus.com", "topmanhua.com", "manhuaplus.org",
+          "manhuaplus.com", "1stkissmanga.io", "1stkissmanga.com", "manganato.com",
+          "readmanganato.com", "mangakakalot.com", "readmangakakalot.com",
+          "manhwa18.cc", "mangatx.com", "kunmanga.com", "harimanga.com",
+          "zinmanga.com", "manhuato.com", "manhwaclan.com", "manhwaden.com", "manga68.com"
+        ],
       };
 
       for (const [platform, domains] of Object.entries(knownPlatforms)) {
         if (domains.some((d) => host === d || host.endsWith(`.${d}`))) {
           return {
-            domain: host,
-            platform,
-            isKnown: true,
-            badge: "🟢 Verified Platform",
-            details: `Dedicated ${platform} High-Speed Adapter Active`,
+            type: "verified",
+            text: `Supported Platform: ${platform}`,
           };
         }
       }
 
       return {
-        domain: host,
-        platform: "Novel / Custom Website",
-        isKnown: false,
-        badge: "✨ Novel Domain Detected",
-        details: `Antigravity AI Engine will autonomously analyze '${host}' DOM & extract comic panels`,
+        type: "custom",
+        text: `Custom Source: ${host}`,
       };
     } catch {
-      return null;
+      return {
+        type: "invalid",
+        text: "Please enter a valid comic URL",
+      };
     }
   }, [targetUrl]);
 
@@ -326,27 +356,30 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
       )}
       </div>
 
-      {domainInfo && (
-        <div className="flex flex-wrap items-center gap-2 px-1 text-xs animate-in fade-in slide-in-from-top-1 duration-200">
-          {domainInfo.isKnown ? (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/30 text-emerald-300 font-medium shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-              <span>
-                {domainInfo.badge}: <strong>{domainInfo.platform}</strong>
-              </span>
-              <span className="text-emerald-400/70 hidden sm:inline">
-                ({domainInfo.details})
-              </span>
+      {urlStatus && (
+        <div className="flex items-center gap-2 px-1 text-xs animate-in fade-in slide-in-from-top-1 duration-150">
+          {urlStatus.type === "verified" && (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 font-medium shadow-sm">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>{urlStatus.text}</span>
             </div>
-          ) : (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/70 border border-indigo-500/30 text-indigo-300 font-medium shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-indigo-400 shrink-0" />
-              <span>
-                {domainInfo.badge}: <strong>{domainInfo.domain}</strong>
-              </span>
-              <span className="text-indigo-300/70 hidden sm:inline">
-                — {domainInfo.details}
-              </span>
+          )}
+          {urlStatus.type === "warning" && (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-950/60 border border-rose-500/30 text-rose-300 font-medium shadow-sm">
+              <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+              <span>{urlStatus.text}</span>
+            </div>
+          )}
+          {urlStatus.type === "invalid" && (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-950/60 border border-amber-500/30 text-amber-300 font-medium shadow-sm">
+              <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>{urlStatus.text}</span>
+            </div>
+          )}
+          {urlStatus.type === "custom" && (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/80 border border-neutral-700/50 text-neutral-300 font-medium shadow-sm">
+              <Globe className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              <span>{urlStatus.text}</span>
             </div>
           )}
         </div>

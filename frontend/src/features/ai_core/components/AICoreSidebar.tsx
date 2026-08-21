@@ -123,7 +123,7 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
 
   const groups = [
     {
-      name: "Intelligence Hub",
+      name: "Intelligence Studio",
       items: [
         {
           id: "overview",
@@ -131,66 +131,63 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
           icon: LayoutGrid,
           path: "/ai-core",
         },
+        {
+          id: "playground",
+          label: "Interactive Playground",
+          icon: Sparkles,
+          path: "/ai-core/playground",
+        },
+        {
+          id: "arena",
+          label: "Model Arena (Battle)",
+          icon: Sliders,
+          path: "/ai-core/arena",
+        },
       ],
     },
     {
-      name: "Engines & Providers",
+      name: "Engines & Speed Limits",
       items: [
         {
           id: "api_keys",
-          label: "API Keys & Provider Vault",
+          label: "API Keys & Providers",
           icon: Key,
           path: "/ai-core/api-keys",
         },
         {
-          id: "models",
-          label: "Model Routing & Fallbacks",
-          icon: Workflow,
-          path: "/ai-core/models",
-        },
-      ],
-    },
-    {
-      name: "Operations & Costs",
-      items: [
-        {
-          id: "tokens",
-          label: "Tokens by Model & Key",
-          icon: Cpu,
-          path: "/ai-core/tokens",
-        },
-        {
-          id: "charts",
-          label: "Peak Usage & Rate Charts",
-          icon: TrendingUp,
-          path: "/ai-core/charts",
-        },
-        {
-          id: "analytics",
-          label: "AI Analytics & Ledger",
-          icon: BarChart3,
-          path: "/ai-core/analytics",
-        },
-        {
-          id: "billing",
-          label: "Billing & Credit Wallet",
-          icon: CreditCard,
-          path: "/ai-core/billing",
-        },
-      ],
-    },
-    {
-      name: "Governance & Safety",
-      items: [
-        {
-          id: "safety_quotas",
-          label: "Safety & Quota Limits",
+          id: "rate_limits",
+          label: "Rate Limits & Quotas",
           icon: ShieldCheck,
-          path: "/ai-core/safety-quotas",
+          path: "/ai-core/limits",
+        },
+        {
+          id: "routing",
+          label: "Smart Model Routing",
+          icon: Workflow,
+          path: "/ai-core/routing",
+        },
+      ],
+    },
+    {
+      name: "Usage & Credit Wallet",
+      items: [
+        {
+          id: "usage",
+          label: "AI Usage & Analytics",
+          icon: TrendingUp,
+          path: "/ai-core/usage",
+        },
+        {
+          id: "wallet",
+          label: "Credit Wallet & Billing",
+          icon: CreditCard,
+          path: "/ai-core/wallet",
         },
       ],
     },
   ];
+
+
 
   const isActive = (path: string) => {
     if (path === "/ai-core") {

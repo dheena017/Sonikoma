@@ -97,32 +97,33 @@ const VideoEditorPage = React.lazy(
 const AICoreLayout = React.lazy(
   () => import("@/features/ai_core/components/AICoreLayout")
 );
-const AICoreDashboardPage = React.lazy(
-  () => import("@/features/ai_core/pages/AICoreDashboardPage")
+const AICoreOverviewPage = React.lazy(
+  () => import("@/features/ai_core/pages/AICoreOverviewPage")
 );
-const AIAPIManagementPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIAPIManagementPage")
+const AIAPIKeysPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIAPIKeysPage")
 );
-const AIAnalyticsPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIAnalyticsPage")
+const AIRateLimitsPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIRateLimitsPage")
 );
-const AIBillingPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIBillingPage")
+const AIUsageAnalyticsPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIUsageAnalyticsPage")
 );
-const AIModelsRoutingPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIModelsRoutingPage")
+const AIPlaygroundPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIPlaygroundPage")
 );
-const AISafetyQuotasPage = React.lazy(
-  () => import("@/features/ai_core/pages/AISafetyQuotasPage")
+const AIModelArenaPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIModelArenaPage")
 );
-const AITokenModelsPage = React.lazy(
-  () => import("@/features/ai_core/pages/AITokenModelsPage")
+const AIRoutingPage = React.lazy(
+  () => import("@/features/ai_core/pages/AIRoutingPage")
 );
-const AIChartsPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIChartsPage")
+const AICreditWalletPage = React.lazy(
+  () => import("@/features/ai_core/pages/AICreditWalletPage")
 );
 
 import MainLayout from "@/components/layout/MainLayout";
+
 
 export interface AppRouterProps {
   currentPath: string;
@@ -786,18 +787,23 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/ai-core/" ||
         currentPath === "/ai-core/overview",
       isAIAPIKeysPath: currentPath === "/ai-core/api-keys",
-      isAITokensPath:
-        currentPath === "/ai-core/tokens" ||
-        currentPath === "/ai-core/tokens/" ||
-        currentPath.startsWith("/ai-core/tokens"),
-      isAIChartsPath:
+      isAIRateLimitsPath:
+        currentPath === "/ai-core/limits" ||
+        currentPath === "/ai-core/safety-quotas" ||
+        currentPath === "/ai-core/tokens",
+      isAIUsagePath:
+        currentPath === "/ai-core/usage" ||
         currentPath === "/ai-core/charts" ||
-        currentPath === "/ai-core/charts/" ||
-        currentPath.startsWith("/ai-core/charts"),
-      isAIAnalyticsPath: currentPath === "/ai-core/analytics",
-      isAIBillingPath: currentPath === "/ai-core/billing",
-      isAIModelsPath: currentPath === "/ai-core/models",
-      isAISafetyQuotasPath: currentPath === "/ai-core/safety-quotas",
+        currentPath === "/ai-core/analytics",
+      isAIPlaygroundPath: currentPath === "/ai-core/playground",
+      isAIArenaPath: currentPath === "/ai-core/arena",
+      isAIRoutingPath:
+        currentPath === "/ai-core/routing" ||
+        currentPath === "/ai-core/models",
+      isAIWalletPath:
+        currentPath === "/ai-core/wallet" ||
+        currentPath === "/ai-core/billing",
+
       editorRouteMatch,
       isImageEditorPage,
       isVideoEditorPath:
@@ -835,15 +841,16 @@ export default function AppRouter(props: AppRouterProps) {
     isAICorePath,
     isAICoreDashboardPath,
     isAIAPIKeysPath,
-    isAITokensPath,
-    isAIChartsPath,
-    isAIAnalyticsPath,
-    isAIBillingPath,
-    isAIModelsPath,
-    isAISafetyQuotasPath,
+    isAIRateLimitsPath,
+    isAIUsagePath,
+    isAIPlaygroundPath,
+    isAIArenaPath,
+    isAIRoutingPath,
+    isAIWalletPath,
     isImageEditorPage,
     isVideoEditorPath,
   } = pathFlags;
+
 
   const isAnyAdmin = isAdminPath || isAdminDashboardPath;
 
@@ -1313,30 +1320,23 @@ export default function AppRouter(props: AppRouterProps) {
           <div className="page-transition w-full flex-1 flex flex-col min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto w-full space-y-6">
               {isAIAPIKeysPath ? (
-                <AIAPIManagementPage addNotification={addNotification} />
-              ) : isAITokensPath ? (
-                <AITokenModelsPage addNotification={addNotification} />
-              ) : isAIChartsPath ? (
-                <AIChartsPage addNotification={addNotification} />
-              ) : isAIAnalyticsPath ? (
-                <AIAnalyticsPage addNotification={addNotification} />
-              ) : isAIBillingPath ? (
-                <AIBillingPage
-                  user={user}
-                  fetchWithInterceptor={fetchWithInterceptor}
-                  addNotification={addNotification}
-                />
-              ) : isAIModelsPath ? (
-                <AIModelsRoutingPage addNotification={addNotification} />
-              ) : isAISafetyQuotasPath ? (
-                <AISafetyQuotasPage addNotification={addNotification} />
+                <AIAPIKeysPage addNotification={addNotification} />
+              ) : isAIRateLimitsPath ? (
+                <AIRateLimitsPage addNotification={addNotification} />
+              ) : isAIUsagePath ? (
+                <AIUsageAnalyticsPage addNotification={addNotification} />
+              ) : isAIPlaygroundPath ? (
+                <AIPlaygroundPage addNotification={addNotification} />
+              ) : isAIArenaPath ? (
+                <AIModelArenaPage addNotification={addNotification} />
+              ) : isAIRoutingPath ? (
+                <AIRoutingPage addNotification={addNotification} />
+              ) : isAIWalletPath ? (
+                <AICreditWalletPage addNotification={addNotification} />
               ) : (
-                <AICoreDashboardPage
-                  navigateTo={navigateTo}
-                  addNotification={addNotification}
-                  user={user}
-                />
+                <AICoreOverviewPage addNotification={addNotification} />
               )}
+
             </div>
           </div>
         )}

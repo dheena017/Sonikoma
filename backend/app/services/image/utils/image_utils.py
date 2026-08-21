@@ -169,7 +169,7 @@ def save_image_to_cache(data: bytes, filename: str, content_type: str = "image/p
     with open(out_path, "wb") as f:
         f.write(data)
     try:
-        stitched_cache[filename] = f"/api/cache-image/{filename}"
+        stitched_cache.set(filename, {"data": data, "content_type": content_type})
     except Exception:
         pass
     logger.debug(f"[image_utils] Saved {len(data)} bytes to image cache: {out_path}")

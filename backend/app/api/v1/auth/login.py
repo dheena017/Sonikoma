@@ -7,12 +7,13 @@ Authentication login routes.
 
 import uuid
 import logging
+from typing import Optional
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.security import verify_password, create_access_token
-from repositories.user import get_user_by_email, create_user_session, write_audit_log
+from repositories.user import get_user_by_email, get_user_by_username, create_user_session, write_audit_log
 from schemas.auth import UserLogin
 
 logger = logging.getLogger("sonikoma.auth.login")
@@ -22,27 +23,29 @@ router = APIRouter()
 @router.post("/token", summary="Obtain OAuth2/JWT access token")
 async def login_for_access_token_endpoint(
     request: Request,
+    form_data: Optional[OAuth2PasswordRequestForm] = Depends(),
 ):
     ip_addr = request.client.host if request and request.client else "127.0.0.1"
     content_type = request.headers.get("content-type", "")
 
-    username = ""
-    password = ""
+    username = form_data.username if form_data else ""
+    password = form_data.password if form_data else ""
 
-    if "application/json" in content_type:
-        try:
-            body = await request.json()
-            username = body.get("username") or body.get("email") or ""
-            password = body.get("password") or ""
-        except Exception:
-            pass
-    else:
-        try:
-            form = await request.form()
-            username = form.get("username") or form.get("email") or ""
-            password = form.get("password") or ""
-        except Exception:
-            pass
+    if not username or not password:
+        if "application/json" in content_type:
+            try:
+                body = await request.json()
+                username = username or body.get("username") or body.get("email") or ""
+                password = password or body.get("password") or ""
+            except Exception:
+                pass
+        else:
+            try:
+                form = await request.form()
+                username = username or form.get("username") or form.get("email") or ""
+                password = password or form.get("password") or ""
+            except Exception:
+                pass
 
     if not username or not password:
         raise HTTPException(
@@ -51,7 +54,7 @@ async def login_for_access_token_endpoint(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = get_user_by_email(username)
+    user = get_user_by_email(username) or get_user_by_username(username)
 
     if (
         not user
@@ -74,12 +77,23 @@ async def login_for_access_token_endpoint(
         "full_name": user.get("full_name"),
         "avatar_url": user.get("avatar_url")
     }
-    return {
+    from fastapi.responses import JSONResponse
+
+    response = JSONResponse(content={
         "success": True,
         "access_token": access_token,
         "token_type": "bearer",
         "user": user_info
-    }
+    })
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=False,
+        samesite="lax",
+        max_age=604800,
+        path="/"
+    )
+    return response
 
 
 @router.get("/token", summary="Verify active authentication token")

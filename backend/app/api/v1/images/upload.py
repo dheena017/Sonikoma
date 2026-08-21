@@ -144,13 +144,10 @@ async def save_training_data(
 async def start_training(epochs: int = 20, batch_size: int = 4):
     os.makedirs(_TRAINING_DIR, exist_ok=True)
     orig_files = glob.glob(os.path.join(_TRAINING_DIR, "original_*.*"))
-    if not orig_files:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot start training: No human-corrected samples have been saved yet."
-        )
     try:
-        from services.image.panel_detection.speech_bubble_detector import trigger_fine_tuning
+        from services.image.panel_detection.speech_bubble_detector import trigger_fine_tuning, _seed_starter_training_pairs
+        if not orig_files:
+            _seed_starter_training_pairs(_TRAINING_DIR)
         success = trigger_fine_tuning(epochs, batch_size)
         if not success:
             raise HTTPException(status_code=409, detail="A training run is already in progress.")

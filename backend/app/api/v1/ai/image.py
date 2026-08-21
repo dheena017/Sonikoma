@@ -13,12 +13,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.v1.ai._deps import get_user_gemini_key, default_output_path
-from app.api.dependencies.auth import get_current_user
+from api.v1.ai._deps import get_user_gemini_key, default_output_path
+from api.dependencies.auth import get_current_user
 
-from app.services.user.credit_service import get_available_credits, record_credit_transaction
-from app.database.config import LOW_BALANCE_THRESHOLD
-from app.schemas.ai import (
+from services.user.credit_service import get_available_credits, record_credit_transaction
+from database.config import LOW_BALANCE_THRESHOLD
+from schemas.ai import (
     AnalyzeImageRequest,
     AnalyzeBatchRequest,
     AnalyzeSequenceRequest,
@@ -31,11 +31,12 @@ from app.schemas.ai import (
     StyleTransferRequest,
     BatchGenerateRequest,
 )
-from app.services.ai.facade import (
+from services.ai.facade import (
     facade_analyze_image,
     facade_analyze_narrative_sequence,
     facade_smart_crop,
 )
+
 
 logger = logging.getLogger("sonikoma.api.ai.image")
 

@@ -1,0 +1,895 @@
+[
+  {
+    "id": "gemini-3.7-flash",
+    "provider": "gemini",
+    "name": "Google Gemini 3.7 Flash (New Stable)",
+    "category": "Multimodal Vision & Audio Workhorse",
+    "context_window": 1048576,
+    "max_output_tokens": 8192,
+    "limit_rpm": 1000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.075,
+    "completion_price_per_1m": 0.3,
+    "speed_rating": "Ultra Fast (<220ms)",
+    "capabilities": [
+      "vision",
+      "json_mode",
+      "streaming",
+      "multilingual",
+      "function_calling",
+      "agentic_workflows",
+      "deep_thinking",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 3000000,
+      "tier2": 400000000,
+      "tier3": 1000000000
+    },
+    "recommended_for": [
+      "Complex Manga Scripting",
+      "Agentic Comic Workflows",
+      "High-Speed Analysis"
+    ]
+  },
+  {
+    "id": "gemini-3.6-flash",
+    "provider": "gemini",
+    "name": "Google Gemini 3.6 Flash (Stable)",
+    "category": "Multimodal Vision & Audio Workhorse",
+    "context_window": 1048576,
+    "max_output_tokens": 8192,
+    "limit_rpm": 1000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.075,
+    "completion_price_per_1m": 0.3,
+    "speed_rating": "Ultra Fast (<240ms)",
+    "capabilities": [
+      "vision",
+      "json_mode",
+      "multilingual",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 3000000,
+      "tier2": 400000000,
+      "tier3": 1000000000
+    },
+    "recommended_for": [
+      "Everyday Comic Tasks",
+      "Fast Panel Narration"
+    ]
+  },
+  {
+    "id": "gemini-3.5-flash",
+    "provider": "gemini",
+    "name": "Google Gemini 3.5 Flash (Stable)",
+    "category": "Multimodal Vision & Audio Workhorse",
+    "context_window": 1048576,
+    "max_output_tokens": 8192,
+    "limit_rpm": 1000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.075,
+    "completion_price_per_1m": 0.3,
+    "speed_rating": "Ultra Fast (~250ms)",
+    "capabilities": [
+      "vision",
+      "json_mode",
+      "multilingual",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 3000000,
+      "tier2": 400000000,
+      "tier3": 1000000000
+    },
+    "recommended_for": [
+      "High-Volume Routine Processing",
+      "Batch Chapter Ingestion"
+    ]
+  },
+  {
+    "id": "gemini-3.5-flash-lite",
+    "provider": "gemini",
+    "name": "Google Gemini 3.5 Flash Lite (Stable)",
+    "category": "High-Throughput Sub-Second OCR & Chat",
+    "context_window": 1048576,
+    "max_output_tokens": 8192,
+    "limit_rpm": 2000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0375,
+    "completion_price_per_1m": 0.15,
+    "speed_rating": "Ultra Fast (<180ms)",
+    "capabilities": [
+      "vision",
+      "speed_optimized",
+      "json_mode",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 5000000,
+      "tier2": 500000000,
+      "tier3": 2000000000
+    },
+    "recommended_for": [
+      "Instant Bubble OCR Extraction",
+      "Real-Time Panel Verification"
+    ]
+  },
+  {
+    "id": "gemini-3.1-flash-lite",
+    "provider": "gemini",
+    "name": "Google Gemini 3.1 Flash Lite (Stable)",
+    "category": "High-Throughput Sub-Second OCR & Chat",
+    "context_window": 1048576,
+    "max_output_tokens": 8192,
+    "limit_rpm": 2000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0375,
+    "completion_price_per_1m": 0.15,
+    "speed_rating": "Ultra Fast (<190ms)",
+    "capabilities": [
+      "vision",
+      "speed_optimized",
+      "json_mode",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 5000000,
+      "tier2": 500000000,
+      "tier3": 2000000000
+    },
+    "recommended_for": [
+      "High-Frequency Lightweight Tasks",
+      "Low Cost Multi-Volume Processing"
+    ]
+  },
+  {
+    "id": "gemini-3.1-pro-preview",
+    "provider": "gemini",
+    "name": "Google Gemini 3.1 Pro (Preview)",
+    "category": "Complex Multi-Step Narrative Reasoning",
+    "context_window": 2097152,
+    "max_output_tokens": 8192,
+    "limit_rpm": 360,
+    "limit_tpm": 2000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 1.25,
+    "completion_price_per_1m": 5.0,
+    "speed_rating": "Deliberate (~950ms)",
+    "capabilities": [
+      "vision",
+      "deep_reasoning",
+      "coding",
+      "agentic",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 1000000,
+      "tier2": 100000000,
+      "tier3": 500000000
+    },
+    "recommended_for": [
+      "Complex Manga Architecture",
+      "Vibe Coding & Logic Generation"
+    ]
+  },
+  {
+    "id": "gemini-3-flash-preview",
+    "provider": "gemini",
+    "name": "Google Gemini 3 Flash (Preview)",
+    "category": "Multimodal Vision & Audio Workhorse",
+    "context_window": 1048576,
+    "max_output_tokens": 8192,
+    "limit_rpm": 1000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.075,
+    "completion_price_per_1m": 0.3,
+    "speed_rating": "Ultra Fast (<220ms)",
+    "capabilities": [
+      "vision",
+      "json_mode",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 3000000,
+      "tier2": 400000000,
+      "tier3": 1000000000
+    },
+    "recommended_for": [
+      "Early Access Multimodal Features",
+      "Next-Gen Benchmarks"
+    ]
+  },
+  {
+    "id": "gemini-3.5-live-translate-preview",
+    "provider": "gemini",
+    "name": "Google Gemini 3.5 Live Translate",
+    "category": "Bidirectional Audio & Dialogue Streaming",
+    "context_window": 128000,
+    "max_output_tokens": 8192,
+    "limit_rpm": 10,
+    "limit_tpm": 500000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 0.15,
+    "completion_price_per_1m": 0.6,
+    "speed_rating": "Streaming (<280ms)",
+    "capabilities": [
+      "speech_to_speech",
+      "live_translation",
+      "audio_streaming",
+      "multilingual"
+    ],
+    "recommended_for": [
+      "Live Anime Dubbing",
+      "Real-Time Multi-Language Chapter Narration"
+    ]
+  },
+  {
+    "id": "gemini-3.1-flash-live-preview",
+    "provider": "gemini",
+    "name": "Google Gemini 3.1 Flash Live (A2A)",
+    "category": "Bidirectional Audio & Dialogue Streaming",
+    "context_window": 128000,
+    "max_output_tokens": 8192,
+    "limit_rpm": 10,
+    "limit_tpm": 500000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 0.15,
+    "completion_price_per_1m": 0.6,
+    "speed_rating": "Real-time (<220ms)",
+    "capabilities": [
+      "audio_to_audio",
+      "live_dialogue",
+      "native_audio_reasoning"
+    ],
+    "recommended_for": [
+      "Voice-First Manga Companion",
+      "Live Dialogue Directing"
+    ]
+  },
+  {
+    "id": "gemini-3.1-flash-tts-preview",
+    "provider": "gemini",
+    "name": "Google Gemini 3.1 Flash TTS",
+    "category": "Expressive Text-to-Speech",
+    "context_window": 32000,
+    "max_output_tokens": 8192,
+    "limit_rpm": 20,
+    "limit_tpm": 500000,
+    "limit_rpd": 1000,
+    "prompt_price_per_1m": 0.1,
+    "completion_price_per_1m": 0.4,
+    "speed_rating": "Voice Fast (<200ms)",
+    "capabilities": [
+      "audio_generation",
+      "expressive_tags",
+      "steerable_prompts"
+    ],
+    "recommended_for": [
+      "Manga Character Voiceover",
+      "Dynamic Emotional Narration"
+    ]
+  },
+  {
+    "id": "gemini-3.1-flash-image",
+    "provider": "gemini",
+    "name": "Nano Banana 2 (Gemini 3.1 Flash Image)",
+    "category": "High-Efficiency Visual Creation",
+    "context_window": 32768,
+    "max_output_tokens": 1024,
+    "limit_rpm": 10,
+    "limit_tpm": 10000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.03,
+    "speed_rating": "Visual GPU (~1.8s)",
+    "capabilities": [
+      "image_generation",
+      "image_editing",
+      "inpainting",
+      "character_consistency"
+    ],
+    "recommended_for": [
+      "High-Volume Manga Art",
+      "Panel Scene Generation"
+    ]
+  },
+  {
+    "id": "gemini-3.1-flash-lite-image",
+    "provider": "gemini",
+    "name": "Nano Banana 2 Lite (Flash Lite Image)",
+    "category": "High-Throughput Sub-Second OCR & Chat",
+    "context_window": 16384,
+    "max_output_tokens": 1024,
+    "limit_rpm": 2000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.015,
+    "speed_rating": "Visual GPU (~0.9s)",
+    "capabilities": [
+      "image_generation",
+      "interactive_editing",
+      "speed_optimized"
+    ],
+    "recommended_for": [
+      "Real-Time Thumbnail Inpainting",
+      "Interactive Art Previews"
+    ]
+  },
+  {
+    "id": "gemini-3-pro-image",
+    "provider": "gemini",
+    "name": "Nano Banana Pro (Gemini 3 Pro Image)",
+    "category": "Studio-Quality 4K Visual Engine",
+    "context_window": 65536,
+    "max_output_tokens": 2048,
+    "limit_rpm": 5,
+    "limit_tpm": 5000,
+    "limit_rpd": 200,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.06,
+    "speed_rating": "Studio GPU (~3.4s)",
+    "capabilities": [
+      "image_generation",
+      "4k_resolution",
+      "complex_layouts",
+      "text_rendering",
+      "reasoning_core"
+    ],
+    "recommended_for": [
+      "Manga Cover Art",
+      "High-Resolution Double Page Spreads"
+    ]
+  },
+  {
+    "id": "gemini-2.5-flash-image",
+    "provider": "gemini",
+    "name": "Nano Banana (Gemini 2.5 Flash Image)",
+    "category": "High-Efficiency Visual Creation",
+    "context_window": 32768,
+    "max_output_tokens": 1024,
+    "limit_rpm": 10,
+    "limit_tpm": 10000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.03,
+    "speed_rating": "Visual GPU (~2.1s)",
+    "capabilities": [
+      "image_generation",
+      "image_editing",
+      "creative_workflows"
+    ],
+    "recommended_for": [
+      "Comic Visuals",
+      "Panel Background Replacement"
+    ]
+  },
+  {
+    "id": "veo-3.1-generate-preview",
+    "provider": "gemini",
+    "name": "Google Veo 3.1 Cinematic Video",
+    "category": "State-of-the-Art Cinematic Video",
+    "context_window": 4096,
+    "max_output_tokens": 1024,
+    "limit_rpm": 2,
+    "limit_tpm": 2000,
+    "limit_rpd": 50,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_video_second": 0.15,
+    "speed_rating": "Video GPU (~25s)",
+    "capabilities": [
+      "video_generation",
+      "cinematic_controls",
+      "synced_audio",
+      "text_to_video",
+      "image_to_video"
+    ],
+    "recommended_for": [
+      "Animated Manga Trailers",
+      "Cinematic Scene Motion"
+    ]
+  },
+  {
+    "id": "veo-3.1-lite-generate-preview",
+    "provider": "gemini",
+    "name": "Google Veo 3.1 Lite Video",
+    "category": "State-of-the-Art Cinematic Video",
+    "context_window": 2048,
+    "max_output_tokens": 512,
+    "limit_rpm": 4,
+    "limit_tpm": 4000,
+    "limit_rpd": 50,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_video_second": 0.075,
+    "speed_rating": "Video GPU (~12s)",
+    "capabilities": [
+      "video_generation",
+      "fast_preview",
+      "developer_first"
+    ],
+    "recommended_for": [
+      "Short Social Teasers",
+      "Fast Video Previews"
+    ]
+  },
+  {
+    "id": "gemini-omni-flash",
+    "provider": "gemini",
+    "name": "Google Gemini Omni Flash Video",
+    "category": "Multimodal Vision & Audio Workhorse",
+    "context_window": 65536,
+    "max_output_tokens": 2048,
+    "limit_rpm": 1000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_video_second": 0.05,
+    "speed_rating": "Video GPU (~8s)",
+    "capabilities": [
+      "video_generation",
+      "conversational_editing",
+      "text_and_image_to_video"
+    ],
+    "recommended_for": [
+      "Interactive Scene Editing",
+      "Natural Language Video Iteration"
+    ]
+  },
+  {
+    "id": "gemini-2.5-flash",
+    "provider": "gemini",
+    "name": "Google Gemini 2.5 Flash",
+    "category": "Multimodal Vision & Audio Workhorse",
+    "context_window": 1048576,
+    "max_output_tokens": 8192,
+    "limit_rpm": 1000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.075,
+    "completion_price_per_1m": 0.3,
+    "speed_rating": "Ultra Fast (<220ms)",
+    "capabilities": [
+      "vision",
+      "json_mode",
+      "multilingual",
+      "function_calling",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 3000000,
+      "tier2": 400000000,
+      "tier3": 1000000000
+    },
+    "recommended_for": [
+      "Script Generation",
+      "Panel OCR Extraction",
+      "Fast YouTube SEO"
+    ]
+  },
+  {
+    "id": "gemini-2.5-flash-lite",
+    "provider": "gemini",
+    "name": "Google Gemini 2.5 Flash-Lite",
+    "category": "High-Throughput Sub-Second OCR & Chat",
+    "context_window": 1048576,
+    "max_output_tokens": 8192,
+    "limit_rpm": 2000,
+    "limit_tpm": 4000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0375,
+    "completion_price_per_1m": 0.15,
+    "speed_rating": "Ultra Fast (<160ms)",
+    "capabilities": [
+      "vision",
+      "speed_optimized",
+      "json_mode",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 10000000,
+      "tier2": 1000000000,
+      "tier3": 5000000000
+    },
+    "recommended_for": [
+      "Low-Latency Bubble Detection",
+      "High-Volume Metadata Parsing"
+    ]
+  },
+  {
+    "id": "gemini-2.5-pro",
+    "provider": "gemini",
+    "name": "Google Gemini 2.5 Pro",
+    "category": "Complex Multi-Step Narrative Reasoning",
+    "context_window": 2097152,
+    "max_output_tokens": 8192,
+    "limit_rpm": 360,
+    "limit_tpm": 2000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 1.25,
+    "completion_price_per_1m": 5.0,
+    "speed_rating": "Deliberate (~900ms)",
+    "capabilities": [
+      "vision",
+      "deep_reasoning",
+      "coding",
+      "agentic",
+      "text",
+      "batch_api"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 1000000,
+      "tier2": 100000000,
+      "tier3": 500000000
+    },
+    "recommended_for": [
+      "Complex Plot Outlining",
+      "Nuanced Character Dialogue"
+    ]
+  },
+  {
+    "id": "gemini-2.5-flash-native-audio-preview-12-2025",
+    "provider": "gemini",
+    "name": "Google Gemini 2.5 Flash Live (Native Audio)",
+    "category": "Bidirectional Audio & Dialogue Streaming",
+    "context_window": 128000,
+    "max_output_tokens": 8192,
+    "limit_rpm": 10,
+    "limit_tpm": 500000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 0.15,
+    "completion_price_per_1m": 0.6,
+    "speed_rating": "Real-time (<220ms)",
+    "capabilities": [
+      "live_api",
+      "bidirectional_voice",
+      "video_agents",
+      "native_audio_reasoning"
+    ],
+    "recommended_for": [
+      "Bidirectional Voice Directing",
+      "Interactive Dialogue Studio"
+    ]
+  },
+  {
+    "id": "gemini-2.5-flash-preview-tts",
+    "provider": "gemini",
+    "name": "Google Gemini 2.5 Flash TTS",
+    "category": "Expressive Text-to-Speech",
+    "context_window": 32000,
+    "max_output_tokens": 8192,
+    "limit_rpm": 20,
+    "limit_tpm": 500000,
+    "limit_rpd": 1000,
+    "prompt_price_per_1m": 0.1,
+    "completion_price_per_1m": 0.4,
+    "speed_rating": "Voice Fast (<190ms)",
+    "capabilities": [
+      "tts",
+      "controllable_style",
+      "pacing_control"
+    ],
+    "recommended_for": [
+      "Fast Chapter Voiceover",
+      "Cost-Efficient Speech Assistants"
+    ]
+  },
+  {
+    "id": "gemini-2.5-pro-preview-tts",
+    "provider": "gemini",
+    "name": "Google Gemini 2.5 Pro TTS",
+    "category": "Expressive Text-to-Speech",
+    "context_window": 64000,
+    "max_output_tokens": 8192,
+    "limit_rpm": 20,
+    "limit_tpm": 500000,
+    "limit_rpd": 1000,
+    "prompt_price_per_1m": 0.25,
+    "completion_price_per_1m": 1.0,
+    "speed_rating": "Studio Quality (<350ms)",
+    "capabilities": [
+      "tts",
+      "high_fidelity",
+      "podcast_quality",
+      "audiobook_narration"
+    ],
+    "recommended_for": [
+      "Full Audiobook Narration",
+      "Studio Quality Episode Podcasts"
+    ]
+  },
+  {
+    "id": "lyria-3-pro-preview",
+    "provider": "gemini",
+    "name": "Google Lyria 3 Pro Music",
+    "category": "Complex Multi-Step Narrative Reasoning",
+    "context_window": 1024,
+    "max_output_tokens": 1,
+    "limit_rpm": 360,
+    "limit_tpm": 2000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_audio_minute": 0.05,
+    "speed_rating": "Music GPU (~5.5s)",
+    "capabilities": [
+      "music_generation",
+      "full_songs",
+      "structural_coherence"
+    ],
+    "recommended_for": [
+      "Manga Theme Music",
+      "Episodic BGM Generation"
+    ]
+  },
+  {
+    "id": "lyria-3-clip-preview",
+    "provider": "gemini",
+    "name": "Google Lyria 3 Clip (30s Loops)",
+    "category": "Full-Length Music & Soundtrack Generation",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 15,
+    "limit_tpm": 1000,
+    "limit_rpd": 100,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_audio_minute": 0.025,
+    "speed_rating": "Music GPU (~2.8s)",
+    "capabilities": [
+      "music_generation",
+      "short_loops",
+      "audio_previews"
+    ],
+    "recommended_for": [
+      "Background Action SFX Beats",
+      "Short Scene Jingles"
+    ]
+  },
+  {
+    "id": "lyria-realtime-exp",
+    "provider": "gemini",
+    "name": "Google Lyria RealTime",
+    "category": "Full-Length Music & Soundtrack Generation",
+    "context_window": 1024,
+    "max_output_tokens": 1,
+    "limit_rpm": 5,
+    "limit_tpm": 1000,
+    "limit_rpd": 100,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_audio_minute": 0.04,
+    "speed_rating": "Streaming (~1.1s)",
+    "capabilities": [
+      "music_generation",
+      "real_time_streaming",
+      "creative_control"
+    ],
+    "recommended_for": [
+      "Interactive Dynamic Soundtrack",
+      "Live Stream Music Generation"
+    ]
+  },
+  {
+    "id": "gemini-2.5-computer-use-preview-10-2025",
+    "provider": "gemini",
+    "name": "Google Gemini Computer Use",
+    "category": "Autonomous Agentic Reasoning & Planning",
+    "context_window": 1048576,
+    "max_output_tokens": 8192,
+    "limit_rpm": 10,
+    "limit_tpm": 500000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 1.25,
+    "completion_price_per_1m": 5.0,
+    "speed_rating": "Agentic (~1.2s)",
+    "capabilities": [
+      "computer_use",
+      "screen_ocr",
+      "ui_automation",
+      "vision"
+    ],
+    "recommended_for": [
+      "Automated Comic Scraping",
+      "Browser UI Automation"
+    ]
+  },
+  {
+    "id": "deep-research-preview-04-2026",
+    "provider": "gemini",
+    "name": "Google Gemini Deep Research",
+    "category": "Autonomous Agentic Reasoning & Planning",
+    "context_window": 2097152,
+    "max_output_tokens": 32768,
+    "limit_rpm": 10,
+    "limit_tpm": 500000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 2.5,
+    "completion_price_per_1m": 10.0,
+    "speed_rating": "Deliberate (~8s)",
+    "capabilities": [
+      "deep_research",
+      "multi_step_planning",
+      "source_synthesis"
+    ],
+    "recommended_for": [
+      "Lore & History Research",
+      "Complex Script Continuity Audits"
+    ]
+  },
+  {
+    "id": "deep-research-max-preview-04-2026",
+    "provider": "gemini",
+    "name": "Google Gemini Deep Research Max",
+    "category": "Autonomous Agentic Reasoning & Planning",
+    "context_window": 4194304,
+    "max_output_tokens": 65536,
+    "limit_rpm": 10,
+    "limit_tpm": 500000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 5.0,
+    "completion_price_per_1m": 20.0,
+    "speed_rating": "Deep Analysis (~18s)",
+    "capabilities": [
+      "deep_research",
+      "maximum_context",
+      "hundreds_of_sources",
+      "source_synthesis"
+    ],
+    "recommended_for": [
+      "Exhaustive Industry Research",
+      "Comprehensive Lore Universe Compilation"
+    ]
+  },
+  {
+    "id": "antigravity-preview-05-2026",
+    "provider": "gemini",
+    "name": "Google Antigravity Agent",
+    "category": "Autonomous Agentic Reasoning & Planning",
+    "context_window": 2097152,
+    "max_output_tokens": 32768,
+    "limit_rpm": 10,
+    "limit_tpm": 500000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 1.5,
+    "completion_price_per_1m": 6.0,
+    "speed_rating": "Autonomous Sandbox (~2.5s)",
+    "capabilities": [
+      "agentic_workflows",
+      "code_execution",
+      "filesystem_management",
+      "web_browsing",
+      "linux_sandbox"
+    ],
+    "recommended_for": [
+      "Autonomous Coding & Architecture",
+      "End-to-End Pipeline Execution"
+    ]
+  },
+  {
+    "id": "gemini-embedding-2-preview",
+    "provider": "gemini",
+    "name": "Google Gemini Embedding 2 (Multimodal)",
+    "category": "Vector Semantic Embeddings",
+    "context_window": 128000,
+    "max_output_tokens": 1536,
+    "limit_rpm": 3000,
+    "limit_tpm": 5000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.02,
+    "completion_price_per_1m": 0.0,
+    "speed_rating": "Ultra Fast (<80ms)",
+    "capabilities": [
+      "embedding",
+      "multimodal_search",
+      "rag_indexing",
+      "pdf_video_audio_embeddings"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 500000,
+      "tier2": 5000000,
+      "tier3": 10000000
+    },
+    "recommended_for": [
+      "Multimodal Comic RAG Search",
+      "Panel Similarity Matching"
+    ]
+  },
+  {
+    "id": "gemini-embedding-001",
+    "provider": "gemini",
+    "name": "Google Gemini Text Embedding",
+    "category": "Vector Semantic Embeddings",
+    "context_window": 2048,
+    "max_output_tokens": 768,
+    "limit_rpm": 3000,
+    "limit_tpm": 5000000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.01,
+    "completion_price_per_1m": 0.0,
+    "speed_rating": "Ultra Fast (<50ms)",
+    "capabilities": [
+      "embedding",
+      "text_search"
+    ],
+    "batch_enqueued_tokens": {
+      "tier1": 500000,
+      "tier2": 5000000,
+      "tier3": 10000000
+    },
+    "recommended_for": [
+      "Text Semantic Search",
+      "Tag Indexing"
+    ]
+  },
+  {
+    "id": "gemini-robotics-er-2-preview",
+    "provider": "gemini",
+    "name": "Google Gemini Robotics ER 2",
+    "category": "Spatial Reasoning & Physical Robotics",
+    "context_window": 524288,
+    "max_output_tokens": 8192,
+    "limit_rpm": 5,
+    "limit_tpm": 250000,
+    "limit_rpd": 100,
+    "prompt_price_per_1m": 1.5,
+    "completion_price_per_1m": 6.0,
+    "speed_rating": "Spatial Reasoning (~1.5s)",
+    "capabilities": [
+      "embodied_reasoning",
+      "spatial_reasoning",
+      "video_understanding",
+      "multi_robot_collaboration"
+    ],
+    "recommended_for": [
+      "Spatial Layout Planning",
+      "Physical Interaction Modeling"
+    ]
+  },
+  {
+    "id": "gemini-robotics-er-1.6-preview",
+    "provider": "gemini",
+    "name": "Google Gemini Robotics ER 1.6",
+    "category": "Spatial Reasoning & Physical Robotics",
+    "context_window": 262144,
+    "max_output_tokens": 4096,
+    "limit_rpm": 5,
+    "limit_tpm": 250000,
+    "limit_rpd": 100,
+    "prompt_price_per_1m": 1.0,
+    "completion_price_per_1m": 4.0,
+    "speed_rating": "Spatial Reasoning (~1.8s)",
+    "capabilities": [
+      "embodied_reasoning",
+      "instrument_reading",
+      "spatial_reasoning"
+    ],
+    "recommended_for": [
+      "Instrument Reading",
+      "Physical Space Planning"
+    ]
+  }
+]

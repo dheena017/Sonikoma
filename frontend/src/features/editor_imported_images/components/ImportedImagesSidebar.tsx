@@ -138,21 +138,19 @@ export const HorizontalScrollContainer: React.FC<{
   };
 
   return (
-    <div className="w-full min-w-0 flex items-center gap-2">
+    <div className="w-full min-w-0 flex items-center gap-2 relative">
       {/* Left Arrow */}
-      <button
-        type="button"
-        onClick={() => scroll("left")}
-        aria-label="Scroll Left"
-        title="Scroll Left"
-        className={`shrink-0 w-9 h-9 rounded-full bg-neutral-900/90 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md ${
-          canScrollLeft
-            ? "opacity-90 hover:opacity-100"
-            : "opacity-20 pointer-events-none"
-        }`}
-      >
-        <ChevronLeft className="w-5 h-5" />
-      </button>
+      {canScrollLeft && (
+        <button
+          type="button"
+          onClick={() => scroll("left")}
+          aria-label="Scroll Left"
+          title="Scroll Left"
+          className="shrink-0 w-8 h-8 rounded-full bg-neutral-900/90 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md z-10"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+      )}
 
       {/* Scroll Track — custom purple scrollbar with smooth horizontal scrolling */}
       <div
@@ -163,19 +161,17 @@ export const HorizontalScrollContainer: React.FC<{
       </div>
 
       {/* Right Arrow */}
-      <button
-        type="button"
-        onClick={() => scroll("right")}
-        aria-label="Scroll Right"
-        title="Scroll Right"
-        className={`shrink-0 w-9 h-9 rounded-full bg-neutral-900/90 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md ${
-          canScrollRight
-            ? "opacity-90 hover:opacity-100"
-            : "opacity-20 pointer-events-none"
-        }`}
-      >
-        <ChevronRight className="w-5 h-5" />
-      </button>
+      {canScrollRight && (
+        <button
+          type="button"
+          onClick={() => scroll("right")}
+          aria-label="Scroll Right"
+          title="Scroll Right"
+          className="shrink-0 w-8 h-8 rounded-full bg-neutral-900/90 hover:bg-purple-600 border border-neutral-700/80 hover:border-purple-400 text-purple-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md z-10"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 };

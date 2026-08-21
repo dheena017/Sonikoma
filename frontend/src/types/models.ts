@@ -29,8 +29,8 @@ export const AI_MODELS: AIModel[] = [
     recommended_for: ["YouTube SEO", "Panel Narration", "Story Scripting", "Smart Crop"],
   },
   {
-    id: "gemini-2.5-pro",
-    name: "Google Gemini 2.5 Pro",
+    id: "gemini-1.5-pro",
+    name: "Google Gemini 1.5 Pro",
     type: "paid",
     provider: "Google",
     category: "Deep Reasoning & Multimodal",

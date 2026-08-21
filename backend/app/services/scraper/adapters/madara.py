@@ -40,7 +40,7 @@ logger = logging.getLogger("sonikoma.services.scraper.adapters.madara")
 # ─── Known Madara Domains & Patterns ─────────────────────────────────────────
 
 _KNOWN_MADARA_DOMAINS = (
-    "mangaclash.com", "manhuaus.com", "topmanhua.com", "manhuaplus.org", "manhuaplus.com",
+    "mangaclash.com", "manhuaus.com", "topmanhua.com", "manhuatop.org", "manhuaplus.org", "manhuaplus.com",
     "manhwa18.cc", "1stkissmanga.io", "1stkissmanga.com", "1stkissmanga.me", "mangatx.com",
     "mangaeffect.com", "mangaonlineteam.com", "kunmanga.com", "harimanga.com",
     "zinmanga.com", "manhwaclan.com", "manhwaden.com", "manga68.com", "manhuato.com",

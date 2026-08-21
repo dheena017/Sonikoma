@@ -1,0 +1,18 @@
+[
+  {
+    "id": "edge-tts-neural",
+    "provider": "edgetts",
+    "name": "Microsoft Edge Neural TTS",
+    "category": "Neural Speech & Emotion",
+    "context_window": 10000,
+    "max_output_tokens": 10000,
+    "limit_rpm": 60,
+    "limit_tpm": 50000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "speed_rating": "Streaming Audio (~250ms TTFB)",
+    "capabilities": ["tts", "multilingual_audio", "speed_pitch_control"],
+    "recommended_for": ["Fast Narration Generation", "Free Audio Fallback"]
+  }
+]

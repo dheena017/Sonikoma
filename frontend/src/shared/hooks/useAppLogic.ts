@@ -368,7 +368,7 @@ export function useAppLogic() {
   const scrapeImages = useCallback(
     async (customUrl?: any, overrideProjectId?: string) => {
       const activeUrl = typeof customUrl === "string" ? customUrl : targetUrl;
-      if (!activeUrl || !activeUrl.trim()) return;
+      if (!activeUrl || !activeUrl.trim()) return false;
 
       const resolvedUrl = convertToViewerUrl(
         activeUrl,
@@ -520,7 +520,8 @@ export function useAppLogic() {
             (state.seriesAuthor ? state.seriesAuthor.trim() : "");
           const returnedCover =
             data.series?.cover_image ||
-            (state.seriesCoverImage ? state.seriesCoverImage.trim() : "");
+            (state.seriesCoverImage ? state.seriesCoverImage.trim() : "") ||
+            (finalImages.length > 0 ? finalImages[0] : "");
           const returnedSynopsis =
             data.series?.description ||
             (state.seriesSynopsis ? state.seriesSynopsis.trim() : "");
@@ -593,45 +594,18 @@ export function useAppLogic() {
           });
 
           state.setIsScraping(false);
+          return true;
         } else {
           state.setIsScraping(false);
           state.setScrapedImages([]);
           state.setPanels([]);
 
-          const errorDetails = data.error?.details ?? {};
-          const isUnmappedWebsite = errorDetails.is_unmapped_website === true;
-
-          if (isUnmappedWebsite) {
-            const domain = errorDetails.domain || currentHost || "this website";
-            const suggestion =
-              errorDetails.suggestion ||
-              `Website '${domain}' is not yet officially supported. A scraper support request has been logged for admin review.`;
-            state.addNotification(
-              `⚠️ Unsupported Website: '${domain}' is not yet mapped.\n${suggestion}`,
-              "warning",
-              {
-                details: [
-                  `Domain: ${domain}`,
-                  `Status: Unmapped / No dedicated adapter`,
-                  `Action Taken: Support request auto-logged for admin review.`,
-                  `What Happens Next: Admins will inspect '${domain}' in the Scraper Admin Panel and configure a dedicated adapter or custom selectors.`,
-                  `Target URL: ${normalizedTargetUrl}`,
-                ].join("\n"),
-              }
-            );
-          } else {
-            const errMsg =
-              data.error?.message ||
-              data.message ||
-              "Connected but no native comic elements identified on page.";
-            state.addNotification(
-              `Failed to find comic panels: ${errMsg} Please check the URL and try again.`,
-              "error",
-              {
-                details: `Error Response Message: ${errMsg}\nTarget URL: ${normalizedTargetUrl}\nSelected Source Portal: ${selectedSource}\nHost: ${currentHost}`,
-              }
-            );
-          }
+          const errMsg =
+            data.error?.message ||
+            data.message ||
+            "Unable to find comic panels on this page. Please check the URL and try again.";
+          state.addNotification(errMsg, "error");
+          return false;
         }
       } catch (err: any) {
         state.setIsScraping(false);
@@ -658,6 +632,7 @@ export function useAppLogic() {
             }
           );
         }
+        return false;
       }
     },
     [

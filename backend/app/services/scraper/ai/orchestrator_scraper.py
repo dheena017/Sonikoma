@@ -283,66 +283,34 @@ HTML Snippet:
 {snippet}
 """
         try:
+            from services.ai.orchestrator import AIOrchestrator
+            from services.ai.skills.utils import extract_json
+
+            selected_model = "gemini-2.5-flash"
             t0 = time.time()
-            from google import genai
-            from google.genai import types
+            res = await AIOrchestrator.execute_capability(
+                capability="scraper_blueprint",
+                prompt=prompt,
+                model=selected_model,
+                api_key=api_key,
+            )
 
-            client = genai.Client(api_key=api_key)
-            primary_model = os.getenv("GEMINI_MODEL_PRIMARY", "gemini-2.5-flash")
-            candidate_models = [primary_model, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite", "gemini-flash-latest", "gemini-2.5-pro"]
-            
-            # Deduplicate models preserving order
-            seen_models = set()
-            models_to_try = [m for m in candidate_models if m and not (m in seen_models or seen_models.add(m))]
-
-            raw_text = ""
-            selected_model = primary_model
-
-            for model_candidate in models_to_try:
+            data = res.get("result", {})
+            if isinstance(data, dict) and "raw_output" in data and len(data) == 1:
+                raw_text = str(data["raw_output"])
                 try:
-                    response = client.models.generate_content(
-                        model=model_candidate,
-                        contents=prompt,
-                        config=types.GenerateContentConfig(
-                            response_mime_type="application/json",
-                            temperature=0.0,
-                        )
-                    )
-                    if response and response.text:
-                        raw_text = response.text.strip()
-                        selected_model = model_candidate
-                        break
-                except Exception as ex:
-                    ex_str = str(ex)
-                    if "429" in ex_str or "RESOURCE_EXHAUSTED" in ex_str or "quota" in ex_str.lower():
-                        logger.warning(f"[ScraperAIOrchestrator] Model {model_candidate} quota exhausted (429). Failing over to next model candidate...")
-                        continue
-                    else:
-                        logger.warning(f"[ScraperAIOrchestrator] Model {model_candidate} failed: {ex}. Retrying next candidate...")
-                        continue
-
-            if not raw_text:
-                logger.error("[ScraperAIOrchestrator] All Gemini model candidates failed or were quota-exhausted.")
-                return None
-
-            try:
-                data = json.loads(raw_text)
-            except json.JSONDecodeError:
-                # Sanitize unescaped regex backslashes in LLM JSON output
-                cleaned_text = re.sub(r'\\(?![/"\\bfnrtu])', r'\\\\', raw_text)
-                try:
-                    data = json.loads(cleaned_text, strict=False)
+                    data = json.loads(raw_text)
                 except Exception:
-                    # Strip any markdown code fences if present
-                    fence_match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', raw_text)
-                    if fence_match:
-                        cleaned_fenced = re.sub(r'\\(?![/"\\bfnrtu])', r'\\\\', fence_match.group(1))
-                        data = json.loads(cleaned_fenced, strict=False)
-                    else:
-                        raise
+                    data = json.loads(extract_json(raw_text))
+            elif isinstance(data, str):
+                try:
+                    data = json.loads(data)
+                except Exception:
+                    data = json.loads(extract_json(data))
 
             sanitized = UniversalComicBlueprint.sanitize_data(data)
             blueprint = UniversalComicBlueprint(**sanitized)
+
 
             # Auto-fill sample image URLs from HTML if AI did not copy them directly
             if len(blueprint.sample_image_urls) == 0 and html:

@@ -114,7 +114,7 @@ def register_routers(app: FastAPI):
             return RedirectResponse(url="/api/docs")
         return RedirectResponse(url="/api/health")
 
-    # SPA Fallback Route for client-side routing
+    # SPA Fallback Route for client-side routing & browser navigation
     @app.get("/{fallback_path:path}", include_in_schema=False)
     async def spa_fallback(request: Request, fallback_path: str):
         # 1. If static production build exists, serve index.html
@@ -127,12 +127,21 @@ def register_routers(app: FastAPI):
         if index_file:
             return FileResponse(index_file)
 
-        # 2. Return structured 404 JSON for missing backend routes
+        # 2. If accessed from a web browser (HTML accept header), redirect to interactive Swagger docs
+        accept_header = request.headers.get("accept", "")
+        if "text/html" in accept_header:
+            return RedirectResponse(url="/api/docs")
+
+        # 3. Return structured JSON with documentation hints
+        clean_path = fallback_path.lstrip("/")
         return JSONResponse(
             status_code=404,
             content={
                 "success": False,
-                "error": f"Route not found: {fallback_path}",
-                "hint": "Ensure the API prefix is correct (/api/...) or check health check."
+                "error": f"Endpoint not found via GET: /{clean_path}",
+                "hint": "This route may require an HTTP POST/PUT/DELETE request or authorization token.",
+                "docs_url": "/api/docs",
+                "redoc_url": "/api/redoc",
+                "health_url": "/api/health"
             }
         )

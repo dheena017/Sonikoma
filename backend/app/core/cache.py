@@ -259,6 +259,27 @@ class CacheStore(Generic[T]):
     def size(self) -> int:
         return len(self.store)
 
+    def __len__(self) -> int:
+        return len(self.store)
+
+    def __setitem__(self, key: str, value: T) -> None:
+        self.set(key, value)
+
+    def __getitem__(self, key: str) -> T:
+        val = self.get(key)
+        if val is None:
+            raise KeyError(key)
+        return val
+
+    def __contains__(self, key: str) -> bool:
+        return self.has(key)
+
+    def __delitem__(self, key: str) -> None:
+        self.delete(key)
+
+    def __iter__(self):
+        return iter(self.store)
+
     def purge_expired(self) -> int:
         purged = 0
         now = time.time()

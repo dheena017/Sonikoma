@@ -116,7 +116,7 @@ class AdaptiveScraperEngine:
                 if not result.error:
                     result.error = ScrapeError(
                         code=ScrapeErrorCode.READER_NOT_FOUND,
-                        message=f"Could not automatically extract chapter panels from unknown website '{domain}'.",
+                        message=f"Could not extract comic panels from '{domain}'. Please check the URL and try again.",
                     )
                 if not result.error.details:
                     result.error.details = {}
@@ -125,7 +125,6 @@ class AdaptiveScraperEngine:
                     "is_unmapped_website": True,
                     "can_request_domain": True,
                     "request_url": "/api/v1/scraper/admin/domains/request",
-                    "suggestion": f"Website '{domain}' is not yet officially mapped. A support request has been logged for review."
                 })
                 # Auto-enqueue to pending domain requests for admin review
                 try:

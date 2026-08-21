@@ -88,6 +88,7 @@ class SeriesInfo(BaseModel):
     tags: List[str] = Field(default_factory=list)
     description: Optional[str] = None
     cover: Optional[str] = None
+    cover_image: Optional[str] = None
     language: Optional[str] = None
 
 

@@ -1,8 +1,9 @@
-"""
-backend/tests/test_model_catalog.py
-Tests for centralized ModelRegistry catalog, pricing calculations, and provider filtering.
-"""
-import pytest
+import os
+import sys
+import unittest
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "app")))
+
 from services.model_catalog.registry import ModelRegistry, MODEL_CATALOG_DETAILED
 
 
@@ -70,7 +71,7 @@ def test_orchestrator_planning():
         "storyboard_narrative", mode="system"
     )
     assert provider == "gemini"
-    assert target == "gemini-2.5-flash"
+    assert target in ["gemini-3.7-flash", "gemini-2.5-flash"]
     assert len(fallbacks) >= 2
 
     # Verify error classification
@@ -81,4 +82,24 @@ def test_orchestrator_planning():
     err_404 = Exception("404 Not Found")
     classified_404 = classify_error(err_404, provider="gemini", model="Qwen/Qwen3-0.6B")
     assert classified_404.error_code == AIErrorCode.MODEL_NOT_FOUND
+
+
+def test_all_catalog_models_resolution():
+    """Verify that every single model in MODEL_CATALOG_DETAILED resolves properly and has valid metadata."""
+    catalog = ModelRegistry.get_catalog()
+    assert len(catalog) >= 20
+    for model_meta in catalog:
+        m_id = model_meta["id"]
+        expected_provider = model_meta["provider"]
+
+        provider, resolved_model = ModelRegistry.resolve_model_provider(m_id)
+        assert provider == expected_provider, f"Model {m_id} resolved to {provider} but expected {expected_provider}"
+        assert resolved_model == m_id
+
+        # Verify pricing calculation does not throw exception
+        cost = ModelRegistry.calculate_cost(m_id, 1000, 500)
+        assert isinstance(cost, float)
+        assert cost >= 0.0
+
+
 

@@ -200,9 +200,13 @@ async def scrape_and_initialize_project(
                     img_utils.stitch_images_together, [item["data"] for item in resolved_buffers_data], layout="vertical"
                 )
                 if stitched_bytes:
-                    saved_path = img_utils.save_image_to_cache(stitched_bytes, f"stitched_{int(time.time())}.png")
-                    stitched_url = f"/api/cache-image/{os.path.basename(saved_path)}"
-                    stitched_cache[normalized_url] = stitched_url
+                    filename = f"stitched_{int(time.time())}.png"
+                    saved_path = img_utils.save_image_to_cache(stitched_bytes, filename)
+                    stitched_url = f"/api/cache-image/{filename}"
+                    if hasattr(stitched_cache, "set"):
+                        stitched_cache.set(normalized_url, {"data": stitched_bytes, "content_type": "image/png"})
+                    else:
+                        stitched_cache[normalized_url] = {"data": stitched_bytes, "content_type": "image/png"}
                     final_images = [stitched_url]
             except Exception as stitch_err:
                 logger.error(f"[Scraper Service] Stitching exception: {stitch_err}")

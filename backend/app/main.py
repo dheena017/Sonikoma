@@ -27,20 +27,22 @@ except ImportError:
     from core.logging import ColoredFormatter, setup_logging, logger
     from core.logging.filters import EndpointFilter
 from app.core.exceptions import global_exception_handler
+from app.core.responses import PrettyJSONResponse
 from app.core.middleware import setup_middleware
 from app.api.router import register_routers
 from app.openapi.config import OPENAPI_TAGS, API_DESCRIPTION
 from app.openapi.router import register_docs_routes
 from app.lifespan import lifespan
 
-# Create FastAPI app instance
+# Create FastAPI app instance with default Pretty-Printed JSON output
 app = FastAPI(
     title="Sonikoma API Engine",
     description=API_DESCRIPTION,
     version=API_VERSION,
     openapi_tags=OPENAPI_TAGS,
+    default_response_class=PrettyJSONResponse,
     docs_url=None,  # Custom Swagger documentation console mounted via docs router
-    redoc_url="/api/redoc",
+    redoc_url=None,  # Custom ReDoc documentation console mounted via docs router
     openapi_url="/api/openapi.json",
     lifespan=lifespan,
 )

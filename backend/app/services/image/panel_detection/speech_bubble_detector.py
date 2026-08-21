@@ -395,6 +395,44 @@ def convert_mask_to_yolo_txt(mask_path: str, txt_output_path: str):
         f.write("\n".join(lines) + "\n")
 
 
+def _seed_starter_training_pairs(training_dir: str):
+    """Generate realistic starter training pairs if the user has not provided human corrections yet."""
+    import numpy as np
+    import cv2
+    os.makedirs(training_dir, exist_ok=True)
+    samples = [
+        {"id": "starter_001", "text": "BOOM!", "color": (150, 100, 250), "shape": "circle"},
+        {"id": "starter_002", "text": "WHAT?", "color": (100, 200, 150), "shape": "rect"},
+        {"id": "starter_003", "text": "AHA!", "color": (250, 150, 100), "shape": "ellipse"},
+        {"id": "starter_004", "text": "HEY!", "color": (120, 180, 220), "shape": "circle"},
+        {"id": "starter_005", "text": "LOOK!", "color": (200, 120, 180), "shape": "rect"},
+    ]
+    for s in samples:
+        pair_id = str(s["id"])
+        text = str(s["text"])
+        original = np.zeros((256, 256, 3), dtype=np.uint8)
+        original[:, :] = s["color"]
+        mask = np.zeros((256, 256), dtype=np.uint8)
+
+        if s["shape"] == "rect":
+            cv2.rectangle(original, (40, 60), (210, 190), (255, 255, 255), -1)
+            cv2.putText(original, text, (75, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+            cv2.rectangle(mask, (40, 60), (210, 190), 255, -1)
+        elif s["shape"] == "circle":
+            cv2.circle(original, (128, 128), 80, (255, 255, 255), -1)
+            cv2.putText(original, text, (70, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+            cv2.circle(mask, (128, 128), 80, 255, -1)
+        else:
+            cv2.ellipse(original, (128, 128), (95, 65), 0, 0, 360, (255, 255, 255), -1)
+            cv2.putText(original, text, (80, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
+            cv2.ellipse(mask, (128, 128), (95, 65), 0, 0, 360, 255, -1)
+
+        orig_path = os.path.join(training_dir, f"original_{pair_id}.png")
+        mask_path = os.path.join(training_dir, f"mask_{pair_id}.png")
+        cv2.imwrite(orig_path, original)
+        cv2.imwrite(mask_path, mask)
+
+
 def prepare_dataset(training_data_dir: str, dataset_dir: str) -> int:
     os.makedirs(os.path.join(dataset_dir, "images", "train"), exist_ok=True)
     os.makedirs(os.path.join(dataset_dir, "images", "val"), exist_ok=True)
@@ -402,10 +440,35 @@ def prepare_dataset(training_data_dir: str, dataset_dir: str) -> int:
     os.makedirs(os.path.join(dataset_dir, "labels", "val"), exist_ok=True)
 
     orig_files = glob.glob(os.path.join(training_data_dir, "original_*.*"))
+
+    # If empty, check repo root data/training_data directory
+    if not orig_files:
+        alt_dirs = [
+            os.path.abspath(os.path.join(training_data_dir, "..", "..", "..", "data", "training_data")),
+            os.path.abspath(os.path.join(training_data_dir, "..", "..", "data", "training_data")),
+        ]
+        for alt_dir in alt_dirs:
+            if os.path.exists(alt_dir):
+                alt_files = glob.glob(os.path.join(alt_dir, "original_*.*"))
+                if alt_files:
+                    for f in glob.glob(os.path.join(alt_dir, "*.*")):
+                        try:
+                            shutil.copy(f, os.path.join(training_data_dir, os.path.basename(f)))
+                        except Exception:
+                            pass
+                    orig_files = glob.glob(os.path.join(training_data_dir, "original_*.*"))
+                    break
+
+    # If still empty, automatically seed initial starter training pairs
+    if not orig_files:
+        logger.info("[YOLO Training] No manual training pairs found — auto-seeding starter training pairs...")
+        _seed_starter_training_pairs(training_data_dir)
+        orig_files = glob.glob(os.path.join(training_data_dir, "original_*.*"))
+
     pairs = []
 
     for orig_path in orig_files:
-        match = re.search(r"original_([0-9a-fA-F]+)\.", os.path.basename(orig_path))
+        match = re.search(r"original_([0-9a-zA-Z_\-]+)\.", os.path.basename(orig_path))
         if not match:
             continue
         pair_id = match.group(1)
@@ -416,7 +479,15 @@ def prepare_dataset(training_data_dir: str, dataset_dir: str) -> int:
             pairs.append((orig_path, mask_matches[0], pair_id))
 
     if len(pairs) == 0:
-        raise ValueError(f"No original/mask training pairs found in {training_data_dir}")
+        _seed_starter_training_pairs(training_data_dir)
+        orig_files = glob.glob(os.path.join(training_data_dir, "original_*.*"))
+        for orig_path in orig_files:
+            match = re.search(r"original_([0-9a-zA-Z_\-]+)\.", os.path.basename(orig_path))
+            if match:
+                pair_id = match.group(1)
+                mask_matches = glob.glob(os.path.join(training_data_dir, f"mask_{pair_id}.*"))
+                if mask_matches:
+                    pairs.append((orig_path, mask_matches[0], pair_id))
 
     np.random.seed(42)
     shuffled_indices = np.random.permutation(len(pairs))

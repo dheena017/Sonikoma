@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sonikoma - ReDoc API Reference</title>
+  <link rel="icon" type="image/png" href="https://fastapi.tiangolo.com/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* Remove scrollbars from internal nested panels */
+    [class*="RightPanel"],
+    [class*="MiddlePanel"],
+    .api-content,
+    .redoc-wrap {
+      scrollbar-width: none !important;
+      overflow-x: visible !important;
+    }
+    [class*="RightPanel"]::-webkit-scrollbar,
+    [class*="MiddlePanel"]::-webkit-scrollbar,
+    .api-content::-webkit-scrollbar,
+    .redoc-wrap::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    /* Suppress scrollbar buttons & arrows across all elements */
+    ::-webkit-scrollbar-button,
+    *::-webkit-scrollbar-button {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    /* Sleek scrollbar for global page and left sidebar */
+    html, body, .menu-content {
+      scrollbar-width: thin !important;
+      scrollbar-color: #283548 #070b16 !important;
+    }
+    ::-webkit-scrollbar {
+      width: 6px !important;
+      height: 6px !important;
+    }
+    ::-webkit-scrollbar-track {
+      background: #070b16 !important;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #283548 !important;
+      border-radius: 4px !important;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #6366f1 !important;
+    }
+    html, body {
+      background-color: #040711 !important;
+      color: #f8fafc !important;
+      overflow-x: hidden !important;
+    }
+  </style>
+  __THEME_CSS_PLACEHOLDER__
+  __REDOC_THEME_CSS_PLACEHOLDER__
+</head>
+<body class="redoc-page">
+  <!-- Top Navigation Header Bar for ReDoc -->
+  <header class="sonikoma-top-bar">
+    <div class="top-bar-left">
+      <div class="breadcrumb">
+        <span class="breadcrumb-root">⚡ Sonikoma</span>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">📖 ReDoc API Reference</span>
+        <div class="sonikoma-live-badge">
+          <span class="sonikoma-live-dot"></span>
+          <span>API v1.0 Live</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="top-bar-center">
+      <div class="top-search-wrapper" style="cursor: text;" onclick="var el = document.querySelector('.top-header-search-input'); if (el) el.focus();">
+        <input type="text" class="top-header-search-input" placeholder="🔍 Search Endpoints, Schemas, & Methods... (Ctrl+K or /)" oninput="window.sonikomaFilterReDoc(this.value, window.currentMethodFilter);">
+      </div>
+    </div>
+
+    <div class="top-bar-right">
+      <a href="/api/docs" class="top-bar-link" title="Interactive Swagger UI Console">
+        <span>⚡ Swagger UI</span>
+      </a>
+      <a href="/api/docs/schemas" class="top-bar-link" title="Data Models & Schemas Explorer">
+        <span>💎 Schemas</span>
+      </a>
+      <a href="http://localhost:3000" target="_blank" class="top-bar-link" title="Open Web App">
+        <span>🚀 Web App</span>
+      </a>
+      <a href="/api/docs/system" class="top-bar-link" title="Admin & System Settings">
+        <span>🛡️ Admin</span>
+      </a>
+      <a href="/api/openapi.json" target="_blank" class="top-bar-link outline" title="OpenAPI JSON Specification">
+        <span>{ } JSON</span>
+      </a>
+    </div>
+  </header>
+
+  <div id="redoc-container"></div>
+
+  <!-- Floating Quick Action Dock for ReDoc -->
+  <div class="sonikoma-floating-dock">
+    <button class="dock-btn" onclick="window.sonikomaToggleAllSchemas();" title="Expand or collapse all schema objects and response sections">
+      <span>⤢ Toggle All</span>
+    </button>
+    <button class="dock-btn" onclick="window.location.href='/api/docs';" title="Jump to interactive Swagger UI">
+      <span>⚡ Interactive UI</span>
+    </button>
+    <button class="dock-btn primary" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });" title="Scroll to top of documentation">
+      <span>↑ Top</span>
+    </button>
+  </div>
+
+  <!-- ReDoc Standalone Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/redoc@2.1.3/bundles/redoc.standalone.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      window.currentMethodFilter = 'ALL';
+
+      // 1. Hotkey search (Ctrl+K or /)
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' || (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA')) {
+          e.preventDefault();
+          var searchInput = document.querySelector('.top-header-search-input');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+      });
+
+      window.sonikomaToggleAllSchemas = function() {
+        var toggles = document.querySelectorAll('#redoc-container button[class*="ObjectProperty"], #redoc-container button[class*="ArrayProperty"], #redoc-container button[class*="FieldCollapsible"], #redoc-container div[class*="ResponseTitle"], #redoc-container button[class*="ResponseTitle"]');
+        toggles.forEach(function(btn) {
+          btn.click();
+        });
+        setTimeout(styleAllTabsAndArtifacts, 80);
+      };
+
+      window.sonikomaFilterByMethod = function(method) {
+        window.currentMethodFilter = method;
+        var chips = document.querySelectorAll('.sonikoma-filter-chip');
+        chips.forEach(function(c) {
+          if (c.dataset.method === method) {
+            c.classList.add('active');
+          } else {
+            c.classList.remove('active');
+          }
+        });
+        var searchInput = document.querySelector('.top-header-search-input');
+        window.sonikomaFilterReDoc(searchInput ? searchInput.value : '', method);
+      };
+
+      window.sonikomaFilterReDoc = function(query, methodFilter) {
+        var cleanQuery = (query || '').toLowerCase().trim();
+        var selectedMethod = (methodFilter || window.currentMethodFilter || 'ALL').toUpperCase();
+        var menuItems = document.querySelectorAll('.menu-content li');
+
+        menuItems.forEach(function(item) {
+          var isOperation = item.querySelector('.http-verb');
+          if (isOperation) {
+            var verbEl = item.querySelector('.http-verb');
+            var verb = (verbEl ? verbEl.textContent : '').toUpperCase();
+            var matchesMethod = (selectedMethod === 'ALL' || verb === selectedMethod);
+            var text = item.textContent.toLowerCase();
+            var matchesQuery = (!cleanQuery || text.indexOf(cleanQuery) !== -1);
+
+            item.style.display = (matchesMethod && matchesQuery) ? '' : 'none';
+          } else {
+            // Category Header
+            if (!cleanQuery && selectedMethod === 'ALL') {
+              item.style.display = '';
+              return;
+            }
+            var hasVisibleChildren = item.querySelector('li') && Array.from(item.querySelectorAll('li')).some(function(child) {
+              return child.style.display !== 'none';
+            });
+            var textMatches = (!cleanQuery || item.textContent.toLowerCase().indexOf(cleanQuery) !== -1);
+            item.style.display = (hasVisibleChildren || textMatches) ? '' : 'none';
+          }
+        });
+      };
+
+      // 2. Initialize ReDoc
+      var openApiUrl = "__OPENAPI_URL__";
+      
+      Redoc.init(openApiUrl, {
+        scrollYOffset: 62,
+        pathInMiddlePanel: false,
+        requiredPropsFirst: true,
+        expandResponses: '200,201',
+        nativeScrollbars: false,
+        hideDownloadButton: false,
+        disableSearch: true,
+        theme: {
+          spacing: {
+            unit: 5,
+            sectionHorizontal: 44,
+            sectionVertical: 36
+          },
+          colors: {
+            primary: {
+              main: '#6366f1'
+            },
+            success: {
+              main: '#10b981'
+            },
+            warning: {
+              main: '#f59e0b'
+            },
+            error: {
+              main: '#ef4444'
+            },
+            text: {
+              primary: '#ffffff',
+              secondary: '#cbd5e1'
+            },
+            http: {
+              get: '#059669',
+              post: '#4f46e5',
+              put: '#d97706',
+              delete: '#dc2626',
+              patch: '#0891b2'
+            },
+            responses: {
+              success: {
+                color: '#10b981',
+                backgroundColor: '#111d27',
+                borderColor: '#10b981',
+                tabTextColor: '#34d399'
+              },
+              error: {
+                color: '#ef4444',
+                backgroundColor: '#1f131a',
+                borderColor: '#ef4444',
+                tabTextColor: '#fb7185'
+              },
+              info: {
+                color: '#38bdf8',
+                backgroundColor: '#0b1222',
+                borderColor: '#38bdf8',
+                tabTextColor: '#38bdf8'
+              }
+            }
+          },
+          sidebar: {
+            width: '320px',
+            backgroundColor: '#070b16',
+            textColor: '#94a3b8',
+            activeTextColor: '#818cf8',
+            arrow: {
+              color: '#818cf8',
+              size: '1.1em'
+            }
+          },
+          rightPanel: {
+            backgroundColor: '#070b16',
+            textColor: '#cbd5e1',
+            width: '42%'
+          },
+          codeBlock: {
+            backgroundColor: '#02050d'
+          },
+          typography: {
+            fontSize: '13.5px',
+            lineHeight: '1.65',
+            fontFamily: "'Inter', sans-serif",
+            headings: {
+              fontFamily: "'Outfit', 'Inter', sans-serif",
+              fontWeight: '800'
+            },
+            code: {
+              fontSize: '12.5px',
+              fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+              backgroundColor: '#02050d',
+              color: '#38bdf8'
+            }
+          },
+          schema: {
+            linesColor: '#334155',
+            defaultDetailsWidth: '70%',
+            typeNameColor: '#a5b4fc',
+            typeTitleColor: '#cbd5e1',
+            requireLabelColor: '#fb7185',
+            labelsTextSize: '0.85em',
+            nestingSpacing: '1.2em',
+            nestedBackground: '#0b1222'
+          }
+        }
+      }, document.getElementById('redoc-container'), function() {
+        injectReDocCopyButtons();
+        injectSidebarMethodFilters();
+        styleAllTabsAndArtifacts();
+      });
+
+      // 3. Inject Method Filter Bar into Left Sidebar
+      function injectSidebarMethodFilters() {
+        var sidebar = document.querySelector('.menu-content');
+        if (sidebar && !sidebar.querySelector('.sonikoma-sidebar-filter-bar')) {
+          var bar = document.createElement('div');
+          bar.className = 'sonikoma-sidebar-filter-bar';
+          bar.innerHTML = `
+            <button type="button" class="sonikoma-filter-chip active" data-method="ALL" onclick="window.sonikomaFilterByMethod('ALL')">ALL</button>
+            <button type="button" class="sonikoma-filter-chip" data-method="GET" onclick="window.sonikomaFilterByMethod('GET')">GET</button>
+            <button type="button" class="sonikoma-filter-chip" data-method="POST" onclick="window.sonikomaFilterByMethod('POST')">POST</button>
+            <button type="button" class="sonikoma-filter-chip" data-method="PUT" onclick="window.sonikomaFilterByMethod('PUT')">PUT</button>
+            <button type="button" class="sonikoma-filter-chip" data-method="DELETE" onclick="window.sonikomaFilterByMethod('DELETE')">DEL</button>
+          `;
+          sidebar.insertBefore(bar, sidebar.firstChild);
+        }
+      }
+
+      // 4. Robust Tab & Word Color Styler
+      function styleAllTabsAndArtifacts() {
+        var tabs = document.querySelectorAll('#redoc-container [role="tab"], #redoc-container [role="tablist"] > *, #redoc-container li.react-tabs__tab, #redoc-container button[class*="TabHeader"], #redoc-container div[class*="tab-item"]');
+        tabs.forEach(function(tab) {
+          var isSelected = tab.getAttribute('aria-selected') === 'true' || tab.classList.contains('react-tabs__tab--selected') || tab.classList.contains('active');
+          var text = (tab.textContent || '').trim().toLowerCase();
+
+          if (text.indexOf('200') !== -1 || text.indexOf('201') !== -1 || text.indexOf('204') !== -1) {
+            if (isSelected) {
+              tab.style.setProperty('background', '#111d27', 'important');
+              tab.style.setProperty('background-color', '#111d27', 'important');
+              tab.style.setProperty('border', '1px solid #10b981', 'important');
+              tab.style.setProperty('border-color', '#10b981', 'important');
+              tab.style.setProperty('color', '#34d399', 'important');
+              tab.style.setProperty('box-shadow', '0 0 12px rgba(16, 185, 129, 0.45)', 'important');
+            } else {
+              tab.style.setProperty('background', '#0f172a', 'important');
+              tab.style.setProperty('background-color', '#0f172a', 'important');
+              tab.style.setProperty('border', '1px solid #334155', 'important');
+              tab.style.setProperty('border-color', '#334155', 'important');
+              tab.style.setProperty('color', '#10b981', 'important');
+              tab.style.setProperty('box-shadow', 'none', 'important');
+            }
+          } else if (text.indexOf('4') === 0 || text.indexOf('5') === 0 || text.indexOf('422') !== -1 || text.indexOf('400') !== -1 || text.indexOf('401') !== -1 || text.indexOf('500') !== -1) {
+            if (isSelected) {
+              tab.style.setProperty('background', '#1f131a', 'important');
+              tab.style.setProperty('background-color', '#1f131a', 'important');
+              tab.style.setProperty('border', '1px solid #ef4444', 'important');
+              tab.style.setProperty('border-color', '#ef4444', 'important');
+              tab.style.setProperty('color', '#fb7185', 'important');
+              tab.style.setProperty('box-shadow', '0 0 12px rgba(244, 63, 94, 0.45)', 'important');
+            } else {
+              tab.style.setProperty('background', '#0f172a', 'important');
+              tab.style.setProperty('background-color', '#0f172a', 'important');
+              tab.style.setProperty('border', '1px solid #334155', 'important');
+              tab.style.setProperty('border-color', '#334155', 'important');
+              tab.style.setProperty('color', '#f87171', 'important');
+              tab.style.setProperty('box-shadow', 'none', 'important');
+            }
+          } else {
+            if (isSelected) {
+              tab.style.setProperty('background', '#151b2d', 'important');
+              tab.style.setProperty('background-color', '#151b2d', 'important');
+              tab.style.setProperty('border', '1px solid #6366f1', 'important');
+              tab.style.setProperty('border-color', '#6366f1', 'important');
+              tab.style.setProperty('color', '#818cf8', 'important');
+              tab.style.setProperty('box-shadow', '0 0 12px rgba(99, 102, 241, 0.45)', 'important');
+            } else {
+              tab.style.setProperty('background', '#0f172a', 'important');
+              tab.style.setProperty('background-color', '#0f172a', 'important');
+              tab.style.setProperty('border', '1px solid #334155', 'important');
+              tab.style.setProperty('border-color', '#334155', 'important');
+              tab.style.setProperty('color', '#94a3b8', 'important');
+              tab.style.setProperty('box-shadow', 'none', 'important');
+            }
+          }
+
+          tab.style.setProperty('border-radius', '7px', 'important');
+          tab.style.setProperty('font-weight', '700', 'important');
+          tab.style.setProperty('font-size', '12px', 'important');
+          tab.style.setProperty('font-family', "'JetBrains Mono', monospace", 'important');
+        });
+
+        // Neutralize light backgrounds & brighten text
+        var targets = document.querySelectorAll('#redoc-container *');
+        targets.forEach(function(el) {
+          if (el.tagName === 'BUTTON' && (el.classList.contains('sonikoma-box-copy-btn') || el.classList.contains('sonikoma-filter-chip'))) return;
+          
+          var bg = window.getComputedStyle(el).backgroundColor;
+          if (bg === 'rgb(255, 255, 255)' || bg === 'rgb(250, 250, 250)' || bg === 'rgb(245, 245, 245)' || bg === 'rgb(240, 240, 240)' || bg === 'rgb(226, 232, 240)' || bg === 'rgb(209, 213, 219)' || bg === 'rgb(216, 221, 230)') {
+            if (el.getAttribute('role') === 'tab') return;
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.classList.contains('EndpointUrl') || el.classList.contains('ServerRelativeURL')) {
+              el.style.setProperty('background', '#03060f', 'important');
+              el.style.setProperty('background-color', '#03060f', 'important');
+              el.style.setProperty('border-color', '#334155', 'important');
+              el.style.setProperty('color', '#38bdf8', 'important');
+            } else {
+              el.style.setProperty('background', '#0b1222', 'important');
+              el.style.setProperty('background-color', '#0b1222', 'important');
+              el.style.setProperty('border-color', '#283548', 'important');
+              el.style.setProperty('color', '#cbd5e1', 'important');
+            }
+          }
+
+          var color = window.getComputedStyle(el).color;
+          if (color === 'rgb(0, 0, 0)' || color === 'rgb(51, 51, 51)' || color === 'rgb(68, 68, 68)' || color === 'rgb(85, 85, 85)' || color === 'rgb(17, 24, 39)') {
+            if (el.textContent && el.textContent.indexOf('RESPONSE SCHEMA') !== -1) {
+              el.style.setProperty('color', '#a5b4fc', 'important');
+              el.style.setProperty('font-weight', '800', 'important');
+            } else {
+              el.style.setProperty('color', '#cbd5e1', 'important');
+            }
+          }
+        });
+      }
+
+      // 5. Inject [Copy] buttons
+      function injectReDocCopyButtons() {
+        function getCleanReDocText(el) {
+          if (!el) return '';
+          var clone = el.cloneNode(true);
+          var removeEls = clone.querySelectorAll('button, .sonikoma-box-copy-btn');
+          removeEls.forEach(function(b) { b.remove(); });
+          var text = clone.innerText || clone.textContent || '';
+          return text.replace(/^\s*(📋|✓|Copy|Copied!)+\s*/gi, '').replace(/\s*(📋|✓|Copy|Copied!)+\s*$/gi, '').trim();
+        }
+
+        var codeBlocks = document.querySelectorAll('#redoc-container pre, #redoc-container [class*="CodeBlock"]');
+        codeBlocks.forEach(function(block) {
+          if (!block.querySelector('.sonikoma-box-copy-btn')) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sonikoma-box-copy-btn';
+            btn.title = 'Copy code snippet';
+            btn.innerHTML = '<span class="icon">📋</span><span>Copy</span>';
+            btn.onclick = function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              var code = block.querySelector('code') || block;
+              var text = getCleanReDocText(code);
+              navigator.clipboard.writeText(text).then(function() {
+                btn.innerHTML = '<span class="icon">✓</span><span>Copied!</span>';
+                btn.classList.add('copied');
+                setTimeout(function() {
+                  btn.innerHTML = '<span class="icon">📋</span><span>Copy</span>';
+                  btn.classList.remove('copied');
+                }, 1500);
+              }).catch(function() {
+                navigator.clipboard.writeText(text);
+              });
+            };
+            block.style.position = 'relative';
+            block.appendChild(btn);
+          }
+        });
+      }
+
+      setInterval(function() {
+        injectReDocCopyButtons();
+        injectSidebarMethodFilters();
+        styleAllTabsAndArtifacts();
+      }, 300);
+
+      document.addEventListener('click', function() {
+        setTimeout(function() {
+          injectReDocCopyButtons();
+          injectSidebarMethodFilters();
+          styleAllTabsAndArtifacts();
+        }, 20);
+        setTimeout(function() {
+          injectReDocCopyButtons();
+          injectSidebarMethodFilters();
+          styleAllTabsAndArtifacts();
+        }, 100);
+      });
+    });
+  </script>
+</body>
+</html>

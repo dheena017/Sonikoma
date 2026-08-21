@@ -15,6 +15,7 @@ from .mangadex import MangaDexAdapter
 from .madara import MadaraCmsAdapter
 from .mangastream import MangaStreamAdapter
 from .bato import BatoAdapter
+from .inkr import InkrAdapter
 from ..models import SourceInfo
 
 
@@ -27,6 +28,7 @@ class AdapterRegistry:
         WebtoonsAdapter,
         WebComicsAdapter,
         BatoAdapter,
+        InkrAdapter,
         
         # CMS Family Adapters (covering 100+ scanlation sites)
         MadaraCmsAdapter,

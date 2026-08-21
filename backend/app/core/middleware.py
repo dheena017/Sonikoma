@@ -132,7 +132,8 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         try:
             user = await get_current_user(request)
         except Exception:
-            return JSONResponse(
+            from app.core.responses import PrettyJSONResponse
+            return PrettyJSONResponse(
                 status_code=401,
                 content={"success": False, "detail": "Missing or invalid Authorization token"},
                 headers={"WWW-Authenticate": "Bearer"},
@@ -149,7 +150,8 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
 
         if is_admin_route:
             if user.get("creator_role") != "admin":
-                return JSONResponse(
+                from app.core.responses import PrettyJSONResponse
+                return PrettyJSONResponse(
                     status_code=403,
                     content={"success": False, "detail": "Administrative privileges required."},
                 )

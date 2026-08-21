@@ -246,6 +246,21 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
             })
         return {"success": True, "provider": "huggingface", "total": len(result_list), "models": result_list}
 
+    elif provider in ("groq", "deepseek", "elevenlabs", "deepl", "edgetts", "stablediffusion", "whisper"):
+        catalog = ModelRegistry.get_catalog_for_providers([provider])
+        result_list = []
+        for m in catalog:
+            result_list.append({
+                "name": m["id"],
+                "fullName": m.get("name", m["id"]),
+                "displayName": m.get("name", m["id"]),
+                "description": m.get("category", "") + (" - " + ", ".join(m.get("recommended_for", [])) if m.get("recommended_for") else ""),
+                "inputTokenLimit": m.get("context_window"),
+                "outputTokenLimit": m.get("max_output_tokens"),
+                "supportedActions": m.get("capabilities", [])
+            })
+        return {"success": True, "provider": provider, "total": len(result_list), "models": result_list}
+
     return {"success": False, "error": f"Unsupported provider {provider}."}
 
 
@@ -664,14 +679,8 @@ async def facade_analyze_narrative_sequence(
     voice: Optional[str],
     user_keys: Dict[str, str]
 ) -> Dict[str, Any]:
-    """Generates chronological narrative voiceover texts via Gemini, then synthesizes TTS audio for each."""
-    from google import genai
-    from google.genai import types
-    from services.ai.skills.base import extract_json
-
-    target_model = model or GEMINI_MODEL_PRIMARY
-    gemini_key = resolve_api_key("gemini", user_keys=user_keys)
-    client = genai.Client(api_key=gemini_key)
+    """Generates chronological narrative voiceover texts via AI Orchestrator, then synthesizes TTS audio for each."""
+    from services.ai.skills.utils import extract_json
 
     scenes_prompt = "\n".join([f"Scene {i+1}: {desc}" for i, desc in enumerate(visual_descriptions)])
     system_instruction = (
@@ -679,42 +688,32 @@ async def facade_analyze_narrative_sequence(
         f"{len(visual_descriptions)} narrative voiceover sentences for these visual scenes:\n{scenes_prompt}"
     )
 
-    fallback_candidates = [target_model] + GEMINI_FALLBACK_MODELS
-    models_to_try = []
-    for m in fallback_candidates:
-        _, clean_m = get_provider_and_model(m)
-        if clean_m not in models_to_try:
-            models_to_try.append(clean_m)
-
-    response = None
-    last_exc = None
-    for m_name in models_to_try:
+    res = await AIOrchestrator.execute_capability(
+        capability="storyboard_narrative",
+        prompt=system_instruction,
+        model=model,
+        user_keys=user_keys,
+    )
+    raw_res = res.get("result", [])
+    if isinstance(raw_res, list):
+        narrative_texts = raw_res
+    elif isinstance(raw_res, dict) and "panels" in raw_res:
+        narrative_texts = [p.get("speech_text") or p.get("narrative", "") for p in raw_res["panels"]]
+    elif isinstance(raw_res, dict) and "raw_output" in raw_res:
         try:
-            response = await call_gemini_with_retry(
-                lambda target=m_name: client.models.generate_content(
-                    model=target,
-                    contents=system_instruction,
-                    config=types.GenerateContentConfig(response_mime_type="application/json")
-                )
-            )
-            if response:
-                logger.info(f"[facade_analyze_narrative_sequence] Successfully generated narratives using model: {m_name}")
-                break
-        except Exception as exc:
-            last_exc = exc
-            logger.warning(f"[facade_analyze_narrative_sequence] Gemini model '{m_name}' failed: {exc}. Trying next fallback model...")
-            continue
-
-    if not response:
-        raise last_exc or RuntimeError("All Gemini fallback models failed for narrative sequence analysis.")
-
-    raw_text = getattr(response, "text", None)
-    if not raw_text:
-        raise RuntimeError("Gemini model returned empty response.")
-
-    narrative_texts = json.loads(extract_json(raw_text))
+            narrative_texts = json.loads(extract_json(str(raw_res["raw_output"])))
+        except Exception:
+            narrative_texts = [str(raw_res["raw_output"])]
+    elif isinstance(raw_res, str):
+        try:
+            narrative_texts = json.loads(extract_json(raw_res))
+        except Exception:
+            narrative_texts = [raw_res]
+    else:
+        narrative_texts = [str(v) for v in visual_descriptions]
 
     semaphore = asyncio.Semaphore(5)
+
 
     async def process_narrative_audio(idx: int, text: str):
         async with semaphore:
@@ -753,34 +752,13 @@ async def facade_analyze_narrative_sequence(
 async def facade_enhance_prompt(
     prompt: str,
     model: Optional[str],
-    api_key: str
+    api_key: Optional[str] = None
 ) -> Dict[str, Any]:
-    """Uses Gemini to enhance/optimize a user's text prompt."""
-    from google import genai
+    """Uses centralized AIOrchestrator to enhance/optimize a user's text prompt."""
+    enhanced = await AIOrchestrator.generate_text(
+        prompt=f"Enhance and optimize this creative prompt for vivid visual details:\n{prompt}",
+        model=model,
+        api_key=api_key
+    )
+    return {"success": True, "enhanced_prompt": enhanced}
 
-    client = genai.Client(api_key=api_key)
-    target_model = model or GEMINI_MODEL_PRIMARY
-    fallback_candidates = [target_model] + GEMINI_FALLBACK_MODELS
-    models_to_try = []
-    for m in fallback_candidates:
-        _, clean_m = get_provider_and_model(m)
-        if clean_m not in models_to_try:
-            models_to_try.append(clean_m)
-
-    response = None
-    last_exc = None
-    for m_name in models_to_try:
-        try:
-            response = await call_gemini_with_retry(
-                lambda target=m_name: client.models.generate_content(model=target, contents=prompt)
-            )
-            if response:
-                break
-        except Exception as exc:
-            last_exc = exc
-            continue
-
-    if not response:
-        raise last_exc or RuntimeError("All Gemini fallback models failed to enhance prompt.")
-
-    return {"success": True, "enhanced_prompt": response.text}

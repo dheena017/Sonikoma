@@ -12,6 +12,7 @@ from .mangadex import MangaDexAdapter
 from .madara import MadaraCmsAdapter
 from .mangastream import MangaStreamAdapter
 from .bato import BatoAdapter
+from .inkr import InkrAdapter
 from .registry import AdapterRegistry
 
 __all__ = [
@@ -23,5 +24,6 @@ __all__ = [
     "MadaraCmsAdapter",
     "MangaStreamAdapter",
     "BatoAdapter",
+    "InkrAdapter",
     "AdapterRegistry",
 ]

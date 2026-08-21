@@ -1,0 +1,19 @@
+[
+  {
+    "id": "stable-diffusion-xl",
+    "provider": "stablediffusion",
+    "name": "Local Stable Diffusion XL",
+    "category": "Local GPU Generation",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 20,
+    "limit_tpm": 1000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.0,
+    "speed_rating": "Local GPU (~2.5s)",
+    "capabilities": ["image_generation", "inpainting", "upscaling", "style_transfer"],
+    "recommended_for": ["Offline Artwork Generation", "Panel Inpainting"]
+  }
+]

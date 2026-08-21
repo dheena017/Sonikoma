@@ -80,58 +80,19 @@ OPENAPI_TAGS = [
     },
 ]
 
-API_DESCRIPTION = """
-## ⚡ Sonikoma Webtoon-to-Video Engine & AI Pipeline
-
-The high-performance computational backend that transforms digital comics, webtoons, and manga into cinematic motion videos with synchronized narration, dynamic sound design, visual effects, and animated storyboards.
-
----
-
-### 🚀 Pipeline Workflow Architecture
-
-```
- ┌───────────────────────────┐      ┌──────────────────────────────┐      ┌─────────────────────────────┐
- │ 03. Webtoon Scraper       │ ───► │  04. Panel Smart Split       │ ───► │ 05. OCR Speech Extraction   │
- └───────────────────────────┘      └──────────────────────────────┘      └─────────────────────────────┘
-               │                                                                         │
-               ▼                                                                         ▼
- ┌───────────────────────────┐      ┌──────────────────────────────┐      ┌─────────────────────────────┐
- │ 08. Image Canvas & Clean  │ ◄─── │   06. Storyboard AI          │ ◄─── │ 07. Multi-Modal Vision      │
- └───────────────────────────┘      └──────────────────────────────┘      └─────────────────────────────┘
-               │                                                                         │
-               ▼                                                                         ▼
- ┌───────────────────────────┐      ┌──────────────────────────────┐      ┌─────────────────────────────┐
- │ 09. Audio Synthesis & TTS │ ───► │ 10. Video Rendering Engine   │ ───► │ 12. Export & Archiving      │
- └───────────────────────────┘      └──────────────────────────────┘      └─────────────────────────────┘
-```
-
----
-
-### 🔑 Authentication & BYOK API Keys
-- **User Sessions**: Include `Authorization: Bearer <jwt_token>` for authenticated routes.
-- **BYOK (Bring Your Own Key)**: Provide direct AI provider keys via request headers:
-  - `X-User-Gemini-Key`: Google AI Studio API Key
-  - `X-User-OpenAI-Key`: OpenAI Developer API Key
-  - `X-User-Anthropic-Key`: Anthropic Claude API Key
-  - `X-User-HuggingFace-Key`: HuggingFace Hub API Token
-
----
-
-### 📡 Real-Time Job Polling Protocol
-Long-running async tasks (scraping, slicing, OCR, AI storyboard, video rendering) return background tasks:
-1. Submit task request (e.g. `POST /api/v1/scraper/chapter` or `POST /api/v1/panels/split`).
-2. Immediate response returns a job envelope: `{"job_id": "...", "status": "QUEUED", "progress": 0.0}`.
-3. Poll `GET /api/v1/jobs/{job_id}` for live progress (`0.0` - `100.0%`), execution stage, and results.
-4. To cancel an active task, send `POST /api/v1/jobs/{job_id}/cancel`.
-"""
+API_DESCRIPTION = ""
 
 CATEGORY_METADATA = [
-    {"id": "all", "label": "🌐 All APIs", "path": "/api/docs"},
-    {"id": "jobs", "label": "⚡ Background Jobs", "path": "/api/docs/jobs"},
-    {"id": "ai", "label": "🧠 AI Core & Models", "path": "/api/docs/ai"},
-    {"id": "projects", "label": "📁 Projects & Series", "path": "/api/docs/projects"},
-    {"id": "scraper", "label": "🕷️ Scraper & OCR", "path": "/api/docs/scraper"},
-    {"id": "media", "label": "🎨 Image, Audio & Video", "path": "/api/docs/media"},
-    {"id": "auth", "label": "🔐 Auth & Profile", "path": "/api/docs/auth"},
-    {"id": "admin", "label": "🛡️ Superuser Admin", "path": "/api/docs/admin"},
+    {"id": "all", "label": "🌐 All APIs (Full Hub)", "path": "/api/docs"},
+    {"id": "auth", "label": "🔐 Auth & Creator Profile", "path": "/api/docs/auth"},
+    {"id": "projects", "label": "📁 Projects & Workspace", "path": "/api/docs/projects"},
+    {"id": "scraper", "label": "🕷️ Webtoon Scraper", "path": "/api/docs/scraper"},
+    {"id": "panels", "label": "📐 Panel Splitting & OCR", "path": "/api/docs/panels"},
+    {"id": "ai", "label": "🧠 AI Models & Storyboard", "path": "/api/docs/ai"},
+    {"id": "audio", "label": "🎙️ Audio Synthesis & TTS", "path": "/api/docs/audio"},
+    {"id": "video", "label": "🎬 Video Rendering Engine", "path": "/api/docs/video"},
+    {"id": "jobs", "label": "⚡ Background Jobs & Queue", "path": "/api/docs/jobs"},
+    {"id": "export", "label": "📦 Export & Archiving", "path": "/api/docs/export"},
+    {"id": "system", "label": "💚 Health & System Stats", "path": "/api/docs/system"},
+    {"id": "schemas", "label": "📊 Data Models & Schemas", "path": "/api/docs/schemas"},
 ]

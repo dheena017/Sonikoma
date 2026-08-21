@@ -1,5 +1,5 @@
 import React from "react";
-import AIBillingPage from "@/features/ai_core/pages/AIBillingPage";
+import AICreditWalletPage from "@/features/ai_core/pages/AICreditWalletPage";
 
 export interface ProfileBillingTabProps {
   credits?: number;
@@ -32,25 +32,10 @@ export default function ProfileBillingTab({
   fetchWithInterceptor,
   addNotification,
 }: ProfileBillingTabProps) {
-  // Merge user object with state props
-  const mergedUser = {
-    ...user,
-    credits: credits !== undefined ? credits : user?.credits,
-    has_claimed_today:
-      hasClaimedToday !== undefined ? hasClaimedToday : user?.has_claimed_today,
-    streak_days:
-      streakDays !== undefined ? streakDays : user?.streak_days || 1,
-    subscription_tier:
-      subscriptionTier !== undefined
-        ? subscriptionTier
-        : user?.subscription_tier || "free",
-  };
-
   return (
-    <AIBillingPage
-      user={mergedUser}
-      fetchWithInterceptor={fetchWithInterceptor}
+    <AICreditWalletPage
       addNotification={addNotification}
     />
   );
 }
+

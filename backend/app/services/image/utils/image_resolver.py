@@ -171,6 +171,14 @@ async def resolve_url_to_buffer(
         mime = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
         return {"data": buf, "content_type": mime, "contentType": mime}
 
+    # 4b. Support direct absolute/relative filesystem paths
+    if os.path.exists(working_url) and os.path.isfile(working_url):
+        with open(working_url, 'rb') as f:
+            buf = f.read()
+        import mimetypes
+        mime = mimetypes.guess_type(working_url)[0] or 'application/octet-stream'
+        return {"data": buf, "content_type": mime, "contentType": mime}
+
     # 5. Normalize internal hostnames → relative paths to call localhost directly
     if re.match(r'^https?://', working_url, re.IGNORECASE):
         try:
@@ -185,9 +193,10 @@ async def resolve_url_to_buffer(
             pass
 
     # 6. Fetch from local backend via internal network route (follow_redirects=True to handle 307 proxy redirects)
-    if working_url.startswith('/api/'):
+    if working_url.startswith('/') or not re.match(r'^[a-zA-Z0-9+.-]+://', working_url):
         port = BACKEND_PORT
-        local_url = f"http://127.0.0.1:{port}{working_url}"
+        normalized_path = working_url if working_url.startswith('/') else f"/{working_url}"
+        local_url = f"http://127.0.0.1:{port}{normalized_path}"
 
         async def _fetch_local(http_client):
             r = await http_client.get(local_url, follow_redirects=True)
@@ -195,11 +204,19 @@ async def resolve_url_to_buffer(
             mime = r.headers.get("Content-Type", "application/octet-stream")
             return {"data": r.content, "content_type": mime, "contentType": mime}
 
-        if client:
-            return await _fetch_local(client)
-        else:
-            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as local_client:
-                return await _fetch_local(local_client)
+        try:
+            if client:
+                return await _fetch_local(client)
+            else:
+                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as local_client:
+                    return await _fetch_local(local_client)
+        except Exception as local_err:
+            logger.debug(f"[ImageResolver] Local fetch attempt failed for '{local_url}': {local_err}")
+            # If it wasn't a relative path and had no scheme, maybe continue to remote or raise
+            if not working_url.startswith('/'):
+                working_url = f"https://{working_url}"
+            else:
+                raise local_err
 
     # 7. Fallback to external remote fetch (e.g. raw Webtoon URLs or unproxied remote assets)
     base_headers = {

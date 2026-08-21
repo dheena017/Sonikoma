@@ -1,0 +1,19 @@
+[
+  {
+    "id": "whisper-1",
+    "provider": "whisper",
+    "name": "OpenAI Whisper / Faster-Whisper",
+    "category": "Speech-to-Text & Subtitles",
+    "context_window": 10000,
+    "max_output_tokens": 10000,
+    "limit_rpm": 50,
+    "limit_tpm": 10000,
+    "limit_rpd": 5000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_audio_minute": 0.006,
+    "speed_rating": "Fast (~500ms)",
+    "capabilities": ["stt", "transcription", "timestamping"],
+    "recommended_for": ["Voiceover Transcription", "Subtitle Alignment"]
+  }
+]

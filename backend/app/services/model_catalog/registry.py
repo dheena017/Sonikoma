@@ -1,194 +1,142 @@
 """
 backend/app/services/model_catalog/registry.py
-Manages the single source of truth for AI model catalogs, provider resolution,
-pricing calculation, token limits, and capability metadata.
+─────────────────────────────────────────────────────────────────────────────
+Manages the AI model catalog dynamically loaded from provider-separated JSONs
+in providers/ (e.g. google.json, openai.json, anthropic.json, etc.).
+Provides provider resolution, pricing calculation, token limit validation,
+and dynamic capability fallback routing with ZERO hardcoded model dictionaries.
+─────────────────────────────────────────────────────────────────────────────
 """
+import os
+import json
+import logging
 from typing import List, Any, Optional, Dict
 
-MODEL_CATALOG_DETAILED: List[Dict[str, Any]] = [
-    # Google Gemini Models
-    {
-        "id": "gemini-2.5-flash",
-        "provider": "gemini",
-        "name": "Google Gemini 2.5 Flash",
-        "category": "Vision & Multimodal",
-        "context_window": 1048576,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 0.075,
-        "completion_price_per_1m": 0.30,
-        "speed_rating": "Ultra Fast (<300ms)",
-        "capabilities": ["vision", "json_mode", "streaming", "multilingual", "function_calling"],
-        "recommended_for": ["YouTube SEO", "Panel Narration", "Story Scripting", "Smart Crop"],
-    },
-    {
-        "id": "gemini-2.5-pro",
-        "provider": "gemini",
-        "name": "Google Gemini 2.5 Pro",
-        "category": "Deep Reasoning & Multimodal",
-        "context_window": 2097152,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 1.25,
-        "completion_price_per_1m": 5.00,
-        "speed_rating": "High (~800ms)",
-        "capabilities": ["vision", "complex_reasoning", "json_mode", "code_generation"],
-        "recommended_for": ["Deep Story Analysis", "Complex Panel Layout Planning"],
-    },
-    {
-        "id": "gemini-2.0-flash",
-        "provider": "gemini",
-        "name": "Google Gemini 2.0 Flash",
-        "category": "Fast Multimodal Backup",
-        "context_window": 1048576,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 0.10,
-        "completion_price_per_1m": 0.40,
-        "speed_rating": "Ultra Fast (~250ms)",
-        "capabilities": ["vision", "json_mode", "streaming"],
-        "recommended_for": ["Panel OCR", "Bubble Text Extraction", "Fast Fallback"],
-    },
-    {
-        "id": "gemini-2.5-flash-lite",
-        "provider": "gemini",
-        "name": "Google Gemini 2.5 Flash Lite",
-        "category": "Ultra Lightweight & Fast",
-        "context_window": 1048576,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 0.0375,
-        "completion_price_per_1m": 0.15,
-        "speed_rating": "Ultra Fast (<200ms)",
-        "capabilities": ["vision", "speed_optimized", "json_mode"],
-        "recommended_for": ["High-Frequency Crop & Metadata", "Fast Background Jobs"],
-    },
-    # OpenAI Models
-    {
-        "id": "gpt-4o",
-        "provider": "openai",
-        "name": "OpenAI GPT-4o",
-        "category": "Omni Intelligence",
-        "context_window": 128000,
-        "max_output_tokens": 4096,
-        "prompt_price_per_1m": 2.50,
-        "completion_price_per_1m": 10.00,
-        "speed_rating": "Fast (~450ms)",
-        "capabilities": ["vision", "json_mode", "structured_outputs"],
-        "recommended_for": ["Nuanced Script Polishing", "Character Dialogue"],
-    },
-    {
-        "id": "gpt-4o-mini",
-        "provider": "openai",
-        "name": "OpenAI GPT-4o Mini",
-        "category": "Fast General Intelligence",
-        "context_window": 128000,
-        "max_output_tokens": 4096,
-        "prompt_price_per_1m": 0.15,
-        "completion_price_per_1m": 0.60,
-        "speed_rating": "Ultra Fast (~300ms)",
-        "capabilities": ["json_mode", "speed_optimized"],
-        "recommended_for": ["High-volume metadata", "Summary Generation"],
-    },
-    # Anthropic Claude Models
-    {
-        "id": "claude-3-5-sonnet-20241022",
-        "provider": "anthropic",
-        "name": "Anthropic Claude 3.5 Sonnet",
-        "category": "State-of-the-Art Reasoning",
-        "context_window": 200000,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 3.00,
-        "completion_price_per_1m": 15.00,
-        "speed_rating": "Standard (~650ms)",
-        "capabilities": ["creative_writing", "vision", "complex_narrative"],
-        "recommended_for": ["Creative Manga Dramatization", "Epic Script Writing"],
-    },
-    {
-        "id": "claude-3-5-haiku-20241022",
-        "provider": "anthropic",
-        "name": "Anthropic Claude 3.5 Haiku",
-        "category": "High Speed Reasoning",
-        "context_window": 200000,
-        "max_output_tokens": 8192,
-        "prompt_price_per_1m": 0.80,
-        "completion_price_per_1m": 4.00,
-        "speed_rating": "Ultra Fast (~280ms)",
-        "capabilities": ["fast_reasoning", "creative_dialogue"],
-        "recommended_for": ["Fast Narration Iterations"],
-    },
-    # ElevenLabs Voice Model
-    {
-        "id": "eleven_multilingual_v2",
-        "provider": "elevenlabs",
-        "name": "ElevenLabs Multilingual v2",
-        "category": "Neural Speech & Emotion",
-        "context_window": 5000,
-        "max_output_tokens": 5000,
-        "prompt_price_per_1m": 0.0,
-        "completion_price_per_1m": 0.0,
-        "speed_rating": "Streaming Audio (~400ms TTFB)",
-        "capabilities": ["voice_cloning", "multilingual_audio", "emotion_control"],
-        "recommended_for": ["Character Voice Acting", "Studio Narration"],
-    },
-    # HuggingFace Models
-    {
-        "id": "FLUX.1-schnell",
-        "provider": "huggingface",
-        "name": "Black Forest Labs FLUX.1 Schnell",
-        "category": "Diffusion Artwork & Thumbnails",
-        "context_window": 512,
-        "max_output_tokens": 1,
-        "prompt_price_per_1m": 0.0,
-        "completion_price_per_1m": 0.0,
-        "speed_rating": "Fast GPU (~1.4s)",
-        "capabilities": ["high_res_image", "anime_fidelity", "fast_steps"],
-        "recommended_for": ["YouTube Thumbnail Base Artwork", "Poster Design"],
-    },
-]
+logger = logging.getLogger("sonikoma.model_catalog")
+
+_CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROVIDERS_DIR = os.path.join(_CURRENT_DIR, "providers")
+
+
+def load_catalog_from_providers() -> List[Dict[str, Any]]:
+    """
+    Loads model catalogs dynamically from separate provider JSON files in providers/
+    (e.g., google.json, openai.json, anthropic.json, etc.), ensuring google.json is prioritized first.
+    """
+    all_models: List[Dict[str, Any]] = []
+    seen_ids = set()
+
+    if os.path.exists(_PROVIDERS_DIR) and os.path.isdir(_PROVIDERS_DIR):
+        all_files = [f for f in os.listdir(_PROVIDERS_DIR) if f.endswith(".json")]
+        # Prioritize Google Gemini models first
+        ordered_files = [f for f in all_files if "google" in f.lower() or "gemini" in f.lower()] + [
+            f for f in sorted(all_files) if "google" not in f.lower() and "gemini" not in f.lower()
+        ]
+
+        for fname in ordered_files:
+            fpath = os.path.join(_PROVIDERS_DIR, fname)
+            try:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        for m in data:
+                            m_id = m.get("id")
+                            if m_id and m_id not in seen_ids:
+                                seen_ids.add(m_id)
+                                all_models.append(m)
+            except Exception as e:
+                logger.error(f"Failed to load provider catalog {fname}: {e}")
+
+    return all_models
+
+
+
+# Dynamic in-memory catalog loaded from provider files
+MODEL_CATALOG_DETAILED: List[Dict[str, Any]] = load_catalog_from_providers()
 
 
 class ModelRegistry:
-    """Manages model metadata, pricing, resolution, and filtering."""
+    """Manages model metadata, pricing, resolution, and filtering dynamically."""
 
-    @staticmethod
-    def get_catalog() -> List[Dict[str, Any]]:
-        """Returns the complete static catalog of models."""
+    @classmethod
+    def get_catalog(cls) -> List[Dict[str, Any]]:
+        """Returns the dynamic catalog of all models."""
+        global MODEL_CATALOG_DETAILED
+        if not MODEL_CATALOG_DETAILED:
+            MODEL_CATALOG_DETAILED = load_catalog_from_providers()
         return MODEL_CATALOG_DETAILED
 
-    @staticmethod
-    def get_catalog_for_providers(available_providers: List[str]) -> List[Dict[str, Any]]:
-        """Returns models matching the given list of available providers."""
-        if not available_providers:
-            # Always return at least Gemini models as basic fallback
-            return [m for m in MODEL_CATALOG_DETAILED if m.get("provider") == "gemini"]
-        
-        normalized = [p.lower().replace("google", "gemini") for p in available_providers]
-        return [m for m in MODEL_CATALOG_DETAILED if m.get("provider", "").lower() in normalized]
+    @classmethod
+    def get_catalog_by_provider(cls, provider: str) -> List[Dict[str, Any]]:
+        """Returns models exclusively for the specified provider (e.g. 'gemini' / 'google')."""
+        p = provider.lower().replace("google", "gemini")
+        return [m for m in cls.get_catalog() if m.get("provider", "").lower() == p]
 
-    @staticmethod
-    def calculate_cost(model_name: str, in_tokens: int, out_tokens: int) -> float:
-        """Estimate cost in USD based on model pricing metadata."""
-        name_lower = model_name.lower()
+    @classmethod
+    def reload_catalog(cls) -> List[Dict[str, Any]]:
+        """Hot-reloads the catalog from disk across all provider JSON files."""
+        global MODEL_CATALOG_DETAILED
+        MODEL_CATALOG_DETAILED = load_catalog_from_providers()
+        logger.info(f"Reloaded {len(MODEL_CATALOG_DETAILED)} models from provider catalogs into ModelRegistry.")
+        return MODEL_CATALOG_DETAILED
+
+    @classmethod
+    def register_model(cls, model_meta: Dict[str, Any]) -> bool:
+        """Dynamically registers or updates a model in the catalog."""
+        global MODEL_CATALOG_DETAILED
+        if not model_meta.get("id") or not model_meta.get("provider"):
+            return False
         
-        # Match exact from catalog
-        for m in MODEL_CATALOG_DETAILED:
+        # Remove existing if present
+        MODEL_CATALOG_DETAILED = [m for m in MODEL_CATALOG_DETAILED if m["id"] != model_meta["id"]]
+        MODEL_CATALOG_DETAILED.append(model_meta)
+        return True
+
+    @classmethod
+    def get_catalog_for_providers(cls, available_providers: List[str]) -> List[Dict[str, Any]]:
+        """Returns models matching the given list of available providers."""
+        catalog = cls.get_catalog()
+        if not available_providers:
+            return [m for m in catalog if m.get("provider") == "gemini"] or catalog
+        
+        normalized = [
+            p.lower().replace("google", "gemini").replace("edge_tts", "edgetts").replace("stable_diffusion", "stablediffusion")
+            for p in available_providers
+        ]
+        return [m for m in catalog if m.get("provider", "").lower() in normalized]
+
+    @classmethod
+    def calculate_cost(
+        cls,
+        model_name: str,
+        in_tokens: int = 0,
+        out_tokens: int = 0,
+        chars: int = 0,
+        audio_seconds: float = 0.0,
+        images: int = 0,
+    ) -> float:
+        """Estimate cost in USD based on model pricing metadata across modalities."""
+        name_lower = model_name.lower().strip()
+        catalog = cls.get_catalog()
+        
+        for m in catalog:
             if m["id"].lower() == name_lower:
                 in_rate = m.get("prompt_price_per_1m", 0.0) / 1_000_000
                 out_rate = m.get("completion_price_per_1m", 0.0) / 1_000_000
-                return (in_tokens * in_rate) + (out_tokens * out_rate)
+                char_rate = m.get("price_per_1k_chars", 0.0) / 1_000
+                image_rate = m.get("price_per_image", 0.0)
+                audio_min_rate = m.get("price_per_audio_minute", 0.0)
+                
+                token_cost = (in_tokens * in_rate) + (out_tokens * out_rate)
+                char_cost = chars * char_rate
+                image_cost = images * image_rate
+                audio_cost = (audio_seconds / 60.0) * audio_min_rate
+                return token_cost + char_cost + image_cost + audio_cost
 
-        # Fallback estimation for common patterns
-        if "pro" in name_lower or "claude-3-5-sonnet" in name_lower or "gpt-4o" in name_lower:
-            in_rate = 1.25 / 1_000_000
-            out_rate = 5.00 / 1_000_000
-        elif "flash" in name_lower or "lite" in name_lower or "mini" in name_lower or "haiku" in name_lower:
-            in_rate = 0.075 / 1_000_000
-            out_rate = 0.30 / 1_000_000
-        else:
-            in_rate = 0.0
-            out_rate = 0.0
+        return 0.0
 
-        return (in_tokens * in_rate) + (out_tokens * out_rate)
-
-    @staticmethod
-    def resolve_model_by_input(user_input: str, models_list: List[Any], active_provider: str) -> Optional[Any]:
+    @classmethod
+    def resolve_model_by_input(cls, user_input: str, models_list: List[Any], active_provider: str) -> Optional[Any]:
         """Resolves a model object/dict from list based on user index choice or exact ID match."""
         user_input = user_input.strip()
         if not user_input or not models_list:
@@ -214,8 +162,9 @@ class ModelRegistry:
 
         return None
 
-    @staticmethod
+    @classmethod
     def filter_models(
+        cls,
         models_list: List[Any],
         active_provider: str,
         filter_query: Optional[str] = None,
@@ -225,71 +174,82 @@ class ModelRegistry:
         if not models_list:
             return []
 
-        filtered = models_list
+        result = models_list
         if filter_query:
-            q = filter_query.lower()
-            if active_provider == "gemini":
-                filtered = [
-                    m for m in models_list
-                    if q in (getattr(m, 'name', '') or m.get("name", "") if isinstance(m, dict) else "").lower() or
-                       q in (getattr(m, 'display_name', '') or m.get("displayName", "") if isinstance(m, dict) else "").lower()
-                ]
-            elif active_provider == "huggingface":
-                filtered = [
-                    m for m in models_list
-                    if q in (m.get("id") or m.get("name", "")).lower() or q in (m.get("pipeline_tag") or "").lower()
-                ]
-            else:
-                filtered = [m for m in models_list if q in (m.get("id") or m.get("name", "")).lower()]
+            q = filter_query.lower().strip()
+            filtered = []
+            for m in result:
+                m_name = m.get("name", m.get("id", "")) if isinstance(m, dict) else getattr(m, 'name', '')
+                m_desc = m.get("description", "") if isinstance(m, dict) else getattr(m, 'description', '')
+                if q in m_name.lower() or q in m_desc.lower():
+                    filtered.append(m)
+            result = filtered
 
-        if show_free_only:
-            if active_provider == "gemini":
-                filtered = [
-                    m for m in filtered
-                    if "flash" in (getattr(m, 'name', '') if not isinstance(m, dict) else m.get("id", "")).lower() or
-                       "lite" in (getattr(m, 'name', '') if not isinstance(m, dict) else m.get("id", "")).lower()
-                ]
-            elif active_provider == "huggingface":
-                pass
-            else:
-                filtered = []
+        return result
 
-        return filtered
-
-    @staticmethod
-    def resolve_model_provider(model_name: Optional[str]) -> tuple[str, str]:
+    @classmethod
+    def resolve_model_provider(cls, model_str: str) -> tuple[str, str]:
         """
-        Authoritative mapping: resolves exact (provider, clean_model_id).
-        Guarantees that a Qwen/HF model is never routed to Gemini, and OpenAI/Anthropic
-        models are strictly isolated to their respective adapters.
+        Extracts (provider, model_name) from any model identifier string.
+        Prioritizes dynamic catalog lookup.
         """
-        if not model_name:
-            return "gemini", "gemini-2.5-flash"
+        if not model_str:
+            catalog = cls.get_catalog()
+            first = catalog[0] if catalog else {"provider": "gemini", "id": "gemini-3.7-flash"}
+            return first["provider"], first["id"]
 
-        m = model_name.strip()
+        m = model_str.strip()
         m_lower = m.lower()
 
-        # Explicit provider prefixes
-        if m_lower.startswith("openai/"):
-            return "openai", m[len("openai/"):]
-        if m_lower.startswith("anthropic/"):
-            return "anthropic", m[len("anthropic/"):]
-        if m_lower.startswith("huggingface/"):
-            return "huggingface", m[len("huggingface/"):]
-        if m_lower.startswith("gemini/") or m_lower.startswith("google/"):
-            return "gemini", m.split("/", 1)[1]
+        # 1. Check explicit provider prefix e.g. "openai/gpt-4o", "gemini/gemini-3.7-flash"
+        if "/" in m:
+            parts = m.split("/", 1)
+            prefix = parts[0].lower()
+            model_id = parts[1]
+            if prefix in ("gemini", "google"):
+                return "gemini", model_id
+            elif prefix in ("openai", "chatgpt"):
+                return "openai", model_id
+            elif prefix in ("anthropic", "claude"):
+                return "anthropic", model_id
+            elif prefix in ("groq",):
+                return "groq", model_id
+            elif prefix in ("deepseek",):
+                return "deepseek", model_id
+            elif prefix in ("elevenlabs",):
+                return "elevenlabs", model_id
+            elif prefix in ("deepl",):
+                return "deepl", model_id
+            elif prefix in ("edgetts", "edge-tts"):
+                return "edgetts", model_id
+            elif prefix in ("stablediffusion", "sd"):
+                return "stablediffusion", model_id
+            elif prefix in ("whisper",):
+                return "whisper", model_id
+            elif prefix in ("huggingface", "hf"):
+                return "huggingface", model_id
 
-        # Check registered catalog
-        for entry in MODEL_CATALOG_DETAILED:
+        # 2. Match exact ID against dynamic catalog
+        for entry in cls.get_catalog():
             if entry["id"].lower() == m_lower:
-                return entry.get("provider", "gemini").lower(), entry["id"]
+                return entry["provider"], entry["id"]
 
-        # Known provider model prefixes
-        if m_lower.startswith(("gpt-", "o1-", "o3-", "text-embedding-", "dall-e-", "chatgpt-")):
+        # 3. Standard heuristics
+        if m_lower.startswith(("gpt-", "o1", "o3", "dall-e", "text-embedding", "whisper", "tts-")):
             return "openai", m
-        if m_lower.startswith(("claude-", "anthropic-")):
+        if m_lower.startswith("claude-"):
             return "anthropic", m
-        if m_lower.startswith(("gemini-", "models/gemini-")):
+        if m_lower.startswith(("llama-", "mixtral-", "gemma-")):
+            return "groq", m
+        if m_lower.startswith("deepseek-"):
+            return "deepseek", m
+        if m_lower.startswith("eleven_") or "eleven" in m_lower:
+            return "elevenlabs", m
+        if m_lower.startswith("deepl") or "deepl" in m_lower:
+            return "deepl", m
+        if m_lower.startswith("edge-tts") or "neural" in m_lower:
+            return "edgetts", m
+        if m_lower.startswith(("gemini-", "models/gemini-", "veo-", "lyria-", "deep-research", "antigravity-")):
             clean = m.replace("models/", "")
             return "gemini", clean
         if m_lower.startswith(("flux.", "sdxl", "stabilityai/", "qwen", "meta-llama/", "mistralai/")):
@@ -299,17 +259,35 @@ class ModelRegistry:
 
         return "gemini", m
 
-    @staticmethod
-    def get_fallback_models_for_provider(provider: str) -> List[str]:
-        """Returns the safe fallback chain strictly for the given provider."""
-        p = provider.lower()
-        if p == "gemini":
-            return ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite"]
-        elif p == "openai":
-            return ["gpt-4o", "gpt-4o-mini"]
-        elif p == "anthropic":
-            return ["claude-3-5-sonnet-20241022", "claude-3-5-haiku-20241022"]
-        elif p == "huggingface":
-            return ["mistralai/Mistral-7B-Instruct-v0.3", "FLUX.1-schnell"]
-        return ["gemini-2.5-flash"]
+    @classmethod
+    def get_fallback_models_for_provider(cls, provider: str) -> List[str]:
+        """Returns the safe fallback chain dynamically computed from the model catalog for the given provider."""
+        p = provider.lower().replace("google", "gemini")
+        matching = [m["id"] for m in cls.get_catalog() if m.get("provider", "").lower() == p]
+        if matching:
+            return matching
+        return [m["id"] for m in cls.get_catalog() if m.get("provider") == "gemini"] or ["gemini-3.7-flash"]
 
+    @classmethod
+    def get_cross_provider_fallback_chain(cls, capability: str) -> List[tuple[str, str]]:
+        """
+        Returns capability-aware cross-provider fallbacks dynamically discovered
+        from the catalog without hardcoded lists.
+        """
+        cap = capability.lower()
+        matching: List[tuple[str, str]] = []
+        for m in cls.get_catalog():
+            m_caps = [c.lower() for c in m.get("capabilities", [])]
+            m_cat = m.get("category", "").lower()
+            if cap in m_caps or cap in m_cat or (cap in ("text", "script", "dramatization", "seo", "sfx", "storyboard_narrative") and "text" in m_caps):
+                matching.append((m["provider"], m["id"]))
+
+        if matching:
+            return matching
+        return [(m["provider"], m["id"]) for m in cls.get_catalog()[:5]]
+
+    @classmethod
+    def get_primary_model_for_capability(cls, capability: str) -> str:
+        """Dynamically finds the best primary model for any capability."""
+        chain = cls.get_cross_provider_fallback_chain(capability)
+        return chain[0][1] if chain else "gemini-3.7-flash"

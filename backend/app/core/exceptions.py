@@ -77,10 +77,13 @@ class YouTubeExportException(SonikomaException):
 # FASTAPI EXCEPTION HANDLERS
 # ─────────────────────────────────────────────────────────────────────────────
 
+from app.core.responses import PrettyJSONResponse
+
+
 async def sonikoma_exception_handler(request: Request, exc: SonikomaException):
     """Handles application-level SonikomaException instances."""
     logger.error(f"SonikomaException on {request.method} {request.url.path}: {exc}")
-    return JSONResponse(
+    return PrettyJSONResponse(
         status_code=exc.status_code,
         content={
             "success": False,
@@ -94,7 +97,7 @@ async def sonikoma_exception_handler(request: Request, exc: SonikomaException):
 async def global_exception_handler(request: Request, exc: Exception):
     """Fallback handler for unhandled server exceptions."""
     logger.error(f"Unhandled exception on {request.method} {request.url.path}: {exc}", exc_info=True)
-    return JSONResponse(
+    return PrettyJSONResponse(
         status_code=500,
         content={
             "success": False,

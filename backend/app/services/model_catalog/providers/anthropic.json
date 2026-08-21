@@ -1,0 +1,34 @@
+[
+  {
+    "id": "claude-3-5-sonnet-20241022",
+    "provider": "anthropic",
+    "name": "Anthropic Claude 3.5 Sonnet",
+    "category": "State-of-the-Art Reasoning",
+    "context_window": 200000,
+    "max_output_tokens": 8192,
+    "limit_rpm": 50,
+    "limit_tpm": 100000,
+    "limit_rpd": 5000,
+    "prompt_price_per_1m": 3.00,
+    "completion_price_per_1m": 15.00,
+    "speed_rating": "Standard (~650ms)",
+    "capabilities": ["creative_writing", "vision", "complex_narrative", "text"],
+    "recommended_for": ["Creative Manga Dramatization", "Epic Script Writing"]
+  },
+  {
+    "id": "claude-3-5-haiku-20241022",
+    "provider": "anthropic",
+    "name": "Anthropic Claude 3.5 Haiku",
+    "category": "High Speed Reasoning",
+    "context_window": 200000,
+    "max_output_tokens": 8192,
+    "limit_rpm": 100,
+    "limit_tpm": 100000,
+    "limit_rpd": 5000,
+    "prompt_price_per_1m": 0.80,
+    "completion_price_per_1m": 4.00,
+    "speed_rating": "Ultra Fast (~280ms)",
+    "capabilities": ["fast_reasoning", "creative_dialogue", "text"],
+    "recommended_for": ["Fast Narration Iterations", "Quick Fallback"]
+  }
+]

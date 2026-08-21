@@ -173,7 +173,7 @@ export function useAutoAnalysis({
                   isAnalyzing: false,
                 };
               }
-              return p;
+              return { ...p, isAnalyzing: false };
             })
           );
 
@@ -206,8 +206,7 @@ export function useAutoAnalysis({
           `Sequence analysis failed: ${err.message || err}`,
           "error"
         );
-
-        // Reset analyzing state on failure
+      } finally {
         setPanels((prev) =>
           prev.map((p) =>
             panelIds.includes(p.id) ? { ...p, isAnalyzing: false } : p

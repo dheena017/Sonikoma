@@ -1,0 +1,19 @@
+[
+  {
+    "id": "FLUX.1-schnell",
+    "provider": "huggingface",
+    "name": "Black Forest Labs FLUX.1 Schnell",
+    "category": "Diffusion Artwork & Thumbnails",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 30,
+    "limit_tpm": 1000,
+    "limit_rpd": 1000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.003,
+    "speed_rating": "Fast GPU (~1.4s)",
+    "capabilities": ["image_generation", "high_res_image", "anime_fidelity", "fast_steps"],
+    "recommended_for": ["YouTube Thumbnail Base Artwork", "Poster Design"]
+  }
+]

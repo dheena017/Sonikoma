@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sonikoma - Data Models & Schema Explorer</title>
+  <link rel="icon" type="image/png" href="https://fastapi.tiangolo.com/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  __THEME_CSS_PLACEHOLDER__
+  <style>
+    .schema-explorer-page {
+      margin-left: 0 !important;
+      padding-top: 60px;
+      min-height: 100vh;
+      background: #050811;
+      color: #f1f5f9;
+      font-family: 'Inter', sans-serif;
+    }
+    .schema-container {
+      max-width: 100%;
+      padding: 24px 32px 120px 32px;
+      box-sizing: border-box;
+    }
+
+    /* Hero Banner */
+    .schema-hero {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.6) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 16px;
+      padding: 24px 30px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 24px rgba(99, 102, 241, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .schema-hero-text h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin: 0 0 6px 0;
+      background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 50%, #f472b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .schema-hero-text p {
+      margin: 0;
+      color: #94a3b8;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+    .schema-stats-badge {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid #6366f1;
+      padding: 9px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #c7d2fe;
+      white-space: nowrap;
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Subsystem Category Pills */
+    .schema-domain-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+      padding: 12px 14px;
+      background: #0b111e;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+    }
+    .domain-tab {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    .domain-tab:hover {
+      background: #1e293b;
+      color: #f8fafc;
+      border-color: #6366f1;
+      transform: translateY(-1px);
+    }
+    .domain-tab.active {
+      background: #4f46e5;
+      color: #ffffff;
+      border-color: #818cf8;
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.6);
+    }
+    .domain-tab .count {
+      background: rgba(0, 0, 0, 0.35);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Model Cards Container */
+    .schema-models-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .schema-card {
+      background: #0b111e;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+    .schema-card:hover {
+      border-color: #334155;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    }
+    .schema-card.match-highlight {
+      border-color: #818cf8 !important;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5) !important;
+    }
+
+    /* Card Header */
+    .schema-card-header {
+      padding: 14px 20px;
+      background: #0e1526;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .schema-card-header:hover {
+      background: #111a2f;
+    }
+    .schema-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .schema-type-badge {
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+    .badge-object { background: rgba(99, 102, 241, 0.16); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.4); }
+    .badge-enum { background: rgba(245, 158, 11, 0.16); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-array { background: rgba(16, 185, 129, 0.16); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); }
+
+    .schema-name {
+      font-family: 'Fira Code', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #f8fafc;
+      letter-spacing: -0.2px;
+    }
+    .schema-domain-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #818cf8;
+      background: rgba(99, 102, 241, 0.1);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      text-transform: uppercase;
+    }
+
+    .schema-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .schema-action-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+    .schema-action-btn:hover {
+      background: #334155;
+      color: #ffffff;
+      border-color: #6366f1;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+    }
+    .schema-expand-icon {
+      color: #94a3b8;
+      font-size: 13px;
+      transition: transform 0.2s ease;
+      display: inline-block;
+      margin-left: 4px;
+    }
+    .schema-card.is-open .schema-expand-icon {
+      transform: rotate(180deg);
+    }
+
+    /* Card Content */
+    .schema-card-body {
+      display: none;
+      padding: 20px;
+    }
+    .schema-card.is-open .schema-card-body {
+      display: block;
+    }
+    .schema-desc {
+      color: #cbd5e1;
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin-bottom: 18px;
+      background: #090d16;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border-left: 3px solid #6366f1;
+    }
+
+    /* Schema Table */
+    .schema-props-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .schema-props-table th {
+      text-align: left;
+      padding: 10px 14px;
+      color: #94a3b8;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 1px solid #1e293b;
+      background: #090d16;
+    }
+    .schema-props-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+      vertical-align: top;
+    }
+    .schema-props-table tr:last-child td {
+      border-bottom: none;
+    }
+    .prop-name-col {
+      font-family: 'Fira Code', monospace;
+      font-weight: 700;
+      color: #f1f5f9;
+      width: 240px;
+    }
+    .req-badge {
+      display: inline-block;
+      font-size: 9.5px;
+      font-weight: 800;
+      color: #f43f5e;
+      background: rgba(244, 63, 94, 0.12);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      border-radius: 4px;
+      padding: 1px 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+      text-transform: uppercase;
+    }
+    .opt-badge {
+      display: inline-block;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #64748b;
+      background: rgba(100, 116, 139, 0.12);
+      border: 1px solid rgba(100, 116, 139, 0.25);
+      border-radius: 4px;
+      padding: 1px 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+      text-transform: uppercase;
+    }
+    .prop-type-badge {
+      display: inline-block;
+      font-family: 'Fira Code', monospace;
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .prop-type-badge.ref {
+      background: rgba(192, 132, 252, 0.12);
+      color: #c084fc;
+      border-color: rgba(192, 132, 252, 0.35);
+      cursor: pointer;
+    }
+    .prop-type-badge.ref:hover {
+      text-decoration: underline;
+      background: rgba(192, 132, 252, 0.22);
+    }
+    .prop-default {
+      font-family: 'Fira Code', monospace;
+      font-size: 11.5px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .prop-desc {
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .prop-constraints {
+      margin-top: 5px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .constraint-chip {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #94a3b8;
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* JSON Example Box */
+    .schema-json-box {
+      background: #050811;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 14px;
+      position: relative;
+    }
+    .schema-json-box pre {
+      margin: 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 12.5px;
+      color: #a5b4fc;
+      overflow-x: auto;
+      max-height: 320px;
+      scrollbar-color: #334155 #050811;
+      scrollbar-width: thin;
+    }
+    .copy-json-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .copy-json-btn:hover {
+      background: #334155;
+      color: #ffffff;
+      border-color: #6366f1;
+    }
+
+    /* Empty state */
+    .schema-empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #64748b;
+    }
+    .schema-empty-state .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body class="schemas-page">
+  __SIDEBAR_HTML_PLACEHOLDER__
+
+  <div class="schema-explorer-page">
+    <div class="schema-container">
+      
+      <!-- Hero Header -->
+      <div class="schema-hero">
+        <div class="schema-hero-text">
+          <h1><span>📊</span> Sonikoma Data Models & Schema Explorer</h1>
+          <p>Complete type specifications, validation rules, field constraints, and JSON schemas for all 120+ engine objects.</p>
+        </div>
+        <div class="schema-stats-badge" id="schemaTotalBadge">
+          <span>⚡</span>
+          <span id="badgeTotalText">124 Verified Models</span>
+        </div>
+      </div>
+
+      <!-- Domain Category Tabs -->
+      <div class="schema-domain-tabs" id="domainTabsContainer">
+        <button class="domain-tab active" onclick="window.filterByDomain('all', this)">
+          <span>🌐 All Schemas</span>
+          <span class="count" id="count-all">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('auth', this)">
+          <span>🔐 Auth & Profile</span>
+          <span class="count" id="count-auth">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('projects', this)">
+          <span>📁 Projects & Chapters</span>
+          <span class="count" id="count-projects">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('scraper', this)">
+          <span>🕷️ Webtoon Scraper</span>
+          <span class="count" id="count-scraper">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('panels', this)">
+          <span>📐 Panels & OCR</span>
+          <span class="count" id="count-panels">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('ai', this)">
+          <span>🧠 AI & Storyboard</span>
+          <span class="count" id="count-ai">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('audio', this)">
+          <span>🎙️ Audio & TTS</span>
+          <span class="count" id="count-audio">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('video', this)">
+          <span>🎬 Video & Motion</span>
+          <span class="count" id="count-video">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('jobs', this)">
+          <span>⚡ Jobs & Queue</span>
+          <span class="count" id="count-jobs">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('export', this)">
+          <span>📦 Export & Archiving</span>
+          <span class="count" id="count-export">0</span>
+        </button>
+        <button class="domain-tab" onclick="window.filterByDomain('system', this)">
+          <span>💚 System & Admin</span>
+          <span class="count" id="count-system">0</span>
+        </button>
+      </div>
+
+      <!-- Models List -->
+      <div class="schema-models-grid" id="modelsGridContainer">
+        <div class="schema-empty-state">
+          <div class="icon">⏳</div>
+          <div>Loading Sonikoma engine data models...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let allSchemasMap = {};
+    let activeDomain = 'all';
+
+    function categorizeSchema(name, schema) {
+      const n = name.toLowerCase();
+      // Admin / Superuser
+      if (n.startsWith('admin') || n.includes('credit') || n.includes('announcement') || n.includes('audit')) return 'system';
+      // Auth & Profile
+      if (n.includes('token') || n.includes('auth') || n.includes('user') || n.includes('login') || n.includes('register') || n.includes('profile') || n.includes('apikey') || n.includes('session') || n.includes('password') || n.includes('oauth')) return 'auth';
+      // Projects
+      if (n.includes('project') || n.includes('chapter') || n.includes('series') || n.includes('workspace')) return 'projects';
+      // Scraper
+      if (n.includes('scrape') || n.includes('proxy') || n.includes('crawler') || n.includes('webtoon')) return 'scraper';
+      // Panels & OCR
+      if (n.includes('panel') || n.includes('ocr') || n.includes('bubble') || n.includes('split') || n.includes('crop') || n.includes('segment')) return 'panels';
+      // AI & Storyboard
+      if (n.includes('ai') || n.includes('storyboard') || n.includes('script') || n.includes('prompt') || n.includes('llm') || n.includes('gemini') || n.includes('claude') || n.includes('scene') || n.includes('dialogue') || n.includes('character') || n.includes('shot')) return 'ai';
+      // Audio & TTS
+      if (n.includes('audio') || n.includes('tts') || n.includes('voice') || n.includes('sound') || n.includes('music') || n.includes('sfx') || n.includes('speech')) return 'audio';
+      // Video & Images
+      if (n.includes('video') || n.includes('render') || n.includes('motion') || n.includes('camera') || n.includes('frame') || n.includes('image') || n.includes('effect') || n.includes('transition')) return 'video';
+      // Jobs & Queue
+      if (n.includes('job') || n.includes('queue') || n.includes('task') || n.includes('progress') || n.includes('status') || n.includes('worker')) return 'jobs';
+      // Export & Archiving
+      if (n.includes('export') || n.includes('archive') || n.includes('zip') || n.includes('cbz') || n.includes('download')) return 'export';
+      // System & Health
+      if (n.includes('health') || n.includes('system') || n.includes('telemetry') || n.includes('stat') || n.includes('gpu') || n.includes('memory') || n.includes('log')) return 'system';
+      return 'system';
+    }
+
+    function formatType(prop) {
+      if (prop['$ref']) {
+        const refName = prop['$ref'].split('/').pop();
+        return `<span class="prop-type-badge ref" onclick="window.scrollToModel('${refName}')">🔗 ${refName}</span>`;
+      }
+      if (prop.anyOf) {
+        return prop.anyOf.map(formatType).join(' <span style="color:#64748b">|</span> ');
+      }
+      if (prop.allOf) {
+        return prop.allOf.map(formatType).join(' <span style="color:#64748b">&</span> ');
+      }
+      if (prop.type === 'array') {
+        const itemsType = prop.items ? formatType(prop.items) : 'any';
+        return `<span class="prop-type-badge">Array[${itemsType}]</span>`;
+      }
+      return `<span class="prop-type-badge">${prop.type || 'any'}</span>`;
+    }
+
+    function generateExampleJson(schema, schemasDict, depth = 0) {
+      if (depth > 2) return "...";
+      if (schema.example !== undefined) return schema.example;
+      if (schema.enum) return schema.enum[0];
+      if (schema.type === 'string') return schema.format === 'date-time' ? "2026-08-20T19:00:00Z" : (schema.default !== undefined ? schema.default : "string");
+      if (schema.type === 'integer') return schema.default !== undefined ? schema.default : 0;
+      if (schema.type === 'number') return schema.default !== undefined ? schema.default : 0.0;
+      if (schema.type === 'boolean') return schema.default !== undefined ? schema.default : true;
+      if (schema.type === 'array') {
+        if (schema.items && schema.items['$ref']) {
+          const refName = schema.items['$ref'].split('/').pop();
+          const target = schemasDict[refName];
+          return target ? [generateExampleJson(target, schemasDict, depth + 1)] : [];
+        }
+        return schema.items ? [generateExampleJson(schema.items, schemasDict, depth + 1)] : [];
+      }
+      if (schema.properties) {
+        const obj = {};
+        for (const [k, v] of Object.entries(schema.properties)) {
+          if (v['$ref']) {
+            const refName = v['$ref'].split('/').pop();
+            const target = schemasDict[refName];
+            obj[k] = target ? generateExampleJson(target, schemasDict, depth + 1) : {};
+          } else {
+            obj[k] = generateExampleJson(v, schemasDict, depth + 1);
+          }
+        }
+        return obj;
+      }
+      return {};
+    }
+
+    function renderModels(schemas, filterQuery = '') {
+      const container = document.getElementById('modelsGridContainer');
+      const counts = { all: 0, auth: 0, projects: 0, scraper: 0, panels: 0, ai: 0, audio: 0, video: 0, jobs: 0, export: 0, system: 0 };
+      
+      const query = filterQuery.toLowerCase().trim();
+      const cardsHtml = [];
+
+      for (const [name, schema] of Object.entries(schemas)) {
+        const domain = categorizeSchema(name, schema);
+        counts[domain] = (counts[domain] || 0) + 1;
+        counts.all++;
+
+        if (activeDomain !== 'all' && activeDomain !== domain) continue;
+        if (query && !name.toLowerCase().includes(query) && !(schema.description || '').toLowerCase().includes(query)) continue;
+
+        const isEnum = Array.isArray(schema.enum);
+        const isArray = schema.type === 'array';
+        const typeBadge = isEnum ? '<span class="schema-type-badge badge-enum">ENUM</span>' : (isArray ? '<span class="schema-type-badge badge-array">ARRAY</span>' : '<span class="schema-type-badge badge-object">OBJECT</span>');
+        const requiredFields = new Set(schema.required || []);
+
+        let propsRows = '';
+        if (schema.properties) {
+          for (const [propName, prop] of Object.entries(schema.properties)) {
+            const isReq = requiredFields.has(propName);
+            const typeHtml = formatType(prop);
+            const desc = prop.description || prop.title || '';
+            const defVal = prop.default !== undefined ? `<div class="prop-default">default: <code>${JSON.stringify(prop.default)}</code></div>` : '';
+            
+            const constraints = [];
+            if (prop.minimum !== undefined) constraints.push(`min: ${prop.minimum}`);
+            if (prop.maximum !== undefined) constraints.push(`max: ${prop.maximum}`);
+            if (prop.minLength !== undefined) constraints.push(`minLen: ${prop.minLength}`);
+            if (prop.maxLength !== undefined) constraints.push(`maxLen: ${prop.maxLength}`);
+            if (prop.enum) constraints.push(`enum: [${prop.enum.join(', ')}]`);
+
+            const constraintsHtml = constraints.length ? `<div class="prop-constraints">${constraints.map(c => `<span class="constraint-chip">${c}</span>`).join('')}</div>` : '';
+
+            propsRows += `
+              <tr>
+                <td class="prop-name-col">
+                  ${propName}
+                  ${isReq ? '<span class="req-badge">REQUIRED</span>' : '<span class="opt-badge">OPTIONAL</span>'}
+                  ${defVal}
+                </td>
+                <td>${typeHtml}</td>
+                <td>
+                  <div class="prop-desc">${desc || '<span style="color:#64748b">—</span>'}</div>
+                  ${constraintsHtml}
+                </td>
+              </tr>
+            `;
+          }
+        } else if (isEnum) {
+          propsRows = `<tr><td colspan="3"><div class="prop-constraints">${schema.enum.map(e => `<span class="constraint-chip" style="font-size:12px; padding:4px 8px; color:#fcd34d;">${e}</span>`).join('')}</div></td></tr>`;
+        }
+
+        const exampleJson = JSON.stringify(generateExampleJson(schema, schemas), null, 2);
+
+        cardsHtml.push(`
+          <div class="schema-card" id="model-${name}">
+            <div class="schema-card-header" onclick="this.parentElement.classList.toggle('is-open')">
+              <div class="schema-title-wrap">
+                ${typeBadge}
+                <span class="schema-name">${name}</span>
+                <span class="schema-domain-tag">${domain.toUpperCase()}</span>
+              </div>
+              <div class="schema-card-actions">
+                <button class="copy-model-btn" onclick="event.stopPropagation(); window.copyModelName('${name}', this);" title="Copy schema model name">
+                  📋 Copy
+                </button>
+                <span class="schema-expand-icon">▼</span>
+              </div>
+            </div>
+            <div class="schema-card-body">
+              ${schema.description ? `<div class="schema-desc">${schema.description}</div>` : ''}
+              
+              <table class="schema-props-table">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Description & Rules</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${propsRows || '<tr><td colspan="3" style="color:#64748b">No explicit properties defined.</td></tr>'}
+                </tbody>
+              </table>
+
+              <div class="schema-json-box">
+                <button class="copy-json-btn" onclick="window.copyJson('${name}', this);">📋 Copy JSON Example</button>
+                <pre id="json-${name}">${exampleJson}</pre>
+              </div>
+            </div>
+          </div>
+        `);
+      }
+
+      for (const [dom, count] of Object.entries(counts)) {
+        const el = document.getElementById(`count-${dom}`);
+        if (el) el.textContent = count;
+      }
+      const badgeTotal = document.getElementById('badgeTotalText');
+      if (badgeTotal) badgeTotal.textContent = `${counts.all} Verified Models`;
+
+      if (cardsHtml.length === 0) {
+        container.innerHTML = `
+          <div class="schema-empty-state">
+            <div class="icon">🔍</div>
+            <div style="font-size:16px; font-weight:700; color:#cbd5e1; margin-bottom:6px;">No matching schemas found</div>
+            <div>Try adjusting your search keywords or switching category filters.</div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = cardsHtml.join('');
+      }
+    }
+
+    window.filterByDomain = function(domain, btn) {
+      activeDomain = domain;
+      document.querySelectorAll('.domain-tab').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const searchInput = document.querySelector('.top-header-search-input');
+      renderModels(allSchemasMap, searchInput ? searchInput.value : '');
+    };
+
+    window.sonikomaFilterEndpoints = function(query) {
+      renderModels(allSchemasMap, query);
+    };
+
+    window.scrollToModel = function(modelName) {
+      const el = document.getElementById(`model-${modelName}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('match-highlight');
+        if (!el.classList.contains('is-open')) el.classList.add('is-open');
+        setTimeout(() => el.classList.remove('match-highlight'), 2000);
+      }
+    };
+
+    window.copyModelName = function(name, btn) {
+      navigator.clipboard.writeText(name).then(() => {
+        if (btn) {
+          const oldText = btn.innerHTML;
+          btn.innerHTML = '✓ Copied';
+          btn.style.color = '#34d399';
+          setTimeout(() => {
+            btn.innerHTML = oldText;
+            btn.style.color = '';
+          }, 1500);
+        }
+      });
+    };
+
+    window.copyJson = function(name, btn) {
+      const el = document.getElementById(`json-${name}`);
+      if (el) {
+        navigator.clipboard.writeText(el.innerText).then(() => {
+          if (btn) {
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '✓ Copied!';
+            btn.style.borderColor = '#10b981';
+            btn.style.color = '#34d399';
+            setTimeout(() => {
+              btn.innerHTML = oldText;
+              btn.style.borderColor = '';
+              btn.style.color = '';
+            }, 1500);
+          }
+        });
+      }
+    };
+
+    window.sonikomaToggleAll = function() {
+      const cards = document.querySelectorAll('.schema-card');
+      const isAnyClosed = Array.from(cards).some(el => !el.classList.contains('is-open'));
+      cards.forEach(c => {
+        if (isAnyClosed) c.classList.add('is-open');
+        else c.classList.remove('is-open');
+      });
+    };
+
+    window.sonikomaToggleSidebar = function() {
+      const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('sonikoma_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+    };
+
+    if (localStorage.getItem('sonikoma_sidebar_collapsed') === 'true') {
+      document.body.classList.add('sidebar-collapsed');
+    }
+
+    // Load full schemas
+    fetch('/api/openapi.json')
+      .then(res => res.json())
+      .then(data => {
+        allSchemasMap = data.components ? (data.components.schemas || {}) : {};
+        renderModels(allSchemasMap);
+      })
+      .catch(err => {
+        console.error('Failed to load OpenAPI schema:', err);
+      });
+  </script>
+</body>
+</html>

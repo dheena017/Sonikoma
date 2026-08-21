@@ -29,6 +29,9 @@ interface StoryboardHeaderProps {
   handleAnalyzeSelected?: () => void;
   selectAllPanels?: () => void;
   clearSelection?: () => void;
+  handleSelectOdd?: () => void;
+  handleSelectEven?: () => void;
+  handleInvertSelection?: () => void;
   handleDeleteSelected?: () => void;
   handleAutoCropSelected?: () => void;
   handleCleanBubblesSelected?: () => void;

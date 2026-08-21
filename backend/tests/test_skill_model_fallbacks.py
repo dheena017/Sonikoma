@@ -20,13 +20,13 @@ class TestSkillModelFallbacks(unittest.TestCase):
         try:
             skill = BaseAISkill(skill_path)
 
-            with patch("services.ai.skills.base.ai_initialized", True), \
-                 patch("services.ai.skills.base.resolve_api_key", return_value="fake-key"), \
-                 patch("google.genai.Client", return_value=MagicMock()), \
-                 patch("services.ai.skills.base.call_gemini_with_retry", side_effect=RuntimeError("429 quota exhausted")):
+            with patch("services.ai.orchestrator.AIOrchestrator.is_provider_configured", return_value=True), \
+                 patch("services.ai.skills.coordinator.execute_provider_call", side_effect=RuntimeError("429 quota exhausted")):
                 result = asyncio.run(skill.execute())
 
             parsed = json.loads(result)
             self.assertEqual(parsed.get("source"), "fallback:error")
+
+
         finally:
             os.remove(skill_path)

@@ -82,48 +82,28 @@ def resolve_api_key(provider: str, user_api_key: Any = None, user_keys: Optional
         return os.getenv("OPENAI_API_KEY")
     elif provider == "anthropic":
         return os.getenv("ANTHROPIC_API_KEY")
+    elif provider == "groq":
+        return os.getenv("GROQ_API_KEY")
+    elif provider == "deepseek":
+        return os.getenv("DEEPSEEK_API_KEY")
     elif provider == "huggingface":
         return os.getenv("HUGGINGFACE_API_KEY")
     elif provider == "elevenlabs":
         return os.getenv("ELEVENLABS_API_KEY")
     elif provider == "deepl":
         return os.getenv("DEEPL_API_KEY")
-    elif provider == "deepseek":
-        return os.getenv("DEEPSEEK_API_KEY")
     elif provider == "replicate":
         return os.getenv("REPLICATE_API_TOKEN")
     else:
         return os.getenv("GEMINI_API_KEY")
 
 
-from app.core.config import GEMINI_MODEL_PRIMARY
 
 def get_provider_and_model(model_name: str) -> tuple[str, str]:
-    """Helper to detect provider (gemini, openai, anthropic, huggingface) from model name."""
-    if not model_name:
-        return "gemini", GEMINI_MODEL_PRIMARY
-    m_lower = model_name.lower()
+    """Resolves provider and model dynamically using the centralized ModelRegistry."""
+    from services.model_catalog.registry import ModelRegistry
+    return ModelRegistry.resolve_model_provider(model_name)
 
-    if m_lower.startswith("openai/"):
-        return "openai", model_name[len("openai/"):]
-    if m_lower.startswith("anthropic/"):
-        return "anthropic", model_name[len("anthropic/"):]
-    if m_lower.startswith("huggingface/"):
-        return "huggingface", model_name[len("huggingface/"):]
-    if m_lower.startswith("gemini/"):
-        return "gemini", model_name[len("gemini/"):]
-
-    if m_lower.startswith("gpt-") or m_lower.startswith("o1-") or m_lower.startswith("o3-"):
-        return "openai", model_name
-    if m_lower.startswith("claude-"):
-        return "anthropic", model_name
-    if m_lower.startswith("gemini-"):
-        return "gemini", model_name
-
-    if "/" in model_name:
-        return "huggingface", model_name
-
-    return "gemini", model_name
 
 
 class SkillLogger:

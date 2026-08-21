@@ -62,6 +62,22 @@ export function useAIModels() {
           localStorage.getItem("user_huggingface_key") ||
           localStorage.getItem("sonikoma_key_huggingface") ||
           "";
+        const groq =
+          localStorage.getItem("user_groq_key") ||
+          localStorage.getItem("sonikoma_key_groq") ||
+          "";
+        const deepseek =
+          localStorage.getItem("user_deepseek_key") ||
+          localStorage.getItem("sonikoma_key_deepseek") ||
+          "";
+        const elevenlabs =
+          localStorage.getItem("user_elevenlabs_key") ||
+          localStorage.getItem("sonikoma_key_elevenlabs") ||
+          "";
+        const deepl =
+          localStorage.getItem("user_deepl_key") ||
+          localStorage.getItem("sonikoma_key_deepl") ||
+          "";
 
         if (gemini) reqHeaders["X-User-Gemini-Key"] = gemini;
         if (openai) reqHeaders["X-User-OpenAI-Key"] = openai;
@@ -87,9 +103,22 @@ export function useAIModels() {
         if (anthropic || env.ANTHROPIC_API_KEY) {
           availableProviders.push({ id: "anthropic", name: "Anthropic", key: anthropic || undefined });
         }
+        if (groq || env.GROQ_API_KEY) {
+          availableProviders.push({ id: "groq", name: "Groq", key: groq || undefined });
+        }
+        if (deepseek || env.DEEPSEEK_API_KEY) {
+          availableProviders.push({ id: "deepseek", name: "DeepSeek", key: deepseek || undefined });
+        }
+        if (elevenlabs || env.ELEVENLABS_API_KEY) {
+          availableProviders.push({ id: "elevenlabs", name: "ElevenLabs", key: elevenlabs || undefined });
+        }
+        if (deepl || env.DEEPL_API_KEY) {
+          availableProviders.push({ id: "deepl", name: "DeepL", key: deepl || undefined });
+        }
         if (huggingface || env.HUGGINGFACE_API_KEY) {
           availableProviders.push({ id: "huggingface", name: "Hugging Face", key: huggingface || undefined });
         }
+
 
         // If user has not configured any keys for any provider, return empty list
         if (availableProviders.length === 0) {

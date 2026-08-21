@@ -13,6 +13,7 @@ from api.dependencies.auth import get_current_user
 from schemas.scraper import ExtractScriptRequest
 from services.scraper.service import scrape_and_initialize_project
 from services.image.ocr.ocr_service import extract_script_from_panels
+from services.image.utils.image_resolver import resolve_image_to_buffer
 from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 logger = logging.getLogger("sonikoma.api.ocr")
@@ -50,14 +51,13 @@ async def extract_ocr_endpoint(body: ExtractScriptRequest, current_user: dict = 
 
         report_progress(35.0, JobStage.FETCHING.value)
         buffers = []
-        async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
-            for u in panel_urls[:body.limit or 50]:
-                try:
-                    resp = await client.get(u)
-                    if resp.status_code == 200:
-                        buffers.append(resp.content)
-                except Exception:
-                    pass
+        for u in panel_urls[:body.limit or 50]:
+            try:
+                img_res = await resolve_image_to_buffer(u)
+                if img_res and img_res.get("data"):
+                    buffers.append(img_res["data"])
+            except Exception:
+                pass
 
         report_progress(60.0, JobStage.PROCESSING_OCR.value)
         script = await extract_script_from_panels(buffers)

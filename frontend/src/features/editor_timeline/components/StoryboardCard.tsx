@@ -22,6 +22,7 @@ import {
   Clock,
   Wand2,
   Bot,
+  Check,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
@@ -838,6 +839,38 @@ const StoryboardCard = ({
     }
   };
 
+  const [dimensions, setDimensions] = React.useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+
+  React.useEffect(() => {
+    if (!panel.image_url) {
+      setDimensions(null);
+      return;
+    }
+    let cancelled = false;
+    const img = new Image();
+    img.src = panel.image_url;
+    img.onload = () => {
+      if (!cancelled) {
+        setDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+      }
+    };
+    return () => {
+      cancelled = true;
+    };
+  }, [panel.image_url]);
+
+  const aspectRatioLabel = React.useMemo(() => {
+    if (!dimensions) return null;
+    const ratio = dimensions.width / dimensions.height;
+    if (ratio > 1.25) return "Landscape";
+    if (ratio < 0.28) return "Too Tall Strip";
+    if (ratio < 0.6) return "Tall Strip";
+    return "Portrait";
+  }, [dimensions]);
+
   return (
     <div
       className={`${
@@ -853,20 +886,20 @@ const StoryboardCard = ({
           ? "bg-[#0c0d16]/90 border-purple-500 shadow-lg scale-[1.01]"
           : isSelected
           ? "border-purple-500 bg-purple-950/30 shadow-[0_12px_40px_-12px_rgba(168,85,247,0.35)] ring-1 ring-purple-500/20 scale-[1.02]"
-          : "border-white/10 bg-[#0c0d16]/80 hover:border-purple-500/50 hover:shadow-[0_18px_40px_-20px_rgba(168,85,247,0.25)] hover:scale-[1.02] hover:-translate-y-1"
+          : "border-neutral-800/60 bg-neutral-950 hover:border-purple-500/50 hover:shadow-[0_18px_40px_-20px_rgba(168,85,247,0.18)] hover:scale-[1.03] hover:-translate-y-1.5"
       }`}
     >
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className="relative h-48 sm:h-52 rounded-2xl overflow-hidden cursor-pointer select-none bg-gradient-to-br from-neutral-950 via-[#07050d] to-neutral-950 border border-white/8 shadow-inner flex items-center justify-center p-1.5 group/thumb"
+        className="relative h-56 sm:h-64 rounded-[1.5rem] overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb group-hover:border-purple-500/30 transition-all duration-300 ease-out"
       >
         <img
           src={panel.image_url}
-          alt={`Panel ${panel.id}`}
+          alt={`Panel #${idx + 1}`}
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
-          className="w-full h-full object-contain object-center group-hover/thumb:scale-[1.03] transition-transform duration-300 rounded-xl"
+          className="w-full h-full object-contain object-center group-hover/thumb:scale-[1.05] transition-transform duration-300 rounded-xl"
           style={{ filter: getPanelFilterStyle(panel) }}
           onError={(e) => {
             const img = e.currentTarget;
@@ -903,232 +936,207 @@ const StoryboardCard = ({
           </div>
         </div>
 
-        {/* Selection checkbox - always visible on hover, prominent when selected */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleSelect();
-          }}
-          className={`absolute top-2 left-2 h-6 w-6 rounded-md flex items-center justify-center z-20 transition-all duration-150 ${
-            isSelected
-              ? "bg-purple-500 border-2 border-purple-300 shadow-lg shadow-purple-500/50 scale-110"
-              : "bg-black/60 border-2 border-neutral-500 hover:border-purple-400 hover:bg-purple-900/50 opacity-0 group-hover/thumb:opacity-100"
-          }`}
-          title={isSelected ? "Deselect panel" : "Select panel"}
-        >
-          {isSelected ? (
-            <svg
-              className="w-3.5 h-3.5 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          ) : (
-            <span className="h-2.5 w-2.5 rounded-sm bg-neutral-600" />
-          )}
-        </button>
+        {/* Top-Left: Index Badge & Reorder Controls grouped together on the same side */}
+        <div className="absolute top-2 left-2 flex items-center gap-1.5 z-20">
+          <div
+            className={[
+              "backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
+              isSelected
+                ? "bg-gradient-to-r from-purple-650 to-indigo-650 border-purple-400/50 text-white shadow-[0_4px_12px_rgba(168,85,247,0.35)]"
+                : "bg-neutral-900 border-neutral-700 text-purple-400 shadow-inner",
+            ].join(" ")}
+          >
+            #{idx + 1}
+          </div>
 
-        {/* Number tag */}
-        <div className="absolute top-2 left-8 h-5 rounded-md bg-black/80 backdrop-blur flex items-center justify-center font-mono text-[10px] text-purple-300 font-bold border border-purple-500/30 px-2">
-          #{panel.id}
+          {/* Reorder Buttons (◀ ▶) together in a unified pill */}
+          <div className="flex items-center bg-black/85 backdrop-blur-md rounded-lg border border-neutral-700/80 p-0.5 opacity-0 group-hover/thumb:opacity-100 transition-opacity duration-200 shadow-sm">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleShiftPanel(idx, "left");
+              }}
+              disabled={idx === 0}
+              className="p-1 rounded text-neutral-300 hover:text-white hover:bg-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[9px] leading-none"
+              title="Move Panel Left"
+            >
+              ◀
+            </button>
+            <div className="w-[1px] h-2.5 bg-neutral-700" />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleShiftPanel(idx, "right");
+              }}
+              disabled={idx === panelsLength - 1}
+              className="p-1 rounded text-neutral-300 hover:text-white hover:bg-neutral-800 disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[9px] leading-none"
+              title="Move Panel Right"
+            >
+              ▶
+            </button>
+          </div>
         </div>
 
-        {/* Reorder Buttons */}
-        <div className="absolute top-2 right-2 flex gap-1 z-20">
+        {/* Selection checkbox circle with animated pulse ring at Top-Right */}
+        <div className="absolute top-2 right-2 z-20">
+          {isSelected && (
+            <div className="absolute inset-0 rounded-full bg-purple-500/35 animate-ping" />
+          )}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              console.log(`[TimelineCard] Shifting panel #${panel.id} left`);
-              handleShiftPanel(idx, "left");
+              onToggleSelect();
             }}
-            disabled={idx === 0}
-            className="p-1 rounded-md bg-black/85 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[8px] leading-none"
-            title="Move Panel Left"
+            className={`relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90 ${
+              isSelected
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.4)] scale-110"
+                : "bg-neutral-900/60 border-neutral-600/70 hover:border-neutral-400 opacity-0 group-hover/thumb:opacity-100"
+            }`}
+            title={isSelected ? "Deselect panel" : "Select panel"}
           >
-            ◀
-          </button>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log(`[TimelineCard] Shifting panel #${panel.id} right`);
-              handleShiftPanel(idx, "right");
-            }}
-            disabled={idx === panelsLength - 1}
-            className="p-1 rounded-md bg-black/85 hover:bg-neutral-800 border border-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:cursor-not-allowed transition-all cursor-pointer font-mono text-[8px] leading-none"
-            title="Move Panel Right"
-          >
-            ▶
+            <Check
+              className={`h-2.5 w-2.5 ${
+                isSelected ? "text-white" : "text-neutral-400"
+              }`}
+              strokeWidth={3.5}
+            />
           </button>
         </div>
 
         {/* Motion overlay text */}
         {panel.motion_type && (
-          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/80 text-[9px] font-mono uppercase tracking-wider text-neutral-300 border border-white/8">
+          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-md bg-black/80 text-[9px] font-mono uppercase tracking-wider text-neutral-300 border border-white/8 z-20">
             {panel.motion_type}
           </div>
         )}
       </div>
 
-      <div className="space-y-2.5 w-full">
-        {/* Content Inspector Mini Tabs */}
-        <div className="flex items-center justify-between gap-1.5 border-b border-neutral-850 pb-2">
-          <div className="grid grid-cols-4 gap-0.5 bg-neutral-900/90 p-0.5 rounded-xl border border-neutral-800 text-[9.5px] font-mono flex-1 min-w-0">
-            <button
-              type="button"
-              onClick={() => setActiveTab("dialogue")}
-              title="Dialogue & Subtitles"
-              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-lg font-bold transition-all cursor-pointer truncate ${
-                activeTab === "dialogue"
-                  ? "bg-purple-600 text-white shadow-sm"
-                  : "text-neutral-400 hover:text-neutral-200"
-              }`}
-            >
-              <MessageSquare className="w-2.5 h-2.5 shrink-0" />
-              <span className="truncate">Dialogue</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("narrative")}
-              title="Narrative Voiceover"
-              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-lg font-bold transition-all cursor-pointer truncate ${
-                activeTab === "narrative"
-                  ? "bg-purple-600 text-white shadow-sm"
-                  : "text-neutral-400 hover:text-neutral-200"
-              }`}
-            >
-              <BookOpen className="w-2.5 h-2.5 shrink-0" />
-              <span className="truncate">Narrative</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("sfx")}
-              title="Sound Effects (SFX)"
-              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-lg font-bold transition-all cursor-pointer truncate ${
-                activeTab === "sfx"
-                  ? "bg-purple-600 text-white shadow-sm"
-                  : "text-neutral-400 hover:text-neutral-200"
-              }`}
-            >
-              <Volume2 className="w-2.5 h-2.5 shrink-0" />
-              <span className="truncate">SFX</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("visual")}
-              title="Visual Scene Prompt"
-              className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-lg font-bold transition-all cursor-pointer truncate ${
-                activeTab === "visual"
-                  ? "bg-purple-600 text-white shadow-sm"
-                  : "text-neutral-400 hover:text-neutral-200"
-              }`}
-            >
-              <Palette className="w-2.5 h-2.5 shrink-0" />
-              <span className="truncate">Visual</span>
-            </button>
-          </div>
-
-          {/* Audio Play/Stop Preview Button for Active Text Tab */}
-          {activeTab === "dialogue" && (
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleDialogueAudio();
-                }}
-                className={`px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
-                  isDialoguePlaying && !isDialoguePaused
-                    ? "bg-amber-950/60 border-amber-500/50 text-amber-300"
-                    : "bg-purple-950/40 border-purple-800/50 text-purple-300 hover:bg-purple-900/50"
-                }`}
-                title="Play Dialogue Preview"
-              >
-                {isDialoguePlaying && !isDialoguePaused ? (
-                  <Pause className="w-2 h-2 fill-current" />
-                ) : (
-                  <Play className="w-2 h-2 fill-current" />
-                )}
-                <span>
-                  {isDialoguePlaying && !isDialoguePaused ? "Pause" : "Play"}
-                </span>
-              </button>
-              {(isDialoguePlaying || isDialoguePaused) && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    stopDialogueAudio();
-                  }}
-                  className="p-1 rounded-lg text-[9px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
-                  title="Stop Dialogue"
-                >
-                  <Square className="w-2 h-2 fill-current" />
-                </button>
-              )}
-            </div>
-          )}
-
-          {activeTab === "narrative" && (
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleNarrativeAudio();
-                }}
-                className={`px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
-                  isNarrativePlaying && !isNarrativePaused
-                    ? "bg-amber-950/60 border-amber-500/50 text-amber-300"
-                    : "bg-purple-950/40 border-purple-800/50 text-purple-300 hover:bg-purple-900/50"
-                }`}
-                title="Play Narration Preview"
-              >
-                {isNarrativePlaying && !isNarrativePaused ? (
-                  <Pause className="w-2 h-2 fill-current" />
-                ) : (
-                  <Play className="w-2 h-2 fill-current" />
-                )}
-                <span>
-                  {isNarrativePlaying && !isNarrativePaused ? "Pause" : "Play"}
-                </span>
-              </button>
-              {(isNarrativePlaying || isNarrativePaused) && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    stopNarrativeAudio();
-                  }}
-                  className="p-1 rounded-lg text-[9px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
-                  title="Stop Narration"
-                >
-                  <Square className="w-2 h-2 fill-current" />
-                </button>
-              )}
-            </div>
+      {/* Dynamic Resolution & Aspect Ratio Badges */}
+      {dimensions && (
+        <div className="flex items-center justify-between gap-2 px-1 text-[9px] font-mono select-none animate-in fade-in duration-300">
+          <span className="text-neutral-500 font-bold bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
+            {dimensions.width} × {dimensions.height} px
+          </span>
+          {aspectRatioLabel && (
+            <span className="bg-neutral-900 border border-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded">
+              {aspectRatioLabel}
+            </span>
           )}
         </div>
+      )}
 
-        {/* Tab Content Panels */}
+      <div className="space-y-3 w-full">
+        {/* Full-Width Segmented Content Inspector Tabs */}
+        <div className="grid grid-cols-4 gap-1 bg-neutral-900/90 p-1 rounded-xl border border-neutral-800/90 text-[10px] font-mono shadow-inner">
+          <button
+            type="button"
+            onClick={() => setActiveTab("dialogue")}
+            title="Dialogue & Subtitles"
+            className={`flex items-center justify-center gap-1 px-1 py-1 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+              activeTab === "dialogue"
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(168,85,247,0.35)]"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
+            }`}
+          >
+            <MessageSquare className="w-3 h-3 shrink-0" />
+            <span className="whitespace-nowrap font-medium text-[9.5px]">Text</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("narrative")}
+            title="Narrative Voiceover"
+            className={`flex items-center justify-center gap-1 px-1 py-1 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+              activeTab === "narrative"
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(168,85,247,0.35)]"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
+            }`}
+          >
+            <BookOpen className="w-3 h-3 shrink-0" />
+            <span className="whitespace-nowrap font-medium text-[9.5px]">Voice</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("sfx")}
+            title="Sound Effects (SFX)"
+            className={`flex items-center justify-center gap-1 px-1 py-1 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+              activeTab === "sfx"
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(168,85,247,0.35)]"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
+            }`}
+          >
+            <Volume2 className="w-3 h-3 shrink-0" />
+            <span className="whitespace-nowrap font-medium text-[9.5px]">SFX</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("visual")}
+            title="Visual Scene Prompt"
+            className={`flex items-center justify-center gap-1 px-1 py-1 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+              activeTab === "visual"
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(168,85,247,0.35)]"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
+            }`}
+          >
+            <Palette className="w-3 h-3 shrink-0" />
+            <span className="whitespace-nowrap font-medium text-[9.5px]">Scene</span>
+          </button>
+        </div>
+
+        {/* Tab Content Panels with Integrated Audio Preview Header */}
         {activeTab === "dialogue" && (
-          <div className="space-y-1 animate-in fade-in duration-150">
+          <div className="space-y-1.5 animate-in fade-in duration-150">
+            <div className="flex items-center justify-between px-0.5">
+              <span className="text-[10px] font-mono font-semibold text-neutral-400">
+                Dialogue Speech
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleDialogueAudio();
+                  }}
+                  className={`px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
+                    isDialoguePlaying && !isDialoguePaused
+                      ? "bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-sm"
+                      : "bg-purple-950/40 border-purple-700/50 text-purple-300 hover:bg-purple-900/60 hover:text-white"
+                  }`}
+                  title="Play Dialogue Preview"
+                >
+                  {isDialoguePlaying && !isDialoguePaused ? (
+                    <Pause className="w-2.5 h-2.5 fill-current" />
+                  ) : (
+                    <Play className="w-2.5 h-2.5 fill-current" />
+                  )}
+                  <span>
+                    {isDialoguePlaying && !isDialoguePaused ? "Pause" : "Play Audio"}
+                  </span>
+                </button>
+                {(isDialoguePlaying || isDialoguePaused) && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stopDialogueAudio();
+                    }}
+                    className="p-1 rounded-lg text-[9px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
+                    title="Stop Dialogue"
+                  >
+                    <Square className="w-2.5 h-2.5 fill-current" />
+                  </button>
+                )}
+              </div>
+            </div>
             <textarea
               rows={2}
               disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
               value={panel.speech_text}
               onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
               placeholder="Enter dialogue or subtitle text..."
-              className={`w-full bg-neutral-900/90 border border-neutral-800 text-[11px] rounded-xl p-2.5 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all resize-none ${
+              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
                   ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
                   : "hover:border-neutral-700"
@@ -1138,7 +1146,49 @@ const StoryboardCard = ({
         )}
 
         {activeTab === "narrative" && (
-          <div className="space-y-1 animate-in fade-in duration-150">
+          <div className="space-y-1.5 animate-in fade-in duration-150">
+            <div className="flex items-center justify-between px-0.5">
+              <span className="text-[10px] font-mono font-semibold text-neutral-400">
+                Narrative Voiceover
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleNarrativeAudio();
+                  }}
+                  className={`px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
+                    isNarrativePlaying && !isNarrativePaused
+                      ? "bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-sm"
+                      : "bg-purple-950/40 border-purple-700/50 text-purple-300 hover:bg-purple-900/60 hover:text-white"
+                  }`}
+                  title="Play Narration Preview"
+                >
+                  {isNarrativePlaying && !isNarrativePaused ? (
+                    <Pause className="w-2.5 h-2.5 fill-current" />
+                  ) : (
+                    <Play className="w-2.5 h-2.5 fill-current" />
+                  )}
+                  <span>
+                    {isNarrativePlaying && !isNarrativePaused ? "Pause" : "Play Audio"}
+                  </span>
+                </button>
+                {(isNarrativePlaying || isNarrativePaused) && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stopNarrativeAudio();
+                    }}
+                    className="p-1 rounded-lg text-[9px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
+                    title="Stop Narration"
+                  >
+                    <Square className="w-2.5 h-2.5 fill-current" />
+                  </button>
+                )}
+              </div>
+            </div>
             <textarea
               rows={2}
               disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
@@ -1147,7 +1197,7 @@ const StoryboardCard = ({
                 handleModifyNarrative?.(panel.id, e.target.value)
               }
               placeholder="Enter narrative voiceover or scene description..."
-              className={`w-full bg-neutral-900/90 border border-neutral-800 text-[11px] rounded-xl p-2.5 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all resize-none ${
+              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
                   ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
                   : "hover:border-neutral-700"
@@ -1157,14 +1207,19 @@ const StoryboardCard = ({
         )}
 
         {activeTab === "sfx" && (
-          <div className="space-y-1 animate-in fade-in duration-150">
+          <div className="space-y-1.5 animate-in fade-in duration-150">
+            <div className="px-0.5">
+              <span className="text-[10px] font-mono font-semibold text-neutral-400">
+                Sound Effects (SFX Cue)
+              </span>
+            </div>
             <input
               type="text"
               disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
               value={panel.sfx || ""}
               onChange={(e) => handleModifySFX(panel.id, e.target.value)}
-              placeholder="e.g. door slam, footsteps, thunder..."
-              className={`w-full bg-neutral-900/90 border border-neutral-800 text-[11px] rounded-xl px-3 py-2 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all ${
+              placeholder="e.g. door slam, footsteps, explosion..."
+              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
                   ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
                   : "hover:border-neutral-700"
@@ -1174,7 +1229,12 @@ const StoryboardCard = ({
         )}
 
         {activeTab === "visual" && (
-          <div className="space-y-1 animate-in fade-in duration-150">
+          <div className="space-y-1.5 animate-in fade-in duration-150">
+            <div className="px-0.5">
+              <span className="text-[10px] font-mono font-semibold text-neutral-400">
+                Visual Scene Prompt
+              </span>
+            </div>
             <textarea
               rows={2}
               disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
@@ -1183,59 +1243,59 @@ const StoryboardCard = ({
                 handleModifyVisualDescription(panel.id, e.target.value)
               }
               placeholder="Describe visual scene for lighting, atmosphere..."
-              className={`w-full bg-[#07050e]/90 border border-white/10 text-[11px] rounded-xl p-2.5 text-neutral-100 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 font-sans transition-all resize-none ${
+              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
                   ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
-                  : "hover:border-white/20"
+                  : "hover:border-neutral-700"
               }`}
             />
           </div>
         )}
 
-        {/* Compact Motion & Timing Row */}
-        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/8">
-          <div className="flex items-center gap-1.5 bg-[#07050e]/90 border border-white/10 rounded-xl px-2.5 py-1.5">
-            <Video className="w-3 h-3 text-purple-400 shrink-0" />
+        {/* Motion & Timing Row */}
+        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-850">
+          <div className="flex items-center gap-1.5 bg-neutral-900/90 border border-neutral-800 hover:border-purple-500/40 rounded-xl px-2.5 py-1.5 transition-all">
+            <Video className="w-3.5 h-3.5 text-purple-400 shrink-0" />
             <select
               value={panel.motion_type ?? ""}
               onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
-              className="appearance-none bg-transparent text-[10px] font-mono text-neutral-300 w-full outline-none cursor-pointer"
+              className="appearance-none bg-transparent text-[10.5px] font-mono text-neutral-200 w-full outline-none cursor-pointer"
             >
-              <option value="" className="bg-[#0c0d16] text-neutral-300">
+              <option value="" className="bg-neutral-950 text-neutral-200">
                 Motion: None
               </option>
-              <option value="zoom_in" className="bg-[#0c0d16] text-neutral-300">
+              <option value="zoom_in" className="bg-neutral-950 text-neutral-200">
                 Zoom In
               </option>
               <option
                 value="zoom_out"
-                className="bg-[#0c0d16] text-neutral-300"
+                className="bg-neutral-950 text-neutral-200"
               >
                 Zoom Out
               </option>
               <option
                 value="pan_right"
-                className="bg-[#0c0d16] text-neutral-300"
+                className="bg-neutral-950 text-neutral-200"
               >
                 Pan Right
               </option>
               <option
                 value="pan_left"
-                className="bg-[#0c0d16] text-neutral-300"
+                className="bg-neutral-950 text-neutral-200"
               >
                 Pan Left
               </option>
               <option
                 value="pan_down"
-                className="bg-[#0c0d16] text-neutral-300"
+                className="bg-neutral-950 text-neutral-200"
               >
                 Pan Down
               </option>
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[#07050e]/90 border border-white/10 rounded-xl px-2.5 py-1.5">
-            <Clock className="w-3 h-3 text-purple-400 shrink-0" />
+          <div className="flex items-center gap-1.5 bg-neutral-900/90 border border-neutral-800 hover:border-purple-500/40 rounded-xl px-2.5 py-1.5 transition-all">
+            <Clock className="w-3.5 h-3.5 text-purple-400 shrink-0" />
             <input
               type="number"
               min={0.5}
@@ -1255,9 +1315,9 @@ const StoryboardCard = ({
                 }
               }}
               placeholder="3.0"
-              className="bg-transparent text-[10px] font-mono text-neutral-300 w-full outline-none text-left"
+              className="bg-transparent text-[10.5px] font-mono font-bold text-neutral-200 w-full outline-none text-left"
             />
-            <span className="text-[9px] font-mono text-neutral-500 shrink-0">
+            <span className="text-[10px] font-mono text-neutral-450 shrink-0 font-semibold">
               sec
             </span>
           </div>
@@ -1270,7 +1330,7 @@ const StoryboardCard = ({
             <button
               type="button"
               onClick={() => handleCancelAnalysis && handleCancelAnalysis()}
-              className="py-1.5 rounded-xl border text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 text-rose-300"
+              className="py-2 rounded-xl border text-[10.5px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 text-rose-300 shadow-sm"
               title="Stop Analyzing"
             >
               <X className="h-3 w-3 text-rose-400" />
@@ -1283,7 +1343,7 @@ const StoryboardCard = ({
                 analyzingPanelId !== null && analyzingPanelId !== panel.id
               }
               onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
-              className="py-1.5 px-1 rounded-xl border text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 text-neutral-300 hover:text-purple-300 shadow-sm active:scale-95 disabled:opacity-40"
+              className="py-2 px-1 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-500/60 text-neutral-200 hover:text-purple-300 text-[10.5px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95 disabled:opacity-40"
               title="Analyze Scene with AI"
             >
               <Sparkles className="h-3 w-3 text-purple-400" />
@@ -1297,7 +1357,7 @@ const StoryboardCard = ({
               type="button"
               disabled={isMagicProcessing}
               onClick={handleMagicMotion}
-              className="py-1.5 px-1 rounded-xl border border-purple-900/60 bg-purple-950/30 hover:bg-purple-900/50 text-purple-300 hover:text-purple-200 text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all disabled:opacity-40 active:scale-95"
+              className="py-2 px-1 rounded-xl border border-purple-500/50 bg-gradient-to-r from-purple-950/60 to-indigo-950/60 hover:from-purple-900/60 hover:to-indigo-900/60 text-purple-200 hover:text-white text-[10.5px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm disabled:opacity-40 active:scale-95"
               title="Apply Magic Motion"
             >
               {isMagicProcessing ? (
@@ -1322,7 +1382,7 @@ const StoryboardCard = ({
               );
               window.dispatchEvent(new Event("popstate"));
             }}
-            className="py-1.5 px-1 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-600/50 text-neutral-350 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all active:scale-95"
+            className="py-2 px-1 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-500/60 text-neutral-200 hover:text-purple-300 text-[10.5px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95"
             title="Open Panel Assistant"
           >
             <Bot className="h-3 w-3 text-purple-400" />

@@ -43,7 +43,7 @@ export interface ScraperPageProps {
   scrapeImages: (
     customUrl?: string,
     overrideProjectId?: string
-  ) => Promise<void>;
+  ) => Promise<boolean | void>;
   seriesTitle: string;
   setSeriesTitle: (v: string) => void;
   chapterNumber: string;
@@ -398,31 +398,70 @@ const ScraperPageInner = (props: ScraperPageProps) => {
     [filteredProjects, showAll]
   );
 
-  const handleWorkspaceImport = () => {
-    if (!targetUrl.trim()) return;
+  const isValidUrl = (urlStr: string): boolean => {
+    if (!urlStr || !urlStr.trim()) return false;
+    try {
+      const formatted =
+        urlStr.trim().startsWith("http://") || urlStr.trim().startsWith("https://")
+          ? urlStr.trim()
+          : `https://${urlStr.trim()}`;
+      const parsed = new URL(formatted);
+      return Boolean(
+        parsed.hostname &&
+          parsed.hostname.includes(".") &&
+          parsed.hostname.split(".").every((part) => part.length > 0) &&
+          parsed.hostname.length >= 4
+      );
+    } catch {
+      return false;
+    }
+  };
 
-    // Must use temp_ prefix, NOT job_ — job_ is reserved for backend processing jobs only.
-    // Using job_ here causes the frontend guard in useAppState.ts to immediately
-    // classify the project_id as an expired background job and enter the missing state.
+  const handleWorkspaceImport = async () => {
+    const trimmed = targetUrl.trim();
+    if (!trimmed) return;
+
+    if (!isValidUrl(trimmed)) {
+      if (addNotification) {
+        addNotification(
+          "Please enter a valid comic URL (e.g. https://domain.com/chapter-1)",
+          "warning"
+        );
+      }
+      return;
+    }
+
     const temporaryProjectId = `temp_${Date.now()}_${Math.random()
       .toString(36)
       .substring(2, 10)}`;
 
-    // Save URL to localStorage so App.tsx auto-import picks it up
-    // (same pattern as Episode Scraper — ensures scrapeImages runs in correct context)
-    localStorage.setItem("auto_import_url", targetUrl.trim());
-
-    const nav = navigateTo || (window as any).navigateTo;
-    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
-    if (typeof nav === "function") {
-      nav(targetPath);
+    if (typeof scrapeImages === "function") {
+      const ok = await scrapeImages(trimmed, temporaryProjectId);
+      if (ok) {
+        localStorage.removeItem("auto_import_url");
+        const nav = navigateTo || (window as any).navigateTo;
+        const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+        if (typeof nav === "function") {
+          nav(targetPath);
+        } else {
+          window.history.pushState({}, "", targetPath);
+          window.dispatchEvent(new Event("popstate"));
+        }
+      }
     } else {
-      window.history.pushState({}, "", targetPath);
-      window.dispatchEvent(new Event("popstate"));
+      localStorage.setItem("auto_import_url", trimmed);
+      const nav = navigateTo || (window as any).navigateTo;
+      const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+      if (typeof nav === "function") {
+        nav(targetPath);
+      } else {
+        window.history.pushState({}, "", targetPath);
+        window.dispatchEvent(new Event("popstate"));
+      }
     }
   };
 
-  const handleEpisodeSelect = (episode: any) => {
+  const handleEpisodeSelect = async (episode: any) => {
     if (!episode.url) return;
 
     setTargetUrl(episode.url);
@@ -452,16 +491,29 @@ const ScraperPageInner = (props: ScraperPageProps) => {
       .toString(36)
       .substring(2, 10)}`;
 
-    // Save URL to localStorage so App.tsx auto-import picks it up
-    localStorage.setItem("auto_import_url", episode.url);
-
-    const nav = navigateTo || (window as any).navigateTo;
-    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
-    if (typeof nav === "function") {
-      nav(targetPath);
+    if (typeof scrapeImages === "function") {
+      const ok = await scrapeImages(episode.url, temporaryProjectId);
+      if (ok) {
+        localStorage.removeItem("auto_import_url");
+        const nav = navigateTo || (window as any).navigateTo;
+        const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+        if (typeof nav === "function") {
+          nav(targetPath);
+        } else {
+          window.history.pushState({}, "", targetPath);
+          window.dispatchEvent(new Event("popstate"));
+        }
+      }
     } else {
-      window.history.pushState({}, "", targetPath);
-      window.dispatchEvent(new Event("popstate"));
+      localStorage.setItem("auto_import_url", episode.url);
+      const nav = navigateTo || (window as any).navigateTo;
+      const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+      if (typeof nav === "function") {
+        nav(targetPath);
+      } else {
+        window.history.pushState({}, "", targetPath);
+        window.dispatchEvent(new Event("popstate"));
+      }
     }
   };
 

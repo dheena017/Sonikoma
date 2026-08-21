@@ -5,8 +5,11 @@ Coordinator classes, provider executors, and fallbacks for AI skill execution.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import os
 import time
 import json
+import uuid
+import tempfile
 import logging
 import asyncio
 from typing import Any, Optional
@@ -159,7 +162,7 @@ async def execute_provider_call(
             raise RuntimeError("Gemini is not initialized and no API key was provided.")
 
         config_args = {}
-        schema = skill.response_schema
+        schema = getattr(skill, "response_schema", None) if skill else None
         if schema:
             config_args["response_mime_type"] = "application/json"
             config_args["response_schema"] = schema
@@ -177,7 +180,16 @@ async def execute_provider_call(
         if not client_to_use:
             raise RuntimeError("Gemini client is not initialized and no API key was provided.")
 
-        fallback_candidates = [clean_model_id] + GEMINI_FALLBACK_MODELS
+        # Normalize and alias deprecated or renamed model identifiers
+        gemini_model_aliases = {
+            "gemini-2.5-pro": "gemini-2.5-flash",
+            "gemini-2.5-pro-preview-tts": "gemini-2.5-flash",
+            "gemini-1.0-pro": "gemini-2.5-flash",
+            "gemini-pro": "gemini-2.5-flash",
+        }
+        effective_model_id = gemini_model_aliases.get(clean_model_id, clean_model_id)
+
+        fallback_candidates = [effective_model_id] + GEMINI_FALLBACK_MODELS
         models_to_try = []
         for m in fallback_candidates:
             if m and m not in models_to_try:
@@ -198,18 +210,22 @@ async def execute_provider_call(
                     break
             except Exception as exc:
                 last_exc = exc
-                logger.warning(f"[coordinator.py] Skill '{skill.name}' model '{target_m}' failed: {exc}. Trying next fallback...")
+                skill_name_log = getattr(skill, "name", "ai_capability") if skill else "ai_capability"
+                logger.warning(f"[coordinator.py] Skill '{skill_name_log}' model '{target_m}' failed: {exc}. Trying next fallback...")
                 continue
 
         if not response:
-            fallback_payload = FallbackCoordinator.get_programmatic_fallback(skill.name, **kwargs)
+            skill_name = getattr(skill, "name", "ai_capability") if skill else "ai_capability"
+            fallback_payload = FallbackCoordinator.get_programmatic_fallback(skill_name, **kwargs)
             fallback_payload.setdefault("success", False)
             fallback_payload.setdefault("source", "fallback:error")
-            fallback_payload["error"] = str(last_exc or RuntimeError(f"All Gemini fallback models failed for skill '{skill.name}'."))
+            fallback_payload["error"] = str(last_exc or RuntimeError(f"All Gemini fallback models failed for skill '{skill_name}'."))
             raw_text = json.dumps(fallback_payload)
-            skill.last_input_tokens = 0
-            skill.last_output_tokens = 0
-            skill.logger.log_execution(skill.name, int((time.monotonic() - start_time) * 1000), False, kwargs, fallback_payload, 0, 0)
+            if skill:
+                skill.last_input_tokens = 0
+                skill.last_output_tokens = 0
+                if getattr(skill, "logger", None):
+                    skill.logger.log_execution(skill_name, int((time.monotonic() - start_time) * 1000), False, kwargs, fallback_payload, 0, 0)
             return raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
@@ -224,10 +240,13 @@ async def execute_provider_call(
         p_tokens = getattr(usage, 'prompt_token_count', 0) if usage else 0
         c_tokens = getattr(usage, 'candidates_token_count', 0) if usage else 0
 
-        skill.last_input_tokens = p_tokens
-        skill.last_output_tokens = c_tokens
-        skill.logger.log_execution(skill.name, elapsed_ms, True, kwargs, parsed_json, p_tokens, c_tokens)
+        if skill:
+            skill.last_input_tokens = p_tokens
+            skill.last_output_tokens = c_tokens
+            if getattr(skill, "logger", None):
+                skill.logger.log_execution(getattr(skill, "name", "ai_capability"), elapsed_ms, True, kwargs, parsed_json, p_tokens, c_tokens)
         return raw_text
+
 
     elif provider == "openai":
         import requests
@@ -268,7 +287,7 @@ async def execute_provider_call(
             "messages": messages,
         }
 
-        schema = skill.response_schema
+        schema = getattr(skill, "response_schema", None) if skill else None
         if schema:
             try:
                 if hasattr(schema, "model_json_schema"):
@@ -302,8 +321,9 @@ async def execute_provider_call(
         raw_text = res_data["choices"][0]["message"]["content"]
 
         usage = res_data.get("usage", {})
-        skill.last_input_tokens = usage.get("prompt_tokens", 0)
-        skill.last_output_tokens = usage.get("completion_tokens", 0)
+        if skill:
+            skill.last_input_tokens = usage.get("prompt_tokens", 0)
+            skill.last_output_tokens = usage.get("completion_tokens", 0)
 
         cleaned_json_text = extract_json(raw_text)
         try:
@@ -313,7 +333,8 @@ async def execute_provider_call(
             cleaned_json_text = raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
-        skill.logger.log_execution(skill.name, elapsed_ms, True, kwargs, parsed_json, skill.last_input_tokens, skill.last_output_tokens)
+        if skill and getattr(skill, "logger", None):
+            skill.logger.log_execution(getattr(skill, "name", "ai_capability"), elapsed_ms, True, kwargs, parsed_json, getattr(skill, "last_input_tokens", 0), getattr(skill, "last_output_tokens", 0))
         return cleaned_json_text
 
     elif provider == "anthropic":
@@ -331,7 +352,7 @@ async def execute_provider_call(
         }
 
         system_prompt = "You are a helpful AI assistant."
-        schema = skill.response_schema
+        schema = getattr(skill, "response_schema", None) if skill else None
         if schema:
             try:
                 if hasattr(schema, "model_json_schema"):
@@ -390,8 +411,9 @@ async def execute_provider_call(
         raw_text = res_data["content"][0]["text"]
 
         usage = res_data.get("usage", {})
-        skill.last_input_tokens = usage.get("input_tokens", 0)
-        skill.last_output_tokens = usage.get("output_tokens", 0)
+        if skill:
+            skill.last_input_tokens = usage.get("input_tokens", 0)
+            skill.last_output_tokens = usage.get("output_tokens", 0)
 
         cleaned_json_text = extract_json(raw_text)
         try:
@@ -401,7 +423,8 @@ async def execute_provider_call(
             cleaned_json_text = raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
-        skill.logger.log_execution(skill.name, elapsed_ms, True, kwargs, parsed_json, skill.last_input_tokens, skill.last_output_tokens)
+        if skill and getattr(skill, "logger", None):
+            skill.logger.log_execution(getattr(skill, "name", "ai_capability"), elapsed_ms, True, kwargs, parsed_json, getattr(skill, "last_input_tokens", 0), getattr(skill, "last_output_tokens", 0))
         return cleaned_json_text
 
     elif provider == "huggingface":
@@ -441,8 +464,9 @@ async def execute_provider_call(
         else:
             raw_text = str(res_data)
 
-        skill.last_input_tokens = len(prompt) // 4
-        skill.last_output_tokens = len(raw_text) // 4
+        if skill:
+            skill.last_input_tokens = len(prompt) // 4
+            skill.last_output_tokens = len(raw_text) // 4
 
         cleaned_json_text = extract_json(raw_text)
         try:
@@ -452,8 +476,199 @@ async def execute_provider_call(
             cleaned_json_text = raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
-        skill.logger.log_execution(skill.name, elapsed_ms, True, kwargs, parsed_json, skill.last_input_tokens, skill.last_output_tokens)
+        if skill and getattr(skill, "logger", None):
+            skill.logger.log_execution(getattr(skill, "name", "ai_capability"), elapsed_ms, True, kwargs, parsed_json, getattr(skill, "last_input_tokens", 0), getattr(skill, "last_output_tokens", 0))
         return cleaned_json_text
+
+    elif provider == "groq":
+        import requests
+        from services.ai.skills.utils import extract_json
+
+        key_to_use = resolve_api_key("groq", api_key, user_keys)
+        if not key_to_use:
+            raise RuntimeError("Missing Groq API Key.")
+
+        headers = {
+            "Authorization": f"Bearer {key_to_use}",
+            "Content-Type": "application/json"
+        }
+
+        messages = [{"role": "user", "content": prompt}]
+        payload: dict[str, Any] = {
+            "model": clean_model_id,
+            "messages": messages,
+            "temperature": 0.2,
+        }
+
+        schema = getattr(skill, "response_schema", None) if skill else None
+        if schema:
+            payload["response_format"] = {"type": "json_object"}
+
+        loop = asyncio.get_running_loop()
+        url = "https://api.groq.com/openai/v1/chat/completions"
+
+        def make_groq_request():
+            return requests.post(url, json=payload, headers=headers, timeout=30)
+
+        response = await loop.run_in_executor(None, make_groq_request)
+        if response.status_code != 200:
+            raise RuntimeError(f"Groq API request failed (HTTP {response.status_code}): {response.text}")
+
+        res_data = response.json()
+        raw_text = res_data["choices"][0]["message"]["content"]
+        usage = res_data.get("usage", {})
+        if skill:
+            skill.last_input_tokens = usage.get("prompt_tokens", 0)
+            skill.last_output_tokens = usage.get("completion_tokens", 0)
+
+        cleaned_json_text = extract_json(raw_text)
+        return cleaned_json_text
+
+    elif provider == "deepseek":
+        import requests
+        from services.ai.skills.utils import extract_json
+
+        key_to_use = resolve_api_key("deepseek", api_key, user_keys)
+        if not key_to_use:
+            raise RuntimeError("Missing DeepSeek API Key.")
+
+        headers = {
+            "Authorization": f"Bearer {key_to_use}",
+            "Content-Type": "application/json"
+        }
+
+        messages = [{"role": "user", "content": prompt}]
+        payload = {
+            "model": clean_model_id,
+            "messages": messages,
+        }
+
+        loop = asyncio.get_running_loop()
+        url = "https://api.deepseek.com/chat/completions"
+
+        def make_deepseek_request():
+            return requests.post(url, json=payload, headers=headers, timeout=60)
+
+        response = await loop.run_in_executor(None, make_deepseek_request)
+        if response.status_code != 200:
+            raise RuntimeError(f"DeepSeek API request failed (HTTP {response.status_code}): {response.text}")
+
+        res_data = response.json()
+        raw_text = res_data["choices"][0]["message"]["content"]
+        usage = res_data.get("usage", {})
+        if skill:
+            skill.last_input_tokens = usage.get("prompt_tokens", 0)
+            skill.last_output_tokens = usage.get("completion_tokens", 0)
+
+        cleaned_json_text = extract_json(raw_text)
+        return cleaned_json_text
+
+    elif provider == "deepl":
+        import requests
+
+        key_to_use = resolve_api_key("deepl", api_key, user_keys)
+        if not key_to_use:
+            raise RuntimeError("Missing DeepL API Key.")
+
+        text_to_translate = kwargs.get("text", prompt)
+        target_lang = kwargs.get("target_lang", "EN-US").upper()
+        if target_lang == "EN":
+            target_lang = "EN-US"
+
+        endpoint = "https://api-free.deepl.com/v2/translate" if ":fx" in key_to_use else "https://api.deepl.com/v2/translate"
+        headers = {
+            "Authorization": f"DeepL-Auth-Key {key_to_use}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "text": [text_to_translate],
+            "target_lang": target_lang
+        }
+
+        loop = asyncio.get_running_loop()
+        def make_deepl_request():
+            return requests.post(endpoint, json=payload, headers=headers, timeout=20)
+
+        response = await loop.run_in_executor(None, make_deepl_request)
+        if response.status_code != 200:
+            raise RuntimeError(f"DeepL API request failed (HTTP {response.status_code}): {response.text}")
+
+        res_data = response.json()
+        translated = res_data.get("translations", [{}])[0].get("text", text_to_translate)
+        if skill:
+            skill.last_input_tokens = len(text_to_translate) // 4
+            skill.last_output_tokens = len(translated) // 4
+
+        return json.dumps({
+            "translated_text": translated,
+            "detected_source_language": res_data.get("translations", [{}])[0].get("detected_source_language", "AUTO")
+        })
+
+    elif provider in ("edgetts", "edge_tts"):
+        from services.audio.tts import generate_panel_audio
+        output_path = kwargs.get("output_path") or os.path.join(tempfile.gettempdir(), f"edgetts_{uuid.uuid4().hex[:8]}.mp3")
+        voice = kwargs.get("voice", "en-US-GuyNeural")
+        saved_path, dur = await generate_panel_audio(
+            dialogue_list=[prompt],
+            target_duration=float(kwargs.get("duration", 4.0)),
+            output_path=output_path,
+            voice=voice,
+        )
+        if skill:
+            skill.last_input_tokens = len(prompt) // 4
+            skill.last_output_tokens = int(dur * 50)
+        return json.dumps({"audio_path": saved_path, "duration": dur, "voice": voice})
+
+    elif provider == "elevenlabs":
+        import requests
+        key_to_use = resolve_api_key("elevenlabs", api_key, user_keys)
+        if not key_to_use:
+            raise RuntimeError("Missing ElevenLabs API Key.")
+
+        voice_id = kwargs.get("voice_id", "21m00Tcm4TlvDq8ikWAM")
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+        headers = {
+            "xi-api-key": key_to_use,
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "text": prompt,
+            "model_id": clean_model_id if "eleven_" in clean_model_id else "eleven_multilingual_v2",
+        }
+
+        loop = asyncio.get_running_loop()
+        def make_eleven_request():
+            return requests.post(url, json=payload, headers=headers, timeout=30)
+
+        response = await loop.run_in_executor(None, make_eleven_request)
+        if response.status_code != 200:
+            raise RuntimeError(f"ElevenLabs API failed (HTTP {response.status_code}): {response.text}")
+
+        output_path = kwargs.get("output_path") or os.path.join(tempfile.gettempdir(), f"elevenlabs_{uuid.uuid4().hex[:8]}.mp3")
+        with open(output_path, "wb") as f:
+            f.write(response.content)
+
+        if skill:
+            skill.last_input_tokens = len(prompt) // 4
+            skill.last_output_tokens = len(response.content) // 100
+
+        return json.dumps({"audio_path": output_path, "size_bytes": len(response.content)})
+
+    elif provider in ("stablediffusion", "stable_diffusion"):
+        from providers.stable_diffusion import get_stable_diffusion_engine
+        engine = get_stable_diffusion_engine()
+        output_path = kwargs.get("output_path") or os.path.join(tempfile.gettempdir(), f"sd_{uuid.uuid4().hex[:8]}.png")
+        engine.generate_image(prompt=prompt, output_path=output_path, width=kwargs.get("width", 1024), height=kwargs.get("height", 1024))
+        return json.dumps({"image_path": output_path})
+
+    elif provider == "whisper":
+        from providers.whisper import get_whisper_engine
+        engine = get_whisper_engine()
+        audio_file = kwargs.get("audio_file") or kwargs.get("audio_path")
+        if not audio_file or not os.path.exists(audio_file):
+            raise RuntimeError(f"Whisper input audio file not found: {audio_file}")
+        transcription = engine.transcribe(audio_file)
+        return json.dumps(transcription if isinstance(transcription, dict) else {"text": str(transcription)})
 
     else:
         raise ValueError(f"Unsupported provider: {provider}")

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "deepseek-chat",
+    "provider": "deepseek",
+    "name": "DeepSeek V3 Chat",
+    "category": "Deep Reasoning & Coding",
+    "context_window": 64000,
+    "max_output_tokens": 4096,
+    "limit_rpm": 60,
+    "limit_tpm": 100000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.14,
+    "completion_price_per_1m": 0.28,
+    "speed_rating": "Fast (~350ms)",
+    "capabilities": ["reasoning", "json_mode", "text"],
+    "recommended_for": ["Cost-Effective Story Analysis", "Complex Script Structure"]
+  },
+  {
+    "id": "deepseek-reasoner",
+    "provider": "deepseek",
+    "name": "DeepSeek R1 Reasoner",
+    "category": "Deep Reasoning & Coding",
+    "context_window": 64000,
+    "max_output_tokens": 8192,
+    "limit_rpm": 60,
+    "limit_tpm": 100000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.55,
+    "completion_price_per_1m": 2.19,
+    "speed_rating": "Standard (~900ms)",
+    "capabilities": ["deep_thinking", "complex_reasoning", "text"],
+    "recommended_for": ["Complex Plot Outlining", "Story Logic Verification"]
+  }
+]

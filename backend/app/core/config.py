@@ -80,11 +80,11 @@ else:
             FRONTEND_PORT = 3000
 
 # 2. BACKEND_PORT
-BACKEND_PORT_STR = os.getenv("BACKEND_PORT") or os.getenv("PORT") or "8000"
+BACKEND_PORT_STR = os.getenv("BACKEND_PORT") or os.getenv("PORT") or "5173"
 try:
     BACKEND_PORT = int(BACKEND_PORT_STR)
 except ValueError:
-    BACKEND_PORT = 8000
+    BACKEND_PORT = 5173
 
 # 3. APP_URL
 APP_URL = os.getenv("APP_URL")
@@ -145,19 +145,19 @@ try:
             from google import genai
             genai_client = genai.Client(api_key=api_key)
             ai_initialized = True
-            logger.debug("Gemini client successfully configured server-side.")
-        except ImportError:
+            logger.debug("Gemini client successfully configured server-side via google-genai.")
+        except Exception as e:
             try:
-                import importlib
-                legacy_genai = importlib.import_module("google.generativeai")
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=FutureWarning)
+                    import google.generativeai as legacy_genai
                 legacy_genai.configure(api_key=api_key)
                 genai_client = legacy_genai
                 ai_initialized = True
-                logger.debug("Legacy Gemini client configured.")
-            except Exception:
-                logger.warning("Could not initialize google-genai or google.generativeai.")
-        except Exception as e:
-            logger.warning(f"Gemini client initialization error: {e}")
+                logger.debug("Gemini client successfully configured server-side via google.generativeai.")
+            except Exception as e2:
+                logger.warning(f"Could not initialize google-genai or google.generativeai: {e2}")
 except Exception as e:
     logger.warning(f"Gemini client initialization skipped: {e}")
 

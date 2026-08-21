@@ -200,7 +200,22 @@ class ProjectService:
                 project_id = project["project_id"]
 
         if not project:
-            raise ValueError(f"Project '{project_id}' not found.")
+            # Auto-provision new/transient project if updating details
+            self.repo.insert_project({
+                "project_id": project_id,
+                "user_id": current_user_id,
+                "title": getattr(body, "title", None) or "Untitled Project",
+                "genre": getattr(body, "genre", None) or "Action",
+                "episode": getattr(body, "episode", None) or "Chapter 1",
+                "author": getattr(body, "author", None) or "Unknown",
+                "synopsis": getattr(body, "synopsis", None) or "",
+                "video_url": getattr(body, "video_url", None) or "",
+                "audio_settings": getattr(body, "audio_settings", None) or {},
+            })
+            project = self.repo.get_project(project_id)
+
+        if not project:
+            raise ValueError(f"Project '{project_id}' could not be initialized.")
 
         if project.get("user_id") and project.get("user_id") not in (current_user_id, "system_default"):
             raise PermissionError("Access denied.")

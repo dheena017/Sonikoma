@@ -1,0 +1,19 @@
+[
+  {
+    "id": "deepl-pro",
+    "provider": "deepl",
+    "name": "DeepL Neural Translation",
+    "category": "Manga & Webtoon Translation",
+    "context_window": 10000,
+    "max_output_tokens": 10000,
+    "limit_rpm": 100,
+    "limit_tpm": 50000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_1k_chars": 0.025,
+    "speed_rating": "Ultra Fast (<200ms)",
+    "capabilities": ["translation", "multilingual"],
+    "recommended_for": ["Speech Bubble Translation", "Manga Localization"]
+  }
+]

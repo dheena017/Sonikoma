@@ -1,0 +1,19 @@
+[
+  {
+    "id": "eleven_multilingual_v2",
+    "provider": "elevenlabs",
+    "name": "ElevenLabs Multilingual v2",
+    "category": "Neural Speech & Emotion",
+    "context_window": 5000,
+    "max_output_tokens": 5000,
+    "limit_rpm": 20,
+    "limit_tpm": 10000,
+    "limit_rpd": 1000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_1k_chars": 0.30,
+    "speed_rating": "Streaming Audio (~400ms TTFB)",
+    "capabilities": ["voice_cloning", "multilingual_audio", "emotion_control", "tts"],
+    "recommended_for": ["Character Voice Acting", "Studio Narration"]
+  }
+]

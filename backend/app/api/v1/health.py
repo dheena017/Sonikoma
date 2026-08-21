@@ -46,7 +46,7 @@ def _check_capability(module_name: str) -> bool:
     try:
         __import__(module_name)
         return True
-    except ImportError:
+    except Exception:
         return False
 
 
