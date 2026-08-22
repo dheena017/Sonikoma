@@ -89,6 +89,21 @@ def register_routers(app: FastAPI):
     os.makedirs(training_data_dir, exist_ok=True)
     app.mount("/training_data", StaticFiles(directory=training_data_dir), name="training_data")
 
+    # Serve Playwright Interactive Test Reports & Trace Artifacts
+    e2e_report_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "e2e", "playwright-report"))
+    fallback_report_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "playwright-report"))
+    playwright_report_dir = e2e_report_dir if os.path.exists(e2e_report_dir) else fallback_report_dir
+    os.makedirs(playwright_report_dir, exist_ok=True)
+    app.mount("/playwright-report", StaticFiles(directory=playwright_report_dir, html=True), name="playwright_report")
+    
+    trace_dir = os.path.join(playwright_report_dir, "trace")
+    if os.path.exists(trace_dir):
+        app.mount("/trace", StaticFiles(directory=trace_dir, html=True), name="trace_viewer")
+        
+    data_dir = os.path.join(playwright_report_dir, "data")
+    if os.path.exists(data_dir):
+        app.mount("/data", StaticFiles(directory=data_dir), name="trace_data")
+
     # Static Frontend Serving (Production Only)
     dist_path = os.path.join(PROJECT_ROOT, "dist")
     repo_root = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))

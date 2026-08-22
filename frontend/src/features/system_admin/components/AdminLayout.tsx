@@ -67,10 +67,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
       desc: "Publish platform-wide broadcast alerts and scheduled maintenance notices",
       badge: "Broadcast",
     },
-    content: {
-      title: "Content Moderation & Projects",
-      desc: "Inspect public and private storyboards, project status, and storage quotas",
-      badge: "Assets",
+    jobs: {
+      title: "Background Processing Jobs",
+      desc: "Monitor active async jobs, video renders, and panel extraction queue",
+      badge: "Workers",
     },
     scrapers: {
       title: "Webtoon Engine Configuration",

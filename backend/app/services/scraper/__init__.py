@@ -1,13 +1,12 @@
 """
 backend/app/services/scraper/__init__.py
 ─────────────────────────────────────────────────────────────────────────────
-Adaptive Webtoon / Chapter Scraper Package.
-Exports core engine, models, workflows, and modular site adapters.
+Sonikoma Universal Adaptive Webtoon / Chapter Scraper Package.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from .engine import AdaptiveScraperEngine
-from .models import (
+from .scraper_engine import AdaptiveScraperEngine, adaptive_scraper_engine
+from .scraper_models import (
     ChapterResult,
     SourceInfo,
     SeriesInfo,
@@ -17,16 +16,21 @@ from .models import (
     ScrapeErrorCode,
     ScrapeCompleteness,
     CompletenessChecklist,
-    ScrapeError
+    ScrapeError,
+    ScrapeConfiguration,
+    CandidateImage,
+    ImageSourceType,
+    EscalationStatus
 )
-from .url_separator import UrlNormalizer, SiteAnalyzer, UniversalUrlSeparator
-from .service import (
+from .scrape_context import ScrapeContext
+from .url_utils import UrlNormalizer, SiteAnalyzer, UniversalUrlSeparator
+from .scraper_service import (
     scrape_images_from_url,
     scrape_and_initialize_project,
     generate_storyboard_and_video,
     generate_storyboard_only_service
 )
-from .workflow import (
+from .scraper_workflow import (
     scrape_series_episodes,
     scrape_series_episodes_advanced,
     scrape_series_episodes_paginated,
@@ -42,16 +46,27 @@ from .adapters import (
     MadaraCmsAdapter,
     MangaStreamAdapter,
     BatoAdapter,
+    InkrAdapter,
     AdapterRegistry
 )
+from .content_validator import ImageValidator
+from .image_order_resolver import OrderResolver
+from .content_evaluator import AccessEvaluator, ExtractionEvaluator
+from .scraper_cache_manager import ScraperCacheManager
+from .domain_rate_limiter import DomainRateLimiter, DomainBlockManager, rate_limiter, domain_block_manager
+
 
 __all__ = [
     "AdaptiveScraperEngine",
+    "adaptive_scraper_engine",
     "ChapterResult",
     "SourceInfo",
     "SeriesInfo",
     "ChapterInfo",
     "ImageItem",
+    "CandidateImage",
+    "ImageSourceType",
+    "EscalationStatus",
     "ScrapeDiagnostics",
     "ScrapeErrorCode",
     "ScrapeCompleteness",
@@ -78,5 +93,15 @@ __all__ = [
     "MadaraCmsAdapter",
     "MangaStreamAdapter",
     "BatoAdapter",
-    "AdapterRegistry"
+    "InkrAdapter",
+    "AdapterRegistry",
+    "ImageValidator",
+    "OrderResolver",
+    "AccessEvaluator",
+    "ExtractionEvaluator",
+    "ScraperCacheManager",
+    "DomainRateLimiter",
+    "DomainBlockManager",
+    "rate_limiter",
+    "domain_block_manager"
 ]

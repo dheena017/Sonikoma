@@ -97,6 +97,8 @@ PUBLIC_ROUTE_PREFIXES = (
     "/videos/",        # Generated videos serving
     "/media/",         # Local processed panel layers served via <img src="/media/...">
     "/media",          # Defensive: allow the exact mount path too
+    "/playwright-report", # Playwright Interactive Visual Report assets & pages
+    "/playwright-report/",
     "/api/export/youtube/", # YouTube publisher routes (uses get_optional_current_user in router)
     "/api/v1/export/youtube/",
     "/api/v1/system/logs/",   # SSE real-time log stream (/api/v1/system/logs/stream)

@@ -1,12 +1,12 @@
 """
 backend/app/services/scraper/evidence/__init__.py
+─────────────────────────────────────────────────────────────────────────────
+Layer 3: Quality Selection (Comparing Sources)
+─────────────────────────────────────────────────────────────────────────────
 """
-from .sources import EvidenceSource
-from .models import EvidenceItem
-from .collector import EvidenceCollector
+from .image_evidence_collector import EvidenceCollector, EvidenceSource
 
 __all__ = [
-    "EvidenceSource",
-    "EvidenceItem",
-    "EvidenceCollector"
+    "EvidenceCollector",
+    "EvidenceSource"
 ]

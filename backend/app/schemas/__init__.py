@@ -178,13 +178,27 @@ from .scraper import (
     SmartSplitRequest,
     # Export
     ExportArchiveRequest,
-    # Scraper Intelligence & Domain Records
-    ScraperAIAnalyzeRequest,
-    ScraperAIAnalyzeResponse,
-    DomainRecord,
-    DomainListResponse,
-    DomainUpdateRequest,
-    DomainRequestSubmission,
+    # Granular Discovery & Raw Image DTOs
+    RawImageItem,
+    ScrapeAllImagesRequest,
+    ScrapeAllImagesResponse,
+    # Validation & Sorting DTOs
+    ValidateImagesRequest,
+    ValidateImagesResponse,
+    SortImagesRequest,
+    SortImagesResponse,
+    # Domain Blocking DTOs
+    BlockDomainRequest,
+    BlockDomainResponse,
+    BlockedDomainsListResponse,
+    CheckBlockedResponse,
+    # Telemetry & Adapter DTOs
+    AdapterMetaResponse,
+    AdaptersListResponse,
+    ScraperHealthResponse,
+    # Session DTOs
+    SessionUpdatePayload,
+    SessionStateResponse,
 )
 
 from .video import (
@@ -339,12 +353,22 @@ __all__ = [
     "ExtractScriptRequest",
     "SmartSplitRequest",
     "ExportArchiveRequest",
-    "ScraperAIAnalyzeRequest",
-    "ScraperAIAnalyzeResponse",
-    "DomainRecord",
-    "DomainListResponse",
-    "DomainUpdateRequest",
-    "DomainRequestSubmission",
+    "RawImageItem",
+    "ScrapeAllImagesRequest",
+    "ScrapeAllImagesResponse",
+    "ValidateImagesRequest",
+    "ValidateImagesResponse",
+    "SortImagesRequest",
+    "SortImagesResponse",
+    "BlockDomainRequest",
+    "BlockDomainResponse",
+    "BlockedDomainsListResponse",
+    "CheckBlockedResponse",
+    "AdapterMetaResponse",
+    "AdaptersListResponse",
+    "ScraperHealthResponse",
+    "SessionUpdatePayload",
+    "SessionStateResponse",
     # video.py
     "PanelLayersData",
     "DialogueSegmentData",

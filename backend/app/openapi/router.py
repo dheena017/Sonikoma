@@ -18,6 +18,7 @@ from app.openapi.theme import (
     get_swagger_navbar_html,
     get_schemas_explorer_html,
     get_redoc_custom_html,
+    get_test_portal_html,
 )
 
 openapi_router = APIRouter()
@@ -227,3 +228,15 @@ def register_docs_routes(app: FastAPI):
     async def redirect_ai_models_to_docs():
         from fastapi.responses import RedirectResponse
         return RedirectResponse(url="/api/docs/ai")
+
+    @app.get("/tests", include_in_schema=False)
+    @app.get("/api/tests", include_in_schema=False)
+    @app.get("/testing", include_in_schema=False)
+    @app.get("/test-portal", include_in_schema=False)
+    @app.get("/api/docs/tests", include_in_schema=False)
+    async def custom_test_portal_html():
+        portal_html = get_test_portal_html()
+        if portal_html:
+            return HTMLResponse(content=portal_html)
+        return HTMLResponse(content="<h1>Sonikoma Test Portal</h1><p>Run 'npm test' or 'npm run test:report' to view automated test reports.</p>")
+

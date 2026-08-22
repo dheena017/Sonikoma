@@ -15,7 +15,12 @@
     "build": "npm run build:frontend",
     "preview": "cd frontend && npm run preview",
     "typecheck": "cd frontend && npm run typecheck",
-    "test": "echo \"No tests specified\" && exit 0",
+    "test": "playwright test",
+    "test:report": "node e2e/generate-report.js && playwright show-report e2e/playwright-report",
+    "test:trace": "playwright show-trace e2e/test-results",
+    "test:functions": "playwright test e2e/functions",
+    "test:endpoints": "playwright test e2e/endpoints",
+    "test:buttons": "playwright test e2e/button_triggers",
     "format": "prettier --write .",
     "start:prod": "npm run python:prod",
     "start:server": "npm run start:prod",
@@ -31,6 +36,8 @@
     "playwright": "^1.62.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^22.20.1",
     "concurrently": "^10.0.3",
     "cross-env": "^10.1.0",
     "prettier": "^2.8.8",

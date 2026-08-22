@@ -219,6 +219,18 @@ class UnifiedJobManager:
             rows = conn.execute(query, tuple(params)).fetchall()
             return [_job_record_from_row(dict(r)) for r in rows]
 
+    def get_active_jobs(self, user_id: Optional[str] = None) -> List[JobRecord]:
+        """Returns all currently active (RUNNING or QUEUED) jobs."""
+        with get_db_connection() as conn:
+            query = "SELECT * FROM jobs WHERE status IN ('RUNNING', 'QUEUED')"
+            params: list = []
+            if user_id:
+                query += " AND user_id = ?"
+                params.append(user_id)
+            query += " ORDER BY created_at DESC"
+            rows = conn.execute(query, tuple(params)).fetchall()
+            return [_job_record_from_row(dict(r)) for r in rows]
+
     def list_all_jobs_admin(
         self,
         user_id: Optional[str] = None,

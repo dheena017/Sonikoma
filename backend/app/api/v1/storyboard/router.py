@@ -13,7 +13,7 @@ from api.dependencies.auth import get_all_user_keys, get_current_user
 from core.security import SECRET_KEY
 from app.core.config import GEMINI_MODEL_PRIMARY
 from schemas.scraper import GenerateStoryboardOnlyRequest, GenerateStoryboardRequest
-from services.scraper.service import generate_storyboard_only_service, generate_storyboard_and_video
+from services.scraper.scraper_service import generate_storyboard_only_service, generate_storyboard_and_video
 from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 logger = logging.getLogger("sonikoma.api.storyboard")

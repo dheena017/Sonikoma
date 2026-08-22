@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from api.dependencies.auth import get_current_user
 
 from schemas.scraper import ExtractScriptRequest
-from services.scraper.service import scrape_and_initialize_project
+from services.scraper.scraper_service import scrape_and_initialize_project
 from services.image.ocr.ocr_service import extract_script_from_panels
 from services.image.utils.image_resolver import resolve_image_to_buffer
 from services.jobs import job_manager, JobType, JobStage, JobStatusResponse

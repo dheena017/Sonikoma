@@ -86,3 +86,14 @@ verify_fix.cjs
 .llm-chat-history/
 
 yolov8n-seg.pt
+
+# ── Playwright Testing & Trace Artifacts ─────────────────────────────────────
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+e2e/playwright-report/
+e2e/test-results/
+e2e/blob-report/
+*.trace.zip
+

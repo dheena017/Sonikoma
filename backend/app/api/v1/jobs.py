@@ -27,7 +27,8 @@ async def get_job_status_endpoint(job_id: str, current_user: dict = Depends(get_
     job = job_manager.get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
-    if job.user_id != current_user["user_id"]:
+    user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
+    if job.user_id != user_id and current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Not authorized to access this job.")
     return job.to_status_response()
 
@@ -42,7 +43,8 @@ async def cancel_job_endpoint(job_id: str, current_user: dict = Depends(get_curr
     job = job_manager.get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
-    if job.user_id != current_user["user_id"]:
+    user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
+    if job.user_id != user_id and current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Not authorized to cancel this job.")
     job = job_manager.cancel_job(job_id)
     return job.to_status_response()
@@ -63,8 +65,9 @@ async def list_jobs_endpoint(
     current_user: dict = Depends(get_current_user)
 ):
     """Lists jobs, optionally filtered by project_id, chapter_id, status, and type."""
+    user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     jobs = job_manager.list_jobs(
-        user_id=current_user["user_id"],
+        user_id=user_id,
         project_id=project_id,
         chapter_id=chapter_id,
         status=status,

@@ -447,6 +447,15 @@ export default defineConfig(({ mode, command }) => {
           timeout: 0,
           configure: createProxyErrorHandler("/training_data"),
         },
+        "/playwright-report": {
+          target: backendTarget,
+          changeOrigin: true,
+          secure: false,
+          ws: false,
+          proxyTimeout: 0,
+          timeout: 0,
+          configure: createProxyErrorHandler("/playwright-report"),
+        },
       },
     },
   };

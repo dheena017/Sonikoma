@@ -94,3 +94,20 @@ def get_redoc_custom_html(category: str = "all") -> str:
             .replace("__OPENAPI_URL__", openapi_url)
         )
     return ""
+
+
+def get_test_portal_html() -> str:
+    """Loads and returns the 3-column Studio & ReDoc Interactive Test Portal."""
+    report_file = Path(__file__).resolve().parent.parent.parent.parent / "e2e" / "playwright-report" / "index.html"
+    if report_file.exists():
+        return report_file.read_text(encoding="utf-8")
+    
+    fallback_report = Path(__file__).resolve().parent.parent.parent.parent / "playwright-report" / "index.html"
+    if fallback_report.exists():
+        return fallback_report.read_text(encoding="utf-8")
+    
+    template_file = _TEMPLATES_DIR / "test_portal.html"
+    if template_file.exists():
+        return template_file.read_text(encoding="utf-8")
+    return ""
+

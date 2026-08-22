@@ -16,7 +16,7 @@ export function useAppState() {
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
         if (params.get("mock_auth") === "true") {
-          return { id: 1, email: "developer@example.com", name: "Developer" };
+          return { id: 1, email: "admin@sonikoma.io", name: "Administrator", role: "admin" };
         }
       }
     } catch (e) {}

@@ -10,8 +10,8 @@ and request/response schemas.
 from __future__ import annotations
 import time
 from enum import Enum
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Optional, Union
+from pydantic import BaseModel, Field, ConfigDict
 from dataclasses import dataclass
 
 
@@ -37,6 +37,7 @@ class ScrapeCompleteness(str, Enum):
     PARTIAL = "PARTIAL"
     UNKNOWN = "UNKNOWN"
     FAILED = "FAILED"
+
 
 
 class EscalationStatus(str, Enum):
@@ -171,6 +172,7 @@ class ScrapeDiagnostics(BaseModel):
 
 class ScrapeError(BaseModel):
     """Structured error details when scraping cannot be fulfilled."""
+    model_config = ConfigDict(arbitrary_types_allowed=True, protected_namespaces=())
     code: ScrapeErrorCode
     message: str
     details: Optional[Dict[str, Any]] = None
@@ -181,6 +183,7 @@ class ChapterResult(BaseModel):
     Authoritative common output contract for all scraping flows.
     Everything in Sonikoma eventually resolves to this typed schema.
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True, protected_namespaces=())
     success: bool = True
     project_id: Optional[str] = None
     job_id: Optional[str] = None
@@ -190,7 +193,7 @@ class ChapterResult(BaseModel):
     chapter: ChapterInfo = Field(default_factory=ChapterInfo)
     images: List[ImageItem] = Field(default_factory=list)
     scrape: ScrapeDiagnostics = Field(default_factory=ScrapeDiagnostics)
-    error: Optional[ScrapeError] = None
+    error: Optional[Union[ScrapeError, Dict[str, Any], Any]] = None
 
 
 class CandidateImage(BaseModel):
@@ -316,26 +319,30 @@ class SeparateUrlRequest(BaseModel):
 
 
 class SeparateUrlResponse(BaseModel):
-    """Structured breakdown of an entered comic/manga URL."""
+    """Structured breakdown and decomposed constituent parts of a comic URL."""
     success: bool = True
-    raw_url: str
+    url: Optional[str] = None
+    raw_url: Optional[str] = None
     canonical_url: str
-    series_url: str
+    series_url: Optional[str] = None
     chapter_url: Optional[str] = None
-    is_chapter_url: bool
-    is_series_url: bool
-    platform: str
-    domain: str
+    parent_series_url: Optional[str] = None
+    is_chapter: Optional[bool] = None
+    is_chapter_url: Optional[bool] = None
+    is_series: Optional[bool] = None
+    is_series_url: Optional[bool] = None
+    platform: str = "generic"
+    domain: str = ""
     title_slug: Optional[str] = None
     title_id: Optional[str] = None
     series_slug: Optional[str] = None
     series_id: Optional[str] = None
     chapter_slug: Optional[str] = None
-    chapter_number: Optional[str] = None
+    chapter_number: Optional[Any] = None
     title_no: Optional[str] = None
     target_adapter: Optional[str] = None
-    recommended_action: str
-    supported_actions: List[str]
+    recommended_action: str = "import_chapter"
+    supported_actions: List[str] = Field(default_factory=lambda: ["import_chapter", "import_episodes", "batch_scrape"])
 
 
 class SaveScrapedImagesRequest(BaseModel):
@@ -390,6 +397,17 @@ class BatchScrapeRequest(BaseModel):
     cookies: Optional[str] = None
     headers: Optional[Dict[str, str]] = None
     bypass_cache: Optional[bool] = False
+
+
+# Canonical Schema Aliases
+ScrapeSeriesRequest = ScrapeEpisodesRequest
+ScrapeBatchRequest = BatchScrapeRequest
+ScrapedImage = ImageItem
+ScrapedChapter = ChapterInfo
+ScrapedSeries = SeriesInfo
+ChapterScrapeResult = ChapterResult
+SeriesScrapeResult = Dict[str, Any]
+UrlSeparationResult = SeparateUrlResponse
 
 
 # =============================================================================
@@ -512,3 +530,151 @@ class DomainRequestSubmission(BaseModel):
     """User submission to request onboarding of a comic website."""
     url: str
     notes: Optional[str] = None
+
+
+# =============================================================================
+# 7. Granular Scraper & Discovery DTOs
+# =============================================================================
+
+class RawImageItem(BaseModel):
+    """Raw unfiltered image item representing an image discovered on a page."""
+    index: int
+    url: str
+    alt: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    source_type: str = "dom"
+    is_svg: bool = False
+    is_background: bool = False
+    attributes: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
+
+class ScrapeAllImagesRequest(BaseModel):
+    """Request payload for extracting ALL raw images from any URL without filtering."""
+    url: str
+    render_js: bool = True
+    bypass_cache: bool = False
+    include_backgrounds: bool = True
+    include_svg: bool = False
+    cookies: Optional[str] = None
+    headers: Optional[Dict[str, str]] = None
+
+
+class ScrapeAllImagesResponse(BaseModel):
+    """Response payload for raw unfiltered image scraping."""
+    success: bool
+    url: str
+    domain: str
+    total_images: int
+    images: List[RawImageItem] = Field(default_factory=list)
+    latency_ms: float = 0.0
+    discovery_methods: List[str] = Field(default_factory=list)
+    error: Optional[str] = None
+
+
+class SeparateUrlRequest(BaseModel):
+    """Request to decompose and analyze any comic URL."""
+    url: str
+
+
+
+class ValidateImagesRequest(BaseModel):
+    """Request to validate and filter a list of candidate image URLs."""
+    images: List[Dict[str, Any]]
+    filter_banners: bool = True
+    min_width: int = 250
+    min_height: int = 250
+
+
+class ValidateImagesResponse(BaseModel):
+    """Response containing validated and rejected image lists."""
+    success: bool
+    valid_count: int
+    rejected_count: int
+    images: List[Dict[str, Any]] = Field(default_factory=list)
+    rejected: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class SortImagesRequest(BaseModel):
+    """Request to re-index and naturally sort a list of image URLs."""
+    images: List[Dict[str, Any]]
+
+
+class SortImagesResponse(BaseModel):
+    """Response containing naturally sorted images."""
+    success: bool
+    total_images: int
+    images: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+class BlockDomainRequest(BaseModel):
+    """Request to block a domain or pattern."""
+    domain: str
+    reason: Optional[str] = None
+
+
+class BlockDomainResponse(BaseModel):
+    """Response confirming domain block state."""
+    success: bool
+    domain: str
+    status: str = "blocked"
+    message: str
+
+
+class BlockedDomainsListResponse(BaseModel):
+    """List of all currently blocked domains."""
+    total: int
+    blocked_domains: List[str] = Field(default_factory=list)
+
+
+class CheckBlockedResponse(BaseModel):
+    """Response indicating whether a URL/domain is blocked."""
+    url: str
+    domain: str
+    is_blocked: bool
+    reason: Optional[str] = None
+
+
+class AdapterMetaResponse(BaseModel):
+    """Metadata describing a scraper adapter."""
+    adapter_id: str
+    name: str
+    description: str
+    badge: str
+    speed: str
+    supported_domains: List[str] = Field(default_factory=list)
+    supports_series_discovery: bool = True
+    supports_chapter_scraping: bool = True
+
+
+class AdaptersListResponse(BaseModel):
+    """Registry listing all available site and CMS adapters."""
+    total: int
+    adapters: List[AdapterMetaResponse] = Field(default_factory=list)
+
+
+class ScraperHealthResponse(BaseModel):
+    """Health check response for scraper engine and in-memory caches."""
+    status: str = "healthy"
+    version: str = "2.0.0"
+    in_memory_l1_cache_size: int = 0
+    in_memory_l5_cache_size: int = 0
+    active_browser_pool_workers: int = 0
+    active_in_flight_jobs: int = 0
+
+
+class SessionUpdatePayload(BaseModel):
+    """Payload to update curated panel list in active in-memory session."""
+    url: str
+    panels: List[Dict[str, Any]] = Field(default_factory=list)
+    chapter_title: Optional[str] = None
+    chapter_number: Optional[float] = None
+
+
+class SessionStateResponse(BaseModel):
+    """Response containing active session state for a URL."""
+    url: str
+    panels_count: int
+    panels: List[Dict[str, Any]] = Field(default_factory=list)
+    updated_at: float = Field(default_factory=time.time)
+

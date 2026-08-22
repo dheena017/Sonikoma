@@ -588,4 +588,170 @@ export const separateComicUrl = async (
   });
 };
 
+// ============================================================================
+// 11. Raw All-Images & Synchronous Scraping
+// ============================================================================
+
+export interface RawImageItem {
+  index: number;
+  url: string;
+  alt?: string | null;
+  width?: number | null;
+  height?: number | null;
+  source_type: string;
+  is_svg?: boolean;
+  is_background?: boolean;
+}
+
+export interface ScrapeAllImagesResponse {
+  success: boolean;
+  url: string;
+  domain: string;
+  total_images: number;
+  images: RawImageItem[];
+  latency_ms: number;
+  discovery_methods: string[];
+  error?: string | null;
+}
+
+/**
+ * Scrapes ALL images from any URL completely unfiltered (including banners, logos, backgrounds).
+ */
+export const scrapeAllImages = async (
+  fetchWithInterceptor: FetchClient,
+  payload: {
+    url: string;
+    render_js?: boolean;
+    include_backgrounds?: boolean;
+    include_svg?: boolean;
+  }
+): Promise<ScrapeAllImagesResponse> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/all-images", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+};
+
+/**
+ * Direct synchronous chapter scrape returning ChapterResult immediately.
+ */
+export const scrapeChapterSync = async (
+  fetchWithInterceptor: FetchClient,
+  payload: {
+    url: string;
+    filter_banners?: boolean;
+    proxy_images?: boolean;
+    limit?: number;
+  }
+): Promise<ChapterResult> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/chapter/sync", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+};
+
+/**
+ * Direct synchronous series & episode discovery.
+ */
+export const scrapeSeriesSync = async (
+  fetchWithInterceptor: FetchClient,
+  payload: {
+    url?: string;
+    title_no?: string;
+    max_episodes?: number;
+    sort_by?: string;
+  }
+): Promise<any> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/series/sync", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+};
+
+// ============================================================================
+// 12. Domain Blocking Client Methods
+// ============================================================================
+
+export const blockDomain = async (
+  fetchWithInterceptor: FetchClient,
+  domain: string,
+  reason?: string
+): Promise<{ success: boolean; domain: string; status: string; message: string }> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/block-domain", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ domain, reason }),
+  });
+};
+
+export const unblockDomain = async (
+  fetchWithInterceptor: FetchClient,
+  domain: string
+): Promise<{ success: boolean; domain: string; message: string }> => {
+  return apiRequest(fetchWithInterceptor, `/api/v1/scraper/block-domain/${encodeURIComponent(domain)}`, {
+    method: "DELETE",
+  });
+};
+
+export const listBlockedDomains = async (
+  fetchWithInterceptor: FetchClient
+): Promise<{ total: number; blocked_domains: string[] }> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/blocked-domains", {
+    method: "GET",
+  });
+};
+
+export const checkDomainBlocked = async (
+  fetchWithInterceptor: FetchClient,
+  url: string
+): Promise<{ url: string; domain: string; is_blocked: boolean; reason?: string | null }> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/check-blocked", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url }),
+  });
+};
+
+// ============================================================================
+// 13. Adapters & Health
+// ============================================================================
+
+export interface AdapterMeta {
+  adapter_id: string;
+  name: string;
+  description: string;
+  badge: string;
+  speed: string;
+  supported_domains: string[];
+  supports_series_discovery: boolean;
+  supports_chapter_scraping: boolean;
+}
+
+export const listAdapters = async (
+  fetchWithInterceptor: FetchClient
+): Promise<{ total: number; adapters: AdapterMeta[] }> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/adapters", {
+    method: "GET",
+  });
+};
+
+export const getScraperHealth = async (
+  fetchWithInterceptor: FetchClient
+): Promise<{
+  status: string;
+  version: string;
+  in_memory_l1_cache_size: number;
+  in_memory_l5_cache_size: number;
+  active_browser_pool_workers: number;
+  active_in_flight_jobs: number;
+}> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/health", {
+    method: "GET",
+  });
+};
+
+
 

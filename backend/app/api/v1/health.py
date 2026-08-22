@@ -15,6 +15,7 @@ import platform
 import logging
 import subprocess
 from typing import Optional
+from datetime import datetime
 
 from fastapi import APIRouter, Request, Query, HTTPException, Header, Depends
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -375,5 +376,3 @@ async def emergency_stop_endpoint():
     except Exception as e:
         logger.error(f"Failed to execute emergency stop: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
