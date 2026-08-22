@@ -19,8 +19,7 @@ from .models import (
     CompletenessChecklist,
     ScrapeError
 )
-from .context import ScrapeContext, ScrapeConfiguration
-from .normalizer import UrlNormalizer, SiteAnalyzer
+from .url_separator import UrlNormalizer, SiteAnalyzer, UniversalUrlSeparator
 from .service import (
     scrape_images_from_url,
     scrape_and_initialize_project,
@@ -57,11 +56,11 @@ __all__ = [
     "ScrapeErrorCode",
     "ScrapeCompleteness",
     "CompletenessChecklist",
-    "ScrapeError",
     "ScrapeContext",
     "ScrapeConfiguration",
     "UrlNormalizer",
     "SiteAnalyzer",
+    "UniversalUrlSeparator",
     "scrape_images_from_url",
     "scrape_and_initialize_project",
     "generate_storyboard_and_video",

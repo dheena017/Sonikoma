@@ -2,8 +2,8 @@
 backend/app/services/scraper/engine.py
 ─────────────────────────────────────────────────────────────────────────────
 Adaptive Scraper Engine.
-Thin orchestrator and entry point for URL processing, context initialization,
-adapter resolution, and execution.
+Pure deterministic orchestrator and entry point for URL processing,
+context initialization, adapter resolution, and execution without AI overhead.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -13,7 +13,7 @@ from typing import Optional, Dict, Any, List
 
 from .models import ChapterResult, ScrapeError, ScrapeErrorCode, ScrapeCompleteness
 from .context import ScrapeContext, ScrapeConfiguration
-from .normalizer import UrlNormalizer, SiteAnalyzer
+from .url_separator import UrlNormalizer, SiteAnalyzer
 from .adapters.registry import AdapterRegistry
 
 logger = logging.getLogger("sonikoma.services.scraper.engine")
@@ -57,22 +57,6 @@ class AdaptiveScraperEngine:
                 )
             )
 
-        # Check domain approval status
-        from .ai.domain_memory import DomainMemory
-        domain_status = DomainMemory.get_domain_status(normalized_url)
-        if domain_status == "blocked":
-            return ChapterResult(
-                success=False,
-                project_id=project_id,
-                job_id=job_id,
-                source=SiteAnalyzer.analyze(url or ""),
-                error=ScrapeError(
-                    code=ScrapeErrorCode.CONTENT_NOT_ACCESSIBLE,
-                    message="This website domain has been blocked by administrator policy.",
-                    details={"domain": DomainMemory.get_domain_from_url(normalized_url)}
-                )
-            )
-
         # Build execution configuration
         config = ScrapeConfiguration(
             bypass_cache=bypass_cache,
@@ -107,46 +91,12 @@ class AdaptiveScraperEngine:
 
         # Execute scrape workflow
         try:
-            result = await adapter.scrape(context)
-            if result.success:
-                DomainMemory.record_success(normalized_url)
-            elif adapter.__class__.__name__ == "GenericAdaptiveAdapter":
-                # Unknown / unmapped website that could not be parsed
-                domain = DomainMemory.get_domain_from_url(normalized_url)
-                if not result.error:
-                    result.error = ScrapeError(
-                        code=ScrapeErrorCode.READER_NOT_FOUND,
-                        message=f"Could not extract comic panels from '{domain}'. Please check the URL and try again.",
-                    )
-                if not result.error.details:
-                    result.error.details = {}
-                result.error.details.update({
-                    "domain": domain,
-                    "is_unmapped_website": True,
-                    "can_request_domain": True,
-                    "request_url": "/api/v1/scraper/admin/domains/request",
-                })
-                # Auto-enqueue to pending domain requests for admin review
-                try:
-                    DomainMemory.request_domain(
-                        url=normalized_url,
-                        requested_by="auto-user-request",
-                        notes=f"Auto-requested: Scrape attempt failed on unmapped website {domain}"
-                    )
-                except Exception:
-                    pass
-            return result
+            return await adapter.scrape(context)
         except Exception as e:
             logger.error(f"[AdaptiveScraperEngine] Unexpected scraper execution failure: {e}", exc_info=True)
-            domain = DomainMemory.get_domain_from_url(normalized_url)
             context.error = ScrapeError(
                 code=ScrapeErrorCode.INTERNAL_ERROR,
-                message=f"Internal scraper engine error: {str(e)}",
-                details={
-                    "domain": domain,
-                    "can_request_domain": True,
-                    "request_url": "/api/v1/scraper/admin/domains/request"
-                }
+                message=f"Internal scraper engine error: {str(e)}"
             )
             context.completeness = ScrapeCompleteness.FAILED
             return context.to_chapter_result()

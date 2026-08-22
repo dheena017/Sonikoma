@@ -2,6 +2,10 @@
 backend/app/services/scraper/adapters/bato.py
 ─────────────────────────────────────────────────────────────────────────────
 Specialized Adapter for Bato.to (bato.to, mangatoto.com, battwo.com, etc.).
+Provides:
+  1. Full Series Discovery & Chapter List Extraction (.episode-list, .item a.chapt)
+  2. Series Metadata & High-Res Cover Art Extraction
+  3. Chapter Panel Image Extraction (JS image array & encrypted state decrypt)
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -9,7 +13,7 @@ import re
 import json
 import time
 import logging
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from urllib.parse import urlparse, urljoin
 
 from .base import BaseSiteAdapter
@@ -47,6 +51,98 @@ class BatoAdapter(BaseSiteAdapter):
         domain = source_info.domain.lower()
         return any(d in domain for d in cls.supported_domains)
 
+    async def discover_series(
+        self,
+        series_url: str,
+        sort_by: str = "latest",
+        max_episodes: Optional[int] = None,
+        preferred_language: str = "en"
+    ) -> Optional[Dict[str, Any]]:
+        """Crawls full series metadata and chapter listing for Bato.to platforms."""
+        raw_url = (series_url or "").strip()
+        parsed = urlparse(raw_url)
+        clean_url = raw_url
+
+        # If user passed a chapter link /title/.../chapter or /chapter/..., resolve parent /series/
+        if "/chapter/" in clean_url:
+            m = re.match(r"^(https?://[^/]+/(?:series|title)/[^/]+)", clean_url)
+            if m:
+                clean_url = m.group(1)
+
+        headers = {"Referer": f"{parsed.scheme}://{parsed.netloc}/"}
+        html, status, _ = await HttpFetcher.fetch_html(clean_url, headers=headers)
+        soup = DomExtractor.get_soup(html) if html else None
+
+        if not html or status in (403, 503) or (soup and not soup.select(".item-title, h3.item-title, .episode-list, .chapter-list")):
+            b_html, _, _ = await BrowserFetcher.render_page(clean_url, auto_scroll=True)
+            if b_html:
+                html = b_html
+                soup = DomExtractor.get_soup(b_html)
+
+        if not soup:
+            return None
+
+        # 1. Series Info & Cover Poster
+        series_meta, _ = DomExtractor.extract_metadata(html or "", clean_url)
+        title_el = soup.select_one("h3.item-title, h1.item-title, .item-title a, h3 a")
+        series_title = title_el.get_text(strip=True) if title_el else (series_meta.title or "Bato Series")
+
+        author_el = soup.select_one(".item-authors, .attr-item:has(b:contains('Author')) a")
+        author = author_el.get_text(strip=True) if author_el else (series_meta.author or "")
+
+        cover_el = soup.select_one(".attr-cover img, .item-cover img, meta[property='og:image']")
+        cover_image = ""
+        if cover_el:
+            cover_image = cover_el.get("content") or cover_el.get("data-src") or cover_el.get("src") or ""
+
+        # 2. Chapters from .episode-list, .main .item a.chapt, .chapter-list
+        episodes: List[Dict[str, Any]] = []
+        seen = set()
+
+        for a in soup.select(".episode-list a, .main .item a.chapt, a.chapt, .chapter-list a"):
+            href = a.get("href", "").strip()
+            if not href or href == "#":
+                continue
+            full_url = urljoin(clean_url, href)
+            if full_url in seen:
+                continue
+            seen.add(full_url)
+
+            txt = a.get_text(strip=True)
+            num_val, _ = self.extract_number_and_type(txt)
+
+            # Date check in parent or next sibling
+            parent_div = a.find_parent("div", class_="item") or a.find_parent("li")
+            date_el = parent_div.select_one(".extra i, .date, .time, i") if parent_div else None
+            date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
+
+            episodes.append({
+                "title": txt or f"Chapter {num_val or len(episodes)+1}",
+                "url": full_url,
+                "chapter_number": num_val,
+                "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
+                "date": date_str,
+                "thumbnail": self.build_proxy_thumbnail_url(None, full_url, cover_image),
+                "cover": cover_image,
+                "language": self.extract_language_tag(txt),
+            })
+
+        sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
+
+        return {
+            "success": True,
+            "series_title": series_title,
+            "url": clean_url,
+            "series": {
+                "title": series_title,
+                "author": author,
+                "cover_image": cover_image,
+                "url": clean_url
+            },
+            "episodes": sorted_eps,
+            "total_episodes": len(sorted_eps)
+        }
+
     async def scrape(self, context: ScrapeContext) -> ChapterResult:
         url = context.normalized_url or context.url
         start_time = time.time()
@@ -57,9 +153,6 @@ class BatoAdapter(BaseSiteAdapter):
         headers.setdefault("Referer", f"{parsed.scheme}://{parsed.netloc}/")
         context.config.headers = headers
 
-        # ------------------------------------------------------------------
-        # Step 1: Static Fetch & JS Array Extraction
-        # ------------------------------------------------------------------
         html, status_code, fetch_dur = await HttpFetcher.fetch_html(
             url,
             headers=headers,
@@ -72,7 +165,6 @@ class BatoAdapter(BaseSiteAdapter):
             series, chapter = DomExtractor.extract_metadata(html, url)
             self._merge_metadata(context, series, chapter)
 
-            # Try extracting server-rendered image array (e.g. const images = [...])
             script_images = self._extract_script_images(html, url)
             if len(script_images) >= 3:
                 context.candidate_images.extend(script_images)
@@ -98,142 +190,72 @@ class BatoAdapter(BaseSiteAdapter):
                     context.checklist.reader_end_reached = True
                     context.checklist.lazy_loading_finished = True
                     context.completeness = ScrapeCompleteness.COMPLETE
-                    context.record_level(
-                        "Level 1: Bato Static DOM",
-                        EscalationStatus.SUCCESS,
-                        95.0,
-                        len(dom_images),
-                        fetch_dur * 1000,
-                    )
                     return self._finalize(context, start_time)
 
-        # ------------------------------------------------------------------
-        # Step 2: Playwright with auto-scroll
-        # ------------------------------------------------------------------
-        if context.config.enable_browser_fallback:
-            t_browser = time.time()
-            pw_html, net_images, storage = await BrowserFetcher.render_page(
-                url,
-                cookies=context.config.cookies,
-                headers=headers,
-                interactive=True,
-                auto_scroll=True,
-                timeout_seconds=context.config.timeout_seconds,
-            )
-            browser_dur = (time.time() - t_browser) * 1000
-
-            if pw_html:
-                soup_pw = DomExtractor.get_soup(pw_html)
-                if soup_pw:
-                    pw_images = self._extract_dom_images(soup_pw, url)
-                    if len(pw_images) >= 3:
-                        context.candidate_images.extend(pw_images)
-                        context.checklist.reader_found = True
-                        context.checklist.reader_end_reached = True
-                        context.checklist.lazy_loading_finished = True
-                        context.completeness = ScrapeCompleteness.COMPLETE
-                        context.record_level(
-                            "Level 4: Bato Playwright",
-                            EscalationStatus.SUCCESS,
-                            95.0,
-                            len(pw_images),
-                            browser_dur,
-                        )
-                        return self._finalize(context, start_time)
-
-        logger.info("[BatoAdapter] Delegating to GenericAdaptiveAdapter fallback.")
+        # Fallback to Generic Adaptive Escalation (Playwright)
         generic = GenericAdaptiveAdapter()
         return await generic.scrape(context)
 
-    # ── Helpers ───────────────────────────────────────────────────────────────
-
     def _extract_script_images(self, html: str, base_url: str) -> List[CandidateImage]:
         candidates: List[CandidateImage] = []
-        seen = set()
-
-        # Bato often stores chapter images in a JS variable: const imgHttpLis = [...] or const images = [...]
-        m = re.search(r'(?:imgHttpLis|images|imgList)\s*=\s*(\[[^\]]+\])', html)
-        if m:
+        # Match server script variable array: const images = ["url1", "url2", ...]
+        matches = re.findall(
+            r'(?:var|const|let)\s+(?:images|imgList|pages|imageFiles|serverImages)\s*=\s*(\[[^\]]+\])',
+            html,
+            re.IGNORECASE,
+        )
+        for m in matches:
             try:
-                raw_urls = json.loads(m.group(1))
-                for idx, src in enumerate(raw_urls):
-                    if isinstance(src, str) and src.startswith(("http://", "https://", "//")):
-                        abs_url = urljoin(base_url, src)
-                        if abs_url not in seen:
-                            seen.add(abs_url)
+                urls = json.loads(m)
+                if isinstance(urls, list) and len(urls) >= 3:
+                    for idx, u in enumerate(urls):
+                        if isinstance(u, str) and u.startswith("http"):
                             candidates.append(
                                 CandidateImage(
-                                    url=abs_url,
-                                    source_type=ImageSourceType.DOM,
-                                    dom_index=idx,
+                                    url=u,
+                                    source_type=ImageSourceType.JSON_DATA,
                                     container_selector="script:images",
-                                    is_inside_reader=True,
-                                    confidence=0.99
+                                    index_hint=idx,
+                                    confidence=0.98,
                                 )
                             )
+                    if candidates:
+                        return candidates
             except Exception:
-                pass
+                continue
 
         return candidates
 
     def _extract_dom_images(self, soup, base_url: str) -> List[CandidateImage]:
         candidates: List[CandidateImage] = []
         seen = set()
+        container = soup.select_one(".page-img, .reader-body, .comic-detail, #viewer, .page-container")
+        if not container:
+            container = soup
 
-        images = soup.select(".main .item img, .page-img, div#viewer img, .comic-detail img")
-        for idx, img in enumerate(images):
-            src = (img.get("src") or img.get("data-src") or img.get("data-lazy-src") or "").strip()
-            if not src or any(ign in src.lower() for ign in ["1x1", "pixel", "blank.gif", "placeholder", "logo"]):
+        for img in container.find_all("img"):
+            src = img.get("data-src") or img.get("data-original") or img.get("src")
+            if not src or src.startswith("data:image") or "logo" in src.lower():
                 continue
-
-            abs_url = urljoin(base_url, src)
-            if abs_url not in seen:
-                seen.add(abs_url)
+            full_url = urljoin(base_url, src.strip())
+            if full_url not in seen:
+                seen.add(full_url)
                 candidates.append(
                     CandidateImage(
-                        url=abs_url,
-                        source_type=ImageSourceType.DOM,
-                        dom_index=idx,
-                        container_selector=".main .item",
-                        is_inside_reader=True,
-                        confidence=0.95
+                        url=full_url,
+                        source_type=ImageSourceType.DOM_IMG,
+                        container_selector=".page-img",
+                        confidence=0.9,
                     )
                 )
 
         return candidates
 
     def _merge_metadata(self, context: ScrapeContext, series, chapter):
-        if series.title and not context.series_info.title:
-            context.series_info.title = series.title
-        if series.description and not context.series_info.description:
-            context.series_info.description = series.description
-        if series.cover and not context.series_info.cover:
-            context.series_info.cover = series.cover
-        if series.author and not context.series_info.author:
-            context.series_info.author = series.author
-        if chapter.title and not context.chapter_info.title:
-            context.chapter_info.title = chapter.title
-        if chapter.number is not None and context.chapter_info.number is None:
-            context.chapter_info.number = chapter.number
-        if chapter.previous and not context.chapter_info.previous:
-            context.chapter_info.previous = chapter.previous
-        if chapter.next and not context.chapter_info.next:
-            context.chapter_info.next = chapter.next
-
-    def _finalize(self, context: ScrapeContext, start_time: float) -> ChapterResult:
-        total_ms = (time.time() - start_time) * 1000
-        validated, rejections = ImageValidator.validate_candidates(
-            context.candidate_images,
-            filter_banners=context.config.filter_banners
-        )
-        context.rejections.extend(rejections)
-        context.validated_images = OrderResolver.resolve_order(validated)
-
-        ScraperDiagnosticsLogger.log_result(
-            chapter_number=context.chapter_info.number,
-            images_count=len(context.validated_images),
-            new_images_count=0,
-            completeness=context.completeness.value,
-            execution_time_ms=total_ms,
-        )
-        return context.to_chapter_result()
+        if series:
+            if series.title: context.series_info.title = series.title
+            if series.cover_image: context.series_info.cover_image = series.cover_image
+            if series.author: context.series_info.author = series.author
+        if chapter:
+            if chapter.number is not None: context.chapter_info.number = chapter.number
+            if chapter.title: context.chapter_info.title = chapter.title

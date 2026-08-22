@@ -11,7 +11,7 @@ import time
 from typing import List, Dict, Any, Optional, Set
 from dataclasses import dataclass, field
 
-from .models import (
+from schemas.scraper import (
     SourceInfo,
     SeriesInfo,
     ChapterInfo,
@@ -23,39 +23,13 @@ from .models import (
     CompletenessChecklist,
     ScrapeError,
     ChapterResult,
-    EscalationStatus
+    EscalationStatus,
+    EscalationLevelRecord,
+    ScrapeConfiguration,
+    EvidenceSource,
 )
-from .evidence import EvidenceCollector, EvidenceSource
+from .evidence import EvidenceCollector
 from .constants import SCRAPER_VERSION
-
-
-@dataclass
-class EscalationLevelRecord:
-    """Record of an executed escalation level."""
-    level_name: str
-    status: EscalationStatus
-    confidence: float
-    images_found: int
-    duration_ms: float
-    reason: Optional[str] = None
-
-
-@dataclass
-class ScrapeConfiguration:
-    """Runtime options for the scrape execution."""
-    bypass_cache: bool = False
-    force_refresh: bool = False
-    proxy_images: bool = True
-    filter_banners: bool = True
-    limit: Optional[int] = None
-    timeout_seconds: float = 30.0
-    enable_browser_fallback: bool = True
-    smart_slice: bool = True
-    cookies: Optional[Dict[str, str]] = None
-    headers: Optional[Dict[str, str]] = None
-    save_debug_html: bool = False
-    project_id: Optional[str] = None
-    job_id: Optional[str] = None
 
 
 @dataclass

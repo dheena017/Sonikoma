@@ -18,7 +18,7 @@ from urllib.parse import quote
 
 from .engine import AdaptiveScraperEngine
 from .models import ChapterResult
-from .normalizer import UrlNormalizer
+from .url_separator import UrlNormalizer
 from .constants import SCRAPER_VERSION
 
 import services.image.utils.image_utils as img_utils

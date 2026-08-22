@@ -22,7 +22,10 @@ from .constants import SCRAPER_VERSION
 try:
     from database.engine import get_db_connection
 except ImportError:
-    get_db_connection = None
+    try:
+        from app.database.engine import get_db_connection
+    except ImportError:
+        get_db_connection = None
 
 try:
     from repositories.scraper import save_scrape_session, get_latest_scrape_session

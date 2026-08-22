@@ -26,10 +26,9 @@ from schemas.scraper import (
     DomainRequestSubmission,
 )
 from services.scraper.engine import AdaptiveScraperEngine
-from services.scraper.normalizer import UrlNormalizer
+from services.scraper.url_separator import UrlNormalizer, UniversalUrlSeparator
 from services.scraper.models import ChapterResult
-from services.scraper.ai.domain_memory import DomainMemory
-from services.scraper.ai.orchestrator_scraper import ScraperAIOrchestrator, UniversalComicBlueprint
+from services.scraper.domain_memory import DomainMemory
 from services.scraper.acquisition.http import HttpFetcher
 from services.scraper.acquisition.browser import BrowserFetcher
 from services.scraper.workflow import scrape_series_episodes_advanced
@@ -58,14 +57,15 @@ def parse_cookie_string(raw: Optional[str]) -> Optional[Dict[str, str]]:
     return cookies if cookies else None
 
 
-# ─── 0. URL Separation & Semantic Analysis ──────────────────────────────────
+# ─── 0. Universal URL Separation & Deconstruction ─────────────────────────
 
 @router.post(
     "/separate-url",
     response_model=SeparateUrlResponse,
     summary="Decompose & separate any comic URL into constituent parts",
-    description="Analyzes any raw comic/manga/webtoon URL and extracts its parent series URL, chapter URL, domain, platform, slugs, numbers, and recommended action."
+    description="Analyzes any raw comic/manga/webtoon URL and extracts its parent series URL, chapter URL, domain, platform, slugs, numbers, and recommended actions without hardcoded domain limits."
 )
+@router.post("/decompose-url", response_model=SeparateUrlResponse, include_in_schema=False)
 @router.post("/parse-url", response_model=SeparateUrlResponse, include_in_schema=False)
 async def separate_url_endpoint(
     payload: SeparateUrlRequest,
@@ -73,7 +73,8 @@ async def separate_url_endpoint(
 ):
     if not payload.url or not payload.url.strip():
         raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
-    result = UrlNormalizer.separate_url(payload.url)
+    from services.scraper.url_separator import UniversalUrlSeparator
+    result = UniversalUrlSeparator.separate(payload.url)
     return SeparateUrlResponse(**result)
 
 
@@ -82,6 +83,7 @@ async def separate_url_endpoint(
     response_model=SeparateUrlResponse,
     summary="Decompose & separate any comic URL via query parameter"
 )
+@router.get("/decompose-url", response_model=SeparateUrlResponse, include_in_schema=False)
 @router.get("/parse-url", response_model=SeparateUrlResponse, include_in_schema=False)
 async def separate_url_get_endpoint(
     url: str,
@@ -89,7 +91,8 @@ async def separate_url_get_endpoint(
 ):
     if not url or not url.strip():
         raise HTTPException(status_code=400, detail="Target URL parameter 'url' cannot be empty.")
-    result = UrlNormalizer.separate_url(url)
+    from services.scraper.url_separator import UniversalUrlSeparator
+    result = UniversalUrlSeparator.separate(url)
     return SeparateUrlResponse(**result)
 
 
@@ -389,17 +392,17 @@ def estimate_total_chapter_images(html: Optional[str], blueprint: Optional[Unive
 @router.post(
     "/ai/analyze",
     response_model=ScraperAIAnalyzeResponse,
-    summary="Directly test or invoke AI Scraper Intelligence on any URL or HTML",
-    description="Uses Gemini 2.5 Flash to inspect comic page structure, discovering reader containers, image attributes, metadata, and JSONPath state queries in real-time."
+    summary="Inspect comic page structure and reader containers",
+    description="Inspects comic page structure, reader containers, image attributes, and metadata deterministically."
 )
 async def analyze_comic_blueprint_endpoint(
     body: ScraperAIAnalyzeRequest,
     current_user: dict = Depends(get_current_user)
 ):
     import time
-    from services.scraper.ai.orchestrator_scraper import ScraperAIOrchestrator
-    from services.scraper.ai.domain_memory import DomainMemory
+    from services.scraper.domain_memory import DomainMemory
     from services.scraper.acquisition.http import HttpFetcher
+    from services.scraper.extraction.dom import DomExtractor
 
     t0 = time.time()
     url = body.url.strip()
@@ -408,35 +411,14 @@ async def analyze_comic_blueprint_endpoint(
 
     user_id = current_user.get("user_id", "guest") if current_user else "guest"
 
-    # Create tracked Job with JobType.AI_SCRAPER_ANALYZE
     job = job_manager.create_job(
         job_type=JobType.AI_SCRAPER_ANALYZE,
         user_id=user_id,
-        project_id="AI Blueprint Analysis",
+        project_id="Blueprint Analysis",
         chapter_id=None,
         metadata={"url": url, "bypass_cache": body.bypass_cache}
     )
-    job_manager.update_progress(job.job_id, 10.0, stage="ANALYZING_PAGE")
 
-    # 1. Check cached domain blueprint unless bypass_cache is requested
-    if not body.bypass_cache:
-        cached = DomainMemory.get_blueprint(url)
-        if cached:
-            latency = (time.time() - t0) * 1000.0
-            job_manager.complete_job(job.job_id, result=cached.model_dump())
-            total_detected = estimate_total_chapter_images(body.html, cached, url)
-            return ScraperAIAnalyzeResponse(
-                success=True,
-                job_id=job.job_id,
-                url=url,
-                is_cached=True,
-                latency_ms=round(latency, 2),
-                total_images=total_detected,
-                blueprint=cached.model_dump(),
-                error=None
-            )
-
-    # 2. Acquire raw HTML if not provided directly in request body or if swagger placeholder
     raw_html = body.html
     if raw_html and (raw_html.strip().lower() in ("string", "nul", "null", "none", "undefined", "{}", "test") or len(raw_html.strip()) < 40):
         raw_html = None
@@ -445,7 +427,6 @@ async def analyze_comic_blueprint_endpoint(
     clean_cookies = None if (not body.cookies or body.cookies.strip().lower() in ("string", "nul", "null", "none", "undefined")) else body.cookies
 
     if not raw_html:
-        job_manager.update_progress(job.job_id, 30.0, stage="FETCHING_HTML")
         parsed_cookies = parse_cookie_string(clean_cookies) if clean_cookies else None
         html, status_code, _ = await HttpFetcher.fetch_html(
             url=url,
@@ -469,53 +450,36 @@ async def analyze_comic_blueprint_endpoint(
             error="Could not fetch HTML content from the specified URL."
         )
 
-    # 3. Execute AI Analysis with Gemini 2.5 Flash
-    try:
-        job_manager.update_progress(job.job_id, 60.0, stage="GEMINI_INFERENCE")
-        blueprint = await ScraperAIOrchestrator.analyze_page(raw_html, url)
-        latency = (time.time() - t0) * 1000.0
+    # Deterministic metadata and reader extraction
+    series_info, chapter_info = DomExtractor.extract_metadata(raw_html, url)
+    soup = DomExtractor.get_soup(raw_html)
+    candidates = DomExtractor.extract_candidates(soup, url) if soup else []
 
-        if not blueprint:
-            job_manager.fail_job(job.job_id, error_message="AI Analysis did not produce a valid comic blueprint.")
-            return ScraperAIAnalyzeResponse(
-                success=False,
-                job_id=job.job_id,
-                url=url,
-                is_cached=False,
-                latency_ms=round(latency, 2),
-                total_images=0,
-                blueprint=None,
-                error="AI Analysis did not produce a valid comic blueprint."
-            )
+    sample_urls = [c.url for c in candidates[:10] if c.url]
+    blueprint_dict = {
+        "series_title": series_info.title if series_info else None,
+        "author": series_info.author if series_info else None,
+        "cover_image_url": series_info.cover if series_info else None,
+        "chapter_number": chapter_info.number if chapter_info else None,
+        "chapter_title": chapter_info.title if chapter_info else None,
+        "sample_image_urls": sample_urls,
+        "total_sample_images": len(candidates),
+        "worker_strategy": "DOM_DIRECT"
+    }
 
-        # Cache for future instant reuse
-        DomainMemory.save_blueprint(url, blueprint)
-        job_manager.complete_job(job.job_id, result=blueprint.model_dump())
+    latency = (time.time() - t0) * 1000.0
+    job_manager.complete_job(job.job_id, result=blueprint_dict)
 
-        total_detected = estimate_total_chapter_images(raw_html, blueprint, url)
-        return ScraperAIAnalyzeResponse(
-            success=True,
-            job_id=job.job_id,
-            url=url,
-            is_cached=False,
-            latency_ms=round(latency, 2),
-            total_images=total_detected,
-            blueprint=blueprint.model_dump(),
-            error=None
-        )
-    except Exception as e:
-        latency = (time.time() - t0) * 1000.0
-        logger.error(f"[AI Scraper Analyze Error] {e}", exc_info=True)
-        job_manager.fail_job(job.job_id, error_message=str(e))
-        return ScraperAIAnalyzeResponse(
-            success=False,
-            job_id=job.job_id,
-            url=url,
-            is_cached=False,
-            latency_ms=round(latency, 2),
-            blueprint=None,
-            error=str(e)
-        )
+    return ScraperAIAnalyzeResponse(
+        success=True,
+        job_id=job.job_id,
+        url=url,
+        is_cached=False,
+        latency_ms=round(latency, 2),
+        total_images=len(candidates),
+        blueprint=blueprint_dict,
+        error=None
+    )
 
 
 # =============================================================================
@@ -578,19 +542,12 @@ async def update_domain_status(
     if new_status not in ("approved", "pending", "blocked"):
         raise HTTPException(status_code=400, detail="Status must be one of: 'approved', 'pending', 'blocked'.")
 
-    bp = None
-    if status_payload.blueprint:
-        try:
-            bp = UniversalComicBlueprint(**status_payload.blueprint)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Invalid blueprint data: {e}")
-
     DomainMemory.set_domain_status(
         domain_or_url=domain,
         status=new_status,
         sample_url=status_payload.sample_url,
         notes=status_payload.notes,
-        blueprint=bp
+        blueprint=status_payload.blueprint
     )
     return {
         "success": True,
@@ -610,19 +567,12 @@ async def update_domain_blueprint(
     current_user: dict = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Updates blueprint selectors, patterns, or notes for a domain."""
-    bp = None
-    if payload.blueprint:
-        try:
-            bp = UniversalComicBlueprint(**payload.blueprint)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Invalid blueprint data: {e}")
-
     DomainMemory.set_domain_status(
         domain_or_url=domain,
         status=payload.status or "approved",
         sample_url=payload.sample_url,
         notes=payload.notes,
-        blueprint=bp
+        blueprint=payload.blueprint
     )
     return {
         "success": True,

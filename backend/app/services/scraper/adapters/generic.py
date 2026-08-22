@@ -17,10 +17,11 @@ Implements the 10-tier architecture:
 """
 
 import re
+import json
 import time
 import logging
-from typing import Optional, List, Any
-from urllib.parse import urlparse
+from typing import Optional, List, Any, Dict, Set, Tuple
+from urllib.parse import urlparse, urljoin
 
 from .base import BaseSiteAdapter
 from ..context import ScrapeContext
@@ -38,9 +39,9 @@ from ..evidence import EvidenceSource
 from ..acquisition import HttpFetcher, BrowserFetcher
 from ..extraction import DomExtractor, EmbeddedStateExtractor, ApiExtractor
 from ..reader_detector import ReaderDetector
+from ..url_separator import UrlNormalizer
 from ..cache_manager import ScraperCacheManager
 from ..diagnostics import ScraperDiagnosticsLogger
-from ..ai import ScraperAIOrchestrator, UniversalComicBlueprint, DomainMemory
 from ..evaluator import AccessEvaluator, AccessStatus, ExtractionEvaluator, EscalationReason
 
 logger = logging.getLogger("sonikoma.services.scraper.adapters.generic")
@@ -58,29 +59,336 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
     def matches(cls, source_info: SourceInfo) -> bool:
         return True
 
-    def _apply_blueprint_metadata(self, context: ScrapeContext, bp: UniversalComicBlueprint, url: str):
-        """Applies blueprint metadata onto ScrapeContext."""
-        if bp.series_title: context.series_info.title = bp.series_title
-        if bp.series_slug: context.series_info.slug = bp.series_slug
-        if bp.author: context.series_info.author = bp.author
-        if bp.artist: context.series_info.artist = bp.artist
-        if bp.publisher: context.series_info.publisher = bp.publisher
-        if bp.status: context.series_info.status = bp.status
-        if bp.genres: context.series_info.genres = bp.genres
-        if bp.tags: context.series_info.tags = bp.tags
-        if bp.synopsis: context.series_info.description = bp.synopsis
-        if bp.cover_image_url: context.series_info.cover = bp.cover_image_url
-        if bp.original_language: context.series_info.language = bp.original_language
+    async def discover_series(
+        self,
+        series_url: str,
+        sort_by: str = "latest",
+        max_episodes: Optional[int] = None,
+        preferred_language: str = "en"
+    ) -> Optional[Dict[str, Any]]:
+        """Universal heuristic and Playwright series discovery fallback."""
+        raw_url = (series_url or "").strip()
+        url = UrlNormalizer.resolve_parent_series_url(raw_url) or raw_url
 
-        if bp.chapter_number is not None: context.chapter_info.number = bp.chapter_number
-        if bp.chapter_title: context.chapter_info.title = bp.chapter_title
-        if bp.previous_chapter_url: context.chapter_info.previous = bp.previous_chapter_url
-        if bp.next_chapter_url: context.chapter_info.next = bp.next_chapter_url
-        if bp.publication_date: context.chapter_info.published_at = bp.publication_date
-        context.checklist.chapter_found = bool(context.chapter_info.title or context.chapter_info.number is not None)
+        html, status, _ = await HttpFetcher.fetch_html(url)
+        access_status = AccessEvaluator.evaluate_response(status, html)
+
+        episodes: List[Dict[str, Any]] = []
+        seen_urls: Set[str] = set()
+        series_info = None
+
+        if access_status not in (AccessStatus.BOT_CHALLENGE, AccessStatus.RATE_LIMITED) and html:
+            soup = DomExtractor.get_soup(html)
+            series_info, _ = DomExtractor.extract_metadata(html, url)
+
+            if soup:
+                first_page_eps = self._extract_episodes_dynamically(soup, url)
+                episodes.extend(first_page_eps)
+                for e in first_page_eps: seen_urls.add(e["url"])
+
+                # Multi-page pagination traversal
+                if len(episodes) > 0:
+                    page_num = 2
+                    max_page_limit = 35
+                    while page_num <= max_page_limit:
+                        if max_episodes and len(episodes) >= max_episodes:
+                            break
+
+                        next_url = None
+                        next_link_elem = soup.select_one("a[rel='next'], a.next, a.next-page, #_nextPage, .pagination a.next")
+                        if next_link_elem and next_link_elem.get("href"):
+                            next_url = urljoin(url, next_link_elem.get("href"))
+                        elif "page=" in url or "_listUl" in str(soup):
+                            next_url = f"{url}&page={page_num}" if "?" in url else f"{url}?page={page_num}"
+
+                        if not next_url or next_url in seen_urls:
+                            break
+
+                        next_html, next_status, _ = await HttpFetcher.fetch_html(next_url)
+                        if not next_html or next_status != 200:
+                            break
+                        next_soup = DomExtractor.get_soup(next_html)
+                        next_eps = self._extract_episodes_dynamically(next_soup, next_url)
+                        if not next_eps:
+                            break
+                        for ep in next_eps:
+                            if ep["url"] not in seen_urls:
+                                seen_urls.add(ep["url"])
+                                episodes.append(ep)
+                        soup = next_soup
+                        page_num += 1
+
+        # Headless Browser Fallback if Cloudflare block or < 2 episodes found
+        if len(episodes) <= 1:
+            logger.info(f"[GenericAdaptiveAdapter] Triggering browser fallback for series discovery: {url}")
+            browser_html, intercepted_urls, _ = await BrowserFetcher.render_page(
+                url,
+                auto_scroll=True,
+                timeout_seconds=25.0
+            )
+            if browser_html:
+                b_soup = DomExtractor.get_soup(browser_html)
+                if b_soup:
+                    b_eps = self._extract_episodes_dynamically(b_soup, url)
+                    if len(b_eps) > len(episodes):
+                        episodes = b_eps
+
+                    # Breadcrumb / Parent Series Link Discovery on Single-Chapter Pages
+                    if len(episodes) <= 1:
+                        parent_anchor = b_soup.select_one("a.breadcrumb-item, .breadcrumbs a, a[rel='up'], a[href*='/series/'], a[href*='/manga/'], a:has-text('All Chapters'), a:has-text('Series')")
+                        if parent_anchor and parent_anchor.get("href"):
+                            parent_url = urljoin(url, parent_anchor.get("href"))
+                            if parent_url != url:
+                                p_html, _, _ = await BrowserFetcher.render_page(parent_url, auto_scroll=True)
+                                if p_html:
+                                    p_soup = DomExtractor.get_soup(p_html)
+                                    p_eps = self._extract_episodes_dynamically(p_soup, parent_url)
+                                    if len(p_eps) > len(episodes):
+                                        episodes = p_eps
+                                        url = parent_url
+
+                if not series_info or not series_info.title:
+                    b_series, _ = DomExtractor.extract_metadata(browser_html, url)
+                    if b_series:
+                        series_info = b_series
+
+        # Format output
+        series_title = (series_info.title if series_info else None) or "Comic Series"
+        cover_image = series_info.cover if series_info and hasattr(series_info, "cover") else (series_info.cover_image if series_info and hasattr(series_info, "cover_image") else "")
+
+        for ep in episodes:
+            if not ep.get("thumbnail") and cover_image:
+                ep["thumbnail"] = self.build_proxy_thumbnail_url(None, ep.get("url", url), cover_image)
+            if not ep.get("cover") and cover_image:
+                ep["cover"] = cover_image
+
+        sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
+
+        return {
+            "success": True,
+            "series_title": series_title,
+            "url": url,
+            "series": {
+                "title": series_title,
+                "author": series_info.author if series_info else "",
+                "genre": series_info.genres[0] if series_info and series_info.genres else "General",
+                "cover_image": cover_image,
+                "url": url
+            },
+            "episodes": sorted_eps,
+            "total_episodes": len(sorted_eps)
+        }
+
+    def _extract_episodes_dynamically(self, soup: Any, base_url: str) -> List[Dict[str, Any]]:
+        """Extracts episode links from HTML DOM and embedded JSON AST structures."""
+        if not soup:
+            return []
+
+        extracted: List[Dict[str, Any]] = []
+        seen_urls: Set[str] = set()
+
+        # 1. Embedded JSON AST Search (Next.js __NEXT_DATA__, window.__DATA__, GraphQL state)
+        for script in soup.find_all("script"):
+            txt = script.string or ""
+            if len(txt) < 50:
+                continue
+            if any(k in txt for k in ("__NEXT_DATA__", "chapters", "episodes", "chapterList", "itemListElement", "relay")):
+                try:
+                    json_str = txt
+                    if "__NEXT_DATA__" in txt:
+                        m = re.search(r'<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)</script>', str(script))
+                        if m:
+                            json_str = m.group(1)
+                    elif "=" in txt and "{" in txt:
+                        m = re.search(r'=\s*({[\s\S]*?});?$', txt.strip())
+                        if m:
+                            json_str = m.group(1)
+
+                    data = json.loads(json_str)
+
+                    def _scan_ast(obj):
+                        found = []
+                        if isinstance(obj, dict):
+                            if "edges" in obj and isinstance(obj["edges"], list):
+                                for edge in obj["edges"]:
+                                    node = edge.get("node", edge) if isinstance(edge, dict) else None
+                                    if isinstance(node, dict):
+                                        t = node.get("title") or node.get("name") or node.get("chapterNumber")
+                                        u = node.get("url") or node.get("slug") or node.get("path")
+                                        if u and t:
+                                            full_u = urljoin(base_url, f"/chapter/{u}" if not str(u).startswith("http") else str(u))
+                                            num_val, _ = self.extract_number_and_type(str(t))
+                                            found.append({"title": str(t), "url": full_u, "chapter_number": num_val, "number": str(num_val or "")})
+
+                            for k, v in obj.items():
+                                if any(w in k.lower() for w in ("chapter", "episode", "itemlist")):
+                                    items_to_process = v if isinstance(v, list) else (list(v.values()) if isinstance(v, dict) else [])
+                                    for item in items_to_process:
+                                        if isinstance(item, dict):
+                                            t = item.get("name") or item.get("title") or item.get("chapter_name") or item.get("episode_name") or item.get("chapter")
+                                            u = item.get("url") or item.get("href") or item.get("item") or item.get("slug") or item.get("path") or item.get("id")
+                                            thmb = item.get("thumbnail") or item.get("cover") or item.get("image")
+                                            dt = item.get("date") or item.get("created_at") or item.get("published_at") or item.get("updated_at")
+                                            is_locked = bool(item.get("is_locked") or item.get("locked") or item.get("price") or item.get("is_vip"))
+
+                                            if u and isinstance(u, (str, int)):
+                                                u_str = str(u)
+                                                full_u = urljoin(base_url, f"/chapter/{u_str}" if not u_str.startswith(("http", "/")) else u_str)
+                                                num_val, _ = self.extract_number_and_type(str(t or u_str))
+                                                found.append({
+                                                    "title": str(t or f"Chapter {num_val or len(found)+1}"),
+                                                    "url": full_u,
+                                                    "thumbnail": urljoin(base_url, str(thmb)) if thmb else None,
+                                                    "date": self.normalize_date(str(dt or "")),
+                                                    "chapter_number": num_val,
+                                                    "number": str(round(num_val) if num_val is not None and num_val.is_integer() else (num_val or "")),
+                                                    "is_locked": is_locked,
+                                                    "language": self.extract_language_tag(str(t or ""))
+                                                })
+                                else:
+                                    found.extend(_scan_ast(v))
+                        elif isinstance(obj, list):
+                            for item in obj:
+                                found.extend(_scan_ast(item))
+                        return found
+
+                    json_eps = _scan_ast(data)
+                    if len(json_eps) >= 2:
+                        for ch in json_eps:
+                            if ch["url"] not in seen_urls:
+                                seen_urls.add(ch["url"])
+                                extracted.append(ch)
+                        if extracted:
+                            return extracted
+                except Exception:
+                    pass
+
+        # 2. Check <select> Dropdown Options
+        for dropdown in soup.find_all("select"):
+            options = dropdown.find_all("option")
+            valid_opts = []
+            for opt in options:
+                val = (opt.get("value") or "").strip()
+                txt = opt.get_text(strip=True)
+                if val and (val.startswith("http") or val.startswith("/")):
+                    num_val, _ = self.extract_number_and_type(txt)
+                    if num_val is not None or "ch" in txt.lower():
+                        valid_opts.append({
+                            "title": txt or f"Chapter {len(valid_opts)+1}",
+                            "url": urljoin(base_url, val),
+                            "chapter_number": num_val,
+                            "number": str(round(num_val) if num_val is not None and num_val.is_integer() else (num_val or "")),
+                            "language": self.extract_language_tag(txt)
+                        })
+            if len(valid_opts) >= 2:
+                return valid_opts
+
+        # 3. Dynamic DOM Cluster Analysis
+        candidate_clusters = []
+        for parent in soup.find_all(["ul", "ol", "div", "tbody", "section"]):
+            links = parent.find_all("a", href=True)
+            if len(links) < 2:
+                continue
+
+            parent_header = ""
+            prev_heading = parent.find_previous(["h1", "h2", "h3", "h4", "h5", "div"])
+            if prev_heading:
+                h_txt = prev_heading.get_text(strip=True).lower()
+                if any(w in h_txt for w in ("season", "volume", "vol.", "vol ")):
+                    parent_header = prev_heading.get_text(strip=True)[:40]
+            if not parent_header:
+                inner_heading = parent.find(["h1", "h2", "h3", "h4", "h5"])
+                if inner_heading:
+                    h_txt = inner_heading.get_text(strip=True).lower()
+                    if any(w in h_txt for w in ("season", "volume", "vol.", "vol ")):
+                        parent_header = inner_heading.get_text(strip=True)[:40]
+
+            chapter_like_count = 0
+            cluster_items = []
+            for a in links:
+                href = a.get("href", "").strip()
+                if not href or href == "#" or href.startswith("javascript:"):
+                    continue
+                full_url = urljoin(base_url, href)
+                txt = a.get_text(strip=True)
+                if not txt or len(txt) > 90:
+                    continue
+
+                num_val, _ = self.extract_number_and_type(txt)
+                is_ch_link = (num_val is not None) or any(w in href.lower() for w in ("/chapter", "/episode", "/read", "-ch-", "-chapter-"))
+
+                if is_ch_link:
+                    chapter_like_count += 1
+                    item_container = a.parent if a.parent else a
+                    is_locked = False
+                    if item_container:
+                        is_locked = bool(item_container.find(class_=re.compile(r"lock|coin|paid|vip|fastpass", re.I)))
+
+                    date_str = ""
+                    if item_container:
+                        date_el = item_container.select_one(".chapter-release-date, .post-on, .chapter-date, .date, .time, i, span.time")
+                        if date_el:
+                            date_str = self.normalize_date(date_el.get_text(strip=True))
+
+                    thmb_src = None
+                    if item_container:
+                        img_el = item_container.find("img")
+                        if img_el:
+                            thmb_src = img_el.get("data-src") or img_el.get("src")
+                            if thmb_src:
+                                thmb_src = urljoin(base_url, thmb_src)
+
+                    cluster_items.append({
+                        "title": txt or f"Chapter {num_val or len(cluster_items)+1}",
+                        "url": full_url,
+                        "thumbnail": thmb_src,
+                        "date": date_str,
+                        "chapter_number": num_val,
+                        "number": str(round(num_val) if num_val is not None and num_val.is_integer() else (num_val or "")),
+                        "volume": parent_header if parent_header else None,
+                        "is_locked": is_locked,
+                        "language": self.extract_language_tag(txt)
+                    })
+
+            if chapter_like_count >= 2:
+                ratio = chapter_like_count / max(1, len(links))
+                tag_bonus = 3.0 if parent.name in ("ul", "ol", "tbody") else 0.0
+                score = (chapter_like_count * 2.0) + (ratio * 10.0) + tag_bonus
+                candidate_clusters.append((score, cluster_items))
+
+        if candidate_clusters:
+            candidate_clusters.sort(key=lambda x: x[0], reverse=True)
+            best_items = candidate_clusters[0][1]
+            for item in best_items:
+                if item["url"] not in seen_urls:
+                    seen_urls.add(item["url"])
+                    extracted.append(item)
+            if extracted:
+                return extracted
+
+        # 4. Anchor Sweep Fallback
+        for a in soup.find_all("a", href=True):
+            href = urljoin(base_url, a.get("href"))
+            if href in seen_urls or "#" in href:
+                continue
+            txt = a.get_text(strip=True)
+            if not txt or len(txt) > 80:
+                continue
+            num_val, _ = self.extract_number_and_type(txt)
+            if num_val is not None:
+                seen_urls.add(href)
+                extracted.append({
+                    "title": txt,
+                    "url": href,
+                    "chapter_number": num_val,
+                    "number": str(round(num_val) if num_val.is_integer() else num_val),
+                    "language": self.extract_language_tag(txt)
+                })
+
+        return extracted
 
     async def scrape(self, context: ScrapeContext) -> ChapterResult:
-        """Executes the complete self-adaptive extraction workflow."""
+        """Executes the complete deterministic self-adaptive extraction workflow."""
         url = context.normalized_url or context.url
         start_time = time.time()
         ScraperDiagnosticsLogger.log_scraper_start(url)
@@ -97,17 +405,10 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             cached_result.job_id = context.job_id
             return cached_result
 
-        # Check existing learned strategy in DomainMemory
-        active_strategy = DomainMemory.get_strategy(url)
-        if active_strategy and active_strategy.blueprint:
-            logger.info(f"[GenericAdaptiveAdapter] DomainMemory strategy hit for {url}: {active_strategy.strategy_id} (confidence: {active_strategy.confidence})")
-            self._apply_blueprint_metadata(context, active_strategy.blueprint, url)
-
         # ---------------------------------------------------------------------
         # Tier 1: Static HTTP Acquisition
         # ---------------------------------------------------------------------
         t0 = time.time()
-        # Check L1 HTML cache
         html = ScraperCacheManager.get_l1_html(url) if not context.config.bypass_cache else None
         status_code = 200 if html else None
 
@@ -153,32 +454,20 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
         if html:
             soup = DomExtractor.get_soup(html)
 
-            # Strategy A: Learned blueprint if available
-            if active_strategy and active_strategy.blueprint and active_strategy.blueprint.container_selector:
-                bp_candidates = DomExtractor.extract_with_selector(
-                    soup,
-                    active_strategy.blueprint.container_selector,
-                    active_strategy.blueprint.image_src_attribute or "src",
-                    url
-                )
-                for cand in bp_candidates:
+            # Strategy A: Reader container scan
+            reader_info = ReaderDetector.detect_reader(soup, url)
+            if reader_info.is_valid and reader_info.container_element:
+                dom_candidates = DomExtractor.extract_from_container(reader_info.container_element, url, reader_info.primary_attribute)
+                for cand in dom_candidates:
                     context.candidate_images.append(cand)
 
-            # Strategy B: Reader container scan
-            if not context.candidate_images:
-                reader_info = ReaderDetector.detect_reader(soup, url)
-                if reader_info.is_valid and reader_info.container_element:
-                    dom_candidates = DomExtractor.extract_from_container(reader_info.container_element, url, reader_info.primary_attribute)
-                    for cand in dom_candidates:
-                        context.candidate_images.append(cand)
-
-            # Strategy C: Universal DOM Candidate sweep
+            # Strategy B: Universal DOM Candidate sweep
             if not context.candidate_images:
                 all_dom = DomExtractor.extract_candidates(soup, url)
                 for cand in all_dom:
                     context.candidate_images.append(cand)
 
-            # Strategy D: Embedded State extraction
+            # Strategy C: Embedded State extraction
             state_candidates = EmbeddedStateExtractor.extract_state_images(html, url)
             for cand in state_candidates:
                 context.candidate_images.append(cand)
@@ -195,46 +484,10 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
 
         # High Confidence: Complete deterministic scrape
         if eval_report.is_acceptable:
-            DomainMemory.record_success(url)
             return self._finalize_and_cache(context, start_time)
 
         # ---------------------------------------------------------------------
-        # Tier 4: Low Confidence -> AI Planning Engine (Gemini 2.5 Flash)
-        # ---------------------------------------------------------------------
-        # If an existing strategy failed, record failure to self-heal
-        if active_strategy:
-            DomainMemory.record_failure(url)
-
-        if html and eval_report.escalation_reason not in (EscalationReason.DYNAMIC_JS_REQUIRED, EscalationReason.BOT_CHALLENGE_DETECTED):
-            logger.info(f"[GenericAdaptiveAdapter] Low confidence ({eval_report.confidence:.2f}). Invoking Gemini Planner with DOM digest.")
-            new_blueprint = await ScraperAIOrchestrator.analyze_page(html, url)
-
-            if new_blueprint:
-                self._apply_blueprint_metadata(context, new_blueprint, url)
-                DomainMemory.save_blueprint(url, new_blueprint)
-
-                # Re-extract using validated blueprint
-                soup = DomExtractor.get_soup(html)
-                if new_blueprint.container_selector and soup:
-                    re_candidates = DomExtractor.extract_with_selector(
-                        soup,
-                        new_blueprint.container_selector,
-                        new_blueprint.image_src_attribute or "src",
-                        url
-                    )
-                    if re_candidates:
-                        context.candidate_images.clear()
-                        for c in re_candidates:
-                            context.candidate_images.append(c)
-
-                        # Re-evaluate
-                        re_eval = ExtractionEvaluator.evaluate(context.candidate_images, html_content=html)
-                        if re_eval.is_acceptable:
-                            DomainMemory.record_success(url)
-                            return self._finalize_and_cache(context, start_time)
-
-        # ---------------------------------------------------------------------
-        # Tier 5: BrowserPool Worker Fallback (Playwright with Auto-Scroll)
+        # Tier 4: BrowserPool Worker Fallback (Playwright with Auto-Scroll)
         # ---------------------------------------------------------------------
         logger.info(f"[GenericAdaptiveAdapter] Escalating to BrowserPool Playwright worker for: {url}")
         return await self._execute_browser_worker(context, url, start_time, reason=eval_report.escalation_reason.value)
@@ -296,13 +549,6 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
         context.candidate_images.clear()
         for cand in combined_cands:
             context.candidate_images.append(cand)
-
-        # Final evaluation of browser extraction
-        b_eval = ExtractionEvaluator.evaluate(context.candidate_images, html_content=browser_html)
-        if b_eval.is_acceptable:
-            DomainMemory.record_success(url)
-        else:
-            DomainMemory.record_failure(url)
 
         return self._finalize_and_cache(context, start_time)
 

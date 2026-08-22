@@ -1,23 +1,57 @@
 """
-backend/app/services/scraper/normalizer.py
+backend/app/services/scraper/url_separator.py
 ─────────────────────────────────────────────────────────────────────────────
-URL Normalization, Canonicalization, and Site/Platform Analysis.
+Dynamic Universal Comic & Manga URL Separator, Normalizer, & Site Analyzer.
+Deconstructs, normalizes, and decomposes ANY comic/manga/manhwa URL into its
+constituent parts (series URL, chapter URL, domain, platform, slugs, IDs, chapter numbers,
+and recommended actions) WITHOUT hardcoded URL constraints.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import re
-from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
-from typing import Optional, Dict, Any, Tuple
-from .models import SourceInfo
+import logging
+from typing import Dict, Any, Optional, List, Tuple
+from urllib.parse import urlparse, urlunparse, parse_qs, urlencode, urljoin
+
+from schemas.scraper import SeparateUrlResponse, SourceInfo
+
+logger = logging.getLogger("sonikoma.services.scraper.url_separator")
 
 
-class UrlNormalizer:
-    """Normalizes and canonicalizes input URLs for scraper consumption."""
+class UniversalUrlSeparator:
+    """
+    Universal Dynamic URL Deconstructor & Normalizer.
+    Handles all comic/manhwa/manga platforms and scanlation formats.
+    """
 
-    TRACKING_PARAMS = {
+    TRACKING_QUERY_PARAMS = {
         "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
-        "fbclid", "gclid", "_ga", "_gl", "ref", "source", "spm"
+        "fbclid", "gclid", "yclid", "_ga", "_gl", "ref", "source", "aff",
+        "spm", "from", "share", "timestamp", "session_id"
     }
+
+    SERIES_SEGMENT_KEYWORDS = {
+        "series", "manga", "manhwa", "manhua", "comic", "comics", "webtoon",
+        "webtoons", "title", "titles", "comic-detail", "detail", "book", "show"
+    }
+
+    CHAPTER_SEGMENT_KEYWORDS = {
+        "chapter", "chapters", "episode", "episodes", "ep", "ch", "chap",
+        "viewer", "reader", "read", "view"
+    }
+
+    # Generic chapter pattern matches: chapter-123, ep_45, ch-10.5, c100, etc.
+    CHAPTER_PATH_REGEX = re.compile(
+        r'[-_/]?(?:chapter|episode|ep|ch|chap|c)[-_/]?(\d+(?:\.\d+)?)',
+        re.IGNORECASE
+    )
+
+    READER_TOKEN_PATTERN = re.compile(
+        r"^(?:chapter|episode|ep|ch|c|chap|read|viewer|volume|vol)[-_]?\d*.*$|"
+        r"^[-_]?(?:chapter|episode|ep|ch|c)[-_]\d+.*$|"
+        r"^\d+(?:\.\d+)?$",
+        re.IGNORECASE
+    )
 
     @classmethod
     def extract_first_url(cls, raw_input: str) -> str:
@@ -36,7 +70,6 @@ class UrlNormalizer:
             return ""
 
         if not url.startswith(("http://", "https://", "file://", "data:image/")):
-            # If scheme is missing, assume https://
             if "." in url and not url.startswith("/"):
                 url = "https://" + url
 
@@ -45,15 +78,13 @@ class UrlNormalizer:
             if not parsed.scheme or not parsed.netloc:
                 return url
 
-            # Filter out tracking query params
             query_dict = parse_qs(parsed.query, keep_blank_values=True)
             clean_query_dict = {
                 k: v for k, v in query_dict.items()
-                if k.lower() not in cls.TRACKING_PARAMS
+                if k.lower() not in cls.TRACKING_QUERY_PARAMS
             }
 
             clean_query = urlencode(clean_query_dict, doseq=True)
-            # Remove trailing slash from path if path is not just '/'
             clean_path = parsed.path
             if len(clean_path) > 1 and clean_path.endswith("/"):
                 clean_path = clean_path[:-1]
@@ -70,11 +101,13 @@ class UrlNormalizer:
         except Exception:
             return url
 
+    clean_canonical_url = normalize_url
+
     @classmethod
     def resolve_parent_series_url(cls, raw_url: str) -> str:
         """
         Dynamically decomposes and canonicalizes any reader or chapter URL into its parent
-        series/catalog URL using semantic path token decomposition (zero hardcoding).
+        series/catalog URL using semantic path token decomposition.
         """
         normalized = cls.normalize_url(raw_url)
         if not normalized:
@@ -88,9 +121,6 @@ class UrlNormalizer:
             if not path_segments:
                 return normalized
 
-            # 1. Separate identifying vs transient query parameters
-            # Identifying params relate to the series (e.g. title_no, series_id, id)
-            # Transient params relate to reading progress (e.g. episode_no, chapter_no, progress, page)
             identifying_keys = {"title_no", "series_id", "comic_id", "manga_id", "id", "title"}
             transient_keys = {"episode_no", "chapter_no", "ch", "ep", "progress", "page", "p", "read_pos", "scroll"}
 
@@ -99,7 +129,7 @@ class UrlNormalizer:
                 if k.lower() in identifying_keys or (k.lower() not in transient_keys and "episode" not in k.lower() and "chapter" not in k.lower())
             }
 
-            # 2. Dynamic Viewer-to-Catalog segment normalization (e.g. /viewer -> /list)
+            # Viewer-to-Catalog normalization (e.g. /viewer -> /list)
             if path_segments[-1].lower() in ("viewer", "reader", "read", "view"):
                 parent_segments = path_segments[:-1] + ["list"]
                 return urlunparse((
@@ -111,20 +141,11 @@ class UrlNormalizer:
                     ""
                 ))
 
-            # 3. Dynamic Path Pruning from Right-to-Left
-            # Detect chapter/reader segments and prune back to parent series container
-            reader_token_pattern = re.compile(
-                r"^(?:chapter|episode|ep|ch|c|chap|read|viewer|volume|vol)[-_]?\d*.*$|"
-                r"^[-_]?(?:chapter|episode|ep|ch|c)[-_]\d+.*$|"
-                r"^\d+(?:\.\d+)?$",
-                re.IGNORECASE
-            )
-
+            # Dynamic Path Pruning from Right-to-Left
             pruned_segments = list(path_segments)
-            while pruned_segments and reader_token_pattern.match(pruned_segments[-1]):
+            while pruned_segments and cls.READER_TOKEN_PATTERN.match(pruned_segments[-1]):
                 pruned_segments.pop()
 
-            # If pruned segments removed the chapter layer, return reconstructed parent URL
             if pruned_segments and len(pruned_segments) < len(path_segments):
                 return urlunparse((
                     parsed.scheme,
@@ -135,7 +156,7 @@ class UrlNormalizer:
                     ""
                 ))
 
-            # 4. In-segment suffix stripping (e.g. /series/slug-chapter-10 -> /series/slug)
+            # In-segment suffix stripping (e.g. /series/slug-chapter-10 -> /series/slug)
             last_seg = path_segments[-1]
             cleaned_last_seg = re.sub(r"[-_](?:chapter|episode|ep|ch|c)[-_]?\d+.*$", "", last_seg, flags=re.IGNORECASE)
             if cleaned_last_seg != last_seg and len(cleaned_last_seg) > 1:
@@ -154,13 +175,13 @@ class UrlNormalizer:
             return normalized
 
     @classmethod
-    def separate_url(cls, raw_url: str) -> Dict[str, Any]:
+    def separate(cls, raw_url: str) -> Dict[str, Any]:
         """
-        Dynamically deconstructs and separates any comic/manga/webtoon URL into its
-        constituent entities (domain, platform, series URL, chapter URL, title/chapter slug, IDs).
+        Deconstructs any given comic/manhwa/manga URL into structured components.
         """
         raw_trimmed = (raw_url or "").strip()
         canonical = cls.normalize_url(raw_trimmed)
+
         if not canonical:
             return {
                 "success": False,
@@ -174,77 +195,124 @@ class UrlNormalizer:
                 "domain": "",
                 "title_slug": None,
                 "title_id": None,
+                "series_slug": None,
+                "series_id": None,
                 "chapter_slug": None,
                 "chapter_number": None,
                 "title_no": None,
+                "target_adapter": "GenericAdaptiveAdapter",
                 "recommended_action": "none",
                 "supported_actions": []
             }
 
         parsed = urlparse(canonical)
-        domain = parsed.netloc.lower()
+        domain = parsed.netloc.lower().split(":")[0]
+        if domain.startswith("www."):
+            domain = domain[4:]
+
         path = parsed.path
         query = parse_qs(parsed.query)
-
-        source_info = SiteAnalyzer.analyze(canonical)
-        series_url = cls.resolve_parent_series_url(canonical)
-        is_chapter = source_info.is_chapter_url
-
-        # Extract title_no / series identifiers dynamically
-        title_no = None
-        for k, v in query.items():
-            if k.lower() in ("title_no", "series_id", "comic_id", "manga_id", "id"):
-                title_no = v[0]
-                break
-
-        # Dynamic title slug and numeric ID extraction from path
-        title_slug = None
-        title_id = None
         path_segments = [s for s in path.split("/") if s]
 
-        for idx, seg in enumerate(path_segments):
-            if seg.lower() in ("title", "series", "manga", "comic", "manhwa", "webtoon", "comic-detail") and idx + 1 < len(path_segments):
-                title_slug = path_segments[idx + 1]
-                num_match = re.match(r"^(\d+)", title_slug)
-                if num_match:
-                    title_id = num_match.group(1)
+        # 1. Resolve Target Adapter and Platform dynamically
+        target_adapter_name = "GenericAdaptiveAdapter"
+        platform_name = "generic"
+
+        try:
+            from .adapters.registry import AdapterRegistry
+            temp_source = SourceInfo(
+                original_url=raw_trimmed,
+                canonical_url=canonical,
+                domain=domain,
+                platform="generic"
+            )
+            adapter = AdapterRegistry.get_adapter(temp_source)
+            target_adapter_name = adapter.__class__.__name__
+            platform_name = getattr(adapter, "name", domain.split(".")[0]).lower().replace(" ", "_")
+        except Exception:
+            domain_parts = [p for p in domain.split(".") if p not in ("com", "net", "org", "to", "io", "app", "me", "co", "xyz")]
+            platform_name = domain_parts[0] if domain_parts else "generic"
+
+        # 2. Extract series ID from query parameters
+        series_id = None
+        for q_key in ("title_no", "series_id", "comic_id", "manga_id", "titleId", "id", "book_id"):
+            if q_key in query and query[q_key]:
+                series_id = query[q_key][0]
                 break
 
-        if not title_slug and path_segments:
-            # Fallback: first non-generic segment
-            candidate = [s for s in path_segments if s.lower() not in ("en", "kr", "jp", "cn", "fr", "es", "de", "viewer", "reader", "read", "list")]
-            if candidate:
-                title_slug = candidate[0]
-                num_match = re.match(r"^(\d+)", title_slug)
-                if num_match:
-                    title_id = num_match.group(1)
+        # 3. Detect chapter indicators in path and query
+        is_chapter = False
+        chapter_number: Optional[str] = None
+        chapter_slug: Optional[str] = None
 
-        # Dynamic chapter slug and number extraction
-        chapter_slug = None
-        chapter_number = None
-
-        for idx, seg in enumerate(path_segments):
-            if seg.lower() in ("chapter", "episode", "ep", "ch", "viewer", "read") and idx + 1 < len(path_segments):
-                chapter_slug = path_segments[idx + 1]
-                num_match = re.search(r"(\d+(?:\.\d+)?)", chapter_slug)
-                if num_match:
-                    chapter_number = num_match.group(1)
-                break
-
-        if not chapter_number:
-            if query.get("episode_no"):
-                chapter_number = query.get("episode_no")[0]
+        for ch_key in ("episode_no", "chapter_no", "ep_no", "episodeNo", "chapterNo", "ch", "ep"):
+            if ch_key in query and query[ch_key]:
+                is_chapter = True
+                chapter_number = query[ch_key][0]
                 chapter_slug = f"episode-{chapter_number}"
-            elif query.get("chapter_no"):
-                chapter_number = query.get("chapter_no")[0]
-                chapter_slug = f"chapter-{chapter_number}"
-            elif path_segments:
-                suffix_num = re.search(r"[-_](?:chapter|episode|ep|ch|c)[-_]?(\d+(?:\.\d+)?)", path_segments[-1], re.IGNORECASE)
-                if suffix_num:
-                    chapter_number = suffix_num.group(1)
-                    chapter_slug = f"chapter-{chapter_number}"
+                break
 
+        # Check path for chapter keywords and patterns
+        chapter_seg_idx = -1
+        for idx, seg in enumerate(path_segments):
+            seg_lower = seg.lower()
+            if seg_lower in cls.CHAPTER_SEGMENT_KEYWORDS:
+                is_chapter = True
+                chapter_seg_idx = idx
+                if idx + 1 < len(path_segments):
+                    chapter_slug = path_segments[idx + 1]
+                    m = re.search(r"(\d+(?:\.\d+)?)", chapter_slug)
+                    if m:
+                        chapter_number = m.group(1)
+                break
+            else:
+                m = cls.CHAPTER_PATH_REGEX.search(seg)
+                if m:
+                    is_chapter = True
+                    chapter_seg_idx = idx
+                    chapter_number = m.group(1)
+                    chapter_slug = seg
+                    break
+
+        if "viewer" in path.lower() or "reader" in path.lower():
+            is_chapter = True
+
+        # 4. Extract series title slug and ID from path
+        series_slug = None
+        for idx, seg in enumerate(path_segments):
+            seg_lower = seg.lower()
+            if seg_lower in cls.SERIES_SEGMENT_KEYWORDS and idx + 1 < len(path_segments):
+                series_slug = path_segments[idx + 1]
+                num_m = re.match(r"^(\d+)", series_slug)
+                if num_m and not series_id:
+                    series_id = num_m.group(1)
+                break
+
+        if not series_slug and path_segments:
+            non_generic = [
+                s for s in path_segments
+                if s.lower() not in ("en", "kr", "jp", "cn", "fr", "es", "de", "viewer", "reader", "read", "list", "index")
+                and not cls.CHAPTER_PATH_REGEX.search(s)
+            ]
+            if non_generic:
+                series_slug = non_generic[0]
+                num_m = re.match(r"^(\d+)", series_slug)
+                if num_m and not series_id:
+                    series_id = num_m.group(1)
+
+        # 5. Resolve Parent Series URL and Clean Chapter URL
+        series_url = cls.resolve_parent_series_url(canonical)
         chapter_url = canonical if is_chapter else None
+
+        is_series = not is_chapter or (series_url == canonical)
+
+        # Recommended action based on detected structure
+        if is_chapter:
+            recommended_action = "import_chapter"
+        else:
+            recommended_action = "import_episodes"
+
+        supported_actions = ["import_chapter", "import_episodes", "batch_scrape"]
 
         return {
             "success": True,
@@ -253,17 +321,22 @@ class UrlNormalizer:
             "series_url": series_url,
             "chapter_url": chapter_url,
             "is_chapter_url": is_chapter,
-            "is_series_url": not is_chapter or (series_url == canonical),
-            "platform": source_info.platform,
+            "is_series_url": is_series,
+            "platform": platform_name,
             "domain": domain,
-            "title_slug": title_slug,
-            "title_id": title_id or title_no,
+            "title_slug": series_slug,
+            "title_id": series_id,
+            "series_slug": series_slug,
+            "series_id": series_id,
             "chapter_slug": chapter_slug,
             "chapter_number": chapter_number,
-            "title_no": title_no,
-            "recommended_action": "scrape_chapter" if is_chapter else "scrape_series",
-            "supported_actions": ["scrape_series", "scrape_chapter"]
+            "title_no": series_id,
+            "target_adapter": target_adapter_name,
+            "recommended_action": recommended_action,
+            "supported_actions": supported_actions
         }
+
+    separate_url = separate
 
 
 class SiteAnalyzer:
@@ -271,13 +344,13 @@ class SiteAnalyzer:
 
     CHAPTER_PATH_INDICATORS = {
         "episode", "episodes", "chapter", "chapters", "viewer",
-        "read", "ch-", "ep-", "c-", "chap"
+        "reader", "read", "ch-", "ep-", "c-", "chap"
     }
 
     @classmethod
     def analyze(cls, raw_url: str) -> SourceInfo:
         """Performs dynamic site analysis on the provided URL using registered adapters and generic heuristics."""
-        canonical_url = UrlNormalizer.normalize_url(raw_url)
+        canonical_url = UniversalUrlSeparator.normalize_url(raw_url)
         parsed = urlparse(canonical_url)
         domain = parsed.netloc.lower()
 
@@ -293,7 +366,6 @@ class SiteAnalyzer:
         except Exception:
             pass
 
-        # Fallback to dynamic SLD extraction (e.g. comic-walker.com -> comic-walker)
         if platform == "generic" and domain:
             domain_parts = [p for p in domain.split(".") if p not in ("www", "m", "cdn", "api", "static", "com", "net", "org", "to", "io", "app", "me", "co")]
             if domain_parts:
@@ -313,7 +385,6 @@ class SiteAnalyzer:
         elif "viewer" in path_lower or "reader" in path_lower:
             is_chapter = True
 
-        # Auth requirement hints
         requires_auth = False
         if any(term in path_lower for term in ["locked", "coin", "premium", "paywall"]):
             requires_auth = True
@@ -326,3 +397,7 @@ class SiteAnalyzer:
             is_chapter_url=is_chapter,
             requires_auth=requires_auth
         )
+
+
+UrlNormalizer = UniversalUrlSeparator
+UrlSeparator = UniversalUrlSeparator

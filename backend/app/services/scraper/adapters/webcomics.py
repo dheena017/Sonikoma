@@ -28,7 +28,7 @@ Strategy:
 import re
 import time
 import logging
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from urllib.parse import urlparse, urljoin
 
 from .base import BaseSiteAdapter
@@ -80,6 +80,89 @@ class WebComicsAdapter(BaseSiteAdapter):
     def matches(cls, source_info: SourceInfo) -> bool:
         domain = source_info.domain.lower()
         return any(d in domain for d in cls.supported_domains)
+
+    async def discover_series(
+        self,
+        series_url: str,
+        sort_by: str = "latest",
+        max_episodes: Optional[int] = None,
+        preferred_language: str = "en"
+    ) -> Optional[Dict[str, Any]]:
+        """Crawls full series metadata and chapter listing for WebComics."""
+        raw_url = (series_url or "").strip()
+        parsed = urlparse(raw_url)
+        clean_url = raw_url
+
+        # If user passed a chapter URL /en/genre/slug/1/comic_id -> resolve series URL /en/comic/slug/comic_id
+        m = _READER_PATH_RE.match(parsed.path)
+        if m:
+            lang = m.group("lang")
+            slug = m.group("slug")
+            comic_id = m.group("comic_id")
+            clean_url = f"https://www.webcomicsapp.com/{lang}/comic/{slug}/{comic_id}"
+
+        headers = {"Referer": "https://www.webcomicsapp.com/"}
+        html, status, _ = await HttpFetcher.fetch_html(clean_url, headers=headers)
+        soup = DomExtractor.get_soup(html) if html else None
+
+        if not html or (soup and not soup.select(".chapter-item, a[href*='/comic/']")):
+            b_html, _, _ = await BrowserFetcher.render_page(clean_url, auto_scroll=True)
+            if b_html:
+                html = b_html
+                soup = DomExtractor.get_soup(b_html)
+
+        if not soup:
+            return None
+
+        series_meta, _ = DomExtractor.extract_metadata(html or "", clean_url)
+        title_el = soup.select_one("h1.comic-title, h1, .detail-title")
+        series_title = title_el.get_text(strip=True) if title_el else (series_meta.title or "WebComics Series")
+
+        cover_el = soup.select_one(".comic-cover img, .cover-img, meta[property='og:image']")
+        cover_image = ""
+        if cover_el:
+            cover_image = cover_el.get("content") or cover_el.get("data-src") or cover_el.get("src") or ""
+
+        episodes: List[Dict[str, Any]] = []
+        seen = set()
+
+        for a in soup.select("a[href*='/genre/'], a[href*='/reader/'], .chapter-item a, a.chapter-link"):
+            href = a.get("href", "").strip()
+            if not href or href == "#":
+                continue
+            full_url = urljoin(clean_url, href)
+            if full_url in seen:
+                continue
+            seen.add(full_url)
+
+            txt = a.get_text(strip=True)
+            num_val, _ = self.extract_number_and_type(txt)
+
+            episodes.append({
+                "title": txt or f"Chapter {num_val or len(episodes)+1}",
+                "url": full_url,
+                "chapter_number": num_val,
+                "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
+                "date": "",
+                "thumbnail": self.build_proxy_thumbnail_url(None, full_url, cover_image),
+                "cover": cover_image,
+                "language": "en",
+            })
+
+        sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
+
+        return {
+            "success": True,
+            "series_title": series_title,
+            "url": clean_url,
+            "series": {
+                "title": series_title,
+                "cover_image": cover_image,
+                "url": clean_url
+            },
+            "episodes": sorted_eps,
+            "total_episodes": len(sorted_eps)
+        }
 
     # ── Main entry ────────────────────────────────────────────────────────────
 
