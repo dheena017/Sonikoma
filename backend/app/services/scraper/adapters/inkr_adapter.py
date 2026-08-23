@@ -111,9 +111,12 @@ class InkrAdapter(BaseSiteAdapter):
                 else:
                     final_cover = ch_thumb or cover_image
 
+                num_val, _ = self.extract_number_and_type(ch_title)
                 chapters.append({
                     "title": ch_title,
                     "url": href,
+                    "chapter_number": num_val,
+                    "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(chapters)+1)),
                     "cover": final_cover,
                     "cover_image": final_cover,
                     "thumbnail": final_cover
@@ -122,11 +125,19 @@ class InkrAdapter(BaseSiteAdapter):
             return {
                 "success": True,
                 "title": series_title,
+                "series_title": series_title,
                 "author": "",
                 "description": description,
                 "cover_image": cover_image,
                 "cover": cover_image,
                 "url": title_url,
+                "series": {
+                    "title": series_title,
+                    "author": "",
+                    "description": description,
+                    "cover_image": cover_image,
+                    "url": title_url
+                },
                 "chapters": chapters,
                 "episodes": chapters,
                 "total_chapters": len(chapters),

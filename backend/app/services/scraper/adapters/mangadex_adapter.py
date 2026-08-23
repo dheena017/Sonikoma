@@ -132,14 +132,16 @@ class MangaDexAdapter(BaseSiteAdapter):
                         num_val = float(c_num) if c_num.replace(".", "").isdigit() else (idx + 1)
                         ch_url = f"https://mangadex.org/chapter/{ch['id']}"
 
+                        ep_cover = self.build_proxy_thumbnail_url(cover_url, ch_url, cover_url)
                         episodes.append({
                             "episode_no": idx + 1,
                             "number": str(c_num),
                             "chapter_number": num_val,
                             "title": c_attrs.get("title") or f"Chapter {c_num}",
                             "url": ch_url,
-                            "thumbnail": self.build_proxy_thumbnail_url(cover_url, ch_url, cover_url),
-                            "cover": cover_url,
+                            "cover_image": ep_cover or cover_url,
+                            "thumbnail": ep_cover or cover_url,
+                            "cover": ep_cover or cover_url,
                             "date": (c_attrs.get("publishAt") or "").split("T")[0],
                             "language": preferred_language
                         })
@@ -148,16 +150,24 @@ class MangaDexAdapter(BaseSiteAdapter):
 
                 return {
                     "success": True,
+                    "title": title_str,
                     "series_title": title_str,
                     "title_no": manga_id,
                     "url": f"https://mangadex.org/title/{manga_id}",
+                    "author": author or artist or "",
+                    "description": synopsis or "",
+                    "cover_image": cover_url,
+                    "cover": cover_url,
                     "series": {
                         "title": title_str,
-                        "author": author or artist,
-                        "synopsis": synopsis,
+                        "author": author or artist or "",
+                        "description": synopsis or "",
+                        "synopsis": synopsis or "",
                         "cover_image": cover_url,
                         "url": f"https://mangadex.org/title/{manga_id}"
                     },
+                    "chapters": sorted_eps,
+                    "total_chapters": len(sorted_eps),
                     "episodes": sorted_eps,
                     "total_episodes": len(sorted_eps)
                 }

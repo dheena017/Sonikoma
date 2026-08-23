@@ -115,14 +115,16 @@ class BatoAdapter(BaseSiteAdapter):
             date_el = parent_div.select_one(".extra i, .date, .time, i") if parent_div else None
             date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
 
+            ep_cover = self.build_proxy_thumbnail_url(None, full_url, cover_image)
             episodes.append({
                 "title": txt or f"Chapter {num_val or len(episodes)+1}",
                 "url": full_url,
                 "chapter_number": num_val,
                 "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                 "date": date_str,
-                "thumbnail": self.build_proxy_thumbnail_url(None, full_url, cover_image),
-                "cover": cover_image,
+                "cover_image": ep_cover or cover_image,
+                "thumbnail": ep_cover or cover_image,
+                "cover": ep_cover or cover_image,
                 "language": self.extract_language_tag(txt),
             })
 
@@ -130,14 +132,22 @@ class BatoAdapter(BaseSiteAdapter):
 
         return {
             "success": True,
+            "title": series_title,
             "series_title": series_title,
             "url": clean_url,
+            "author": author if 'author' in locals() else "",
+            "description": description if 'description' in locals() else "",
+            "cover_image": cover_image,
+            "cover": cover_image,
             "series": {
                 "title": series_title,
-                "author": author,
+                "author": author if 'author' in locals() else "",
+                "description": description if 'description' in locals() else "",
                 "cover_image": cover_image,
                 "url": clean_url
             },
+            "chapters": sorted_eps,
+            "total_chapters": len(sorted_eps),
             "episodes": sorted_eps,
             "total_episodes": len(sorted_eps)
         }

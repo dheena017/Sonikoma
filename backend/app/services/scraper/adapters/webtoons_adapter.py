@@ -233,14 +233,16 @@ class WebtoonsAdapter(BaseSiteAdapter):
                             num_val = float(ep_no_str)
                         except ValueError:
                             pass
+                    ep_cover = self.build_proxy_thumbnail_url(thmb_src, ep_url, cover_image)
                     episodes.append({
                         "episode_no": len(episodes) + 1,
-                        "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or ep_no_str or len(episodes)+1)),
                         "chapter_number": num_val,
+                        "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or ep_no_str or len(episodes)+1)),
                         "title": ep_title or f"Episode {ep_no_str or len(episodes)+1}",
                         "url": ep_url,
-                        "thumbnail": self.build_proxy_thumbnail_url(thmb_src, ep_url, cover_image),
-                        "cover": cover_image,
+                        "cover_image": ep_cover or cover_image,
+                        "thumbnail": ep_cover or cover_image,
+                        "cover": ep_cover or cover_image,
                         "date": "",
                         "language": "en"
                     })
@@ -249,16 +251,25 @@ class WebtoonsAdapter(BaseSiteAdapter):
 
         return {
             "success": True,
+            "title": series_title,
             "series_title": series_title,
             "title_no": title_no,
             "url": target_url,
+            "author": author,
+            "genre": genre,
+            "description": description if 'description' in locals() else "",
+            "cover_image": cover_image,
+            "cover": cover_image,
             "series": {
                 "title": series_title,
                 "author": author,
                 "genre": genre,
+                "description": description if 'description' in locals() else "",
                 "cover_image": cover_image,
                 "url": target_url
             },
+            "chapters": sorted_eps,
+            "total_chapters": len(sorted_eps),
             "episodes": sorted_eps,
             "total_episodes": len(sorted_eps)
         }
