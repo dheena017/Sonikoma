@@ -120,19 +120,9 @@ class MadaraCmsAdapter(BaseSiteAdapter):
         ) if soup else None
         cover_image = ""
         if cover_el:
-            if cover_el.name == "meta":
-                cover_image = cover_el.get("content", "").strip()
-            else:
-                cover_image = (
-                    cover_el.get("data-src")
-                    or cover_el.get("data-lazy-src")
-                    or cover_el.get("data-original")
-                    or cover_el.get("data-cfsrc")
-                    or cover_el.get("src")
-                    or ""
-                ).strip()
-        if not cover_image and series_meta.cover_image:
-            cover_image = series_meta.cover_image
+            cover_image = self.extract_image_src(cover_el, clean_url)
+        if not cover_image and series_meta and series_meta.cover_image:
+            cover_image = self.extract_image_src(series_meta.cover_image, clean_url)
 
         # AJAX Discovery
         manga_id = None
@@ -189,8 +179,8 @@ class MadaraCmsAdapter(BaseSiteAdapter):
 
                             is_locked = bool(li.find(class_=re.compile(r"lock|coin|paid|vip|fastpass", re.I)))
 
-                            ep_img = a.find("img") or li.find("img")
-                            ep_cover = (ep_img.get("data-src") or ep_img.get("src")) if ep_img else cover_image
+                            ep_img = a.find("img") or li.find("img") or li.find(class_=re.compile(r"thumb|cover|img", re.I))
+                            ep_cover = self.extract_image_src(ep_img, clean_url) if ep_img else cover_image
 
                             episodes.append({
                                 "title": title_raw or f"Chapter {num_val or len(episodes)+1}",

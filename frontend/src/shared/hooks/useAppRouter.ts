@@ -208,6 +208,8 @@ export function useAppRouter({
             path === "/creative-suite-dashboard" ||
             path.startsWith("/creative-suite/") ||
             path === "/scraper" ||
+            path === "/scraper/" ||
+            path.startsWith("/scraper/") ||
             path === "/settings/account" ||
             path === "/settings/account/" ||
             path === "/shortcuts" ||
@@ -325,10 +327,9 @@ export function useAppRouter({
         path === "/project-details" ||
         path === "/dashboard" ||
         path === "/admin" ||
-        path === "/chapter-scraper" ||
-        path === "/scraper/chapter-scraper" ||
-        path === "/episode-scraper" ||
-        path === "/scraper/episode-scraper" ||
+        path === "/scraper" ||
+        path === "/scraper/" ||
+        path.startsWith("/scraper/") ||
         path.startsWith("/display") ||
         isChapterDetails
       ) {

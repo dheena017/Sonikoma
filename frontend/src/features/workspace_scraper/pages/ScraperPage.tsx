@@ -676,7 +676,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
             fetchWithInterceptor={props.fetchWithInterceptor}
             onOpenChapterScraper={(url) => {
               const nav = navigateTo || (window as any).navigateTo;
-              const targetPath = `/scraper/chapter-scraper?url=${encodeURIComponent(
+              const targetPath = `/scraper/chapters?url=${encodeURIComponent(
                 url
               )}`;
               if (typeof nav === "function") {
@@ -688,7 +688,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
             }}
             onOpenEpisodeScraper={(url) => {
               const nav = navigateTo || (window as any).navigateTo;
-              const targetPath = `/scraper/chapter-scraper?url=${encodeURIComponent(
+              const targetPath = `/scraper/chapters?url=${encodeURIComponent(
                 url
               )}`;
               if (typeof nav === "function") {

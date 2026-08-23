@@ -61,7 +61,16 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const rawCover = chapter.cover_image || "";
+  const getFirstPanel = () => {
+    if (chapter.first_panel_image) return chapter.first_panel_image;
+    if (chapter.images && chapter.images.length > 0) {
+      const first = chapter.images[0];
+      return typeof first === "string" ? first : first?.url || "";
+    }
+    return "";
+  };
+
+  const rawCover = chapter.cover_image || getFirstPanel() || "";
   const [imgSrc, setImgSrc] = useState<string>(() =>
     getProxiedImageUrl(rawCover, chapter.url)
   );
@@ -69,9 +78,9 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
   useEffect(() => {
     setImageError(false);
-    const cover = chapter.cover_image || "";
+    const cover = chapter.cover_image || getFirstPanel() || "";
     setImgSrc(getProxiedImageUrl(cover, chapter.url));
-  }, [chapter.cover_image, chapter.url]);
+  }, [chapter.cover_image, chapter.first_panel_image, chapter.images, chapter.url]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -233,8 +242,12 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               isHovered ? "scale-105 brightness-105" : "scale-100"
             }`}
             onError={() => {
-              if (imgSrc.includes("/api/proxy-image") && chapter.cover_image) {
+              const firstP = getFirstPanel();
+              const proxiedFirstP = firstP ? getProxiedImageUrl(firstP, chapter.url) : "";
+              if (imgSrc.includes("/api/proxy-image") && chapter.cover_image && imgSrc !== chapter.cover_image) {
                 setImgSrc(chapter.cover_image);
+              } else if (firstP && imgSrc !== proxiedFirstP && imgSrc !== firstP) {
+                setImgSrc(proxiedFirstP || firstP);
               } else {
                 setImageError(true);
               }

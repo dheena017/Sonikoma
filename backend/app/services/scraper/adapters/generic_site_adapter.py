@@ -311,13 +311,12 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
 
         # Format output
         series_title = (series_info.title if series_info else None) or "Comic Series"
-        cover_image = series_info.cover_image if series_info and hasattr(series_info, "cover_image") else ""
+        cover_image = self.extract_image_src(series_info.cover_image, url) if series_info and hasattr(series_info, "cover_image") else ""
 
         for ep in episodes:
-            ep_img = ep.get("cover_image") or ep.get("thumbnail") or ep.get("cover") or cover_image
-            if not ep_img and cover_image:
-                ep_img = self.build_proxy_thumbnail_url(None, ep.get("url", url), cover_image)
-            ep["cover_image"] = ep_img
+            raw_ep_img = ep.get("cover_image") or ep.get("thumbnail") or ep.get("cover")
+            ep_img = self.extract_image_src(raw_ep_img, url) if raw_ep_img else cover_image
+            ep["cover_image"] = ep_img or cover_image
             ep.pop("thumbnail", None)
             ep.pop("cover", None)
             ch_num = ep.get("chapter_number") or ep.get("episode_no") or ep.get("number")

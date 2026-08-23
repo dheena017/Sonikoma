@@ -100,10 +100,10 @@ class WebtoonsAdapter(BaseSiteAdapter):
         desc_elem = soup.select_one(".summary, .desc, .summary_content, meta[property='og:description']")
         description = (desc_elem.get("content") or desc_elem.get_text(strip=True)) if desc_elem else (series_meta.description or "")
 
-        cover_elem = soup.select_one(".detail_thumb img, .thmb img, .detail_header img, meta[property='og:image']")
-        cover_image = ""
-        if cover_elem:
-            cover_image = cover_elem.get("content") or cover_elem.get("src") or cover_elem.get("data-src") or ""
+        cover_elem = soup.select_one(".detail_thumb img, .thmb img, .detail_header img, meta[property='og:image'], meta[name='twitter:image']")
+        cover_image = self.extract_image_src(cover_elem, target_url) if cover_elem else (series_meta.cover_image or "")
+        if not cover_image and series_meta and series_meta.cover_image:
+            cover_image = self.extract_image_src(series_meta.cover_image, target_url)
 
         # 2. Paginated Episode Extraction Loop
         episodes: List[Dict[str, Any]] = []
@@ -162,9 +162,7 @@ class WebtoonsAdapter(BaseSiteAdapter):
 
                 # Thumbnail image
                 thmb_img = li.select_one(".thmb img, img")
-                thmb_src = ""
-                if thmb_img:
-                    thmb_src = thmb_img.get("data-url") or thmb_img.get("data-src") or thmb_img.get("src") or ""
+                thmb_src = self.extract_image_src(thmb_img, target_url) if thmb_img else cover_image
 
                 # Date
                 date_el = li.select_one(".date, .tx")
@@ -180,7 +178,7 @@ class WebtoonsAdapter(BaseSiteAdapter):
                     "chapter_number": num_val,
                     "title": ep_title or f"Episode {ep_no_str or len(episodes)+1}",
                     "url": ep_url,
-                    "cover_image": self.build_proxy_thumbnail_url(thmb_src, ep_url, cover_image),
+                    "cover_image": thmb_src or cover_image,
                     "date": date_str,
                     "likes": likes_str,
                     "language": "en"
@@ -222,7 +220,7 @@ class WebtoonsAdapter(BaseSiteAdapter):
                     sub_el = li.select_one(".subj span, .subj, .sub_title, .ep-title, h4, .title")
                     ep_title = sub_el.get_text(strip=True) if sub_el else a_tag.get_text(strip=True)
                     thmb_img = li.select_one(".thmb img, img, img[data-src]")
-                    thmb_src = (thmb_img.get("data-src") or thmb_img.get("data-url") or thmb_img.get("src") or "") if thmb_img else ""
+                    thmb_src = self.extract_image_src(thmb_img, ep_url) if thmb_img else cover_image
                     ep_parsed = urlparse(ep_url)
                     ep_q = parse_qs(ep_parsed.query)
                     ep_no_str = ep_q.get("episode_no", [""])[0]
@@ -235,7 +233,7 @@ class WebtoonsAdapter(BaseSiteAdapter):
                             num_val = float(ep_no_str)
                         except ValueError:
                             pass
-                    ep_cover = self.build_proxy_thumbnail_url(thmb_src, ep_url, cover_image)
+                    ep_cover = thmb_src or cover_image
                     episodes.append({
                         "episode_no": len(episodes) + 1,
                         "chapter_number": num_val,

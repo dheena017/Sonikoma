@@ -14,7 +14,7 @@ import time
 import logging
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any, List, Tuple
-from urllib.parse import quote, urlparse
+from urllib.parse import quote, urlparse, urljoin
 from datetime import datetime, timedelta
 
 from ..scrape_context import ScrapeContext
@@ -95,23 +95,56 @@ class BaseSiteAdapter(ABC):
     # ─────────────────────────────────────────────────────────────────────────
 
     @staticmethod
+    def extract_image_src(img_node: Any, base_url: str = "") -> str:
+        """Extracts and resolves absolute image URL from an img element or dict."""
+        if not img_node:
+            return ""
+        if isinstance(img_node, str):
+            src = img_node.strip()
+        elif isinstance(img_node, dict):
+            src = (
+                img_node.get("data-src")
+                or img_node.get("data-lazy-src")
+                or img_node.get("data-original")
+                or img_node.get("data-url")
+                or img_node.get("data-cfsrc")
+                or img_node.get("content")
+                or img_node.get("src")
+                or ""
+            ).strip()
+        else:
+            # BeautifulSoup Tag
+            src = (
+                img_node.get("data-src")
+                or img_node.get("data-lazy-src")
+                or img_node.get("data-original")
+                or img_node.get("data-url")
+                or img_node.get("data-cfsrc")
+                or img_node.get("content")
+                or img_node.get("src")
+                or ""
+            ).strip()
+        if not src or src.startswith("data:image/svg") or "1x1.gif" in src or "blank" in src:
+            return ""
+        if base_url and not src.startswith("http"):
+            src = urljoin(base_url if base_url.endswith("/") else (base_url + "/"), src)
+        return src
+
+    @staticmethod
     def build_proxy_thumbnail_url(
         thumbnail_url: Optional[str],
         referer_url: str,
         series_cover: Optional[str] = None
     ) -> str:
-        """Builds a secure proxy image URL for hotlink-protected thumbnails."""
+        """Builds a direct or clean image URL for thumbnails."""
         raw = thumbnail_url or series_cover or ""
         if not raw or raw.startswith("data:image/svg") or "1x1.gif" in raw or "blank" in raw:
             raw = series_cover or ""
         if not raw:
             return ""
-        if raw.startswith("/api/proxy-image") or raw.startswith("/api/v1/proxy-image"):
-            return raw
-
-        encoded_url = quote(raw, safe="")
-        encoded_ref = quote(referer_url, safe="")
-        return f"/api/v1/proxy-image?url={encoded_url}&referer={encoded_ref}"
+        if referer_url and not raw.startswith("http") and not raw.startswith("/"):
+            raw = urljoin(referer_url if referer_url.endswith("/") else (referer_url + "/"), raw)
+        return raw
 
     @staticmethod
     def extract_number_and_type(text: str) -> Tuple[Optional[float], str]:

@@ -63,7 +63,7 @@ def _ensure_episodes_table():
     _ensure_chapters_table()
 
 
-def _get_cached_chapters(series_url: str, ttl_seconds: float = 600.0) -> Optional[Dict[str, Any]]:
+def _get_cached_chapters(series_url: str, ttl_seconds: float = 86400.0) -> Optional[Dict[str, Any]]:
     """Retrieves cached series chapter discovery results within the TTL window."""
     if not get_db_connection:
         return None
@@ -72,7 +72,7 @@ def _get_cached_chapters(series_url: str, ttl_seconds: float = 600.0) -> Optiona
         clean_url = series_url.strip().lower()
         now = time.time()
         with get_db_connection() as conn:
-            # Check new chapters cache first
+            # 1. Exact URL match
             row = conn.execute(
                 "SELECT data_json, updated_at FROM series_chapters_cache WHERE LOWER(series_url) = ?",
                 (clean_url,)
@@ -81,6 +81,23 @@ def _get_cached_chapters(series_url: str, ttl_seconds: float = 600.0) -> Optiona
                 data = json.loads(row["data_json"])
                 data["from_cache"] = True
                 return data
+
+            # 2. Fuzzy slug / title match for URL routing
+            if not clean_url.startswith("http"):
+                clean_slug_pattern = f"%{clean_url}%"
+                clean_title_pattern = f"%{clean_url.replace('-', ' ')}%"
+                fuzzy_row = conn.execute(
+                    """
+                    SELECT data_json, updated_at FROM series_chapters_cache 
+                    WHERE LOWER(series_url) LIKE ? OR LOWER(title) LIKE ?
+                    ORDER BY updated_at DESC LIMIT 1
+                    """,
+                    (clean_slug_pattern, clean_title_pattern)
+                ).fetchone()
+                if fuzzy_row and fuzzy_row["data_json"]:
+                    data = json.loads(fuzzy_row["data_json"])
+                    data["from_cache"] = True
+                    return data
 
             # Fallback to legacy episodes cache if present
             try:
@@ -217,6 +234,10 @@ async def scrape_series_chapters(
             desc_val = series_dict.get("description") or series_dict.get("synopsis") or result.get("description") or result.get("synopsis") or ""
             platform_val = series_dict.get("platform") or result.get("platform") or result.get("publisher") or (source_info.platform.value if hasattr(source_info, "platform") and hasattr(source_info.platform, "value") else "comic")
 
+            if cover_img and not cover_img.startswith("http") and raw_input.startswith("http"):
+                clean_base = raw_input if raw_input.endswith("/") else (raw_input + "/")
+                cover_img = urljoin(clean_base, cover_img)
+
             series_dict["title"] = series_title
             series_dict["cover_image"] = cover_img
             series_dict["author"] = author_val
@@ -237,7 +258,17 @@ async def scrape_series_chapters(
 
             chapter_list = result.get("chapters") or result.get("episodes") or []
             for ch in chapter_list:
-                ch_img = ch.get("cover_image") or ch.get("thumbnail") or ch.get("cover") or cover_img
+                ch_img = ch.get("cover_image") or ch.get("thumbnail") or ch.get("cover")
+                # Fallback to 1st panel image if panels/images exist
+                if not ch_img and ch.get("images") and len(ch["images"]) > 0:
+                    first_item = ch["images"][0]
+                    ch_img = first_item.get("url") if isinstance(first_item, dict) else str(first_item)
+                if not ch_img:
+                    ch_img = cover_img
+
+                if ch_img and not ch_img.startswith("http") and raw_input.startswith("http"):
+                    clean_base = raw_input if raw_input.endswith("/") else (raw_input + "/")
+                    ch_img = urljoin(clean_base, ch_img)
                 ch["cover_image"] = ch_img
                 ch_num = ch.get("chapter_number") or ch.get("episode_no") or ch.get("number")
                 ch["chapter_number"] = ch_num

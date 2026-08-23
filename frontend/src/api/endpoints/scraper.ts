@@ -576,6 +576,8 @@ export interface SeparateUrlResult {
   is_series_url: boolean;
   platform: string;
   domain: string;
+  series_slug?: string | null;
+  series_id?: string | null;
   title_slug?: string | null;
   title_id?: string | null;
   chapter_slug?: string | null;

@@ -122,9 +122,9 @@ class MangaStreamAdapter(BaseSiteAdapter):
         description = (desc_el.get("content") or desc_el.get_text(strip=True)) if desc_el else (series_meta.description or "")
 
         cover_el = soup.select_one(".thumb img, .bigcover img, meta[property='og:image'], .series-thumb img, .poster img")
-        cover_image = ""
-        if cover_el:
-            cover_image = cover_el.get("content") or cover_el.get("data-src") or cover_el.get("src") or ""
+        cover_image = self.extract_image_src(cover_el, clean_url) if cover_el else (series_meta.cover_image or "")
+        if not cover_image and series_meta and series_meta.cover_image:
+            cover_image = self.extract_image_src(series_meta.cover_image, clean_url)
 
         # 2. Extract Chapters from .eplister / #chapterlist / select#chapter / links
         episodes: List[Dict[str, Any]] = []
@@ -148,13 +148,17 @@ class MangaStreamAdapter(BaseSiteAdapter):
             # Date
             date_str = self.extract_date_from_node(li)
 
+            # Separate chapter thumbnail
+            img_node = li.find("img") or a.find("img")
+            ep_cover = self.extract_image_src(img_node, clean_url) if img_node else cover_image
+
             episodes.append({
                 "title": title_text or f"Chapter {num_val or len(episodes)+1}",
                 "url": full_url,
                 "chapter_number": num_val,
                 "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                 "date": date_str,
-                "cover_image": self.build_proxy_thumbnail_url(None, full_url, cover_image),
+                "cover_image": ep_cover or cover_image,
                 "language": self.extract_language_tag(title_text),
             })
 
@@ -176,7 +180,7 @@ class MangaStreamAdapter(BaseSiteAdapter):
                     "chapter_number": num_val,
                     "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                     "date": "",
-                    "cover_image": self.build_proxy_thumbnail_url(None, val, cover_image),
+                    "cover_image": cover_image,
                     "language": self.extract_language_tag(txt),
                 })
 
@@ -196,7 +200,11 @@ class MangaStreamAdapter(BaseSiteAdapter):
                     m_ch = re.search(r'chapter[-_]?([0-9.]+)', href, re.I)
                     txt = f"Chapter {m_ch.group(1)}" if m_ch else (txt or "Chapter")
 
-                ep_cover = self.build_proxy_thumbnail_url(None, full_url, cover_image)
+                num_val, _ = self.extract_number_and_type(txt)
+                img_node = a.find("img") or a.find_parent(class_=re.compile(r"card|item|row|li", re.I))
+                img_el = img_node.find("img") if (img_node and img_node.name != "img") else img_node
+                ep_cover = self.extract_image_src(img_el, clean_url) if img_el else cover_image
+
                 episodes.append({
                     "title": txt or f"Chapter {num_val or len(episodes)+1}",
                     "url": full_url,

@@ -92,10 +92,10 @@ class BatoAdapter(BaseSiteAdapter):
         desc_el = soup.select_one(".limit-html, .item-text, .synopsis, .summary, meta[property='og:description']")
         description = (desc_el.get("content") or desc_el.get_text(strip=True)) if desc_el else (series_meta.description or "")
 
-        cover_el = soup.select_one(".attr-cover img, .item-cover img, meta[property='og:image']")
-        cover_image = ""
-        if cover_el:
-            cover_image = cover_el.get("content") or cover_el.get("data-src") or cover_el.get("src") or ""
+        cover_el = soup.select_one(".attr-cover img, .item-cover img, meta[property='og:image'], meta[name='twitter:image']")
+        cover_image = self.extract_image_src(cover_el, clean_url) if cover_el else (series_meta.cover_image or "")
+        if not cover_image and series_meta and series_meta.cover_image:
+            cover_image = self.extract_image_src(series_meta.cover_image, clean_url)
 
         # 2. Chapters from .episode-list, .main .item a.chapt, .chapter-list
         episodes: List[Dict[str, Any]] = []
@@ -117,7 +117,10 @@ class BatoAdapter(BaseSiteAdapter):
             parent_div = a.find_parent("div", class_="item") or a.find_parent("li")
             date_str = self.extract_date_from_node(parent_div) if parent_div else ""
 
-            ep_cover = self.build_proxy_thumbnail_url(None, full_url, cover_image)
+            # Check chapter specific thumbnail
+            img_node = a.find("img") or (parent_div.find("img") if parent_div else None)
+            ep_cover = self.extract_image_src(img_node, clean_url) if img_node else cover_image
+
             episodes.append({
                 "title": txt or f"Chapter {num_val or len(episodes)+1}",
                 "url": full_url,

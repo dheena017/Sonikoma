@@ -696,8 +696,16 @@ export default function AppRouter(props: AppRouterProps) {
       currentPath.endsWith("/image-editor/") ||
       currentPath.includes("/image-editor");
 
+    const isChapterScraperWithSeries =
+      currentPath.startsWith("/scraper/") &&
+      currentPath !== "/scraper" &&
+      currentPath !== "/scraper/" &&
+      !currentPath.startsWith("/scraper/editor") &&
+      !currentPath.startsWith("/scraper/audio-settings");
+
     const isWorkspacePath =
       currentPath === "/scraper" ||
+      currentPath === "/scraper/" ||
       (chapterPathMatch !== null &&
         !isDetailsMode &&
         !currentPath.startsWith("/scraper/editor/"));
@@ -715,6 +723,7 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/settings/account/",
       isAutoCropPath: currentPath === "/auto-crop",
       isEpisodeScraperPath:
+        isChapterScraperWithSeries ||
         currentPath === "/chapter-scraper" ||
         currentPath === "/scraper/chapter-scraper" ||
         currentPath === "/episode-scraper" ||

@@ -48,14 +48,24 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
   if (url.includes("/api/")) {
     return url;
   }
-  if (url.startsWith("http") && !url.includes("/api/")) {
-    let proxied = `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  let resolvedUrl = url;
+  if (!url.startsWith("http") && referer && referer.startsWith("http")) {
+    try {
+      const baseUrl = referer.endsWith("/") ? referer : referer + "/";
+      resolvedUrl = new URL(url, baseUrl).href;
+    } catch {
+      resolvedUrl = url;
+    }
+  }
+
+  if (resolvedUrl.startsWith("http") && !resolvedUrl.includes("/api/")) {
+    let proxied = `/api/proxy-image?url=${encodeURIComponent(resolvedUrl)}`;
     if (referer) {
       proxied += `&referer=${encodeURIComponent(referer)}`;
     }
     return proxied;
   }
-  return url;
+  return resolvedUrl;
 }
 
 /**

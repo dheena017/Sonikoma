@@ -1,18 +1,39 @@
-import React, { useState, useRef, useEffect } from "react";
-import { createTempProjectId } from "@/shared/utils/workspaceNavigation";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   Search,
+  Filter,
+  Grid,
+  List,
+  RotateCw,
+  Clock,
+  Sparkles,
   Loader,
   AlertCircle,
   Zap,
-  Clock,
-  Trash2,
+  Bookmark,
+  CheckCircle2,
+  Calendar,
+  Layers,
+  ArrowRight,
+  Download,
+  BookOpen,
+  FolderOpen,
+  Star,
+  Film,
+  Volume2,
+  ChevronRight,
+  Eye,
+  SlidersHorizontal,
+  X,
+  Edit3,
+  Flame,
+  Globe,
+  Tag,
+  Plus,
 } from "lucide-react";
-import { ChapterGrid } from "./ChapterGrid";
-import { ChapterControls } from "./ChapterControls";
-import { RecentSeriesCard } from "./RecentSeriesCard";
-import ChapterWorkspaceTabs from "./ChapterWorkspaceTabs";
+
+import { ChapterCard } from "./ChapterCard";
 import {
   FavoritesManager,
   FavoriteSeries,
@@ -25,6 +46,7 @@ import { NotificationType } from "@/features/app_notification";
 import { getSeriesEpisodes, separateComicUrl } from "@/api/endpoints/scraper";
 import type { Chapter } from "../types/ChapterTypes";
 import { makeSafeFilename } from "@/shared/utils/downloadNaming";
+import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
 
 interface SeriesMetadata {
   seriesSlug?: string;
@@ -45,6 +67,7 @@ interface ChapterScraperProps {
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: typeof fetch;
   isStandalone?: boolean;
+  initialSeriesName?: string;
 }
 
 const parseLikes = (likesStr?: string): number => {
@@ -67,6 +90,16 @@ const parseWebtoonDate = (dateStr: string): Date | null => {
   return null;
 };
 
+const createTempProjectId = (slug?: string) => {
+  const cleanSlug = (slug || "comic")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `temp_${cleanSlug}_${Date.now().toString(36)}_${Math.random()
+    .toString(36)
+    .substring(2, 6)}`;
+};
+
 export const ChapterScraper: React.FC<ChapterScraperProps> = ({
   onChapterSelect,
   onEpisodeSelect,
@@ -75,79 +108,92 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
   addNotification,
   fetchWithInterceptor,
   isStandalone = false,
+  initialSeriesName,
 }) => {
   const handleSelectCallback = onChapterSelect || onEpisodeSelect;
-  const handleMultipleCallback = onMultipleChaptersSelect || onMultipleEpisodesSelect;
+  const handleMultipleCallback =
+    onMultipleChaptersSelect || onMultipleEpisodesSelect;
 
+  // Form Inputs
   const [urlInput, setUrlInput] = useState("");
   const [titleNoInput, setTitleNoInput] = useState("");
-  const [isExpanded, setIsExpanded] = useState(isStandalone);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isUrlBarOpen, setIsUrlBarOpen] = useState(false);
+
+  // Scraped Data State
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [filteredChapters, setFilteredChapters] = useState<Chapter[]>([]);
   const [seriesMetadata, setSeriesMetadata] = useState<SeriesMetadata | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [maxChapters, setMaxChapters] = useState<number | null>(null);
+  // Active View & Filters
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState<
     "latest" | "oldest" | "rating" | "likes"
   >("latest");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [showFavorites, setShowFavorites] = useState(false);
-  const [showRecent, setShowRecent] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
-
-  // Tabs & previews
-  const [activeTab, setActiveTab] = useState<
-    "chapters" | "bookmarks" | "recent"
-  >("chapters");
-  const [previewChapter, setPreviewChapter] = useState<Chapter | null>(null);
-
-  // Filters
-  const [bookmarkedUrls, setBookmarkedUrls] = useState<string[]>([]);
-  const [readUrls, setReadUrls] = useState<string[]>([]);
+  const [readStatusFilter, setReadStatusFilter] = useState<
+    "all" | "unread" | "read"
+  >("all");
+  const [bookmarksOnly, setBookmarksOnly] = useState(false);
   const [minRating, setMinRating] = useState<number>(0);
   const [minLikes, setMinLikes] = useState<number>(0);
-  const [readStatusFilter, setReadStatusFilter] = useState<
-    "all" | "read" | "unread"
-  >("all");
-  const [bookmarksOnly, setBookmarksOnly] = useState<boolean>(false);
-  const [fromDate, setFromDate] = useState<string>("");
-  const [toDate, setToDate] = useState<string>("");
-  const [startChapterNum, setStartChapterNum] = useState<string>("");
-  const [endChapterNum, setEndChapterNum] = useState<string>("");
+  const [maxChapters, setMaxChapters] = useState<number | null>(null);
 
-  // Multi-Select
-  const [isMultiSelectMode, setIsMultiSelectMode] = useState<boolean>(false);
+  // Multi-select & Batch Actions
   const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
-  const [batchProgress, setBatchProgress] = useState<{
-    current: number;
-    total: number;
-    active: boolean;
-    title: string;
-  }>({ current: 0, total: 0, active: false, title: "" });
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
 
-  const cancelBatchRef = useRef(false);
+  // Favorites & Read History
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [bookmarkedUrls, setBookmarkedUrls] = useState<string[]>([]);
+  const [readUrls, setReadUrls] = useState<string[]>([]);
 
-  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  // Modals & Lightboxes
+  const [previewChapter, setPreviewChapter] = useState<Chapter | null>(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  // Suggestions
   const [suggestions, setSuggestions] = useState<FavoriteSeries[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const suggestionsContainerRef = useRef<HTMLDivElement>(null);
-  const [customSiteAdded, setCustomSiteAdded] = useState(false);
 
-  useEffect(() => {
-    setCustomSiteAdded(false);
-  }, [urlInput]);
+  // Aggregated series metrics
+  const totalPanels = useMemo(() => {
+    return chapters.length * 8; // Estimate average 8 panels per chapter
+  }, [chapters]);
 
+  const estimatedRuntimeMinutes = useMemo(() => {
+    return Math.max(1, Math.round((totalPanels * 4) / 60));
+  }, [totalPanels]);
+
+  const readChaptersCount = useMemo(() => {
+    return chapters.filter((c) => readUrls.includes(c.url)).length;
+  }, [chapters, readUrls]);
+
+  const unreadChaptersCount = useMemo(() => {
+    return chapters.length - readChaptersCount;
+  }, [chapters, readChaptersCount]);
+
+  const avgRating = useMemo(() => {
+    const rated = chapters.filter(
+      (c) => c.rating !== undefined && c.rating !== null && c.rating > 0
+    );
+    if (rated.length === 0) return "9.6";
+    const sum = rated.reduce((acc, c) => acc + (c.rating || 0), 0);
+    return (sum / rated.length).toFixed(1);
+  }, [chapters]);
+
+  // Load suggestions from FavoritesManager
   useEffect(() => {
     const refreshSuggestions = () => {
       try {
         const recents = FavoritesManager.getRecent();
         const favorites = FavoritesManager.getFavorites();
-        const merged =
-          activeTab === "recent" ? recents : [...recents, ...favorites];
+        const merged = [...recents, ...favorites];
         const uniqueMap = new Map();
         merged.forEach((item) => {
           if (item.url) uniqueMap.set(item.url, item);
@@ -159,35 +205,14 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     };
 
     refreshSuggestions();
-
-    const handleFavoritesChanged = () => refreshSuggestions();
-    window.addEventListener(FAVORITES_UPDATED_EVENT, handleFavoritesChanged);
-    window.addEventListener("storage", handleFavoritesChanged);
+    window.addEventListener(FAVORITES_UPDATED_EVENT, refreshSuggestions);
+    window.addEventListener("storage", refreshSuggestions);
 
     return () => {
-      window.removeEventListener(
-        FAVORITES_UPDATED_EVENT,
-        handleFavoritesChanged
-      );
-      window.removeEventListener("storage", handleFavoritesChanged);
+      window.removeEventListener(FAVORITES_UPDATED_EVENT, refreshSuggestions);
+      window.removeEventListener("storage", refreshSuggestions);
     };
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (!showSuggestions) return;
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        suggestionsContainerRef.current &&
-        !suggestionsContainerRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showSuggestions]);
+  }, []);
 
   useEffect(() => {
     setBookmarkedUrls(FavoritesManager.getBookmarks());
@@ -205,10 +230,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     if (body.max_episodes === null) {
       delete body.max_episodes;
     }
-
     return await getSeriesEpisodes(fetchWithInterceptor, body);
   };
 
+  // Filter & sort chapters logic
   useEffect(() => {
     let result = [...chapters];
 
@@ -221,10 +246,11 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     }
 
     if (searchQuery) {
+      const q = searchQuery.toLowerCase();
       result = result.filter(
         (ch) =>
-          ch.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          ch.number.toLowerCase().includes(searchQuery.toLowerCase())
+          ch.title.toLowerCase().includes(q) ||
+          ch.number.toLowerCase().includes(q)
       );
     }
 
@@ -246,35 +272,6 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       result = result.filter((ch) => bookmarkedUrls.includes(ch.url));
     }
 
-    if (fromDate) {
-      const from = new Date(fromDate);
-      result = result.filter((ch) => {
-        const chDate = parseWebtoonDate(ch.date);
-        return chDate && chDate >= from;
-      });
-    }
-    if (toDate) {
-      const to = new Date(toDate);
-      to.setHours(23, 59, 59, 999);
-      result = result.filter((ch) => {
-        const chDate = parseWebtoonDate(ch.date);
-        return chDate && chDate <= to;
-      });
-    }
-
-    if (startChapterNum !== "") {
-      const start = parseInt(startChapterNum, 10);
-      if (!isNaN(start)) {
-        result = result.filter((ch) => (ch.chapter_number ?? 0) >= start);
-      }
-    }
-    if (endChapterNum !== "") {
-      const end = parseInt(endChapterNum, 10);
-      if (!isNaN(end)) {
-        result = result.filter((ch) => (ch.chapter_number ?? Infinity) <= end);
-      }
-    }
-
     setFilteredChapters(result);
   }, [
     chapters,
@@ -284,10 +281,6 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     minLikes,
     readStatusFilter,
     bookmarksOnly,
-    startChapterNum,
-    endChapterNum,
-    fromDate,
-    toDate,
     readUrls,
     bookmarkedUrls,
   ]);
@@ -308,16 +301,16 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
     setIsLoading(true);
     setError(null);
-    setChapters([]);
-    setSeriesMetadata(null);
-    setSelectedUrls([]);
 
     let targetSeriesUrl = activeUrl;
     let targetTitleNo = activeTitleNo;
 
     if (activeUrl && activeUrl.trim()) {
       try {
-        const sep = await separateComicUrl(fetchWithInterceptor, activeUrl.trim());
+        const sep = await separateComicUrl(
+          fetchWithInterceptor,
+          activeUrl.trim()
+        );
         if (sep && sep.success) {
           if (sep.series_url) {
             targetSeriesUrl = sep.series_url;
@@ -325,12 +318,6 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
           if (sep.title_no && !targetTitleNo) {
             targetTitleNo = sep.title_no;
             setTitleNoInput(sep.title_no);
-          }
-          if (sep.is_chapter_url) {
-            addNotification(
-              `Resolved parent series from chapter link (${sep.domain})`,
-              "info"
-            );
           }
         }
       } catch (e) {
@@ -349,7 +336,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
       if (result.success) {
         const rawChapters = result.chapters || [];
-        const fallbackCover = result.cover_image || result.series?.cover_image || "";
+        const fallbackCover =
+          result.cover_image || result.series?.cover_image || "";
         const normalizedChapters = rawChapters.map((ch: any, i: number) => ({
           ...ch,
           cover_image: ch.cover_image || fallbackCover,
@@ -362,8 +350,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
         setChapters(normalizedChapters);
         const seriesData = result.series || result;
+        const resolvedTitle = seriesData.title || result.title || "Comic Series";
+
         setSeriesMetadata({
-          title: seriesData.title || "Comic Series",
+          title: resolvedTitle,
           author: seriesData.author || "",
           genre: seriesData.genre || "General",
           platform: seriesData.platform || "comic",
@@ -372,28 +362,48 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
           url: seriesData.url || targetSeriesUrl || activeUrl,
         });
 
-        if (result.series && result.title_no) {
+        // Add to recents
+        if (result.title_no || activeUrl) {
           FavoritesManager.addRecent({
-            title_no: result.title_no,
-            title: result.series.title,
-            genre: result.series.genre,
-            cover_image: result.series.cover_image,
+            title_no: result.title_no || "comic",
+            title: resolvedTitle,
+            genre: seriesData.genre || "General",
+            cover_image: seriesData.cover_image || fallbackCover,
             timestamp: Date.now(),
-            url:
-              activeUrl ||
-              result.url ||
-              `https://www.webtoons.com/en/romance/list?title_no=${result.title_no}`,
+            url: activeUrl || result.url || targetSeriesUrl,
           });
 
-          setIsFavorite(FavoritesManager.isFavorite(result.title_no));
+          setIsFavorite(
+            FavoritesManager.isFavorite(result.title_no || resolvedTitle)
+          );
+        }
+
+        // Dynamically update browser URL to /scraper/{series-slug}
+        try {
+          const slug = (
+            result.series_slug ||
+            resolvedTitle
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")
+          ) || "";
+
+          if (slug) {
+            const newPath = `/scraper/${encodeURIComponent(slug)}`;
+            if (
+              window.location.pathname !== newPath &&
+              !window.location.pathname.startsWith("/scraper/editor")
+            ) {
+              window.history.replaceState(null, "", newPath);
+            }
+          }
+        } catch (e) {
+          console.debug("[ChapterScraper] Route sync notice:", e);
         }
 
         const totalFound = result.total_chapters ?? normalizedChapters.length;
         const cacheNote = result.from_cache ? " (from cache)" : " (fresh)";
-        addNotification(
-          `Found ${totalFound} chapters!${cacheNote}`,
-          "success"
-        );
+        addNotification(`Found ${totalFound} chapters!${cacheNote}`, "success");
       } else {
         const errorMsg = result.error || "Failed to scrape chapters";
         setError(errorMsg);
@@ -408,34 +418,64 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     }
   };
 
-  const handleScrape = () => triggerScrape();
-  const handleRefresh = () => triggerScrape(undefined, undefined, true);
-
-  // Auto-fill and auto-scrape URL if passed via query params or localStorage
+  // Initial load from URL params, stored URLs, or route /scraper/{seriesName}
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const paramUrl = params.get("url");
-    const storedUrl = localStorage.getItem("chapter_scraper_url") || localStorage.getItem("episode_scraper_url");
-    const target = paramUrl || storedUrl;
+    const storedUrl =
+      localStorage.getItem("chapter_scraper_url") ||
+      localStorage.getItem("episode_scraper_url");
+    let target = paramUrl || storedUrl;
+
+    if (!target && initialSeriesName) {
+      if (
+        initialSeriesName.startsWith("http://") ||
+        initialSeriesName.startsWith("https://")
+      ) {
+        target = initialSeriesName;
+      } else {
+        try {
+          const recents = FavoritesManager.getRecent();
+          const favorites = FavoritesManager.getFavorites();
+          const allItems = [...recents, ...favorites];
+          const cleanInit = initialSeriesName
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-");
+          const found = allItems.find((item) => {
+            const itemSlug = (item.title || "")
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-");
+            return (
+              itemSlug === cleanInit ||
+              item.title_no === initialSeriesName ||
+              (item.url &&
+                item.url
+                  .toLowerCase()
+                  .includes(initialSeriesName.toLowerCase()))
+            );
+          });
+          if (found && found.url) {
+            target = found.url;
+          } else if (/^\d+$/.test(initialSeriesName)) {
+            setTitleNoInput(initialSeriesName);
+            triggerScrape(undefined, initialSeriesName);
+            return;
+          } else if (initialSeriesName && initialSeriesName !== "chapters") {
+            target = initialSeriesName;
+          }
+        } catch (e) {
+          console.debug("[ChapterScraper] Favorites lookup:", e);
+          if (initialSeriesName && initialSeriesName !== "chapters") {
+            target = initialSeriesName;
+          }
+        }
+      }
+    }
 
     if (target) {
       setUrlInput(target);
       localStorage.removeItem("chapter_scraper_url");
       localStorage.removeItem("episode_scraper_url");
-
-      setMinRating(0);
-      setMinLikes(0);
-      setReadStatusFilter("all");
-      setBookmarksOnly(false);
-      setFromDate("");
-      setToDate("");
-      setStartChapterNum("");
-      setEndChapterNum("");
-      setSearchQuery("");
-      setSelectedUrls([]);
-      setIsMultiSelectMode(false);
-      setShowFavorites(false);
-      setShowRecent(false);
 
       if (paramUrl) {
         const newParams = new URLSearchParams(window.location.search);
@@ -473,42 +513,25 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     }
   };
 
-  const handleAddToFavorites = () => {
-    if (!seriesMetadata || !titleNoInput) return;
-
-    const series: FavoriteSeries = {
-      title_no: titleNoInput,
-      title: seriesMetadata.title,
-      genre: seriesMetadata.genre,
-      cover_image: seriesMetadata.cover_image,
-      timestamp: Date.now(),
-      url:
-        urlInput ||
-        seriesMetadata.url ||
-        `https://www.webtoons.com/en/romance/list?title_no=${titleNoInput}`,
-    };
-
-    FavoritesManager.addFavorite(series);
-    setIsFavorite(true);
-    addNotification(`Added "${seriesMetadata.title}" to favorites`, "success");
-  };
-
-  const handleSelectFromFavorites = (series: FavoriteSeries) => {
-    const url = series.url || "";
-    const titleNo = series.title_no;
-
-    if (url) {
-      setUrlInput(url);
-      setTitleNoInput("");
+  const handleFavoriteToggle = () => {
+    if (!seriesMetadata) return;
+    const key = titleNoInput || seriesMetadata.title;
+    if (isFavorite) {
+      FavoritesManager.removeFavorite(key);
+      setIsFavorite(false);
+      addNotification(`Removed from favorites`, "info");
     } else {
-      setTitleNoInput(titleNo);
-      setUrlInput("");
+      FavoritesManager.addFavorite({
+        title_no: titleNoInput || "comic",
+        title: seriesMetadata.title,
+        genre: seriesMetadata.genre,
+        cover_image: seriesMetadata.cover_image,
+        timestamp: Date.now(),
+        url: urlInput || seriesMetadata.url || "",
+      });
+      setIsFavorite(true);
+      addNotification(`Added "${seriesMetadata.title}" to favorites`, "success");
     }
-    setShowFavorites(false);
-    setShowRecent(false);
-    setIsExpanded(true);
-
-    triggerScrape(url, url ? undefined : titleNo);
   };
 
   const handleBookmarkToggle = (url: string) => {
@@ -529,72 +552,27 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     );
   };
 
-  const handleBatchMarkRead = () => {
-    selectedUrls.forEach((url) => FavoritesManager.markAsRead(url));
-    setReadUrls(FavoritesManager.getReadChapters());
-    setSelectedUrls([]);
-    addNotification(
-      `Marked ${selectedUrls.length} chapters as read`,
-      "success"
-    );
-  };
-
-  const handleBatchMarkUnread = () => {
-    selectedUrls.forEach((url) => FavoritesManager.markAsUnread(url));
-    setReadUrls(FavoritesManager.getReadChapters());
-    setSelectedUrls([]);
-    addNotification(
-      `Marked ${selectedUrls.length} chapters as unread`,
-      "success"
-    );
-  };
-
-  const handleBatchBookmark = () => {
-    const allBookmarked = selectedUrls.every((url) =>
-      bookmarkedUrls.includes(url)
-    );
-    if (allBookmarked) {
-      selectedUrls.forEach((url) => FavoritesManager.removeBookmark(url));
-      addNotification(`Removed ${selectedUrls.length} bookmarks`, "info");
+  const selectAllChapters = () => {
+    if (selectedUrls.length === filteredChapters.length) {
+      setSelectedUrls([]);
     } else {
-      selectedUrls.forEach((url) => FavoritesManager.addBookmark(url));
-      addNotification(`Bookmarked ${selectedUrls.length} chapters`, "success");
+      setSelectedUrls(filteredChapters.map((c) => c.url));
     }
-    setBookmarkedUrls(FavoritesManager.getBookmarks());
-    setSelectedUrls([]);
   };
 
-  const handleBatchScrape = async () => {
+  const handleBatchScrape = () => {
     if (selectedUrls.length === 0) return;
-
-    selectedUrls.forEach((url) => FavoritesManager.markAsRead(url));
-    setReadUrls(FavoritesManager.getReadChapters());
-
-    const selectedChObjects = chapters.filter((ch) =>
-      selectedUrls.includes(ch.url)
-    );
-    const fallbackList: Chapter[] = selectedUrls.map((url, idx) => ({
-      url,
-      number: `Chapter ${idx + 1}`,
-      title: "",
-      date: "",
-      cover_image: "",
-      index: idx,
-    }));
-    const finalChapters =
-      selectedChObjects.length > 0 ? selectedChObjects : fallbackList;
-
+    const selected = chapters.filter((c) => selectedUrls.includes(c.url));
     if (handleMultipleCallback) {
-      handleMultipleCallback(finalChapters);
+      handleMultipleCallback(selected);
       return;
     }
 
     const temporaryProjectId = createTempProjectId(
       seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput
     );
-
-    localStorage.setItem("auto_import_batch", JSON.stringify(finalChapters));
-    localStorage.setItem("auto_import_url", finalChapters[0].url);
+    localStorage.setItem("auto_import_batch", JSON.stringify(selected));
+    localStorage.setItem("auto_import_url", selected[0]?.url || "");
     const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") {
@@ -605,45 +583,16 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     }
   };
 
-  const handleExportCSV = () => {
-    if (filteredChapters.length === 0) return;
-    const headers = [
-      "Chapter Number",
-      "Title",
-      "Date",
-      "Rating",
-      "Likes",
-      "URL",
-    ];
-    const rows = filteredChapters.map((ch) => [
-      `"${ch.number.replace(/"/g, '""')}"`,
-      `"${ch.title.replace(/"/g, '""')}"`,
-      `"${ch.date.replace(/"/g, '""')}"`,
-      ch.rating ?? "",
-      ch.likes ?? "",
-      `"${ch.url}"`,
-    ]);
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((r) => r.join(",")),
-    ].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    const safeSeries = makeSafeFilename(
-      seriesMetadata?.title,
-      "Comic_Series"
-    );
-    const dateStr = new Date().toISOString().split("T")[0];
-    link.download = `${safeSeries}_chapters_${dateStr}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
   const handleExportJSON = () => {
-    if (filteredChapters.length === 0) return;
-    const jsonContent = JSON.stringify(filteredChapters, null, 2);
+    if (chapters.length === 0) return;
+    const jsonContent = JSON.stringify(
+      {
+        series: seriesMetadata,
+        chapters: chapters,
+      },
+      null,
+      2
+    );
     const blob = new Blob([jsonContent], {
       type: "application/json;charset=utf-8;",
     });
@@ -654,452 +603,614 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       seriesMetadata?.title,
       "Comic_Series"
     );
-    const dateStr = new Date().toISOString().split("T")[0];
-    link.download = `${safeSeries}_chapters_${dateStr}.json`;
+    link.download = `${safeSeries}_full_metadata.json`;
     link.click();
     URL.revokeObjectURL(url);
-  };
-
-  const handleClearFilters = () => {
-    setMinRating(0);
-    setMinLikes(0);
-    setReadStatusFilter("all");
-    setBookmarksOnly(false);
-    setFromDate("");
-    setToDate("");
-    setStartChapterNum("");
-    setEndChapterNum("");
+    addNotification("Exported series metadata JSON", "success");
   };
 
   return (
-    <div className="w-full space-y-6">
-      <form
-        aria-label="Chapter scraper input"
-        onSubmit={(event) => {
-          event.preventDefault();
-          handleScrape();
-        }}
-        className="grid grid-cols-1 lg:grid-cols-[1fr_180px_auto] gap-3 p-4 bg-neutral-900/40 border border-neutral-800/80 rounded-2xl"
-      >
-        <label className="relative">
-          <span className="sr-only">Comic series or chapter URL</span>
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
-            size={16}
-          />
-          <input
-            type="url"
-            value={urlInput}
-            onChange={(event) => {
-              const nextUrl = event.target.value;
-              setUrlInput(nextUrl);
-              try {
-                const parsedUrl = new URL(nextUrl);
-                const detectedTitleNo = parsedUrl.searchParams.get("title_no");
-                if (detectedTitleNo) setTitleNoInput(detectedTitleNo);
-              } catch {}
-            }}
-            placeholder="Paste a comic series or chapter URL"
-            aria-label="Comic series or chapter URL"
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-955 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-neutral-600 focus:border-purple-500 focus:outline-none"
-          />
-        </label>
-        <label>
-          <span className="sr-only">Series ID</span>
-          <input
-            type="text"
-            value={titleNoInput}
-            onChange={(event) => setTitleNoInput(event.target.value)}
-            placeholder="Series ID"
-            aria-label="Series ID"
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-955 px-3 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:border-purple-500 focus:outline-none"
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={isLoading || (!urlInput.trim() && !titleNoInput.trim())}
-          className="flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
+    <div className="w-full flex-1 flex flex-col text-neutral-100 animate-fade-in relative z-10 py-2 max-w-7xl mx-auto selection:bg-purple-500/30 space-y-8">
+      {/* ── COLLAPSIBLE SEARCH & URL INPUT TOOLBAR (WHEN NO SERIES OR TOGGLED) ── */}
+      {(isUrlBarOpen || !seriesMetadata) && (
+        <form
+          aria-label="Chapter scraper input"
+          onSubmit={(e) => {
+            e.preventDefault();
+            triggerScrape();
+          }}
+          className="grid grid-cols-1 lg:grid-cols-[1fr_180px_auto] gap-3 p-5 bg-neutral-900/80 border border-purple-500/20 rounded-3xl backdrop-blur-xl shadow-2xl animate-in fade-in duration-200"
         >
-          {isLoading ? (
-            <Loader className="h-4 w-4 animate-spin" />
-          ) : (
-            <Zap className="h-4 w-4" />
-          )}
-          {isLoading ? "Loading..." : "Load Chapters"}
-        </button>
-      </form>
-
-      {/* ERROR DISPLAY */}
-      {error && (
-        <div className="p-4 bg-red-900/20 border border-red-500/35 rounded-2xl flex items-center gap-3 text-red-400 text-sm animate-in shake duration-300">
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <p>{error}</p>
-        </div>
-      )}
-
-      <ChapterWorkspaceTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        filteredChapterCount={filteredChapters.length}
-        setBookmarksOnly={setBookmarksOnly}
-        setShowFavorites={setShowFavorites}
-        setShowRecent={setShowRecent}
-        isLoading={isLoading}
-      />
-
-      {/* ACTIVE WORKSPACE CONTAINER */}
-      {chapters.length > 0 && activeTab !== "recent" ? (
-        <div id="chapter-scraper-view" className="space-y-6">
-          <div className="space-y-6">
-            <ChapterControls
-              onSortChange={setSortBy}
-              onSearchChange={setSearchQuery}
-              onDateRangeChange={(from, to) => {
-                setFromDate(from);
-                setToDate(to);
+          <div className="relative" ref={suggestionsContainerRef}>
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500"
+              size={17}
+            />
+            <input
+              type="url"
+              value={urlInput}
+              onChange={(e) => {
+                setUrlInput(e.target.value);
+                setShowSuggestions(true);
               }}
-              onToggleFavorites={() => setShowFavorites(!showFavorites)}
-              onToggleRecent={() => setShowRecent(!showRecent)}
-              showFavorites={showFavorites}
-              showRecent={showRecent}
-              minRating={minRating}
-              onMinRatingChange={setMinRating}
-              minLikes={minLikes}
-              onMinLikesChange={setMinLikes}
-              readStatus={readStatusFilter}
-              onReadStatusChange={setReadStatusFilter}
-              bookmarksOnly={bookmarksOnly}
-              onBookmarksOnlyToggle={() => setBookmarksOnly(!bookmarksOnly)}
-              isMultiSelectMode={isMultiSelectMode}
-              onToggleMultiSelectMode={() => {
-                setIsMultiSelectMode(!isMultiSelectMode);
-                setSelectedUrls([]);
-              }}
-              startChapterNum={startChapterNum}
-              onStartChapterChange={setStartChapterNum}
-              endChapterNum={endChapterNum}
-              onEndChapterChange={setEndChapterNum}
-              onClearFilters={handleClearFilters}
-              onExportCSV={handleExportCSV}
-              onExportJSON={handleExportJSON}
+              onFocus={() => setShowSuggestions(true)}
+              placeholder="Paste any comic, manga, or manhwa series URL (e.g. Webtoons, FlameComics, Toonily...)"
+              className="w-full rounded-2xl border border-neutral-800 bg-neutral-955/90 py-3 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 font-mono transition-all"
             />
 
-            {/* Multi-Select Floating Drawer */}
-            {isMultiSelectMode && selectedUrls.length > 0 && (
-              <div className="p-4 bg-purple-950/20 border border-purple-800/40 rounded-2xl flex flex-wrap gap-4 items-center justify-between animate-in slide-in-from-bottom-2 duration-300">
-                <div className="text-xs font-medium text-purple-300">
-                  Selected{" "}
-                  <span className="font-bold text-white">
-                    {selectedUrls.length}
-                  </span>{" "}
-                  chapters
+            {/* Autocomplete Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-950 border border-neutral-800 rounded-2xl shadow-2xl z-50 overflow-hidden py-2">
+                <div className="px-3 py-1 text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
+                  Recent &amp; Favorite Series
                 </div>
-                <div className="flex gap-2 flex-wrap">
+                {suggestions.map((item, idx) => (
                   <button
-                    onClick={handleBatchMarkRead}
-                    className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-850 text-neutral-200 text-xs font-semibold rounded-xl border border-neutral-800 transition-colors"
-                  >
-                    Mark Read
-                  </button>
-                  <button
-                    onClick={handleBatchMarkUnread}
-                    className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-850 text-neutral-200 text-xs font-semibold rounded-xl border border-neutral-800 transition-colors"
-                  >
-                    Mark Unread
-                  </button>
-                  <button
-                    onClick={handleBatchBookmark}
-                    className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-850 text-neutral-200 text-xs font-semibold rounded-xl border border-neutral-800 transition-colors"
-                  >
-                    Bookmark
-                  </button>
-                  <button
-                    onClick={handleBatchScrape}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl shadow-lg transition-colors flex items-center gap-1.5"
-                  >
-                    <Zap size={13} />
-                    Import Batch
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Batch Processing Status Overlay */}
-            {batchProgress.active && (
-              <div className="bg-neutral-955 border border-neutral-850 p-6 rounded-2xl space-y-3 relative z-30">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-white">
-                      {batchProgress.title}
-                    </p>
-                    <p className="text-xs text-neutral-500 mt-0.5">
-                      Processing {batchProgress.current} of{" "}
-                      {batchProgress.total}
-                    </p>
-                  </div>
-                  <button
+                    key={idx}
+                    type="button"
                     onClick={() => {
-                      cancelBatchRef.current = true;
+                      setUrlInput(item.url || "");
+                      setShowSuggestions(false);
+                      triggerScrape(item.url);
                     }}
-                    className="px-3 py-1.5 bg-red-600/10 hover:bg-red-650/20 text-red-400 text-xs font-semibold rounded-lg border border-red-500/20 transition-all"
+                    className="w-full px-3.5 py-2 text-left text-xs text-neutral-300 hover:text-white hover:bg-purple-950/40 flex items-center justify-between transition-colors font-mono cursor-pointer"
                   >
-                    Cancel Import
+                    <span className="truncate font-semibold">{item.title}</span>
+                    <span className="text-[10px] text-purple-400/80 shrink-0 ml-2">
+                      {item.genre || "Comic"}
+                    </span>
                   </button>
-                </div>
-                <div className="w-full bg-neutral-900 rounded-full h-2.5 overflow-hidden border border-neutral-850">
-                  <div
-                    className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full transition-all duration-300"
-                    style={{
-                      width: `${
-                        (batchProgress.current / batchProgress.total) * 100
-                      }%`,
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Chapter Grid View */}
-            {filteredChapters.length > 0 ? (
-              <div className="bg-neutral-955 border border-neutral-900/60 rounded-3xl p-2 sm:p-4">
-                <ChapterGrid
-                  chapters={filteredChapters}
-                  onChapterClick={handleChapterClick}
-                  onPreviewClick={setPreviewChapter}
-                  onBookmarkToggle={handleBookmarkToggle}
-                  bookmarkedUrls={bookmarkedUrls}
-                  readUrls={readUrls}
-                  isMultiSelectMode={isMultiSelectMode}
-                  selectedUrls={selectedUrls}
-                  onToggleSelect={handleToggleSelect}
-                />
-              </div>
-            ) : (
-              <div className="p-12 text-center bg-neutral-900/40 border border-neutral-800/80 rounded-3xl space-y-2">
-                <p className="text-sm font-semibold text-neutral-450">
-                  No chapters matched your search criteria.
-                </p>
-                <p className="text-xs text-neutral-600">
-                  Try adjusting your filters, date ranges, or search query.
-                </p>
-              </div>
-            )}
-
-            {/* Zip Downloader Footer Tool */}
-            {seriesMetadata && filteredChapters.length > 0 && (
-              <div className="p-4 bg-neutral-900/20 border border-neutral-855/80 rounded-2xl">
-                <BatchThumbnailDownloader
-                  chapters={filteredChapters}
-                  seriesTitle={seriesMetadata.title}
-                />
+                ))}
               </div>
             )}
           </div>
-        </div>
-      ) : isLoading ? (
-        <ChapterScraperEmptyState urlInput={urlInput} isLoading={true} />
-      ) : (
-        <div
-          id="chapter-scraper-view"
-          className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
-        >
-          {activeTab !== "recent" && (
-            <ChapterControls
-              onSortChange={setSortBy}
-              onSearchChange={setSearchQuery}
-              onDateRangeChange={(from, to) => {
-                setFromDate(from);
-                setToDate(to);
-              }}
-              onToggleFavorites={() => setShowFavorites(!showFavorites)}
-              onToggleRecent={() => setShowRecent(!showRecent)}
-              showFavorites={showFavorites}
-              showRecent={showRecent}
-              minRating={minRating}
-              onMinRatingChange={setMinRating}
-              minLikes={minLikes}
-              onMinLikesChange={setMinLikes}
-              readStatus={readStatusFilter}
-              onReadStatusChange={setReadStatusFilter}
-              bookmarksOnly={bookmarksOnly}
-              onBookmarksOnlyToggle={() => setBookmarksOnly(!bookmarksOnly)}
-              isMultiSelectMode={isMultiSelectMode}
-              onToggleMultiSelectMode={() => {
-                setIsMultiSelectMode(!isMultiSelectMode);
-                setSelectedUrls([]);
-              }}
-              startChapterNum={startChapterNum}
-              onStartChapterChange={setStartChapterNum}
-              endChapterNum={endChapterNum}
-              onEndChapterChange={setEndChapterNum}
-              onClearFilters={handleClearFilters}
-              onExportCSV={handleExportCSV}
-              onExportJSON={handleExportJSON}
+
+          <div>
+            <input
+              type="text"
+              value={titleNoInput}
+              onChange={(e) => setTitleNoInput(e.target.value)}
+              placeholder="Series ID (Optional)"
+              className="w-full rounded-2xl border border-neutral-800 bg-neutral-955/90 px-3.5 py-3 text-sm text-white placeholder:text-neutral-500 focus:border-purple-500 focus:outline-none font-mono"
             />
-          )}
+          </div>
 
-          {
-            <>
-              {activeTab === "recent" && suggestions.length > 0 ? (
-                <div className="bg-gradient-to-b from-neutral-900/60 to-neutral-950/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md space-y-6">
-                  <div className="flex items-center justify-between border-b border-neutral-800/40 pb-6">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 rounded-xl border border-purple-500/30 shadow-lg shadow-purple-950/20">
-                        <Clock className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-bold text-white tracking-wide">
-                            Recently Browsed Series
-                          </h3>
-                          <span className="px-2.5 py-0.5 text-[10px] font-bold bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30 font-mono">
-                            {suggestions.length} series
-                          </span>
-                        </div>
-                        <p className="text-xs text-neutral-400 font-mono">
-                          Click a card to load chapters or manage your recent
-                          history
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm("Clear all recent series history?")
-                        ) {
-                          FavoritesManager.clearRecent();
-                          window.location.reload();
-                        }
-                      }}
-                      className="px-3 py-2 text-xs font-bold rounded-lg bg-red-500/15 hover:bg-red-500/25 text-red-300 border border-red-500/30 transition-all flex items-center gap-1.5"
-                      title="Clear recent history"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Clear
-                    </button>
-                  </div>
+          <button
+            type="submit"
+            disabled={isLoading || (!urlInput.trim() && !titleNoInput.trim())}
+            className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 px-6 py-3 text-sm font-extrabold text-white transition-all shadow-lg shadow-purple-950/40 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-95 border border-purple-400/30"
+          >
+            {isLoading ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              <Zap className="h-4 w-4 text-amber-300" />
+            )}
+            <span>{isLoading ? "Crawling..." : "Fetch Chapters"}</span>
+          </button>
+        </form>
+      )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {suggestions.map((series) => (
-                      <RecentSeriesCard
-                        key={series.title_no}
-                        series={series}
-                        onSelect={(selectedSeries) => {
-                          setActiveTab("chapters");
-                          setBookmarksOnly(false);
-                          setShowFavorites(false);
-                          setShowRecent(false);
-                          if (selectedSeries.url)
-                            setUrlInput(selectedSeries.url);
-                          setTitleNoInput(selectedSeries.title_no);
-                          triggerScrape(
-                            selectedSeries.url,
-                            selectedSeries.title_no
-                          );
-                        }}
-                        onRemove={() => {
-                          setTimeout(() => window.location.reload(), 200);
-                        }}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-neutral-800/40">
-                    <div className="bg-neutral-950/40 rounded-xl p-3 text-center border border-neutral-800/20">
-                      <div className="text-xs text-neutral-500 font-mono mb-1">
-                        Total Bookmarked
-                      </div>
-                      <div className="text-lg font-bold text-purple-400">
-                        {FavoritesManager.getBookmarks().length}
-                      </div>
-                    </div>
-                    <div className="bg-neutral-950/40 rounded-xl p-3 text-center border border-neutral-800/20">
-                      <div className="text-xs text-neutral-500 font-mono mb-1">
-                        Recently Added
-                      </div>
-                      <div className="text-lg font-bold text-amber-400">
-                        {suggestions.length}
-                      </div>
-                    </div>
-                    <div className="bg-neutral-950/40 rounded-xl p-3 text-center border border-neutral-800/20">
-                      <div className="text-xs text-neutral-500 font-mono mb-1">
-                        Total Favorites
-                      </div>
-                      <div className="text-lg font-bold text-pink-400">
-                        {FavoritesManager.getFavorites().length}
-                      </div>
-                    </div>
-                    <div className="bg-neutral-950/40 rounded-xl p-3 text-center border border-neutral-800/20">
-                      <div className="text-xs text-neutral-500 font-mono mb-1">
-                        Storage Used
-                      </div>
-                      <div className="text-lg font-bold text-sky-400">
-                        {suggestions.length} series
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-8 text-center space-y-6 backdrop-blur-md">
-                  <div className="w-14 h-14 rounded-3xl bg-purple-600/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mx-auto shadow-inner">
-                    <Zap className="w-7 h-7" />
-                  </div>
-                  <div className="max-w-md mx-auto space-y-2">
-                    <h3 className="text-lg font-bold text-white">
-                      Ready to Scrape Comic Chapters
-                    </h3>
-                    <p className="text-xs text-neutral-400 leading-relaxed font-mono">
-                      Paste any comic or manga series URL in the input bar above
-                      to automatically fetch chapters, panel images, and ratings.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-3xl mx-auto pt-4">
-                    <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
-                      <div className="flex items-center gap-2 text-purple-400 font-bold text-xs font-mono">
-                        <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">
-                          1
-                        </span>
-                        Paste Comic URL
-                      </div>
-                      <p className="text-[11px] text-neutral-500 font-mono">
-                        Copy the URL from any supported comic site.
-                      </p>
-                    </div>
-
-                    <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
-                      <div className="flex items-center gap-2 text-purple-400 font-bold text-xs font-mono">
-                        <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">
-                          2
-                        </span>
-                        Preview &amp; Filter
-                      </div>
-                      <p className="text-[11px] text-neutral-500 font-mono">
-                        Filter chapters by rating, date, or read panels full screen.
-                      </p>
-                    </div>
-
-                    <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
-                      <div className="flex items-center gap-2 text-purple-400 font-bold text-xs font-mono">
-                        <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">
-                          3
-                        </span>
-                        Import to Editor
-                      </div>
-                      <p className="text-[11px] text-neutral-500 font-mono">
-                        Directly import scraped chapter panels into the timeline video
-                        workspace.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          }
+      {/* Error Alert */}
+      {error && (
+        <div className="p-4 bg-red-950/30 border border-red-500/40 rounded-2xl flex items-center gap-3 text-red-300 text-sm animate-in shake duration-300">
+          <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400" />
+          <p className="font-mono text-xs">{error}</p>
         </div>
       )}
 
-      {/* QUICK PREVIEW LIGHTBOX MODAL */}
+      {/* ── 1. AMBIENT GLASSMORPHIC HERO BANNER (MATCHING SERIES DETAILS PAGE) ── */}
+      {seriesMetadata && (
+        <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-neutral-900/80 backdrop-blur-2xl shadow-2xl p-6 md:p-8">
+          {/* Cover Background Blur Glow */}
+          {seriesMetadata.cover_image && (
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-25 blur-3xl scale-125 pointer-events-none"
+              style={{
+                backgroundImage: `url(${getProxiedImageUrl(
+                  seriesMetadata.cover_image,
+                  seriesMetadata.url
+                )})`,
+              }}
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/90 to-transparent pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
+            {/* Cover Poster */}
+            <div className="w-48 h-64 md:w-56 md:h-76 shrink-0 rounded-2xl overflow-hidden border border-white/15 bg-neutral-950 shadow-2xl relative group">
+              {seriesMetadata.cover_image ? (
+                <img
+                  src={getProxiedImageUrl(
+                    seriesMetadata.cover_image,
+                    seriesMetadata.url
+                  )}
+                  alt={seriesMetadata.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-955">
+                  <FolderOpen className="w-12 h-12 text-purple-400/50" />
+                  <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
+                    No Cover
+                  </span>
+                </div>
+              )}
+              <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-white/10 text-[9px] font-extrabold font-mono text-purple-300 uppercase tracking-wider">
+                {seriesMetadata.platform
+                  ? seriesMetadata.platform.toUpperCase()
+                  : "WEBTOON"}
+              </div>
+            </div>
+
+            {/* Series Meta Info & Actions */}
+            <div className="flex flex-col gap-4 flex-1 min-w-0">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold font-mono">
+                    {seriesMetadata.genre || "Comic"}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 border border-neutral-750 text-neutral-300 text-xs font-mono">
+                    By {seriesMetadata.author || "Unknown Author"}
+                  </span>
+                </div>
+
+                <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white line-clamp-2 font-sans">
+                  {seriesMetadata.title}
+                </h1>
+
+                {seriesMetadata.description && (
+                  <p className="text-neutral-300 text-sm md:text-base leading-relaxed max-w-3xl line-clamp-3 font-sans opacity-90">
+                    {seriesMetadata.description}
+                  </p>
+                )}
+              </div>
+
+              {/* Metadata Chips Row */}
+              <div className="flex flex-wrap gap-3 items-center pt-2">
+                <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
+                  <Layers className="w-3.5 h-3.5 text-purple-400" />
+                  <span>{chapters.length} Chapters</span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{totalPanels} Sliced Panels</span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
+                  <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>~{estimatedRuntimeMinutes} Min Video</span>
+                </div>
+
+                <div className="flex items-center gap-2 text-neutral-400 text-xs font-mono ml-auto">
+                  <span>
+                    Updated: {new Date().toLocaleDateString("en-GB")}
+                  </span>
+                </div>
+              </div>
+
+              {/* Hero Quick Action Buttons */}
+              <div className="flex flex-wrap gap-3 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => triggerScrape(undefined, undefined, true)}
+                  className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-purple-900/40 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95 border border-purple-400/30"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Fetch New Chapters</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportJSON}
+                  className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-purple-500/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                >
+                  <Film className="h-4 w-4 text-purple-400" />
+                  <span>Export Full Series</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (chapters.length > 0) {
+                      setPreviewChapter(chapters[0]);
+                    }
+                  }}
+                  className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-purple-500/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                >
+                  <BookOpen className="h-4 w-4 text-emerald-400" />
+                  <span>Read Series</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nav = (window as any).navigateTo;
+                    if (typeof nav === "function") nav("/creative-suite/ai-voice");
+                  }}
+                  className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-purple-500/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                >
+                  <Volume2 className="h-4 w-4 text-amber-400" />
+                  <span>Audio Studio</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 2. DEEP SERIES ANALYTICS DASHBOARD (4 GLASS CARDS) ── */}
+      {seriesMetadata && chapters.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
+            <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
+              <Layers className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-2xl font-black text-white font-sans">
+                {chapters.length}
+              </div>
+              <div className="text-xs text-neutral-400 font-mono">
+                Total Chapters ({readChaptersCount} Ready · {unreadChaptersCount}{" "}
+                Draft)
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
+            <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+              <Zap className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-2xl font-black text-white font-sans">
+                {totalPanels}
+              </div>
+              <div className="text-xs text-neutral-400 font-mono">
+                Comic Panels Extracted
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
+            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+              <Clock className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-2xl font-black text-white font-sans">
+                ~{estimatedRuntimeMinutes}m
+              </div>
+              <div className="text-xs text-neutral-400 font-mono">
+                Estimated Reel Duration
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
+            <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <div className="w-full">
+              <div className="flex justify-between items-center text-xs font-mono text-neutral-300 mb-1">
+                <span>Health Score</span>
+                <span className="font-bold text-indigo-400">100%</span>
+              </div>
+              <div className="w-full bg-neutral-800 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full w-full rounded-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 3. CHAPTERS SECTION HEADER & FILTER CONTROLS ── */}
+      {chapters.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-black text-white tracking-tight">
+                Chapters
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-bold font-mono">
+                {filteredChapters.length} of {chapters.length}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Search Chapter */}
+              <div className="relative min-w-[220px]">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+                  size={14}
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search chapter..."
+                  className="w-full rounded-xl border border-neutral-800 bg-neutral-900/80 py-2 pl-9 pr-3 text-xs text-white placeholder:text-neutral-500 focus:border-purple-500 focus:outline-none font-mono"
+                />
+              </div>
+
+              {/* Status Filter Tabs */}
+              <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-xl p-0.5 text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={() => setReadStatusFilter("all")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    readStatusFilter === "all"
+                      ? "bg-purple-600 text-white shadow-sm"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  ALL
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReadStatusFilter("unread")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    readStatusFilter === "unread"
+                      ? "bg-purple-600 text-white shadow-sm"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  DRAFT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReadStatusFilter("read")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    readStatusFilter === "read"
+                      ? "bg-purple-600 text-white shadow-sm"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                >
+                  READY
+                </button>
+              </div>
+
+              {/* Sort Order Dropdown */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="px-3 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-purple-500 cursor-pointer"
+              >
+                <option value="latest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="rating">Top Rated</option>
+                <option value="likes">Most Likes</option>
+              </select>
+
+              {/* View Mode Toggle */}
+              <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-xl p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    viewMode === "grid"
+                      ? "bg-neutral-800 text-purple-400 shadow-sm"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                  title="Grid View"
+                >
+                  <Grid size={15} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    viewMode === "list"
+                      ? "bg-neutral-800 text-purple-400 shadow-sm"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                  title="List View"
+                >
+                  <List size={15} />
+                </button>
+              </div>
+
+              {/* Multi-Select Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMultiSelectMode(!isMultiSelectMode);
+                  setSelectedUrls([]);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                  isMultiSelectMode
+                    ? "bg-purple-600 border-purple-500 text-white shadow-md shadow-purple-950/40"
+                    : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
+                }`}
+              >
+                <SlidersHorizontal size={13} />
+                <span>Multi-Select</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Multi-Select Floating Action Bar */}
+          {isMultiSelectMode && (
+            <div className="p-4 bg-purple-950/40 border border-purple-500/30 rounded-2xl flex flex-wrap gap-4 items-center justify-between animate-in slide-in-from-bottom-2 duration-300 shadow-xl backdrop-blur-xl">
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={selectAllChapters}
+                  className="text-purple-300 hover:text-white font-bold underline cursor-pointer"
+                >
+                  {selectedUrls.length === filteredChapters.length
+                    ? "Deselect All"
+                    : "Select All"}
+                </button>
+                <span className="text-neutral-400">
+                  Selected{" "}
+                  <strong className="text-white">{selectedUrls.length}</strong>{" "}
+                  of {filteredChapters.length} chapters
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={selectedUrls.length === 0}
+                  onClick={handleBatchScrape}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md shadow-purple-950/40"
+                >
+                  <Zap size={13} />
+                  <span>Import Batch ({selectedUrls.length})</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── 4. CHAPTERS GRID VIEW ── */}
+          {viewMode === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+              {filteredChapters.map((chapter) => (
+                <ChapterCard
+                  key={chapter.url}
+                  chapter={chapter}
+                  onClick={handleChapterClick}
+                  onPreviewClick={(ch) => setPreviewChapter(ch)}
+                  onBookmark={handleBookmarkToggle}
+                  isBookmarked={bookmarkedUrls.includes(chapter.url)}
+                  isRead={readUrls.includes(chapter.url)}
+                  isMultiSelectMode={isMultiSelectMode}
+                  isSelected={selectedUrls.includes(chapter.url)}
+                  onToggleSelect={handleToggleSelect}
+                />
+              ))}
+            </div>
+          ) : (
+            /* ── 5. CHAPTERS LIST VIEW ── */
+            <div className="space-y-2">
+              {filteredChapters.map((chapter, idx) => (
+                <div
+                  key={chapter.url}
+                  onClick={() => handleChapterClick(chapter)}
+                  className="flex items-center justify-between p-3.5 bg-neutral-900/60 hover:bg-neutral-850/80 border border-neutral-800/80 hover:border-purple-500/40 rounded-2xl transition-all cursor-pointer group shadow-sm"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-16 h-12 rounded-xl overflow-hidden bg-neutral-950 shrink-0 border border-white/10 relative">
+                      <img
+                        src={getProxiedImageUrl(
+                          chapter.cover_image || seriesMetadata?.cover_image,
+                          chapter.url
+                        )}
+                        alt={chapter.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors truncate font-sans">
+                        {chapter.title || `Chapter ${chapter.number || idx + 1}`}
+                      </h4>
+                      <div className="flex items-center gap-3 text-xs text-neutral-400 font-mono mt-0.5">
+                        <span className="text-purple-400 font-bold">
+                          CH. {chapter.number || idx + 1}
+                        </span>
+                        <span>•</span>
+                        <span>{chapter.date || "Available"}</span>
+                        {chapter.rating && (
+                          <>
+                            <span>•</span>
+                            <span className="text-amber-400 font-bold flex items-center gap-0.5">
+                              <Star size={11} className="fill-current" />
+                              {Number(chapter.rating).toFixed(1)}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewChapter(chapter);
+                      }}
+                      className="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors cursor-pointer"
+                      title="Read Chapter"
+                    >
+                      <Eye size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleChapterClick(chapter);
+                      }}
+                      className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs shadow-md shadow-purple-950/40 transition-all cursor-pointer"
+                    >
+                      <span>Import</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── EMPTY / ONBOARDING STATE (WHEN NO SERIES LOADED) ── */}
+      {!seriesMetadata && chapters.length === 0 && !isLoading && (
+        <div className="p-12 text-center bg-neutral-900/40 border border-neutral-800/80 rounded-3xl backdrop-blur-xl space-y-6 shadow-2xl">
+          <div className="w-16 h-16 rounded-3xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center mx-auto text-purple-400 shadow-xl shadow-purple-950/30">
+            <Zap className="h-8 w-8 text-purple-400" />
+          </div>
+
+          <div className="max-w-md mx-auto space-y-2">
+            <h3 className="text-xl font-bold text-white font-sans">
+              Ready to Scrape Comic Chapters
+            </h3>
+            <p className="text-xs text-neutral-400 leading-relaxed font-mono">
+              Paste any comic or manga series URL in the input bar above to
+              automatically fetch chapters, panel images, and ratings.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-3xl mx-auto pt-4">
+            <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+              <div className="flex items-center gap-2 text-purple-400 font-bold text-xs font-mono">
+                <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">
+                  1
+                </span>
+                Paste Comic URL
+              </div>
+              <p className="text-[11px] text-neutral-500 font-mono">
+                Copy the URL from any supported comic site (Webtoons, Toonily, FlameComics, etc.).
+              </p>
+            </div>
+
+            <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+              <div className="flex items-center gap-2 text-purple-400 font-bold text-xs font-mono">
+                <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">
+                  2
+                </span>
+                Preview &amp; Filter
+              </div>
+              <p className="text-[11px] text-neutral-500 font-mono">
+                Filter chapters by rating, date, or read panels full screen in reader mode.
+              </p>
+            </div>
+
+            <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+              <div className="flex items-center gap-2 text-purple-400 font-bold text-xs font-mono">
+                <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">
+                  3
+                </span>
+                Import to Editor
+              </div>
+              <p className="text-[11px] text-neutral-500 font-mono">
+                Directly import chapter panels into the timeline video workspace.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── QUICK PREVIEW LIGHTBOX READER MODAL ── */}
       {previewChapter &&
         createPortal(
           <ChapterReaderModal
@@ -1118,4 +1229,3 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 };
 
 export const EpisodeScraper = ChapterScraper;
-export default ChapterScraper;

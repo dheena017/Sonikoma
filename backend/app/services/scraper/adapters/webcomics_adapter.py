@@ -125,10 +125,10 @@ class WebComicsAdapter(BaseSiteAdapter):
         desc_el = soup.select_one(".comic-desc, .desc, .synopsis, meta[property='og:description']")
         description = (desc_el.get("content") or desc_el.get_text(strip=True)) if desc_el else (series_meta.description or "")
 
-        cover_el = soup.select_one(".comic-cover img, .cover-img, meta[property='og:image']")
-        cover_image = ""
-        if cover_el:
-            cover_image = cover_el.get("content") or cover_el.get("data-src") or cover_el.get("src") or ""
+        cover_el = soup.select_one(".comic-cover img, .cover-img, meta[property='og:image'], meta[name='twitter:image']")
+        cover_image = self.extract_image_src(cover_el, clean_url) if cover_el else (series_meta.cover_image or "")
+        if not cover_image and series_meta and series_meta.cover_image:
+            cover_image = self.extract_image_src(series_meta.cover_image, clean_url)
 
         episodes: List[Dict[str, Any]] = []
         seen = set()
@@ -148,7 +148,10 @@ class WebComicsAdapter(BaseSiteAdapter):
             parent_container = a.find_parent("li") or a.find_parent("div") or a.parent
             date_str = self.extract_date_from_node(parent_container) if parent_container else ""
 
-            ep_cover = self.build_proxy_thumbnail_url(None, full_url, cover_image)
+            # Check chapter specific thumbnail
+            img_node = a.find("img") or (parent_container.find("img") if parent_container else None)
+            ep_cover = self.extract_image_src(img_node, clean_url) if img_node else cover_image
+
             episodes.append({
                 "title": txt or f"Chapter {num_val or len(episodes)+1}",
                 "url": full_url,

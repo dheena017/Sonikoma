@@ -77,8 +77,8 @@ class InkrAdapter(BaseSiteAdapter):
             title_el = soup.select_one("h1, meta[property='og:title']")
             series_title = (title_el.get("content") if title_el and title_el.name == "meta" else title_el.get_text(strip=True)) if title_el else "INKR Comic"
 
-            cover_el = soup.select_one("meta[property='og:image'], .cover-img, img[src*='ogimage'], img[src*='inkr.com']")
-            cover_image = (cover_el.get("content") or cover_el.get("src") or "") if cover_el else ""
+            cover_el = soup.select_one("meta[property='og:image'], meta[name='twitter:image'], .cover-img, img[src*='ogimage'], img[src*='inkr.com']")
+            cover_image = self.extract_image_src(cover_el, title_url) if cover_el else ""
 
             desc_el = soup.select_one("meta[property='og:description'], .description, p")
             description = (desc_el.get("content") or desc_el.get_text(strip=True)) if desc_el else ""
@@ -100,8 +100,9 @@ class InkrAdapter(BaseSiteAdapter):
                     m_ch = re.search(r'chapter/([0-9]+)', href)
                     ch_title = f"Chapter {m_ch.group(1)}" if m_ch else (ch_title or "Chapter")
 
-                ch_img = a.find("img") or (a.find_parent("div").find("img") if a.find_parent("div") else None)
-                ch_thumb = (ch_img.get("data-src") or ch_img.get("src") or "") if ch_img else ""
+                ch_parent = a.find_parent("div")
+                ch_img = a.find("img") or (ch_parent.find("img") if ch_parent else None)
+                ch_thumb = self.extract_image_src(ch_img, title_url) if ch_img else ""
                 
                 # Derive real unique chapter-specific cover image from INKR chapter slug
                 m_ch_slug = re.search(r'comics\.inkr\.com/title/([^/]+)/chapter/([^/?#]+)', href)

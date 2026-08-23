@@ -132,7 +132,7 @@ class MangaDexAdapter(BaseSiteAdapter):
                         num_val = float(c_num) if c_num.replace(".", "").isdigit() else (idx + 1)
                         ch_url = f"https://mangadex.org/chapter/{ch['id']}"
 
-                        ep_cover = self.build_proxy_thumbnail_url(cover_url, ch_url, cover_url)
+                        ep_cover = cover_url  # MangaDex API provides absolute CDN cover_url
                         episodes.append({
                             "episode_no": idx + 1,
                             "number": str(c_num),

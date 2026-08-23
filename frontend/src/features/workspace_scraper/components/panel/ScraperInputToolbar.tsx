@@ -172,14 +172,18 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
   const handleOpenChapterScraperClick = () => {
     const destinationUrl = separatedData?.series_url || targetUrl;
+    const seriesSlug =
+      separatedData?.series_slug ||
+      separatedData?.title_slug ||
+      "chapters";
     const opener = onOpenChapterScraper || onOpenEpisodeScraper;
     if (opener) {
       opener(destinationUrl);
     } else {
       const nav = (window as any).navigateTo;
-      const targetPath = `/scraper/chapter-scraper?url=${encodeURIComponent(
-        destinationUrl
-      )}`;
+      const targetPath = `/scraper/${encodeURIComponent(
+        seriesSlug
+      )}?url=${encodeURIComponent(destinationUrl)}`;
       if (typeof nav === "function") {
         nav(targetPath);
       } else {

@@ -4,6 +4,8 @@ export interface Chapter {
   title: string;
   date: string;
   cover_image?: string;
+  first_panel_image?: string;
+  images?: Array<string | { url: string }>;
   url: string;
   index: number;
   rating?: number;
