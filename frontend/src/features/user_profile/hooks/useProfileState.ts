@@ -120,7 +120,7 @@ export function useProfileState({
   });
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [connections, setConnections] = useState(
-    user?.social_connections || { google: true, github: false, discord: false }
+    user?.social_connections || { google: true, discord: false }
   );
   const [achievementPoints, setAchievementPoints] = useState<number>(
     user?.achievement_points ?? 0

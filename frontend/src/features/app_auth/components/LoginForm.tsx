@@ -10,7 +10,6 @@ import {
   EyeOff,
   Check,
   Chrome,
-  Github,
   Languages,
   HelpCircle,
   X,

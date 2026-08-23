@@ -11,7 +11,6 @@ import {
   EyeOff,
   Check,
   Chrome,
-  Github,
   Key,
   Compass,
   Bell,
@@ -145,10 +144,10 @@ export default function RegisterForm({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="w-full">
             <button
               onClick={() => handleSocialRegister("Google")}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#141624] hover:bg-[#1a1e32] border border-white/10 hover:border-purple-500/40 text-white font-bold text-xs transition-all duration-300 cursor-pointer shadow-md active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-[#141624] hover:bg-[#1a1e32] border border-white/10 hover:border-purple-500/40 text-white font-bold text-xs transition-all duration-300 cursor-pointer shadow-md active:scale-[0.98]"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path
@@ -168,14 +167,7 @@ export default function RegisterForm({
                   d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                 />
               </svg>
-              <span>Google</span>
-            </button>
-            <button
-              onClick={() => handleSocialRegister("GitHub")}
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#141624] hover:bg-[#1a1e32] border border-white/10 hover:border-purple-500/40 text-white font-bold text-xs transition-all duration-300 cursor-pointer shadow-md active:scale-[0.98]"
-            >
-              <Github className="w-4 h-4 text-white" />
-              <span>GitHub</span>
+              <span>Continue with Google</span>
             </button>
           </div>
 

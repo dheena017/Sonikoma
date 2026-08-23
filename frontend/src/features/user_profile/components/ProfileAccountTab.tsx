@@ -35,9 +35,9 @@ interface ProfileAccountTabProps {
   saveSuccess: boolean;
 
   // Lifted database profile props
-  connections: { google: boolean; github: boolean; discord: boolean };
+  connections: { google: boolean; discord: boolean };
   setConnections: React.Dispatch<
-    React.SetStateAction<{ google: boolean; github: boolean; discord: boolean }>
+    React.SetStateAction<{ google: boolean; discord: boolean }>
   >;
   achievementPoints: number;
   setAchievementPoints: React.Dispatch<React.SetStateAction<number>>;
@@ -115,7 +115,7 @@ export default function ProfileAccountTab({
       { label: "Creator Role picked", done: !!profileUser.role },
       {
         label: "Social Account linked",
-        done: connections.google || connections.github || connections.discord,
+        done: connections.google || connections.discord,
       },
     ];
   }, [profileUser, connections]);
@@ -125,7 +125,7 @@ export default function ProfileAccountTab({
     return Math.round((doneCount / completionItems.length) * 100);
   }, [completionItems]);
 
-  const toggleLink = (provider: "google" | "github" | "discord") => {
+  const toggleLink = (provider: "google" | "discord") => {
     setConnections((prev) => ({
       ...prev,
       [provider]: !prev[provider],

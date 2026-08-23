@@ -1,5 +1,5 @@
 import React from "react";
-import { Github, Twitter, Youtube } from "lucide-react";
+import { Twitter, Youtube } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 
 function FooterSocial({ icon }: { icon: React.ReactElement<any> }) {
@@ -58,7 +58,6 @@ export function LandingFooter() {
             are ready to share.
           </p>
           <div className="flex items-center gap-3">
-            <FooterSocial icon={<Github />} />
             <FooterSocial icon={<Twitter />} />
             <FooterSocial icon={<Youtube />} />
           </div>

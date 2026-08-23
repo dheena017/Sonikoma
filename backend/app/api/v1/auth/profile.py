@@ -44,9 +44,9 @@ async def get_current_user_profile_endpoint(current_user: dict = Depends(get_cur
         portfolio_links = []
 
     try:
-        social_connections = json.loads(current_user.get("social_connections") or '{"google":true,"github":false,"discord":false}')
+        social_connections = json.loads(current_user.get("social_connections") or '{"google":true,"discord":false}')
     except Exception:
-        social_connections = {"google": True, "github": False, "discord": False}
+        social_connections = {"google": True, "discord": False}
 
     try:
         unlocked_rewards = json.loads(current_user.get("unlocked_rewards") or "[]")

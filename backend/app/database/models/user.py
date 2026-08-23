@@ -33,7 +33,7 @@ class User(Base):
     social_connections: Mapped[str] = mapped_column(
         Text,
         nullable=False,
-        default='{"google":true,"github":false,"discord":false}',
+        default='{"google":true,"discord":false}',
     )
     is_locked: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[str] = mapped_column(String, server_default=func.current_timestamp())
