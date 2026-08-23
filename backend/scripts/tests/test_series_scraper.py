@@ -228,17 +228,17 @@ async def discover_and_select_episodes(
 
     latency = time.time() - t0
 
-    if not series_data or not series_data.get("episodes"):
-        print(f"\n  {color('Notice:', Style.YELLOW)} No episode catalog found for this URL.")
+    if not series_data or (not series_data.get("chapters") and not series_data.get("episodes")):
+        print(f"\n  {color('Notice:', Style.YELLOW)} No chapter catalog found for this URL.")
         print(f"  💡 {color('Tip:', Style.CYAN)} If this is a single chapter reader, you can test it directly with:")
-        print(f"     python backend/scripts/test_chapter_scraper.py \"{series_url}\"")
+        print(f"     python backend/scripts/tests/test_chapter_scraper.py \"{series_url}\"")
         return
 
-    title = series_data.get("title") or "Webtoon Series"
-    episodes = series_data.get("episodes") or []
+    title = series_data.get("title") or series_data.get("series_title") or "Comic Series"
+    chapters = series_data.get("chapters") or series_data.get("episodes") or []
     author = series_data.get("author") or "N/A"
     genre = series_data.get("genre") or "N/A"
-    cover_image = series_data.get("cover_image") or series_data.get("cover") or series_data.get("thumbnail") or "N/A"
+    cover_image = series_data.get("cover_image") or "N/A"
 
     print("\n" + "=" * 80)
     print(color("  [2] DISCOVERED SERIES CATALOG", Style.BOLD + Style.CYAN))
@@ -247,39 +247,39 @@ async def discover_and_select_episodes(
     print(f"  • Author                : {author}")
     print(f"  • Genre                 : {genre}")
     print(f"  • Cover Image           : {color(cover_image, Style.CYAN)}")
-    print(f"  • Total Episodes Found  : {color(str(len(episodes)), Style.BOLD + Style.GREEN)}")
+    print(f"  • Total Chapters Found  : {color(str(len(chapters)), Style.BOLD + Style.GREEN)}")
     print(f"  • Discovery Latency     : {latency:.2f}s")
     print("=" * 80)
 
-    # 3. Display Discovered Episodes Table
-    display_limit = min(20, len(episodes))
-    print(f"\n  📚 Episode List Preview (Showing {display_limit} of {len(episodes)}):")
-    print(f"  {'#':<4} | {'Episode Name':<40} | {'Date':<12} | {'Cover Image'}")
+    # 3. Display Discovered Chapters Table
+    display_limit = min(20, len(chapters))
+    print(f"\n  📚 Chapter List Preview (Showing {display_limit} of {len(chapters)}):")
+    print(f"  {'#':<4} | {'Chapter Name':<40} | {'Date':<12} | {'Cover Image'}")
     print("  " + "-" * 85)
-    for idx, ep in enumerate(episodes[:display_limit]):
-        ep_name = ep.get("title") or ep.get("episode") or f"Episode {idx+1}"
-        ep_date = ep.get("date") or "N/A"
-        ep_cover = (ep.get("cover_image") or "N/A")[:35]
-        print(f"  {idx+1:<4} | {ep_name[:40]:<40} | {ep_date:<12} | {ep_cover}")
+    for idx, ch in enumerate(chapters[:display_limit]):
+        ch_name = ch.get("title") or ch.get("episode") or f"Chapter {idx+1}"
+        ch_date = ch.get("date") or "N/A"
+        ch_cover = (ch.get("cover_image") or "N/A")[:35]
+        print(f"  {idx+1:<4} | {ch_name[:40]:<40} | {ch_date:<12} | {ch_cover}")
 
-    if len(episodes) > display_limit:
-        print(f"  ... and {len(episodes) - display_limit} additional episodes in catalog.")
+    if len(chapters) > display_limit:
+        print(f"  ... and {len(chapters) - display_limit} additional chapters in catalog.")
 
-    # 4. Episode Selection
+    # 4. Chapter Selection
     if select_all:
-        selected_indices = list(range(1, len(episodes) + 1))
-        print(f"\n  {color('[Auto-Select]', Style.BOLD + Style.GREEN)} Selected ALL {len(episodes)} episodes.")
+        selected_indices = list(range(1, len(chapters) + 1))
+        print(f"\n  {color('[Auto-Select]', Style.BOLD + Style.GREEN)} Selected ALL {len(chapters)} chapters.")
     else:
         print("\n" + "-" * 80)
-        print(color("  👉 How would you like to select episodes?", Style.BOLD + Style.YELLOW))
-        print("     • [A]   : Select ALL episodes")
+        print(color("  👉 How would you like to select chapters?", Style.BOLD + Style.YELLOW))
+        print("     • [A]   : Select ALL chapters")
         print("     • [1-5] : Select a specific range (e.g. 1-5 or 1,3,7)")
-        print("     • [L 5] : Select the latest 5 episodes")
+        print("     • [L 5] : Select the latest 5 chapters")
         print("     • [Q]   : Quit without scraping")
         print("-" * 80)
 
         try:
-            choice = input(f"[?] Enter episode selection [A/1-{len(episodes)}/L 5]: ").strip()
+            choice = input(f"[?] Enter chapter selection [A/1-{len(chapters)}/L 5]: ").strip()
             if choice.lower() == "q":
                 print("Aborted.")
                 return

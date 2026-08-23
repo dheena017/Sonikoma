@@ -320,6 +320,9 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             ep["cover_image"] = ep_img
             ep["thumbnail"] = ep_img
             ep["cover"] = ep_img
+            ch_num = ep.get("chapter_number") or ep.get("episode_no") or ep.get("number")
+            ep["chapter_number"] = ch_num
+            ep["episode_no"] = ch_num
 
         sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
 
@@ -334,6 +337,8 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                 "cover_image": cover_image,
                 "url": url
             },
+            "chapters": sorted_eps,
+            "total_chapters": len(sorted_eps),
             "episodes": sorted_eps,
             "total_episodes": len(sorted_eps)
         }

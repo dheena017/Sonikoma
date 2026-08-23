@@ -182,6 +182,7 @@ async def scrape_series_episodes(
             series_dict["cover_image"] = cover_img
             result["series"] = series_dict
             result["title"] = result.get("series_title") or series_dict.get("title") or "Comic Series"
+            result["series_title"] = result["title"]
             result["cover_image"] = cover_img
             result["cover"] = cover_img
             result["thumbnail"] = cover_img
@@ -189,26 +190,37 @@ async def scrape_series_episodes(
             result["genre"] = series_dict.get("genre") or ""
             result["description"] = series_dict.get("description") or ""
 
-            for ep in result.get("episodes", []):
+            chapter_list = result.get("chapters") or result.get("episodes") or []
+            for ep in chapter_list:
                 ep_img = ep.get("cover_image") or ep.get("thumbnail") or ep.get("cover") or cover_img
                 ep["cover_image"] = ep_img
                 ep["thumbnail"] = ep_img
                 ep["cover"] = ep_img
+                ch_num = ep.get("chapter_number") or ep.get("episode_no") or ep.get("number")
+                ep["chapter_number"] = ch_num
+                ep["episode_no"] = ch_num
+
+            result["chapters"] = chapter_list
+            result["total_chapters"] = len(chapter_list)
+            result["episodes"] = chapter_list
+            result["total_episodes"] = len(chapter_list)
 
             _save_cached_episodes(raw_input, result.get("series_title", "Comic Series"), result)
             return result
 
         return result or {
             "success": False,
-            "error": "Could not discover episodes for this series URL.",
+            "error": "Could not discover chapters for this series URL.",
             "series_title": "Unknown Series",
             "url": raw_input,
+            "chapters": [],
+            "total_chapters": 0,
             "episodes": [],
             "total_episodes": 0
         }
 
     except Exception as e:
-        logger.error(f"[scrape_series_episodes] Error discovering episodes for {raw_input}: {e}", exc_info=True)
+        logger.error(f"[scrape_series_episodes] Error discovering chapters for {raw_input}: {e}", exc_info=True)
         return {
             "success": False,
             "error": str(e),
@@ -223,6 +235,8 @@ async def scrape_series_episodes(
                 "description": "",
                 "url": raw_input
             },
+            "chapters": [],
+            "total_chapters": 0,
             "episodes": [],
             "total_episodes": 0
         }
@@ -238,7 +252,7 @@ async def scrape_series_episodes_advanced(
     sort_by: str = "latest",
     bypass_cache: bool = False
 ) -> Dict[str, Any]:
-    """Universal advanced series & episode scraper with pagination, natural sorting, and caching."""
+    """Universal advanced series & chapter scraper with pagination, natural sorting, and caching."""
     result = await scrape_series_episodes(
         series_url=series_url,
         title_no=title_no,
@@ -250,27 +264,31 @@ async def scrape_series_episodes_advanced(
     if not result.get("success"):
         return result
 
-    episodes = result.get("episodes", [])
+    chapters = result.get("chapters") or result.get("episodes", [])
     if max_episodes:
-        episodes = episodes[:max_episodes]
+        chapters = chapters[:max_episodes]
 
-    total_episodes = len(episodes)
+    total_chapters = len(chapters)
     if not per_page or per_page <= 0:
-        per_page = total_episodes if total_episodes > 0 else 1
+        per_page = total_chapters if total_chapters > 0 else 1
 
-    total_pages = max(1, (total_episodes + per_page - 1) // per_page)
+    total_pages = max(1, (total_chapters + per_page - 1) // per_page)
     page = max(1, min(page, total_pages))
 
     start_idx = (page - 1) * per_page
     end_idx = start_idx + per_page
-    paginated_episodes = episodes[start_idx:end_idx]
+    paginated_chapters = chapters[start_idx:end_idx]
 
-    result["episodes"] = paginated_episodes
+    result["chapters"] = paginated_chapters
+    result["total_chapters"] = total_chapters
+    result["episodes"] = paginated_chapters
+    result["total_episodes"] = total_chapters
     result["pagination"] = {
         "page": page,
         "per_page": per_page,
         "total_pages": total_pages,
-        "total_episodes": total_episodes,
+        "total_chapters": total_chapters,
+        "total_episodes": total_chapters,
         "has_next": page < total_pages,
         "has_prev": page > 1
     }
