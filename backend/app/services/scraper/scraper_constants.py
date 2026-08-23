@@ -144,11 +144,11 @@ WEBCOMICS_DOMAINS = [
 
 # 9. MangaStream & ThemeSphere Scanlations
 MANGASTREAM_DOMAINS = [
-    "asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com",
-    "flamecomics.xyz", "flamecomics.me", "flamecomics.com", "flamescans.org",
+    "asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com", "asuracomics.com", "asura.nacm.me", "asurascans.net",
+    "flamecomics.xyz", "flamecomics.me", "flamecomics.com", "flamescans.org", "flamecomics.org", "flamescans.com", "flame-comics.com",
     "void-scans.com", "voidscans.com", "luminousscans.gg", "luminousscans.com",
     "reaperscans.com", "realmscans.xyz", "cosmicscans.com", "anigliscans.com",
-    "freakscans.com", "suryascans.com", "nightcomic.com"
+    "freakscans.com", "suryascans.com", "nightcomic.com", "omegascans.org", "vortexscans.org"
 ]
 
 # 10. WordPress WP-Manga (Madara) Platforms
@@ -157,8 +157,10 @@ MADARA_DOMAINS = [
     "manhuaus.com", "topmanhua.com", "manhuaplus.org", "manhuaplus.com",
     "1stkissmanga.io", "1stkissmanga.com", "1stkissmanga.me", "mangatx.com",
     "mangaeffect.com", "mangaonlineteam.com", "kunmanga.com", "harimanga.com",
-    "zinmanga.com", "manhwaclan.com", "manhwaden.com", "manga68.com",
-    "manhuato.com", "mangakakalot.com", "mangakakalot.tv", "readmangakakalot.com",
+    "zinmanga.com", "zinmanga.me", "zinmanga.net", "manhwaclan.com", "manhwaden.com", "manga68.com",
+    "manhuato.com", "mangakakalot.com", "mangakakalot.tv", "mangakakalot.so", "readmangakakalot.com",
+    "manganato.com", "readmanganato.com", "chapmanganato.to", "chapmanganato.com", "natomanga.com",
+    "mangasee123.com", "mangalife.us", "mangareader.to", "mangapill.com",
     "manhwa18.cc", "example-manhwa.xyz"
 ]
 

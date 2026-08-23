@@ -234,9 +234,10 @@ class DomainBlockManager:
             if domain == blocked or domain.endswith(f".{blocked}"):
                 return True
 
-        # 3. Whitelist check: only registered comic domains are allowed
-        if not cls.is_registered(domain):
-            return True
+        # 3. Optional Strict Whitelist check (only if STRICT_DOMAIN_WHITELIST=1)
+        if os.getenv("STRICT_DOMAIN_WHITELIST", "0").lower() in ("1", "true", "yes"):
+            if not cls.is_registered(domain):
+                return True
 
         return False
 
@@ -262,9 +263,10 @@ class DomainBlockManager:
             if domain == blocked or domain.endswith(f".{blocked}"):
                 return True, info.get("reason", "Domain is blocked by policy")
 
-        # 3. Whitelist check
-        if not cls.is_registered(domain):
-            return True, f"Domain '{domain}' is not registered in the comic platform allowlist"
+        # 3. Optional Strict Whitelist check
+        if os.getenv("STRICT_DOMAIN_WHITELIST", "0").lower() in ("1", "true", "yes"):
+            if not cls.is_registered(domain):
+                return True, f"Domain '{domain}' is not registered in the comic platform allowlist"
 
         return False, None
 
