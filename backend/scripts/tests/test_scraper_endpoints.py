@@ -12,7 +12,8 @@ import sys
 import os
 from pathlib import Path
 
-backend_dir = Path(__file__).resolve().parent.parent
+script_dir = Path(__file__).resolve().parent
+backend_dir = script_dir.parent.parent if script_dir.name in ("tests", "test") else script_dir.parent
 app_dir = backend_dir / "app"
 sys.path.insert(0, str(app_dir))
 sys.path.insert(0, str(backend_dir))

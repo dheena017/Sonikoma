@@ -38,7 +38,8 @@ if hasattr(sys.stdout, "reconfigure"):
         pass
 
 # Add backend and backend/app to sys.path
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.abspath(os.path.join(_SCRIPT_DIR, "..", "..")) if os.path.basename(_SCRIPT_DIR) in ("tests", "test") else os.path.abspath(os.path.join(_SCRIPT_DIR, ".."))
 APP_DIR = os.path.abspath(os.path.join(BASE_DIR, "app"))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
