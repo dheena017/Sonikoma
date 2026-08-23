@@ -1,13 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   X,
   Play,
   Loader,
   AlertTriangle,
   ArrowRight,
+  RotateCw,
 } from "lucide-react";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import { scrapeChapter } from "@/api";
+import { getChapterReaderPanels } from "@/api/endpoints/scraper";
 
 import type { Chapter } from "../types/ChapterTypes";
 
@@ -55,45 +57,58 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (!chapter) return;
-
-    const fetchPanels = async () => {
+  const fetchPanels = useCallback(
+    async (forceRefresh = false) => {
+      if (!chapter) return;
       setLoading(true);
       setError(null);
       setImages([]);
 
       try {
-        const data = await scrapeChapter(fetchWithInterceptor, {
+        const data = await getChapterReaderPanels(fetchWithInterceptor, {
           url: chapter.url,
-          force_refresh: true,
-          proxy_images: true,
+          force_refresh: forceRefresh,
         });
 
-        if (data.success && data.images && data.images.length > 0) {
-          const imageUrls = data.images.map((img: any) =>
-            typeof img === "string" ? img : img.url
-          );
-          setImages(imageUrls);
+        if (data && data.success && data.panels && data.panels.length > 0) {
+          const list = data.panels.map((p) => p.proxied_url || p.url);
+          setImages(list);
+        } else if (data && data.images && data.images.length > 0) {
+          setImages(data.images);
         } else {
-          throw new Error(
-            data.error?.message ||
-              (data as any).message ||
-              "No images found on this comic chapter page."
-          );
+          // Fallback to scrapeChapter
+          const fallback = await scrapeChapter(fetchWithInterceptor, {
+            url: chapter.url,
+            force_refresh: true,
+            proxy_images: true,
+          });
+          if (fallback && fallback.success && fallback.images && fallback.images.length > 0) {
+            setImages(
+              fallback.images.map((img: any) =>
+                typeof img === "string" ? img : img.url
+              )
+            );
+          } else {
+            throw new Error("No images found on this comic chapter page.");
+          }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("[Preview Scraper Error] ", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch chapter panels."
-        );
+        const errorMsg =
+          err?.message ||
+          (err?.detail ? (typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail)) : null) ||
+          (typeof err === "string" ? err : "Failed to fetch chapter panels.");
+        setError(errorMsg);
       } finally {
         setLoading(false);
       }
-    };
+    },
+    [chapter, fetchWithInterceptor]
+  );
 
-    fetchPanels();
-  }, [chapter, fetchWithInterceptor]);
+  useEffect(() => {
+    fetchPanels(false);
+  }, [fetchPanels]);
 
   useEffect(() => {
     if (autoScrollSpeed === 0) return;
@@ -300,18 +315,25 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
                   private/restricted.
                 </p>
               </div>
-              <div className="flex gap-3 mt-4">
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                 <button
-                  onClick={onClose}
-                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  onClick={() => fetchPanels(true)}
+                  className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-purple-950/40 cursor-pointer active:scale-95 border border-purple-400/30"
                 >
-                  Close
+                  <RotateCw size={14} className={loading ? "animate-spin" : ""} />
+                  Retry Scraping
                 </button>
                 <button
                   onClick={() => onImport(chapter)}
-                  className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-purple-300 hover:text-white border border-purple-500/20 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   Force Open Editor <ArrowRight size={14} />
+                </button>
+                <button
+                  onClick={onClose}
+                  className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                >
+                  Close
                 </button>
               </div>
             </div>
@@ -323,22 +345,34 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
               className="w-full flex flex-col items-center space-y-0 transition-all duration-300 py-4"
               style={{ maxWidth: `${stripWidthPx}px` }}
             >
-              {images.map((imgUrl, idx) => (
-                <img
-                  key={idx}
-                  src={getProxiedImageUrl(imgUrl, chapter?.url)}
-                  alt={`Panel ${idx + 1}`}
-                  className="w-full h-auto select-none pointer-events-none block m-0 p-0 min-h-[300px] bg-neutral-900/20 shadow-2xl"
-                  style={{ width: "100%" }}
-                  loading={idx < 5 ? "eager" : "lazy"}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='150'%3E%3Crect fill='%23171717' width='400' height='150'/%3E%3Ctext fill='%236b7280' font-family='sans-serif' font-size='14' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3EFailed to load panel %23" +
-                      (idx + 1) +
-                      "%3C/text%3E%3C/svg%3E";
-                  }}
-                />
-              ))}
+              {images.map((imgUrl, idx) => {
+                const resolvedSrc = imgUrl.startsWith("/api/proxy-image")
+                  ? imgUrl
+                  : getProxiedImageUrl(imgUrl, chapter?.url);
+
+                return (
+                  <img
+                    key={idx}
+                    src={resolvedSrc}
+                    alt={`Panel ${idx + 1}`}
+                    className="w-full h-auto select-none block m-0 p-0 min-h-[300px] bg-neutral-900/40 shadow-2xl transition-opacity duration-300"
+                    style={{ width: "100%" }}
+                    loading={idx < 4 ? "eager" : "lazy"}
+                    onError={(e) => {
+                      const el = e.target as HTMLImageElement;
+                      if (el.src.includes("/api/proxy-image") && !el.dataset.retried) {
+                        el.dataset.retried = "1";
+                        el.src = imgUrl; // Try raw direct URL
+                      } else {
+                        el.src =
+                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='150'%3E%3Crect fill='%23171717' width='400' height='150'/%3E%3Ctext fill='%23a855f7' font-family='sans-serif' font-size='14' font-weight='bold' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3EPanel %23" +
+                          (idx + 1) +
+                          "%3C/text%3E%3C/svg%3E";
+                      }
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
         </div>

@@ -704,11 +704,10 @@ export default function AppRouter(props: AppRouterProps) {
       !currentPath.startsWith("/scraper/audio-settings");
 
     const isWorkspacePath =
-      currentPath === "/scraper" ||
-      currentPath === "/scraper/" ||
+      (currentPath === "/scraper" || currentPath === "/scraper/") ||
       (chapterPathMatch !== null &&
         !isDetailsMode &&
-        !currentPath.startsWith("/scraper/editor/"));
+        !currentPath.startsWith("/scraper/editor"));
 
     return {
       chapterPathMatch,
@@ -730,9 +729,7 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/scraper/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
-        currentPath === "/scraper/editor" ||
-        currentPath === "/scraper/editor/" ||
-        currentPath.startsWith("/scraper/editor/"),
+        currentPath.startsWith("/scraper/editor"),
       isShortcutsPath: currentPath === "/shortcuts",
       isAudioSettingsPath: currentPath === "/scraper/audio-settings",
       isOptimizerPath:
@@ -879,11 +876,8 @@ export default function AppRouter(props: AppRouterProps) {
 
   const isProEditorPage =
     (Boolean(pathFlags.editorRouteMatch) ||
-      currentPath === "/editor" ||
-      currentPath === "/editor/" ||
-      currentPath === "/scraper/editor" ||
-      currentPath === "/scraper/editor/" ||
-      currentPath.startsWith("/scraper/editor/")) &&
+      currentPath.startsWith("/editor") ||
+      currentPath.startsWith("/scraper/editor")) &&
     !pathFlags.isImageEditorPage;
 
   const editorSeriesSlug =

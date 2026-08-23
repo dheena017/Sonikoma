@@ -599,7 +599,7 @@ const AdminDashboardPage = React.memo(
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-              <span className="text-neutral-400 font-bold">New Series</span>
+              <span className="text-neutral-400 font-bold">New Chapter</span>
             </div>
           </div>
         </div>

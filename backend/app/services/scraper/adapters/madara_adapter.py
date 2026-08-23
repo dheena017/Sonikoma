@@ -78,10 +78,14 @@ class MadaraCmsAdapter(BaseSiteAdapter):
         clean_url = raw_url.rstrip("/")
 
         # If user passed a chapter link, resolve parent manga url
-        if "/chapter" in clean_url or "-chapter-" in clean_url:
-            m = re.match(r"^(https?://[^/]+/manga/[^/]+)", clean_url)
+        if "/chapter" in clean_url or "-chapter-" in clean_url or "/ch-" in clean_url or "/ch/" in clean_url:
+            m = re.match(r"^(https?://[^/]+/(?:manga|serie|series|comic|comics|webtoon|webtoons|read|book)/[^/]+)", clean_url, re.I)
             if m:
-                clean_url = m.group(1)
+                clean_url = m.group(1).rstrip("/") + "/"
+            else:
+                m2 = re.match(r"^(https?://.+?)/(?:chapter[-_/\d]|ch[-_/\d]).*", clean_url, re.I)
+                if m2:
+                    clean_url = m2.group(1).rstrip("/") + "/"
 
         html, status, _ = await HttpFetcher.fetch_html(clean_url)
         if not html or status in (403, 503, 429) or (html and "<html" not in html.lower()):
@@ -250,7 +254,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                         is_locked = bool(li.find(class_=re.compile(r"lock|coin|paid|vip|fastpass", re.I)))
 
                         ep_img = a.find("img") or li.find("img")
-                        ep_cover = (ep_img.get("data-src") or ep_img.get("src")) if ep_img else cover_image
+                        ep_cover = self.extract_image_src(ep_img, clean_url) if ep_img else cover_image
 
                         episodes.append({
                             "title": title_raw or f"Chapter {num_val or len(episodes)+1}",
@@ -297,7 +301,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                 date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
 
                 ep_img = a.find("img") or (parent_li.find("img") if parent_li else None)
-                ep_cover = (ep_img.get("data-src") or ep_img.get("src")) if ep_img else cover_image
+                ep_cover = self.extract_image_src(ep_img, clean_url) if ep_img else cover_image
 
                 episodes.append({
                     "title": title_raw or f"Chapter {num_val or len(episodes)+1}",

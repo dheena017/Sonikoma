@@ -19,10 +19,11 @@ Exposes modular, dedicated REST routes for:
 import time
 import logging
 from typing import Optional, Dict, Any, List
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 from fastapi import APIRouter, HTTPException, Depends, Query
 
-from api.dependencies.auth import get_current_user
+from app.core.logging import logger
+from api.dependencies.auth import get_current_user, get_optional_current_user
 from schemas.scraper import (
     # Chapter DTOs
     ScrapeChapterRequest,
@@ -125,7 +126,9 @@ async def separate_url_post(
 ):
     if not payload.url or not payload.url.strip():
         raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
+    logger.debug(f"[ScraperAPI] POST /separate-url: target='{payload.url}'")
     result = UniversalUrlSeparator.separate(payload.url)
+    logger.debug(f"[ScraperAPI] Separate result: platform={result.get('platform')}, is_chapter={result.get('is_chapter_url')}, series_slug={result.get('series_slug')}")
     return SeparateUrlResponse(**result)
 
 
@@ -140,7 +143,9 @@ async def separate_url_get(
 ):
     if not url or not url.strip():
         raise HTTPException(status_code=400, detail="Target URL parameter 'url' cannot be empty.")
+    logger.debug(f"[ScraperAPI] GET /separate-url: target='{url}'")
     result = UniversalUrlSeparator.separate(url)
+    logger.debug(f"[ScraperAPI] Separate result: platform={result.get('platform')}, is_chapter={result.get('is_chapter_url')}, series_slug={result.get('series_slug')}")
     return SeparateUrlResponse(**result)
 
 
@@ -153,6 +158,7 @@ async def normalize_url_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /normalize-url: target='{payload.url}'")
     normalized = UrlNormalizer.normalize_url(payload.url)
     return {"original_url": payload.url, "normalized_url": normalized}
 
@@ -165,6 +171,7 @@ async def resolve_parent_series_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /parent-series-url: target='{payload.url}'")
     parent = UrlNormalizer.resolve_parent_series_url(payload.url)
     return {"chapter_url": payload.url, "parent_series_url": parent}
 
@@ -177,9 +184,11 @@ async def detect_platform_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /detect-platform: target='{payload.url}'")
     source_info = SiteAnalyzer.analyze(payload.url)
     adapter = AdapterRegistry.get_adapter(source_info)
     sep_data = UniversalUrlSeparator.separate(payload.url)
+    logger.debug(f"[ScraperAPI] Detected platform: {source_info.platform} -> adapter: {adapter.__class__.__name__}")
     return {
         "url": payload.url,
         "domain": source_info.domain,
@@ -208,8 +217,10 @@ async def scrape_chapter_async_endpoint(
         raise HTTPException(status_code=400, detail="Target Chapter URL is required.")
 
     target_url = body.url.strip()
+    logger.info(f"[ScraperAPI] POST /chapter: url='{target_url}', force_refresh={body.force_refresh}, bypass_cache={body.bypass_cache}")
     if domain_block_manager.is_blocked(target_url):
         domain = urlparse(target_url).netloc or target_url
+        logger.warning(f"[ScraperAPI] Blocked domain rejected: {domain}")
         raise HTTPException(
             status_code=403,
             detail=f"This domain ({domain}) is currently in the blocked exclusion list."
@@ -223,12 +234,14 @@ async def scrape_chapter_async_endpoint(
         chapter_id=body.chapter_id,
         metadata={"url": target_url}
     )
+    logger.debug(f"[ScraperAPI] Created async scrape job: {job.job_id} for user: {user_id}")
 
     clean_headers = {k: v for k, v in (body.headers or {}).items() if not k.startswith("additionalProp") and v != "string"} or None
     parsed_cookies = parse_cookie_string(body.cookies) if body.cookies else None
     bypass = True if body.force_refresh else (body.bypass_cache or False)
 
     async def _scrape_coro(report_progress):
+        logger.debug(f"[ScraperAPI] Starting execution of scrape job: {job.job_id}")
         report_progress(10.0, JobStage.ANALYZING_URL.value)
         report_progress(30.0, JobStage.FETCHING.value)
 
@@ -244,6 +257,7 @@ async def scrape_chapter_async_endpoint(
             job_id=job.job_id
         )
 
+        logger.debug(f"[ScraperAPI] Scrape job {job.job_id} extracted {len(result.images)} images (series: '{result.series.title if result.series else 'N/A'}')")
         if result.series and result.series.title:
             job.project_id = result.series.title
         if result.chapter and (result.chapter.title or result.chapter.number is not None):
@@ -271,8 +285,10 @@ async def scrape_chapter_sync_post(
         raise HTTPException(status_code=400, detail="Target Chapter URL is required.")
 
     target_url = body.url.strip()
+    logger.info(f"[ScraperAPI] POST /chapter/sync: url='{target_url}'")
     if domain_block_manager.is_blocked(target_url):
         domain = urlparse(target_url).netloc or target_url
+        logger.warning(f"[ScraperAPI] Blocked domain rejected: {domain}")
         raise HTTPException(
             status_code=403,
             detail=f"This domain ({domain}) is currently in the blocked exclusion list."
@@ -292,6 +308,7 @@ async def scrape_chapter_sync_post(
         filter_banners=body.filter_banners if body.filter_banners is not None else True,
         project_id=body.project_id
     )
+    logger.debug(f"[ScraperAPI] Synchronous scrape completed: {len(result.images)} panels returned")
     return result
 
 
@@ -315,6 +332,96 @@ async def scrape_chapter_sync_get(
         filter_banners=filter_banners
     )
     return result
+
+
+@router.post(
+    "/reader-chapter",
+    summary="Scrape & return optimized chapter reading panels",
+    description="Dedicated fast endpoint for chapter reader strip with proxied and high-res image URLs."
+)
+async def get_reader_chapter_panels_post(
+    body: ScrapeChapterRequest,
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    if not body.url or not body.url.strip():
+        raise HTTPException(status_code=400, detail="Chapter URL is required.")
+
+    target_url = body.url.strip()
+    result = await AdaptiveScraperEngine.scrape_url(
+        url=target_url,
+        bypass_cache=bool(body.force_refresh or body.bypass_cache),
+        proxy_images=False,
+        filter_banners=True
+    )
+
+    panels = []
+    for idx, img in enumerate(result.images):
+        raw_u = img.url if hasattr(img, "url") else str(img)
+        proxied_u = f"/api/proxy-image?url={quote(raw_u, safe='')}&referer={quote(target_url, safe='')}"
+        panels.append({
+            "index": idx,
+            "url": raw_u,
+            "proxied_url": proxied_u,
+            "width": getattr(img, "width", None),
+            "height": getattr(img, "height", None)
+        })
+
+    return {
+        "success": result.success if result else bool(panels),
+        "url": target_url,
+        "series_title": result.series.title if result and result.series else "",
+        "chapter_title": result.chapter.title if result and result.chapter else "",
+        "chapter_number": result.chapter.number if result and result.chapter else None,
+        "total_panels": len(panels),
+        "panels": panels,
+        "images": [p["proxied_url"] for p in panels],
+        "raw_images": [p["url"] for p in panels]
+    }
+
+
+@router.get(
+    "/reader-chapter",
+    summary="Get chapter reader panels via GET query"
+)
+async def get_reader_chapter_panels_get(
+    url: str = Query(..., description="Target chapter URL"),
+    force_refresh: bool = Query(False, description="Bypass cache"),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    if not url or not url.strip():
+        raise HTTPException(status_code=400, detail="URL query parameter is required.")
+
+    target_url = url.strip()
+    result = await AdaptiveScraperEngine.scrape_url(
+        url=target_url,
+        bypass_cache=force_refresh,
+        proxy_images=False,
+        filter_banners=True
+    )
+
+    panels = []
+    for idx, img in enumerate(result.images):
+        raw_u = img.url if hasattr(img, "url") else str(img)
+        proxied_u = f"/api/proxy-image?url={quote(raw_u, safe='')}&referer={quote(target_url, safe='')}"
+        panels.append({
+            "index": idx,
+            "url": raw_u,
+            "proxied_url": proxied_u,
+            "width": getattr(img, "width", None),
+            "height": getattr(img, "height", None)
+        })
+
+    return {
+        "success": result.success if result else bool(panels),
+        "url": target_url,
+        "series_title": result.series.title if result and result.series else "",
+        "chapter_title": result.chapter.title if result and result.chapter else "",
+        "chapter_number": result.chapter.number if result and result.chapter else None,
+        "total_panels": len(panels),
+        "panels": panels,
+        "images": [p["proxied_url"] for p in panels],
+        "raw_images": [p["url"] for p in panels]
+    }
 
 
 @router.post(
@@ -469,8 +576,11 @@ async def scrape_series_async_endpoint(
         raise HTTPException(status_code=400, detail="Either 'url' or 'title_no' is required.")
 
     target_url = body.url or f"https://www.webtoons.com/en/fantasy/episode/list?title_no={body.title_no}"
+    logger.info(f"[ScraperAPI] POST /series: target='{target_url}', title_no={body.title_no}, sort_by={body.sort_by}")
+
     if domain_block_manager.is_blocked(target_url):
         domain = urlparse(target_url).netloc or target_url
+        logger.warning(f"[ScraperAPI] Blocked domain rejected for series discovery: {domain}")
         raise HTTPException(
             status_code=403,
             detail=f"This domain ({domain}) is currently in the blocked exclusion list."
@@ -483,8 +593,10 @@ async def scrape_series_async_endpoint(
         project_id=body.project_id or "Comic Series",
         metadata={"url": target_url}
     )
+    logger.debug(f"[ScraperAPI] Created series discovery job: {job.job_id}")
 
     async def _chapters_coro(report_progress):
+        logger.debug(f"[ScraperAPI] Executing series discovery job: {job.job_id}")
         report_progress(10.0, JobStage.ANALYZING_URL.value)
         report_progress(30.0, JobStage.FETCHING.value)
 
@@ -499,7 +611,11 @@ async def scrape_series_async_endpoint(
             bypass_cache=body.bypass_cache or False,
         )
 
+        total_ch = len(result.get("chapters", []))
+        logger.debug(f"[ScraperAPI] Series discovery job {job.job_id} found {total_ch} chapters (title: '{result.get('series_title')}')")
+
         if not result.get("success") and result.get("error"):
+            logger.error(f"[ScraperAPI] Series discovery job {job.job_id} failed: {result.get('error')}")
             raise Exception(result.get("error") or "Series scraping failed.")
 
         report_progress(100.0, JobStage.COMPLETED.value)
@@ -521,14 +637,16 @@ async def scrape_series_sync_endpoint(
         raise HTTPException(status_code=400, detail="Either 'url' or 'title_no' is required.")
 
     target_url = body.url or f"https://www.webtoons.com/en/fantasy/episode/list?title_no={body.title_no}"
+    logger.info(f"[ScraperAPI] POST /series/sync: target='{target_url}', title_no={body.title_no}")
     if domain_block_manager.is_blocked(target_url):
         domain = urlparse(target_url).netloc or target_url
+        logger.warning(f"[ScraperAPI] Blocked domain rejected for series discovery: {domain}")
         raise HTTPException(
             status_code=403,
             detail=f"This domain ({domain}) is currently in the blocked exclusion list."
         )
 
-    return await scrape_series_chapters_advanced(
+    result = await scrape_series_chapters_advanced(
         series_url=target_url,
         title_no=body.title_no,
         max_chapters=body.max_episodes if (body.max_episodes and body.max_episodes > 0) else None,
@@ -538,6 +656,8 @@ async def scrape_series_sync_endpoint(
         include_ratings=body.include_ratings if body.include_ratings is not None else False,
         bypass_cache=body.bypass_cache or False,
     )
+    logger.debug(f"[ScraperAPI] Sync series discovery completed: {len(result.get('chapters', []))} chapters found")
+    return result
 
 
 @router.get(
@@ -552,19 +672,23 @@ async def scrape_series_sync_get(
     current_user: dict = Depends(get_current_user)
 ):
     target_url = url.strip()
+    logger.info(f"[ScraperAPI] GET /series/sync: target='{target_url}'")
     if domain_block_manager.is_blocked(target_url):
         domain = urlparse(target_url).netloc or target_url
+        logger.warning(f"[ScraperAPI] Blocked domain rejected for series discovery: {domain}")
         raise HTTPException(
             status_code=403,
             detail=f"This domain ({domain}) is currently in the blocked exclusion list."
         )
 
     limit = max_chapters or max_episodes
-    return await scrape_series_chapters_advanced(
+    result = await scrape_series_chapters_advanced(
         series_url=target_url,
         sort_by=sort_by,
         max_chapters=limit
     )
+    logger.debug(f"[ScraperAPI] Sync GET series discovery completed: {len(result.get('chapters', []))} chapters found")
+    return result
 
 
 # =============================================================================

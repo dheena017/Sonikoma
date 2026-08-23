@@ -308,7 +308,7 @@ export default function MainLayout(props: MainLayoutProps) {
     currentPath === "/scraper" ||
     (currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/) !== null &&
       !currentPath.endsWith("/details") &&
-      !currentPath.startsWith("/scraper/editor/"));
+      !currentPath.startsWith("/scraper/editor"));
 
   const isAdminRestricted =
     isAnyAdmin && (!user || user.creator_role !== "admin");

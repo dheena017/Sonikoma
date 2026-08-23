@@ -676,9 +676,37 @@ const ScraperPageInner = (props: ScraperPageProps) => {
             fetchWithInterceptor={props.fetchWithInterceptor}
             onOpenChapterScraper={(url) => {
               const nav = navigateTo || (window as any).navigateTo;
-              const targetPath = `/scraper/chapters?url=${encodeURIComponent(
-                url
-              )}`;
+              let targetSlug = "";
+              if (url) {
+                try {
+                  const u = new URL(
+                    url.startsWith("http") ? url : `https://${url}`
+                  );
+                  const segments = u.pathname.split("/").filter(Boolean);
+                  const ignored = new Set([
+                    "list", "viewer", "chapter", "episode", "detail", "read", "index",
+                    "comic", "comics", "manga", "series", "en", "ko", "id", "zh", "webtoon"
+                  ]);
+                  while (segments.length > 0 && ignored.has(segments[segments.length - 1].toLowerCase())) {
+                    segments.pop();
+                  }
+                  if (
+                    segments.length > 1 &&
+                    (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(segments[segments.length - 1]) ||
+                     /^\d+$/.test(segments[segments.length - 1]))
+                  ) {
+                    segments.pop();
+                  }
+                  targetSlug = segments[segments.length - 1] || "";
+                } catch {
+                  targetSlug = url.split("/").filter(Boolean).pop() || "";
+                }
+                localStorage.setItem("chapter_scraper_url", url);
+                localStorage.setItem("episode_scraper_url", url);
+              }
+              const targetPath = targetSlug
+                ? `/scraper/${encodeURIComponent(targetSlug)}`
+                : "/scraper";
               if (typeof nav === "function") {
                 nav(targetPath);
               } else {
@@ -688,9 +716,37 @@ const ScraperPageInner = (props: ScraperPageProps) => {
             }}
             onOpenEpisodeScraper={(url) => {
               const nav = navigateTo || (window as any).navigateTo;
-              const targetPath = `/scraper/chapters?url=${encodeURIComponent(
-                url
-              )}`;
+              let targetSlug = "";
+              if (url) {
+                try {
+                  const u = new URL(
+                    url.startsWith("http") ? url : `https://${url}`
+                  );
+                  const segments = u.pathname.split("/").filter(Boolean);
+                  const ignored = new Set([
+                    "list", "viewer", "chapter", "episode", "detail", "read", "index",
+                    "comic", "comics", "manga", "series", "en", "ko", "id", "zh", "webtoon"
+                  ]);
+                  while (segments.length > 0 && ignored.has(segments[segments.length - 1].toLowerCase())) {
+                    segments.pop();
+                  }
+                  if (
+                    segments.length > 1 &&
+                    (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(segments[segments.length - 1]) ||
+                     /^\d+$/.test(segments[segments.length - 1]))
+                  ) {
+                    segments.pop();
+                  }
+                  targetSlug = segments[segments.length - 1] || "";
+                } catch {
+                  targetSlug = url.split("/").filter(Boolean).pop() || "";
+                }
+                localStorage.setItem("chapter_scraper_url", url);
+                localStorage.setItem("episode_scraper_url", url);
+              }
+              const targetPath = targetSlug
+                ? `/scraper/${encodeURIComponent(targetSlug)}`
+                : "/scraper";
               if (typeof nav === "function") {
                 nav(targetPath);
               } else {

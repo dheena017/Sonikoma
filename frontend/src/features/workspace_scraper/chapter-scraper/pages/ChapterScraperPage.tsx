@@ -15,6 +15,13 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
   navigateTo,
 }) => {
   const seriesNameParam = React.useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const searchUrl =
+      params.get("url") || params.get("target") || params.get("series");
+    if (searchUrl) {
+      return searchUrl;
+    }
+
     const path = window.location.pathname;
     if (path.startsWith("/scraper/")) {
       const seg = decodeURIComponent(

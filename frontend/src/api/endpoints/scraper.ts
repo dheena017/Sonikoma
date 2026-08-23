@@ -767,5 +767,38 @@ export const getScraperHealth = async (
   });
 };
 
+export interface ReaderPanel {
+  index: number;
+  url: string;
+  proxied_url: string;
+  width?: number | null;
+  height?: number | null;
+}
+
+export interface ReaderChapterResponse {
+  success: boolean;
+  url: string;
+  series_title?: string;
+  chapter_title?: string;
+  chapter_number?: number | null;
+  total_panels: number;
+  panels: ReaderPanel[];
+  images: string[];
+  raw_images: string[];
+}
+
+export const getChapterReaderPanels = async (
+  fetchWithInterceptor: FetchClient,
+  payload: { url: string; force_refresh?: boolean }
+): Promise<ReaderChapterResponse> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/reader-chapter", {
+    method: "POST",
+    body: JSON.stringify({
+      url: payload.url,
+      force_refresh: payload.force_refresh ?? false,
+    }),
+  });
+};
+
 
 

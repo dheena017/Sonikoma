@@ -171,19 +171,52 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
   };
 
   const handleOpenChapterScraperClick = () => {
-    const destinationUrl = separatedData?.series_url || targetUrl;
-    const seriesSlug =
+    const destinationUrl = separatedData?.series_url || targetUrl.trim();
+    let seriesSlug =
       separatedData?.series_slug ||
-      separatedData?.title_slug ||
-      "chapters";
+      separatedData?.title_slug;
+
+    if (!seriesSlug && destinationUrl) {
+      try {
+        const u = new URL(
+          destinationUrl.startsWith("http")
+            ? destinationUrl
+            : `https://${destinationUrl}`
+        );
+        const segments = u.pathname.split("/").filter(Boolean);
+        const ignored = new Set([
+          "list", "viewer", "chapter", "episode", "detail", "read", "index",
+          "comic", "comics", "manga", "series", "en", "ko", "id", "zh", "webtoon"
+        ]);
+        while (segments.length > 0 && ignored.has(segments[segments.length - 1].toLowerCase())) {
+          segments.pop();
+        }
+        if (
+          segments.length > 1 &&
+          (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(segments[segments.length - 1]) ||
+           /^\d+$/.test(segments[segments.length - 1]))
+        ) {
+          segments.pop();
+        }
+        seriesSlug = segments[segments.length - 1] || "";
+      } catch {
+        seriesSlug = destinationUrl.split("/").filter(Boolean).pop() || "";
+      }
+    }
+
+    if (destinationUrl) {
+      localStorage.setItem("chapter_scraper_url", destinationUrl);
+      localStorage.setItem("episode_scraper_url", destinationUrl);
+    }
+
     const opener = onOpenChapterScraper || onOpenEpisodeScraper;
     if (opener) {
       opener(destinationUrl);
     } else {
       const nav = (window as any).navigateTo;
-      const targetPath = `/scraper/${encodeURIComponent(
-        seriesSlug
-      )}?url=${encodeURIComponent(destinationUrl)}`;
+      const targetPath = seriesSlug
+        ? `/scraper/${encodeURIComponent(seriesSlug)}`
+        : "/scraper";
       if (typeof nav === "function") {
         nav(targetPath);
       } else {
@@ -200,7 +233,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-500" />
           <input
             id="target_url_input"
-            type="url"
+            type="text"
             autoComplete="off"
             value={targetUrl}
             onFocus={() => setShowSuggestions(true)}

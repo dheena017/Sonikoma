@@ -86,7 +86,7 @@ export default function DashboardHeader({
           className="flex items-center gap-2 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-2xl text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-purple-900/40 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95 border border-purple-400/30"
         >
           <Plus className="h-4 w-4 text-white" />
-          <span>New Series</span>
+          <span>New Chapter</span>
         </button>
       </div>
     </div>

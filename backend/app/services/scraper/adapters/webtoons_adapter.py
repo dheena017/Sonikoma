@@ -187,11 +187,8 @@ class WebtoonsAdapter(BaseSiteAdapter):
             if not found_new:
                 break
 
-            # Check if there is a next page button or if list is exhausted
-            next_btn = soup.select_one("#_nextPage, .pagination a.next, a.pg_next")
-            if not next_btn:
-                break
-
+            # Try the next page even if no explicit next-button is found in HTML.
+            # Webtoons renders pagination dynamically; we just probe page_num+1 and stop if empty.
             page_num += 1
 
         # Browser retry if HTTP episode list came back empty (geo-block / lazy render)

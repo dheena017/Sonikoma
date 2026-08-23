@@ -431,8 +431,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
         <div
           className={`relative z-10 bg-transparent min-h-0 min-w-0 ${
             activeTab === "settings" || activeTab === "audio-settings"
-              ? "px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8 w-full max-w-[1720px] mx-auto"
-              : `border-t border-white/5 px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-10 w-full max-w-[1720px] mx-auto ${
+              ? "px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 w-full max-w-[1720px] mx-auto"
+              : `border-t border-white/5 px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-8 w-full max-w-[1720px] mx-auto ${
                   isFocusMode ? "hidden" : "block"
                 }`
           }`}
@@ -633,7 +633,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
               <div
                 id="section-storyboard"
                 data-section="section-timeline"
-                className="w-full scroll-mt-20 min-h-[calc(100vh-6rem)] flex flex-col"
+                className="w-full scroll-mt-20 min-h-0 flex flex-col"
               >
                 <StoryboardTimeline
                   panels={panels}
@@ -687,7 +687,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
               {/* BOTTOM: Imported Assets (Resource Pool) */}
               <div
                 id="section-assets"
-                className="w-full scroll-mt-20 min-h-[calc(100vh-6rem)] flex flex-col"
+                className="w-full scroll-mt-20 min-h-0 flex flex-col"
               >
                 <div className="bg-transparent">
                   <ChapterScraperDeck

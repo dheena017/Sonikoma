@@ -165,6 +165,14 @@ export default function useDashboardPage() {
   }, []);
 
   const handleNewSeries = useCallback(() => {
+    useProjectStore.getState().clearActiveProject();
+    localStorage.removeItem("active_project_id");
+    localStorage.removeItem("active_job_id");
+    localStorage.removeItem("active_series_slug");
+    localStorage.removeItem("active_chapter_slug");
+    localStorage.removeItem("auto_import_url");
+    localStorage.removeItem("auto_import_batch");
+
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") {
       nav("/scraper");

@@ -213,8 +213,13 @@ class DomainBlockManager:
     @classmethod
     def is_blocked(cls, url_or_domain: str) -> bool:
         if not url_or_domain:
-            return True
+            return False
         domain = url_or_domain.strip().lower()
+
+        # If it's a search term, title keyword, or slug (e.g. "prologue-eseo-30-nyeoni-heulleotda") and not a URL/domain, do not block
+        if not (domain.startswith("http://") or domain.startswith("https://") or "://" in domain or "." in domain):
+            return False
+
         if "://" in domain:
             parsed = urlparse(domain)
             domain = (parsed.netloc or parsed.path).lower().split(":")[0]
@@ -227,7 +232,7 @@ class DomainBlockManager:
         if domain.startswith("192.168.") or domain.startswith("10.") or domain.startswith("172.16.") or domain.startswith("172.31."):
             return True
         if "." not in domain:
-            return True
+            return False
 
         # 2. Explicitly blocked list
         for blocked in cls._blocked_domains.keys():
@@ -244,8 +249,12 @@ class DomainBlockManager:
     @classmethod
     def is_blocked_with_reason(cls, url_or_domain: str) -> Tuple[bool, Optional[str]]:
         if not url_or_domain:
-            return True, "Empty URL"
+            return False, None
         domain = url_or_domain.strip().lower()
+
+        if not (domain.startswith("http://") or domain.startswith("https://") or "://" in domain or "." in domain):
+            return False, None
+
         if "://" in domain:
             parsed = urlparse(domain)
             domain = (parsed.netloc or parsed.path).lower().split(":")[0]
@@ -253,10 +262,12 @@ class DomainBlockManager:
             domain = domain[4:]
 
         # 1. SSRF & Local network checks
-        if domain in {"localhost", "127.0.0.1", "0.0.0.0", "::1"} or domain.endswith(".local") or domain.endswith(".internal") or "." not in domain:
+        if domain in {"localhost", "127.0.0.1", "0.0.0.0", "::1"} or domain.endswith(".local") or domain.endswith(".internal"):
             return True, "Restricted by SSRF policy (Localhost / Private Network)"
         if domain.startswith("192.168.") or domain.startswith("10.") or domain.startswith("172.16.") or domain.startswith("172.31."):
             return True, "Restricted by SSRF policy (Private IP range)"
+        if "." not in domain:
+            return False, None
 
         # 2. Explicitly blocked list
         for blocked, info in cls._blocked_domains.items():

@@ -126,6 +126,15 @@ class BaseSiteAdapter(ABC):
             ).strip()
         if not src or src.startswith("data:image/svg") or "1x1.gif" in src or "blank" in src:
             return ""
+        # Filter out HTML manga/chapter page links mistakenly passed as image nodes
+        # These are webpage URLs, not image URLs (e.g. toonily.com/serie/.../chapter-52/)
+        _HTML_PATH_PATTERN = re.compile(
+            r'/(?:serie|series|manga|comic|comics|webtoon|webtoons|read|book|chapter|ep|episode|ch)[-_/\w]*(?:/(?:chapter|ep|episode|ch)[-_/\d]*)?/?(?:[?#].*)?$',
+            re.I
+        )
+        _IMG_EXT_PATTERN = re.compile(r'\.(?:jpe?g|png|webp|avif|gif|svg)(\?.*)?$', re.I)
+        if re.search(r'^https?://', src) and _HTML_PATH_PATTERN.search(src) and not _IMG_EXT_PATTERN.search(src):
+            return ""
         if base_url and not src.startswith("http"):
             src = urljoin(base_url if base_url.endswith("/") else (base_url + "/"), src)
         return src

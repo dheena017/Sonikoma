@@ -217,7 +217,54 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
   useEffect(() => {
     setBookmarkedUrls(FavoritesManager.getBookmarks());
     setReadUrls(FavoritesManager.getReadChapters());
-  }, []);
+
+    // Auto-discover if initialSeriesName or ?url= query is present
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryUrl = searchParams.get("url") || searchParams.get("target");
+    if (queryUrl) {
+      setUrlInput(queryUrl);
+      triggerScrape(queryUrl, undefined, false);
+      return;
+    }
+
+    const isReservedRoute =
+      initialSeriesName === "chapters" ||
+      initialSeriesName === "chapter-scraper" ||
+      initialSeriesName === "episode-scraper" ||
+      initialSeriesName === "editor" ||
+      initialSeriesName === "audio-settings";
+
+    if (initialSeriesName && !isReservedRoute) {
+      const recents = FavoritesManager.getRecent();
+      const favorites = FavoritesManager.getFavorites();
+      const allItems = [...recents, ...favorites];
+
+      const match = allItems.find((item) => {
+        const titleSlug = (item.title || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const urlSlug = (item.url || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        const targetSlug = initialSeriesName.toLowerCase();
+        return (
+          titleSlug.includes(targetSlug) ||
+          targetSlug.includes(titleSlug) ||
+          urlSlug.includes(targetSlug) ||
+          item.title_no === initialSeriesName
+        );
+      });
+
+      if (match && match.url) {
+        setUrlInput(match.url);
+        triggerScrape(match.url, match.title_no, false);
+      } else {
+        triggerScrape(initialSeriesName, undefined, false);
+      }
+    }
+  }, [initialSeriesName]);
 
   const scrapeChaptersAPI = async (data: {
     url?: string;
@@ -611,6 +658,28 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
   return (
     <div className="w-full flex-1 flex flex-col text-neutral-100 animate-fade-in relative z-10 py-2 max-w-7xl mx-auto selection:bg-purple-500/30 space-y-8">
+      {/* ── TOP PERSISTENT NAV: New Chapter button (when series is loaded) ── */}
+      {seriesMetadata && (
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => {
+              const nav = (window as any).navigateTo;
+              if (typeof nav === "function") {
+                nav("/scraper");
+              } else {
+                window.history.pushState({}, "", "/scraper");
+                window.dispatchEvent(new Event("popstate"));
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900/80 border border-neutral-700/60 hover:border-purple-500/50 text-neutral-300 hover:text-white text-xs font-bold font-mono transition-all cursor-pointer group active:scale-95 backdrop-blur-sm"
+          >
+            <Plus className="w-3.5 h-3.5 text-purple-400 group-hover:rotate-90 transition-transform duration-200" />
+            New Chapter
+          </button>
+        </div>
+      )}
+
       {/* ── COLLAPSIBLE SEARCH & URL INPUT TOOLBAR (WHEN NO SERIES OR TOGGLED) ── */}
       {(isUrlBarOpen || !seriesMetadata) && (
         <form
@@ -627,7 +696,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               size={17}
             />
             <input
-              type="url"
+              type="text"
               value={urlInput}
               onChange={(e) => {
                 setUrlInput(e.target.value);
@@ -694,7 +763,94 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       {error && (
         <div className="p-4 bg-red-950/30 border border-red-500/40 rounded-2xl flex items-center gap-3 text-red-300 text-sm animate-in shake duration-300">
           <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400" />
-          <p className="font-mono text-xs">{error}</p>
+          <p className="font-mono text-xs flex-1">{error}</p>
+          {(urlInput || titleNoInput) && (
+            <button
+              type="button"
+              onClick={() => { setError(null); triggerScrape(urlInput || undefined, titleNoInput || undefined, true); }}
+              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-800/60 hover:bg-red-700/60 border border-red-500/40 text-red-200 hover:text-white text-xs font-bold font-mono transition-all cursor-pointer"
+            >
+              <RotateCw className="w-3 h-3" />
+              Retry
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── SKELETON LOADING STATE (shown while crawling, before metadata arrives) ── */}
+      {isLoading && !seriesMetadata && (
+        <div className="space-y-6 animate-pulse">
+          {/* Hero Banner Skeleton */}
+          <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-neutral-900/80 backdrop-blur-2xl shadow-2xl p-6 md:p-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-950/20 via-neutral-900/60 to-transparent pointer-events-none" />
+            <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
+              {/* Cover Poster Skeleton */}
+              <div className="w-48 h-64 md:w-56 shrink-0 rounded-2xl skeleton-shimmer bg-neutral-800/80 border border-white/5" />
+              {/* Meta Info Skeleton */}
+              <div className="flex flex-col gap-4 flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="h-5 w-20 rounded-full bg-purple-900/50 border border-purple-700/20" />
+                  <div className="h-5 w-32 rounded-full bg-neutral-800" />
+                </div>
+                <div className="space-y-2.5">
+                  <div className="h-10 w-3/4 rounded-xl skeleton-shimmer bg-neutral-800/80" />
+                  <div className="h-4 w-full rounded-lg bg-neutral-800/60" />
+                  <div className="h-4 w-5/6 rounded-lg bg-neutral-800/60" />
+                  <div className="h-4 w-2/3 rounded-lg bg-neutral-800/40" />
+                </div>
+                <div className="flex flex-wrap gap-3 pt-1">
+                  <div className="h-8 w-28 rounded-xl bg-neutral-800" />
+                  <div className="h-8 w-28 rounded-xl bg-neutral-800" />
+                  <div className="h-8 w-24 rounded-xl bg-neutral-800" />
+                </div>
+                <div className="flex flex-wrap gap-3 pt-3 border-t border-white/5">
+                  <div className="h-9 w-40 rounded-xl bg-purple-900/40 border border-purple-700/20" />
+                  <div className="h-9 w-32 rounded-xl bg-neutral-800" />
+                  <div className="h-9 w-28 rounded-xl bg-neutral-800" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Row Skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
+                <div className="w-12 h-12 rounded-xl skeleton-shimmer bg-neutral-800" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-6 w-10 rounded skeleton-shimmer bg-neutral-700" />
+                  <div className="h-3 w-20 rounded bg-neutral-800" />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Chapters Header Skeleton */}
+          <div className="flex items-center gap-3">
+            <div className="h-7 w-28 rounded-xl skeleton-shimmer bg-neutral-800" />
+            <div className="h-5 w-16 rounded-full bg-neutral-800" />
+          </div>
+
+          {/* Chapter Card Grid Skeleton */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
+            {[...Array(10)].map((_, i) => (
+              <div key={i} className="rounded-2xl bg-neutral-900/80 border border-neutral-800/60 overflow-hidden shadow-lg">
+                {/* Thumbnail */}
+                <div className="relative w-full aspect-[3/4] skeleton-shimmer bg-neutral-800">
+                  <div className="absolute top-2 left-2 h-5 w-14 rounded-lg bg-neutral-700/80" />
+                </div>
+                {/* Info */}
+                <div className="p-3 space-y-2">
+                  <div className="h-4 w-full rounded bg-neutral-800" />
+                  <div className="h-3 w-2/3 rounded bg-neutral-800/70" />
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="h-3 w-12 rounded bg-neutral-800" />
+                    <div className="h-6 w-16 rounded-xl bg-purple-900/40" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -1206,6 +1362,26 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 Directly import chapter panels into the timeline video workspace.
               </p>
             </div>
+          </div>
+
+          {/* New Chapter CTA button */}
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                const nav = (window as any).navigateTo;
+                if (typeof nav === "function") {
+                  nav("/scraper");
+                } else {
+                  window.history.pushState({}, "", "/scraper");
+                  window.dispatchEvent(new Event("popstate"));
+                }
+              }}
+              className="flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm shadow-lg shadow-purple-900/40 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95 border border-purple-400/30"
+            >
+              <Plus className="w-4 h-4" />
+              Go to Scraper
+            </button>
           </div>
         </div>
       )}

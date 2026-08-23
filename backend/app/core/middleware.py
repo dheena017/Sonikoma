@@ -77,6 +77,12 @@ PUBLIC_ROUTE_SET = {
     "/api/proxy-image",
     "/api/proxy/image",
     "/api/v1/proxy/image",
+    "/api/v1/scraper/reader-chapter",
+    "/api/scraper/reader-chapter",
+    "/api/v1/scraper/chapter/sync",
+    "/api/v1/scraper/series",
+    "/api/v1/scraper/separate-url",
+    "/api/v1/scraper/detect-platform",
     "/api/docs",
     "/api/redoc",
     "/openapi.json",
@@ -103,6 +109,8 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/v1/export/youtube/",
     "/api/v1/system/logs/",   # SSE real-time log stream (/api/v1/system/logs/stream)
     "/api/system/logs/",      # Legacy SSE alias
+    "/api/v1/scraper/reader-chapter",
+    "/api/scraper/reader-chapter",
 )
 
 # Admin-only endpoints (require creator_role/admin)

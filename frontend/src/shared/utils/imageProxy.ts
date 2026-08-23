@@ -59,6 +59,18 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
   }
 
   if (resolvedUrl.startsWith("http") && !resolvedUrl.includes("/api/")) {
+    // Prevent proxying HTML reader/manga pages as images
+    try {
+      const pathname = new URL(resolvedUrl).pathname.toLowerCase();
+      const hasImageExt = /\.(jpe?g|png|webp|avif|gif|svg)(\?.*)?$/i.test(pathname);
+      const isHtmlMangaPage = /\/(serie|series|manga|comic|comics|webtoon|webtoons|read|book|chapter|ep|episode|ch)([-_/]|$)/i.test(pathname);
+      if (isHtmlMangaPage && !hasImageExt) {
+        return "";
+      }
+    } catch {
+      // If URL parsing fails, let it through to be caught by the proxy
+    }
+
     let proxied = `/api/proxy-image?url=${encodeURIComponent(resolvedUrl)}`;
     if (referer) {
       proxied += `&referer=${encodeURIComponent(referer)}`;

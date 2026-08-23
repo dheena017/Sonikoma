@@ -102,7 +102,7 @@ export default function DashboardProjectSection({
             onClick={onNewSeries}
             className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 font-bold text-sm transition-all cursor-pointer"
           >
-            Start New Series
+            Start New Chapter
           </button>
         </div>
       ) : (

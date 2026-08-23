@@ -63,7 +63,7 @@ def _ensure_episodes_table():
     _ensure_chapters_table()
 
 
-def _get_cached_chapters(series_url: str, ttl_seconds: float = 86400.0) -> Optional[Dict[str, Any]]:
+def _get_cached_chapters(series_url: str, ttl_seconds: float = 3600.0) -> Optional[Dict[str, Any]]:
     """Retrieves cached series chapter discovery results within the TTL window."""
     if not get_db_connection:
         return None
@@ -257,14 +257,33 @@ async def scrape_series_chapters(
             result["series"] = series_dict
 
             chapter_list = result.get("chapters") or result.get("episodes") or []
+
+            # Pre-compile patterns once for efficiency
+            _IMG_EXT_RE = re.compile(r'\.(jpe?g|png|webp|avif|gif|svg)(\?.*)?$', re.I)
+            _HTML_PAGE_RE = re.compile(
+                r'/(?:serie|series|manga|comic|comics|webtoon|webtoons|read|book|chapter|ep|episode|ch)[\-_/\w]*/[\-_/\w]*/?(?:[?#].*)?$',
+                re.I
+            )
+
+            def _is_valid_image_url(url: str) -> bool:
+                """Return True if url looks like an actual image, not an HTML page."""
+                if not url or not url.startswith("http"):
+                    return False
+                if _HTML_PAGE_RE.search(url) and not _IMG_EXT_RE.search(url):
+                    return False
+                return True
+
             for ch in chapter_list:
                 ch_img = ch.get("cover_image") or ch.get("thumbnail") or ch.get("cover")
+                # Reject any HTML page URL accidentally stored as a cover image
+                if ch_img and not _is_valid_image_url(ch_img):
+                    ch_img = None
                 # Fallback to 1st panel image if panels/images exist
                 if not ch_img and ch.get("images") and len(ch["images"]) > 0:
                     first_item = ch["images"][0]
                     ch_img = first_item.get("url") if isinstance(first_item, dict) else str(first_item)
                 if not ch_img:
-                    ch_img = cover_img
+                    ch_img = cover_img if _is_valid_image_url(cover_img) else ""
 
                 if ch_img and not ch_img.startswith("http") and raw_input.startswith("http"):
                     clean_base = raw_input if raw_input.endswith("/") else (raw_input + "/")
