@@ -254,13 +254,13 @@ async def discover_and_select_episodes(
     # 3. Display Discovered Episodes Table
     display_limit = min(20, len(episodes))
     print(f"\n  📚 Episode List Preview (Showing {display_limit} of {len(episodes)}):")
-    print(f"  {'#':<4} | {'Episode Name':<40} | {'Date':<12} | {'Thumbnail'}")
+    print(f"  {'#':<4} | {'Episode Name':<40} | {'Date':<12} | {'Cover Image'}")
     print("  " + "-" * 85)
     for idx, ep in enumerate(episodes[:display_limit]):
         ep_name = ep.get("title") or ep.get("episode") or f"Episode {idx+1}"
         ep_date = ep.get("date") or "N/A"
-        ep_thumb = (ep.get("thumbnail") or "N/A")[:35]
-        print(f"  {idx+1:<4} | {ep_name[:40]:<40} | {ep_date:<12} | {ep_thumb}")
+        ep_cover = (ep.get("cover_image") or "N/A")[:35]
+        print(f"  {idx+1:<4} | {ep_name[:40]:<40} | {ep_date:<12} | {ep_cover}")
 
     if len(episodes) > display_limit:
         print(f"  ... and {len(episodes) - display_limit} additional episodes in catalog.")

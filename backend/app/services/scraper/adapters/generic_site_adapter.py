@@ -314,10 +314,12 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
         cover_image = series_info.cover if series_info and hasattr(series_info, "cover") else (series_info.cover_image if series_info and hasattr(series_info, "cover_image") else "")
 
         for ep in episodes:
-            if not ep.get("thumbnail") and cover_image:
-                ep["thumbnail"] = self.build_proxy_thumbnail_url(None, ep.get("url", url), cover_image)
-            if not ep.get("cover") and cover_image:
-                ep["cover"] = cover_image
+            ep_img = ep.get("cover_image") or ep.get("thumbnail") or ep.get("cover") or cover_image
+            if not ep_img and cover_image:
+                ep_img = self.build_proxy_thumbnail_url(None, ep.get("url", url), cover_image)
+            ep["cover_image"] = ep_img
+            ep["thumbnail"] = ep_img
+            ep["cover"] = ep_img
 
         sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
 
