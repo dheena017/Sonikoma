@@ -333,8 +333,10 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
 
         return {
             "success": True,
+            "title": series_title,
             "series_title": series_title,
             "url": url,
+            "platform": "generic",
             "description": description,
             "author": author,
             "genre": genre,
@@ -343,9 +345,9 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                 "title": series_title,
                 "author": author,
                 "genre": genre,
-                "genres": genres,
                 "description": description,
                 "cover_image": cover_image,
+                "platform": "generic",
                 "url": url
             },
             "chapters": sorted_eps,

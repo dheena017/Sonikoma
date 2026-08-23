@@ -178,41 +178,62 @@ async def scrape_series_episodes(
 
         if result and result.get("success"):
             series_dict = result.get("series", {}) or {}
-            cover_img = series_dict.get("cover_image") or result.get("cover_image") or result.get("cover") or result.get("thumbnail") or ""
+            cover_img = series_dict.get("cover_image") or result.get("cover_image") or ""
+            series_title = series_dict.get("title") or result.get("title") or result.get("series_title") or "Comic Series"
+            author_val = series_dict.get("author") or result.get("author") or ""
+            genre_val = series_dict.get("genre") or (", ".join(series_dict.get("genres", [])) if series_dict.get("genres") else "") or result.get("genre") or ""
+            desc_val = series_dict.get("description") or result.get("description") or ""
+            platform_val = series_dict.get("platform") or result.get("platform") or result.get("publisher") or sep.get("platform", "comic")
+
+            series_dict["title"] = series_title
             series_dict["cover_image"] = cover_img
-            result["series"] = series_dict
-            result["title"] = result.get("series_title") or series_dict.get("title") or "Comic Series"
-            result["series_title"] = result["title"]
+            series_dict["author"] = author_val
+            series_dict["genre"] = genre_val
+            series_dict["description"] = desc_val
+            series_dict["platform"] = platform_val
+            series_dict["url"] = raw_input
+
+            result["title"] = series_title
+            result["series_title"] = series_title
             result["cover_image"] = cover_img
-            result["cover"] = cover_img
-            result["thumbnail"] = cover_img
-            result["author"] = series_dict.get("author") or ""
-            result["genre"] = series_dict.get("genre") or ""
-            result["description"] = series_dict.get("description") or ""
+            result["author"] = author_val
+            result["genre"] = genre_val
+            result["description"] = desc_val
+            result["platform"] = platform_val
+            result["url"] = raw_input
+            result["series"] = series_dict
 
             chapter_list = result.get("chapters") or result.get("episodes") or []
-            for ep in chapter_list:
-                ep_img = ep.get("cover_image") or ep.get("thumbnail") or ep.get("cover") or cover_img
-                ep["cover_image"] = ep_img
-                ep["thumbnail"] = ep_img
-                ep["cover"] = ep_img
-                ch_num = ep.get("chapter_number") or ep.get("episode_no") or ep.get("number")
-                ep["chapter_number"] = ch_num
-                ep["episode_no"] = ch_num
+            for ch in chapter_list:
+                ch_img = ch.get("cover_image") or cover_img
+                ch["cover_image"] = ch_img
+                ch_num = ch.get("chapter_number") or ch.get("episode_no") or ch.get("number")
+                ch["chapter_number"] = ch_num
+                # Sync aliases for backwards compatibility
+                ch["thumbnail"] = ch_img
+                ch["cover"] = ch_img
+                ch["episode_no"] = ch_num
 
             result["chapters"] = chapter_list
             result["total_chapters"] = len(chapter_list)
+            # Sync aliases for legacy callers
             result["episodes"] = chapter_list
             result["total_episodes"] = len(chapter_list)
 
-            _save_cached_episodes(raw_input, result.get("series_title", "Comic Series"), result)
+            _save_cached_episodes(raw_input, series_title, result)
             return result
 
         return result or {
             "success": False,
             "error": "Could not discover chapters for this series URL.",
+            "title": "Unknown Series",
             "series_title": "Unknown Series",
             "url": raw_input,
+            "platform": sep.get("platform", "comic"),
+            "genre": "",
+            "author": "",
+            "description": "",
+            "cover_image": "",
             "chapters": [],
             "total_chapters": 0,
             "episodes": [],
@@ -224,15 +245,21 @@ async def scrape_series_episodes(
         return {
             "success": False,
             "error": str(e),
+            "title": "Unknown Series",
             "series_title": "Unknown Series",
-            "title_no": title_no,
             "url": raw_input,
+            "platform": "comic",
+            "genre": "",
+            "author": "",
+            "description": "",
+            "cover_image": "",
             "series": {
                 "title": "Unknown Series",
-                "author": "Unknown",
-                "genre": "Comic",
-                "cover_image": "",
+                "author": "",
+                "genre": "",
                 "description": "",
+                "cover_image": "",
+                "platform": "comic",
                 "url": raw_input
             },
             "chapters": [],
