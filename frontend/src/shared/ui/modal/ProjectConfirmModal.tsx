@@ -2,8 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
-  ChevronDown,
-  ChevronRight,
   Video,
   Crop,
   Globe,
@@ -23,14 +21,13 @@ import {
   Wand2,
   Mic,
   Music,
-  Play,
   Zap,
-  Sliders,
   Film,
-  Camera,
-  Tv,
   Flame,
+  Tv,
   CheckCircle2,
+  ChevronRight,
+  Sliders,
 } from "lucide-react";
 
 interface ProjectConfirmModalProps {
@@ -46,7 +43,6 @@ interface ProjectConfirmModalProps {
       seriesCoverImage: string;
       seriesSynopsis: string;
       status: string;
-
       targetLayout: string;
       narrationTone: string;
       cropSensitivity: string;
@@ -79,6 +75,149 @@ interface ProjectConfirmModalProps {
   };
 }
 
+// ── Shared Style Classes ──
+const inputCls =
+  "w-full bg-[#0a0a12] border border-white/[0.08] focus:border-purple-500/60 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner placeholder:text-neutral-600 focus:bg-[#0e0f1a]";
+
+const selectCls =
+  "w-full bg-[#0a0a12] border border-white/[0.08] focus:border-purple-500/60 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner cursor-pointer focus:bg-[#0e0f1a]";
+
+const labelCls =
+  "text-[10px] font-bold text-neutral-500 uppercase tracking-wider font-mono flex items-center gap-1.5 mb-1.5";
+
+const cardCls =
+  "bg-[#0e0f19]/80 border border-white/[0.07] rounded-2xl p-5 space-y-4";
+
+type TabKey = "metadata" | "ai" | "distribution";
+
+// ── Configuration Constants (Decoupled & Extensible) ──
+const PRESETS = [
+  {
+    id: "shorts" as const,
+    label: "Shorts / TikTok",
+    icon: Flame,
+    color: "purple",
+    config: {
+      targetLayout: "9:16",
+      narrationTone: "Dramatic",
+      voiceActor: "Epic Trailer Narrator",
+      bgmStyle: "Dark Action Hybrid",
+      targetPlatforms: ["YouTube Shorts", "TikTok"],
+    },
+  },
+  {
+    id: "movie" as const,
+    label: "Full Video (16:9)",
+    icon: Film,
+    color: "indigo",
+    config: {
+      targetLayout: "16:9",
+      narrationTone: "Cinematic",
+      voiceActor: "Deep Fantasy Narrator",
+      bgmStyle: "Epic Orchestral",
+      targetPlatforms: ["YouTube Video"],
+    },
+  },
+  {
+    id: "reel" as const,
+    label: "Story Reel",
+    icon: Tv,
+    color: "cyan",
+    config: {
+      targetLayout: "9:16",
+      narrationTone: "Dialogue-focused",
+      voiceActor: "Soft Female Storyteller",
+      bgmStyle: "Lo-Fi Recaps",
+      targetPlatforms: ["Instagram Reels", "TikTok"],
+    },
+  },
+];
+
+const LAYOUT_OPTIONS = [
+  { value: "9:16", label: "📱 Vertical Shorts (9:16)" },
+  { value: "16:9", label: "🎬 Landscape Video (16:9)" },
+  { value: "1:1", label: "⏹️ Square Post (1:1)" },
+];
+
+const TONE_OPTIONS = [
+  { value: "Dramatic", label: "Dramatic / Epic" },
+  { value: "Dialogue-focused", label: "Dialogue Focused" },
+  { value: "Action-paced", label: "Fast Action" },
+  { value: "Cinematic", label: "Cinematic" },
+  { value: "Minimalistic", label: "Subtle & Minimal" },
+];
+
+const VOICE_ACTORS = [
+  { value: "Epic Trailer Narrator", label: "🎙️ Epic Trailer (Deep Male)" },
+  { value: "Anime Protagonist (Male)", label: "🔥 Anime Protagonist" },
+  { value: "Deep Fantasy Narrator", label: "🏰 Deep Fantasy (Cinematic)" },
+  { value: "Soft Female Storyteller", label: "🌸 Soft Female Storyteller" },
+  { value: "Cinematic Male", label: "🎬 Cinematic Male" },
+];
+
+const BGM_STYLES = [
+  { value: "Dark Action Hybrid", label: "⚡ Dark Action Hybrid" },
+  { value: "Epic Orchestral", label: "🎻 Epic Orchestral" },
+  { value: "Lo-Fi Recaps", label: "🎧 Lo-Fi Chill" },
+  { value: "Cyberpunk Synthwave", label: "🌆 Cyberpunk Synthwave" },
+  { value: "None", label: "🔇 None (Voice Only)" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "Draft", label: "🔒 Private Draft" },
+  { value: "Review", label: "👀 Ready for Review" },
+  { value: "Published", label: "🌐 Published (Public)" },
+];
+
+const SENSITIVITY_OPTIONS = [
+  { value: "Conservative", label: "Conservative" },
+  { value: "Balanced", label: "Balanced" },
+  { value: "Aggressive", label: "Aggressive" },
+];
+
+const LANGUAGE_OPTIONS = [
+  { value: "English", label: "English" },
+  { value: "Korean", label: "Korean" },
+  { value: "Japanese", label: "Japanese" },
+  { value: "Spanish", label: "Spanish" },
+  { value: "Chinese", label: "Chinese" },
+  { value: "French", label: "French" },
+  { value: "German", label: "German" },
+];
+
+const SUBTITLE_OPTIONS = [
+  { value: "None", label: "None" },
+  ...LANGUAGE_OPTIONS,
+];
+
+const PLATFORM_OPTIONS = [
+  "YouTube Shorts",
+  "TikTok",
+  "Instagram Reels",
+  "YouTube Video",
+];
+
+const AI_TASK_DEFINITIONS = [
+  {
+    key: "generateScript" as const,
+    icon: FileText,
+    label: "Script Extraction",
+    sub: "OCR & Clean Dialogue",
+  },
+  {
+    key: "generateVoice" as const,
+    icon: Mic,
+    label: "AI Voiceover",
+    sub: "Text-to-Speech Narration",
+  },
+  {
+    key: "generateSFX" as const,
+    icon: Music,
+    label: "SFX & Soundtrack",
+    sub: "Ambient & Impact Audio",
+  },
+];
+
 export default function ProjectConfirmModal({
   isOpen,
   onClose,
@@ -86,7 +225,9 @@ export default function ProjectConfirmModal({
   onAutoExtractCover,
   initialDetails,
 }: ProjectConfirmModalProps) {
-  // Existing State
+  const [activeTab, setActiveTab] = useState<TabKey>("metadata");
+
+  // Form states initialized dynamically from initialDetails or clean defaults
   const [seriesTitle, setSeriesTitle] = useState("");
   const [chapterNumber, setChapterNumber] = useState("");
   const [chapterTitle, setChapterTitle] = useState("");
@@ -94,8 +235,6 @@ export default function ProjectConfirmModal({
   const [seriesAuthor, setSeriesAuthor] = useState("");
   const [seriesCoverImage, setSeriesCoverImage] = useState("");
   const [seriesSynopsis, setSeriesSynopsis] = useState("");
-
-  // Premium State Additions
   const [projectStatus, setProjectStatus] = useState("Draft");
   const [aiTasks, setAiTasks] = useState({
     generateScript: true,
@@ -103,8 +242,6 @@ export default function ProjectConfirmModal({
     generateSFX: true,
   });
   const [isSaving, setIsSaving] = useState(false);
-
-  // Configuration States
   const [targetLayout, setTargetLayout] = useState("9:16");
   const [narrationTone, setNarrationTone] = useState("Dramatic");
   const [cropSensitivity, setCropSensitivity] = useState("Balanced");
@@ -118,36 +255,14 @@ export default function ProjectConfirmModal({
   const [episodePrefix, setEpisodePrefix] = useState("");
   const [localCoverImage, setLocalCoverImage] = useState<string | null>(null);
   const [isExtractingCover, setIsExtractingCover] = useState(false);
-
-  // Rich AI Audio & Visual Pipeline States
   const [voiceActor, setVoiceActor] = useState("Epic Trailer Narrator");
   const [bgmStyle, setBgmStyle] = useState("Dark Action Hybrid");
-  const [artStyle, setArtStyle] = useState("Manhwa Vibrant");
-  const [transitionPace, setTransitionPace] = useState("Standard (4.0s)");
-  const [cameraMotion, setCameraMotion] = useState("2.5D Parallax Motion");
-  const [renderQuality, setRenderQuality] = useState("1080p Standard");
   const [targetPlatforms, setTargetPlatforms] = useState<string[]>([
     "YouTube Shorts",
     "TikTok",
   ]);
 
-  // Accordion State
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    core: true,
-    media: true,
-    video: true,
-    processing: false,
-    ai_audio: true,
-    visual_motion: false,
-    audience: false,
-    organization: false,
-  });
-
   const isSubmittingRef = useRef(false);
-
-  const toggleSection = (section: string) => {
-    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
 
   const toggleTask = (taskKey: keyof typeof aiTasks) => {
     setAiTasks((prev) => ({ ...prev, [taskKey]: !prev[taskKey] }));
@@ -161,75 +276,52 @@ export default function ProjectConfirmModal({
     );
   };
 
+  // Dynamically generate tags strictly from user's current series and genre data
   const handleAutoGenerateTags = () => {
     const generated: string[] = [];
     if (scrapedGenre) {
       scrapedGenre.split(",").forEach((g) => {
-        const clean = g.trim().toLowerCase().replace(/\s+/g, "");
-        if (clean && !generated.includes(`#${clean}`))
+        const clean = g.trim().toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "");
+        if (clean && !generated.includes(`#${clean}`)) {
           generated.push(`#${clean}`);
+        }
       });
     }
     if (seriesTitle) {
-      const titleTag = seriesTitle.trim().toLowerCase().replace(/\s+/g, "");
-      if (titleTag && !generated.includes(`#${titleTag}`))
+      const titleTag = seriesTitle.trim().toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "");
+      if (titleTag && !generated.includes(`#${titleTag}`)) {
         generated.push(`#${titleTag}`);
+      }
     }
-    const defaults = [
-      "#manhwa",
-      "#webtoon",
-      "#recap",
-      "#anime",
-      "#comic",
-      "#shorts",
-    ];
-    defaults.forEach((d) => {
-      if (!generated.includes(d)) generated.push(d);
-    });
+    if (chapterNumber) {
+      generated.push(`#ch${chapterNumber.trim()}`);
+    }
     setCustomTags(Array.from(new Set([...customTags, ...generated])));
   };
 
-  const applyPreset = (preset: "shorts" | "movie" | "reel") => {
-    if (preset === "shorts") {
-      setTargetLayout("9:16");
-      setNarrationTone("Dramatic");
-      setTransitionPace("Fast (2.5s)");
-      setCameraMotion("Pan & Zoom Dynamic");
-      setVoiceActor("Epic Trailer Narrator");
-      setBgmStyle("Dark Action Hybrid");
-      setTargetPlatforms(["YouTube Shorts", "TikTok"]);
-    } else if (preset === "movie") {
-      setTargetLayout("16:9");
-      setNarrationTone("Cinematic");
-      setTransitionPace("Cinematic Slow (6.0s)");
-      setCameraMotion("2.5D Parallax Motion");
-      setVoiceActor("Deep Fantasy Narrator");
-      setBgmStyle("Epic Orchestral");
-      setRenderQuality("4K Ultra Precision");
-      setTargetPlatforms(["YouTube Video"]);
-    } else if (preset === "reel") {
-      setTargetLayout("9:16");
-      setNarrationTone("Dialogue-focused");
-      setTransitionPace("Standard (4.0s)");
-      setCameraMotion("Static Clean");
-      setVoiceActor("Soft Female Storyteller");
-      setBgmStyle("Lo-Fi Recaps");
-      setTargetPlatforms(["Instagram Reels", "TikTok"]);
-    }
+  const applyPreset = (presetId: "shorts" | "movie" | "reel") => {
+    const selected = PRESETS.find((p) => p.id === presetId);
+    if (!selected) return;
+    setTargetLayout(selected.config.targetLayout);
+    setNarrationTone(selected.config.narrationTone);
+    setVoiceActor(selected.config.voiceActor);
+    setBgmStyle(selected.config.bgmStyle);
+    setTargetPlatforms(selected.config.targetPlatforms);
   };
 
-  // Sync when initialDetails updates or panel opens
+  // Sync state dynamically from initialDetails
   useEffect(() => {
     const container = document.getElementById("main-scroll-container");
     if (isOpen) {
-      setSeriesTitle(initialDetails.seriesTitle || "");
-      setChapterNumber(initialDetails.chapterNumber || "");
-      setChapterTitle(initialDetails.chapterTitle || "");
-      setScrapedGenre(initialDetails.scrapedGenre || "");
-      setSeriesAuthor(initialDetails.seriesAuthor || "");
-      setSeriesCoverImage(initialDetails.seriesCoverImage || "");
-      setSeriesSynopsis(initialDetails.seriesSynopsis || "");
-      setProjectStatus(initialDetails.status || "Draft");
+      setSeriesTitle(initialDetails?.seriesTitle || "");
+      setChapterNumber(initialDetails?.chapterNumber || "");
+      setChapterTitle(initialDetails?.chapterTitle || "");
+      setScrapedGenre(initialDetails?.scrapedGenre || "");
+      setSeriesAuthor(initialDetails?.seriesAuthor || "");
+      setSeriesCoverImage(initialDetails?.seriesCoverImage || "");
+      setSeriesSynopsis(initialDetails?.seriesSynopsis || "");
+      setProjectStatus(initialDetails?.status || "Draft");
+      setActiveTab("metadata");
       document.body.style.overflow = "hidden";
       if (container) container.style.overflow = "hidden";
     } else {
@@ -274,9 +366,7 @@ export default function ProjectConfirmModal({
         },
         shouldGenerate
       );
-      if (success) {
-        onClose();
-      }
+      if (success) onClose();
     } finally {
       setIsSaving(false);
       isSubmittingRef.current = false;
@@ -327,886 +417,598 @@ export default function ProjectConfirmModal({
 
   if (typeof document === "undefined") return null;
 
+  const tabs: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { key: "metadata", label: "Metadata & Details", icon: BookOpen },
+    { key: "ai", label: "AI & Audio Studio", icon: Sparkles },
+    { key: "distribution", label: "Distribution & Tags", icon: Globe },
+  ];
+
   return createPortal(
     <div
       className="fixed inset-0 z-[100] flex project-confirm-modal-overlay"
       data-modal="true"
     >
+      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300"
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      <div className="relative ml-auto h-full w-full max-w-2xl bg-[#09090f]/90 backdrop-blur-2xl border-l border-white/10 rounded-l-3xl shadow-2xl overflow-hidden z-10 animate-in slide-in-from-right-4 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col">
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 blur-[1px]" />
+      {/* Side Panel */}
+      <div className="relative ml-auto h-full w-full max-w-[660px] bg-[#09090f]/95 backdrop-blur-2xl border-l border-white/[0.07] shadow-2xl overflow-hidden z-10 animate-in slide-in-from-right-4 duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col">
+        {/* Top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500" />
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-850 shrink-0 bg-neutral-900/80 backdrop-blur-xl">
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-xl text-purple-400 border border-purple-500/30 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]">
-              <Sparkles className="h-5 w-5 animate-pulse" />
+            <div className="p-2.5 bg-purple-500/10 border border-purple-500/30 rounded-2xl">
+              <Sparkles className="h-5 w-5 text-purple-400" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-base font-black text-white tracking-tight">
-                  Project & AI Pipeline Initialization
+                  Project Confirmation
                 </h2>
                 <span className="px-2 py-0.5 text-[9px] font-mono font-extrabold uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-full">
-                  PRO STUDIO
+                  STUDIO
                 </span>
               </div>
-              <p className="text-[10px] text-neutral-400 font-mono tracking-wide mt-0.5">
-                Configure metadata, AI voice actor, motion pacing & target
-                platforms
+              <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
+                Review information before starting the AI pipeline
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-neutral-450 hover:text-white bg-neutral-950/40 border border-neutral-800 hover:bg-neutral-800 p-2 rounded-xl transition-all cursor-pointer active:scale-95"
+            className="text-neutral-500 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.07] p-2 rounded-xl transition-all cursor-pointer active:scale-95"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Quick Presets Bar */}
-        <div className="px-6 py-3 bg-neutral-950/60 border-b border-neutral-850 flex items-center justify-between gap-2 overflow-x-auto shrink-0">
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider">
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>Presets:</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => applyPreset("shorts")}
-              className="px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Flame className="w-3 h-3 text-purple-400" />
-              <span>TikTok / Shorts</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => applyPreset("movie")}
-              className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Film className="w-3 h-3 text-indigo-400" />
-              <span>Full Recap (16:9)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => applyPreset("reel")}
-              className="px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Tv className="w-3 h-3 text-cyan-400" />
-              <span>Story Reel</span>
-            </button>
-          </div>
+        {/* ── Navigation Tabs ── */}
+        <div className="px-6 py-2.5 bg-[#0a0a14] border-b border-white/[0.06] flex items-center gap-2 shrink-0">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer select-none ${
+                  isActive
+                    ? "bg-purple-600/20 text-purple-300 border border-purple-500/35 shadow-sm shadow-purple-950/40"
+                    : "text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.03] border border-transparent"
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-purple-400" : "text-neutral-500"}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Scrollable Form Content */}
-        <div className="p-6 space-y-4 overflow-y-auto flex-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-neutral-950/40 [&::-webkit-scrollbar-thumb]:bg-purple-500/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-purple-500/60 transition-colors">
-          {/* Section 1 */}
-          <div className="space-y-4 bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/60 transition-all">
-            <h3
-              onClick={() => toggleSection("core")}
-              className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between cursor-pointer hover:text-white transition-colors select-none"
-            >
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-purple-400" />
-                1. Core Metadata
-              </div>
-              {openSections.core ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </h3>
-            {openSections.core && (
-              <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-2">
-                      <BookOpen className="h-3.5 w-3.5 text-purple-400" />
-                      Series Title <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={seriesTitle}
-                      onChange={(e) => setSeriesTitle(e.target.value)}
-                      placeholder="e.g. Boundless Necromancer"
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner"
-                      required
-                    />
+        {/* ── Tab Content Area ── */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-purple-500/40">
+          
+          {/* TAB 1: METADATA & DETAILS */}
+          {activeTab === "metadata" && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              <div className={cardCls}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="p-1.5 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                    <BookOpen className="h-3.5 w-3.5 text-purple-400" />
                   </div>
+                  <span className="text-xs font-bold text-white">Title &amp; Chapter Information</span>
+                </div>
 
+                <div className="space-y-1.5">
+                  <label className={labelCls}>
+                    <BookOpen className="h-3 w-3 text-purple-400" />
+                    Series Title <span className="text-rose-500 ml-0.5">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={seriesTitle}
+                    onChange={(e) => setSeriesTitle(e.target.value)}
+                    placeholder="Enter series title..."
+                    className={inputCls}
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-2">
-                      <Hash className="h-3.5 w-3.5 text-purple-400" />
-                      Chapter No. <span className="text-rose-500">*</span>
+                    <label className={labelCls}>
+                      <Hash className="h-3 w-3 text-purple-400" />
+                      Chapter Number <span className="text-rose-500 ml-0.5">*</span>
                     </label>
                     <input
                       type="text"
                       value={chapterNumber}
                       onChange={(e) => setChapterNumber(e.target.value)}
-                      placeholder="e.g. 72"
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors font-mono shadow-inner"
+                      placeholder="Chapter number..."
+                      className={`${inputCls} font-mono`}
                       required
                     />
                   </div>
-
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-2">
-                      <FileText className="h-3.5 w-3.5 text-purple-400" />
+                    <label className={labelCls}>
+                      <FileText className="h-3 w-3 text-purple-400" />
                       Chapter Title
                     </label>
                     <input
                       type="text"
                       value={chapterTitle}
                       onChange={(e) => setChapterTitle(e.target.value)}
-                      placeholder="e.g. The S-Rank Awakens"
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner"
+                      placeholder="Chapter title (optional)..."
+                      className={inputCls}
                     />
                   </div>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-2">
-                      <Tags className="h-3.5 w-3.5 text-purple-400" />
+                    <label className={labelCls}>
+                      <Tags className="h-3 w-3 text-purple-400" />
                       Genre
                     </label>
                     <input
                       type="text"
                       value={scrapedGenre}
                       onChange={(e) => setScrapedGenre(e.target.value)}
-                      placeholder="e.g. Fantasy, Action"
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner"
+                      placeholder="e.g. Action, Fantasy..."
+                      className={inputCls}
                     />
                   </div>
-
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-2">
-                      <User className="h-3.5 w-3.5 text-purple-400" />
-                      Author / Artist
+                    <label className={labelCls}>
+                      <User className="h-3 w-3 text-purple-400" />
+                      Author / Studio
                     </label>
                     <input
                       type="text"
                       value={seriesAuthor}
                       onChange={(e) => setSeriesAuthor(e.target.value)}
-                      placeholder="e.g. Chugong, DUBU"
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner"
+                      placeholder="Author or artist name..."
+                      className={inputCls}
                     />
                   </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Section 2 */}
-          <div className="space-y-4 bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/60 transition-all">
-            <h3
-              onClick={() => toggleSection("media")}
-              className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between cursor-pointer hover:text-white transition-colors select-none"
-            >
-              <div className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4 text-purple-400" />
-                2. Media & Details
-              </div>
-              {openSections.media ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </h3>
-            {openSections.media && (
-              <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-2">
-                    <Eye className="h-3.5 w-3.5 text-purple-400" />
-                    Project Visibility
-                  </label>
-                  <select
-                    value={projectStatus}
-                    onChange={(e) => setProjectStatus(e.target.value)}
-                    className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
-                  >
-                    <option value="Draft">Private Draft</option>
-                    <option value="Review">Ready for Review</option>
-                    <option value="Published">Published (Public)</option>
-                  </select>
+              <div className={cardCls}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="p-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+                    <ImageIcon className="h-3.5 w-3.5 text-indigo-400" />
+                  </div>
+                  <span className="text-xs font-bold text-white">Cover Art &amp; Visibility</span>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-2">
-                    <ImageIcon className="h-3.5 w-3.5 text-purple-400" />
-                    Cover Image
-                  </label>
+                <div className="flex gap-4 items-start">
+                  <div className="w-[80px] h-[108px] shrink-0 rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0a0a12] flex items-center justify-center relative">
+                    {localCoverImage || seriesCoverImage ? (
+                      <>
+                        <img
+                          src={localCoverImage || seriesCoverImage}
+                          alt="Cover"
+                          className="w-full h-full object-cover"
+                          onError={(e) => (e.currentTarget.style.display = "none")}
+                        />
+                        {isExtractingCover && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                            <Loader2 className="h-5 w-5 animate-spin text-purple-400" />
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-neutral-700 gap-1">
+                        {isExtractingCover ? (
+                          <Loader2 className="h-5 w-5 animate-spin text-purple-400" />
+                        ) : (
+                          <ImageIcon className="h-5 w-5" />
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-                  <div className="flex gap-4 items-start flex-col sm:flex-row">
-                    <div className="w-20 h-28 shrink-0 rounded-lg overflow-hidden border border-neutral-800 bg-[#0a0a0e] flex items-center justify-center relative group">
-                      {localCoverImage || seriesCoverImage ? (
-                        <>
-                          <img
-                            src={localCoverImage || seriesCoverImage}
-                            alt="Cover Preview"
-                            className="w-full h-full object-cover"
-                            onError={(e) =>
-                              (e.currentTarget.style.display = "none")
-                            }
-                          />
-                          {isExtractingCover && (
-                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                              <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-neutral-700">
-                          {isExtractingCover ? (
-                            <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
-                          ) : (
-                            <ImageIcon className="h-6 w-6" />
-                          )}
-                        </div>
+                  <div className="flex-1 space-y-2.5">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={seriesCoverImage}
+                        onChange={(e) => {
+                          setSeriesCoverImage(e.target.value);
+                          if (e.target.value) setLocalCoverImage(null);
+                        }}
+                        placeholder="Image URL..."
+                        className={`${inputCls} text-xs font-mono`}
+                      />
+                      {onAutoExtractCover && (
+                        <button
+                          type="button"
+                          onClick={handleAutoExtract}
+                          disabled={isExtractingCover}
+                          className="px-3 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/25 text-purple-300 rounded-2xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Auto
+                        </button>
                       )}
                     </div>
-
-                    <div className="flex-1 space-y-3 w-full">
-                      <div className="flex gap-2">
+                    <div className="flex items-center gap-3">
+                      <label className="cursor-pointer px-3 py-2 bg-white/[0.04] hover:bg-white/[0.07] text-neutral-400 hover:text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border border-white/[0.07] w-fit">
+                        <Upload className="w-3 h-3 text-purple-400" />
+                        Upload File
                         <input
-                          type="text"
-                          value={seriesCoverImage}
-                          onChange={(e) => {
-                            setSeriesCoverImage(e.target.value);
-                            if (e.target.value) setLocalCoverImage(null);
-                          }}
-                          placeholder="Image URL (e.g. https://.../cover.jpg)"
-                          className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-xs text-neutral-200 outline-none transition-colors shadow-inner font-mono"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          className="hidden"
                         />
-                        {onAutoExtractCover && (
-                          <button
-                            type="button"
-                            onClick={handleAutoExtract}
-                            disabled={isExtractingCover}
-                            className="px-3 py-2.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                            title="Auto-extract cover from scraped panels"
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span className="hidden sm:inline">Auto</span>
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <label className="cursor-pointer px-3 py-2 bg-neutral-800 hover:bg-neutral-750 text-neutral-300 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-neutral-700">
-                          <Upload className="w-3.5 h-3.5 text-purple-400" />
-                          <span>Upload Local File</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                          />
-                        </label>
-                        {localCoverImage && (
-                          <span className="text-[10px] text-emerald-400 font-mono">
-                            File selected
-                          </span>
-                        )}
-                      </div>
+                      </label>
+                      {localCoverImage && (
+                        <span className="text-[10px] text-emerald-400 font-mono">✓ File uploaded</span>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-2">
-                    <AlignLeft className="h-3.5 w-3.5 text-purple-400" />
+                  <label className={labelCls}>
+                    <AlignLeft className="h-3 w-3 text-indigo-400" />
                     Series Synopsis
                   </label>
                   <textarea
                     value={seriesSynopsis}
                     onChange={(e) => setSeriesSynopsis(e.target.value)}
                     rows={3}
-                    placeholder="Enter series summary or story background..."
-                    className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-xs text-neutral-200 outline-none transition-colors shadow-inner resize-none font-sans leading-relaxed"
+                    placeholder="Enter series summary or story overview..."
+                    className={`${inputCls} resize-none leading-relaxed`}
                   />
                 </div>
-              </div>
-            )}
-          </div>
 
-          {/* Section 3 */}
-          <div className="space-y-4 bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/60 transition-all">
-            <h3
-              onClick={() => toggleSection("video")}
-              className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between cursor-pointer hover:text-white transition-colors select-none"
-            >
-              <div className="flex items-center gap-2">
-                <Video className="h-4 w-4 text-purple-400" />
-                3. Video & Layout
+                <div className="space-y-1.5">
+                  <label className={labelCls}>
+                    <Eye className="h-3 w-3 text-indigo-400" />
+                    Visibility Status
+                  </label>
+                  <select
+                    value={projectStatus}
+                    onChange={(e) => setProjectStatus(e.target.value)}
+                    className={selectCls}
+                  >
+                    {STATUS_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              {openSections.video ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </h3>
-            {openSections.video && (
-              <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            </div>
+          )}
+
+          {/* TAB 2: AI & AUDIO STUDIO */}
+          {activeTab === "ai" && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              {/* Presets */}
+              <div className="bg-[#0e0f19]/80 border border-white/[0.07] rounded-2xl p-4 flex items-center justify-between gap-2 overflow-x-auto">
+                <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  Quick Presets:
+                </span>
+                <div className="flex items-center gap-2">
+                  {PRESETS.map((preset) => {
+                    const Icon = preset.icon;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => applyPreset(preset.id)}
+                        className={`px-3 py-1.5 bg-${preset.color}-500/10 hover:bg-${preset.color}-500/20 border border-${preset.color}-500/25 text-${preset.color}-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer`}
+                      >
+                        <Icon className={`w-3 h-3 text-${preset.color}-400`} />
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Layout & Narration */}
+              <div className={cardCls}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="p-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl">
+                    <Video className="h-3.5 w-3.5 text-cyan-400" />
+                  </div>
+                  <span className="text-xs font-bold text-white">Video Format &amp; Tone</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Target Layout
-                    </label>
+                    <label className={labelCls}>Target Video Ratio</label>
                     <select
                       value={targetLayout}
                       onChange={(e) => setTargetLayout(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
+                      className={selectCls}
                     >
-                      <option value="9:16">📱 Vertical Shorts (9:16)</option>
-                      <option value="16:9">🎬 Landscape Video (16:9)</option>
-                      <option value="1:1">⏹️ Square Post (1:1)</option>
+                      {LAYOUT_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Narration Tone
-                    </label>
+                    <label className={labelCls}>Narration Tone</label>
                     <select
                       value={narrationTone}
                       onChange={(e) => setNarrationTone(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
+                      className={selectCls}
                     >
-                      <option value="Dramatic">Dramatic / Cinematic</option>
-                      <option value="Dialogue-focused">Dialogue-focused</option>
-                      <option value="Action-paced">Action-paced</option>
-                      <option value="Minimalistic">Minimalistic</option>
+                      {TONE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* NEW Section 4: AI Voice & Audio Pipeline */}
-          <div className="space-y-4 bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/60 transition-all">
-            <h3
-              onClick={() => toggleSection("ai_audio")}
-              className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between cursor-pointer hover:text-white transition-colors select-none"
-            >
-              <div className="flex items-center gap-2">
-                <Mic className="h-4 w-4 text-purple-400" />
-                4. AI Voice & Sound Pipeline
-              </div>
-              {openSections.ai_audio ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </h3>
-            {openSections.ai_audio && (
-              <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                {/* AI Tasks Toggles */}
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => toggleTask("generateScript")}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      aiTasks.generateScript
-                        ? "bg-purple-500/10 border-purple-500/40 text-purple-300"
-                        : "bg-[#0a0a0e] border-neutral-800 text-neutral-500"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <FileText className="w-4 h-4" />
-                      {aiTasks.generateScript && (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
-                      )}
-                    </div>
-                    <p className="text-xs font-bold leading-tight">
-                      Extract Script
-                    </p>
-                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-                      OCR dialogue
-                    </p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => toggleTask("generateVoice")}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      aiTasks.generateVoice
-                        ? "bg-purple-500/10 border-purple-500/40 text-purple-300"
-                        : "bg-[#0a0a0e] border-neutral-800 text-neutral-500"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <Mic className="w-4 h-4" />
-                      {aiTasks.generateVoice && (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
-                      )}
-                    </div>
-                    <p className="text-xs font-bold leading-tight">
-                      AI Voiceover
-                    </p>
-                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-                      TTS Narration
-                    </p>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => toggleTask("generateSFX")}
-                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                      aiTasks.generateSFX
-                        ? "bg-purple-500/10 border-purple-500/40 text-purple-300"
-                        : "bg-[#0a0a0e] border-neutral-800 text-neutral-500"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <Music className="w-4 h-4" />
-                      {aiTasks.generateSFX && (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
-                      )}
-                    </div>
-                    <p className="text-xs font-bold leading-tight">SFX & BGM</p>
-                    <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-                      Audio FX
-                    </p>
-                  </button>
+              {/* AI Pipeline Toggles */}
+              <div className={cardCls}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="p-1.5 bg-purple-500/10 border border-purple-500/20 rounded-xl">
+                    <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                  </div>
+                  <span className="text-xs font-bold text-white">AI Automation Pipeline</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-3">
+                  {AI_TASK_DEFINITIONS.map(({ key, icon: Icon, label, sub }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => toggleTask(key)}
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                        aiTasks[key]
+                          ? "bg-purple-500/15 border-purple-500/40 text-purple-200"
+                          : "bg-white/[0.03] border-white/[0.06] text-neutral-600 hover:text-neutral-400"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <Icon className="w-4 h-4" />
+                        {aiTasks[key] && (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                        )}
+                      </div>
+                      <p className="text-xs font-bold leading-tight">{label}</p>
+                      <p className="text-[10px] text-neutral-500 font-mono mt-1">{sub}</p>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-2">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                      <Mic className="w-3.5 h-3.5 text-purple-400" />
-                      AI Voice Actor
+                    <label className={labelCls}>
+                      <Mic className="h-3 w-3 text-purple-400" />
+                      Voice Character
                     </label>
                     <select
                       value={voiceActor}
                       onChange={(e) => setVoiceActor(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
+                      className={selectCls}
                     >
-                      <option value="Epic Trailer Narrator">
-                        🎙️ Epic Trailer Narrator (Deep Male)
-                      </option>
-                      <option value="Anime Protagonist (Male)">
-                        🔥 Anime Protagonist (Hype Male)
-                      </option>
-                      <option value="Deep Fantasy Narrator">
-                        🏰 Deep Fantasy Narrator (Cinematic)
-                      </option>
-                      <option value="Soft Female Storyteller">
-                        🌸 Soft Female Storyteller
-                      </option>
-                      <option value="Cinematic Male">
-                        🎬 Cinematic Male (Standard)
-                      </option>
+                      {VOICE_ACTORS.map((actor) => (
+                        <option key={actor.value} value={actor.value}>
+                          {actor.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
-
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                      <Music className="w-3.5 h-3.5 text-purple-400" />
-                      Background BGM Style
+                    <label className={labelCls}>
+                      <Music className="h-3 w-3 text-purple-400" />
+                      Soundtrack Style
                     </label>
                     <select
                       value={bgmStyle}
                       onChange={(e) => setBgmStyle(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
+                      className={selectCls}
                     >
-                      <option value="Dark Action Hybrid">
-                        ⚡ Dark Action Hybrid (Manhwa Hype)
-                      </option>
-                      <option value="Epic Orchestral">
-                        🎻 Epic Orchestral (Symphonic)
-                      </option>
-                      <option value="Lo-Fi Recaps">🎧 Lo-Fi Chill Recap</option>
-                      <option value="Cyberpunk Synthwave">
-                        🌆 Cyberpunk Synthwave
-                      </option>
-                      <option value="None">🔇 None (Voice Only)</option>
+                      {BGM_STYLES.map((style) => (
+                        <option key={style.value} value={style.value}>
+                          {style.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* NEW Section 5: Visual Effects & Motion Style */}
-          <div className="space-y-4 bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/60 transition-all">
-            <h3
-              onClick={() => toggleSection("visual_motion")}
-              className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between cursor-pointer hover:text-white transition-colors select-none"
-            >
-              <div className="flex items-center gap-2">
-                <Camera className="h-4 w-4 text-purple-400" />
-                5. Visual Motion & Rendering
-              </div>
-              {openSections.visual_motion ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </h3>
-            {openSections.visual_motion && (
-              <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Camera Motion Pacing
-                    </label>
-                    <select
-                      value={transitionPace}
-                      onChange={(e) => setTransitionPace(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
-                    >
-                      <option value="Fast (2.5s)">
-                        ⚡ Fast Paced (2.5s / panel - TikTok)
-                      </option>
-                      <option value="Standard (4.0s)">
-                        🎯 Standard Paced (4.0s / panel)
-                      </option>
-                      <option value="Cinematic Slow (6.0s)">
-                        🎥 Cinematic Slow (6.0s / panel)
-                      </option>
-                    </select>
+          {/* TAB 3: DISTRIBUTION & TAGS */}
+          {activeTab === "distribution" && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              {/* Platforms */}
+              <div className={cardCls}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="p-1.5 bg-teal-500/10 border border-teal-500/20 rounded-xl">
+                    <Globe className="h-3.5 w-3.5 text-teal-400" />
                   </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Motion Effect Mode
-                    </label>
-                    <select
-                      value={cameraMotion}
-                      onChange={(e) => setCameraMotion(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
-                    >
-                      <option value="2.5D Parallax Motion">
-                        ✨ 2.5D Parallax Depth Motion
-                      </option>
-                      <option value="Pan & Zoom Dynamic">
-                        🔍 Dynamic Pan & Zoom
-                      </option>
-                      <option value="Static Clean">
-                        📷 Static Clean Frame
-                      </option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Art Style Enhancement
-                    </label>
-                    <select
-                      value={artStyle}
-                      onChange={(e) => setArtStyle(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
-                    >
-                      <option value="Manhwa Vibrant">
-                        💥 Manhwa Vibrant Glow
-                      </option>
-                      <option value="Anime Studio">
-                        🎨 Anime Studio Crisp
-                      </option>
-                      <option value="Dark Fantasy">
-                        🌙 Dark Fantasy Contrast
-                      </option>
-                      <option value="Manga Monochrome">
-                        ✒️ Manga Ink Black & White
-                      </option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Render Engine Quality
-                    </label>
-                    <select
-                      value={renderQuality}
-                      onChange={(e) => setRenderQuality(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
-                    >
-                      <option value="1080p Standard">
-                        ⚡ 1080p Standard (Fast Export)
-                      </option>
-                      <option value="4K Ultra Precision">
-                        🌟 4K Ultra Precision Studio
-                      </option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Section 6: Panel Processing */}
-          <div className="space-y-4 bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/60 transition-all">
-            <h3
-              onClick={() => toggleSection("processing")}
-              className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between cursor-pointer hover:text-white transition-colors select-none"
-            >
-              <div className="flex items-center gap-2">
-                <Crop className="h-4 w-4 text-purple-400" />
-                6. Panel Crop & Segmentation
-              </div>
-              {openSections.processing ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </h3>
-            {openSections.processing && (
-              <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Crop Sensitivity
-                    </label>
-                    <select
-                      value={cropSensitivity}
-                      onChange={(e) => setCropSensitivity(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
-                    >
-                      <option value="Conservative">
-                        Conservative (Preserve full panels)
-                      </option>
-                      <option value="Balanced">Balanced (Recommended)</option>
-                      <option value="Aggressive">
-                        Aggressive (Tight on speech bubbles)
-                      </option>
-                    </select>
-                  </div>
-                  <div className="space-y-1.5 flex flex-col justify-center pt-5">
-                    <label className="flex items-center gap-3 cursor-pointer select-none">
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          checked={splitTallStrips}
-                          onChange={(e) => setSplitTallStrips(e.target.checked)}
-                          className="sr-only"
-                        />
-                        <div
-                          className={`block w-10 h-6 rounded-full transition-colors ${
-                            splitTallStrips ? "bg-purple-500" : "bg-neutral-800"
-                          }`}
-                        ></div>
-                        <div
-                          className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${
-                            splitTallStrips ? "transform translate-x-4" : ""
-                          }`}
-                        ></div>
-                      </div>
-                      <span className="text-sm text-neutral-300">
-                        Auto-split long tall strips
-                      </span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Section 7: Tags & Audience */}
-          <div className="space-y-4 bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/60 transition-all">
-            <h3
-              onClick={() => toggleSection("audience")}
-              className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between cursor-pointer hover:text-white transition-colors select-none"
-            >
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-purple-400" />
-                7. Tags & Target Audience
-              </div>
-              {openSections.audience ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </h3>
-            {openSections.audience && (
-              <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Age Rating
-                    </label>
-                    <select
-                      value={ageRating}
-                      onChange={(e) => setAgeRating(e.target.value)}
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
-                    >
-                      <option value="All Ages">All Ages</option>
-                      <option value="Teen (13+)">Teen (13+)</option>
-                      <option value="Mature (18+)">Mature (18+)</option>
-                      <option value="Action Violence">Action Violence</option>
-                      <option value="Flash Warning">Flash Warning</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Languages (Primary / Subtitles)
-                    </label>
-                    <div className="flex gap-2">
-                      <select
-                        value={primaryLanguage}
-                        onChange={(e) => setPrimaryLanguage(e.target.value)}
-                        className="w-1/2 bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
-                      >
-                        <option value="English">English</option>
-                        <option value="Korean">Korean</option>
-                        <option value="Japanese">Japanese</option>
-                        <option value="Spanish">Spanish</option>
-                      </select>
-                      <select
-                        value={subtitleLanguage}
-                        onChange={(e) => setSubtitleLanguage(e.target.value)}
-                        className="w-1/2 bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-3 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner cursor-pointer"
-                      >
-                        <option value="None">None</option>
-                        <option value="English">English</option>
-                        <option value="Korean">Korean</option>
-                        <option value="Japanese">Japanese</option>
-                      </select>
-                    </div>
-                  </div>
+                  <span className="text-xs font-bold text-white">Target Platforms</span>
                 </div>
 
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Project Custom Tags
-                    </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {PLATFORM_OPTIONS.map((platform) => (
                     <button
+                      key={platform}
                       type="button"
-                      onClick={handleAutoGenerateTags}
-                      className="px-2.5 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1"
+                      onClick={() => togglePlatform(platform)}
+                      className={`py-3 px-3.5 rounded-2xl border text-xs font-semibold transition-all cursor-pointer text-left flex items-center justify-between ${
+                        targetPlatforms.includes(platform)
+                          ? "bg-purple-600/15 border-purple-500/35 text-purple-300 shadow-sm"
+                          : "bg-white/[0.03] border-white/[0.06] text-neutral-600 hover:text-neutral-400"
+                      }`}
                     >
-                      <Wand2 className="w-3 h-3 text-purple-400" />
-                      <span>Auto-Generate AI Tags</span>
+                      <span>{platform}</span>
+                      {targetPlatforms.includes(platform) && (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                      )}
                     </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 p-3 bg-[#0a0a0e] border border-neutral-800 rounded-xl min-h-[46px]">
-                    {customTags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-mono font-semibold"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="hover:text-white"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-                    <input
-                      type="text"
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={handleTagKeyDown}
-                      placeholder={
-                        customTags.length === 0 ? "e.g. #manhwa, #action" : ""
-                      }
-                      className="bg-transparent border-none outline-none text-sm text-neutral-200 flex-1 min-w-[120px]"
-                    />
-                  </div>
+                  ))}
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Section 8: Workspace & Target Platforms */}
-          <div className="space-y-4 bg-neutral-900/40 p-4 rounded-xl border border-neutral-800/60 transition-all">
-            <h3
-              onClick={() => toggleSection("organization")}
-              className="text-xs font-bold text-neutral-400 uppercase tracking-wider font-mono flex items-center justify-between cursor-pointer hover:text-white transition-colors select-none"
-            >
-              <div className="flex items-center gap-2">
-                <FolderTree className="h-4 w-4 text-purple-400" />
-                8. Workspace & Publishing Destinations
+              {/* Tags */}
+              <div className={cardCls}>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                      <Tags className="h-3.5 w-3.5 text-amber-400" />
+                    </div>
+                    <span className="text-xs font-bold text-white">Tags &amp; Keywords</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleAutoGenerateTags}
+                    className="px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/25 rounded-xl text-[10px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Wand2 className="w-3 h-3" />
+                    Auto-Generate
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2 p-3 bg-[#0a0a12] border border-white/[0.07] rounded-2xl min-h-[46px]">
+                  {customTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/15 text-purple-300 border border-purple-500/25 text-xs font-mono"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="hover:text-white transition-colors"
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={handleTagKeyDown}
+                    placeholder={customTags.length === 0 ? "Type tag & press Enter..." : ""}
+                    className="bg-transparent border-none outline-none text-sm text-neutral-300 flex-1 min-w-[120px] placeholder:text-neutral-700"
+                  />
+                </div>
               </div>
-              {openSections.organization ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </h3>
-            {openSections.organization && (
-              <div className="space-y-4 pt-4 border-t border-neutral-850 mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {/* Organization & Processing settings */}
+              <div className={cardCls}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="p-1.5 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+                    <Sliders className="h-3.5 w-3.5 text-rose-400" />
+                  </div>
+                  <span className="text-xs font-bold text-white">Processing &amp; Workspace</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Folder / Series Grouping
-                    </label>
+                    <label className={labelCls}>Folder / Season</label>
                     <input
                       type="text"
                       value={workspaceFolder}
                       onChange={(e) => setWorkspaceFolder(e.target.value)}
-                      placeholder="e.g. Season 1, Action Recaps"
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors shadow-inner"
+                      placeholder="Folder or series grouping..."
+                      className={inputCls}
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                      Episode Numbering Prefix
-                    </label>
+                    <label className={labelCls}>Episode Prefix</label>
                     <input
                       type="text"
                       value={episodePrefix}
                       onChange={(e) => setEpisodePrefix(e.target.value)}
-                      placeholder="e.g. EP {num} • S1"
-                      className="w-full bg-[#0a0a0e] border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-3 text-sm text-neutral-200 outline-none transition-colors font-mono shadow-inner"
+                      placeholder="Episode numbering prefix..."
+                      className={`${inputCls} font-mono`}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider font-mono">
-                    Target Distribution Platforms
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      "YouTube Shorts",
-                      "TikTok",
-                      "Instagram Reels",
-                      "YouTube Video",
-                    ].map((platform) => (
-                      <button
-                        key={platform}
-                        type="button"
-                        onClick={() => togglePlatform(platform)}
-                        className={`p-2.5 rounded-xl border text-center text-xs font-semibold transition-all cursor-pointer ${
-                          targetPlatforms.includes(platform)
-                            ? "bg-purple-600/20 border-purple-500/40 text-purple-300 shadow-md shadow-purple-950/20"
-                            : "bg-[#0a0a0e] border-neutral-800 text-neutral-500 hover:text-neutral-300"
-                        }`}
-                      >
-                        {platform}
-                      </button>
-                    ))}
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                  <div className="space-y-1.5">
+                    <label className={labelCls}>Crop Sensitivity</label>
+                    <select
+                      value={cropSensitivity}
+                      onChange={(e) => setCropSensitivity(e.target.value)}
+                      className={selectCls}
+                    >
+                      {SENSITIVITY_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className={labelCls}>Primary Language</label>
+                    <select
+                      value={primaryLanguage}
+                      onChange={(e) => setPrimaryLanguage(e.target.value)}
+                      className={selectCls}
+                    >
+                      {LANGUAGE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
         </div>
 
-        {/* Footer Actions */}
-        <div className="px-6 py-4 bg-neutral-900/90 backdrop-blur-xl border-t border-neutral-850 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+        {/* ── Footer ── */}
+        <div className="px-6 py-4 border-t border-white/[0.06] flex items-center justify-between gap-3 shrink-0 bg-[#09090f]/90 backdrop-blur-xl">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2.5 bg-[#0a0a0e] hover:bg-neutral-850 text-neutral-400 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-800 text-center"
+            className="px-4 py-2.5 bg-white/[0.04] hover:bg-white/[0.07] text-neutral-500 hover:text-neutral-300 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-white/[0.07]"
           >
             Cancel
           </button>
 
           <div className="flex items-center gap-2.5">
+            {activeTab !== "distribution" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  if (activeTab === "metadata") setActiveTab("ai");
+                  else if (activeTab === "ai") setActiveTab("distribution");
+                }}
+                className="px-4 py-2.5 bg-white/[0.05] hover:bg-white/[0.08] text-neutral-300 hover:text-white border border-white/[0.08] hover:border-white/[0.14] rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>Next Tab</span>
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
+
             <button
               type="button"
               onClick={() => handleConfirm(false)}
               disabled={!seriesTitle.trim() || isSaving}
-              className="px-4 py-2.5 bg-neutral-800/80 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-700/60 hover:border-neutral-600 rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2.5 bg-white/[0.05] hover:bg-white/[0.08] text-neutral-300 hover:text-white border border-white/[0.08] hover:border-white/[0.14] rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>
@@ -1225,17 +1027,17 @@ export default function ProjectConfirmModal({
               type="button"
               onClick={() => handleConfirm(true)}
               disabled={!seriesTitle.trim() || isSaving}
-              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-lg shadow-purple-900/30 border border-purple-400/30 active:scale-95 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-lg shadow-purple-900/30 border border-purple-400/25 active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-white" />
-                  <span>Initializing Studio...</span>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Initializing...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-3.5 w-3.5 text-amber-300 animate-pulse" />
-                  <span>🚀 Initialize & Launch AI Studio</span>
+                  <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                  <span>Launch AI Studio</span>
                 </>
               )}
             </button>
