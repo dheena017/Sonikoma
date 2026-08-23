@@ -1,4 +1,4 @@
-export interface Episode {
+export interface Chapter {
   number: string;
   chapter_number?: number;
   title: string;

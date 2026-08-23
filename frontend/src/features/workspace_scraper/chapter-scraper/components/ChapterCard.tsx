@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   Calendar,
-  Image as ImageIcon,
   Star,
   ThumbsUp,
   Clock,
@@ -17,33 +16,37 @@ import {
   Flame,
   ArrowUpRight,
   Sparkles,
+  BookOpen,
+  Tag,
 } from "lucide-react";
 
-import type { Episode as BaseEpisode } from "../types/EpisodeTypes";
+import type { Chapter as BaseChapter } from "../types/ChapterTypes";
 import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
 
-type EpisodeCardEpisode = BaseEpisode & {
+type ChapterCardChapter = BaseChapter & {
   duration?: string;
   progress?: number;
   isNew?: boolean;
   index?: number;
+  language?: string;
+  is_locked?: boolean;
 };
 
-interface EpisodeCardProps {
-  episode: EpisodeCardEpisode;
-  onClick: (episode: EpisodeCardEpisode) => void;
-  onPreviewClick?: (episode: EpisodeCardEpisode) => void;
-  onBookmark?: (episodeUrl: string) => void;
-  onMarkReadToggle?: (episodeUrl: string) => void;
+interface ChapterCardProps {
+  chapter: ChapterCardChapter;
+  onClick: (chapter: ChapterCardChapter) => void;
+  onPreviewClick?: (chapter: ChapterCardChapter) => void;
+  onBookmark?: (chapterUrl: string) => void;
+  onMarkReadToggle?: (chapterUrl: string) => void;
   isBookmarked?: boolean;
   isRead?: boolean;
   isMultiSelectMode?: boolean;
   isSelected?: boolean;
-  onToggleSelect?: (episodeUrl: string) => void;
+  onToggleSelect?: (chapterUrl: string) => void;
 }
 
-export const EpisodeCard: React.FC<EpisodeCardProps> = ({
-  episode,
+export const ChapterCard: React.FC<ChapterCardProps> = ({
+  chapter,
   onClick,
   onPreviewClick,
   onBookmark,
@@ -58,17 +61,17 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const rawCover = episode.cover_image || "";
+  const rawCover = chapter.cover_image || "";
   const [imgSrc, setImgSrc] = useState<string>(() =>
-    getProxiedImageUrl(rawCover, episode.url)
+    getProxiedImageUrl(rawCover, chapter.url)
   );
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setImageError(false);
-    const cover = episode.cover_image || "";
-    setImgSrc(getProxiedImageUrl(cover, episode.url));
-  }, [episode.cover_image, episode.url]);
+    const cover = chapter.cover_image || "";
+    setImgSrc(getProxiedImageUrl(cover, chapter.url));
+  }, [chapter.cover_image, chapter.url]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -89,20 +92,20 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
   const handleBookmarkClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onBookmark) onBookmark(episode.url);
+    if (onBookmark) onBookmark(chapter.url);
   };
 
   const handleCardClick = () => {
     if (isMultiSelectMode && onToggleSelect) {
-      onToggleSelect(episode.url);
+      onToggleSelect(chapter.url);
     } else {
-      onClick(episode);
+      onClick(chapter);
     }
   };
 
   const handleCopyLink = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(episode.url);
+    navigator.clipboard.writeText(chapter.url);
     setCopied(true);
     setTimeout(() => {
       setCopied(false);
@@ -112,17 +115,17 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
   const handleExportSingleJSON = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const jsonContent = JSON.stringify(episode, null, 2);
+    const jsonContent = JSON.stringify(chapter, null, 2);
     const blob = new Blob([jsonContent], {
       type: "application/json;charset=utf-8;",
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const safeEp = (episode.number || "ep")
+    const safeCh = (chapter.number || "ch")
       .replace(/[^\w\s-]/g, "")
       .replace(/\s+/g, "_");
-    link.download = `Episode_${safeEp}_metadata.json`;
+    link.download = `Chapter_${safeCh}_metadata.json`;
     link.click();
     URL.revokeObjectURL(url);
     setIsMenuOpen(false);
@@ -140,43 +143,17 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
     if (name.includes("kakao") || name.includes("tapas"))
       return "bg-amber-500 shadow-amber-500/35";
     if (name.includes("lezhin")) return "bg-rose-500 shadow-rose-500/35";
+    if (name.includes("toonily")) return "bg-fuchsia-500 shadow-fuchsia-500/35";
+    if (name.includes("bato")) return "bg-sky-500 shadow-sky-500/35";
+    if (name.includes("manga")) return "bg-indigo-500 shadow-indigo-500/35";
     return "bg-purple-500 shadow-purple-500/35";
   };
 
-  const renderRatingStars = (rating: number | null | undefined) => {
-    if (rating === null || rating === undefined || isNaN(rating)) return null;
-    const isScale10 = rating > 5.0;
-    const maxVal = isScale10 ? 10 : 5;
-    const scaledRating = isScale10 ? rating / 2 : rating;
-
-    return (
-      <div
-        className="flex items-center gap-0.5"
-        title={`Rating: ${Number(rating).toFixed(1)}/${maxVal}`}
-      >
-        {Array(5)
-          .fill(0)
-          .map((_, i) => {
-            const isFilled = i < Math.round(scaledRating);
-            return (
-              <Star
-                key={i}
-                size={11}
-                className={`transition-all duration-350 ${
-                  isFilled
-                    ? "fill-amber-400 text-amber-450 drop-shadow-[0_0_3px_rgba(245,158,11,0.6)]"
-                    : "text-neutral-700"
-                }`}
-              />
-            );
-          })}
-      </div>
-    );
-  };
-
+  // Format Display Title with "Chapter [Num]" or custom subtitle
   const renderTitle = () => {
-    const num = (episode.number || "").trim();
-    const title = (episode.title || "")
+    const rawNum = (chapter.number || "").trim();
+    const cleanNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim();
+    const rawTitle = (chapter.title || "")
       .replace(
         /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}.*$/i,
         ""
@@ -187,102 +164,63 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
       .replace(/^[-:–—\s]+|[-:–—\s]+$/g, "")
       .trim();
 
-    if (!title || title.toLowerCase() === num.toLowerCase()) {
+    const displayNum = cleanNum || rawNum || (chapter.index !== undefined ? String(chapter.index + 1) : "");
+
+    // If there is no custom subtitle, render "Chapter [Num]"
+    if (!rawTitle || rawTitle.toLowerCase() === displayNum.toLowerCase() || rawTitle.toLowerCase() === `chapter ${displayNum}`.toLowerCase()) {
       return (
         <h3
-          className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
-          title={num || title}
+          className="text-sm font-bold text-white line-clamp-2 leading-snug flex-1 tracking-tight"
+          title={`Chapter ${displayNum}`}
         >
-          <span className="text-purple-400 font-extrabold font-mono">
-            {num || title}
+          <span className="text-purple-300 font-extrabold">
+            {displayNum ? `Chapter ${displayNum}` : "Comic Chapter"}
           </span>
         </h3>
       );
     }
 
-    if (!num) {
-      return (
-        <h3
-          className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
-          title={title}
-        >
-          <span className="text-neutral-100">{title}</span>
-        </h3>
-      );
-    }
-
-    const cleanNum = num.toLowerCase().replace(/[^a-z0-9]/g, "");
-    const cleanTitle = title.toLowerCase().replace(/[^a-z0-9]/g, "");
-
-    if (cleanNum === cleanTitle) {
-      return (
-        <h3
-          className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
-          title={title}
-        >
-          <span className="text-purple-400 font-extrabold font-mono">
-            {title}
-          </span>
-        </h3>
-      );
-    }
-
-    if (cleanTitle.startsWith(cleanNum)) {
-      const remainder = title
-        .slice(num.length)
-        .replace(/^[-_:\s•·/\\|]+/, "")
-        .trim();
-      return (
-        <h3
-          className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
-          title={title}
-        >
-          <span className="text-purple-400 font-extrabold font-mono mr-1.5">
-            {num}
-          </span>
-          {remainder && <span className="text-neutral-100">{remainder}</span>}
-        </h3>
-      );
-    }
-
+    // If there is a distinct subtitle, render "Chapter [Num]: [Subtitle]"
     return (
       <h3
-        className="text-sm font-bold text-white line-clamp-2 leading-tight flex-1"
-        title={`${num}: ${title}`}
+        className="text-sm font-bold text-white line-clamp-2 leading-snug flex-1 tracking-tight"
+        title={`Chapter ${displayNum}: ${rawTitle}`}
       >
-        <span className="text-purple-400 font-extrabold mr-1.5 font-mono">
-          {num}
+        <span className="text-purple-300 font-extrabold mr-1.5">
+          {displayNum ? `Ch. ${displayNum}` : "Chapter"}
         </span>
-        <span className="text-neutral-100">{title}</span>
+        <span className="text-neutral-200 font-medium">{rawTitle}</span>
       </h3>
     );
   };
 
-  const isPopular = episode.rating && episode.rating >= 4.0;
+  const isPopular = chapter.rating && chapter.rating >= 4.0;
+  const rawNum = (chapter.number || "").trim();
+  const cleanBadgeNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() || (chapter.index !== undefined ? String(chapter.index + 1) : "");
 
   return (
     <div
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`w-full min-h-[285px] flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0d0d12] border ${
+      className={`w-full min-h-[300px] flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0e0e14] border ${
         isSelected
-          ? "border-purple-500 ring-2 ring-purple-500/40 shadow-[0_0_30px_rgba(168,85,247,0.3)] bg-neutral-900"
-          : "border-neutral-800/80 hover:border-purple-500/50 shadow-xl hover:shadow-2xl hover:shadow-purple-950/20"
+          ? "border-purple-500 ring-2 ring-purple-500/40 shadow-[0_0_30px_rgba(168,85,247,0.35)] bg-purple-955/20"
+          : "border-neutral-800/80 hover:border-purple-500/50 shadow-xl hover:shadow-2xl hover:shadow-purple-950/25"
       }`}
     >
       {/* Top Banner / Image Area */}
       <div className="relative w-full bg-neutral-950 aspect-[16/9] overflow-hidden border-b border-neutral-850">
         {isMultiSelectMode && (
           <div
-            className="absolute top-3 left-3 z-20"
+            className="absolute top-3 left-3 z-30"
             onClick={(e) => e.stopPropagation()}
           >
             <input
               type="checkbox"
               checked={isSelected}
-              onChange={() => onToggleSelect?.(episode.url)}
-              className="w-5 h-5 rounded-md border-neutral-700 text-purple-600 focus:ring-purple-500 focus:ring-offset-neutral-900 bg-neutral-950 cursor-pointer accent-purple-600 transition-transform duration-200 hover:scale-105 shadow-md"
+              onChange={() => onToggleSelect?.(chapter.url)}
+              className="w-5 h-5 rounded-md border-neutral-700 text-purple-600 focus:ring-purple-500 focus:ring-offset-neutral-900 bg-neutral-955 cursor-pointer accent-purple-600 transition-transform duration-200 hover:scale-105 shadow-md"
             />
           </div>
         )}
@@ -290,14 +228,13 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
         {imgSrc && !imageError ? (
           <img
             src={imgSrc}
-            alt={episode.title}
+            alt={chapter.title || `Chapter ${cleanBadgeNum}`}
             className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
               isHovered ? "scale-105 brightness-105" : "scale-100"
             }`}
             onError={() => {
-              if (imgSrc.includes("/api/proxy-image") && episode.cover_image) {
-                // Retry directly with raw URL if proxy failed
-                setImgSrc(episode.cover_image);
+              if (imgSrc.includes("/api/proxy-image") && chapter.cover_image) {
+                setImgSrc(chapter.cover_image);
               } else {
                 setImageError(true);
               }
@@ -309,25 +246,32 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             <div className="w-12 h-12 rounded-2xl bg-neutral-900/80 border border-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-950/30 mb-1.5 transition-transform group-hover:scale-110 duration-300">
               <Sparkles className="w-6 h-6 text-purple-400/80" />
             </div>
-            <span className="text-[11px] font-bold text-neutral-300 font-mono tracking-wider">
-              {episode.number ? `CH. ${episode.number}` : "COMIC COVER"}
+            <span className="text-[11px] font-bold text-purple-300 font-mono tracking-wider">
+              {cleanBadgeNum ? `CHAPTER ${cleanBadgeNum}` : "COMIC COVER"}
             </span>
             <span className="text-[9px] text-neutral-500 font-mono">
-              Ready to Read & Import
+              Ready to Read &amp; Import
             </span>
           </div>
         )}
 
-        {/* Gradient vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d12] via-[#0d0d12]/30 to-transparent pointer-events-none" />
+        {/* Gradient vignette overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e14] via-[#0e0e14]/20 to-transparent pointer-events-none" />
 
-        {/* Status badges (Single clean row, fades out on hover) */}
+        {/* Top-Left Floating Chapter Number & Status Badges */}
         <div
           className={`absolute top-2.5 ${
             isMultiSelectMode ? "left-10" : "left-2.5"
-          } flex items-center gap-1.5 z-10 max-w-[70%] overflow-hidden`}
+          } flex flex-wrap items-center gap-1.5 z-20 max-w-[70%] overflow-hidden`}
         >
-          {episode.isNew && (
+          {cleanBadgeNum && (
+            <span className="bg-black/80 backdrop-blur-md text-purple-300 border border-purple-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-lg uppercase tracking-wider font-mono shadow-md flex items-center gap-1">
+              <BookOpen size={10} className="text-purple-400" />
+              CH. {cleanBadgeNum}
+            </span>
+          )}
+
+          {chapter.isNew && (
             <span className="bg-gradient-to-r from-rose-500 to-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-md border border-rose-400/20 font-mono shrink-0">
               NEW
             </span>
@@ -342,11 +286,11 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
               <Flame size={10} className="fill-current text-black" /> POPULAR
             </span>
           )}
-          {episode.rating !== null && episode.rating !== undefined && (
+          {chapter.rating !== null && chapter.rating !== undefined && (
             <div className="bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-1 shadow-md border border-white/10 shrink-0">
               <Star size={10} className="fill-amber-400 text-amber-400" />
               <span className="text-[10px] font-extrabold text-amber-300 font-mono">
-                {Number(episode.rating).toFixed(1)}
+                {Number(chapter.rating).toFixed(1)}
               </span>
             </div>
           )}
@@ -356,12 +300,12 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
         <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-20">
           <button
             onClick={handleBookmarkClick}
-            className={`p-1.5 rounded-xl backdrop-blur-md transition-all duration-200 border ${
+            className={`p-1.5 rounded-xl backdrop-blur-md transition-all duration-200 border cursor-pointer ${
               isBookmarked
-                ? "bg-amber-500 text-black border-amber-400 shadow-lg shadow-amber-500/25"
-                : "bg-black/60 text-neutral-300 hover:bg-white hover:text-black border-white/10"
+                ? "bg-amber-500 text-black border-amber-400 shadow-lg shadow-amber-500/25 scale-105"
+                : "bg-black/70 text-neutral-300 hover:bg-white hover:text-black border-white/10"
             }`}
-            title={isBookmarked ? "Remove Bookmark" : "Bookmark Episode"}
+            title={isBookmarked ? "Remove Bookmark" : "Bookmark Chapter"}
           >
             {isBookmarked ? (
               <BookmarkCheck size={14} className="fill-current" />
@@ -372,8 +316,8 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
           <button
             onClick={handleCopyLink}
-            className="p-1.5 rounded-xl backdrop-blur-md transition-all duration-200 border bg-black/60 text-neutral-300 hover:bg-white hover:text-black border-white/10 active:scale-90"
-            title="Copy Episode Link"
+            className="p-1.5 rounded-xl backdrop-blur-md transition-all duration-200 border bg-black/70 text-neutral-300 hover:bg-white hover:text-black border-white/10 active:scale-90 cursor-pointer"
+            title="Copy Chapter Link"
           >
             {copied ? (
               <Check size={14} className="text-emerald-400" />
@@ -383,30 +327,30 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
           </button>
         </div>
 
-        {episode.duration && (
+        {chapter.duration && (
           <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 font-mono z-10">
             <Clock size={11} className="text-purple-400" />
-            {episode.duration}
+            {chapter.duration}
           </div>
         )}
       </div>
 
       {/* Card Content & Metadata */}
-      <div className="p-4 space-y-2.5 flex flex-col justify-between flex-1 relative">
+      <div className="p-4 space-y-3 flex flex-col justify-between flex-1 relative">
         <div className="space-y-2">
           <div className="flex justify-between items-start gap-2">
             {renderTitle()}
             <div className="flex items-center gap-1 shrink-0">
-              {episode.index !== undefined && (
+              {chapter.index !== undefined && (
                 <span
-                  className="text-[10px] font-bold text-neutral-500 font-mono bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded-md"
-                  title={`Episode Index: ${episode.index}`}
+                  className="text-[10px] font-bold text-neutral-400 font-mono bg-neutral-900 border border-neutral-800 px-2 py-0.5 rounded-lg"
+                  title={`Release sequence #${chapter.index}`}
                 >
-                  #{episode.index}
+                  #{chapter.index}
                 </span>
               )}
               <button
-                className="text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all p-1 rounded-lg active:scale-90"
+                className="text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all p-1 rounded-lg active:scale-90 cursor-pointer"
                 onClick={handleMenuToggle}
                 title="More Actions"
               >
@@ -415,14 +359,14 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             </div>
           </div>
 
-          {/* Star Rating Visual Row */}
-          {episode.rating !== undefined && (
+          {/* Star Rating Visual Row (if available) */}
+          {chapter.rating !== undefined && (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((star) => {
-                  const filled = episode.rating! / 2 >= star;
+                  const filled = chapter.rating! / 2 >= star;
                   const halfFilled =
-                    !filled && episode.rating! / 2 >= star - 0.5;
+                    !filled && chapter.rating! / 2 >= star - 0.5;
                   return (
                     <Star
                       key={star}
@@ -439,8 +383,8 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
                 })}
               </div>
               <span className="text-[10px] font-extrabold text-amber-300 font-mono">
-                {episode.rating !== null && episode.rating !== undefined
-                  ? Number(episode.rating).toFixed(1)
+                {chapter.rating !== null && chapter.rating !== undefined
+                  ? Number(chapter.rating).toFixed(1)
                   : "N/A"}
               </span>
               <span className="text-[10px] text-neutral-600 font-mono">
@@ -449,77 +393,78 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             </div>
           )}
 
-          {/* Source Platform Badge & Date Row */}
-          <div className="flex items-center justify-between text-xs text-neutral-400 pt-0.5">
-            {episode.url && (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-widest text-purple-400 bg-purple-950/40 border border-purple-500/20 px-2 py-0.5 rounded-md font-mono">
+          {/* Source Platform Badge & Release Date Row */}
+          <div className="flex items-center justify-between text-xs text-neutral-400 pt-1 border-t border-neutral-850/60">
+            {chapter.url && (
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-widest text-purple-300 bg-purple-950/40 border border-purple-500/20 px-2 py-0.5 rounded-lg font-mono">
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${getPlatformColor(
-                    episode.url
+                    chapter.url
                   )} shadow-sm animate-pulse`}
                 />
-                {getSourceName(episode.url).toUpperCase()}
+                {getSourceName(chapter.url).toUpperCase()}
               </span>
             )}
 
-            {episode.date && (
-              <div className="flex items-center gap-1 text-[11px] font-mono text-neutral-400">
-                <Calendar className="w-3.5 h-3.5 text-neutral-500" />
-                <span>{episode.date}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-1 text-[11px] font-mono text-neutral-400">
+              <Calendar className="w-3.5 h-3.5 text-purple-400/70" />
+              <span>{chapter.date || "Available"}</span>
+            </div>
           </div>
         </div>
 
-        {/* Interactive Bottom Bar */}
-        <div className="pt-2 border-t border-neutral-800/80 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {episode.likes && (
-              <div className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono">
+        {/* Interactive Bottom Action Bar */}
+        <div className="pt-2.5 border-t border-neutral-800/80 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {chapter.likes && (
+              <div className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono truncate">
                 <ThumbsUp
                   size={12}
-                  className="text-purple-400 fill-purple-400/20"
+                  className="text-purple-400 fill-purple-400/20 shrink-0"
                 />
-                <span>{episode.likes}</span>
+                <span>{chapter.likes}</span>
               </div>
             )}
-            {episode.views !== undefined && episode.views > 0 && (
-              <div className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono">
-                <Eye size={12} className="text-sky-400" />
+            {chapter.views !== undefined && chapter.views > 0 && (
+              <div className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono truncate">
+                <Eye size={12} className="text-sky-400 shrink-0" />
                 <span>
-                  {episode.views >= 1000
-                    ? `${(episode.views / 1000).toFixed(1)}K`
-                    : episode.views}
+                  {chapter.views >= 1000
+                    ? `${(chapter.views / 1000).toFixed(1)}K`
+                    : chapter.views}
                 </span>
               </div>
             )}
-            {!episode.likes && !episode.views && (
-              <div className="text-[10px] font-mono text-neutral-600">
-                Ready to import
+            {!chapter.likes && !chapter.views && (
+              <div className="text-[10px] font-mono text-neutral-500 flex items-center gap-1 truncate">
+                <Tag size={10} className="text-neutral-600 shrink-0" />
+                <span>{cleanBadgeNum ? `Chapter ${cleanBadgeNum}` : "Ready"}</span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onPreviewClick?.(episode);
+                onPreviewClick?.(chapter);
               }}
-              className="min-w-[64px] px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+              className="px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
+              title="Read Full Chapter Strip"
             >
-              <Eye size={12} />
-              Read
+              <Eye size={12} className="text-purple-400" />
+              <span>Read</span>
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onClick(episode);
+                onClick(chapter);
               }}
-              className="min-w-[76px] px-4 py-1.5 bg-purple-600/90 hover:bg-purple-500 text-white rounded-lg text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-purple-950/40 cursor-pointer active:scale-95"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-purple-950/40 cursor-pointer active:scale-95 border border-purple-400/30"
+              title="Open Chapter in Storyboard Timeline Editor"
             >
               <span>Import</span>
-              <ArrowUpRight size={12} />
+              <ArrowUpRight size={13} />
             </button>
           </div>
         </div>
@@ -529,7 +474,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
           <div
             ref={menuRef}
             onClick={(e) => e.stopPropagation()}
-            className="absolute right-2 bottom-14 w-56 max-w-[calc(100%-1rem)] bg-neutral-950/98 backdrop-blur-xl border border-purple-500/25 rounded-2xl shadow-2xl shadow-black/50 z-40 overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-neutral-200"
+            className="absolute right-2 bottom-14 w-56 max-w-[calc(100%-1rem)] bg-neutral-950/98 backdrop-blur-xl border border-purple-500/25 rounded-2xl shadow-2xl shadow-black/60 z-40 overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-neutral-200"
           >
             <div className="p-1.5 space-y-0.5">
               <button
@@ -537,7 +482,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
                   handleBookmarkClick(e);
                   setIsMenuOpen(false);
                 }}
-                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all cursor-pointer"
               >
                 {isBookmarked ? (
                   <>
@@ -550,7 +495,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
                 ) : (
                   <>
                     <Bookmark size={14} className="text-neutral-400" />
-                    <span>Bookmark Episode</span>
+                    <span>Bookmark Chapter</span>
                   </>
                 )}
               </button>
@@ -558,10 +503,10 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (onMarkReadToggle) onMarkReadToggle(episode.url);
+                  if (onMarkReadToggle) onMarkReadToggle(chapter.url);
                   setIsMenuOpen(false);
                 }}
-                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all cursor-pointer"
               >
                 {isRead ? (
                   <>
@@ -580,7 +525,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
               <button
                 onClick={handleCopyLink}
-                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all font-medium"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all font-medium cursor-pointer"
               >
                 {copied ? (
                   <>
@@ -590,14 +535,14 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
                 ) : (
                   <>
                     <Copy size={14} className="text-neutral-400" />
-                    <span>Copy Episode Link</span>
+                    <span>Copy Chapter Link</span>
                   </>
                 )}
               </button>
 
               <button
                 onClick={handleExportSingleJSON}
-                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all cursor-pointer"
               >
                 <Download size={14} className="text-neutral-400" />
                 <span>Export Metadata (JSON)</span>
@@ -609,3 +554,5 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
     </div>
   );
 };
+
+export const EpisodeCard = ChapterCard;

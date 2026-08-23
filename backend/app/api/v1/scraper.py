@@ -80,8 +80,8 @@ from services.scraper.content_validator import ImageValidator
 from services.scraper.image_order_resolver import OrderResolver
 from services.scraper.scraper_service import scrape_and_initialize_project
 from services.scraper.scraper_workflow import (
-    scrape_series_episodes,
-    scrape_series_episodes_advanced,
+    scrape_series_chapters,
+    scrape_series_chapters_advanced,
     batch_scrape_chapters_with_checkpoint
 )
 from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
@@ -478,20 +478,20 @@ async def scrape_series_async_endpoint(
 
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     job = job_manager.create_job(
-        job_type=JobType.DISCOVER_EPISODES,
+        job_type=JobType.DISCOVER_CHAPTERS,
         user_id=user_id,
         project_id=body.project_id or "Comic Series",
         metadata={"url": target_url}
     )
 
-    async def _episodes_coro(report_progress):
+    async def _chapters_coro(report_progress):
         report_progress(10.0, JobStage.ANALYZING_URL.value)
         report_progress(30.0, JobStage.FETCHING.value)
 
-        result = await scrape_series_episodes_advanced(
+        result = await scrape_series_chapters_advanced(
             series_url=target_url,
             title_no=body.title_no,
-            max_episodes=body.max_episodes if (body.max_episodes and body.max_episodes > 0) else None,
+            max_chapters=body.max_episodes if (body.max_episodes and body.max_episodes > 0) else None,
             sort_by=body.sort_by or "latest",
             page=body.page or 1,
             per_page=body.per_page or 100,
@@ -505,7 +505,7 @@ async def scrape_series_async_endpoint(
         report_progress(100.0, JobStage.COMPLETED.value)
         return result
 
-    job_manager.run_in_background(job.job_id, _episodes_coro)
+    job_manager.run_in_background(job.job_id, _chapters_coro)
     return job.to_status_response()
 
 
@@ -528,10 +528,10 @@ async def scrape_series_sync_endpoint(
             detail=f"This domain ({domain}) is currently in the blocked exclusion list."
         )
 
-    return await scrape_series_episodes_advanced(
+    return await scrape_series_chapters_advanced(
         series_url=target_url,
         title_no=body.title_no,
-        max_episodes=body.max_episodes if (body.max_episodes and body.max_episodes > 0) else None,
+        max_chapters=body.max_episodes if (body.max_episodes and body.max_episodes > 0) else None,
         sort_by=body.sort_by or "latest",
         page=body.page or 1,
         per_page=body.per_page or 100,
@@ -542,12 +542,13 @@ async def scrape_series_sync_endpoint(
 
 @router.get(
     "/series/sync",
-    summary="Discover series episodes via GET query parameter"
+    summary="Discover series chapters via GET query parameter"
 )
 async def scrape_series_sync_get(
     url: str = Query(..., description="Target series URL"),
     sort_by: str = Query("latest", description="Sort order: latest or oldest"),
-    max_episodes: Optional[int] = Query(None, description="Max episodes to return"),
+    max_chapters: Optional[int] = Query(None, description="Max chapters to return"),
+    max_episodes: Optional[int] = Query(None, description="Max chapters alias"),
     current_user: dict = Depends(get_current_user)
 ):
     target_url = url.strip()
@@ -558,10 +559,11 @@ async def scrape_series_sync_get(
             detail=f"This domain ({domain}) is currently in the blocked exclusion list."
         )
 
-    return await scrape_series_episodes_advanced(
+    limit = max_chapters or max_episodes
+    return await scrape_series_chapters_advanced(
         series_url=target_url,
         sort_by=sort_by,
-        max_episodes=max_episodes
+        max_chapters=limit
     )
 
 

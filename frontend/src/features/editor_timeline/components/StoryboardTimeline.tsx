@@ -11,7 +11,7 @@ import StoryboardHeader from "@/features/editor_timeline/components/StoryboardHe
 import StoryboardBulkOps from "@/features/editor_timeline/components/StoryboardBulkOps";
 import StoryboardCard from "@/features/editor_timeline/components/StoryboardCard";
 import StoryboardSidebar from "@/features/editor_timeline/components/StoryboardSidebar";
-import StoryboardEpisodeGroup from "@/features/editor_timeline/components/StoryboardEpisodeGroup";
+import StoryboardChapterGroup from "@/features/editor_timeline/components/StoryboardChapterGroup";
 import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
 import StoryboardAnalysisBanner from "./StoryboardAnalysisBanner";
 
@@ -954,7 +954,7 @@ const StoryboardTimeline = React.memo(
           if (episodeGroups.length === 0) {
             return (
               <div className="w-full min-w-0">
-                <StoryboardEpisodeGroup
+                <StoryboardChapterGroup
                   episodeGroups={[]}
                   selectedTimelineEp={selectedTimelineEp}
                   panels={panels}
@@ -1012,7 +1012,7 @@ const StoryboardTimeline = React.memo(
               />
 
               <div className="flex-1 w-full min-w-0">
-                <StoryboardEpisodeGroup
+                <StoryboardChapterGroup
                   episodeGroups={episodeGroups}
                   selectedTimelineEp={selectedTimelineEp}
                   panels={panels}

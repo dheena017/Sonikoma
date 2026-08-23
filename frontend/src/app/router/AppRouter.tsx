@@ -78,11 +78,12 @@ const NotificationsPage = React.lazy(
 const CreativeSuiteDashboardPage = React.lazy(
   () => import("@/features/creative_suite/pages/CreativeSuiteDashboardPage")
 );
-const EpisodeScraperPage = React.lazy(() =>
+const ChapterScraperPage = React.lazy(() =>
   import(
-    "@/features/workspace_scraper/episode-scraper/pages/EpisodeScraperPage"
-  ).then((m) => ({ default: m.EpisodeScraperPage }))
+    "@/features/workspace_scraper/chapter-scraper/pages/ChapterScraperPage"
+  ).then((m) => ({ default: m.ChapterScraperPage }))
 );
+const EpisodeScraperPage = ChapterScraperPage;
 const AdminPage = React.lazy(
   () => import("@/features/system_admin/pages/AdminPage")
 );
@@ -714,6 +715,8 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/settings/account/",
       isAutoCropPath: currentPath === "/auto-crop",
       isEpisodeScraperPath:
+        currentPath === "/chapter-scraper" ||
+        currentPath === "/scraper/chapter-scraper" ||
         currentPath === "/episode-scraper" ||
         currentPath === "/scraper/episode-scraper",
       isEditorPath:
@@ -1373,17 +1376,17 @@ export default function AppRouter(props: AppRouterProps) {
           />
         )}
 
-        {/* PAGE VIEW 16.5: Dedicated WEBTOON Episode Scraper Page */}
+        {/* PAGE VIEW 16.5: Dedicated Chapter Scraper Page */}
         {isEpisodeScraperPath && (
           <React.Suspense
             fallback={
               <LoadingPage
-                status="Loading Episode Scraper..."
+                status="Loading Chapter Scraper..."
                 themeMode={themeMode}
               />
             }
           >
-            <EpisodeScraperPage
+            <ChapterScraperPage
               addNotification={addNotification}
               fetchWithInterceptor={fetchWithInterceptor}
               navigateTo={navigateTo}

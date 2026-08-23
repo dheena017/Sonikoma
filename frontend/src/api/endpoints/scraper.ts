@@ -163,10 +163,11 @@ export const scrapeImages = async (
 // 3. Series & Episodes Discovery
 // ============================================================================
 
-export interface SeriesEpisodesPayload {
+export interface SeriesChaptersPayload {
   url?: string;
   title_no?: string;
   max_episodes?: number;
+  max_chapters?: number;
   page?: number;
   sort_by?: "latest" | "oldest" | "rating" | "likes";
   include_ratings?: boolean;
@@ -176,9 +177,11 @@ export interface SeriesEpisodesPayload {
   job_id?: string;
 }
 
-export const createEpisodeDiscoveryJob = async (
+export type SeriesEpisodesPayload = SeriesChaptersPayload;
+
+export const createChapterDiscoveryJob = async (
   fetchWithInterceptor: FetchClient,
-  data: SeriesEpisodesPayload,
+  data: SeriesChaptersPayload,
   options?: RequestInit
 ): Promise<ApiResponse<JobRecord>> => {
   return apiRequest(fetchWithInterceptor, "/api/v1/scraper/series", {
@@ -189,15 +192,17 @@ export const createEpisodeDiscoveryJob = async (
   });
 };
 
+export const createEpisodeDiscoveryJob = createChapterDiscoveryJob;
+
 /**
- * Canonical unified series and episodes crawler.
+ * Canonical unified series and chapters crawler.
  */
-export const getSeriesEpisodes = async (
+export const getSeriesChapters = async (
   fetchWithInterceptor: FetchClient,
-  data: SeriesEpisodesPayload,
+  data: SeriesChaptersPayload,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  const job = await createEpisodeDiscoveryJob(
+  const job = await createChapterDiscoveryJob(
     fetchWithInterceptor,
     data,
     options
@@ -209,32 +214,39 @@ export const getSeriesEpisodes = async (
   return finished.result || finished;
 };
 
-export const scrapeEpisodes = getSeriesEpisodes;
+export const getSeriesEpisodes = getSeriesChapters;
+export const scrapeChapters = getSeriesChapters;
+export const scrapeEpisodes = getSeriesChapters;
 
-export const scrapeEpisodesAdvanced = async (
+export const scrapeChaptersAdvanced = async (
   fetchWithInterceptor: FetchClient,
-  data: SeriesEpisodesPayload,
+  data: SeriesChaptersPayload,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return getSeriesEpisodes(fetchWithInterceptor, data, options);
+  return getSeriesChapters(fetchWithInterceptor, data, options);
 };
 
-export const scrapeEpisodesPaginated = async (
+export const scrapeEpisodesAdvanced = scrapeChaptersAdvanced;
+
+export const scrapeChaptersPaginated = async (
   fetchWithInterceptor: FetchClient,
   data: {
     title_no: string;
     max_episodes?: number;
+    max_chapters?: number;
     project_id?: string;
     job_id?: string;
   },
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return getSeriesEpisodes(
+  return getSeriesChapters(
     fetchWithInterceptor,
     { ...data, auto_paginate: true },
     options
   );
 };
+
+export const scrapeEpisodesPaginated = scrapeChaptersPaginated;
 
 export const batchScrapeSeriesAPI = async (
   fetchWithInterceptor: FetchClient,

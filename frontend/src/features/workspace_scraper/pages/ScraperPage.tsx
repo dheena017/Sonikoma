@@ -674,10 +674,21 @@ const ScraperPageInner = (props: ScraperPageProps) => {
             setAutoSplitTallStrips={setAutoSplitTallStrips}
             onUploadImages={handleUploadLocalImages}
             fetchWithInterceptor={props.fetchWithInterceptor}
-            onOpenEpisodeScraper={(url) => {
-              // Store URL and navigate to workspace nested scraper route
+            onOpenChapterScraper={(url) => {
               const nav = navigateTo || (window as any).navigateTo;
-              const targetPath = `/scraper/episode-scraper?url=${encodeURIComponent(
+              const targetPath = `/scraper/chapter-scraper?url=${encodeURIComponent(
+                url
+              )}`;
+              if (typeof nav === "function") {
+                nav(targetPath);
+              } else {
+                window.history.pushState({}, "", targetPath);
+                window.dispatchEvent(new Event("popstate"));
+              }
+            }}
+            onOpenEpisodeScraper={(url) => {
+              const nav = navigateTo || (window as any).navigateTo;
+              const targetPath = `/scraper/chapter-scraper?url=${encodeURIComponent(
                 url
               )}`;
               if (typeof nav === "function") {

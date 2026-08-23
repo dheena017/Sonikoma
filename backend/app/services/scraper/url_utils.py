@@ -171,8 +171,19 @@ class UniversalUrlSeparator:
 
             # Dynamic Path Pruning from Right-to-Left
             pruned_segments = list(path_segments)
-            while pruned_segments and cls.READER_TOKEN_PATTERN.match(pruned_segments[-1]):
-                pruned_segments.pop()
+            while len(pruned_segments) > 1:
+                last = pruned_segments[-1]
+
+                # Stop pruning if the preceding segment is a series keyword (e.g. /series/165, /manga/555, /comic/123)
+                # Unless the last token explicitly contains a chapter identifier (e.g. chapter-1, ch-1, ep-1)
+                if len(pruned_segments) >= 2 and pruned_segments[-2].lower() in cls.SERIES_SEGMENT_KEYWORDS:
+                    if not re.match(r"^(?:chapter|episode|ep|ch|chap|c)[-_]?\d+", last, re.IGNORECASE):
+                        break
+
+                if cls.READER_TOKEN_PATTERN.match(last):
+                    pruned_segments.pop()
+                else:
+                    break
 
             if pruned_segments and len(pruned_segments) < len(path_segments):
                 return urlunparse((

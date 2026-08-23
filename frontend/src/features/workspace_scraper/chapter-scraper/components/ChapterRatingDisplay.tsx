@@ -1,14 +1,14 @@
 import React from "react";
 import { Star, ThumbsUp, Eye } from "lucide-react";
 
-interface EpisodeRatingDisplayProps {
+interface ChapterRatingDisplayProps {
   rating?: number;
   likes?: string;
   views?: number;
   compact?: boolean;
 }
 
-export const EpisodeRatingDisplay: React.FC<EpisodeRatingDisplayProps> = ({
+export const ChapterRatingDisplay: React.FC<ChapterRatingDisplayProps> = ({
   rating,
   likes,
   views,
@@ -19,15 +19,11 @@ export const EpisodeRatingDisplay: React.FC<EpisodeRatingDisplayProps> = ({
   }
 
   const renderStars = (score: number) => {
-    // Prevent `RangeError: Invalid array length` by ensuring we always pass
-    // sane integer counts to `Array(count)`.
     const s = Number(score);
     if (!Number.isFinite(s)) {
       return null;
     }
 
-    // Clamp to expected range (0..5). If backend sends something unexpected,
-    // we render a reasonable visualization instead of crashing.
     const clamped = Math.min(5, Math.max(0, s));
 
     const fullStars = Math.floor(clamped);
@@ -128,3 +124,5 @@ export const EpisodeRatingDisplay: React.FC<EpisodeRatingDisplayProps> = ({
     </div>
   );
 };
+
+export const EpisodeRatingDisplay = ChapterRatingDisplay;

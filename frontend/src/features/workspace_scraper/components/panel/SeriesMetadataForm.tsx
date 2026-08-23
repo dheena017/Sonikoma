@@ -1,7 +1,7 @@
 import React from "react";
 import { Layout } from "lucide-react";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
-import { FavoritesManager } from "@/features/workspace_scraper/episode-scraper/utils/FavoritesManager";
+import { FavoritesManager } from "@/features/workspace_scraper/chapter-scraper/utils/FavoritesManager";
 
 export interface SeriesMetadataFormProps {
   seriesTitle?: string;

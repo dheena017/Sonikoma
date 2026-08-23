@@ -9,7 +9,7 @@ export interface FavoriteSeries {
   cover_image?: string;
   timestamp: number;
   url?: string;
-  episode_count?: number | string;
+  chapter_count?: number | string;
   [x: string]: any;
 }
 
@@ -92,7 +92,7 @@ export class FavoritesManager {
 
   static getBookmarks(): string[] {
     try {
-      const data = localStorage.getItem("sonikoma_bookmarked_episodes");
+      const data = localStorage.getItem("sonikoma_bookmarked_chapters") || localStorage.getItem("sonikoma_bookmarked_episodes");
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
@@ -104,7 +104,7 @@ export class FavoritesManager {
     if (!bookmarks.includes(url)) {
       bookmarks.push(url);
       localStorage.setItem(
-        "sonikoma_bookmarked_episodes",
+        "sonikoma_bookmarked_chapters",
         JSON.stringify(bookmarks)
       );
       this.notifyUpdated();
@@ -114,7 +114,7 @@ export class FavoritesManager {
   static removeBookmark(url: string) {
     const bookmarks = this.getBookmarks().filter((u) => u !== url);
     localStorage.setItem(
-      "sonikoma_bookmarked_episodes",
+      "sonikoma_bookmarked_chapters",
       JSON.stringify(bookmarks)
     );
     this.notifyUpdated();
@@ -124,32 +124,36 @@ export class FavoritesManager {
     return this.getBookmarks().includes(url);
   }
 
-  static getReadEpisodes(): string[] {
+  static getReadChapters(): string[] {
     try {
-      const data = localStorage.getItem("sonikoma_read_episodes");
+      const data = localStorage.getItem("sonikoma_read_chapters") || localStorage.getItem("sonikoma_read_episodes");
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
     }
   }
 
+  static getReadEpisodes(): string[] {
+    return this.getReadChapters();
+  }
+
   static markAsRead(url: string) {
-    const readUrls = this.getReadEpisodes();
+    const readUrls = this.getReadChapters();
     if (!readUrls.includes(url)) {
       readUrls.push(url);
-      localStorage.setItem("sonikoma_read_episodes", JSON.stringify(readUrls));
+      localStorage.setItem("sonikoma_read_chapters", JSON.stringify(readUrls));
       this.notifyUpdated();
     }
   }
 
   static markAsUnread(url: string) {
-    const readUrls = this.getReadEpisodes().filter((u) => u !== url);
-    localStorage.setItem("sonikoma_read_episodes", JSON.stringify(readUrls));
+    const readUrls = this.getReadChapters().filter((u) => u !== url);
+    localStorage.setItem("sonikoma_read_chapters", JSON.stringify(readUrls));
     this.notifyUpdated();
   }
 
   static isRead(url: string): boolean {
-    return this.getReadEpisodes().includes(url);
+    return this.getReadChapters().includes(url);
   }
 
   static getEnteredUrls(): string[] {
@@ -264,7 +268,7 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
                     className="text-gray-500 hover:text-purple-400 transition-colors flex-shrink-0"
-                    title="Open original WEBTOON page"
+                    title="Open original comic page"
                   >
                     <ExternalLink size={10} />
                   </a>

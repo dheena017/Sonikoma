@@ -117,7 +117,7 @@ export const ImageEditorEmptyState: React.FC<ImageEditorEmptyStateProps> = ({
             </button>
 
             <button
-              onClick={() => handleNavigate("/episode-scraper")}
+              onClick={() => handleNavigate("/chapter-scraper")}
               className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-mono font-medium transition-all cursor-pointer"
             >
               <Zap className="w-3.5 h-3.5 text-indigo-400 shrink-0" />

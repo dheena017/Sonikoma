@@ -221,9 +221,10 @@ export function useAppRouter({
             path === "/auto-crop" ||
             path === "/projects" ||
             path === "/project-details" ||
-            path === "/project-editor" ||
+            path === "/chapter-scraper" ||
+            path === "/scraper/chapter-scraper" ||
             path === "/episode-scraper" ||
-            path === "/admin" ||
+            path === "/scraper/episode-scraper" ||
             path === "/admin-dashboard" ||
             path.startsWith("/admin/") ||
             path === "/ai-core" ||
@@ -324,9 +325,10 @@ export function useAppRouter({
         path === "/project-details" ||
         path === "/dashboard" ||
         path === "/admin" ||
-        path === "/admin-dashboard" ||
+        path === "/chapter-scraper" ||
+        path === "/scraper/chapter-scraper" ||
         path === "/episode-scraper" ||
-        path.startsWith("/admin/") ||
+        path === "/scraper/episode-scraper" ||
         path.startsWith("/display") ||
         isChapterDetails
       ) {

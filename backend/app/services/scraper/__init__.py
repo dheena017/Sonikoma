@@ -31,6 +31,9 @@ from .scraper_service import (
     generate_storyboard_only_service
 )
 from .scraper_workflow import (
+    scrape_series_chapters,
+    scrape_series_chapters_advanced,
+    scrape_series_chapters_paginated,
     scrape_series_episodes,
     scrape_series_episodes_advanced,
     scrape_series_episodes_paginated,
@@ -80,6 +83,9 @@ __all__ = [
     "scrape_and_initialize_project",
     "generate_storyboard_and_video",
     "generate_storyboard_only_service",
+    "scrape_series_chapters",
+    "scrape_series_chapters_advanced",
+    "scrape_series_chapters_paginated",
     "scrape_series_episodes",
     "scrape_series_episodes_advanced",
     "scrape_series_episodes_paginated",

@@ -146,8 +146,7 @@ class MangaStreamAdapter(BaseSiteAdapter):
             num_val, _ = self.extract_number_and_type(title_text)
 
             # Date
-            date_el = li.select_one(".chapterdate, .epl-date")
-            date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
+            date_str = self.extract_date_from_node(li)
 
             episodes.append({
                 "title": title_text or f"Chapter {num_val or len(episodes)+1}",

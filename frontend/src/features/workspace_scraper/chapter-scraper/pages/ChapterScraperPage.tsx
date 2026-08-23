@@ -1,17 +1,17 @@
 import React from "react";
 import { Zap, ArrowLeft } from "lucide-react";
-import { EpisodeScraper } from "@/features/workspace_scraper/episode-scraper/components/EpisodeScraper";
+import { ChapterScraper } from "../components/ChapterScraper";
 import { NotificationType } from "@/features/app_notification";
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
 
-interface EpisodeScraperPageProps {
+interface ChapterScraperPageProps {
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: typeof fetch;
   navigateTo: (path: string) => void;
   lastEditorPath?: string;
 }
 
-export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
+export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
   addNotification,
   fetchWithInterceptor,
   navigateTo,
@@ -51,7 +51,7 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
             )}
             <span className="text-neutral-600 font-bold">&rsaquo;</span>
             <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold">
-              Episode Scraper
+              Chapter Scraper
             </span>
           </div>
 
@@ -65,13 +65,13 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
 
             <div>
               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-                Manga & Webtoon Scraper
+                Manga & Comic Scraper
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase tracking-wider">
                   Auto Engine
                 </span>
               </h2>
               <p className="text-xs text-neutral-400 font-sans mt-0.5">
-                Browse episodes, manage bookmarks, filter chapters, and batch
+                Browse chapters, manage bookmarks, filter releases, and batch
                 import panels into your workspace.
               </p>
             </div>
@@ -91,79 +91,78 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
       </div>
 
       <div className="w-full flex-1">
-        <EpisodeScraper
+        <ChapterScraper
           addNotification={addNotification}
           fetchWithInterceptor={fetchWithInterceptor}
           isStandalone={true}
-          onEpisodeSelect={(episode) => {
+          onChapterSelect={(chapter) => {
             const temporaryProjectId = `temp_${Date.now()}_${Math.random()
               .toString(36)
               .substring(2, 10)}`;
-            localStorage.setItem("auto_import_url", episode.url);
+            localStorage.setItem("auto_import_url", chapter.url);
 
-            // Save visual metadata to localStorage
-            if (episode.rating !== undefined && episode.rating !== null) {
+            if (chapter.rating !== undefined && chapter.rating !== null) {
               localStorage.setItem(
-                "active_episode_rating",
-                String(episode.rating)
+                "active_chapter_rating",
+                String(chapter.rating)
               );
             } else {
-              localStorage.removeItem("active_episode_rating");
+              localStorage.removeItem("active_chapter_rating");
             }
-            if (episode.likes !== undefined && episode.likes !== null) {
+            if (chapter.likes !== undefined && chapter.likes !== null) {
               localStorage.setItem(
-                "active_episode_likes",
-                String(episode.likes)
+                "active_chapter_likes",
+                String(chapter.likes)
               );
             } else {
-              localStorage.removeItem("active_episode_likes");
+              localStorage.removeItem("active_chapter_likes");
             }
-            if (episode.views !== undefined && episode.views !== null) {
+            if (chapter.views !== undefined && chapter.views !== null) {
               localStorage.setItem(
-                "active_episode_views",
-                String(episode.views)
+                "active_chapter_views",
+                String(chapter.views)
               );
             } else {
-              localStorage.removeItem("active_episode_views");
+              localStorage.removeItem("active_chapter_views");
             }
 
             navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
           }}
-          onMultipleEpisodesSelect={(episodes) => {
-            if (episodes.length > 0) {
+          onMultipleChaptersSelect={(chapters) => {
+            if (chapters.length > 0) {
               const temporaryProjectId = `temp_${Date.now()}_${Math.random()
                 .toString(36)
                 .substring(2, 10)}`;
               localStorage.setItem(
                 "auto_import_batch",
-                JSON.stringify(episodes)
+                JSON.stringify(chapters)
               );
-              localStorage.setItem("auto_import_url", episodes[0].url);
+              localStorage.setItem("auto_import_url", chapters[0].url);
 
-              const episode = episodes[0];
-              if (episode.rating !== undefined && episode.rating !== null) {
+              const chapter = chapters[0];
+              if (chapter.rating !== undefined && chapter.rating !== null) {
                 localStorage.setItem(
-                  "active_episode_rating",
-                  String(episode.rating)
+                  "active_chapter_rating",
+                  String(chapter.rating)
                 );
               } else {
-                localStorage.removeItem("active_episode_rating");
+                localStorage.removeItem("active_chapter_rating");
               }
-              if (episode.likes !== undefined && episode.likes !== null) {
+              if (chapter.likes !== undefined && chapter.likes !== null) {
                 localStorage.setItem(
-                  "active_episode_likes",
-                  String(episode.likes)
+                  "active_chapter_likes",
+                  String(chapter.likes)
                 );
               } else {
-                localStorage.removeItem("active_episode_likes");
+                localStorage.removeItem("active_chapter_likes");
               }
-              if (episode.views !== undefined && episode.views !== null) {
+              if (chapter.views !== undefined && chapter.views !== null) {
                 localStorage.setItem(
-                  "active_episode_views",
-                  String(episode.views)
+                  "active_chapter_views",
+                  String(chapter.views)
                 );
               } else {
-                localStorage.removeItem("active_episode_views");
+                localStorage.removeItem("active_chapter_views");
               }
 
               navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
@@ -174,3 +173,5 @@ export const EpisodeScraperPage: React.FC<EpisodeScraperPageProps> = ({
     </div>
   );
 };
+
+export const EpisodeScraperPage = ChapterScraperPage;

@@ -5,23 +5,21 @@ import {
   Loader,
   AlertTriangle,
   ArrowRight,
-  Minimize2,
-  Maximize2,
 } from "lucide-react";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import { scrapeChapter } from "@/api";
 
-import type { Episode } from "../types/EpisodeTypes";
+import type { Chapter } from "../types/ChapterTypes";
 
-interface EpisodePreviewModalProps {
-  episode: Episode | null;
+interface ChapterPreviewModalProps {
+  chapter: Chapter | null;
   onClose: () => void;
-  onImport: (episode: Episode) => void;
+  onImport: (chapter: Chapter) => void;
   fetchWithInterceptor: typeof fetch;
 }
 
-export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
-  episode,
+export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
+  chapter,
   onClose,
   onImport,
   fetchWithInterceptor,
@@ -29,10 +27,9 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
-  const [isFullscreen, setIsFullscreen] = useState(true);
-  const [zoom, setZoom] = useState(100); // 40% to 150%
+  const [zoom, setZoom] = useState(100);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [autoScrollSpeed, setAutoScrollSpeed] = useState(0); // 0 = off, 1, 2, 3, 5 = pixels per interval
+  const [autoScrollSpeed, setAutoScrollSpeed] = useState(0);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +56,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!episode) return;
+    if (!chapter) return;
 
     const fetchPanels = async () => {
       setLoading(true);
@@ -68,7 +65,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
 
       try {
         const data = await scrapeChapter(fetchWithInterceptor, {
-          url: episode.url,
+          url: chapter.url,
           force_refresh: true,
           proxy_images: true,
         });
@@ -82,13 +79,13 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
           throw new Error(
             data.error?.message ||
               (data as any).message ||
-              "No images found on this Webtoon page."
+              "No images found on this comic chapter page."
           );
         }
       } catch (err) {
         console.error("[Preview Scraper Error] ", err);
         setError(
-          err instanceof Error ? err.message : "Failed to fetch episode panels."
+          err instanceof Error ? err.message : "Failed to fetch chapter panels."
         );
       } finally {
         setLoading(false);
@@ -96,9 +93,8 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
     };
 
     fetchPanels();
-  }, [episode, fetchWithInterceptor]);
+  }, [chapter, fetchWithInterceptor]);
 
-  // Handle auto scrolling
   useEffect(() => {
     if (autoScrollSpeed === 0) return;
     const interval = setInterval(() => {
@@ -109,7 +105,6 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
     return () => clearInterval(interval);
   }, [autoScrollSpeed]);
 
-  // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -142,10 +137,9 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
     }
   };
 
-  if (!episode) return null;
+  if (!chapter) return null;
 
   const renderInner = () => {
-    // Calculate strip width based on zoom level (default 100% = 800px optimal webtoon width)
     const stripWidthPx = Math.round(800 * (zoom / 100));
 
     return (
@@ -154,26 +148,26 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
         <div className="flex items-center justify-between px-4 sm:px-8 py-3 border-b border-neutral-800/80 bg-neutral-900/90 backdrop-blur-md shrink-0 z-30 shadow-xl">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
-              <span className="text-purple-400 font-bold text-xs">WP</span>
+              <span className="text-purple-400 font-bold text-xs">CR</span>
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest font-mono">
-                  Full Page Webtoon Reader
+                  Full Page Chapter Reader
                 </span>
                 <span className="text-[10px] bg-purple-900/40 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full font-mono">
                   Live Stream
                 </span>
               </div>
               <h2 className="text-sm font-bold text-white tracking-tight truncate max-w-xs sm:max-w-md">
-                {episode.number} — {episode.title}
+                {chapter.number} — {chapter.title}
               </h2>
             </div>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <button
-              onClick={() => onImport(episode)}
+              onClick={() => onImport(chapter)}
               className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-900/30 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
               <Play size={14} />
@@ -191,7 +185,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
           </div>
         </div>
 
-        {/* Premium Control Toolbar */}
+        {/* Control Toolbar */}
         {!loading && !error && images.length > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-8 py-2.5 border-b border-neutral-800/60 bg-neutral-900/40 backdrop-blur-md text-xs text-neutral-300 shrink-0 z-20">
             {/* Auto Scroll Speed Controls */}
@@ -302,7 +296,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
                 </h3>
                 <p className="text-sm text-neutral-400">{error}</p>
                 <p className="text-xs text-neutral-500">
-                  The server might be rate-limited, or the Webtoon slug is
+                  The server might be rate-limited, or the chapter is
                   private/restricted.
                 </p>
               </div>
@@ -314,7 +308,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
                   Close
                 </button>
                 <button
-                  onClick={() => onImport(episode)}
+                  onClick={() => onImport(chapter)}
                   className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   Force Open Editor <ArrowRight size={14} />
@@ -323,7 +317,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
             </div>
           )}
 
-          {/* Webtoon Panels Continuous Strip */}
+          {/* Chapters Continuous Strip */}
           {!loading && !error && images.length > 0 && (
             <div
               className="w-full flex flex-col items-center space-y-0 transition-all duration-300 py-4"
@@ -332,7 +326,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
               {images.map((imgUrl, idx) => (
                 <img
                   key={idx}
-                  src={getProxiedImageUrl(imgUrl, episode?.url)}
+                  src={getProxiedImageUrl(imgUrl, chapter?.url)}
                   alt={`Panel ${idx + 1}`}
                   className="w-full h-auto select-none pointer-events-none block m-0 p-0 min-h-[300px] bg-neutral-900/20 shadow-2xl"
                   style={{ width: "100%" }}
@@ -367,7 +361,7 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
               Close Reader
             </button>
             <button
-              onClick={() => onImport(episode)}
+              onClick={() => onImport(chapter)}
               className="px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-950/40 transition-all flex items-center gap-2 cursor-pointer"
             >
               <Play size={14} />
@@ -385,3 +379,5 @@ export const EpisodeReaderModal: React.FC<EpisodePreviewModalProps> = ({
     </div>
   );
 };
+
+export const EpisodeReaderModal = ChapterReaderModal;

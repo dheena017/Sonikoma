@@ -5,46 +5,25 @@ import {
   Search,
   Loader,
   AlertCircle,
-  Play,
-  Download,
   Zap,
-  ChevronDown,
-  Heart,
   Clock,
-  ExternalLink,
-  BarChart2,
-  List,
-  Eye,
-  Bookmark,
-  CheckCircle2,
-  XCircle,
-  FileJson,
-  RefreshCw,
-  Dices,
-  Sparkles,
-  Copy,
-  FileText,
-  Star,
-  Flame,
   Trash2,
-  ArrowRight,
 } from "lucide-react";
-import { EpisodeGrid } from "./EpisodeGrid";
-import { EpisodeControls } from "./EpisodeControls";
+import { ChapterGrid } from "./ChapterGrid";
+import { ChapterControls } from "./ChapterControls";
 import { RecentSeriesCard } from "./RecentSeriesCard";
-import EpisodeWorkspaceTabs from "./EpisodeWorkspaceTabs";
+import ChapterWorkspaceTabs from "./ChapterWorkspaceTabs";
 import {
   FavoritesManager,
-  FavoritesList,
   FavoriteSeries,
   FAVORITES_UPDATED_EVENT,
 } from "../utils/FavoritesManager";
 import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
-import { EpisodeReaderModal } from "./EpisodeReaderModal";
-import { EpisodeScraperEmptyState } from "./EpisodeScraperEmptyState";
+import { ChapterReaderModal } from "./ChapterReaderModal";
+import { ChapterScraperEmptyState } from "./ChapterScraperEmptyState";
 import { NotificationType } from "@/features/app_notification";
 import { getSeriesEpisodes, separateComicUrl } from "@/api/endpoints/scraper";
-import type { Episode } from "../types/EpisodeTypes";
+import type { Chapter } from "../types/ChapterTypes";
 import { makeSafeFilename } from "@/shared/utils/downloadNaming";
 
 interface SeriesMetadata {
@@ -58,9 +37,11 @@ interface SeriesMetadata {
   url?: string;
 }
 
-interface EpisodeScraperProps {
-  onEpisodeSelect?: (episode: Episode) => void;
-  onMultipleEpisodesSelect?: (episodes: Episode[]) => void;
+interface ChapterScraperProps {
+  onChapterSelect?: (chapter: Chapter) => void;
+  onEpisodeSelect?: (chapter: Chapter) => void; // alias for backwards compatibility
+  onMultipleChaptersSelect?: (chapters: Chapter[]) => void;
+  onMultipleEpisodesSelect?: (chapters: Chapter[]) => void; // alias
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: typeof fetch;
   isStandalone?: boolean;
@@ -86,25 +67,30 @@ const parseWebtoonDate = (dateStr: string): Date | null => {
   return null;
 };
 
-export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
+export const ChapterScraper: React.FC<ChapterScraperProps> = ({
+  onChapterSelect,
   onEpisodeSelect,
+  onMultipleChaptersSelect,
   onMultipleEpisodesSelect,
   addNotification,
   fetchWithInterceptor,
   isStandalone = false,
 }) => {
+  const handleSelectCallback = onChapterSelect || onEpisodeSelect;
+  const handleMultipleCallback = onMultipleChaptersSelect || onMultipleEpisodesSelect;
+
   const [urlInput, setUrlInput] = useState("");
   const [titleNoInput, setTitleNoInput] = useState("");
   const [isExpanded, setIsExpanded] = useState(isStandalone);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [filteredEpisodes, setFilteredEpisodes] = useState<Episode[]>([]);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [filteredChapters, setFilteredChapters] = useState<Chapter[]>([]);
   const [seriesMetadata, setSeriesMetadata] = useState<SeriesMetadata | null>(
     null
   );
 
-  const [maxEpisodes, setMaxEpisodes] = useState<number | null>(null);
+  const [maxChapters, setMaxChapters] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<
     "latest" | "oldest" | "rating" | "likes"
   >("latest");
@@ -114,11 +100,11 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   const [showRecent, setShowRecent] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Expanded tabs & previews
+  // Tabs & previews
   const [activeTab, setActiveTab] = useState<
-    "episodes" | "bookmarks" | "recent"
-  >("episodes");
-  const [previewEpisode, setPreviewEpisode] = useState<Episode | null>(null);
+    "chapters" | "bookmarks" | "recent"
+  >("chapters");
+  const [previewChapter, setPreviewChapter] = useState<Chapter | null>(null);
 
   // Filters
   const [bookmarkedUrls, setBookmarkedUrls] = useState<string[]>([]);
@@ -131,8 +117,8 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   const [bookmarksOnly, setBookmarksOnly] = useState<boolean>(false);
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
-  const [startEpisodeNum, setStartEpisodeNum] = useState<string>("");
-  const [endEpisodeNum, setEndEpisodeNum] = useState<string>("");
+  const [startChapterNum, setStartChapterNum] = useState<string>("");
+  const [endChapterNum, setEndChapterNum] = useState<string>("");
 
   // Multi-Select
   const [isMultiSelectMode, setIsMultiSelectMode] = useState<boolean>(false);
@@ -151,12 +137,10 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   const suggestionsContainerRef = useRef<HTMLDivElement>(null);
   const [customSiteAdded, setCustomSiteAdded] = useState(false);
 
-  // Reset "Added" badge whenever URL input changes
   useEffect(() => {
     setCustomSiteAdded(false);
   }, [urlInput]);
 
-  // Show recent series on the Recent view and merged suggestions elsewhere.
   useEffect(() => {
     const refreshSuggestions = () => {
       try {
@@ -207,10 +191,10 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
 
   useEffect(() => {
     setBookmarkedUrls(FavoritesManager.getBookmarks());
-    setReadUrls(FavoritesManager.getReadEpisodes());
+    setReadUrls(FavoritesManager.getReadChapters());
   }, []);
 
-  const scrapeEpisodesAPI = async (data: {
+  const scrapeChaptersAPI = async (data: {
     url?: string;
     title_no?: string;
     max_episodes?: number | null;
@@ -226,7 +210,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   };
 
   useEffect(() => {
-    let result = [...episodes];
+    let result = [...chapters];
 
     if (sortBy === "oldest") {
       result = result.reverse();
@@ -238,70 +222,70 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
 
     if (searchQuery) {
       result = result.filter(
-        (ep) =>
-          ep.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          ep.number.toLowerCase().includes(searchQuery.toLowerCase())
+        (ch) =>
+          ch.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          ch.number.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     if (minRating > 0) {
-      result = result.filter((ep) => (ep.rating || 0) >= minRating);
+      result = result.filter((ch) => (ch.rating || 0) >= minRating);
     }
 
     if (minLikes > 0) {
-      result = result.filter((ep) => parseLikes(ep.likes) >= minLikes);
+      result = result.filter((ch) => parseLikes(ch.likes) >= minLikes);
     }
 
     if (readStatusFilter === "read") {
-      result = result.filter((ep) => readUrls.includes(ep.url));
+      result = result.filter((ch) => readUrls.includes(ch.url));
     } else if (readStatusFilter === "unread") {
-      result = result.filter((ep) => !readUrls.includes(ep.url));
+      result = result.filter((ch) => !readUrls.includes(ch.url));
     }
 
     if (bookmarksOnly) {
-      result = result.filter((ep) => bookmarkedUrls.includes(ep.url));
+      result = result.filter((ch) => bookmarkedUrls.includes(ch.url));
     }
 
     if (fromDate) {
       const from = new Date(fromDate);
-      result = result.filter((ep) => {
-        const epDate = parseWebtoonDate(ep.date);
-        return epDate && epDate >= from;
+      result = result.filter((ch) => {
+        const chDate = parseWebtoonDate(ch.date);
+        return chDate && chDate >= from;
       });
     }
     if (toDate) {
       const to = new Date(toDate);
       to.setHours(23, 59, 59, 999);
-      result = result.filter((ep) => {
-        const epDate = parseWebtoonDate(ep.date);
-        return epDate && epDate <= to;
+      result = result.filter((ch) => {
+        const chDate = parseWebtoonDate(ch.date);
+        return chDate && chDate <= to;
       });
     }
 
-    if (startEpisodeNum !== "") {
-      const start = parseInt(startEpisodeNum, 10);
+    if (startChapterNum !== "") {
+      const start = parseInt(startChapterNum, 10);
       if (!isNaN(start)) {
-        result = result.filter((ep) => (ep.chapter_number ?? 0) >= start);
+        result = result.filter((ch) => (ch.chapter_number ?? 0) >= start);
       }
     }
-    if (endEpisodeNum !== "") {
-      const end = parseInt(endEpisodeNum, 10);
+    if (endChapterNum !== "") {
+      const end = parseInt(endChapterNum, 10);
       if (!isNaN(end)) {
-        result = result.filter((ep) => (ep.chapter_number ?? Infinity) <= end);
+        result = result.filter((ch) => (ch.chapter_number ?? Infinity) <= end);
       }
     }
 
-    setFilteredEpisodes(result);
+    setFilteredChapters(result);
   }, [
-    episodes,
+    chapters,
     sortBy,
     searchQuery,
     minRating,
     minLikes,
     readStatusFilter,
     bookmarksOnly,
-    startEpisodeNum,
-    endEpisodeNum,
+    startChapterNum,
+    endChapterNum,
     fromDate,
     toDate,
     readUrls,
@@ -324,7 +308,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
 
     setIsLoading(true);
     setError(null);
-    setEpisodes([]);
+    setChapters([]);
     setSeriesMetadata(null);
     setSelectedUrls([]);
 
@@ -350,15 +334,15 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
           }
         }
       } catch (e) {
-        console.debug("[EpisodeScraper] URL separation note:", e);
+        console.debug("[ChapterScraper] URL separation note:", e);
       }
     }
 
     try {
-      const result = await scrapeEpisodesAPI({
+      const result = await scrapeChaptersAPI({
         url: targetSeriesUrl || undefined,
         title_no: targetTitleNo || undefined,
-        max_episodes: maxEpisodes,
+        max_episodes: maxChapters,
         sort_by: sortBy,
         bypass_cache: bypassCache,
       });
@@ -376,7 +360,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
           index: ch.index ?? i,
         }));
 
-        setEpisodes(normalizedChapters);
+        setChapters(normalizedChapters);
         const seriesData = result.series || result;
         setSeriesMetadata({
           title: seriesData.title || "Comic Series",
@@ -411,7 +395,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
           "success"
         );
       } else {
-        const errorMsg = result.error || "Failed to scrape episodes";
+        const errorMsg = result.error || "Failed to scrape chapters";
         setError(errorMsg);
         addNotification(errorMsg, "error");
       }
@@ -431,22 +415,22 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const paramUrl = params.get("url");
-    const storedUrl = localStorage.getItem("episode_scraper_url");
+    const storedUrl = localStorage.getItem("chapter_scraper_url") || localStorage.getItem("episode_scraper_url");
     const target = paramUrl || storedUrl;
 
     if (target) {
       setUrlInput(target);
+      localStorage.removeItem("chapter_scraper_url");
       localStorage.removeItem("episode_scraper_url");
 
-      // Clear filters and search so the scraper shows all episodes by default
       setMinRating(0);
       setMinLikes(0);
       setReadStatusFilter("all");
       setBookmarksOnly(false);
       setFromDate("");
       setToDate("");
-      setStartEpisodeNum("");
-      setEndEpisodeNum("");
+      setStartChapterNum("");
+      setEndChapterNum("");
       setSearchQuery("");
       setSelectedUrls([]);
       setIsMultiSelectMode(false);
@@ -466,19 +450,19 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     }
   }, []);
 
-  const handleEpisodeClick = (episode: Episode) => {
-    FavoritesManager.markAsRead(episode.url);
-    setReadUrls(FavoritesManager.getReadEpisodes());
+  const handleChapterClick = (chapter: Chapter) => {
+    FavoritesManager.markAsRead(chapter.url);
+    setReadUrls(FavoritesManager.getReadChapters());
 
-    if (onEpisodeSelect) {
-      onEpisodeSelect(episode);
+    if (handleSelectCallback) {
+      handleSelectCallback(chapter);
       return;
     }
 
     const temporaryProjectId = createTempProjectId(
       seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput
     );
-    localStorage.setItem("auto_import_url", episode.url);
+    localStorage.setItem("auto_import_url", chapter.url);
     const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") {
@@ -534,7 +518,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       addNotification("Removed bookmark", "info");
     } else {
       FavoritesManager.addBookmark(url);
-      addNotification("Episode bookmarked", "success");
+      addNotification("Chapter bookmarked", "success");
     }
     setBookmarkedUrls(FavoritesManager.getBookmarks());
   };
@@ -547,20 +531,20 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
 
   const handleBatchMarkRead = () => {
     selectedUrls.forEach((url) => FavoritesManager.markAsRead(url));
-    setReadUrls(FavoritesManager.getReadEpisodes());
+    setReadUrls(FavoritesManager.getReadChapters());
     setSelectedUrls([]);
     addNotification(
-      `Marked ${selectedUrls.length} episodes as read`,
+      `Marked ${selectedUrls.length} chapters as read`,
       "success"
     );
   };
 
   const handleBatchMarkUnread = () => {
     selectedUrls.forEach((url) => FavoritesManager.markAsUnread(url));
-    setReadUrls(FavoritesManager.getReadEpisodes());
+    setReadUrls(FavoritesManager.getReadChapters());
     setSelectedUrls([]);
     addNotification(
-      `Marked ${selectedUrls.length} episodes as unread`,
+      `Marked ${selectedUrls.length} chapters as unread`,
       "success"
     );
   };
@@ -574,7 +558,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       addNotification(`Removed ${selectedUrls.length} bookmarks`, "info");
     } else {
       selectedUrls.forEach((url) => FavoritesManager.addBookmark(url));
-      addNotification(`Bookmarked ${selectedUrls.length} episodes`, "success");
+      addNotification(`Bookmarked ${selectedUrls.length} chapters`, "success");
     }
     setBookmarkedUrls(FavoritesManager.getBookmarks());
     setSelectedUrls([]);
@@ -584,24 +568,24 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     if (selectedUrls.length === 0) return;
 
     selectedUrls.forEach((url) => FavoritesManager.markAsRead(url));
-    setReadUrls(FavoritesManager.getReadEpisodes());
+    setReadUrls(FavoritesManager.getReadChapters());
 
-    const selectedEpObjects = episodes.filter((ep) =>
-      selectedUrls.includes(ep.url)
+    const selectedChObjects = chapters.filter((ch) =>
+      selectedUrls.includes(ch.url)
     );
-    const fallbackList: Episode[] = selectedUrls.map((url, idx) => ({
+    const fallbackList: Chapter[] = selectedUrls.map((url, idx) => ({
       url,
-      number: `Episode ${idx + 1}`,
+      number: `Chapter ${idx + 1}`,
       title: "",
       date: "",
       cover_image: "",
       index: idx,
     }));
-    const finalEpisodes =
-      selectedEpObjects.length > 0 ? selectedEpObjects : fallbackList;
+    const finalChapters =
+      selectedChObjects.length > 0 ? selectedChObjects : fallbackList;
 
-    if (onMultipleEpisodesSelect) {
-      onMultipleEpisodesSelect(finalEpisodes);
+    if (handleMultipleCallback) {
+      handleMultipleCallback(finalChapters);
       return;
     }
 
@@ -609,8 +593,8 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput
     );
 
-    localStorage.setItem("auto_import_batch", JSON.stringify(finalEpisodes));
-    localStorage.setItem("auto_import_url", finalEpisodes[0].url);
+    localStorage.setItem("auto_import_batch", JSON.stringify(finalChapters));
+    localStorage.setItem("auto_import_url", finalChapters[0].url);
     const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") {
@@ -622,22 +606,22 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
   };
 
   const handleExportCSV = () => {
-    if (filteredEpisodes.length === 0) return;
+    if (filteredChapters.length === 0) return;
     const headers = [
-      "Episode Number",
+      "Chapter Number",
       "Title",
       "Date",
       "Rating",
       "Likes",
       "URL",
     ];
-    const rows = filteredEpisodes.map((ep) => [
-      `"${ep.number.replace(/"/g, '""')}"`,
-      `"${ep.title.replace(/"/g, '""')}"`,
-      `"${ep.date.replace(/"/g, '""')}"`,
-      ep.rating ?? "",
-      ep.likes ?? "",
-      `"${ep.url}"`,
+    const rows = filteredChapters.map((ch) => [
+      `"${ch.number.replace(/"/g, '""')}"`,
+      `"${ch.title.replace(/"/g, '""')}"`,
+      `"${ch.date.replace(/"/g, '""')}"`,
+      ch.rating ?? "",
+      ch.likes ?? "",
+      `"${ch.url}"`,
     ]);
     const csvContent = [
       headers.join(","),
@@ -649,17 +633,17 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     link.href = url;
     const safeSeries = makeSafeFilename(
       seriesMetadata?.title,
-      "Webtoon_Series"
+      "Comic_Series"
     );
     const dateStr = new Date().toISOString().split("T")[0];
-    link.download = `${safeSeries}_episodes_${dateStr}.csv`;
+    link.download = `${safeSeries}_chapters_${dateStr}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
   const handleExportJSON = () => {
-    if (filteredEpisodes.length === 0) return;
-    const jsonContent = JSON.stringify(filteredEpisodes, null, 2);
+    if (filteredChapters.length === 0) return;
+    const jsonContent = JSON.stringify(filteredChapters, null, 2);
     const blob = new Blob([jsonContent], {
       type: "application/json;charset=utf-8;",
     });
@@ -668,10 +652,10 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     link.href = url;
     const safeSeries = makeSafeFilename(
       seriesMetadata?.title,
-      "Webtoon_Series"
+      "Comic_Series"
     );
     const dateStr = new Date().toISOString().split("T")[0];
-    link.download = `${safeSeries}_episodes_${dateStr}.json`;
+    link.download = `${safeSeries}_chapters_${dateStr}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -683,31 +667,14 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
     setBookmarksOnly(false);
     setFromDate("");
     setToDate("");
-    setStartEpisodeNum("");
-    setEndEpisodeNum("");
-  };
-
-  const handleCopyAiPrompt = () => {
-    if (!seriesMetadata) return;
-    const prompt = `Series Title: ${seriesMetadata.title}
-Author: ${seriesMetadata.author || "Unknown"}
-Genre: ${seriesMetadata.genre || "Webtoon"}
-Synopsis: ${seriesMetadata.description || "N/A"}
-Total Episodes: ${episodes.length}
-URL: ${seriesMetadata.url || ""}
-
-Task: Generate a detailed video recap script, panel selection strategy, and AI voiceover narration breakdown for this series.`;
-
-    navigator.clipboard.writeText(prompt);
-    addNotification("Copied AI Script Prompt to clipboard!", "success");
+    setStartChapterNum("");
+    setEndChapterNum("");
   };
 
   return (
     <div className="w-full space-y-6">
-      {/* Scraper configuration box removed — moved into workspace header */}
-
       <form
-        aria-label="Episode scraper input"
+        aria-label="Chapter scraper input"
         onSubmit={(event) => {
           event.preventDefault();
           handleScrape();
@@ -715,7 +682,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
         className="grid grid-cols-1 lg:grid-cols-[1fr_180px_auto] gap-3 p-4 bg-neutral-900/40 border border-neutral-800/80 rounded-2xl"
       >
         <label className="relative">
-          <span className="sr-only">Webtoon series or episode URL</span>
+          <span className="sr-only">Comic series or chapter URL</span>
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
             size={16}
@@ -732,8 +699,8 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                 if (detectedTitleNo) setTitleNoInput(detectedTitleNo);
               } catch {}
             }}
-            placeholder="Paste a Webtoon series or episode URL"
-            aria-label="Webtoon series or episode URL"
+            placeholder="Paste a comic series or chapter URL"
+            aria-label="Comic series or chapter URL"
             className="w-full rounded-xl border border-neutral-800 bg-neutral-955 py-2.5 pl-9 pr-3 text-sm text-white placeholder:text-neutral-600 focus:border-purple-500 focus:outline-none"
           />
         </label>
@@ -758,11 +725,11 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
           ) : (
             <Zap className="h-4 w-4" />
           )}
-          {isLoading ? "Loading..." : "Load Episodes"}
+          {isLoading ? "Loading..." : "Load Chapters"}
         </button>
       </form>
 
-      {/* 2. ERROR DISPLAY */}
+      {/* ERROR DISPLAY */}
       {error && (
         <div className="p-4 bg-red-900/20 border border-red-500/35 rounded-2xl flex items-center gap-3 text-red-400 text-sm animate-in shake duration-300">
           <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -770,22 +737,21 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
         </div>
       )}
 
-      <EpisodeWorkspaceTabs
+      <ChapterWorkspaceTabs
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        filteredEpisodeCount={filteredEpisodes.length}
+        filteredChapterCount={filteredChapters.length}
         setBookmarksOnly={setBookmarksOnly}
         setShowFavorites={setShowFavorites}
         setShowRecent={setShowRecent}
         isLoading={isLoading}
       />
 
-      {/* 3. ACTIVE WORKSPACE CONTAINER (EPISODES VS ANALYTICS) */}
-      {episodes.length > 0 && activeTab !== "recent" ? (
-        <div id="episode-scraper-view" className="space-y-6">
-          {/* TAB VIEW 1: EPISODE GRID & CONTROLS */}
+      {/* ACTIVE WORKSPACE CONTAINER */}
+      {chapters.length > 0 && activeTab !== "recent" ? (
+        <div id="chapter-scraper-view" className="space-y-6">
           <div className="space-y-6">
-            <EpisodeControls
+            <ChapterControls
               onSortChange={setSortBy}
               onSearchChange={setSearchQuery}
               onDateRangeChange={(from, to) => {
@@ -809,10 +775,10 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                 setIsMultiSelectMode(!isMultiSelectMode);
                 setSelectedUrls([]);
               }}
-              startEpisodeNum={startEpisodeNum}
-              onStartEpisodeChange={setStartEpisodeNum}
-              endEpisodeNum={endEpisodeNum}
-              onEndEpisodeChange={setEndEpisodeNum}
+              startChapterNum={startChapterNum}
+              onStartChapterChange={setStartChapterNum}
+              endChapterNum={endChapterNum}
+              onEndChapterChange={setEndChapterNum}
               onClearFilters={handleClearFilters}
               onExportCSV={handleExportCSV}
               onExportJSON={handleExportJSON}
@@ -826,7 +792,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                   <span className="font-bold text-white">
                     {selectedUrls.length}
                   </span>{" "}
-                  episodes
+                  chapters
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <button
@@ -893,13 +859,13 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
               </div>
             )}
 
-            {/* Episode Grid View */}
-            {filteredEpisodes.length > 0 ? (
+            {/* Chapter Grid View */}
+            {filteredChapters.length > 0 ? (
               <div className="bg-neutral-955 border border-neutral-900/60 rounded-3xl p-2 sm:p-4">
-                <EpisodeGrid
-                  episodes={filteredEpisodes}
-                  onEpisodeClick={handleEpisodeClick}
-                  onPreviewClick={setPreviewEpisode}
+                <ChapterGrid
+                  chapters={filteredChapters}
+                  onChapterClick={handleChapterClick}
+                  onPreviewClick={setPreviewChapter}
                   onBookmarkToggle={handleBookmarkToggle}
                   bookmarkedUrls={bookmarkedUrls}
                   readUrls={readUrls}
@@ -911,7 +877,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
             ) : (
               <div className="p-12 text-center bg-neutral-900/40 border border-neutral-800/80 rounded-3xl space-y-2">
                 <p className="text-sm font-semibold text-neutral-450">
-                  No episodes matched your search criteria.
+                  No chapters matched your search criteria.
                 </p>
                 <p className="text-xs text-neutral-600">
                   Try adjusting your filters, date ranges, or search query.
@@ -920,26 +886,25 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
             )}
 
             {/* Zip Downloader Footer Tool */}
-            {seriesMetadata && filteredEpisodes.length > 0 && (
-              <div className="p-4 bg-neutral-900/20 border border-neutral-850/80 rounded-2xl">
+            {seriesMetadata && filteredChapters.length > 0 && (
+              <div className="p-4 bg-neutral-900/20 border border-neutral-855/80 rounded-2xl">
                 <BatchThumbnailDownloader
-                  episodes={filteredEpisodes}
+                  chapters={filteredChapters}
                   seriesTitle={seriesMetadata.title}
                 />
               </div>
             )}
           </div>
         </div>
-      ) : /* RICH EMPTY STATE WORKSPACE DASHBOARD (WHEN NO EPISODES ARE LOADED) */
-      isLoading ? (
-        <EpisodeScraperEmptyState urlInput={urlInput} isLoading={true} />
+      ) : isLoading ? (
+        <ChapterScraperEmptyState urlInput={urlInput} isLoading={true} />
       ) : (
         <div
-          id="episode-scraper-view"
+          id="chapter-scraper-view"
           className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
         >
           {activeTab !== "recent" && (
-            <EpisodeControls
+            <ChapterControls
               onSortChange={setSortBy}
               onSearchChange={setSearchQuery}
               onDateRangeChange={(from, to) => {
@@ -963,10 +928,10 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                 setIsMultiSelectMode(!isMultiSelectMode);
                 setSelectedUrls([]);
               }}
-              startEpisodeNum={startEpisodeNum}
-              onStartEpisodeChange={setStartEpisodeNum}
-              endEpisodeNum={endEpisodeNum}
-              onEndEpisodeChange={setEndEpisodeNum}
+              startChapterNum={startChapterNum}
+              onStartChapterChange={setStartChapterNum}
+              endChapterNum={endChapterNum}
+              onEndChapterChange={setEndChapterNum}
               onClearFilters={handleClearFilters}
               onExportCSV={handleExportCSV}
               onExportJSON={handleExportJSON}
@@ -975,10 +940,8 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
 
           {
             <>
-              {/* DYNAMIC USER RECENT / FAVORITE SERIES (IF ANY EXIST) */}
               {activeTab === "recent" && suggestions.length > 0 ? (
                 <div className="bg-gradient-to-b from-neutral-900/60 to-neutral-950/40 rounded-3xl border border-neutral-800/80 p-6 sm:p-8 backdrop-blur-md space-y-6">
-                  {/* Header with Enhanced Design */}
                   <div className="flex items-center justify-between border-b border-neutral-800/40 pb-6">
                     <div className="flex items-center gap-4 flex-1">
                       <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-600/10 text-purple-400 rounded-xl border border-purple-500/30 shadow-lg shadow-purple-950/20">
@@ -994,7 +957,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                           </span>
                         </div>
                         <p className="text-xs text-neutral-400 font-mono">
-                          Click a card to load episodes or manage your recent
+                          Click a card to load chapters or manage your recent
                           history
                         </p>
                       </div>
@@ -1016,14 +979,13 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                     </button>
                   </div>
 
-                  {/* Series Grid - Enhanced Layout */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {suggestions.map((series) => (
                       <RecentSeriesCard
                         key={series.title_no}
                         series={series}
                         onSelect={(selectedSeries) => {
-                          setActiveTab("episodes");
+                          setActiveTab("chapters");
                           setBookmarksOnly(false);
                           setShowFavorites(false);
                           setShowRecent(false);
@@ -1036,14 +998,12 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                           );
                         }}
                         onRemove={() => {
-                          // Trigger UI refresh after remove
                           setTimeout(() => window.location.reload(), 200);
                         }}
                       />
                     ))}
                   </div>
 
-                  {/* Quick Stats */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-neutral-800/40">
                     <div className="bg-neutral-950/40 rounded-xl p-3 text-center border border-neutral-800/20">
                       <div className="text-xs text-neutral-500 font-mono mb-1">
@@ -1080,19 +1040,17 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                   </div>
                 </div>
               ) : (
-                /* DYNAMIC WORKFLOW & GETTING STARTED GUIDE */
                 <div className="bg-neutral-900/40 rounded-3xl border border-neutral-800/80 p-8 text-center space-y-6 backdrop-blur-md">
                   <div className="w-14 h-14 rounded-3xl bg-purple-600/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mx-auto shadow-inner">
                     <Zap className="w-7 h-7" />
                   </div>
                   <div className="max-w-md mx-auto space-y-2">
                     <h3 className="text-lg font-bold text-white">
-                      Ready to Scrape Webtoon Episodes
+                      Ready to Scrape Comic Chapters
                     </h3>
                     <p className="text-xs text-neutral-400 leading-relaxed font-mono">
-                      Paste any official WEBTOON series URL (or enter a Series
-                      ID) in the input bar above to automatically fetch
-                      chapters, panel images, likes, and ratings.
+                      Paste any comic or manga series URL in the input bar above
+                      to automatically fetch chapters, panel images, and ratings.
                     </p>
                   </div>
 
@@ -1102,11 +1060,10 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                         <span className="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px]">
                           1
                         </span>
-                        Paste Webtoon URL
+                        Paste Comic URL
                       </div>
                       <p className="text-[11px] text-neutral-500 font-mono">
-                        Copy the URL from webtoons.com or use a series ID
-                        number.
+                        Copy the URL from any supported comic site.
                       </p>
                     </div>
 
@@ -1118,8 +1075,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                         Preview &amp; Filter
                       </div>
                       <p className="text-[11px] text-neutral-500 font-mono">
-                        Filter by likes, date, rating, or preview panels full
-                        screen.
+                        Filter chapters by rating, date, or read panels full screen.
                       </p>
                     </div>
 
@@ -1131,7 +1087,7 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
                         Import to Editor
                       </div>
                       <p className="text-[11px] text-neutral-500 font-mono">
-                        Directly import scraped images into the timeline video
+                        Directly import scraped chapter panels into the timeline video
                         workspace.
                       </p>
                     </div>
@@ -1143,16 +1099,15 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
         </div>
       )}
 
-      {/* QUICK PREVIEW LIGHTBOX MODAL (Rendered at Application Root Level via Portal) */}
-      {previewEpisode &&
+      {/* QUICK PREVIEW LIGHTBOX MODAL */}
+      {previewChapter &&
         createPortal(
-          <EpisodeReaderModal
-            episode={previewEpisode}
-            onClose={() => setPreviewEpisode(null)}
-            onImport={(ep) => {
-              // Preview modal uses the shared Episode type; safe to forward
-              setPreviewEpisode(null);
-              handleEpisodeClick(ep);
+          <ChapterReaderModal
+            chapter={previewChapter}
+            onClose={() => setPreviewChapter(null)}
+            onImport={(ch) => {
+              setPreviewChapter(null);
+              handleChapterClick(ch);
             }}
             fetchWithInterceptor={fetchWithInterceptor}
           />,
@@ -1161,3 +1116,6 @@ Task: Generate a detailed video recap script, panel selection strategy, and AI v
     </div>
   );
 };
+
+export const EpisodeScraper = ChapterScraper;
+export default ChapterScraper;

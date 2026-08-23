@@ -7,14 +7,14 @@ import {
   HorizontalScrollContainer,
 } from "@/features/editor_imported_images/components/ImportedImagesSidebar";
 
-type EpisodeGroupRecord = {
+type ChapterGroupRecord = {
   episodeLabel: string;
   startIndex: number;
   count: number;
 };
 
-interface StoryboardEpisodeGroupProps {
-  episodeGroups: EpisodeGroupRecord[];
+interface StoryboardChapterGroupProps {
+  episodeGroups: ChapterGroupRecord[];
   selectedTimelineEp: number | "all";
   panels: GeneratedPanel[];
   currentPanelIndex: number;
@@ -53,7 +53,7 @@ interface StoryboardEpisodeGroupProps {
   storyboardViewLayout: "scroll" | "grid";
 }
 
-const StoryboardEpisodeGroup = ({
+export const StoryboardChapterGroup = ({
   episodeGroups,
   selectedTimelineEp,
   panels,
@@ -86,7 +86,7 @@ const StoryboardEpisodeGroup = ({
   speechRate,
   speechPitch,
   storyboardViewLayout,
-}: StoryboardEpisodeGroupProps) => {
+}: StoryboardChapterGroupProps) => {
   if (episodeGroups.length === 0) {
     return (
       <div className="w-full flex-1 min-w-0">
@@ -324,4 +324,5 @@ const StoryboardEpisodeGroup = ({
   );
 };
 
-export default StoryboardEpisodeGroup;
+export const StoryboardEpisodeGroup = StoryboardChapterGroup;
+export default StoryboardChapterGroup;

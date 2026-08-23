@@ -7,7 +7,7 @@ import {
   MoreVertical,
   Clock,
 } from "lucide-react";
-import { FavoritesManager } from "@/features/workspace_scraper/episode-scraper/utils/FavoritesManager";
+import { FavoritesManager } from "@/features/workspace_scraper/chapter-scraper/utils/FavoritesManager";
 import { separateComicUrl, type SeparateUrlResult } from "@/api/endpoints/scraper";
 
 export interface ScraperInputToolbarProps {
@@ -17,6 +17,7 @@ export interface ScraperInputToolbarProps {
   isProcessing?: boolean;
   handleScrape?: () => void;
   resetWorkspace?: () => void;
+  onOpenChapterScraper?: (url: string) => void;
   onOpenEpisodeScraper?: (url: string) => void;
   actionSlot?: React.ReactNode;
   setSeriesTitle?: (title: string) => void;
@@ -34,6 +35,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
   isProcessing = false,
   handleScrape,
   resetWorkspace,
+  onOpenChapterScraper,
   onOpenEpisodeScraper,
   actionSlot,
   setSeriesTitle,
@@ -168,17 +170,14 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     handleScrape?.();
   };
 
-  const handleOpenEpisodeScraperClick = () => {
-    if (!targetUrl.trim()) return;
-    const url = targetUrl.trim();
-    FavoritesManager.addEnteredUrl(url);
-    const destinationUrl = separatedData?.series_url || url;
-    localStorage.setItem("episode_scraper_url", destinationUrl);
-    if (onOpenEpisodeScraper) {
-      onOpenEpisodeScraper(destinationUrl);
+  const handleOpenChapterScraperClick = () => {
+    const destinationUrl = separatedData?.series_url || targetUrl;
+    const opener = onOpenChapterScraper || onOpenEpisodeScraper;
+    if (opener) {
+      opener(destinationUrl);
     } else {
       const nav = (window as any).navigateTo;
-      const targetPath = `/scraper/episode-scraper?url=${encodeURIComponent(
+      const targetPath = `/scraper/chapter-scraper?url=${encodeURIComponent(
         destinationUrl
       )}`;
       if (typeof nav === "function") {
@@ -317,17 +316,17 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
             <button
               type="button"
-              onClick={handleOpenEpisodeScraperClick}
+              onClick={handleOpenChapterScraperClick}
               disabled={!targetUrl.trim()}
               className={`relative px-5 py-3.5 border rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer ${
                 separatedData?.is_series_url && !separatedData?.is_chapter_url
                   ? "bg-purple-600 hover:bg-purple-500 border-purple-500/50 text-white shadow-purple-900/20"
                   : "bg-neutral-950 hover:bg-neutral-900 border-purple-500/30 hover:border-purple-500/60 text-purple-300 hover:text-purple-200"
               }`}
-              title="Browse and select specific episodes for this series URL"
+              title="Browse and select specific chapters for this series URL"
             >
               <Zap className="h-4 w-4 text-purple-400" />
-              Import Episode Scraper
+              Import Chapter Scraper
             </button>
           </div>
         )}

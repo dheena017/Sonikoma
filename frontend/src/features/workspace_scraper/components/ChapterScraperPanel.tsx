@@ -42,6 +42,7 @@ export interface UrlInputPanelProps {
   autoSplitTallStrips?: boolean;
   setAutoSplitTallStrips?: (v: boolean) => void;
   actionSlot?: React.ReactNode;
+  onOpenChapterScraper?: (url: string) => void;
   onOpenEpisodeScraper?: (url: string) => void;
   fetchWithInterceptor?: typeof fetch;
   onUploadImages?: (files: FileList | File[]) => void;
@@ -81,6 +82,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
     autoSplitTallStrips = true,
     setAutoSplitTallStrips,
     actionSlot,
+    onOpenChapterScraper,
     onOpenEpisodeScraper,
     onUploadImages,
   } = props;
@@ -184,8 +186,8 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             isScraping={isScraping}
             isProcessing={isProcessing}
             handleScrape={handleScrape}
-            resetWorkspace={resetWorkspace}
-            onOpenEpisodeScraper={onOpenEpisodeScraper}
+            onOpenChapterScraper={onOpenChapterScraper || onOpenEpisodeScraper}
+            onOpenEpisodeScraper={onOpenChapterScraper || onOpenEpisodeScraper}
             actionSlot={actionSlot}
             setSeriesTitle={setSeriesTitle}
             setScrapedGenre={setScrapedGenre}

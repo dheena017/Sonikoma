@@ -185,8 +185,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                             title_raw = a.get_text(strip=True)
                             num_val, _ = self.extract_number_and_type(title_raw)
 
-                            date_el = li.select_one(".chapter-release-date, .post-on, .chapter-date, i")
-                            date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
+                            date_str = self.extract_date_from_node(li)
 
                             is_locked = bool(li.find(class_=re.compile(r"lock|coin|paid|vip|fastpass", re.I)))
 
@@ -256,8 +255,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                         title_raw = a.get_text(strip=True)
                         num_val, _ = self.extract_number_and_type(title_raw)
 
-                        date_el = li.select_one(".chapter-release-date, .post-on, .chapter-date, i")
-                        date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
+                        date_str = self.extract_date_from_node(li)
 
                         is_locked = bool(li.find(class_=re.compile(r"lock|coin|paid|vip|fastpass", re.I)))
 

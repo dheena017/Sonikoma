@@ -190,6 +190,7 @@ export type JobStatus =
 export type JobType =
   // Scraping
   | "SCRAPE_CHAPTER"
+  | "DISCOVER_CHAPTERS"
   | "DISCOVER_EPISODES"
   | "BATCH_SCRAPE"
   | "BATCH_SERIES"

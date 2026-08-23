@@ -1,21 +1,21 @@
 import React from "react";
 import { BookOpen } from "lucide-react";
 
-export interface EpisodeScraperEmptyStateProps {
+export interface ChapterScraperEmptyStateProps {
   urlInput: string;
   isLoading?: boolean;
   error?: string | null;
 }
 
-export const EpisodeScraperEmptyState: React.FC<
-  EpisodeScraperEmptyStateProps
+export const ChapterScraperEmptyState: React.FC<
+  ChapterScraperEmptyStateProps
 > = ({ urlInput, isLoading = false, error = null }) => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-16 space-y-4">
         <div className="w-12 h-12 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
         <p className="text-sm font-bold text-neutral-400 animate-pulse">
-          Fetching episode list...
+          Fetching chapter list...
         </p>
         <p className="text-xs text-neutral-600 font-mono max-w-xs text-center truncate">
           {urlInput}
@@ -32,7 +32,7 @@ export const EpisodeScraperEmptyState: React.FC<
         </div>
         <div className="space-y-1">
           <p className="text-sm font-bold text-red-400">
-            Failed to fetch episodes
+            Failed to fetch chapters
           </p>
           <p className="text-xs text-neutral-500 max-w-sm leading-relaxed">
             {error}
@@ -48,12 +48,14 @@ export const EpisodeScraperEmptyState: React.FC<
         <BookOpen className="w-7 h-7 text-purple-400 opacity-60" />
       </div>
       <div className="space-y-1">
-        <p className="text-sm font-bold text-neutral-400">No Episodes Found</p>
+        <p className="text-sm font-bold text-neutral-400">No Chapters Found</p>
         <p className="text-xs text-neutral-600 max-w-sm leading-relaxed">
-          Paste a valid webtoon series URL above and press Enter to load its
-          episode list.
+          Paste a valid comic or manga series URL above and press Enter to load its
+          chapter list.
         </p>
       </div>
     </div>
   );
 };
+
+export const EpisodeScraperEmptyState = ChapterScraperEmptyState;

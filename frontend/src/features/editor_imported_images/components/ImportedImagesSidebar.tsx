@@ -33,7 +33,8 @@ import ImportedAssetsHeader from "./ImportedAssetsHeader";
 
 import { getSourceName, getProxiedImageUrl } from "@/utils";
 import { updateSelection } from "@/shared/utils/selection";
-import { EpisodeRatingDisplay } from "@/features/workspace_scraper/episode-scraper/components/EpisodeRatingDisplay";
+import { ChapterRatingDisplay } from "@/features/workspace_scraper/chapter-scraper/components/ChapterRatingDisplay";
+const EpisodeRatingDisplay = ChapterRatingDisplay;
 import { ExtractionSkeletonCard } from "@/shared/ui/loading/ExtractionSkeletonCard";
 import { ImportImagesOverlay } from "@/shared/ui/loading/ImportImagesOverlay";
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowRight, BookOpen, X, Clock, Eye, Star } from "lucide-react";
+import { ArrowRight, BookOpen, X, Clock, Star } from "lucide-react";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import type { FavoriteSeries } from "../utils/FavoritesManager";
 import { FavoritesManager } from "../utils/FavoritesManager";
@@ -61,7 +61,7 @@ export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       role="button"
       tabIndex={0}
-      aria-label={`Open episodes for ${series.title || "untitled series"}`}
+      aria-label={`Open chapters for ${series.title || "untitled series"}`}
       className="group relative min-h-[160px] bg-gradient-to-br from-neutral-900/60 to-neutral-950/40 hover:from-purple-950/30 hover:to-neutral-950/60 border border-neutral-800/60 hover:border-purple-500/50 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-900/20 flex flex-col justify-between overflow-hidden"
     >
       {/* Remove Button */}
@@ -117,17 +117,17 @@ export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({
           <Clock className="w-3 h-3 text-amber-400" />
           <span>Opened {getTimeAgo(series.timestamp)}</span>
         </div>
-        {series.episode_count && (
+        {(series.chapter_count || series.episode_count) && (
           <div className="flex items-center gap-1.5">
             <Star className="w-3 h-3 text-yellow-400" />
-            <span>{series.episode_count} episodes</span>
+            <span>{series.chapter_count || series.episode_count} chapters</span>
           </div>
         )}
       </div>
 
       {/* CTA */}
       <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-purple-400 group-hover:text-purple-300 transition-colors pt-2 border-t border-neutral-800/40">
-        <span>Open Episodes</span>
+        <span>Open Chapters</span>
         <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
       </div>
     </div>

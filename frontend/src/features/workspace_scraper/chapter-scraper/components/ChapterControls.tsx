@@ -2,9 +2,6 @@ import React, { useState } from "react";
 import {
   Filter,
   Search,
-  Heart,
-  Clock,
-  Bookmark,
   CheckSquare,
   FileJson,
   Download,
@@ -14,7 +11,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-interface EpisodeControlsProps {
+interface ChapterControlsProps {
   onSortChange: (sortBy: "latest" | "oldest" | "rating" | "likes") => void;
   onSearchChange: (query: string) => void;
   onDateRangeChange: (fromDate: string, toDate: string) => void;
@@ -35,10 +32,10 @@ interface EpisodeControlsProps {
   isMultiSelectMode: boolean;
   onToggleMultiSelectMode: () => void;
 
-  startEpisodeNum?: string;
-  onStartEpisodeChange?: (val: string) => void;
-  endEpisodeNum?: string;
-  onEndEpisodeChange?: (val: string) => void;
+  startChapterNum?: string;
+  onStartChapterChange?: (val: string) => void;
+  endChapterNum?: string;
+  onEndChapterChange?: (val: string) => void;
 
   onClearFilters: () => void;
   onExportCSV: () => void;
@@ -47,7 +44,7 @@ interface EpisodeControlsProps {
   onMarkAllUnread?: () => void;
 }
 
-export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
+export const ChapterControls: React.FC<ChapterControlsProps> = ({
   onSortChange,
   onSearchChange,
   onDateRangeChange,
@@ -68,10 +65,10 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
   isMultiSelectMode,
   onToggleMultiSelectMode,
 
-  startEpisodeNum,
-  onStartEpisodeChange,
-  endEpisodeNum,
-  onEndEpisodeChange,
+  startChapterNum,
+  onStartChapterChange,
+  endChapterNum,
+  onEndChapterChange,
 
   onClearFilters,
   onExportCSV,
@@ -114,8 +111,8 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
       readStatus !== "all" ||
       fromDate ||
       toDate ||
-      startEpisodeNum ||
-      endEpisodeNum
+      startChapterNum ||
+      endChapterNum
   );
 
   return (
@@ -127,7 +124,7 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
         />
         <input
           type="text"
-          placeholder="Search episodes by title or episode number..."
+          placeholder="Search chapters by title or chapter number..."
           value={searchQuery}
           onChange={handleSearchChange}
           className="w-full rounded-xl border border-neutral-800 bg-neutral-955 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-600 transition-all focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
@@ -239,25 +236,25 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-xs text-gray-400 block mb-1">
-                  Start Ep #
+                  Start Ch #
                 </label>
                 <input
                   type="number"
                   placeholder="e.g. 1"
-                  value={startEpisodeNum || ""}
-                  onChange={(e) => onStartEpisodeChange?.(e.target.value)}
+                  value={startChapterNum || ""}
+                  onChange={(e) => onStartChapterChange?.(e.target.value)}
                   className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
                 />
               </div>
               <div>
                 <label className="text-xs text-gray-400 block mb-1">
-                  End Ep #
+                  End Ch #
                 </label>
                 <input
                   type="number"
                   placeholder="e.g. 50"
-                  value={endEpisodeNum || ""}
-                  onChange={(e) => onEndEpisodeChange?.(e.target.value)}
+                  value={endChapterNum || ""}
+                  onChange={(e) => onEndChapterChange?.(e.target.value)}
                   className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-purple-500"
                 />
               </div>
@@ -319,7 +316,7 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
               <button
                 onClick={onExportCSV}
                 className="px-3 py-1.5 bg-green-600/20 hover:bg-green-600/30 text-green-400 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
-                title="Export Episode Metadata to CSV"
+                title="Export Chapter Metadata to CSV"
               >
                 <Download size={13} />
                 Export CSV
@@ -327,7 +324,7 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
               <button
                 onClick={onExportJSON}
                 className="px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
-                title="Export Episode Metadata to JSON"
+                title="Export Chapter Metadata to JSON"
               >
                 <FileJson size={13} />
                 Export JSON
@@ -346,3 +343,5 @@ export const EpisodeControls: React.FC<EpisodeControlsProps> = ({
     </div>
   );
 };
+
+export const EpisodeControls = ChapterControls;

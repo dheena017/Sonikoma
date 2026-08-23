@@ -115,8 +115,7 @@ class BatoAdapter(BaseSiteAdapter):
 
             # Date check in parent or next sibling
             parent_div = a.find_parent("div", class_="item") or a.find_parent("li")
-            date_el = parent_div.select_one(".extra i, .date, .time, i") if parent_div else None
-            date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
+            date_str = self.extract_date_from_node(parent_div) if parent_div else ""
 
             ep_cover = self.build_proxy_thumbnail_url(None, full_url, cover_image)
             episodes.append({

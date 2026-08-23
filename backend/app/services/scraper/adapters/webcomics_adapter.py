@@ -145,13 +145,16 @@ class WebComicsAdapter(BaseSiteAdapter):
             txt = a.get_text(strip=True)
             num_val, _ = self.extract_number_and_type(txt)
 
+            parent_container = a.find_parent("li") or a.find_parent("div") or a.parent
+            date_str = self.extract_date_from_node(parent_container) if parent_container else ""
+
             ep_cover = self.build_proxy_thumbnail_url(None, full_url, cover_image)
             episodes.append({
                 "title": txt or f"Chapter {num_val or len(episodes)+1}",
                 "url": full_url,
                 "chapter_number": num_val,
                 "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
-                "date": "",
+                "date": date_str,
                 "cover_image": ep_cover or cover_image,
                 "language": "en",
             })

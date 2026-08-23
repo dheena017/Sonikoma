@@ -552,15 +552,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                     if item_container:
                         is_locked = bool(item_container.find(class_=re.compile(r"lock|coin|paid|vip|fastpass", re.I)))
 
-                    date_str = ""
-                    if item_container:
-                        date_el = item_container.select_one(".chapter-release-date, .post-on, .chapter-date, .date, .time, i, span.time")
-                        if date_el:
-                            date_str = self.normalize_date(date_el.get_text(strip=True))
-                        else:
-                            spans = a.find_all("span")
-                            if len(spans) >= 2:
-                                date_str = self.normalize_date(spans[-1].get_text(strip=True))
+                    date_str = self.extract_date_from_node(item_container) if item_container else ""
 
                     thmb_src = None
                     if item_container:

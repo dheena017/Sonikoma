@@ -21,7 +21,8 @@ class JobStatus(str, Enum):
 class JobType(str, Enum):
     # ── Scraping ─────────────────────────────────────────────────────────────
     SCRAPE_CHAPTER = "SCRAPE_CHAPTER"           # Single chapter → ChapterResult
-    DISCOVER_EPISODES = "DISCOVER_EPISODES"     # Series episode list discovery
+    DISCOVER_CHAPTERS = "DISCOVER_CHAPTERS"     # Series chapter list discovery
+    DISCOVER_EPISODES = "DISCOVER_EPISODES"     # Alias / Series episode list discovery
     BATCH_SCRAPE = "BATCH_SCRAPE"               # Multiple chapter URLs batch
     BATCH_SERIES = "BATCH_SERIES"               # Multiple series batch
     PROCESS_URL = "PROCESS_URL"                 # Generic URL metadata resolution

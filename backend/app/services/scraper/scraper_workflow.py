@@ -37,55 +37,78 @@ logger = logging.getLogger("sonikoma.services.scraper.workflow")
 # 1. SQLite Series Episode Discovery Cache
 # ═════════════════════════════════════════════════════════════════════════════
 
-def _ensure_episodes_table():
-    """Initializes the series_episodes_cache SQLite table if not already present."""
+def _ensure_chapters_table():
+    """Initializes the series_chapters_cache SQLite table if not already present."""
     if not get_db_connection:
         return
     try:
         with get_db_connection() as conn:
             conn.execute("""
-            CREATE TABLE IF NOT EXISTS series_episodes_cache (
+            CREATE TABLE IF NOT EXISTS series_chapters_cache (
                 series_url      TEXT PRIMARY KEY,
                 title           TEXT,
                 data_json       TEXT NOT NULL,
-                total_episodes  INTEGER DEFAULT 0,
+                total_chapters  INTEGER DEFAULT 0,
                 updated_at      REAL NOT NULL,
                 created_at      TEXT DEFAULT (datetime('now'))
             )
             """)
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_series_ep_url ON series_episodes_cache(series_url)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_series_ch_url ON series_chapters_cache(series_url)")
             conn.commit()
     except Exception as e:
-        logger.debug(f"[SeriesEpisodeCache] DB Init notice: {e}")
+        logger.debug(f"[SeriesChapterCache] DB Init notice: {e}")
 
 
-def _get_cached_episodes(series_url: str, ttl_seconds: float = 600.0) -> Optional[Dict[str, Any]]:
-    """Retrieves cached series discovery results within the TTL window."""
+def _ensure_episodes_table():
+    _ensure_chapters_table()
+
+
+def _get_cached_chapters(series_url: str, ttl_seconds: float = 600.0) -> Optional[Dict[str, Any]]:
+    """Retrieves cached series chapter discovery results within the TTL window."""
     if not get_db_connection:
         return None
-    _ensure_episodes_table()
+    _ensure_chapters_table()
     try:
         clean_url = series_url.strip().lower()
         now = time.time()
         with get_db_connection() as conn:
+            # Check new chapters cache first
             row = conn.execute(
-                "SELECT data_json, updated_at FROM series_episodes_cache WHERE LOWER(series_url) = ?",
+                "SELECT data_json, updated_at FROM series_chapters_cache WHERE LOWER(series_url) = ?",
                 (clean_url,)
             ).fetchone()
             if row and row["data_json"] and (now - row["updated_at"] < ttl_seconds):
-                logger.info(f"[SeriesEpisodeCache] HIT for {series_url} (age: {now - row['updated_at']:.1f}s)")
-                return json.loads(row["data_json"])
+                data = json.loads(row["data_json"])
+                data["from_cache"] = True
+                return data
+
+            # Fallback to legacy episodes cache if present
+            try:
+                legacy_row = conn.execute(
+                    "SELECT data_json, updated_at FROM series_episodes_cache WHERE LOWER(series_url) = ?",
+                    (clean_url,)
+                ).fetchone()
+                if legacy_row and legacy_row["data_json"] and (now - legacy_row["updated_at"] < ttl_seconds):
+                    data = json.loads(legacy_row["data_json"])
+                    data["from_cache"] = True
+                    return data
+            except Exception:
+                pass
     except Exception as e:
-        logger.debug(f"[SeriesEpisodeCache] Read notice: {e}")
+        logger.debug(f"[SeriesChapterCache] Read notice: {e}")
     return None
 
 
-def _save_cached_episodes(series_url: str, title: str, result_dict: Dict[str, Any]):
-    """Persists newly crawled series episodes to SQLite cache."""
+def _get_cached_episodes(series_url: str, ttl_seconds: float = 600.0) -> Optional[Dict[str, Any]]:
+    return _get_cached_chapters(series_url, ttl_seconds)
+
+
+def _save_cached_chapters(series_url: str, title: str, result_dict: Dict[str, Any]):
+    """Persists newly crawled series chapters to SQLite cache."""
     chapters = result_dict.get("chapters") or result_dict.get("episodes")
     if not get_db_connection or not result_dict or not chapters:
         return
-    _ensure_episodes_table()
+    _ensure_chapters_table()
     try:
         clean_url = series_url.strip()
         data_json = json.dumps(result_dict)
@@ -93,35 +116,41 @@ def _save_cached_episodes(series_url: str, title: str, result_dict: Dict[str, An
         now = time.time()
         with get_db_connection() as conn:
             conn.execute("""
-            INSERT INTO series_episodes_cache (series_url, title, data_json, total_episodes, updated_at)
+            INSERT INTO series_chapters_cache (series_url, title, data_json, total_chapters, updated_at)
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT(series_url) DO UPDATE SET
                 title           = excluded.title,
                 data_json       = excluded.data_json,
-                total_episodes  = excluded.total_episodes,
+                total_chapters  = excluded.total_chapters,
                 updated_at      = excluded.updated_at
             """, (clean_url, title, data_json, total, now))
             conn.commit()
     except Exception as e:
-        logger.debug(f"[SeriesEpisodeCache] Write notice: {e}")
+        logger.debug(f"[SeriesChapterCache] Write notice: {e}")
+
+
+def _save_cached_episodes(series_url: str, title: str, result_dict: Dict[str, Any]):
+    _save_cached_chapters(series_url, title, result_dict)
 
 
 # ═════════════════════════════════════════════════════════════════════════════
 # 2. Main Public API Workflow Functions (Dispatched to Modular Adapters)
 # ═════════════════════════════════════════════════════════════════════════════
 
-async def scrape_series_episodes(
+async def scrape_series_chapters(
     series_url: str,
     title_no: Optional[str] = None,
     max_episodes: Optional[int] = None,
+    max_chapters: Optional[int] = None,
     sort_by: str = "latest",
     bypass_cache: bool = False
 ) -> Dict[str, Any]:
     """
-    Universal Multi-Platform Series & Episode Discovery Coordinator.
+    Universal Multi-Platform Series & Chapter Discovery Coordinator.
     Dispatches to dedicated site adapters (Webtoons, MangaDex, Madara, ThemeSphere, Bato, etc.)
     with automatic SQLite caching and generic fallback.
     """
+    limit = max_chapters or max_episodes
     raw_input = (series_url or "").strip()
     if title_no and not raw_input.startswith("http"):
         raw_input = f"https://www.webtoons.com/en/episode/list?title_no={title_no}"
@@ -221,7 +250,7 @@ async def scrape_series_episodes(
             result.pop("episodes", None)
             result.pop("total_episodes", None)
 
-            _save_cached_episodes(raw_input, series_title, result)
+            _save_cached_chapters(raw_input, series_title, result)
             return result
 
         return result or {
@@ -266,10 +295,11 @@ async def scrape_series_episodes(
         }
 
 
-async def scrape_series_episodes_advanced(
+async def scrape_series_chapters_advanced(
     series_url: str,
     title_no: Optional[str] = None,
     max_episodes: Optional[int] = None,
+    max_chapters: Optional[int] = None,
     page: int = 1,
     per_page: int = 100,
     include_ratings: bool = True,
@@ -277,10 +307,11 @@ async def scrape_series_episodes_advanced(
     bypass_cache: bool = False
 ) -> Dict[str, Any]:
     """Universal advanced series & chapter scraper with pagination, natural sorting, and caching."""
-    result = await scrape_series_episodes(
+    limit = max_chapters or max_episodes
+    result = await scrape_series_chapters(
         series_url=series_url,
         title_no=title_no,
-        max_episodes=None,
+        max_chapters=None,
         sort_by=sort_by,
         bypass_cache=bypass_cache
     )
@@ -289,8 +320,8 @@ async def scrape_series_episodes_advanced(
         return result
 
     chapters = result.get("chapters") or result.get("episodes", [])
-    if max_episodes:
-        chapters = chapters[:max_episodes]
+    if limit:
+        chapters = chapters[:limit]
 
     total_chapters = len(chapters)
     if not per_page or per_page <= 0:
@@ -319,17 +350,24 @@ async def scrape_series_episodes_advanced(
     return result
 
 
-async def scrape_series_episodes_paginated(
+async def scrape_series_chapters_paginated(
     title_no: str,
-    max_episodes: Optional[int] = None
+    max_episodes: Optional[int] = None,
+    max_chapters: Optional[int] = None
 ) -> Dict[str, Any]:
     """Convenience pagination helper."""
-    return await scrape_series_episodes_advanced(
+    return await scrape_series_chapters_advanced(
         series_url="",
         title_no=title_no,
         page=1,
-        per_page=max_episodes or 100
+        per_page=max_chapters or max_episodes or 100
     )
+
+
+# Backward compatibility aliases
+scrape_series_episodes = scrape_series_chapters
+scrape_series_episodes_advanced = scrape_series_chapters_advanced
+scrape_series_episodes_paginated = scrape_series_chapters_paginated
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -338,14 +376,16 @@ async def scrape_series_episodes_paginated(
 
 async def batch_scrape_series(
     series_list: List[Dict[str, Optional[str]]],
-    max_episodes_per_series: int = 50
+    max_chapters_per_series: int = 50,
+    max_episodes_per_series: Optional[int] = None
 ) -> Dict[str, Any]:
-    """Batch crawler for discovering episodes across multiple series URLs."""
+    """Batch crawler for discovering chapters across multiple series URLs."""
+    limit = max_episodes_per_series or max_chapters_per_series
     results = []
     for s in series_list:
         url = s.get("url") or ""
         title_no = s.get("title_no")
-        res = await scrape_series_episodes(series_url=url, title_no=title_no, max_episodes=max_episodes_per_series)
+        res = await scrape_series_chapters(series_url=url, title_no=title_no, max_chapters=limit)
         results.append(res)
     return {"success": True, "series_results": results, "total_series": len(results)}
 

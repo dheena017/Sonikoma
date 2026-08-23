@@ -1,17 +1,10 @@
 import React, { useState } from "react";
 import { makeSafeFilename } from "@/shared/utils/downloadNaming";
-import JSZip from "jszip";
 import { Download, X } from "lucide-react";
-
-interface Episode {
-  number: string;
-  title: string;
-  cover_image?: string;
-  url?: string;
-}
+import type { Chapter } from "../types/ChapterTypes";
 
 interface BatchDownloaderProps {
-  episodes: Episode[];
+  chapters: Chapter[];
   seriesTitle: string;
   onDownloadStart?: () => void;
   onDownloadComplete?: (count: number) => void;
@@ -24,7 +17,7 @@ interface DownloadProgress {
 }
 
 export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
-  episodes,
+  chapters,
   seriesTitle,
   onDownloadStart,
   onDownloadComplete,
@@ -36,8 +29,8 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
   });
 
   const downloadThumbnails = async () => {
-    if (!episodes || episodes.length === 0) {
-      alert("No episodes to download");
+    if (!chapters || chapters.length === 0) {
+      alert("No chapters to download");
       return;
     }
 
@@ -54,15 +47,15 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
       onDownloadStart?.();
       setProgress({
         current: 0,
-        total: episodes.length,
+        total: chapters.length,
         isDownloading: true,
       });
 
       let downloaded = 0;
 
-      for (let i = 0; i < episodes.length; i++) {
-        const episode = episodes[i];
-        const coverUrl = episode.cover_image;
+      for (let i = 0; i < chapters.length; i++) {
+        const chapter = chapters[i];
+        const coverUrl = chapter.cover_image;
 
         if (!coverUrl) {
           setProgress((p) => ({
@@ -85,7 +78,7 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
               : coverUrl.includes("png")
               ? "png"
               : "webp";
-            const filename = `${episode.number}_${episode.title
+            const filename = `${chapter.number}_${chapter.title
               .replace(/[/\\?*:|"<>]/g, "_")
               .substring(0, 30)}.${ext}`;
 
@@ -93,7 +86,7 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
             downloaded++;
           }
         } catch (err) {
-          console.warn(`Failed to download ${episode.number}:`, err);
+          console.warn(`Failed to download chapter ${chapter.number}:`, err);
         }
 
         setProgress((p) => ({
@@ -109,16 +102,16 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
         "",
         `Series Title    : ${seriesTitle || "Webtoon Series"}`,
         `Export Date     : ${new Date().toLocaleString()}`,
-        `Total Episodes  : ${validEpisodes.length}`,
+        `Total Chapters  : ${validChapters.length}`,
         `Downloaded      : ${downloaded}`,
         "",
         "--------------------------------------------------------------------------",
-        "                       EPISODE THUMBNAIL LIST                             ",
+        "                       CHAPTER THUMBNAIL LIST                             ",
         "--------------------------------------------------------------------------",
-        ...validEpisodes.map(
-          (ep) =>
-            `Episode ${ep.number || "?"} | ${ep.title || "Untitled"} -> ${
-              ep.cover_image || "N/A"
+        ...validChapters.map(
+          (ch) =>
+            `Chapter ${ch.number || "?"} | ${ch.title || "Untitled"} -> ${
+              ch.cover_image || "N/A"
             }`
         ),
         "",
@@ -183,16 +176,16 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
     );
   }
 
-  const validEpisodes = episodes.filter((ep) => ep.cover_image);
+  const validChapters = chapters.filter((ch) => ch.cover_image);
 
   return (
     <button
       onClick={downloadThumbnails}
-      disabled={validEpisodes.length === 0}
+      disabled={validChapters.length === 0}
       className="w-full px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-all flex items-center justify-center gap-2"
     >
       <Download size={18} />
-      Download {validEpisodes.length} Thumbnails as ZIP
+      Download {validChapters.length} Thumbnails as ZIP
     </button>
   );
 };

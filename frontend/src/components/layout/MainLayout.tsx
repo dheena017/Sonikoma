@@ -354,6 +354,7 @@ export default function MainLayout(props: MainLayoutProps) {
       currentPath === "/scraper" ||
       currentPath.startsWith("/scraper") ||
       isWorkspacePath ||
+      currentPath.includes("chapter-scraper") ||
       currentPath.includes("episode-scraper")
     ) {
       return "workspace";

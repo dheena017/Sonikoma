@@ -220,6 +220,36 @@ class BaseSiteAdapter(ABC):
 
         return date_raw.strip()[:20]
 
+    @classmethod
+    def extract_date_from_node(cls, node) -> str:
+        """Extracts and normalizes release date from HTML element or its children/attributes."""
+        if not node:
+            return ""
+        # 1. Attribute inspection
+        for attr in ("datetime", "data-date", "data-time", "data-release", "title", "data-timestamp"):
+            val = node.get(attr)
+            if val:
+                norm = cls.normalize_date(str(val))
+                if norm and len(norm) >= 4:
+                    return norm
+
+        # 2. Specific date selector lookup
+        for sub in node.select(".chapter-release-date, .post-on, .chapter-date, .c-new-tag, time, .date, [class*='date'], [class*='release'], i, font, em"):
+            for attr in ("datetime", "data-date", "title"):
+                val = sub.get(attr)
+                if val:
+                    norm = cls.normalize_date(str(val))
+                    if norm and len(norm) >= 4:
+                        return norm
+            txt = sub.get_text(strip=True)
+            if txt:
+                norm = cls.normalize_date(txt)
+                if norm and len(norm) >= 4:
+                    return norm
+
+        # 3. Direct node text
+        return cls.normalize_date(node.get_text(strip=True))
+
     @staticmethod
     def extract_language_tag(text: str) -> Optional[str]:
         """Detects bracketed language indicators like [EN], [RAW], [ID], [ES], [FR], [KR]."""

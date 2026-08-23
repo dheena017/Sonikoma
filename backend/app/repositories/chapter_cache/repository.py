@@ -1,7 +1,7 @@
 """
-backend/app/services/scraper/cache.py
+backend/app/repositories/chapter_cache/repository.py
 ─────────────────────────────────────────────────────────────────────────────
-SQLite-based caching for scraped WEBTOON episodes and image panel lists.
+SQLite-based caching for scraped comic chapters and image panel lists.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -22,12 +22,12 @@ except ImportError:
 logger = logging.getLogger("sonikoma.services.scraper.cache")
 
 
-class EpisodeCacheManager:
-    """SQLite-based caching for scraped WEBTOON episodes."""
+class ChapterCacheManager:
+    """SQLite-based caching for scraped comic chapters."""
 
     def __init__(self, db_path: Optional[str] = None):
         self.db_path = db_path or os.path.join(
-            os.path.dirname(__file__), "..", "..", "..", "database", "webtoon_episodes_cache.db"
+            os.path.dirname(__file__), "..", "..", "..", "database", "comic_chapters_cache.db"
         )
         self._init_db()
 
@@ -38,12 +38,12 @@ class EpisodeCacheManager:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS episode_cache (
+                    CREATE TABLE IF NOT EXISTS chapter_cache (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         title_no TEXT NOT NULL,
                         genre TEXT,
                         cache_key TEXT UNIQUE NOT NULL,
-                        episodes_json TEXT NOT NULL,
+                        chapters_json TEXT NOT NULL,
                         series_metadata TEXT,
                         cached_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                         expires_at DATETIME,
@@ -52,92 +52,97 @@ class EpisodeCacheManager:
                 """)
                 cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_title_no_genre
-                    ON episode_cache(title_no, genre)
+                    ON chapter_cache(title_no, genre)
                 """)
                 cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_expires_at
-                    ON episode_cache(expires_at)
+                    ON chapter_cache(expires_at)
                 """)
                 conn.commit()
-            logger.info(f"[Cache Manager] Database initialized at {self.db_path}")
+            logger.info(f"[ChapterCacheManager] Database initialized at {self.db_path}")
         except Exception as e:
-            logger.warning(f"[Cache Manager] Failed to initialize: {e}")
+            logger.warning(f"[ChapterCacheManager] Failed to initialize: {e}")
 
     def _make_cache_key(self, title_no: str, genre: Optional[str] = None) -> str:
         """Generate cache key."""
         key_str = f"{title_no}:{genre or 'any'}"
         return hashlib.md5(key_str.encode(), usedforsecurity=False).hexdigest()
 
-    def save_episodes(
+    def save_chapters(
         self,
         title_no: str,
-        episodes: List[Dict[str, Any]],
+        chapters: List[Dict[str, Any]],
         series_metadata: Optional[Dict[str, Any]] = None,
         genre: Optional[str] = None,
         ttl_hours: int = 24
     ) -> bool:
-        """Save episodes to cache."""
+        """Save chapters to cache."""
         try:
             cache_key = self._make_cache_key(title_no, genre)
             expires_at = datetime.utcnow() + timedelta(hours=ttl_hours)
 
-            episodes_json = json.dumps(episodes)
+            chapters_json = json.dumps(chapters)
             metadata_json = json.dumps(series_metadata) if series_metadata else None
 
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    INSERT OR REPLACE INTO episode_cache
-                    (title_no, genre, cache_key, episodes_json, series_metadata, expires_at)
+                    INSERT OR REPLACE INTO chapter_cache
+                    (title_no, genre, cache_key, chapters_json, series_metadata, expires_at)
                     VALUES (?, ?, ?, ?, ?, ?)
-                """, (title_no, genre, cache_key, episodes_json, metadata_json, expires_at))
+                """, (title_no, genre, cache_key, chapters_json, metadata_json, expires_at))
                 conn.commit()
 
-            logger.info(f"[Cache Manager] Cached {len(episodes)} episodes for {title_no}")
+            logger.info(f"[ChapterCacheManager] Cached {len(chapters)} chapters for {title_no}")
             return True
         except Exception as e:
-            logger.warning(f"[Cache Manager] Save failed: {e}")
+            logger.warning(f"[ChapterCacheManager] Save failed: {e}")
             return False
 
-    def get_episodes(self, title_no: str, genre: Optional[str] = None) -> Optional[Dict[str, Any]]:
-        """Retrieve episodes from cache if valid."""
+    def save_episodes(self, *args, **kwargs) -> bool:
+        return self.save_chapters(*args, **kwargs)
+
+    def get_chapters(self, title_no: str, genre: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """Retrieve chapters from cache if valid."""
         try:
             cache_key = self._make_cache_key(title_no, genre)
 
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    SELECT episodes_json, series_metadata, hit_count, expires_at
-                    FROM episode_cache
+                    SELECT chapters_json, series_metadata, hit_count, expires_at
+                    FROM chapter_cache
                     WHERE cache_key = ? AND (expires_at IS NULL OR expires_at > datetime('now'))
                 """, (cache_key,))
 
                 row = cursor.fetchone()
                 if row:
-                    episodes_json, metadata_json, hit_count, _ = row
+                    chapters_json, metadata_json, hit_count, _ = row
 
-                    # Update hit count
                     cursor.execute(
-                        "UPDATE episode_cache SET hit_count = hit_count + 1 WHERE cache_key = ?",
+                        "UPDATE chapter_cache SET hit_count = hit_count + 1 WHERE cache_key = ?",
                         (cache_key,)
                     )
                     conn.commit()
 
-                    episodes = json.loads(episodes_json)
+                    chapters = json.loads(chapters_json)
                     metadata = json.loads(metadata_json) if metadata_json else None
 
-                    logger.info(f"[Cache Manager] Cache HIT for {title_no} ({len(episodes)} episodes, hits: {hit_count + 1})")
+                    logger.info(f"[ChapterCacheManager] Cache HIT for {title_no} ({len(chapters)} chapters, hits: {hit_count + 1})")
                     return {
-                        "episodes": episodes,
+                        "chapters": chapters,
                         "series_metadata": metadata,
                         "from_cache": True
                     }
 
-                logger.debug(f"[Cache Manager] Cache MISS for {title_no}")
+                logger.debug(f"[ChapterCacheManager] Cache MISS for {title_no}")
                 return None
         except Exception as e:
-            logger.warning(f"[Cache Manager] Retrieval failed: {e}")
+            logger.warning(f"[ChapterCacheManager] Retrieval failed: {e}")
             return None
+
+    def get_episodes(self, *args, **kwargs) -> Optional[Dict[str, Any]]:
+        return self.get_chapters(*args, **kwargs)
 
     def clear_expired(self) -> int:
         """Remove expired cache entries."""
@@ -145,28 +150,31 @@ class EpisodeCacheManager:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    "DELETE FROM episode_cache WHERE expires_at IS NOT NULL AND expires_at < datetime('now')"
+                    "DELETE FROM chapter_cache WHERE expires_at IS NOT NULL AND expires_at < datetime('now')"
                 )
                 deleted = cursor.rowcount
                 conn.commit()
 
             if deleted > 0:
-                logger.info(f"[Cache Manager] Cleared {deleted} expired entries")
+                logger.info(f"[ChapterCacheManager] Cleared {deleted} expired entries")
             return deleted
         except Exception as e:
-            logger.warning(f"[Cache Manager] Clear failed: {e}")
+            logger.warning(f"[ChapterCacheManager] Clear failed: {e}")
             return 0
 
 
 # Global cache manager instance
-_episode_cache = None
+_chapter_cache = None
 
-def get_episode_cache() -> EpisodeCacheManager:
-    """Get global episode cache manager."""
-    global _episode_cache
-    if _episode_cache is None:
-        _episode_cache = EpisodeCacheManager()
-    return _episode_cache
+def get_chapter_cache() -> ChapterCacheManager:
+    """Get global chapter cache manager."""
+    global _chapter_cache
+    if _chapter_cache is None:
+        _chapter_cache = ChapterCacheManager()
+    return _chapter_cache
+
+EpisodeCacheManager = ChapterCacheManager
+get_episode_cache = get_chapter_cache
 
 
 def check_sqlite_cache(url: str) -> Optional[List[str]]:
