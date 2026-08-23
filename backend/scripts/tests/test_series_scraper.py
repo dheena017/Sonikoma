@@ -239,6 +239,11 @@ async def discover_and_select_episodes(
     author = series_data.get("author") or "N/A"
     genre = series_data.get("genre") or "N/A"
     cover_image = series_data.get("cover_image") or "N/A"
+    description = (series_data.get("description") or "N/A").strip()
+    if len(description) > 160:
+        desc_preview = description[:160] + "..."
+    else:
+        desc_preview = description
 
     print("\n" + "=" * 80)
     print(color("  [2] DISCOVERED SERIES CATALOG", Style.BOLD + Style.CYAN))
@@ -247,6 +252,7 @@ async def discover_and_select_episodes(
     print(f"  • Author                : {author}")
     print(f"  • Genre                 : {genre}")
     print(f"  • Cover Image           : {color(cover_image, Style.CYAN)}")
+    print(f"  • Description           : {desc_preview}")
     print(f"  • Total Chapters Found  : {color(str(len(chapters)), Style.BOLD + Style.GREEN)}")
     print(f"  • Discovery Latency     : {latency:.2f}s")
     print("=" * 80)

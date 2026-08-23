@@ -369,15 +369,67 @@ class DomExtractor:
             # Clean common trailing site branding or reading junk (e.g. "Series Name - Read Manga Online | Site")
             cleaned_title = re.split(r'\s*(?:[-–|•·»~]\s*(?:read|manga|comic|webtoon|raw|online|chapter|scan|free|hd)\b|\|)', title, flags=re.IGNORECASE)[0].strip()
             series.title = cleaned_title if cleaned_title else title
-        if desc and not series.description:
-            series.description = desc
+
+        # DOM synopsis / description heuristics
+        dom_desc = None
+        for sel in (
+            ".panel-story-info-description", "#panel-story-info-description",
+            ".story-info-right-extent", ".summary__content", ".synopsis",
+            ".manga-description", ".series-synopsis", ".comic-description",
+            "[itemprop='description']", ".entry-content p", "div.description",
+            ".story-description", ".content3 p"
+        ):
+            elem = soup.select_one(sel)
+            if elem:
+                txt = elem.get_text(separator="\n", strip=True)
+                if len(txt) > 20:
+                    # Strip common prefix labels like "Description :", "Synopsis :", "Summary :"
+                    cleaned_txt = re.sub(r'^(?:description|synopsis|summary|story)\s*:\s*', '', txt, flags=re.IGNORECASE).strip()
+                    dom_desc = cleaned_txt
+                    break
+
+        if dom_desc:
+            series.description = dom_desc
+        elif desc and not series.description:
+            # Clean SEO boilerplate from meta description
+            cleaned_desc = re.sub(r'^(?:read\s+manga\s+free\s*:\s*[^.]+\.\s*(?:full\s+chapter\s+archive[^.]*\.\s*)?|read\s+[^.]+\s+online\s+free\s*-\s*)', '', desc, flags=re.IGNORECASE).strip()
+            series.description = cleaned_desc if cleaned_desc else desc
+
+        # DOM Cover Image fallback
+        if not series.cover and not cover:
+            for c_sel in (".story-info-left img", ".poster img", ".summary_image img", ".manga-poster img", ".thumb img", "div.img-cover img"):
+                c_elem = soup.select_one(c_sel)
+                if c_elem and (c_elem.get("src") or c_elem.get("data-src")):
+                    raw_c = c_elem.get("src") or c_elem.get("data-src")
+                    if raw_c:
+                        series.cover = urljoin(base_url, raw_c)
+                        break
+
         if cover and not series.cover:
             series.cover = urljoin(base_url, cover)
+
+        # DOM Author & Artist heuristics
+        if not author:
+            for a_sel in ("a[href*='/author/']", "a[href*='/creator/']", "a[href*='/search/author/']", ".table-value a[href*='author']", ".author-content a", "[itemprop='author']"):
+                a_elem = soup.select_one(a_sel)
+                if a_elem and a_elem.get_text(strip=True):
+                    author = a_elem.get_text(strip=True)
+                    break
+
         if author and not series.author:
             series.author = author
+
         if publisher and not series.publisher:
             series.publisher = publisher
-        if section and section not in series.genres:
+
+        # DOM Genre list heuristics
+        for g_sel in ("a[href*='/genre/']", "a[href*='/genres/']", "a[href*='/category/']", "a[href*='/tag/']", ".genres-content a"):
+            for g_elem in soup.select(g_sel):
+                g_txt = g_elem.get_text(strip=True)
+                if g_txt and len(g_txt) < 30 and g_txt.capitalize() not in series.genres:
+                    series.genres.append(g_txt.capitalize())
+
+        if section and section.capitalize() not in series.genres:
             series.genres.append(section.capitalize())
 
         # 3. Generic Chapter number and title resolution from title/h1

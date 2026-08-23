@@ -326,14 +326,25 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
 
         sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
 
+        description = (series_info.description if series_info else "") or ""
+        author = (series_info.author if series_info else "") or ""
+        genres = series_info.genres if series_info and series_info.genres else []
+        genre = ", ".join(genres) if genres else "General"
+
         return {
             "success": True,
             "series_title": series_title,
             "url": url,
+            "description": description,
+            "author": author,
+            "genre": genre,
+            "cover_image": cover_image,
             "series": {
                 "title": series_title,
-                "author": series_info.author if series_info else "",
-                "genre": series_info.genres[0] if series_info and series_info.genres else "General",
+                "author": author,
+                "genre": genre,
+                "genres": genres,
+                "description": description,
                 "cover_image": cover_image,
                 "url": url
             },
