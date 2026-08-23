@@ -4,7 +4,6 @@ import DashboardStats from "@/features/app_dashboard/components/DashboardStats";
 import DashboardQuickLinks from "@/features/app_dashboard/components/DashboardQuickLinks";
 import DashboardProjectSection from "@/features/app_dashboard/components/DashboardProjectSection";
 import DashboardActivityFeed from "@/features/app_dashboard/components/DashboardActivityFeed";
-import DashboardAIPipeline from "@/features/app_dashboard/components/DashboardAIPipeline";
 import DashboardSidebar from "@/features/app_dashboard/components/DashboardSidebar";
 import useDashboardPage, {
   Project,
@@ -85,9 +84,7 @@ export default function DashboardPage() {
             onSaveRename={saveProjectName}
           />
 
-          <DashboardActivityFeed analytics={analytics} />
-
-          <DashboardAIPipeline />
+          <DashboardActivityFeed analytics={analytics} projects={projects} />
         </div>
 
         <div className="lg:col-span-4">
