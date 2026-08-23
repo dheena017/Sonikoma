@@ -179,28 +179,17 @@ const AIOptimizerPage = React.memo(
     return (
       <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
         {/* PAGE HERO HEADER */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-neutral-850 pb-5">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/30">
-              <Sliders className="h-6 w-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                  VISUAL STUDIO
-                </span>
-                <span className="text-xs text-neutral-400 font-mono">
-                  • {panels.length} active panels
-                </span>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                Video Optimizer
-              </h1>
-              <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                AI-driven video metadata, chapter splitters, shorts script
-                generators, and sound direction.
-              </p>
-            </div>
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-white/5 pb-6">
+          <div className="space-y-2 max-w-2xl text-left">
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+              Video{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
+                Optimizer
+              </span>
+            </h1>
+            <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
+              AI-driven video metadata, chapter splitters, shorts script generators, and sound direction.
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
@@ -210,7 +199,7 @@ const AIOptimizerPage = React.memo(
             {/* Quick Copy YouTube Package Button */}
             <button
               onClick={handleCopyAllPackage}
-              className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-850 text-purple-300 hover:text-white rounded-xl border border-purple-500/30 text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+              className="px-4 py-2.5 bg-neutral-900/80 hover:bg-neutral-800 text-purple-300 hover:text-white rounded-2xl border border-purple-500/30 text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md"
             >
               {copiedAll ? (
                 <Check className="w-3.5 h-3.5 text-emerald-400" />

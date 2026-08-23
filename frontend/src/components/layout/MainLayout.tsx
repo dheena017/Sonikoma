@@ -634,13 +634,7 @@ export default function MainLayout(props: MainLayoutProps) {
           notificationsMuted={notificationsMuted}
         />
 
-        {/* Dynamic Page Transfer Laser Progress Bar */}
-        <div
-          key={`route-laser-${currentPath}`}
-          className="fixed top-16 left-0 right-0 h-[2px] z-50 pointer-events-none overflow-hidden"
-        >
-          <div className="h-full bg-gradient-to-r from-purple-500 via-indigo-400 to-cyan-400 animate-route-bar" />
-        </div>
+
 
         {/* Scrollable Main Children Page Area */}
         <main

@@ -672,44 +672,17 @@ const AdminDashboardPage = React.memo(
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/5 pb-5">
           <div className="space-y-2.5 max-w-2xl text-left">
             {/* Breadcrumbs */}
-            <div className="flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
-              <button
-                type="button"
-                onClick={() => navigateTo("/dashboard")}
-                className="px-2.5 py-0.5 rounded-md bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
-              >
-                Main App
-              </button>
-              <span className="text-neutral-600 font-bold">&rsaquo;</span>
-              <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold">
-                System Administration
-              </span>
-              <span className="text-neutral-600 font-bold">&rsaquo;</span>
-              <span className="text-neutral-400">Root Telemetry Dashboard</span>
-            </div>
-
-            {/* Title & Badge */}
-            <div className="flex items-center gap-3 pt-0.5">
-              <div className="relative group">
-                <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-900/40 border border-purple-400/30 group-hover:scale-105 transition-transform">
-                  <ShieldCheck className="h-5 w-5 text-white" />
-                </div>
-                <span className="absolute -inset-0.5 rounded-2xl border border-purple-500/40 pointer-events-none animate-pulse" />
-              </div>
-
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-                  Root Admin Console
-                  <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase tracking-wider flex items-center gap-1">
-                    <Zap className="w-2.5 h-2.5 text-purple-400" />
-                    Superuser
-                  </span>
-                </h1>
-                <p className="text-xs text-neutral-400 font-sans mt-0.5">
-                  Monitor system health, database latency, active worker jobs,
-                  and user accounts.
-                </p>
-              </div>
+            {/* Title & Description */}
+            <div className="space-y-2">
+              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+                Admin{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
+                  Console
+                </span>
+              </h1>
+              <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
+                Monitor system health, database latency, active worker jobs, and user accounts.
+              </p>
             </div>
           </div>
 

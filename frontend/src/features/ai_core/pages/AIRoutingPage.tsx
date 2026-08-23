@@ -362,34 +362,27 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200 text-left">
-      {/* ── TOP HERO HEADER BANNER ────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl border border-neutral-850 bg-neutral-900/60 p-6 shadow-md">
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-600 to-indigo-500 opacity-90" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
-                <Shuffle className="w-4 h-4" /> AI Capability Routing
-              </h3>
-              <span className="text-[10px] font-mono font-bold bg-gradient-to-r from-purple-600 to-indigo-500 text-white px-2.5 py-0.5 rounded-full shadow-sm">
-                Strict Suitability Filter Active
-              </span>
-            </div>
+      {/* ── HEADER ────────────────────────────────────────────────────────── */}
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
+        <div className="space-y-2 max-w-2xl">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight font-sans">
+            Smart Model{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
+              Routing &amp; Cascades
+            </span>
+          </h1>
+          <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
+            Every comic task only routes through compatible models (Voice models for TTS, Vision models for OCR, Diffusion for Art).
+          </p>
+        </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-sans">
-              Smart Model Routing &amp; Cascades
-            </h1>
-            <p className="text-xs sm:text-sm text-neutral-400 max-w-2xl font-mono leading-relaxed">
-              Every comic task only displays compatible models (e.g. Voice models for TTS, Vision models for OCR, Diffusion for Art).
-            </p>
-          </div>
-
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium shadow-md shadow-purple-500/20 flex items-center gap-2 transition-all cursor-pointer font-sans shrink-0"
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-40"
           >
-            <Save className={`w-3.5 h-3.5 ${isSaving ? "animate-spin" : ""}`} />
+            <Save className={`w-4 h-4 ${isSaving ? "animate-spin" : ""}`} />
             <span>Save All Routing Rules</span>
           </button>
         </div>

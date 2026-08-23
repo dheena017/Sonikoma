@@ -93,33 +93,22 @@ const PanelAssistantPage = React.memo(
     return (
       <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
         {/* PAGE HERO HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-850 pb-5">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-2xl text-purple-400 shadow-lg shadow-purple-950/30">
-              <Languages className="h-6 w-6 animate-pulse" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 border border-purple-500/20">
-                  VISUAL STUDIO • TRANSLATION
-                </span>
-                <span className="text-xs text-purple-400 font-mono">
-                  • Panel #{selectedIdx + 1} Selected
-                </span>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                Translation Studio
-              </h1>
-              <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Multi-language dialogue translator and narrative editor per
-                comic panel frame.
-              </p>
-            </div>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-6">
+          <div className="space-y-2 max-w-2xl text-left">
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
+              Translation{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
+                Studio
+              </span>
+            </h1>
+            <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
+              Multi-language dialogue translator and narrative editor per comic panel frame.
+            </p>
           </div>
 
           <div className="flex items-center gap-3 self-start md:self-center">
-            <div className="px-3.5 py-1.5 rounded-full bg-neutral-950 border border-neutral-850 text-neutral-300 text-xs font-mono flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+            <div className="px-3.5 py-1.5 rounded-full bg-neutral-900 border border-white/10 text-neutral-300 text-xs font-mono flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
               <span>Total Panels: {safePanels.length}</span>
             </div>
           </div>

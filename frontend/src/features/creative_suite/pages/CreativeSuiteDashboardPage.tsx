@@ -187,25 +187,16 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   return (
     <div className="flex-1 w-full space-y-6 animate-fade-in text-left">
       {/* Welcome Hero Panel */}
-      <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-r from-purple-950/40 via-neutral-900/60 to-neutral-950/70 backdrop-blur-md p-6 sm:p-8 shadow-xl">
-        <div className="absolute top-0 right-0 p-8 opacity-15 pointer-events-none">
-          <Sparkles className="w-36 h-36 text-purple-400" />
-        </div>
-
-        <div className="relative z-10 max-w-xl">
-          <span className="px-3 py-1 bg-purple-500/15 border border-purple-500/30 text-[10px] text-purple-300 font-bold uppercase tracking-wider rounded-full font-mono mb-3 inline-block">
-            CREATOR STUDIO HUB
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white mt-1">
-            Welcome to the{" "}
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
+        <div className="space-y-2 max-w-2xl">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight">
+            Creative{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">
-              Creative Suite
+              Suite
             </span>
           </h1>
-          <p className="text-neutral-300 mt-2 text-xs leading-relaxed font-mono">
-            Fine-tune visual boundaries, compose orchestral backings, cast AI
-            narrators, translate speech dialogues, and evaluate engagement
-            ratings in a single location.
+          <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed max-w-xl">
+            Fine-tune visual boundaries, compose orchestral backings, cast AI narrators, and translate speech dialogues.
           </p>
         </div>
       </div>

@@ -98,29 +98,21 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200 text-left">
-      {/* ── TOP HERO HEADER BANNER ────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl border border-neutral-850 bg-neutral-900/60 p-6 shadow-md">
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-600 to-indigo-500 opacity-90" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4" /> Usage &amp; Cost Analytics
-              </h3>
-              <span className="text-[10px] font-mono font-bold bg-gradient-to-r from-purple-600 to-indigo-500 text-white px-2.5 py-0.5 rounded-full shadow-sm">
-                Real-Time Ledger
-              </span>
-            </div>
+      {/* ── HEADER ────────────────────────────────────────────────────────── */}
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
+        <div className="space-y-2 max-w-2xl">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight font-sans">
+            AI Token{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
+              Usage &amp; Spending
+            </span>
+          </h1>
+          <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
+            Track token consumption, response latencies, estimated costs in USD, and credit burn rates across all features.
+          </p>
+        </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-sans">
-              AI Token Usage &amp; Spending
-            </h1>
-            <p className="text-xs sm:text-sm text-neutral-400 max-w-2xl font-mono leading-relaxed">
-              Track token consumption, response latencies, estimated costs in USD, and credit burn rates across all features.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-3 shrink-0">
             {/* Timeframe Selector */}
             <div className="flex items-center bg-neutral-900 p-1 rounded-xl border border-neutral-800">
               {["24h", "7d", "30d", "all"].map((tf) => (
@@ -161,7 +153,6 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
             </div>
           </div>
         </div>
-      </div>
 
       {/* ── KPI METRICS CARDS ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

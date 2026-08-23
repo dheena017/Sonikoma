@@ -153,23 +153,26 @@ export default function SettingsAccountPage({
 
   return (
     <div className="w-full flex-1 text-neutral-200 py-6 max-w-5xl mx-auto space-y-8">
-      {/* Navigation & Header */}
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
+        <div className="space-y-2 max-w-2xl">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight font-sans">
+            Account{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
+              Settings
+            </span>
+          </h1>
+          <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
+            Manage your personal profile, security credentials, and active studio sessions.
+          </p>
+        </div>
+
         <button
           onClick={() => navigateTo("/dashboard")}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-xs font-bold text-neutral-400 hover:text-neutral-200 transition-all hover:bg-neutral-800 cursor-pointer"
+          className="px-4 py-2.5 rounded-2xl bg-neutral-900 border border-white/10 text-xs font-bold text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all flex items-center gap-2 cursor-pointer shadow-sm shrink-0"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Dashboard
         </button>
-
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-purple-600/10 border border-purple-500/20 text-purple-400">
-            <Settings className="w-5 h-5" />
-          </div>
-          <h1 className="text-xl font-black uppercase tracking-wider text-white">
-            Account Settings
-          </h1>
-        </div>
       </div>
 
       {/* Content Layout */}

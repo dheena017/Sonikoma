@@ -24,55 +24,46 @@ export default function ProjectsStats({
     <div className="space-y-6 mb-8">
       {/* 3 Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
-        <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/70 backdrop-blur-xl p-5 shadow-lg hover:border-purple-500/40 transition-all">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <div className="text-xs text-neutral-400 font-mono uppercase tracking-wider">
-                Total Projects
-              </div>
-              <div className="text-3xl font-black text-white tracking-tight">
-                {stats.totalProjects}
-              </div>
+        <div className="p-5 rounded-3xl bg-[#0e0f19]/90 backdrop-blur-2xl border border-white/[0.08] shadow-2xl flex items-center gap-4 hover:border-purple-500/40 transition-all group">
+          <div className="w-14 h-14 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <Film className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="text-3xl sm:text-4xl font-black text-white font-mono leading-none">
+              {stats.totalProjects}
             </div>
-            <div className="h-12 w-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-              <Film className="w-6 h-6" />
+            <div className="text-xs text-neutral-400 font-mono tracking-wide mt-1.5">
+              Total Projects
             </div>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-purple-500/40 via-purple-500/10 to-transparent" />
         </div>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/70 backdrop-blur-xl p-5 shadow-lg hover:border-emerald-500/40 transition-all">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <div className="text-xs text-neutral-400 font-mono uppercase tracking-wider">
-                Completed
-              </div>
-              <div className="text-3xl font-black text-white tracking-tight">
-                {stats.completedProjects}
-              </div>
+        <div className="p-5 rounded-3xl bg-[#0e0f19]/90 backdrop-blur-2xl border border-white/[0.08] shadow-2xl flex items-center gap-4 hover:border-emerald-500/40 transition-all group">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="text-3xl sm:text-4xl font-black text-white font-mono leading-none">
+              {stats.completedProjects}
             </div>
-            <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-              <CheckCircle2 className="w-6 h-6" />
+            <div className="text-xs text-neutral-400 font-mono tracking-wide mt-1.5">
+              Completed
             </div>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-emerald-500/40 via-emerald-500/10 to-transparent" />
         </div>
 
-        <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/70 backdrop-blur-xl p-5 shadow-lg hover:border-indigo-500/40 transition-all">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <div className="text-xs text-neutral-400 font-mono uppercase tracking-wider">
-                Total Panels Sliced
-              </div>
-              <div className="text-3xl font-black text-white tracking-tight">
-                {stats.totalPanels.toLocaleString()}
-              </div>
+        <div className="p-5 rounded-3xl bg-[#0e0f19]/90 backdrop-blur-2xl border border-white/[0.08] shadow-2xl flex items-center gap-4 hover:border-amber-500/40 transition-all group">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <BarChart2 className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="text-3xl sm:text-4xl font-black text-white font-mono leading-none">
+              {stats.totalPanels.toLocaleString()}
             </div>
-            <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-              <BarChart2 className="w-6 h-6" />
+            <div className="text-xs text-neutral-400 font-mono tracking-wide mt-1.5">
+              Total Panels Sliced
             </div>
           </div>
-          <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-indigo-500/40 via-indigo-500/10 to-transparent" />
         </div>
       </div>
 

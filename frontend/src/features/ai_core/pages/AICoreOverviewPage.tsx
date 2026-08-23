@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Play,
+  DollarSign,
 } from "lucide-react";
 
 interface AICoreOverviewPageProps {
@@ -67,72 +68,87 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
   return (
     <div className="space-y-6 animate-in fade-in duration-200 text-left">
       {/* ── TOP HERO HEADER BANNER ────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl border border-neutral-850 bg-neutral-900/60 p-6 shadow-md">
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-600 to-indigo-500 opacity-90" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4" /> AI Command Center
-              </h3>
-              <span className="text-[10px] font-mono font-bold bg-gradient-to-r from-purple-600 to-indigo-500 text-white px-2.5 py-0.5 rounded-full shadow-sm">
-                System Healthy
-              </span>
-            </div>
+      {/* ── HEADER ────────────────────────────────────────────────────────── */}
+      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
+        <div className="space-y-2 max-w-2xl">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight font-sans">
+            AI Command{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
+              Center
+            </span>
+          </h1>
+          <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
+            Unified control center for AI providers, live rate limits, token telemetry, and smart model routing.
+          </p>
+        </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-sans">
-              Centralized AI Dashboard
-            </h1>
-            <p className="text-xs sm:text-sm text-neutral-400 max-w-2xl font-mono leading-relaxed">
-              Your unified control center for all 11 AI providers, live rate limits, token telemetry, and smart model routing.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => handleNav("/ai-core/api-keys")}
-              className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium shadow-md shadow-purple-500/20 flex items-center gap-2 transition-all font-sans cursor-pointer"
-            >
-              <Key className="w-3.5 h-3.5" />
-              <span>Manage API Keys</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => handleNav("/ai-core/api-keys")}
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+          >
+            <Key className="w-4 h-4" />
+            <span>Manage API Keys</span>
+          </button>
         </div>
       </div>
 
       {/* ── QUICK STATS ───────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-          <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Active Providers</span>
-          <p className="text-2xl font-black text-white font-mono">
-            {activeProvidersCount} <span className="text-neutral-500 text-sm">/ {providers.length || 10}</span>
-          </p>
-          <span className="text-[10px] text-purple-400 font-mono">Live Probes Active</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-5 rounded-2xl bg-neutral-900/60 backdrop-blur-xl border border-white/10 shadow-xl flex items-center gap-4 hover:border-purple-500/40 transition-all group">
+          <div className="p-3.5 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/30 shrink-0 group-hover:scale-105 transition-transform">
+            <Cpu className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="text-3xl font-black text-white font-mono leading-none">
+              {activeProvidersCount} <span className="text-neutral-500 text-sm font-normal">/ {providers.length || 10}</span>
+            </div>
+            <div className="text-xs text-neutral-400 font-mono tracking-wide mt-1.5">
+              Active Providers
+            </div>
+          </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-          <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Available Credits</span>
-          <p className="text-2xl font-black text-purple-400 font-mono flex items-center gap-1">
-            <Coins className="w-5 h-5" />
-            {availableCredits.toLocaleString()}
-          </p>
-          <span className="text-[10px] text-emerald-400 font-mono">Ready to Generate</span>
+        <div className="p-5 rounded-2xl bg-neutral-900/60 backdrop-blur-xl border border-white/10 shadow-xl flex items-center gap-4 hover:border-amber-500/40 transition-all group">
+          <div className="p-3.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 text-amber-400 shrink-0 group-hover:scale-105 transition-transform">
+            <Coins className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="text-3xl font-black text-amber-400 font-mono leading-none">
+              {availableCredits.toLocaleString()}
+            </div>
+            <div className="text-xs text-neutral-400 font-mono tracking-wide mt-1.5">
+              Available Credits
+            </div>
+          </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-          <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Tokens Processed</span>
-          <p className="text-2xl font-black text-white font-mono">
-            {totalTokens.toLocaleString()}
-          </p>
-          <span className="text-[10px] text-neutral-400 font-mono">Total Lifetime Usage</span>
+        <div className="p-5 rounded-2xl bg-neutral-900/60 backdrop-blur-xl border border-white/10 shadow-xl flex items-center gap-4 hover:border-emerald-500/40 transition-all group">
+          <div className="p-3.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shrink-0 group-hover:scale-105 transition-transform">
+            <Activity className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="text-3xl font-black text-white font-mono leading-none">
+              {totalTokens.toLocaleString()}
+            </div>
+            <div className="text-xs text-neutral-400 font-mono tracking-wide mt-1.5">
+              Tokens Processed
+            </div>
+          </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-          <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Total Spend ($ USD)</span>
-          <p className="text-2xl font-black text-emerald-400 font-mono">
-            ${Number(estimatedCost).toFixed(4)}
-          </p>
-          <span className="text-[10px] text-neutral-400 font-mono">Estimated Cost</span>
+        <div className="p-5 rounded-2xl bg-neutral-900/60 backdrop-blur-xl border border-white/10 shadow-xl flex items-center gap-4 hover:border-cyan-500/40 transition-all group">
+          <div className="p-3.5 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shrink-0 group-hover:scale-105 transition-transform">
+            <DollarSign className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="text-3xl font-black text-cyan-400 font-mono leading-none">
+              ${Number(estimatedCost).toFixed(4)}
+            </div>
+            <div className="text-xs text-neutral-400 font-mono tracking-wide mt-1.5">
+              Total Spend ($ USD)
+            </div>
+          </div>
         </div>
       </div>
 
