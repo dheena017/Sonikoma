@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Shield, ArrowLeft } from "lucide-react";
 import AdminHeaderPage from "@/features/system_admin/pages/AdminHeaderPage";
 import AdminMiniSidebar from "@/features/system_admin/components/AdminMiniSidebar";
 import AdminSidebar from "@/features/system_admin/components/AdminSidebar";
@@ -163,18 +162,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
             {/* Subpage Header for non-overview admin tabs */}
             {!isOverview && (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5 mb-6">
-                <div className="flex items-center gap-3.5">
-                  <div className="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 shrink-0">
-                    <Shield className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                      {currentTabInfo.title}
-                    </h1>
-                    <p className="text-xs text-neutral-400 mt-0.5">
-                      {currentTabInfo.desc}
-                    </p>
-                  </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                    {currentTabInfo.title}
+                  </h1>
+                  <p className="text-xs text-neutral-400 mt-0.5">
+                    {currentTabInfo.desc}
+                  </p>
                 </div>
               </div>
             )}

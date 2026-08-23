@@ -40,38 +40,6 @@ export interface VideoPreviewHeaderProps {
   onZoomReset?: () => void;
 }
 
-const getPreviewDisplayLabel = (
-  videoUrl: string | null,
-  seriesTitle?: string,
-  chapterTitle?: string,
-  chapterNumber?: string | number
-) => {
-  const parts: string[] = [];
-  if (seriesTitle && seriesTitle.trim()) {
-    parts.push(seriesTitle.trim());
-  }
-  if (chapterTitle && chapterTitle.trim()) {
-    let cleanChapter = chapterTitle.trim();
-    // Normalize repeated "Episode Episode" strings
-    cleanChapter = cleanChapter.replace(/^(episode\s+)+/i, "Episode ");
-    parts.push(cleanChapter);
-  } else if (chapterNumber) {
-    parts.push(`Episode ${chapterNumber}`);
-  }
-
-  if (parts.length > 0) {
-    return parts.join(" · ").toUpperCase();
-  }
-
-  if (!videoUrl) return "VIDEO PREVIEW PLAYER";
-  const sanitizedUrl = videoUrl.split("?")[0];
-  const fileName = sanitizedUrl.split("/").filter(Boolean).pop() ?? "";
-  const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
-  return (
-    nameWithoutExt.replace(/[_-]+/g, " ").trim() || "VIDEO PREVIEW PLAYER"
-  ).toUpperCase();
-};
-
 const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   videoUrl,
   musicTheme,
@@ -99,12 +67,6 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   onZoomOut,
   onZoomReset,
 }) => {
-  const previewLabel = getPreviewDisplayLabel(
-    videoUrl,
-    seriesTitle,
-    chapterTitle,
-    chapterNumber
-  );
   const isFloating = variant !== "embedded";
 
   const leftBlock = (
@@ -114,12 +76,6 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <h3
-            className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate"
-            title={previewLabel}
-          >
-            {previewLabel}
-          </h3>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[10px] font-bold text-purple-300 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
             Program Monitor
@@ -150,27 +106,24 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         <button
           type="button"
           onClick={() => setActivePreviewTab?.("timeline")}
-          className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${
-            activePreviewTab === "timeline"
+          className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${activePreviewTab === "timeline"
               ? "bg-purple-600/30 border-purple-500/60 text-white shadow-[0_0_10px_rgba(168,85,247,0.2)]"
               : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
-          }`}
+            }`}
         >
           <Layout
-            className={`h-3 w-3 ${
-              activePreviewTab === "timeline"
+            className={`h-3 w-3 ${activePreviewTab === "timeline"
                 ? "text-purple-400"
                 : "text-neutral-500"
-            }`}
+              }`}
           />
           <span>Storyboard Live</span>
           {panelsCount > 0 && (
             <span
-              className={`text-[8px] px-1 py-0.2 rounded font-black border ${
-                activePreviewTab === "timeline"
+              className={`text-[8px] px-1 py-0.2 rounded font-black border ${activePreviewTab === "timeline"
                   ? "bg-purple-500/30 text-purple-200 border-purple-500/40"
                   : "bg-neutral-900 text-neutral-500 border-neutral-800"
-              }`}
+                }`}
             >
               {panelsCount}p
             </span>
@@ -182,26 +135,23 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         <button
           type="button"
           onClick={() => setActivePreviewTab?.("editor")}
-          className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${
-            activePreviewTab === "editor"
+          className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${activePreviewTab === "editor"
               ? "bg-indigo-600/30 border-indigo-500/60 text-white shadow-[0_0_10px_rgba(99,102,241,0.2)]"
               : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
-          }`}
+            }`}
         >
           <Sparkles
-            className={`h-3 w-3 ${
-              activePreviewTab === "editor"
+            className={`h-3 w-3 ${activePreviewTab === "editor"
                 ? "text-indigo-400"
                 : "text-neutral-500"
-            }`}
+              }`}
           />
           <span>Video Editor Live</span>
           <span
-            className={`text-[8px] px-1 py-0.2 rounded font-black border ${
-              activePreviewTab === "editor"
+            className={`text-[8px] px-1 py-0.2 rounded font-black border ${activePreviewTab === "editor"
                 ? "bg-indigo-500/25 text-indigo-200 border-indigo-500/40"
                 : "bg-neutral-900 text-neutral-500 border-neutral-800"
-            }`}
+              }`}
           >
             CANVAS
           </span>
@@ -211,26 +161,23 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
       <button
         type="button"
         onClick={() => setActivePreviewTab?.("video")}
-        className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${
-          activePreviewTab === "video"
+        className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${activePreviewTab === "video"
             ? "bg-emerald-600/25 border-emerald-500/50 text-white shadow-[0_0_10px_rgba(16,185,129,0.2)]"
             : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
-        }`}
+          }`}
       >
         <Video
-          className={`h-3 w-3 ${
-            activePreviewTab === "video"
+          className={`h-3 w-3 ${activePreviewTab === "video"
               ? "text-emerald-400"
               : "text-neutral-500"
-          }`}
+            }`}
         />
         <span>Final Video</span>
         <span
-          className={`text-[8px] px-1 py-0.2 rounded font-black border ${
-            activePreviewTab === "video"
+          className={`text-[8px] px-1 py-0.2 rounded font-black border ${activePreviewTab === "video"
               ? "bg-emerald-500/25 text-emerald-200 border-emerald-500/40"
               : "bg-neutral-900 text-neutral-500 border-neutral-800"
-          }`}
+            }`}
         >
           MP4
         </span>
@@ -278,11 +225,10 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
                   ? "Not enough credits to export"
                   : "Export final video"
               }
-              className={`relative overflow-hidden h-7 px-3.5 rounded-lg font-black text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border shrink-0 ${
-                !hasEnoughCredits
+              className={`relative overflow-hidden h-7 px-3.5 rounded-lg font-black text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border shrink-0 ${!hasEnoughCredits
                   ? "bg-neutral-900/50 text-neutral-600 cursor-not-allowed border-neutral-800"
                   : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-white/10 cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
-              }`}
+                }`}
             >
               <Sparkles className="h-3 w-3 text-purple-200 shrink-0" />
               <span>{!hasEnoughCredits ? "No Credits" : "Export Video"}</span>

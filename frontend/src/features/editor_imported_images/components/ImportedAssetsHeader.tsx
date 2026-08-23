@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Images,
   LayoutGrid,
   Rows,
   Save,
@@ -15,6 +14,7 @@ import {
   Trash2,
   X,
   RefreshCw,
+  Images,
 } from "lucide-react";
 import EditorHeaderFrame from "@/features/editor_studio/components/EditorHeaderFrame";
 
@@ -151,10 +151,10 @@ export default function ImportedAssetsHeader({
               {isBatchCropping && batchProgress
                 ? `Cropping ${batchProgress.current}/${batchProgress.total}`
                 : isCleaningBubbles && cleanProgress
-                ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
-                : isBatchMerging
-                ? "Stitching..."
-                : "Processing..."}
+                  ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
+                  : isBatchMerging
+                    ? "Stitching..."
+                    : "Processing..."}
             </span>
           </div>
         )}
@@ -292,11 +292,10 @@ export default function ImportedAssetsHeader({
         type="button"
         onClick={() => setViewLayout("scroll")}
         title="Horizontal Scroll View"
-        className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-          viewLayout === "scroll"
+        className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${viewLayout === "scroll"
             ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(52,211,153,0.4)]"
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-        }`}
+          }`}
       >
         <Rows className="w-3.5 h-3.5" />
         <span>Scroll</span>
@@ -305,11 +304,10 @@ export default function ImportedAssetsHeader({
         type="button"
         onClick={() => setViewLayout("grid")}
         title="Grid View"
-        className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-          viewLayout === "grid"
+        className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${viewLayout === "grid"
             ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(52,211,153,0.4)]"
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-        }`}
+          }`}
       >
         <LayoutGrid className="w-3.5 h-3.5" />
         <span>Grid</span>
@@ -358,11 +356,10 @@ export default function ImportedAssetsHeader({
               ? "Show Episode Navigator"
               : "Hide Episode Navigator"
           }
-          className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
-            isEpisodeCollapsed
+          className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${isEpisodeCollapsed
               ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-emerald-300 hover:border-emerald-700"
               : "bg-emerald-600/20 border-emerald-600/50 text-emerald-300 hover:bg-emerald-600/30"
-          }`}
+            }`}
         >
           {isEpisodeCollapsed ? (
             <>

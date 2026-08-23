@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Sparkles, Square } from "lucide-react";
+import { Square } from "lucide-react";
 import CreativeSuiteHeader from "@/features/creative_suite/components/CreativeSuiteHeader";
 import CreativeSuiteMiniSidebar from "@/features/creative_suite/components/CreativeSuiteMiniSidebar";
 import CreativeSuiteSidebar from "@/features/creative_suite/components/CreativeSuiteSidebar";
@@ -65,18 +65,13 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
 
   const renderHeader = () => (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5 mb-6">
-      <div className="flex items-center gap-3.5">
-        <div className="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 shrink-0">
-          <Sparkles className="h-5 w-5" />
-        </div>
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Creative Tools Workspace
-          </h1>
-          <p className="text-xs text-neutral-400 mt-0.5">
-            Access AI-assisted video editing, neural voice acting, translations, and publisher tools
-          </p>
-        </div>
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          Creative Tools Workspace
+        </h1>
+        <p className="text-xs text-neutral-400 mt-0.5">
+          Access AI-assisted video editing, neural voice acting, translations, and publisher tools
+        </p>
       </div>
 
       {activeSkillRequests > 0 && (

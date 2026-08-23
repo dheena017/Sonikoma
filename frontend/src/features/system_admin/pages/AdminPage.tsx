@@ -364,18 +364,13 @@ const AdminPage = React.memo(
       <div className="w-full max-w-7xl mx-auto py-6 space-y-6 animate-fade-in relative z-10">
         {!isOverview && (
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
-            <div className="flex items-center gap-3.5">
-              <div className="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 shrink-0">
-                <ShieldAlert className="h-5 w-5" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                  {currentTabInfo.title}
-                </h1>
-                <p className="text-xs text-neutral-400 mt-0.5">
-                  {currentTabInfo.desc}
-                </p>
-              </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                {currentTabInfo.title}
+              </h1>
+              <p className="text-xs text-neutral-400 mt-0.5">
+                {currentTabInfo.desc}
+              </p>
             </div>
           </div>
         )}
