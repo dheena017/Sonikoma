@@ -146,7 +146,6 @@ export function useVideoPreviewGeneration({
       manhuaplus: "Manhua Plus",
       manhwaclan: "Manhwa Clan",
       "1stkissmanga": "1st Kiss Manga",
-      manganato: "Manganato",
       mangakakalot: "Mangakakalot",
       batoto: "Bato.to",
       custom: "Direct Image / Custom URL",
@@ -173,11 +172,11 @@ export function useVideoPreviewGeneration({
     })();
 
     const allowedHosts: Record<string, string[]> = {
-      webtoons: ["webtoons.com", "webtoon.com", "naver.com"],
+      webtoons: ["webtoons.com", "webtoon.com"],
       webcomicsapp: ["webcomicsapp.com"],
-      mangadex: ["mangadex.org", "mangadex.com", "mangadex.cc"],
+      mangadex: ["mangadex.org", "mangadex.com"],
       toomics: ["toomics.com"],
-      linewebtoon: ["webtoon.com", "webtoons.com", "naver.com"],
+      linewebtoon: ["webtoon.com", "webtoons.com"],
       asurascans: ["asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com"],
       manhuato: ["manhuato.com"],
       reaperscans: ["reaperscans.com"],
@@ -195,7 +194,6 @@ export function useVideoPreviewGeneration({
       manhuaplus: ["manhuaplus.com", "manhuaplus.org"],
       manhwaclan: ["manhwaclan.com"],
       "1stkissmanga": ["1stkissmanga.io", "1stkissmanga.com", "1stkissmanga.me"],
-      manganato: ["manganato.com", "readmanganato.com", "chapmanganato.to", "chapmanganato.com"],
       mangakakalot: ["mangakakalot.com", "mangakakalot.tv", "readmangakakalot.com"],
       batoto: ["bato.to", "mangatoto.com", "battwo.com", "batocomic.com", "readtoto.com"],
       custom: [],

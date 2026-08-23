@@ -134,7 +134,24 @@ class ScrapeContext:
                 if not img.proxy_url:
                     img.proxy_url = f"/api/proxy-image?url={quote(img.url)}&referer={quote(canonical_ref)}"
 
+        # Ensure series and chapter cover images are populated with real comic art (ignoring logos/branding/avatars)
+        if self.validated_images:
+            is_valid_art = lambda u: bool(u) and not u.endswith("/") and not any(k in u.lower() for k in ("gravatar", "avatar", "logo", "theme", "about", "continued", "banner"))
+            real_comic_panels = [img.url for img in self.validated_images if is_valid_art(img.url)]
+            best_cover_art = real_comic_panels[0] if real_comic_panels else self.validated_images[0].url
+
+            if not is_valid_art(self.series_info.cover_image):
+                self.series_info.cover_image = best_cover_art
+            if not is_valid_art(self.series_info.cover):
+                self.series_info.cover = self.series_info.cover_image or best_cover_art
+            if not is_valid_art(self.chapter_info.thumbnail):
+                self.chapter_info.thumbnail = self.series_info.cover_image or best_cover_art
+
+
+
         new_count = sum(1 for img in self.validated_images if img.is_new)
+
+
 
         diagnostics = ScrapeDiagnostics(
             method=self.level_history[-1].level_name if self.level_history else "unknown",

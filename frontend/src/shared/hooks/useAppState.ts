@@ -5,7 +5,6 @@ import { createFetchWithInterceptor } from "@/api/client/fetchWithInterceptor";
 import * as api from "@/api";
 import { Notification, NotificationType } from "@/features/app_notification";
 import { ErrorModalDetail } from "@/shared/ui/modal/ErrorModal";
-import { parseWebtoonUrl } from "@/shared/utils/url";
 import { useAudioFeedback } from "@/features/editor_audio/hooks/useAudioFeedback";
 import { LogEntry, normalizeLog } from "@/types/logs";
 import { useProjectStore, WorkspaceContext } from "@/store/useProjectStore";
@@ -564,18 +563,6 @@ export function useAppState() {
       setSeriesCoverImage("");
       setSeriesSynopsis("");
       return;
-    }
-    try {
-      const parsed = parseWebtoonUrl(targetUrl);
-      if (parsed) {
-        setSeriesTitle(parsed.title || "");
-        setChapterNumber(parsed.chapterNumber || "");
-        setChapterTitle(parsed.chapterTitle || "");
-        setScrapedGenre(parsed.genre || "general");
-        setScrapedTitle(parsed.title || "");
-      }
-    } catch {
-      // ignore
     }
   }, [targetUrl, projectId]);
 

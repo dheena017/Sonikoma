@@ -13,6 +13,7 @@ import asyncio
 import logging
 from typing import Dict, Optional, Any, List, Tuple
 from urllib.parse import urlparse
+from .scraper_constants import ALLOWED_DOMAINS
 
 logger = logging.getLogger("sonikoma.services.scraper.limiter")
 
@@ -105,11 +106,77 @@ rate_limiter = DomainRateLimiter.get_instance()
 
 class DomainBlockManager:
     """
-    100% In-Memory Domain & URL Pattern Blocking Registry.
-    Guarantees zero database overhead for security filtering and exclusion.
+    100% In-Memory Domain Whitelist & Access Controller.
+    Enforces strict access control: only domains in ALLOWED_DOMAINS (or registered by user) are permitted.
+    All other domains are blocked automatically without needing a pre-written blacklist.
     """
 
     _blocked_domains: Dict[str, Dict[str, Any]] = {}
+
+    _allowed_domains: Dict[str, Dict[str, Any]] = {
+        d: {
+            "domain": d,
+            "registered_at": 0.0,
+            "source": "System Supported Platform"
+        }
+        for d in ALLOWED_DOMAINS
+    }
+
+    @classmethod
+    def register_allowed_domain(cls, domain_or_url: str, source: str = "User Registered") -> str:
+        """Registers a comic domain into the allowed whitelist."""
+        domain = domain_or_url.strip().lower()
+        if "://" in domain:
+            parsed = urlparse(domain)
+            domain = (parsed.netloc or parsed.path).lower().split(":")[0]
+        if domain.startswith("www."):
+            domain = domain[4:]
+
+        cls._allowed_domains[domain] = {
+            "domain": domain,
+            "registered_at": time.time(),
+            "source": source
+        }
+        if domain in cls._blocked_domains:
+            del cls._blocked_domains[domain]
+        logger.info(f"[DomainBlockManager] Domain registered to allowlist: {domain}")
+        return domain
+
+    @classmethod
+    def unregister_allowed_domain(cls, domain_or_url: str) -> bool:
+        """Removes a comic domain from the allowed whitelist."""
+        domain = domain_or_url.strip().lower()
+        if "://" in domain:
+            parsed = urlparse(domain)
+            domain = (parsed.netloc or parsed.path).lower().split(":")[0]
+        if domain.startswith("www."):
+            domain = domain[4:]
+
+        if domain in cls._allowed_domains:
+            del cls._allowed_domains[domain]
+            return True
+        return False
+
+    @classmethod
+    def is_registered(cls, url_or_domain: str) -> bool:
+        """Checks if a domain is present in the registered comic whitelist."""
+        if not url_or_domain:
+            return False
+        domain = url_or_domain.strip().lower()
+        if "://" in domain:
+            parsed = urlparse(domain)
+            domain = (parsed.netloc or parsed.path).lower().split(":")[0]
+        if domain.startswith("www."):
+            domain = domain[4:]
+
+        for allowed in cls._allowed_domains.keys():
+            if domain == allowed or domain.endswith(f".{allowed}"):
+                return True
+        return False
+
+    @classmethod
+    def list_allowed(cls) -> List[Dict[str, Any]]:
+        return list(cls._allowed_domains.values())
 
     @classmethod
     def block_domain(cls, domain_or_pattern: str, reason: Optional[str] = None) -> str:
@@ -146,7 +213,7 @@ class DomainBlockManager:
     @classmethod
     def is_blocked(cls, url_or_domain: str) -> bool:
         if not url_or_domain:
-            return False
+            return True
         domain = url_or_domain.strip().lower()
         if "://" in domain:
             parsed = urlparse(domain)
@@ -154,15 +221,29 @@ class DomainBlockManager:
         if domain.startswith("www."):
             domain = domain[4:]
 
+        # 1. SSRF & Local network checks
+        if domain in {"localhost", "127.0.0.1", "0.0.0.0", "::1"} or domain.endswith(".local") or domain.endswith(".internal"):
+            return True
+        if domain.startswith("192.168.") or domain.startswith("10.") or domain.startswith("172.16.") or domain.startswith("172.31."):
+            return True
+        if "." not in domain:
+            return True
+
+        # 2. Explicitly blocked list
         for blocked in cls._blocked_domains.keys():
             if domain == blocked or domain.endswith(f".{blocked}"):
                 return True
+
+        # 3. Whitelist check: only registered comic domains are allowed
+        if not cls.is_registered(domain):
+            return True
+
         return False
 
     @classmethod
     def is_blocked_with_reason(cls, url_or_domain: str) -> Tuple[bool, Optional[str]]:
         if not url_or_domain:
-            return False, None
+            return True, "Empty URL"
         domain = url_or_domain.strip().lower()
         if "://" in domain:
             parsed = urlparse(domain)
@@ -170,9 +251,21 @@ class DomainBlockManager:
         if domain.startswith("www."):
             domain = domain[4:]
 
+        # 1. SSRF & Local network checks
+        if domain in {"localhost", "127.0.0.1", "0.0.0.0", "::1"} or domain.endswith(".local") or domain.endswith(".internal") or "." not in domain:
+            return True, "Restricted by SSRF policy (Localhost / Private Network)"
+        if domain.startswith("192.168.") or domain.startswith("10.") or domain.startswith("172.16.") or domain.startswith("172.31."):
+            return True, "Restricted by SSRF policy (Private IP range)"
+
+        # 2. Explicitly blocked list
         for blocked, info in cls._blocked_domains.items():
             if domain == blocked or domain.endswith(f".{blocked}"):
-                return True, info.get("reason", "Domain is blocked")
+                return True, info.get("reason", "Domain is blocked by policy")
+
+        # 3. Whitelist check
+        if not cls.is_registered(domain):
+            return True, f"Domain '{domain}' is not registered in the comic platform allowlist"
+
         return False, None
 
     @classmethod

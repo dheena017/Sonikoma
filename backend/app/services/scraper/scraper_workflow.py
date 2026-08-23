@@ -23,6 +23,7 @@ from urllib.parse import urljoin, urlparse, parse_qs, quote
 from .url_utils import UrlNormalizer, SiteAnalyzer, UniversalUrlSeparator
 from .adapters.site_adapter_registry import AdapterRegistry
 from .adapters.generic_site_adapter import GenericAdaptiveAdapter
+from .domain_rate_limiter import domain_block_manager
 
 try:
     from database.engine import get_db_connection
@@ -129,6 +130,19 @@ async def scrape_series_episodes(
             "success": False,
             "error": "No series URL or title_no provided",
             "series_title": "Unknown",
+            "episodes": [],
+            "total_episodes": 0
+        }
+
+    # 0. Check Domain Blocklist Immediately
+    if domain_block_manager.is_blocked(raw_input):
+        domain = urlparse(raw_input).netloc or raw_input
+        logger.warning(f"[SeriesWorkflow] Rejecting blocked domain: {domain}")
+        return {
+            "success": False,
+            "error": f"This domain ({domain}) is currently in the blocked exclusion list.",
+            "series_title": "Blocked Domain",
+            "url": raw_input,
             "episodes": [],
             "total_episodes": 0
         }
@@ -316,7 +330,7 @@ async def batch_scrape_chapters_with_checkpoint(
             else:
                 failed.append({
                     "url": chap_url,
-                    "error": res.error.message if res.error else "Unknown scrape failure"
+                    "error": res.error_message or "Unknown scrape failure"
                 })
         except Exception as e:
             failed.append({"url": chap_url, "error": str(e)})

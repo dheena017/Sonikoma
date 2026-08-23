@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ArrowRight, BookOpen, X, Clock, Eye, Star } from "lucide-react";
-import { getProxiedImageUrl } from "@/shared/utils/url";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import type { FavoriteSeries } from "../utils/FavoritesManager";
 import { FavoritesManager } from "../utils/FavoritesManager";
 
@@ -16,6 +16,15 @@ export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({
   onRemove,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imgSrc, setImgSrc] = useState<string>(() =>
+    getProxiedImageUrl(series.cover_image, series.url)
+  );
+
+  React.useEffect(() => {
+    setImageError(false);
+    setImgSrc(getProxiedImageUrl(series.cover_image, series.url));
+  }, [series.cover_image, series.url]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -68,11 +77,18 @@ export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({
 
       {/* Cover Image */}
       <div className="flex items-start gap-3 mb-2">
-        {series.cover_image ? (
+        {imgSrc && !imageError ? (
           <img
-            src={getProxiedImageUrl(series.cover_image, series.url)}
+            src={imgSrc}
             alt={series.title}
             className="w-16 h-20 object-cover rounded-lg border border-neutral-700/60 flex-shrink-0 group-hover:scale-105 transition-transform shadow-md"
+            onError={() => {
+              if (imgSrc.includes("/api/proxy-image") && series.cover_image) {
+                setImgSrc(series.cover_image);
+              } else {
+                setImageError(true);
+              }
+            }}
           />
         ) : (
           <div className="w-16 h-20 bg-gradient-to-br from-purple-900/40 to-purple-950/60 border border-purple-700/40 rounded-lg flex items-center justify-center text-purple-400 flex-shrink-0 shadow-md">

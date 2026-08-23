@@ -31,7 +31,7 @@ import PanelCard from "./PanelCard";
 import ChapterScraperDeckEmptyState from "./ImportedImagesDeckEmptyState";
 import ImportedAssetsHeader from "./ImportedAssetsHeader";
 
-import { parseWebtoonUrl, getSourceName, getProxiedImageUrl } from "@/utils";
+import { getSourceName, getProxiedImageUrl } from "@/utils";
 import { updateSelection } from "@/shared/utils/selection";
 import { EpisodeRatingDisplay } from "@/features/workspace_scraper/episode-scraper/components/EpisodeRatingDisplay";
 import { ExtractionSkeletonCard } from "@/shared/ui/loading/ExtractionSkeletonCard";
@@ -295,43 +295,24 @@ const ChapterScraperDeck = React.memo(
     };
 
     const getZipFilename = () => {
-      if (!targetUrl || !targetUrl.trim()) {
-        return "webtoon_frames.zip";
+      const proj = useProjectStore.getState().activeProjectData?.project;
+      const source = targetUrl ? getSourceName(targetUrl) : "";
+      const title = proj?.title || "";
+      const ep = proj?.episode || "";
+      const parts: string[] = [];
+
+      if (source && source.toLowerCase() !== "custom source") {
+        parts.push(makeSafeFilename(source));
       }
-
-      try {
-        const parsed = parseWebtoonUrl(targetUrl);
-        const source = getSourceName(targetUrl);
-        const parts: string[] = [];
-
-        if (source && source.toLowerCase() !== "custom source") {
-          parts.push(makeSafeFilename(source));
-        }
-
-        if (parsed.title && parsed.title.trim()) {
-          parts.push(makeSafeFilename(parsed.title.trim()));
-        }
-
-        if (parsed.chapterNumber && parsed.chapterNumber.trim()) {
-          parts.push(
-            `Chapter_${makeSafeFilename(parsed.chapterNumber.trim())}`
-          );
-        }
-
-        if (parsed.chapterTitle && parsed.chapterTitle.trim()) {
-          parts.push(makeSafeFilename(parsed.chapterTitle.trim()));
-        }
-
-        if (parts.length > 0) {
-          return `${parts.join("_")}.zip`;
-        }
-      } catch (err) {
-        console.error(
-          "[ChapterScraperDeck] Failed to parse targetUrl for ZIP filename:",
-          err
-        );
+      if (title && title.trim()) {
+        parts.push(makeSafeFilename(title.trim()));
       }
-
+      if (ep && ep.trim()) {
+        parts.push(makeSafeFilename(ep.trim()));
+      }
+      if (parts.length > 0) {
+        return `${parts.join("_")}.zip`;
+      }
       return "webtoon_frames.zip";
     };
 

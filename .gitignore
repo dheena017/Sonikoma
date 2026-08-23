@@ -9,24 +9,33 @@ node_modules/
 venv/
 env/
 ENV/
+env.bak/
+venv.bak/
 
 # ── Build & Production Artifacts ─────────────────────────────────────────────
 dist/
 dist-ssr/
 build/
 out/
+.next/
+.nuxt/
 *.tsbuildinfo
 
 # ── Environment & Secret Credentials ─────────────────────────────────────────
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
 !.env.example
 !.env.template
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
 client_secrets.json
-backend/data/client_secrets.json
+**/client_secrets.json
+service_account.json
+**/service_account.json
 
 # ── Database & Persistent Media Storage (data/ & backend/data/) ───────────────
 data/
@@ -36,6 +45,10 @@ backend/data/
 sonikoma-test-*
 sonikoma-credits-test-*
 *.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.db-journal
 *.db-wal
 *.db-shm
 data/media/
@@ -50,18 +63,46 @@ backend/data/scraped_html/
 backend/data/training_data/
 backend/database/image_cache/
 
-# ── Python Cache & Bytecode ──────────────────────────────────────────────────
+# ── AI / ML Models & Heavy Weights ───────────────────────────────────────────
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.bin
+*.engine
+*.tflite
+yolov8n-seg.pt
+yolov8*.pt
+
+# ── Python Cache, Bytecode & Diagnostics ─────────────────────────────────────
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
-.coverage
-htmlcov/
+**/.pytest_cache/
 .ruff_cache/
+**/.ruff_cache/
 .mypy_cache/
+**/.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
+.nyc_output/
+pyright_out.json
+*pyright*.json
+
+# ── Reports, Audits & Output Dumps ───────────────────────────────────────────
+reports/
+backend/reports/
+last_scrape_audit.json
+**/last_scrape_audit.json
 
 # ── Logs & Debugging Output ──────────────────────────────────────────────────
 *.log
+logs/
+backend/logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -72,6 +113,8 @@ pnpm-debug.log*
 .idea/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
 .DS_Store
 Thumbs.db
 ehthumbs.db
@@ -80,12 +123,17 @@ Desktop.ini
 # ── Temporary Diagnostics & Scratch Scripts ──────────────────────────────────
 scratch/
 temp/
+tmp/
 temp_test_combos/
+scratch_*.py
+**/scratch_*.py
+scratch_*.ts
+**/scratch_*.ts
+scratch_*.js
+**/scratch_*.js
 skills-lock.json
 verify_fix.cjs
 .llm-chat-history/
-
-yolov8n-seg.pt
 
 # ── Playwright Testing & Trace Artifacts ─────────────────────────────────────
 playwright-report/
@@ -96,4 +144,5 @@ e2e/playwright-report/
 e2e/test-results/
 e2e/blob-report/
 *.trace.zip
+
 

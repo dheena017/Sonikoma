@@ -20,6 +20,9 @@ class EndpointFilter(logging.Filter):
 
     # Base set of high-frequency polling, health checks, and static asset routes
     DEFAULT_SILENCED_PREFIXES: Tuple[str, ...] = (
+        "/api/v1/jobs",
+        "/api/jobs",
+        "/jobs",
         "/system/logs",
         "/api/system/logs",
         "/api/v1/system/logs",

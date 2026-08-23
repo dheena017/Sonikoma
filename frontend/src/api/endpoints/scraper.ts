@@ -48,7 +48,7 @@ export const pollJobUntilComplete = async <T = any>(
   fetchWithInterceptor: FetchClient,
   jobId: string,
   onProgress?: (progress: number, stage: string, job: JobStatusResponse<T>) => void,
-  intervalMs: number = 1000,
+  intervalMs: number = 1500,
   timeoutMs: number = 180000
 ): Promise<JobStatusResponse<T>> => {
   const startTime = Date.now();

@@ -379,7 +379,7 @@ async def proxy_image_stream_endpoint(
                 "ETag": etag,
                 "X-Cache": "MISS",
                 "Cache-Control": "public, max-age=31536000, immutable",
-                "X-Proxy-Source": parsed_url.hostname or "",
+                "X-Proxy-Source": urlparse(fetch_url).hostname or "",
                 "X-Proxy-Size-KB": f"{len(buffer) / 1024:.1f}"
             }
         )

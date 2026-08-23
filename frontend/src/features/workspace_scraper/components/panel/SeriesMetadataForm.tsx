@@ -1,6 +1,6 @@
 import React from "react";
 import { Layout } from "lucide-react";
-import { parseWebtoonUrl, getProxiedImageUrl } from "@/shared/utils/url";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import { FavoritesManager } from "@/features/workspace_scraper/episode-scraper/utils/FavoritesManager";
 
 export interface SeriesMetadataFormProps {

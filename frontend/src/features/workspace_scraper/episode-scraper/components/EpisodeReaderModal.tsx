@@ -8,7 +8,7 @@ import {
   Minimize2,
   Maximize2,
 } from "lucide-react";
-import { getProxiedImageUrl } from "@/shared/utils/url";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import { scrapeChapter } from "@/api";
 
 import type { Episode } from "../types/EpisodeTypes";

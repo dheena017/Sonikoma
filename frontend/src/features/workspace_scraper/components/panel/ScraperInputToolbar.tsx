@@ -6,12 +6,7 @@ import {
   Zap,
   MoreVertical,
   Clock,
-  CheckCircle2,
-  AlertCircle,
-  Globe,
-  Layers,
 } from "lucide-react";
-import { parseWebtoonUrl, extractWebtoonUrl } from "@/shared/utils/url";
 import { FavoritesManager } from "@/features/workspace_scraper/episode-scraper/utils/FavoritesManager";
 import { separateComicUrl, type SeparateUrlResult } from "@/api/endpoints/scraper";
 
@@ -29,6 +24,7 @@ export interface ScraperInputToolbarProps {
   setChapterNumber?: (num: string) => void;
   setChapterTitle?: (title: string) => void;
   fetchWithInterceptor?: typeof fetch;
+  onSeparatedDataChange?: (data: SeparateUrlResult | null) => void;
 }
 
 export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
@@ -45,6 +41,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
   setChapterNumber,
   setChapterTitle,
   fetchWithInterceptor,
+  onSeparatedDataChange,
 }) => {
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [openSuggestionMenuIdx, setOpenSuggestionMenuIdx] = React.useState<
@@ -60,6 +57,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     const trimmed = targetUrl.trim();
     if (!trimmed) {
       setSeparatedData(null);
+      onSeparatedDataChange?.(null);
       setIsSeparating(false);
       return;
     }
@@ -72,6 +70,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         const result = await separateComicUrl(fetchClient, trimmed);
         if (isMounted && result && result.success) {
           setSeparatedData(result);
+          onSeparatedDataChange?.(result);
 
           // Auto-populate series title if not already populated
           if (result.title_slug && setSeriesTitle) {
@@ -95,7 +94,6 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           }
         }
       } catch (err) {
-        // Fallback gracefully without breaking UI
         if (isMounted) {
           console.debug("[ScraperInputToolbar] URL separation background fetch:", err);
         }
@@ -108,7 +106,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [targetUrl, fetchWithInterceptor, setSeriesTitle, setChapterNumber, setChapterTitle]);
+  }, [targetUrl, fetchWithInterceptor, setSeriesTitle, setChapterNumber, setChapterTitle, onSeparatedDataChange]);
 
   React.useEffect(() => {
     try {
@@ -117,14 +115,11 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
       const entered = FavoritesManager.getEnteredUrls();
       const merged = [...entered, ...bookmarks, ...reads];
       const uniqueUrls = Array.from(new Set(merged));
-      let suggestionsData = uniqueUrls.map((url) => {
-        const parsed = parseWebtoonUrl(url);
-        return {
-          url: url,
-          title: parsed.episode || parsed.title || "Webtoon Episode",
-          genre: parsed.genre || "general",
-        };
-      });
+      let suggestionsData = uniqueUrls.map((url) => ({
+        url: url,
+        title: url,
+        genre: "general",
+      }));
 
       if (targetUrl && targetUrl.trim()) {
         const searchVal = targetUrl.trim().toLowerCase();
@@ -159,17 +154,17 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     const pasted = e.clipboardData?.getData("text") || "";
     const url = pasted.trim();
     if (url) {
-      const normalized = extractWebtoonUrl(url);
-      if (normalized !== targetUrl && resetWorkspace) {
+      if (url !== targetUrl && resetWorkspace) {
         resetWorkspace();
       }
-      setTargetUrl(normalized);
+      setTargetUrl(url);
     }
   };
 
   const handleImportClick = () => {
-    if (!targetUrl.trim()) return;
-    FavoritesManager.addEnteredUrl(targetUrl.trim());
+    const trimmed = targetUrl.trim();
+    if (!trimmed) return;
+    FavoritesManager.addEnteredUrl(trimmed);
     handleScrape?.();
   };
 
@@ -177,7 +172,6 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     if (!targetUrl.trim()) return;
     const url = targetUrl.trim();
     FavoritesManager.addEnteredUrl(url);
-    // Use separated parent series URL if this was a single chapter URL
     const destinationUrl = separatedData?.series_url || url;
     localStorage.setItem("episode_scraper_url", destinationUrl);
     if (onOpenEpisodeScraper) {
@@ -196,253 +190,148 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     }
   };
 
-  const urlStatus = React.useMemo(() => {
-    const trimmed = targetUrl.trim();
-    if (!trimmed) return null;
-
-    if (separatedData && separatedData.success) {
-      const platformDisplay =
-        separatedData.platform && separatedData.platform !== "unknown"
-          ? separatedData.platform.toUpperCase()
-          : separatedData.domain;
-      const typeLabel = separatedData.is_chapter_url
-        ? (separatedData.chapter_number ? `Chapter ${separatedData.chapter_number}` : "Chapter Viewer")
-        : "Series Catalog";
-
-      return {
-        type: "verified",
-        text: `${platformDisplay} • ${typeLabel}`,
-        isChapter: separatedData.is_chapter_url,
-      };
-    }
-
-    try {
-      const urlObj = new URL(
-        trimmed.startsWith("http://") || trimmed.startsWith("https://")
-          ? trimmed
-          : `https://${trimmed}`
-      );
-      const host = urlObj.hostname.toLowerCase().replace(/^www\./, "");
-      if (!host || !host.includes(".")) {
-        return {
-          type: "invalid",
-          text: "Please enter a valid comic URL (e.g. https://domain.com/chapter-1)",
-        };
-      }
-
-      const nonComicDomains = [
-        "chatgpt.com", "openai.com", "google.com", "youtube.com", "youtu.be",
-        "facebook.com", "twitter.com", "x.com", "instagram.com", "reddit.com",
-        "github.com", "linkedin.com", "wikipedia.org", "yahoo.com", "bing.com", "amazon.com"
-      ];
-      if (nonComicDomains.some((d) => host === d || host.endsWith(`.${d}`))) {
-        return {
-          type: "warning",
-          text: `'${host}' is not a comic reader website`,
-        };
-      }
-
-      return {
-        type: "custom",
-        text: `Source: ${host}`,
-      };
-    } catch {
-      return {
-        type: "invalid",
-        text: "Please enter a valid comic URL",
-      };
-    }
-  }, [targetUrl, separatedData]);
-
   return (
     <div className="flex flex-col gap-2.5 w-full">
       <div className="flex flex-col sm:flex-row gap-4">
-      <div className="relative group flex-grow z-30" ref={containerRef}>
-        <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-500" />
-        <input
-          id="target_url_input"
-          type="url"
-          autoComplete="off"
-          value={targetUrl}
-          onFocus={() => setShowSuggestions(true)}
-          onChange={(e) => {
-            setTargetUrl(e.target.value);
-            setShowSuggestions(true);
-          }}
-          onPaste={handlePaste}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
-              handleImportClick();
-            }
-          }}
-          placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic reader URL..."
-          className="relative w-full bg-neutral-950 border border-neutral-800 rounded-2xl px-6 py-4 text-sm text-neutral-200 outline-none placeholder:text-neutral-700 focus:border-purple-500 transition-all shadow-inner"
-        />
+        <div className="relative group flex-grow z-30" ref={containerRef}>
+          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-500" />
+          <input
+            id="target_url_input"
+            type="url"
+            autoComplete="off"
+            value={targetUrl}
+            onFocus={() => setShowSuggestions(true)}
+            onChange={(e) => {
+              setTargetUrl(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onPaste={handlePaste}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
+                handleImportClick();
+              }
+            }}
+            placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic reader URL..."
+            className="relative w-full bg-neutral-950 border border-neutral-800 rounded-2xl px-6 py-4 text-sm text-neutral-200 outline-none placeholder:text-neutral-700 focus:border-purple-500 transition-all shadow-inner"
+          />
 
-        {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-2 bg-gradient-to-b from-neutral-900/95 to-neutral-950/85 border border-neutral-800/60 rounded-xl shadow-2xl z-[1000] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-sm">
-            <div className="px-4 py-3 border-b border-neutral-800/40 bg-gradient-to-r from-purple-950/30 to-neutral-950/30">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-purple-400" />
-                  <span className="text-[11px] font-bold text-neutral-300 uppercase tracking-wider">
-                    Recent &amp; Bookmarked Episodes
-                  </span>
-                  <span className="px-2 py-0.5 text-[9px] font-bold bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30">
-                    {suggestions.length}
-                  </span>
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute left-0 right-0 top-full mt-2 bg-gradient-to-b from-neutral-900/95 to-neutral-950/85 border border-neutral-800/60 rounded-xl shadow-2xl z-[1000] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-sm">
+              <div className="px-4 py-3 border-b border-neutral-800/40 bg-gradient-to-r from-purple-950/30 to-neutral-950/30">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-purple-400" />
+                    <span className="text-[11px] font-bold text-neutral-300 uppercase tracking-wider">
+                      Recent &amp; Bookmarked Episodes
+                    </span>
+                    <span className="px-2 py-0.5 text-[9px] font-bold bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30">
+                      {suggestions.length}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="max-h-72 overflow-y-auto divide-y divide-neutral-800/30 bg-neutral-950/60">
-              {suggestions.map((series, idx) => {
-                const parsed = parseWebtoonUrl(series.url);
-                const seriesTitleText =
-                  parsed.title || series.title || "Webtoon Series";
-                const chapterText =
-                  parsed.chapterTitle ||
-                  (parsed.chapterNumber
-                    ? `Chapter ${parsed.chapterNumber}`
-                    : "Chapter 1");
+              <div className="max-h-72 overflow-y-auto divide-y divide-neutral-800/30 bg-neutral-950/60">
+                {suggestions.map((series, idx) => {
+                  const seriesTitleText = series.title || series.url || "Webtoon Series";
+                  const chapterText = "Saved Series";
 
-                return (
-                  <div
-                    key={idx}
-                    onClick={() => {
-                      if (series.url) {
-                        const normalized = extractWebtoonUrl(series.url);
-                        if (normalized !== targetUrl && resetWorkspace) {
-                          resetWorkspace();
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => {
+                        if (series.url) {
+                          if (series.url !== targetUrl && resetWorkspace) {
+                            resetWorkspace();
+                          }
+                          setTargetUrl(series.url);
+                          if (setSeriesTitle && series.title) setSeriesTitle(series.title);
                         }
-                        setTargetUrl(normalized);
-                        if (setSeriesTitle) setSeriesTitle(parsed.title);
-                        if (setScrapedGenre) setScrapedGenre(parsed.genre);
-                        if (setChapterNumber)
-                          setChapterNumber(parsed.chapterNumber);
-                        if (setChapterTitle && parsed.chapterTitle)
-                          setChapterTitle(parsed.chapterTitle);
-                      }
-                      setShowSuggestions(false);
-                    }}
-                    className="w-full px-4 py-3 hover:bg-purple-600/15 border-b border-neutral-800/20 last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-neutral-950/40 hover:bg-neutral-900/60 relative"
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="w-8 h-8 bg-gradient-to-br from-purple-600/30 to-purple-700/20 rounded-lg flex items-center justify-center border border-purple-500/30 flex-shrink-0 shadow-sm">
-                        <Book className="w-4 h-4 text-purple-400" />
+                        setShowSuggestions(false);
+                      }}
+                      className="w-full px-4 py-3 hover:bg-purple-600/15 border-b border-neutral-800/20 last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-neutral-950/40 hover:bg-neutral-900/60 relative"
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-8 h-8 bg-gradient-to-br from-purple-600/30 to-purple-700/20 rounded-lg flex items-center justify-center border border-purple-500/30 flex-shrink-0 shadow-sm">
+                          <Book className="w-4 h-4 text-purple-400" />
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <p className="text-xs font-bold text-neutral-100 group-hover:text-purple-300 truncate leading-snug transition-colors">
+                            {seriesTitleText}
+                          </p>
+                          <p className="text-[10px] text-neutral-500 group-hover:text-neutral-400 truncate mt-0.5 transition-colors">
+                            {chapterText}
+                          </p>
+                          <p className="text-[9px] text-neutral-600 font-mono truncate mt-0.5 select-all group-hover:text-neutral-500 transition-colors">
+                            {series.url}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-grow min-w-0">
-                        <p className="text-xs font-bold text-neutral-100 group-hover:text-purple-300 truncate leading-snug transition-colors">
-                          {seriesTitleText}
-                        </p>
-                        <p className="text-[10px] text-neutral-500 group-hover:text-neutral-400 truncate mt-0.5 transition-colors">
-                          {chapterText}
-                        </p>
-                        <p className="text-[9px] text-neutral-600 font-mono truncate mt-0.5 select-all group-hover:text-neutral-500 transition-colors">
-                          {series.url}
-                        </p>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded border bg-purple-500/15 text-purple-300 border-purple-500/30 group-hover:bg-purple-500/25 transition-colors">
+                          Recent
+                        </span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenSuggestionMenuIdx(
+                              openSuggestionMenuIdx === idx ? null : idx
+                            );
+                          }}
+                          className="w-7 h-7 rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-neutral-400 hover:text-purple-300 border border-purple-500/20 flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                        >
+                          <MoreVertical className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded border bg-purple-500/15 text-purple-300 border-purple-500/30 group-hover:bg-purple-500/25 transition-colors">
-                        Recent
-                      </span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setOpenSuggestionMenuIdx(
-                            openSuggestionMenuIdx === idx ? null : idx
-                          );
-                        }}
-                        className="w-7 h-7 rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-neutral-400 hover:text-purple-300 border border-purple-500/20 flex items-center justify-center transition-all cursor-pointer active:scale-95"
-                      >
-                        <MoreVertical className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
+          )}
+        </div>
+
+        {actionSlot || (
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={handleImportClick}
+              disabled={isScraping || !targetUrl.trim()}
+              className={`relative px-6 py-3.5 border rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer ${
+                separatedData?.is_chapter_url || !separatedData?.is_series_url
+                  ? "bg-purple-600 hover:bg-purple-500 border-purple-500/50 text-white shadow-purple-900/20"
+                  : "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
+              }`}
+            >
+              {isScraping ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-purple-200" />
+                  <span>Extracting...</span>
+                </>
+              ) : (
+                <>
+                  <ImageIcon className="h-4 w-4" /> Import chapter Images
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleOpenEpisodeScraperClick}
+              disabled={!targetUrl.trim()}
+              className={`relative px-5 py-3.5 border rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer ${
+                separatedData?.is_series_url && !separatedData?.is_chapter_url
+                  ? "bg-purple-600 hover:bg-purple-500 border-purple-500/50 text-white shadow-purple-900/20"
+                  : "bg-neutral-950 hover:bg-neutral-900 border-purple-500/30 hover:border-purple-500/60 text-purple-300 hover:text-purple-200"
+              }`}
+              title="Browse and select specific episodes for this series URL"
+            >
+              <Zap className="h-4 w-4 text-purple-400" />
+              Import Episode Scraper
+            </button>
           </div>
         )}
       </div>
-
-      {actionSlot || (
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={handleImportClick}
-            disabled={isScraping || !targetUrl.trim()}
-            className={`relative px-6 py-3.5 border rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer ${
-              separatedData?.is_chapter_url || !separatedData?.is_series_url
-                ? "bg-purple-600 hover:bg-purple-500 border-purple-500/50 text-white shadow-purple-900/20"
-                : "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
-            }`}
-          >
-            {isScraping ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin text-purple-200" />
-                <span>Extracting...</span>
-              </>
-            ) : (
-              <>
-                <ImageIcon className="h-4 w-4" /> Import chapter Images
-              </>
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleOpenEpisodeScraperClick}
-            disabled={!targetUrl.trim()}
-            className={`relative px-5 py-3.5 border rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer ${
-              separatedData?.is_series_url && !separatedData?.is_chapter_url
-                ? "bg-purple-600 hover:bg-purple-500 border-purple-500/50 text-white shadow-purple-900/20"
-                : "bg-neutral-950 hover:bg-neutral-900 border-purple-500/30 hover:border-purple-500/60 text-purple-300 hover:text-purple-200"
-            }`}
-            title="Browse and select specific episodes for this series URL"
-          >
-            <Zap className="h-4 w-4 text-purple-400" />
-            Import Episode Scraper
-          </button>
-        </div>
-      )}
-      </div>
-
-      {urlStatus && (
-        <div className="flex items-center gap-2 px-1 text-xs animate-in fade-in slide-in-from-top-1 duration-150">
-          {urlStatus.type === "verified" && (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 font-medium shadow-sm">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span>{urlStatus.text}</span>
-            </div>
-          )}
-          {urlStatus.type === "warning" && (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-950/60 border border-rose-500/30 text-rose-300 font-medium shadow-sm">
-              <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-              <span>{urlStatus.text}</span>
-            </div>
-          )}
-          {urlStatus.type === "invalid" && (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-950/60 border border-amber-500/30 text-amber-300 font-medium shadow-sm">
-              <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>{urlStatus.text}</span>
-            </div>
-          )}
-          {urlStatus.type === "custom" && (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/80 border border-neutral-700/50 text-neutral-300 font-medium shadow-sm">
-              <Globe className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-              <span>{urlStatus.text}</span>
-            </div>
-          )}
-          {isSeparating && (
-            <div className="inline-flex items-center gap-1 text-[10px] text-neutral-500">
-              <Loader2 className="w-3 h-3 animate-spin text-purple-400" />
-              <span>Analyzing URL...</span>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };

@@ -5,7 +5,7 @@ Pydantic request/response schemas for audio synthesis, analysis, and transcripti
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 from app.providers.whisper import WhisperModel
 
@@ -77,6 +77,7 @@ class EnergySegmentRequest(BaseModel):
 
 class TranscribeRequest(BaseModel):
     """Transcribes speech using OpenAI Whisper."""
+    model_config = ConfigDict(protected_namespaces=())
     audio_path: str
     language: Optional[str] = None
     task: Optional[str] = Field("transcribe", description="Either 'transcribe' or 'translate'")
@@ -86,6 +87,7 @@ class TranscribeRequest(BaseModel):
 
 class SubtitleRequest(BaseModel):
     """Generates subtitle files from audio."""
+    model_config = ConfigDict(protected_namespaces=())
     audio_path: str
     output_path: Optional[str] = None
     language: Optional[str] = None
@@ -94,6 +96,7 @@ class SubtitleRequest(BaseModel):
 
 class ExtractWordsRequest(BaseModel):
     """Extracts word-level timestamps from audio."""
+    model_config = ConfigDict(protected_namespaces=())
     audio_path: str
     language: Optional[str] = None
     model_name: Optional[WhisperModel] = WhisperModel.BASE
@@ -101,6 +104,7 @@ class ExtractWordsRequest(BaseModel):
 
 class BatchTranscribeRequest(BaseModel):
     """Transcribes multiple audio files in batch."""
+    model_config = ConfigDict(protected_namespaces=())
     audio_paths: List[str]
     language: Optional[str] = None
     model_name: Optional[WhisperModel] = WhisperModel.BASE

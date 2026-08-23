@@ -18,6 +18,7 @@ from .base_site_adapter import BaseSiteAdapter
 from .generic_site_adapter import GenericAdaptiveAdapter
 from ..scrape_context import ScrapeContext
 from ..scraper_models import ChapterResult, SourceInfo, SeriesInfo
+from ..scraper_constants import WEBTOONS_DOMAINS, NAVER_DOMAINS, TAPAS_DOMAINS
 from ..acquisition import HttpFetcher, BrowserFetcher
 from ..extraction import DomExtractor
 
@@ -25,16 +26,12 @@ logger = logging.getLogger("sonikoma.services.scraper.adapters.webtoons")
 
 
 class WebtoonsAdapter(BaseSiteAdapter):
-    """Specialized adapter for Webtoons.com, Naver Webtoon, and top webcomic portals."""
+    """Specialized adapter for Webtoons.com, Naver Webtoon, Tapas, and top webcomic portals."""
 
     name: str = "Line Webtoon & Official Portals"
     icon: str = "🟢"
     description: str = "Official webtoon reader adapter covering Webtoons, Naver, Toomics, Tapas, Tappytoon, Lezhin, Copin, and Pocket Comics."
-    supported_domains: list = [
-        "webtoons.com", "webtoon.com", "naver.com", "toomics.com",
-        "tapas.io", "tappytoon.com", "copincomics.com", "pocketcomics.com",
-        "lezhin.com", "lezhinus.com", "bilibilicomics.com", "mangatoon.mobi", "webnovel.com"
-    ]
+    supported_domains: list = list(WEBTOONS_DOMAINS + NAVER_DOMAINS + TAPAS_DOMAINS)
 
     @classmethod
     def matches(cls, source_info: SourceInfo) -> bool:
@@ -64,11 +61,25 @@ class WebtoonsAdapter(BaseSiteAdapter):
             if len(path_parts) >= 3 and title_no:
                 target_url = f"https://www.webtoons.com/{path_parts[0]}/{path_parts[1]}/{path_parts[2]}/list?title_no={title_no}"
 
+        is_toomics = "toomics.com" in parsed.netloc.lower()
+        referer = "https://global.toomics.com/" if is_toomics else "https://www.webtoons.com/"
+        cookies = "age_check=1; needGDPR=false; adult_check=1; countryCode=US"
+
         html, status, _ = await HttpFetcher.fetch_html(
             target_url,
-            headers={"Referer": "https://www.webtoons.com/"}
+            headers={"Referer": referer, "Cookie": cookies}
         )
-        if not html or status != 200:
+        # Fall back to browser if HTTP is blocked (Cloudflare / geo-gate)
+        if not html or status not in (200, 206):
+            logger.info(f"[WebtoonsAdapter] HTTP blocked ({status}), falling back to browser: {target_url}")
+            wait_sel = "li.normal_ep, .list-ep li, .ep-item, a[href*='/webtoon/detail'], #_listUl li, ul#_episodeList li, .detail_lst li, h1"
+            html, _, _ = await BrowserFetcher.render_page(
+                target_url,
+                auto_scroll=True,
+                wait_selector=wait_sel,
+                timeout_seconds=25.0
+            )
+        if not html:
             return None
 
         soup = DomExtractor.get_soup(html)
@@ -183,6 +194,57 @@ class WebtoonsAdapter(BaseSiteAdapter):
 
             page_num += 1
 
+        # Browser retry if HTTP episode list came back empty (geo-block / lazy render)
+        if not episodes:
+            logger.info(f"[WebtoonsAdapter] No episodes from HTTP, triggering browser retry: {target_url}")
+            b_html, _, _ = await BrowserFetcher.render_page(
+                target_url,
+                auto_scroll=True,
+                wait_selector="#_listUl li, ul#_episodeList li, .detail_lst li",
+                timeout_seconds=25.0
+            )
+            if b_html:
+                b_soup = DomExtractor.get_soup(b_html)
+                if not cover_image:
+                    cover_el2 = b_soup.select_one(".detail_thumb img, .thmb img, meta[property='og:image']")
+                    if cover_el2:
+                        cover_image = cover_el2.get("content") or cover_el2.get("src") or cover_el2.get("data-src") or ""
+                for li in b_soup.select("#_listUl li, ul#_episodeList li, .detail_lst li, li.normal_ep, .list-ep li, .ep-item, a[href*='/webtoon/detail']"):
+                    a_tag = li if li.name == "a" else li.find("a", href=True)
+                    if not a_tag:
+                        continue
+                    ep_url = urljoin(target_url, a_tag["href"])
+                    if ep_url in seen_urls:
+                        continue
+                    seen_urls.add(ep_url)
+                    sub_el = li.select_one(".subj span, .subj, .sub_title, .ep-title, h4, .title")
+                    ep_title = sub_el.get_text(strip=True) if sub_el else a_tag.get_text(strip=True)
+                    thmb_img = li.select_one(".thmb img, img, img[data-src]")
+                    thmb_src = (thmb_img.get("data-src") or thmb_img.get("data-url") or thmb_img.get("src") or "") if thmb_img else ""
+                    ep_parsed = urlparse(ep_url)
+                    ep_q = parse_qs(ep_parsed.query)
+                    ep_no_str = ep_q.get("episode_no", [""])[0]
+                    m_ep = re.search(r"/ep/(\d+)", ep_url)
+                    if m_ep and not ep_no_str:
+                        ep_no_str = m_ep.group(1)
+                    num_val, _ = self.extract_number_and_type(ep_title)
+                    if num_val is None and ep_no_str:
+                        try:
+                            num_val = float(ep_no_str)
+                        except ValueError:
+                            pass
+                    episodes.append({
+                        "episode_no": len(episodes) + 1,
+                        "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or ep_no_str or len(episodes)+1)),
+                        "chapter_number": num_val,
+                        "title": ep_title or f"Episode {ep_no_str or len(episodes)+1}",
+                        "url": ep_url,
+                        "thumbnail": self.build_proxy_thumbnail_url(thmb_src, ep_url, cover_image),
+                        "cover": cover_image,
+                        "date": "",
+                        "language": "en"
+                    })
+
         sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
 
         return {
@@ -205,14 +267,29 @@ class WebtoonsAdapter(BaseSiteAdapter):
         """Executes Webtoon-specific extraction with proper headers and episode parsing."""
         if not context.config.headers:
             context.config.headers = {}
-        context.config.headers["Referer"] = "https://www.webtoons.com/"
+        
+        is_toomics = "toomics.com" in (context.normalized_url or context.url or "").lower()
+        if is_toomics:
+            context.config.headers["Referer"] = "https://global.toomics.com/"
+            context.config.cookies = {"age_check": "1", "needGDPR": "false", "adult_check": "1", "countryCode": "US"}
+            context.series_info.publisher = "TOOMICS"
+            m_ep = re.search(r"/ep/(\d+)", context.normalized_url or context.url)
+            if m_ep:
+                try:
+                    context.chapter_info.number = float(m_ep.group(1))
+                    context.chapter_info.episode = f"Episode {m_ep.group(1)}"
+                except ValueError:
+                    pass
+        else:
+            context.config.headers["Referer"] = "https://www.webtoons.com/"
+            context.series_info.publisher = "WEBTOON"
 
         # Extract title_no, episode_no, slug, and genre from URL structure
         parsed = urlparse(context.normalized_url or context.url)
         q = parse_qs(parsed.query)
 
         path_parts = [p for p in parsed.path.split("/") if p]
-        if len(path_parts) >= 3:
+        if len(path_parts) >= 3 and not is_toomics:
             genre = path_parts[1]
             slug = path_parts[2]
             context.series_info.slug = slug
@@ -220,12 +297,10 @@ class WebtoonsAdapter(BaseSiteAdapter):
                 context.series_info.genres = [genre.capitalize()]
 
         title_no = q.get("title_no", [""])[0]
-        if title_no and context.series_info.slug:
+        if title_no and context.series_info.slug and not is_toomics:
             context.series_info.url = f"https://www.webtoons.com/en/{path_parts[1] if len(path_parts) >= 2 else 'general'}/{context.series_info.slug}/list?title_no={title_no}"
 
-        context.series_info.publisher = "WEBTOON"
-
-        if "episode_no" in q:
+        if "episode_no" in q and not is_toomics:
             try:
                 context.chapter_info.number = float(q["episode_no"][0])
                 context.chapter_info.episode = f"Episode {q['episode_no'][0]}"

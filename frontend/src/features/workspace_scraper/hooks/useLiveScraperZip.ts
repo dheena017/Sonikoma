@@ -1,6 +1,5 @@
 import JSZip from "jszip";
 import { processWithConcurrency } from "@/shared/utils/batchUtils";
-import { parseWebtoonUrl } from "@/shared/utils/url";
 import {
   resolveDownloadNaming,
   generateMetadataText,

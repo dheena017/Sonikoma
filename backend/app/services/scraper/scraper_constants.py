@@ -64,7 +64,9 @@ UNWANTED_PATTERNS = [
     "read-manga-", "read-manhua-", "read-manhwa-", "-75x106", "-150x150",
     "pocketcomics", "pocket_comics", "app_icon", "app-icon", "appstore", "googleplay",
     "playstore", "download_app", "web_app", "app_banner", "site_logo", "/_nuxt/",
-    "img_app_", "img_app", "app_comico", "original_image."
+    "img_app_", "img_app", "app_comico", "original_image.",
+    "wp-content/themes", "/themes/", "to_be_continued", "about_", "credit_", "discord",
+    "patreon", "donation", "paypal", "lock-white", "lock.png", "assets/mobile/img/icon", "assets/img/icon"
 ]
 
 # Image extensions
@@ -94,79 +96,90 @@ DEFAULT_MIN_IMAGE_HEIGHT = 250
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Centralized Supported Platforms & Domains Directory
+# Platform-Specific Allowed Domain Lists (Single Source of Truth)
 # ─────────────────────────────────────────────────────────────────────────────
-SUPPORTED_PLATFORMS = {
-    "mangadex": {
-        "name": "MangaDex",
-        "description": "High-Speed Direct REST API v5 with lossless @Home CDN",
-        "domains": ["mangadex.org", "mangadex.cc"],
-        "badge": "Official API",
-        "speed": "Fastest (~100ms)"
-    },
-    "webtoons": {
-        "name": "Line Webtoons / Naver",
-        "description": "Multi-page vertical scroll webtoon crawler with HD cover art",
-        "domains": ["webtoons.com", "comic.naver.com"],
-        "badge": "Dedicated Adapter",
-        "speed": "Fast (~300ms)"
-    },
-    "bato": {
-        "name": "Bato.to & Mirrors",
-        "description": "JavaScript state decryptor for Bato, MangaToto, BatTwo, ReadToto",
-        "domains": ["bato.to", "mangatoto.com", "battwo.com", "readtoto.com", "batotwo.com"],
-        "badge": "Dedicated Adapter",
-        "speed": "Fast (~400ms)"
-    },
-    "madara": {
-        "name": "WordPress Madara CMS",
-        "description": "Direct AJAX chapter crawler powering 100+ scanlation websites",
-        "domains": [
-            "mangatx.com", "manhuaplus.com", "reaperscans.com", "manhwaclan.com",
-            "manga68.com", "manhuaus.com", "toonily.com", "mangakakalot.com"
-        ],
-        "badge": "CMS Family",
-        "speed": "Fast (~300ms)"
-    },
-    "mangastream": {
-        "name": "MangaStream / ThemeSphere",
-        "description": "Scanlation reader themes (FlameComics, VoidScans, LuminousScans)",
-        "domains": ["flamecomics.xyz", "flamecomics.me", "void-scans.com", "luminousscans.gg"],
-        "badge": "CMS Family",
-        "speed": "Fast (~350ms)"
-    },
-    "inkr": {
-        "name": "INKR Comics",
-        "description": "GraphQL manifest parser for INKR comics platform",
-        "domains": ["inkr.com"],
-        "badge": "Dedicated Adapter",
-        "speed": "Fast (~200ms)"
-    },
-    "webcomics": {
-        "name": "WebComics App",
-        "description": "WebComics reader API integration",
-        "domains": ["webcomicsapp.com"],
-        "badge": "Dedicated Adapter",
-        "speed": "Fast (~250ms)"
-    },
-    "generic": {
-        "name": "Universal Adaptive Engine",
-        "description": "Autonomous dynamic extraction for 100% of all other websites on the internet",
-        "domains": ["*"],
-        "badge": "Universal Fallback",
-        "speed": "Adaptive (~200ms - 1.2s)"
-    }
-}
+
+# 1. Line Webtoons & Official Webcomic Portals
+WEBTOONS_DOMAINS = [
+    "webtoons.com", "webtoon.com", "toomics.com", "global.toomics.com",
+    "tapas.io", "tappytoon.com", "copincomics.com", "pocketcomics.com",
+    "lezhin.com", "lezhinus.com", "bilibilicomics.com", "mangatoon.mobi", "webnovel.com"
+]
+
+# 2. Naver Webtoon (Korean Official Portal)
+NAVER_DOMAINS = [
+    "comic.naver.com", "naver.com"
+]
+
+# 3. Kakao Webtoon & KakaoPage
+KAKAO_DOMAINS = [
+    "webtoon.kakao.com", "kakao.com", "page.kakao.com"
+]
+
+# 4. Tapas Media Portal
+TAPAS_DOMAINS = [
+    "tapas.io"
+]
+
+# 5. MangaDex Official API
+MANGADEX_DOMAINS = [
+    "mangadex.org"
+]
+
+# 6. Bato.to Network & Mirrors
+BATO_DOMAINS = [
+    "bato.to", "mangatoto.com", "battwo.com", "readtoto.com",
+    "batotwo.com", "batocomic.com", "batotoo.com"
+]
+
+# 7. INKR Comics
+INKR_DOMAINS = [
+    "inkr.com", "comics.inkr.com"
+]
+
+# 8. WebComics App
+WEBCOMICS_DOMAINS = [
+    "webcomicsapp.com"
+]
+
+# 9. MangaStream & ThemeSphere Scanlations
+MANGASTREAM_DOMAINS = [
+    "asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com",
+    "flamecomics.xyz", "flamecomics.me", "flamecomics.com", "flamescans.org",
+    "void-scans.com", "voidscans.com", "luminousscans.gg", "luminousscans.com",
+    "reaperscans.com", "realmscans.xyz", "cosmicscans.com", "anigliscans.com",
+    "freakscans.com", "suryascans.com", "nightcomic.com"
+]
+
+# 10. WordPress WP-Manga (Madara) Platforms
+MADARA_DOMAINS = [
+    "manhuatop.org", "manhwatop.com", "manhwatop.org", "mangaclash.com",
+    "manhuaus.com", "topmanhua.com", "manhuaplus.org", "manhuaplus.com",
+    "1stkissmanga.io", "1stkissmanga.com", "1stkissmanga.me", "mangatx.com",
+    "mangaeffect.com", "mangaonlineteam.com", "kunmanga.com", "harimanga.com",
+    "zinmanga.com", "manhwaclan.com", "manhwaden.com", "manga68.com",
+    "manhuato.com", "mangakakalot.com", "mangakakalot.tv", "readmangakakalot.com",
+    "manhwa18.cc", "example-manhwa.xyz"
+]
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Default Excluded & Blocked Ad/Tracker Domains
+# Master Allowed Comic Domains (Strict Whitelist Aggregate)
 # ─────────────────────────────────────────────────────────────────────────────
-DEFAULT_BLOCKED_DOMAINS = [
-    "doubleclick.net", "google-analytics.com", "googletagmanager.com",
-    "facebook.com", "adservice.google.com", "pagead2.googlesyndication.com",
-    "adtrue.com", "exoclick.com", "popads.net", "propellerads.com",
-    "trafficjunky.com", "outbrain.com", "taboola.com", "mgid.com"
-]
+ALLOWED_DOMAINS = sorted(list(set(
+    WEBTOONS_DOMAINS +
+    NAVER_DOMAINS +
+    KAKAO_DOMAINS +
+    TAPAS_DOMAINS +
+    MANGADEX_DOMAINS +
+    BATO_DOMAINS +
+    INKR_DOMAINS +
+    WEBCOMICS_DOMAINS +
+    MANGASTREAM_DOMAINS +
+    MADARA_DOMAINS
+)))
+
+# Alias for backwards compatibility
+REGISTERED_ALLOWED_DOMAINS = ALLOWED_DOMAINS
 
 # ─────────────────────────────────────────────────────────────────────────────
 # User-Friendly Frontend Status & Error Messages

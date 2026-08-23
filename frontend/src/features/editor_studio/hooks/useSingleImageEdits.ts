@@ -2,7 +2,7 @@ import { LogEntry, normalizeLog } from "@/types/logs";
 import React, { useState, useCallback, useMemo } from "react";
 import { NotificationType } from "@/features/app_notification";
 import { processWithConcurrency } from "@/shared/utils/batchUtils";
-import { getProxiedImageUrl } from "@/shared/utils/url";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import * as api from "@/api/index";
 
 interface UseSingleImageEditsProps {

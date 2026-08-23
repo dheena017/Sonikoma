@@ -1,5 +1,5 @@
 import React from "react";
-import { getProxiedImageUrl } from "@/shared/utils/url";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import {
   RefreshCw,
   Check,

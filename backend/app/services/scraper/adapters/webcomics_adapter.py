@@ -33,6 +33,7 @@ from urllib.parse import urlparse, urljoin
 
 from .base_site_adapter import BaseSiteAdapter
 from .generic_site_adapter import GenericAdaptiveAdapter
+from ..scraper_constants import WEBCOMICS_DOMAINS
 from ..scrape_context import ScrapeContext
 from ..scraper_models import (
     ChapterResult,
@@ -74,7 +75,7 @@ class WebComicsAdapter(BaseSiteAdapter):
     name: str = "WebComics"
     icon: str = "📖"
     description: str = "WebComics Nuxt.js Vue SSR reader with auto-scroll and imgg.mangaina.com CDN interception."
-    supported_domains: list = ["webcomicsapp.com"]
+    supported_domains: list = list(WEBCOMICS_DOMAINS)
 
     @classmethod
     def matches(cls, source_info: SourceInfo) -> bool:

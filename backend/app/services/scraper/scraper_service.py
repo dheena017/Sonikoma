@@ -153,7 +153,7 @@ async def scrape_and_initialize_project(
     )
 
     if not result.success:
-        err_msg = result.error.message if result.error else "Failed to scrape chapter images."
+        err_msg = result.error_message or "Failed to scrape chapter images."
         logger.warning(f"[Scraper Service] Adaptive scrape returned unsuccessful: {err_msg}")
         return {
             "success": False,

@@ -207,13 +207,21 @@ async def scrape_chapter_async_endpoint(
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Chapter URL is required.")
 
+    target_url = body.url.strip()
+    if domain_block_manager.is_blocked(target_url):
+        domain = urlparse(target_url).netloc or target_url
+        raise HTTPException(
+            status_code=403,
+            detail=f"This domain ({domain}) is currently in the blocked exclusion list."
+        )
+
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     job = job_manager.create_job(
         job_type=JobType.SCRAPE_CHAPTER,
         user_id=user_id,
         project_id=body.project_id or "Comic Chapter",
         chapter_id=body.chapter_id,
-        metadata={"url": body.url.strip()}
+        metadata={"url": target_url}
     )
 
     clean_headers = {k: v for k, v in (body.headers or {}).items() if not k.startswith("additionalProp") and v != "string"} or None
@@ -225,7 +233,7 @@ async def scrape_chapter_async_endpoint(
         report_progress(30.0, JobStage.FETCHING.value)
 
         result: ChapterResult = await AdaptiveScraperEngine.scrape_url(
-            url=body.url.strip(),
+            url=target_url,
             cookies=parsed_cookies,
             headers=clean_headers,
             bypass_cache=bypass,
@@ -261,6 +269,14 @@ async def scrape_chapter_sync_post(
 ):
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Chapter URL is required.")
+
+    target_url = body.url.strip()
+    if domain_block_manager.is_blocked(target_url):
+        domain = urlparse(target_url).netloc or target_url
+        raise HTTPException(
+            status_code=403,
+            detail=f"This domain ({domain}) is currently in the blocked exclusion list."
+        )
 
     clean_headers = {k: v for k, v in (body.headers or {}).items() if not k.startswith("additionalProp") and v != "string"} or None
     parsed_cookies = parse_cookie_string(body.cookies) if body.cookies else None
@@ -453,6 +469,13 @@ async def scrape_series_async_endpoint(
         raise HTTPException(status_code=400, detail="Either 'url' or 'title_no' is required.")
 
     target_url = body.url or f"https://www.webtoons.com/en/fantasy/episode/list?title_no={body.title_no}"
+    if domain_block_manager.is_blocked(target_url):
+        domain = urlparse(target_url).netloc or target_url
+        raise HTTPException(
+            status_code=403,
+            detail=f"This domain ({domain}) is currently in the blocked exclusion list."
+        )
+
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     job = job_manager.create_job(
         job_type=JobType.DISCOVER_EPISODES,
@@ -498,6 +521,13 @@ async def scrape_series_sync_endpoint(
         raise HTTPException(status_code=400, detail="Either 'url' or 'title_no' is required.")
 
     target_url = body.url or f"https://www.webtoons.com/en/fantasy/episode/list?title_no={body.title_no}"
+    if domain_block_manager.is_blocked(target_url):
+        domain = urlparse(target_url).netloc or target_url
+        raise HTTPException(
+            status_code=403,
+            detail=f"This domain ({domain}) is currently in the blocked exclusion list."
+        )
+
     return await scrape_series_episodes_advanced(
         series_url=target_url,
         title_no=body.title_no,
@@ -520,8 +550,16 @@ async def scrape_series_sync_get(
     max_episodes: Optional[int] = Query(None, description="Max episodes to return"),
     current_user: dict = Depends(get_current_user)
 ):
+    target_url = url.strip()
+    if domain_block_manager.is_blocked(target_url):
+        domain = urlparse(target_url).netloc or target_url
+        raise HTTPException(
+            status_code=403,
+            detail=f"This domain ({domain}) is currently in the blocked exclusion list."
+        )
+
     return await scrape_series_episodes_advanced(
-        series_url=url.strip(),
+        series_url=target_url,
         sort_by=sort_by,
         max_episodes=max_episodes
     )

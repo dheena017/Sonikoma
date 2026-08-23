@@ -143,7 +143,7 @@ class HttpFetcher:
                         if resp.status_code == 200:
                             return resp.text, resp.status_code, duration_ms
                         elif resp.status_code in (403, 429):
-                            logger.warning(f"[HttpFetcher] Blocked status {resp.status_code} in httpx")
+                            logger.info(f"[HttpFetcher] Cloudflare/Anti-Bot Challenge (HTTP {resp.status_code}) -> Auto-escalating to Level 2 (Stealth Browser)")
                             return None, resp.status_code, duration_ms
 
                 elif client_type == "aiohttp" and aiohttp is not None:
@@ -155,7 +155,7 @@ class HttpFetcher:
                                 text = await resp.text()
                                 return text, resp.status, duration_ms
                             elif resp.status in (403, 429):
-                                logger.warning(f"[HttpFetcher] Blocked status {resp.status} in aiohttp")
+                                logger.info(f"[HttpFetcher] Cloudflare/Anti-Bot Challenge (HTTP {resp.status}) -> Auto-escalating to Level 2 (Stealth Browser)")
                                 return None, resp.status, duration_ms
 
                 elif client_type == "requests" and requests is not None:
@@ -169,8 +169,9 @@ class HttpFetcher:
                     if resp.status_code == 200:
                         return resp.text, resp.status_code, duration_ms
                     elif resp.status_code in (403, 429):
-                        logger.warning(f"[HttpFetcher] Blocked status {resp.status_code} in requests")
+                        logger.info(f"[HttpFetcher] Cloudflare/Anti-Bot Challenge (HTTP {resp.status_code}) -> Auto-escalating to Level 2 (Stealth Browser)")
                         return None, resp.status_code, duration_ms
+
 
             except Exception as e:
                 logger.debug(f"[HttpFetcher] Attempt {attempt} via {client_type} failed: {e}")

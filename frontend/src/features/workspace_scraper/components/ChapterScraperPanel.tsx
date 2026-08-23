@@ -1,9 +1,9 @@
 import React from "react";
 import { Sparkles, Book, UploadCloud } from "lucide-react";
 import { NotificationType } from "@/features/app_notification";
-import { SeriesMetadataForm } from "./panel/SeriesMetadataForm";
 import { ScraperInputToolbar } from "./panel/ScraperInputToolbar";
 import { LocalImageUploadZone } from "./panel/LocalImageUploadZone";
+import type { SeparateUrlResult } from "@/api/endpoints/scraper";
 
 export interface UrlInputPanelProps {
   targetUrl: string;
@@ -87,6 +87,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
 
   const [inputMode, setInputMode] = React.useState<"url" | "upload">("url");
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
+  const [separatedData, setSeparatedData] = React.useState<SeparateUrlResult | null>(null);
 
   return (
     <div
@@ -112,24 +113,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
         </div>
       </div>
 
-      {/* 2. Series Metadata Form */}
-      <div className="bg-black/20 p-6 rounded-2xl border border-white/5">
-        <SeriesMetadataForm
-          seriesTitle={seriesTitle}
-          setSeriesTitle={setSeriesTitle}
-          chapterNumber={chapterNumber}
-          setChapterNumber={setChapterNumber}
-          scrapedGenre={scrapedGenre}
-          setScrapedGenre={setScrapedGenre}
-          setTargetUrl={setTargetUrl}
-          setSeriesCoverImage={setSeriesCoverImage}
-          setSeriesAuthor={setSeriesAuthor}
-          setSeriesSynopsis={setSeriesSynopsis}
-          setChapterTitle={setChapterTitle}
-        />
-      </div>
-
-      {/* 3. Input Mode Selector */}
+      {/* 2. Input Mode Selector & Tab Header */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-800/80 pb-3">
           <div className="flex items-center gap-2">
@@ -163,6 +147,27 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               )}
             </button>
           </div>
+
+          {/* Option B: Platform Badge Aligned in Tab Header Row */}
+          {inputMode === "url" && separatedData && separatedData.success && (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-500/30 backdrop-blur-md text-xs shadow-lg shadow-purple-950/20 animate-in fade-in zoom-in-95 duration-200">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+              </span>
+              <span className="font-bold text-purple-300 tracking-wider text-[11px] uppercase font-mono">
+                {separatedData.platform && separatedData.platform !== "unknown"
+                  ? separatedData.platform.toUpperCase()
+                  : separatedData.domain}
+              </span>
+              <span className="text-neutral-600 font-bold">•</span>
+              <span className="text-neutral-300 font-medium text-[11px]">
+                {separatedData.is_chapter_url
+                  ? (separatedData.chapter_number ? `Chapter ${separatedData.chapter_number}` : "Chapter Viewer")
+                  : "Series Catalog"}
+              </span>
+            </div>
+          )}
         </div>
 
         {inputMode === "upload" ? (
@@ -187,6 +192,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
             setChapterNumber={setChapterNumber}
             setChapterTitle={setChapterTitle}
             fetchWithInterceptor={props.fetchWithInterceptor}
+            onSeparatedDataChange={setSeparatedData}
           />
         )}
       </div>

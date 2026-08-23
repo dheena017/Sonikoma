@@ -1,4 +1,4 @@
-import { getSourceName, parseWebtoonUrl } from "./url";
+import { getSourceName } from "./imageProxy";
 
 export function makeSafeFilename(name?: string, fallback = "unnamed"): string {
   if (!name || !name.trim()) return fallback;
@@ -32,17 +32,6 @@ export function resolveDownloadNaming(options?: ChapterNamingOptions): {
   if (targetUrl) {
     if (!sourceSite) {
       sourceSite = getSourceName(targetUrl);
-    }
-    if (!seriesName || !chapterNum) {
-      try {
-        const parsed = parseWebtoonUrl(targetUrl);
-        if (!seriesName && parsed.title) {
-          seriesName = parsed.title.trim();
-        }
-        if (!chapterNum && parsed.chapterNumber) {
-          chapterNum = parsed.chapterNumber.trim();
-        }
-      } catch (e) {}
     }
   }
 

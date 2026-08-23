@@ -274,6 +274,11 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                 timeout_seconds=25.0
             )
             if browser_html:
+                from ..extraction.embedded_state_extractor import EmbeddedStateExtractor
+                state_data = EmbeddedStateExtractor.extract_series_and_episodes_from_state(browser_html, url)
+                if state_data and state_data.get("episodes") and len(state_data["episodes"]) > len(episodes):
+                    episodes = state_data["episodes"]
+
                 b_soup = DomExtractor.get_soup(browser_html)
                 if b_soup:
                     b_eps = self._extract_episodes_dynamically(b_soup, url)
@@ -281,8 +286,13 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                         episodes = b_eps
 
                     # Breadcrumb / Parent Series Link Discovery on Single-Chapter Pages
-                    if len(episodes) <= 1:
-                        parent_anchor = b_soup.select_one("a.breadcrumb-item, .breadcrumbs a, a[rel='up'], a[href*='/series/'], a[href*='/manga/'], a:has-text('All Chapters'), a:has-text('Series')")
+                        parent_anchor = b_soup.select_one("a.breadcrumb-item, .breadcrumbs a, a[rel='up'], a[href*='/series/'], a[href*='/manga/'], a[href*='/comic/'], a[href*='/title/']")
+                        if not parent_anchor:
+                            for a_tag in b_soup.find_all("a", href=True):
+                                txt = a_tag.get_text(strip=True).lower()
+                                if any(k in txt for k in ("all chapters", "series", "chapter list", "comic detail", "table of contents")):
+                                    parent_anchor = a_tag
+                                    break
                         if parent_anchor and parent_anchor.get("href"):
                             parent_url = urljoin(url, parent_anchor.get("href"))
                             if parent_url != url:
@@ -621,7 +631,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                     context.candidate_images.append(cand)
 
             # Strategy C: Embedded State extraction
-            state_candidates = EmbeddedStateExtractor.extract_from_html(html, url)
+            state_candidates = EmbeddedStateExtractor.extract_from_html(html, url) or []
             existing_urls = {c.url for c in context.candidate_images}
             for cand in state_candidates:
                 if cand.url not in existing_urls:

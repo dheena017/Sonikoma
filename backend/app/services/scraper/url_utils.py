@@ -121,6 +121,34 @@ class UniversalUrlSeparator:
             if not path_segments:
                 return normalized
 
+            # Specialized Platform Parent Series Resolvers
+            netloc_lower = parsed.netloc.lower()
+            if "toomics.com" in netloc_lower:
+                if "/webtoon/detail/" in parsed.path:
+                    m_toon = re.search(r"/toon/(\d+)", parsed.path)
+                    lang = path_segments[0] if path_segments else "en"
+                    if m_toon:
+                        return f"{parsed.scheme}://{parsed.netloc}/{lang}/webtoon/episode/toon/{m_toon.group(1)}"
+                elif "/webtoon/episode/toon/" in parsed.path:
+                    return normalized
+
+            if "comic.naver.com" in netloc_lower or "naver.com" in netloc_lower:
+                t_id = query_dict.get("titleId", [""])[0] or query_dict.get("title_id", [""])[0]
+                if t_id:
+                    return f"{parsed.scheme}://{parsed.netloc}/webtoon/list?titleId={t_id}"
+
+            if "kakao.com" in netloc_lower:
+                if "/viewer/" in parsed.path and len(path_segments) >= 2:
+                    return f"{parsed.scheme}://{parsed.netloc}/content/{path_segments[-2]}"
+                elif "/content/" in parsed.path:
+                    return normalized
+
+            if "mangadex.org" in netloc_lower:
+                if "/chapter/" in parsed.path:
+                    return normalized
+                elif "/title/" in parsed.path:
+                    return normalized
+
             identifying_keys = {"title_no", "series_id", "comic_id", "manga_id", "id", "title"}
             transient_keys = {"episode_no", "chapter_no", "ch", "ep", "progress", "page", "p", "read_pos", "scroll"}
 
@@ -211,8 +239,11 @@ class UniversalUrlSeparator:
             domain = domain[4:]
 
         path = parsed.path
+        path_lower = path.lower()
         query = parse_qs(parsed.query)
         path_segments = [s for s in path.split("/") if s]
+
+        is_novel = any(seg in path_lower for seg in ["/novel/", "/novels/", "/lightnovel/", "/webnovel/"])
 
         # 1. Resolve Target Adapter and Platform dynamically
         target_adapter_name = "GenericAdaptiveAdapter"
@@ -232,6 +263,212 @@ class UniversalUrlSeparator:
         except Exception:
             domain_parts = [p for p in domain.split(".") if p not in ("com", "net", "org", "to", "io", "app", "me", "co", "xyz")]
             platform_name = domain_parts[0] if domain_parts else "generic"
+
+        # Toomics Platform Specialized Extraction
+        if "toomics.com" in domain:
+            if "/webtoon/episode/toon/" in path:
+                series_id = path_segments[-1] if path_segments else None
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": canonical,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_series_url": True,
+                    "platform": "toomics",
+                    "domain": domain,
+                    "title_slug": f"toon-{series_id}",
+                    "title_id": series_id,
+                    "series_slug": f"toon-{series_id}",
+                    "series_id": series_id,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": series_id,
+                    "target_adapter": "WebtoonsAdapter",
+                    "recommended_action": "import_episodes",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"]
+                }
+            elif "/webtoon/detail/" in path:
+                m_ep = re.search(r"/ep/(\d+)", path)
+                m_toon = re.search(r"/toon/(\d+)", path)
+                chapter_number = m_ep.group(1) if m_ep else None
+                series_id = m_toon.group(1) if m_toon else None
+                lang = path_segments[0] if path_segments else "en"
+                parent_url = f"{parsed.scheme}://{parsed.netloc}/{lang}/webtoon/episode/toon/{series_id}" if series_id else canonical
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": parent_url,
+                    "chapter_url": canonical,
+                    "is_chapter_url": True,
+                    "is_series_url": False,
+                    "platform": "toomics",
+                    "domain": domain,
+                    "title_slug": f"toon-{series_id}",
+                    "title_id": series_id,
+                    "series_slug": f"toon-{series_id}",
+                    "series_id": series_id,
+                    "chapter_slug": f"ep-{chapter_number}" if chapter_number else None,
+                    "chapter_number": chapter_number,
+                    "title_no": series_id,
+                    "target_adapter": "WebtoonsAdapter",
+                    "recommended_action": "import_chapter",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"]
+                }
+
+        # Naver Webtoon Platform Specialized Extraction
+        if "comic.naver.com" in domain or "naver.com" in domain:
+            title_id = query.get("titleId", [""])[0] or query.get("title_id", [""])[0]
+            if "/webtoon/list" in path or "no" not in query:
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": canonical,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_series_url": True,
+                    "platform": "naver",
+                    "domain": domain,
+                    "title_slug": f"title-{title_id}" if title_id else "webtoon",
+                    "title_id": title_id or None,
+                    "series_slug": f"title-{title_id}" if title_id else "webtoon",
+                    "series_id": title_id or None,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": title_id or None,
+                    "target_adapter": "WebtoonsAdapter",
+                    "recommended_action": "import_episodes",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"]
+                }
+            elif "/webtoon/detail" in path or "no" in query:
+                ch_num = query.get("no", [""])[0]
+                parent_url = f"{parsed.scheme}://{parsed.netloc}/webtoon/list?titleId={title_id}" if title_id else canonical
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": parent_url,
+                    "chapter_url": canonical,
+                    "is_chapter_url": True,
+                    "is_series_url": False,
+                    "platform": "naver",
+                    "domain": domain,
+                    "title_slug": f"title-{title_id}" if title_id else "webtoon",
+                    "title_id": title_id or None,
+                    "series_slug": f"title-{title_id}" if title_id else "webtoon",
+                    "series_id": title_id or None,
+                    "chapter_slug": f"no-{ch_num}",
+                    "chapter_number": ch_num or None,
+                    "title_no": title_id or None,
+                    "target_adapter": "WebtoonsAdapter",
+                    "recommended_action": "import_chapter",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"]
+                }
+
+        # Kakao Webtoon Platform Specialized Extraction
+        if "kakao.com" in domain:
+            if "/content/" in path:
+                series_id = path_segments[-1] if path_segments else None
+                title_slug = path_segments[-2] if len(path_segments) >= 2 else "comic"
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": canonical,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_series_url": True,
+                    "platform": "kakao",
+                    "domain": domain,
+                    "title_slug": title_slug,
+                    "title_id": series_id,
+                    "series_slug": title_slug,
+                    "series_id": series_id,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": series_id,
+                    "target_adapter": "GenericAdaptiveAdapter",
+                    "recommended_action": "import_episodes",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"]
+                }
+            elif "/viewer/" in path:
+                chapter_id = path_segments[-1] if path_segments else None
+                chapter_slug_part = path_segments[-2] if len(path_segments) >= 2 else "chapter"
+                m_num = re.search(r"(\d+)", chapter_slug_part)
+                ch_num = m_num.group(1) if m_num else None
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": f"{parsed.scheme}://{parsed.netloc}/content/{chapter_slug_part}",
+                    "chapter_url": canonical,
+                    "is_chapter_url": True,
+                    "is_series_url": False,
+                    "platform": "kakao",
+                    "domain": domain,
+                    "title_slug": chapter_slug_part,
+                    "title_id": chapter_id,
+                    "series_slug": chapter_slug_part,
+                    "series_id": chapter_id,
+                    "chapter_slug": f"ep-{ch_num or chapter_id}",
+                    "chapter_number": ch_num,
+                    "title_no": chapter_id,
+                    "target_adapter": "GenericAdaptiveAdapter",
+                    "recommended_action": "import_chapter",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"]
+                }
+
+        # Tapas Platform Specialized Extraction
+        if "tapas.io" in domain:
+            if "/episode/" in path:
+                ep_id = path_segments[-1] if path_segments else None
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": canonical,
+                    "chapter_url": canonical,
+                    "is_chapter_url": True,
+                    "is_series_url": False,
+                    "platform": "tapas",
+                    "domain": domain,
+                    "title_slug": f"episode-{ep_id}",
+                    "title_id": ep_id,
+                    "series_slug": f"episode-{ep_id}",
+                    "series_id": ep_id,
+                    "chapter_slug": f"ep-{ep_id}",
+                    "chapter_number": ep_id,
+                    "title_no": ep_id,
+                    "target_adapter": "WebtoonsAdapter",
+                    "recommended_action": "import_chapter",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"]
+                }
+            elif "/series/" in path:
+                series_slug = path_segments[1] if len(path_segments) >= 2 else path_segments[-1]
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": canonical,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_series_url": True,
+                    "platform": "tapas",
+                    "domain": domain,
+                    "title_slug": series_slug,
+                    "title_id": series_slug,
+                    "series_slug": series_slug,
+                    "series_id": series_slug,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": None,
+                    "target_adapter": "WebtoonsAdapter",
+                    "recommended_action": "import_episodes",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"]
+                }
 
         # 2. Extract series ID from query parameters
         series_id = None

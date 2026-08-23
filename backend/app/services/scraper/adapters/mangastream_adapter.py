@@ -33,16 +33,9 @@ from ..extraction import DomExtractor
 from ..content_validator import ImageValidator
 from ..image_order_resolver import OrderResolver
 from ..content_evaluator import ScraperDiagnosticsLogger
+from ..scraper_constants import MANGASTREAM_DOMAINS
 
 logger = logging.getLogger("sonikoma.services.scraper.adapters.mangastream")
-
-_KNOWN_MANGASTREAM_DOMAINS = (
-    "asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com",
-    "flamecomics.xyz", "flamecomics.com", "flamecomics.me", "flamescans.org",
-    "reaperscans.com", "realmscans.xyz", "void-scans.com", "voidscans.com",
-    "cosmicscans.com", "luminousscans.com", "anigliscans.com",
-    "freakscans.com", "suryascans.com", "nightcomic.com"
-)
 
 
 class MangaStreamAdapter(BaseSiteAdapter):
@@ -51,7 +44,7 @@ class MangaStreamAdapter(BaseSiteAdapter):
     name: str = "ThemeSphere (MangaStream)"
     icon: str = "⚡"
     description: str = "ThemeSphere reader (#readerarea img). Covers Asura, Flame, Reaper, Void Scans."
-    supported_domains: list = list(_KNOWN_MANGASTREAM_DOMAINS)
+    supported_domains: list = list(MANGASTREAM_DOMAINS)
 
     @classmethod
     def matches(cls, source_info: SourceInfo) -> bool:
@@ -84,9 +77,14 @@ class MangaStreamAdapter(BaseSiteAdapter):
         soup = DomExtractor.get_soup(html) if html else None
 
         # Fallback to browser rendering if blocked by Cloudflare
-        if not html or status in (403, 503) or (soup and not soup.select(".eplister, #chapterlist, .entry-title")):
+        if not html or status in (403, 503) or (soup and not soup.select(".eplister, #chapterlist, .entry-title, a[href*='/chapter']")):
             logger.info(f"[MangaStreamAdapter] Fetching series page via BrowserFetcher: {clean_url}")
-            b_html, _, _ = await BrowserFetcher.render_page(clean_url, auto_scroll=True)
+            b_html, _, _ = await BrowserFetcher.render_page(
+                clean_url,
+                auto_scroll=True,
+                wait_selector="a[href*='/chapter'], h1, .entry-title, .eplister",
+                timeout_seconds=25.0
+            )
             if b_html:
                 html = b_html
                 soup = DomExtractor.get_soup(b_html)
@@ -94,25 +92,43 @@ class MangaStreamAdapter(BaseSiteAdapter):
         if not soup:
             return None
 
+        # 0. Check Embedded Next.js / Nuxt state trees (e.g. Asura / FlameComics SPA state)
+        from ..extraction.embedded_state_extractor import EmbeddedStateExtractor
+        state_data = EmbeddedStateExtractor.extract_series_and_episodes_from_state(html or "", clean_url)
+        if state_data and state_data.get("episodes"):
+            return {
+                "success": True,
+                "series_title": state_data.get("title") or "Comic Series",
+                "url": clean_url,
+                "series": {
+                    "title": state_data.get("title") or "Comic Series",
+                    "author": state_data.get("author") or "",
+                    "cover_image": state_data.get("cover") or "",
+                    "url": clean_url
+                },
+                "episodes": state_data["episodes"],
+                "total_episodes": len(state_data["episodes"])
+            }
+
         # 1. Extract Series Metadata & Cover Poster
         series_meta, _ = DomExtractor.extract_metadata(html or "", clean_url)
         title_el = soup.select_one(".entry-title, h1.entry-title, .infox h1")
         series_title = title_el.get_text(strip=True) if title_el else (series_meta.title or "Comic Series")
 
-        author_el = soup.select_one(".infox .spe span:has(b:contains('Author')), .infox .author, .author")
+        author_el = soup.select_one(".infox .author, .author, .spe span, .fmed b")
         author = author_el.get_text(strip=True) if author_el else (series_meta.author or "")
 
-        cover_el = soup.select_one(".thumb img, .bigcover img, meta[property='og:image']")
+        cover_el = soup.select_one(".thumb img, .bigcover img, meta[property='og:image'], .series-thumb img, .poster img")
         cover_image = ""
         if cover_el:
             cover_image = cover_el.get("content") or cover_el.get("data-src") or cover_el.get("src") or ""
 
-        # 2. Extract Chapters from .eplister / #chapterlist / select#chapter
+        # 2. Extract Chapters from .eplister / #chapterlist / select#chapter / links
         episodes: List[Dict[str, Any]] = []
         seen = set()
 
         # Strategy A: .eplister li or #chapterlist li
-        for li in soup.select(".eplister li, #chapterlist li, ul.clstyle li"):
+        for li in soup.select(".eplister li, #chapterlist li, ul.clstyle li, .chapter-list li, .bxcl li"):
             a = li.find("a", href=True)
             if not a:
                 continue
@@ -160,6 +176,34 @@ class MangaStreamAdapter(BaseSiteAdapter):
                     "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                     "date": "",
                     "thumbnail": self.build_proxy_thumbnail_url(None, val, cover_image),
+                    "cover": cover_image,
+                    "language": self.extract_language_tag(txt),
+                })
+
+        # Strategy C: Modern React / Tailwind Grid Chapter links (Asura / Flame / Void)
+        if not episodes:
+            for a in soup.select("a[href*='/chapter/'], a[href*='/chapter-'], a[href*='-chapter-'], a[href*='/ch-']"):
+                href = a.get("href", "").strip()
+                if not href or href == "#" or href.startswith("javascript:"):
+                    continue
+                full_url = urljoin(clean_url, href)
+                if full_url in seen:
+                    continue
+                seen.add(full_url)
+
+                txt = a.get_text(strip=True)
+                if not txt or not any(k in txt.lower() for k in ("chapter", "ch.", "ep.", "episode")):
+                    m_ch = re.search(r'chapter[-_]?([0-9.]+)', href, re.I)
+                    txt = f"Chapter {m_ch.group(1)}" if m_ch else (txt or "Chapter")
+
+                num_val, _ = self.extract_number_and_type(txt)
+                episodes.append({
+                    "title": txt or f"Chapter {num_val or len(episodes)+1}",
+                    "url": full_url,
+                    "chapter_number": num_val,
+                    "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
+                    "date": "",
+                    "thumbnail": self.build_proxy_thumbnail_url(None, full_url, cover_image),
                     "cover": cover_image,
                     "language": self.extract_language_tag(txt),
                 })
@@ -243,7 +287,7 @@ class MangaStreamAdapter(BaseSiteAdapter):
                 candidates.append(
                     CandidateImage(
                         url=full_url,
-                        source_type=ImageSourceType.DOM_IMG,
+                        source_type=ImageSourceType.DOM,
                         container_selector="#readerarea",
                         confidence=0.95,
                     )

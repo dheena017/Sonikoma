@@ -4,8 +4,6 @@ import * as api from "@/api/index";
 import { useProjectStore } from "@/store/useProjectStore";
 import { usePlaybackEngine } from "./usePlaybackEngine";
 import { usePipelineActions } from "./usePipelineActions";
-import { parseWebtoonUrl } from "@/utils";
-import { extractWebtoonUrl, convertToViewerUrl } from "@/shared/utils/url";
 
 export function useAppLogic() {
   const state = useAppState();
@@ -63,12 +61,8 @@ export function useAppLogic() {
               return "";
             })();
 
-        const resolvedUrl = convertToViewerUrl(
-          activeUrl,
-          state.chapterNumber.trim()
-        );
         const data = await api.generateStoryboard(state.fetchWithInterceptor, {
-          url: extractWebtoonUrl(resolvedUrl),
+          url: activeUrl.trim(),
           project_id: projId,
           model: selectedModel,
           narrationStyle: state.narrationStyle,
@@ -336,11 +330,11 @@ export function useAppLogic() {
   }, [state.setConsoleLogs]);
 
   const SOURCE_DOMAINS: Record<string, string[]> = {
-    webtoons: ["webtoons.com", "webtoon.com", "naver.com"],
+    webtoons: ["webtoons.com", "webtoon.com"],
     webcomicsapp: ["webcomicsapp.com"],
-    mangadex: ["mangadex.org", "mangadex.com", "mangadex.cc"],
+    mangadex: ["mangadex.org", "mangadex.com"],
     toomics: ["toomics.com"],
-    linewebtoon: ["webtoon.com", "webtoons.com", "naver.com"],
+    linewebtoon: ["webtoon.com", "webtoons.com"],
     asurascans: ["asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com"],
     manhuato: ["manhuato.com"],
     reaperscans: ["reaperscans.com"],
@@ -358,7 +352,6 @@ export function useAppLogic() {
     manhuaplus: ["manhuaplus.com", "manhuaplus.org"],
     manhwaclan: ["manhwaclan.com"],
     "1stkissmanga": ["1stkissmanga.io", "1stkissmanga.com", "1stkissmanga.me"],
-    manganato: ["manganato.com", "readmanganato.com", "chapmanganato.to", "chapmanganato.com"],
     mangakakalot: ["mangakakalot.com", "mangakakalot.tv", "readmangakakalot.com"],
     batoto: ["bato.to", "mangatoto.com", "battwo.com", "batocomic.com", "readtoto.com"],
     custom: [],
@@ -370,11 +363,7 @@ export function useAppLogic() {
       const activeUrl = typeof customUrl === "string" ? customUrl : targetUrl;
       if (!activeUrl || !activeUrl.trim()) return false;
 
-      const resolvedUrl = convertToViewerUrl(
-        activeUrl,
-        state.chapterNumber.trim()
-      );
-      const normalizedTargetUrl = extractWebtoonUrl(resolvedUrl);
+      const normalizedTargetUrl = activeUrl.trim();
 
       const currentHost = (() => {
         try {
@@ -425,26 +414,7 @@ export function useAppLogic() {
       sourceMismatchNotified.current = false;
       state.setIsScraping(true);
 
-      const { genre, title, episode } = parseWebtoonUrl(normalizedTargetUrl);
-
-      if (title) {
-        state.setScrapedTitle(
-          title
-            .split("-")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ")
-        );
-      }
-      if (genre) {
-        state.setScrapedGenre(
-          genre
-            .split("-")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ")
-        );
-      }
-
-      // Semantic URL separation check
+      // Semantic URL separation check via Backend API
       try {
         const sep = await api.separateComicUrl(state.fetchWithInterceptor, normalizedTargetUrl);
         if (sep && sep.success) {
@@ -482,7 +452,6 @@ export function useAppLogic() {
           `[Import] Spawned live import task to separate strip images from: ${normalizedTargetUrl}`,
           `[Model] Using System engine: ${selectedModel} for panel analysis`,
           `[Import] Selected source website: ${selectedSource}`,
-          `[Import] Parsed URL → Genre: ${genre} | Title: ${title} | Episode: ${episode}`,
           ...baseLogs,
         ];
       });
@@ -711,7 +680,7 @@ export function useAppLogic() {
 
       for (let i = 0; i < episodesList.length; i++) {
         const ep = episodesList[i];
-        const target = extractWebtoonUrl(ep.url);
+        const target = (ep.url || "").trim();
         const numStr = (ep.number || "").trim();
         const titleStr = (ep.title || "").trim();
         let epLabel = numStr || titleStr || target;

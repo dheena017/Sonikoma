@@ -86,6 +86,21 @@ class AdaptiveScraperEngine:
                 )
             )
 
+        # Step 1.5: Check for text Light Novel URLs (/novel/, /novels/, /lightnovel/, /webnovel/)
+        parsed_path = urlparse(normalized_url).path.lower()
+        if any(seg in parsed_path for seg in ["/novel/", "/novels/", "/lightnovel/", "/webnovel/"]):
+            logger.info(f"[AdaptiveScraperEngine] Rejecting text Light Novel URL: {normalized_url}")
+            return ChapterResult(
+                success=False,
+                project_id=project_id,
+                job_id=job_id,
+                source=SiteAnalyzer.analyze(normalized_url),
+                error=ScrapeError(
+                    code=ScrapeErrorCode.READER_NOT_FOUND,
+                    message="This URL is a written text novel (/novel/...) which contains written story paragraphs and zero comic panel artwork. Sonikoma requires a visual comic/manhwa URL (e.g. /series/...) to extract panels."
+                )
+            )
+
         # Step 2: Build execution configuration
         config = ScrapeConfiguration(
             bypass_cache=bypass_cache,

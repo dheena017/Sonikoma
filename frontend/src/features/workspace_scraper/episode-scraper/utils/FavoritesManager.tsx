@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ReactNode } from "react";
 import { Trash2, ExternalLink } from "lucide-react";
-import { getProxiedImageUrl } from "@/shared/utils/url";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 
 export interface FavoriteSeries {
   title_no: string;

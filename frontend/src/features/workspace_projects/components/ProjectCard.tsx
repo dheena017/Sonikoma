@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowRight,
   CheckSquare,
@@ -13,6 +13,7 @@ import {
   Square,
   Trash2,
   Clock,
+  Sparkles,
 } from "lucide-react";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 
@@ -72,6 +73,16 @@ export default function ProjectCard({
   const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
   const isRenaming = renamingProjectId === project.project_id;
   const titleText = project.title || "Untitled Series";
+  const [imageError, setImageError] = useState(false);
+  const [imgSrc, setImgSrc] = useState<string>(() =>
+    getProxiedImageUrl(project.cover_image, project.url)
+  );
+
+  useEffect(() => {
+    setImageError(false);
+    setImgSrc(getProxiedImageUrl(project.cover_image, project.url));
+  }, [project.cover_image, project.url]);
+
   const statusColor =
     project.status?.toLowerCase() === "completed"
       ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-emerald-950/20"
@@ -104,22 +115,29 @@ export default function ProjectCard({
 
       {/* ─── Thumbnail ─────────────────────────────────── */}
       <div className="relative aspect-[16/10] w-full bg-neutral-950 overflow-hidden flex-shrink-0 rounded-t-3xl">
-        {project.cover_image ? (
+        {imgSrc && !imageError ? (
           <>
             {/* Ambient blurred background filler */}
             <img
-              src={getProxiedImageUrl(project.cover_image, project.url)}
+              src={imgSrc}
               alt=""
               aria-hidden="true"
               className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-125 pointer-events-none"
             />
             {/* Crisp full image without cropping */}
             <img
-              src={getProxiedImageUrl(project.cover_image, project.url)}
+              src={imgSrc}
               alt={project.title}
               className={`relative z-[1] w-full h-full object-contain transition-transform duration-700 ease-out block ${
                 isSelected ? "scale-105 opacity-90" : "group-hover:scale-105"
               }`}
+              onError={() => {
+                if (imgSrc.includes("/api/proxy-image") && project.cover_image) {
+                  setImgSrc(project.cover_image);
+                } else {
+                  setImageError(true);
+                }
+              }}
             />
             {/* Seamless gradient overlay at bottom */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none z-[2]" />
@@ -127,10 +145,15 @@ export default function ProjectCard({
             <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.15),_transparent_45%)] z-[2]" />
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/20 via-neutral-900 to-neutral-950">
-            <FolderOpen className="w-8 h-8 text-purple-500/40" />
-            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
-              No Cover
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-950 p-4 relative overflow-hidden">
+            <div className="w-10 h-10 rounded-2xl bg-neutral-900/80 border border-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-950/30 transition-transform group-hover:scale-110 duration-300">
+              <Sparkles className="w-5 h-5 text-purple-400/80" />
+            </div>
+            <span className="text-[11px] text-neutral-300 font-bold font-mono tracking-wider text-center line-clamp-1">
+              {formatEpisodeLabel(project.episode) || project.title || "CHAPTER PROJECT"}
+            </span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              Ready for Creative Studio
             </span>
           </div>
         )}

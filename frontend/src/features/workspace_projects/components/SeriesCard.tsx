@@ -13,9 +13,11 @@ import {
   Download,
   Link,
   Layers,
+  Sparkles,
 } from "lucide-react";
 import type { Series } from "@/features/workspace_projects/utils/seriesGrouping";
 import { timeAgo } from "@/utils/dateUtils";
+import { getProxiedImageUrl } from "@/utils";
 
 interface SeriesCardProps {
   series: Series;
@@ -54,10 +56,19 @@ export default function SeriesCard({
 }: SeriesCardProps) {
   const isRenaming = renamingProjectId === series.id;
   const [titleText, setTitleText] = useState(series.title || "Untitled Series");
+  const [imageError, setImageError] = useState(false);
+  const [imgSrc, setImgSrc] = useState<string>(() =>
+    getProxiedImageUrl(series.cover, series.latestChapter?.url)
+  );
 
   useEffect(() => {
     setTitleText(series.title || "Untitled Series");
   }, [series.title]);
+
+  useEffect(() => {
+    setImageError(false);
+    setImgSrc(getProxiedImageUrl(series.cover, series.latestChapter?.url));
+  }, [series.cover, series.latestChapter?.url]);
 
   const statusColors: Record<string, string> = {
     Completed: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
@@ -121,31 +132,43 @@ export default function SeriesCard({
         )}
 
         {/* Cover image with Ambient Blurred Background */}
-        {series.cover ? (
+        {imgSrc && !imageError ? (
           <>
             <img
-              src={series.cover}
+              src={imgSrc}
               alt=""
               aria-hidden="true"
               className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-125 pointer-events-none"
             />
             <img
-              src={series.cover}
+              src={imgSrc}
               alt={series.title}
               className={`relative z-[1] w-full h-full object-contain transition-transform duration-700 ease-out block ${
                 isSelected ? "scale-105 opacity-90" : "group-hover:scale-105"
               }`}
               loading="lazy"
+              onError={() => {
+                if (imgSrc.includes("/api/proxy-image") && series.cover) {
+                  setImgSrc(series.cover);
+                } else {
+                  setImageError(true);
+                }
+              }}
             />
             {/* Seamless bottom fade */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none z-[2]" />
             <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.15),_transparent_45%)] z-[2]" />
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-purple-950/20 via-neutral-900 to-neutral-950">
-            <FolderOpen className="w-8 h-8 text-purple-500/40" />
-            <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
-              No Cover
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-950 p-4 relative overflow-hidden">
+            <div className="w-10 h-10 rounded-2xl bg-neutral-900/80 border border-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-950/30 transition-transform group-hover:scale-110 duration-300">
+              <Sparkles className="w-5 h-5 text-purple-400/80" />
+            </div>
+            <span className="text-[11px] text-neutral-300 font-bold font-mono tracking-wider text-center line-clamp-1">
+              {series.title || "COMIC SERIES"}
+            </span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              {series.chapterCount || 0} Chapters in Workspace
             </span>
           </div>
         )}

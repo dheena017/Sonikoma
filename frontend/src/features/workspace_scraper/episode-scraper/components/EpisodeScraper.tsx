@@ -45,7 +45,6 @@ import { EpisodeScraperEmptyState } from "./EpisodeScraperEmptyState";
 import { NotificationType } from "@/features/app_notification";
 import { getSeriesEpisodes, separateComicUrl } from "@/api/endpoints/scraper";
 import type { Episode } from "../types/EpisodeTypes";
-import { isKnownSite, addCustomSite } from "@/shared/utils/url";
 import { makeSafeFilename } from "@/shared/utils/downloadNaming";
 
 interface SeriesMetadata {
@@ -364,11 +363,29 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       });
 
       if (result.success) {
-        setEpisodes(result.episodes || []);
+        const rawEpisodes = result.episodes || result.chapters || [];
+        const fallbackCover = result.cover_image || result.cover || result.series?.cover_image || result.series?.cover || "";
+        const normalizedEpisodes = rawEpisodes.map((ep: any, i: number) => ({
+          ...ep,
+          thumbnail: ep.thumbnail || ep.cover_image || ep.cover || fallbackCover,
+          number: String(ep.number ?? ep.chapter_number ?? (i + 1)),
+          title: ep.title || `Chapter ${ep.number ?? (i + 1)}`,
+          url: ep.url,
+          index: ep.index ?? i,
+        }));
+
+        setEpisodes(normalizedEpisodes);
         setSeriesMetadata(
           result.series
             ? { ...result.series, url: result.url || targetSeriesUrl || activeUrl }
-            : null
+            : {
+                title: result.title || result.series_title || "Comic Series",
+                author: result.author || "",
+                genre: result.genre || "Webtoon",
+                cover_image: fallbackCover,
+                description: result.description || "",
+                url: result.url || targetSeriesUrl || activeUrl,
+              }
         );
 
         if (result.series && result.title_no) {

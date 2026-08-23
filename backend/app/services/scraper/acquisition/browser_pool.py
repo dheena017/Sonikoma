@@ -8,10 +8,34 @@ stability, ephemeral context isolation per domain, and queue lifecycle managemen
 """
 
 import os
+import sys
 import asyncio
 import logging
 from typing import Optional, Dict, Any, Tuple, List, Callable, Awaitable
 from urllib.parse import urlparse
+
+# Windows Python 3.8-3.12 ProactorEventLoop Pipe Transport Cleanup Patch
+if sys.platform == "win32":
+    try:
+        from functools import wraps
+        from asyncio.proactor_events import _ProactorBasePipeTransport
+        from asyncio.base_subprocess import BaseSubprocessTransport
+
+        def _silence_asyncio_del(func):
+            @wraps(func)
+            def wrapper(self, *args, **kwargs):
+                try:
+                    func(self, *args, **kwargs)
+                except (RuntimeError, BaseException):
+                    pass
+            return wrapper
+
+        if hasattr(_ProactorBasePipeTransport, "__del__"):
+            _ProactorBasePipeTransport.__del__ = _silence_asyncio_del(_ProactorBasePipeTransport.__del__)
+        if hasattr(BaseSubprocessTransport, "__del__"):
+            BaseSubprocessTransport.__del__ = _silence_asyncio_del(BaseSubprocessTransport.__del__)
+    except Exception:
+        pass
 
 logger = logging.getLogger("sonikoma.services.scraper.browser.pool")
 
@@ -140,10 +164,18 @@ class BrowserPool:
                     timeout=timeout_seconds
                 )
                 return result
+            except (asyncio.TimeoutError, asyncio.CancelledError):
+                logger.debug(f"[BrowserPool] Task timed out or was cancelled after {timeout_seconds}s")
+                return "", [], {}
+            except Exception as e:
+                if "TargetClosedError" not in type(e).__name__ and "closed" not in str(e).lower():
+                    logger.debug(f"[BrowserPool] Worker task error: {e}")
+                return "", [], {}
             finally:
                 self._active_jobs = max(0, self._active_jobs - 1)
                 try:
-                    await page.close()
+                    if not page.is_closed():
+                        await page.close()
                 except Exception:
                     pass
                 try:

@@ -255,11 +255,21 @@ class ScraperCacheManager:
     # ── In-Memory Fast Cache Clearing & Session Operations ──────────────────
     @classmethod
     def clear(cls) -> Dict[str, Any]:
-        """Flushes in-memory RAM caches (_mem_l1, _mem_l5)."""
+        """Flushes in-memory RAM caches (_mem_l1, _mem_l5) and SQLite persistent cache tables."""
         l1_count = len(cls._mem_l1)
         l5_count = len(cls._mem_l5)
         cls._mem_l1.clear()
         cls._mem_l5.clear()
+
+        if get_db_connection:
+            try:
+                with get_db_connection() as conn:
+                    conn.execute("DELETE FROM scraper_l1_cache")
+                    conn.execute("DELETE FROM scraper_l5_cache")
+                    conn.commit()
+            except Exception:
+                pass
+
         return {
             "success": True,
             "message": f"Cleared {l1_count} L1 HTML caches and {l5_count} L5 result caches."

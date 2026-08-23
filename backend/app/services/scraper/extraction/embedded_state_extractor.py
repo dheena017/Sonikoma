@@ -94,7 +94,54 @@ class EmbeddedStateExtractor:
             except Exception:
                 pass
 
-        return candidates
+    @classmethod
+    def extract_series_and_episodes_from_state(cls, html: str, base_url: str) -> Optional[Dict[str, Any]]:
+        """Parses series info and chapter list from Next.js (__NEXT_DATA__) or Nuxt state trees."""
+        if not html:
+            return None
+
+        # 1. Next.js __NEXT_DATA__
+        next_match = re.search(r'<script\s+id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.DOTALL)
+        if next_match:
+            try:
+                data = json.loads(next_match.group(1))
+                props = data.get("props", {}).get("pageProps", {})
+                
+                # Check for series/manga object
+                series_obj = props.get("series") or props.get("manga") or props.get("comic") or props.get("data") or {}
+                if isinstance(series_obj, dict):
+                    title = series_obj.get("title") or series_obj.get("name") or ""
+                    cover = series_obj.get("thumbnail") or series_obj.get("cover") or series_obj.get("cover_image") or series_obj.get("poster") or ""
+                    author = series_obj.get("author") or series_obj.get("artist") or ""
+                    
+                    raw_chapters = series_obj.get("chapters") or props.get("chapters") or []
+                    if isinstance(raw_chapters, list) and raw_chapters:
+                        episodes = []
+                        for idx, ch in enumerate(raw_chapters):
+                            if not isinstance(ch, dict):
+                                continue
+                            ch_name = ch.get("name") or ch.get("title") or f"Chapter {ch.get('number', idx + 1)}"
+                            slug = ch.get("slug") or ch.get("id") or str(ch.get("number", idx + 1))
+                            ch_url = f"{base_url.rstrip('/')}/chapter/{slug}" if not slug.startswith("http") else slug
+                            episodes.append({
+                                "title": ch_name,
+                                "url": ch_url,
+                                "number": str(ch.get("number", idx + 1)),
+                                "thumbnail": ch.get("thumbnail") or cover,
+                                "cover": cover,
+                                "date": ch.get("created_at") or ch.get("date") or ""
+                            })
+                        if episodes:
+                            return {
+                                "title": title,
+                                "cover": cover,
+                                "author": author,
+                                "episodes": episodes
+                            }
+            except Exception as e:
+                logger.debug(f"[EmbeddedStateExtractor] Next.js series extraction error: {e}")
+
+        return None
 
     extract_state_images = extract_from_html
 

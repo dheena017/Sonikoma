@@ -134,9 +134,12 @@ class ChapterInfo(BaseModel):
     episode: Optional[str] = None
     title: Optional[str] = None
     url: Optional[str] = None
+    thumbnail: Optional[str] = None
+    cover: Optional[str] = None
     published_at: Optional[str] = None
     previous: Optional[str] = None
     next: Optional[str] = None
+
 
 
 class ImageItem(BaseModel):
@@ -194,6 +197,42 @@ class ChapterResult(BaseModel):
     images: List[ImageItem] = Field(default_factory=list)
     scrape: ScrapeDiagnostics = Field(default_factory=ScrapeDiagnostics)
     error: Optional[Union[ScrapeError, Dict[str, Any], Any]] = None
+
+    @property
+    def error_message(self) -> Optional[str]:
+        """Convenience accessor returning a clean error string message if present."""
+        if not self.error:
+            return None
+        if isinstance(self.error, str):
+            return self.error
+        if hasattr(self.error, "message"):
+            return getattr(self.error, "message")
+        if isinstance(self.error, dict):
+            return self.error.get("message") or self.error.get("detail") or str(self.error)
+        return str(self.error)
+
+    @property
+    def diagnostics(self) -> ScrapeDiagnostics:
+        """Alias for scrape diagnostics metadata."""
+        return self.scrape
+
+    @property
+    def cover_image(self) -> Optional[str]:
+        """Convenience accessor for chapter / series cover image."""
+        is_valid = lambda u: bool(u) and not str(u).endswith("/") and not any(k in str(u).lower() for k in ("avatar", "gravatar", "theme", "logo", "about", "continued", "banner"))
+        if self.series and self.series.cover_image and is_valid(self.series.cover_image):
+            return self.series.cover_image
+        if self.series and self.series.cover and is_valid(self.series.cover):
+            return self.series.cover
+        if self.chapter and self.chapter.thumbnail and is_valid(self.chapter.thumbnail):
+            return self.chapter.thumbnail
+        for img in self.images:
+            if is_valid(img.url):
+                return img.url
+        return self.images[0].url if self.images else None
+
+
+
 
 
 class CandidateImage(BaseModel):

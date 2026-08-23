@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 import type { Episode as BaseEpisode } from "../types/EpisodeTypes";
-import { getProxiedImageUrl, getSourceName } from "@/shared/utils/url";
+import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
 
 type EpisodeCardEpisode = BaseEpisode & {
   duration?: string;
@@ -57,7 +57,16 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imgSrc, setImgSrc] = useState<string>(() =>
+    getProxiedImageUrl(episode.thumbnail, episode.url)
+  );
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setImageError(false);
+    setImgSrc(getProxiedImageUrl(episode.thumbnail, episode.url));
+  }, [episode.thumbnail, episode.url]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -276,23 +285,33 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
           </div>
         )}
 
-        {episode.thumbnail ? (
+        {imgSrc && !imageError ? (
           <img
-            src={getProxiedImageUrl(episode.thumbnail, episode.url)}
+            src={imgSrc}
             alt={episode.title}
             className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
               isHovered ? "scale-105 brightness-105" : "scale-100"
             }`}
-            onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23171717' width='100' height='100'/%3E%3C/svg%3E";
+            onError={() => {
+              if (imgSrc.includes("/api/proxy-image") && episode.thumbnail) {
+                // Retry directly with raw URL if proxy failed
+                setImgSrc(episode.thumbnail);
+              } else {
+                setImageError(true);
+              }
             }}
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-neutral-900 to-neutral-950">
-            <ImageIcon className="w-10 h-10 text-neutral-700" />
-            <span className="text-[10px] text-neutral-600 font-mono">
-              No Image
+          <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-950 p-4">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent" />
+            <div className="w-12 h-12 rounded-2xl bg-neutral-900/80 border border-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-950/30 mb-1.5 transition-transform group-hover:scale-110 duration-300">
+              <Sparkles className="w-6 h-6 text-purple-400/80" />
+            </div>
+            <span className="text-[11px] font-bold text-neutral-300 font-mono tracking-wider">
+              {episode.number ? `CH. ${episode.number}` : "COMIC COVER"}
+            </span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              Ready to Read & Import
             </span>
           </div>
         )}

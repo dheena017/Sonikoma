@@ -34,17 +34,9 @@ from ..extraction import DomExtractor
 from ..content_validator import ImageValidator
 from ..image_order_resolver import OrderResolver
 from ..content_evaluator import ScraperDiagnosticsLogger
+from ..scraper_constants import MADARA_DOMAINS
 
 logger = logging.getLogger("sonikoma.services.scraper.adapters.madara")
-
-_KNOWN_MADARA_DOMAINS = (
-    "mangaclash.com", "manhuaus.com", "topmanhua.com", "manhuatop.org", "manhuaplus.org", "manhuaplus.com",
-    "manhwatop.com", "manhwatop.org", "manhwa18.cc", "1stkissmanga.io", "1stkissmanga.com", "1stkissmanga.me", "mangatx.com",
-    "mangaeffect.com", "mangaonlineteam.com", "kunmanga.com", "harimanga.com",
-    "zinmanga.com", "manhwaclan.com", "manhwaden.com", "manga68.com", "manhuato.com",
-    "manganato.com", "readmanganato.com", "chapmanganato.to", "chapmanganato.com",
-    "mangakakalot.com", "mangakakalot.tv", "readmangakakalot.com"
-)
 
 _MADARA_CONTAINER_SELECTORS = [
     ".reading-content",
@@ -60,7 +52,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
     name: str = "WP-Manga (Madara)"
     icon: str = "📑"
     description: str = "WordPress WP-Manga reader (.reading-content img). Covers 100+ scanlation sites."
-    supported_domains: list = list(_KNOWN_MADARA_DOMAINS)
+    supported_domains: list = list(MADARA_DOMAINS)
 
     @classmethod
     def matches(cls, source_info: SourceInfo) -> bool:
@@ -92,20 +84,55 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                 clean_url = m.group(1)
 
         html, status, _ = await HttpFetcher.fetch_html(clean_url)
+        if not html or status in (403, 503, 429) or (html and "<html" not in html.lower()):
+            logger.info(f"[MadaraCmsAdapter] HttpFetcher returned status {status}. Escalating to BrowserFetcher for series discovery...")
+            b_html, _, _ = await BrowserFetcher.render_page(
+                clean_url, 
+                auto_scroll=True, 
+                wait_selector=".listing-chapters_wrap, #manga-chapters-holder, .wp-manga-chapter, .sub-chap-list, .version-chap", 
+                timeout_seconds=25.0
+            )
+            if b_html:
+                html = b_html
+
         soup = DomExtractor.get_soup(html) if html else None
 
         # Extract Series Metadata & Cover Image
         series_meta, _ = DomExtractor.extract_metadata(html or "", clean_url)
-        title_el = soup.select_one(".post-title h1, .post-title h3, h1.entry-title") if soup else None
-        series_title = title_el.get_text(strip=True) if title_el else (series_meta.title or "Madara Series")
+        title_el = soup.select_one(".post-title h1, .post-title h3, h1.entry-title, .series-title, meta[property='og:title']") if soup else None
+        if title_el and title_el.name == "meta":
+            series_title = title_el.get("content", "").strip()
+        else:
+            series_title = title_el.get_text(strip=True) if title_el else (series_meta.title or "Madara Series")
 
-        author_el = soup.select_one(".author-content a, .artist-content a, .manga-authors a") if soup else None
+        author_el = soup.select_one(".author-content a, .artist-content a, .manga-authors a, .author-item a") if soup else None
         author = author_el.get_text(strip=True) if author_el else (series_meta.author or "")
 
-        cover_el = soup.select_one(".summary_image img, .tab-summary img, meta[property='og:image']") if soup else None
+        desc_el = soup.select_one(".description-summary, .summary__content, .manga-excerpt, meta[property='og:description']") if soup else None
+        if desc_el and desc_el.name == "meta":
+            description = desc_el.get("content", "").strip()
+        else:
+            description = desc_el.get_text(strip=True) if desc_el else (series_meta.description or "")
+
+        cover_el = soup.select_one(
+            ".summary_image img, .tab-summary img, .summary_image a img, .item-thumb img, "
+            "meta[property='og:image'], meta[name='twitter:image'], img.wp-post-image, .c-image-hover img"
+        ) if soup else None
         cover_image = ""
         if cover_el:
-            cover_image = cover_el.get("content") or cover_el.get("data-src") or cover_el.get("src") or ""
+            if cover_el.name == "meta":
+                cover_image = cover_el.get("content", "").strip()
+            else:
+                cover_image = (
+                    cover_el.get("data-src")
+                    or cover_el.get("data-lazy-src")
+                    or cover_el.get("data-original")
+                    or cover_el.get("data-cfsrc")
+                    or cover_el.get("src")
+                    or ""
+                ).strip()
+        if not cover_image and series_meta.cover:
+            cover_image = series_meta.cover
 
         # AJAX Discovery
         manga_id = None
@@ -163,6 +190,9 @@ class MadaraCmsAdapter(BaseSiteAdapter):
 
                             is_locked = bool(li.find(class_=re.compile(r"lock|coin|paid|vip|fastpass", re.I)))
 
+                            ep_img = a.find("img") or li.find("img")
+                            ep_cover = (ep_img.get("data-src") or ep_img.get("src")) if ep_img else cover_image
+
                             episodes.append({
                                 "title": title_raw or f"Chapter {num_val or len(episodes)+1}",
                                 "url": full_url,
@@ -171,29 +201,119 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                                 "date": date_str,
                                 "is_locked": is_locked,
                                 "language": self.extract_language_tag(title_raw),
-                                "thumbnail": self.build_proxy_thumbnail_url(None, full_url, cover_image),
-                                "cover": cover_image,
+                                "thumbnail": ep_cover or cover_image,
+                                "cover_image": ep_cover or cover_image,
+                                "cover": ep_cover or cover_image,
                             })
                         if episodes:
                             break
                 except Exception as e:
                     logger.debug(f"[MadaraCmsAdapter] AJAX endpoint failed: {e}")
 
+        # Fallback to Browser-Authenticated AJAX / DOM if static httpx yielded 0
+        if not episodes:
+            logger.info("[MadaraCmsAdapter] Fetching chapter catalog via Browser-Authenticated session...")
+            async def _fetch_ajax_in_browser(page, context):
+                await page.goto(clean_url, wait_until="domcontentloaded", timeout=25000)
+                ajax_script = """
+                async () => {
+                    const endpoints = [
+                        window.location.href.replace(/\\/?$/, '/') + 'ajax/chapters/',
+                        '/wp-admin/admin-ajax.php'
+                    ];
+                    for (const ep of endpoints) {
+                        try {
+                            const res = await fetch(ep, {
+                                method: 'POST',
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            });
+                            if (res.ok) {
+                                const txt = await res.text();
+                                if (txt && txt.includes('<li')) return txt;
+                            }
+                        } catch(e) {}
+                    }
+                    const holder = document.querySelector('.listing-chapters_wrap, #manga-chapters-holder, .version-chap, ul.main');
+                    return holder ? holder.innerHTML : '';
+                }
+                """
+                return await page.evaluate(ajax_script)
+
+            try:
+                ajax_html = await browser_pool.execute_task(_fetch_ajax_in_browser, domain=parsed.netloc, timeout_seconds=25.0)
+                if ajax_html:
+                    sub = BeautifulSoup(ajax_html, "html.parser")
+                    for li in sub.find_all("li", class_=re.compile(r"wp-manga-chapter|chapter-li|chapter_list|version-chap", re.I)):
+                        a = li.find("a", href=True)
+                        if not a:
+                            continue
+                        href = a.get("href", "").strip()
+                        if not href or href == "#":
+                            continue
+                        full_url = urljoin(clean_url, href)
+                        if full_url in seen:
+                            continue
+                        seen.add(full_url)
+
+                        title_raw = a.get_text(strip=True)
+                        num_val, _ = self.extract_number_and_type(title_raw)
+
+                        date_el = li.select_one(".chapter-release-date, .post-on, .chapter-date, i")
+                        date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
+
+                        is_locked = bool(li.find(class_=re.compile(r"lock|coin|paid|vip|fastpass", re.I)))
+
+                        ep_img = a.find("img") or li.find("img")
+                        ep_cover = (ep_img.get("data-src") or ep_img.get("src")) if ep_img else cover_image
+
+                        episodes.append({
+                            "title": title_raw or f"Chapter {num_val or len(episodes)+1}",
+                            "url": full_url,
+                            "chapter_number": num_val,
+                            "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
+                            "date": date_str,
+                            "is_locked": is_locked,
+                            "language": self.extract_language_tag(title_raw),
+                            "thumbnail": ep_cover or cover_image,
+                            "cover_image": ep_cover or cover_image,
+                            "cover": ep_cover or cover_image,
+                        })
+            except Exception as ex:
+                logger.debug(f"[MadaraCmsAdapter] Browser AJAX evaluation failed: {ex}")
+
         # Fallback to Static DOM Chapters if AJAX yielded 0
         if not episodes and soup:
-            for li in soup.select("li.wp-manga-chapter, li.chapter-li"):
-                a = li.find("a", href=True)
-                if not a:
+            series_slug = parsed.path.strip("/").split("/")[-1]
+            for a in soup.select("li.wp-manga-chapter a, li.chapter-li a, .listing-chapters_wrap a, .sub-chap-list a, .version-chap a, a[href*='chapter'], a[href*='/ch-']"):
+                href = a.get("href", "").strip()
+                if not href or href == "#" or href.startswith("javascript:"):
                     continue
-                full_url = urljoin(clean_url, a["href"])
+                # Ensure link belongs to this specific series
+                if series_slug and series_slug not in href:
+                    continue
+                if not any(k in href.lower() for k in ("chapter", "ch-", "ep-", "episode")):
+                    continue
+
+                full_url = urljoin(clean_url, href)
                 if full_url in seen:
                     continue
                 seen.add(full_url)
 
                 title_raw = a.get_text(strip=True)
+                if not title_raw or "chapter" not in title_raw.lower():
+                    m_slug = re.search(r'chapter[-_]?([0-9.]+)', href, re.I)
+                    if m_slug:
+                        title_raw = f"Chapter {m_slug.group(1)}"
+                    else:
+                        title_raw = title_raw or "Chapter"
+
                 num_val, _ = self.extract_number_and_type(title_raw)
-                date_el = li.select_one(".chapter-release-date, .post-on, .chapter-date, i")
+                parent_li = a.find_parent("li")
+                date_el = parent_li.select_one(".chapter-release-date, .post-on, .chapter-date, i") if parent_li else None
                 date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
+
+                ep_img = a.find("img") or (parent_li.find("img") if parent_li else None)
+                ep_cover = (ep_img.get("data-src") or ep_img.get("src")) if ep_img else cover_image
 
                 episodes.append({
                     "title": title_raw or f"Chapter {num_val or len(episodes)+1}",
@@ -201,26 +321,39 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                     "chapter_number": num_val,
                     "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                     "date": date_str,
-                    "thumbnail": self.build_proxy_thumbnail_url(None, full_url, cover_image),
-                    "cover": cover_image,
+                    "thumbnail": ep_cover or cover_image,
+                    "cover_image": ep_cover or cover_image,
+                    "cover": ep_cover or cover_image,
                     "language": self.extract_language_tag(title_raw),
                 })
+
+
+
 
         sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
 
         return {
             "success": True,
+            "title": series_title,
             "series_title": series_title,
+            "author": author,
+            "description": description,
+            "cover_image": cover_image,
+            "cover": cover_image,
             "url": clean_url,
             "series": {
                 "title": series_title,
                 "author": author,
+                "description": description,
                 "cover_image": cover_image,
                 "url": clean_url
             },
+            "chapters": sorted_eps,
             "episodes": sorted_eps,
+            "total_chapters": len(sorted_eps),
             "total_episodes": len(sorted_eps)
         }
+
 
     async def scrape(self, context: ScrapeContext) -> ChapterResult:
         """Executes chapter image extraction for Madara reader sites."""
@@ -252,9 +385,11 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                 context.completeness = ScrapeCompleteness.COMPLETE
                 return self._finalize(context, start_time)
 
-        # Fallback to Generic Adaptive Escalation (Playwright) if static HTML failed
+        # Fallback to Generic Adaptive Escalation (Playwright) if static HTML was challenged/failed
+        logger.info("[MadaraCmsAdapter] Level 1 (HTTP) challenged by Cloudflare/WAF -> Escalating to Level 2 (Playwright Stealth Engine)")
         generic = GenericAdaptiveAdapter()
         return await generic.scrape(context)
+
 
     def _extract_madara_images(self, html: str, base_url: str) -> List[CandidateImage]:
         soup = DomExtractor.get_soup(html)
@@ -281,7 +416,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                             candidates.append(
                                 CandidateImage(
                                     url=full_url,
-                                    source_type=ImageSourceType.DOM_IMG,
+                                    source_type=ImageSourceType.DOM,
                                     container_selector=sel,
                                     confidence=0.95,
                                 )

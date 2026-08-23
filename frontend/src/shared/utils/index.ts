@@ -5,5 +5,5 @@ export * from "./filter";
 export * from "./logger";
 export * from "./selection";
 export * from "./textUtils";
-export * from "./url";
+export * from "./imageProxy";
 export * from "./workspaceNavigation";

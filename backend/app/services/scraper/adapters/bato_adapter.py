@@ -32,10 +32,9 @@ from ..extraction import DomExtractor
 from ..content_validator import ImageValidator
 from ..image_order_resolver import OrderResolver
 from ..content_evaluator import ScraperDiagnosticsLogger
+from ..scraper_constants import BATO_DOMAINS
 
 logger = logging.getLogger("sonikoma.services.scraper.adapters.bato")
-
-_BATO_DOMAINS = ("bato.to", "mangatoto.com", "battwo.com", "batocomic.com", "batotoo.com", "readtoto.com")
 
 
 class BatoAdapter(BaseSiteAdapter):
@@ -44,7 +43,7 @@ class BatoAdapter(BaseSiteAdapter):
     name: str = "Bato.to"
     icon: str = "🔵"
     description: str = "Bato.to & MangaToto server-rendered script image arrays."
-    supported_domains: list = ["bato.to", "mangatoto.com", "battwo.com", "batocomic.com", "batotoo.com", "readtoto.com"]
+    supported_domains: list = list(BATO_DOMAINS)
 
     @classmethod
     def matches(cls, source_info: SourceInfo) -> bool:
@@ -87,7 +86,7 @@ class BatoAdapter(BaseSiteAdapter):
         title_el = soup.select_one("h3.item-title, h1.item-title, .item-title a, h3 a")
         series_title = title_el.get_text(strip=True) if title_el else (series_meta.title or "Bato Series")
 
-        author_el = soup.select_one(".item-authors, .attr-item:has(b:contains('Author')) a")
+        author_el = soup.select_one(".item-authors, .attr-item a, .authors a")
         author = author_el.get_text(strip=True) if author_el else (series_meta.author or "")
 
         cover_el = soup.select_one(".attr-cover img, .item-cover img, meta[property='og:image']")
@@ -213,7 +212,7 @@ class BatoAdapter(BaseSiteAdapter):
                             candidates.append(
                                 CandidateImage(
                                     url=u,
-                                    source_type=ImageSourceType.JSON_DATA,
+                                    source_type=ImageSourceType.EMBEDDED_STATE,
                                     container_selector="script:images",
                                     index_hint=idx,
                                     confidence=0.98,
@@ -243,7 +242,7 @@ class BatoAdapter(BaseSiteAdapter):
                 candidates.append(
                     CandidateImage(
                         url=full_url,
-                        source_type=ImageSourceType.DOM_IMG,
+                        source_type=ImageSourceType.DOM,
                         container_selector=".page-img",
                         confidence=0.9,
                     )

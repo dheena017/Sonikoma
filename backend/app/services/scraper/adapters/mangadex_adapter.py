@@ -31,6 +31,7 @@ from ..scraper_models import (
 from ..content_validator import ImageValidator
 from ..image_order_resolver import OrderResolver
 from ..content_evaluator import ScraperDiagnosticsLogger
+from ..scraper_constants import MANGADEX_DOMAINS
 
 logger = logging.getLogger("sonikoma.services.scraper.adapters.mangadex")
 
@@ -46,7 +47,7 @@ class MangaDexAdapter(BaseSiteAdapter):
     name: str = "MangaDex"
     icon: str = "🟠"
     description: str = "Official MangaDex at-home REST API adapter. 0ms browser overhead with lossless panels."
-    supported_domains: list = ["mangadex.org", "mangadex.cc"]
+    supported_domains: list = list(MANGADEX_DOMAINS)
 
     @classmethod
     def matches(cls, source_info: SourceInfo) -> bool:
@@ -233,7 +234,7 @@ class MangaDexAdapter(BaseSiteAdapter):
                 if not base_url or not chapter_hash or not data_files:
                     context.completeness = ScrapeCompleteness.FAILED
                     context.error = ScrapeError(
-                        code=ScrapeErrorCode.PARSER_ERROR,
+                        code=ScrapeErrorCode.INTERNAL_ERROR,
                         message="MangaDex @home response was missing baseUrl, hash, or data files.",
                     )
                     return self._finalize(context, start_time)
@@ -244,7 +245,7 @@ class MangaDexAdapter(BaseSiteAdapter):
                     candidates.append(
                         CandidateImage(
                             url=img_url,
-                            source_type=ImageSourceType.JSON_DATA,
+                            source_type=ImageSourceType.API,
                             container_selector="api.mangadex.org/at-home",
                             index_hint=idx,
                             confidence=1.0,
@@ -252,7 +253,7 @@ class MangaDexAdapter(BaseSiteAdapter):
                     )
 
                 context.candidate_images = candidates
-                context.escalation_status = EscalationStatus.STATIC_HTTP
+                context.escalation_status = EscalationStatus.SUCCESS
                 context.completeness = (
                     ScrapeCompleteness.COMPLETE if candidates else ScrapeCompleteness.FAILED
                 )
