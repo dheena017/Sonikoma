@@ -320,9 +320,6 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 <h3 className="font-black text-base text-white font-sans tracking-tight">
                   Select Active Project
                 </h3>
-                <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-md font-mono animate-pulse">
-                  CONTEXT
-                </span>
               </div>
               <p className="text-[11px] text-neutral-400 font-sans leading-tight">
                 Global workspace active context switcher
