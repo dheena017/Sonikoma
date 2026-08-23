@@ -1,15 +1,14 @@
 import React from "react";
-import { Search, Plus, Sparkles, X, Volume2, Wand2 } from "lucide-react";
+import { Search, Plus, X } from "lucide-react";
 
 interface DashboardHeaderProps {
-  themeMode: string;
+  themeMode?: string;
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onNewSeries: () => void;
 }
 
 export default function DashboardHeader({
-  themeMode,
   searchQuery,
   onSearchChange,
   onNewSeries,
@@ -17,31 +16,6 @@ export default function DashboardHeader({
   return (
     <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
       <div className="space-y-3.5 max-w-2xl">
-        {/* Studio Branding Pill */}
-        <div className="flex items-center gap-3">
-          <div className="relative group">
-            <img
-              src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              alt="Sonikoma Logo"
-              className="h-10 w-10 rounded-2xl border border-purple-500/40 bg-black/80 shadow-lg shadow-purple-900/30 object-cover group-hover:scale-105 transition-transform"
-              style={{
-                background: themeMode === "light" ? "#ffffff" : "#000000",
-              }}
-            />
-            <span className="absolute -inset-0.5 rounded-2xl border border-purple-500/40 pointer-events-none animate-pulse" />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full border border-purple-500/30 bg-purple-500/15 text-[10px] font-black uppercase tracking-[0.18em] text-purple-300 shadow-sm font-mono flex items-center gap-1.5">
-              <Sparkles className="w-2.5 h-2.5 text-purple-400" />
-              Creator Workspace
-            </span>
-          </div>
-        </div>
-
         {/* Title & Subtitle */}
         <div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight">
