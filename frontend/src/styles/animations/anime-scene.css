@@ -629,22 +629,23 @@
 
 /* 5. EDITOR STUDIO / CANVAS: Minimalist focused high-contrast background */
 .anime-hero-scene-editor {
-  opacity: 0.65;
+  opacity: 0.85;
   background: radial-gradient(
       circle at 50% 50%,
-      rgba(99, 102, 241, 0.14) 0%,
+      rgba(99, 102, 241, 0.18) 0%,
       transparent 65%
     ),
     linear-gradient(180deg, #07070a 0%, #0a0b12 100%);
 }
 .anime-hero-scene-editor .anime-hero-art {
-  display: none;
+  animation: anime-art-drift-slow 28s ease-in-out infinite;
+  filter: saturate(1.15) contrast(1.06) brightness(0.92);
 }
 .anime-hero-scene-editor .anime-hero-speed-lines {
-  display: none;
+  opacity: 0.6;
 }
 .anime-hero-scene-editor .anime-hero-filmstrip {
-  opacity: 0.2;
+  opacity: 0.35;
 }
 
 /* 6. PROFILE & SETTINGS: Soft celestial gold-purple stardust */
