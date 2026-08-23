@@ -63,7 +63,6 @@ class HttpFetcher:
             "Origin": origin,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
             "Accept-Language": "en-US,en;q=0.9,ko;q=0.8,ja;q=0.7",
-            "Accept-Encoding": "gzip, deflate, br",
             "Connection": "keep-alive",
             "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
             "Sec-Ch-Ua-Mobile": "?0",

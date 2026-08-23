@@ -366,6 +366,11 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                     def _scan_ast(obj):
                         found = []
                         if isinstance(obj, dict):
+                            # Explicitly reject schema.org Breadcrumbs
+                            obj_type = str(obj.get("@type", "")).lower()
+                            if "breadcrumb" in obj_type:
+                                return []
+
                             if "edges" in obj and isinstance(obj["edges"], list):
                                 for edge in obj["edges"]:
                                     node = edge.get("node", edge) if isinstance(edge, dict) else None
@@ -378,7 +383,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                                             found.append({"title": str(t), "url": full_u, "chapter_number": num_val, "number": str(num_val or "")})
 
                             for k, v in obj.items():
-                                if any(w in k.lower() for w in ("chapter", "episode", "itemlist")):
+                                if any(w in k.lower() for w in ("chapter", "episode")) or (k.lower() == "itemlistelement" and "breadcrumb" not in obj_type):
                                     items_to_process = v if isinstance(v, list) else (list(v.values()) if isinstance(v, dict) else [])
                                     for item in items_to_process:
                                         if isinstance(item, dict):
@@ -389,18 +394,30 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                                             is_locked = bool(item.get("is_locked") or item.get("locked") or item.get("price") or item.get("is_vip"))
 
                                             if u and isinstance(u, (str, int)):
-                                                u_str = str(u)
+                                                u_str = str(u).strip()
+                                                if u_str in ("/", "#") or any(nav in u_str.lower() for nav in ("/genre/", "/category/", "/tag/", "/author/")):
+                                                    continue
+                                                t_str = str(t or u_str).strip()
+                                                if t_str.lower() in ("home", "index", "action", "romance", "fantasy", "drama", "comedy", "manga", "genres"):
+                                                    continue
+
                                                 full_u = urljoin(base_url, f"/chapter/{u_str}" if not u_str.startswith(("http", "/")) else u_str)
-                                                num_val, _ = self.extract_number_and_type(str(t or u_str))
+                                                num_val, _ = self.extract_number_and_type(t_str)
+
+                                                # Validate comic chapter characteristics
+                                                is_chapter_like = (num_val is not None) or any(ch_term in full_u.lower() for ch_term in ("/chapter", "/episode", "/read/", "-ch-", "-chapter-"))
+                                                if not is_chapter_like:
+                                                    continue
+
                                                 found.append({
-                                                    "title": str(t or f"Chapter {num_val or len(found)+1}"),
+                                                    "title": t_str or f"Chapter {num_val or len(found)+1}",
                                                     "url": full_u,
                                                     "thumbnail": urljoin(base_url, str(thmb)) if thmb else None,
                                                     "date": self.normalize_date(str(dt or "")),
                                                     "chapter_number": num_val,
                                                     "number": str(round(num_val) if num_val is not None and num_val.is_integer() else (num_val or "")),
                                                     "is_locked": is_locked,
-                                                    "language": self.extract_language_tag(str(t or ""))
+                                                    "language": self.extract_language_tag(t_str)
                                                 })
                                 else:
                                     found.extend(_scan_ast(v))
@@ -464,19 +481,55 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             cluster_items = []
             for a in links:
                 href = a.get("href", "").strip()
-                if not href or href == "#" or href.startswith("javascript:"):
+                if not href or href in ("#", "javascript:;") or href.startswith("javascript:"):
                     continue
                 full_url = urljoin(base_url, href)
-                txt = a.get_text(strip=True)
+                
+                # Extract clean chapter title
+                title_attr = (a.get("title") or "").strip()
+                first_span = a.select_one("span")
+                first_span_txt = first_span.get_text(" ", strip=True) if first_span else ""
+                raw_txt = a.get_text(" ", strip=True)
+                
+                txt = raw_txt
+                if title_attr and any(w in title_attr.lower() for w in ("chapter", "episode", "ch.", "ep.", "prologue")):
+                    txt = title_attr
+                elif first_span_txt and any(w in first_span_txt.lower() for w in ("chapter", "episode", "ch.", "ep.", "prologue")):
+                    txt = first_span_txt
+
                 if not txt or len(txt) > 90:
                     continue
 
+                # Check data-number attribute on link or parent
+                data_num_str = a.get("data-number") or (a.parent.get("data-number") if a.parent else None)
                 num_val, _ = self.extract_number_and_type(txt)
-                is_ch_link = (num_val is not None) or any(w in href.lower() for w in ("/chapter", "/episode", "/read", "-ch-", "-chapter-"))
+                if num_val is None and data_num_str:
+                    try:
+                        num_val = float(data_num_str)
+                    except ValueError:
+                        pass
+
+                # Determine if link has chapter characteristics
+                is_ch_link = (num_val is not None) or any(w in href.lower() for w in ("/chapter", "/episode", "/read/", "-ch-", "-chapter-"))
+                if txt.lower() in ("start reading", "read now", "start readingread now", "home", "bookmark", "favorite"):
+                    is_ch_link = False
+
+                # Filter out elements inside recommendation, sidebar, or related blocks
+                item_container = a.parent if a.parent else a
+                if item_container.find_parent(class_=re.compile(r"related|sidebar|recommend|popular|widget|comment|footer|header", re.I)):
+                    continue
+
+                # If base url is a series URL (e.g. /manga/some-title), reject other series cards
+                parsed_base = urlparse(base_url)
+                base_path = parsed_base.path.rstrip("/")
+                parsed_href = urlparse(full_url)
+                if base_path.startswith(("/manga/", "/series/", "/comic/")):
+                    if parsed_href.path.startswith(("/manga/", "/series/", "/comic/")) and parsed_href.path.rstrip("/") != base_path:
+                        if not any(k in parsed_href.path.lower() for k in ("/chapter", "/read/", "/ch-", "/ep-", "-chapter-")):
+                            is_ch_link = False
 
                 if is_ch_link:
                     chapter_like_count += 1
-                    item_container = a.parent if a.parent else a
                     is_locked = False
                     if item_container:
                         is_locked = bool(item_container.find(class_=re.compile(r"lock|coin|paid|vip|fastpass", re.I)))
@@ -486,6 +539,10 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                         date_el = item_container.select_one(".chapter-release-date, .post-on, .chapter-date, .date, .time, i, span.time")
                         if date_el:
                             date_str = self.normalize_date(date_el.get_text(strip=True))
+                        else:
+                            spans = a.find_all("span")
+                            if len(spans) >= 2:
+                                date_str = self.normalize_date(spans[-1].get_text(strip=True))
 
                     thmb_src = None
                     if item_container:
@@ -495,8 +552,13 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                             if thmb_src:
                                 thmb_src = urljoin(base_url, thmb_src)
 
+                    # Normalize display title
+                    display_title = txt
+                    if num_val is not None and (not display_title or display_title.lower().startswith("chapter")):
+                        display_title = f"Chapter {int(num_val) if num_val.is_integer() else num_val}"
+
                     cluster_items.append({
-                        "title": txt or f"Chapter {num_val or len(cluster_items)+1}",
+                        "title": display_title or f"Chapter {num_val or len(cluster_items)+1}",
                         "url": full_url,
                         "thumbnail": thmb_src,
                         "date": date_str,
@@ -530,6 +592,8 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                 continue
             txt = a.get_text(strip=True)
             if not txt or len(txt) > 80:
+                continue
+            if txt.lower() in ("start reading", "read now", "start readingread now", "home", "bookmark", "favorite"):
                 continue
             num_val, _ = self.extract_number_and_type(txt)
             if num_val is not None:
