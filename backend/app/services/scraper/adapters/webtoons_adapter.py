@@ -105,6 +105,8 @@ class WebtoonsAdapter(BaseSiteAdapter):
         if not cover_image and series_meta and series_meta.cover_image:
             cover_image = self.extract_image_src(series_meta.cover_image, target_url)
 
+        logger.debug(f"[WebtoonsAdapter] Extracted metadata: title='{series_title}', author='{author}', genre='{genre}', cover='{cover_image[:60]}...'")
+
         # 2. Paginated Episode Extraction Loop
         episodes: List[Dict[str, Any]] = []
         seen_urls = set()
@@ -113,25 +115,31 @@ class WebtoonsAdapter(BaseSiteAdapter):
 
         while page_num <= max_pages:
             if max_episodes and len(episodes) >= max_episodes:
+                logger.debug(f"[WebtoonsAdapter] Reached max_episodes limit ({max_episodes}), stopping pagination")
                 break
 
             current_page_url = target_url
             if page_num > 1:
                 current_page_url = f"{target_url}&page={page_num}" if "?" in target_url else f"{target_url}?page={page_num}"
+                logger.debug(f"[WebtoonsAdapter] Crawling pagination page {page_num}: {current_page_url}")
                 p_html, p_status, _ = await HttpFetcher.fetch_html(
                     current_page_url,
                     headers={"Referer": "https://www.webtoons.com/"}
                 )
                 if not p_html or p_status != 200:
+                    logger.debug(f"[WebtoonsAdapter] Page {page_num} fetch returned status={p_status}, ending pagination")
                     break
                 soup = DomExtractor.get_soup(p_html)
                 if not soup:
+                    logger.debug(f"[WebtoonsAdapter] Page {page_num} HTML parse failed, ending pagination")
                     break
 
             list_items = soup.select("#_listUl li, ul#_episodeList li, .detail_lst li")
             if not list_items:
+                logger.debug(f"[WebtoonsAdapter] Page {page_num}: 0 episode items found, ending pagination")
                 break
 
+            page_new_count = 0
             found_new = False
             for li in list_items:
                 a_tag = li.find("a", href=True)
@@ -143,6 +151,7 @@ class WebtoonsAdapter(BaseSiteAdapter):
                     continue
                 seen_urls.add(ep_url)
                 found_new = True
+                page_new_count += 1
 
                 # Episode number and title
                 sub_title_el = li.select_one(".subj span, .subj, .sub_title, .title")
@@ -184,11 +193,12 @@ class WebtoonsAdapter(BaseSiteAdapter):
                     "language": "en"
                 })
 
+            logger.debug(f"[WebtoonsAdapter] Page {page_num}: parsed {page_new_count} new episodes (running total: {len(episodes)})")
+
             if not found_new:
                 break
 
             # Try the next page even if no explicit next-button is found in HTML.
-            # Webtoons renders pagination dynamically; we just probe page_num+1 and stop if empty.
             page_num += 1
 
         # Browser retry if HTTP episode list came back empty (geo-block / lazy render)
@@ -241,8 +251,10 @@ class WebtoonsAdapter(BaseSiteAdapter):
                         "date": "",
                         "language": "en"
                     })
+                logger.debug(f"[WebtoonsAdapter] Browser fallback extracted {len(episodes)} episodes")
 
         sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
+        logger.debug(f"[WebtoonsAdapter] Completed discovery for '{series_title}': total {len(sorted_eps)} episodes sorted and ready")
 
         return {
             "success": True,

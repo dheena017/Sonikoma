@@ -326,11 +326,14 @@ async def scrape_chapter_sync_get(
     if not url or not url.strip():
         raise HTTPException(status_code=400, detail="URL query parameter is required.")
 
+    target_url = url.strip()
+    logger.debug(f"[ScraperAPI] GET /chapter/sync: url='{target_url}', proxy={proxy_images}, filter={filter_banners}")
     result = await AdaptiveScraperEngine.scrape_url(
-        url=url.strip(),
+        url=target_url,
         proxy_images=proxy_images,
         filter_banners=filter_banners
     )
+    logger.debug(f"[ScraperAPI] GET /chapter/sync completed: {len(result.images)} panels for '{target_url}'")
     return result
 
 
@@ -347,6 +350,7 @@ async def get_reader_chapter_panels_post(
         raise HTTPException(status_code=400, detail="Chapter URL is required.")
 
     target_url = body.url.strip()
+    logger.debug(f"[ScraperAPI] POST /reader-chapter: url='{target_url}', bypass_cache={bool(body.force_refresh or body.bypass_cache)}")
     result = await AdaptiveScraperEngine.scrape_url(
         url=target_url,
         bypass_cache=bool(body.force_refresh or body.bypass_cache),
@@ -366,6 +370,7 @@ async def get_reader_chapter_panels_post(
             "height": getattr(img, "height", None)
         })
 
+    logger.debug(f"[ScraperAPI] POST /reader-chapter completed: {len(panels)} reader panels for '{target_url}'")
     return {
         "success": result.success if result else bool(panels),
         "url": target_url,
@@ -392,6 +397,7 @@ async def get_reader_chapter_panels_get(
         raise HTTPException(status_code=400, detail="URL query parameter is required.")
 
     target_url = url.strip()
+    logger.debug(f"[ScraperAPI] GET /reader-chapter: url='{target_url}', force_refresh={force_refresh}")
     result = await AdaptiveScraperEngine.scrape_url(
         url=target_url,
         bypass_cache=force_refresh,
@@ -411,6 +417,7 @@ async def get_reader_chapter_panels_get(
             "height": getattr(img, "height", None)
         })
 
+    logger.debug(f"[ScraperAPI] GET /reader-chapter completed: {len(panels)} reader panels for '{target_url}'")
     return {
         "success": result.success if result else bool(panels),
         "url": target_url,
@@ -432,10 +439,12 @@ async def scrape_chapter_metadata_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /chapter/metadata: url='{payload.url}'")
     html, _, _ = await HttpFetcher.fetch_html(payload.url)
     if not html:
         raise HTTPException(status_code=400, detail="Could not fetch page content.")
     series_info, chapter_info = DomExtractor.extract_metadata(html, payload.url)
+    logger.debug(f"[ScraperAPI] Metadata extracted: series='{series_info.title if series_info else 'N/A'}', chapter='{chapter_info.title if chapter_info else 'N/A'}'")
     return {
         "url": payload.url,
         "series": series_info.model_dump() if series_info else None,
@@ -462,7 +471,8 @@ async def scrape_all_images_post(
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
 
-    return await AdaptiveScraperEngine.extract_all_raw_images(
+    logger.debug(f"[ScraperAPI] POST /all-images: url='{body.url}', render_js={body.render_js}, bypass_cache={body.bypass_cache}")
+    res = await AdaptiveScraperEngine.extract_all_raw_images(
         url=body.url.strip(),
         render_js=body.render_js,
         bypass_cache=body.bypass_cache,
@@ -471,6 +481,8 @@ async def scrape_all_images_post(
         cookies=body.cookies,
         headers=body.headers
     )
+    logger.debug(f"[ScraperAPI] POST /all-images completed: found {res.total_images} raw images")
+    return res
 
 
 @router.get(
@@ -489,12 +501,15 @@ async def scrape_all_images_get(
     if not url or not url.strip():
         raise HTTPException(status_code=400, detail="URL query parameter is required.")
 
-    return await AdaptiveScraperEngine.extract_all_raw_images(
+    logger.debug(f"[ScraperAPI] GET /all-images: url='{url}', render_js={render_js}")
+    res = await AdaptiveScraperEngine.extract_all_raw_images(
         url=url.strip(),
         render_js=render_js,
         include_backgrounds=include_backgrounds,
         include_svg=include_svg
     )
+    logger.debug(f"[ScraperAPI] GET /all-images completed: found {res.total_images} raw images")
+    return res
 
 
 # ─── Granular Technology-Specific Discovery Routes ─────────────────────────
@@ -507,11 +522,13 @@ async def discover_html_dom_endpoint(
     body: ScrapeAllImagesRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /discover/html-dom: url='{body.url}'")
     html, _, _ = await HttpFetcher.fetch_html(body.url)
     if not html:
         raise HTTPException(status_code=400, detail="Could not fetch HTML.")
     soup = DomExtractor.get_soup(html)
     candidates = DomExtractor.extract_manga_images_fallback(soup, body.url) if soup else []
+    logger.debug(f"[ScraperAPI] HTML DOM discovery completed: {len(candidates)} images for '{body.url}'")
     return {
         "url": body.url,
         "technology": "static_html_dom",
@@ -528,10 +545,12 @@ async def discover_js_state_endpoint(
     body: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /discover/javascript-state: url='{body.url}'")
     html, _, _ = await HttpFetcher.fetch_html(body.url)
     if not html:
         raise HTTPException(status_code=400, detail="Could not fetch HTML.")
     state_candidates = EmbeddedStateExtractor.extract_from_html(html, body.url)
+    logger.debug(f"[ScraperAPI] JS state discovery completed: {len(state_candidates)} images for '{body.url}'")
     return {
         "url": body.url,
         "technology": "javascript_embedded_state",
@@ -548,8 +567,10 @@ async def discover_network_traffic_endpoint(
     body: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /discover/network-traffic: url='{body.url}'")
     res = await BrowserFetcher.render_page(body.url, auto_scroll=True)
     net_images = res.get("network_images", []) if res else []
+    logger.debug(f"[ScraperAPI] Network traffic discovery completed: {len(net_images)} images intercepted for '{body.url}'")
     return {
         "url": body.url,
         "technology": "browser_network_interception",
@@ -656,7 +677,8 @@ async def scrape_series_sync_endpoint(
         include_ratings=body.include_ratings if body.include_ratings is not None else False,
         bypass_cache=body.bypass_cache or False,
     )
-    logger.debug(f"[ScraperAPI] Sync series discovery completed: {len(result.get('chapters', []))} chapters found")
+    total_ch = len(result.get("chapters", []))
+    logger.debug(f"[ScraperAPI] POST /series/sync completed: found {total_ch} chapters for '{target_url}' (title: '{result.get('series_title')}')")
     return result
 
 
@@ -708,6 +730,7 @@ async def scrape_batch_endpoint(
     if not body.urls:
         raise HTTPException(status_code=400, detail="Urls list cannot be empty.")
 
+    logger.debug(f"[ScraperAPI] POST /batch: {len(body.urls)} URLs queued for batch scraping")
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     job = job_manager.create_job(
         job_type=JobType.BATCH_SCRAPE,
@@ -717,6 +740,7 @@ async def scrape_batch_endpoint(
     )
 
     async def _batch_coro(report_progress):
+        logger.debug(f"[ScraperAPI] Starting batch scrape job: {job.job_id} ({len(body.urls)} URLs)")
         report_progress(10.0, JobStage.FETCHING.value)
         total = len(body.urls)
         results = []
@@ -739,6 +763,7 @@ async def scrape_batch_endpoint(
             )
             results.append(res.model_dump())
 
+        logger.debug(f"[ScraperAPI] Batch scrape job {job.job_id} completed: {len(results)}/{total} URLs scraped")
         report_progress(100.0, JobStage.COMPLETED.value)
         return {
             "success": True,
@@ -763,10 +788,12 @@ async def validate_images_endpoint(
     body: ValidateImagesRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /validate-images: validating {len(body.images)} candidates (filter_banners={body.filter_banners})")
     accepted, rejections = ImageValidator.validate_candidates(
         candidates=body.images,  # type: ignore
         filter_banners=body.filter_banners
     )
+    logger.debug(f"[ScraperAPI] Validation results: {len(accepted)} accepted, {len(rejections)} rejected")
     return ValidateImagesResponse(
         success=True,
         valid_count=len(accepted),
@@ -785,7 +812,9 @@ async def sort_images_endpoint(
     body: SortImagesRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /sort-images: sorting {len(body.images)} images")
     sorted_imgs = OrderResolver.resolve_order(body.images)
+    logger.debug(f"[ScraperAPI] Sorting complete: {len(sorted_imgs)} images resolved in reading order")
     return SortImagesResponse(
         success=True,
         total_images=len(sorted_imgs),
@@ -806,6 +835,7 @@ async def block_domain_endpoint(
     body: BlockDomainRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] POST /block-domain: blocking '{body.domain}' (reason: '{body.reason}')")
     blocked_domain = domain_block_manager.block_domain(body.domain, reason=body.reason or "Blocked by user")
     return BlockDomainResponse(
         success=bool(blocked_domain),
@@ -823,6 +853,7 @@ async def unblock_domain_endpoint(
     domain: str,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug(f"[ScraperAPI] DELETE /block-domain: unblocking '{domain}'")
     success = domain_block_manager.unblock_domain(domain)
     return {
         "success": success,
@@ -840,6 +871,7 @@ async def list_blocked_domains_endpoint(
     current_user: dict = Depends(get_current_user)
 ):
     blocked = domain_block_manager.get_all_blocked()
+    logger.debug(f"[ScraperAPI] GET /blocked-domains: {len(blocked)} blocked domains active")
     return BlockedDomainsListResponse(total=len(blocked), blocked_domains=blocked)
 
 
@@ -854,6 +886,7 @@ async def check_blocked_endpoint(
 ):
     is_blk = domain_block_manager.is_blocked(payload.url)
     domain = urlparse(payload.url).netloc
+    logger.debug(f"[ScraperAPI] POST /check-blocked: '{payload.url}' -> is_blocked={is_blk}")
     return CheckBlockedResponse(
         url=payload.url,
         domain=domain,
@@ -875,6 +908,7 @@ async def get_session_endpoint(
     current_user: dict = Depends(get_current_user)
 ):
     extracted_url = UrlNormalizer.extract_first_url(url)
+    logger.debug(f"[ScraperAPI] GET /session: url='{extracted_url}'")
     session_data = get_scrape_session(extracted_url)
     return {"url": url, "session": session_data}
 
@@ -888,6 +922,7 @@ async def update_session_cache_endpoint(
     current_user: dict = Depends(get_current_user)
 ):
     extracted_url = UrlNormalizer.extract_first_url(body.url)
+    logger.debug(f"[ScraperAPI] PUT /session: saving {len(body.images)} panels for '{extracted_url}'")
     save_scrape_session(extracted_url, body.images)
     return {"success": True, "project_id": body.project_id}
 
@@ -901,6 +936,7 @@ async def delete_session_endpoint(
     current_user: dict = Depends(get_current_user)
 ):
     extracted_url = UrlNormalizer.extract_first_url(url)
+    logger.debug(f"[ScraperAPI] DELETE /session: clearing session for '{extracted_url}'")
     delete_scrape_session(extracted_url)
     return {"success": True, "message": "Session cleared."}
 
@@ -912,6 +948,7 @@ async def delete_session_endpoint(
 async def clear_cache_endpoint(
     current_user: dict = Depends(get_current_user)
 ):
+    logger.debug("[ScraperAPI] POST /cache/clear: flushing in-memory scraper caches")
     ScraperCacheManager.clear()
     return {"success": True, "message": "In-memory scraper cache flushed."}
 
@@ -929,6 +966,7 @@ async def list_adapters_endpoint(
     current_user: dict = Depends(get_current_user)
 ):
     raw_meta = AdapterRegistry.get_all_adapters_meta()
+    logger.debug(f"[ScraperAPI] GET /adapters: {len(raw_meta)} registered adapters retrieved")
     adapters = [
         AdapterMetaResponse(
             adapter_id=m.get("adapter_id", m.get("name", "").lower().replace(" ", "_")),
@@ -958,6 +996,7 @@ async def scraper_health_endpoint():
     except Exception:
         active_jobs_count = 0
 
+    logger.debug(f"[ScraperAPI] GET /health: scraper engine healthy, {active_jobs_count} active jobs")
     return ScraperHealthResponse(
         status="healthy",
         version="2.0.0",
@@ -985,8 +1024,10 @@ async def import_to_project_endpoint(
     Only called when the user explicitly clicks 'Import to Project' or 'Save Project'.
     """
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
+    target_url = body.url.strip()
+    logger.debug(f"[ScraperAPI] POST /import-to-project: ingesting '{target_url}' for user: {user_id}")
     return await scrape_and_initialize_project(
-        url=body.url.strip(),
+        url=target_url,
         user_id=user_id,
         project_id=body.project_id,
         limit=body.limit,
