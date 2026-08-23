@@ -10,6 +10,7 @@ Provides:
 """
 
 import re
+import time
 import logging
 from urllib.parse import urlparse, parse_qs, urljoin
 from typing import Optional, Dict, Any, List
@@ -17,7 +18,14 @@ from typing import Optional, Dict, Any, List
 from .base_site_adapter import BaseSiteAdapter
 from .generic_site_adapter import GenericAdaptiveAdapter
 from ..scrape_context import ScrapeContext
-from ..scraper_models import ChapterResult, SourceInfo, SeriesInfo
+from ..scraper_models import (
+    ChapterResult,
+    SourceInfo,
+    SeriesInfo,
+    CandidateImage,
+    ImageSourceType,
+    ScrapeCompleteness
+)
 from ..scraper_constants import WEBTOONS_DOMAINS, NAVER_DOMAINS, TAPAS_DOMAINS
 from ..acquisition import HttpFetcher, BrowserFetcher
 from ..extraction import DomExtractor
@@ -322,5 +330,81 @@ class WebtoonsAdapter(BaseSiteAdapter):
             except ValueError:
                 pass
 
+        # Dedicated Webtoons High-Speed DOM Extraction in Strict Presentation Sequence
+        target_url = context.normalized_url or context.url
+        start_time = time.time()
+        html, status, _ = await HttpFetcher.fetch_html(
+            target_url,
+            headers=context.config.headers,
+            cookies=context.config.cookies
+        )
+
+        soup = DomExtractor.get_soup(html) if html and status == 200 else None
+        img_nodes = soup.select("#_imageList img, .viewer_lst img, div.viewer_img img, .viewer_img img, ._viewerBox img") if soup else []
+
+        if not img_nodes and context.config.enable_browser_fallback:
+            logger.info(f"[WebtoonsAdapter] Static HTML yielded 0 viewer images, escalating to headless browser for {target_url}")
+            b_html, _, _ = await BrowserFetcher.render_page(
+                target_url,
+                auto_scroll=True,
+                wait_selector="#_imageList img, .viewer_lst img",
+                timeout_seconds=25.0
+            )
+            if b_html:
+                soup = DomExtractor.get_soup(b_html)
+                img_nodes = soup.select("#_imageList img, .viewer_lst img, div.viewer_img img, .viewer_img img, ._viewerBox img") if soup else []
+
+        if soup:
+            series_meta, chapter_meta = DomExtractor.extract_metadata(soup, target_url)
+            if series_meta and series_meta.title and not context.series_info.title:
+                context.series_info.title = series_meta.title
+            if chapter_meta and chapter_meta.title and not context.chapter_info.title:
+                context.chapter_info.title = chapter_meta.title
+
+            # Webtoon specific title extraction from viewer headers
+            series_node = soup.select_one(".subj_info a.subj, .viewer_header .subj, .title_area h2, .info h1")
+            if series_node and not context.series_info.title:
+                context.series_info.title = series_node.get_text(strip=True)
+
+            if not context.series_info.title and context.series_info.slug:
+                context.series_info.title = context.series_info.slug.replace("-", " ").replace("_", " ").title()
+
+            title_node = soup.select_one(".subj_episode, .subj_sub, h1.subj, .subj")
+            if title_node:
+                ch_txt = title_node.get_text(strip=True)
+                if ch_txt:
+                    context.chapter_info.title = ch_txt
+
+            seen_urls = set()
+            for idx, img in enumerate(img_nodes):
+                raw_src = (
+                    img.get("data-url")
+                    or img.get("data-src")
+                    or img.get("data-original")
+                    or img.get("src")
+                    or ""
+                ).strip()
+                if not raw_src or raw_src in seen_urls:
+                    continue
+                if any(ext in raw_src.lower() for ext in ["1x1.gif", "spacer.gif", "blank.gif", "loading.gif", "pixel.gif"]):
+                    continue
+                full_src = urljoin(target_url, raw_src)
+                if not full_src.startswith("http"):
+                    continue
+                seen_urls.add(raw_src)
+                context.candidate_images.append(CandidateImage(
+                    url=full_src,
+                    source_type=ImageSourceType.DOM,
+                    index=len(context.candidate_images),
+                    is_inside_reader=True,
+                    confidence=0.98
+                ))
+
+            if context.candidate_images:
+                logger.debug(f"[WebtoonsAdapter] Extracted {len(context.candidate_images)} panel images in strict DOM order from {target_url}")
+                context.completeness = ScrapeCompleteness.COMPLETE
+                return self._finalize(context, start_time)
+
+        # Generic fallback if specialized selectors found nothing
         generic_engine = GenericAdaptiveAdapter()
         return await generic_engine.scrape(context)

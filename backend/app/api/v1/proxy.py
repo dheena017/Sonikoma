@@ -50,6 +50,19 @@ def spoof_referer(url: str) -> str:
         host = (parsed.hostname or "").lower()
         if not host:
             return "https://google.com/"
+
+        # Dedicated mappings for major protected CDNs (Akamai EdgeSuite, Cloudflare, etc.)
+        if "pstatic.net" in host or "naver" in host or "webtoon" in host:
+            return "https://www.webtoons.com/"
+        if "kakaocdn.net" in host or "daumcdn.net" in host:
+            return "https://page.kakao.com/"
+        if "tapas.io" in host or "tapascdn" in host:
+            return "https://tapas.io/"
+        if "toomics.com" in host or "toomics" in host:
+            return "https://global.toomics.com/"
+        if "mangadex" in host or "mangadex.org" in host:
+            return "https://mangadex.org/"
+
         # Remove CDN prefixes (cdn4., img2., etc.)
         clean_host = re.sub(r'^(?:cdn\d*|img\d*|images\d*|pic\d*|pics\d*|static\d*|assets\d*|media\d*|uploads\d*|files\d*|storage\d*)\.', '', host, flags=re.IGNORECASE)
         return f"{parsed.scheme or 'https'}://{clean_host}/"
