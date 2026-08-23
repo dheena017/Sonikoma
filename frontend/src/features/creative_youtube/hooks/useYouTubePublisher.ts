@@ -17,11 +17,10 @@ import { PublisherProfile } from "@/features/creative_youtube/types";
 const DEFAULT_PRESETS: PublisherProfile[] = [
   {
     name: "Webtoon Recap (Landscape)",
-    title:
-      "The Insane OP MC Leveling Up in [Series Name] Chapters [Start]-[End] Recap",
+    title: "[Series Name] · Chapter [Start]-[End] Video Recap",
     description:
-      "🎬 [Series Name] Recap\n\nEnjoyed this recap? Hit that subscribe button and turn on notifications!\n\n📚 Read the Original Webtoon here:\n👉 [Link]\n\n#webtoon #manhwa #recap",
-    tags: ["manhwa recap", "webtoon recap", "op mc", "leveling up"],
+      "🎬 [Series Name] Video Adaptation\n\nEnjoyed this chapter? Subscribe and turn on notifications for future releases!\n\n📚 Original Series: [Series Name]\nAuthor: [Author]\nArtist: [Artist]\nPlatform: [Platform]",
+    tags: ["webtoon", "manhwa", "manga", "motion comic", "recap"],
     category: "1",
     privacy: "unlisted",
     isShort: false,
@@ -43,10 +42,10 @@ const DEFAULT_PRESETS: PublisherProfile[] = [
   },
   {
     name: "YouTube Shorts (Vertical)",
-    title: "This OP MC is just too clean... 🥶 #shorts #manhwa",
+    title: "[Series Name] #shorts #webtoon",
     description:
-      "This overpowered main character is breaking all limits! Full recap on channel.\n\n#shorts #manhwa #webtoon #anime",
-    tags: ["shorts", "manhwa", "webtoon", "recap"],
+      "[Series Name] Highlights and motion panels preview.\n\n#shorts #webtoon #manhwa #anime",
+    tags: ["shorts", "webtoon", "manhwa", "animation"],
     category: "24",
     privacy: "unlisted",
     isShort: true,
@@ -353,32 +352,33 @@ export function useYouTubePublisher({
     loadDatabaseData();
   }, []);
 
-  // Generate localized suggest tag banks based on genre
+  // Generate localized suggest tag banks based on genre and series metadata
   useEffect(() => {
     const genre = (scrapedGenre || "action").toLowerCase();
-    const tagsBank = ["manhwa recap", "webtoon recap", "motion comic"];
+    const tagsBank: string[] = [];
+
+    if (scrapedTitle && scrapedTitle.trim()) {
+      tagsBank.push(scrapedTitle.trim().toLowerCase());
+    }
+
+    tagsBank.push("webtoon", "manhwa", "manga", "motion comic");
 
     if (genre.includes("action") || genre.includes("shounen")) {
-      tagsBank.push("action manhwa", "system manhwa", "leveling up", "op mc");
+      tagsBank.push("action manhwa", "system manhwa", "recap");
     } else if (
       genre.includes("romance") ||
       genre.includes("shoujo") ||
       genre.includes("otome")
     ) {
-      tagsBank.push(
-        "romance webtoon",
-        "villainess manhwa",
-        "reincarnation",
-        "love story"
-      );
+      tagsBank.push("romance webtoon", "love story");
     } else if (genre.includes("fantasy") || genre.includes("isekai")) {
-      tagsBank.push("fantasy manga", "isekai manhwa", "magic story", "reborn");
+      tagsBank.push("fantasy manga", "isekai manhwa");
     } else {
-      tagsBank.push("comic review", "manga summary", "webtoon explanation");
+      tagsBank.push("comic adaptation", "webtoon recap");
     }
 
-    setSuggestedTags(tagsBank);
-  }, [scrapedGenre]);
+    setSuggestedTags(Array.from(new Set(tagsBank)));
+  }, [scrapedGenre, scrapedTitle]);
 
   // Run real-time SEO Auditor
   useEffect(() => {

@@ -13,7 +13,7 @@ export const TEMPLATE_SUB_TABS = [
   "Ending",
 ];
 
-export const MOCK_TEMPLATES: TemplateProject[] = [
+export const PRESET_TEMPLATES: TemplateProject[] = [
   {
     id: "t-1",
     title: "Manhwa Split Panel Burst",
@@ -60,3 +60,5 @@ export const MOCK_TEMPLATES: TemplateProject[] = [
     desc: "High energy 15-second teaser trailer edit with impact sound cues.",
   },
 ];
+
+export const MOCK_TEMPLATES = PRESET_TEMPLATES;
