@@ -177,6 +177,15 @@ async def scrape_series_episodes(
             )
 
         if result and result.get("success"):
+            series_dict = result.get("series", {}) or {}
+            result["title"] = result.get("series_title") or series_dict.get("title") or "Comic Series"
+            result["cover_image"] = series_dict.get("cover_image") or result.get("cover") or result.get("thumbnail") or ""
+            result["cover"] = result["cover_image"]
+            result["thumbnail"] = result["cover_image"]
+            result["author"] = series_dict.get("author") or ""
+            result["genre"] = series_dict.get("genre") or ""
+            result["description"] = series_dict.get("description") or ""
+
             _save_cached_episodes(raw_input, result.get("series_title", "Comic Series"), result)
             return result
 

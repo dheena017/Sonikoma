@@ -238,6 +238,7 @@ async def discover_and_select_episodes(
     episodes = series_data.get("episodes") or []
     author = series_data.get("author") or "N/A"
     genre = series_data.get("genre") or "N/A"
+    cover_image = series_data.get("cover_image") or series_data.get("cover") or series_data.get("thumbnail") or "N/A"
 
     print("\n" + "=" * 80)
     print(color("  [2] DISCOVERED SERIES CATALOG", Style.BOLD + Style.CYAN))
@@ -245,6 +246,7 @@ async def discover_and_select_episodes(
     print(f"  • Title                 : {color(title, Style.BOLD + Style.WHITE)}")
     print(f"  • Author                : {author}")
     print(f"  • Genre                 : {genre}")
+    print(f"  • Cover Image           : {color(cover_image, Style.CYAN)}")
     print(f"  • Total Episodes Found  : {color(str(len(episodes)), Style.BOLD + Style.GREEN)}")
     print(f"  • Discovery Latency     : {latency:.2f}s")
     print("=" * 80)
@@ -252,12 +254,13 @@ async def discover_and_select_episodes(
     # 3. Display Discovered Episodes Table
     display_limit = min(20, len(episodes))
     print(f"\n  📚 Episode List Preview (Showing {display_limit} of {len(episodes)}):")
-    print(f"  {'#':<4} | {'Episode Name':<45} | {'Date':<12}")
-    print("  " + "-" * 65)
+    print(f"  {'#':<4} | {'Episode Name':<40} | {'Date':<12} | {'Thumbnail'}")
+    print("  " + "-" * 85)
     for idx, ep in enumerate(episodes[:display_limit]):
         ep_name = ep.get("title") or ep.get("episode") or f"Episode {idx+1}"
         ep_date = ep.get("date") or "N/A"
-        print(f"  {idx+1:<4} | {ep_name[:45]:<45} | {ep_date:<12}")
+        ep_thumb = (ep.get("thumbnail") or "N/A")[:35]
+        print(f"  {idx+1:<4} | {ep_name[:40]:<40} | {ep_date:<12} | {ep_thumb}")
 
     if len(episodes) > display_limit:
         print(f"  ... and {len(episodes) - display_limit} additional episodes in catalog.")
