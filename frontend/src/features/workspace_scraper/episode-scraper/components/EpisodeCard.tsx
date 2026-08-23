@@ -58,15 +58,17 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const rawCover = episode.cover_image || "";
   const [imgSrc, setImgSrc] = useState<string>(() =>
-    getProxiedImageUrl(episode.thumbnail, episode.url)
+    getProxiedImageUrl(rawCover, episode.url)
   );
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setImageError(false);
-    setImgSrc(getProxiedImageUrl(episode.thumbnail, episode.url));
-  }, [episode.thumbnail, episode.url]);
+    const cover = episode.cover_image || "";
+    setImgSrc(getProxiedImageUrl(cover, episode.url));
+  }, [episode.cover_image, episode.url]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -293,9 +295,9 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
               isHovered ? "scale-105 brightness-105" : "scale-100"
             }`}
             onError={() => {
-              if (imgSrc.includes("/api/proxy-image") && episode.thumbnail) {
+              if (imgSrc.includes("/api/proxy-image") && episode.cover_image) {
                 // Retry directly with raw URL if proxy failed
-                setImgSrc(episode.thumbnail);
+                setImgSrc(episode.cover_image);
               } else {
                 setImageError(true);
               }

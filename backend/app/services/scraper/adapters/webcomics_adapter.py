@@ -119,6 +119,12 @@ class WebComicsAdapter(BaseSiteAdapter):
         title_el = soup.select_one("h1.comic-title, h1, .detail-title")
         series_title = title_el.get_text(strip=True) if title_el else (series_meta.title or "WebComics Series")
 
+        author_el = soup.select_one(".author, .comic-author, meta[name='author']")
+        author = (author_el.get("content") or author_el.get_text(strip=True)) if author_el else (series_meta.author or "")
+
+        desc_el = soup.select_one(".comic-desc, .desc, .synopsis, meta[property='og:description']")
+        description = (desc_el.get("content") or desc_el.get_text(strip=True)) if desc_el else (series_meta.description or "")
+
         cover_el = soup.select_one(".comic-cover img, .cover-img, meta[property='og:image']")
         cover_image = ""
         if cover_el:
@@ -147,8 +153,6 @@ class WebComicsAdapter(BaseSiteAdapter):
                 "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                 "date": "",
                 "cover_image": ep_cover or cover_image,
-                "thumbnail": ep_cover or cover_image,
-                "cover": ep_cover or cover_image,
                 "language": "en",
             })
 
@@ -162,7 +166,6 @@ class WebComicsAdapter(BaseSiteAdapter):
             "author": author if 'author' in locals() else "",
             "description": description if 'description' in locals() else "",
             "cover_image": cover_image,
-            "cover": cover_image,
             "series": {
                 "title": series_title,
                 "author": author if 'author' in locals() else "",
@@ -171,9 +174,7 @@ class WebComicsAdapter(BaseSiteAdapter):
                 "url": clean_url
             },
             "chapters": sorted_eps,
-            "total_chapters": len(sorted_eps),
-            "episodes": sorted_eps,
-            "total_episodes": len(sorted_eps)
+            "total_chapters": len(sorted_eps)
         }
 
     # ── Main entry ────────────────────────────────────────────────────────────
@@ -467,8 +468,8 @@ class WebComicsAdapter(BaseSiteAdapter):
             context.series_info.title = series.title
         if series.description and not context.series_info.description:
             context.series_info.description = series.description
-        if series.cover and not context.series_info.cover:
-            context.series_info.cover = series.cover
+        if getattr(series, "cover_image", None) and not context.series_info.cover_image:
+            context.series_info.cover_image = series.cover_image
         if series.author and not context.series_info.author:
             context.series_info.author = series.author
         if series.publisher and not context.series_info.publisher:

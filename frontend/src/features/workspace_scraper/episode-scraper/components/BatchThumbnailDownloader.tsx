@@ -6,7 +6,7 @@ import { Download, X } from "lucide-react";
 interface Episode {
   number: string;
   title: string;
-  thumbnail?: string;
+  cover_image?: string;
   url?: string;
 }
 
@@ -62,8 +62,9 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
 
       for (let i = 0; i < episodes.length; i++) {
         const episode = episodes[i];
+        const coverUrl = episode.cover_image;
 
-        if (!episode.thumbnail) {
+        if (!coverUrl) {
           setProgress((p) => ({
             ...p,
             current: i + 1,
@@ -72,16 +73,16 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
         }
 
         try {
-          const response = await fetch(episode.thumbnail, {
+          const response = await fetch(coverUrl, {
             mode: "cors",
             credentials: "omit",
           });
 
           if (response.ok) {
             const blob = await response.blob();
-            const ext = episode.thumbnail.includes("jpg")
+            const ext = coverUrl.includes("jpg")
               ? "jpg"
-              : episode.thumbnail.includes("png")
+              : coverUrl.includes("png")
               ? "png"
               : "webp";
             const filename = `${episode.number}_${episode.title
@@ -117,7 +118,7 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
         ...validEpisodes.map(
           (ep) =>
             `Episode ${ep.number || "?"} | ${ep.title || "Untitled"} -> ${
-              ep.thumbnail || "N/A"
+              ep.cover_image || "N/A"
             }`
         ),
         "",
@@ -182,7 +183,7 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
     );
   }
 
-  const validEpisodes = episodes.filter((ep) => ep.thumbnail);
+  const validEpisodes = episodes.filter((ep) => ep.cover_image);
 
   return (
     <button

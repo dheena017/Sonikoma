@@ -346,11 +346,11 @@ class DomExtractor:
                             series.publisher = str(pub["name"])
                         elif isinstance(pub, str):
                             series.publisher = pub
-                    if item.get("image") and not series.cover:
+                    if item.get("image") and not series.cover_image:
                         img = item["image"]
                         img_url = img.get("url") if isinstance(img, dict) else str(img)
                         if img_url:
-                            series.cover = urljoin(base_url, img_url)
+                            series.cover_image = urljoin(base_url, img_url)
             except Exception:
                 pass
 
@@ -396,17 +396,17 @@ class DomExtractor:
             series.description = cleaned_desc if cleaned_desc else desc
 
         # DOM Cover Image fallback
-        if not series.cover and not cover:
+        if not series.cover_image and not cover:
             for c_sel in (".story-info-left img", ".poster img", ".summary_image img", ".manga-poster img", ".thumb img", "div.img-cover img"):
                 c_elem = soup.select_one(c_sel)
                 if c_elem and (c_elem.get("src") or c_elem.get("data-src")):
                     raw_c = c_elem.get("src") or c_elem.get("data-src")
                     if raw_c:
-                        series.cover = urljoin(base_url, raw_c)
+                        series.cover_image = urljoin(base_url, raw_c)
                         break
 
-        if cover and not series.cover:
-            series.cover = urljoin(base_url, cover)
+        if cover and not series.cover_image:
+            series.cover_image = urljoin(base_url, cover)
 
         # DOM Author & Artist heuristics
         if not author:

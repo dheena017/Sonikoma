@@ -3,7 +3,7 @@ export interface Episode {
   chapter_number?: number;
   title: string;
   date: string;
-  thumbnail: string;
+  cover_image?: string;
   url: string;
   index: number;
   rating?: number;

@@ -89,6 +89,9 @@ class BatoAdapter(BaseSiteAdapter):
         author_el = soup.select_one(".item-authors, .attr-item a, .authors a")
         author = author_el.get_text(strip=True) if author_el else (series_meta.author or "")
 
+        desc_el = soup.select_one(".limit-html, .item-text, .synopsis, .summary, meta[property='og:description']")
+        description = (desc_el.get("content") or desc_el.get_text(strip=True)) if desc_el else (series_meta.description or "")
+
         cover_el = soup.select_one(".attr-cover img, .item-cover img, meta[property='og:image']")
         cover_image = ""
         if cover_el:
@@ -123,8 +126,6 @@ class BatoAdapter(BaseSiteAdapter):
                 "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                 "date": date_str,
                 "cover_image": ep_cover or cover_image,
-                "thumbnail": ep_cover or cover_image,
-                "cover": ep_cover or cover_image,
                 "language": self.extract_language_tag(txt),
             })
 
@@ -138,7 +139,6 @@ class BatoAdapter(BaseSiteAdapter):
             "author": author if 'author' in locals() else "",
             "description": description if 'description' in locals() else "",
             "cover_image": cover_image,
-            "cover": cover_image,
             "series": {
                 "title": series_title,
                 "author": author if 'author' in locals() else "",
@@ -147,9 +147,7 @@ class BatoAdapter(BaseSiteAdapter):
                 "url": clean_url
             },
             "chapters": sorted_eps,
-            "total_chapters": len(sorted_eps),
-            "episodes": sorted_eps,
-            "total_episodes": len(sorted_eps)
+            "total_chapters": len(sorted_eps)
         }
 
     async def scrape(self, context: ScrapeContext) -> ChapterResult:

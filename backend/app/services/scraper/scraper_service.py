@@ -167,7 +167,7 @@ async def scrape_and_initialize_project(
     final_episode = episode or result.chapter.episode or (f"Episode {int(result.chapter.number)}" if result.chapter.number else "Episode 1")
     final_genre = genre or (result.series.genres[0] if result.series.genres else "general")
     final_author = author or result.series.author or "Unknown Author"
-    final_cover = cover_image or result.series.cover or ""
+    final_cover = cover_image or result.series.cover_image or ""
     final_synopsis = synopsis or result.series.description or ""
 
     raw_urls = [img.url for img in result.images]

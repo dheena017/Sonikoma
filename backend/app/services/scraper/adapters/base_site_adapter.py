@@ -259,8 +259,8 @@ class BaseSiteAdapter(ABC):
                 dedup_map[key] = ep
             else:
                 existing = dedup_map[key]
-                if not existing.get("thumbnail") and ep.get("thumbnail"):
-                    existing["thumbnail"] = ep["thumbnail"]
+                if not existing.get("cover_image") and ep.get("cover_image"):
+                    existing["cover_image"] = ep["cover_image"]
                 if not existing.get("date") and ep.get("date"):
                     existing["date"] = ep["date"]
 

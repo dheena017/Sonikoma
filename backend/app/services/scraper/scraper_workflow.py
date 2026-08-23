@@ -82,13 +82,14 @@ def _get_cached_episodes(series_url: str, ttl_seconds: float = 600.0) -> Optiona
 
 def _save_cached_episodes(series_url: str, title: str, result_dict: Dict[str, Any]):
     """Persists newly crawled series episodes to SQLite cache."""
-    if not get_db_connection or not result_dict or not result_dict.get("episodes"):
+    chapters = result_dict.get("chapters") or result_dict.get("episodes")
+    if not get_db_connection or not result_dict or not chapters:
         return
     _ensure_episodes_table()
     try:
         clean_url = series_url.strip()
         data_json = json.dumps(result_dict)
-        total = len(result_dict.get("episodes", []))
+        total = len(chapters)
         now = time.time()
         with get_db_connection() as conn:
             conn.execute("""
@@ -130,8 +131,8 @@ async def scrape_series_episodes(
             "success": False,
             "error": "No series URL or title_no provided",
             "series_title": "Unknown",
-            "episodes": [],
-            "total_episodes": 0
+            "chapters": [],
+            "total_chapters": 0
         }
 
     # 0. Check Domain Blocklist Immediately
@@ -143,15 +144,16 @@ async def scrape_series_episodes(
             "error": f"This domain ({domain}) is currently in the blocked exclusion list.",
             "series_title": "Blocked Domain",
             "url": raw_input,
-            "episodes": [],
-            "total_episodes": 0
+            "chapters": [],
+            "total_chapters": 0
         }
 
     try:
         # 0. Check SQLite Cache
         if not bypass_cache:
             cached = _get_cached_episodes(raw_input)
-            if cached and cached.get("success") and len(cached.get("episodes", [])) > 0:
+            cached_chapters = cached.get("chapters") or cached.get("episodes", []) if cached else []
+            if cached and cached.get("success") and len(cached_chapters) > 0:
                 return cached
 
         # 1. Analyze site domain & resolve matching adapter
@@ -166,9 +168,10 @@ async def scrape_series_episodes(
             max_episodes=max_episodes
         )
 
-        # 3. If specialized adapter returned None or 0 episodes, escalate to GenericAdaptiveAdapter
-        if not result or not result.get("success") or not result.get("episodes"):
-            logger.info(f"[Workflow] Adapter {adapter.__class__.__name__} yielded 0 episodes. Falling back to GenericAdaptiveAdapter.")
+        # 3. If specialized adapter returned None or 0 chapters, escalate to GenericAdaptiveAdapter
+        curr_chapters = (result.get("chapters") or result.get("episodes")) if result else None
+        if not result or not result.get("success") or not curr_chapters:
+            logger.info(f"[Workflow] Adapter {adapter.__class__.__name__} yielded 0 chapters. Falling back to GenericAdaptiveAdapter.")
             generic_adapter = GenericAdaptiveAdapter()
             result = await generic_adapter.discover_series(
                 raw_input,
@@ -182,8 +185,8 @@ async def scrape_series_episodes(
             series_title = series_dict.get("title") or result.get("title") or result.get("series_title") or "Comic Series"
             author_val = series_dict.get("author") or result.get("author") or ""
             genre_val = series_dict.get("genre") or (", ".join(series_dict.get("genres", [])) if series_dict.get("genres") else "") or result.get("genre") or ""
-            desc_val = series_dict.get("description") or result.get("description") or ""
-            platform_val = series_dict.get("platform") or result.get("platform") or result.get("publisher") or sep.get("platform", "comic")
+            desc_val = series_dict.get("description") or series_dict.get("synopsis") or result.get("description") or result.get("synopsis") or ""
+            platform_val = series_dict.get("platform") or result.get("platform") or result.get("publisher") or (source_info.platform.value if hasattr(source_info, "platform") and hasattr(source_info.platform, "value") else "comic")
 
             series_dict["title"] = series_title
             series_dict["cover_image"] = cover_img
@@ -205,20 +208,18 @@ async def scrape_series_episodes(
 
             chapter_list = result.get("chapters") or result.get("episodes") or []
             for ch in chapter_list:
-                ch_img = ch.get("cover_image") or cover_img
+                ch_img = ch.get("cover_image") or ch.get("thumbnail") or ch.get("cover") or cover_img
                 ch["cover_image"] = ch_img
                 ch_num = ch.get("chapter_number") or ch.get("episode_no") or ch.get("number")
                 ch["chapter_number"] = ch_num
-                # Sync aliases for backwards compatibility
-                ch["thumbnail"] = ch_img
-                ch["cover"] = ch_img
-                ch["episode_no"] = ch_num
+                ch["number"] = str(int(ch_num) if isinstance(ch_num, float) and ch_num.is_integer() else (ch_num if ch_num is not None else ""))
+                ch.pop("thumbnail", None)
+                ch.pop("cover", None)
 
             result["chapters"] = chapter_list
             result["total_chapters"] = len(chapter_list)
-            # Sync aliases for legacy callers
-            result["episodes"] = chapter_list
-            result["total_episodes"] = len(chapter_list)
+            result.pop("episodes", None)
+            result.pop("total_episodes", None)
 
             _save_cached_episodes(raw_input, series_title, result)
             return result
@@ -229,15 +230,13 @@ async def scrape_series_episodes(
             "title": "Unknown Series",
             "series_title": "Unknown Series",
             "url": raw_input,
-            "platform": sep.get("platform", "comic"),
+            "platform": (source_info.platform.value if 'source_info' in locals() and hasattr(source_info, "platform") and hasattr(source_info.platform, "value") else "comic"),
             "genre": "",
             "author": "",
             "description": "",
             "cover_image": "",
             "chapters": [],
-            "total_chapters": 0,
-            "episodes": [],
-            "total_episodes": 0
+            "total_chapters": 0
         }
 
     except Exception as e:
@@ -263,9 +262,7 @@ async def scrape_series_episodes(
                 "url": raw_input
             },
             "chapters": [],
-            "total_chapters": 0,
-            "episodes": [],
-            "total_episodes": 0
+            "total_chapters": 0
         }
 
 
@@ -308,14 +305,13 @@ async def scrape_series_episodes_advanced(
 
     result["chapters"] = paginated_chapters
     result["total_chapters"] = total_chapters
-    result["episodes"] = paginated_chapters
-    result["total_episodes"] = total_chapters
+    result.pop("episodes", None)
+    result.pop("total_episodes", None)
     result["pagination"] = {
         "page": page,
         "per_page": per_page,
         "total_pages": total_pages,
         "total_chapters": total_chapters,
-        "total_episodes": total_chapters,
         "has_next": page < total_pages,
         "has_prev": page > 1
     }

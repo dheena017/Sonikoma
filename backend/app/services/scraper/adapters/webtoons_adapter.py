@@ -97,6 +97,9 @@ class WebtoonsAdapter(BaseSiteAdapter):
         genre_elem = soup.select_one(".genre, .detail_header .genre")
         genre = genre_elem.get_text(strip=True) if genre_elem else (series_meta.genres[0] if series_meta.genres else "General")
 
+        desc_elem = soup.select_one(".summary, .desc, .summary_content, meta[property='og:description']")
+        description = (desc_elem.get("content") or desc_elem.get_text(strip=True)) if desc_elem else (series_meta.description or "")
+
         cover_elem = soup.select_one(".detail_thumb img, .thmb img, .detail_header img, meta[property='og:image']")
         cover_image = ""
         if cover_elem:
@@ -177,8 +180,7 @@ class WebtoonsAdapter(BaseSiteAdapter):
                     "chapter_number": num_val,
                     "title": ep_title or f"Episode {ep_no_str or len(episodes)+1}",
                     "url": ep_url,
-                    "thumbnail": self.build_proxy_thumbnail_url(thmb_src, ep_url, cover_image),
-                    "cover": cover_image,
+                    "cover_image": self.build_proxy_thumbnail_url(thmb_src, ep_url, cover_image),
                     "date": date_str,
                     "likes": likes_str,
                     "language": "en"
@@ -241,8 +243,6 @@ class WebtoonsAdapter(BaseSiteAdapter):
                         "title": ep_title or f"Episode {ep_no_str or len(episodes)+1}",
                         "url": ep_url,
                         "cover_image": ep_cover or cover_image,
-                        "thumbnail": ep_cover or cover_image,
-                        "cover": ep_cover or cover_image,
                         "date": "",
                         "language": "en"
                     })
@@ -259,7 +259,6 @@ class WebtoonsAdapter(BaseSiteAdapter):
             "genre": genre,
             "description": description if 'description' in locals() else "",
             "cover_image": cover_image,
-            "cover": cover_image,
             "series": {
                 "title": series_title,
                 "author": author,
@@ -269,9 +268,7 @@ class WebtoonsAdapter(BaseSiteAdapter):
                 "url": target_url
             },
             "chapters": sorted_eps,
-            "total_chapters": len(sorted_eps),
-            "episodes": sorted_eps,
-            "total_episodes": len(sorted_eps)
+            "total_chapters": len(sorted_eps)
         }
 
     async def scrape(self, context: ScrapeContext) -> ChapterResult:

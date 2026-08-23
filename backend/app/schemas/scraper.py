@@ -123,7 +123,6 @@ class SeriesInfo(BaseModel):
     genres: List[str] = Field(default_factory=list)
     tags: List[str] = Field(default_factory=list)
     description: Optional[str] = None
-    cover: Optional[str] = None
     cover_image: Optional[str] = None
     language: Optional[str] = None
 
@@ -134,8 +133,7 @@ class ChapterInfo(BaseModel):
     episode: Optional[str] = None
     title: Optional[str] = None
     url: Optional[str] = None
-    thumbnail: Optional[str] = None
-    cover: Optional[str] = None
+    cover_image: Optional[str] = None
     published_at: Optional[str] = None
     previous: Optional[str] = None
     next: Optional[str] = None
@@ -222,10 +220,8 @@ class ChapterResult(BaseModel):
         is_valid = lambda u: bool(u) and not str(u).endswith("/") and not any(k in str(u).lower() for k in ("avatar", "gravatar", "theme", "logo", "about", "continued", "banner"))
         if self.series and self.series.cover_image and is_valid(self.series.cover_image):
             return self.series.cover_image
-        if self.series and self.series.cover and is_valid(self.series.cover):
-            return self.series.cover
-        if self.chapter and self.chapter.thumbnail and is_valid(self.chapter.thumbnail):
-            return self.chapter.thumbnail
+        if self.chapter and self.chapter.cover_image and is_valid(self.chapter.cover_image):
+            return self.chapter.cover_image
         for img in self.images:
             if is_valid(img.url):
                 return img.url

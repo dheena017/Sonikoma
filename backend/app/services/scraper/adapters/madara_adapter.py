@@ -131,8 +131,8 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                     or cover_el.get("src")
                     or ""
                 ).strip()
-        if not cover_image and series_meta.cover:
-            cover_image = series_meta.cover
+        if not cover_image and series_meta.cover_image:
+            cover_image = series_meta.cover_image
 
         # AJAX Discovery
         manga_id = None
@@ -201,9 +201,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                                 "date": date_str,
                                 "is_locked": is_locked,
                                 "language": self.extract_language_tag(title_raw),
-                                "thumbnail": ep_cover or cover_image,
                                 "cover_image": ep_cover or cover_image,
-                                "cover": ep_cover or cover_image,
                             })
                         if episodes:
                             break
@@ -274,9 +272,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                             "date": date_str,
                             "is_locked": is_locked,
                             "language": self.extract_language_tag(title_raw),
-                            "thumbnail": ep_cover or cover_image,
                             "cover_image": ep_cover or cover_image,
-                            "cover": ep_cover or cover_image,
                         })
             except Exception as ex:
                 logger.debug(f"[MadaraCmsAdapter] Browser AJAX evaluation failed: {ex}")
@@ -321,9 +317,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                     "chapter_number": num_val,
                     "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                     "date": date_str,
-                    "thumbnail": ep_cover or cover_image,
                     "cover_image": ep_cover or cover_image,
-                    "cover": ep_cover or cover_image,
                     "language": self.extract_language_tag(title_raw),
                 })
 
@@ -339,7 +333,6 @@ class MadaraCmsAdapter(BaseSiteAdapter):
             "author": author,
             "description": description,
             "cover_image": cover_image,
-            "cover": cover_image,
             "url": clean_url,
             "series": {
                 "title": series_title,
@@ -349,9 +342,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                 "url": clean_url
             },
             "chapters": sorted_eps,
-            "episodes": sorted_eps,
-            "total_chapters": len(sorted_eps),
-            "total_episodes": len(sorted_eps)
+            "total_chapters": len(sorted_eps)
         }
 
 

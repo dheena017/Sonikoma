@@ -52,6 +52,7 @@ interface SeriesMetadata {
   title: string;
   author: string;
   genre: string;
+  platform?: string;
   cover_image: string;
   description: string;
   url?: string;
@@ -363,30 +364,29 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       });
 
       if (result.success) {
-        const rawEpisodes = result.episodes || result.chapters || [];
-        const fallbackCover = result.cover_image || result.cover || result.series?.cover_image || result.series?.cover || "";
-        const normalizedEpisodes = rawEpisodes.map((ep: any, i: number) => ({
-          ...ep,
-          thumbnail: ep.thumbnail || ep.cover_image || ep.cover || fallbackCover,
-          number: String(ep.number ?? ep.chapter_number ?? (i + 1)),
-          title: ep.title || `Chapter ${ep.number ?? (i + 1)}`,
-          url: ep.url,
-          index: ep.index ?? i,
+        const rawChapters = result.chapters || [];
+        const fallbackCover = result.cover_image || result.series?.cover_image || "";
+        const normalizedChapters = rawChapters.map((ch: any, i: number) => ({
+          ...ch,
+          cover_image: ch.cover_image || fallbackCover,
+          chapter_number: ch.chapter_number ?? ch.number ?? (i + 1),
+          number: String(ch.chapter_number ?? ch.number ?? (i + 1)),
+          title: ch.title || `Chapter ${ch.chapter_number ?? (i + 1)}`,
+          url: ch.url,
+          index: ch.index ?? i,
         }));
 
-        setEpisodes(normalizedEpisodes);
-        setSeriesMetadata(
-          result.series
-            ? { ...result.series, url: result.url || targetSeriesUrl || activeUrl }
-            : {
-                title: result.title || result.series_title || "Comic Series",
-                author: result.author || "",
-                genre: result.genre || "Webtoon",
-                cover_image: fallbackCover,
-                description: result.description || "",
-                url: result.url || targetSeriesUrl || activeUrl,
-              }
-        );
+        setEpisodes(normalizedChapters);
+        const seriesData = result.series || result;
+        setSeriesMetadata({
+          title: seriesData.title || "Comic Series",
+          author: seriesData.author || "",
+          genre: seriesData.genre || "General",
+          platform: seriesData.platform || "comic",
+          cover_image: seriesData.cover_image || fallbackCover,
+          description: seriesData.description || "",
+          url: seriesData.url || targetSeriesUrl || activeUrl,
+        });
 
         if (result.series && result.title_no) {
           FavoritesManager.addRecent({
@@ -404,9 +404,10 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
           setIsFavorite(FavoritesManager.isFavorite(result.title_no));
         }
 
+        const totalFound = result.total_chapters ?? normalizedChapters.length;
         const cacheNote = result.from_cache ? " (from cache)" : " (fresh)";
         addNotification(
-          `Found ${result.total_episodes || 0} episodes!${cacheNote}`,
+          `Found ${totalFound} chapters!${cacheNote}`,
           "success"
         );
       } else {
@@ -593,7 +594,7 @@ export const EpisodeScraper: React.FC<EpisodeScraperProps> = ({
       number: `Episode ${idx + 1}`,
       title: "",
       date: "",
-      thumbnail: "",
+      cover_image: "",
       index: idx,
     }));
     const finalEpisodes =

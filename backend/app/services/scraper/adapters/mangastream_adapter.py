@@ -95,7 +95,7 @@ class MangaStreamAdapter(BaseSiteAdapter):
         # 0. Check Embedded Next.js / Nuxt state trees (e.g. Asura / FlameComics SPA state)
         from ..extraction.embedded_state_extractor import EmbeddedStateExtractor
         state_data = EmbeddedStateExtractor.extract_series_and_episodes_from_state(html or "", clean_url)
-        if state_data and state_data.get("episodes"):
+        if state_data and state_data.get("chapters"):
             return {
                 "success": True,
                 "series_title": state_data.get("title") or "Comic Series",
@@ -103,11 +103,11 @@ class MangaStreamAdapter(BaseSiteAdapter):
                 "series": {
                     "title": state_data.get("title") or "Comic Series",
                     "author": state_data.get("author") or "",
-                    "cover_image": state_data.get("cover") or "",
+                    "cover_image": state_data.get("cover_image") or "",
                     "url": clean_url
                 },
-                "episodes": state_data["episodes"],
-                "total_episodes": len(state_data["episodes"])
+                "chapters": state_data["chapters"],
+                "total_chapters": len(state_data["chapters"])
             }
 
         # 1. Extract Series Metadata & Cover Poster
@@ -117,6 +117,9 @@ class MangaStreamAdapter(BaseSiteAdapter):
 
         author_el = soup.select_one(".infox .author, .author, .spe span, .fmed b")
         author = author_el.get_text(strip=True) if author_el else (series_meta.author or "")
+
+        desc_el = soup.select_one(".entry-content, .synopsis, .summary, .description, .mindesc, [itemprop='description'], meta[property='og:description']")
+        description = (desc_el.get("content") or desc_el.get_text(strip=True)) if desc_el else (series_meta.description or "")
 
         cover_el = soup.select_one(".thumb img, .bigcover img, meta[property='og:image'], .series-thumb img, .poster img")
         cover_image = ""
@@ -152,8 +155,7 @@ class MangaStreamAdapter(BaseSiteAdapter):
                 "chapter_number": num_val,
                 "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                 "date": date_str,
-                "thumbnail": self.build_proxy_thumbnail_url(None, full_url, cover_image),
-                "cover": cover_image,
+                "cover_image": self.build_proxy_thumbnail_url(None, full_url, cover_image),
                 "language": self.extract_language_tag(title_text),
             })
 
@@ -175,8 +177,7 @@ class MangaStreamAdapter(BaseSiteAdapter):
                     "chapter_number": num_val,
                     "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                     "date": "",
-                    "thumbnail": self.build_proxy_thumbnail_url(None, val, cover_image),
-                    "cover": cover_image,
+                    "cover_image": self.build_proxy_thumbnail_url(None, val, cover_image),
                     "language": self.extract_language_tag(txt),
                 })
 
@@ -204,8 +205,6 @@ class MangaStreamAdapter(BaseSiteAdapter):
                     "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(episodes)+1)),
                     "date": "",
                     "cover_image": ep_cover or cover_image,
-                    "thumbnail": ep_cover or cover_image,
-                    "cover": ep_cover or cover_image,
                     "language": self.extract_language_tag(txt),
                 })
 
@@ -219,7 +218,6 @@ class MangaStreamAdapter(BaseSiteAdapter):
             "author": author if 'author' in locals() else "",
             "description": description if 'description' in locals() else "",
             "cover_image": cover_image,
-            "cover": cover_image,
             "series": {
                 "title": series_title,
                 "author": author if 'author' in locals() else "",
@@ -228,9 +226,7 @@ class MangaStreamAdapter(BaseSiteAdapter):
                 "url": clean_url
             },
             "chapters": sorted_eps,
-            "total_chapters": len(sorted_eps),
-            "episodes": sorted_eps,
-            "total_episodes": len(sorted_eps)
+            "total_chapters": len(sorted_eps)
         }
 
     async def scrape(self, context: ScrapeContext) -> ChapterResult:

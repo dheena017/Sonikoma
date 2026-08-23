@@ -127,16 +127,15 @@ class EmbeddedStateExtractor:
                                 "title": ch_name,
                                 "url": ch_url,
                                 "number": str(ch.get("number", idx + 1)),
-                                "thumbnail": ch.get("thumbnail") or cover,
-                                "cover": cover,
+                                "cover_image": ch.get("cover_image") or ch.get("thumbnail") or cover,
                                 "date": ch.get("created_at") or ch.get("date") or ""
                             })
                         if episodes:
                             return {
                                 "title": title,
-                                "cover": cover,
+                                "cover_image": cover,
                                 "author": author,
-                                "episodes": episodes
+                                "chapters": episodes
                             }
             except Exception as e:
                 logger.debug(f"[EmbeddedStateExtractor] Next.js series extraction error: {e}")

@@ -276,8 +276,8 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             if browser_html:
                 from ..extraction.embedded_state_extractor import EmbeddedStateExtractor
                 state_data = EmbeddedStateExtractor.extract_series_and_episodes_from_state(browser_html, url)
-                if state_data and state_data.get("episodes") and len(state_data["episodes"]) > len(episodes):
-                    episodes = state_data["episodes"]
+                if state_data and state_data.get("chapters") and len(state_data["chapters"]) > len(episodes):
+                    episodes = state_data["chapters"]
 
                 b_soup = DomExtractor.get_soup(browser_html)
                 if b_soup:
@@ -311,15 +311,15 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
 
         # Format output
         series_title = (series_info.title if series_info else None) or "Comic Series"
-        cover_image = series_info.cover if series_info and hasattr(series_info, "cover") else (series_info.cover_image if series_info and hasattr(series_info, "cover_image") else "")
+        cover_image = series_info.cover_image if series_info and hasattr(series_info, "cover_image") else ""
 
         for ep in episodes:
             ep_img = ep.get("cover_image") or ep.get("thumbnail") or ep.get("cover") or cover_image
             if not ep_img and cover_image:
                 ep_img = self.build_proxy_thumbnail_url(None, ep.get("url", url), cover_image)
             ep["cover_image"] = ep_img
-            ep["thumbnail"] = ep_img
-            ep["cover"] = ep_img
+            ep.pop("thumbnail", None)
+            ep.pop("cover", None)
             ch_num = ep.get("chapter_number") or ep.get("episode_no") or ep.get("number")
             ep["chapter_number"] = ch_num
             ep["episode_no"] = ch_num
@@ -351,9 +351,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                 "url": url
             },
             "chapters": sorted_eps,
-            "total_chapters": len(sorted_eps),
-            "episodes": sorted_eps,
-            "total_episodes": len(sorted_eps)
+            "total_chapters": len(sorted_eps)
         }
 
     def _extract_episodes_dynamically(self, soup: Any, base_url: str) -> List[Dict[str, Any]]:
@@ -432,7 +430,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                                                 found.append({
                                                     "title": t_str or f"Chapter {num_val or len(found)+1}",
                                                     "url": full_u,
-                                                    "thumbnail": urljoin(base_url, str(thmb)) if thmb else None,
+                                                    "cover_image": urljoin(base_url, str(thmb)) if thmb else None,
                                                     "date": self.normalize_date(str(dt or "")),
                                                     "chapter_number": num_val,
                                                     "number": str(round(num_val) if num_val is not None and num_val.is_integer() else (num_val or "")),
@@ -580,7 +578,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                     cluster_items.append({
                         "title": display_title or f"Chapter {num_val or len(cluster_items)+1}",
                         "url": full_url,
-                        "thumbnail": thmb_src,
+                        "cover_image": thmb_src,
                         "date": date_str,
                         "chapter_number": num_val,
                         "number": str(round(num_val) if num_val is not None and num_val.is_integer() else (num_val or "")),
@@ -682,7 +680,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             series, chapter = DomExtractor.extract_metadata(html, url)
             if not context.series_info.title and series.title: context.series_info.title = series.title
             if not context.series_info.description and series.description: context.series_info.description = series.description
-            if not context.series_info.cover and series.cover: context.series_info.cover = series.cover
+            if not context.series_info.cover_image and getattr(series, "cover_image", None): context.series_info.cover_image = series.cover_image
             if not context.series_info.author and series.author: context.series_info.author = series.author
             if not context.chapter_info.title and chapter.title: context.chapter_info.title = chapter.title
             if context.chapter_info.number is None and chapter.number is not None: context.chapter_info.number = chapter.number
@@ -774,7 +772,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
         # Extract metadata from rendered page
         series, chapter = DomExtractor.extract_metadata(browser_html, url)
         if not context.series_info.title and series.title: context.series_info.title = series.title
-        if not context.series_info.cover and series.cover: context.series_info.cover = series.cover
+        if not context.series_info.cover_image and getattr(series, "cover_image", None): context.series_info.cover_image = series.cover_image
         if not context.chapter_info.title and chapter.title: context.chapter_info.title = chapter.title
 
         # Collect candidate images from rendered DOM

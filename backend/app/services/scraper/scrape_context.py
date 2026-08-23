@@ -142,10 +142,8 @@ class ScrapeContext:
 
             if not is_valid_art(self.series_info.cover_image):
                 self.series_info.cover_image = best_cover_art
-            if not is_valid_art(self.series_info.cover):
-                self.series_info.cover = self.series_info.cover_image or best_cover_art
-            if not is_valid_art(self.chapter_info.thumbnail):
-                self.chapter_info.thumbnail = self.series_info.cover_image or best_cover_art
+            if not is_valid_art(self.chapter_info.cover_image):
+                self.chapter_info.cover_image = self.series_info.cover_image or best_cover_art
 
 
 

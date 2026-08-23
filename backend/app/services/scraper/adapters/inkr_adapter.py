@@ -117,9 +117,7 @@ class InkrAdapter(BaseSiteAdapter):
                     "url": href,
                     "chapter_number": num_val,
                     "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or len(chapters)+1)),
-                    "cover": final_cover,
                     "cover_image": final_cover,
-                    "thumbnail": final_cover
                 })
 
             return {
@@ -129,7 +127,6 @@ class InkrAdapter(BaseSiteAdapter):
                 "author": "",
                 "description": description,
                 "cover_image": cover_image,
-                "cover": cover_image,
                 "url": title_url,
                 "series": {
                     "title": series_title,
@@ -139,9 +136,7 @@ class InkrAdapter(BaseSiteAdapter):
                     "url": title_url
                 },
                 "chapters": chapters,
-                "episodes": chapters,
-                "total_chapters": len(chapters),
-                "total_episodes": len(chapters)
+                "total_chapters": len(chapters)
             }
         except Exception as e:
             logger.debug(f"[InkrAdapter] discover_series failed: {e}")
@@ -228,7 +223,6 @@ class InkrAdapter(BaseSiteAdapter):
                 if series_title:
                     context.series_info.title = series_title
                 if raw_image:
-                    context.series_info.cover = raw_image
                     context.series_info.cover_image = raw_image
                 if raw_desc:
                     context.series_info.description = raw_desc
@@ -254,7 +248,6 @@ class InkrAdapter(BaseSiteAdapter):
                 for idx, u in enumerate(extracted_urls)
             ]
             if not getattr(context.series_info, "cover_image", None) and validated:
-                context.series_info.cover = validated[0].url
                 context.series_info.cover_image = validated[0].url
             context.completeness = ScrapeCompleteness.COMPLETE
             logger.info(f"[InkrAdapter] Successfully extracted {len(validated)} panels for {url}")

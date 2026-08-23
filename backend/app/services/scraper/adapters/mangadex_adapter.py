@@ -140,8 +140,6 @@ class MangaDexAdapter(BaseSiteAdapter):
                             "title": c_attrs.get("title") or f"Chapter {c_num}",
                             "url": ch_url,
                             "cover_image": ep_cover or cover_url,
-                            "thumbnail": ep_cover or cover_url,
-                            "cover": ep_cover or cover_url,
                             "date": (c_attrs.get("publishAt") or "").split("T")[0],
                             "language": preferred_language
                         })
@@ -157,7 +155,6 @@ class MangaDexAdapter(BaseSiteAdapter):
                     "author": author or artist or "",
                     "description": synopsis or "",
                     "cover_image": cover_url,
-                    "cover": cover_url,
                     "series": {
                         "title": title_str,
                         "author": author or artist or "",
@@ -167,9 +164,7 @@ class MangaDexAdapter(BaseSiteAdapter):
                         "url": f"https://mangadex.org/title/{manga_id}"
                     },
                     "chapters": sorted_eps,
-                    "total_chapters": len(sorted_eps),
-                    "episodes": sorted_eps,
-                    "total_episodes": len(sorted_eps)
+                    "total_chapters": len(sorted_eps)
                 }
 
             except Exception as e:
