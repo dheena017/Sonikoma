@@ -668,26 +668,24 @@ const AdminDashboardPage = React.memo(
 
     const dashboardContent = (
       <div className="w-full max-w-7xl mx-auto py-6 space-y-6">
-        {/* Admin Header with Breadcrumbs & Action Toolbar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/5 pb-5">
-          <div className="space-y-2.5 max-w-2xl text-left">
-            {/* Breadcrumbs */}
-            {/* Title & Description */}
-            <div className="space-y-2">
-              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                Admin{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
-                  Console
-                </span>
+        {/* Admin Header with Action Toolbar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-white/[0.06] pb-5">
+          <div className="flex items-center gap-3.5 text-left">
+            <div className="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 shrink-0">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+                Admin Console
               </h1>
-              <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
-                Monitor system health, database latency, active worker jobs, and user accounts.
+              <p className="text-neutral-400 text-xs mt-0.5">
+                Monitor system health, database latency, active worker jobs, and user accounts
               </p>
             </div>
           </div>
 
           {/* Header Right Action Toolbar */}
-          <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-center shrink-0">
             <button
               type="button"
               onClick={handleClearCache}

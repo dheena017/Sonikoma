@@ -363,144 +363,19 @@ const AdminPage = React.memo(
     return (
       <div className="w-full max-w-7xl mx-auto py-6 space-y-6 animate-fade-in relative z-10">
         {!isOverview && (
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 border-b border-white/5 pb-5">
-            <div className="space-y-2.5 max-w-2xl text-left">
-              {/* Breadcrumbs */}
-              <div className="flex items-center gap-1.5 text-[11px] font-mono flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/dashboard")}
-                  className="px-2.5 py-0.5 rounded-md bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
-                >
-                  Main App
-                </button>
-                <span className="text-neutral-600 font-bold">&rsaquo;</span>
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/admin")}
-                  className="px-2.5 py-0.5 rounded-md bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm"
-                >
-                  Admin
-                </button>
-                <span className="text-neutral-600 font-bold">&rsaquo;</span>
-                <span className="px-2.5 py-0.5 rounded-md bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
+            <div className="flex items-center gap-3.5">
+              <div className="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 shrink-0">
+                <ShieldAlert className="h-5 w-5" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                   {currentTabInfo.title}
-                </span>
+                </h1>
+                <p className="text-xs text-neutral-400 mt-0.5">
+                  {currentTabInfo.desc}
+                </p>
               </div>
-
-              {/* Title & Badge */}
-              <div className="flex items-center gap-3 pt-0.5">
-                <div className="relative group shrink-0">
-                  <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-900/40 border border-purple-400/30 group-hover:scale-105 transition-transform">
-                    <ShieldAlert className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="absolute -inset-0.5 rounded-2xl border border-purple-500/40 pointer-events-none animate-pulse" />
-                </div>
-
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
-                    {currentTabInfo.title}
-                    <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase tracking-wider">
-                      {currentTabInfo.badge}
-                    </span>
-                  </h1>
-                  <p className="text-xs text-neutral-400 font-sans mt-0.5">
-                    {currentTabInfo.desc}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Tab Switcher Strip & Action */}
-            <div className="flex flex-wrap items-center gap-2 self-start lg:self-center shrink-0">
-              <div className="hidden xl:flex items-center gap-1 bg-neutral-900/80 p-1 rounded-xl border border-white/10 backdrop-blur-xl">
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/admin")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    activeTab === "overview"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Overview
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/admin/users")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    activeTab === "users"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Users
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/admin/credits")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    activeTab === "credits"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Credits
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/admin/announcements")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    activeTab === "announcements"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Broadcasts
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/admin/health")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    activeTab === "health"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Health
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/admin/scrapers")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    activeTab === "scrapers"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Scrapers
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigateTo("/admin/settings")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    activeTab === "settings"
-                      ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  Settings
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => navigateTo("/dashboard")}
-                className="group flex items-center gap-2 px-4 py-2 bg-neutral-900/90 hover:bg-neutral-800/90 text-neutral-200 hover:text-white border border-white/10 hover:border-purple-500/30 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md hover:shadow-lg active:scale-95"
-              >
-                <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform text-purple-400" />
-                <span>Main App</span>
-              </button>
             </div>
           </div>
         )}
