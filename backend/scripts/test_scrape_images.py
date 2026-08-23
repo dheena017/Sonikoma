@@ -189,7 +189,9 @@ async def main():
 
     # 3. Optional Local Download
     if args.download:
-        save_dir = os.path.join(BASE_DIR, "downloads", sep.get("platform", "comic"), f"chapter_{sep.get('chapter_number') or '1'}")
+        project_root = os.path.abspath(os.path.join(BASE_DIR, ".."))
+        test_data_dir = os.path.join(project_root, "data", "test_data")
+        save_dir = os.path.join(test_data_dir, sep.get("platform", "comic"), f"chapter_{sep.get('chapter_number') or '1'}")
         print(f"\n  💾 Downloading {len(result.images)} panels to: {color(save_dir, Style.BOLD + Style.CYAN)}")
         os.makedirs(save_dir, exist_ok=True)
 
@@ -213,7 +215,7 @@ async def main():
 
         print(f"\n  {color('✓ Download completed successfully!', Style.GREEN + Style.BOLD)}")
     else:
-        print(f"\n  {color('Tip:', Style.YELLOW)} Run with {color('--download', Style.BOLD)} to download all extracted comic panels locally into backend/downloads/")
+        print(f"\n  {color('Tip:', Style.YELLOW)} Run with {color('--download', Style.BOLD)} to download all extracted comic panels locally into data/test_data/")
 
 
 if __name__ == "__main__":

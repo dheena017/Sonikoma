@@ -210,7 +210,8 @@ async def download_chapter_images(
     Returns (target_dir, success_count, total_count).
     """
     if not dest_base:
-        dest_base = os.path.join(BASE_DIR, "downloads")
+        project_root = os.path.abspath(os.path.join(BASE_DIR, ".."))
+        dest_base = os.path.join(project_root, "data", "test_data")
     
     clean_series = sanitize_filename(series_title or "unknown_series")
     clean_chapter = sanitize_filename(chapter_title or "unknown_chapter")

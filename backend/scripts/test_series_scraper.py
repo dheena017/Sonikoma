@@ -296,14 +296,16 @@ async def discover_and_select_episodes(
         print("\n" + "-" * 80)
         print(color("  👉 Download Option:", Style.BOLD + Style.YELLOW))
         print("     [1] Scrape & View Panel Counts only")
-        print("     [2] Scrape & Download all images to backend/downloads/")
+        print("     [2] Scrape & Download all images to data/test_data/")
         print("-" * 80)
         dl_choice = input(f"[?] Choose download option [1/2, default 1]: ").strip()
         download = dl_choice == "2"
 
     # 5. Batch Scrape & Download Execution
     platform_name = sep.get("platform", "comic")
-    safe_title = "".join(c for c in title if c.isalnum() or c in " _-").strip().replace(" ", "_")[:30]
+    safe_title = "".join(c for c in title if c.isalnum() or c in " _-").strip().replace(" ", "_")[:30] or "Webtoon_Series"
+    project_root = os.path.abspath(os.path.join(BASE_DIR, ".."))
+    test_data_dir = os.path.join(project_root, "data", "test_data")
 
     print("\n" + "=" * 80)
     print(color(f"  [3] BATCH SCRAPING {len(selected_episodes)} EPISODES", Style.BOLD + Style.CYAN))
@@ -326,7 +328,7 @@ async def discover_and_select_episodes(
                 print(f"    ✓ Extracted {color(str(len(res.images)), Style.GREEN)} panels.")
 
                 if download:
-                    save_dir = os.path.join(BASE_DIR, "downloads", platform_name, safe_title, f"episode_{ep_num}")
+                    save_dir = os.path.join(test_data_dir, platform_name, safe_title, f"episode_{ep_num}")
                     os.makedirs(save_dir, exist_ok=True)
                     dl_tasks = []
                     for img in res.images:

@@ -271,8 +271,10 @@ async def process_user_series_input(
 
     # 5. Local Storage Configuration
     platform_slug = sep.get("platform", "comic")
-    safe_title = "".join(c for c in title if c.isalnum() or c in " _-").strip().replace(" ", "_")[:32]
-    base_save_dir = os.path.join(BASE_DIR, "downloads", platform_slug, safe_title)
+    safe_title = "".join(c for c in title if c.isalnum() or c in " _-").strip().replace(" ", "_")[:32] or "Webtoon_Series"
+    project_root = os.path.abspath(os.path.join(BASE_DIR, ".."))
+    test_data_dir = os.path.join(project_root, "data", "test_data")
+    base_save_dir = os.path.join(test_data_dir, platform_slug, safe_title)
 
     print(f"  💾 Local Storage Directory : {color(base_save_dir, Style.BOLD + Style.CYAN)}")
     print(f"  🚀 Downloading panel images for {len(selected_episodes)} chapters (Concurrency={concurrency})...\n")

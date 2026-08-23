@@ -274,7 +274,9 @@ async def run_single_scrape(
     if download and result.images:
         platform_slug = sep.get("platform", "comic")
         ch_num = sep.get("chapter_number") or "1"
-        save_dir = os.path.join(BASE_DIR, "downloads", platform_slug, f"chapter_{ch_num}")
+        project_root = os.path.abspath(os.path.join(BASE_DIR, ".."))
+        test_data_dir = os.path.join(project_root, "data", "test_data")
+        save_dir = os.path.join(test_data_dir, platform_slug, f"chapter_{ch_num}")
         print(f"\n  💾 Downloading {len(result.images)} panels to: {color(save_dir, Style.BOLD + Style.CYAN)}")
         os.makedirs(save_dir, exist_ok=True)
 
