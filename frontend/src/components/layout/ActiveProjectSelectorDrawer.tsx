@@ -528,14 +528,14 @@ export const ActiveProjectSelectorDrawer: React.FC<
             .join(" · ");
 
           return (
-            <div className="p-4 border-b border-white/10 bg-gradient-to-b from-[#131427] to-[#0d0e19] space-y-3.5">
+            <div className="p-4 border-b border-white/10 bg-gradient-to-b from-purple-950/20 via-[#0c0d16]/80 to-[#07070a]/90 space-y-3.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1.5 font-mono">
-                  <Activity className="w-3.5 h-3.5 text-purple-400" /> Active
-                  Project Context
+                <span className="text-[11px] uppercase font-black text-purple-300 tracking-wider flex items-center gap-2 font-mono">
+                  <span className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                  Active Project Context
                 </span>
                 <span
-                  className={`text-[9px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 font-mono capitalize ${statusColor}`}
+                  className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1.5 font-mono capitalize ${statusColor}`}
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                   {proj?.status || "Active"}
@@ -543,7 +543,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
               </div>
 
               {/* Title, Source, Cover & Actions */}
-              <div className="bg-[#17192e] border border-white/10 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-xl">
+              <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-xl backdrop-blur-xl transition-all">
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div className="w-14 h-14 rounded-xl overflow-hidden bg-neutral-950 border border-white/15 shrink-0 relative shadow-md">
                     {activeCover ? (
@@ -593,7 +593,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             )}`
                           );
                         }}
-                        className="px-2.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-[11px] font-extrabold transition-all shadow-md flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                        className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all shadow-md shadow-purple-900/30 border border-purple-400/30 flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
                         title="Open Studio Editor"
                       >
                         <Film className="w-3.5 h-3.5" />
@@ -609,7 +609,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             )}`
                           );
                         }}
-                        className="px-2.5 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                        className="px-2.5 py-1.5 bg-neutral-800/80 hover:bg-purple-500/20 text-neutral-200 hover:text-white border border-white/10 hover:border-purple-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
                         title="Open Image Cropper & Cleaner"
                       >
                         <Zap className="w-3.5 h-3.5 text-amber-400" />
@@ -625,7 +625,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             )}`
                           );
                         }}
-                        className="px-2.5 py-1.5 bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                        className="px-2.5 py-1.5 bg-neutral-800/80 hover:bg-indigo-500/20 text-neutral-200 hover:text-white border border-white/10 hover:border-indigo-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
                         title="Open AI Voice Studio"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
@@ -642,7 +642,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                               )}`
                             );
                           }}
-                          className="px-2.5 py-1.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-300 border border-neutral-700 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                          className="px-2.5 py-1.5 bg-neutral-800/80 hover:bg-neutral-750 text-neutral-300 border border-white/10 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
                           title="Open Series Details Page"
                         >
                           <FolderOpen className="w-3.5 h-3.5 text-purple-400" />
@@ -651,7 +651,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       ) : (
                         <button
                           onClick={() => clearActiveProject()}
-                          className="px-2.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer active:scale-95 justify-center"
+                          className="px-2.5 py-1.5 bg-neutral-800/80 hover:bg-rose-500/20 text-neutral-300 hover:text-rose-300 border border-white/10 hover:border-rose-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
                           title="Deactivate / Clear active project"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -693,16 +693,16 @@ export const ActiveProjectSelectorDrawer: React.FC<
 
               {/* Real Stats Grid — 4 columns with contextual data */}
               <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                <div className="bg-[#17192e] border border-white/5 p-2 rounded-xl">
-                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">
+                <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 p-2.5 rounded-xl backdrop-blur-md transition-all">
+                  <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">
                     Panels
                   </span>
                   <span className="font-bold text-white font-mono text-sm">
                     {activePanelsCount}
                   </span>
                 </div>
-                <div className="bg-[#17192e] border border-white/5 p-2 rounded-xl">
-                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">
+                <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 p-2.5 rounded-xl backdrop-blur-md transition-all">
+                  <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">
                     Imported
                   </span>
                   <span
@@ -713,8 +713,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     {importedCount}
                   </span>
                 </div>
-                <div className="bg-[#17192e] border border-white/5 p-2 rounded-xl">
-                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">
+                <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 p-2.5 rounded-xl backdrop-blur-md transition-all">
+                  <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">
                     Speech
                   </span>
                   <span
@@ -727,8 +727,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     {activeSpeechCount}
                   </span>
                 </div>
-                <div className="bg-[#17192e] border border-white/5 p-2 rounded-xl">
-                  <span className="text-[9px] text-neutral-400 font-mono uppercase block">
+                <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 p-2.5 rounded-xl backdrop-blur-md transition-all">
+                  <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">
                     Audio
                   </span>
                   <span
