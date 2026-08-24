@@ -42,7 +42,7 @@ class GeminiProvider:
         model: str,
         contents: Any,
         config: Optional[Any] = None,
-        max_attempts: int = 5
+        max_attempts: int = 2
     ) -> Any:
         """Executes a model generation call wrapped in the standard exponential backoff retrier."""
 

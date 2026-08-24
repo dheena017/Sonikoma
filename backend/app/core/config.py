@@ -177,12 +177,12 @@ _gemini_global_lock = asyncio.Lock()
 
 async def call_gemini_with_retry(
     fn: Callable[[], Any],
-    max_attempts: int = 5,
-    initial_delay_sec: float = 3.0
+    max_attempts: int = 2,
+    initial_delay_sec: float = 1.0
 ) -> Any:
     """
     Resilient Gemini wrapper with exponential back-off + jitter.
-    Handles 429 (quota) and 503 (high demand) automatically.
+    Handles 429 (quota) and 503 (high demand) automatically with max 2 attempts for fast failover.
     """
     attempt = 0
     import inspect
@@ -231,18 +231,18 @@ async def call_gemini_with_retry(
                     raise err
 
                 if (is_rate_limit or is_unavailable) and attempt < max_attempts:
-                    delay = initial_delay_sec * (2.2 ** (attempt - 1)) + random.uniform(0.1, 1.5)
+                    delay = initial_delay_sec * (1.5 ** (attempt - 1)) + random.uniform(0.1, 0.5)
                     retry_match = re.search(r'please retry in\s+(\d+(?:\.\d+)?)s', str(err), re.IGNORECASE)
                     if retry_match:
                         try:
-                            delay = float(retry_match.group(1)) + 1.0 + random.uniform(1.0, 8.0)
+                            delay = min(5.0, float(retry_match.group(1)) + 0.5)
                         except ValueError:
                             pass
                     else:
                         retry_json_match = re.search(r"['\"]retryDelay['\"]\s*:\s*['\"](\d+)s['\"]", str(err), re.IGNORECASE)
                         if retry_json_match:
                             try:
-                                delay = float(retry_json_match.group(1)) + 1.5 + random.uniform(1.0, 8.0)
+                                delay = min(5.0, float(retry_json_match.group(1)) + 0.5)
                             except ValueError:
                                 pass
 
