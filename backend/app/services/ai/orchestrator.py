@@ -458,18 +458,20 @@ class AIOrchestrator:
         # 2. Build Candidate Execution Chain
         primary_provider, target_model, intra_fallbacks = cls.resolve_execution_plan(cap_clean, mode="manual" if model else "system", requested_model=model)
         
-        candidates: List[Tuple[str, str]] = [(primary_provider, target_model)]
-        for f_model in intra_fallbacks:
-            if f_model != target_model:
-                candidates.append((primary_provider, f_model))
-
-        # Check cross-provider fallback policy
         policy = cls.FALLBACK_POLICY.get(cap_clean, {"cross_provider": True, "deterministic": True})
-        if policy.get("cross_provider", True):
-            cross_chain = ModelRegistry.get_cross_provider_fallback_chain(cap_clean)
-            for cp_provider, cp_model in cross_chain:
-                if (cp_provider, cp_model) not in candidates:
-                    candidates.append((cp_provider, cp_model))
+        candidates: List[Tuple[str, str]] = [(primary_provider, target_model)]
+        
+        # Only attach fallback chain if no specific model was requested (system auto-routing mode)
+        if not model:
+            for f_model in intra_fallbacks:
+                if f_model != target_model:
+                    candidates.append((primary_provider, f_model))
+
+            if policy.get("cross_provider", True):
+                cross_chain = ModelRegistry.get_cross_provider_fallback_chain(cap_clean)
+                for cp_provider, cp_model in cross_chain:
+                    if (cp_provider, cp_model) not in candidates:
+                        candidates.append((cp_provider, cp_model))
 
         last_error = None
         attempt = 0

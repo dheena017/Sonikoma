@@ -189,30 +189,13 @@ async def execute_provider_call(
         }
         effective_model_id = gemini_model_aliases.get(clean_model_id, clean_model_id)
 
-        fallback_candidates = [effective_model_id] + GEMINI_FALLBACK_MODELS
-        models_to_try = []
-        for m in fallback_candidates:
-            if m and m not in models_to_try:
-                models_to_try.append(m)
-
-        response = None
-        last_exc = None
-        for target_m in models_to_try:
-            try:
-                response = await call_gemini_with_retry(
-                    lambda m_name=target_m: client_to_use.models.generate_content(
-                        model=m_name,
-                        contents=contents,
-                        config=config
-                    )
-                )
-                if response:
-                    break
-            except Exception as exc:
-                last_exc = exc
-                skill_name_log = getattr(skill, "name", "ai_capability") if skill else "ai_capability"
-                logger.warning(f"[coordinator.py] Skill '{skill_name_log}' model '{target_m}' failed: {exc}. Trying next fallback...")
-                continue
+        response = await call_gemini_with_retry(
+            lambda: client_to_use.models.generate_content(
+                model=effective_model_id,
+                contents=contents,
+                config=config
+            )
+        )
 
         if not response:
             skill_name = getattr(skill, "name", "ai_capability") if skill else "ai_capability"

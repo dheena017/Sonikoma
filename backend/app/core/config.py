@@ -223,11 +223,15 @@ async def call_gemini_with_retry(
                 is_daily_exhausted = (
                     "limit: 0" in err_msg or
                     "perday" in err_msg or
-                    "per day" in err_msg
+                    "per day" in err_msg or
+                    "limit: 0.0" in err_msg or
+                    status_code == 404 or
+                    "not found" in err_msg or
+                    "not supported for generatecontent" in err_msg
                 )
 
                 if is_daily_exhausted:
-                    logger.error(f"[Gemini] Daily API quota exhausted! Error: {err}")
+                    logger.debug(f"[Gemini] Non-retryable error (limit:0 / unsupported): {err}")
                     raise err
 
                 if (is_rate_limit or is_unavailable) and attempt < max_attempts:
