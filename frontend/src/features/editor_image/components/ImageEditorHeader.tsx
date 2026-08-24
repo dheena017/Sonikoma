@@ -228,32 +228,6 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           </span>
         </div>
 
-        {/* User Profile Pill next to logo */}
-        <button
-          onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/40 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1"
-          title="View Profile & Account Settings"
-          aria-label="Open User profile"
-        >
-          <img
-            key={user?.avatar_url || user?.full_name || "avatar"}
-            src={getUserAvatarUrl(user)}
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              const target = e.currentTarget as HTMLImageElement;
-              target.onerror = null;
-              target.src = DEFAULT_USER_AVATAR_DATA_URI;
-            }}
-            alt="User Avatar"
-            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
-          />
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans">
-            {user?.full_name ||
-              user?.username ||
-              (user?.email ? user.email.split("@")[0] : "User")}
-          </span>
-        </button>
-
         <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-purple-400 bg-purple-900/30 rounded-full border border-purple-700/50">
           IMAGE EDITOR
         </span>
@@ -466,24 +440,16 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               (user?.email ? user.email.split("@")[0] : "User")}
           </span>
           <img
-            src={(() => {
-              const raw = user?.avatar_url || user?.picture || user?.photo_url;
-              if (
-                raw &&
-                typeof raw === "string" &&
-                !raw.includes("dicebear") &&
-                !raw.includes("avataaars")
-              ) {
-                return raw;
-              }
-              return "https://lh3.googleusercontent.com/a/default-user";
-            })()}
+            key={user?.avatar_url || user?.full_name || "avatar"}
+            src={getUserAvatarUrl(user)}
+            referrerPolicy="no-referrer"
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src =
-                "https://lh3.googleusercontent.com/a/default-user";
+              const target = e.currentTarget as HTMLImageElement;
+              target.onerror = null;
+              target.src = DEFAULT_USER_AVATAR_DATA_URI;
             }}
             alt="User Avatar"
-            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs"
+            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
           />
         </button>
 
