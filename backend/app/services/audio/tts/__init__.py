@@ -5,7 +5,7 @@ Text-to-Speech (TTS) audio synthesis services package.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from services.audio.tts.tts_engine import (
+from app.services.audio.tts.tts_engine import (
     generate_panel_audio,
     generate_tts_audio,
     get_available_voices,

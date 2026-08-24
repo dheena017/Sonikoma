@@ -5,7 +5,7 @@ Speech transcription and subtitle generation services package.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from services.audio.transcription.speech_transcriber import (
+from app.services.audio.transcription.speech_transcriber import (
     generate_srt,
     generate_vtt,
     extract_words_with_timestamps,

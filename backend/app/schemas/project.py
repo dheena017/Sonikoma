@@ -110,6 +110,7 @@ class AudioSettingsUpdateRequest(BaseModel):
     speechRate: Optional[float] = Field(None, description="Speech rate speed factor")
     speechPitch: Optional[float] = Field(None, description="Speech pitch factor")
     voiceActor: Optional[str] = Field(None, description="Selected TTS voice identifier")
+    narratorVoice: Optional[str] = Field(None, description="Selected chapter narrator voice")
     musicTheme: Optional[str] = Field(None, description="Background music theme")
     audioDucking: Optional[bool] = Field(None, description="Auto ducking flag")
 

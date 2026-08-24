@@ -5,7 +5,7 @@ Audio signal processing and feature extraction services package.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from services.audio.processing.audio_processor import (
+from app.services.audio.processing.audio_processor import (
     detect_silence,
     segment_by_energy,
     extract_summary_stats,

@@ -306,6 +306,24 @@ export const useProjectStore = create<ProjectStoreState>()(
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
 
+        const isTemp = activeProjectId.startsWith("temp_") || activeProjectId.startsWith("draft_");
+        if (isTemp) {
+          if (activeProjectData) {
+            set({
+              activeProjectData: {
+                ...activeProjectData,
+                project: {
+                  ...activeProjectData.project,
+                  video_settings: settings.video_settings ?? activeProjectData.project.video_settings,
+                  audio_settings: settings.audio_settings ?? activeProjectData.project.audio_settings,
+                  autocrop_settings: settings.autocrop_settings ?? activeProjectData.project.autocrop_settings,
+                },
+              },
+            });
+          }
+          return true;
+        }
+
         try {
           const fetchFn = fetchClient || fetch;
           const res = await fetchFn(`/api/projects/${encodeURIComponent(activeProjectId)}/settings`, {
@@ -344,6 +362,22 @@ export const useProjectStore = create<ProjectStoreState>()(
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
 
+        const isTemp = activeProjectId.startsWith("temp_") || activeProjectId.startsWith("draft_");
+        if (isTemp) {
+          if (activeProjectData) {
+            set({
+              activeProjectData: {
+                ...activeProjectData,
+                project: {
+                  ...activeProjectData.project,
+                  video_settings: videoSettings,
+                },
+              },
+            });
+          }
+          return true;
+        }
+
         try {
           const fetchFn = fetchClient || fetch;
           const res = await fetchFn(`/api/projects/${encodeURIComponent(activeProjectId)}/settings/video`, {
@@ -376,6 +410,22 @@ export const useProjectStore = create<ProjectStoreState>()(
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
 
+        const isTemp = activeProjectId.startsWith("temp_") || activeProjectId.startsWith("draft_");
+        if (isTemp) {
+          if (activeProjectData) {
+            set({
+              activeProjectData: {
+                ...activeProjectData,
+                project: {
+                  ...activeProjectData.project,
+                  audio_settings: audioSettings,
+                },
+              },
+            });
+          }
+          return true;
+        }
+
         try {
           const fetchFn = fetchClient || fetch;
           const res = await fetchFn(`/api/projects/${encodeURIComponent(activeProjectId)}/settings/audio`, {
@@ -407,6 +457,22 @@ export const useProjectStore = create<ProjectStoreState>()(
       updateAutoCropSettings: async (autoCropSettings, fetchClient) => {
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
+
+        const isTemp = activeProjectId.startsWith("temp_") || activeProjectId.startsWith("draft_");
+        if (isTemp) {
+          if (activeProjectData) {
+            set({
+              activeProjectData: {
+                ...activeProjectData,
+                project: {
+                  ...activeProjectData.project,
+                  autocrop_settings: autoCropSettings,
+                },
+              },
+            });
+          }
+          return true;
+        }
 
         try {
           const fetchFn = fetchClient || fetch;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Mic,
   Music,
@@ -15,7 +15,13 @@ import {
   AudioWaveform,
   ChevronRight,
   Check,
+  Search,
+  Globe,
 } from "lucide-react";
+import { MUSIC_THEMES_CATALOG, DEFAULT_TTS_VOICES } from "@/features/editor_studio/types/settings";
+import { useProjectStore } from "@/store/useProjectStore";
+
+const MUSIC_THEMES = MUSIC_THEMES_CATALOG;
 
 interface AudioSettingsPageProps {
   projectId?: string | null;
@@ -49,10 +55,6 @@ interface AudioSettingsPageProps {
   setAudioDucking: (val: boolean) => void;
   onSave?: () => void;
 }
-
-import { MUSIC_THEMES_CATALOG, DEFAULT_TTS_VOICES } from "@/features/editor_studio/types/settings";
-
-const MUSIC_THEMES = MUSIC_THEMES_CATALOG;
 
 // Animated waveform bars for visual feedback
 function WaveformBars({ active, color = "#a855f7" }: { active: boolean; color?: string }) {
@@ -176,49 +178,54 @@ function VoiceCard({
   isSelected,
   onSelect,
 }: {
-  voice: { code: string; label: string };
+  voice: { code: string; label: string; gender?: "Male" | "Female"; lang?: string };
   isSelected: boolean;
   onSelect: () => void;
 }) {
   const parts = voice.label.split("—");
-  const lang = parts[0]?.trim() ?? voice.label;
-  const name = parts[1]?.trim() ?? "";
+  const lang = voice.lang || parts[0]?.trim() || voice.label;
+  const name = parts[1]?.trim() || parts[0]?.trim() || voice.code;
 
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left px-2.5 py-2 rounded-lg border transition-all duration-200 relative group"
+      className="w-full text-left px-3 py-2.5 rounded-xl border transition-all duration-200 relative group cursor-pointer hover:border-purple-500/40"
       style={{
         borderColor: isSelected ? "#a855f7" : "#1e1e2e",
-        backgroundColor: isSelected ? "#a855f710" : "#0d0d14",
+        backgroundColor: isSelected ? "#a855f718" : "#0d0d14",
       }}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <div
-            className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
+            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ backgroundColor: isSelected ? "#a855f733" : "#1a1a2e" }}
           >
             <Mic
-              className="h-3 w-3"
-              style={{ color: isSelected ? "#a855f7" : "#6b7280" }}
+              className="h-3.5 w-3.5"
+              style={{ color: isSelected ? "#c084fc" : "#6b7280" }}
             />
           </div>
           <div className="min-w-0">
             <div
-              className="text-[11px] font-semibold truncate leading-tight"
-              style={{ color: isSelected ? "#e2e8f0" : "#9ca3af" }}
+              className="text-xs font-bold truncate leading-tight flex items-center gap-1.5"
+              style={{ color: isSelected ? "#f3e8ff" : "#d1d5db" }}
             >
-              {name || lang}
+              <span>{name}</span>
+              {voice.gender && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800/80 text-neutral-400 font-mono">
+                  {voice.gender}
+                </span>
+              )}
             </div>
-            {name && (
-              <div className="text-[9px] text-neutral-600 truncate">{lang}</div>
-            )}
+            <div className="text-[10px] text-purple-400/80 truncate mt-0.5">
+              {lang} • <span className="font-mono text-neutral-500">{voice.code}</span>
+            </div>
           </div>
         </div>
         {isSelected && (
-          <div className="w-4 h-4 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-            <Check className="h-2.5 w-2.5 text-white" />
+          <div className="w-5 h-5 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm shadow-purple-500/50">
+            <Check className="h-3 w-3 text-white stroke-[3]" />
           </div>
         )}
       </div>
@@ -257,8 +264,10 @@ export default function AudioSettingsPage({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<"mixer" | "voice" | "music">("mixer");
-  const [availableVoices, setAvailableVoices] = useState<Array<{ code: string; label: string }>>([]);
+  const [availableVoices, setAvailableVoices] = useState<Array<{ code: string; label: string; gender?: "Male" | "Female"; lang?: string }>>([]);
   const [loadingVoices, setLoadingVoices] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
+  const [voiceSearch, setVoiceSearch] = useState<string>("");
   const [localNarratorVoice, setLocalNarratorVoice] = useState<string>(
     () => localStorage.getItem("ai_comic_narrator_voice") || "en-US-GuyNeural"
   );
@@ -293,16 +302,69 @@ export default function AudioSettingsPage({
   const defaultVoices = DEFAULT_TTS_VOICES;
   const displayVoices = availableVoices.length > 0 ? availableVoices : defaultVoices;
 
+  const distinctLanguages = useMemo(() => {
+    const langs = new Set<string>();
+    displayVoices.forEach((v) => {
+      if (v.lang) {
+        langs.add(v.lang);
+      } else {
+        const parts = v.label?.split("—");
+        const langName = parts?.[0]?.split("(")?.[0]?.trim() || "English";
+        langs.add(langName);
+      }
+    });
+    const order = ["Tamil", "English", "Japanese", "Korean", "Spanish", "French", "German", "Chinese", "Hindi", "Telugu", "Kannada", "Malayalam"];
+    const ordered = order.filter((l) => langs.has(l));
+    const rest = Array.from(langs).filter((l) => !order.includes(l));
+    return ["All", ...ordered, ...rest];
+  }, [displayVoices]);
+
+  const filteredVoices = useMemo(() => {
+    return displayVoices.filter((v) => {
+      const lang = v.lang || v.label?.split("—")?.[0]?.split("(")?.[0]?.trim() || "English";
+      const matchLang = selectedLanguage === "All" || lang.toLowerCase() === selectedLanguage.toLowerCase() || v.label.toLowerCase().includes(selectedLanguage.toLowerCase());
+      const query = voiceSearch.trim().toLowerCase();
+      const matchQuery =
+        !query ||
+        v.label.toLowerCase().includes(query) ||
+        v.code.toLowerCase().includes(query) ||
+        (v.lang && v.lang.toLowerCase().includes(query));
+      return matchLang && matchQuery;
+    });
+  }, [displayVoices, selectedLanguage, voiceSearch]);
+
   const handleSave = useCallback(async () => {
     if (onSave) { onSave(); return; }
     localStorage.setItem("ai_comic_narrator_voice", localNarratorVoice);
 
-    if (!projectId) {
+    const isTemp = !projectId || projectId.startsWith("temp_") || projectId.startsWith("draft_");
+    if (isTemp) {
       localStorage.setItem("global_audio_settings", JSON.stringify({
         masterVolume: volume, narrationVolume, bgmVolume, sfxVolume,
-        speechRate, speechPitch, voiceActor, musicTheme, audioDucking,
+        speechRate, speechPitch, voiceActor, narratorVoice: localNarratorVoice, musicTheme, audioDucking,
       }));
-      if (addNotification) addNotification("Audio profile saved to browser cache.", "success");
+      const activeProjectData = useProjectStore.getState().activeProjectData;
+      if (activeProjectData) {
+        useProjectStore.getState().setActiveProject({
+          ...activeProjectData,
+          project: {
+            ...activeProjectData.project,
+            audio_settings: {
+              volume,
+              narrationVolume,
+              bgmVolume,
+              sfxVolume,
+              speechRate,
+              speechPitch,
+              voiceActor,
+              narratorVoice: localNarratorVoice,
+              musicTheme,
+              audioDucking,
+            },
+          },
+        });
+      }
+      if (addNotification) addNotification("Audio profile saved for current workspace!", "success");
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
       return;
@@ -323,6 +385,7 @@ export default function AudioSettingsPage({
             speechRate,
             speechPitch,
             voiceActor,
+            narratorVoice: localNarratorVoice,
             musicTheme,
             audioDucking,
           },
@@ -471,19 +534,73 @@ export default function AudioSettingsPage({
         {/* VOICE TAB */}
         {activeTab === "voice" && (
           <div className="space-y-4">
-            {/* Voice Selector Card */}
+            {/* Global Language Filter & Search Toolbar */}
             <div
-              className="rounded-2xl border p-6 space-y-5"
+              className="rounded-2xl border p-4 space-y-3"
               style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
             >
-              <div className="flex items-center gap-3 pb-4 border-b border-neutral-800">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-white">
+                  <Globe className="h-4 w-4 text-purple-400" />
+                  <span>Choose Voice Language & Dialect</span>
+                </div>
+                <div className="relative flex-1 sm:max-w-xs">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500" />
+                  <input
+                    type="text"
+                    value={voiceSearch}
+                    onChange={(e) => setVoiceSearch(e.target.value)}
+                    placeholder="Search voice actor or dialect..."
+                    className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl pl-8.5 pr-3 py-1.5 text-white placeholder-neutral-500 focus:border-purple-500 outline-none"
+                  />
+                  {voiceSearch && (
+                    <button
+                      onClick={() => setVoiceSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 hover:text-white"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Language Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+                {distinctLanguages.map((lang) => {
+                  const isSelected = selectedLanguage === lang;
+                  return (
+                    <button
+                      key={lang}
+                      onClick={() => setSelectedLanguage(lang)}
+                      className="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer"
+                      style={{
+                        backgroundColor: isSelected ? "#a855f7" : "#141420",
+                        color: isSelected ? "#ffffff" : "#9ca3af",
+                        border: `1px solid ${isSelected ? "#a855f7" : "#222233"}`,
+                      }}
+                    >
+                      {lang}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Voice Selector Card */}
+            <div
+              className="rounded-2xl border p-6 space-y-4"
+              style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
+            >
+              <div className="flex items-center gap-3 pb-3 border-b border-neutral-800">
                 <div className="w-8 h-8 rounded-xl bg-purple-600/20 flex items-center justify-center">
                   <Radio className="h-4 w-4 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">AI Voice Character</h3>
+                  <h3 className="text-sm font-bold text-white">AI Character Voice</h3>
                   <p className="text-[11px] text-neutral-500 mt-0.5">
-                    {loadingVoices ? "Loading voices from server..." : `${displayVoices.length} voices available`}
+                    {loadingVoices
+                      ? "Loading voices from server..."
+                      : `Showing ${filteredVoices.length} of ${displayVoices.length} voices`}
                   </p>
                 </div>
                 {loadingVoices && (
@@ -492,50 +609,66 @@ export default function AudioSettingsPage({
               </div>
 
               {/* Voice grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1"
-                style={{ scrollbarWidth: "thin", scrollbarColor: "#4b2d7e transparent" }}>
-                {displayVoices.map((voice) => (
-                  <VoiceCard
-                    key={voice.code}
-                    voice={voice}
-                    isSelected={voiceActor === voice.code}
-                    onSelect={() => setVoiceActor(voice.code)}
-                  />
-                ))}
-              </div>
+              {filteredVoices.length === 0 ? (
+                <div className="text-center py-6 text-xs text-neutral-500">
+                  No voice matches &quot;{voiceSearch}&quot; in {selectedLanguage}.
+                </div>
+              ) : (
+                <div
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1"
+                  style={{ scrollbarWidth: "thin", scrollbarColor: "#4b2d7e transparent" }}
+                >
+                  {filteredVoices.map((voice) => (
+                    <VoiceCard
+                      key={voice.code}
+                      voice={voice}
+                      isSelected={voiceActor === voice.code}
+                      onSelect={() => setVoiceActor(voice.code)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Narrator Voice Card */}
             <div
-              className="rounded-2xl border p-6 space-y-5"
+              className="rounded-2xl border p-6 space-y-4"
               style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
             >
-              <div className="flex items-center gap-3 pb-4 border-b border-neutral-800">
+              <div className="flex items-center gap-3 pb-3 border-b border-neutral-800">
                 <div className="w-8 h-8 rounded-xl bg-indigo-600/20 flex items-center justify-center">
                   <Sparkles className="h-4 w-4 text-indigo-400" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white">Narrator Voice Profile</h3>
                   <p className="text-[11px] text-neutral-500 mt-0.5">
-                    Dedicated voice used for chapter-level narration
+                    Dedicated voice actor for narrative dialogue and story transitions
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1"
-                style={{ scrollbarWidth: "thin", scrollbarColor: "#3730a3 transparent" }}>
-                {displayVoices.map((voice) => (
-                  <VoiceCard
-                    key={voice.code}
-                    voice={voice}
-                    isSelected={localNarratorVoice === voice.code}
-                    onSelect={() => {
-                      setLocalNarratorVoice(voice.code);
-                      localStorage.setItem("ai_comic_narrator_voice", voice.code);
-                    }}
-                  />
-                ))}
-              </div>
+              {filteredVoices.length === 0 ? (
+                <div className="text-center py-6 text-xs text-neutral-500">
+                  No voice matches &quot;{voiceSearch}&quot; in {selectedLanguage}.
+                </div>
+              ) : (
+                <div
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1"
+                  style={{ scrollbarWidth: "thin", scrollbarColor: "#3730a3 transparent" }}
+                >
+                  {filteredVoices.map((voice) => (
+                    <VoiceCard
+                      key={voice.code}
+                      voice={voice}
+                      isSelected={localNarratorVoice === voice.code}
+                      onSelect={() => {
+                        setLocalNarratorVoice(voice.code);
+                        localStorage.setItem("ai_comic_narrator_voice", voice.code);
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Speech Rate & Pitch */}

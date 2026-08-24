@@ -327,6 +327,17 @@ async def get_project_settings_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     try:
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "settings": {
+                    "video_settings": {},
+                    "audio_settings": {},
+                    "autocrop_settings": {},
+                },
+            }
+
         project = get_project(projectId) or get_project_by_slug(projectId)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found.")
@@ -358,6 +369,17 @@ async def update_project_settings_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     try:
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "settings": {
+                    "video_settings": body.video_settings or {},
+                    "audio_settings": body.audio_settings or {},
+                    "autocrop_settings": body.autocrop_settings or {},
+                },
+            }
+
         project = get_project(projectId) or get_project_by_slug(projectId)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found.")
@@ -393,6 +415,13 @@ async def get_video_settings_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     try:
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "video_settings": {},
+            }
+
         project = get_project(projectId) or get_project_by_slug(projectId)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found.")
@@ -420,14 +449,20 @@ async def update_video_settings_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     try:
+        video_payload = body.video_settings if body.video_settings is not None else body.dict(exclude_unset=True, exclude={"video_settings"})
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "video_settings": video_payload,
+            }
+
         project = get_project(projectId) or get_project_by_slug(projectId)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found.")
         if project.get("user_id") != current_user["user_id"]:
             raise HTTPException(status_code=403, detail="Access denied.")
         
-        # Resolve payload: prefer nested video_settings object or unpack top-level fields
-        video_payload = body.video_settings if body.video_settings is not None else body.dict(exclude_unset=True, exclude={"video_settings"})
         updated_settings = update_project_settings(project["project_id"], {"video_settings": video_payload})
         return {
             "success": True,
@@ -449,6 +484,13 @@ async def get_audio_settings_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     try:
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "audio_settings": {},
+            }
+
         project = get_project(projectId) or get_project_by_slug(projectId)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found.")
@@ -476,14 +518,20 @@ async def update_audio_settings_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     try:
+        audio_payload = body.audio_settings if body.audio_settings is not None else body.dict(exclude_unset=True, exclude={"audio_settings"})
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "audio_settings": audio_payload,
+            }
+
         project = get_project(projectId) or get_project_by_slug(projectId)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found.")
         if project.get("user_id") != current_user["user_id"]:
             raise HTTPException(status_code=403, detail="Access denied.")
         
-        # Resolve payload: prefer nested audio_settings object or unpack top-level fields
-        audio_payload = body.audio_settings if body.audio_settings is not None else body.dict(exclude_unset=True, exclude={"audio_settings"})
         updated_settings = update_project_settings(project["project_id"], {"audio_settings": audio_payload})
         return {
             "success": True,
@@ -505,6 +553,13 @@ async def get_autocrop_settings_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     try:
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "autocrop_settings": {},
+            }
+
         project = get_project(projectId) or get_project_by_slug(projectId)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found.")
@@ -532,14 +587,20 @@ async def update_autocrop_settings_endpoint(
     current_user: dict = Depends(get_current_user),
 ):
     try:
+        autocrop_payload = body.autocrop_settings if body.autocrop_settings is not None else body.dict(exclude_unset=True, exclude={"autocrop_settings"})
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "autocrop_settings": autocrop_payload,
+            }
+
         project = get_project(projectId) or get_project_by_slug(projectId)
         if not project:
             raise HTTPException(status_code=404, detail="Project not found.")
         if project.get("user_id") != current_user["user_id"]:
             raise HTTPException(status_code=403, detail="Access denied.")
         
-        # Resolve payload: prefer nested autocrop_settings object or unpack top-level fields
-        autocrop_payload = body.autocrop_settings if body.autocrop_settings is not None else body.dict(exclude_unset=True, exclude={"autocrop_settings"})
         updated_settings = update_project_settings(project["project_id"], {"autocrop_settings": autocrop_payload})
         return {
             "success": True,

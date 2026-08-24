@@ -8,7 +8,7 @@ audio signal processing.
 """
 
 # 1. Text-to-Speech (TTS) Synthesis
-from services.audio.tts import (
+from app.services.audio.tts import (
     generate_panel_audio,
     generate_tts_audio,
     get_available_voices,
@@ -21,7 +21,7 @@ from services.audio.tts import (
 )
 
 # 2. Speech Transcription & Subtitle Generation
-from services.audio.transcription import (
+from app.services.audio.transcription import (
     generate_srt,
     generate_vtt,
     extract_words_with_timestamps,
@@ -38,15 +38,15 @@ from services.audio.transcription import (
     extract_timestamped_words,
 )
 
-# 3. Dialogue Alignment & Audio Peak Extraction
-from services.audio.alignment import (
+# 3. Dialogue Alignment & Peak Extraction
+from app.services.audio.alignment import (
     align_dialogue_and_extract_peaks,
     align_dialogue_service,
     align_dialogue_with_audio_timestamps,
 )
 
 # 4. Audio Signal Processing & Spectral Statistics
-from services.audio.processing import (
+from app.services.audio.processing import (
     detect_silence,
     segment_by_energy,
     extract_summary_stats,
