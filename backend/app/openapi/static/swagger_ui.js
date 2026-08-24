@@ -3,48 +3,38 @@
  * and Universal Request Authorization Interceptor
  */
 
-// Reset authorization tokens on reload / initial page load
-(function() {
-    try {
-        localStorage.removeItem('sonikoma_jwt_token');
-        localStorage.removeItem('authorized');
-        sessionStorage.removeItem('sonikoma_jwt_token');
-        sessionStorage.removeItem('access_token');
-        document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;';
-    } catch (e) {}
-
-    window.addEventListener('beforeunload', function() {
-        try {
-            localStorage.removeItem('sonikoma_jwt_token');
-            localStorage.removeItem('authorized');
-            sessionStorage.removeItem('sonikoma_jwt_token');
-            sessionStorage.removeItem('access_token');
-            document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax;';
-        } catch (e) {}
-    });
-})();
-
 // 0. Intercept all outgoing Swagger UI API requests and automatically attach Bearer token
 (function() {
     var originalFetch = window.fetch;
     if (originalFetch) {
         window.fetch = function(input, init) {
-            init = init || {};
-            var token = localStorage.getItem('sonikoma_jwt_token');
+            var token = localStorage.getItem('sonikoma_jwt_token') || sessionStorage.getItem('sonikoma_jwt_token');
             if (token) {
-                init.headers = init.headers || {};
-                if (typeof Headers !== 'undefined' && init.headers instanceof Headers) {
-                    if (!init.headers.has('Authorization')) {
-                        init.headers.set('Authorization', 'Bearer ' + token);
+                var cleanToken = token.trim().replace(/^Bearer\s+/i, '');
+                var authHeaderVal = 'Bearer ' + cleanToken;
+
+                if (typeof Request !== 'undefined' && input instanceof Request) {
+                    var newHeaders = new Headers(input.headers);
+                    if (!newHeaders.has('Authorization')) {
+                        newHeaders.set('Authorization', authHeaderVal);
                     }
-                } else if (Array.isArray(init.headers)) {
-                    var hasAuth = init.headers.some(function(h) { return h[0].toLowerCase() === 'authorization'; });
-                    if (!hasAuth) {
-                        init.headers.push(['Authorization', 'Bearer ' + token]);
-                    }
+                    input = new Request(input, { headers: newHeaders });
                 } else {
-                    if (!init.headers['Authorization'] && !init.headers['authorization']) {
-                        init.headers['Authorization'] = 'Bearer ' + token;
+                    init = init || {};
+                    if (typeof Headers !== 'undefined' && init.headers instanceof Headers) {
+                        if (!init.headers.has('Authorization')) {
+                            init.headers.set('Authorization', authHeaderVal);
+                        }
+                    } else if (Array.isArray(init.headers)) {
+                        var hasAuth = init.headers.some(function(h) { return h[0].toLowerCase() === 'authorization'; });
+                        if (!hasAuth) {
+                            init.headers.push(['Authorization', authHeaderVal]);
+                        }
+                    } else {
+                        init.headers = init.headers || {};
+                        if (!init.headers['Authorization'] && !init.headers['authorization']) {
+                            init.headers['Authorization'] = authHeaderVal;
+                        }
                     }
                 }
             }
@@ -59,10 +49,11 @@
         return origOpen.apply(this, arguments);
     };
     XMLHttpRequest.prototype.send = function() {
-        var token = localStorage.getItem('sonikoma_jwt_token');
+        var token = localStorage.getItem('sonikoma_jwt_token') || sessionStorage.getItem('sonikoma_jwt_token');
         if (token && this._url && typeof this._url === 'string' && this._url.indexOf('/api/') !== -1) {
             try {
-                this.setRequestHeader('Authorization', 'Bearer ' + token);
+                var cleanToken = token.trim().replace(/^Bearer\s+/i, '');
+                this.setRequestHeader('Authorization', 'Bearer ' + cleanToken);
             } catch (e) {}
         }
         return origSend.apply(this, arguments);
@@ -303,10 +294,51 @@ window.addEventListener('DOMContentLoaded', function() {
         }
 
         if (token && window.ui) {
-            if (typeof window.ui.preauthorizeApiKey === 'function') {
-                window.ui.preauthorizeApiKey('OAuth2PasswordBearer', token);
-                window.ui.preauthorizeApiKey('HTTPBearer', token);
-            }
+            try {
+                if (typeof window.ui.preauthorizeApiKey === 'function') {
+                    window.ui.preauthorizeApiKey('OAuth2PasswordBearer', token);
+                    window.ui.preauthorizeApiKey('HTTPBearer', token);
+                }
+                var isAlreadyAuthorizedInUI = false;
+                if (window.ui.authSelectors && typeof window.ui.authSelectors.authorized === 'function') {
+                    var authObj = window.ui.authSelectors.authorized();
+                    if (authObj) {
+                        var jsAuth = typeof authObj.toJS === 'function' ? authObj.toJS() : authObj;
+                        if (jsAuth && (jsAuth.OAuth2PasswordBearer || jsAuth.HTTPBearer)) {
+                            isAlreadyAuthorizedInUI = true;
+                        }
+                    }
+                }
+                if (!isAlreadyAuthorizedInUI && window.ui.authActions && typeof window.ui.authActions.authorize === 'function') {
+                    window.ui.authActions.authorize({
+                        OAuth2PasswordBearer: {
+                            name: 'OAuth2PasswordBearer',
+                            schema: {
+                                type: 'oauth2',
+                                flows: {
+                                    password: {
+                                        tokenUrl: '/api/v1/auth/token'
+                                    }
+                                }
+                            },
+                            value: {
+                                token: {
+                                    access_token: token,
+                                    token_type: 'bearer'
+                                }
+                            }
+                        },
+                        HTTPBearer: {
+                            name: 'HTTPBearer',
+                            schema: {
+                                type: 'http',
+                                scheme: 'bearer'
+                            },
+                            value: token
+                        }
+                    });
+                }
+            } catch (e) {}
         }
 
         // Update all per-endpoint lock icon buttons

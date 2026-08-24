@@ -174,7 +174,7 @@ def register_docs_routes(app: FastAPI):
                 "filter": True,
                 "deepLinking": True,
                 "displayRequestDuration": True,
-                "persistAuthorization": False,
+                "persistAuthorization": True,
                 "docExpansion": "list",
                 "defaultModelsExpandDepth": -1,
                 "defaultModelExpandDepth": -1,

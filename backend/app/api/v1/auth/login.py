@@ -23,7 +23,7 @@ router = APIRouter()
 @router.post("/token", summary="Obtain OAuth2/JWT access token")
 async def login_for_access_token_endpoint(
     request: Request,
-    form_data: Optional[OAuth2PasswordRequestForm] = Depends(),
+    form_data: OAuth2PasswordRequestForm = Depends(),
 ):
     ip_addr = request.client.host if request and request.client else "127.0.0.1"
     content_type = request.headers.get("content-type", "")
