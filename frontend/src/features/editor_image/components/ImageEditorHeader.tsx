@@ -2,21 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   X,
   Check,
-  Undo,
-  Redo,
   ChevronLeft,
   ChevronRight,
-  Trash2,
-  PanelRightClose,
-  PanelRightOpen,
-  Minimize2,
   Bell,
   BellOff,
   Menu,
   Zap,
   FolderSync,
 } from "lucide-react";
-import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState"; // Adjust path if needed
+import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
 import {
   getUserAvatarUrl,
   DEFAULT_USER_AVATAR_DATA_URI,
@@ -192,11 +186,11 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#06060c]/80 backdrop-blur-2xl border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] flex items-center justify-between pl-4 lg:pl-0 pr-6 md:pr-8 flex-shrink-0 z-50 selection:bg-purple-650">
-      {/* Left: Hamburger, Brand / Logo & Navigation */}
-      <div className="flex items-center space-x-4 h-full">
+    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#0a0b10] border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6)] flex items-center justify-between pl-4 lg:pl-0 pr-6 flex-shrink-0 z-50 selection:bg-purple-650 relative">
+      {/* ── Left: Hamburger, Brand Logo, Mode Badge & Image Pagination ──── */}
+      <div className="flex items-center gap-3 shrink-0 h-full">
         {onToggleSidebar && (
-          <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-4">
+          <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-2">
             <button
               onClick={onToggleSidebar}
               className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/8 flex items-center justify-center text-neutral-300 hover:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
@@ -228,27 +222,41 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           </span>
         </div>
 
-        <span className="px-3 py-1 text-[10px] font-bold tracking-wider text-purple-400 bg-purple-900/30 rounded-full border border-purple-700/50">
+        <span className="px-2.5 py-1 text-[10px] font-black tracking-wider text-purple-300 bg-purple-950/70 rounded-full border border-purple-700/50 shadow-xs uppercase">
           IMAGE EDITOR
         </span>
 
-        {hasMultipleImages && (
-          <div className="flex items-center space-x-1 bg-gray-900/50 rounded-lg p-1 border border-gray-800">
+        {scrapedImages && scrapedImages.length > 0 && (
+          <div className="flex items-center space-x-1 bg-neutral-900/90 rounded-xl px-1.5 py-1 border border-white/8 shadow-xs">
             <button
               onClick={handlePrevImage}
-              className="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition"
-              title="Previous Image"
+              disabled={editingImageIdx === null || editingImageIdx <= 0}
+              className={`p-1 rounded-lg transition ${
+                editingImageIdx !== null && editingImageIdx > 0
+                  ? "text-neutral-300 hover:text-white hover:bg-white/10 cursor-pointer active:scale-95"
+                  : "text-neutral-600 cursor-not-allowed opacity-35"
+              }`}
+              title="Previous Image (← Left Arrow)"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="text-xs font-medium text-gray-400 min-w-[3rem] text-center">
-              {editingImageIdx !== null ? editingImageIdx + 1 : 0} /{" "}
+            <span className="text-xs font-semibold text-neutral-300 min-w-[2.8rem] text-center font-mono">
+              {editingImageIdx !== null ? editingImageIdx + 1 : 1} /{" "}
               {scrapedImages.length}
             </span>
             <button
               onClick={handleNextImage}
-              className="p-1.5 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition"
-              title="Next Image"
+              disabled={
+                editingImageIdx === null ||
+                editingImageIdx >= scrapedImages.length - 1
+              }
+              className={`p-1 rounded-lg transition ${
+                editingImageIdx !== null &&
+                editingImageIdx < scrapedImages.length - 1
+                  ? "text-neutral-300 hover:text-white hover:bg-white/10 cursor-pointer active:scale-95"
+                  : "text-neutral-600 cursor-not-allowed opacity-35"
+              }`}
+              title="Next Image (→ Right Arrow)"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -256,75 +264,13 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         )}
       </div>
 
-      {/* Center: History & Canvas Tools */}
-      <div className="flex items-center space-x-2 bg-gray-900/50 p-1 rounded-lg border border-gray-800">
-        <button
-          onClick={handleUndo}
-          disabled={historyLength === 0}
-          className={`p-2 rounded-md transition ${
-            historyLength > 0
-              ? "text-gray-300 hover:text-white hover:bg-gray-800"
-              : "text-gray-600 cursor-not-allowed"
-          }`}
-          title="Undo"
-        >
-          <Undo className="w-4 h-4" />
-        </button>
-        <button
-          onClick={handleRedo}
-          disabled={redoHistoryLength === 0}
-          className={`p-2 rounded-md transition ${
-            redoHistoryLength > 0
-              ? "text-gray-300 hover:text-white hover:bg-gray-800"
-              : "text-gray-600 cursor-not-allowed"
-          }`}
-          title="Redo"
-        >
-          <Redo className="w-4 h-4" />
-        </button>
-        <div className="w-px h-4 bg-gray-700 mx-1"></div>
-        <button
-          onClick={handleDeleteCurrentImage}
-          className="p-2 text-red-400 hover:text-red-300 rounded-md hover:bg-red-900/20 transition"
-          title="Delete Image"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-        {setIsPipMode && (
-          <button
-            onClick={() => setIsPipMode(true)}
-            className="p-2 text-gray-400 hover:text-white rounded-md hover:bg-gray-800 transition"
-            title="Picture-in-Picture Mode"
-          >
-            <Minimize2 className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-
-      {/* Right: Toggle Sidebar, Credits, Notifications, Project, Profile & Exit Actions */}
-      <div className="flex items-center space-x-2 sm:space-x-3">
-        {/* Server Status Indicator */}
+      {/* ── Right: AI Routing, Credits, Notifications, Profile & Actions ─── */}
+      <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+        {/* 🟢 Server Status Indicator */}
         <ServerStatusIndicator status={backendStatus} />
 
-        {/* Toggle properties panel */}
-        <button
-          onClick={() => setIsToolsPanelOpen((prev) => !prev)}
-          className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition border border-transparent hover:border-gray-700"
-          title={
-            isToolsPanelOpen
-              ? "Close Properties Panel"
-              : "Open Properties Panel"
-          }
-        >
-          {isToolsPanelOpen ? (
-            <PanelRightClose className="w-5 h-5" />
-          ) : (
-            <PanelRightOpen className="w-5 h-5" />
-          )}
-        </button>
-
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector className="hidden sm:inline-flex" />
+        <AIModelSelector compact className="hidden sm:inline-flex" />
 
         {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (
@@ -335,7 +281,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+              className={`hidden sm:flex h-9 items-center gap-1.5 px-3 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
                 credits < 20
                   ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
                   : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
@@ -369,15 +315,15 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               setShowNotifications(!showNotifications);
               setShowCreditsPopover(false);
             }}
-            className={`p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition border border-transparent hover:border-gray-700 relative ${
-              showNotifications ? "bg-gray-800 text-white border-gray-700" : ""
+            className={`h-9 w-9 flex items-center justify-center text-neutral-400 hover:text-white rounded-xl bg-neutral-900 border border-neutral-800 hover:border-white/20 transition-all relative cursor-pointer active:scale-95 ${
+              showNotifications ? "bg-neutral-800 text-white border-white/20" : ""
             }`}
             title="Notifications"
           >
             {notificationsMuted ? (
-              <BellOff className="h-5 w-5 text-rose-500" />
+              <BellOff className="h-4 w-4 text-rose-500" />
             ) : (
-              <Bell className="h-5 w-5" />
+              <Bell className="h-4 w-4" />
             )}
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
@@ -411,7 +357,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="p-2 text-gray-400 hover:text-purple-300 rounded-lg hover:bg-purple-500/10 transition border border-transparent hover:border-purple-500/20 relative"
+            className="h-9 w-9 flex items-center justify-center text-neutral-400 hover:text-purple-300 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/40 hover:bg-purple-500/10 transition-all relative cursor-pointer active:scale-95"
             title={
               activeProjectId && activeProjectData
                 ? `Active Project: ${
@@ -420,21 +366,21 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 : "Select Active Project"
             }
           >
-            <FolderSync className="h-5 w-5 text-purple-400" />
+            <FolderSync className="h-4 w-4 text-purple-400" />
             {activeProjectId && activeProjectData && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
             )}
           </button>
         </div>
 
-        {/* User Profile Pill at Far Right End (Image 3 Style) */}
+        {/* User Profile Pill at Far Right */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 shadow-sm active:scale-95"
+          className="h-9 flex items-center gap-2 px-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 shadow-sm active:scale-95"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[130px] hidden md:inline font-sans px-1.5 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
             {user?.full_name ||
               user?.username ||
               (user?.email ? user.email.split("@")[0] : "User")}
@@ -449,11 +395,11 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               target.src = DEFAULT_USER_AVATAR_DATA_URI;
             }}
             alt="User Avatar"
-            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
+            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
           />
         </button>
 
-        <div className="w-px h-6 bg-gray-800 mx-1"></div>
+        <div className="w-px h-6 bg-white/10 mx-0.5 hidden sm:block" />
 
         <button
           onClick={() => {
@@ -469,9 +415,10 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               window.dispatchEvent(new Event("popstate"));
             }
           }}
-          className="px-4 py-2 text-xs font-black tracking-widest uppercase text-neutral-300 hover:text-white bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-2xl transition-all cursor-pointer flex items-center active:scale-95 shadow-sm"
+          className="h-8 px-2.5 text-[11px] font-medium text-neutral-300 hover:text-white bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-xs"
         >
-          <X className="w-4 h-4 mr-1.5" /> Cancel
+          <X className="w-3.5 h-3.5 text-neutral-400" />
+          <span>Cancel</span>
         </button>
 
         <button
@@ -484,9 +431,10 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               setEditingImageIdx(null);
             }
           }}
-          className="px-5 py-2 text-xs font-black tracking-widest uppercase text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 rounded-2xl transition-all flex items-center shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-purple-400/30 cursor-pointer active:scale-95"
+          className="h-8 px-3 text-[11px] font-semibold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 rounded-lg transition-all flex items-center gap-1 shadow-[0_2px_10px_rgba(139,92,246,0.25)] hover:shadow-[0_4px_16px_rgba(139,92,246,0.45)] border border-purple-400/30 cursor-pointer active:scale-95"
         >
-          <Check className="w-4 h-4 mr-1.5 text-purple-200" /> Apply Changes
+          <Check className="w-3.5 h-3.5 text-purple-200" />
+          <span>Apply Changes</span>
         </button>
       </div>
     </header>

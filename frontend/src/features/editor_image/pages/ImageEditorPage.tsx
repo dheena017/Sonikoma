@@ -65,8 +65,56 @@ const ImageEditorPage = React.memo(
       }
     }, [editingImageIdx, appLogic.scrapedImages, setEditingImageIdx]);
 
+    // Fallback sync: If scrapedImages is empty but panels exist, populate scrapedImages from panels
+    useEffect(() => {
+      if (
+        (!appLogic.scrapedImages || appLogic.scrapedImages.length === 0) &&
+        appLogic.panels &&
+        appLogic.panels.length > 0
+      ) {
+        const extracted = appLogic.panels
+          .map((p: any) => p.image_url || p.original_image_url)
+          .filter(Boolean);
+        if (extracted.length > 0) {
+          appLogic.setScrapedImages(extracted);
+          if (editingImageIdx === null) {
+            setEditingImageIdx(0);
+          }
+        }
+      }
+    }, [
+      appLogic.scrapedImages,
+      appLogic.panels,
+      appLogic.setScrapedImages,
+      editingImageIdx,
+      setEditingImageIdx,
+    ]);
+
     // Load the editor logic
     const editorProps = useImageEditor({ appLogic });
+
+    // Keyboard Arrow navigation for Previous / Next Image
+    useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        const target = e.target as HTMLElement;
+        if (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable
+        ) {
+          return;
+        }
+
+        if (e.key === "ArrowLeft") {
+          editorProps.handlePrevImage();
+        } else if (e.key === "ArrowRight") {
+          editorProps.handleNextImage();
+        }
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [editorProps]);
 
     const activeStoryboardPanel = useMemo(() => {
       if (editingImageIdx === null) return null;
@@ -122,13 +170,22 @@ const ImageEditorPage = React.memo(
           setEditCropTop={appLogic.setEditCropTop}
           setEditCropBottom={appLogic.setEditCropBottom}
           setEditCropLeft={appLogic.setEditCropLeft}
-          setEditCropRight={appLogic.setEditCropRight}
           setSelectedSliceId={editorProps.setSelectedSliceId}
           activeTab={editorProps.activeTab}
           aspectRatio={appLogic.aspectRatio}
           fillColor={editorProps.fillColor}
           textBgColor="#ffffff"
-        />
+          handleUndo={editorProps.handleUndo}
+          historyLength={editorProps.history.length}
+          handleRedo={editorProps.handleRedo}
+          redoHistoryLength={editorProps.redoHistory.length}
+          handleDeleteCurrentImage={editorProps.handleDeleteCurrentImage}
+          isPipMode={false}
+          setIsPipMode={() => { } }
+          isToolsPanelOpen={isToolsPanelOpen}
+          setIsToolsPanelOpen={setIsToolsPanelOpen} setEditCropRight={function (val: number): void {
+            throw new Error("Function not implemented.");
+          } }        />
       );
     }, [
       editorProps.imageUrl,
@@ -237,7 +294,7 @@ const ImageEditorPage = React.memo(
         <div className="flex-1 flex flex-row overflow-hidden w-full relative">
           {/* Left Tools Sidebar */}
           <aside
-            className={`h-full bg-[#0d0e15] border-r border-white/10 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`h-full bg-[#0a0b10] border-r border-white/8 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
               isToolsPanelOpen
                 ? "w-[360px] lg:w-[420px] opacity-100"
                 : "w-0 opacity-0 border-none"

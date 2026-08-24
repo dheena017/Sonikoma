@@ -342,7 +342,7 @@ export default function CropCanvas({
   return (
     <div
       ref={scrollParentRef}
-      className={`relative border border-white/10 hover:border-purple-500/30 rounded-2xl bg-gradient-to-br from-[#0c0a1a]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl ${
+      className={`relative border border-white/10 hover:border-purple-500/30 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] ${
         zoom > 1 ? "overflow-auto" : "overflow-hidden"
       } flex-1 h-0 flex items-center justify-center select-none transition-all shadow-[0_10px_40px_rgba(0,0,0,0.7)]`}
     >
@@ -427,42 +427,6 @@ export default function CropCanvas({
             aspectRatio: naturalAspect || undefined,
           }}
         >
-          {showSafeZones && activeTab === "edit" && (
-            <div className="absolute inset-0 pointer-events-none z-30">
-              <div className="absolute inset-[12.5%] border border-cyan-400/60 rounded-[28px] bg-cyan-500/[0.04] shadow-[0_0_30px_rgba(34,211,238,0.12)]" />
-              <div className="absolute inset-[12.5%] border border-dashed border-cyan-300/40 rounded-[28px]" />
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/10 px-2 py-1 text-[8px] font-mono uppercase tracking-[0.2em] text-cyan-200 border border-cyan-400/30">
-                Safe Zone
-              </div>
-            </div>
-          )}
-
-          {activeTab === "edit" && (
-            <div className="absolute inset-0 pointer-events-none z-35">
-              <div
-                className="absolute -translate-x-1/2 -translate-y-1/2 h-6 w-6 rounded-full border border-violet-300/80 bg-violet-400/20 shadow-[0_0_20px_rgba(167,139,250,0.45)]"
-                style={{
-                  left: focalPointPositions[selectedFocalPoint].left,
-                  top: focalPointPositions[selectedFocalPoint].top,
-                }}
-              />
-              <div
-                className="absolute left-1/2 top-1/2 h-px w-[18%] -translate-x-1/2 -translate-y-1/2 bg-violet-200/60"
-                style={{
-                  left: focalPointPositions[selectedFocalPoint].left,
-                  top: focalPointPositions[selectedFocalPoint].top,
-                }}
-              />
-              <div
-                className="absolute left-1/2 top-1/2 h-[18%] w-px -translate-x-1/2 -translate-y-1/2 bg-violet-200/60"
-                style={{
-                  left: focalPointPositions[selectedFocalPoint].left,
-                  top: focalPointPositions[selectedFocalPoint].top,
-                }}
-              />
-            </div>
-          )}
-
           {imgUrl ? (
             <img
               ref={imgRef}

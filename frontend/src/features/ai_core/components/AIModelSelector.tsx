@@ -131,6 +131,11 @@ const CATEGORY_STYLES: Record<string, { color: string; bg: string; border: strin
 
 export const AIModelSelector: React.FC<AIModelSelectorProps> = ({
   className = "",
+  compact = false,
+  value,
+  selectedModel,
+  onChange,
+  fullWidth = false,
 }) => {
   const { loadCatalogFromBackend, getAvailableModels } = useAIModelStore();
 
@@ -228,30 +233,43 @@ export const AIModelSelector: React.FC<AIModelSelectorProps> = ({
           setIsOpen(!isOpen);
           if (!isOpen) fetchRoutingConfig();
         }}
-        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-500/30 bg-[#0d0d18]/95 hover:bg-purple-950/30 hover:border-purple-500/60 text-neutral-200 transition-all duration-200 shadow-sm focus:outline-none group cursor-pointer"
+        className={`inline-flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-purple-500/30 bg-[#0d0d18]/95 hover:bg-purple-950/30 hover:border-purple-500/60 text-neutral-200 transition-all duration-200 shadow-sm focus:outline-none group cursor-pointer ${
+          compact ? "h-9 text-xs" : "h-10"
+        }`}
         title="AI Model Routing: All 11 comic tasks automatically route through specialized engines"
       >
         <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border border-purple-400/40 flex items-center justify-center flex-shrink-0">
           <Workflow className="w-3 h-3 text-purple-300 group-hover:rotate-45 transition-transform duration-300" />
         </div>
 
-        <div className="flex flex-col text-left">
+        {compact ? (
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-black text-white tracking-tight">
+            <span className="text-[11px] font-black text-white tracking-tight whitespace-nowrap">
               AI Smart Routing
             </span>
-            <span className="px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded tracking-wider bg-purple-950/90 text-purple-300 border border-purple-800/50">
-              11 Tasks Active
+            <span className="px-1.5 py-0.5 text-[8px] font-extrabold uppercase rounded tracking-wider bg-purple-950/90 text-purple-300 border border-purple-800/50 hidden md:inline">
+              11 Tasks
             </span>
           </div>
-          <span className="text-[9px] text-neutral-400 font-mono flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Automatic Cascades Enabled
-          </span>
-        </div>
+        ) : (
+          <div className="flex flex-col text-left">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-black text-white tracking-tight whitespace-nowrap">
+                AI Smart Routing
+              </span>
+              <span className="px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded tracking-wider bg-purple-950/90 text-purple-300 border border-purple-800/50">
+                11 Tasks Active
+              </span>
+            </div>
+            <span className="text-[9px] text-neutral-400 font-mono flex items-center gap-1 leading-tight">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              Automatic Cascades Enabled
+            </span>
+          </div>
+        )}
 
         <ChevronDown
-          className={`w-3.5 h-3.5 text-purple-400 group-hover:text-white transition-transform duration-200 ml-0.5 ${
+          className={`w-3.5 h-3.5 text-purple-400 group-hover:text-white transition-transform duration-200 ml-0.5 shrink-0 ${
             isOpen ? "rotate-180 text-purple-300" : ""
           }`}
         />

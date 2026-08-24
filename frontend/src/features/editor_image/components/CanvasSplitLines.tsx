@@ -19,6 +19,10 @@ export default function CanvasSplitLines({
   setSplitPosition,
   setShowSplitPosition,
 }: CanvasSplitLinesProps) {
+  if (!isVisible || !splitLines || splitLines.length === 0) {
+    return null;
+  }
+
   return (
     <div
       className="absolute inset-0 z-40 pointer-events-none"
@@ -26,17 +30,6 @@ export default function CanvasSplitLines({
         display: isVisible ? "block" : "none",
       }}
     >
-      {/* Active sliding guideline */}
-      <div
-        className="absolute left-0 right-0 z-40 pointer-events-none"
-        style={{ top: `${splitPosition}%` }}
-      >
-        <div className="absolute inset-x-0 border-t-2 border-dashed border-purple-400/80" />
-        <div className="absolute right-2 -top-5 bg-purple-950/95 text-purple-300 font-mono text-[9px] px-2 py-0.5 rounded-lg border border-purple-800/60 font-bold backdrop-blur shadow-lg">
-          Split: {splitPosition}% (draft)
-        </div>
-      </div>
-
       {/* Saved split lines */}
       {splitLines.map((y, idx) => {
         const isHovered = hoverPct ? Math.abs(hoverPct.y - y) < 2.5 : false;

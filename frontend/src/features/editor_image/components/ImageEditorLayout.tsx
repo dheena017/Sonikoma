@@ -28,19 +28,13 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
   panelsCount,
 }) => {
   return (
-    <div className="w-screen h-screen m-0 p-0 overflow-hidden bg-[#06060c]/85 text-white flex flex-col relative">
-      {/* Global Anime Background Scene */}
-      <LandingAnimeScene variant="editor" />
-
-      {/* Subtle ambient background glow */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(88,28,235,0.08),transparent)] z-0" />
-
+    <div className="w-screen h-screen m-0 p-0 overflow-hidden bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:24px_24px] text-white flex flex-col relative">
       {/* Top Header */}
       {header}
 
       <div className="flex-grow flex flex-row overflow-hidden w-full min-h-0 relative z-10">
         {/* Left Column: Mini Sidebar */}
-        <aside className="w-20 h-full bg-neutral-950/80 backdrop-blur-2xl border-r border-white/8 shadow-[4px_0_24px_rgba(0,0,0,0.5)] flex-shrink-0 z-10">
+        <aside className="w-20 h-full bg-[#0a0b10] border-r border-white/8 shadow-[4px_0_24px_rgba(0,0,0,0.5)] flex-shrink-0 z-10">
           <ImageEditorMiniSidebar
             onOpenToolsPanel={onOpenToolsPanel}
             onToggleSidebar={onToggleSidebar}

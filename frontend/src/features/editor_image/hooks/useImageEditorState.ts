@@ -113,7 +113,7 @@ export const useImageEditorStore = create<
   setSlicesCount: (count) => set({ slicesCount: count }),
   selectedFocalPoint: "MC",
   setSelectedFocalPoint: (point) => set({ selectedFocalPoint: point }),
-  showSafeZones: true,
+  showSafeZones: false,
   setShowSafeZones: (value) => set({ showSafeZones: value }),
   lineSharpen: true,
   setLineSharpen: (value) => set({ lineSharpen: value }),

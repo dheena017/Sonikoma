@@ -203,7 +203,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-white/8 bg-[#06060c]/80 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-3 border-b border-white/8 bg-[#06060c]/90 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
         className || ""
       }`}
       style={style}
@@ -211,11 +211,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       {/* Left Section - Menu Icon + Title + Metadata */}
       <div className="flex items-center shrink-0 h-full">
         {/* PREMIUM ALIGNMENT FIX: w-20 wrapper perfectly aligns the menu button above the mini-sidebar */}
-        <div className="w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-4">
+        <div className="w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-3">
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
+              className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
               title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
             >
               <Menu className="h-5 w-5" />
@@ -247,9 +247,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             />
           )}
 
-          <div className="min-w-0 hidden sm:block max-w-[340px] md:max-w-[420px] lg:max-w-[500px]">
+          <div className="min-w-0 hidden sm:block max-w-[280px] md:max-w-[340px] lg:max-w-[420px]">
             {/* Top Workspace & Source Website Badge */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-purple-400/90 leading-none">
                 Editor Workspace
               </span>
@@ -260,19 +260,19 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold tracking-wide transition-colors ${websiteInfo.badgeColor} hover:brightness-125`}
+                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-bold tracking-wide transition-colors ${websiteInfo.badgeColor} hover:brightness-125`}
                   title={`Source: ${websiteInfo.domain}`}
                 >
                   <Globe className="w-2.5 h-2.5" />
-                  <span>{websiteInfo.name}</span>
+                  <span className="truncate max-w-[90px]">{websiteInfo.name}</span>
                   <ExternalLink className="w-2 h-2 opacity-60" />
                 </a>
               )}
 
               {projectGenre && (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/50 text-[9px] font-medium text-neutral-300">
-                  <Tag className="w-2.5 h-2.5 text-neutral-400" />
-                  {projectGenre.split(",")[0].trim()}
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/50 text-[9px] font-medium text-neutral-300 truncate max-w-[90px]">
+                  <Tag className="w-2.5 h-2.5 text-neutral-400 shrink-0" />
+                  <span className="truncate">{projectGenre.split(",")[0].trim()}</span>
                 </span>
               )}
             </div>
@@ -291,7 +291,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               {projectAuthor && (
                 <span className="inline-flex items-center gap-1 text-neutral-500 shrink-0">
                   <User className="w-2.5 h-2.5 text-neutral-500" />
-                  {projectAuthor}
+                  <span className="truncate">{projectAuthor}</span>
                 </span>
               )}
             </div>
@@ -299,8 +299,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         </div>
       </div>
 
-      {/* Center: Live Stats Chips */}
-      <div className="hidden md:flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
+      {/* Center: Live Stats Chips (Only rendered when sufficient width exists to prevent collisions) */}
+      <div className="hidden 2xl:flex items-center gap-2 absolute left-1/2 -translate-x-1/2 pointer-events-none">
         {/* Backend status */}
         <div
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${
@@ -324,18 +324,13 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             {panelsCount} panels
           </div>
         )}
-
-        {/* Auto-save hint */}
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full text-[9px] font-bold text-neutral-600">
-          <Clock className="h-2.5 w-2.5" />
-          <span className="hidden lg:inline">Ctrl+S to save</span>
-        </div>
       </div>
 
-      {/* Right Section - Action Buttons */}
-      <div className="flex flex-wrap items-center gap-2">
+      {/* Right Section - Action Buttons (Unified h-9 height and clean spacing) */}
+      <div className="flex items-center gap-2 shrink-0 flex-nowrap">
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector className="hidden sm:inline-flex" />
+        <AIModelSelector compact className="hidden sm:inline-flex" />
+
         {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>
@@ -345,10 +340,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
+              className={`hidden sm:flex h-9 items-center gap-1.5 px-3 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
                 credits < 20
                   ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
-                  : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
+                  : "bg-neutral-900 border-neutral-800 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
               }`}
             >
               <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
@@ -383,10 +378,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               .setPlayerSettings({ isPlayerOpen: !current });
           }}
           title="Toggle Floating Player"
-          className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+          className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
             isPlayerOpen
               ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-              : "border-white/8 bg-white/[0.03] text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+              : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
           }`}
         >
           <Monitor className="h-4 w-4" />
@@ -397,10 +392,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           type="button"
           onClick={() => setIsFocusMode((value) => !value)}
           title={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
-          className={`flex items-center justify-center gap-1.5 w-11 h-11 rounded-2xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+          className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
             isFocusMode
               ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-              : "border-white/8 bg-white/[0.03] text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+              : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
           }`}
         >
           <Focus className="h-4 w-4" />
@@ -412,16 +407,16 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           onClick={onSave}
           disabled={isSaving}
           title={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"}
-          className={`flex items-center gap-1.5 px-3.5 h-11 rounded-2xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${
+          className={`flex items-center gap-1.5 px-3 h-9 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${
             isSaving
               ? "bg-purple-600/30 border-purple-500/40 text-purple-200 cursor-wait opacity-80"
               : isDirty
               ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-400/50 shadow-lg shadow-purple-900/40 animate-pulse"
-              : "bg-neutral-800 hover:bg-neutral-750 border-neutral-700 text-neutral-300 hover:text-white"
+              : "bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white"
           }`}
         >
           <Save
-            className={`h-4 w-4 ${
+            className={`h-3.5 w-3.5 ${
               isSaving
                 ? "animate-spin text-purple-200"
                 : isDirty
@@ -429,7 +424,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 : "text-neutral-400"
             }`}
           />
-          <span className="hidden sm:inline font-sans">
+          <span className="hidden sm:inline font-sans text-[11px]">
             {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
           </span>
         </button>
@@ -439,7 +434,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <button
             onClick={() => setShowNotifications((v) => !v)}
             title="Notifications"
-            className="w-11 h-11 rounded-2xl border border-white/8 bg-white/[0.03] text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center"
+            className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
           >
             {notificationsMuted ? (
               <BellOff className="h-4 w-4 text-rose-500" />
@@ -447,7 +442,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               <Bell className="h-4 w-4" />
             )}
             {notifications.filter((n) => !n.isRead).length > 0 && (
-              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold">
+              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold">
                 {notifications.filter((n) => !n.isRead).length}
               </span>
             )}
@@ -471,7 +466,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-11 h-11 rounded-2xl border border-white/8 bg-white/[0.03] text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
+            className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
             title={
               activeProjectId && activeProjectData
                 ? `Active Project: ${
@@ -482,19 +477,19 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           >
             <FolderSync className="h-4 w-4 text-purple-400" />
             {activeProjectId && activeProjectData && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
             )}
           </button>
         </div>
 
-        {/* User Profile Pill at Far Right End (Image 3 Style) */}
+        {/* User Profile Pill at Far Right End */}
         <button
           onClick={() => navigateTo?.("/profile")}
-          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95"
+          className="h-9 flex items-center gap-2 px-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 shadow-sm active:scale-95"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[110px] hidden md:inline font-sans px-1.5 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
             {user?.full_name ||
               user?.username ||
               (user?.email ? user.email.split("@")[0] : "User")}
@@ -509,7 +504,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               target.src = DEFAULT_USER_AVATAR_DATA_URI;
             }}
             alt="User Avatar"
-            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
+            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
           />
         </button>
       </div>

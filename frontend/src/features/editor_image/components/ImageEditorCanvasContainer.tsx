@@ -1,5 +1,15 @@
 import React from "react";
-import { Move, RefreshCw, Layers } from "lucide-react";
+import {
+  Move,
+  RefreshCw,
+  Layers,
+  Undo,
+  Redo,
+  Trash2,
+  Minimize2,
+  PanelRightClose,
+  PanelRightOpen,
+} from "lucide-react";
 import {
   CropCanvas,
   CanvasMultiLayer,
@@ -56,8 +66,18 @@ interface ImageEditorCanvasContainerProps {
   setEditCropRight: (val: number) => void;
   setSelectedSliceId: (id: string | null) => void;
   activeTab: ImageTool;
-
   aspectRatio?: any;
+
+  // Header Toolbar Props
+  handleUndo?: () => void;
+  historyLength?: number;
+  handleRedo?: () => void;
+  redoHistoryLength?: number;
+  handleDeleteCurrentImage?: () => void;
+  isPipMode?: boolean;
+  setIsPipMode?: (val: boolean) => void;
+  isToolsPanelOpen?: boolean;
+  setIsToolsPanelOpen?: (val: boolean | ((prev: boolean) => boolean)) => void;
 }
 
 export default function ImageEditorCanvasContainer({
@@ -106,6 +126,17 @@ export default function ImageEditorCanvasContainer({
   setSelectedSliceId,
   activeTab,
   aspectRatio,
+
+  // Header Toolbar Props
+  handleUndo,
+  historyLength = 0,
+  handleRedo,
+  redoHistoryLength = 0,
+  handleDeleteCurrentImage,
+  isPipMode,
+  setIsPipMode,
+  isToolsPanelOpen = true,
+  setIsToolsPanelOpen,
 }: ImageEditorCanvasContainerProps) {
   // Safe handlers that only allow crop drawing when in the correct tabs
   const safeHandleStart = (clientX: number, clientY: number) => {
@@ -130,15 +161,93 @@ export default function ImageEditorCanvasContainer({
         pointerEvents: "auto",
       }}
     >
-      <div className="flex justify-between items-center bg-white/[0.02] backdrop-blur-sm p-2.5 rounded-xl border border-white/[0.06]">
+      <div className="flex justify-between items-center bg-neutral-900/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/8 shadow-sm">
+        {/* Left: Canvas Title */}
         <div className="flex items-center gap-2">
           <div className="p-1 rounded-lg bg-purple-500/10">
-            <Move className="h-3 w-3 text-purple-400" />
+            <Move className="h-3.5 w-3.5 text-purple-400" />
           </div>
-          <span className="text-[10px] uppercase font-mono font-bold text-neutral-300 tracking-widest">
+          <span className="text-[11px] uppercase font-mono font-bold text-neutral-200 tracking-wider">
             Interactive Viewport Canvas
           </span>
         </div>
+
+        {/* Center: Canvas Action & Status Toolbar */}
+        <div className="flex items-center gap-1.5 bg-neutral-950/90 px-2.5 py-1 rounded-xl border border-white/10 shadow-inner">
+          {handleUndo && (
+            <button
+              onClick={handleUndo}
+              disabled={historyLength === 0}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                historyLength > 0
+                  ? "text-neutral-300 hover:text-white hover:bg-white/10 active:scale-95"
+                  : "text-neutral-600 cursor-not-allowed opacity-35"
+              }`}
+              title="Undo (Ctrl+Z)"
+            >
+              <Undo className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {handleRedo && (
+            <button
+              onClick={handleRedo}
+              disabled={redoHistoryLength === 0}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                redoHistoryLength > 0
+                  ? "text-neutral-300 hover:text-white hover:bg-white/10 active:scale-95"
+                  : "text-neutral-600 cursor-not-allowed opacity-35"
+              }`}
+              title="Redo (Ctrl+Y)"
+            >
+              <Redo className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          <div className="w-px h-3.5 bg-white/10 mx-0.5" />
+
+          {handleDeleteCurrentImage && (
+            <button
+              onClick={handleDeleteCurrentImage}
+              className="p-1.5 text-rose-400 hover:text-rose-300 rounded-lg hover:bg-rose-500/15 transition-all cursor-pointer active:scale-95"
+              title="Delete Current Image"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          {setIsPipMode && (
+            <button
+              onClick={() => setIsPipMode(true)}
+              className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/10 transition-all cursor-pointer active:scale-95"
+              title="Picture-in-Picture Mode"
+            >
+              <Minimize2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+
+          <div className="w-px h-3.5 bg-white/10 mx-0.5" />
+
+          {/* Toggle properties panel */}
+          {setIsToolsPanelOpen && (
+            <button
+              onClick={() => setIsToolsPanelOpen((prev) => !prev)}
+              className="p-1.5 text-neutral-400 hover:text-purple-300 rounded-lg hover:bg-purple-500/15 transition-all border border-transparent hover:border-purple-500/30 cursor-pointer active:scale-95"
+              title={
+                isToolsPanelOpen
+                  ? "Close Properties Panel"
+                  : "Open Properties Panel"
+              }
+            >
+              {isToolsPanelOpen ? (
+                <PanelRightClose className="w-3.5 h-3.5" />
+              ) : (
+                <PanelRightOpen className="w-3.5 h-3.5" />
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Right: AI Smart Crop & Mode Badges */}
         <div className="flex items-center gap-1.5">
           <button
             onClick={handleAiCrop}
@@ -163,7 +272,7 @@ export default function ImageEditorCanvasContainer({
 
       {activeStoryboardPanel?.layers && activeTab === "separate" ? (
         <div
-          className="relative border border-white/5 hover:border-purple-500/20 rounded-2xl bg-black overflow-hidden flex-1 h-0 flex items-center justify-center select-none transition-colors"
+          className="relative border border-white/10 hover:border-purple-500/20 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] overflow-hidden flex-1 h-0 flex items-center justify-center select-none transition-colors"
           style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
         >
           <div className="relative w-full h-full max-h-full max-w-full z-10 flex items-center justify-center p-4">

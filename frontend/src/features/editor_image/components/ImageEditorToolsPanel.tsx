@@ -97,13 +97,13 @@ function ImageEditorToolsPanel(
   } = props;
 
   return (
-    <div className="w-full h-full flex flex-col min-h-0 bg-[#0c0d16]/75 backdrop-blur-3xl border-r border-white/10 shadow-[8px_0_32px_rgba(0,0,0,0.6)] overflow-hidden">
+    <div className="w-full h-full flex flex-col min-h-0 bg-[#0a0b10] border-r border-white/8 shadow-[8px_0_32px_rgba(0,0,0,0.6)] overflow-hidden">
       {/* Sidebar Header */}
       <ImageEditorSidebarHeader activeTab={activeTab} />
 
       {/* Main Active Tool Panel Area */}
       <div className="flex-1 min-h-0 overflow-y-auto custom-purple-scrollbar p-4 space-y-4">
-        <div className="bg-white/[0.03] border border-white/10 rounded-3xl p-4 sm:p-5 shadow-2xl backdrop-blur-xl space-y-4">
+        <div className="bg-[#12131c]/70 border border-white/8 rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">
           {activeTab === "merge" && (
             <MergePanel
               editingImageIdx={editingImageIdx}

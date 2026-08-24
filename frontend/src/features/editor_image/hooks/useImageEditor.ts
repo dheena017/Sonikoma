@@ -502,6 +502,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
   const handlePrevImage = () => {
     if (editingImageIdx === null || editingImageIdx <= 0) return;
     const nextIdx = editingImageIdx - 1;
+    setEditingImageIdx(nextIdx);
     const isProjectScoped = window.location.pathname.includes(
       "/scraper/editor/series/"
     );
@@ -520,6 +521,7 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     if (editingImageIdx === null || editingImageIdx >= scrapedImages.length - 1)
       return;
     const nextIdx = editingImageIdx + 1;
+    setEditingImageIdx(nextIdx);
     const isProjectScoped = window.location.pathname.includes(
       "/scraper/editor/series/"
     );

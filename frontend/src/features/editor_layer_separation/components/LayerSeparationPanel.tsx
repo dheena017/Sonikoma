@@ -275,12 +275,12 @@ export default function LayerSeparationPanel({
                 <div className="truncate">
                   <span className="text-neutral-450">BG: </span>
                   <a
-                    href={activeStoryboardPanel.layers?.background_url}
+                    href={activeStoryboardPanel?.layers?.background_url}
                     target="_blank"
                     rel="noreferrer"
                     className="text-purple-400 underline hover:text-purple-300"
                   >
-                    {activeStoryboardPanel.layers?.background_url
+                    {activeStoryboardPanel?.layers?.background_url
                       ?.split("/")
                       .pop() || "bg.png"}
                   </a>
@@ -288,12 +288,12 @@ export default function LayerSeparationPanel({
                 <div className="truncate">
                   <span className="text-neutral-450">Char: </span>
                   <a
-                    href={activeStoryboardPanel.layers?.character_url}
+                    href={activeStoryboardPanel?.layers?.character_url}
                     target="_blank"
                     rel="noreferrer"
                     className="text-purple-400 underline hover:text-purple-300"
                   >
-                    {activeStoryboardPanel.layers?.character_url
+                    {activeStoryboardPanel?.layers?.character_url
                       ?.split("/")
                       .pop() || "char.png"}
                   </a>
@@ -301,12 +301,12 @@ export default function LayerSeparationPanel({
                 <div className="truncate">
                   <span className="text-neutral-450">Text: </span>
                   <a
-                    href={activeStoryboardPanel.layers?.text_url}
+                    href={activeStoryboardPanel?.layers?.text_url}
                     target="_blank"
                     rel="noreferrer"
                     className="text-purple-400 underline hover:text-purple-300"
                   >
-                    {activeStoryboardPanel.layers?.text_url?.split("/").pop() ||
+                    {activeStoryboardPanel?.layers?.text_url?.split("/").pop() ||
                       "text.png"}
                   </a>
                 </div>
@@ -325,14 +325,14 @@ export default function LayerSeparationPanel({
                 <div>
                   <span className="text-neutral-450">Synced Bubbles: </span>
                   <span className="text-emerald-400">
-                    {activeStoryboardPanel.syncMap?.dialogue_map.length}{" "}
+                    {activeStoryboardPanel?.syncMap?.dialogue_map?.length || 0}{" "}
                     detected
                   </span>
                 </div>
                 <div>
                   <span className="text-neutral-450">RMS Peaks: </span>
                   <span className="text-emerald-400">
-                    {activeStoryboardPanel.syncMap?.audio_peaks.length} frames
+                    {activeStoryboardPanel?.syncMap?.audio_peaks?.length || 0} frames
                   </span>
                 </div>
               </div>
@@ -342,7 +342,7 @@ export default function LayerSeparationPanel({
       )}
 
       {/* Help / Tips */}
-      {!activeStoryboardPanel.audio_url && (
+      {!activeStoryboardPanel?.audio_url && (
         <div className="bg-amber-950/20 border border-amber-850/40 rounded-xl p-3 flex items-start gap-2 text-amber-400 text-[9px] font-sans">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
           <p className="leading-relaxed">

@@ -139,7 +139,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
   };
 
   return (
-    <div className="w-[80px] h-full flex flex-col items-center py-3 bg-neutral-950/95 backdrop-blur-2xl border-r border-neutral-800/80 select-none shrink-0 z-30">
+    <div className="w-[80px] h-full flex flex-col items-center py-3 bg-[#0a0b10] border-r border-white/8 select-none shrink-0 z-30">
       {/* Navigation Scroll Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-4 py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {groups.map((group, groupIdx) => (
