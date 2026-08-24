@@ -6,7 +6,7 @@ and connection factories.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from database.engine import get_db_connection
-from database.bootstrap import init_db
+from app.database.engine import get_db_connection
+from app.database.bootstrap import init_db
 
 __all__ = ["get_db_connection", "init_db"]

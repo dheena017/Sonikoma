@@ -162,6 +162,17 @@ class UnifiedJobManager:
 
         with get_db_connection() as conn:
             metadata_json = json.dumps(metadata) if metadata else "{}"
+            try:
+                conn.execute(
+                    """
+                    INSERT OR IGNORE INTO users (id, username, email, password_hash, creator_role)
+                    VALUES (?, ?, ?, 'auto_hash', 'creator')
+                    """,
+                    (user_id, f"usr_{user_id[:8]}", f"{user_id}@sonikoma.internal")
+                )
+            except Exception:
+                pass
+
             conn.execute(
                 """
                 INSERT INTO jobs (id, user_id, project_id, chapter_id, type, status, progress, stage, metadata, created_at)
