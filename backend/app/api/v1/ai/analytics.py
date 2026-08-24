@@ -898,7 +898,7 @@ async def get_model_routing():
     dynamic_routing = {}
     for cap in capabilities:
         chain = ModelRegistry.get_cross_provider_fallback_chain(cap)
-        p1 = chain[0][1] if len(chain) > 0 else "gemini-2.5-flash"
+        p1 = chain[0][1] if len(chain) > 0 else "gemini-3.7-flash"
         p2 = chain[1][1] if len(chain) > 1 else p1
         p3 = chain[2][1] if len(chain) > 2 else p2
 
@@ -1164,32 +1164,58 @@ async def export_ai_analytics_ledger(
 async def get_models_breakdown(
     project_id: Optional[str] = Query(None),
     time_range: Optional[str] = Query("24h"),
+    configured_only: Optional[bool] = Query(False),
+    active_only: Optional[bool] = Query(False),
     current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Returns enriched models breakdown with pricing, observed token usage, RPM/TPM limits and meters."""
     from services.model_catalog.registry import MODEL_CATALOG_DETAILED
     from services.ai.orchestrator import AIOrchestrator
 
+    filter_active = configured_only or active_only
     rate_limiter = AIOrchestrator.get_rate_limiter()
     now = time.time()
     current_min = int(now // 60)
     current_day = int(now // 86400)
 
-    # Query DB for historical token usage per model in the time range
+    # Query DB for real 1-minute, 24-hour, and all-time token usage per model
     conn = get_db_connection()
+    model_minute_stats = {}
+    model_day_stats = {}
     model_totals = {}
     try:
+        # 1. Last 1 minute stats (Real RPM & TPM)
+        rows_min = conn.execute("""
+            SELECT LOWER(model) as model_id, COUNT(*) as rpm, COALESCE(SUM(total_tokens), 0) as tpm
+            FROM ai_token_usage_ledger
+            WHERE created_at >= datetime('now', '-1 minute')
+            GROUP BY LOWER(model)
+        """).fetchall()
+        for r in rows_min:
+            model_minute_stats[r["model_id"]] = dict(r)
+
+        # 2. Last 24 hours stats (Real RPD)
+        rows_day = conn.execute("""
+            SELECT LOWER(model) as model_id, COUNT(*) as rpd, COALESCE(SUM(total_tokens), 0) as tpd
+            FROM ai_token_usage_ledger
+            WHERE created_at >= datetime('now', '-24 hours')
+            GROUP BY LOWER(model)
+        """).fetchall()
+        for r in rows_day:
+            model_day_stats[r["model_id"]] = dict(r)
+
+        # 3. All-time totals per model
         rows = conn.execute("""
-            SELECT model, 
-                   SUM(prompt_tokens) as total_prompt, 
-                   SUM(completion_tokens) as total_completion, 
-                   SUM(total_tokens) as total_toks,
+            SELECT LOWER(model) as model_id, 
+                   COALESCE(SUM(prompt_tokens), 0) as total_prompt, 
+                   COALESCE(SUM(completion_tokens), 0) as total_completion, 
+                   COALESCE(SUM(total_tokens), 0) as total_toks,
                    COUNT(*) as req_count
             FROM ai_token_usage_ledger
-            GROUP BY model
+            GROUP BY LOWER(model)
         """).fetchall()
         for r in rows:
-            model_totals[r["model"].lower()] = dict(r)
+            model_totals[r["model_id"]] = dict(r)
     except Exception as e:
         logger.debug(f"Failed to query model totals: {e}")
     finally:
@@ -1202,16 +1228,24 @@ async def get_models_breakdown(
         m_id = m["id"]
         m_lower = m_id.lower()
         provider_id = m.get("provider", "gemini")
+        is_configured = AIOrchestrator.is_provider_configured(provider_id)
+
+        # If configured_only requested, skip unconfigured providers
+        if filter_active and not is_configured:
+            continue
+
         db_stat = model_totals.get(m_lower, {})
+        db_min = model_minute_stats.get(m_lower, {})
+        db_day = model_day_stats.get(m_lower, {})
 
-        # Live in-memory sliding window meters
-        rpm_used = rate_limiter._minute_counts.get((f"model:{m_id}", current_min), 0)
-        tpm_used = rate_limiter._minute_tokens.get((f"model:{m_id}", current_min), 0)
-        rpd_used = rate_limiter._day_counts.get((f"model:{m_id}", current_day), 0) + db_stat.get("req_count", 0)
+        # Real dynamic meters: Combines in-memory live session + persisted database window
+        mem_rpm = rate_limiter._minute_counts.get((f"model:{m_id}", current_min), 0)
+        mem_tpm = rate_limiter._minute_tokens.get((f"model:{m_id}", current_min), 0)
+        mem_rpd = rate_limiter._day_counts.get((f"model:{m_id}", current_day), 0)
 
-        limit_rpm = m.get("limit_rpm", 60)
-        limit_tpm = m.get("limit_tpm", 1000000)
-        limit_rpd = m.get("limit_rpd", 10000)
+        rpm_used = max(mem_rpm, db_min.get("rpm", 0))
+        tpm_used = max(mem_tpm, db_min.get("tpm", 0))
+        rpd_used = max(mem_rpd, db_day.get("rpd", 0))
 
         provider_name = {
             "gemini": "Google Gemini",
@@ -1246,58 +1280,23 @@ async def get_models_breakdown(
             providers_summary[provider_id] = {
                 "name": provider_name,
                 "count": 0,
-                "status": "ONLINE" if AIOrchestrator.is_provider_configured(provider_id) else "KEY_REQUIRED"
+                "status": "ONLINE" if is_configured else "KEY_REQUIRED"
             }
         providers_summary[provider_id]["count"] += 1
 
-        # Accurate Official Model Quotas & Categories from Google, OpenAI, Anthropic, Groq
-        if "flash-lite" in m_lower or "8b" in m_lower:
-            real_category = "High-Throughput Sub-Second OCR & Chat"
-            free_tier = {"rpm": 30, "tpm": 1_000_000, "rpd": 1_500}
-            paid_tier = {"rpm": 2_000, "tpm": 4_000_000, "rpd": 10_000}
-        elif ("pro" in m_lower or "ultra" in m_lower) and provider_id == "gemini":
-            real_category = "Complex Multi-Step Narrative Reasoning"
-            free_tier = {"rpm": 2, "tpm": 32_000, "rpd": 50}
-            paid_tier = {"rpm": 360, "tpm": 2_000_000, "rpd": 10_000}
-        elif provider_id == "gemini":
-            real_category = "Multimodal Vision & Audio Workhorse"
-            free_tier = {"rpm": 15, "tpm": 1_000_000, "rpd": 1_500}
-            paid_tier = {"rpm": 1_000, "tpm": 4_000_000, "rpd": 10_000}
-        elif "gpt-4o-mini" in m_lower:
-            real_category = "Fast Cost-Efficient Multimodal"
-            free_tier = {"rpm": 3, "tpm": 40_000, "rpd": 200}
-            paid_tier = {"rpm": 500, "tpm": 200_000, "rpd": 10_000}
-        elif "gpt-4o" in m_lower or "o1" in m_lower or "o3" in m_lower:
-            real_category = "Omni Multimodal Intelligence"
-            free_tier = {"rpm": 3, "tpm": 40_000, "rpd": 200}
-            paid_tier = {"rpm": 500, "tpm": 30_000, "rpd": 10_000}
-        elif "claude-3-5-sonnet" in m_lower or "claude-3-7" in m_lower:
-            real_category = "Deep Visual & Storyboard Analysis"
-            free_tier = {"rpm": 5, "tpm": 20_000, "rpd": 100}
-            paid_tier = {"rpm": 50, "tpm": 40_000, "rpd": 5_000}
-        elif "claude" in m_lower:
-            real_category = "High-Speed Reasoning & OCR"
-            free_tier = {"rpm": 5, "tpm": 20_000, "rpd": 100}
-            paid_tier = {"rpm": 50, "tpm": 50_000, "rpd": 5_000}
-        elif provider_id == "groq":
-            real_category = "Ultra-Fast 750 T/s LPU Inference"
-            free_tier = {"rpm": 30, "tpm": 6_000 if "70b" in m_lower else 30_000, "rpd": 14_400}
-            paid_tier = {"rpm": 1_000, "tpm": 300_000, "rpd": 100_000}
-        elif provider_id == "deepseek":
-            real_category = "Ultra-Low Cost General Intelligence" if "chat" in m_lower else "Reinforcement Learning Reasoning (R1)"
-            free_tier = {"rpm": 10, "tpm": 20_000, "rpd": 500}
-            paid_tier = {"rpm": 60, "tpm": 100_000, "rpd": 10_000}
-        else:
-            real_category = m.get("category", "General AI Intelligence")
-            free_tier = {"rpm": m.get("limit_rpm", 15), "tpm": m.get("limit_tpm", 100_000), "rpd": m.get("limit_rpd", 1_000)}
-            paid_tier = {"rpm": m.get("limit_rpm", 60), "tpm": m.get("limit_tpm", 1_000_000), "rpd": m.get("limit_rpd", 10_000)}
+        from services.model_catalog.discovery import MODEL_METADATA_AUGMENTATION
+        meta = MODEL_METADATA_AUGMENTATION.get(m_id, {})
 
-        limit_rpm = paid_tier["rpm"]
-        limit_tpm = paid_tier["tpm"]
-        limit_rpd = paid_tier["rpd"]
+        # Dynamic Model Quotas & Categories
+        limit_rpm = meta.get("limit_rpm") or m.get("limit_rpm", 60)
+        limit_tpm = meta.get("limit_tpm") or m.get("limit_tpm", 1000000)
+        limit_rpd = meta.get("limit_rpd") or m.get("limit_rpd", 10000)
 
-        special_quotas = []
-        if provider_id == "gemini":
+        free_tier = m.get("free_tier", {"rpm": min(limit_rpm, 15), "tpm": min(limit_tpm, 100000), "rpd": min(limit_rpd, 1000)})
+        paid_tier = m.get("paid_tier", {"rpm": limit_rpm, "tpm": limit_tpm, "rpd": limit_rpd})
+
+        special_quotas = m.get("special_quotas", [])
+        if not special_quotas and provider_id == "gemini":
             special_quotas = [
                 {"name": "Google Search Grounding", "limit": "1,500 RPD (Free)", "used": "0 RPD"},
                 {"name": "Google Maps Grounding", "limit": "600 RPD (Free)", "used": "0 RPD"},
@@ -1305,11 +1304,11 @@ async def get_models_breakdown(
 
         breakdown_list.append({
             "id": m_id,
-            "name": m.get("name", m_id),
+            "name": meta.get("name") or m.get("name", m_id),
             "provider": provider_id,
             "provider_name": provider_name,
             "provider_badge": provider_badge,
-            "category": real_category,
+            "category": meta.get("category") or m.get("category", "General AI Intelligence"),
             "free_tier": free_tier,
             "paid_tier": paid_tier,
             "limit_rpm": limit_rpm,
@@ -1320,14 +1319,15 @@ async def get_models_breakdown(
             "rpd_used": rpd_used,
             "utilization_pct_rpm": round(min(100.0, (rpm_used / max(1, limit_rpm)) * 100), 1),
             "utilization_pct_tpm": round(min(100.0, (tpm_used / max(1, limit_tpm)) * 100), 1),
-            "cost_per_1m_prompt": m.get("prompt_price_per_1m", 0.0),
-            "cost_per_1m_completion": m.get("completion_price_per_1m", 0.0),
-            "context_window": m.get("context_window", 128000),
-            "max_output_tokens": 8192,
-            "speed_rating": m.get("speed_rating", "Fast"),
-            "capabilities": m.get("capabilities", ["Vision", "JSON Mode", "Dialogue"]),
+            "cost_per_1m_prompt": meta.get("prompt_price_per_1m") or m.get("prompt_price_per_1m", 0.0),
+            "cost_per_1m_completion": meta.get("completion_price_per_1m") or m.get("completion_price_per_1m", 0.0),
+            "context_window": meta.get("context_window") or m.get("context_window", 128000),
+            "max_output_tokens": meta.get("max_output_tokens") or m.get("max_output_tokens", 8192),
+            "speed_rating": meta.get("speed_rating") or m.get("speed_rating", "Fast"),
+            "capabilities": meta.get("capabilities") or m.get("capabilities", ["text"]),
+            "recommended_for": meta.get("recommended_for") or m.get("recommended_for", []),
             "special_quotas": special_quotas,
-            "status": "HEALTHY" if AIOrchestrator.is_provider_configured(provider_id) else "KEY_REQUIRED",
+            "status": "HEALTHY" if is_configured else "KEY_REQUIRED",
             "total_tokens_consumed": db_stat.get("total_toks", 0),
             "prompt_tokens_consumed": db_stat.get("total_prompt", 0),
             "completion_tokens_consumed": db_stat.get("total_completion", 0),

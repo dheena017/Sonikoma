@@ -174,21 +174,21 @@ class AIOrchestrator:
     """
 
     DEFAULT_CAPABILITY_ROUTING = {
-        "panel_analysis": "gemini-2.5-flash",
-        "storyboard_narrative": "gemini-2.5-flash",
-        "smart_crop": "gemini-2.5-flash",
-        "sfx_audio": "gemini-2.5-flash",
-        "bgm_vibe": "gemini-2.5-flash",
-        "seo_optimization": "gemini-2.5-flash",
-        "voice_cast": "gemini-2.5-flash",
-        "translate": "gemini-2.5-flash",
-        "image_diffusion": "FLUX.1-schnell",
+        "panel_analysis": "gemini-3.7-flash",
+        "storyboard_narrative": "gemini-3.7-flash",
+        "smart_crop": "gemini-3.7-flash",
+        "sfx_audio": "gemini-3.7-flash",
+        "bgm_vibe": "gemini-3.7-flash",
+        "seo_optimization": "gemini-3.7-flash",
+        "voice_cast": "gemini-3.7-flash",
+        "translate": "gemini-3.7-flash",
+        "image_diffusion": "gemini-3.1-flash-image",
         "speech_synthesis": "edge-tts-neural",
         "speech_to_text": "whisper-1",
-        "chat_completion": "gemini-2.5-flash",
-        "text": "gemini-2.5-flash",
-        "scraper_blueprint": "gemini-2.5-flash",
-        "prompt_enhancement": "gemini-2.5-flash",
+        "chat_completion": "gemini-3.7-flash",
+        "text": "gemini-3.7-flash",
+        "scraper_blueprint": "gemini-3.7-flash",
+        "prompt_enhancement": "gemini-3.7-flash",
     }
 
     # Capability-aware fallback policy

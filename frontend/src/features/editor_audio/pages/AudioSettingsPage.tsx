@@ -1,15 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Mic,
   Music,
   Sliders,
   Save,
-  ArrowLeft,
-  Sparkles,
   Volume2,
   Volume1,
   Activity,
   Disc,
+  Sparkles,
+  Play,
+  Zap,
+  Radio,
+  AudioWaveform,
+  ChevronRight,
+  Check,
 } from "lucide-react";
 
 interface AudioSettingsPageProps {
@@ -23,29 +28,6 @@ interface AudioSettingsPageProps {
   isEmbed?: boolean;
   onVoiceActorChange?: (val: string) => void;
   onMusicThemeChange?: (val: string) => void;
-}
-
-const DEFAULT_AUDIO_SETTINGS = {
-  masterVolume: 80,
-  narrationVolume: 90,
-  bgmVolume: 50,
-  sfxVolume: 75,
-  speechRate: 1.0,
-  speechPitch: 1.0,
-  musicTheme: "Orchestral Battle Theme",
-  audioDucking: true,
-  voiceActor: "en-US-GuyNeural",
-};
-
-interface AudioSettingsPageProps {
-  projectId?: string | null;
-  onNavigateHome?: () => void;
-  addNotification?: (
-    msg: string,
-    type: "success" | "info" | "warning" | "error"
-  ) => void;
-  fetchWithInterceptor?: any;
-  isEmbed?: boolean;
 
   volume: number;
   setVolume: (val: number) => void;
@@ -66,6 +48,185 @@ interface AudioSettingsPageProps {
   audioDucking: boolean;
   setAudioDucking: (val: boolean) => void;
   onSave?: () => void;
+}
+
+const MUSIC_THEMES = [
+  { id: "orchestral_battle", label: "Orchestral Battle Theme", icon: "⚔️", mood: "Epic" },
+  { id: "mysterious_ambience", label: "Mysterious Ambience", icon: "🌫️", mood: "Tense" },
+  { id: "scifi_synth", label: "Sci-Fi Synth Wave", icon: "🚀", mood: "Futuristic" },
+  { id: "calm_acoustic", label: "Calm Acoustic Melancholy", icon: "🎸", mood: "Emotional" },
+  { id: "no_music", label: "No Music (Dialogue Only)", icon: "🔇", mood: "Silent" },
+];
+
+// Animated waveform bars for visual feedback
+function WaveformBars({ active, color = "#a855f7" }: { active: boolean; color?: string }) {
+  return (
+    <div className="flex items-end gap-[2px] h-4">
+      {[3, 5, 8, 6, 9, 5, 7, 4, 8, 5, 3].map((h, i) => (
+        <div
+          key={i}
+          style={{
+            width: 2,
+            height: active ? `${h * 1.6}px` : "3px",
+            backgroundColor: color,
+            borderRadius: 2,
+            transition: `height ${0.15 + i * 0.04}s ease-in-out`,
+            opacity: active ? 0.7 + (i % 3) * 0.1 : 0.25,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Premium volume slider with a glowing track fill
+function VolumeSlider({
+  label,
+  icon: Icon,
+  value,
+  onChange,
+  color = "#a855f7",
+  unit = "%",
+  min = 0,
+  max = 100,
+  step = 1,
+  sublabel,
+}: {
+  label: string;
+  icon: React.ElementType;
+  value: number;
+  onChange: (v: number) => void;
+  color?: string;
+  unit?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  sublabel?: string;
+}) {
+  const pct = ((value - min) / (max - min)) * 100;
+  const isActive = pct > 0;
+
+  return (
+    <div className="group space-y-2">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
+            style={{ backgroundColor: isActive ? `${color}22` : "#1a1a2e" }}
+          >
+            <Icon
+              className="h-3.5 w-3.5 transition-colors duration-200"
+              style={{ color: isActive ? color : "#6b7280" }}
+            />
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-neutral-200">{label}</span>
+            {sublabel && (
+              <span className="block text-[10px] text-neutral-500 mt-0.5">{sublabel}</span>
+            )}
+          </div>
+        </div>
+        <div
+          className="text-xs font-bold tabular-nums px-2 py-0.5 rounded-md transition-all duration-200"
+          style={{
+            color: isActive ? color : "#6b7280",
+            backgroundColor: isActive ? `${color}18` : "transparent",
+          }}
+        >
+          {unit === "%" ? `${value}${unit}` : `${value}${unit}`}
+        </div>
+      </div>
+
+      {/* Track */}
+      <div className="relative h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full transition-all duration-100"
+          style={{
+            width: `${pct}%`,
+            background: `linear-gradient(90deg, ${color}88, ${color})`,
+            boxShadow: isActive ? `0 0 8px ${color}66` : "none",
+          }}
+        />
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="absolute inset-0 w-full opacity-0 cursor-pointer h-full"
+          style={{ WebkitAppearance: "none" }}
+        />
+      </div>
+
+      {/* Tick marks at 0, 25, 50, 75, 100 for volume sliders */}
+      {unit === "%" && (
+        <div className="flex justify-between px-0.5">
+          {[0, 25, 50, 75, 100].map((tick) => (
+            <span key={tick} className="text-[9px] text-neutral-600">
+              {tick}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Voice card selector
+function VoiceCard({
+  voice,
+  isSelected,
+  onSelect,
+}: {
+  voice: { code: string; label: string };
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  const parts = voice.label.split("—");
+  const lang = parts[0]?.trim() ?? voice.label;
+  const name = parts[1]?.trim() ?? "";
+
+  return (
+    <button
+      onClick={onSelect}
+      className="w-full text-left px-2.5 py-2 rounded-lg border transition-all duration-200 relative group"
+      style={{
+        borderColor: isSelected ? "#a855f7" : "#1e1e2e",
+        backgroundColor: isSelected ? "#a855f710" : "#0d0d14",
+      }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div
+            className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: isSelected ? "#a855f733" : "#1a1a2e" }}
+          >
+            <Mic
+              className="h-3 w-3"
+              style={{ color: isSelected ? "#a855f7" : "#6b7280" }}
+            />
+          </div>
+          <div className="min-w-0">
+            <div
+              className="text-[11px] font-semibold truncate leading-tight"
+              style={{ color: isSelected ? "#e2e8f0" : "#9ca3af" }}
+            >
+              {name || lang}
+            </div>
+            {name && (
+              <div className="text-[9px] text-neutral-600 truncate">{lang}</div>
+            )}
+          </div>
+        </div>
+        {isSelected && (
+          <div className="w-4 h-4 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+            <Check className="h-2.5 w-2.5 text-white" />
+          </div>
+        )}
+      </div>
+    </button>
+  );
 }
 
 export default function AudioSettingsPage({
@@ -96,500 +257,521 @@ export default function AudioSettingsPage({
   onSave,
 }: AudioSettingsPageProps) {
   const [projectId, setProjectId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  // Aliases to match parent state prop names to variables used in the JSX
-  const masterVolume = volume;
-  const setMasterVolume = setVolume;
-
-  // Available Voices
-  const [availableVoices, setAvailableVoices] = useState<
-    Array<{ code: string; label: string }>
-  >([]);
+  const [saved, setSaved] = useState(false);
+  const [activeTab, setActiveTab] = useState<"mixer" | "voice" | "music">("mixer");
+  const [availableVoices, setAvailableVoices] = useState<Array<{ code: string; label: string }>>([]);
   const [loadingVoices, setLoadingVoices] = useState(false);
-
   const [localNarratorVoice, setLocalNarratorVoice] = useState<string>(
-    () =>
-      localStorage.getItem("ai_comic_narrator_voice") ||
-      "Sultry Narrative Tone (Female)"
+    () => localStorage.getItem("ai_comic_narrator_voice") || "en-US-GuyNeural"
   );
 
-  // 1. Resolve projectId from URL query parameters if not passed as prop
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id") || params.get("project_id") || propProjectId;
-    if (id) {
-      setProjectId(id);
-    }
+    if (id) setProjectId(id);
   }, [propProjectId]);
 
-  // 2. Fetch voices list from backend on mount
   useEffect(() => {
     let active = true;
     const loadVoices = async () => {
       setLoadingVoices(true);
       try {
         const fetchFn = fetchWithInterceptor || window.fetch.bind(window);
-        const res = await fetchFn("/api/audio/voices");
+        const res = await fetchFn("/api/v1/audio/voices");
         const data = await res.json();
         if (active && data?.success && data?.voices) {
           setAvailableVoices(data.voices);
         }
-      } catch (e) {
-        console.error("Failed to load server voices:", e);
+      } catch {
+        // fall through to defaults
       } finally {
         if (active) setLoadingVoices(false);
       }
     };
     loadVoices();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [fetchWithInterceptor]);
-
-  // 4. Save Audio Mixer Profile
-  const handleSaveSettings = async () => {
-    if (onSave) {
-      onSave();
-      return;
-    }
-
-    // Save narrator voice choice directly
-    localStorage.setItem("ai_comic_narrator_voice", localNarratorVoice);
-
-    if (!projectId) {
-      // Local Storage Fallback if no project is active
-      const localSettings = {
-        masterVolume: volume,
-        narrationVolume,
-        bgmVolume,
-        sfxVolume,
-        speechRate,
-        speechPitch,
-        voiceActor,
-        musicTheme,
-        audioDucking,
-      };
-      localStorage.setItem(
-        "global_audio_settings",
-        JSON.stringify(localSettings)
-      );
-      if (addNotification) {
-        addNotification(
-          "Saved global audio fallback profile to browser cache.",
-          "success"
-        );
-      }
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const fetchFn = fetchWithInterceptor || window.fetch.bind(window);
-
-      const payload = {
-        audio_settings: {
-          masterVolume: volume,
-          narrationVolume,
-          bgmVolume,
-          sfxVolume,
-          speechRate,
-          speechPitch,
-          voiceActor,
-          musicTheme,
-          audioDucking,
-        },
-      };
-
-      const res = await fetchFn(`/api/projects/${projectId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (data?.success) {
-        if (addNotification) {
-          addNotification(
-            "Successfully compiled and persisted project audio settings!",
-            "success"
-          );
-        }
-      } else {
-        throw new Error(data?.detail || "Unsuccessful update response");
-      }
-    } catch (e: any) {
-      console.error("Failed to save audio settings:", e);
-      if (addNotification) {
-        addNotification(
-          `Error saving audio profile: ${e.message || String(e)}`,
-          "error"
-        );
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const defaultVoices = [
     { code: "en-US-GuyNeural", label: "English (US) — Guy (Male)" },
     { code: "en-US-JennyNeural", label: "English (US) — Jenny (Female)" },
     { code: "en-US-AriaNeural", label: "English (US) — Aria (Female)" },
     { code: "en-GB-SoniaNeural", label: "English (UK) — Sonia (Female)" },
+    { code: "en-US-TonyNeural", label: "English (US) — Tony (Male)" },
+    { code: "en-GB-RyanNeural", label: "English (UK) — Ryan (Male)" },
+    { code: "ko-KR-InJoonNeural", label: "Korean — InJoon (Male)" },
+    { code: "ja-JP-NanamiNeural", label: "Japanese — Nanami (Female)" },
   ];
+  const displayVoices = availableVoices.length > 0 ? availableVoices : defaultVoices;
 
-  const displayVoices =
-    availableVoices.length > 0 ? availableVoices : defaultVoices;
+  const handleSave = useCallback(async () => {
+    if (onSave) { onSave(); return; }
+    localStorage.setItem("ai_comic_narrator_voice", localNarratorVoice);
+
+    if (!projectId) {
+      localStorage.setItem("global_audio_settings", JSON.stringify({
+        masterVolume: volume, narrationVolume, bgmVolume, sfxVolume,
+        speechRate, speechPitch, voiceActor, musicTheme, audioDucking,
+      }));
+      if (addNotification) addNotification("Audio profile saved to browser cache.", "success");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const fetchFn = fetchWithInterceptor || window.fetch.bind(window);
+      const res = await fetchFn(`/api/projects/${projectId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audio_settings: { masterVolume: volume, narrationVolume, bgmVolume, sfxVolume, speechRate, speechPitch, voiceActor, musicTheme, audioDucking } }),
+      });
+      const data = await res.json();
+      if (data?.success) {
+        if (addNotification) addNotification("Audio settings saved!", "success");
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      } else {
+        throw new Error(data?.detail || "Save failed");
+      }
+    } catch (e: any) {
+      if (addNotification) addNotification(`Save failed: ${e.message}`, "error");
+    } finally {
+      setSaving(false);
+    }
+  }, [onSave, localNarratorVoice, projectId, volume, narrationVolume, bgmVolume, sfxVolume, speechRate, speechPitch, voiceActor, musicTheme, audioDucking, addNotification, fetchWithInterceptor]);
+
+  const tabs = [
+    { id: "mixer", label: "Mixer", icon: Sliders },
+    { id: "voice", label: "Voice & TTS", icon: Mic },
+    { id: "music", label: "Soundtrack", icon: Music },
+  ] as const;
 
   return (
-    <div
-      className={
-        isEmbed
-          ? "w-full space-y-6 pt-2"
-          : "flex-1 w-full max-w-7xl mx-auto py-6 space-y-6"
-      }
-    >
-      {/* HEADER SECTION */}
-      {!isEmbed && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-              <span
-                className="hover:text-purple-400 cursor-pointer"
-                onClick={onNavigateHome}
-              >
-                Dashboard
-              </span>
-              <span>&gt;</span>
-              <span className="text-purple-400">Audio & TTS Mixer</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-              <div className="icon-pill icon-pill--purple">
-                <Mic className="h-5 w-5" />
-              </div>
-              Audio & TTS Settings
-            </h2>
-            <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Synchronize narration character, configure pitch and rate, and mix
-              sound loop presets
-            </p>
-          </div>
-          <button
-            onClick={onNavigateHome}
-            className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-800 hover:text-white text-neutral-450 rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Return
-          </button>
-        </div>
-      )}
+    <div className={isEmbed ? "w-full" : "w-full max-w-4xl mx-auto py-4"}>
 
-      {loading ? (
-        <div className="h-64 flex flex-col items-center justify-center space-y-3">
-          <div className="animate-spin h-8 w-8 border-4 border-purple-500 border-t-transparent rounded-full" />
-          <span className="text-xs font-mono text-neutral-400">
-            Loading audio profiles...
-          </span>
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            {/* Icon badge */}
+            <div
+              className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+              style={{
+                background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+                boxShadow: "0 0 24px #7c3aed55",
+              }}
+            >
+              <AudioWaveform className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white tracking-tight">
+                Audio Studio
+              </h2>
+              <p className="text-[11px] text-neutral-500 mt-0.5">
+                {projectId
+                  ? `Editing audio matrix for chapter "${projectId}"`
+                  : "Configuring global audio fallback profile"}
+              </p>
+            </div>
+          </div>
+
+          {/* Live waveform visual */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800">
+            <WaveformBars active={volume > 0} />
+            <span className="text-[10px] text-neutral-500 font-mono">LIVE</span>
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* LEFT PANEL: AUDIO VOLUME MIXER DASHBOARD */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-5">
-            <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
-              <Sliders className="h-4 w-4 text-purple-400" />
+
+        {/* Tab bar */}
+        <div className="flex gap-1 mt-5 p-1 bg-neutral-900 rounded-2xl border border-neutral-800 w-fit">
+          {tabs.map(({ id, label, icon: Icon }) => {
+            const isActive = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200"
+                style={{
+                  color: isActive ? "#fff" : "#6b7280",
+                  background: isActive
+                    ? "linear-gradient(135deg, #7c3aed22 0%, #4f46e522 100%)"
+                    : "transparent",
+                  borderWidth: 1,
+                  borderStyle: "solid",
+                  borderColor: isActive ? "#7c3aed55" : "transparent",
+                }}
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Tab Content ────────────────────────────────────────────────── */}
+      <div className="space-y-4">
+
+        {/* MIXER TAB */}
+        {activeTab === "mixer" && (
+          <div
+            className="rounded-2xl border p-6 space-y-6"
+            style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
+          >
+            {/* Section header */}
+            <div className="flex items-center gap-3 pb-4 border-b border-neutral-800">
+              <div className="w-8 h-8 rounded-xl bg-purple-600/20 flex items-center justify-center">
+                <Sliders className="h-4 w-4 text-purple-400" />
+              </div>
               <div>
-                <h3 className="font-bold text-sm text-white font-sans">
-                  Audio Volume Mixer Dashboard
-                </h3>
-                <p className="text-[10px] text-neutral-400 font-mono">
-                  Balance audio gains across distinct output sound pipelines
+                <h3 className="text-sm font-bold text-white">Volume Mixer</h3>
+                <p className="text-[11px] text-neutral-500 mt-0.5">
+                  Balance each output pipeline independently
                 </p>
               </div>
             </div>
 
-            <div className="space-y-4">
-              {/* Master Volume */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between font-mono">
-                  <span className="flex items-center gap-1.5">
-                    <Volume2 className="h-4 w-4 text-purple-400" />
-                    Master Volume Gain
-                  </span>
-                  <span className="text-xs font-mono text-purple-400 font-bold">
-                    {masterVolume}%
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={masterVolume}
-                  onChange={(e) => setMasterVolume(Number(e.target.value))}
-                  className="w-full accent-purple-500 bg-neutral-800 cursor-pointer h-1.5 rounded-lg"
-                />
-              </div>
+            <div className="space-y-5">
+              <VolumeSlider
+                label="Master Output"
+                sublabel="Overall output gain across all channels"
+                icon={Volume2}
+                value={volume}
+                onChange={setVolume}
+                color="#a855f7"
+              />
+              <VolumeSlider
+                label="Narration / Voice Track"
+                sublabel="TTS dialogue & character voice lines"
+                icon={Mic}
+                value={narrationVolume}
+                onChange={setNarrationVolume}
+                color="#8b5cf6"
+              />
+              <VolumeSlider
+                label="Background Music"
+                sublabel="Thematic BGM loop level"
+                icon={Music}
+                value={bgmVolume}
+                onChange={setBgmVolume}
+                color="#6366f1"
+              />
+              <VolumeSlider
+                label="Sound Effects"
+                sublabel="Atmospheric SFX & ambient layers"
+                icon={Volume1}
+                value={sfxVolume}
+                onChange={setSfxVolume}
+                color="#4f46e5"
+              />
+            </div>
 
-              {/* Narration/TTS Volume */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between font-mono">
-                  <span className="flex items-center gap-1.5">
-                    <Mic className="h-4 w-4 text-purple-400" />
-                    Narration / Voice Track Gain
-                  </span>
-                  <span className="text-xs font-mono text-neutral-200 font-bold">
-                    {narrationVolume}%
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={narrationVolume}
-                  onChange={(e) => setNarrationVolume(Number(e.target.value))}
-                  className="w-full accent-purple-500 bg-neutral-800 cursor-pointer h-1.5 rounded-lg"
+            {/* Quick preview strip */}
+            <div
+              className="flex items-center gap-3 p-3 rounded-xl border"
+              style={{ backgroundColor: "#0d0d1a", borderColor: "#1e1e30" }}
+            >
+              <Zap className="h-3.5 w-3.5 text-yellow-500 flex-shrink-0" />
+              <p className="text-[11px] text-neutral-400">
+                <span className="text-neutral-200 font-semibold">Auto-Ducking</span>{" "}
+                is{" "}
+                <span
+                  className="font-semibold"
+                  style={{ color: audioDucking ? "#a855f7" : "#6b7280" }}
+                >
+                  {audioDucking ? "enabled" : "disabled"}
+                </span>
+                {" "}— BGM will {audioDucking ? "drop automatically" : "stay constant"} during dialogue.
+              </p>
+              <button
+                onClick={() => setAudioDucking(!audioDucking)}
+                className="ml-auto flex-shrink-0 relative inline-flex h-5 w-10 rounded-full border-2 border-transparent transition-all duration-200 focus:outline-none"
+                style={{ backgroundColor: audioDucking ? "#7c3aed" : "#374151" }}
+              >
+                <span
+                  className="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ease-in-out"
+                  style={{ transform: audioDucking ? "translateX(20px)" : "translateX(0)" }}
                 />
-              </div>
-
-              {/* BGM Volume */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between font-mono">
-                  <span className="flex items-center gap-1.5">
-                    <Music className="h-4 w-4 text-purple-400" />
-                    Thematic Background Music Gain
-                  </span>
-                  <span className="text-xs font-mono text-neutral-200 font-bold">
-                    {bgmVolume}%
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={bgmVolume}
-                  onChange={(e) => setBgmVolume(Number(e.target.value))}
-                  className="w-full accent-purple-500 bg-neutral-800 cursor-pointer h-1.5 rounded-lg"
-                />
-              </div>
-
-              {/* SFX Volume */}
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between font-mono">
-                  <span className="flex items-center gap-1.5">
-                    <Volume1 className="h-4 w-4 text-purple-400" />
-                    Atmospheric Sound Effects Gain
-                  </span>
-                  <span className="text-xs font-mono text-neutral-200 font-bold">
-                    {sfxVolume}%
-                  </span>
-                </label>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={sfxVolume}
-                  onChange={(e) => setSfxVolume(Number(e.target.value))}
-                  className="w-full accent-purple-500 bg-neutral-800 cursor-pointer h-1.5 rounded-lg"
-                />
-              </div>
+              </button>
             </div>
           </div>
+        )}
 
-          {/* RIGHT PANEL: VOICE CHARACTERS & EXPERIMENTAL TTS CONTROLS */}
-          <div className="space-y-6">
-            {/* CARD 1: Voice Characters selection */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
-              <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
-                <Activity className="h-4 w-4 text-purple-400" />
+        {/* VOICE TAB */}
+        {activeTab === "voice" && (
+          <div className="space-y-4">
+            {/* Voice Selector Card */}
+            <div
+              className="rounded-2xl border p-6 space-y-5"
+              style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-neutral-800">
+                <div className="w-8 h-8 rounded-xl bg-purple-600/20 flex items-center justify-center">
+                  <Radio className="h-4 w-4 text-purple-400" />
+                </div>
                 <div>
-                  <h3 className="font-bold text-sm text-white font-sans">
-                    Voice Actor & Speech Synthesizer Controls
-                  </h3>
-                  <p className="text-[10px] text-neutral-400 font-mono">
-                    Select active vocal profiles and modify speech pace
-                    properties
+                  <h3 className="text-sm font-bold text-white">AI Voice Character</h3>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">
+                    {loadingVoices ? "Loading voices from server..." : `${displayVoices.length} voices available`}
+                  </p>
+                </div>
+                {loadingVoices && (
+                  <div className="ml-auto h-4 w-4 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+                )}
+              </div>
+
+              {/* Voice grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1"
+                style={{ scrollbarWidth: "thin", scrollbarColor: "#4b2d7e transparent" }}>
+                {displayVoices.map((voice) => (
+                  <VoiceCard
+                    key={voice.code}
+                    voice={voice}
+                    isSelected={voiceActor === voice.code}
+                    onSelect={() => setVoiceActor(voice.code)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Narrator Voice Card */}
+            <div
+              className="rounded-2xl border p-6 space-y-5"
+              style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-neutral-800">
+                <div className="w-8 h-8 rounded-xl bg-indigo-600/20 flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Narrator Voice Profile</h3>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">
+                    Dedicated voice used for chapter-level narration
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                {/* Voice Speaker Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between gap-1.5 font-mono">
-                    <span className="flex items-center gap-1.5">
-                      <Mic className="h-3.5 w-3.5 text-purple-400" />
-                      AI Voice Speaker Character
-                    </span>
-                    {loadingVoices && (
-                      <span className="text-[10px] text-purple-400 animate-pulse font-bold">
-                        Loading...
-                      </span>
-                    )}
-                  </label>
-                  <select
-                    id="voice_select"
-                    value={voiceActor}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setVoiceActor(val);
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1"
+                style={{ scrollbarWidth: "thin", scrollbarColor: "#3730a3 transparent" }}>
+                {displayVoices.map((voice) => (
+                  <VoiceCard
+                    key={voice.code}
+                    voice={voice}
+                    isSelected={localNarratorVoice === voice.code}
+                    onSelect={() => {
+                      setLocalNarratorVoice(voice.code);
+                      localStorage.setItem("ai_comic_narrator_voice", voice.code);
                     }}
-                    className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
-                  >
-                    {displayVoices.map((voice) => (
-                      <option key={voice.code} value={voice.code}>
-                        {voice.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Dedicated Narrator Voice Profile */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between gap-1.5 font-mono">
-                    <span className="flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-purple-400" />
-                      Dedicated Narrator Voice Profile
-                    </span>
-                  </label>
-                  <select
-                    value={localNarratorVoice}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setLocalNarratorVoice(val);
-                      localStorage.setItem("ai_comic_narrator_voice", val);
-                    }}
-                    className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
-                  >
-                    {displayVoices.map((voice) => (
-                      <option key={voice.code} value={voice.code}>
-                        {voice.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Speech Rate (Speed) */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between font-mono">
-                    <span>Vocal Playback Speech Rate (Speed)</span>
-                    <span className="text-xs font-mono text-neutral-200 font-bold">
-                      {speechRate}x
-                    </span>
-                  </label>
-                  <input
-                    type="range"
-                    min={0.5}
-                    max={2.0}
-                    step={0.1}
-                    value={speechRate}
-                    onChange={(e) => setSpeechRate(Number(e.target.value))}
-                    className="w-full accent-purple-500 bg-neutral-800 cursor-pointer h-1 rounded"
                   />
-                </div>
-
-                {/* Speech Pitch */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-400 flex items-center justify-between font-mono">
-                    <span>Vocal Resonance Pitch Frequency</span>
-                    <span className="text-xs font-mono text-neutral-200 font-bold">
-                      {speechPitch}x
-                    </span>
-                  </label>
-                  <input
-                    type="range"
-                    min={0.5}
-                    max={2.0}
-                    step={0.1}
-                    value={speechPitch}
-                    onChange={(e) => setSpeechPitch(Number(e.target.value))}
-                    className="w-full accent-purple-500 bg-neutral-800 cursor-pointer h-1 rounded"
-                  />
-                </div>
+                ))}
               </div>
             </div>
 
-            {/* CARD 2: Soundtrack loops and Ducking Settings */}
-            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
-              <div className="flex items-center gap-2 border-b border-neutral-800 pb-3">
-                <Disc className="h-4 w-4 text-purple-400" />
+            {/* Speech Rate & Pitch */}
+            <div
+              className="rounded-2xl border p-6 space-y-5"
+              style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-neutral-800">
+                <div className="w-8 h-8 rounded-xl bg-violet-600/20 flex items-center justify-center">
+                  <Activity className="h-4 w-4 text-violet-400" />
+                </div>
                 <div>
-                  <h3 className="font-bold text-sm text-white font-sans">
-                    Soundtrack loops and Ducking Settings
-                  </h3>
-                  <p className="text-[10px] text-neutral-400 font-mono">
-                    Control background music styles and automatic speech ducking
+                  <h3 className="text-sm font-bold text-white">Speech Properties</h3>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">
+                    Tune delivery speed and vocal resonance
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                {/* Soundtrack loops */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5 font-mono">
-                    <Music className="h-3.5 w-3.5 text-purple-400" />
-                    Thematic Soundtrack Loop
-                  </label>
-                  <select
-                    id="bg_music_select"
-                    value={musicTheme}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setMusicTheme(val);
-                    }}
-                    className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2.5 text-neutral-300 focus:border-purple-500 outline-none"
-                  >
-                    <option>Orchestral Battle Theme</option>
-                    <option>Mysterious Ambience</option>
-                    <option>Sci-Fi Synth Wave</option>
-                    <option>Calm Acoustic Melancholy</option>
-                    <option>No Music (Dialogue Only)</option>
-                  </select>
-                </div>
+              <VolumeSlider
+                label="Speech Rate (Speed)"
+                icon={ChevronRight}
+                value={speechRate}
+                onChange={setSpeechRate}
+                color="#8b5cf6"
+                unit="x"
+                min={0.5}
+                max={2.0}
+                step={0.1}
+              />
+              <VolumeSlider
+                label="Pitch Frequency"
+                icon={AudioWaveform}
+                value={speechPitch}
+                onChange={setSpeechPitch}
+                color="#6366f1"
+                unit="x"
+                min={0.5}
+                max={2.0}
+                step={0.1}
+              />
+            </div>
+          </div>
+        )}
 
-                {/* Audio Ducking Toggle */}
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-neutral-400 flex flex-col font-mono">
-                    <span>Intelligent Audio Ducking</span>
-                    <span className="text-[10px] text-neutral-500 font-sans mt-0.5">
-                      Dynamically quiet soundtrack during spoken lines
-                    </span>
-                  </label>
-                  <button
-                    onClick={() => setAudioDucking(!audioDucking)}
-                    className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      audioDucking ? "bg-purple-600" : "bg-neutral-800"
-                    }`}
-                  >
-                    <span
-                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                        audioDucking ? "translate-x-5" : "translate-x-0"
-                      }`}
-                    />
-                  </button>
+        {/* MUSIC TAB */}
+        {activeTab === "music" && (
+          <div className="space-y-4">
+            {/* Theme picker */}
+            <div
+              className="rounded-2xl border p-6 space-y-5"
+              style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-neutral-800">
+                <div className="w-8 h-8 rounded-xl bg-blue-600/20 flex items-center justify-center">
+                  <Disc className="h-4 w-4 text-blue-400" />
                 </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Soundtrack Theme</h3>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">
+                    Choose the atmospheric BGM loop for this chapter
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {MUSIC_THEMES.map((theme) => {
+                  const isSelected = musicTheme === theme.label;
+                  return (
+                    <button
+                      key={theme.id}
+                      onClick={() => setMusicTheme(theme.label)}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200"
+                      style={{
+                        borderColor: isSelected ? "#6366f1" : "#1e1e30",
+                        backgroundColor: isSelected ? "#6366f110" : "#0d0d1a",
+                      }}
+                    >
+                      <span className="text-lg">{theme.icon}</span>
+                      <div className="text-left flex-1">
+                        <div
+                          className="text-xs font-semibold"
+                          style={{ color: isSelected ? "#e2e8f0" : "#9ca3af" }}
+                        >
+                          {theme.label}
+                        </div>
+                        <div className="text-[10px] text-neutral-500 mt-0.5">
+                          Mood: {theme.mood}
+                        </div>
+                      </div>
+                      <div
+                        className="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
+                        style={{
+                          borderColor: isSelected ? "#6366f1" : "#374151",
+                          backgroundColor: isSelected ? "#6366f1" : "transparent",
+                        }}
+                      >
+                        {isSelected && <Check className="h-2.5 w-2.5 text-white" />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Ducking Card */}
+            <div
+              className="rounded-2xl border p-6 space-y-4"
+              style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
+            >
+              <div className="flex items-center gap-3 pb-4 border-b border-neutral-800">
+                <div className="w-8 h-8 rounded-xl bg-amber-600/20 flex items-center justify-center">
+                  <Zap className="h-4 w-4 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Intelligent Audio Ducking</h3>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">
+                    Auto-reduce BGM volume during spoken dialogue
+                  </p>
+                </div>
+                <button
+                  onClick={() => setAudioDucking(!audioDucking)}
+                  className="ml-auto relative inline-flex h-6 w-12 rounded-full border-2 border-transparent transition-all duration-200 focus:outline-none"
+                  style={{ backgroundColor: audioDucking ? "#7c3aed" : "#374151" }}
+                >
+                  <span
+                    className="inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out"
+                    style={{ transform: audioDucking ? "translateX(24px)" : "translateX(0px)" }}
+                  />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Dialogue Detection", value: "Whisper STT", active: audioDucking },
+                  { label: "Duck Amount", value: "−12 dB", active: audioDucking },
+                  { label: "Attack Time", value: "80 ms", active: audioDucking },
+                  { label: "Release Time", value: "320 ms", active: audioDucking },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="px-3 py-2.5 rounded-xl border"
+                    style={{
+                      borderColor: stat.active ? "#7c3aed44" : "#1e1e30",
+                      backgroundColor: stat.active ? "#7c3aed0a" : "#0d0d1a",
+                    }}
+                  >
+                    <div className="text-[10px] text-neutral-500 mb-1">{stat.label}</div>
+                    <div
+                      className="text-xs font-bold font-mono"
+                      style={{ color: stat.active ? "#c4b5fd" : "#6b7280" }}
+                    >
+                      {stat.value}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* SAVE CONTROL ACTION FOOTER */}
-      <div className="flex justify-between items-center bg-neutral-900 border border-neutral-800 rounded-2xl p-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
-          <span className="text-xs font-mono text-neutral-400">
-            {projectId
-              ? `Configuring Audio Matrix profile for Chapter: "${projectId}"`
-              : "No active chapter open; configuring global fallback options."}
+      {/* ── Save Footer ────────────────────────────────────────────────── */}
+      <div
+        className="mt-5 flex items-center justify-between gap-4 px-5 py-3.5 rounded-2xl border"
+        style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <div
+            className="w-2 h-2 rounded-full flex-shrink-0"
+            style={{
+              backgroundColor: saved ? "#22c55e" : "#7c3aed",
+              boxShadow: saved ? "0 0 8px #22c55e99" : "0 0 8px #7c3aed99",
+            }}
+          />
+          <span className="text-[11px] text-neutral-500 truncate">
+            {saved
+              ? "All settings saved successfully!"
+              : projectId
+              ? `Audio matrix for: "${projectId}"`
+              : "Global fallback audio profile"}
           </span>
         </div>
+
         <button
-          onClick={handleSaveSettings}
+          onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold font-sans transition-all active:scale-[0.98] cursor-pointer shadow-md shadow-purple-950/20"
+          className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 flex-shrink-0 disabled:opacity-40"
+          style={{
+            background: saved
+              ? "linear-gradient(135deg, #16a34a, #15803d)"
+              : "linear-gradient(135deg, #7c3aed, #4f46e5)",
+            boxShadow: saved
+              ? "0 0 16px #16a34a44"
+              : "0 0 16px #7c3aed44",
+          }}
         >
-          <Save className="h-4 w-4" />
-          {saving ? "Saving Mix..." : "Save Audio Mixer Settings"}
+          {saved ? (
+            <><Check className="h-3.5 w-3.5" /> Saved!</>
+          ) : saving ? (
+            <><div className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" /> Saving...</>
+          ) : (
+            <><Save className="h-3.5 w-3.5" /> Save Settings</>
+          )}
         </button>
       </div>
     </div>
