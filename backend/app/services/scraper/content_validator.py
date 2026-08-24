@@ -166,9 +166,13 @@ class ImageValidator:
             elif "avif" in url.lower():
                 file_type = "image/avif"
 
+            from urllib.parse import quote
+            proxy_url = f"/api/proxy-image?url={quote(url)}" if url else None
+
             accepted.append(ImageItem(
                 index=len(accepted),
                 url=url,
+                proxy_url=proxy_url,
                 source=source_str,
                 width=cand_width,
                 height=cand_height,

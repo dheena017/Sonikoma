@@ -126,12 +126,13 @@ class ScrapeContext:
         elif self.validated_images:
             confidence = 80.0
 
-        # Apply proxy URLs if requested
-        if self.config.proxy_images and self.validated_images:
-            from urllib.parse import quote
-            canonical_ref = self.canonical_url or self.normalized_url or self.url
+        from urllib.parse import quote
+        canonical_ref = self.canonical_url or self.normalized_url or self.url or ""
+
+        # Always apply proxy URLs so users and frontend can immediately preview images without CDN 403 blocks
+        if self.validated_images:
             for img in self.validated_images:
-                if not img.proxy_url:
+                if not img.proxy_url and img.url:
                     img.proxy_url = f"/api/proxy-image?url={quote(img.url)}&referer={quote(canonical_ref)}"
 
         # Ensure series and chapter cover images are populated with real comic art (ignoring logos/branding/avatars)
@@ -144,6 +145,11 @@ class ScrapeContext:
                 self.series_info.cover_image = best_cover_art
             if not is_valid_art(self.chapter_info.cover_image):
                 self.chapter_info.cover_image = self.series_info.cover_image or best_cover_art
+
+        if self.series_info.cover_image and not self.series_info.proxy_cover_image:
+            self.series_info.proxy_cover_image = f"/api/proxy-image?url={quote(self.series_info.cover_image)}&referer={quote(canonical_ref)}"
+        if self.chapter_info.cover_image and not self.chapter_info.proxy_cover_image:
+            self.chapter_info.proxy_cover_image = f"/api/proxy-image?url={quote(self.chapter_info.cover_image)}&referer={quote(canonical_ref)}"
 
 
 

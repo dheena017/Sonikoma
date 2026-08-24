@@ -284,6 +284,12 @@ class AdaptiveScraperEngine:
                         source_type="embedded_state"
                     ))
 
+        # Attach proxy URLs to all raw discovered images for immediate CDN preview bypass
+        from urllib.parse import quote
+        for item in raw_images:
+            if not item.proxy_url and item.url:
+                item.proxy_url = f"/api/proxy-image?url={quote(item.url)}&referer={quote(normalized_url)}"
+
         latency_ms = (time.time() - start_time) * 1000.0
         return ScrapeAllImagesResponse(
             success=True,

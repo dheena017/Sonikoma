@@ -124,6 +124,7 @@ class SeriesInfo(BaseModel):
     tags: List[str] = Field(default_factory=list)
     description: Optional[str] = None
     cover_image: Optional[str] = None
+    proxy_cover_image: Optional[str] = None
     language: Optional[str] = None
 
 
@@ -134,6 +135,7 @@ class ChapterInfo(BaseModel):
     title: Optional[str] = None
     url: Optional[str] = None
     cover_image: Optional[str] = None
+    proxy_cover_image: Optional[str] = None
     published_at: Optional[str] = None
     previous: Optional[str] = None
     next: Optional[str] = None
@@ -575,6 +577,7 @@ class RawImageItem(BaseModel):
     """Raw unfiltered image item representing an image discovered on a page."""
     index: int
     url: str
+    proxy_url: Optional[str] = None
     alt: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None

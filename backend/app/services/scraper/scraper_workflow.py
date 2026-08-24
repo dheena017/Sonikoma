@@ -244,8 +244,12 @@ async def scrape_series_chapters(
                 clean_base = raw_input if raw_input.endswith("/") else (raw_input + "/")
                 cover_img = urljoin(clean_base, cover_img)
 
+            from urllib.parse import quote
+            proxy_cover = f"/api/proxy-image?url={quote(cover_img)}&referer={quote(raw_input)}" if cover_img else ""
+
             series_dict["title"] = series_title
             series_dict["cover_image"] = cover_img
+            series_dict["proxy_cover_image"] = proxy_cover
             series_dict["author"] = author_val
             series_dict["genre"] = genre_val
             series_dict["description"] = desc_val
@@ -255,6 +259,7 @@ async def scrape_series_chapters(
             result["title"] = series_title
             result["series_title"] = series_title
             result["cover_image"] = cover_img
+            result["proxy_cover_image"] = proxy_cover
             result["author"] = author_val
             result["genre"] = genre_val
             result["description"] = desc_val
@@ -295,6 +300,8 @@ async def scrape_series_chapters(
                     clean_base = raw_input if raw_input.endswith("/") else (raw_input + "/")
                     ch_img = urljoin(clean_base, ch_img)
                 ch["cover_image"] = ch_img
+                ch["proxy_url"] = f"/api/proxy-image?url={quote(ch_img)}&referer={quote(raw_input)}" if ch_img else ""
+                ch["proxy_cover_image"] = ch["proxy_url"]
                 ch_num = ch.get("chapter_number") or ch.get("episode_no") or ch.get("number")
                 ch["chapter_number"] = ch_num
                 ch["number"] = str(int(ch_num) if isinstance(ch_num, float) and ch_num.is_integer() else (ch_num if ch_num is not None else ""))

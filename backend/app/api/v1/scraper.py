@@ -533,7 +533,15 @@ async def discover_html_dom_endpoint(
         "url": body.url,
         "technology": "static_html_dom",
         "total_images": len(candidates),
-        "images": [{"index": i, "url": c.url, "source": c.source_type.value} for i, c in enumerate(candidates)]
+        "images": [
+            {
+                "index": i,
+                "url": c.url,
+                "proxy_url": f"/api/proxy-image?url={quote(c.url)}&referer={quote(body.url)}",
+                "source": c.source_type.value
+            }
+            for i, c in enumerate(candidates)
+        ]
     }
 
 
@@ -555,7 +563,15 @@ async def discover_js_state_endpoint(
         "url": body.url,
         "technology": "javascript_embedded_state",
         "total_images": len(state_candidates),
-        "images": [{"index": i, "url": c.url, "source": c.source_type.value} for i, c in enumerate(state_candidates)]
+        "images": [
+            {
+                "index": i,
+                "url": c.url,
+                "proxy_url": f"/api/proxy-image?url={quote(c.url)}&referer={quote(body.url)}",
+                "source": c.source_type.value
+            }
+            for i, c in enumerate(state_candidates)
+        ]
     }
 
 
@@ -571,11 +587,21 @@ async def discover_network_traffic_endpoint(
     res = await BrowserFetcher.render_page(body.url, auto_scroll=True)
     net_images = res.get("network_images", []) if res else []
     logger.debug(f"[ScraperAPI] Network traffic discovery completed: {len(net_images)} images intercepted for '{body.url}'")
+    
+    formatted_images = []
+    for i, item in enumerate(net_images):
+        img_u = item.get("url") if isinstance(item, dict) else str(item)
+        formatted_images.append({
+            "index": i,
+            "url": img_u,
+            "proxy_url": f"/api/proxy-image?url={quote(img_u)}&referer={quote(body.url)}" if img_u else ""
+        })
+
     return {
         "url": body.url,
         "technology": "browser_network_interception",
-        "total_images": len(net_images),
-        "images": net_images
+        "total_images": len(formatted_images),
+        "images": formatted_images
     }
 
 
