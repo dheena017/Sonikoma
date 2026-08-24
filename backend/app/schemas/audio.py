@@ -108,3 +108,66 @@ class BatchTranscribeRequest(BaseModel):
     audio_paths: List[str]
     language: Optional[str] = None
     model_name: Optional[WhisperModel] = WhisperModel.BASE
+
+
+# =============================================================================
+# 4. Audio Settings, Presets, and Mixing DTOs
+# =============================================================================
+
+class AudioSettingsModel(BaseModel):
+    """Global and user-level audio synthesis configuration settings."""
+    model_config = ConfigDict(protected_namespaces=())
+    default_voice: str = Field(default="en-US-GuyNeural", description="Default Edge-TTS voice identifier")
+    speech_rate: float = Field(default=1.0, ge=0.25, le=3.0, description="Speech rate speed multiplier (1.0 = normal)")
+    speech_pitch: float = Field(default=1.0, ge=0.25, le=3.0, description="Speech pitch modifier (1.0 = normal)")
+    master_volume: float = Field(default=1.0, ge=0.0, le=2.0, description="Master audio volume multiplier")
+    bgm_volume: float = Field(default=0.35, ge=0.0, le=1.0, description="Default background music track volume (0.0 to 1.0)")
+    sfx_volume: float = Field(default=0.75, ge=0.0, le=1.0, description="Default sound effects track volume (0.0 to 1.0)")
+    auto_ducking: bool = Field(default=True, description="Automatically lower background music volume when dialogue speaks")
+    ducking_factor: float = Field(default=0.25, ge=0.0, le=1.0, description="Volume level for BGM during dialogue ducking")
+    audio_format: str = Field(default="mp3", description="Audio container format: 'mp3', 'wav', 'aac', 'ogg'")
+    sample_rate: int = Field(default=44100, description="Target audio sample rate in Hz (44100 or 48000)")
+    enable_normalization: bool = Field(default=True, description="Apply dynamic range normalization (LUFS compliance)")
+    whisper_model: Optional[str] = Field(default="base", description="Default OpenAI Whisper model for speech recognition")
+    elevenlabs_voice_id: Optional[str] = Field(default=None, description="Optional ElevenLabs voice ID for premium narration")
+    elevenlabs_stability: float = Field(default=0.5, ge=0.0, le=1.0, description="ElevenLabs voice stability setting")
+    elevenlabs_similarity_boost: float = Field(default=0.75, ge=0.0, le=1.0, description="ElevenLabs similarity boost setting")
+
+
+class AudioPreviewRequest(BaseModel):
+    """Request payload to test or preview voice settings with sample text."""
+    model_config = ConfigDict(protected_namespaces=())
+    text: str = Field(default="Welcome to Sonikoma. Turning comic panels into cinematic stories.", description="Sample dialogue text to speak")
+    voice: Optional[str] = Field(default="en-US-GuyNeural", description="Voice identifier")
+    speech_rate: Optional[float] = Field(default=1.0, ge=0.25, le=3.0, description="Speech rate multiplier")
+    speech_pitch: Optional[float] = Field(default=1.0, ge=0.25, le=3.0, description="Speech pitch multiplier")
+    provider: Optional[str] = Field(default="edge-tts", description="TTS Provider: 'edge-tts' or 'elevenlabs'")
+    return_base64: bool = Field(default=True, description="Return base64 audio data")
+
+
+class AudioMixRequest(BaseModel):
+    """Request payload to mix voiceover, background music (BGM), and sound effects (SFX) tracks."""
+    model_config = ConfigDict(protected_namespaces=())
+    voice_audio_base64: Optional[str] = Field(default=None, description="Base64 encoded voiceover audio track")
+    voice_audio_path: Optional[str] = Field(default=None, description="Server file path to voiceover audio")
+    bgm_audio_url: Optional[str] = Field(default=None, description="URL or server path to background music")
+    bgm_volume: float = Field(default=0.35, ge=0.0, le=1.0, description="BGM volume multiplier")
+    voice_volume: float = Field(default=1.0, ge=0.0, le=2.0, description="Voice track volume multiplier")
+    auto_ducking: bool = Field(default=True, description="Enable automatic background music ducking")
+    ducking_factor: float = Field(default=0.25, ge=0.0, le=1.0, description="Ducking volume multiplier")
+    target_duration: Optional[float] = Field(default=None, description="Target total duration in seconds")
+    output_format: str = Field(default="mp3", description="Desired mixed audio format: 'mp3' or 'wav'")
+    return_base64: bool = Field(default=True, description="Return mixed audio as base64 string")
+
+
+class AudioPresetItem(BaseModel):
+    """Preset configuration for character voices and audio atmospheres."""
+    model_config = ConfigDict(protected_namespaces=())
+    id: str
+    name: str
+    category: str
+    voice: str
+    speech_rate: float
+    speech_pitch: float
+    description: str
+    sample_text: str
