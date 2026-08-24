@@ -541,8 +541,8 @@ export default function YouTubeChannelHome({
             )}
 
           {/* ── 5. TOP PERFORMING STORIES (LEADERBOARD) ── */}
-          {(activeFilter === "all" || activeFilter === "popular") &&
-            topVideos.length > 1 && (
+          {(activeFilter === "all" || activeFilter === "popular") && (
+            topVideos.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -613,11 +613,22 @@ export default function YouTubeChannelHome({
                   ))}
                 </div>
               </div>
-            )}
+            ) : activeFilter === "popular" ? (
+              <div className="p-12 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
+                <Trophy className="w-12 h-12 text-neutral-600 mx-auto" />
+                <h4 className="text-sm font-bold text-white">
+                  No Popular Videos Yet
+                </h4>
+                <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
+                  Videos and their performance analytics will rank here as they accumulate views and likes.
+                </p>
+              </div>
+            ) : null
+          )}
 
           {/* ── 6. PLAYLISTS & SERIES SHELF ── */}
-          {(activeFilter === "all" || activeFilter === "playlists") &&
-            playlists.length > 0 && (
+          {(activeFilter === "all" || activeFilter === "playlists") && (
+            playlists.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -686,11 +697,31 @@ export default function YouTubeChannelHome({
                   ))}
                 </div>
               </div>
-            )}
+            ) : activeFilter === "playlists" ? (
+              <div className="p-12 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
+                <ListMusic className="w-12 h-12 text-neutral-600 mx-auto" />
+                <h4 className="text-sm font-bold text-white">
+                  No Playlists Found
+                </h4>
+                <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
+                  Create playlists and series to organize your chapters and video episodes.
+                </p>
+                {onNavigateTab && (
+                  <button
+                    onClick={() => onNavigateTab("playlists")}
+                    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-purple-600/30 transition-all cursor-pointer inline-flex items-center gap-2"
+                  >
+                    <FolderPlus className="w-4 h-4" />
+                    <span>Create Playlist</span>
+                  </button>
+                )}
+              </div>
+            ) : null
+          )}
 
           {/* ── 7. SHORTS SHELF ── */}
-          {(activeFilter === "all" || activeFilter === "shorts") &&
-            shorts.length > 0 && (
+          {(activeFilter === "all" || activeFilter === "shorts") && (
+            shorts.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -753,10 +784,30 @@ export default function YouTubeChannelHome({
                   ))}
                 </div>
               </div>
-            )}
+            ) : activeFilter === "shorts" ? (
+              <div className="p-12 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
+                <Zap className="w-12 h-12 text-neutral-600 mx-auto" />
+                <h4 className="text-sm font-bold text-white">
+                  No YouTube Shorts Found
+                </h4>
+                <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
+                  Generate vertical short-form episodes from your comic panels for YouTube Shorts.
+                </p>
+                {onNavigateTab && (
+                  <button
+                    onClick={() => onNavigateTab("studio")}
+                    className="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-red-600/30 transition-all cursor-pointer inline-flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Create Short</span>
+                  </button>
+                )}
+              </div>
+            ) : null
+          )}
 
           {/* ── 8. RECENT UPLOADS GRID ── */}
-          {(activeFilter === "all" || activeFilter === "popular") && (
+          {activeFilter === "all" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">

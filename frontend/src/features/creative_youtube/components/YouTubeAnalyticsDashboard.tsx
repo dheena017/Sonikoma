@@ -244,6 +244,12 @@ export default function YouTubeAnalyticsDashboard({
 
   // ── Computed ────────────────────────────────────────────────────────────
 
+  const isConnected = Boolean(
+    channel?.title &&
+      channel?.title !== "YouTube Not Connected" &&
+      !channel?.title.includes("Not Connected")
+  );
+
   const totalViews = videos.reduce((a, v) => a + parseNum(v.view_count), 0);
   const totalLikes = videos.reduce((a, v) => a + parseNum(v.like_count), 0);
   const totalComments = videos.reduce(
@@ -364,67 +370,61 @@ export default function YouTubeAnalyticsDashboard({
                   icon={<Users className="w-4 h-4 text-red-400" />}
                   label="Subscribers"
                   value={
-                    channel?.subscriber_count
+                    isConnected &&
+                    channel?.subscriber_count &&
+                    channel.subscriber_count !== "--"
                       ? fmtNum(parseNum(channel.subscriber_count))
                       : "--"
                   }
-                  sub={channel?.custom_url || ""}
+                  sub={
+                    isConnected
+                      ? channel?.custom_url || "Channel subscribers"
+                      : "Not connected"
+                  }
                   color="bg-red-950/50 border-red-900/40"
                 />
                 <StatCard
                   icon={<Eye className="w-4 h-4 text-sky-400" />}
                   label="Total Views"
                   value={
-                    channel?.view_count
+                    isConnected &&
+                    channel?.view_count &&
+                    channel.view_count !== "--"
                       ? fmtNum(parseNum(channel.view_count))
-                      : fmtNum(totalViews)
+                      : totalViews > 0
+                      ? fmtNum(totalViews)
+                      : "--"
                   }
-                  sub="All-time channel views"
+                  sub={isConnected ? "All-time channel views" : "Not connected"}
                   color="bg-sky-950/50 border-sky-900/40"
                 />
                 <StatCard
                   icon={<Video className="w-4 h-4 text-purple-400" />}
                   label="Videos"
-                  value={channel?.video_count || videos.length || "--"}
-                  sub={`${privacyCounts.public} public · ${privacyCounts.unlisted} unlisted`}
+                  value={
+                    isConnected &&
+                    channel?.video_count &&
+                    channel.video_count !== "--"
+                      ? channel.video_count
+                      : videos.length > 0
+                      ? String(videos.length)
+                      : "--"
+                  }
+                  sub={
+                    videos.length > 0
+                      ? `${privacyCounts.public} public · ${privacyCounts.unlisted} unlisted`
+                      : isConnected
+                      ? "0 public · 0 unlisted"
+                      : "Not connected"
+                  }
                   color="bg-purple-950/50 border-purple-900/40"
                 />
                 <StatCard
                   icon={<TrendingUp className="w-4 h-4 text-emerald-400" />}
                   label="Avg Views"
                   value={avgViews > 0 ? fmtNum(avgViews) : "--"}
-                  sub="Per video average"
+                  sub={avgViews > 0 ? "Per video average" : "Not connected"}
                   color="bg-emerald-950/50 border-emerald-900/40"
-                />
-              </div>
-
-              {/* Secondary KPIs */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <StatCard
-                  icon={<ThumbsUp className="w-4 h-4 text-rose-400" />}
-                  label="Total Likes"
-                  value={fmtNum(totalLikes)}
-                  color="bg-rose-950/50 border-rose-900/40"
-                />
-                <StatCard
-                  icon={<MessageCircle className="w-4 h-4 text-blue-400" />}
-                  label="Total Comments"
-                  value={fmtNum(totalComments)}
-                  color="bg-blue-950/50 border-blue-900/40"
-                />
-                <StatCard
-                  icon={<Flame className="w-4 h-4 text-orange-400" />}
-                  label="Engagement Rate"
-                  value={`${engagementRate}%`}
-                  sub="(Likes + Comments) / Views"
-                  color="bg-orange-950/50 border-orange-900/40"
-                />
-                <StatCard
-                  icon={<ListMusic className="w-4 h-4 text-violet-400" />}
-                  label="Playlists"
-                  value={playlists.length || "--"}
-                  sub="On your channel"
-                  color="bg-violet-950/50 border-violet-900/40"
                 />
               </div>
 
@@ -444,9 +444,15 @@ export default function YouTubeAnalyticsDashboard({
                     </span>
                   </div>
                   {topVideos.length === 0 ? (
-                    <p className="text-xs text-neutral-500 font-mono text-center py-6">
-                      No video data available
-                    </p>
+                    <div className="text-center py-10 space-y-2 border border-dashed border-neutral-800/80 rounded-xl bg-neutral-950/30">
+                      <Trophy className="w-8 h-8 text-neutral-600 mx-auto" />
+                      <p className="text-xs font-bold text-white">
+                        No video analytics yet
+                      </p>
+                      <p className="text-[11px] text-neutral-500 font-mono max-w-xs mx-auto">
+                        Top performing videos and rankings will populate here as you publish videos to your channel.
+                      </p>
+                    </div>
                   ) : (
                     <div className="space-y-2 max-h-80 overflow-y-auto scrollbar-thin pr-1">
                       {topVideos.map((vid, idx) => {
@@ -657,38 +663,48 @@ export default function YouTubeAnalyticsDashboard({
                   )}
 
                   {/* Channel info card */}
-                  {channel?.title && (
-                    <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
-                      <h3 className="text-xs font-black text-white font-mono uppercase tracking-wider flex items-center gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" />
-                        Channel Info
-                      </h3>
-                      <div className="flex items-center gap-2.5">
-                        {channel.thumbnail && (
-                          <img
-                            src={channel.thumbnail}
-                            alt={channel.title}
-                            className="w-10 h-10 rounded-full border border-neutral-700 shrink-0"
-                          />
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-sm font-black text-white truncate">
-                            {channel.title}
-                          </p>
-                          {channel.custom_url && (
-                            <p className="text-[10px] font-mono text-neutral-500 truncate">
-                              @{channel.custom_url.replace("@", "")}
-                            </p>
-                          )}
-                          {channel.country && (
-                            <p className="text-[10px] font-mono text-neutral-600">
-                              {channel.country}
-                            </p>
-                          )}
+                  <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+                    <h3 className="text-xs font-black text-white font-mono uppercase tracking-wider flex items-center gap-2">
+                      <CheckCircle2
+                        className={`w-3.5 h-3.5 ${
+                          isConnected ? "text-emerald-400" : "text-neutral-500"
+                        }`}
+                      />
+                      Channel Info
+                    </h3>
+                    <div className="flex items-center gap-2.5">
+                      {channel?.thumbnail && isConnected ? (
+                        <img
+                          src={channel.thumbnail}
+                          alt={channel.title}
+                          className="w-10 h-10 rounded-full border border-neutral-700 shrink-0 object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-purple-800 flex items-center justify-center font-bold text-white text-xs font-sans uppercase shrink-0">
+                          {isConnected && channel?.title
+                            ? channel.title.charAt(0)
+                            : "Y"}
                         </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-white truncate">
+                          {isConnected ? channel?.title : "YouTube Not Connected"}
+                        </p>
+                        <p className="text-[10px] font-mono text-neutral-500 truncate">
+                          {isConnected && channel?.custom_url
+                            ? channel.custom_url.startsWith("@")
+                              ? channel.custom_url
+                              : `@${channel.custom_url.replace("@", "")}`
+                            : "Connect YouTube account to load live stats"}
+                        </p>
+                        {isConnected && channel?.country && (
+                          <p className="text-[10px] font-mono text-neutral-600">
+                            {channel.country}
+                          </p>
+                        )}
                       </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
 
@@ -759,8 +775,14 @@ export default function YouTubeAnalyticsDashboard({
                 </p>
               </div>
               {videos.length === 0 ? (
-                <div className="text-center py-16 text-neutral-500 font-mono text-xs">
-                  No videos found.
+                <div className="text-center py-16 space-y-3 border border-neutral-800/80 rounded-3xl bg-neutral-950/40 p-8">
+                  <Play className="w-10 h-10 text-neutral-600 mx-auto" />
+                  <h4 className="text-sm font-bold text-white">No videos found</h4>
+                  <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
+                    {isConnected
+                      ? "No videos have been uploaded or tracked for this channel yet."
+                      : "Connect your YouTube account to view video performance metrics."}
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -866,10 +888,13 @@ export default function YouTubeAnalyticsDashboard({
                 {playlists.length} playlists on your channel
               </p>
               {playlists.length === 0 ? (
-                <div className="text-center py-16 space-y-2">
-                  <ListMusic className="w-8 h-8 text-neutral-700 mx-auto" />
-                  <p className="text-xs text-neutral-500 font-mono">
-                    No playlists found on your channel.
+                <div className="text-center py-16 space-y-3 border border-neutral-800/80 rounded-3xl bg-neutral-950/40 p-8">
+                  <ListMusic className="w-10 h-10 text-neutral-600 mx-auto" />
+                  <h4 className="text-sm font-bold text-white">No playlists found</h4>
+                  <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
+                    {isConnected
+                      ? "No playlists are currently associated with your YouTube channel."
+                      : "Connect your YouTube account to view your playlist analytics."}
                   </p>
                 </div>
               ) : (
@@ -934,22 +959,26 @@ export default function YouTubeAnalyticsDashboard({
                 <StatCard
                   icon={<ThumbsUp className="w-4 h-4 text-rose-400" />}
                   label="Total Likes"
-                  value={fmtNum(totalLikes)}
-                  sub="Across all videos"
+                  value={totalLikes > 0 ? fmtNum(totalLikes) : "--"}
+                  sub={isConnected ? "Across all videos" : "Not connected"}
                   color="bg-rose-950/50 border-rose-900/40"
                 />
                 <StatCard
                   icon={<MessageCircle className="w-4 h-4 text-blue-400" />}
                   label="Total Comments"
-                  value={fmtNum(totalComments)}
-                  sub="Across all videos"
+                  value={totalComments > 0 ? fmtNum(totalComments) : "--"}
+                  sub={isConnected ? "Across all videos" : "Not connected"}
                   color="bg-blue-950/50 border-blue-900/40"
                 />
                 <StatCard
                   icon={<Flame className="w-4 h-4 text-orange-400" />}
                   label="Engagement Rate"
-                  value={`${engagementRate}%`}
-                  sub="(Likes + Comments) / Views"
+                  value={totalViews > 0 ? `${engagementRate}%` : "--"}
+                  sub={
+                    totalViews > 0
+                      ? "(Likes + Comments) / Views"
+                      : "Not connected"
+                  }
                   color="bg-orange-950/50 border-orange-900/40"
                 />
               </div>
@@ -964,44 +993,54 @@ export default function YouTubeAnalyticsDashboard({
                       Most Liked
                     </h3>
                   </div>
-                  <div className="space-y-2">
-                    {mostLiked.map((vid, i) => {
-                      const n = parseNum(vid.like_count);
-                      const max = parseNum(mostLiked[0]?.like_count);
-                      return (
-                        <a
-                          key={vid.id}
-                          href={vid.youtube_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-2.5 group"
-                        >
-                          <span className="w-4 text-[10px] font-mono text-neutral-600 shrink-0">
-                            #{i + 1}
-                          </span>
-                          <img
-                            src={vid.thumbnail}
-                            alt=""
-                            className="w-10 h-7 object-cover rounded shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-bold text-neutral-300 truncate group-hover:text-rose-300 transition-colors">
-                              {vid.title}
-                            </p>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <MiniBar
-                                pct={max > 0 ? (n / max) * 100 : 0}
-                                color="bg-gradient-to-r from-rose-700 to-rose-400"
-                              />
-                              <span className="text-[10px] font-mono text-rose-400 shrink-0">
-                                {fmtNum(n)}
-                              </span>
+                  {mostLiked.length === 0 ? (
+                    <div className="text-center py-8 space-y-1.5">
+                      <ThumbsUp className="w-6 h-6 text-neutral-600 mx-auto" />
+                      <p className="text-xs font-bold text-white">No likes data</p>
+                      <p className="text-[11px] text-neutral-500 font-mono">
+                        Like counts will appear as your videos gain engagement.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {mostLiked.map((vid, i) => {
+                        const n = parseNum(vid.like_count);
+                        const max = parseNum(mostLiked[0]?.like_count);
+                        return (
+                          <a
+                            key={vid.id}
+                            href={vid.youtube_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-2.5 group"
+                          >
+                            <span className="w-4 text-[10px] font-mono text-neutral-600 shrink-0">
+                              #{i + 1}
+                            </span>
+                            <img
+                              src={vid.thumbnail}
+                              alt=""
+                              className="w-10 h-7 object-cover rounded shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-bold text-neutral-300 truncate group-hover:text-rose-300 transition-colors">
+                                {vid.title}
+                              </p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <MiniBar
+                                  pct={max > 0 ? (n / max) * 100 : 0}
+                                  color="bg-gradient-to-r from-rose-700 to-rose-400"
+                                />
+                                <span className="text-[10px] font-mono text-rose-400 shrink-0">
+                                  {fmtNum(n)}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        </a>
-                      );
-                    })}
-                  </div>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Most Discussed */}
@@ -1012,44 +1051,54 @@ export default function YouTubeAnalyticsDashboard({
                       Most Discussed
                     </h3>
                   </div>
-                  <div className="space-y-2">
-                    {mostDiscussed.map((vid, i) => {
-                      const n = parseNum(vid.comment_count);
-                      const max = parseNum(mostDiscussed[0]?.comment_count);
-                      return (
-                        <a
-                          key={vid.id}
-                          href={vid.youtube_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-2.5 group"
-                        >
-                          <span className="w-4 text-[10px] font-mono text-neutral-600 shrink-0">
-                            #{i + 1}
-                          </span>
-                          <img
-                            src={vid.thumbnail}
-                            alt=""
-                            className="w-10 h-7 object-cover rounded shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-bold text-neutral-300 truncate group-hover:text-blue-300 transition-colors">
-                              {vid.title}
-                            </p>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <MiniBar
-                                pct={max > 0 ? (n / max) * 100 : 0}
-                                color="bg-gradient-to-r from-blue-700 to-blue-400"
-                              />
-                              <span className="text-[10px] font-mono text-blue-400 shrink-0">
-                                {fmtNum(n)}
-                              </span>
+                  {mostDiscussed.length === 0 ? (
+                    <div className="text-center py-8 space-y-1.5">
+                      <MessageCircle className="w-6 h-6 text-neutral-600 mx-auto" />
+                      <p className="text-xs font-bold text-white">No comment data</p>
+                      <p className="text-[11px] text-neutral-500 font-mono">
+                        Comment counts will appear as your audience engages.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {mostDiscussed.map((vid, i) => {
+                        const n = parseNum(vid.comment_count);
+                        const max = parseNum(mostDiscussed[0]?.comment_count);
+                        return (
+                          <a
+                            key={vid.id}
+                            href={vid.youtube_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-2.5 group"
+                          >
+                            <span className="w-4 text-[10px] font-mono text-neutral-600 shrink-0">
+                              #{i + 1}
+                            </span>
+                            <img
+                              src={vid.thumbnail}
+                              alt=""
+                              className="w-10 h-7 object-cover rounded shrink-0"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-bold text-neutral-300 truncate group-hover:text-blue-300 transition-colors">
+                                {vid.title}
+                              </p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <MiniBar
+                                  pct={max > 0 ? (n / max) * 100 : 0}
+                                  color="bg-gradient-to-r from-blue-700 to-blue-400"
+                                />
+                                <span className="text-[10px] font-mono text-blue-400 shrink-0">
+                                  {fmtNum(n)}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        </a>
-                      );
-                    })}
-                  </div>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
