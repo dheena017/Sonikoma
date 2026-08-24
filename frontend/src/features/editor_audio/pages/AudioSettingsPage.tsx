@@ -352,48 +352,16 @@ export default function AudioSettingsPage({
   return (
     <div className={isEmbed ? "w-full" : "w-full max-w-4xl mx-auto py-4"}>
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {/* ── Tab Bar Navigation ────────────────────────────────────────── */}
       <div className="mb-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            {/* Icon badge */}
-            <div
-              className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-              style={{
-                background: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-                boxShadow: "0 0 24px #7c3aed55",
-              }}
-            >
-              <AudioWaveform className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">
-                Audio Studio
-              </h2>
-              <p className="text-[11px] text-neutral-500 mt-0.5">
-                {projectId
-                  ? `Editing audio matrix for chapter "${projectId}"`
-                  : "Configuring global audio fallback profile"}
-              </p>
-            </div>
-          </div>
-
-          {/* Live waveform visual */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800">
-            <WaveformBars active={volume > 0} />
-            <span className="text-[10px] text-neutral-500 font-mono">LIVE</span>
-          </div>
-        </div>
-
-        {/* Tab bar */}
-        <div className="flex gap-1 mt-5 p-1 bg-neutral-900 rounded-2xl border border-neutral-800 w-fit">
+        <div className="flex gap-1 p-1 bg-neutral-900 rounded-2xl border border-neutral-800 w-fit shadow-md">
           {tabs.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
             return (
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer"
                 style={{
                   color: isActive ? "#fff" : "#6b7280",
                   background: isActive

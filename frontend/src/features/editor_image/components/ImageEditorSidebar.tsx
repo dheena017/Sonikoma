@@ -1,8 +1,6 @@
 import React from "react";
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
 import {
-  LayoutGrid,
-  Layout,
   Layers,
   Sparkles,
   Settings2,
@@ -11,8 +9,6 @@ import {
   Crop,
   Link2,
   Database,
-  Brain,
-  Settings,
   ExternalLink,
   X,
   type LucideIcon,
@@ -115,32 +111,15 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
       items: [
         {
           id: "separate",
-          label: "Layer Separation",
+          label: "AI Layer Separation",
           icon: Layers,
           type: "tool",
         },
         {
           id: "train",
-          label: "YOLO AI Fine-Tuner",
+          label: "YOLO Fine-Tuner",
           icon: Database,
           type: "tool",
-        },
-        {
-          id: "autocrop-hub",
-          label: "Auto Panel Detection",
-          icon: Brain,
-          type: "modal",
-        },
-      ],
-    },
-    {
-      title: "Preferences",
-      items: [
-        {
-          id: "settings",
-          label: "Editor Settings",
-          icon: Settings,
-          type: "link",
         },
       ],
     },
@@ -260,11 +239,6 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                         onClick={() => {
                           if (item.type === "tool" && setActiveTool) {
                             setActiveTool(item.id as ImageTool);
-                          } else if (
-                            item.id === "autocrop-hub" &&
-                            onOpenAutoCropModal
-                          ) {
-                            onOpenAutoCropModal();
                           } else if (
                             item.id === "canvas" ||
                             item.id === "image-editor"

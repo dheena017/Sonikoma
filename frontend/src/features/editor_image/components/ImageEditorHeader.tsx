@@ -376,27 +376,29 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         {/* User Profile Pill at Far Right */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
-          className="h-9 flex items-center gap-2 px-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 shadow-sm active:scale-95"
+          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95 h-9"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[130px] hidden md:inline font-sans px-1.5 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
             {user?.full_name ||
               user?.username ||
               (user?.email ? user.email.split("@")[0] : "User")}
           </span>
-          <img
-            key={user?.avatar_url || user?.full_name || "avatar"}
-            src={getUserAvatarUrl(user)}
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              const target = e.currentTarget as HTMLImageElement;
-              target.onerror = null;
-              target.src = DEFAULT_USER_AVATAR_DATA_URI;
-            }}
-            alt="User Avatar"
-            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
-          />
+          <div className="relative w-6 h-6 rounded-full overflow-hidden border border-purple-500/40 bg-purple-950/40 shrink-0 shadow-xs ring-1 ring-white/10 group-hover:border-purple-400 group-hover:ring-purple-500/30 transition-all duration-300">
+            <img
+              key={user?.avatar_url || user?.full_name || "avatar"}
+              src={getUserAvatarUrl(user)}
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                target.onerror = null;
+                target.src = DEFAULT_USER_AVATAR_DATA_URI;
+              }}
+              alt="User Avatar"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </button>
 
         <div className="w-px h-6 bg-white/10 mx-0.5 hidden sm:block" />

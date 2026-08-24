@@ -31,6 +31,7 @@ import { HeaderCreditsPopover } from "@/features/ai_core";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import { useProjectStore } from "@/store/useProjectStore";
 import { AIModelSelector } from "@/features/ai_core";
+import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 
 interface EditorPageHeaderProps {
   title: string;
@@ -300,34 +301,20 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       </div>
 
       {/* Center: Live Stats Chips (Only rendered when sufficient width exists to prevent collisions) */}
-      <div className="hidden 2xl:flex items-center gap-2 absolute left-1/2 -translate-x-1/2 pointer-events-none">
-        {/* Backend status */}
-        <div
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${
-            backendOnline
-              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-              : "bg-red-500/10 border-red-500/20 text-red-400"
-          }`}
-        >
-          {backendOnline ? (
-            <Wifi className="h-2.5 w-2.5" />
-          ) : (
-            <WifiOff className="h-2.5 w-2.5" />
-          )}
-          {backendOnline ? "Online" : "Offline"}
-        </div>
-
-        {/* Panel count */}
-        {panelsCount > 0 && (
+      {panelsCount > 0 && (
+        <div className="hidden 2xl:flex items-center gap-2 absolute left-1/2 -translate-x-1/2 pointer-events-none">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-purple-500/20 bg-purple-500/10 text-[9px] font-black uppercase tracking-widest text-purple-400">
             <Layers className="h-2.5 w-2.5" />
             {panelsCount} panels
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Right Section - Action Buttons (Unified h-9 height and clean spacing) */}
       <div className="flex items-center gap-2 shrink-0 flex-nowrap">
+        {/* 🟢 Server Status Indicator */}
+        <ServerStatusIndicator status={backendOnline ? "online" : "offline"} />
+
         {/* 🤖 Global AI Model Selector */}
         <AIModelSelector compact className="hidden sm:inline-flex" />
 
@@ -485,27 +472,29 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         {/* User Profile Pill at Far Right End */}
         <button
           onClick={() => navigateTo?.("/profile")}
-          className="h-9 flex items-center gap-2 px-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 shadow-sm active:scale-95"
+          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95 h-9"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[110px] hidden md:inline font-sans px-1.5 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
             {user?.full_name ||
               user?.username ||
               (user?.email ? user.email.split("@")[0] : "User")}
           </span>
-          <img
-            key={user?.avatar_url || user?.full_name || "avatar"}
-            src={getUserAvatarUrl(user)}
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              const target = e.currentTarget as HTMLImageElement;
-              target.onerror = null;
-              target.src = DEFAULT_USER_AVATAR_DATA_URI;
-            }}
-            alt="User Avatar"
-            className="w-5 h-5 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
-          />
+          <div className="relative w-6 h-6 rounded-full overflow-hidden border border-purple-500/40 bg-purple-950/40 shrink-0 shadow-xs ring-1 ring-white/10 group-hover:border-purple-400 group-hover:ring-purple-500/30 transition-all duration-300">
+            <img
+              key={user?.avatar_url || user?.full_name || "avatar"}
+              src={getUserAvatarUrl(user)}
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                target.onerror = null;
+                target.src = DEFAULT_USER_AVATAR_DATA_URI;
+              }}
+              alt="User Avatar"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </button>
       </div>
     </header>

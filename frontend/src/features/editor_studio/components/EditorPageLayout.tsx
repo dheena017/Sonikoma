@@ -36,6 +36,7 @@ interface LayoutEditorPageProps {
   chapterSlug?: string | null;
   fetchWithInterceptor?: any;
   locationSearch?: string;
+  user?: any;
 }
 
 const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
@@ -70,6 +71,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   chapterSlug,
   fetchWithInterceptor,
   locationSearch,
+  user,
 }) => {
   const isSidebarOpen = !isSidebarCollapsed && !isFocusMode;
 
@@ -158,6 +160,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           onNavigateToAll={onNavigateToAll}
           fetchWithInterceptor={fetchWithInterceptor}
           navigateTo={navigateTo}
+          user={user}
         />
       )}
 

@@ -25,6 +25,9 @@ const AudioSettingsPage = React.lazy(
 const VideoEditorPage = React.lazy(
   () => import("@/features/editor_video/pages/VideoEditorPage")
 );
+const AutoCropModal = React.lazy(
+  () => import("@/features/editor_auto_crop/components/AutoCropModal")
+);
 
 interface EditorPageProps {
   appLogic: any;
@@ -425,12 +428,15 @@ const EditorPage: React.FC<EditorPageProps> = ({
       }
       fetchWithInterceptor={fetchWithInterceptor}
       locationSearch={window.location.search}
+      user={appLogic.user}
     >
       <main className="flex-1 w-full relative bg-transparent min-w-0">
         {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
         <div
           className={`relative z-10 bg-transparent min-h-0 min-w-0 ${
-            activeTab === "settings" || activeTab === "audio-settings"
+            activeTab === "settings" ||
+            activeTab === "audio-settings" ||
+            activeTab === "autocrop-settings"
               ? "px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 w-full max-w-[1720px] mx-auto"
               : `border-t border-white/5 px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-8 w-full max-w-[1720px] mx-auto ${
                   isFocusMode ? "hidden" : "block"
@@ -568,6 +574,65 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   setAudioDucking={appLogic.setAudioDucking}
                 />
               </div>
+            </div>
+          ) : activeTab === "autocrop-settings" ? (
+            <div className="w-full space-y-6">
+              <React.Suspense fallback={null}>
+                <div className="rounded-3xl border border-neutral-800/80 overflow-hidden bg-[#050508] shadow-2xl">
+                  <AutoCropModal
+                    isPage={true}
+                    onClose={handleCloseSettings}
+                    onApply={() => {
+                      addNotification(
+                        "Auto-crop configurations applied successfully!",
+                        "success"
+                      );
+                      handleCloseSettings();
+                    }}
+                    sensitivity={cropSensitivity}
+                    setSensitivity={setCropSensitivity}
+                    padding={cropPaddingPx}
+                    setPadding={setCropPaddingPx}
+                    backgroundColorMode={appLogic.cropBackgroundMode}
+                    setBackgroundColorMode={appLogic.setCropBackgroundMode}
+                    autoSplitTallStrips={appLogic.autoSplitTallStrips}
+                    setAutoSplitTallStrips={appLogic.setAutoSplitTallStrips}
+                    aspectRatioLock={appLogic.aspectRatioLock}
+                    setAspectRatioLock={appLogic.setAspectRatioLock}
+                    minPanelAreaPct={appLogic.minPanelAreaPct}
+                    setMinPanelAreaPct={appLogic.setMinPanelAreaPct}
+                    overlapMergeThreshold={appLogic.overlapMergeThreshold}
+                    setOverlapMergeThreshold={appLogic.setOverlapMergeThreshold}
+                    useLocalCV={appLogic.useLocalCV}
+                    setUseLocalCV={appLogic.setUseLocalCV}
+                    cropModel={cropModel}
+                    setCropModel={setCropModel}
+                    cropMinHeightPx={appLogic.cropMinHeightPx}
+                    setCropMinHeightPx={appLogic.setCropMinHeightPx}
+                    cropCannyLow={appLogic.cropCannyLow}
+                    setCropCannyLow={appLogic.setCropCannyLow}
+                    cropCannyHigh={appLogic.cropCannyHigh}
+                    setCropCannyHigh={appLogic.setCropCannyHigh}
+                    cropCloseKernelSize={appLogic.cropCloseKernelSize}
+                    setCropCloseKernelSize={appLogic.setCropCloseKernelSize}
+                    activeTab={appLogic.activeAutoCropTab}
+                    setActiveTab={appLogic.setActiveAutoCropTab}
+                    selectedCount={
+                      selectedScraped?.length || scrapedImages?.length || 0
+                    }
+                    isApplying={isBatchCropping}
+                    scrapedImages={scrapedImages}
+                    selectedScraped={selectedScraped}
+                    setSelectedScraped={setSelectedScraped}
+                    setConsoleLogs={appLogic.setConsoleLogs}
+                    addNotification={addNotification}
+                    cropGuidance={appLogic.cropGuidance}
+                    setCropGuidance={appLogic.setCropGuidance}
+                    cropFocusMode={cropFocusMode}
+                    setCropFocusMode={setCropFocusMode}
+                  />
+                </div>
+              </React.Suspense>
             </div>
           ) : (
             <>

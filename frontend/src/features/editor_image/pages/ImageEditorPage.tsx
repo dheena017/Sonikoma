@@ -288,7 +288,6 @@ const ImageEditorPage = React.memo(
           }
           seriesSlug={seriesSlug}
           chapterSlug={chapterSlug}
-          onOpenAutoCropModal={() => setActiveTool("crop")}
         />
 
         <div className="flex-1 flex flex-row overflow-hidden w-full relative">

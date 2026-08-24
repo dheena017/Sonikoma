@@ -4,7 +4,6 @@ import {
   Scissors,
   Film,
   Layers,
-  Brain,
   Settings,
   ExternalLink,
   Sparkles,
@@ -101,9 +100,8 @@ const EditorMiniSidebarInner = ({
     return (
       <aside
         style={{ top: `${topOffsetPx}px` }}
-        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
-          isCollapsed ? "w-20" : "w-24"
-        }`}
+        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
+          }`}
       >
         <div className="flex-1 w-full flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-4">
           {cropToolGroups.map((group, gi) => (
@@ -139,11 +137,10 @@ const EditorMiniSidebarInner = ({
                     >
                       {/* Active Pill */}
                       <div
-                        className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-                          isActive
+                        className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
                             ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
                             : "h-0 bg-transparent opacity-0"
-                        }`}
+                          }`}
                       />
 
                       <button
@@ -161,18 +158,16 @@ const EditorMiniSidebarInner = ({
                       >
                         {/* Icon pill */}
                         <div
-                          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
-                            isActive
+                          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
                               ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
                               : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
-                          }`}
+                            }`}
                         >
                           <Icon
-                            className={`w-5 h-5 transition-colors duration-300 ${
-                              isActive
+                            className={`w-5 h-5 transition-colors duration-300 ${isActive
                                 ? "text-purple-400"
                                 : "text-neutral-400 group-hover:text-purple-300"
-                            }`}
+                              }`}
                           />
                         </div>
 
@@ -231,17 +226,6 @@ const EditorMiniSidebarInner = ({
           icon: Film,
         },
         {
-          id: "ai-automation",
-          label: "AI Automation Suite",
-          icon: Brain,
-        },
-        {
-          id: "autocrop",
-          label: "Auto-Crop Panels",
-          icon: Scissors,
-          isProcessing: isBatchCropping,
-        },
-        {
           id: "image-editor",
           label: "Image Editor",
           icon: Edit2,
@@ -260,6 +244,11 @@ const EditorMiniSidebarInner = ({
           id: "audio-settings",
           label: "Audio Settings",
           icon: Mic,
+        },
+        {
+          id: "autocrop-settings",
+          label: "Auto-Crop Settings",
+          icon: Scissors,
         },
       ],
     },
@@ -291,10 +280,13 @@ const EditorMiniSidebarInner = ({
       locationSearch || window.location.search
     );
     const activeTab = params.get("tab");
-    const isActive =
-      item.id === "settings" || item.id === "audio-settings"
-        ? activeTab === item.id
-        : !activeTab && currentSection === item.id;
+    const isSettingsTab =
+      item.id === "settings" ||
+      item.id === "audio-settings" ||
+      item.id === "autocrop-settings";
+    const isActive = isSettingsTab
+      ? activeTab === item.id
+      : !activeTab && currentSection === item.id;
 
     const Icon = item.icon;
 
@@ -302,24 +294,22 @@ const EditorMiniSidebarInner = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Active Pill */}
         <div
-          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-            isActive
+          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
               ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
               : "h-0 bg-transparent opacity-0"
-          }`}
+            }`}
         />
 
         <button
           onClick={() => {
             // Remove ?tab query param if navigating to a different section
-            if (item.id !== "settings" && item.id !== "audio-settings") {
+            if (!isSettingsTab) {
               const p = new URLSearchParams(window.location.search);
               if (p.has("tab")) {
                 p.delete("tab");
                 const searchStr = p.toString();
-                const newPath = `${window.location.pathname}${
-                  searchStr ? "?" + searchStr : ""
-                }`;
+                const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""
+                  }`;
                 if (navigateTo) {
                   navigateTo(newPath);
                 } else {
@@ -345,18 +335,7 @@ const EditorMiniSidebarInner = ({
                 window.history.pushState({}, "", target);
                 window.dispatchEvent(new Event("popstate"));
               }
-            } else if (item.id === "autocrop" || item.id === "bubbles") {
-              setCurrentSection(item.id);
-              requestAnimationFrame(() => {
-                setTimeout(() => {
-                  const el =
-                    document.getElementById("section-storyboard") ||
-                    document.getElementById("section-timeline") ||
-                    document.getElementById("panels_timeline_section");
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }, 60);
-              });
-            } else if (item.id === "settings" || item.id === "audio-settings") {
+            } else if (isSettingsTab) {
               const p = new URLSearchParams(window.location.search);
               p.set("tab", item.id);
               const newPath = `${window.location.pathname}?${p.toString()}`;
@@ -402,18 +381,16 @@ const EditorMiniSidebarInner = ({
         >
           {/* Icon pill */}
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
-              isActive
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
                 ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
                 : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
-            }`}
+              }`}
           >
             <Icon
-              className={`w-5 h-5 transition-colors duration-300 ${
-                isActive
+              className={`w-5 h-5 transition-colors duration-300 ${isActive
                   ? "text-purple-400"
                   : "text-neutral-400 group-hover:text-purple-300"
-              }`}
+                }`}
             />
           </div>
 
@@ -448,9 +425,8 @@ const EditorMiniSidebarInner = ({
     // Premium Glassmorphism Container
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className={`hidden md:flex fixed bottom-0 left-0 bg-[#06060c]/85 backdrop-blur-3xl border-r border-white/8 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[90] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.5),inset_-1px_0_0_rgba(168,85,247,0.05)] ${
-        isCollapsed ? "w-20" : "w-24"
-      }`}
+      className={`hidden md:flex fixed bottom-0 left-0 bg-[#06060c]/85 backdrop-blur-3xl border-r border-white/8 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[90] py-4 shadow-[4px_0_24px_rgba(0,0,0,0.5),inset_-1px_0_0_rgba(168,85,247,0.05)] ${isCollapsed ? "w-20" : "w-24"
+        }`}
     >
       {/* Scrollable Tools Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
