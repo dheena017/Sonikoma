@@ -1,3 +1,11 @@
+"""
+backend/app/database/supabase/storage.py
+─────────────────────────────────────────────────────────────────────────────
+Supabase Storage bucket upload and URL retrieval helpers.
+─────────────────────────────────────────────────────────────────────────────
+"""
+
+import os
 import logging
 from typing import Optional
 
@@ -9,18 +17,18 @@ try:
 except ImportError:
     HAS_SUPABASE = False
 
+
 def upload_to_supabase_bucket(
     file_bytes: bytes, 
     bucket_name: str, 
     filename: str, 
     content_type: str
 ) -> Optional[str]:
-    """
-    Uploads bytes to a Supabase Storage bucket and returns the public URL.
+    """Uploads bytes to a Supabase Storage bucket and returns the public URL.
+    
     Supabase uploads are enabled only in production mode (NODE_ENV=production).
     In development mode, returns None so local/memory caching handles storage.
     """
-    import os
     node_env = os.getenv("NODE_ENV", "development").lower()
     if node_env != "production":
         logger.debug(f"Non-production environment ({node_env}): Bypassing Supabase upload for {filename}.")
@@ -31,13 +39,16 @@ def upload_to_supabase_bucket(
         return None
 
     try:
-        from database.supabase import supabase
+        try:
+            from . import supabase
+        except ImportError:
+            from database.supabase import supabase
+
         if not supabase:
             logger.debug(f"Supabase client not initialized, bypassing upload to {bucket_name}.")
             return None
         
         # Upload using the bytes payload
-        # file_options requires a dict with content-type to set the header
         res = supabase.storage.from_(bucket_name).upload(
             file=file_bytes, 
             path=filename, 

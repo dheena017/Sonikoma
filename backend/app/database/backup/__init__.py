@@ -1,12 +1,21 @@
-"""Database backup utilities."""
+"""
+backend/app/database/backup/__init__.py
+─────────────────────────────────────────────────────────────────────────────
+Database export, import, and restoration helpers.
+─────────────────────────────────────────────────────────────────────────────
+"""
 
-from __future__ import annotations
+try:
+    from .export import export_sqlite_database
+    from .restore import restore_sqlite_database
+    from .import_sql import import_database
+except ImportError:
+    from database.backup.export import export_sqlite_database
+    from database.backup.restore import restore_sqlite_database
+    from database.backup.import_sql import import_database
 
-from importlib import import_module
-
-from database.backup.export import export_sqlite_database
-from database.backup.restore import restore_sqlite_database
-
-import_database = import_module("database.backup.import").import_database
-
-__all__ = ["export_sqlite_database", "import_database", "restore_sqlite_database"]
+__all__ = [
+    "export_sqlite_database",
+    "restore_sqlite_database",
+    "import_database",
+]

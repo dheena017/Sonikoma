@@ -1,9 +1,0 @@
-[
-  {
-    "id": "test_user",
-    "username": "test_user",
-    "email": "test_user@local.invalid",
-    "creator_role": "creator",
-    "credits": 840
-  }
-]

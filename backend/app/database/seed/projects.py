@@ -1,12 +1,20 @@
-"""Project seed helpers."""
+"""
+backend/app/database/seed/projects.py
+─────────────────────────────────────────────────────────────────────────────
+Project seed helpers for local development and testing.
+─────────────────────────────────────────────────────────────────────────────
+"""
 
 from __future__ import annotations
 
-from database.health import ensure_user_exists
+try:
+    from ..health import ensure_user_exists
+except ImportError:
+    from database.health import ensure_user_exists
 
 
 def seed_demo_project(conn, user_id: str = "system_default") -> str:
-    """Create a small demo series/chapter pair if it does not exist."""
+    """Create a demo series/chapter pair if it does not exist."""
     ensure_user_exists(conn, user_id, fallback_username="system")
     series_id = "demo_series"
     chapter_id = "demo_chapter"

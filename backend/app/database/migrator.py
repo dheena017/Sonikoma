@@ -1,7 +1,7 @@
 """
-infrastructure/database/migrations.py
+backend/app/database/migrator.py
 ─────────────────────────────────────────────────────────────────────────────
-Schema initialisation and incremental migration runner.
+Schema initialisation and incremental migration runner for SQLite and PostgreSQL.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -9,11 +9,16 @@ import os
 import logging
 import sqlite3
 
-import database.config as config
-from database.transaction import generate_missing_slugs
-from database.seed import seed_default_settings
+try:
+    from . import config
+    from .transaction import generate_missing_slugs
+    from .seed import seed_default_settings
+except ImportError:
+    import database.config as config
+    from database.transaction import generate_missing_slugs
+    from database.seed import seed_default_settings
 
-logger = logging.getLogger("sonikoma.database.migrations")
+logger = logging.getLogger("sonikoma.database.migrator")
 
 
 # ── PostgreSQL initialisation ─────────────────────────────────────────────
@@ -301,7 +306,6 @@ def init_sqlite(conn) -> None:
                         "ALTER TABLE series ADD COLUMN is_flagged INTEGER NOT NULL DEFAULT 0",
                         "added 'is_flagged' to 'series'")
         # project_type lifecycle column: 'temp' | 'permanent'
-        # All existing chapters default to 'permanent' (backwards safe).
         _run_safe_alter(cursor, conn,
                         "ALTER TABLE chapters ADD COLUMN project_type TEXT NOT NULL DEFAULT 'permanent'",
                         "added 'project_type' to 'chapters'")

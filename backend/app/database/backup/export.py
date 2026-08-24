@@ -1,10 +1,18 @@
-"""SQLite database export helpers."""
+"""
+backend/app/database/backup/export.py
+─────────────────────────────────────────────────────────────────────────────
+SQLite database export helpers.
+─────────────────────────────────────────────────────────────────────────────
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from database.engine import get_db_connection
+try:
+    from ..engine import get_db_connection
+except ImportError:
+    from database.engine import get_db_connection
 
 
 def export_sqlite_database(output_path: str | Path) -> Path:

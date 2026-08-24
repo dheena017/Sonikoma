@@ -1,8 +1,16 @@
-"""User seed helpers."""
+"""
+backend/app/database/seed/users.py
+─────────────────────────────────────────────────────────────────────────────
+User seed helpers for system and fallback users.
+─────────────────────────────────────────────────────────────────────────────
+"""
 
 from __future__ import annotations
 
-from database.health import ensure_user_exists
+try:
+    from ..health import ensure_user_exists
+except ImportError:
+    from database.health import ensure_user_exists
 
 
 def seed_system_user(conn, user_id: str = "system_default") -> str:

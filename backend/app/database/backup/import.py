@@ -1,20 +1,13 @@
-"""Database import helpers."""
+"""
+backend/app/database/backup/import.py
+─────────────────────────────────────────────────────────────────────────────
+Compatibility wrapper forwarding to import_sql.py.
+─────────────────────────────────────────────────────────────────────────────
+"""
 
-from __future__ import annotations
+try:
+    from .import_sql import import_database
+except ImportError:
+    from database.backup.import_sql import import_database
 
-from pathlib import Path
-
-from database.engine import get_db_connection
-
-
-def import_database(sql_dump_path: str | Path) -> None:
-    """Import a SQLite SQL dump into the active database."""
-    path = Path(sql_dump_path)
-    script = path.read_text(encoding="utf-8")
-
-    conn = get_db_connection()
-    try:
-        conn.executescript(script)
-        conn.commit()
-    finally:
-        conn.close()
+__all__ = ["import_database"]

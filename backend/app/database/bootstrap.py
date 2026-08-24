@@ -1,5 +1,5 @@
 """
-infrastructure/database/bootstrap.py
+backend/app/database/bootstrap.py
 ─────────────────────────────────────────────────────────────────────────────
 Database initialization orchestrator and startup guards.
 ─────────────────────────────────────────────────────────────────────────────
@@ -8,7 +8,15 @@ Database initialization orchestrator and startup guards.
 import os
 import logging
 import threading
-import database.config as config
+
+try:
+    from . import config
+    from .engine import _create_db_connection
+    from . import migrator
+except ImportError:
+    import database.config as config
+    from database.engine import _create_db_connection
+    import database.migrator as migrator
 
 
 logger = logging.getLogger("sonikoma.database.bootstrap")
@@ -50,21 +58,18 @@ def init_db() -> None:
         _db_init_complete.wait(timeout=60)
         return
 
-    from database.core_engine import _create_db_connection
     try:
         if config.is_postgres:
             logger.info("[Database] Connecting to PostgreSQL (Supabase)...")
             conn = _create_db_connection()
-            from database.migrations import init_postgres
-            init_postgres(conn)
+            migrator.init_postgres(conn)
             logger.info("[Database] PostgreSQL ready [OK]")
         else:
             logger.debug(f"[Database] Opening local SQLite database at: {config.DB_PATH}")
             os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
             os.makedirs(config.DB_DIR, exist_ok=True)
             conn = _create_db_connection()
-            from database.migrations import init_sqlite
-            init_sqlite(conn)
+            migrator.init_sqlite(conn)
             logger.debug("[Database] SQLite database ready [OK]")
     except Exception as e:
         logger.error(f"[Database] Error during database initialization: {e}")

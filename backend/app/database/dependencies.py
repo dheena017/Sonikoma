@@ -1,26 +1,24 @@
-"""FastAPI database dependencies."""
+"""
+backend/app/database/dependencies.py
+─────────────────────────────────────────────────────────────────────────────
+FastAPI database connection dependencies.
+─────────────────────────────────────────────────────────────────────────────
+"""
 
 from __future__ import annotations
 
 from typing import Generator
 
-from database.engine import get_db_connection
-from database.session import get_session
+try:
+    from .engine import get_db_connection
+except ImportError:
+    from database.engine import get_db_connection
 
 
-def get_db():
-    """Yield the existing raw DB connection used by repository modules."""
+def get_db() -> Generator:
+    """Yield the active database connection and close it after request completion."""
     conn = get_db_connection()
     try:
         yield conn
     finally:
         conn.close()
-
-
-def get_db_session() -> Generator:
-    """Yield an SQLAlchemy session for newer repository code."""
-    session = get_session()
-    try:
-        yield session
-    finally:
-        session.close()

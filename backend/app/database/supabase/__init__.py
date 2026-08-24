@@ -1,5 +1,5 @@
 """
-backend/app/infrastructure/database/supabase.py
+backend/app/database/supabase/__init__.py
 ─────────────────────────────────────────────────────────────────────────────
 Supabase client initialization.
 ─────────────────────────────────────────────────────────────────────────────
@@ -36,3 +36,5 @@ def get_supabase_client() -> Optional[Any]:
 
 
 supabase = get_supabase_client()
+
+__all__ = ["supabase", "get_supabase_client"]

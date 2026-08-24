@@ -1,28 +1,28 @@
 """
-backend/app/database/backup/restore.py
+backend/app/database/backup/import_sql.py
 ─────────────────────────────────────────────────────────────────────────────
-Database restore helpers.
+Database SQL import helpers.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from shutil import copy2
 
 try:
-    from .. import config
+    from ..engine import get_db_connection
 except ImportError:
-    import database.config as config
+    from database.engine import get_db_connection
 
 
-def restore_sqlite_database(
-    backup_path: str | Path,
-    destination_path: str | Path | None = None,
-) -> Path:
-    """Restore a SQLite database file from a backup copy."""
-    source = Path(backup_path)
-    destination = Path(destination_path or config.DB_PATH)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    copy2(source, destination)
-    return destination
+def import_database(sql_dump_path: str | Path) -> None:
+    """Import a SQLite SQL dump into the active database."""
+    path = Path(sql_dump_path)
+    script = path.read_text(encoding="utf-8")
+
+    conn = get_db_connection()
+    try:
+        conn.executescript(script)
+        conn.commit()
+    finally:
+        conn.close()
