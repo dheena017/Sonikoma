@@ -20,6 +20,10 @@ from schemas.project import (
     PanelsSaveRequest,
     TokenIncrementRequest,
     ProjectUpdateRequest,
+    ProjectSettingsUpdateRequest,
+    VideoSettingsUpdateRequest,
+    AudioSettingsUpdateRequest,
+    AutoCropSettingsUpdateRequest,
     BatchDeleteRequest,
     DetectPanelsBase64Request,
 )
@@ -34,6 +38,8 @@ from repositories.project import (
     delete_panels,
     delete_project,
     get_token_logs,
+    get_project_settings,
+    update_project_settings,
 )
 from repositories.user import write_audit_log
 from services.project.project_service import (
@@ -311,6 +317,242 @@ async def update_project_details_endpoint(
     except Exception as e:
         logger.error(f"Failed to update project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to update project: {e}")
+
+
+# ── Centralized Settings ──────────────────────────────────────────────────
+
+@project_router.get("/{projectId}/settings", summary="Get centralized project settings (video, audio, autocrop)")
+async def get_project_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        settings = get_project_settings(project["project_id"])
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "settings": settings or {
+                "video_settings": {},
+                "audio_settings": {},
+                "autocrop_settings": {},
+            },
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch project settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch project settings: {e}")
+
+
+@project_router.put("/{projectId}/settings", summary="Update centralized project settings (video, audio, autocrop)")
+@project_router.patch("/{projectId}/settings", summary="Patch centralized project settings (video, audio, autocrop)")
+async def update_project_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    body: ProjectSettingsUpdateRequest = Body(...),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        updates = {}
+        if body.video_settings is not None:
+            updates["video_settings"] = body.video_settings
+        if body.audio_settings is not None:
+            updates["audio_settings"] = body.audio_settings
+        if body.autocrop_settings is not None:
+            updates["autocrop_settings"] = body.autocrop_settings
+
+        updated_settings = update_project_settings(project["project_id"], updates)
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "settings": updated_settings,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update project settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to update project settings: {e}")
+
+
+# ── 1. Video Settings Dedicated Endpoint ───────────────────────────────────
+
+@project_router.get("/{projectId}/settings/video", summary="Get dedicated Video & Canvas settings")
+async def get_video_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        settings = get_project_settings(project["project_id"]) or {}
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "video_settings": settings.get("video_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch video settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch video settings: {e}")
+
+
+@project_router.put("/{projectId}/settings/video", summary="Update dedicated Video & Canvas settings")
+@project_router.patch("/{projectId}/settings/video", summary="Patch dedicated Video & Canvas settings")
+async def update_video_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    body: VideoSettingsUpdateRequest = Body(...),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        # Resolve payload: prefer nested video_settings object or unpack top-level fields
+        video_payload = body.video_settings if body.video_settings is not None else body.dict(exclude_unset=True, exclude={"video_settings"})
+        updated_settings = update_project_settings(project["project_id"], {"video_settings": video_payload})
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "video_settings": updated_settings.get("video_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update video settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to update video settings: {e}")
+
+
+# ── 2. Audio Settings Dedicated Endpoint ───────────────────────────────────
+
+@project_router.get("/{projectId}/settings/audio", summary="Get dedicated Audio & Narration settings")
+async def get_audio_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        settings = get_project_settings(project["project_id"]) or {}
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "audio_settings": settings.get("audio_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch audio settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch audio settings: {e}")
+
+
+@project_router.put("/{projectId}/settings/audio", summary="Update dedicated Audio & Narration settings")
+@project_router.patch("/{projectId}/settings/audio", summary="Patch dedicated Audio & Narration settings")
+async def update_audio_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    body: AudioSettingsUpdateRequest = Body(...),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        # Resolve payload: prefer nested audio_settings object or unpack top-level fields
+        audio_payload = body.audio_settings if body.audio_settings is not None else body.dict(exclude_unset=True, exclude={"audio_settings"})
+        updated_settings = update_project_settings(project["project_id"], {"audio_settings": audio_payload})
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "audio_settings": updated_settings.get("audio_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update audio settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to update audio settings: {e}")
+
+
+# ── 3. AutoCrop Settings Dedicated Endpoint ────────────────────────────────
+
+@project_router.get("/{projectId}/settings/autocrop", summary="Get dedicated Auto-Crop & Panel Slicing settings")
+async def get_autocrop_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        settings = get_project_settings(project["project_id"]) or {}
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "autocrop_settings": settings.get("autocrop_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch autocrop settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch autocrop settings: {e}")
+
+
+@project_router.put("/{projectId}/settings/autocrop", summary="Update dedicated Auto-Crop & Panel Slicing settings")
+@project_router.patch("/{projectId}/settings/autocrop", summary="Patch dedicated Auto-Crop & Panel Slicing settings")
+async def update_autocrop_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    body: AutoCropSettingsUpdateRequest = Body(...),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        # Resolve payload: prefer nested autocrop_settings object or unpack top-level fields
+        autocrop_payload = body.autocrop_settings if body.autocrop_settings is not None else body.dict(exclude_unset=True, exclude={"autocrop_settings"})
+        updated_settings = update_project_settings(project["project_id"], {"autocrop_settings": autocrop_payload})
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "autocrop_settings": updated_settings.get("autocrop_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update autocrop settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to update autocrop settings: {e}")
+
+
 
 
 # ── Delete ────────────────────────────────────────────────────────────────

@@ -129,3 +129,86 @@ export const updateProjectTokens = async (
     body: JSON.stringify({ tokens, ...(jobId ? { job_id: jobId } : {}) }),
   });
 };
+
+export const getProjectSettings = async (
+  fetchWithInterceptor: FetchClient,
+  projectId: string
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings`);
+};
+
+export const updateProjectSettings = async (
+  fetchWithInterceptor: FetchClient,
+  projectId: string,
+  settings: {
+    video_settings?: any;
+    audio_settings?: any;
+    autocrop_settings?: any;
+  }
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(settings),
+  });
+};
+
+// 1. Dedicated Video Settings API
+export const getVideoSettings = async (
+  fetchWithInterceptor: FetchClient,
+  projectId: string
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/video`);
+};
+
+export const updateVideoSettings = async (
+  fetchWithInterceptor: FetchClient,
+  projectId: string,
+  videoSettings: any
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/video`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ video_settings: videoSettings }),
+  });
+};
+
+// 2. Dedicated Audio Settings API
+export const getAudioSettings = async (
+  fetchWithInterceptor: FetchClient,
+  projectId: string
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/audio`);
+};
+
+export const updateAudioSettings = async (
+  fetchWithInterceptor: FetchClient,
+  projectId: string,
+  audioSettings: any
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/audio`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ audio_settings: audioSettings }),
+  });
+};
+
+// 3. Dedicated AutoCrop Settings API
+export const getAutoCropSettings = async (
+  fetchWithInterceptor: FetchClient,
+  projectId: string
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/autocrop`);
+};
+
+export const updateAutoCropSettings = async (
+  fetchWithInterceptor: FetchClient,
+  projectId: string,
+  autoCropSettings: any
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/autocrop`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ autocrop_settings: autoCropSettings }),
+  });
+};

@@ -74,6 +74,63 @@ class ProjectUpdateRequest(BaseModel):
     status: Optional[str] = Field(None, description="Project compilation status")
     panels: Optional[List[PanelSaveItem]] = Field(None, description="Storyboard panels list")
     audio_settings: Optional[Dict[str, Any]] = Field(None, description="Audio settings JSON object (volumes, pitch, rate, BGM, ducking, etc.)")
+    video_settings: Optional[Dict[str, Any]] = Field(None, description="Video and canvas settings (aspect ratio, FPS, camera shake, etc.)")
+    autocrop_settings: Optional[Dict[str, Any]] = Field(None, description="Auto-crop and panel slicing settings (sensitivity, padding, canny, etc.)")
+
+
+class ProjectSettingsUpdateRequest(BaseModel):
+    """Updates only the centralized project settings (video, audio, autocrop)."""
+    video_settings: Optional[Dict[str, Any]] = Field(None, description="Video and canvas settings")
+    audio_settings: Optional[Dict[str, Any]] = Field(None, description="Audio and narration settings")
+    autocrop_settings: Optional[Dict[str, Any]] = Field(None, description="Auto-crop and panel slicing parameters")
+
+
+class VideoSettingsUpdateRequest(BaseModel):
+    """Updates only the video and canvas rendering settings."""
+    video_settings: Optional[Dict[str, Any]] = Field(None, description="Video configuration payload")
+    # Also allow direct properties at root of payload if passed directly
+    aspectRatio: Optional[str] = Field(None, description="Aspect ratio (e.g. 16:9, 9:16)")
+    frameRate: Optional[int] = Field(None, description="Target frame rate (fps)")
+    audioReactiveShake: Optional[bool] = Field(None, description="Camera shake reactive to audio")
+    shakeIntensity: Optional[Any] = Field(None, description="Camera shake intensity")
+    videoFormat: Optional[str] = Field(None, description="Target video format (mp4, webm, etc.)")
+    backgroundStyle: Optional[str] = Field(None, description="Background fill style")
+    subtitlesStyle: Optional[str] = Field(None, description="Subtitles typography style")
+    activeTheme: Optional[str] = Field(None, description="Color palette theme")
+
+
+class AudioSettingsUpdateRequest(BaseModel):
+    """Updates only the audio synthesis and playback settings."""
+    audio_settings: Optional[Dict[str, Any]] = Field(None, description="Audio configuration payload")
+    # Also allow direct properties at root of payload if passed directly
+    volume: Optional[float] = Field(None, description="Master volume (0-100)")
+    narrationVolume: Optional[float] = Field(None, description="Narration/TTS volume (0-100)")
+    bgmVolume: Optional[float] = Field(None, description="Background music volume (0-100)")
+    sfxVolume: Optional[float] = Field(None, description="Sound effects volume (0-100)")
+    speechRate: Optional[float] = Field(None, description="Speech rate speed factor")
+    speechPitch: Optional[float] = Field(None, description="Speech pitch factor")
+    voiceActor: Optional[str] = Field(None, description="Selected TTS voice identifier")
+    musicTheme: Optional[str] = Field(None, description="Background music theme")
+    audioDucking: Optional[bool] = Field(None, description="Auto ducking flag")
+
+
+class AutoCropSettingsUpdateRequest(BaseModel):
+    """Updates only the auto-crop panel slicing parameters."""
+    autocrop_settings: Optional[Dict[str, Any]] = Field(None, description="AutoCrop configuration payload")
+    # Also allow direct properties at root of payload if passed directly
+    sensitivity: Optional[int] = Field(None, description="Detection sensitivity threshold")
+    padding: Optional[int] = Field(None, description="Panel margin padding in pixels")
+    backgroundColorMode: Optional[str] = Field(None, description="Background color removal mode")
+    autoSplitTallStrips: Optional[bool] = Field(None, description="Auto-split tall webtoon strips")
+    aspectRatioLock: Optional[str] = Field(None, description="Aspect ratio locking rule")
+    minPanelAreaPct: Optional[float] = Field(None, description="Minimum panel surface area percentage")
+    overlapMergeThreshold: Optional[float] = Field(None, description="Overlap merging threshold")
+    useLocalCV: Optional[bool] = Field(None, description="Use local OpenCV engine")
+    cropModel: Optional[str] = Field(None, description="Model for panel detection")
+    cropMinHeightPx: Optional[int] = Field(None, description="Minimum panel height in pixels")
+    cropCannyLow: Optional[int] = Field(None, description="Canny edge low threshold")
+    cropCannyHigh: Optional[int] = Field(None, description="Canny edge high threshold")
+    cropCloseKernelSize: Optional[int] = Field(None, description="Morphological close kernel size")
 
 
 class TokenIncrementRequest(BaseModel):

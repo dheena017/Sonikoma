@@ -7,9 +7,6 @@ import {
   BellOff,
   X,
   Search,
-  Volume2,
-  VolumeX,
-  Volume1,
   Activity,
   ChevronDown,
   Loader2,
@@ -671,38 +668,6 @@ const HeaderInner = ({
           </div>
         )}
 
-        {/* Playback Volume Widget */}
-        <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-850 px-2.5 py-1.5 rounded-xl hover:border-neutral-750 transition-all select-none group h-[34px]">
-          <button
-            onClick={() => setIsMuted && setIsMuted(!isMuted)}
-            className="text-neutral-400 hover:text-white p-0.5 rounded transition-colors cursor-pointer"
-            title={isMuted ? "Unmute" : "Mute"}
-          >
-            {isMuted || volume === 0 ? (
-              <VolumeX className="h-4 w-4 text-rose-450" />
-            ) : volume < 40 ? (
-              <Volume1 className="h-4 w-4" />
-            ) : (
-              <Volume2 className="h-4 w-4 text-purple-400" />
-            )}
-          </button>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            step="1"
-            value={isMuted ? 0 : volume}
-            onChange={(e) => {
-              const val = parseInt(e.target.value, 10);
-              if (setVolume) setVolume(val);
-              if (val > 0 && isMuted && setIsMuted) {
-                setIsMuted(false);
-              }
-            }}
-            className="w-12 sm:w-16 h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500 outline-none transition-all"
-            title={`Volume: ${isMuted ? 0 : volume}%`}
-          />
-        </div>
 
         {/* Notifications Bell */}
         <div className="relative" ref={notificationsRef}>

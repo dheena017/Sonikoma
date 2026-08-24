@@ -25,6 +25,13 @@ import {
   Zap,
 } from "lucide-react";
 import { AIModelSelector } from "@/features/ai_core";
+import {
+  DEFAULT_VIDEO_SETTINGS,
+  DEFAULT_AUDIO_SETTINGS,
+  DEFAULT_AUTOCROP_SETTINGS,
+  DEFAULT_TTS_VOICES,
+  MUSIC_THEMES_CATALOG,
+} from "@/features/editor_studio/types/settings";
 
 export interface VideoPreviewAdvancedSettingsProps {
   voiceActor: string;
@@ -253,13 +260,13 @@ const VideoPreviewAdvancedSettings = React.memo(
     subtitlesStyle,
     setSubtitlesStyle,
 
-    cropSensitivity = 30,
+    cropSensitivity = DEFAULT_AUTOCROP_SETTINGS.sensitivity,
     setCropSensitivity,
-    cropPaddingPx = 10,
+    cropPaddingPx = DEFAULT_AUTOCROP_SETTINGS.padding,
     setCropPaddingPx,
     cropFocusMode = "standard",
     setCropFocusMode,
-    cropModel = "",
+    cropModel = DEFAULT_AUTOCROP_SETTINGS.cropModel,
     setCropModel,
 
     bubbleSensitivity = 50,
@@ -324,8 +331,8 @@ const VideoPreviewAdvancedSettings = React.memo(
         if (stored) return JSON.parse(stored);
       } catch { /* empty */ }
       return [
-        { name: "Action Comic", voiceActor: "Shonen Protagonist (Energetic Male)", musicTheme: "Orchestral Battle Theme", aspectRatio: "16:9", frameRate: 30, activeTheme: "cyberpunk", audioReactiveShake: true, shakeIntensity: "high", videoFormat: "mp4", backgroundStyle: "black", subtitlesStyle: "burn-in", cropSensitivity: 30, cropPaddingPx: 10, cropFocusMode: "standard", cropModel: "gemini-2.0-flash-lite", bubbleSensitivity: 50, bubbleDilation: 5, bubbleEraseMethod: "telea", bubbleDetectionStyle: "hybrid" },
-        { name: "B&W Manga", voiceActor: "Standard Comic Narrator (Male)", musicTheme: "Mysterious Ambience", aspectRatio: "9:16", frameRate: 24, activeTheme: "obsidian", audioReactiveShake: false, shakeIntensity: "medium", videoFormat: "mp4", backgroundStyle: "white", subtitlesStyle: "none", cropSensitivity: 40, cropPaddingPx: 15, cropFocusMode: "face", cropModel: "local-opencv", bubbleSensitivity: 60, bubbleDilation: 3, bubbleEraseMethod: "ns", bubbleDetectionStyle: "yolo" },
+        { name: "Action Comic", voiceActor: DEFAULT_TTS_VOICES[0]?.code || "en-US-GuyNeural", musicTheme: MUSIC_THEMES_CATALOG[0]?.id || "orchestral_battle", aspectRatio: "16:9", frameRate: 30, activeTheme: "cyberpunk", audioReactiveShake: true, shakeIntensity: "high", videoFormat: "mp4", backgroundStyle: "black", subtitlesStyle: "burn-in", cropSensitivity: DEFAULT_AUTOCROP_SETTINGS.sensitivity, cropPaddingPx: DEFAULT_AUTOCROP_SETTINGS.padding, cropFocusMode: "standard", cropModel: DEFAULT_AUTOCROP_SETTINGS.cropModel, bubbleSensitivity: 50, bubbleDilation: 5, bubbleEraseMethod: "telea", bubbleDetectionStyle: "hybrid" },
+        { name: "B&W Manga", voiceActor: DEFAULT_TTS_VOICES[1]?.code || "en-US-JennyNeural", musicTheme: MUSIC_THEMES_CATALOG[1]?.id || "mysterious_ambience", aspectRatio: "9:16", frameRate: 24, activeTheme: "obsidian", audioReactiveShake: false, shakeIntensity: "medium", videoFormat: "mp4", backgroundStyle: "white", subtitlesStyle: "none", cropSensitivity: DEFAULT_AUTOCROP_SETTINGS.sensitivity, cropPaddingPx: DEFAULT_AUTOCROP_SETTINGS.padding, cropFocusMode: "face", cropModel: DEFAULT_AUTOCROP_SETTINGS.cropModel, bubbleSensitivity: 60, bubbleDilation: 3, bubbleEraseMethod: "ns", bubbleDetectionStyle: "yolo" },
       ];
     });
 

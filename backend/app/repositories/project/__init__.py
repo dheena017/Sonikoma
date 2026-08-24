@@ -18,6 +18,8 @@ from .project import (
     cleanup_cached_url,
     delete_project,
     get_all_projects_admin,
+    get_project_settings,
+    update_project_settings,
 )
 from .series import (
     get_series_by_slug,

@@ -16,8 +16,10 @@ import {
   Layers,
   PlaySquare,
   MonitorPlay,
+  Save,
 } from "lucide-react";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
+import { useProjectStore } from "@/store/useProjectStore";
 
 const AudioSettingsPage = React.lazy(
   () => import("@/features/editor_audio/pages/AudioSettingsPage")
@@ -434,16 +436,17 @@ const EditorPage: React.FC<EditorPageProps> = ({
         {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
         <div
           className={`relative z-10 bg-transparent min-h-0 min-w-0 ${
+            activeTab === "video-settings" ||
             activeTab === "settings" ||
             activeTab === "audio-settings" ||
             activeTab === "autocrop-settings"
-              ? "px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 w-full max-w-[1720px] mx-auto"
+              ? "px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 w-full max-w-5xl mx-auto"
               : `border-t border-white/5 px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-8 w-full max-w-[1720px] mx-auto ${
                   isFocusMode ? "hidden" : "block"
                 }`
           }`}
         >
-          {activeTab === "settings" ? (
+          {activeTab === "video-settings" || activeTab === "settings" ? (
             <div className="w-full space-y-6 rounded-3xl border border-neutral-800/80 bg-[#050508]/95 backdrop-blur-3xl shadow-2xl p-6 sm:p-8">
               {/* Settings Header */}
               <div className="flex items-center justify-between border-b border-white/5 pb-4">
@@ -461,13 +464,42 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={handleCloseSettings}
-                  className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-2 cursor-pointer text-xs font-bold font-mono active:scale-95 shadow-sm"
-                >
-                  <X className="h-4 w-4" />
-                  Close Settings
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={async () => {
+                      if (projectId) {
+                        const success = await useProjectStore.getState().updateVideoSettings({
+                          aspectRatio,
+                          frameRate,
+                          activeTheme: appLogic.activeTheme || "obsidian",
+                          audioReactiveShake: appLogic.audioReactiveShake,
+                          shakeIntensity: appLogic.shakeIntensity,
+                          videoFormat: appLogic.videoFormat,
+                          backgroundStyle: appLogic.backgroundStyle,
+                          subtitlesStyle: appLogic.subtitlesStyle,
+                          voiceActor,
+                          musicTheme,
+                        }, fetchWithInterceptor);
+                        if (success) {
+                          addNotification?.("Video settings saved successfully!", "success");
+                        } else {
+                          addNotification?.("Failed to save video settings", "error");
+                        }
+                      }
+                    }}
+                    className="p-2 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold active:scale-95 shadow-md"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save Settings
+                  </button>
+                  <button
+                    onClick={handleCloseSettings}
+                    className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-2 cursor-pointer text-xs font-bold font-mono active:scale-95 shadow-sm"
+                  >
+                    <X className="h-4 w-4" />
+                    Close Settings
+                  </button>
+                </div>
               </div>
 
               {/* Render VideoPreviewAdvancedSettings */}
@@ -582,13 +614,28 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   <AutoCropModal
                     isPage={true}
                     onClose={handleCloseSettings}
-                    onApply={() => {
-                      addNotification(
-                        "Auto-crop configurations applied successfully!",
-                        "success"
-                      );
+                    onApply={async () => {
+                      if (projectId) {
+                        await useProjectStore.getState().updateAutoCropSettings({
+                          sensitivity: cropSensitivity,
+                          padding: cropPaddingPx,
+                          backgroundColorMode: appLogic.cropBackgroundMode,
+                          autoSplitTallStrips: appLogic.autoSplitTallStrips,
+                          aspectRatioLock: appLogic.aspectRatioLock,
+                          minPanelAreaPct: appLogic.minPanelAreaPct,
+                          overlapMergeThreshold: appLogic.overlapMergeThreshold,
+                          useLocalCV: appLogic.useLocalCV,
+                          cropModel,
+                          cropMinHeightPx: appLogic.cropMinHeightPx,
+                          cropCannyLow: appLogic.cropCannyLow,
+                          cropCannyHigh: appLogic.cropCannyHigh,
+                          cropCloseKernelSize: appLogic.cropCloseKernelSize,
+                        }, fetchWithInterceptor);
+                      }
                       handleCloseSettings();
+                      handleAutoCropSelected();
                     }}
+                    fetchWithInterceptor={fetchWithInterceptor}
                     sensitivity={cropSensitivity}
                     setSensitivity={setCropSensitivity}
                     padding={cropPaddingPx}
@@ -615,8 +662,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     setCropCannyHigh={appLogic.setCropCannyHigh}
                     cropCloseKernelSize={appLogic.cropCloseKernelSize}
                     setCropCloseKernelSize={appLogic.setCropCloseKernelSize}
-                    activeTab={appLogic.activeAutoCropTab}
-                    setActiveTab={appLogic.setActiveAutoCropTab}
                     selectedCount={
                       selectedScraped?.length || scrapedImages?.length || 0
                     }
@@ -626,10 +671,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     setSelectedScraped={setSelectedScraped}
                     setConsoleLogs={appLogic.setConsoleLogs}
                     addNotification={addNotification}
-                    cropGuidance={appLogic.cropGuidance}
-                    setCropGuidance={appLogic.setCropGuidance}
-                    cropFocusMode={cropFocusMode}
-                    setCropFocusMode={setCropFocusMode}
                   />
                 </div>
               </React.Suspense>

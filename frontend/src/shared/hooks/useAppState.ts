@@ -8,6 +8,11 @@ import { ErrorModalDetail } from "@/shared/ui/modal/ErrorModal";
 import { useAudioFeedback } from "@/features/editor_audio/hooks/useAudioFeedback";
 import { LogEntry, normalizeLog } from "@/types/logs";
 import { useProjectStore, WorkspaceContext } from "@/store/useProjectStore";
+import {
+  DEFAULT_VIDEO_SETTINGS,
+  DEFAULT_AUDIO_SETTINGS,
+  DEFAULT_AUTOCROP_SETTINGS,
+} from "@/features/editor_studio/types/settings";
 
 export function useAppState() {
   const [user, setUser] = useState<any>(() => {
@@ -215,13 +220,13 @@ export function useAppState() {
   // Auto crop states
   const [showAutoCropModal, setShowAutoCropModal] = useState<boolean>(false);
   const [cropSensitivity, setCropSensitivity] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_sensitivity") || "30", 10)
+    parseInt(localStorage.getItem("ai_crop_sensitivity") || String(DEFAULT_AUTOCROP_SETTINGS.sensitivity), 10)
   );
   const [cropPaddingPx, setCropPaddingPx] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_padding") || "10", 10)
+    parseInt(localStorage.getItem("ai_crop_padding") || String(DEFAULT_AUTOCROP_SETTINGS.padding), 10)
   );
   const [cropBackgroundMode, setCropBackgroundMode] = useState<string>(
-    () => localStorage.getItem("ai_crop_bg_mode") || "auto"
+    () => localStorage.getItem("ai_crop_bg_mode") || DEFAULT_AUTOCROP_SETTINGS.backgroundColorMode
   );
   const [autoSplitTallStrips, setAutoSplitTallStrips] = useState<boolean>(
     () => localStorage.getItem("ai_crop_auto_split") !== "false"
@@ -229,13 +234,13 @@ export function useAppState() {
   const [processingStrategy, setProcessingStrategy] =
     useState<string>("balanced");
   const [aspectRatioLock, setAspectRatioLock] = useState<string>(
-    () => localStorage.getItem("ai_crop_aspect_ratio") || "free"
+    () => localStorage.getItem("ai_crop_aspect_ratio") || DEFAULT_AUTOCROP_SETTINGS.aspectRatioLock
   );
   const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(() =>
-    parseFloat(localStorage.getItem("ai_crop_min_area") || "2.0")
+    parseFloat(localStorage.getItem("ai_crop_min_area") || String(DEFAULT_AUTOCROP_SETTINGS.minPanelAreaPct))
   );
   const [overlapMergeThreshold, setOverlapMergeThreshold] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_crop_merge_thresh") || "20", 10)
+    () => parseInt(localStorage.getItem("ai_crop_merge_thresh") || String(Math.round(DEFAULT_AUTOCROP_SETTINGS.overlapMergeThreshold * 100)), 10)
   );
   const [useLocalCV, setUseLocalCV] = useState<boolean>(
     () => localStorage.getItem("ai_crop_use_local_cv") !== "false"
@@ -247,19 +252,19 @@ export function useAppState() {
   } | null>(null);
   const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
   const [cropModel, setCropModel] = useState<string>(
-    () => localStorage.getItem("ai_crop_model") || ""
+    () => localStorage.getItem("ai_crop_model") || DEFAULT_AUTOCROP_SETTINGS.cropModel
   );
   const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_min_height") || "60", 10)
+    parseInt(localStorage.getItem("ai_crop_min_height") || String(DEFAULT_AUTOCROP_SETTINGS.cropMinHeightPx), 10)
   );
   const [cropCannyLow, setCropCannyLow] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_canny_low") || "20", 10)
+    parseInt(localStorage.getItem("ai_crop_canny_low") || String(DEFAULT_AUTOCROP_SETTINGS.cropCannyLow), 10)
   );
   const [cropCannyHigh, setCropCannyHigh] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_canny_high") || "100", 10)
+    parseInt(localStorage.getItem("ai_crop_canny_high") || String(DEFAULT_AUTOCROP_SETTINGS.cropCannyHigh), 10)
   );
   const [cropCloseKernelSize, setCropCloseKernelSize] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_close_kernel") || "15", 10)
+    parseInt(localStorage.getItem("ai_crop_close_kernel") || String(DEFAULT_AUTOCROP_SETTINGS.cropCloseKernelSize), 10)
   );
   const [activeAutoCropTab, setActiveAutoCropTab] = useState<string>("general");
   const [cropGuidance, setCropGuidance] = useState<string>(
@@ -369,17 +374,17 @@ export function useAppState() {
   }, []);
   const [voiceActor, setVoiceActor] = useState<string>(
     () =>
-      localStorage.getItem("ai_comic_voice") || "Standard Comic Narrator (Male)"
+      localStorage.getItem("ai_comic_voice") || DEFAULT_AUDIO_SETTINGS.voiceActor
   );
   const [musicTheme, setMusicTheme] = useState<string>(
-    () => localStorage.getItem("ai_comic_music") || "Orchestral Battle Theme"
+    () => localStorage.getItem("ai_comic_music") || DEFAULT_AUDIO_SETTINGS.musicTheme
   );
   const [aspectRatio, setAspectRatio] = useState<"auto" | "9:16" | "16:9">(
     () =>
       (localStorage.getItem("ai_comic_aspectRatio") as
         | "auto"
         | "9:16"
-        | "16:9") || "9:16"
+        | "16:9") || (DEFAULT_VIDEO_SETTINGS.aspectRatio as any) || "16:9"
   );
   const [selectedModel, setSelectedModel] = useState<string>(
     () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
@@ -388,17 +393,17 @@ export function useAppState() {
     () => localStorage.getItem("ai_comic_source") || "webtoons"
   );
   const [frameRate, setFrameRate] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_fps") || "24")
+    parseInt(localStorage.getItem("ai_comic_fps") || String(DEFAULT_VIDEO_SETTINGS.frameRate))
   );
   const [volume, setVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_volume") || "80")
+    parseInt(localStorage.getItem("ai_comic_volume") || String(DEFAULT_AUDIO_SETTINGS.volume))
   );
   const [isMuted, setIsMuted] = useState<boolean>(
     () => localStorage.getItem("ai_comic_muted") === "true"
   );
 
   const [sfxVolume, setSfxVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_sfx_volume") || "60")
+    parseInt(localStorage.getItem("ai_comic_sfx_volume") || String(DEFAULT_AUDIO_SETTINGS.sfxVolume))
   );
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(
     () => localStorage.getItem("ai_comic_sfx_enabled") !== "false"
@@ -408,22 +413,22 @@ export function useAppState() {
   );
 
   const [narrationVolume, setNarrationVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_narration_volume") || "90", 10)
+    parseInt(localStorage.getItem("ai_comic_narration_volume") || String(DEFAULT_AUDIO_SETTINGS.narrationVolume), 10)
   );
   const [bgmVolume, setBgmVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_bgm_volume") || "50", 10)
+    parseInt(localStorage.getItem("ai_comic_bgm_volume") || String(DEFAULT_AUDIO_SETTINGS.bgmVolume), 10)
   );
   const [audioDucking, setAudioDucking] = useState<boolean>(
     () => localStorage.getItem("ai_comic_audio_ducking") !== "false"
   );
   const [speechRate, setSpeechRate] = useState<number>(() =>
-    parseFloat(localStorage.getItem("ai_comic_speech_rate") || "1.0")
+    parseFloat(localStorage.getItem("ai_comic_speech_rate") || String(DEFAULT_AUDIO_SETTINGS.speechRate))
   );
   const [speechPitch, setSpeechPitch] = useState<number>(() =>
-    parseFloat(localStorage.getItem("ai_comic_speech_pitch") || "1.0")
+    parseFloat(localStorage.getItem("ai_comic_speech_pitch") || String(DEFAULT_AUDIO_SETTINGS.speechPitch))
   );
   const [audioReactiveShake, setAudioReactiveShake] = useState<boolean>(
-    () => localStorage.getItem("ai_video_shake") === "true"
+    () => localStorage.getItem("ai_video_shake") !== null ? localStorage.getItem("ai_video_shake") === "true" : DEFAULT_VIDEO_SETTINGS.audioReactiveShake
   );
   const [shakeIntensity, setShakeIntensity] = useState<
     "low" | "medium" | "high" | "extreme"
@@ -431,14 +436,14 @@ export function useAppState() {
     () => (localStorage.getItem("ai_video_shake_intensity") as any) || "medium"
   );
   const [videoFormat, setVideoFormat] = useState<"mp4" | "webm" | "mkv">(
-    () => (localStorage.getItem("ai_video_format") as any) || "mp4"
+    () => (localStorage.getItem("ai_video_format") as any) || DEFAULT_VIDEO_SETTINGS.videoFormat
   );
   const [backgroundStyle, setBackgroundStyle] = useState<
     "black" | "white" | "transparent" | "blurred"
   >(() => (localStorage.getItem("ai_video_bg_style") as any) || "black");
   const [subtitlesStyle, setSubtitlesStyle] = useState<
     "none" | "burn-in" | "soft"
-  >("none");
+  >(() => (localStorage.getItem("ai_video_subtitles_style") as any) || "burn-in");
 
   const audioFeedback = useAudioFeedback(sfxVolume, !sfxEnabled);
 
@@ -1118,78 +1123,130 @@ export function useAppState() {
           }
 
           // Populate details from loaded project
-          const loadedSettings = data.project.audio_settings || {};
-          if (loadedSettings.masterVolume !== undefined) {
-            setVolume(loadedSettings.masterVolume);
+          const loadedAudio = data.project.audio_settings || {};
+          const loadedVideo = data.project.video_settings || loadedAudio.video_settings || {};
+          const loadedAutoCrop = data.project.autocrop_settings || loadedAudio.autocrop_settings || {};
+
+          // 1. Audio Settings
+          if (loadedAudio.volume !== undefined || loadedAudio.masterVolume !== undefined) {
+            setVolume(loadedAudio.volume ?? loadedAudio.masterVolume);
           }
-          if (loadedSettings.narrationVolume !== undefined) {
-            setNarrationVolume(loadedSettings.narrationVolume);
+          if (loadedAudio.narrationVolume !== undefined) {
+            setNarrationVolume(loadedAudio.narrationVolume);
           }
-          if (loadedSettings.bgmVolume !== undefined) {
-            setBgmVolume(loadedSettings.bgmVolume);
+          if (loadedAudio.bgmVolume !== undefined) {
+            setBgmVolume(loadedAudio.bgmVolume);
           }
-          if (loadedSettings.sfxVolume !== undefined) {
-            setSfxVolume(loadedSettings.sfxVolume);
+          if (loadedAudio.sfxVolume !== undefined) {
+            setSfxVolume(loadedAudio.sfxVolume);
           }
-          if (loadedSettings.speechRate !== undefined) {
-            setSpeechRate(loadedSettings.speechRate);
+          if (loadedAudio.speechRate !== undefined) {
+            setSpeechRate(loadedAudio.speechRate);
           }
-          if (loadedSettings.speechPitch !== undefined) {
-            setSpeechPitch(loadedSettings.speechPitch);
+          if (loadedAudio.speechPitch !== undefined) {
+            setSpeechPitch(loadedAudio.speechPitch);
           }
-          if (loadedSettings.voiceActor ?? loadedSettings.voice) {
-            setVoiceActor(loadedSettings.voiceActor ?? loadedSettings.voice);
+          if (loadedAudio.voiceActor ?? loadedAudio.voice) {
+            setVoiceActor(loadedAudio.voiceActor ?? loadedAudio.voice);
           }
-          if (loadedSettings.musicTheme ?? loadedSettings.music) {
-            setMusicTheme(loadedSettings.musicTheme ?? loadedSettings.music);
+          if (loadedAudio.musicTheme ?? loadedAudio.music) {
+            setMusicTheme(loadedAudio.musicTheme ?? loadedAudio.music);
           }
-          if (loadedSettings.audioDucking !== undefined) {
-            setAudioDucking(loadedSettings.audioDucking);
+          if (loadedAudio.audioDucking !== undefined) {
+            setAudioDucking(loadedAudio.audioDucking);
           }
-          if (loadedSettings.aspectRatio) {
-            setAspectRatio(loadedSettings.aspectRatio);
+
+          // 2. Video Settings
+          if (loadedVideo.aspectRatio) {
+            setAspectRatio(loadedVideo.aspectRatio);
           }
-          if (loadedSettings.frameRate) {
-            setFrameRate(loadedSettings.frameRate);
+          if (loadedVideo.frameRate) {
+            setFrameRate(loadedVideo.frameRate);
           }
-          if (loadedSettings.audioReactiveShake !== undefined) {
-            setAudioReactiveShake(loadedSettings.audioReactiveShake);
+          if (loadedVideo.audioReactiveShake !== undefined) {
+            setAudioReactiveShake(loadedVideo.audioReactiveShake);
           }
-          if (loadedSettings.shakeIntensity) {
-            setShakeIntensity(loadedSettings.shakeIntensity);
+          if (loadedVideo.shakeIntensity) {
+            setShakeIntensity(loadedVideo.shakeIntensity);
           }
-          if (loadedSettings.videoFormat) {
-            setVideoFormat(loadedSettings.videoFormat);
+          if (loadedVideo.videoFormat) {
+            setVideoFormat(loadedVideo.videoFormat);
           }
-          if (loadedSettings.backgroundStyle) {
-            setBackgroundStyle(loadedSettings.backgroundStyle);
+          if (loadedVideo.backgroundStyle) {
+            setBackgroundStyle(loadedVideo.backgroundStyle);
           }
-          if (loadedSettings.subtitlesStyle) {
-            setSubtitlesStyle(loadedSettings.subtitlesStyle);
+          if (loadedVideo.subtitlesStyle) {
+            setSubtitlesStyle(loadedVideo.subtitlesStyle);
           }
-          if (loadedSettings.activePreviewTab) {
-            setActivePreviewTab(loadedSettings.activePreviewTab);
+          if (loadedVideo.activeTheme && typeof window !== "undefined") {
+            document.documentElement.setAttribute("data-theme", loadedVideo.activeTheme);
+            localStorage.setItem("ai_comic_theme", loadedVideo.activeTheme);
+          }
+
+          // 3. Auto-Crop Settings
+          if (loadedAutoCrop.sensitivity !== undefined && typeof setCropSensitivity === "function") {
+            setCropSensitivity(loadedAutoCrop.sensitivity);
+          }
+          if (loadedAutoCrop.padding !== undefined && typeof setCropPaddingPx === "function") {
+            setCropPaddingPx(loadedAutoCrop.padding);
+          }
+          if (loadedAutoCrop.backgroundColorMode !== undefined && typeof setCropBackgroundMode === "function") {
+            setCropBackgroundMode(loadedAutoCrop.backgroundColorMode);
+          }
+          if (loadedAutoCrop.autoSplitTallStrips !== undefined && typeof setAutoSplitTallStrips === "function") {
+            setAutoSplitTallStrips(loadedAutoCrop.autoSplitTallStrips);
+          }
+          if (loadedAutoCrop.aspectRatioLock !== undefined && typeof setAspectRatioLock === "function") {
+            setAspectRatioLock(loadedAutoCrop.aspectRatioLock);
+          }
+          if (loadedAutoCrop.minPanelAreaPct !== undefined && typeof setMinPanelAreaPct === "function") {
+            setMinPanelAreaPct(loadedAutoCrop.minPanelAreaPct);
+          }
+          if (loadedAutoCrop.overlapMergeThreshold !== undefined && typeof setOverlapMergeThreshold === "function") {
+            setOverlapMergeThreshold(loadedAutoCrop.overlapMergeThreshold);
+          }
+          if (loadedAutoCrop.useLocalCV !== undefined && typeof setUseLocalCV === "function") {
+            setUseLocalCV(loadedAutoCrop.useLocalCV);
+          }
+          if (loadedAutoCrop.cropModel && typeof setCropModel === "function") {
+            setCropModel(loadedAutoCrop.cropModel);
+          }
+          if (loadedAutoCrop.cropMinHeightPx !== undefined && typeof setCropMinHeightPx === "function") {
+            setCropMinHeightPx(loadedAutoCrop.cropMinHeightPx);
+          }
+          if (loadedAutoCrop.cropCannyLow !== undefined && typeof setCropCannyLow === "function") {
+            setCropCannyLow(loadedAutoCrop.cropCannyLow);
+          }
+          if (loadedAutoCrop.cropCannyHigh !== undefined && typeof setCropCannyHigh === "function") {
+            setCropCannyHigh(loadedAutoCrop.cropCannyHigh);
+          }
+          if (loadedAutoCrop.cropCloseKernelSize !== undefined && typeof setCropCloseKernelSize === "function") {
+            setCropCloseKernelSize(loadedAutoCrop.cropCloseKernelSize);
+          }
+
+          if (loadedAudio.activePreviewTab) {
+            setActivePreviewTab(loadedAudio.activePreviewTab);
           }
           if (
-            loadedSettings.selectedScraped &&
-            Array.isArray(loadedSettings.selectedScraped)
+            loadedAudio.selectedScraped &&
+            Array.isArray(loadedAudio.selectedScraped)
           ) {
-            setSelectedScraped(loadedSettings.selectedScraped);
+            setSelectedScraped(loadedAudio.selectedScraped);
           }
-          if (loadedSettings.autoPlayAudio !== undefined) {
-            setAutoPlayAudio(loadedSettings.autoPlayAudio);
+          if (loadedAudio.autoPlayAudio !== undefined) {
+            setAutoPlayAudio(loadedAudio.autoPlayAudio);
           }
-          if (loadedSettings.isMuted !== undefined) {
-            setIsMuted(loadedSettings.isMuted);
+          if (loadedAudio.isMuted !== undefined) {
+            setIsMuted(loadedAudio.isMuted);
           }
-          if (loadedSettings.sfxEnabled !== undefined) {
-            setSfxEnabled(loadedSettings.sfxEnabled);
+          if (loadedAudio.sfxEnabled !== undefined) {
+            setSfxEnabled(loadedAudio.sfxEnabled);
           }
-          if (loadedSettings.narrationStyle) {
-            setNarrationStyle(loadedSettings.narrationStyle);
+          if (loadedAudio.narrationStyle) {
+            setNarrationStyle(loadedAudio.narrationStyle);
           }
-          if (loadedSettings.selectedModel) {
-            setSelectedModel(loadedSettings.selectedModel);
+          if (loadedAudio.selectedModel) {
+            setSelectedModel(loadedAudio.selectedModel);
           }
 
           let loadedChapterNumber = "";
@@ -1220,7 +1277,7 @@ export function useAppState() {
           const savedScrapedImages =
             Array.isArray(data.scraped_images) && data.scraped_images.length > 0
               ? data.scraped_images
-              : loadedSettings.scraped_images;
+              : loadedAudio.scraped_images;
           let proxiedScraped: string[] = [];
           if (
             Array.isArray(savedScrapedImages) &&

@@ -29,14 +29,30 @@ _PROJECT_ROOT = os.path.abspath(os.path.join(_BACKEND_ROOT, ".."))
 def _parse_audio_settings(proj_dict: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     if not proj_dict:
         return None
-    audio_set = proj_dict.get("audio_settings")
-    if isinstance(audio_set, str) and audio_set.strip():
+    raw_settings = proj_dict.get("audio_settings")
+    parsed_json = {}
+    if isinstance(raw_settings, str) and raw_settings.strip():
         try:
-            proj_dict["audio_settings"] = json.loads(audio_set)
+            parsed_json = json.loads(raw_settings)
         except Exception:
-            proj_dict["audio_settings"] = None
-    elif not audio_set:
-        proj_dict["audio_settings"] = None
+            parsed_json = {}
+    elif isinstance(raw_settings, dict):
+        parsed_json = raw_settings
+
+    # Extract centralized settings if present
+    if isinstance(parsed_json, dict):
+        proj_dict["video_settings"] = parsed_json.get("video_settings") or {}
+        proj_dict["autocrop_settings"] = parsed_json.get("autocrop_settings") or {}
+        # If audio_settings was wrapped under "audio_settings" key
+        if "audio_settings" in parsed_json and isinstance(parsed_json["audio_settings"], dict):
+            proj_dict["audio_settings"] = parsed_json["audio_settings"]
+        else:
+            proj_dict["audio_settings"] = parsed_json
+    else:
+        proj_dict["video_settings"] = {}
+        proj_dict["autocrop_settings"] = {}
+        proj_dict["audio_settings"] = {}
+
     return proj_dict
 
 
@@ -288,12 +304,28 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             if 'job_id' in updates:
                 chapter_set_parts.append("job_id = ?")
                 chapter_params.append(updates['job_id'])
-            if 'audio_settings' in updates:
+            if any(k in updates for k in ('audio_settings', 'video_settings', 'autocrop_settings')):
+                cur_row = conn.execute("SELECT audio_settings FROM chapters WHERE id = ?", (project_id,)).fetchone()
+                existing_raw = cur_row['audio_settings'] if cur_row else None
+                
+                settings_dict = {}
+                if isinstance(existing_raw, str) and existing_raw.strip():
+                    try:
+                        settings_dict = json.loads(existing_raw)
+                    except Exception:
+                        settings_dict = {}
+                elif isinstance(existing_raw, dict):
+                    settings_dict = dict(existing_raw)
+
+                if 'audio_settings' in updates and updates['audio_settings'] is not None:
+                    settings_dict["audio_settings"] = updates['audio_settings']
+                if 'video_settings' in updates and updates['video_settings'] is not None:
+                    settings_dict["video_settings"] = updates['video_settings']
+                if 'autocrop_settings' in updates and updates['autocrop_settings'] is not None:
+                    settings_dict["autocrop_settings"] = updates['autocrop_settings']
+
                 chapter_set_parts.append("audio_settings = ?")
-                val = updates['audio_settings']
-                if isinstance(val, (dict, list)):
-                    val = json.dumps(val)
-                chapter_params.append(val)
+                chapter_params.append(json.dumps(settings_dict))
 
             if chapter_set_parts:
                 chapter_set_parts.append("updated_at = datetime('now')")
@@ -429,3 +461,23 @@ def get_all_projects_admin() -> list[dict]:
         return [dict(row) for row in rows]
     finally:
         conn.close()
+
+
+def get_project_settings(project_id: str) -> Optional[Dict[str, Any]]:
+    """Retrieve the centralized settings (video, audio, autocrop) for a given project."""
+    project = get_project(project_id)
+    if not project:
+        project = get_project_by_slug(project_id)
+    if not project:
+        return None
+    return {
+        "video_settings": project.get("video_settings") or {},
+        "audio_settings": project.get("audio_settings") or {},
+        "autocrop_settings": project.get("autocrop_settings") or {},
+    }
+
+
+def update_project_settings(project_id: str, settings: Dict[str, Any]) -> Dict[str, Any]:
+    """Persist updated centralized settings (video, audio, autocrop) for a given project."""
+    update_project_full(project_id, updates=settings)
+    return get_project_settings(project_id) or {}

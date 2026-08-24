@@ -50,13 +50,9 @@ interface AudioSettingsPageProps {
   onSave?: () => void;
 }
 
-const MUSIC_THEMES = [
-  { id: "orchestral_battle", label: "Orchestral Battle Theme", icon: "⚔️", mood: "Epic" },
-  { id: "mysterious_ambience", label: "Mysterious Ambience", icon: "🌫️", mood: "Tense" },
-  { id: "scifi_synth", label: "Sci-Fi Synth Wave", icon: "🚀", mood: "Futuristic" },
-  { id: "calm_acoustic", label: "Calm Acoustic Melancholy", icon: "🎸", mood: "Emotional" },
-  { id: "no_music", label: "No Music (Dialogue Only)", icon: "🔇", mood: "Silent" },
-];
+import { MUSIC_THEMES_CATALOG, DEFAULT_TTS_VOICES } from "@/features/editor_studio/types/settings";
+
+const MUSIC_THEMES = MUSIC_THEMES_CATALOG;
 
 // Animated waveform bars for visual feedback
 function WaveformBars({ active, color = "#a855f7" }: { active: boolean; color?: string }) {
@@ -107,44 +103,45 @@ function VolumeSlider({
   const isActive = pct > 0;
 
   return (
-    <div className="group space-y-2">
+    <div className="group space-y-2.5 p-3 rounded-2xl bg-neutral-900/40 border border-white/[0.04] hover:border-purple-500/20 transition-all duration-300">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-200"
-            style={{ backgroundColor: isActive ? `${color}22` : "#1a1a2e" }}
+            className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200 shadow-sm"
+            style={{ backgroundColor: isActive ? `${color}25` : "#1a1a2e" }}
           >
             <Icon
-              className="h-3.5 w-3.5 transition-colors duration-200"
+              className="h-4 w-4 transition-colors duration-200"
               style={{ color: isActive ? color : "#6b7280" }}
             />
           </div>
           <div>
-            <span className="text-xs font-semibold text-neutral-200">{label}</span>
+            <span className="text-xs font-bold text-neutral-100 tracking-wide">{label}</span>
             {sublabel && (
-              <span className="block text-[10px] text-neutral-500 mt-0.5">{sublabel}</span>
+              <span className="block text-[10px] text-neutral-400 mt-0.5">{sublabel}</span>
             )}
           </div>
         </div>
         <div
-          className="text-xs font-bold tabular-nums px-2 py-0.5 rounded-md transition-all duration-200"
+          className="text-xs font-bold tabular-nums px-2.5 py-1 rounded-xl transition-all duration-200 border"
           style={{
-            color: isActive ? color : "#6b7280",
-            backgroundColor: isActive ? `${color}18` : "transparent",
+            color: isActive ? color : "#9ca3af",
+            backgroundColor: isActive ? `${color}18` : "#181824",
+            borderColor: isActive ? `${color}35` : "transparent",
           }}
         >
           {unit === "%" ? `${value}${unit}` : `${value}${unit}`}
         </div>
       </div>
 
-      {/* Track */}
-      <div className="relative h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+      {/* Track & Interactive Range Slider */}
+      <div className="relative h-2.5 bg-neutral-950 rounded-full overflow-hidden border border-white/5 shadow-inner">
         <div
-          className="absolute inset-y-0 left-0 rounded-full transition-all duration-100"
+          className="absolute inset-y-0 left-0 rounded-full transition-all duration-75"
           style={{
             width: `${pct}%`,
-            background: `linear-gradient(90deg, ${color}88, ${color})`,
-            boxShadow: isActive ? `0 0 8px ${color}66` : "none",
+            background: `linear-gradient(90deg, ${color}99, ${color})`,
+            boxShadow: isActive ? `0 0 10px ${color}88` : "none",
           }}
         />
         <input
@@ -159,11 +156,11 @@ function VolumeSlider({
         />
       </div>
 
-      {/* Tick marks at 0, 25, 50, 75, 100 for volume sliders */}
+      {/* Tick marks for percentage sliders */}
       {unit === "%" && (
-        <div className="flex justify-between px-0.5">
+        <div className="flex justify-between px-1">
           {[0, 25, 50, 75, 100].map((tick) => (
-            <span key={tick} className="text-[9px] text-neutral-600">
+            <span key={tick} className="text-[9px] font-mono text-neutral-500">
               {tick}
             </span>
           ))}
@@ -293,16 +290,7 @@ export default function AudioSettingsPage({
     return () => { active = false; };
   }, [fetchWithInterceptor]);
 
-  const defaultVoices = [
-    { code: "en-US-GuyNeural", label: "English (US) — Guy (Male)" },
-    { code: "en-US-JennyNeural", label: "English (US) — Jenny (Female)" },
-    { code: "en-US-AriaNeural", label: "English (US) — Aria (Female)" },
-    { code: "en-GB-SoniaNeural", label: "English (UK) — Sonia (Female)" },
-    { code: "en-US-TonyNeural", label: "English (US) — Tony (Male)" },
-    { code: "en-GB-RyanNeural", label: "English (UK) — Ryan (Male)" },
-    { code: "ko-KR-InJoonNeural", label: "Korean — InJoon (Male)" },
-    { code: "ja-JP-NanamiNeural", label: "Japanese — Nanami (Female)" },
-  ];
+  const defaultVoices = DEFAULT_TTS_VOICES;
   const displayVoices = availableVoices.length > 0 ? availableVoices : defaultVoices;
 
   const handleSave = useCallback(async () => {
@@ -323,10 +311,22 @@ export default function AudioSettingsPage({
     setSaving(true);
     try {
       const fetchFn = fetchWithInterceptor || window.fetch.bind(window);
-      const res = await fetchFn(`/api/projects/${projectId}`, {
+      const res = await fetchFn(`/api/projects/${projectId}/settings/audio`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audio_settings: { masterVolume: volume, narrationVolume, bgmVolume, sfxVolume, speechRate, speechPitch, voiceActor, musicTheme, audioDucking } }),
+        body: JSON.stringify({
+          audio_settings: {
+            volume,
+            narrationVolume,
+            bgmVolume,
+            sfxVolume,
+            speechRate,
+            speechPitch,
+            voiceActor,
+            musicTheme,
+            audioDucking,
+          },
+        }),
       });
       const data = await res.json();
       if (data?.success) {
@@ -402,7 +402,7 @@ export default function AudioSettingsPage({
               </div>
             </div>
 
-            <div className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <VolumeSlider
                 label="Master Output"
                 sublabel="Overall output gain across all channels"

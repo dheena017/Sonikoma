@@ -25,6 +25,8 @@ export interface ProjectMetadata {
   genre?: string | null;
   episode?: string | null;
   audio_settings?: any;
+  video_settings?: any;
+  autocrop_settings?: any;
   status?: string;
   created_at?: string;
   panels_count?: number;
@@ -67,6 +69,17 @@ export interface ProjectStoreState {
     id?: string | null,
     fetchClient?: any
   ) => Promise<void>;
+  updateProjectSettings: (
+    settings: {
+      video_settings?: any;
+      audio_settings?: any;
+      autocrop_settings?: any;
+    },
+    fetchClient?: any
+  ) => Promise<boolean>;
+  updateVideoSettings: (videoSettings: any, fetchClient?: any) => Promise<boolean>;
+  updateAudioSettings: (audioSettings: any, fetchClient?: any) => Promise<boolean>;
+  updateAutoCropSettings: (autoCropSettings: any, fetchClient?: any) => Promise<boolean>;
   clearActiveProject: () => void;
   setDrawerOpen: (open: boolean) => void;
   setIsDirty: (dirty: boolean) => void;
@@ -261,6 +274,8 @@ export const useProjectStore = create<ProjectStoreState>()(
             genre: projectRaw.genre || null,
             episode: projectRaw.episode || null,
             audio_settings: projectRaw.audio_settings || null,
+            video_settings: projectRaw.video_settings || null,
+            autocrop_settings: projectRaw.autocrop_settings || null,
             status: projectRaw.status || "Ready",
             created_at:
               projectRaw.created_at || projectRaw.updated_at || undefined,
@@ -284,6 +299,140 @@ export const useProjectStore = create<ProjectStoreState>()(
           get().setProjectMissing(idToHydrate, {
             isJobId: idToHydrate.startsWith("job_"),
           });
+        }
+      },
+
+      updateProjectSettings: async (settings, fetchClient) => {
+        const { activeProjectId, activeProjectData } = get();
+        if (!activeProjectId) return false;
+
+        try {
+          const fetchFn = fetchClient || fetch;
+          const res = await fetchFn(`/api/projects/${encodeURIComponent(activeProjectId)}/settings`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(settings),
+          });
+
+          if (!res.ok) {
+            console.error("Failed to update project settings:", res.statusText);
+            return false;
+          }
+
+          const data = await res.json();
+          if (data && data.settings && activeProjectData) {
+            set({
+              activeProjectData: {
+                ...activeProjectData,
+                project: {
+                  ...activeProjectData.project,
+                  video_settings: data.settings.video_settings ?? activeProjectData.project.video_settings,
+                  audio_settings: data.settings.audio_settings ?? activeProjectData.project.audio_settings,
+                  autocrop_settings: data.settings.autocrop_settings ?? activeProjectData.project.autocrop_settings,
+                },
+              },
+            });
+          }
+          return true;
+        } catch (err) {
+          console.error("Error updating project settings:", err);
+          return false;
+        }
+      },
+
+      updateVideoSettings: async (videoSettings, fetchClient) => {
+        const { activeProjectId, activeProjectData } = get();
+        if (!activeProjectId) return false;
+
+        try {
+          const fetchFn = fetchClient || fetch;
+          const res = await fetchFn(`/api/projects/${encodeURIComponent(activeProjectId)}/settings/video`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ video_settings: videoSettings }),
+          });
+
+          if (!res.ok) return false;
+          const data = await res.json();
+          if (data && data.video_settings && activeProjectData) {
+            set({
+              activeProjectData: {
+                ...activeProjectData,
+                project: {
+                  ...activeProjectData.project,
+                  video_settings: data.video_settings,
+                },
+              },
+            });
+          }
+          return true;
+        } catch (err) {
+          console.error("Error updating video settings:", err);
+          return false;
+        }
+      },
+
+      updateAudioSettings: async (audioSettings, fetchClient) => {
+        const { activeProjectId, activeProjectData } = get();
+        if (!activeProjectId) return false;
+
+        try {
+          const fetchFn = fetchClient || fetch;
+          const res = await fetchFn(`/api/projects/${encodeURIComponent(activeProjectId)}/settings/audio`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ audio_settings: audioSettings }),
+          });
+
+          if (!res.ok) return false;
+          const data = await res.json();
+          if (data && data.audio_settings && activeProjectData) {
+            set({
+              activeProjectData: {
+                ...activeProjectData,
+                project: {
+                  ...activeProjectData.project,
+                  audio_settings: data.audio_settings,
+                },
+              },
+            });
+          }
+          return true;
+        } catch (err) {
+          console.error("Error updating audio settings:", err);
+          return false;
+        }
+      },
+
+      updateAutoCropSettings: async (autoCropSettings, fetchClient) => {
+        const { activeProjectId, activeProjectData } = get();
+        if (!activeProjectId) return false;
+
+        try {
+          const fetchFn = fetchClient || fetch;
+          const res = await fetchFn(`/api/projects/${encodeURIComponent(activeProjectId)}/settings/autocrop`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ autocrop_settings: autoCropSettings }),
+          });
+
+          if (!res.ok) return false;
+          const data = await res.json();
+          if (data && data.autocrop_settings && activeProjectData) {
+            set({
+              activeProjectData: {
+                ...activeProjectData,
+                project: {
+                  ...activeProjectData.project,
+                  autocrop_settings: data.autocrop_settings,
+                },
+              },
+            });
+          }
+          return true;
+        } catch (err) {
+          console.error("Error updating autocrop settings:", err);
+          return false;
         }
       },
 

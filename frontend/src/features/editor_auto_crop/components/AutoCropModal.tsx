@@ -1,18 +1,24 @@
-import React from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Scissors,
   X,
-  RefreshCw,
   Sparkles,
   RotateCcw,
   Cpu,
-  Sliders,
   Layers,
   Brain,
   Zap,
-  ArrowLeft,
+  Check,
+  Play,
+  Loader2,
+  Image as ImageIcon,
+  ChevronDown,
+  Info,
+  Maximize2,
 } from "lucide-react";
-import AutoCropTabContent from "./AutoCropTabContent";
+import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
+import * as api from "@/api";
+import { getProxiedImageUrl } from "@/utils";
 
 interface AutoCropModalProps {
   onClose: () => void;
@@ -45,21 +51,22 @@ interface AutoCropModalProps {
   setCropCannyHigh: (v: number) => void;
   cropCloseKernelSize: number;
   setCropCloseKernelSize: (v: number) => void;
-  activeTab: string;
-  setActiveTab: (v: string) => void;
-  cropGuidance: string;
-  setCropGuidance: (v: string) => void;
-  cropFocusMode: string;
-  setCropFocusMode: (v: string) => void;
+  activeTab?: string;
+  setActiveTab?: (v: string) => void;
+  cropGuidance?: string;
+  setCropGuidance?: (v: string) => void;
+  cropFocusMode?: string;
+  setCropFocusMode?: (v: string) => void;
 
   selectedCount: number;
   isApplying: boolean;
   scrapedImages: string[];
   selectedScraped: string[];
-  setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
+  setSelectedScraped?: React.Dispatch<React.SetStateAction<string[]>>;
   setConsoleLogs?: React.Dispatch<React.SetStateAction<any[]>>;
   addNotification?: (msg: string, type: any) => void;
   isPage?: boolean;
+  fetchWithInterceptor?: any;
 }
 
 export default function AutoCropModal({
@@ -92,37 +99,54 @@ export default function AutoCropModal({
   setCropCannyHigh,
   cropCloseKernelSize,
   setCropCloseKernelSize,
-  activeTab,
-  setActiveTab,
-  cropGuidance,
-  setCropGuidance,
-  cropFocusMode,
-  setCropFocusMode,
 
   selectedCount,
   isApplying,
-  scrapedImages,
-  selectedScraped,
+  scrapedImages = [],
+  selectedScraped = [],
   setSelectedScraped,
   setConsoleLogs,
   addNotification,
   isPage = false,
+  fetchWithInterceptor,
 }: AutoCropModalProps) {
-  const [useYolo, setUseYolo] = React.useState(false);
-  const [activePreviewUrl, setActivePreviewUrl] = React.useState<string | null>(
-    null
-  );
+  const { models } = useAIModels();
+  
+  // Dynamically group vision-capable models from backend catalog
+  const visionModels = useMemo(() => {
+    return models.filter(
+      (m) =>
+        m.capabilities?.includes("vision") ||
+        m.category?.toLowerCase().includes("vision") ||
+        m.provider?.toLowerCase() === "google" ||
+        m.id.toLowerCase().includes("vision")
+    );
+  }, [models]);
 
-  const previewImageUrl =
-    activePreviewUrl ||
-    (selectedScraped.length > 0
-      ? selectedScraped[0]
-      : scrapedImages.length > 0
-      ? scrapedImages[0]
-      : null);
+  const [activeImageIdx, setActiveImageIdx] = useState<number>(0);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testBoxes, setTestBoxes] = useState<any[]>([]);
+  const [testDimensions, setTestDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [testStats, setTestStats] = useState<{ count: number; timeMs: number } | null>(null);
 
-  const handleResetAll = () => {
-    console.log("[AutoCropModal] Resetting all parameters to defaults");
+  const targetList = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+  const currentImageUrl = targetList[activeImageIdx] || targetList[0] || null;
+
+  // Reset test boxes when switching images
+  useEffect(() => {
+    setTestBoxes([]);
+    setTestDimensions(null);
+    setTestStats(null);
+  }, [activeImageIdx, currentImageUrl]);
+
+  // Synchronize active model dynamically from catalog
+  useEffect(() => {
+    if (!cropModel && visionModels.length > 0) {
+      setCropModel(visionModels[0].id);
+    }
+  }, [cropModel, visionModels, setCropModel]);
+
+  const handleResetDefaults = () => {
     setSensitivity(30);
     setPadding(10);
     setBackgroundColorMode("auto");
@@ -131,291 +155,538 @@ export default function AutoCropModal({
     setMinPanelAreaPct(2);
     setOverlapMergeThreshold(20);
     setUseLocalCV(true);
-    setCropModel("");
-    setCropMinHeightPx(60);
-    setCropCannyLow(20);
-    setCropCannyHigh(100);
-    setCropCloseKernelSize(15);
-    setActiveTab("general");
-    setCropGuidance("");
-    setCropFocusMode("standard");
-    setActivePreviewUrl(null);
-    if (addNotification) {
-      addNotification("Restored all crop parameters to defaults.", "info");
+    if (visionModels.length > 0) {
+      setCropModel(visionModels[0].id);
+    }
+    setTestBoxes([]);
+    setTestDimensions(null);
+    setTestStats(null);
+    addNotification?.("Reset all crop settings to default values.", "info");
+  };
+
+  const handleRunSingleTest = async () => {
+    if (!currentImageUrl) {
+      addNotification?.("Please select an image to test detection on.", "warning");
+      return;
+    }
+
+    setIsTesting(true);
+    setTestBoxes([]);
+    setTestDimensions(null);
+    setTestStats(null);
+    const startTime = performance.now();
+
+    try {
+      const payload = {
+        url: currentImageUrl,
+        strategy: useLocalCV ? "local-cv" : "ai",
+        model: cropModel || (visionModels[0]?.id ?? undefined),
+        sensitivity: Number(sensitivity),
+        paddingPx: Number(padding),
+        aspectRatio: aspectRatioLock,
+        autoSplit: autoSplitTallStrips,
+        minAreaPct: Number(minPanelAreaPct) / 100,
+        mergeThreshold: Number(overlapMergeThreshold),
+        cannyLow: Number(cropCannyLow),
+        cannyHigh: Number(cropCannyHigh),
+        closeKernelSize: Number(cropCloseKernelSize),
+        minHeightPx: Number(cropMinHeightPx),
+      };
+
+      const res = await api.aiSmartCrop(fetchWithInterceptor || fetch, payload);
+      const elapsed = Math.round(performance.now() - startTime);
+
+      const detectedPanels = res?.panels || res?.boxes || [];
+      const imageW = res?.imageWidth || res?.width || null;
+      const imageH = res?.imageHeight || res?.height || null;
+
+      if (imageW && imageH) {
+        setTestDimensions({ width: imageW, height: imageH });
+      }
+
+      if (Array.isArray(detectedPanels) && detectedPanels.length > 0) {
+        setTestBoxes(detectedPanels);
+        setTestStats({ count: detectedPanels.length, timeMs: elapsed });
+        addNotification?.(
+          `Detected ${detectedPanels.length} panels in ${elapsed}ms!`,
+          "success"
+        );
+      } else {
+        setTestStats({ count: 0, timeMs: elapsed });
+        addNotification?.("Detection completed: No panel boundaries found.", "info");
+      }
+    } catch (err: any) {
+      console.error("[AutoCropModal] Single detection test failed:", err);
+      addNotification?.(
+        `Test detection failed: ${err?.message || "Internal server error"}`,
+        "error"
+      );
+    } finally {
+      setIsTesting(false);
     }
   };
 
-  const tabs = [
-    { id: "general", label: "General", icon: <Cpu className="h-3.5 w-3.5" /> },
-    {
-      id: "advanced",
-      label: "Advanced CV",
-      icon: <Sliders className="h-3.5 w-3.5" />,
-    },
+  // Calculate real bounding box percentage position without hardcoded math
+  const computeBoxCoordinates = (box: any) => {
+    // 1. Normalized Box [ymin, xmin, ymax, xmax]
+    if (Array.isArray(box.box) && box.box.length === 4) {
+      const [ymin, xmin, ymax, xmax] = box.box;
+      if (ymax > 1 || xmax > 1) {
+        return {
+          left: `${(xmin / 1000) * 100}%`,
+          top: `${(ymin / 1000) * 100}%`,
+          width: `${((xmax - xmin) / 1000) * 100}%`,
+          height: `${((ymax - ymin) / 1000) * 100}%`,
+        };
+      }
+      return {
+        left: `${xmin * 100}%`,
+        top: `${ymin * 100}%`,
+        width: `${(xmax - xmin) * 100}%`,
+        height: `${(ymax - ymin) * 100}%`,
+      };
+    }
+
+    // 2. Pixel coordinates { x, y, w, h } with image dimensions
+    if (
+      testDimensions &&
+      typeof box.x === "number" &&
+      typeof box.w === "number" &&
+      testDimensions.width > 0 &&
+      testDimensions.height > 0
+    ) {
+      return {
+        left: `${(box.x / testDimensions.width) * 100}%`,
+        top: `${(box.y / testDimensions.height) * 100}%`,
+        width: `${(box.w / testDimensions.width) * 100}%`,
+        height: `${(box.h / testDimensions.height) * 100}%`,
+      };
+    }
+
+    // 3. Pre-calculated percentages { pctX, pctY, pctW, pctH }
+    if (typeof box.pctX === "number") {
+      return {
+        left: `${box.pctX}%`,
+        top: `${box.pctY}%`,
+        width: `${box.pctW}%`,
+        height: `${box.pctH}%`,
+      };
+    }
+
+    return null;
+  };
+
+  const aspectRatios = [
+    { id: "free", label: "Free" },
+    { id: "16:9", label: "16:9" },
+    { id: "9:16", label: "9:16" },
+    { id: "1:1", label: "1:1" },
+    { id: "4:3", label: "4:3" },
   ];
 
-  const mainCard = (
-    <div className="bg-[#050508] text-neutral-100 w-full flex flex-col p-4 sm:p-6 md:p-8 space-y-6 pb-24 animate-[fadeIn_0.22s_ease-out]">
-      {/* HEADER SECTION (Matched to AI Model Control Hub Header) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800/80 pb-5 shrink-0">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-            <span
-              className="hover:text-purple-400 cursor-pointer transition-colors"
-              onClick={onClose}
-            >
-              Dashboard
-            </span>
-            <span>&gt;</span>
-            <span className="text-purple-400 font-semibold">
-              Auto Panel Detection Hub
-            </span>
+  return (
+    <div className="w-full bg-[#050508] text-white p-6 sm:p-8 space-y-6">
+      {/* ── Top Header Bar ─────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/8">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600/30 to-indigo-600/20 border border-purple-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.25)] flex-shrink-0">
+            <Scissors className="h-6 w-6 text-purple-300" />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.35)] flex items-center justify-center shrink-0">
-              <Brain className="h-5 w-5 text-purple-300" />
-            </div>
-            Auto Panel Detection Hub
-          </h2>
-          <p className="text-xs sm:text-sm text-neutral-400 font-mono mt-1">
-            Configure OpenCV contour segmentation, AI vision models, and comic
-            panel auto-crop parameters.
-          </p>
+          <div>
+            <h2 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+              Auto-Crop & Panel Slicer
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                PRO CV
+              </span>
+            </h2>
+            <p className="text-xs text-neutral-400 font-mono mt-0.5">
+              Automated comic panel segmentation using local OpenCV or Gemini Multimodal Vision
+            </p>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Active Strategy Status Badge */}
-          <div className="bg-gradient-to-br from-neutral-900/90 to-neutral-950/90 border border-neutral-800/90 px-4 py-2.5 rounded-2xl flex items-center gap-3 font-mono text-xs shadow-md">
-            <div>
-              <span className="text-[9px] text-purple-400 uppercase tracking-wider block font-bold">
-                Active System Strategy
-              </span>
-              <span className="text-white font-bold block mt-0.5">
-                {useLocalCV
-                  ? "OPENCV LOCAL ENGINE"
-                  : `AI VISION (${cropModel.toUpperCase() || "GEMINI"})`}
-              </span>
-            </div>
-            <span className="bg-emerald-950/60 text-emerald-400 border border-emerald-800/40 text-[9px] font-bold px-2.5 py-1 rounded-xl uppercase flex items-center gap-1 shadow-sm">
-              <Zap className="h-3 w-3 text-emerald-400 fill-emerald-400" />{" "}
-              ACTIVE
-            </span>
-          </div>
-
+        <div className="flex items-center gap-3">
           <button
-            type="button"
-            onClick={handleResetAll}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl border border-neutral-800 bg-neutral-900/80 hover:bg-neutral-800 text-neutral-300 hover:text-white transition-all duration-300 text-xs font-mono font-bold active:scale-95 cursor-pointer shrink-0 shadow-sm"
-            title="Reset all settings to defaults"
+            onClick={handleResetDefaults}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white transition-all text-xs font-mono font-bold cursor-pointer active:scale-95 shadow-sm"
+            title="Reset parameters to defaults"
           >
             <RotateCcw className="h-3.5 w-3.5 text-neutral-400" />
             <span>Reset</span>
           </button>
-
           <button
-            type="button"
             onClick={onClose}
-            className="flex items-center gap-2 px-4.5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-mono transition-all duration-300 shadow-lg shadow-purple-900/40 font-bold cursor-pointer active:scale-95 border border-purple-400/30"
+            className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all cursor-pointer text-xs font-bold font-mono active:scale-95 shadow-sm"
+            title="Close"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Home
+            <X className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Tabs & Quick Action Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between border border-neutral-800/90 bg-neutral-900/70 backdrop-blur-xl rounded-3xl p-3 shrink-0 gap-3 shadow-lg">
-        {/* Left: Tab Buttons */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => {
-                console.log(`[AutoCropModal] Switching to tab: ${tab.id}`);
-                setActiveTab(tab.id);
-              }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all duration-300 cursor-pointer select-none whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "text-purple-200 bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.3)] scale-102"
-                  : "text-neutral-400 border border-transparent hover:text-neutral-200 hover:bg-neutral-800/60"
-              }`}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Right: Quick Controls */}
-        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
-          {/* Quick Engine Switcher Pills */}
-          <div
-            className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner"
-            title="Engine Strategy Mode"
-          >
-            <button
-              type="button"
-              onClick={() => setUseLocalCV(true)}
-              className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 cursor-pointer ${
-                useLocalCV
-                  ? "bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 shadow-sm"
-                  : "text-neutral-500 hover:text-neutral-300"
-              }`}
-            >
-              OpenCV
-            </button>
-            <button
-              type="button"
-              onClick={() => setUseLocalCV(false)}
-              className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 cursor-pointer ${
-                !useLocalCV
-                  ? "bg-purple-500/25 text-purple-300 border border-purple-500/40 shadow-sm"
-                  : "text-neutral-500 hover:text-neutral-300"
-              }`}
-            >
-              Gemini AI
-            </button>
-          </div>
-
-          {/* Background Gutter Mode Pills */}
-          <div
-            className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner"
-            title="Background Gutter Mode"
-          >
-            {(["auto", "white", "black"] as const).map((mode) => (
+      {/* ── Main 2-Column Grid Layout ──────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column (5 cols): Strategy & Core Parameter Controls */}
+        <div className="lg:col-span-5 space-y-6">
+          {/* Section 1: Engine Strategy Selector */}
+          <div className="space-y-3">
+            <label className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">
+              Detection Engine
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {/* OpenCV Button */}
               <button
-                key={mode}
-                type="button"
-                onClick={() => setBackgroundColorMode(mode)}
-                className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 cursor-pointer ${
-                  backgroundColorMode === mode
-                    ? "bg-amber-500/25 text-amber-300 border border-amber-500/40 shadow-sm"
-                    : "text-neutral-500 hover:text-neutral-300"
+                onClick={() => setUseLocalCV(true)}
+                className={`p-3.5 rounded-2xl border transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer relative ${
+                  useLocalCV
+                    ? "bg-purple-950/40 border-purple-500/60 shadow-[0_0_16px_rgba(168,85,247,0.2)] text-white"
+                    : "bg-neutral-900/40 border-white/5 hover:border-white/15 text-neutral-400"
                 }`}
               >
-                {mode}
+                <div className="flex items-center justify-between">
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/15 flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-purple-400" />
+                  </div>
+                  {useLocalCV && (
+                    <span className="w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
+                      <Check className="h-2.5 w-2.5 text-white" />
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white">OpenCV Engine</div>
+                  <div className="text-[10px] text-neutral-400 font-mono mt-0.5">
+                    Local CV · 0s latency · 0 credits
+                  </div>
+                </div>
               </button>
-            ))}
-          </div>
 
-          {/* Aspect Ratio Lock Pills */}
-          <div
-            className="flex items-center bg-neutral-950/90 border border-neutral-800/90 rounded-2xl p-1 shadow-inner"
-            title="Aspect Ratio Lock Mode"
-          >
-            {(["free", "1:1", "16:9"] as const).map((ratio) => (
+              {/* Gemini Vision AI Button */}
               <button
-                key={ratio}
-                type="button"
-                onClick={() => setAspectRatioLock(ratio)}
-                className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 cursor-pointer ${
-                  aspectRatioLock === ratio
-                    ? "bg-purple-500/25 text-purple-300 border border-purple-500/40 shadow-sm"
-                    : "text-neutral-500 hover:text-neutral-300"
+                onClick={() => setUseLocalCV(false)}
+                className={`p-3.5 rounded-2xl border transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer relative ${
+                  !useLocalCV
+                    ? "bg-purple-950/40 border-purple-500/60 shadow-[0_0_16px_rgba(168,85,247,0.2)] text-white"
+                    : "bg-neutral-900/40 border-white/5 hover:border-white/15 text-neutral-400"
                 }`}
               >
-                {ratio}
+                <div className="flex items-center justify-between">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-500/15 flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-indigo-400" />
+                  </div>
+                  {!useLocalCV && (
+                    <span className="w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center">
+                      <Check className="h-2.5 w-2.5 text-white" />
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-white">Gemini AI Vision</div>
+                  <div className="text-[10px] text-neutral-400 font-mono mt-0.5">
+                    Deep multimodal understanding
+                  </div>
+                </div>
               </button>
-            ))}
+            </div>
           </div>
 
-          {/* Auto-Split Strips Indicator */}
-          <div
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 text-xs font-bold shadow-sm"
-            title="Auto-Split is automatically active for all tall webtoon strips"
-          >
-            <Layers className="h-3.5 w-3.5" />
-            <span>Auto-Split: ACTIVE</span>
+          {/* Section 2: Model Dropdown (when AI engine is active) */}
+          {!useLocalCV && (
+            <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-2.5 animate-fadeIn">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-mono font-bold text-neutral-300">
+                  Vision Model
+                </label>
+                <span className="text-[10px] font-mono text-purple-400">
+                  Google Gemini Catalog
+                </span>
+              </div>
+              <div className="relative">
+                <select
+                  value={cropModel}
+                  onChange={(e) => setCropModel(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs font-mono text-white appearance-none cursor-pointer focus:outline-none focus:border-purple-500 transition-colors"
+                >
+                  {visionModels.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name || m.id} {m.speed_rating ? `— ${m.speed_rating}` : ""}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500 pointer-events-none" />
+              </div>
+            </div>
+          )}
+
+          {/* Section 3: Core Parameters Card */}
+          <div className="p-5 rounded-2xl bg-neutral-900/50 border border-neutral-800/80 space-y-5 shadow-lg">
+            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-2">
+              <Layers className="h-3.5 w-3.5 text-purple-400" />
+              Segmentation Parameters
+            </h3>
+
+            {/* Edge Sensitivity Slider */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-neutral-200">Edge Sensitivity</span>
+                <span className="font-mono font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20">
+                  {sensitivity}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min={10}
+                max={90}
+                step={1}
+                value={sensitivity}
+                onChange={(e) => setSensitivity(Number(e.target.value))}
+                className="w-full h-2 bg-neutral-950 rounded-full appearance-none cursor-pointer accent-purple-500 border border-white/5"
+              />
+              <div className="flex justify-between text-[9px] font-mono text-neutral-500 px-0.5">
+                <span>10% (Tolerant)</span>
+                <span>50% (Default)</span>
+                <span>90% (Strict)</span>
+              </div>
+            </div>
+
+            {/* Padding Slider */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-neutral-200">Panel Padding</span>
+                <span className="font-mono font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20">
+                  {padding}px
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={40}
+                step={2}
+                value={padding}
+                onChange={(e) => setPadding(Number(e.target.value))}
+                className="w-full h-2 bg-neutral-950 rounded-full appearance-none cursor-pointer accent-purple-500 border border-white/5"
+              />
+              <div className="flex justify-between text-[9px] font-mono text-neutral-500 px-0.5">
+                <span>0px (Tight)</span>
+                <span>10px (Standard)</span>
+                <span>40px (Spacious)</span>
+              </div>
+            </div>
+
+            {/* Aspect Ratio Locking */}
+            <div className="space-y-2 pt-1">
+              <label className="text-xs font-semibold text-neutral-200 block">
+                Aspect Ratio Lock
+              </label>
+              <div className="flex flex-wrap gap-1.5 p-1 bg-neutral-950 rounded-xl border border-neutral-800">
+                {aspectRatios.map((ratio) => {
+                  const isActive = aspectRatioLock === ratio.id;
+                  return (
+                    <button
+                      key={ratio.id}
+                      onClick={() => setAspectRatioLock(ratio.id)}
+                      className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                        isActive
+                          ? "bg-purple-600 text-white shadow-sm"
+                          : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      {ratio.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Split Tall Strips Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-xl bg-neutral-950 border border-neutral-800/80">
+              <div>
+                <div className="text-xs font-semibold text-neutral-200">
+                  Split Tall Webtoon Strips
+                </div>
+                <div className="text-[10px] text-neutral-500 font-mono mt-0.5">
+                  Slice long vertical scrolls into individual frames
+                </div>
+              </div>
+              <button
+                onClick={() => setAutoSplitTallStrips(!autoSplitTallStrips)}
+                className={`relative inline-flex h-5 w-10 rounded-full transition-colors duration-200 focus:outline-none cursor-pointer ${
+                  autoSplitTallStrips ? "bg-purple-600" : "bg-neutral-800"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out my-auto ml-0.5 ${
+                    autoSplitTallStrips ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column (7 cols): Interactive Live Test & Preview */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Target Image Selector Tray */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between text-xs font-mono">
+              <span className="font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2">
+                <ImageIcon className="h-3.5 w-3.5 text-purple-400" />
+                Target Test Image ({targetList.length} total)
+              </span>
+              <span className="text-neutral-500">
+                Page {activeImageIdx + 1} of {Math.max(1, targetList.length)}
+              </span>
+            </div>
+
+            {/* Thumbnail Scroll Tray */}
+            {targetList.length > 0 ? (
+              <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
+                {targetList.map((imgUrl, idx) => {
+                  const isSelected = activeImageIdx === idx;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveImageIdx(idx)}
+                      className={`relative w-16 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all cursor-pointer ${
+                        isSelected
+                          ? "border-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.4)] scale-105"
+                          : "border-neutral-800 opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      <img
+                        src={getProxiedImageUrl(imgUrl)}
+                        alt={`Thumb ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <span className="absolute bottom-1 right-1 bg-black/80 text-[8px] font-mono px-1 rounded text-white">
+                        {idx + 1}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl border border-dashed border-neutral-800 text-center text-xs font-mono text-neutral-500">
+                No images available in this chapter. Scrape or import images first.
+              </div>
+            )}
           </div>
 
-          {/* YOLO AI Vision Box Fusion Quick Toggle */}
-          <button
-            type="button"
-            onClick={() => setUseYolo(!useYolo)}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl border text-xs font-bold transition-all duration-300 cursor-pointer ${
-              useYolo
-                ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-                : "bg-neutral-900/90 border-neutral-800/90 text-neutral-400 hover:text-neutral-200"
-            }`}
-            title="Use YOLO AI neural model for deep learning panel candidates & speech bubble protection"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-            <span>YOLO AI: {useYolo ? "ON" : "OFF"}</span>
-          </button>
+          {/* Interactive Preview Canvas */}
+          <div className="space-y-3">
+            <div className="relative w-full h-[380px] bg-neutral-950 rounded-3xl border border-neutral-800/80 overflow-hidden flex items-center justify-center shadow-xl group">
+              {currentImageUrl ? (
+                <div className="relative w-full h-full flex items-center justify-center p-3">
+                  <img
+                    src={getProxiedImageUrl(currentImageUrl)}
+                    alt="Active Canvas"
+                    className="max-w-full max-h-full object-contain rounded-lg select-none pointer-events-none"
+                  />
+
+                  {/* Overlaid Detected Slices / Bounding Boxes */}
+                  {testBoxes.map((box, bIdx) => {
+                    const coords = computeBoxCoordinates(box);
+                    if (!coords) return null;
+
+                    return (
+                      <div
+                        key={bIdx}
+                        className="absolute border-2 border-emerald-400 bg-emerald-400/15 pointer-events-none rounded transition-all animate-fadeIn shadow-[0_0_10px_rgba(52,211,153,0.3)]"
+                        style={{
+                          left: coords.left,
+                          top: coords.top,
+                          width: coords.width,
+                          height: coords.height,
+                        }}
+                      >
+                        <span className="absolute -top-3 left-1 bg-emerald-500 text-black text-[9px] font-mono font-bold px-1.5 py-0.2 rounded shadow">
+                          #{bIdx + 1}
+                        </span>
+                      </div>
+                    );
+                  })}
+
+                  {/* Test Stats Pill */}
+                  {testStats && (
+                    <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 text-xs font-mono text-emerald-400 shadow-lg">
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      <span>
+                        {testStats.count} Panels Detected ({testStats.timeMs}ms)
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-neutral-600 font-mono text-xs">
+                  <ImageIcon className="h-8 w-8" />
+                  <span>No image selected</span>
+                </div>
+              )}
+            </div>
+
+            {/* Test Action Buttons Bar */}
+            <div className="flex items-center justify-between gap-4">
+              <button
+                onClick={handleRunSingleTest}
+                disabled={isTesting || !currentImageUrl}
+                className="flex-1 py-3 px-4 rounded-2xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-white text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-md active:scale-98"
+              >
+                {isTesting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
+                    <span>Analyzing Image...</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-3.5 w-3.5 text-purple-400 fill-purple-400" />
+                    <span>Test Detection on Current Image</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Main Workspace Content */}
-      <div className="w-full flex flex-col space-y-6">
-        <AutoCropTabContent
-          activeTab={activeTab}
-          useLocalCV={useLocalCV}
-          setUseLocalCV={setUseLocalCV}
-          cropModel={cropModel}
-          setCropModel={setCropModel}
-          autoSplitTallStrips={autoSplitTallStrips}
-          setAutoSplitTallStrips={setAutoSplitTallStrips}
-          cropSensitivity={sensitivity}
-          setCropSensitivity={setSensitivity}
-          cropPaddingPx={padding}
-          setCropPaddingPx={setPadding}
-          cropBackgroundMode={backgroundColorMode}
-          setCropBackgroundMode={setBackgroundColorMode}
-          aspectRatioLock={aspectRatioLock}
-          setAspectRatioLock={setAspectRatioLock}
-          minPanelAreaPct={minPanelAreaPct}
-          setMinPanelAreaPct={setMinPanelAreaPct}
-          overlapMergeThreshold={overlapMergeThreshold}
-          setOverlapMergeThreshold={setOverlapMergeThreshold}
-          cropMinHeightPx={cropMinHeightPx}
-          setCropMinHeightPx={setCropMinHeightPx}
-          cropCannyLow={cropCannyLow}
-          setCropCannyLow={setCropCannyLow}
-          cropCannyHigh={cropCannyHigh}
-          setCropCannyHigh={setCropCannyHigh}
-          cropCloseKernelSize={cropCloseKernelSize}
-          setCropCloseKernelSize={setCropCloseKernelSize}
-          scrapedImages={scrapedImages}
-          selectedScraped={selectedScraped}
-          setConsoleLogs={setConsoleLogs}
-          addNotification={addNotification}
-          cropGuidance={cropGuidance}
-          setCropGuidance={setCropGuidance}
-          cropFocusMode={cropFocusMode}
-          setCropFocusMode={setCropFocusMode}
-          previewImageUrl={previewImageUrl}
-        />
-      </div>
+      {/* ── Bottom Action Footer ───────────────────────────────────────── */}
+      <div className="pt-6 border-t border-white/8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-2.5 text-xs font-mono text-neutral-400">
+          <Info className="h-4 w-4 text-purple-400 flex-shrink-0" />
+          <span>
+            {targetList.length > 0
+              ? `Ready to crop ${targetList.length} image${targetList.length > 1 ? "s" : ""} and push sliced panels to Storyboard Timeline.`
+              : "No images loaded in current chapter."}
+          </span>
+        </div>
 
-      {/* Footer */}
-      <div className="pt-6 pb-2 border-t border-neutral-800/80 flex items-center justify-between gap-4 shrink-0 mt-auto">
-        <p className="text-xs text-neutral-500 font-mono hidden sm:block">
-          Settings apply to all current and future auto-crop jobs.
-        </p>
-        <div className="flex items-center gap-3.5 ml-auto">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
-            type="button"
-            onClick={() => {
-              console.log("[AutoCropModal] Apply clicked");
-              onApply();
-            }}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold font-sans transition-all cursor-pointer shadow-lg shadow-purple-900/40 flex items-center gap-2 active:scale-95"
+            onClick={onClose}
+            className="flex-1 sm:flex-none px-5 py-3 rounded-2xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-mono font-bold transition-all cursor-pointer active:scale-95"
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            Apply Settings
+            Cancel
+          </button>
+          <button
+            onClick={onApply}
+            disabled={isApplying || targetList.length === 0}
+            className="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2 active:scale-95 border border-purple-400/30 disabled:opacity-50"
+          >
+            {isApplying ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Cropping Panels...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 text-purple-200" />
+                <span>
+                  Auto-Crop All ({targetList.length} Images)
+                </span>
+              </>
+            )}
           </button>
         </div>
       </div>
-    </div>
-  );
-
-  return (
-    <div
-      id="auto-crop-container"
-      className="flex-1 w-full min-h-full flex flex-col animate-[fadeIn_0.22s_ease-out] bg-[#050508]"
-    >
-      {mainCard}
     </div>
   );
 }

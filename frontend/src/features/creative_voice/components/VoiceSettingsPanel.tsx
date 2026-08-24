@@ -27,87 +27,10 @@ interface CastResult {
   match_confidence: number;
 }
 
-interface VoiceOption {
-  code: string;
-  label: string;
-  gender?: "Male" | "Female";
-  lang?: string;
-}
+import { DEFAULT_TTS_VOICES, TTSVoiceOption } from "@/features/editor_studio/types/settings";
 
-const DEFAULT_VOICES: VoiceOption[] = [
-  {
-    code: "en-US-GuyNeural",
-    label: "English (US) — Guy (Male)",
-    gender: "Male",
-    lang: "English",
-  },
-  {
-    code: "en-US-JennyNeural",
-    label: "English (US) — Jenny (Female)",
-    gender: "Female",
-    lang: "English",
-  },
-  {
-    code: "en-US-AriaNeural",
-    label: "English (US) — Aria (Female)",
-    gender: "Female",
-    lang: "English",
-  },
-  {
-    code: "en-GB-SoniaNeural",
-    label: "English (UK) — Sonia (Female)",
-    gender: "Female",
-    lang: "English",
-  },
-  {
-    code: "en-GB-RyanNeural",
-    label: "English (UK) — Ryan (Male)",
-    gender: "Male",
-    lang: "English",
-  },
-  {
-    code: "en-AU-NatashaNeural",
-    label: "English (AU) — Natasha (Female)",
-    gender: "Female",
-    lang: "English",
-  },
-  {
-    code: "ko-KR-SunHiNeural",
-    label: "Korean — SunHi (Female)",
-    gender: "Female",
-    lang: "Korean",
-  },
-  {
-    code: "ko-KR-InJoonNeural",
-    label: "Korean — InJoon (Male)",
-    gender: "Male",
-    lang: "Korean",
-  },
-  {
-    code: "ja-JP-NanamiNeural",
-    label: "Japanese — Nanami (Female)",
-    gender: "Female",
-    lang: "Japanese",
-  },
-  {
-    code: "zh-CN-XiaoxiaoNeural",
-    label: "Chinese (Mandarin) — Xiaoxiao (Female)",
-    gender: "Female",
-    lang: "Chinese",
-  },
-  {
-    code: "ta-IN-PallaviNeural",
-    label: "Tamil (India) — Pallavi (Female)",
-    gender: "Female",
-    lang: "Tamil",
-  },
-  {
-    code: "ta-IN-ValluvarNeural",
-    label: "Tamil (India) — Valluvar (Male)",
-    gender: "Male",
-    lang: "Tamil",
-  },
-];
+type VoiceOption = TTSVoiceOption;
+const DEFAULT_VOICES: VoiceOption[] = DEFAULT_TTS_VOICES;
 
 export default function VoiceSettingsPanel({
   activePanel,
