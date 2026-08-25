@@ -30,7 +30,7 @@ import {
 import { useLoginForm } from "@/features/app_auth/hooks";
 
 interface LoginPageProps {
-  onLogin: (data: any) => Promise<void>;
+  onLogin: (data: any) => Promise<any>;
   onNavigateToRegister: () => void;
   onNavigateToForgotPassword: () => void;
   onNavigateHome?: () => void;

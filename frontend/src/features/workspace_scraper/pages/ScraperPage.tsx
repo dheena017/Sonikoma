@@ -26,7 +26,7 @@ import RecentProjectsSection from "@/features/workspace_scraper/components/Recen
 import CreatorGuideSection from "@/features/workspace_scraper/components/CreatorGuideSection";
 import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 export interface ScraperPageProps {
   [key: string]: any;

@@ -25,7 +25,7 @@ import {
   RotateCw,
   Settings2,
 } from "lucide-react";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 interface ScraperSelectionToolbarProps {
   scrapedImages: string[];

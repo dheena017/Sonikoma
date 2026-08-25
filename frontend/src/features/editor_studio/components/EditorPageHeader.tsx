@@ -29,7 +29,7 @@ import { Notification } from "@/features/app_notification";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { HeaderCreditsPopover } from "@/features/ai_core";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { AIModelSelector } from "@/features/ai_core";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 
@@ -204,7 +204,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-3 border-b border-white/8 bg-[#06060c]/90 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-4 lg:pl-0 pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-2 sm:gap-3 border-b border-white/8 bg-[#06060c]/90 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
         className || ""
       }`}
       style={style}
@@ -212,14 +212,14 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       {/* Left Section - Menu Icon + Title + Metadata */}
       <div className="flex items-center shrink-0 h-full">
         {/* PREMIUM ALIGNMENT FIX: w-20 wrapper perfectly aligns the menu button above the mini-sidebar */}
-        <div className="w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-3">
+        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1.5 sm:mr-3">
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
               title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           )}
         </div>
@@ -311,14 +311,14 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       )}
 
       {/* Right Section - Action Buttons (Unified h-9 height and clean spacing) */}
-      <div className="flex items-center gap-2 shrink-0 flex-nowrap">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
         {/* 🟢 Server Status Indicator */}
         <ServerStatusIndicator status={backendOnline ? "online" : "offline"} />
 
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector compact className="hidden sm:inline-flex" />
+        <AIModelSelector compact className="flex" />
 
-        {/* ⚡ Credits Pill & Popover */}
+        {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>
             <button
@@ -327,14 +327,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className={`hidden sm:flex h-9 items-center gap-1.5 px-3 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
-                credits < 20
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
-                  : "bg-neutral-900 border-neutral-800 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
-              }`}
+              className="flex h-9 items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
             >
-              <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
-              {credits.toLocaleString()}
+              <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
+              <span>{credits.toLocaleString()}</span>
             </button>
 
             {showCreditsPopover && (
@@ -469,19 +465,19 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           </button>
         </div>
 
-        {/* User Profile Pill at Far Right End */}
+        {/* User Profile Pill at Far Right End (Image 2 Style) */}
         <button
           onClick={() => navigateTo?.("/profile")}
-          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95 h-9"
+          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+          <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
             {user?.full_name ||
               user?.username ||
-              (user?.email ? user.email.split("@")[0] : "User")}
+              (user?.email ? user.email.split("@")[0] : "Studio Creator")}
           </span>
-          <div className="relative w-6 h-6 rounded-full overflow-hidden border border-purple-500/40 bg-purple-950/40 shrink-0 shadow-xs ring-1 ring-white/10 group-hover:border-purple-400 group-hover:ring-purple-500/30 transition-all duration-300">
+          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
             <img
               key={user?.avatar_url || user?.full_name || "avatar"}
               src={getUserAvatarUrl(user)}

@@ -233,44 +233,50 @@ export const AIModelSelector: React.FC<AIModelSelectorProps> = ({
           setIsOpen(!isOpen);
           if (!isOpen) fetchRoutingConfig();
         }}
-        className={`inline-flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-purple-500/30 bg-[#0d0d18]/95 hover:bg-purple-950/30 hover:border-purple-500/60 text-neutral-200 transition-all duration-200 shadow-sm focus:outline-none group cursor-pointer ${
-          compact ? "h-9 text-xs" : "h-10"
+        className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-xl border border-[#3f3f46] bg-[#202024] hover:bg-[#28282e] hover:border-neutral-500 text-neutral-200 transition-all duration-200 shadow-sm focus:outline-none group cursor-pointer ${
+          compact ? "h-8 text-xs" : "h-9"
         }`}
         title="AI Model Routing: All 11 comic tasks automatically route through specialized engines"
       >
-        <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border border-purple-400/40 flex items-center justify-center flex-shrink-0">
-          <Workflow className="w-3 h-3 text-purple-300 group-hover:rotate-45 transition-transform duration-300" />
+        <div className="w-5.5 h-5.5 rounded-lg bg-[#2a2a30] border border-[#484852] flex items-center justify-center flex-shrink-0 shadow-sm group-hover:border-neutral-400 transition-colors">
+          <Workflow className="w-3 h-3 text-neutral-300 group-hover:text-white group-hover:rotate-45 transition-all duration-300" />
         </div>
 
         {compact ? (
           <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-black text-white tracking-tight whitespace-nowrap">
+            <span className="text-[11px] font-bold text-white tracking-tight whitespace-nowrap hidden min-[440px]:inline">
               AI Smart Routing
             </span>
-            <span className="px-1.5 py-0.5 text-[8px] font-extrabold uppercase rounded tracking-wider bg-purple-950/90 text-purple-300 border border-purple-800/50 hidden md:inline">
+            <span className="text-[11px] font-bold text-white tracking-tight whitespace-nowrap min-[440px]:hidden">
+              AI
+            </span>
+            <span className="px-1.5 py-0.2 text-[7.5px] font-black uppercase rounded tracking-wider bg-[#2d1b54] text-purple-300 border border-purple-600/40 shadow-sm hidden sm:inline">
               11 Tasks
             </span>
           </div>
         ) : (
-          <div className="flex flex-col text-left">
+          <div className="flex flex-col text-left justify-center">
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-black text-white tracking-tight whitespace-nowrap">
+              <span className="text-[11px] font-bold text-white tracking-tight whitespace-nowrap leading-none hidden min-[440px]:inline">
                 AI Smart Routing
               </span>
-              <span className="px-1.5 py-0.2 text-[8px] font-extrabold uppercase rounded tracking-wider bg-purple-950/90 text-purple-300 border border-purple-800/50">
+              <span className="text-[11px] font-bold text-white tracking-tight whitespace-nowrap leading-none min-[440px]:hidden">
+                AI
+              </span>
+              <span className="px-1.5 py-0.2 text-[7.5px] font-black uppercase rounded tracking-wider bg-[#2d1b54] text-purple-300 border border-purple-600/40 shadow-sm leading-none hidden sm:inline">
                 11 Tasks Active
               </span>
             </div>
-            <span className="text-[9px] text-neutral-400 font-mono flex items-center gap-1 leading-tight">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="text-[8.5px] text-neutral-400 font-mono flex items-center gap-1 leading-none mt-0.5 hidden sm:flex">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-[0_0_5px_#10b981]" />
               Automatic Cascades Enabled
             </span>
           </div>
         )}
 
         <ChevronDown
-          className={`w-3.5 h-3.5 text-purple-400 group-hover:text-white transition-transform duration-200 ml-0.5 shrink-0 ${
-            isOpen ? "rotate-180 text-purple-300" : ""
+          className={`w-3.5 h-3.5 text-neutral-400 group-hover:text-white transition-transform duration-200 ml-0.5 shrink-0 ${
+            isOpen ? "rotate-180 text-white" : ""
           }`}
         />
       </button>
@@ -278,7 +284,7 @@ export const AIModelSelector: React.FC<AIModelSelectorProps> = ({
       {/* ── Smart Model Routing Dashboard Flyout ─────────────────────── */}
       {isOpen && (
         <div
-          className="absolute top-full right-0 mt-2 w-[540px] max-w-[95vw] rounded-2xl border shadow-2xl z-50 overflow-hidden text-left animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl"
+          className="fixed sm:absolute top-16 sm:top-full left-2 right-2 sm:left-auto sm:right-0 mt-1 sm:mt-2 w-auto sm:w-[540px] max-w-[95vw] rounded-2xl border shadow-2xl z-50 overflow-hidden text-left animate-in fade-in zoom-in-95 duration-150 backdrop-blur-2xl"
           style={{
             backgroundColor: "#090910",
             borderColor: "#1e1e32",
@@ -292,8 +298,8 @@ export const AIModelSelector: React.FC<AIModelSelectorProps> = ({
             style={{ borderColor: "#1a1a2e", backgroundColor: "#0e0e1a" }}
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-purple-600/25 border border-purple-500/40 flex items-center justify-center flex-shrink-0 shadow-inner">
-                <Workflow className="w-4 h-4 text-purple-300" />
+              <div className="w-8 h-8 rounded-xl bg-[#202024] border border-[#3f3f46] flex items-center justify-center flex-shrink-0 shadow-sm">
+                <Workflow className="w-4 h-4 text-neutral-300" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -351,11 +357,10 @@ export const AIModelSelector: React.FC<AIModelSelectorProps> = ({
                   key={cat}
                   type="button"
                   onClick={() => setSelectedFilter(cat)}
-                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all cursor-pointer ${
-                    isSelected
+                  className={`px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all cursor-pointer ${isSelected
                       ? "bg-purple-600 text-white shadow-sm"
                       : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-850 border border-transparent"
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>

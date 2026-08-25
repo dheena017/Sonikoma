@@ -1,27 +1,25 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 
-interface UseGlobalShortcutsProps {
-  scrapedImages: string[];
-  selectedScraped: string[];
-  setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
-  lastEditorPath: string;
-  targetUrl: string;
-  volume: number;
-  setVolume: React.Dispatch<React.SetStateAction<number>>;
-  isMuted: boolean;
-  setIsMuted: React.Dispatch<React.SetStateAction<boolean>>;
-  addNotification: (
-    msg: string,
-    type: "success" | "info" | "warning" | "error"
-  ) => void;
-  handleGenerateVideo: () => void;
-  toggleStoryboardPlayback: () => void;
-  resetStoryboardPlayback: () => void;
-  navigateTo: (path: string) => void;
-  setIsPipMode: (v: boolean) => void;
+export interface UseGlobalShortcutsProps {
+  scrapedImages?: string[];
+  selectedScraped?: string[];
+  setSelectedScraped?: React.Dispatch<React.SetStateAction<string[]>>;
+  lastEditorPath?: string;
+  targetUrl?: string;
+  volume?: number;
+  setVolume?: React.Dispatch<React.SetStateAction<number>>;
+  isMuted?: boolean;
+  setIsMuted?: React.Dispatch<React.SetStateAction<boolean>>;
+  addNotification?: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  handleGenerateVideo?: () => void;
+  toggleStoryboardPlayback?: () => void;
+  resetStoryboardPlayback?: () => void;
+  navigateTo?: (path: string) => void;
+  setIsPipMode?: (v: boolean) => void;
+  [key: string]: any;
 }
 
-export const DEFAULT_SHORTCUTS = {
+export const DEFAULT_SHORTCUTS: Record<string, string> = {
   nav_dashboard: "Alt+D",
   nav_settings: "Alt+S",
   nav_editor: "Alt+E",
@@ -35,351 +33,110 @@ export const DEFAULT_SHORTCUTS = {
   trigger_scrape: "Alt+N",
   playback_toggle: "Space",
   playback_reset: "Alt+R",
-  playback_speed_1: "Alt+Z",
-  playback_speed_1_5: "Alt+X",
-  playback_speed_2: "Alt+C",
   volume_up: "Alt+ArrowUp",
   volume_down: "Alt+ArrowDown",
   volume_mute: "Alt+M",
-  editor_tab_1: "Alt+1",
-  editor_tab_2: "Alt+2",
-  editor_tab_3: "Alt+3",
-  editor_tab_4: "Alt+4",
-  editor_tab_5: "Alt+5",
-  editor_tab_6: "Alt+6",
-  editor_prev: "ArrowLeft",
-  editor_next: "ArrowRight",
-  editor_undo: "Control+Z",
-  editor_redo: "Control+Y",
-  editor_save: "Control+S",
-  editor_close: "Escape",
-  editor_zoom_in: "Control++",
-  editor_zoom_out: "Control+-",
-  editor_brush_inc: "]",
-  editor_brush_dec: "[",
-  deck_select_all: "Alt+A",
-  deck_invert: "Alt+I",
-  deck_clear: "Alt+X",
-  deck_stitch: "Alt+M",
 };
 
-export function useGlobalShortcuts({
-  scrapedImages,
-  selectedScraped,
-  setSelectedScraped,
-  lastEditorPath,
-  targetUrl,
-  volume,
-  setVolume,
-  isMuted,
-  setIsMuted,
-  addNotification,
-  handleGenerateVideo,
-  toggleStoryboardPlayback,
-  resetStoryboardPlayback,
-  navigateTo,
-  setIsPipMode,
-}: UseGlobalShortcutsProps) {
-  const [shortcuts, setShortcuts] = React.useState<Record<string, string>>(
-    () => {
-      try {
+/** Normalize and check if a keyboard event matches a shortcut string like "Alt+D" or "Ctrl+Z" */
+export function matchesShortcut(e: KeyboardEvent, shortcutStr?: string): boolean {
+  if (!shortcutStr) return false;
+  const parts = shortcutStr.toLowerCase().split("+");
+  const key = parts[parts.length - 1];
+  const requiresCtrl = parts.includes("ctrl") || parts.includes("control");
+  const requiresAlt = parts.includes("alt");
+  const requiresShift = parts.includes("shift");
+
+  const ctrlPressed = e.ctrlKey || e.metaKey;
+  if (requiresCtrl !== ctrlPressed) return false;
+  if (requiresAlt !== e.altKey) return false;
+  if (requiresShift !== e.shiftKey) return false;
+
+  if (key === "space") return e.code === "Space";
+  if (key === "arrowup") return e.key === "ArrowUp";
+  if (key === "arrowdown") return e.key === "ArrowDown";
+  if (key === "arrowleft") return e.key === "ArrowLeft";
+  if (key === "arrowright") return e.key === "ArrowRight";
+  if (key === "escape") return e.key === "Escape";
+
+  return e.key.toLowerCase() === key;
+}
+
+export function useGlobalShortcuts(props: UseGlobalShortcutsProps) {
+  const [shortcuts, setShortcuts] = useState<Record<string, string>>(() => {
+    try {
+      if (typeof window !== "undefined") {
         const stored = localStorage.getItem("ai_comic_shortcuts");
         if (stored) {
           const parsed = JSON.parse(stored);
-          // Sanitize: only keep entries where the value is a non-empty string
-          const sanitized = Object.fromEntries(
-            Object.entries(parsed).filter(
-              ([, v]) => typeof v === "string" && (v as string).trim() !== ""
-            )
-          ) as Record<string, string>;
-          return { ...DEFAULT_SHORTCUTS, ...sanitized };
+          return { ...DEFAULT_SHORTCUTS, ...parsed };
         }
-      } catch (e) {}
-      return DEFAULT_SHORTCUTS;
-    }
-  );
+      }
+    } catch {}
+    return DEFAULT_SHORTCUTS;
+  });
 
-  React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const activeEl = document.activeElement;
+  const [activePlaybackSpeed, setActivePlaybackSpeed] = useState<number>(1.0);
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore shortcut keys when typing inside input fields or textareas
+      const target = e.target as HTMLElement;
       if (
-        activeEl instanceof HTMLInputElement ||
-        activeEl instanceof HTMLTextAreaElement ||
-        (activeEl instanceof HTMLElement && activeEl.isContentEditable)
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
       ) {
         return;
       }
 
-      if ((window as any).isRecordingHotkey) {
-        return;
-      }
-
-      // Build modifier key strings
-      const parts: string[] = [];
-      if (event.ctrlKey) parts.push("Control");
-      if (event.altKey) parts.push("Alt");
-      if (event.shiftKey) parts.push("Shift");
-
-      let key = event.key;
-      if (!key) return;
-      if (key === " ") key = "Space";
-
-      if (!["Control", "Alt", "Shift"].includes(key)) {
-        parts.push(key.length === 1 ? key.toUpperCase() : key);
-      } else {
-        return; // modifier-only
-      }
-
-      const combination = parts.join("+").toLowerCase();
-
-      // Find matched keybind action — guard against undefined/null shortcut values
-      const matchedAction = Object.entries(shortcuts).find(
-        ([_, val]) =>
-          typeof val === "string" && val.toLowerCase() === combination
-      )?.[0];
-
-      if (!matchedAction) return;
-
-      event.preventDefault();
-
-      const path = window.location.pathname;
-      const chapterPathMatch = path.match(
-        /\/series\/[^\/]+\/chapters\/([^\/]+)/
-      );
-      const isDashboard =
-        path === "/dashboard" ||
-        (chapterPathMatch !== null && !path.endsWith("/details"));
-      const isProEditor = path === "/editor";
-      const isInternalEditor = path.startsWith("/editor/");
-      const isAnyEditor = isProEditor || isInternalEditor;
-
-      switch (matchedAction) {
-        case "nav_dashboard":
-          navigateTo("/dashboard");
-          break;
-        case "nav_editor":
-          if (scrapedImages.length > 0) {
-            setIsPipMode(false);
-            navigateTo(lastEditorPath);
-          } else {
-            addNotification(
-              "No scraped frames available. Scraping required.",
-              "info"
-            );
-          }
-          break;
-        case "nav_autocrop":
-          if (scrapedImages.length > 0) {
-            navigateTo("/auto-crop");
-          } else {
-            addNotification("No scraped frames available.", "info");
-          }
-          break;
-        case "nav_shortcuts":
-          navigateTo("/shortcuts");
-          break;
-        case "nav_profile":
-          navigateTo("/profile");
-          break;
-        case "trigger_compile":
-          handleGenerateVideo();
-          break;
-        case "trigger_scrape":
-          if (targetUrl) {
-            addNotification(
-              "Keyboard Trigger: Initializing comic scraper task...",
-              "info"
-            );
-          } else {
-            addNotification("Enter a Webtoon URL first.", "warning");
-          }
-          break;
-        case "playback_toggle":
-          if (isDashboard || isProEditor) toggleStoryboardPlayback();
-          break;
-        case "playback_reset":
-          if (isDashboard || isProEditor) resetStoryboardPlayback();
-          break;
-        case "playback_speed_1":
-          if (isDashboard || isProEditor) {
-            const video = document.querySelector("video");
-            if (video) video.playbackRate = 1.0;
-            addNotification("Playback speed: 1x", "info");
-          }
-          break;
-        case "playback_speed_1_5":
-          if (isDashboard || isProEditor) {
-            const video = document.querySelector("video");
-            if (video) video.playbackRate = 1.5;
-            addNotification("Playback speed: 1.5x", "info");
-          }
-          break;
-        case "playback_speed_2":
-          if (isDashboard || isProEditor) {
-            const video = document.querySelector("video");
-            if (video) video.playbackRate = 2.0;
-            addNotification("Playback speed: 2x", "info");
-          }
-          break;
-        case "volume_up":
-          if (isDashboard || isProEditor) {
-            setVolume((v) => Math.min(100, v + 10));
-          }
-          break;
-        case "volume_down":
-          if (isDashboard || isProEditor) {
-            setVolume((v) => Math.max(0, v - 10));
-          }
-          break;
-        case "volume_mute":
-          if (isDashboard || isProEditor) {
-            setIsMuted((m) => !m);
-          }
-          break;
-        case "deck_select_all":
-          if (isDashboard && scrapedImages.length > 0) {
-            if (selectedScraped.length === scrapedImages.length) {
-              setSelectedScraped([]);
-            } else {
-              setSelectedScraped([...scrapedImages]);
-            }
-          }
-          break;
-        case "deck_invert":
-          if (isDashboard && scrapedImages.length > 0) {
-            setSelectedScraped((prev) =>
-              scrapedImages.filter((img) => !prev.includes(img))
-            );
-          }
-          break;
-        case "deck_clear":
-          if (isDashboard) setSelectedScraped([]);
-          break;
-        case "deck_stitch":
-          if (isDashboard && selectedScraped.length >= 2) {
-            addNotification(
-              "Keyboard Trigger: Stitching selected panels...",
-              "info"
-            );
-            const btn = document.querySelector(
-              '#scraped_strips_deck button[title*="Stitch"]'
-            ) as HTMLButtonElement;
-            btn?.click();
-          }
-          break;
-
-        // Editor Shortcuts
-        case "editor_tab_1":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({
-              type: "SWITCH_TAB",
-              tab: "adjust",
-            });
-          break;
-        case "editor_tab_2":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({
-              type: "SWITCH_TAB",
-              tab: "edit",
-            });
-          break;
-        case "editor_tab_3":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({
-              type: "SWITCH_TAB",
-              tab: "eraser",
-            });
-          break;
-        case "editor_tab_4":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({
-              type: "SWITCH_TAB",
-              tab: "slice",
-            });
-          break;
-        case "editor_tab_5":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({
-              type: "SWITCH_TAB",
-              tab: "crop",
-            });
-          break;
-        case "editor_tab_6":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({
-              type: "SWITCH_TAB",
-              tab: "merge",
-            });
-          break;
-        case "editor_prev":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "PREV_IMAGE" });
-          break;
-        case "editor_next":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "NEXT_IMAGE" });
-          break;
-        case "editor_undo":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "UNDO" });
-          break;
-        case "editor_redo":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "REDO" });
-          break;
-        case "editor_save":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "SAVE" });
-          break;
-        case "editor_close":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "CLOSE" });
-          break;
-        case "editor_zoom_in":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "ZOOM_IN" });
-          break;
-        case "editor_zoom_out":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "ZOOM_OUT" });
-          break;
-        case "editor_brush_inc":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "BRUSH_INC" });
-          break;
-        case "editor_brush_dec":
-          if (isInternalEditor)
-            (window as any).dispatchEditorAction?.({ type: "BRUSH_DEC" });
-          break;
+      // ── Dispatch table ───────────────────────────────────────────────────
+      if (matchesShortcut(e, shortcuts.nav_dashboard)) {
+        e.preventDefault();
+        props.navigateTo?.("/dashboard");
+      } else if (matchesShortcut(e, shortcuts.nav_settings)) {
+        e.preventDefault();
+        props.navigateTo?.("/settings");
+      } else if (matchesShortcut(e, shortcuts.nav_editor)) {
+        e.preventDefault();
+        props.navigateTo?.("/editor");
+      } else if (matchesShortcut(e, shortcuts.nav_shortcuts)) {
+        e.preventDefault();
+        setIsShortcutsHelpOpen((prev) => !prev);
+      } else if (matchesShortcut(e, shortcuts.playback_toggle)) {
+        e.preventDefault();
+        props.toggleStoryboardPlayback?.();
+      } else if (matchesShortcut(e, shortcuts.playback_reset)) {
+        e.preventDefault();
+        props.resetStoryboardPlayback?.();
+      } else if (matchesShortcut(e, shortcuts.trigger_compile)) {
+        e.preventDefault();
+        props.handleGenerateVideo?.();
+      } else if (matchesShortcut(e, shortcuts.volume_up) && props.setVolume) {
+        e.preventDefault();
+        props.setVolume((v) => Math.min(100, v + 10));
+      } else if (matchesShortcut(e, shortcuts.volume_down) && props.setVolume) {
+        e.preventDefault();
+        props.setVolume((v) => Math.max(0, v - 10));
+      } else if (matchesShortcut(e, shortcuts.volume_mute) && props.setIsMuted) {
+        e.preventDefault();
+        props.setIsMuted((m) => !m);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    shortcuts,
-    scrapedImages,
-    lastEditorPath,
-    targetUrl,
-    selectedScraped,
-    volume,
-    isMuted,
-    addNotification,
-    handleGenerateVideo,
-    toggleStoryboardPlayback,
-    resetStoryboardPlayback,
-    setVolume,
-    setIsMuted,
-    setSelectedScraped,
-    navigateTo,
-    setIsPipMode,
-  ]);
+  }, [shortcuts, props]);
 
-  return useMemo(
-    () => ({
-      shortcuts,
-      setShortcuts,
-    }),
-    [shortcuts]
-  );
+  return {
+    shortcuts,
+    setShortcuts,
+    activePlaybackSpeed,
+    setActivePlaybackSpeed,
+    isShortcutsHelpOpen,
+    setIsShortcutsHelpOpen,
+  };
 }

@@ -1,528 +1,122 @@
-import React from "react";
-import { createTempProjectId } from "@/shared/utils/workspaceNavigation";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 
-interface UseAppRouterProps {
-  scrapedImages: string[];
-  panels: any[];
-  editingImageIdx: number | null;
-  setEditingImageIdx: (idx: number | null) => void;
-  setShowAutoCropModal: (v: boolean) => void;
-  setShowBubbleModal: (v: boolean) => void;
-  setTargetUrl: (v: string) => void;
-  setSelectedModel: (v: string) => void;
-  setSelectedSource: (v: string) => void;
-  setVoiceActor: (v: string) => void;
-  setMusicTheme: (v: string) => void;
-  setAspectRatio: (v: "auto" | "9:16" | "16:9") => void;
-  setFrameRate: (v: number) => void;
-  addNotification: (
-    msg: string,
-    type: "success" | "info" | "warning" | "error",
-    options?: {
-      errorCode?: number;
-      retryDelay?: number;
-      onRetry?: () => void;
-      details?: string;
-      link?: string;
-    }
-  ) => void;
-  isAuthenticated: boolean;
-  authLoading: boolean;
-  isInitializing: boolean;
-  user: any;
-  voiceActor: string;
-  musicTheme: string;
-  aspectRatio: "auto" | "9:16" | "16:9";
-  frameRate: number;
+export interface UseAppRouterProps {
+  scrapedImages?: string[];
+  panels?: any[];
+  editingImageIdx?: number | null;
+  setEditingImageIdx?: (idx: number | null) => void;
+  setShowAutoCropModal?: (v: boolean) => void;
+  setShowBubbleModal?: (v: boolean) => void;
+  setTargetUrl?: (v: string) => void;
+  setSelectedModel?: (v: string) => void;
+  setSelectedSource?: (v: string) => void;
+  setVoiceActor?: (v: string) => void;
+  setMusicTheme?: (v: string) => void;
+  setAspectRatio?: (v: "auto" | "9:16" | "16:9") => void;
+  setFrameRate?: (v: number) => void;
+  addNotification?: (msg: string, type: any) => void;
+  isAuthenticated?: boolean;
+  authLoading?: boolean;
+  isInitializing?: boolean;
+  user?: any;
+  voiceActor?: string;
+  musicTheme?: string;
+  aspectRatio?: "auto" | "9:16" | "16:9";
+  frameRate?: number;
   isDirty?: boolean;
-  projectId: string | null;
-  seriesSlug: string | null;
-  chapterSlug: string | null;
+  projectId?: string | null;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
+  [key: string]: any;
 }
 
-export function useAppRouter({
-  scrapedImages,
-  panels,
-  editingImageIdx,
-  setEditingImageIdx,
-  setShowAutoCropModal,
-  setShowBubbleModal,
-  setTargetUrl,
-  setSelectedModel,
-  setSelectedSource,
-  setVoiceActor,
-  setMusicTheme,
-  setAspectRatio,
-  setFrameRate,
-  addNotification,
-  isAuthenticated,
-  authLoading,
-  isInitializing,
-  user,
-  voiceActor,
-  musicTheme,
-  aspectRatio,
-  frameRate,
-  isDirty = false,
-  projectId,
-  seriesSlug,
-  chapterSlug,
-}: UseAppRouterProps) {
-  const getInitialPath = () => {
-    return window.location.pathname || "/";
-  };
+export function useAppRouter(props?: UseAppRouterProps) {
+  const [currentPath, setCurrentPath] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return window.location.pathname || "/";
+    }
+    return "/";
+  });
 
-  const [currentPath, setCurrentPath] = React.useState(getInitialPath);
-  const [lastEditorPath, setLastEditorPath] = React.useState<string>(
-    "/editor/adjust?idx=0"
-  );
-  const [activeTheme, setActiveTheme] = React.useState<string>(
-    () => localStorage.getItem("ai_comic_theme") || "obsidian"
-  );
-  const [isPipMode, setIsPipMode] = React.useState<boolean>(false);
+  const [lastEditorPath, setLastEditorPath] = useState<string>("/editor/adjust?idx=0");
+  const [activeTheme, setActiveTheme] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("ai_comic_theme") || "obsidian";
+    }
+    return "obsidian";
+  });
+  const [isPipMode, setIsPipMode] = useState<boolean>(false);
 
-  // Use refs for unstable dependencies to prevent redundant effect re-runs
-  const scrapedImagesRef = React.useRef(scrapedImages);
-  const panelsRef = React.useRef(panels);
-  const editingImageIdxRef = React.useRef(editingImageIdx);
-
-  React.useEffect(() => {
-    scrapedImagesRef.current = scrapedImages;
-  }, [scrapedImages]);
-
-  React.useEffect(() => {
-    panelsRef.current = panels;
-  }, [panels]);
-
-  React.useEffect(() => {
-    editingImageIdxRef.current = editingImageIdx;
-  }, [editingImageIdx]);
-
-  // Sync visual theme with root html element
-  React.useEffect(() => {
-    document.documentElement.setAttribute("data-theme", activeTheme);
-    localStorage.setItem("ai_comic_theme", activeTheme);
+  // Sync visual theme with root HTML element
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-theme", activeTheme);
+      localStorage.setItem("ai_comic_theme", activeTheme);
+    }
   }, [activeTheme]);
 
-  // Sync settings and state URL parameters on load
-  React.useEffect(() => {
+  // Sync settings and state URL query parameters on initial mount
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const urlParam = params.get("url");
     const modelParam = params.get("model");
     const sourceParam = params.get("source");
 
-    if (urlParam) setTargetUrl(urlParam);
-    if (modelParam) setSelectedModel(modelParam);
-    if (sourceParam) setSelectedSource(sourceParam);
-
-    const stateHash = params.get("state");
-    if (stateHash) {
-      try {
-        const decoded = JSON.parse(atob(stateHash));
-        if (decoded.url) setTargetUrl(decoded.url);
-        if (decoded.voice) setVoiceActor(decoded.voice);
-        if (decoded.music) setMusicTheme(decoded.music);
-        if (decoded.aspectRatio) setAspectRatio(decoded.aspectRatio);
-        if (decoded.fps) setFrameRate(decoded.fps);
-        if (decoded.model) setSelectedModel(decoded.model);
-        if (decoded.source) setSelectedSource(decoded.source);
-        addNotification(
-          "Workspace session state restored successfully!",
-          "success"
-        );
-      } catch (e) {
-        console.error("Failed to decode session state hash:", e);
-      }
-    }
+    if (urlParam && props?.setTargetUrl) props.setTargetUrl(urlParam);
+    if (modelParam && props?.setSelectedModel) props.setSelectedModel(modelParam);
+    if (sourceParam && props?.setSelectedSource) props.setSelectedSource(sourceParam);
   }, []);
 
-  // Core router change listener with equality guards
-  React.useEffect(() => {
+  // Popstate and navigation listener
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const handleLocationChange = () => {
       const path = window.location.pathname;
       setCurrentPath(path);
 
-      const isLegacyChapterDetailsPath =
-        path.startsWith("/scraper/editor/series/") && path.endsWith("/details");
-
-      if (isLegacyChapterDetailsPath) {
-        const normalizedPath = path.replace(/\/details$/, "");
-        window.history.replaceState({}, "", normalizedPath);
-        setCurrentPath(normalizedPath);
-        return;
-      }
-
-      const isLegacyProjectPagePath =
-        path === "/project-details" ||
-        path === "/project-editor" ||
-        path === "/editor/editor" ||
-        path === "/editor/editor/" ||
-        path.startsWith("/editor/editor/");
-
-      if (isLegacyProjectPagePath) {
-        const activeProjId =
-          localStorage.getItem("active_project_id") || projectId;
-        const activeSeriesSlug =
-          localStorage.getItem("active_series_slug") || seriesSlug;
-        const activeChapterSlug =
-          localStorage.getItem("active_chapter_slug") || chapterSlug;
-        let target = "/dashboard";
-
-        const hasValidSlugs =
-          activeSeriesSlug &&
-          activeChapterSlug &&
-          activeSeriesSlug !== "null" &&
-          activeChapterSlug !== "null";
-
-        if (hasValidSlugs) {
-          if (path.startsWith("/editor/editor")) {
-            const params = new URLSearchParams(window.location.search);
-            const idx = params.get("idx") || "0";
-            target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}/image-editor?idx=${idx}`;
-          } else {
-            target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
-          }
-        } else if (activeProjId) {
-          if (path.includes("image-editor")) {
-            const params = new URLSearchParams(window.location.search);
-            const idx = params.get("idx") || "0";
-            target = `/scraper/editor/image-editor?id=${activeProjId}&idx=${idx}`;
-          } else {
-            target = `/scraper/editor?id=${activeProjId}`;
-          }
-        }
-
-        window.history.replaceState({}, "", target);
-        setCurrentPath(target);
-        return;
-      }
-
-      // Root redirect logic
-      if (!isInitializing && !authLoading) {
-        if (!isAuthenticated) {
-          const isProtectedRoute =
-            path === "/dashboard" ||
-            path === "/dashboard" ||
-            path === "/creative-suite" ||
-            path === "/creative-suite/" ||
-            path === "/creative-suite-dashboard" ||
-            path.startsWith("/creative-suite/") ||
-            path === "/scraper" ||
-            path === "/scraper/" ||
-            path.startsWith("/scraper/") ||
-            path === "/settings/account" ||
-            path === "/settings/account/" ||
-            path === "/shortcuts" ||
-            path === "/ai-optimizer" ||
-            path === "/panel-assistant" ||
-            path === "/ai-characters" ||
-            path === "/ai-voice" ||
-            path === "/youtube" ||
-            path === "/profile" ||
-            path === "/notifications" ||
-            path === "/auto-crop" ||
-            path === "/projects" ||
-            path === "/project-details" ||
-            path === "/chapter-scraper" ||
-            path === "/scraper/chapter-scraper" ||
-            path === "/episode-scraper" ||
-            path === "/scraper/episode-scraper" ||
-            path === "/admin-dashboard" ||
-            path.startsWith("/admin/") ||
-            path === "/ai-core" ||
-            path === "/ai-core/" ||
-            path.startsWith("/ai-core/") ||
-            path.startsWith("/series/") ||
-            path === "/scraper/editor" ||
-            path === "/scraper/editor/" ||
-            path.startsWith("/scraper/editor/") ||
-            path === "/editor" ||
-            path === "/editor/" ||
-            path.startsWith("/editor/") ||
-            path === "/image-editor" ||
-            path === "/image-editor/" ||
-            path.startsWith("/image-editor/") ||
-            path === "/video-editor" ||
-            path === "/video-editor/" ||
-            path.startsWith("/video-editor/") ||
-            /^\/scraper\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
-
-          if (isProtectedRoute) {
-            window.history.replaceState({}, "", "/");
-            setCurrentPath("/");
-            return;
-          }
-        } else {
-          if (
-            path === "/" ||
-            path === "" ||
-            path === "/index.html" ||
-            path === "/landing" ||
-            path === "/login" ||
-            path === "/register"
-          ) {
-            const target = "/dashboard";
-            window.history.replaceState({}, "", target);
-            setCurrentPath(target);
-            return;
-          }
-        }
-      }
-
-      // Automatic redirect for legacy top-level Creative Suite routes to /creative-suite/...
-      if (
-        path === "/ai-optimizer" ||
-        path.startsWith("/ai-optimizer?") ||
-        path.startsWith("/ai-optimizer/") ||
-        path === "/panel-assistant" ||
-        path.startsWith("/panel-assistant?") ||
-        path.startsWith("/panel-assistant/") ||
-        path === "/ai-thumbnails" ||
-        path.startsWith("/ai-thumbnails?") ||
-        path.startsWith("/ai-thumbnails/") ||
-        path === "/ai-voice" ||
-        path.startsWith("/ai-voice?") ||
-        path.startsWith("/ai-voice/") ||
-        path === "/ai-analytics" ||
-        path.startsWith("/ai-analytics?") ||
-        path.startsWith("/ai-analytics/") ||
-        path === "/youtube" ||
-        path.startsWith("/youtube?") ||
-        path.startsWith("/youtube/")
-      ) {
-        const target = `/creative-suite${path}`;
-        window.history.replaceState({}, "", target);
-        setCurrentPath(target);
-        return;
-      }
-
-      if (
-        path === "/creative/youtube" ||
-        path.startsWith("/creative/youtube?") ||
-        path.startsWith("/creative/youtube/")
-      ) {
-        const search = window.location.search || "";
-        const target = `/creative-suite/youtube${search}`;
-        window.history.replaceState({}, "", target);
-        setCurrentPath(target);
-        return;
-      }
-
-      const isSeriesPath = path.startsWith("/series/");
-      const isChapterDetails = isSeriesPath && path.endsWith("/details");
-      const isWorkspacePath =
-        path === "/scraper" || (isSeriesPath && !isChapterDetails);
-
-      if (
-        path === "/settings/account" ||
-        path === "/settings/account/" ||
-        path === "/creative-suite" ||
-        path === "/creative-suite/" ||
-        path === "/creative-suite-dashboard" ||
-        path.startsWith("/creative-suite/") ||
-        path === "/shortcuts" ||
-        path === "/profile" ||
-        path === "/notifications" ||
-        path === "/projects" ||
-        path === "/project-details" ||
-        path === "/dashboard" ||
-        path === "/admin" ||
-        path === "/scraper" ||
-        path === "/scraper/" ||
-        path.startsWith("/scraper/") ||
-        path.startsWith("/display") ||
-        isChapterDetails
-      ) {
-        setShowAutoCropModal(false);
-        setShowBubbleModal(false);
-        setEditingImageIdx(null);
-      } else if (path === "/project-editor") {
-        const params = new URLSearchParams(window.location.search);
-        const hasProjId = params.has("id") || params.has("project_id");
-        if (
-          scrapedImagesRef.current.length === 0 &&
-          panelsRef.current.length === 0 &&
-          !hasProjId
-        ) {
-          window.history.replaceState({}, "", "/dashboard");
-          setCurrentPath("/dashboard");
-          return;
-        }
-        setShowAutoCropModal(false);
-        setShowBubbleModal(false);
-        setEditingImageIdx(null);
-      } else if (path === "/auto-crop") {
-        setShowAutoCropModal(true);
-        setShowBubbleModal(false);
-        setEditingImageIdx(null);
-      } else if (
-        path.startsWith("/editor") ||
-        path.startsWith("/scraper/editor") ||
-        path.startsWith("/image-editor") ||
-        path.startsWith("/video-editor")
-      ) {
-        const params = new URLSearchParams(window.location.search);
-
-        // Skip editor redirects or checks if this is the theater player mode
-        const isTheaterRoute =
-          /^\/scraper\/editor\/[^\/]+\/[^\/]+\/player\/?$/.test(path);
-        if (isTheaterRoute) {
-          setIsPipMode(false);
-          setShowAutoCropModal(false);
-          setShowBubbleModal(false);
-          setEditingImageIdx(null);
-          return;
-        }
-        // Redirect /editor?importUrl=... to /scraper/editor?id=temp_...
-        if (params.has("importUrl") && !params.has("id")) {
-          const importUrl = params.get("importUrl");
-          if (importUrl) {
-            localStorage.setItem("auto_import_url", importUrl);
-          }
-          const temporaryProjectId = createTempProjectId();
-          const newUrl = `/scraper/editor?id=${temporaryProjectId}`;
-          window.history.replaceState({}, "", newUrl);
-          setCurrentPath("/scraper/editor");
-          return;
-        }
-
-        // Upgrade temp_ URLs to clean series/chapter routes if slugs exist in storage
-        const activeSeriesSlug = localStorage.getItem("active_series_slug");
-        const activeChapterSlug = localStorage.getItem("active_chapter_slug");
-        const activeProjId =
-          localStorage.getItem("active_project_id") || projectId;
-
-        if (
-          params.get("id")?.startsWith("temp_") &&
-          activeSeriesSlug &&
-          activeChapterSlug
-        ) {
-          const cleanPath = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
-          window.history.replaceState({}, "", cleanPath);
-          setCurrentPath(cleanPath);
-          return;
-        }
-
-        // Auto-upgrade plain routes (/editor, /image-editor, /video-editor) if active series/chapter or project exists in storage
-        if ((path === "/editor" || path === "/editor/") && !params.has("id")) {
-          if (
-            activeSeriesSlug &&
-            activeChapterSlug &&
-            activeSeriesSlug !== "null" &&
-            activeChapterSlug !== "null"
-          ) {
-            const target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`;
-            window.history.replaceState({}, "", target);
-            setCurrentPath(target);
-            return;
-          } else if (activeProjId && activeProjId !== "null") {
-            const target = `/scraper/editor?id=${activeProjId}`;
-            window.history.replaceState({}, "", target);
-            setCurrentPath(target);
-            return;
-          }
-        } else if (
-          (path === "/image-editor" || path === "/image-editor/") &&
-          !params.has("id")
-        ) {
-          if (
-            activeSeriesSlug &&
-            activeChapterSlug &&
-            activeSeriesSlug !== "null" &&
-            activeChapterSlug !== "null"
-          ) {
-            const target = `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}/image-editor`;
-            window.history.replaceState({}, "", target);
-            setCurrentPath(target);
-            return;
-          } else if (activeProjId && activeProjId !== "null") {
-            const target = `/image-editor?id=${activeProjId}`;
-            window.history.replaceState({}, "", target);
-            setCurrentPath(target);
-            return;
-          }
-        } else if (
-          (path === "/video-editor" || path === "/video-editor/") &&
-          !params.has("id")
-        ) {
-          if (activeProjId && activeProjId !== "null") {
-            const target = `/video-editor?id=${activeProjId}`;
-            window.history.replaceState({}, "", target);
-            setCurrentPath(target);
-            return;
-          }
-        }
-
-        setIsPipMode(false);
+      if (path.includes("/editor")) {
         setLastEditorPath(path + window.location.search);
-
-        // Parse idx query parameter
+        const params = new URLSearchParams(window.location.search);
         const idxVal = params.get("idx");
-        const idx = idxVal !== null ? parseInt(idxVal) : 0;
-        const validatedIdx = isNaN(idx) ? 0 : idx;
-        if (editingImageIdxRef.current !== validatedIdx) {
-          setEditingImageIdx(validatedIdx);
+        if (idxVal !== null && props?.setEditingImageIdx) {
+          const idx = parseInt(idxVal, 10);
+          props.setEditingImageIdx(isNaN(idx) ? 0 : idx);
         }
-      } else {
-        // Dashboard
-        setShowAutoCropModal(false);
-        setShowBubbleModal(false);
-        setEditingImageIdx(null);
       }
-    };
-
-    // Run router on mount to sync initial page route
-    handleLocationChange();
-
-    const originalPushState = window.history.pushState;
-    const originalReplaceState = window.history.replaceState;
-
-    window.history.pushState = function (...args) {
-      originalPushState.apply(this, args);
-      handleLocationChange();
-    };
-
-    window.history.replaceState = function (...args) {
-      originalReplaceState.apply(this, args);
-      handleLocationChange();
     };
 
     window.addEventListener("popstate", handleLocationChange);
+    return () => window.removeEventListener("popstate", handleLocationChange);
+  }, [props]);
 
-    return () => {
-      window.history.pushState = originalPushState;
-      window.history.replaceState = originalReplaceState;
-      window.removeEventListener("popstate", handleLocationChange);
-    };
-  }, [isAuthenticated, authLoading, isInitializing, user]);
-
-  const navigateTo = React.useCallback(
+  const navigateTo = useCallback(
     (path: string) => {
+      if (typeof window === "undefined") return;
+
       let targetPath = path;
-      if (
-        isAuthenticated &&
-        (path === "/" || path === "" || path === "/index.html")
-      ) {
+      if (props?.isAuthenticated && (path === "/" || path === "" || path === "/index.html")) {
         targetPath = "/dashboard";
       }
 
-      const currentPathWithSearch =
-        window.location.pathname + window.location.search;
-      if (currentPathWithSearch === targetPath) {
-        return;
-      }
+      const current = window.location.pathname + window.location.search;
+      if (current === targetPath) return;
 
       window.history.pushState({}, "", targetPath);
+      setCurrentPath(window.location.pathname);
       window.dispatchEvent(new Event("popstate"));
     },
-    [isAuthenticated, projectId, seriesSlug, chapterSlug]
+    [props?.isAuthenticated]
   );
 
-  React.useEffect(() => {
-    (window as any).navigateTo = navigateTo;
-    return () => {
-      delete (window as any).navigateTo;
-    };
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).navigateTo = navigateTo;
+      return () => {
+        delete (window as any).navigateTo;
+      };
+    }
   }, [navigateTo]);
 
   return {

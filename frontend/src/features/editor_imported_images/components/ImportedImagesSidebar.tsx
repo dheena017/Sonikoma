@@ -25,7 +25,7 @@ import {
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import * as api from "@/api/index";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { ChapterScraperDeckProps } from "./types";
 import PanelCard from "./PanelCard";
 import ChapterScraperDeckEmptyState from "./ImportedImagesDeckEmptyState";

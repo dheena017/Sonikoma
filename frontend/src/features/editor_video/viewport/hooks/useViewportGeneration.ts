@@ -3,7 +3,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { GeneratedPanel } from "@/types";
 import { NotificationType } from "@/features/app_notification";
 import * as api from "@/api/index";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 export interface UseVideoPreviewGenerationProps {
   panels: GeneratedPanel[];

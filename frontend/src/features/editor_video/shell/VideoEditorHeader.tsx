@@ -25,7 +25,7 @@ import NotificationDropdown from "@/features/app_notification/components/Notific
 import { HeaderCreditsPopover } from "@/features/ai_core";
 import { Notification } from "@/features/app_notification";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { AIModelSelector } from "@/features/ai_core";
 
 interface VideoEditorHeaderProps {
@@ -179,36 +179,36 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   return (
     <>
-      <header className="h-16 w-full bg-[#06060c]/80 backdrop-blur-2xl border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pr-6 flex items-center justify-between z-30 shrink-0 select-none">
-        <div className="flex items-center gap-3 shrink-0 h-full">
-          <div className="w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-2">
+      <header className="h-16 w-full bg-[#06060c]/80 backdrop-blur-2xl border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex items-center justify-between z-30 shrink-0 select-none gap-2 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
+          <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1 sm:mr-2">
             <button
               onClick={onToggleSidebar}
-              className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
               title="Toggle Sidebar Drawer"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
 
           <div
-            className="flex items-center gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
             onClick={() => navigateTo && navigateTo("/dashboard")}
           >
             <img
               src="/logo-dark.png"
               alt="Sonikoma Logo"
-              className="h-9 w-9 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
             />
-            <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
+            <span className="font-black text-base sm:text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
               Sonikoma
             </span>
           </div>
 
-          <div className="flex items-center gap-2 ml-1 bg-[#121218] border border-neutral-800 px-3 py-1 rounded-lg text-xs font-semibold text-neutral-200 cursor-pointer hover:border-neutral-700 transition-all max-w-[240px] truncate">
+          <div className="hidden sm:flex items-center gap-2 ml-1 bg-[#121218] border border-neutral-800 px-3 py-1 rounded-lg text-xs font-semibold text-neutral-200 cursor-pointer hover:border-neutral-700 transition-all max-w-[240px] truncate">
             <span className="text-neutral-400 font-normal shrink-0">
               Project:
             </span>
@@ -236,11 +236,11 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          {/* ⚡ Credits Pill & Popover */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           {/* 🤖 Global AI Model Selector */}
-          <AIModelSelector className="hidden sm:inline-flex" />
+          <AIModelSelector compact className="flex" />
 
+          {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
           {credits !== null && (
             <div className="relative" ref={creditsRef}>
               <button
@@ -249,14 +249,10 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                   setShowNotifications(false);
                 }}
                 title="Your credit balance & daily rewards — click to view"
-                className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
-                  credits < 20
-                    ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
-                    : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
-                }`}
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
               >
-                <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
-                {credits.toLocaleString()}
+                <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
+                <span>{credits.toLocaleString()}</span>
               </button>
 
               {showCreditsPopover && (

@@ -29,7 +29,7 @@ import NotificationDropdown from "@/features/app_notification/components/Notific
 import HeaderCreditsPopover from "./HeaderCreditsPopover";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useBackendHealth } from "@/shared/hooks";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { AIModelSelector } from "@/features/ai_core";
 
 export interface AICoreHeaderProps {
@@ -55,10 +55,10 @@ export default function AICoreHeader({
   fetchWithInterceptor,
   onToggleSidebar,
   notifications = [],
-  markNotificationAsRead = () => {},
-  markAllNotificationsAsRead = () => {},
-  deleteNotification = () => {},
-  clearAllNotifications = () => {},
+  markNotificationAsRead = () => { },
+  markAllNotificationsAsRead = () => { },
+  deleteNotification = () => { },
+  clearAllNotifications = () => { },
   notificationsMuted = false,
   setNotificationsMuted,
   isSidebarOpen = false,
@@ -185,11 +185,11 @@ export default function AICoreHeader({
   return (
     <header
       id="ai_core_header_pane"
-      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-4 lg:pl-0 pr-6 md:pr-8 flex items-center justify-between gap-4 selection:bg-purple-600/30 shadow-md shadow-black/20"
+      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 selection:bg-purple-600/30 shadow-md shadow-black/20"
     >
       {/* Left side: Hamburger and Brand */}
-      <div className="flex items-center gap-3 shrink-0 h-full">
-        <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900 h-full mr-4">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
+        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
           <button
             onClick={onToggleSidebar}
             className="icon-pill cursor-pointer hover:icon-pill--purple transition-all"
@@ -289,14 +289,14 @@ export default function AICoreHeader({
       </div>
 
       {/* Right side: Standardized Controls Suite */}
-      <div className="flex items-center gap-2 lg:gap-3 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
         {/* Server Status Indicator */}
         <ServerStatusIndicator status={backendStatus} />
 
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector className="hidden sm:inline-flex" />
+        <AIModelSelector className="flex" />
 
-        {/* ⚡ Credits Pill & Popover */}
+        {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>
             <button
@@ -305,14 +305,10 @@ export default function AICoreHeader({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
-                credits < 20
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
-                  : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
-              }`}
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
             >
-              <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
-              {credits.toLocaleString()}
+              <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
+              <span>{credits.toLocaleString()}</span>
             </button>
 
             {showCreditsPopover && (
@@ -397,30 +393,32 @@ export default function AICoreHeader({
           </button>
         </div>
 
-        {/* User Profile Pill at Far Right End */}
+        {/* User Profile Pill at Far Right End (Image 2 Style) */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95"
+          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+          <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
             {user?.full_name ||
               user?.username ||
-              (user?.email ? user.email.split("@")[0] : "Creator")}
+              (user?.email ? user.email.split("@")[0] : "Studio Creator")}
           </span>
-          <img
-            key={user?.avatar_url || user?.full_name || "avatar"}
-            src={getUserAvatarUrl(user)}
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              const target = e.currentTarget as HTMLImageElement;
-              target.onerror = null;
-              target.src = DEFAULT_USER_AVATAR_DATA_URI;
-            }}
-            alt="User Avatar"
-            className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
-          />
+          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+            <img
+              key={user?.avatar_url || user?.full_name || "avatar"}
+              src={getUserAvatarUrl(user)}
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                target.onerror = null;
+                target.src = DEFAULT_USER_AVATAR_DATA_URI;
+              }}
+              alt="User Avatar"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </button>
       </div>
     </header>

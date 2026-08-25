@@ -9,7 +9,7 @@ import {
 export type Language = "en" | "ko" | "ja";
 
 export interface LoginFormProps {
-  onLogin: (data: any) => Promise<void>;
+  onLogin: (data: any) => Promise<any>;
   onNavigateToRegister: () => void;
   onNavigateToForgotPassword: () => void;
   onNavigateHome?: () => void;
@@ -47,10 +47,29 @@ export default function useLoginForm(props: LoginFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+    if (!isEmailValid) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
+    if (!isPasswordValid) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
-      await props.onLogin({ email, password, rememberMe });
+      const res = await props.onLogin({ email, password, rememberMe });
+      if (res === false) {
+        throw new Error("Invalid email or password. Please try again.");
+      }
       const target = "/dashboard";
       if (typeof (window as any).navigateTo === "function") {
         (window as any).navigateTo(target);

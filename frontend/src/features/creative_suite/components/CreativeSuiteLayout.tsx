@@ -3,7 +3,7 @@ import { Square } from "lucide-react";
 import CreativeSuiteHeader from "@/features/creative_suite/components/CreativeSuiteHeader";
 import CreativeSuiteMiniSidebar from "@/features/creative_suite/components/CreativeSuiteMiniSidebar";
 import CreativeSuiteSidebar from "@/features/creative_suite/components/CreativeSuiteSidebar";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 interface CreativeSuiteLayoutProps {
   children: React.ReactNode;

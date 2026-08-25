@@ -8,6 +8,7 @@ import ImageEditorToolsPanel from "@/features/editor_image/components/ImageEdito
 import ImageEditorSidebar from "@/features/editor_image/components/ImageEditorSidebar";
 import { ImageEditorLayout } from "@/features/editor_image/components/ImageEditorLayout";
 import { ImageEditorEmptyState } from "@/features/editor_image/components/ImageEditorEmptyState";
+import { GeneratedPanel } from "@/types";
 
 interface ImageEditorPageProps {
   appLogic: ReturnType<typeof useAppLogic>;
@@ -131,7 +132,7 @@ const ImageEditorPage = React.memo(
       return (
         <ImageEditorCanvasContainer
           key={editorProps.imageUrl || undefined}
-          activeStoryboardPanel={activeStoryboardPanel}
+          activeStoryboardPanel={activeStoryboardPanel as unknown as GeneratedPanel}
           handleAiCrop={editorProps.handleAiCrop}
           isAiDetecting={editorProps.isAiDetecting}
           editingImageIdx={editingImageIdx}

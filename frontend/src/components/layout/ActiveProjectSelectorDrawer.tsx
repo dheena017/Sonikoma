@@ -18,7 +18,7 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/utils";
 import { timeAgo } from "@/utils/dateUtils";

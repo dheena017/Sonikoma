@@ -27,7 +27,7 @@ import {
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { GeneratedPanel } from "@/types";
 import { Notification } from "@/features/app_notification";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { useMemo } from "react";
 import React from "react";
 

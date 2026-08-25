@@ -11,7 +11,7 @@ import { cleanDialogueDisplay } from "@/utils";
 
 import PanelTranslationTool from "@/features/creative_panel_assistant/components/PanelTranslationTool";
 
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 interface PanelAssistantPageProps {
   panels?: GeneratedPanel[];
@@ -31,12 +31,13 @@ const PanelAssistantPage = React.memo(
       (state) => state.activeProjectData
     );
     const storePanels = activeProjectData?.panels || [];
-    const safePanels =
+    const safePanels = (
       panels && panels.length > 0
         ? panels
         : Array.isArray(storePanels)
         ? storePanels
-        : [];
+        : []
+    ) as unknown as GeneratedPanel[];
     const [selectedIdx, setSelectedIdx] = useState(0);
 
     const filmstripRef = useRef<HTMLDivElement>(null);

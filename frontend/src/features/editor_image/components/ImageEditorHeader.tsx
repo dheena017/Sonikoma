@@ -20,7 +20,7 @@ import { HeaderCreditsPopover } from "@/features/ai_core";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useBackendHealth } from "@/shared/hooks";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
 import { AIModelSelector } from "@/features/ai_core";
 
@@ -186,23 +186,23 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#0a0b10] border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6)] flex items-center justify-between pl-4 lg:pl-0 pr-6 flex-shrink-0 z-50 selection:bg-purple-650 relative">
+    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#0a0b10] border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6)] flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex-shrink-0 z-50 selection:bg-purple-650 relative gap-2 sm:gap-4">
       {/* ── Left: Hamburger, Brand Logo, Mode Badge & Image Pagination ──── */}
-      <div className="flex items-center gap-3 shrink-0 h-full">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
         {onToggleSidebar && (
-          <div className="w-auto lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-2">
+          <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1 sm:mr-2">
             <button
               onClick={onToggleSidebar}
-              className="w-11 h-11 rounded-2xl bg-white/[0.04] border border-white/8 flex items-center justify-center text-neutral-300 hover:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/8 flex items-center justify-center text-neutral-300 hover:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
               title="Toggle Navigation Menu"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         )}
 
         <div
-          className="flex items-center gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
           onClick={handleLogoClick}
         >
           <img
@@ -211,18 +211,18 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
             }}
-            className="h-10 w-10 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
+            className="h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
             style={{
               background: themeMode === "light" ? "#ffffff" : "#000000",
             }}
             alt="Sonikoma Logo"
           />
-          <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
+          <span className="font-black text-base sm:text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
             Sonikoma
           </span>
         </div>
 
-        <span className="px-2.5 py-1 text-[10px] font-black tracking-wider text-purple-300 bg-purple-950/70 rounded-full border border-purple-700/50 shadow-xs uppercase">
+        <span className="hidden sm:inline-block px-2.5 py-1 text-[10px] font-black tracking-wider text-purple-300 bg-purple-950/70 rounded-full border border-purple-700/50 shadow-xs uppercase">
           IMAGE EDITOR
         </span>
 
@@ -265,14 +265,14 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
       </div>
 
       {/* ── Right: AI Routing, Credits, Notifications, Profile & Actions ─── */}
-      <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* 🟢 Server Status Indicator */}
         <ServerStatusIndicator status={backendStatus} />
 
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector compact className="hidden sm:inline-flex" />
+        <AIModelSelector compact className="flex" />
 
-        {/* ⚡ Credits Pill & Popover */}
+        {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>
             <button
@@ -281,14 +281,10 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className={`hidden sm:flex h-9 items-center gap-1.5 px-3 rounded-xl border text-[11px] font-bold font-mono select-none cursor-pointer transition-all ${
-                credits < 20
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 animate-pulse"
-                  : "bg-neutral-900 border-neutral-850 text-amber-400 hover:border-amber-500/40 hover:bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]"
-              }`}
+              className="flex h-9 items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
             >
-              <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400" />
-              {credits.toLocaleString()}
+              <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
+              <span>{credits.toLocaleString()}</span>
             </button>
 
             {showCreditsPopover && (
@@ -373,19 +369,19 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           </button>
         </div>
 
-        {/* User Profile Pill at Far Right */}
+        {/* User Profile Pill at Far Right (Image 2 Style) */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95 h-9"
+          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
+          <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
             {user?.full_name ||
               user?.username ||
-              (user?.email ? user.email.split("@")[0] : "User")}
+              (user?.email ? user.email.split("@")[0] : "Studio Creator")}
           </span>
-          <div className="relative w-6 h-6 rounded-full overflow-hidden border border-purple-500/40 bg-purple-950/40 shrink-0 shadow-xs ring-1 ring-white/10 group-hover:border-purple-400 group-hover:ring-purple-500/30 transition-all duration-300">
+          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
             <img
               key={user?.avatar_url || user?.full_name || "avatar"}
               src={getUserAvatarUrl(user)}

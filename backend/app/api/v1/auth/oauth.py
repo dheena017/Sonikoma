@@ -313,9 +313,10 @@ async def google_callback(
 
         access_token = create_access_token(data={"sub": user["user_id"]})
 
-        # Set token in a secure HttpOnly cookie instead of exposing it in the URL.
-        redirect_target = APP_URL or "/"
-        resp = RedirectResponse(redirect_target)
+        # Redirect to frontend dashboard with token parameter for client-side state hydration
+        base_target = (APP_URL or "http://localhost:5173").rstrip("/")
+        redirect_url = f"{base_target}/dashboard?token={access_token}"
+        resp = RedirectResponse(redirect_url)
 
         cookie_kwargs = {
             "key": "access_token",

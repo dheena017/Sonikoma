@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import * as api from "@/api";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 export interface Project {
   project_id: string;

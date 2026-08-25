@@ -2,7 +2,7 @@ import React from "react";
 import { THEMES, ThemeKey } from "@/features/app_auth/components/constants";
 
 export interface RegisterFormProps {
-  onRegister: (data: any) => Promise<void>;
+  onRegister: (data: any) => Promise<any>;
   onNavigateToLogin: () => void;
   onNavigateHome?: () => void;
 }
@@ -73,18 +73,51 @@ export default function useRegisterForm(props: RegisterFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid || isLoading) return;
+    if (isLoading) return;
+    if (!fullName.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+    if (!isEmailValid) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (!password) {
+      setError("Please enter a password.");
+      return;
+    }
+    if (!hasMinLength) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (!acceptTerms) {
+      setError("You must accept the Terms of Service to continue.");
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
-      await props.onRegister({
+      const res = await props.onRegister({
         email,
         password,
         full_name: fullName,
         creator_role: creatorRole,
         subscribe_newsletter: subscribeNewsletter,
       });
-      (window as any).navigateTo?.("/dashboard");
+      if (res === false) {
+        throw new Error("Failed to create account. Please try again.");
+      }
+      const target = "/dashboard";
+      if (typeof (window as any).navigateTo === "function") {
+        (window as any).navigateTo(target);
+      } else {
+        window.history.replaceState({}, "", target);
+        window.dispatchEvent(new Event("popstate"));
+      }
     } catch (err: any) {
       setError(err.message || "Failed to create account. Please try again.");
     } finally {

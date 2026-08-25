@@ -19,7 +19,7 @@ import {
   Save,
 } from "lucide-react";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 const AudioSettingsPage = React.lazy(
   () => import("@/features/editor_audio/pages/AudioSettingsPage")

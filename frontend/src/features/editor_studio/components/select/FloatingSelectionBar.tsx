@@ -28,7 +28,7 @@ import {
   Settings2,
 } from "lucide-react";
 import * as api from "@/api";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { ScraperSelectionToolbar } from "./ScraperSelectionToolbar";
 
 // ── Types ────────────────────────────────────────────────────────────

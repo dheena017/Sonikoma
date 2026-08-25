@@ -19,7 +19,7 @@ import {
   Globe,
 } from "lucide-react";
 import { MUSIC_THEMES_CATALOG, DEFAULT_TTS_VOICES } from "@/features/editor_studio/types/settings";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 const MUSIC_THEMES = MUSIC_THEMES_CATALOG;
 

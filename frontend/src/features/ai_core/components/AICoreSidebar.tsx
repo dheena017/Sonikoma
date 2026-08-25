@@ -17,7 +17,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 const ActiveProjectSidebarWidget: React.FC<{
   setDrawerOpen: (open: boolean) => void;

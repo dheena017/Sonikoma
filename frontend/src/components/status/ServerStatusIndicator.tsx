@@ -35,18 +35,22 @@ export const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
   const colors = getStatusColors();
 
   return (
-    <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-850 text-[10px] font-medium font-sans select-none hover:border-neutral-750 transition-all">
-      <span className="relative flex h-2 w-2">
+    <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#18191e] border border-[#2b2d35] text-[10px] sm:text-xs font-medium font-sans select-none hover:border-neutral-600 transition-all shadow-sm shrink-0">
+      <span className="relative flex h-3 sm:h-3.5 w-3 sm:w-3.5 items-center justify-center rounded-full bg-emerald-950/80 border border-emerald-500/40 shrink-0">
         <span
-          className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${colors.pulseBg}`}
+          className={`absolute inline-flex h-1.5 sm:h-2 w-1.5 sm:w-2 rounded-full opacity-75 animate-ping ${colors.pulseBg}`}
         />
         <span
-          className={`relative inline-flex rounded-full h-2 w-2 ${colors.dotBg}`}
+          className={`relative inline-flex rounded-full h-1.5 sm:h-2 w-1.5 sm:w-2 ${colors.dotBg} shadow-[0_0_6px_#10b981]`}
         />
       </span>
-      {showLabel && <span className="text-neutral-400">Server:</span>}
+      {showLabel && (
+        <span className="hidden sm:inline text-neutral-300 font-medium">Server:</span>
+      )}
       <span
-        className={`font-bold uppercase tracking-wider ${colors.textColor}`}
+        className={`font-black uppercase tracking-wider font-mono text-[9px] sm:text-[11px] ${
+          status === "online" ? "text-[#00f59b]" : colors.textColor
+        }`}
       >
         {status}
       </span>

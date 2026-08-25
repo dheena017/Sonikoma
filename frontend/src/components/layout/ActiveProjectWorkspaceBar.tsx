@@ -15,7 +15,7 @@ import {
   Zap,
   Save,
 } from "lucide-react";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { getProxiedImageUrl } from "@/utils";
 
 interface ActiveProjectWorkspaceBarProps {

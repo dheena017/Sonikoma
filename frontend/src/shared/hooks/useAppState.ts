@@ -1,92 +1,42 @@
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { GeneratedPanel, CharacterBio } from "@/types";
-import { AI_MODELS } from "@/types/models";
 import { createFetchWithInterceptor } from "@/api/client/fetchWithInterceptor";
 import * as api from "@/api";
-import { Notification, NotificationType } from "@/features/app_notification";
-import { ErrorModalDetail } from "@/shared/ui/modal/ErrorModal";
-import { useAudioFeedback } from "@/features/editor_audio/hooks/useAudioFeedback";
-import { LogEntry, normalizeLog } from "@/types/logs";
-import { useProjectStore, WorkspaceContext } from "@/store/useProjectStore";
-import {
-  DEFAULT_VIDEO_SETTINGS,
-  DEFAULT_AUDIO_SETTINGS,
-  DEFAULT_AUTOCROP_SETTINGS,
-} from "@/features/editor_studio/types/settings";
+import { useProjectStore, WorkspaceContext } from "./useProjectStore";
+import { useAppAuth } from "./useAppAuth";
+import { useAppNotifications } from "./useAppNotifications";
+import { useAppAutoCrop } from "./useAppAutoCrop";
+import { useAppBubbleCleaner } from "./useAppBubbleCleaner";
+import { useAppLogs } from "./useAppLogs";
+import { useAppEditorSettings } from "./useAppEditorSettings";
+import { useAppScraperState } from "./useAppScraperState";
 
 export function useAppState() {
-  const [user, setUser] = useState<any>(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("mock_auth") === "true") {
-          return { id: 1, email: "admin@sonikoma.io", name: "Administrator", role: "admin" };
-        }
-      }
-    } catch (e) {}
-    return null;
-  });
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("mock_auth") === "true") {
-          return true;
-        }
-      }
-    } catch (e) {}
-    return false;
-  });
-  const [authLoading, setAuthLoading] = useState<boolean>(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("mock_auth") === "true") {
-          return false;
-        }
-        // If there's no stored token and no token in query, we are not loading auth
-        const token =
-          localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token") ||
-          params.get("token");
-        return Boolean(token);
-      }
-    } catch (e) {}
-    return false;
-  });
-  const [isInitializing, setIsInitializing] = useState<boolean>(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("mock_auth") === "true") {
-          return false;
-        }
-        const token =
-          localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token") ||
-          params.get("token");
-        return Boolean(token);
-      }
-    } catch (e) {}
-    return false;
-  });
+  // ── 1. Domain Sub-Hooks ───────────────────────────────────────────────────
+  const auth = useAppAuth();
+  const notifs = useAppNotifications();
+  const autoCrop = useAppAutoCrop();
+  const bubbleCleaner = useAppBubbleCleaner();
+  const logs = useAppLogs();
+  const settings = useAppEditorSettings();
+  const scraper = useAppScraperState();
 
+  // ── 2. Active Project from Zustand Store ──────────────────────────────────
   const activeProjectData = useProjectStore((state) => state.activeProjectData);
 
-  const panels = useMemo(
-    () => activeProjectData?.panels ?? [],
+  const panels = useMemo<GeneratedPanel[]>(
+    () => (activeProjectData?.panels as unknown as GeneratedPanel[]) ?? [],
     [activeProjectData]
   );
+
   const setPanels = useCallback(
-    (
-      val: GeneratedPanel[] | ((prev: GeneratedPanel[]) => GeneratedPanel[])
-    ) => {
+    (val: GeneratedPanel[] | ((prev: GeneratedPanel[]) => GeneratedPanel[])) => {
       const cur = useProjectStore.getState().activeProjectData;
-      const currentPanels = cur?.panels ?? [];
+      const currentPanels = (cur?.panels as unknown as GeneratedPanel[]) ?? [];
       const nextPanels = typeof val === "function" ? val(currentPanels) : val;
       useProjectStore.getState().setActiveProject({
         project: cur?.project ?? { project_id: "", title: "", url: "" },
-        panels: nextPanels,
+        panels: nextPanels as any,
       });
     },
     []
@@ -94,6 +44,7 @@ export function useAppState() {
 
   const projectId = activeProjectData?.project?.project_id ?? null;
   const jobId = activeProjectData?.project?.job_id ?? null;
+
   const setProjectId = useCallback((val: string | null) => {
     const cur = useProjectStore.getState().activeProjectData;
     if (!val) {
@@ -148,223 +99,21 @@ export function useAppState() {
       project: { ...cur.project, chapter_slug: val },
     });
   }, []);
-  const [consoleLogs, setRawConsoleLogs] = useState<LogEntry[]>([]);
+
+  // ── 3. Additional Local Canvas & Editing States ───────────────────────────
   const [characters, setCharacters] = useState<CharacterBio[]>([]);
-
-  // Refs removed: useAppState popstate handler relies on Zustand reads to avoid batching/race issues.
-
-  const [scrapedImages, setScrapedImages] = useState<string[]>(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const raw =
-          localStorage.getItem("sonikoma-active-project-store") ||
-          sessionStorage.getItem("sonikoma-active-project-store");
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          const imgs = parsed?.state?.activeProjectData?.scrapedImages;
-          if (Array.isArray(imgs) && imgs.length > 0) {
-            return imgs;
-          }
-        }
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("idx") !== null) {
-          return [
-            "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=800",
-          ];
-        }
-      }
-    } catch (e) {}
-    return [];
-  });
-  const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
-  const [activePreviewTab, setActivePreviewTab] = useState<
-    "video" | "timeline"
-  >("timeline");
-
-  // Image editing/cropping states
+  const [activePreviewTab, setActivePreviewTab] = useState<"video" | "timeline">("timeline");
   const [editingImageIdx, setEditingImageIdx] = useState<number | null>(null);
   const [editCropTop, setEditCropTop] = useState<number>(0);
   const [editCropBottom, setEditCropBottom] = useState<number>(0);
   const [editCropLeft, setEditCropLeft] = useState<number>(0);
   const [editCropRight, setEditCropRight] = useState<number>(0);
   const [editAutoTrim, setEditAutoTrim] = useState<boolean>(true);
-  const [imageEditStates, setImageEditStates] = useState<Record<string, any>>(
-    {}
-  );
+  const [imageEditStates, setImageEditStates] = useState<Record<string, any>>({});
+  const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
 
-  // Bubble cleaner states
-  const [showBubbleModal, setShowBubbleModal] = useState<boolean>(false);
-  const [bubbleDetectionStyle, setBubbleDetectionStyle] = useState<
-    "all" | "white_only" | "text_only"
-  >("all");
-  const [bubbleEraseMethod, setBubbleEraseMethod] = useState<
-    "auto" | "inpaint" | "blur" | "solid_white" | "solid_black"
-  >("auto");
-  const [bubbleSensitivity, setBubbleSensitivity] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_bubble_sensitivity") || "50", 10)
-  );
-  const [bubbleDilation, setBubbleDilation] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_bubble_dilation") || "-1", 10)
-  );
-  const [bubbleInpaintRadius, setBubbleInpaintRadius] = useState<number>(3);
-  const [activeBubbleTab, setActiveBubbleTab] = useState<string>("general");
-  const [isCleaningBubbles, setIsCleaningBubbles] = useState<boolean>(false);
-  const [cleanProgress, setCleanProgress] = useState<{
-    current: number;
-    total: number;
-  } | null>(null);
-  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<
-    string | null
-  >(null);
-
-  // Auto crop states
-  const [showAutoCropModal, setShowAutoCropModal] = useState<boolean>(false);
-  const [cropSensitivity, setCropSensitivity] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_sensitivity") || String(DEFAULT_AUTOCROP_SETTINGS.sensitivity), 10)
-  );
-  const [cropPaddingPx, setCropPaddingPx] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_padding") || String(DEFAULT_AUTOCROP_SETTINGS.padding), 10)
-  );
-  const [cropBackgroundMode, setCropBackgroundMode] = useState<string>(
-    () => localStorage.getItem("ai_crop_bg_mode") || DEFAULT_AUTOCROP_SETTINGS.backgroundColorMode
-  );
-  const [autoSplitTallStrips, setAutoSplitTallStrips] = useState<boolean>(
-    () => localStorage.getItem("ai_crop_auto_split") !== "false"
-  );
-  const [processingStrategy, setProcessingStrategy] =
-    useState<string>("balanced");
-  const [aspectRatioLock, setAspectRatioLock] = useState<string>(
-    () => localStorage.getItem("ai_crop_aspect_ratio") || DEFAULT_AUTOCROP_SETTINGS.aspectRatioLock
-  );
-  const [minPanelAreaPct, setMinPanelAreaPct] = useState<number>(() =>
-    parseFloat(localStorage.getItem("ai_crop_min_area") || String(DEFAULT_AUTOCROP_SETTINGS.minPanelAreaPct))
-  );
-  const [overlapMergeThreshold, setOverlapMergeThreshold] = useState<number>(
-    () => parseInt(localStorage.getItem("ai_crop_merge_thresh") || String(Math.round(DEFAULT_AUTOCROP_SETTINGS.overlapMergeThreshold * 100)), 10)
-  );
-  const [useLocalCV, setUseLocalCV] = useState<boolean>(
-    () => localStorage.getItem("ai_crop_use_local_cv") !== "false"
-  );
-  const [isBatchCropping, setIsBatchCropping] = useState<boolean>(false);
-  const [batchProgress, setBatchProgress] = useState<{
-    current: number;
-    total: number;
-  } | null>(null);
-  const [croppingImgUrl, setCroppingImgUrl] = useState<string | null>(null);
-  const [cropModel, setCropModel] = useState<string>(
-    () => localStorage.getItem("ai_crop_model") || DEFAULT_AUTOCROP_SETTINGS.cropModel
-  );
-  const [cropMinHeightPx, setCropMinHeightPx] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_min_height") || String(DEFAULT_AUTOCROP_SETTINGS.cropMinHeightPx), 10)
-  );
-  const [cropCannyLow, setCropCannyLow] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_canny_low") || String(DEFAULT_AUTOCROP_SETTINGS.cropCannyLow), 10)
-  );
-  const [cropCannyHigh, setCropCannyHigh] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_canny_high") || String(DEFAULT_AUTOCROP_SETTINGS.cropCannyHigh), 10)
-  );
-  const [cropCloseKernelSize, setCropCloseKernelSize] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_crop_close_kernel") || String(DEFAULT_AUTOCROP_SETTINGS.cropCloseKernelSize), 10)
-  );
-  const [activeAutoCropTab, setActiveAutoCropTab] = useState<string>("general");
-  const [cropGuidance, setCropGuidance] = useState<string>(
-    () => localStorage.getItem("ai_crop_guidance") || ""
-  );
-  const [cropFocusMode, setCropFocusMode] = useState<string>(
-    () => localStorage.getItem("ai_crop_focus_mode") || "standard"
-  );
-
-  // Sync auto crop configuration to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("ai_crop_use_local_cv", String(useLocalCV));
-      localStorage.setItem("ai_crop_sensitivity", String(cropSensitivity));
-      localStorage.setItem("ai_crop_padding", String(cropPaddingPx));
-      localStorage.setItem("ai_crop_bg_mode", cropBackgroundMode);
-      localStorage.setItem("ai_crop_auto_split", String(autoSplitTallStrips));
-      localStorage.setItem("ai_crop_aspect_ratio", aspectRatioLock);
-      localStorage.setItem("ai_crop_min_area", String(minPanelAreaPct));
-      localStorage.setItem(
-        "ai_crop_merge_thresh",
-        String(overlapMergeThreshold)
-      );
-      localStorage.setItem("ai_crop_model", cropModel);
-      localStorage.setItem("ai_crop_min_height", String(cropMinHeightPx));
-      localStorage.setItem("ai_crop_canny_low", String(cropCannyLow));
-      localStorage.setItem("ai_crop_canny_high", String(cropCannyHigh));
-      localStorage.setItem("ai_crop_close_kernel", String(cropCloseKernelSize));
-      localStorage.setItem("ai_crop_guidance", cropGuidance);
-      localStorage.setItem("ai_crop_focus_mode", cropFocusMode);
-    } catch (_) {}
-  }, [
-    useLocalCV,
-    cropSensitivity,
-    cropPaddingPx,
-    cropBackgroundMode,
-    autoSplitTallStrips,
-    aspectRatioLock,
-    minPanelAreaPct,
-    overlapMergeThreshold,
-    cropModel,
-    cropMinHeightPx,
-    cropCannyLow,
-    cropCannyHigh,
-    cropCloseKernelSize,
-    cropGuidance,
-    cropFocusMode,
-  ]);
-
-  const [showScrapeConfirmModal, setShowScrapeConfirmModal] =
-    useState<boolean>(false);
-  const [accumulatedTokens, setAccumulatedTokens] = useState<number>(0);
-
-  // Notifications
-  const [notifications, setNotifications] = useState<Notification[]>(() => {
-    try {
-      const saved = localStorage.getItem("ai_comic_notifications");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          const filtered = parsed.filter(
-            (n: any) =>
-              n &&
-              n.message &&
-              !n.message.includes("The backend server is not running")
-          );
-          // Deduplicate by message to show only the most recent one
-          const seen = new Set<string>();
-          return filtered.filter((n: any) => {
-            if (seen.has(n.message)) return false;
-            seen.add(n.message);
-            return true;
-          });
-        }
-      }
-      return [];
-    } catch {
-      return [];
-    }
-  });
-  const [notificationsMuted, setNotificationsMuted] = useState<boolean>(() => {
-    return localStorage.getItem("ai_comic_notifications_muted") === "true";
-  });
-  const [errorPopup, setErrorPopup] = useState<ErrorModalDetail | null>(null);
-
-  // Settings — all useState MUST come before any useCallback/useEffect
-  const targetUrl =
-    activeProjectData?.project?.url ??
-    (() => {
-      try {
-        if (typeof window !== "undefined") {
-          const params = new URLSearchParams(window.location.search);
-          if (params.get("idx") !== null) {
-            return "https://www.webtoons.com/en/fantasy/tower-of-god/season-3-ep-1/viewer?title_no=95&episode_no=418";
-          }
-        }
-      } catch (e) {}
-      return localStorage.getItem("ai_comic_url") || "";
-    })();
-
+  // ── 4. Project Fields Direct Setters ──────────────────────────────────────
+  const targetUrl = activeProjectData?.project?.url || "";
   const setTargetUrl = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
@@ -372,102 +121,8 @@ export function useAppState() {
       panels: cur?.panels ?? [],
     });
   }, []);
-  const [voiceActor, setVoiceActor] = useState<string>(
-    () =>
-      localStorage.getItem("ai_comic_voice") || DEFAULT_AUDIO_SETTINGS.voiceActor
-  );
-  const [musicTheme, setMusicTheme] = useState<string>(
-    () => localStorage.getItem("ai_comic_music") || DEFAULT_AUDIO_SETTINGS.musicTheme
-  );
-  const [aspectRatio, setAspectRatio] = useState<"auto" | "9:16" | "16:9">(
-    () =>
-      (localStorage.getItem("ai_comic_aspectRatio") as
-        | "auto"
-        | "9:16"
-        | "16:9") || (DEFAULT_VIDEO_SETTINGS.aspectRatio as any) || "16:9"
-  );
-  const [selectedModel, setSelectedModel] = useState<string>(
-    () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
-  );
-  const [selectedSource, setSelectedSource] = useState<string>(
-    () => localStorage.getItem("ai_comic_source") || "webtoons"
-  );
-  const [frameRate, setFrameRate] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_fps") || String(DEFAULT_VIDEO_SETTINGS.frameRate))
-  );
-  const [volume, setVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_volume") || String(DEFAULT_AUDIO_SETTINGS.volume))
-  );
-  const [isMuted, setIsMuted] = useState<boolean>(
-    () => localStorage.getItem("ai_comic_muted") === "true"
-  );
 
-  const [sfxVolume, setSfxVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_sfx_volume") || String(DEFAULT_AUDIO_SETTINGS.sfxVolume))
-  );
-  const [sfxEnabled, setSfxEnabled] = useState<boolean>(
-    () => localStorage.getItem("ai_comic_sfx_enabled") !== "false"
-  );
-  const [autoPlayAudio, setAutoPlayAudio] = useState<boolean>(
-    () => localStorage.getItem("app-autoplay-audio") === "true"
-  );
-
-  const [narrationVolume, setNarrationVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_narration_volume") || String(DEFAULT_AUDIO_SETTINGS.narrationVolume), 10)
-  );
-  const [bgmVolume, setBgmVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_bgm_volume") || String(DEFAULT_AUDIO_SETTINGS.bgmVolume), 10)
-  );
-  const [audioDucking, setAudioDucking] = useState<boolean>(
-    () => localStorage.getItem("ai_comic_audio_ducking") !== "false"
-  );
-  const [speechRate, setSpeechRate] = useState<number>(() =>
-    parseFloat(localStorage.getItem("ai_comic_speech_rate") || String(DEFAULT_AUDIO_SETTINGS.speechRate))
-  );
-  const [speechPitch, setSpeechPitch] = useState<number>(() =>
-    parseFloat(localStorage.getItem("ai_comic_speech_pitch") || String(DEFAULT_AUDIO_SETTINGS.speechPitch))
-  );
-  const [audioReactiveShake, setAudioReactiveShake] = useState<boolean>(
-    () => localStorage.getItem("ai_video_shake") !== null ? localStorage.getItem("ai_video_shake") === "true" : DEFAULT_VIDEO_SETTINGS.audioReactiveShake
-  );
-  const [shakeIntensity, setShakeIntensity] = useState<
-    "low" | "medium" | "high" | "extreme"
-  >(
-    () => (localStorage.getItem("ai_video_shake_intensity") as any) || "medium"
-  );
-  const [videoFormat, setVideoFormat] = useState<"mp4" | "webm" | "mkv">(
-    () => (localStorage.getItem("ai_video_format") as any) || DEFAULT_VIDEO_SETTINGS.videoFormat
-  );
-  const [backgroundStyle, setBackgroundStyle] = useState<
-    "black" | "white" | "transparent" | "blurred"
-  >(() => (localStorage.getItem("ai_video_bg_style") as any) || "black");
-  const [subtitlesStyle, setSubtitlesStyle] = useState<
-    "none" | "burn-in" | "soft"
-  >(() => (localStorage.getItem("ai_video_subtitles_style") as any) || "burn-in");
-
-  const audioFeedback = useAudioFeedback(sfxVolume, !sfxEnabled);
-
-  const videoUrl = activeProjectData?.project?.video_url ?? null;
-  const setVideoUrl = useCallback((val: string | null) => {
-    const cur = useProjectStore.getState().activeProjectData;
-    if (!cur) return;
-    useProjectStore.getState().setActiveProject({
-      ...cur,
-      project: { ...cur.project, video_url: val },
-    });
-  }, []);
-
-  const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
-  const [isScraping, setIsScraping] = useState<boolean>(false);
-  const [narrationStyle, setNarrationStyle] = useState<string>(
-    () => localStorage.getItem("ai_comic_narration_style") || "long"
-  );
-  const [smartSlice, setSmartSlice] = useState<boolean>(
-    () => localStorage.getItem("ai_comic_smart_slice") !== "false"
-  );
-
-  const scrapedTitle =
-    activeProjectData?.project?.title || "Overpowered S-Rank Recap";
+  const scrapedTitle = activeProjectData?.project?.title || "Overpowered S-Rank Recap";
   const setScrapedTitle = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
@@ -557,1118 +212,257 @@ export function useAppState() {
     });
   }, []);
 
-  useEffect(() => {
-    if (projectId) return;
-
-    if (!targetUrl.trim()) {
-      setSeriesTitle("");
-      setChapterNumber("");
-      setChapterTitle("");
-      setSeriesAuthor("");
-      setSeriesCoverImage("");
-      setSeriesSynopsis("");
-      return;
-    }
-  }, [targetUrl, projectId]);
-
-  // ── Callbacks & effects AFTER all useState declarations ──────────────────
-
-  const setConsoleLogs = useCallback((val: React.SetStateAction<any[]>) => {
-    setRawConsoleLogs((prev) => {
-      const incoming = typeof val === "function" ? val(prev) : val;
-      // If incoming is already normalized array, just slice
-      if (Array.isArray(incoming)) {
-        const normalized = incoming.map((log) => normalizeLog(log));
-        return normalized.slice(-200);
-      }
-      return prev;
+  const videoUrl = activeProjectData?.project?.video_url ?? null;
+  const setVideoUrl = useCallback((val: string | null) => {
+    const cur = useProjectStore.getState().activeProjectData;
+    if (!cur) return;
+    useProjectStore.getState().setActiveProject({
+      ...cur,
+      project: { ...cur.project, video_url: val },
     });
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "ai_comic_notifications_muted",
-      String(notificationsMuted)
-    );
-  }, [notificationsMuted]);
+  // ── 5. Auth API Methods ───────────────────────────────────────────────────
+  const {
+    setUser,
+    setIsAuthenticated,
+    setAuthLoading,
+    setIsInitializing,
+    handleLogout,
+    handleLoginSuccess,
+  } = auth;
 
-  const removeNotification = useCallback((id: number) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, toastDismissed: true } : n))
-    );
-  }, []);
-
-  const addNotification = useCallback(
-    (
-      message: string,
-      type: NotificationType,
-      options?: {
-        errorCode?: number;
-        retryDelay?: number;
-        onRetry?: () => void;
-        details?: string;
-        link?: string;
-      }
-    ) => {
-      const id = Date.now() + Math.random();
-      const newNote: Notification = {
-        id,
-        message,
-        type,
-        timestamp: Date.now(),
-        isRead: false,
-        ...options,
-      };
-
-      setNotifications((prev) => {
-        const filtered = prev.filter((n) => n.message !== message);
-        return [newNote, ...filtered];
-      });
-
-      // Play audio feedback based on type
-      if (sfxEnabled) {
-        if (type === "success") {
-          audioFeedback.playSuccess();
-        } else if (type === "error") {
-          audioFeedback.playError();
-        } else {
-          audioFeedback.playInfo();
-        }
-      }
-
-      if (!options?.onRetry) {
-        setTimeout(() => {
-          removeNotification(id);
-        }, 5000);
-      }
-    },
-    [removeNotification]
+  const fetchWithInterceptor = useMemo(
+    () =>
+      createFetchWithInterceptor({
+        addNotification: notifs.addNotification,
+        setErrorPopup: notifs.setErrorModalDetail,
+        onUnauthorized: handleLogout,
+      }),
+    [notifs.addNotification, notifs.setErrorModalDetail, handleLogout]
   );
 
-  const fetchWithInterceptor = useCallback(
-    createFetchWithInterceptor({
-      addNotification,
-      setErrorPopup,
-      onUnauthorized: () => {
-        localStorage.removeItem("sonikoma_token");
-        sessionStorage.removeItem("sonikoma_token");
-        setUser(null);
-        setIsAuthenticated(false);
-      },
-    }),
-    [addNotification, setErrorPopup]
-  );
-
-  const getToken = useCallback(() => {
-    return (
-      localStorage.getItem("sonikoma_token") ||
-      sessionStorage.getItem("sonikoma_token")
-    );
-  }, []);
-
-  // --- Auth Actions ---
-  const login = useCallback(
-    async (credentials: any) => {
-      const data = await api.login(fetchWithInterceptor, credentials);
-      if (data.access_token) {
-        if (credentials.rememberMe) {
-          localStorage.setItem("sonikoma_token", data.access_token);
-          sessionStorage.removeItem("sonikoma_token");
-        } else {
-          sessionStorage.setItem("sonikoma_token", data.access_token);
-          localStorage.removeItem("sonikoma_token");
+  const checkAuth = useCallback(async () => {
+    try {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const urlToken = params.get("token");
+        if (urlToken) {
+          localStorage.setItem("sonikoma_token", urlToken);
+          params.delete("token");
+          const newSearch = params.toString() ? `?${params.toString()}` : "";
+          window.history.replaceState({}, "", `${window.location.pathname}${newSearch}`);
         }
-        if (data.user?.email) {
-          localStorage.setItem("user_email", data.user.email);
-          localStorage.setItem("sonikoma_user_email", data.user.email);
-        }
-        setUser(data.user);
+      }
+
+      const res = await api.getCurrentUser(fetchWithInterceptor);
+      const user =
+        (res as any)?.user ||
+        (res as any)?.data?.user ||
+        (res as any)?.data ||
+        res;
+      if (user && (user.email || user.user_id || user.id)) {
+        setUser(user);
         setIsAuthenticated(true);
-        addNotification("Logged in successfully!", "success", {
-          details: `User ID: ${data.user.id}\nEmail: ${
-            data.user.email
-          }\nWelcome back, ${data.user.name || data.user.email}!`,
-        });
       } else {
-        throw new Error(data.detail || "Login failed");
-      }
-    },
-    [addNotification, fetchWithInterceptor]
-  );
-
-  const register = useCallback(
-    async (userData: any) => {
-      const data = await api.register(fetchWithInterceptor, userData);
-      if (data.access_token) {
-        // Default to localStorage for registration/new accounts
-        localStorage.setItem("sonikoma_token", data.access_token);
-        sessionStorage.removeItem("sonikoma_token");
-        if (data.user?.email) {
-          localStorage.setItem("user_email", data.user.email);
-          localStorage.setItem("sonikoma_user_email", data.user.email);
-        }
-        setUser(data.user);
-        setIsAuthenticated(true);
-        addNotification("Account created successfully!", "success", {
-          details: `User ID: ${data.user.id}\nEmail: ${
-            data.user.email
-          }\nWelcome to Sonikoma, ${data.user.name || data.user.email}!`,
-        });
-      } else {
-        throw new Error(data.detail || "Registration failed");
-      }
-    },
-    [addNotification, fetchWithInterceptor]
-  );
-
-  const logout = useCallback(() => {
-    localStorage.removeItem("sonikoma_token");
-    sessionStorage.removeItem("sonikoma_token");
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("sonikoma_user_email");
-    setUser(null);
-    setIsAuthenticated(false);
-    addNotification("Logged out successfully.", "info", {
-      details: `Your session token has been cleared. You have been securely logged out.`,
-    });
-    const nav = (window as any).navigateTo;
-    if (typeof nav === "function") {
-      nav("/landing");
-    } else {
-      window.history.pushState({}, "", "/landing");
-      window.dispatchEvent(new Event("popstate"));
-    }
-  }, [addNotification]);
-
-  const checkAuth = useCallback(
-    async (showDelay: boolean = true) => {
-      try {
-        if (typeof window !== "undefined") {
-          const params = new URLSearchParams(window.location.search);
-          if (params.get("mock_auth") === "true") {
-            setAuthLoading(false);
-            setIsInitializing(false);
-            return;
-          }
-        }
-      } catch (e) {}
-
-      const token = getToken();
-
-      const finishAuth = () => {
-        setAuthLoading(false);
-        setIsInitializing(false);
-      };
-
-      if (!token) {
-        // No token in storage — check if an OAuth HttpOnly cookie was set
-        // (e.g. right after a Google OAuth redirect). The browser sends it
-        // automatically; if valid the server returns a JSON access_token we
-        // can persist in localStorage so all subsequent requests work.
         try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 1000);
-          const sessionRes = await fetch("/api/auth/google/session", {
-            credentials: "include",
-            signal: controller.signal,
-          });
-          clearTimeout(timeoutId);
+          const sessionRes = await fetch("/api/auth/google/session");
           if (sessionRes.ok) {
             const sessionData = await sessionRes.json();
             if (sessionData.access_token) {
-              localStorage.setItem("sonikoma_token", sessionData.access_token);
-              sessionStorage.removeItem("sonikoma_token");
-              const userPayload = sessionData.user ?? sessionData;
-              if (userPayload.email) {
-                localStorage.setItem("user_email", userPayload.email);
-                localStorage.setItem("sonikoma_user_email", userPayload.email);
-              }
-              setUser(userPayload);
-              setIsAuthenticated(true);
-              addNotification("Signed in with Google!", "success", {
-                details: `Welcome back, ${
-                  userPayload.full_name || userPayload.email || ""
-                }!`,
-              });
-
-              // Auto-refresh YouTube avatar in background (fire-and-forget)
-              const avatarUrl = userPayload.avatar_url || "";
-              const needsRefresh =
-                !avatarUrl ||
-                avatarUrl.includes("default-user") ||
-                avatarUrl.startsWith("data:");
-              if (needsRefresh) {
-                fetch("/api/auth/avatar/youtube-refresh", {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${sessionData.access_token}`,
-                  },
-                })
-                  .then((r) => r.json())
-                  .then((res) => {
-                    if (res.success && res.avatar_url) {
-                      setUser((prev: any) => ({
-                        ...prev,
-                        avatar_url: res.avatar_url,
-                      }));
-                    }
-                  })
-                  .catch(() => {
-                    /* silent */
-                  });
-              }
-
-              // Navigate to dashboard after OAuth login
-              const nav = (window as any).navigateTo;
-              if (typeof nav === "function") {
-                nav("/dashboard");
-              } else {
-                window.history.replaceState({}, "", "/dashboard");
-                window.dispatchEvent(new Event("popstate"));
-              }
-              finishAuth();
+              handleLoginSuccess(sessionData.access_token, sessionData.user);
               return;
             }
           }
-        } catch (_) {
-          // No cookie session available — fall through to unauthenticated state
+        } catch {}
+
+        const hasLocalToken = Boolean(
+          typeof window !== "undefined" &&
+          (localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token"))
+        );
+        if (!hasLocalToken) {
+          setUser(null);
+          setIsAuthenticated(false);
         }
-        finishAuth();
-        return;
       }
+    } catch {
       try {
-        const data = await api.getCurrentUser(fetchWithInterceptor);
-        setUser(data);
-        setIsAuthenticated(true);
-      } catch (e: any) {
-        console.error("Auth check failed", e);
-        // Current logic only clears on 401/403, but my simplified getCurrentUser throws on non-ok.
-        // I should probably refine getCurrentUser or keep the logic here.
-        // Actually, let's keep it robust.
-      } finally {
-        finishAuth();
-      }
-    },
-    [getToken, fetchWithInterceptor, addNotification]
-  );
-
-  const forgotPassword = useCallback(
-    async (email: string) => {
-      return api.forgotPassword(fetchWithInterceptor, email);
-    },
-    [fetchWithInterceptor]
-  );
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tokenParam = params.get("token");
-    if (tokenParam) {
-      localStorage.setItem("sonikoma_token", tokenParam);
-      sessionStorage.removeItem("sonikoma_token");
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-    checkAuth();
-  }, [checkAuth]);
-
-  // --- Extension/IDE Communication Event Listener ---
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      const data = event.data;
-      if (data && data.type === "showRuleLimitsAlert") {
-        console.log(
-          "[tsweb.assistant-listener] Handling showRuleLimitsAlert event:",
-          data
-        );
-        const title =
-          data.title || data.data?.title || "Assistant Rule Limits Enforced";
-        const message =
-          data.message ||
-          data.data?.message ||
-          "You have reached the system rule or usage limits for this active session.";
-        const technicalDetails =
-          data.technicalDetails || data.data?.technicalDetails || "";
-        const suggestion =
-          data.suggestion ||
-          data.data?.suggestion ||
-          "Please review the RULES.md guidelines, optimize your files/tokens, or adjust model configurations.";
-
-        setErrorPopup({
-          title,
-          message,
-          type: "warning",
-          technicalDetails:
-            technicalDetails ||
-            `Source: tsweb.assistant-listener\nTimestamp: ${new Date().toISOString()}`,
-          suggestion,
-        });
-
-        addNotification(message, "warning", {
-          details: technicalDetails || undefined,
-        });
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-  }, [addNotification, setErrorPopup]);
-
-  // Load active project into workspace if url query parameter id/project_id exists or slug in path
-  useEffect(() => {
-    const handlePopState = () => {
-      if (!isAuthenticated) return;
-
-      const params = new URLSearchParams(window.location.search);
-      const urlProjectId = params.get("id") || params.get("project_id");
-      const urlJobId = params.get("job_id") || params.get("jobId") || null;
-
-      // ── Guard: if the URL contains a job_ ID as project_id, clean it up
-      // immediately and delegate to loadProject which will set the missing state.
-      if (urlProjectId && urlProjectId.startsWith("job_")) {
-        console.warn(
-          `[AppState] job_ ID found in URL project param: "${urlProjectId}". Stripping and setting missing state.`
-        );
-        const cleanUrl = new URL(window.location.href);
-        cleanUrl.searchParams.delete("project_id");
-        cleanUrl.searchParams.delete("id");
-        window.history.replaceState({}, "", cleanUrl.toString());
-        // delegate to loadProject which has the full missing-state guard
-        loadProject(urlProjectId, urlJobId);
-        return;
-      }
-
-      const path = window.location.pathname;
-      const match = path.match(
-        /(?:\/scraper\/editor)?\/series\/[^\/]+\/chapters\/([^\/]+)/
-      );
-      const chapterSlug = match ? match[1] : params.get("chapter") || null;
-
-      if (!urlProjectId && !chapterSlug) {
-        // If we cleared the state (navigated to clean /scraper), reset workspace
-        if (path === "/scraper") {
-          useProjectStore.getState().clearActiveProject();
-          localStorage.removeItem("active_project_id");
-          localStorage.removeItem("active_job_id");
-          localStorage.removeItem("active_series_slug");
-          localStorage.removeItem("active_chapter_slug");
-          setScrapedImages([]);
-        }
-        return;
-      }
-
-      const lookupId = urlProjectId ?? chapterSlug;
-      if (!lookupId) return;
-
-      // Query Zustand store directly to avoid stale React refs during batching
-      const currentActiveProject = useProjectStore.getState().activeProjectData;
-      const currentActiveId = currentActiveProject?.project?.project_id;
-      const currentChapterSlug = currentActiveProject?.project?.chapter_slug;
-      const currentJobId = currentActiveProject?.project?.job_id ?? null;
-
-      const targetJobId = urlJobId ?? null;
-
-      const isSameProject =
-        (lookupId === currentActiveId ||
-          (currentChapterSlug && lookupId === currentChapterSlug)) &&
-        (targetJobId === null || targetJobId === currentJobId);
-
-      if (isSameProject) {
-        if (
-          currentActiveProject?.scrapedImages &&
-          currentActiveProject.scrapedImages.length > 0
-        ) {
-          setScrapedImages((prev) =>
-            prev.length === 0 ? currentActiveProject.scrapedImages! : prev
-          );
-        }
-        return;
-      }
-
-      if (lookupId.startsWith("temp_")) {
-        const rawPersisted =
-          localStorage.getItem("sonikoma-active-project-store") ||
-          sessionStorage.getItem("sonikoma-active-project-store");
-        if (rawPersisted) {
-          try {
-            const persisted = JSON.parse(rawPersisted);
-            const persistedActive = persisted?.state?.activeProjectData;
-            const persistedProjectId = persistedActive?.project?.project_id;
-            if (
-              persistedActive &&
-              persistedProjectId === lookupId &&
-              persistedActive.project
-            ) {
-              useProjectStore.getState().setActiveProject(persistedActive);
-              if (Array.isArray(persistedActive.scrapedImages)) {
-                setScrapedImages(persistedActive.scrapedImages);
-              } else {
-                setScrapedImages([]);
-              }
-              localStorage.setItem("active_project_id", lookupId);
-              if (urlJobId) {
-                localStorage.setItem("active_job_id", urlJobId);
-              }
-              localStorage.removeItem("active_series_slug");
-              localStorage.removeItem("active_chapter_slug");
-              return;
-            }
-          } catch (e) {
-            console.warn(
-              "[AppState] Failed to parse persisted project store",
-              e
-            );
-          }
-        }
-
-        // A temp_ route is a direct URL-backed draft. During a refresh, the app may
-        // reach this branch before the persisted store has hydrated.
-        // Preserve existing store value and restore images.
-        const alreadyHasActiveProject = Boolean(
-          useProjectStore.getState().activeProjectData?.project?.project_id
-        );
-        if (alreadyHasActiveProject) {
-          const activeProject = useProjectStore.getState().activeProjectData;
-          if (activeProject?.project?.project_id === lookupId) {
-            if (Array.isArray(activeProject.scrapedImages) && activeProject.scrapedImages.length > 0) {
-              setScrapedImages((prev) =>
-                prev.length === 0 ? activeProject.scrapedImages! : prev
-              );
-            }
-            localStorage.setItem("active_project_id", lookupId);
-            if (urlJobId) {
-              localStorage.setItem("active_job_id", urlJobId);
-            }
-            localStorage.removeItem("active_series_slug");
-            localStorage.removeItem("active_chapter_slug");
+        const sessionRes = await fetch("/api/auth/google/session");
+        if (sessionRes.ok) {
+          const sessionData = await sessionRes.json();
+          if (sessionData.access_token) {
+            handleLoginSuccess(sessionData.access_token, sessionData.user);
             return;
           }
         }
+      } catch {}
 
-        localStorage.setItem("active_project_id", lookupId);
-        if (urlJobId) {
-          localStorage.setItem("active_job_id", urlJobId);
-        }
-        localStorage.removeItem("active_series_slug");
-        localStorage.removeItem("active_chapter_slug");
-        return;
-      }
-
-      loadProject(lookupId, urlJobId);
-    };
-
-    const loadProject = async (lookupId: string, jobId?: string | null) => {
-      // ── Guard: job_ IDs are processing references, never real project IDs.
-      // Short-circuit immediately — no network call needed, the server would
-      // always 404 on these and we already know the correct error state.
-      if (lookupId.startsWith("job_")) {
-        console.warn(
-          `[AppState] Detected job ID in URL: "${lookupId}". Entering missing state without API call.`
-        );
-        useProjectStore
-          .getState()
-          .setProjectMissing(lookupId, { isJobId: true });
-        if (addNotification) {
-          addNotification(
-            `Processing Job ID "${lookupId}" is not a project reference.`,
-            "warning",
-            {
-              details:
-                "Open the project selector to pick an active project or clear the workspace.",
-            }
-          );
-        }
-        // Also clean the stale job ID out of the URL so it can't loop
-        const cleanUrl = new URL(window.location.href);
-        cleanUrl.searchParams.delete("project_id");
-        cleanUrl.searchParams.delete("id");
-        window.history.replaceState({}, "", cleanUrl.toString());
-        return;
-      }
-
-      try {
-        const data = await api.getProject(
-          fetchWithInterceptor,
-          lookupId,
-          jobId
-        );
-        if (data.success && data.project) {
-          localStorage.setItem("active_project_id", data.project.project_id);
-          if (data.project.job_id) {
-            localStorage.setItem("active_job_id", data.project.job_id);
-          } else {
-            localStorage.removeItem("active_job_id");
-          }
-          if (data.project.series_slug) {
-            localStorage.setItem(
-              "active_series_slug",
-              data.project.series_slug
-            );
-          } else {
-            localStorage.removeItem("active_series_slug");
-          }
-          if (data.project.chapter_slug) {
-            localStorage.setItem(
-              "active_chapter_slug",
-              data.project.chapter_slug
-            );
-          } else {
-            localStorage.removeItem("active_chapter_slug");
-          }
-          if (data.project.series_slug && data.project.chapter_slug) {
-            const newPath = `/scraper/editor/series/${data.project.series_slug}/chapters/${data.project.chapter_slug}`;
-            if (window.location.pathname !== newPath) {
-              window.history.replaceState(null, "", newPath);
-            }
-          }
-
-          // Populate details from loaded project
-          const loadedAudio = data.project.audio_settings || {};
-          const loadedVideo = data.project.video_settings || loadedAudio.video_settings || {};
-          const loadedAutoCrop = data.project.autocrop_settings || loadedAudio.autocrop_settings || {};
-
-          // 1. Audio Settings
-          if (loadedAudio.volume !== undefined || loadedAudio.masterVolume !== undefined) {
-            setVolume(loadedAudio.volume ?? loadedAudio.masterVolume);
-          }
-          if (loadedAudio.narrationVolume !== undefined) {
-            setNarrationVolume(loadedAudio.narrationVolume);
-          }
-          if (loadedAudio.bgmVolume !== undefined) {
-            setBgmVolume(loadedAudio.bgmVolume);
-          }
-          if (loadedAudio.sfxVolume !== undefined) {
-            setSfxVolume(loadedAudio.sfxVolume);
-          }
-          if (loadedAudio.speechRate !== undefined) {
-            setSpeechRate(loadedAudio.speechRate);
-          }
-          if (loadedAudio.speechPitch !== undefined) {
-            setSpeechPitch(loadedAudio.speechPitch);
-          }
-          if (loadedAudio.voiceActor ?? loadedAudio.voice) {
-            setVoiceActor(loadedAudio.voiceActor ?? loadedAudio.voice);
-          }
-          if (loadedAudio.musicTheme ?? loadedAudio.music) {
-            setMusicTheme(loadedAudio.musicTheme ?? loadedAudio.music);
-          }
-          if (loadedAudio.audioDucking !== undefined) {
-            setAudioDucking(loadedAudio.audioDucking);
-          }
-
-          // 2. Video Settings
-          if (loadedVideo.aspectRatio) {
-            setAspectRatio(loadedVideo.aspectRatio);
-          }
-          if (loadedVideo.frameRate) {
-            setFrameRate(loadedVideo.frameRate);
-          }
-          if (loadedVideo.audioReactiveShake !== undefined) {
-            setAudioReactiveShake(loadedVideo.audioReactiveShake);
-          }
-          if (loadedVideo.shakeIntensity) {
-            setShakeIntensity(loadedVideo.shakeIntensity);
-          }
-          if (loadedVideo.videoFormat) {
-            setVideoFormat(loadedVideo.videoFormat);
-          }
-          if (loadedVideo.backgroundStyle) {
-            setBackgroundStyle(loadedVideo.backgroundStyle);
-          }
-          if (loadedVideo.subtitlesStyle) {
-            setSubtitlesStyle(loadedVideo.subtitlesStyle);
-          }
-          if (loadedVideo.activeTheme && typeof window !== "undefined") {
-            document.documentElement.setAttribute("data-theme", loadedVideo.activeTheme);
-            localStorage.setItem("ai_comic_theme", loadedVideo.activeTheme);
-          }
-
-          // 3. Auto-Crop Settings
-          if (loadedAutoCrop.sensitivity !== undefined && typeof setCropSensitivity === "function") {
-            setCropSensitivity(loadedAutoCrop.sensitivity);
-          }
-          if (loadedAutoCrop.padding !== undefined && typeof setCropPaddingPx === "function") {
-            setCropPaddingPx(loadedAutoCrop.padding);
-          }
-          if (loadedAutoCrop.backgroundColorMode !== undefined && typeof setCropBackgroundMode === "function") {
-            setCropBackgroundMode(loadedAutoCrop.backgroundColorMode);
-          }
-          if (loadedAutoCrop.autoSplitTallStrips !== undefined && typeof setAutoSplitTallStrips === "function") {
-            setAutoSplitTallStrips(loadedAutoCrop.autoSplitTallStrips);
-          }
-          if (loadedAutoCrop.aspectRatioLock !== undefined && typeof setAspectRatioLock === "function") {
-            setAspectRatioLock(loadedAutoCrop.aspectRatioLock);
-          }
-          if (loadedAutoCrop.minPanelAreaPct !== undefined && typeof setMinPanelAreaPct === "function") {
-            setMinPanelAreaPct(loadedAutoCrop.minPanelAreaPct);
-          }
-          if (loadedAutoCrop.overlapMergeThreshold !== undefined && typeof setOverlapMergeThreshold === "function") {
-            setOverlapMergeThreshold(loadedAutoCrop.overlapMergeThreshold);
-          }
-          if (loadedAutoCrop.useLocalCV !== undefined && typeof setUseLocalCV === "function") {
-            setUseLocalCV(loadedAutoCrop.useLocalCV);
-          }
-          if (loadedAutoCrop.cropModel && typeof setCropModel === "function") {
-            setCropModel(loadedAutoCrop.cropModel);
-          }
-          if (loadedAutoCrop.cropMinHeightPx !== undefined && typeof setCropMinHeightPx === "function") {
-            setCropMinHeightPx(loadedAutoCrop.cropMinHeightPx);
-          }
-          if (loadedAutoCrop.cropCannyLow !== undefined && typeof setCropCannyLow === "function") {
-            setCropCannyLow(loadedAutoCrop.cropCannyLow);
-          }
-          if (loadedAutoCrop.cropCannyHigh !== undefined && typeof setCropCannyHigh === "function") {
-            setCropCannyHigh(loadedAutoCrop.cropCannyHigh);
-          }
-          if (loadedAutoCrop.cropCloseKernelSize !== undefined && typeof setCropCloseKernelSize === "function") {
-            setCropCloseKernelSize(loadedAutoCrop.cropCloseKernelSize);
-          }
-
-          if (loadedAudio.activePreviewTab) {
-            setActivePreviewTab(loadedAudio.activePreviewTab);
-          }
-          if (
-            loadedAudio.selectedScraped &&
-            Array.isArray(loadedAudio.selectedScraped)
-          ) {
-            setSelectedScraped(loadedAudio.selectedScraped);
-          }
-          if (loadedAudio.autoPlayAudio !== undefined) {
-            setAutoPlayAudio(loadedAudio.autoPlayAudio);
-          }
-          if (loadedAudio.isMuted !== undefined) {
-            setIsMuted(loadedAudio.isMuted);
-          }
-          if (loadedAudio.sfxEnabled !== undefined) {
-            setSfxEnabled(loadedAudio.sfxEnabled);
-          }
-          if (loadedAudio.narrationStyle) {
-            setNarrationStyle(loadedAudio.narrationStyle);
-          }
-          if (loadedAudio.selectedModel) {
-            setSelectedModel(loadedAudio.selectedModel);
-          }
-
-          let loadedChapterNumber = "";
-          let loadedChapterTitle = "";
-          if (data.project.episode) {
-            const epStr = data.project.episode;
-            const epParts = epStr.split(" - ");
-            loadedChapterNumber = epParts[0].replace("Chapter ", "").trim();
-            loadedChapterTitle = epParts.slice(1).join(" - ").trim();
-          }
-
-          const mappedPanels = data.panels
-            ? data.panels.map((p: any) => {
-                const img = p.image_url;
-                const proxiedImg =
-                  img && img.startsWith("http") && !api.isApiUrl(img)
-                    ? api.getProxyImageUrl(img)
-                    : img;
-                return {
-                  ...p,
-                  image_url: proxiedImg,
-                  grayscale: p.grayscale === 1 || p.grayscale === true,
-                };
-              })
-            : [];
-
-          // Populate scraped images list: prefer saved raw scraped_images, fallback to panel images
-          const savedScrapedImages =
-            Array.isArray(data.scraped_images) && data.scraped_images.length > 0
-              ? data.scraped_images
-              : loadedAudio.scraped_images;
-          let proxiedScraped: string[] = [];
-          if (
-            Array.isArray(savedScrapedImages) &&
-            savedScrapedImages.length > 0
-          ) {
-            proxiedScraped = savedScrapedImages.map((img: string) =>
-              img && img.startsWith("http") && !api.isApiUrl(img)
-                ? api.getProxyImageUrl(img)
-                : img
-            );
-          } else {
-            proxiedScraped = mappedPanels
-              .map((p: any) => p.image_url)
-              .filter(Boolean);
-          }
-          setScrapedImages(proxiedScraped);
-
-          // Save directly to global Zustand store in a single transaction
-          useProjectStore.getState().setActiveProject({
-            project: {
-              ...data.project,
-              chapterNumber: loadedChapterNumber,
-              chapterTitle: loadedChapterTitle,
-            },
-            panels: mappedPanels,
-            scrapedImages: proxiedScraped,
-          });
-          addNotification(
-            `Loaded project "${
-              data.project.title || "Untitled"
-            }" into active workspace!`,
-            "success",
-            {
-              details: `Project ID: ${data.project.project_id}\nTitle: ${
-                data.project.title || "Untitled"
-              }\nAuthor: ${data.project.author || "Unknown"}\nGenre: ${
-                data.project.genre || "General"
-              }\nTotal Panels Loaded: ${data.panels?.length || 0}`,
-            }
-          );
-        }
-      } catch (err: any) {
-        const is404 =
-          err.message?.includes("404") ||
-          err.message?.includes("Project not found") ||
-          err.status === 404;
-
-        const isJobId = lookupId.startsWith("job_");
-        console.warn(
-          `[AppState] Project ${lookupId} ${
-            is404 ? "not found" : "load error"
-          }. Setting missing state.`
-        );
-
-        useProjectStore.getState().setProjectMissing(lookupId, { isJobId });
-
-        if (addNotification) {
-          addNotification(
-            isJobId
-              ? `Processing Job ID "${lookupId}" is not associated with an active project.`
-              : `Project "${lookupId}" could not be found or loaded.`,
-            "warning",
-            {
-              details:
-                "Open the project selector in the header to pick another project or clear the workspace.",
-            }
-          );
-        }
-      }
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    handlePopState();
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [isAuthenticated, addNotification, getToken, fetchWithInterceptor]);
-
-  useEffect(() => {
-    if (
-      scrapedImages.length === 0 &&
-      activeProjectData?.scrapedImages &&
-      activeProjectData.scrapedImages.length > 0
-    ) {
-      setScrapedImages(activeProjectData.scrapedImages);
-    }
-  }, [activeProjectData, scrapedImages.length]);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      localStorage.setItem(
-        "ai_comic_notifications",
-        JSON.stringify(notifications)
+      const hasLocalToken = Boolean(
+        typeof window !== "undefined" &&
+        (localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token"))
       );
-    }, 500);
-    return () => clearTimeout(timeoutId);
-  }, [notifications]);
+      if (!hasLocalToken) {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } finally {
+      setAuthLoading(false);
+      setIsInitializing(false);
+    }
+  }, [
+    setUser,
+    setIsAuthenticated,
+    setAuthLoading,
+    setIsInitializing,
+    handleLoginSuccess,
+    fetchWithInterceptor,
+  ]);
 
   useEffect(() => {
-    localStorage.setItem("ai_comic_url", targetUrl);
-  }, [targetUrl]);
+    checkAuth();
+  }, [checkAuth]);
 
-  useEffect(() => {
-    localStorage.setItem("ai_comic_voice", voiceActor);
-  }, [voiceActor]);
+  const login = useCallback(
+    async (credentials: any) => {
+      auth.setAuthLoading(true);
+      try {
+        const res = await api.login(fetchWithInterceptor, credentials);
+        const token =
+          (res as any)?.access_token ||
+          (res as any)?.token ||
+          (res as any)?.data?.access_token ||
+          (res as any)?.data?.token;
+        const user =
+          (res as any)?.user ||
+          (res as any)?.data?.user ||
+          (res as any)?.data;
+        if (token) {
+          auth.handleLoginSuccess(token, user);
+          notifs.addNotification("Successfully logged in!", "success");
+          return res;
+        }
+        throw new Error(
+          (res as any)?.message ||
+            (res as any)?.detail ||
+            "Invalid email or password. Please try again."
+        );
+      } catch (err: any) {
+        notifs.addNotification(err?.message || "Login failed", "error");
+        throw err;
+      } finally {
+        auth.setAuthLoading(false);
+      }
+    },
+    [auth, notifs, fetchWithInterceptor]
+  );
 
-  useEffect(() => {
-    localStorage.setItem("ai_comic_music", musicTheme);
-  }, [musicTheme]);
+  const register = useCallback(
+    async (data: any) => {
+      auth.setAuthLoading(true);
+      try {
+        const res = await api.register(fetchWithInterceptor, data);
+        const token =
+          (res as any)?.access_token ||
+          (res as any)?.token ||
+          (res as any)?.data?.access_token ||
+          (res as any)?.data?.token;
+        const user =
+          (res as any)?.user ||
+          (res as any)?.data?.user ||
+          (res as any)?.data;
+        if (token) {
+          auth.handleLoginSuccess(token, user);
+          notifs.addNotification("Account created successfully!", "success");
+          return res;
+        }
+        throw new Error(
+          (res as any)?.message ||
+            (res as any)?.detail ||
+            "Registration failed. Please try again."
+        );
+      } catch (err: any) {
+        notifs.addNotification(err?.message || "Registration failed", "error");
+        throw err;
+      } finally {
+        auth.setAuthLoading(false);
+      }
+    },
+    [auth, notifs, fetchWithInterceptor]
+  );
 
-  useEffect(() => {
-    localStorage.setItem("ai_comic_aspectRatio", aspectRatio);
-  }, [aspectRatio]);
+  const logout = useCallback(async () => {
+    auth.handleLogout();
+    notifs.addNotification("Logged out", "info");
+  }, [auth, notifs]);
 
-  useEffect(() => {
-    localStorage.setItem("ai_comic_model", selectedModel);
-  }, [selectedModel]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_source", selectedSource);
-  }, [selectedSource]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_fps", frameRate.toString());
-  }, [frameRate]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_volume", volume.toString());
-  }, [volume]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_muted", isMuted.toString());
-  }, [isMuted]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_sfx_volume", sfxVolume.toString());
-  }, [sfxVolume]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "ai_comic_narration_volume",
-      narrationVolume.toString()
-    );
-  }, [narrationVolume]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_bgm_volume", bgmVolume.toString());
-  }, [bgmVolume]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_audio_ducking", String(audioDucking));
-  }, [audioDucking]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_speech_rate", speechRate.toString());
-  }, [speechRate]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_speech_pitch", speechPitch.toString());
-  }, [speechPitch]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_video_shake", String(audioReactiveShake));
-  }, [audioReactiveShake]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_video_shake_intensity", shakeIntensity);
-  }, [shakeIntensity]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_video_format", videoFormat);
-  }, [videoFormat]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_video_bg_style", backgroundStyle);
-  }, [backgroundStyle]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_video_subtitles_style", subtitlesStyle);
-  }, [subtitlesStyle]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_sfx_enabled", sfxEnabled.toString());
-  }, [sfxEnabled]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_narration_style", narrationStyle);
-  }, [narrationStyle]);
-
-  useEffect(() => {
-    localStorage.setItem("app-autoplay-audio", autoPlayAudio.toString());
-  }, [autoPlayAudio]);
-
-  useEffect(() => {
-    localStorage.setItem("ai_comic_smart_slice", smartSlice.toString());
-  }, [smartSlice]);
+  const forgotPassword = useCallback(
+    async (email: string) => {
+      try {
+        const res = await api.forgotPassword(fetchWithInterceptor, email);
+        notifs.addNotification("Password reset email sent", "info");
+        return res;
+      } catch (err: any) {
+        notifs.addNotification(err?.message || "Password reset failed", "error");
+        throw err;
+      }
+    },
+    [notifs, fetchWithInterceptor]
+  );
 
   const resetWorkspace = useCallback(() => {
     useProjectStore.getState().clearActiveProject();
-    localStorage.removeItem("active_project_id");
-    localStorage.removeItem("active_series_slug");
-    localStorage.removeItem("active_chapter_slug");
-    setScrapedImages([]);
-    setRawConsoleLogs([
-      normalizeLog(`[System] Workspace initialized for new project.`),
-    ]);
-    // Optionally remove project_id from URL
-    window.history.pushState(null, "");
-  }, []);
+    scraper.setScrapedImages([]);
+    scraper.setSelectedScraped([]);
+    notifs.addNotification("Workspace cleared", "info");
+  }, [scraper, notifs]);
 
-  const clearAllNotifications = useCallback(() => {
-    setNotifications([]);
-    audioFeedback.playError();
-  }, [audioFeedback]);
-
-  const markAllNotificationsAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-  }, []);
-
-  const markNotificationAsRead = useCallback((id: number) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
-  }, []);
-
-  const deleteNotification = useCallback((id: number) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  }, []);
-
+  // ── 6. Full Backwards-Compatible Memoized Export ──────────────────────────
   return useMemo(
     () => ({
-      user,
-      setUser,
-      isAuthenticated,
-      setIsAuthenticated,
-      authLoading,
-      isInitializing,
+      // Auth
+      user: auth.user,
+      setUser: auth.setUser,
+      isAuthenticated: auth.isAuthenticated,
+      setIsAuthenticated: auth.setIsAuthenticated,
+      authLoading: auth.authLoading,
+      isInitializing: auth.isInitializing,
       login,
       register,
       logout,
       forgotPassword,
+      checkAuth,
+      fetchWithInterceptor,
+
+      // Project & Workspace
       panels,
       setPanels,
-      consoleLogs,
-      setConsoleLogs,
-      scrapedImages,
-      setScrapedImages,
-      selectedScraped,
-      setSelectedScraped,
-      activePreviewTab,
-      setActivePreviewTab,
-      editingImageIdx,
-      setEditingImageIdx,
-      editCropTop,
-      setEditCropTop,
-      editCropBottom,
-      setEditCropBottom,
-      editCropLeft,
-      setEditCropLeft,
-      editCropRight,
-      setEditCropRight,
-      editAutoTrim,
-      setEditAutoTrim,
-      imageEditStates,
-      setImageEditStates,
-      showBubbleModal,
-      setShowBubbleModal,
-      bubbleDetectionStyle,
-      setBubbleDetectionStyle,
-      bubbleEraseMethod,
-      setBubbleEraseMethod,
-      bubbleSensitivity,
-      setBubbleSensitivity,
-      bubbleDilation,
-      setBubbleDilation,
-      bubbleInpaintRadius,
-      setBubbleInpaintRadius,
-      activeBubbleTab,
-      setActiveBubbleTab,
-      isCleaningBubbles,
-      setIsCleaningBubbles,
-      cleanProgress,
-      setCleanProgress,
-      bubbleCroppingImgUrl,
-      setBubbleCroppingImgUrl,
-      showAutoCropModal,
-      setShowAutoCropModal,
-      cropSensitivity,
-      setCropSensitivity,
-      cropPaddingPx,
-      setCropPaddingPx,
-      cropBackgroundMode,
-      setCropBackgroundMode,
-      autoSplitTallStrips,
-      setAutoSplitTallStrips,
-      processingStrategy,
-      setProcessingStrategy,
-      aspectRatioLock,
-      setAspectRatioLock,
-      minPanelAreaPct,
-      setMinPanelAreaPct,
-      overlapMergeThreshold,
-      setOverlapMergeThreshold,
-      useLocalCV,
-      setUseLocalCV,
-      isBatchCropping,
-      setIsBatchCropping,
-      batchProgress,
-      setBatchProgress,
-      croppingImgUrl,
-      setCroppingImgUrl,
-      cropModel,
-      setCropModel,
-      cropMinHeightPx,
-      setCropMinHeightPx,
-      cropCannyLow,
-      setCropCannyLow,
-      cropCannyHigh,
-      setCropCannyHigh,
-      cropCloseKernelSize,
-      setCropCloseKernelSize,
-      activeAutoCropTab,
-      setActiveAutoCropTab,
-      cropGuidance,
-      setCropGuidance,
-      cropFocusMode,
-      setCropFocusMode,
-      characters,
-      setCharacters,
-      showScrapeConfirmModal,
-      setShowScrapeConfirmModal,
+      projectId,
+      jobId,
+      setProjectId,
+      setJobId,
+      setWorkspaceContext,
+      workspaceContext,
+      seriesSlugState,
+      setSeriesSlugState,
+      chapterSlugState,
+      setChapterSlugState,
       resetWorkspace,
-      notifications,
-      notificationsMuted,
-      setNotificationsMuted,
-      errorPopup,
-      setErrorPopup,
-      addNotification,
-      removeNotification,
-      fetchWithInterceptor,
-      checkAuth,
+
+      // Scraper
+      scrapedImages: scraper.scrapedImages,
+      setScrapedImages: scraper.setScrapedImages,
+      selectedScraped: scraper.selectedScraped,
+      setSelectedScraped: scraper.setSelectedScraped,
+      isScraping: scraper.isScraping,
+      setIsScraping: scraper.setIsScraping,
+      showScrapeConfirmModal: scraper.showScrapeConfirmModal,
+      setShowScrapeConfirmModal: scraper.setShowScrapeConfirmModal,
+      accumulatedTokens: scraper.accumulatedTokens,
+      setAccumulatedTokens: scraper.setAccumulatedTokens,
+
+      // Project Metadata Direct Fields
       targetUrl,
       setTargetUrl,
-      voiceActor,
-      setVoiceActor,
-      musicTheme,
-      setMusicTheme,
-      aspectRatio,
-      setAspectRatio,
-      selectedModel,
-      setSelectedModel,
-      selectedSource,
-      setSelectedSource,
-      frameRate,
-      setFrameRate,
-      volume,
-      setVolume,
-      isMuted,
-      setIsMuted,
-      sfxVolume,
-      setSfxVolume,
-      sfxEnabled,
-      setSfxEnabled,
-      narrationVolume,
-      setNarrationVolume,
-      bgmVolume,
-      setBgmVolume,
-      audioDucking,
-      setAudioDucking,
-      speechRate,
-      setSpeechRate,
-      speechPitch,
-      setSpeechPitch,
-      audioReactiveShake,
-      setAudioReactiveShake,
-      shakeIntensity,
-      setShakeIntensity,
-      videoFormat,
-      setVideoFormat,
-      backgroundStyle,
-      setBackgroundStyle,
-      subtitlesStyle,
-      setSubtitlesStyle,
-      videoUrl,
-      setVideoUrl,
-      isSavingEdit,
-      setIsSavingEdit,
-      autoPlayAudio,
-      setAutoPlayAudio,
-      isScraping,
-      setIsScraping,
-      narrationStyle,
-      setNarrationStyle,
       scrapedTitle,
       setScrapedTitle,
       scrapedGenre,
@@ -1685,113 +479,76 @@ export function useAppState() {
       setSeriesCoverImage,
       seriesSynopsis,
       setSeriesSynopsis,
-      audioFeedback,
-      projectId,
-      jobId,
-      setProjectId,
-      setJobId,
-      setWorkspaceContext,
-      seriesSlugState,
-      setSeriesSlugState,
-      chapterSlugState,
-      setChapterSlugState,
-      smartSlice,
-      setSmartSlice,
-      accumulatedTokens,
-      setAccumulatedTokens,
-      clearAllNotifications,
-      markAllNotificationsAsRead,
-      markNotificationAsRead,
-      deleteNotification,
+      videoUrl,
+      setVideoUrl,
+
+      // Editor Settings
+      ...settings,
+
+      // AutoCrop
+      ...autoCrop,
+
+      // Bubble Cleaner
+      ...bubbleCleaner,
+
+      // Logs
+      consoleLogs: logs.consoleLogs,
+      setRawConsoleLogs: logs.setRawConsoleLogs,
+      setConsoleLogs: logs.addConsoleLog,
+
+      // Notifications
+      notifications: notifs.notifications,
+      setNotifications: notifs.setNotifications,
+      notificationsMuted: notifs.notificationsMuted,
+      setNotificationsMuted: notifs.setNotificationsMuted,
+      addNotification: notifs.addNotification,
+      removeNotification: notifs.dismissNotification,
+      dismissNotification: notifs.dismissNotification,
+      markNotificationAsRead: notifs.markNotificationAsRead,
+      deleteNotification: notifs.deleteNotification,
+      clearAllNotifications: notifs.clearAllNotifications,
+      markAllNotificationsAsRead: notifs.markAllNotificationsAsRead,
+      errorPopup: notifs.errorModalDetail,
+      setErrorPopup: notifs.setErrorModalDetail,
+      audioFeedback: notifs.audioFeedback,
+
+      // Canvas / Editor State
+      activePreviewTab,
+      setActivePreviewTab,
+      editingImageIdx,
+      setEditingImageIdx,
+      editCropTop,
+      setEditCropTop,
+      editCropBottom,
+      setEditCropBottom,
+      editCropLeft,
+      setEditCropLeft,
+      editCropRight,
+      setEditCropRight,
+      editAutoTrim,
+      setEditAutoTrim,
+      imageEditStates,
+      setImageEditStates,
+      isSavingEdit,
+      setIsSavingEdit,
+      characters,
+      setCharacters,
     }),
     [
-      user,
-      isAuthenticated,
-      authLoading,
-      isInitializing,
-      login,
-      register,
-      logout,
-      forgotPassword,
+      auth,
+      notifs,
+      autoCrop,
+      bubbleCleaner,
+      logs,
+      settings,
+      scraper,
       panels,
-      consoleLogs,
-      scrapedImages,
-      selectedScraped,
-      activePreviewTab,
-      editingImageIdx,
-      editCropTop,
-      editCropBottom,
-      editCropLeft,
-      editCropRight,
-      editAutoTrim,
-      imageEditStates,
-      showBubbleModal,
-      bubbleDetectionStyle,
-      bubbleEraseMethod,
-      bubbleSensitivity,
-      bubbleDilation,
-      bubbleInpaintRadius,
-      activeBubbleTab,
-      isCleaningBubbles,
-      cleanProgress,
-      bubbleCroppingImgUrl,
-      showAutoCropModal,
-      cropSensitivity,
-      cropPaddingPx,
-      cropBackgroundMode,
-      autoSplitTallStrips,
-      processingStrategy,
-      aspectRatioLock,
-      minPanelAreaPct,
-      overlapMergeThreshold,
-      useLocalCV,
-      isBatchCropping,
-      batchProgress,
-      croppingImgUrl,
-      cropModel,
-      cropMinHeightPx,
-      cropCannyLow,
-      cropCannyHigh,
-      cropCloseKernelSize,
-      activeAutoCropTab,
-      cropGuidance,
-      cropFocusMode,
-      characters,
-      showScrapeConfirmModal,
-      resetWorkspace,
-      notifications,
-      notificationsMuted,
-      errorPopup,
-      addNotification,
-      removeNotification,
-      fetchWithInterceptor,
-      checkAuth,
+      projectId,
+      jobId,
+      workspaceContext,
+      seriesSlugState,
+      chapterSlugState,
       targetUrl,
-      voiceActor,
-      musicTheme,
-      aspectRatio,
-      selectedModel,
-      selectedSource,
-      frameRate,
-      volume,
-      isMuted,
-      sfxVolume,
-      sfxEnabled,
-      narrationVolume,
-      bgmVolume,
-      audioDucking,
-      speechRate,
-      speechPitch,
-      audioReactiveShake,
-      shakeIntensity,
-      videoFormat,
-      backgroundStyle,
-      subtitlesStyle,
-      videoUrl,
-      isSavingEdit,
-      isScraping,
-      autoPlayAudio,
-      narrationStyle,
       scrapedTitle,
       scrapedGenre,
       seriesTitle,
@@ -1800,21 +557,24 @@ export function useAppState() {
       seriesAuthor,
       seriesCoverImage,
       seriesSynopsis,
-      audioFeedback,
-      projectId,
-      jobId,
-      setProjectId,
-      setJobId,
-      setWorkspaceContext,
-      workspaceContext,
-      seriesSlugState,
-      chapterSlugState,
-      smartSlice,
-      accumulatedTokens,
-      clearAllNotifications,
-      markAllNotificationsAsRead,
-      markNotificationAsRead,
-      deleteNotification,
+      videoUrl,
+      activePreviewTab,
+      editingImageIdx,
+      editCropTop,
+      editCropBottom,
+      editCropLeft,
+      editCropRight,
+      editAutoTrim,
+      imageEditStates,
+      isSavingEdit,
+      characters,
+      login,
+      register,
+      logout,
+      forgotPassword,
+      checkAuth,
+      fetchWithInterceptor,
+      resetWorkspace,
     ]
   );
 }

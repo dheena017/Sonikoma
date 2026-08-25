@@ -2,7 +2,7 @@ import React from "react";
 import LoginForm from "@/features/app_auth/components/LoginForm";
 
 interface LoginPageProps {
-  onLogin: (data: any) => Promise<void>;
+  onLogin: (data: any) => Promise<any>;
   onNavigateToRegister: () => void;
   onNavigateToForgotPassword: () => void;
   onNavigateHome?: () => void;

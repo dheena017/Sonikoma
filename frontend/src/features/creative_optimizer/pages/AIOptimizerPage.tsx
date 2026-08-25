@@ -27,7 +27,7 @@ import AdPlacementTab from "@/features/creative_optimizer/components/AdPlacement
 import ThumbnailStudioTab from "@/features/creative_optimizer/components/ThumbnailStudioTab";
 import { AIModelSelector } from "@/features/ai_core";
 
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 interface AIOptimizerPageProps {
   panels: GeneratedPanel[];
@@ -51,7 +51,9 @@ const AIOptimizerPage = React.memo(
       (state) => state.activeProjectData
     );
     const storePanels = activeProjectData?.panels || [];
-    const safePanels = panels && panels.length > 0 ? panels : storePanels;
+    const safePanels = (
+      panels && panels.length > 0 ? panels : storePanels
+    ) as unknown as GeneratedPanel[];
 
     const [selectedIdx, setSelectedIdx] = useState(0);
     const [activeTab, setActiveTab] = useState<

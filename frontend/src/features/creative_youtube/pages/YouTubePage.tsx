@@ -28,7 +28,7 @@ import YouTubeStudioPage from "@/features/creative_youtube/components/YouTubeStu
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 import { useYouTubePublisher } from "@/features/creative_youtube/hooks/useYouTubePublisher";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface YouTubePageProps {
@@ -75,12 +75,13 @@ const YouTubePage = React.memo(
       (state) => state.activeProjectData
     );
     const storePanels = activeProjectData?.panels || [];
-    const safePanels =
+    const safePanels = (
       panels && panels.length > 0
         ? panels
         : Array.isArray(storePanels)
         ? storePanels
-        : [];
+        : []
+    ) as unknown as GeneratedPanel[];
     const effectiveTitle =
       scrapedTitle || activeProjectData?.project?.title || "";
     const effectiveGenre =

@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import type { MouseEvent } from "react";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 export interface UseProjectsActionsHandlers {
   handleNewSeries: () => void;

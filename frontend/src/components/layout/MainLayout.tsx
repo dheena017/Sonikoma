@@ -11,7 +11,7 @@ import {
   LandingAnimeScene,
   AnimeSceneVariant,
 } from "@/features/app_landing/components/LandingAnimeScene";
-import { useProjectStore } from "@/store/useProjectStore";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 // --- Lazy Loaded Heavy Conditional Components ---
 const ProjectConfirmModal = React.lazy(

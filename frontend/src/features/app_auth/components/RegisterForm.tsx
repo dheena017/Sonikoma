@@ -21,7 +21,7 @@ import ThemeSwitcher from "@/features/app_auth/components/ThemeSwitcher";
 import { useRegisterForm } from "@/features/app_auth/hooks";
 
 interface RegisterFormProps {
-  onRegister: (data: any) => Promise<void>;
+  onRegister: (data: any) => Promise<any>;
   onNavigateToLogin: () => void;
   onNavigateHome?: () => void;
 }

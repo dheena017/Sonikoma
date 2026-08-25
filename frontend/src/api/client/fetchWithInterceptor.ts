@@ -113,6 +113,23 @@ export function createFetchWithInterceptor({
               }
 
               if (response.status === 401) {
+                const inputUrl = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
+                const isAuthEndpoint =
+                  inputUrl.includes("/auth/login") ||
+                  inputUrl.includes("/auth/register") ||
+                  inputUrl.includes("/auth/forgot-password");
+
+                if (isAuthEndpoint) {
+                  const detailMsg =
+                    errorData.detail ||
+                    errorData.message ||
+                    errorData.error ||
+                    "Incorrect email or password";
+                  const err = new Error(detailMsg);
+                  reject(err);
+                  return;
+                }
+
                 errMsg =
                   "Action Unauthorized (401): You do not have valid authentication or server credentials.";
                 addNotification(errMsg, "error");
@@ -218,23 +235,35 @@ export function createFetchWithInterceptor({
             } else {
               if (contentType.includes("application/json")) {
                 const errorData = await response.json().catch(() => ({}));
-                errMsg =
-                  errorData.message ||
-                  errorData.detail ||
-                  errorData.error ||
-                  errMsg;
+                if (Array.isArray(errorData.detail)) {
+                  errMsg = errorData.detail.map((d: any) => d.msg || d.message).join(", ");
+                } else {
+                  errMsg =
+                    errorData.message ||
+                    errorData.detail ||
+                    errorData.error ||
+                    errMsg;
+                }
               }
-              setErrorPopup({
-                title: `Server Operation Error (${response.status})`,
-                message: errMsg,
-                type: "error",
-                technicalDetails: `HTTP ${response.status} Error\nEndpoint: ${input}`,
-                suggestion:
-                  "Double check model specifications and link parameters. If problems persist, refresh your browser tab or choose an alternative frame.",
-                onRetry: () => {
-                  executeFetch();
-                },
-              });
+              const inputUrl = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
+              const isAuthEndpoint =
+                inputUrl.includes("/auth/login") ||
+                inputUrl.includes("/auth/register") ||
+                inputUrl.includes("/auth/forgot-password");
+
+              if (!isAuthEndpoint) {
+                setErrorPopup({
+                  title: `Server Operation Error (${response.status})`,
+                  message: errMsg,
+                  type: "error",
+                  technicalDetails: `HTTP ${response.status} Error\nEndpoint: ${input}`,
+                  suggestion:
+                    "Double check model specifications and link parameters. If problems persist, refresh your browser tab or choose an alternative frame.",
+                  onRetry: () => {
+                    executeFetch();
+                  },
+                });
+              }
             }
 
             const err = new Error(errMsg);
