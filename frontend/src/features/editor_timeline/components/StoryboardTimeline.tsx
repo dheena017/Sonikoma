@@ -636,32 +636,37 @@ const StoryboardTimeline = React.memo(
                     Array.isArray(result.data?.panels) &&
                     result.data.panels.length > 0
                   ) {
-                    for (let i = 0; i < result.data.panels.length; i++) {
-                      const box = result.data.panels[i];
-                      let croppedUrl = box.croppedUrl;
+                    const rawBoxes = result.data.panels;
+                    let sliceUrls: string[] = [];
 
-                      if (!croppedUrl) {
-                        const cropData = await api.submitImageEdits(
-                          activeFetch,
-                          {
-                            url: originalPanel.image_url,
-                            cropTop: box.cropTop,
-                            cropBottom: box.cropBottom,
-                            cropLeft: box.cropLeft,
-                            cropRight: box.cropRight,
-                            autoTrim: false, // detection coordinates are already precise; autoTrim would over-crop artwork
-                            padding: cropPaddingPx,
-                            sensitivity: cropSensitivity,
-                            backgroundColorMode: cropBackgroundMode,
-                          }
-                        );
-                        croppedUrl = cropData.url;
+                    try {
+                      const sliceRes = await api.cropLongPanels(activeFetch, {
+                        url: originalPanel.image_url,
+                        panels: rawBoxes,
+                        bleed_guard_px: 5,
+                        background_mode: cropBackgroundMode || "auto",
+                        output_format: "webp",
+                        quality: 90,
+                      });
+
+                      if (sliceRes && sliceRes.success && Array.isArray(sliceRes.slices) && sliceRes.slices.length > 0) {
+                        sliceUrls = sliceRes.slices
+                          .sort((a: any, b: any) => a.index - b.index)
+                          .map((s: any) => s.url);
                       }
+                    } catch (sliceErr) {
+                      console.warn("[Auto Cropper Timeline] Batch slicing fallback:", sliceErr);
+                    }
 
+                    if (sliceUrls.length === 0) {
+                      sliceUrls = rawBoxes.map((b: any) => b.croppedUrl || originalPanel.image_url);
+                    }
+
+                    for (let i = 0; i < sliceUrls.length; i++) {
                       newSubPanels.push({
                         ...originalPanel,
                         id: nextId++,
-                        image_url: croppedUrl,
+                        image_url: sliceUrls[i],
                       });
                     }
                     successCount++;

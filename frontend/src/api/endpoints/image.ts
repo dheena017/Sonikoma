@@ -15,6 +15,7 @@ export const submitImageEdits = async (
 };
 
 export const editImage = submitImageEdits;
+export * from "./crop";
 
 export const removeSpeechBubblesBatch = async (
   fetchWithInterceptor: FetchClient,

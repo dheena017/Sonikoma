@@ -355,6 +355,22 @@ export function useBatchImageActions({
           const controller = new AbortController();
           abortControllersRef.current.add(controller);
           try {
+            // ── STEP 1: Detect Layout & Comic Format ────────────────────────
+            try {
+              const typeInfo = await api.detectPanelCropType(
+                fetchWithInterceptor,
+                { url: url },
+                { signal: controller.signal }
+              );
+              if (typeInfo && typeInfo.success) {
+                console.log(
+                  `[Auto Cropper: Layout] Detected ${typeInfo.type_label} (${typeInfo.width}x${typeInfo.height}px, ~${typeInfo.estimated_panel_count} estimated panels, flow: ${typeInfo.reading_flow})`
+                );
+              }
+            } catch (typeErr) {
+              console.warn("[Auto Cropper] detectPanelCropType warning:", typeErr);
+            }
+
             const detectPayload = {
               url: url,
               sensitivity: cropSensitivity,
@@ -503,31 +519,35 @@ export function useBatchImageActions({
                       } need edit API fallback`,
                   ...prev,
                 ]);
-                const croppedResults = await Promise.all(
-                  sortedPanels.map(async (box: any, boxIdx: number) => {
-                    if (box.croppedUrl)
-                      return { orderIndex: boxIdx, url: box.croppedUrl };
-                    const cropData = await api.submitImageEdits(
-                      fetchWithInterceptor,
-                      {
-                        url: url,
-                        cropTop: box.cropTop,
-                        cropBottom: box.cropBottom,
-                        cropLeft: box.cropLeft,
-                        cropRight: box.cropRight,
-                        autoTrim: false, // detection coordinates are already precise; autoTrim would over-trim artwork
-                        padding: cropPaddingPx,
-                        sensitivity: cropSensitivity,
-                        backgroundColorMode: cropBackgroundMode,
-                      }
-                    );
-                    return { orderIndex: boxIdx, url: cropData.url };
-                  })
-                );
+                // ── STEP 3: Execute Single-Pass Batch Slicing (NO LOOP) ───────────
+                let croppedUrls: string[] = [];
+                try {
+                  const sliceRes = await api.cropLongPanels(
+                    fetchWithInterceptor,
+                    {
+                      url: url,
+                      panels: sortedPanels,
+                      bleed_guard_px: 5,
+                      background_mode: cropBackgroundMode || "auto",
+                      output_format: "webp",
+                      quality: 90,
+                    },
+                    { signal: controller.signal }
+                  );
 
-                const croppedUrls = croppedResults
-                  .sort((a, b) => a.orderIndex - b.orderIndex)
-                  .map((res) => res.url);
+                  if (sliceRes && sliceRes.success && Array.isArray(sliceRes.slices) && sliceRes.slices.length > 0) {
+                    croppedUrls = sliceRes.slices
+                      .sort((a: any, b: any) => a.index - b.index)
+                      .map((s: any) => s.url);
+                    console.log(`[Auto Cropper] ✓ Batch sliced ${croppedUrls.length} panels in ${sliceRes.processing_time_ms}ms (1 request)`);
+                  } else {
+                    // Fallback to pre-cropped server URLs if available
+                    croppedUrls = sortedPanels.map((p: any) => p.croppedUrl || url);
+                  }
+                } catch (sliceErr: any) {
+                  console.warn("[Auto Cropper] cropLongPanels batch slicing fallback:", sliceErr);
+                  croppedUrls = sortedPanels.map((p: any) => p.croppedUrl || url);
+                }
 
                 newSlicedUrlsMap[url] = croppedUrls;
               } else {

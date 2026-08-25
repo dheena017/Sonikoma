@@ -8,6 +8,7 @@ Main entry router coordinating all image editing, detection, and transformation 
 from fastapi import APIRouter
 
 # Import sub-routers
+from api.v1.images.crop import router as crop_router
 from api.v1.images.edit import router as edit_router
 from api.v1.images.detect import router as detect_router
 from api.v1.images.upload import router as upload_router
@@ -17,6 +18,7 @@ from api.v1.images.transform import router as transform_router
 image_router = APIRouter()
 
 # Include sub-routers under main image_router
+image_router.include_router(crop_router, prefix="/crop", tags=["08. Image Cropping & Slicing"])
 image_router.include_router(edit_router)
 image_router.include_router(detect_router)
 image_router.include_router(upload_router)
