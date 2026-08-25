@@ -23,7 +23,7 @@ LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "local_med
 LOCAL_MEDIA_URL_PREFIX = "/media"
 
 from services.image.ocr.ocr_engine import extract_full_ocr_data
-from services.image.panel_detection.webtoon_detector import _detect_bg_color_and_threshold
+from services.image.panel_detection.panel_detector import _detect_bg_color_and_threshold
 from services.image.panel_detection.speech_bubble_detector import (
     segment_speech_bubbles_and_text_balloons as segment_text_and_balloons,
     segment_character_foreground as segment_characters,

@@ -155,6 +155,38 @@ export const detectWithOpenCV = async (
 };
 
 /**
+ * Option 1: OpenCV + YOLO Deep Learning Dialogue & Panel Detector (Fast, On-Device).
+ */
+export const detectPanelsCVYOLO = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/cv-yolo", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+/**
+ * Option 2: Full Multimodal AI Vision & Reading Flow Pipeline.
+ */
+export const detectPanelsAIVision = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/ai-vision", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+/**
  * Direct YOLOv8m-seg speech bubble & character detector.
  */
 export const detectWithYOLO = async (
@@ -179,6 +211,102 @@ export const detectWithAI = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/ai", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+/**
+ * Dedicated Ultra-Long Chapter Scroll detector (20-100+ panels).
+ */
+export const detectUltraLongPanels = async (
+  fetchWithInterceptor: FetchClient,
+  data: DetectLongPanelsPayload,
+  options?: RequestInit
+): Promise<ApiResponse<DetectLongPanelsResponse>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/ultra-long-panels", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+/**
+ * Dedicated Manga 2D Multi-Panel Grid Detector.
+ */
+export const detectMangaGrid = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/grid", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+/**
+ * Dedicated Raw Webtoon Gutter Seam Scanner.
+ */
+export const detectWebtoonGutters = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/webtoon-gutters", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+/**
+ * Dedicated Panel + Speech Bubble Fusion Engine.
+ */
+export const detectFusion = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/fusion", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+/**
+ * Dedicated Post-Processor for panel deduplication & overlap resolution.
+ */
+export const detectPostprocess = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/postprocess", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+};
+
+/**
+ * Dedicated Visual Debug Diagnostic Overlay Generator (Returns JPEG image blob).
+ */
+export const detectVisualizeOverlay = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/visualize", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

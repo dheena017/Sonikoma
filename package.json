@@ -21,6 +21,7 @@
     "test:functions": "playwright test e2e/functions",
     "test:endpoints": "playwright test e2e/endpoints",
     "test:buttons": "playwright test e2e/button_triggers",
+    "test:crop": "python backend/scripts/test_crop_pipeline.py",
     "format": "prettier --write .",
     "start:prod": "npm run python:prod",
     "start:server": "npm run start:prod",

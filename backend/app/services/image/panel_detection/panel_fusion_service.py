@@ -137,8 +137,8 @@ def fuse_panels_and_bubbles(
     for idx, cp in enumerate(cv_panels):
         px = int(cp.get("x", 0))
         py = int(cp.get("y", 0))
-        pw = int(cp.get("w", img_w))
-        ph = int(cp.get("h", 100))
+        pw = int(cp.get("w", cp.get("width", img_w)))
+        ph = int(cp.get("h", cp.get("height", 100)))
         p_id = f"panel_{idx + 1}"
 
         panel_bubbles: List[SpeechBubbleItem] = []
@@ -176,8 +176,8 @@ def fuse_panels_and_bubbles(
             index=idx,
             x=pad_x1,
             y=pad_y1,
-            w=pad_x2 - pad_x1,
-            h=pad_y2 - pad_y1,
+            w=max(10, pad_x2 - pad_x1),
+            h=max(10, pad_y2 - pad_y1),
             width=pad_x2 - pad_x1,
             height=pad_y2 - pad_y1,
             confidence=round(float(cp.get("confidence", 0.95)), 2),

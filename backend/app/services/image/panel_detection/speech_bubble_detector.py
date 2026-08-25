@@ -666,3 +666,82 @@ def trigger_yolo_fine_tuning(epochs: int = 20, batch_size: int = 4) -> bool:
 
 # Backward compatibility alias
 trigger_fine_tuning = trigger_yolo_fine_tuning
+
+
+def detect_yolo_entities(
+    image_bytes: bytes,
+    conf_threshold: float = 0.30
+) -> List[Any]:
+    """
+    Executes YOLOv8m-seg semantic inference on comic image bytes.
+    Extracts dialogue bubbles, thought clouds, captions, and polygon masks.
+    """
+    import io
+    from PIL import Image
+    from schemas.project import SpeechBubbleItem, EntityLabel, EntityCategory
+
+    pil_img = Image.open(io.BytesIO(image_bytes))
+    img_w, img_h = pil_img.size
+
+    model = get_yolo_speech_bubble_model()
+    if model is None:
+        logger.warning("[YOLO Detector] YOLO model unavailable. Returning empty speech bubble list.")
+        return []
+
+    try:
+        results = model.predict(source=pil_img, conf=conf_threshold, verbose=False)
+    except Exception as e:
+        logger.error(f"[YOLO Detector] Inference error: {e}", exc_info=True)
+        return []
+
+    entities: List[SpeechBubbleItem] = []
+    bubble_counter = 1
+
+    for r in results:
+        boxes = r.boxes.xyxy.cpu().numpy() if r.boxes is not None else []
+        confs = r.boxes.conf.cpu().numpy() if r.boxes is not None else []
+        masks = r.masks.xy if r.masks is not None else []
+
+        for idx, (box, conf) in enumerate(zip(boxes, confs)):
+            x1, y1, x2, y2 = [int(v) for v in box]
+            w = max(10, x2 - x1)
+            h = max(10, y2 - y1)
+
+            polygon = None
+            if idx < len(masks) and masks[idx] is not None and len(masks[idx]) > 2:
+                polygon = [[int(pt[0]), int(pt[1])] for pt in masks[idx]]
+
+            aspect = w / float(h)
+            if aspect > 2.5:
+                bubble_type = "caption"
+                label = EntityLabel.CAPTION_NARRATION.value
+            elif conf > 0.85:
+                bubble_type = "speech"
+                label = EntityLabel.BUBBLE_SPEECH.value
+            else:
+                bubble_type = "thought"
+                label = EntityLabel.BUBBLE_THOUGHT.value
+
+            entities.append(SpeechBubbleItem(
+                bubble_id=f"bubble_{bubble_counter}",
+                label=label,
+                category=EntityCategory.TEXT.value,
+                sub_type=bubble_type,
+                x=x1,
+                y=y1,
+                width=w,
+                height=h,
+                polygon=polygon,
+                dialogue_text=None,
+                confidence=round(float(conf), 2),
+                reading_order=bubble_counter,
+                is_bound=False
+            ))
+            bubble_counter += 1
+
+    entities.sort(key=lambda b: (b.y, b.x))
+    for i, b in enumerate(entities):
+        b.reading_order = i + 1
+
+    logger.debug(f"[YOLO Detector] Image {img_w}x{img_h}px -> Detected {len(entities)} speech bubble(s).")
+    return entities

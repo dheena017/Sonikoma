@@ -212,6 +212,10 @@ class DetectSmallPanelsRequest(BaseModel):
     """Request payload for Small Image & Single Frame detection."""
     url: Optional[str] = Field(None, description="Target image public URL")
     image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
+    engine_mode: Literal["cv_yolo", "ai_vision"] = Field(
+        "cv_yolo",
+        description="Detection strategy: 'cv_yolo' (OpenCV + YOLO Dialogue/Panels) or 'ai_vision' (Full AI Vision OCR & Flow)"
+    )
     aspect_ratio: str = Field("free", description="Target aspect ratio lock")
     auto_trim: bool = Field(True, description="Auto-trim solid background borders")
     snap_to_frame: bool = Field(True, description="Snap tightly to black border frame")
@@ -224,6 +228,7 @@ class DetectSmallPanelsResponse(BaseModel):
     """Response payload for Small Image & Single Frame detection."""
     success: bool
     crop_type: str = "small_panels"
+    engine_mode: str = "cv_yolo"
     image_width: int = Field(0, description="Source image width in pixels")
     image_height: int = Field(0, description="Source image height in pixels")
     panel: Optional[PanelBoundingBox] = None
@@ -239,6 +244,10 @@ class DetectLongPanelsRequest(BaseModel):
     """Request payload for Tall Webtoon Strip detection."""
     url: Optional[str] = Field(None, description="Target image public URL")
     image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
+    engine_mode: Literal["cv_yolo", "ai_vision"] = Field(
+        "cv_yolo",
+        description="Detection strategy: 'cv_yolo' (OpenCV + YOLO Dialogue/Panels) or 'ai_vision' (Full AI Vision OCR & Flow)"
+    )
     sensitivity: float = Field(30.0, ge=0.0, le=100.0, description="Gutter seam sensitivity")
     background_mode: str = Field("auto", description="'auto', 'white', 'black'")
     min_panel_height: int = Field(150, ge=10, description="Minimum panel height in pixels")
@@ -251,6 +260,7 @@ class DetectLongPanelsResponse(BaseModel):
     """Response payload for Tall Webtoon Strip detection."""
     success: bool
     crop_type: str = "long_panels"
+    engine_mode: str = "cv_yolo"
     total_panels: int = 0
     total_speech_bubbles_count: int = 0
     image_width: int = 0
@@ -266,6 +276,10 @@ class DetectPanelsUrlRequest(BaseModel):
     url: Optional[str] = None
     image_url: Optional[str] = None
     image_base64: Optional[str] = None
+    engine_mode: Literal["cv_yolo", "ai_vision"] = Field(
+        "cv_yolo",
+        description="Detection strategy: 'cv_yolo' (OpenCV + YOLO) or 'ai_vision' (Full AI Vision)"
+    )
     sensitivity: float = Field(30.0, ge=0.0, le=100.0)
     background_mode: str = "auto"
     min_width_pct: float = 0.15
