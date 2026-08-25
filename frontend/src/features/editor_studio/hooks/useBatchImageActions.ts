@@ -307,38 +307,6 @@ export function useBatchImageActions({
     let finalTargetImages = targetImages;
     let isStitchedCombined = false;
 
-    if (targetImages.length > 1) {
-      setConsoleLogs((prev) => [
-        `[Auto Cropper] Merging ${targetImages.length} images into a single long strip for full-page panel detection...`,
-        ...prev,
-      ]);
-      console.group(
-        `[DBG] Auto Crop — Pre-Stitch (${targetImages.length} images)`
-      );
-      console.log("[DBG] Source image URLs:", targetImages);
-      console.groupEnd();
-      try {
-        const mergeData = await api.mergeImages(fetchWithInterceptor, {
-          urls: targetImages,
-        });
-        console.log("[DBG] mergeImages response:", mergeData);
-        if (mergeData && mergeData.url) {
-          finalTargetImages = [mergeData.url];
-          isStitchedCombined = true;
-          console.log("[DBG] Stitched URL:", mergeData.url);
-          setConsoleLogs((prev) => [
-            `[Auto Cropper] Successfully stitched full long strip! Running panel detection on combined image...`,
-            ...prev,
-          ]);
-        }
-      } catch (mergeErr: any) {
-        console.warn(
-          "[Auto Cropper] Pre-crop image stitching failed, proceeding on individual images:",
-          mergeErr
-        );
-      }
-    }
-
     let completedCount = 0;
     const errors: string[] = [];
     const newSlicedUrlsMap: Record<string, string[]> = {};
@@ -347,15 +315,16 @@ export function useBatchImageActions({
       abortBatchRef.current.aborted = false;
       await processWithConcurrency(
         finalTargetImages,
-        8,
+        4,
         async (url) => {
           if (abortBatchRef.current.aborted)
             throw new Error("Cancelled by user");
           setCroppingImgUrl(url);
           const controller = new AbortController();
           abortControllersRef.current.add(controller);
+          let detectedLayout: any = null;
           try {
-            // ── STEP 1: Detect Layout & Comic Format ────────────────────────
+            // ── STEP 1: Detect Layout & Comic Format (Small vs Tall) ───────
             try {
               const typeInfo = await api.detectPanelCropType(
                 fetchWithInterceptor,
@@ -363,164 +332,106 @@ export function useBatchImageActions({
                 { signal: controller.signal }
               );
               if (typeInfo && typeInfo.success) {
+                detectedLayout = typeInfo;
                 console.log(
-                  `[Auto Cropper: Layout] Detected ${typeInfo.type_label} (${typeInfo.width}x${typeInfo.height}px, ~${typeInfo.estimated_panel_count} estimated panels, flow: ${typeInfo.reading_flow})`
+                  `[Auto Cropper: Layout] Detected ${typeInfo.type_label} (${typeInfo.width}x${typeInfo.height}px, ratio: ${typeInfo.aspect_ratio}, flow: ${typeInfo.reading_flow})`
                 );
               }
             } catch (typeErr) {
               console.warn("[Auto Cropper] detectPanelCropType warning:", typeErr);
             }
 
-            const detectPayload = {
-              url: url,
-              sensitivity: cropSensitivity,
-              backgroundColorMode: cropBackgroundMode || "auto",
-              aspectRatio: aspectRatioLock,
-              minAreaPct: minPanelAreaPct / 100.0,
-              mergeThreshold: overlapMergeThreshold,
-              strategy: useLocalCV ? "local-cv" : "balanced",
-              model: cropModel,
-              cannyLow: cropCannyLow,
-              cannyHigh: cropCannyHigh,
-              closeKernelSize: cropCloseKernelSize,
-              minHeightPx: cropMinHeightPx || 150,
-              paddingPx: cropPaddingPx,
-              autoSplit: autoSplitTallStrips,
-              useYolo: true,
-              guidanceInstructions: cropGuidance,
-              focusMode: cropFocusMode,
-            };
-            console.group(`[DBG] detectPanels — Request`);
-            console.log("[DBG] Payload:", detectPayload);
-            console.groupEnd();
-            const data = await api.detectPanels(
-              fetchWithInterceptor,
-              detectPayload,
-              { signal: controller.signal }
-            );
-            console.group(`[DBG] detectPanels — Response`);
-            console.log(
-              "[DBG] success:",
-              data.success,
-              "| total_panels:",
-              data.total_panels,
-              "| imageWidth:",
-              data.imageWidth,
-              "| imageHeight:",
-              data.imageHeight
-            );
-            console.log(
-              "[DBG] isTallStrip:",
-              data.isTallStrip,
-              "| fallback:",
-              data.fallback
-            );
-            console.log(
-              "[DBG] Raw panels count:",
-              Array.isArray(data.panels) ? data.panels.length : "N/A"
-            );
-            console.groupEnd();
-            if (abortBatchRef.current.aborted)
-              throw new Error("Cancelled by user");
-            if (data.fallback) {
+            const isTallStrip =
+              detectedLayout?.crop_type === "long_panels" ||
+              (detectedLayout?.aspect_ratio != null && detectedLayout.aspect_ratio >= 2.2);
+
+            let croppedUrls: string[] = [];
+
+            if (!isTallStrip) {
+              // ── Route 3A: Small Image 4-Directional Margin Crop ───────────
+              // Small images (single comic frames, pages, speech bubbles) keep
+              // artwork & dialogue together as 1 panel and trim outer margins.
+              try {
+                const smallRes = await api.cropSmallPanels(
+                  fetchWithInterceptor,
+                  {
+                    url: url,
+                    unit: "percent",
+                    aspect_ratio: aspectRatioLock && aspectRatioLock !== "free" ? (aspectRatioLock as any) : "free",
+                    auto_trim: true,
+                    padding_px: cropPaddingPx,
+                    output_format: "webp",
+                    quality: 90,
+                  },
+                  { signal: controller.signal }
+                );
+
+                if (smallRes && smallRes.success && smallRes.url) {
+                  croppedUrls = [smallRes.url];
+                  console.log(
+                    `[Auto Cropper] ✓ Small image cropped in ${smallRes.processing_time_ms}ms via small-panels`
+                  );
+                } else {
+                  croppedUrls = [url];
+                }
+              } catch (smallErr) {
+                console.warn("[Auto Cropper] cropSmallPanels fallback:", smallErr);
+                croppedUrls = [url];
+              }
+
               setConsoleLogs((prev) => [
-                `[Smart Cropper Fallback] Smart Scanner detection failed on ${url.substring(
-                  0,
-                  40
-                )}..., fell back to local CV: ${data.message}`,
+                `[Auto Cropper] ✓ Small Image processed (${detectedLayout?.width || "auto"}x${detectedLayout?.height || "auto"}px)`,
                 ...prev,
               ]);
-              addNotification(
-                `System failed (quota/connection). Fell back to local CV detection.`,
-                "info"
-              );
-            }
+            } else {
+              // ── Route 3B: Tall Webtoon Strip Multi-Panel Batch Slicer ─────
+              const detectPayload = {
+                url: url,
+                sensitivity: cropSensitivity,
+                backgroundColorMode: cropBackgroundMode || "auto",
+                aspectRatio: aspectRatioLock,
+                minAreaPct: minPanelAreaPct / 100.0,
+                mergeThreshold: overlapMergeThreshold,
+                strategy: useLocalCV ? "local-cv" : "balanced",
+                model: cropModel,
+                cannyLow: cropCannyLow,
+                cannyHigh: cropCannyHigh,
+                closeKernelSize: cropCloseKernelSize,
+                minHeightPx: cropMinHeightPx || 150,
+                paddingPx: cropPaddingPx,
+                autoSplit: autoSplitTallStrips,
+                useYolo: true,
+                guidanceInstructions: cropGuidance,
+                focusMode: cropFocusMode,
+              };
 
-            if (data.success && Array.isArray(data.panels)) {
-              if (data.panels.length > 0) {
-                // Sort strictly top-to-bottom (y pixel), then left-to-right (x pixel).
-                // Using pixel coords is accurate for both webtoon strips and manga grids.
-                // The old 4%-cropTop row-band method reordered panels incorrectly on tall
-                // stitched strips (one band = ~2400px on a 60k-px strip).
+              console.group(`[DBG] detectPanels — Tall Strip Request`);
+              console.log("[DBG] Payload:", detectPayload);
+              console.groupEnd();
+
+              const data = await api.detectPanels(
+                fetchWithInterceptor,
+                detectPayload,
+                { signal: controller.signal }
+              );
+
+              if (data.fallback) {
+                setConsoleLogs((prev) => [
+                  `[Smart Cropper Fallback] Scanner failed on ${url.substring(
+                    0,
+                    40
+                  )}..., fell back to local CV: ${data.message}`,
+                  ...prev,
+                ]);
+              }
+
+              if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
                 const sortedPanels = [...data.panels].sort((a: any, b: any) => {
                   const dy = (a.y ?? 0) - (b.y ?? 0);
                   if (dy !== 0) return dy;
                   return (a.x ?? 0) - (b.x ?? 0);
                 });
-                (window as any).__lastDetectedPanels = sortedPanels;
-                const totalPanelsCount =
-                  data.total_panels || sortedPanels.length;
-                const imgW = data.imageWidth || "auto";
-                const imgH = data.imageHeight || "auto";
-                console.log(
-                  `[Auto Cropper Debug JSON] Total panels: ${totalPanelsCount}, Image size: ${imgW}x${imgH}px`,
-                  sortedPanels
-                );
-                // ── Detailed gap analysis ────────────────────────────────────────
-                console.group(
-                  `[DBG] Panel Sorted Order — ${sortedPanels.length} panels (image: ${imgW}x${imgH}px)`
-                );
-                let prevYEnd = 0;
-                const panelDebugRows = sortedPanels.map((p: any, i: number) => {
-                  const gap = p.y - prevYEnd;
-                  const row = {
-                    "#": i + 1,
-                    id: p.id,
-                    y_start: p.y,
-                    y_end: p.y + p.height,
-                    height: p.height,
-                    x: p.x,
-                    width: p.width,
-                    gap_from_prev: gap,
-                    croppedUrl: p.croppedUrl ? "✓" : "✗",
-                  };
-                  if (gap > 0)
-                    console.warn(
-                      `[DBG] ⚠ GAP ${gap}px before panel ${
-                        i + 1
-                      } (prev ended at y=${prevYEnd}, this starts at y=${p.y})`
-                    );
-                  prevYEnd = p.y + p.height;
-                  return row;
-                });
-                console.table(panelDebugRows);
-                const totalGap = sortedPanels.reduce(
-                  (acc: number, p: any, i: number) => {
-                    if (i === 0) return p.y; // gap from 0 to first panel
-                    return (
-                      acc +
-                      (p.y -
-                        (sortedPanels[i - 1].y + sortedPanels[i - 1].height))
-                    );
-                  },
-                  0
-                );
-                const coveredH = sortedPanels.reduce(
-                  (acc: number, p: any) => acc + p.height,
-                  0
-                );
-                console.log(
-                  `[DBG] Coverage: ${coveredH}px covered out of ${imgH}px total | Total gap: ${totalGap}px | Panel 1 starts at y=${
-                    sortedPanels[0]?.y ?? "N/A"
-                  }`
-                );
-                console.groupEnd();
-                const serverCroppedCount = sortedPanels.filter(
-                  (b: any) => !!b.croppedUrl
-                ).length;
-                setConsoleLogs((prev) => [
-                  `[Auto Cropper] Image Size: ${imgW}x${imgH}px | Total Panels: ${totalPanelsCount}`,
-                  serverCroppedCount === sortedPanels.length
-                    ? `[Auto Cropper] ✓ All ${sortedPanels.length} panels cropped server-side (no extra API calls needed)`
-                    : `[Auto Cropper] ${serverCroppedCount}/${
-                        sortedPanels.length
-                      } panels pre-cropped server-side, ${
-                        sortedPanels.length - serverCroppedCount
-                      } need edit API fallback`,
-                  ...prev,
-                ]);
-                // ── STEP 3: Execute Single-Pass Batch Slicing (NO LOOP) ───────────
-                let croppedUrls: string[] = [];
+
                 try {
                   const sliceRes = await api.cropLongPanels(
                     fetchWithInterceptor,
@@ -535,37 +446,40 @@ export function useBatchImageActions({
                     { signal: controller.signal }
                   );
 
-                  if (sliceRes && sliceRes.success && Array.isArray(sliceRes.slices) && sliceRes.slices.length > 0) {
+                  if (
+                    sliceRes &&
+                    sliceRes.success &&
+                    Array.isArray(sliceRes.slices) &&
+                    sliceRes.slices.length > 0
+                  ) {
                     croppedUrls = sliceRes.slices
                       .sort((a: any, b: any) => a.index - b.index)
                       .map((s: any) => s.url);
-                    console.log(`[Auto Cropper] ✓ Batch sliced ${croppedUrls.length} panels in ${sliceRes.processing_time_ms}ms (1 request)`);
+                    console.log(
+                      `[Auto Cropper] ✓ Batch sliced ${croppedUrls.length} panels from tall strip via long-panels`
+                    );
                   } else {
-                    // Fallback to pre-cropped server URLs if available
                     croppedUrls = sortedPanels.map((p: any) => p.croppedUrl || url);
                   }
                 } catch (sliceErr: any) {
-                  console.warn("[Auto Cropper] cropLongPanels batch slicing fallback:", sliceErr);
+                  console.warn("[Auto Cropper] cropLongPanels fallback:", sliceErr);
                   croppedUrls = sortedPanels.map((p: any) => p.croppedUrl || url);
                 }
 
-                newSlicedUrlsMap[url] = croppedUrls;
-              } else {
-                newSlicedUrlsMap[url] = [url];
                 setConsoleLogs((prev) => [
-                  `[Auto Cropper Warning] No panels detected for ${url.substring(
-                    0,
-                    40
-                  )}... - keeping original image as a single panel.`,
+                  `[Auto Cropper] ✓ Tall Strip sliced into ${croppedUrls.length} panels`,
+                  ...prev,
+                ]);
+              } else {
+                croppedUrls = [url];
+                setConsoleLogs((prev) => [
+                  `[Auto Cropper Warning] No panels detected for tall strip ${url.substring(0, 40)}...`,
                   ...prev,
                 ]);
               }
-            } else {
-              const errMsg =
-                data.message ||
-                "No panels detected or backend service unavailable.";
-              throw new Error(errMsg);
             }
+
+            newSlicedUrlsMap[url] = croppedUrls;
           } catch (err: any) {
             if (err.name === "AbortError") {
               console.log(`[Auto Cropper] Image crop ${url} cancelled.`);

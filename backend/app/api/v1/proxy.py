@@ -200,6 +200,18 @@ async def proxy_image_stream_endpoint(
     if fetch_url.startswith("data:") or fetch_url.startswith("blob:") or "data:image/svg" in fetch_url:
         raise HTTPException(status_code=400, detail="Data and Blob URLs are browser-local and not supported by the server image proxy")
 
+    # Local /media/ or /videos/ fallback resolution
+    if fetch_url.startswith("/media/") or fetch_url.startswith("media/") or "/media/slice_" in fetch_url or "/media/single_" in fetch_url:
+        media_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media"))
+        clean_name = fetch_url.split("/media/")[-1] if "/media/" in fetch_url else fetch_url.split("media/")[-1]
+        local_path = os.path.join(media_root, clean_name)
+        if os.path.exists(local_path):
+            with open(local_path, "rb") as f:
+                content = f.read()
+            ext = os.path.splitext(clean_name)[1].lower()
+            m_type = "image/webp" if ext == ".webp" else ("image/png" if ext == ".png" else "image/jpeg")
+            return Response(content=content, media_type=m_type)
+
     # SSRF Security Validation
     is_safe, sec_reason = is_safe_proxy_url(fetch_url)
     if not is_safe:

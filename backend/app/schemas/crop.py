@@ -18,7 +18,8 @@ from pydantic import BaseModel, Field
 class DetectedLayoutType(str, Enum):
     """Supported comic panel & image layout formats."""
     LONG_PANELS = "long_panels"               # Tall continuous vertical webtoon scroll
-    SINGLE_PANELS = "single_panels"           # Single isolated comic frame / illustration
+    SMALL_PANELS = "small_panels"             # Single isolated small panel / illustration
+    SINGLE_PANELS = "small_panels"            # Alias for backward compatibility
     MULTI_GRID_PAGE = "multi_grid_page"       # Standard manga/comic page with multiple framed boxes
     DOUBLE_PAGE_SPREAD = "double_page_spread" # 2-page landscape panorama
     FOUR_KOMA = "four_koma"                   # 4-panel vertical strip (Yonkoma)
@@ -116,10 +117,10 @@ class LongPanelsCropResponse(BaseModel):
     message: Optional[str] = None
 
 
-# ─── 4. Single-Panels (4-Way Margin Cropping) Schemas ─────────────────────────
+# ─── 4. Small-Panels (4-Way Margin Cropping) Schemas ──────────────────────────
 
-class SinglePanelsCropRequest(BaseModel):
-    """Request payload for 4-directional margin cropping on single images."""
+class SmallPanelsCropRequest(BaseModel):
+    """Request payload for 4-directional margin cropping on small / single images."""
     url: str = Field(..., description="Target image URL or data URI")
     crop_top: float = Field(default=0.0, description="Margin to crop from top/above")
     crop_bottom: float = Field(default=0.0, description="Margin to crop from bottom")
@@ -136,10 +137,10 @@ class SinglePanelsCropRequest(BaseModel):
     quality: int = Field(default=90, description="Output compression quality (1-100)")
 
 
-class SinglePanelsCropResponse(BaseModel):
-    """Response payload returned from single-panels margin cropping."""
+class SmallPanelsCropResponse(BaseModel):
+    """Response payload returned from small-panels margin cropping."""
     success: bool
-    crop_type: str = "single_panels"
+    crop_type: str = "small_panels"
     url: str = Field(..., description="Public media URL of the cropped output")
     width: int = Field(..., description="Output width in pixels")
     height: int = Field(..., description="Output height in pixels")
@@ -148,3 +149,8 @@ class SinglePanelsCropResponse(BaseModel):
     auto_trimmed: bool = Field(default=False, description="Whether background auto-trim was applied")
     processing_time_ms: int = Field(default=0, description="Processing duration in milliseconds")
     message: Optional[str] = None
+
+
+# Backward-compatible aliases
+SinglePanelsCropRequest = SmallPanelsCropRequest
+SinglePanelsCropResponse = SmallPanelsCropResponse

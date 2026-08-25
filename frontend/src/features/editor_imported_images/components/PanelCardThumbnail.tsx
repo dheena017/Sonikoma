@@ -139,7 +139,9 @@ export function PanelCardThumbnail({
             // If already using the proxy or internal API path, don't wrap again
             if (
               currentSrc.includes("/api/proxy-image") ||
-              currentSrc.includes("/api/")
+              currentSrc.includes("/api/") ||
+              currentSrc.includes("/media/") ||
+              currentSrc.includes("/videos/")
             ) {
               setHasError(true);
               return;

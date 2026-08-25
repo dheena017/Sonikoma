@@ -5,7 +5,14 @@ import { Globe, Book, Smartphone, ExternalLink } from "lucide-react";
  */
 export function getProxiedImageUrl(url?: string, referer?: string): string {
   if (!url) return "";
-  if (url.startsWith("data:") || url.startsWith("blob:")) {
+  if (
+    url.startsWith("data:") ||
+    url.startsWith("blob:") ||
+    url.startsWith("/media/") ||
+    url.includes("/media/") ||
+    url.startsWith("/videos/") ||
+    url.includes("/videos/")
+  ) {
     return url;
   }
   if (

@@ -8,6 +8,7 @@ Crop API Router:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+from app.schemas.crop import SmallPanelsCropRequest
 import logging
 from fastapi import APIRouter, HTTPException, Request
 
@@ -16,8 +17,10 @@ from schemas.crop import (
     DetectTypeResponse,
     LongPanelsCropRequest,
     LongPanelsCropResponse,
+    SmallPanelsCropRequest,
+    SmallPanelsCropResponse,
     SinglePanelsCropRequest,
-    SinglePanelsCropResponse
+    SinglePanelsCropResponse,
 )
 from services.image.crop import (
     detect_image_layout_type,
@@ -68,12 +71,12 @@ async def long_panels_crop_endpoint(body: LongPanelsCropRequest):
 
 
 @router.post(
-    "/single-panels",
-    response_model=SinglePanelsCropResponse,
-    summary="Crop directional margins (Above, Bottom, Left, Right) on a single image",
+    "/small-panels",
+    response_model=SmallPanelsCropResponse,
+    summary="Crop directional margins (Above, Bottom, Left, Right) on a small / single image",
     description="Trims directional margins with color-tolerance auto-trim and aspect ratio snapping."
 )
-async def single_panels_crop_endpoint(body: SinglePanelsCropRequest):
+async def small_panels_crop_endpoint(body: SmallPanelsCropRequest):
     try:
         if not body.url:
             raise HTTPException(status_code=400, detail="Image URL is required.")
@@ -81,8 +84,18 @@ async def single_panels_crop_endpoint(body: SinglePanelsCropRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"[SinglePanelsCrop API] Error: {e}", exc_info=True)
+        logger.error(f"[SmallPanelsCrop API] Error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post(
+    "/single-panels",
+    response_model=SmallPanelsCropResponse,
+    summary="[Alias] Crop directional margins on a small / single image",
+    description="Backward-compatible alias for /small-panels."
+)
+async def single_panels_crop_endpoint(body: SmallPanelsCropRequest):
+    return await small_panels_crop_endpoint(body)
 
 
 # Backward compatibility aliases for multi-slice
@@ -92,5 +105,5 @@ async def multi_slice_alias(body: LongPanelsCropRequest):
 
 
 @router.post("/margins", include_in_schema=False)
-async def margins_crop_alias(body: SinglePanelsCropRequest):
+async def margins_crop_alias(body: SmallPanelsCropRequest):
     return await crop_single_panels_margins(body)

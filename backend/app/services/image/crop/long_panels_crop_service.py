@@ -31,8 +31,9 @@ from app.core.cache import stitched_cache
 
 logger = logging.getLogger("sonikoma.services.crop.long_panels")
 
-# Local media storage directory
-MEDIA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media"))
+# Local media storage directory (Sonikoma/data/local_media)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", ".."))
+MEDIA_DIR = os.path.join(PROJECT_ROOT, "data", "local_media")
 os.makedirs(MEDIA_DIR, exist_ok=True)
 
 
@@ -178,6 +179,11 @@ async def crop_long_panels_batch(request: LongPanelsCropRequest) -> LongPanelsCr
         key=lambda b: (b.get("y", 0), b.get("x", 0))
     )
 
+    logger.debug(
+        f"[DEBUG:LongPanels] Processing batch slicing on {len(sorted_boxes)} boxes | "
+        f"Format: {request.output_format} | Quality: {request.quality} | BleedGuard: {request.bleed_guard_px}px"
+    )
+
     # 2. Compute gutter distances between adjacent panels
     worker_tasks = []
     for i, box in enumerate(sorted_boxes):
@@ -186,6 +192,8 @@ async def crop_long_panels_batch(request: LongPanelsCropRequest) -> LongPanelsCr
         if i + 1 < len(sorted_boxes):
             y_next_start = sorted_boxes[i + 1].get("y", 0)
             gutter_after = max(0, y_next_start - y_curr_end)
+
+        logger.debug(f"[DEBUG:LongPanels] Box #{i+1}: id={box.get('panel_id') or box.get('id')} at (x={box.get('x')}, y={box.get('y')}, w={box.get('width')}, h={box.get('height')}) | GutterAfter: {gutter_after}px")
 
         worker_tasks.append((
             img_bytes,
@@ -210,6 +218,7 @@ async def crop_long_panels_batch(request: LongPanelsCropRequest) -> LongPanelsCr
 
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
     logger.info(f"[LongPanelsCrop] Successfully sliced {len(valid_slices)}/{len(request.panels)} panels in {elapsed_ms}ms (parallel workers={max_workers})")
+    logger.debug(f"[DEBUG:LongPanels] Output: {len(valid_slices)} slices generated | Total bytes: {sum(s.file_size_bytes for s in valid_slices)}")
 
     return LongPanelsCropResponse(
         success=True,

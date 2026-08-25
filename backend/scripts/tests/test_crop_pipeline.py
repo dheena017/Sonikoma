@@ -189,14 +189,17 @@ async def run_all_tests():
     print()
 
     # ─────────────────────────────────────────────────────────────────────────
-    # TEST 3: single-panels 4-Directional Margin Crop
+    # TEST 3: small-panels 4-Directional Margin Crop
     # ─────────────────────────────────────────────────────────────────────────
-    print(color("[TEST 3] 4-Directional Margin Cropper (/single-panels)", Style.BOLD + Style.YELLOW))
+    print(color("[TEST 3] 4-Directional Margin Cropper (/small-panels)", Style.BOLD + Style.YELLOW))
     try:
         t0 = time.perf_counter()
         page_uri = create_synthetic_single_page()
 
-        req_single = SinglePanelsCropRequest(
+        from schemas.crop import SmallPanelsCropRequest
+        from services.image.crop import crop_small_panels_margins
+
+        req_small = SmallPanelsCropRequest(
             url=page_uri,
             crop_top=10.0,      # 10% from top (140px)
             crop_bottom=10.0,   # 10% from bottom (140px)
@@ -209,21 +212,22 @@ async def run_all_tests():
             quality=92
         )
 
-        res_margin = await crop_single_panels_margins(req_single)
+        res_margin = await crop_small_panels_margins(req_small)
         assert res_margin.success is True
+        assert res_margin.crop_type == "small_panels"
         assert res_margin.url.startswith("/media/single_crop_")
         assert res_margin.width > 0 and res_margin.height > 0
 
         applied = res_margin.applied_margins
-        print(f"  [OK] Single Page Trimmed: {res_margin.width}x{res_margin.height}px (Aspect: {res_margin.aspect_ratio})")
+        print(f"  [OK] Small Panel Trimmed: {res_margin.width}x{res_margin.height}px (Aspect: {res_margin.aspect_ratio})")
         print(f"  [OK] Applied Margins: Top={applied.get('top_px')}px, Bottom={applied.get('bottom_px')}px, Left={applied.get('left_px')}px, Right={applied.get('right_px')}px")
         print(f"  [OK] Output Media URL: {res_margin.url}")
 
         dt_3 = int((time.perf_counter() - t0) * 1000)
-        results.append(("3. single-panels Margin Cropper", True, f"{dt_3}ms (Aspect Snapped: 9:16)"))
+        results.append(("3. small-panels Margin Cropper", True, f"{dt_3}ms (Aspect Snapped: 9:16)"))
     except Exception as e:
         print(color(f"  [FAIL] Failed: {e}", Style.RED))
-        results.append(("3. single-panels Margin Cropper", False, str(e)))
+        results.append(("3. small-panels Margin Cropper", False, str(e)))
 
     print()
 

@@ -12,8 +12,11 @@ from .detect_type_service import detect_image_layout_type
 from .long_panels_crop_service import crop_long_panels_batch
 from .single_panels_crop_service import crop_single_panels_margins
 
+crop_small_panels_margins = crop_single_panels_margins
+
 __all__ = [
     "detect_image_layout_type",
     "crop_long_panels_batch",
     "crop_single_panels_margins",
+    "crop_small_panels_margins",
 ]

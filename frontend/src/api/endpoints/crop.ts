@@ -76,7 +76,7 @@ export interface LongPanelsCropResponse {
   message?: string;
 }
 
-export interface SinglePanelsCropPayload {
+export interface SmallPanelsCropPayload {
   url: string;
   crop_top?: number;
   crop_bottom?: number;
@@ -93,7 +93,9 @@ export interface SinglePanelsCropPayload {
   quality?: number;
 }
 
-export interface SinglePanelsCropResponse {
+export type SinglePanelsCropPayload = SmallPanelsCropPayload;
+
+export interface SmallPanelsCropResponse {
   success: boolean;
   crop_type: string;
   url: string;
@@ -105,6 +107,8 @@ export interface SinglePanelsCropResponse {
   processing_time_ms: number;
   message?: string;
 }
+
+export type SinglePanelsCropResponse = SmallPanelsCropResponse;
 
 /**
  * Step 1: 5-Layer Layout Classifier
@@ -141,18 +145,20 @@ export const cropLongPanels = async (
 };
 
 /**
- * Step 3B: 4-directional margin cropper for single comic pages and frames.
+ * Step 3B: 4-directional margin cropper for small comic pages and single frames.
  * Supports Above, Bottom, Left, and Right margin trimming with aspect ratio snapping.
  */
-export const cropSinglePanels = async (
+export const cropSmallPanels = async (
   fetchWithInterceptor: FetchClient,
-  data: SinglePanelsCropPayload,
+  data: SmallPanelsCropPayload,
   options?: RequestInit
-): Promise<ApiResponse<SinglePanelsCropResponse>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/images/crop/single-panels", {
+): Promise<ApiResponse<SmallPanelsCropResponse>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/images/crop/small-panels", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
 };
+
+export const cropSinglePanels = cropSmallPanels;

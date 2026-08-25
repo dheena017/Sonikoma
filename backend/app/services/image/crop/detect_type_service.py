@@ -105,6 +105,12 @@ async def detect_image_layout_type(url: Optional[str] = None, image_base64: Opti
         edge_complexity = "medium"
         optimal_canny = {"low": 20, "high": 100}
 
+    logger.debug(
+        f"[DEBUG:DetectType] Input Image: {width}x{height}px | Aspect: {aspect_ratio:.3f} | "
+        f"Corner Brightness: {corner_brightness:.1f} (BG: {detected_bg_color}) | "
+        f"Gutter Transitions: {estimated_valleys} | Edge Energy: {edge_energy:.2f} (Complexity: {edge_complexity})"
+    )
+
     # ── 5. Layer 5: Classification & Reading Flow Decision Tree ──────────────
     
     # Case A: Tall Webtoon Continuous Scroll Strip
@@ -151,19 +157,20 @@ async def detect_image_layout_type(url: Optional[str] = None, image_base64: Opti
         suggested_strategy = "grid_split"
         message = f"Standard comic page detected with ~{estimated_panel_count} grid panels."
 
-    # Case E: Single Isolated Panel / Square Illustration
+    # Case E: Single Isolated Panel / Square Illustration / Small Panel
     else:
-        crop_type = DetectedLayoutType.SINGLE_PANELS
-        type_label = "Single Panels"
+        crop_type = DetectedLayoutType.SMALL_PANELS
+        type_label = "Small Panel"
         confidence = 0.90
         estimated_panel_count = 1
         reading_flow = ReadingFlow.LEFT_TO_RIGHT
-        recommended_endpoint = "/api/v1/images/crop/single-panels"
+        recommended_endpoint = "/api/v1/images/crop/small-panels"
         suggested_strategy = "margin_crop"
-        message = f"Single panel frame / illustration ({width}x{height}px)."
+        message = f"Small panel frame / illustration ({width}x{height}px)."
 
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
     logger.info(f"[DetectType] Classified as '{crop_type.value}' ({width}x{height}px, ratio {aspect_ratio:.2f}) in {elapsed_ms}ms")
+    logger.debug(f"[DEBUG:DetectType] Output Result: {crop_type.value} | Strategy: {suggested_strategy} | Canny: {optimal_canny} | Conf: {confidence:.2f}")
 
     return DetectTypeResponse(
         success=True,

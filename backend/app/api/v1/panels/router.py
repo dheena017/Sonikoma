@@ -296,8 +296,11 @@ async def detect_panels_upload_endpoint(request: Request):
                 raise HTTPException(status_code=422, detail="Must provide 'image_base64', 'image_url', 'url', or multipart 'file'.")
 
             logger.info(f"[Panel Detection] Processing panel detection")
+            logger.debug(f"[DEBUG:PanelDetect] Params: {params}")
             panels = _detect_helper(image_path, params)
             logger.info(f"[Panel Detection] Successfully detected {len(panels)} panels.")
+            for idx, p in enumerate(panels):
+                logger.debug(f"[DEBUG:PanelDetect] Panel #{idx+1}: id={p.get('id')} at (x={p.get('x')}, y={p.get('y')}, w={p.get('width') or p.get('w')}, h={p.get('height') or p.get('h')})")
 
             img_w, img_h = 0, 0
             try:
@@ -306,6 +309,8 @@ async def detect_panels_upload_endpoint(request: Request):
                     img_w, img_h = im.size
             except Exception:
                 pass
+
+            logger.debug(f"[DEBUG:PanelDetect] Source Image Dimensions: {img_w}x{img_h}px | isTallStrip: {(img_h > img_w * 2) if img_w else False}")
 
             return JSONResponse(content={
                 "success": True,
