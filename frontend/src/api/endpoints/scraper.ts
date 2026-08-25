@@ -393,45 +393,12 @@ export const createExportJob = async (
 
 export const exportComicArchive = createExportJob;
 
-// Panel Tool Endpoints
-export const detectPanelsBatch = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-export const detectPanels = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-export const detectPanelsB64 = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
+// Panel Tool Endpoints (Forwarded to dedicated panels.ts)
+export {
+  detectPanelsBatch,
+  detectPanelsByUrl as detectPanels,
+  detectPanelsByUrl as detectPanelsB64
+} from "./panels";
 
 export const extractOcrB64 = async (
   fetchWithInterceptor: FetchClient,

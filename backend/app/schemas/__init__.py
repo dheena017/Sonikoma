@@ -137,6 +137,17 @@ from .project import (
     TokenIncrementRequest,
     BatchDeleteRequest,
     DetectPanelsBase64Request,
+    DetectSmallPanelsRequest,
+    DetectSmallPanelsResponse,
+    DetectLongPanelsRequest,
+    DetectLongPanelsResponse,
+    DetectPanelsBatchRequest,
+    DetectPanelsBatchResponse,
+    DetectPanelsUrlRequest,
+    PanelBoundingBox,
+    SpeechBubbleItem,
+    EntityLabel,
+    EntityCategory,
 )
 
 from .scraper import (

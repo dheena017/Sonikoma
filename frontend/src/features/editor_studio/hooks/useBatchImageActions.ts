@@ -349,14 +349,45 @@ export function useBatchImageActions({
 
             if (!isTallStrip) {
               // ── Route 3A: Small Image 4-Directional Margin Crop ───────────
-              // Small images (single comic frames, pages, speech bubbles) keep
-              // artwork & dialogue together as 1 panel and trim outer margins.
+              // 1. Detect tight frame, bind nearby speech bubbles, and drop gutter SFX
+              let appliedMargins: any = {};
+              try {
+                const detectRes = await api.detectSmallPanels(
+                  fetchWithInterceptor,
+                  {
+                    url: url,
+                    aspect_ratio: aspectRatioLock && aspectRatioLock !== "free" ? aspectRatioLock : "free",
+                    auto_trim: true,
+                    snap_to_frame: true,
+                    merge_speech_bubbles: true,
+                    filter_gutter_sfx: true,
+                    bleed_padding_px: cropPaddingPx || 5,
+                  },
+                  { signal: controller.signal }
+                );
+
+                if (detectRes && detectRes.success && detectRes.margins) {
+                  appliedMargins = detectRes.margins;
+                  console.log(
+                    `[Auto Cropper: Small] Snapped frame with ${detectRes.bound_speech_bubbles_count || 0} bound dialogue bubbles:`,
+                    appliedMargins
+                  );
+                }
+              } catch (detErr) {
+                console.warn("[Auto Cropper] detectSmallPanels fallback:", detErr);
+              }
+
+              // 2. Execute tight crop
               try {
                 const smallRes = await api.cropSmallPanels(
                   fetchWithInterceptor,
                   {
                     url: url,
-                    unit: "percent",
+                    crop_top: appliedMargins.crop_top || 0,
+                    crop_bottom: appliedMargins.crop_bottom || 0,
+                    crop_left: appliedMargins.crop_left || 0,
+                    crop_right: appliedMargins.crop_right || 0,
+                    unit: appliedMargins.unit || "pixels",
                     aspect_ratio: aspectRatioLock && aspectRatioLock !== "free" ? (aspectRatioLock as any) : "free",
                     auto_trim: true,
                     padding_px: cropPaddingPx,
@@ -385,48 +416,38 @@ export function useBatchImageActions({
               ]);
             } else {
               // ── Route 3B: Tall Webtoon Strip Multi-Panel Batch Slicer ─────
-              const detectPayload = {
-                url: url,
-                sensitivity: cropSensitivity,
-                backgroundColorMode: cropBackgroundMode || "auto",
-                aspectRatio: aspectRatioLock,
-                minAreaPct: minPanelAreaPct / 100.0,
-                mergeThreshold: overlapMergeThreshold,
-                strategy: useLocalCV ? "local-cv" : "balanced",
-                model: cropModel,
-                cannyLow: cropCannyLow,
-                cannyHigh: cropCannyHigh,
-                closeKernelSize: cropCloseKernelSize,
-                minHeightPx: cropMinHeightPx || 150,
-                paddingPx: cropPaddingPx,
-                autoSplit: autoSplitTallStrips,
-                useYolo: true,
-                guidanceInstructions: cropGuidance,
-                focusMode: cropFocusMode,
-              };
-
-              console.group(`[DBG] detectPanels — Tall Strip Request`);
-              console.log("[DBG] Payload:", detectPayload);
+              console.group(`[DBG] detectLongPanels — Tall Strip Request`);
+              console.log("[DBG] URL:", url);
               console.groupEnd();
 
-              const data = await api.detectPanels(
-                fetchWithInterceptor,
-                detectPayload,
-                { signal: controller.signal }
-              );
+              let detectedPanelsList: any[] = [];
+              try {
+                const longDetectRes = await api.detectLongPanels(
+                  fetchWithInterceptor,
+                  {
+                    url: url,
+                    sensitivity: cropSensitivity,
+                    background_mode: cropBackgroundMode || "auto",
+                    min_panel_height: cropMinHeightPx || 150,
+                    overlap_merge_threshold: overlapMergeThreshold,
+                    auto_split: autoSplitTallStrips,
+                    bleed_padding_px: cropPaddingPx || 5,
+                  },
+                  { signal: controller.signal }
+                );
 
-              if (data.fallback) {
-                setConsoleLogs((prev) => [
-                  `[Smart Cropper Fallback] Scanner failed on ${url.substring(
-                    0,
-                    40
-                  )}..., fell back to local CV: ${data.message}`,
-                  ...prev,
-                ]);
+                if (longDetectRes && longDetectRes.success && Array.isArray(longDetectRes.panels)) {
+                  detectedPanelsList = longDetectRes.panels;
+                  console.log(
+                    `[Auto Cropper: Long] Detected ${detectedPanelsList.length} panels down tall strip.`
+                  );
+                }
+              } catch (longDetErr) {
+                console.warn("[Auto Cropper] detectLongPanels fallback:", longDetErr);
               }
 
-              if (data.success && Array.isArray(data.panels) && data.panels.length > 0) {
-                const sortedPanels = [...data.panels].sort((a: any, b: any) => {
+              if (detectedPanelsList.length > 0) {
+                const sortedPanels = [...detectedPanelsList].sort((a: any, b: any) => {
                   const dy = (a.y ?? 0) - (b.y ?? 0);
                   if (dy !== 0) return dy;
                   return (a.x ?? 0) - (b.x ?? 0);
@@ -438,7 +459,7 @@ export function useBatchImageActions({
                     {
                       url: url,
                       panels: sortedPanels,
-                      bleed_guard_px: 5,
+                      bleed_guard_px: cropPaddingPx || 5,
                       background_mode: cropBackgroundMode || "auto",
                       output_format: "webp",
                       quality: 90,

@@ -145,35 +145,171 @@ class BatchDeleteRequest(BaseModel):
     project_ids: List[str] = Field(..., description="List of Project IDs to delete")
 
 
-class DetectPanelsBase64Request(BaseModel):
-    """Panel detection parameters for base64 image streams."""
-    image_base64: str = Field(..., description="Base64-encoded source image")
-    sensitivity: float = Field(30.0, ge=0.0, le=100.0)
-    background_mode: Literal["auto", "white", "black"] = "auto"
-    min_width_pct: float = Field(0.15, ge=0.0, le=1.0)
-    min_height_px: int = Field(60, ge=1)
-    merge_threshold: int = Field(20, ge=0)
-    aspect_ratio: Literal["free", "1:1", "16:9", "9:16", "4:3"] = "free"
-    canny_low: int = Field(20, ge=0, le=255)
-    canny_high: int = Field(100, ge=0, le=255)
-    close_kernel_size: int = Field(15, ge=1, le=99)
-    auto_split: bool = Field(True, description="Automatically split tall strips at gutters")
+from enum import Enum
+
+
+class EntityCategory(str, Enum):
+    PANEL = "panel"
+    TEXT = "text"
+    CHARACTER = "character"
+
+
+class EntityLabel(str, Enum):
+    PANEL_STANDARD = "panel_standard"
+    PANEL_BORDERLESS = "panel_borderless"
+    PANEL_SPLASH = "panel_splash"
+    PANEL_DIAGONAL = "panel_diagonal"
+    PANEL_INSET = "panel_inset"
+    BUBBLE_SPEECH = "bubble_speech"
+    BUBBLE_SHOUT = "bubble_shout"
+    BUBBLE_THOUGHT = "bubble_thought"
+    BUBBLE_WHISPER = "bubble_whisper"
+    CAPTION_NARRATION = "caption_narration"
+    SFX_SOUND_EFFECT = "sfx_sound_effect"
+    CHARACTER_BREAKOUT = "character_breakout"
+    CHARACTER_FACE = "character_face"
+
+
+class SpeechBubbleItem(BaseModel):
+    """Rich metadata for a single detected speech bubble or dialogue caption."""
+    bubble_id: str = Field(..., description="Unique bubble identifier")
+    parent_panel_id: Optional[str] = Field(None, description="Bound parent panel ID")
+    label: str = Field(EntityLabel.BUBBLE_SPEECH.value, description="Semantic bubble label")
+    category: str = Field(EntityCategory.TEXT.value, description="Entity category")
+    sub_type: Optional[str] = Field("dialogue_balloon", description="Detailed sub-type")
+    x: int = Field(..., description="Top-left X coordinate in pixels")
+    y: int = Field(..., description="Top-left Y coordinate in pixels")
+    width: int = Field(..., description="Width in pixels")
+    height: int = Field(..., description="Height in pixels")
+    polygon: Optional[List[List[int]]] = Field(None, description="Exact polygon contour vertices")
+    dialogue_text: Optional[str] = Field(None, description="OCR transcribed dialogue text")
+    confidence: float = Field(1.0, description="Detection confidence score")
+    reading_order: int = Field(1, description="Reading sequence within panel")
+    is_bound: bool = Field(True, description="Whether bubble was bound into panel boundary")
 
 
 class PanelBoundingBox(BaseModel):
-    """Detected comic panel bounding box coordinates."""
+    """Detected comic panel bounding box coordinates with rich metadata."""
+    id: Optional[str] = Field(None, description="Panel identifier")
+    index: int = Field(0, description="Reading order index")
     x: int = Field(..., description="X pixel coordinate")
     y: int = Field(..., description="Y pixel coordinate")
     w: int = Field(..., description="Width in pixels")
     h: int = Field(..., description="Height in pixels")
+    width: Optional[int] = Field(None, description="Width alias in pixels")
+    height: Optional[int] = Field(None, description="Height alias in pixels")
     confidence: Optional[float] = Field(1.0, description="Detection confidence score")
-    label: Optional[str] = Field("panel", description="Detected entity label")
-    type: Optional[str] = Field("panel", description="Entity type: panel, bubble, character")
+    label: Optional[str] = Field(EntityLabel.PANEL_STANDARD.value, description="Detected entity label")
+    category: Optional[str] = Field(EntityCategory.PANEL.value, description="Entity category")
+    type: Optional[str] = Field("panel", description="Entity type")
+    sub_type: Optional[str] = Field("standard_framed", description="Panel layout sub-type")
+    has_bound_bubbles: bool = Field(False, description="Whether dialogue bubbles were bound inside")
+    speech_bubbles_count: int = Field(0, description="Count of speech bubbles in panel")
+    speech_bubbles: List[SpeechBubbleItem] = Field(default_factory=list, description="Bound speech bubble items")
+
+
+class DetectSmallPanelsRequest(BaseModel):
+    """Request payload for Small Image & Single Frame detection."""
+    url: Optional[str] = Field(None, description="Target image public URL")
+    image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
+    aspect_ratio: str = Field("free", description="Target aspect ratio lock")
+    auto_trim: bool = Field(True, description="Auto-trim solid background borders")
+    snap_to_frame: bool = Field(True, description="Snap tightly to black border frame")
+    merge_speech_bubbles: bool = Field(True, description="Bind nearby speech bubbles into panel")
+    filter_gutter_sfx: bool = Field(True, description="Filter loose SFX in empty gutters")
+    bleed_padding_px: int = Field(5, description="Padding in pixels around detected frame")
+
+
+class DetectSmallPanelsResponse(BaseModel):
+    """Response payload for Small Image & Single Frame detection."""
+    success: bool
+    crop_type: str = "small_panels"
+    image_width: int = Field(0, description="Source image width in pixels")
+    image_height: int = Field(0, description="Source image height in pixels")
+    panel: Optional[PanelBoundingBox] = None
+    panels: List[PanelBoundingBox] = Field(default_factory=list)
+    speech_bubbles: List[SpeechBubbleItem] = Field(default_factory=list)
+    total_speech_bubbles_count: int = 0
+    bound_speech_bubbles_count: int = 0
+    margins: Dict[str, Any] = Field(default_factory=dict)
+    message: Optional[str] = None
+
+
+class DetectLongPanelsRequest(BaseModel):
+    """Request payload for Tall Webtoon Strip detection."""
+    url: Optional[str] = Field(None, description="Target image public URL")
+    image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
+    sensitivity: float = Field(30.0, ge=0.0, le=100.0, description="Gutter seam sensitivity")
+    background_mode: str = Field("auto", description="'auto', 'white', 'black'")
+    min_panel_height: int = Field(150, ge=10, description="Minimum panel height in pixels")
+    overlap_merge_threshold: int = Field(20, ge=0, description="Pixel overlap merge threshold")
+    auto_split: bool = Field(True, description="Auto-split tall strips at gutters")
+    bleed_padding_px: int = Field(5, description="Padding in pixels around each slice")
+
+
+class DetectLongPanelsResponse(BaseModel):
+    """Response payload for Tall Webtoon Strip detection."""
+    success: bool
+    crop_type: str = "long_panels"
+    total_panels: int = 0
+    total_speech_bubbles_count: int = 0
+    image_width: int = 0
+    image_height: int = 0
+    reading_flow: str = "top_to_bottom"
+    panels: List[PanelBoundingBox] = Field(default_factory=list)
+    gutter_count: int = 0
+    message: Optional[str] = None
+
+
+class DetectPanelsUrlRequest(BaseModel):
+    """General URL or Base64 request for panel detection."""
+    url: Optional[str] = None
+    image_url: Optional[str] = None
+    image_base64: Optional[str] = None
+    sensitivity: float = Field(30.0, ge=0.0, le=100.0)
+    background_mode: str = "auto"
+    min_width_pct: float = 0.15
+    min_height_px: int = 60
+    merge_threshold: int = 20
+    aspect_ratio: str = "free"
+    canny_low: int = 20
+    canny_high: int = 100
+    close_kernel_size: int = 15
+    auto_split: bool = True
+    use_yolo: bool = True
+
+
+class DetectPanelsBase64Request(DetectPanelsUrlRequest):
+    """Backward-compatible alias for Base64 panel detection."""
+    pass
+
+
+class DetectPanelsBatchRequest(BaseModel):
+    """Batch URL request for concurrent panel detection."""
+    urls: List[str] = Field(..., description="List of image URLs to detect")
+    sensitivity: float = Field(30.0, ge=0.0, le=100.0)
+    background_mode: str = "auto"
+    aspect_ratio: str = "free"
+    auto_split: bool = True
+
+
+class DetectPanelsBatchResponse(BaseModel):
+    """Batch URL response for concurrent panel detection."""
+    success: bool
+    total_images: int = 0
+    results: List[Dict[str, Any]] = Field(default_factory=list)
+    message: Optional[str] = None
 
 
 class PanelDetectionResponse(BaseModel):
-    """Result of comic panel and bubble detection."""
+    """Unified / Legacy result of comic panel and bubble detection."""
     success: bool
-    panels: List[PanelBoundingBox] = []
+    panels: List[PanelBoundingBox] = Field(default_factory=list)
     count: int = 0
+    total_panels: int = 0
+    imageWidth: Optional[int] = None
+    imageHeight: Optional[int] = None
+    isTallStrip: bool = False
+    fallback: bool = False
+    total_speech_bubbles_count: int = 0
     message: Optional[str] = None

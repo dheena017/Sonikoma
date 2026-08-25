@@ -42,6 +42,15 @@ from .speech_bubble_detector import (
     get_yolo_training_status,
 )
 
+from .opencv_detector import detect_opencv_boxes
+from .yolo_detector import detect_yolo_entities
+from .ai_vision_detector import detect_ai_vision
+from .panel_fusion_service import fuse_panels_and_bubbles
+from .detect_small_panels_service import detect_small_panels_boxes
+from .detect_long_panels_service import detect_long_panels_boxes
+from .detect_batch_service import detect_batch_panels
+from .detect_upload_service import detect_upload_panels
+
 # Human-readable alias for post-processing panel boundaries
 postprocess_panel_boundaries = compute_post_panel_confidence
 

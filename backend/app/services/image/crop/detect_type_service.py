@@ -113,14 +113,25 @@ async def detect_image_layout_type(url: Optional[str] = None, image_base64: Opti
 
     # ── 5. Layer 5: Classification & Reading Flow Decision Tree ──────────────
     
-    # Case A: Tall Webtoon Continuous Scroll Strip
-    if aspect_ratio >= 2.5:
+    # Case A1: Giant / Ultra-Long Webtoon Continuous Scroll (Whole Chapter / 10-50+ Panels)
+    if aspect_ratio >= 5.5 or (aspect_ratio >= 3.5 and height >= 4000):
+        crop_type = DetectedLayoutType.ULTRA_LONG_PANELS
+        type_label = "Ultra-Long Chapter Webtoon Scroll"
+        confidence = 0.99
+        estimated_panel_count = max(8, estimated_valleys + 1)
+        reading_flow = ReadingFlow.TOP_TO_BOTTOM
+        recommended_endpoint = "/api/v1/panels/detect/long-panels"
+        suggested_strategy = "sliding_window_slice"
+        message = f"Ultra-long chapter scroll detected ({width}x{height}px, ratio {aspect_ratio:.1f}) with ~{estimated_panel_count} estimated panels."
+
+    # Case A2: Standard Tall Webtoon Continuous Scroll Strip (2-5 Panels)
+    elif aspect_ratio >= 2.2:
         crop_type = DetectedLayoutType.LONG_PANELS
         type_label = "Tall Webtoon Scroll"
         confidence = min(0.99, 0.90 + (aspect_ratio / 100.0))
         estimated_panel_count = max(2, estimated_valleys + 1)
         reading_flow = ReadingFlow.TOP_TO_BOTTOM
-        recommended_endpoint = "/api/v1/images/crop/long-panels"
+        recommended_endpoint = "/api/v1/panels/detect/long-panels"
         suggested_strategy = "batch_slice"
         message = f"Continuous Webtoon strip detected ({width}x{height}px, ratio {aspect_ratio:.2f}) with ~{estimated_panel_count} estimated panels."
 

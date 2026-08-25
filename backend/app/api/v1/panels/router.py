@@ -1,68 +1,54 @@
 """
 backend/app/api/v1/panels/router.py
 ─────────────────────────────────────────────────────────────────────────────
-Panel processing API routes: strip splitting, panel detection, and bounding boxes.
+Panel processing API routes:
+1. POST /split               -> Split tall vertical strip into discrete panels (Job)
+2. POST /detect/small-panels -> Small Images & Single Frames (Tight frame snapping)
+3. POST /detect/long-panels  -> Tall Webtoon Strips (Gutter seam slicing)
+4. POST /detect/opencv       -> Pure OpenCV geometric frames and gutters
+5. POST /detect/yolo         -> Pure YOLO speech bubbles & character masks
+6. POST /detect/ai           -> Pure AI Vision OCR & reading flow
+7. POST /detect/batch        -> Batch URL panel detection
+8. POST /detect/upload       -> Multipart form file upload detection
+9. POST /detect/url          -> Generic URL / Base64 detection
+10. POST /detect             -> [Alias] Backward-compatible dispatcher
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import os
 import json
 import base64
-import tempfile
-import httpx
 import logging
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, HTTPException, Request, Depends, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 
 from api.dependencies.auth import get_current_user
 from schemas.scraper import SmartSplitRequest
-from schemas.project import DetectPanelsBase64Request, PanelDetectionResponse
+from schemas.project import (
+    DetectSmallPanelsRequest,
+    DetectSmallPanelsResponse,
+    DetectLongPanelsRequest,
+    DetectLongPanelsResponse,
+    DetectPanelsBatchRequest,
+    DetectPanelsBatchResponse,
+    DetectPanelsUrlRequest,
+    PanelDetectionResponse
+)
 from services.image.processing.panel_splitter import split_vertical_strip_into_panels
-from services.image.panel_detection.panel_detector import run_cv_detection
 from services.image.utils.image_resolver import resolve_image_to_buffer
 from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
+from services.image.panel_detection.detect_small_panels_service import detect_small_panels_boxes
+from services.image.panel_detection.detect_long_panels_service import detect_long_panels_boxes
+from services.image.panel_detection.detect_batch_service import detect_batch_panels
+from services.image.panel_detection.detect_upload_service import detect_upload_panels
+from services.image.panel_detection.opencv_detector import detect_opencv_boxes
+from services.image.panel_detection.yolo_detector import detect_yolo_entities
+from services.image.panel_detection.ai_vision_detector import detect_ai_vision
+
 logger = logging.getLogger("sonikoma.api.panels")
-
 panels_router = APIRouter()
-
-
-def _detect_helper(image_path: str, params: dict) -> List[dict]:
-    """Helper to execute CV & YOLO panel detection."""
-    try:
-        from PIL import Image
-        with Image.open(image_path) as im:
-            w, h = im.size
-            if w < 10 or h < 10:
-                return []
-    except Exception:
-        pass
-
-    panels = run_cv_detection(
-        image_path=image_path,
-        sensitivity=params.get("sensitivity", 30.0),
-        bg_mode=params.get("background_mode", "auto"),
-        min_width_pct=params.get("min_width_pct", 0.15),
-        min_height_px=params.get("min_height_px", 60),
-        merge_threshold=params.get("merge_threshold", 20),
-        aspect_ratio_str=params.get("aspect_ratio", "free"),
-        canny_low=params.get("canny_low", 20),
-        canny_high=params.get("canny_high", 100),
-        close_kernel_size=params.get("close_kernel_size", 15),
-        auto_split=params.get("auto_split", True),
-        use_yolo=params.get("use_yolo", True),
-    )
-    for p in panels:
-        if "w" not in p and "width" in p:
-            p["w"] = p["width"]
-        if "h" not in p and "height" in p:
-            p["h"] = p["height"]
-        if "width" not in p and "w" in p:
-            p["width"] = p["w"]
-        if "height" not in p and "h" in p:
-            p["height"] = p["h"]
-    return panels
 
 
 # ─── 1. Vertical Strip Splitting (Background Job) ────────────────────────────
@@ -109,228 +95,305 @@ async def split_strip_panels_endpoint(body: SmartSplitRequest, current_user: dic
     return job.to_status_response()
 
 
-# ─── 2. Unified Panel Bounding Box Detection (File Upload & Base64 JSON) ──────
-
-def _extract_params(data: dict) -> dict:
-    """Extract and normalize panel detection parameters from dict or form."""
-    def _get(keys, default):
-        for k in keys:
-            if k in data and data[k] is not None:
-                return data[k]
-        return default
-
-    def _to_float(v, default: float) -> float:
-        try:
-            return float(v)
-        except (ValueError, TypeError):
-            return default
-
-    def _to_int(v, default: int) -> int:
-        try:
-            return int(v)
-        except (ValueError, TypeError):
-            return default
-
-    def _to_bool(v, default: bool) -> bool:
-        if isinstance(v, bool):
-            return v
-        if isinstance(v, (int, float)):
-            return bool(v)
-        if isinstance(v, str):
-            return v.lower() in ("true", "1", "yes")
-        return default
-
-    return {
-        "sensitivity": _to_float(_get(["sensitivity"], 30.0), 30.0),
-        "background_mode": str(_get(["background_mode", "backgroundColorMode", "backgroundMode"], "auto")),
-        "min_width_pct": _to_float(_get(["min_width_pct", "minAreaPct", "min_area_pct"], 0.15), 0.15),
-        "min_height_px": _to_int(_get(["min_height_px", "minHeightPx"], 60), 60),
-        "merge_threshold": _to_int(_get(["merge_threshold", "mergeThreshold"], 20), 20),
-        "aspect_ratio": str(_get(["aspect_ratio", "aspectRatio"], "free")),
-        "canny_low": _to_int(_get(["canny_low", "cannyLow"], 20), 20),
-        "canny_high": _to_int(_get(["canny_high", "cannyHigh"], 100), 100),
-        "close_kernel_size": _to_int(_get(["close_kernel_size", "closeKernelSize"], 15), 15),
-        "auto_split": _to_bool(_get(["auto_split", "autoSplit"], True), True),
-        "use_yolo": _to_bool(_get(["use_yolo", "useYolo"], True), True),
-    }
-
+# ─── 2. Dedicated Small-Panels Detection ──────────────────────────────────────
 
 @panels_router.post(
-    "/detect",
-    operation_id="detect_panels_in_image",
-    summary="Detect panel bounding boxes in a comic image (Unified File Upload & Base64/URL JSON)",
-    description="Analyzes uploaded webtoon page, URL, or base64 JSON payload and detects individual panel bounding boxes via OpenCV and YOLO."
+    "/detect/small-panels",
+    response_model=DetectSmallPanelsResponse,
+    operation_id="detect_small_panels",
+    summary="Detect and snap tight bounding frame on small / single comic images",
+    description="Finds the dominant frame, binds adjacent speech bubbles into artwork, and filters empty gutter white space / SFX."
 )
-async def detect_panels_upload_endpoint(request: Request):
-    content_type = request.headers.get("content-type", "").lower()
+async def detect_small_panels_endpoint(body: DetectSmallPanelsRequest):
+    try:
+        if not body.url and not body.image_base64:
+            raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
+        return await detect_small_panels_boxes(body)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectSmallPanels API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
-    # Scenario A: Multipart Form Upload
-    if "multipart/form-data" in content_type:
-        image_path = None
-        try:
-            form = await request.form()
-            file = form.get("file")
-            if file and hasattr(file, "read"):
-                suffix = os.path.splitext(getattr(file, "filename", ".png"))[1] or ".png"
-                with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
-                    tmp.write(await file.read())
-                    image_path = tmp.name
 
-            if not image_path:
-                raise HTTPException(status_code=400, detail="No image file provided in form data.")
+# ─── 3. Dedicated Long-Panels Detection ───────────────────────────────────────
 
-            params = _extract_params(dict(form))
-            panels = _detect_helper(image_path, params)
+@panels_router.post(
+    "/detect/long-panels",
+    response_model=DetectLongPanelsResponse,
+    operation_id="detect_long_panels",
+    summary="Detect stacked panel bounding boxes in a tall continuous webtoon strip",
+    description="Scans horizontal projection variance to find gutter seams and binds speech bubbles down the strip."
+)
+async def detect_long_panels_endpoint(body: DetectLongPanelsRequest):
+    try:
+        if not body.url and not body.image_base64:
+            raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
+        return await detect_long_panels_boxes(body)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectLongPanels API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 4. Dedicated Standalone OpenCV Engine ────────────────────────────────────
+
+@panels_router.post(
+    "/detect/opencv",
+    operation_id="detect_opencv_standalone",
+    summary="Direct OpenCV geometric contour and gutter analysis"
+)
+async def detect_opencv_endpoint(body: DetectPanelsUrlRequest):
+    try:
+        target_url = body.url or body.image_url
+        raw_bytes = None
+        if target_url:
+            resolved = await resolve_image_to_buffer(target_url)
+            raw_bytes = resolved.get("data")
+        elif body.image_base64:
+            b64 = body.image_base64
+            if "," in b64:
+                b64 = b64.split(",", 1)[1]
+            raw_bytes = base64.b64decode(b64)
+
+        if not raw_bytes:
+            raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
+
+        return detect_opencv_boxes(
+            image_bytes=raw_bytes,
+            canny_low=body.canny_low,
+            canny_high=body.canny_high,
+            close_kernel_size=body.close_kernel_size,
+            min_width_pct=body.min_width_pct,
+            min_height_px=body.min_height_px
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectOpenCV API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 5. Dedicated Standalone YOLO Engine ──────────────────────────────────────
+
+@panels_router.post(
+    "/detect/yolo",
+    operation_id="detect_yolo_standalone",
+    summary="Direct YOLOv8m-seg comic speech bubble and character segmentation"
+)
+async def detect_yolo_endpoint(body: DetectPanelsUrlRequest):
+    try:
+        target_url = body.url or body.image_url
+        raw_bytes = None
+        if target_url:
+            resolved = await resolve_image_to_buffer(target_url)
+            raw_bytes = resolved.get("data")
+        elif body.image_base64:
+            b64 = body.image_base64
+            if "," in b64:
+                b64 = b64.split(",", 1)[1]
+            raw_bytes = base64.b64decode(b64)
+
+        if not raw_bytes:
+            raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
+
+        entities = detect_yolo_entities(raw_bytes, conf_threshold=0.30)
+        return {"success": True, "count": len(entities), "entities": entities}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectYOLO API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 6. Dedicated Standalone AI Vision Engine ─────────────────────────────────
+
+@panels_router.post(
+    "/detect/ai",
+    operation_id="detect_ai_standalone",
+    summary="Direct AI Vision reading flow and OCR transcription"
+)
+async def detect_ai_endpoint(body: DetectPanelsUrlRequest):
+    try:
+        target_url = body.url or body.image_url
+        raw_bytes = None
+        if target_url:
+            resolved = await resolve_image_to_buffer(target_url)
+            raw_bytes = resolved.get("data")
+        elif body.image_base64:
+            b64 = body.image_base64
+            if "," in b64:
+                b64 = b64.split(",", 1)[1]
+            raw_bytes = base64.b64decode(b64)
+
+        if not raw_bytes:
+            raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
+
+        return await detect_ai_vision(raw_bytes)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectAI API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 7. Dedicated Batch URL Detection ─────────────────────────────────────────
+
+@panels_router.post(
+    "/detect/batch",
+    response_model=DetectPanelsBatchResponse,
+    operation_id="detect_panels_batch",
+    summary="Concurrent panel detection for an array of image URLs"
+)
+async def detect_batch_endpoint(body: DetectPanelsBatchRequest):
+    try:
+        if not body.urls:
+            raise HTTPException(status_code=400, detail="List of 'urls' is required.")
+        return await detect_batch_panels(body)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectBatch API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 8. Dedicated Multipart File Upload Detection ─────────────────────────────
+
+@panels_router.post(
+    "/detect/upload",
+    response_model=PanelDetectionResponse,
+    operation_id="detect_panels_upload",
+    summary="In-memory multipart form file upload detector"
+)
+async def detect_upload_endpoint(file: UploadFile = File(...)):
+    try:
+        return await detect_upload_panels(file)
+    except Exception as e:
+        logger.error(f"[DetectUpload API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 9. Dedicated URL / Base64 JSON Detection ─────────────────────────────────
+
+@panels_router.post(
+    "/detect/url",
+    response_model=PanelDetectionResponse,
+    operation_id="detect_panels_url",
+    summary="Panel detection for a single URL or Base64 payload"
+)
+async def detect_url_endpoint(body: DetectPanelsUrlRequest):
+    try:
+        target_url = body.url or body.image_url
+        if target_url:
+            resolved = await resolve_image_to_buffer(target_url)
+            raw = resolved.get("data")
+            if not raw:
+                raise HTTPException(status_code=400, detail="Failed to resolve image URL.")
             
-            img_w, img_h = 0, 0
-            try:
-                from PIL import Image
-                with Image.open(image_path) as im:
-                    img_w, img_h = im.size
-            except Exception:
-                pass
+            # Classify & route
+            from PIL import Image
+            import io
+            with Image.open(io.BytesIO(raw)) as im:
+                w, h = im.size
+                is_tall = h > w * 2
 
-            return JSONResponse(content={
-                "success": True,
-                "panels": panels,
-                "count": len(panels),
-                "total_panels": len(panels),
-                "imageWidth": img_w,
-                "imageHeight": img_h,
-                "isTallStrip": (img_h > img_w * 2) if img_w else False,
-                "fallback": False,
-                "message": f"Detected {len(panels)} panel(s).",
-            })
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error(f"Panel detection failed: {exc}", exc_info=True)
-            raise HTTPException(status_code=500, detail=str(exc))
-        finally:
-            if image_path and os.path.exists(image_path):
-                try:
-                    os.remove(image_path)
-                except OSError:
-                    pass
-
-    # Scenario B: JSON Payload (Base64, URL, or batch URLs)
-    else:
-        try:
-            body_dict = await request.json()
-        except Exception:
-            body_bytes = await request.body()
-            body_dict = json.loads(body_bytes.decode("utf-8")) if body_bytes else {}
-
-        params = _extract_params(body_dict)
-
-        # Batch handling if 'urls' is provided
-        urls = body_dict.get("urls")
-        if isinstance(urls, list) and urls:
-            results = []
-            for url in urls:
-                single_tmp = None
-                try:
-                    res = await resolve_image_to_buffer(url)
-                    raw = res.get("data")
-                    if not raw:
-                        results.append({"url": url, "success": False, "error": "Failed to resolve image data.", "panels": []})
-                        continue
-                    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-                        tmp.write(raw)
-                        single_tmp = tmp.name
-                    panels = _detect_helper(single_tmp, params)
-                    results.append({
-                        "url": url,
-                        "success": True,
-                        "panels": panels,
-                        "count": len(panels),
-                        "total_panels": len(panels),
-                        "data": {
-                            "success": True,
-                            "panels": panels,
-                            "count": len(panels),
-                        }
-                    })
-                except Exception as e:
-                    results.append({"url": url, "success": False, "error": str(e), "panels": []})
-                finally:
-                    if single_tmp and os.path.exists(single_tmp):
-                        try:
-                            os.remove(single_tmp)
-                        except OSError:
-                            pass
-            return JSONResponse(content={"success": True, "results": results, "count": len(results)})
-
-        # Single image detection (base64 or URL)
-        image_path = None
-        try:
-            b64_str = body_dict.get("image_base64") or body_dict.get("base64") or body_dict.get("image")
-            img_url = body_dict.get("image_url") or body_dict.get("url")
-
-            if b64_str:
-                if "," in b64_str:
-                    b64_str = b64_str.split(",", 1)[1]
-                try:
-                    raw = base64.b64decode(b64_str)
-                except Exception:
-                    raise HTTPException(status_code=422, detail="Invalid base64 image data.")
-
-                with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-                    tmp.write(raw)
-                    image_path = tmp.name
-            elif img_url:
-                try:
-                    res = await resolve_image_to_buffer(img_url)
-                    raw = res.get("data")
-                    if not raw:
-                        raise HTTPException(status_code=400, detail="Failed to resolve image data.")
-                    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-                        tmp.write(raw)
-                        image_path = tmp.name
-                except HTTPException:
-                    raise
-                except Exception as e:
-                    logger.error(f"[Panel Detection] Failed to resolve image URL '{img_url}': {e}")
-                    raise HTTPException(status_code=400, detail=f"Failed to fetch image: {str(e)}")
+            if is_tall:
+                long_req = DetectLongPanelsRequest(url=target_url, sensitivity=body.sensitivity)
+                long_res = await detect_long_panels_boxes(long_req)
+                return PanelDetectionResponse(
+                    success=True,
+                    panels=long_res.panels,
+                    count=len(long_res.panels),
+                    total_panels=long_res.total_panels,
+                    imageWidth=w,
+                    imageHeight=h,
+                    isTallStrip=True,
+                    fallback=False,
+                    total_speech_bubbles_count=long_res.total_speech_bubbles_count,
+                    message=long_res.message
+                )
             else:
-                raise HTTPException(status_code=422, detail="Must provide 'image_base64', 'image_url', 'url', or multipart 'file'.")
+                small_req = DetectSmallPanelsRequest(url=target_url, aspect_ratio=body.aspect_ratio)
+                small_res = await detect_small_panels_boxes(small_req)
+                panels_list = [small_res.panel] if small_res.panel else small_res.panels
+                return PanelDetectionResponse(
+                    success=True,
+                    panels=panels_list,
+                    count=len(panels_list),
+                    total_panels=len(panels_list),
+                    imageWidth=w,
+                    imageHeight=h,
+                    isTallStrip=False,
+                    fallback=False,
+                    total_speech_bubbles_count=small_res.total_speech_bubbles_count,
+                    message=small_res.message
+                )
+        elif body.image_base64:
+            b64 = body.image_base64
+            if "," in b64:
+                b64 = b64.split(",", 1)[1]
+            raw = base64.b64decode(b64)
+            from PIL import Image
+            import io
+            with Image.open(io.BytesIO(raw)) as im:
+                w, h = im.size
+                is_tall = h > w * 2
+            if is_tall:
+                long_res = await detect_long_panels_boxes(DetectLongPanelsRequest(image_base64=body.image_base64))
+                return PanelDetectionResponse(
+                    success=True,
+                    panels=long_res.panels,
+                    count=len(long_res.panels),
+                    total_panels=long_res.total_panels,
+                    imageWidth=w,
+                    imageHeight=h,
+                    isTallStrip=True,
+                    total_speech_bubbles_count=long_res.total_speech_bubbles_count
+                )
+            else:
+                small_res = await detect_small_panels_boxes(DetectSmallPanelsRequest(image_base64=body.image_base64))
+                panels_list = [small_res.panel] if small_res.panel else small_res.panels
+                return PanelDetectionResponse(
+                    success=True,
+                    panels=panels_list,
+                    count=len(panels_list),
+                    total_panels=len(panels_list),
+                    imageWidth=w,
+                    imageHeight=h,
+                    isTallStrip=False,
+                    total_speech_bubbles_count=small_res.total_speech_bubbles_count
+                )
+        else:
+            raise HTTPException(status_code=400, detail="Must provide 'url', 'image_url', or 'image_base64'.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectURL API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
-            logger.info(f"[Panel Detection] Processing panel detection")
-            logger.debug(f"[DEBUG:PanelDetect] Params: {params}")
-            panels = _detect_helper(image_path, params)
-            logger.info(f"[Panel Detection] Successfully detected {len(panels)} panels.")
-            for idx, p in enumerate(panels):
-                logger.debug(f"[DEBUG:PanelDetect] Panel #{idx+1}: id={p.get('id')} at (x={p.get('x')}, y={p.get('y')}, w={p.get('width') or p.get('w')}, h={p.get('height') or p.get('h')})")
 
-            img_w, img_h = 0, 0
-            try:
-                from PIL import Image
-                with Image.open(image_path) as im:
-                    img_w, img_h = im.size
-            except Exception:
-                pass
+# ─── 10. Backward-Compatible Dispatcher Alias ─────────────────────────────────
 
-            logger.debug(f"[DEBUG:PanelDetect] Source Image Dimensions: {img_w}x{img_h}px | isTallStrip: {(img_h > img_w * 2) if img_w else False}")
-
-            return JSONResponse(content={
-                "success": True,
-                "panels": panels,
-                "count": len(panels),
-                "total_panels": len(panels),
-                "imageWidth": img_w,
-                "imageHeight": img_h,
-                "isTallStrip": (img_h > img_w * 2) if img_w else False,
-                "fallback": False,
-                "message": f"Detected {len(panels)} panel(s).",
-            })
-        except HTTPException:
-            raise
-        except Exception as exc:
-            logger.error(f"Panel detection failed: {exc}", exc_info=True)
-            raise HTTPException(status_code=500, detail=str(exc))
-        finally:
-            if image_path and os.path.exists(image_path):
-                try:
-                    os.remove(image_path)
-                except OSError:
-                    pass
+@panels_router.post("/detect", include_in_schema=False)
+async def detect_legacy_dispatcher(request: Request):
+    """Backward-compatible dispatcher for legacy calls to /api/v1/panels/detect."""
+    content_type = request.headers.get("content-type", "").lower()
+    if "multipart/form-data" in content_type:
+        form = await request.form()
+        file = form.get("file")
+        if file and hasattr(file, "read"):
+            return await detect_upload_panels(file)
+        raise HTTPException(status_code=400, detail="No file in form data.")
+    else:
+        body = await request.json()
+        urls = body.get("urls")
+        if isinstance(urls, list) and urls:
+            req = DetectPanelsBatchRequest(urls=urls)
+            return await detect_batch_panels(req)
+        
+        req = DetectPanelsUrlRequest(
+            url=body.get("url") or body.get("image_url"),
+            image_base64=body.get("image_base64") or body.get("base64")
+        )
+        return await detect_url_endpoint(req)

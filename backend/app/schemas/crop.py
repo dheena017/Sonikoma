@@ -17,7 +17,8 @@ from pydantic import BaseModel, Field
 
 class DetectedLayoutType(str, Enum):
     """Supported comic panel & image layout formats."""
-    LONG_PANELS = "long_panels"               # Tall continuous vertical webtoon scroll
+    LONG_PANELS = "long_panels"               # Tall continuous vertical webtoon scroll (2-5 panels)
+    ULTRA_LONG_PANELS = "ultra_long_panels"   # Giant full-chapter continuous scroll strip (6-50+ panels)
     SMALL_PANELS = "small_panels"             # Single isolated small panel / illustration
     SINGLE_PANELS = "small_panels"            # Alias for backward compatibility
     MULTI_GRID_PAGE = "multi_grid_page"       # Standard manga/comic page with multiple framed boxes
