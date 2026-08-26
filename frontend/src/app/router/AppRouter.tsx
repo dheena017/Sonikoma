@@ -1204,21 +1204,23 @@ export default function AppRouter(props: AppRouterProps) {
 
         {/* PAGE VIEW 2.25: SaaS Profile & Account Settings */}
         {isSettingsAccountPath && (
-          <ProfilePage
-            user={user}
-            projects={[]}
-            onLogout={logout}
-            onNavigateHome={handleNavigateHome}
-            onRefreshUser={checkAuth}
-            themeMode={themeMode}
-            toggleThemeMode={toggleThemeMode}
-            navigateTo={navigateTo}
-            addNotification={addNotification}
-            fetchWithInterceptor={fetchWithInterceptor}
-            initialTab="account"
-            selectedModel={selectedModel}
-            setSelectedModel={setSelectedModel}
-          />
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <ProfilePage
+              user={user}
+              projects={[]}
+              onLogout={logout}
+              onNavigateHome={handleNavigateHome}
+              onRefreshUser={checkAuth}
+              themeMode={themeMode}
+              toggleThemeMode={toggleThemeMode}
+              navigateTo={navigateTo}
+              addNotification={addNotification}
+              fetchWithInterceptor={fetchWithInterceptor}
+              initialTab="account"
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+            />
+          </div>
         )}
 
         {/* PAGE VIEW 2.5: Dedicated Audio & TTS Mixer Settings */}
@@ -1267,55 +1269,57 @@ export default function AppRouter(props: AppRouterProps) {
 
         {/* PAGE VIEW 6: Creative Suite Unified Views */}
         {isCreativeSuitePath && (
-          <CreativeSuiteLayout
-            hideSidebarAndHeader={true}
-            currentPath={currentPath}
-            navigateTo={navigateTo}
-            fetchWithInterceptor={fetchWithInterceptor}
-            panels={panels}
-          >
-            {isCreativeSuiteDashboardPath ? (
-              <CreativeSuiteDashboardPage
-                navigateTo={navigateTo}
-                panels={panels}
-                setPanels={setPanels}
-              />
-            ) : isOptimizerPath ? (
-              <AIOptimizerPage
-                panels={panels}
-                onNavigateHome={handleNavigateHome}
-                addNotification={addNotification}
-                scrapedTitle={seriesTitle}
-                scrapedGenre={scrapedGenre}
-                videoUrl={videoUrl}
-              />
-            ) : isPanelAssistantPath ? (
-              <PanelAssistantPage
-                panels={panels}
-                setPanels={setPanels}
-                onNavigateHome={handleNavigateHome}
-                addNotification={addNotification}
-              />
-            ) : isVoicePath ? (
-              <VoiceStudioPage
-                panels={panels}
-                setPanels={setPanels}
-                onNavigateHome={handleNavigateHome}
-                addNotification={addNotification}
-                scrapedGenre={scrapedGenre}
-                setMusicTheme={setMusicTheme}
-              />
-            ) : isYouTubePath ? (
-              <YouTubePage
-                panels={panels}
-                videoUrl={videoUrl}
-                scrapedTitle={seriesTitle}
-                scrapedGenre={scrapedGenre}
-                onNavigateHome={handleNavigateHome}
-                addNotification={addNotification}
-              />
-            ) : null}
-          </CreativeSuiteLayout>
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <CreativeSuiteLayout
+              hideSidebarAndHeader={true}
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              fetchWithInterceptor={fetchWithInterceptor}
+              panels={panels}
+            >
+              {isCreativeSuiteDashboardPath ? (
+                <CreativeSuiteDashboardPage
+                  navigateTo={navigateTo}
+                  panels={panels}
+                  setPanels={setPanels}
+                />
+              ) : isOptimizerPath ? (
+                <AIOptimizerPage
+                  panels={panels}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                  scrapedTitle={seriesTitle}
+                  scrapedGenre={scrapedGenre}
+                  videoUrl={videoUrl}
+                />
+              ) : isPanelAssistantPath ? (
+                <PanelAssistantPage
+                  panels={panels}
+                  setPanels={setPanels}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                />
+              ) : isVoicePath ? (
+                <VoiceStudioPage
+                  panels={panels}
+                  setPanels={setPanels}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                  scrapedGenre={scrapedGenre}
+                  setMusicTheme={setMusicTheme}
+                />
+              ) : isYouTubePath ? (
+                <YouTubePage
+                  panels={panels}
+                  videoUrl={videoUrl}
+                  scrapedTitle={seriesTitle}
+                  scrapedGenre={scrapedGenre}
+                  onNavigateHome={handleNavigateHome}
+                  addNotification={addNotification}
+                />
+              ) : null}
+            </CreativeSuiteLayout>
+          </div>
         )}
 
         {/* ── AI CORE SUITE (STANDALONE DEDICATED WORKSPACE) ── */}
@@ -1346,103 +1350,113 @@ export default function AppRouter(props: AppRouterProps) {
 
         {/* PAGE VIEW 15: User Profile & Account Settings */}
         {isProfilePath && (
-          <ProfilePage
-            user={user}
-            projects={[]}
-            onLogout={logout}
-            onNavigateHome={handleNavigateHome}
-            onRefreshUser={checkAuth}
-            themeMode={themeMode}
-            toggleThemeMode={toggleThemeMode}
-            navigateTo={navigateTo}
-            addNotification={addNotification}
-            fetchWithInterceptor={fetchWithInterceptor}
-            selectedModel={selectedModel}
-            setSelectedModel={setSelectedModel}
-          />
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <ProfilePage
+              user={user}
+              projects={[]}
+              onLogout={logout}
+              onNavigateHome={handleNavigateHome}
+              onRefreshUser={checkAuth}
+              themeMode={themeMode}
+              toggleThemeMode={toggleThemeMode}
+              navigateTo={navigateTo}
+              addNotification={addNotification}
+              fetchWithInterceptor={fetchWithInterceptor}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+            />
+          </div>
         )}
 
         {/* PAGE VIEW 16: Notification Center Hub */}
         {isNotificationsPath && (
-          <NotificationsPage
-            notifications={notifications}
-            onNavigateHome={handleNavigateHome}
-            onMarkAsRead={markNotificationAsRead as any}
-            onMarkAllAsRead={markAllNotificationsAsRead}
-            onDelete={deleteNotification as any}
-            onClearAll={clearAllNotifications}
-            notificationsMuted={notificationsMuted}
-            onToggleMute={() => setNotificationsMuted(!notificationsMuted)}
-          />
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <NotificationsPage
+              notifications={notifications}
+              onNavigateHome={handleNavigateHome}
+              onMarkAsRead={markNotificationAsRead as any}
+              onMarkAllAsRead={markAllNotificationsAsRead}
+              onDelete={deleteNotification as any}
+              onClearAll={clearAllNotifications}
+              notificationsMuted={notificationsMuted}
+              onToggleMute={() => setNotificationsMuted(!notificationsMuted)}
+            />
+          </div>
         )}
 
         {/* PAGE VIEW 16.5: Dedicated Chapter Scraper Page */}
         {isEpisodeScraperPath && (
-          <React.Suspense fallback={<RouteLoadingFallback />}>
-            <ChapterScraperPage
-              addNotification={addNotification}
-              fetchWithInterceptor={fetchWithInterceptor}
-              navigateTo={navigateTo}
-              lastEditorPath={lastEditorPath}
-            />
-          </React.Suspense>
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <React.Suspense fallback={<RouteLoadingFallback />}>
+              <ChapterScraperPage
+                addNotification={addNotification}
+                fetchWithInterceptor={fetchWithInterceptor}
+                navigateTo={navigateTo}
+                lastEditorPath={lastEditorPath}
+              />
+            </React.Suspense>
+          </div>
         )}
 
         {/* PAGE VIEW 17.5: Series Landing Page */}
         {isSeriesDetailsPath && (
-          <SeriesDetailsPage
-            onNavigateHome={handleNavigateHome}
-            navigateTo={navigateTo}
-            fetchWithInterceptor={fetchWithInterceptor}
-          />
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <SeriesDetailsPage
+              onNavigateHome={handleNavigateHome}
+              navigateTo={navigateTo}
+              fetchWithInterceptor={fetchWithInterceptor}
+            />
+          </div>
         )}
 
         {/* PAGE VIEW 18: Batch Panel Auto Crop Page */}
         {isAutoCropPath && (
-          <AutoCropModal
-            isPage={true}
-            onClose={handleAutoCropClose}
-            onApply={handleAutoCropApply}
-            sensitivity={cropSensitivity}
-            setSensitivity={setCropSensitivity}
-            padding={cropPaddingPx}
-            setPadding={setCropPaddingPx}
-            backgroundColorMode={cropBackgroundMode}
-            setBackgroundColorMode={setCropBackgroundMode}
-            autoSplitTallStrips={autoSplitTallStrips}
-            setAutoSplitTallStrips={setAutoSplitTallStrips}
-            aspectRatioLock={aspectRatioLock}
-            setAspectRatioLock={setAspectRatioLock}
-            minPanelAreaPct={minPanelAreaPct}
-            setMinPanelAreaPct={setMinPanelAreaPct}
-            overlapMergeThreshold={overlapMergeThreshold}
-            setOverlapMergeThreshold={setOverlapMergeThreshold}
-            useLocalCV={useLocalCV}
-            setUseLocalCV={setUseLocalCV}
-            cropModel={cropModel}
-            setCropModel={setCropModel}
-            cropMinHeightPx={cropMinHeightPx}
-            setCropMinHeightPx={setCropMinHeightPx}
-            cropCannyLow={cropCannyLow}
-            setCropCannyLow={setCropCannyLow}
-            cropCannyHigh={cropCannyHigh}
-            setCropCannyHigh={setCropCannyHigh}
-            cropCloseKernelSize={cropCloseKernelSize}
-            setCropCloseKernelSize={setCropCloseKernelSize}
-            activeTab={activeAutoCropTab}
-            setActiveTab={setActiveAutoCropTab}
-            selectedCount={selectedScraped.length}
-            isApplying={isBatchCropping}
-            scrapedImages={scrapedImages}
-            selectedScraped={selectedScraped}
-            setSelectedScraped={setSelectedScraped}
-            setConsoleLogs={setConsoleLogs}
-            addNotification={addNotification}
-            cropGuidance={cropGuidance}
-            setCropGuidance={setCropGuidance}
-            cropFocusMode={cropFocusMode}
-            setCropFocusMode={setCropFocusMode}
-          />
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <AutoCropModal
+              isPage={true}
+              onClose={handleAutoCropClose}
+              onApply={handleAutoCropApply}
+              sensitivity={cropSensitivity}
+              setSensitivity={setCropSensitivity}
+              padding={cropPaddingPx}
+              setPadding={setCropPaddingPx}
+              backgroundColorMode={cropBackgroundMode}
+              setBackgroundColorMode={setCropBackgroundMode}
+              autoSplitTallStrips={autoSplitTallStrips}
+              setAutoSplitTallStrips={setAutoSplitTallStrips}
+              aspectRatioLock={aspectRatioLock}
+              setAspectRatioLock={setAspectRatioLock}
+              minPanelAreaPct={minPanelAreaPct}
+              setMinPanelAreaPct={setMinPanelAreaPct}
+              overlapMergeThreshold={overlapMergeThreshold}
+              setOverlapMergeThreshold={setOverlapMergeThreshold}
+              useLocalCV={useLocalCV}
+              setUseLocalCV={setUseLocalCV}
+              cropModel={cropModel}
+              setCropModel={setCropModel}
+              cropMinHeightPx={cropMinHeightPx}
+              setCropMinHeightPx={setCropMinHeightPx}
+              cropCannyLow={cropCannyLow}
+              setCropCannyLow={setCropCannyLow}
+              cropCannyHigh={cropCannyHigh}
+              setCropCannyHigh={setCropCannyHigh}
+              cropCloseKernelSize={cropCloseKernelSize}
+              setCropCloseKernelSize={setCropCloseKernelSize}
+              activeTab={activeAutoCropTab}
+              setActiveTab={setActiveAutoCropTab}
+              selectedCount={selectedScraped.length}
+              isApplying={isBatchCropping}
+              scrapedImages={scrapedImages}
+              selectedScraped={selectedScraped}
+              setSelectedScraped={setSelectedScraped}
+              setConsoleLogs={setConsoleLogs}
+              addNotification={addNotification}
+              cropGuidance={cropGuidance}
+              setCropGuidance={setCropGuidance}
+              cropFocusMode={cropFocusMode}
+              setCropFocusMode={setCropFocusMode}
+            />
+          </div>
         )}
 
         {/* PAGE VIEW 19: Full Editor Page */}
@@ -1450,73 +1464,85 @@ export default function AppRouter(props: AppRouterProps) {
           !isPipMode &&
           isProEditorPage &&
           !isImageEditorPage && (
-            <EditorPage
-              appLogic={memoizedAppLogic}
-              navigateTo={navigateTo}
-              onRequestProjectConfirmation={headerOnSave}
-              seriesSlug={editorSeriesSlug}
-              chapterSlug={editorChapterSlug}
-              rating={scrapedRating}
-              likes={scrapedLikes}
-              views={scrapedViews}
-            />
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <React.Suspense fallback={<RouteLoadingFallback />}>
+                <EditorPage
+                  appLogic={memoizedAppLogic}
+                  navigateTo={navigateTo}
+                  onRequestProjectConfirmation={headerOnSave}
+                  seriesSlug={editorSeriesSlug}
+                  chapterSlug={editorChapterSlug}
+                  rating={scrapedRating}
+                  likes={scrapedLikes}
+                  views={scrapedViews}
+                />
+              </React.Suspense>
+            </div>
           )}
 
         {/* PAGE VIEW 20: Advanced Crop & Trim Editor Page */}
         {(isImageEditorPage || (isEditorPath && !isProEditorPage)) &&
           !isPipMode && (
-            <ImageEditorPage
-              appLogic={memoizedAppLogic}
-              themeMode={themeMode as any}
-              toggleThemeMode={toggleThemeMode}
-              isSidebarOpen={isSidebarOpen}
-              setIsSidebarOpen={setIsSidebarOpen}
-              navigateTo={navigateTo}
-              seriesSlug={editorSeriesSlug}
-              chapterSlug={editorChapterSlug}
-            />
+            <div className="page-transition w-full flex-1 flex flex-col">
+              <React.Suspense fallback={<RouteLoadingFallback />}>
+                <ImageEditorPage
+                  appLogic={memoizedAppLogic}
+                  themeMode={themeMode as any}
+                  toggleThemeMode={toggleThemeMode}
+                  isSidebarOpen={isSidebarOpen}
+                  setIsSidebarOpen={setIsSidebarOpen}
+                  navigateTo={navigateTo}
+                  seriesSlug={editorSeriesSlug}
+                  chapterSlug={editorChapterSlug}
+                />
+              </React.Suspense>
+            </div>
           )}
 
         {/* PAGE VIEW 21: Admin Dashboard */}
         {isAdminPath && (
-          <AdminPage
-            user={user}
-            navigateTo={navigateTo}
-            currentPath={currentPath}
-            isAuthenticated={isAuthenticated}
-            fetchWithInterceptor={fetchWithInterceptor}
-            addNotification={addNotification}
-            audioFeedback={audioFeedback}
-          />
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <React.Suspense fallback={<RouteLoadingFallback />}>
+              <AdminPage
+                user={user}
+                navigateTo={navigateTo}
+                currentPath={currentPath}
+                isAuthenticated={isAuthenticated}
+                fetchWithInterceptor={fetchWithInterceptor}
+                addNotification={addNotification}
+                audioFeedback={audioFeedback}
+              />
+            </React.Suspense>
+          </div>
         )}
 
         {/* PAGE VIEW 22: New Standalone Admin Dashboard Page */}
         {isAdminDashboardPath && (
-          <AdminDashboardPage
-            user={user}
-            navigateTo={navigateTo}
-            isAuthenticated={isAuthenticated}
-            fetchWithInterceptor={fetchWithInterceptor}
-            addNotification={addNotification}
-            audioFeedback={audioFeedback}
-          />
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <React.Suspense fallback={<RouteLoadingFallback />}>
+              <AdminDashboardPage
+                user={user}
+                navigateTo={navigateTo}
+                isAuthenticated={isAuthenticated}
+                fetchWithInterceptor={fetchWithInterceptor}
+                addNotification={addNotification}
+                audioFeedback={audioFeedback}
+              />
+            </React.Suspense>
+          </div>
         )}
 
         {/* PAGE VIEW 23: Video Editor Studio */}
         {isVideoEditorPath && (
-          <React.Suspense
-            fallback={
-              <div className="flex-1 flex items-center justify-center bg-[#050507] text-neutral-400 text-sm">
-                Loading Video Editor...
-              </div>
-            }
-          >
-            <VideoEditorPage
-              appLogic={memoizedAppLogic}
-              navigateTo={navigateTo}
-              onBackToApp={handleNavigateHome}
-            />
-          </React.Suspense>
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <React.Suspense fallback={<RouteLoadingFallback />}>
+              <VideoEditorPage
+                appLogic={memoizedAppLogic}
+                navigateTo={navigateTo}
+                onBackToApp={handleNavigateHome}
+              />
+            </React.Suspense>
+          </div>
         )}
 
         {/* FALLBACK VIEW: 404 Route Not Found */}
