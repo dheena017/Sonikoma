@@ -47,6 +47,7 @@ import { getSeriesEpisodes, separateComicUrl } from "@/api/endpoints/scraper";
 import type { Chapter } from "../types/ChapterTypes";
 import { makeSafeFilename } from "@/shared/utils/downloadNaming";
 import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
+import { ChapterScraperSkeleton } from "@/shared/ui/loading";
 import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
 
 interface SeriesMetadata {
@@ -778,8 +779,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
         </div>
       )}
 
-      {/* ── LOADING STATE ── */}
-      {isLoading && !seriesMetadata && <RouteLoadingFallback />}
+      {/* ── SKELETON LOADING STATE (shown while fetching series/chapter data from backend) ── */}
+      {isLoading && !seriesMetadata && <ChapterScraperSkeleton />}
 
       {/* ── 1. AMBIENT GLASSMORPHIC HERO BANNER (MATCHING SERIES DETAILS PAGE) ── */}
       {seriesMetadata && (

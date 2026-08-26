@@ -730,7 +730,9 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/scraper/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
-        currentPath.startsWith("/scraper/editor"),
+        currentPath.startsWith("/scraper/editor") ||
+        currentPath.startsWith("/image-editor") ||
+        isImageEditorPage,
       isShortcutsPath: currentPath === "/shortcuts",
       isAudioSettingsPath: currentPath === "/scraper/audio-settings",
       isOptimizerPath:
@@ -1551,6 +1553,7 @@ export default function AppRouter(props: AppRouterProps) {
           !isProjectsPath &&
           !isAutoCropPath &&
           !isEditorPath &&
+          !isImageEditorPage &&
           !isShortcutsPath &&
           !isAudioSettingsPath &&
           !isOptimizerPath &&

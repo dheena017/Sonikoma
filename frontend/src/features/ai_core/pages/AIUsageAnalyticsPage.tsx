@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   FileText,
 } from "lucide-react";
+import { DashboardStatsSkeleton } from "@/shared/ui/loading";
 
 interface AIUsageAnalyticsPageProps {
   addNotification?: (msg: string, type?: string) => void;
@@ -155,42 +156,46 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
         </div>
 
       {/* ── KPI METRICS CARDS ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-          <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Total Tokens</span>
-          <p className="text-2xl font-black text-white font-mono">
-            {kpis.total_tokens?.toLocaleString() || 0}
-          </p>
-          <span className="text-[10px] text-purple-400 font-mono">
-            {kpis.prompt_tokens?.toLocaleString() || 0} in / {kpis.completion_tokens?.toLocaleString() || 0} out
-          </span>
-        </div>
+      {isLoading ? (
+        <DashboardStatsSkeleton count={4} />
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+            <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Total Tokens</span>
+            <p className="text-2xl font-black text-white font-mono">
+              {kpis.total_tokens?.toLocaleString() || 0}
+            </p>
+            <span className="text-[10px] text-purple-400 font-mono">
+              {kpis.prompt_tokens?.toLocaleString() || 0} in / {kpis.completion_tokens?.toLocaleString() || 0} out
+            </span>
+          </div>
 
-        <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-          <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Total Spend ($ USD)</span>
-          <p className="text-2xl font-black text-emerald-400 font-mono">
-            ${Number(kpis.total_cost_usd || 0).toFixed(4)}
-          </p>
-          <span className="text-[10px] text-neutral-400 font-mono">Estimated API usage cost</span>
-        </div>
+          <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+            <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Total Spend ($ USD)</span>
+            <p className="text-2xl font-black text-emerald-400 font-mono">
+              ${Number(kpis.total_cost_usd || 0).toFixed(4)}
+            </p>
+            <span className="text-[10px] text-neutral-400 font-mono">Estimated API usage cost</span>
+          </div>
 
-        <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-          <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Available Credits</span>
-          <p className="text-2xl font-black text-purple-400 font-mono flex items-center gap-1">
-            <Coins className="w-5 h-5" />
-            {kpis.available_credits?.toLocaleString() || 1000}
-          </p>
-          <span className="text-[10px] text-emerald-400 font-mono">Wallet Active</span>
-        </div>
+          <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+            <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Available Credits</span>
+            <p className="text-2xl font-black text-purple-400 font-mono flex items-center gap-1">
+              <Coins className="w-5 h-5" />
+              {kpis.available_credits?.toLocaleString() || 1000}
+            </p>
+            <span className="text-[10px] text-emerald-400 font-mono">Wallet Active</span>
+          </div>
 
-        <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-          <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Success Rate / Latency</span>
-          <p className="text-2xl font-black text-white font-mono">
-            {kpis.success_rate_percent}%
-          </p>
-          <span className="text-[10px] text-neutral-400 font-mono">Avg {kpis.avg_latency_ms}ms</span>
+          <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+            <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Success Rate / Latency</span>
+            <p className="text-2xl font-black text-white font-mono">
+              {kpis.success_rate_percent}%
+            </p>
+            <span className="text-[10px] text-neutral-400 font-mono">Avg {kpis.avg_latency_ms}ms</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* ── VISUAL TIMESERIES CHART ───────────────────────────────────────── */}
       <div className="rounded-2xl border border-neutral-850 bg-[#161616] p-6 space-y-4 shadow-sm">

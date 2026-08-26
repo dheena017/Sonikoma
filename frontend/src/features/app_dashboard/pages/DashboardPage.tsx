@@ -52,6 +52,7 @@ export default function DashboardPage() {
         completedCount={completedCount}
         processingCount={processingCount}
         totalPanels={totalPanels}
+        loading={loading}
       />
 
       <DashboardQuickLinks

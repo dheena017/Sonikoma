@@ -22,6 +22,7 @@ import {
   Layers,
   Pencil,
 } from "lucide-react";
+import { AICardSkeleton } from "@/shared/ui/loading";
 
 interface AIAPIKeysPageProps {
   addNotification?: (msg: string, type?: string) => void;
@@ -275,7 +276,10 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
 
       {/* ── PROVIDER CARDS GRID ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {providers.map((provider) => {
+        {isLoading ? (
+          <AICardSkeleton count={6} />
+        ) : (
+          providers.map((provider) => {
           const Icon = ICON_MAP[provider.id] || Sparkles;
           const userKey = keys[provider.id] || "";
           const isVisible = Boolean(visibleKeys[provider.id]);
@@ -429,7 +433,8 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
               )}
             </div>
           );
-        })}
+        })
+      )}
       </div>
     </div>
   );

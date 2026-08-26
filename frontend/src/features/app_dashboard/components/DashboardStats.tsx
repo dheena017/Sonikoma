@@ -1,11 +1,13 @@
 import React from "react";
 import { Layers, CheckCircle2, Zap, Clock } from "lucide-react";
+import { DashboardStatsSkeleton } from "@/shared/ui/loading";
 
 interface DashboardStatsProps {
   projectsCount: number;
   completedCount: number;
   processingCount: number;
   totalPanels: number;
+  loading?: boolean;
 }
 
 export default function DashboardStats({
@@ -13,7 +15,16 @@ export default function DashboardStats({
   completedCount,
   processingCount,
   totalPanels,
+  loading = false,
 }: DashboardStatsProps) {
+  if (loading) {
+    return (
+      <div className="mb-8">
+        <DashboardStatsSkeleton count={4} />
+      </div>
+    );
+  }
+
   const estimatedRuntimeMinutes = Math.max(
     1,
     Math.round((totalPanels * 4) / 60)

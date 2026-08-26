@@ -2,6 +2,7 @@ import React from "react";
 import { Film, Activity, ExternalLink } from "lucide-react";
 import { getSourceIcon } from "@/utils";
 import ProjectCard from "@/features/workspace_projects/components/ProjectCard";
+import { ProjectCardSkeleton } from "@/shared/ui/loading";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 
 interface DashboardProjectSectionProps {
@@ -55,20 +56,8 @@ export default function DashboardProjectSection({
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center animate-pulse shadow-lg shadow-purple-500/20">
-            <img
-              src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              alt="Loading..."
-              className="w-full h-full rounded-[10px] object-cover p-[2px]"
-              style={{
-                background: themeMode === "light" ? "#ffffff" : "#000000",
-              }}
-            />
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <ProjectCardSkeleton count={3} />
         </div>
       ) : error ? (
         <div className="border border-red-500/20 bg-red-500/5 rounded-3xl p-12 text-center flex flex-col items-center justify-center">

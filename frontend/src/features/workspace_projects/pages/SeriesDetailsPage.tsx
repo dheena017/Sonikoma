@@ -31,9 +31,9 @@ import ProjectCard from "../components/ProjectCard";
 import { useProjectsActions } from "../hooks";
 import SeriesEditModal from "../components/SeriesEditModal";
 import SeriesPublishModal from "../components/SeriesPublishModal";
-import SeriesReaderModal from "../components/SeriesReaderModal";
-import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
+import { SeriesDetailsSkeleton } from "@/shared/ui/loading";
 import { notify } from "@/features/app_notification";
+import SeriesReaderModal from "../components/SeriesReaderModal";
 
 interface SeriesDetailsPageProps {
   onNavigateHome: () => void;
@@ -277,7 +277,7 @@ export default function SeriesDetailsPage({
   };
 
   if (loading) {
-    return <RouteLoadingFallback />;
+    return <SeriesDetailsSkeleton />;
   }
 
   if (error || !series) {
