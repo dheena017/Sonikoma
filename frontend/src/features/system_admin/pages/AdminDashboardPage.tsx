@@ -25,6 +25,7 @@ import {
 import * as api from "@/api";
 import AdminLayout from "@/features/system_admin/components/AdminLayout";
 import BackendStatusPanel from "@/components/feedback/BackendStatusPanel";
+import { DashboardStatsSkeleton } from "@/shared/ui/loading";
 
 const AdminDashboardPage = React.memo(
   ({
@@ -737,93 +738,97 @@ const AdminDashboardPage = React.memo(
         />
 
         {/* Stats Ribbon */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-purple-500/50 transition-all shadow-lg text-left">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Users className="w-16 h-16 text-purple-400" />
-            </div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-purple-500/10 rounded-xl text-purple-400 border border-purple-500/20">
-                <Users className="w-4 h-4" />
+        {loadingStats ? (
+          <DashboardStatsSkeleton count={4} />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-purple-500/50 transition-all shadow-lg text-left">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Users className="w-16 h-16 text-purple-400" />
               </div>
-              <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
-                Total Creators
-              </h3>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-purple-500/10 rounded-xl text-purple-400 border border-purple-500/20">
+                  <Users className="w-4 h-4" />
+                </div>
+                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
+                  Total Creators
+                </h3>
+              </div>
+              <div className="text-3xl font-extrabold text-white leading-none mb-2">
+                {stats.users?.toLocaleString() || "0"}
+              </div>
+              <p className="text-[10px] text-purple-400 font-bold flex items-center gap-1 font-mono">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Active platform subscription tier</span>
+              </p>
             </div>
-            <div className="text-3xl font-extrabold text-white leading-none mb-2">
-              {stats.users?.toLocaleString() || "0"}
-            </div>
-            <p className="text-[10px] text-purple-400 font-bold flex items-center gap-1 font-mono">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Active platform subscription tier</span>
-            </p>
-          </div>
 
-          <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-indigo-500/50 transition-all shadow-lg text-left">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <FolderGit2 className="w-16 h-16 text-indigo-400" />
-            </div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/20">
-                <FolderGit2 className="w-4 h-4" />
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-indigo-500/50 transition-all shadow-lg text-left">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <FolderGit2 className="w-16 h-16 text-indigo-400" />
               </div>
-              <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
-                Total Projects
-              </h3>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/20">
+                  <FolderGit2 className="w-4 h-4" />
+                </div>
+                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
+                  Total Projects
+                </h3>
+              </div>
+              <div className="text-3xl font-extrabold text-white leading-none mb-2">
+                {stats.projects?.toLocaleString() || "0"}
+              </div>
+              <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono">
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>Storyboards compiled</span>
+              </p>
             </div>
-            <div className="text-3xl font-extrabold text-white leading-none mb-2">
-              {stats.projects?.toLocaleString() || "0"}
-            </div>
-            <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span>Storyboards compiled</span>
-            </p>
-          </div>
 
-          <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/50 transition-all shadow-lg text-left">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <DollarSign className="w-16 h-16 text-emerald-400" />
-            </div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
-                <DollarSign className="w-4 h-4" />
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/50 transition-all shadow-lg text-left">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <DollarSign className="w-16 h-16 text-emerald-400" />
               </div>
-              <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
-                Revenue MRR
-              </h3>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
+                  <DollarSign className="w-4 h-4" />
+                </div>
+                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
+                  Revenue MRR
+                </h3>
+              </div>
+              <div className="text-3xl font-extrabold text-white leading-none mb-2">
+                ${(analytics?.mrr || 0).toLocaleString()}
+              </div>
+              <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>
+                  {analytics?.active_subscriptions || 0} active paying plans
+                </span>
+              </p>
             </div>
-            <div className="text-3xl font-extrabold text-white leading-none mb-2">
-              ${(analytics?.mrr || 0).toLocaleString()}
-            </div>
-            <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>
-                {analytics?.active_subscriptions || 0} active paying plans
-              </span>
-            </p>
-          </div>
 
-          <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-cyan-500/50 transition-all shadow-lg text-left">
-            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-              <Activity className="w-16 h-16 text-cyan-400" />
-            </div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-cyan-500/10 rounded-xl text-cyan-400 border border-cyan-500/20">
-                <Activity className="w-4 h-4" />
+            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-cyan-500/50 transition-all shadow-lg text-left">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Activity className="w-16 h-16 text-cyan-400" />
               </div>
-              <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
-                Pipeline Health
-              </h3>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-cyan-500/10 rounded-xl text-cyan-400 border border-cyan-500/20">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
+                  Pipeline Health
+                </h3>
+              </div>
+              <div className="text-3xl font-extrabold text-white leading-none mb-2">
+                {analytics?.success_rate || 100}%
+              </div>
+              <p className="text-[10px] text-violet-400 font-bold flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Process compilation rate</span>
+              </p>
             </div>
-            <div className="text-3xl font-extrabold text-white leading-none mb-2">
-              {analytics?.success_rate || 100}%
-            </div>
-            <p className="text-[10px] text-violet-400 font-bold flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Process compilation rate</span>
-            </p>
           </div>
-        </div>
+        )}
 
         {/* Core Analytics SVG Trends Chart */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
