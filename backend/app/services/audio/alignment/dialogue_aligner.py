@@ -105,7 +105,7 @@ async def align_dialogue_and_extract_peaks(
 
                 current_search_idx = int(best_match["end_idx"]) + 1
             else:
-                logger.debug(f"Could not find a strong match for OCR text: '{raw_ocr_text}'")
+                pass
 
     try:
         if librosa is not None:

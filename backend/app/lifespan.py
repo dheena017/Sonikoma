@@ -102,11 +102,8 @@ async def lifespan(app: FastAPI):
             try:
                 from services.image.layer_separation.sam import get_rembg_session
                 from services.image.panel_detection.speech_bubble_detector import get_yolo_model
-                logger.debug("[Startup] Pre-warming rembg U-2-Net session...")
                 await asyncio.to_thread(get_rembg_session)
-                logger.debug("[Startup] Pre-warming YOLO manga-segmentation model...")
                 await asyncio.to_thread(get_yolo_model)
-                logger.debug("[Startup] rembg U-2-Net and YOLO models pre-warmed successfully — first request will be fast.")
             except Exception as e:
                 logger.warning(f"[Startup] Model pre-warm failed (non-critical, will lazy-load on first request): {e}")
         else:

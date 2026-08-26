@@ -50,7 +50,6 @@ def detect_opencv_boxes(
 
     img_h, img_w = img_bgr.shape[:2]
     gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-    logger.debug(f"[OpenCV Detector] Image matrix shape: {img_w}x{img_h} (channels=3)")
 
     # 1. Multi-Channel Color Edge Detection (RGB + LAB)
     # Smooths textured background while preserving color contrasts and black ink lines
@@ -61,7 +60,6 @@ def detect_opencv_boxes(
     median_val = float(np.median(gray))
     computed_low = max(10, int(max(0, (1.0 - 0.33) * median_val) if canny_low == 20 else canny_low))
     computed_high = min(250, int(min(255, (1.0 + 0.33) * median_val) if canny_high == 100 else canny_high))
-    logger.debug(f"[OpenCV Detector] Median intensity={median_val:.1f}, Canny thresholds: low={computed_low}, high={computed_high}")
 
     edges_gray = cv2.Canny(filtered_bgr, computed_low, computed_high)
     edges_l = cv2.Canny(lab[:, :, 0], computed_low, computed_high)
@@ -76,7 +74,6 @@ def detect_opencv_boxes(
 
     # 3. Contour Extraction
     contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    logger.debug(f"[OpenCV Detector] Raw contour count extracted: {len(contours)}")
 
     min_w = int(img_w * min_width_pct)
     min_h = max(20, min_height_px)
@@ -89,7 +86,6 @@ def detect_opencv_boxes(
 
         # Filter out tiny noise contours
         if w < min_w or h < min_h or (area / total_area) < 0.02:
-            logger.debug(f"[OpenCV Detector: Discarded] Contour #{idx+1} ({w}x{h}px, area_pct={area/total_area:.3f}) below threshold (min_w={min_w}, min_h={min_h})")
             continue
 
         # Polygon approximation to check if frame is rectangular or diagonal
@@ -104,7 +100,6 @@ def detect_opencv_boxes(
         pad_w = min(img_w - pad_x, w + (bleed_padding_px * 2))
         pad_h = min(img_h - pad_y, h + (bleed_padding_px * 2))
 
-        logger.debug(f"[OpenCV Detector: Accepted] Panel #{len(panels)+1}: rect=({pad_x},{pad_y},{pad_w},{pad_h}), diag={is_diagonal}, approx_vertices={len(approx)}")
 
         panels.append({
             "id": f"cv_panel_{idx + 1}",
@@ -140,10 +135,6 @@ def detect_opencv_boxes(
     except Exception:
         edge_energy = 0.0
 
-    logger.debug(
-        f"[OpenCV Detector] Image {img_w}x{img_h}px -> Detected {len(panels)} panels, "
-        f"{len(gutter_indices)} gutter rows, Edge energy: {edge_energy:.2f}"
-    )
 
     return {
         "success": True,

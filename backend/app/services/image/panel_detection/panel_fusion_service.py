@@ -38,7 +38,6 @@ def _box_distance(p_x: int, p_y: int, p_w: int, p_h: int, b_x: int, b_y: int, b_
 def _estimate_cinematography(panel_w: int, panel_h: int, characters: List[CharacterEntityItem]) -> PanelCinematography:
     """Estimates camera shot type and camera motion recommendations based on character framing."""
     if not characters:
-        logger.debug(f"[Fusion: Cinematography] No characters detected in panel ({panel_w}x{panel_h}px) -> wide_shot/ambient")
         return PanelCinematography(
             shot_type="wide_shot",
             camera_angle="eye_level",
@@ -49,7 +48,6 @@ def _estimate_cinematography(panel_w: int, panel_h: int, characters: List[Charac
     # Find dominant character height ratio relative to panel height
     max_char_h = max(c.height for c in characters)
     h_ratio = max_char_h / float(max(1, panel_h))
-    logger.debug(f"[Fusion: Cinematography] Panel {panel_w}x{panel_h}px has {len(characters)} character(s), max_char_h={max_char_h}, h_ratio={h_ratio:.2f}")
 
     if h_ratio >= 0.75:
         res = PanelCinematography(
@@ -72,7 +70,6 @@ def _estimate_cinematography(panel_w: int, panel_h: int, characters: List[Charac
             dominant_mood="action",
             suggested_camera_motion="pan_down"
         )
-    logger.debug(f"[Fusion: Cinematography] Selected: shot={res.shot_type}, angle={res.camera_angle}, mood={res.dominant_mood}, motion={res.suggested_camera_motion}")
     return res
 
 
@@ -93,14 +90,9 @@ def fuse_panels_and_bubbles(
     fused_panels: List[PanelBoundingBox] = []
     char_list = list(characters or [])
 
-    logger.debug(
-        f"[Fusion: Start] Input frames={len(cv_panels)}, bubbles={len(yolo_bubbles)}, "
-        f"characters={len(char_list)}, img_dim={img_w}x{img_h}px, snap_to_frame={snap_to_frame}, bleed={bleed_padding_px}px"
-    )
 
     # If no OpenCV frames detected, synthesize a baseline frame
     if not cv_panels:
-        logger.debug("[Fusion] No OpenCV panels provided; synthesizing full-image baseline frame.")
         cv_panels = [{
             "id": "panel_1",
             "x": 0,
@@ -134,10 +126,6 @@ def fuse_panels_and_bubbles(
         tol_y = max(4, int(ph * 0.03))
         dyn_max_dist = max(10, int(pw * 0.08)) if max_binding_dist_px == 60 else max_binding_dist_px
 
-        logger.debug(
-            f"[Fusion: Frame #{idx+1} ({p_id})] Initial rect: x={px}, y={py}, w={pw}, h={ph}, "
-            f"tol_x={tol_x}, tol_y={tol_y}, dyn_max_dist={dyn_max_dist}"
-        )
 
         # 1. Assign characters situated within or overlapping this panel frame
         for char in char_list:
@@ -146,7 +134,6 @@ def fuse_panels_and_bubbles(
             if (px - tol_x) <= cx <= (px + pw + tol_x) and (py - tol_y) <= cy <= (py + ph + tol_y):
                 char.panel_id = p_id
                 panel_characters.append(char)
-                logger.debug(f"[Fusion: {p_id}] Attached character '{char.character_id}' at center ({cx},{cy})")
 
         # 2. Find bubbles belonging to or adjacent to this OpenCV panel frame
         for bubble in list(unassigned_bubbles):
@@ -162,10 +149,6 @@ def fuse_panels_and_bubbles(
             is_adjacent_below = (0 <= (bubble.y - (py + ph)) <= max_gutter_reach)
             is_near = dist <= dyn_max_dist
 
-            logger.debug(
-                f"[Fusion: {p_id} vs {bubble.bubble_id}] dist={dist:.1f}, inside_x={inside_x}, "
-                f"is_inside={is_inside}, adj_above={is_adjacent_above}, adj_below={is_adjacent_below}, is_near={is_near}"
-            )
 
             if inside_x and (is_inside or is_adjacent_above or is_adjacent_below or is_near):
                 bubble.parent_panel_id = p_id
@@ -181,7 +164,6 @@ def fuse_panels_and_bubbles(
                         )
                     )
                     closest_char.associated_bubble_ids.append(bubble.bubble_id)
-                    logger.debug(f"[Fusion: {p_id}] Bound bubble '{bubble.bubble_id}' to character '{closest_char.character_id}'")
 
                 panel_bubbles.append(bubble)
                 unassigned_bubbles.remove(bubble)
@@ -194,10 +176,6 @@ def fuse_panels_and_bubbles(
                 new_x2 = min(img_w, min(px + pw + max_exp_x, max(px + pw, bubble.x + bubble.width)))
                 new_y2 = min(img_h, min(py + ph + max_exp_y, max(py + ph, bubble.y + bubble.height)))
 
-                logger.debug(
-                    f"[Fusion: {p_id}] Expanded boundary for bubble '{bubble.bubble_id}': "
-                    f"from ({px},{py},{pw},{ph}) -> ({new_x1},{new_y1},{new_x2-new_x1},{new_y2-new_y1})"
-                )
 
                 px, py = new_x1, new_y1
                 pw, ph = new_x2 - new_x1, new_y2 - new_y1
@@ -241,7 +219,6 @@ def fuse_panels_and_bubbles(
                         other.depth = 1
                         other.parent_panel_id = p.id
                         other.label = EntityLabel.PANEL_INSET.value
-                        logger.debug(f"[Fusion: Inset] Identified panel '{other.id}' as inset inside parent '{p.id}'")
 
     fused_panels.sort(key=lambda p: (p.y, p.x))
     for i, p in enumerate(fused_panels):
@@ -259,5 +236,4 @@ def fuse_panels_and_bubbles(
     else:
         margins = {"unit": "pixels"}
 
-    logger.debug(f"[Fusion: Finish] Fused into {len(fused_panels)} PanelBoundingBox item(s), unassigned_bubbles={len(unassigned_bubbles)}")
     return fused_panels, yolo_bubbles, margins

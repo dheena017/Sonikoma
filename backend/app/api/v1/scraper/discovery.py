@@ -47,7 +47,6 @@ async def scrape_all_images_post(
 ):
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
-    logger.debug(f"[ScraperAPI] POST /all-images: url='{body.url}', render_js={body.render_js}")
     res = await AdaptiveScraperEngine.extract_all_raw_images(
         url=body.url.strip(),
         render_js=body.render_js,
@@ -75,7 +74,6 @@ async def scrape_all_images_get(
 ):
     if not url or not url.strip():
         raise HTTPException(status_code=400, detail="URL query parameter is required.")
-    logger.debug(f"[ScraperAPI] GET /all-images: url='{url}', render_js={render_js}")
     res = await AdaptiveScraperEngine.extract_all_raw_images(
         url=url.strip(),
         render_js=render_js,
@@ -93,7 +91,6 @@ async def discover_html_dom_endpoint(
     body: ScrapeAllImagesRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    logger.debug(f"[ScraperAPI] POST /discover/html-dom: url='{body.url}'")
     html, _, _ = await HttpFetcher.fetch_html(body.url)
     if not html:
         raise HTTPException(status_code=400, detail="Could not fetch HTML.")
@@ -123,7 +120,6 @@ async def discover_js_state_endpoint(
     body: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    logger.debug(f"[ScraperAPI] POST /discover/javascript-state: url='{body.url}'")
     html, _, _ = await HttpFetcher.fetch_html(body.url)
     if not html:
         raise HTTPException(status_code=400, detail="Could not fetch HTML.")
@@ -152,7 +148,6 @@ async def discover_network_traffic_endpoint(
     body: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    logger.debug(f"[ScraperAPI] POST /discover/network-traffic: url='{body.url}'")
     res = await BrowserFetcher.render_page(body.url, auto_scroll=True)
     net_images = res.get("network_images", []) if res else []
     formatted_images = []

@@ -771,7 +771,7 @@ async def youtube_oauth_callback(
             google_account_email = u_info.get("email")
             logger.info(f"[YouTube OAuth] Authenticated Google email: {google_account_email}")
     except Exception as u_err:
-        logger.debug(f"[YouTube OAuth] Failed to fetch Google email from userinfo: {u_err}")
+        pass
 
     # Save YouTube-specific tokens (attached to verified user_id)
     try:
@@ -806,7 +806,7 @@ async def youtube_oauth_callback(
                     if found:
                         target_ch = found
             except Exception as active_err:
-                logger.debug(f"[YouTube OAuth] Active channel match note: {active_err}")
+                pass
 
             cid = target_ch.get("id")
             title = target_ch.get("title") or "YouTube Channel"
@@ -949,7 +949,7 @@ async def select_youtube_channel(
                 auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urllib.parse.urlencode(params)}"
                 needs_auth = True
     except Exception as e:
-        logger.debug(f"[YouTube Channel Select] Active token check: {e}")
+        pass
 
     return {
         "success": True,
@@ -1015,7 +1015,7 @@ async def generate_youtube_thumbnail_image_route(
         if results and len(results) > 0:
             return {"success": True, "image_url": results[0].image_path}
     except Exception as e:
-        logger.debug(f"[YouTube AI Thumbnail Engine] Local SD engine notice: {e}")
+        pass
 
     return {
         "success": True,

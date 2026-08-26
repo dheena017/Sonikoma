@@ -73,7 +73,7 @@ class BrowserFetcher:
                         try:
                             await page.goto(url, wait_until="domcontentloaded", timeout=6000)
                         except Exception as e:
-                            logger.debug(f"[BrowserFetcher] Navigation exception: {e}")
+                            pass
 
                 # Allow SPA dynamic hydration & API dispatch
                 await asyncio.sleep(1.2)
@@ -110,7 +110,7 @@ class BrowserFetcher:
                             if not clicked_any:
                                 break
                     except Exception as e:
-                        logger.debug(f"[BrowserFetcher] Interactive click warning: {e}")
+                        pass
 
                 # Progressive auto-scrolling for lazy-loaded asset discovery
                 if auto_scroll:
@@ -174,7 +174,7 @@ class BrowserFetcher:
                         }""")
                         await asyncio.sleep(0.8)
                     except Exception as e:
-                        logger.debug(f"[BrowserFetcher] Auto-scroll warning: {e}")
+                        pass
 
                 # Normalize lazy attributes in DOM
                 if not page.is_closed():
@@ -205,7 +205,7 @@ class BrowserFetcher:
                             });
                         }""")
                     except Exception as e:
-                        logger.debug(f"[BrowserFetcher] DOM lazy normalization warning: {e}")
+                        pass
 
                 accumulated_images = []
                 if not page.is_closed():
@@ -240,7 +240,7 @@ class BrowserFetcher:
                 return html, all_combined, storage_data
             except BaseException as e:
                 if "TargetClosedError" not in type(e).__name__ and "closed" not in str(e).lower():
-                    logger.debug(f"[BrowserFetcher] Worker task exception: {e}")
+                    pass
                 return "", [], {}
             finally:
                 try:

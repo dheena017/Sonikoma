@@ -426,7 +426,6 @@ def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]], so
                 bounds = clamped_bounds
 
             if bounds.width < 5 or bounds.height < 5:
-                logger.debug(f"[_crop_panels_server_side] Skipping panel #{idx+1}: bounds too small ({bounds.width}x{bounds.height})")
                 continue
 
             cropped = full_img.crop((bounds.x, bounds.y, bounds.x2, bounds.y2))

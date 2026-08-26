@@ -141,10 +141,6 @@ async def scrape_and_initialize_project(
     start_time = time.time()
     normalized_url = UrlNormalizer.normalize_url(url)
     logger.info(f"[Scraper Service] Processing scrape request: {normalized_url}")
-    logger.debug(
-        f"[Scraper Service] Parameters: project_id={project_id}, job_id={job_id}, "
-        f"scrape_only={scrape_only}, smart_slice={smart_slice}, proxy_images={proxy_images}, limit={limit}"
-    )
 
     result: ChapterResult = await AdaptiveScraperEngine.scrape_url(
         url=normalized_url,
@@ -174,15 +170,10 @@ async def scrape_and_initialize_project(
     final_cover = cover_image or result.series.cover_image or ""
     final_synopsis = synopsis or result.series.description or ""
 
-    logger.debug(
-        f"[Scraper Service] Resolved metadata: title='{final_title}', episode='{final_episode}', "
-        f"author='{final_author}', genre='{final_genre}', cover_image='{final_cover[:50]}...'"
-    )
 
     raw_urls = [img.url for img in result.images]
     canonical = result.source.canonical_url or normalized_url
     proxied_urls = [wrap_proxy_image(u, canonical) for u in raw_urls] if proxy_images else raw_urls
-    logger.debug(f"[Scraper Service] Discovered {len(raw_urls)} image URL(s), canonical='{canonical}'")
 
     final_images = proxied_urls
 
@@ -190,7 +181,6 @@ async def scrape_and_initialize_project(
         # Buffer resolution and stitching
         resolved_buffers_data = []
         if proxied_urls:
-            logger.debug(f"[Scraper Service] Resolving {len(proxied_urls)} image buffers concurrently (concurrency=15)...")
             async with httpx.AsyncClient(follow_redirects=True, timeout=60.0) as client:
                 sem = asyncio.Semaphore(15)
                 async def fetch_item(u):
@@ -204,11 +194,9 @@ async def scrape_and_initialize_project(
                             "data": res["data"],
                             "content_type": res.get("contentType", "image/png")
                         })
-            logger.debug(f"[Scraper Service] Successfully resolved {len(resolved_buffers_data)}/{len(proxied_urls)} image buffers in memory")
 
         if len(resolved_buffers_data) > 1 and not smart_slice:
             try:
-                logger.debug(f"[Scraper Service] Stitching {len(resolved_buffers_data)} image slices vertically...")
                 stitched_bytes = await asyncio.to_thread(
                     img_utils.stitch_images_together, [item["data"] for item in resolved_buffers_data], layout="vertical"
                 )
@@ -221,13 +209,11 @@ async def scrape_and_initialize_project(
                     else:
                         stitched_cache[normalized_url] = {"data": stitched_bytes, "content_type": "image/png"}
                     final_images = [stitched_url]
-                    logger.debug(f"[Scraper Service] Stitching completed: {stitched_url} (size={len(stitched_bytes)} bytes)")
             except Exception as stitch_err:
                 logger.error(f"[Scraper Service] Stitching exception: {stitch_err}")
 
     # Initialize or update project record in database
     active_project_id = project_id or generate_project_id()
-    logger.debug(f"[Scraper Service] Target project ID: {active_project_id}")
     project_payload = {
         "id": active_project_id,
         "project_id": active_project_id,
@@ -250,7 +236,7 @@ async def scrape_and_initialize_project(
         else:
             insert_project(project_payload)
     except Exception as db_err:
-        logger.debug(f"[Scraper Service] Database save notice: {db_err}")
+        pass
 
     elapsed_ms = (time.time() - start_time) * 1000.0
 

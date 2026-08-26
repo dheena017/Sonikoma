@@ -70,7 +70,7 @@ async def merge_images_service(
             timeout=2.0
         )
     except Exception as se:
-        logger.debug(f"[merge_images_service] Supabase upload skipped or timed out: {se}")
+        pass
 
     new_url = supabase_url if supabase_url else cached_url
     return {"success": True, "url": new_url}

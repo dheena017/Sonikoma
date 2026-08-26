@@ -140,7 +140,6 @@ class InkrAdapter(BaseSiteAdapter):
                 "total_chapters": len(chapters)
             }
         except Exception as e:
-            logger.debug(f"[InkrAdapter] discover_series failed: {e}")
             return None
 
 
@@ -230,7 +229,7 @@ class InkrAdapter(BaseSiteAdapter):
                 if chapter_title:
                     context.chapter_info.title = chapter_title
             except Exception as e:
-                logger.debug(f"[InkrAdapter] Metadata parsing non-critical error: {e}")
+                pass
 
         validated = [
             ImageItem(

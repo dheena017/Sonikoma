@@ -210,7 +210,7 @@ def detect_character_entities(
                     ))
                     char_counter += 1
         except Exception as e:
-            logger.debug(f"[Character Detector] Haar cascade fallback: {e}")
+            pass
 
     # ── Tier 3: Adaptive Saliency / Foreground Contours Fallback ──────────────
     if not characters:
@@ -248,7 +248,7 @@ def detect_character_entities(
                         if len(characters) >= 12:
                             break
         except Exception as e:
-            logger.debug(f"[Character Detector] Saliency fallback error: {e}")
+            pass
 
     # ── Deduplicate overlapping character boxes ────────────────────────────────
     if characters:

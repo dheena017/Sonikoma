@@ -82,7 +82,7 @@ class MangaDexAdapter(BaseSiteAdapter):
                                 manga_id = rel.get("id")
                                 break
                 except Exception as e:
-                    logger.debug(f"[MangaDexAdapter] Failed to resolve parent manga UUID: {e}")
+                    pass
 
             # 1. Fetch Manga Details (Title, Cover Art, Authors, Synopsis)
             try:

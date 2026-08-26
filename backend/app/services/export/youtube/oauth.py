@@ -89,10 +89,9 @@ async def get_authenticated_service(user_id: Optional[str] = None, allow_interac
                     from google.oauth2.credentials import Credentials
                     creds = Credentials(token=user.get("google_access_token"))
                     youtube = _build_youtube_client(creds)
-                    logger.debug(f"Attempting fallback to Google session token for user {user_id}")
                     return youtube
             except Exception as token_err:
-                logger.debug(f"Google session token auth note: {token_err}")
+                pass
 
         custom_secrets = None
         if user_id:
@@ -408,7 +407,7 @@ async def fetch_user_youtube_channels(user_id: Optional[str] = None) -> list[dic
                         "is_selected": 1,
                     }
         except Exception as db_err:
-            logger.debug(f"[YouTube Channels] Error reading saved channels from DB: {db_err}")
+            pass
 
     # ── Step 1: Query live YouTube API for the currently authorized account ───
     try:
@@ -463,7 +462,7 @@ async def fetch_user_youtube_channels(user_id: Optional[str] = None) -> list[dic
                             from repositories.youtube import save_user_youtube_channel
                             save_user_youtube_channel(user_id, norm_ch)
                         except Exception as save_err:
-                            logger.debug(f"[YouTube Channels] Failed to save channel {cid}: {save_err}")
+                            pass
         except Exception as e_mine:
             logger.warning(f"[YouTube Channels] Warning querying mine=true channels: {e_mine}")
 
@@ -501,7 +500,7 @@ async def fetch_user_youtube_channels(user_id: Optional[str] = None) -> list[dic
                             channel_map[cid]["view_count"] = f"{int(view_count):,}"
                         channel_map[cid]["video_count"] = str(stats.get("videoCount", channel_map[cid].get("video_count", "0")))
             except Exception as batch_err:
-                logger.debug(f"[YouTube Channels] Batch stats refresh note: {batch_err}")
+                pass
 
     except Exception as e:
         logger.warning(f"[YouTube Channels] Could not connect to YouTube service: {e}")
@@ -595,7 +594,7 @@ async def lookup_youtube_channel_by_handle(user_id: Optional[str], query: str) -
                     save_user_youtube_channel(user_id, norm_ch)
                 return norm_ch
         except Exception as handle_err:
-            logger.debug(f"[YouTube Channels] Handle lookup '{handle_str}' note: {handle_err}")
+            pass
 
         # 3. Try by username
         username_str = clean_q.lstrip("@")
@@ -628,7 +627,7 @@ async def lookup_youtube_channel_by_handle(user_id: Optional[str], query: str) -
                     save_user_youtube_channel(user_id, norm_ch)
                 return norm_ch
         except Exception as un_err:
-            logger.debug(f"[YouTube Channels] Username lookup '{username_str}' note: {un_err}")
+            pass
 
         # 4. Try API Search by Channel Name/Topic
         try:
@@ -666,7 +665,7 @@ async def lookup_youtube_channel_by_handle(user_id: Optional[str], query: str) -
                             save_user_youtube_channel(user_id, norm_ch)
                         return norm_ch
         except Exception as search_err:
-            logger.debug(f"[YouTube Channels] API Search error for '{clean_q}': {search_err}")
+            pass
 
         return None
 
@@ -675,7 +674,7 @@ async def lookup_youtube_channel_by_handle(user_id: Optional[str], query: str) -
         if api_result:
             return api_result
     except Exception as e:
-        logger.debug(f"[YouTube Channels] API Lookup note for '{clean_q}': {e}. Using fast public lookup...")
+        pass
 
     # 5. Fallback: Parse public YouTube channel page
     try:
@@ -727,7 +726,7 @@ async def lookup_youtube_channel_by_handle(user_id: Optional[str], query: str) -
             logger.info(f"[YouTube Channels] Successfully resolved public channel '{resolved_title}' ({resolved_id})")
             return norm_ch
     except Exception as fallback_err:
-        logger.debug(f"[YouTube Channels] Direct page lookup note for '{clean_q}': {fallback_err}")
+        pass
 
     # 6. Fallback: Search YouTube public search results for channel name
     try:

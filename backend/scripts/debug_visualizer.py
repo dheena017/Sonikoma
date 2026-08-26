@@ -89,7 +89,6 @@ def _extract_box_coords(obj: Union[Dict[str, Any], Any]) -> Tuple[int, int, int,
         h = int(raw_h) if raw_h is not None else 0
         return x, y, w, h
     except (ValueError, TypeError, AttributeError) as e:
-        logger.debug(f"[DebugViz] Failed to extract box coordinates: {e}")
         return 0, 0, 0, 0
 
 
@@ -217,10 +216,9 @@ def draw_yolo_detections(image_path: str, conf_threshold: float = 0.25,
                             np.array(colors.mask_fill, dtype=np.uint8), config.mask_alpha, 0
                         )
                     except Exception as e:
-                        logger.debug(f"[DebugViz] Error processing individual mask: {e}")
                         continue
             except Exception as e:
-                logger.debug(f"[DebugViz] Error drawing masks: {e}")
+                pass
 
         frame = cv2.addWeighted(overlay, config.mask_alpha, frame, 1 - config.mask_alpha, 0)
 
@@ -243,7 +241,6 @@ def draw_yolo_detections(image_path: str, conf_threshold: float = 0.25,
                                          text_color=colors.label_fg, bg_color=colors.label_bg,
                                          thickness=config.box_thickness)
                     except Exception as e:
-                        logger.debug(f"[DebugViz] Error drawing box {i}: {e}")
                         continue
             except TypeError as e:
                 logger.warning(f"[DebugViz] Cannot iterate over boxes: {e}")
@@ -492,7 +489,6 @@ def _generate_separator_heatmap(frame: np.ndarray, separator_scores: Optional[np
         cv2.imwrite(p02, heatmap_frame)
         return p02
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating separator heatmap: {e}")
         return None
 
 
@@ -511,7 +507,6 @@ def _generate_separator_rows(frame: np.ndarray, separator_bands: Optional[List[i
         cv2.imwrite(p03, sep_frame)
         return p03
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating separator rows: {e}")
         return None
 
 
@@ -533,7 +528,6 @@ def _generate_candidate_boxes(frame: np.ndarray, candidates: List[Any],
         cv2.imwrite(p04, cand_frame)
         return p04
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating candidate boxes: {e}")
         return None
 
 
@@ -555,7 +549,6 @@ def _generate_merged_boxes(frame: np.ndarray, merged: List[Any],
         cv2.imwrite(p05, merge_frame)
         return p05
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating merged boxes: {e}")
         return None
 
 
@@ -579,7 +572,6 @@ def _generate_split_boxes(frame: np.ndarray, panel_bounds: List[Any],
         cv2.imwrite(p06, split_frame)
         return p06
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating split boxes: {e}")
         return None
 
 
@@ -607,7 +599,6 @@ def _generate_final_boxes(frame: np.ndarray, panel_bounds: List[Any],
         cv2.imwrite(p07, final_frame)
         return p07
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating final boxes: {e}")
         return None
 
 
@@ -651,7 +642,6 @@ def _generate_crop_preview(pil_img: Image.Image, panel_bounds: List[Any],
         grid_img.save(p08)
         return p08
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating crop preview: {e}")
         return None
 
 
@@ -716,7 +706,6 @@ def _generate_pipeline_summary(panel_bounds: List[Any], w: int, h: int,
             json.dump(summary_data, f, indent=2, default=str)
         return p09
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating pipeline summary: {e}")
         return None
 
 
@@ -753,7 +742,6 @@ def _generate_panel_lineage(panel_bounds: List[Any],
             json.dump(lineage_data, f, indent=2, default=str)
         return p10
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating panel lineage: {e}")
         return None
 
 
@@ -808,7 +796,6 @@ def _generate_characters_overlay(frame: np.ndarray, characters: Optional[List[An
         cv2.imwrite(p11, char_frame)
         return p11
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating characters overlay: {e}")
         return None
 
 
@@ -851,7 +838,6 @@ def _generate_dialogue_ocr_overlay(frame: np.ndarray, speech_bubbles: List[Any],
         cv2.imwrite(p12, ocr_frame)
         return p12
     except Exception as e:
-        logger.debug(f"[DebugViz] Error generating dialogue OCR overlay: {e}")
         return None
 
 
@@ -1028,7 +1014,7 @@ def main():
                 if hasattr(webtoon_res, "separator_bands"):
                     separator_bands = webtoon_res.separator_bands
             except Exception as e:
-                logger.debug(f"[DebugViz] Separator calculation: {e}")
+                pass
 
         print(f"  ✓ Detected {len(panels)} comic panels.")
 

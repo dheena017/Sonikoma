@@ -69,7 +69,6 @@ def check_and_trigger_training() -> bool:
     # 1. Check if training is already active
     lock_file = os.path.join(TRAINING_DATA_DIR, "training.lock")
     if status.to_dict()["is_training"] or os.path.exists(lock_file):
-        logger.debug("[Monitor] Training is currently running or locked. Skipping check.")
         return False
 
     # 2. Get current sample count and last trained count
@@ -85,9 +84,9 @@ def check_and_trigger_training() -> bool:
 
     new_samples = current_count - last_trained
     if new_samples > 0:
-        logger.debug(f"[Monitor] Current samples: {current_count}, Last trained at: {last_trained}, New samples: {new_samples}/20")
+        pass
     else:
-        logger.debug(f"[Monitor] Current samples: {current_count}, Last trained at: {last_trained}, New samples: 0/20")
+        pass
 
     if new_samples >= 20:
         logger.info(f"[Monitor] Reached threshold of {new_samples} new samples! Triggering automatic YOLO fine-tuning.")

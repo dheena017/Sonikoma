@@ -88,7 +88,6 @@ class DomainRateLimiter:
 
         if elapsed < min_delay:
             wait_time = min_delay - elapsed
-            logger.debug(f"[DomainRateLimiter] Pacing request for domain '{domain}': waiting {wait_time:.3f}s (min_delay={min_delay:.2f}s)")
             await asyncio.sleep(wait_time)
 
         self._last_request_times[domain] = time.time()

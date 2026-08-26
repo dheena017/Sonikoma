@@ -58,7 +58,6 @@ class AdaptiveScraperEngine:
         """
         start_time = time.time()
         normalized_url = UrlNormalizer.normalize_url(url)
-        logger.debug(f"[AdaptiveScraperEngine] scrape_url called with raw url='{url}', normalized='{normalized_url}', bypass_cache={bypass_cache}, limit={limit}")
 
         if not normalized_url:
             logger.warning(f"[AdaptiveScraperEngine] Failed to normalize URL: '{url}'")
@@ -120,7 +119,6 @@ class AdaptiveScraperEngine:
 
         # Step 3: Analyze site and create initial execution context
         source_info = SiteAnalyzer.analyze(normalized_url)
-        logger.debug(f"[AdaptiveScraperEngine] Site analysis: domain={source_info.domain}, site_type={source_info.site_type}, canonical={source_info.canonical_url}")
         context = ScrapeContext(
             url=url,
             normalized_url=normalized_url,
@@ -135,12 +133,10 @@ class AdaptiveScraperEngine:
         # Step 4: Resolve matching adapter
         adapter = AdapterRegistry.get_adapter(source_info)
         logger.info(f"[AdaptiveScraperEngine] Dispatching {normalized_url} to adapter: {adapter.__class__.__name__}")
-        logger.debug(f"[AdaptiveScraperEngine] Adapter configuration details: {adapter}")
 
         # Step 5: Execute scrape workflow
         try:
             res = await adapter.scrape(context)
-            logger.debug(f"[AdaptiveScraperEngine] Adapter returned: success={res.success}, total_images={len(res.images) if res.images else 0}, completeness={res.completeness}")
             return res
         except Exception as e:
             logger.error(f"[AdaptiveScraperEngine] Unexpected scraper execution failure: {e}", exc_info=True)
@@ -233,7 +229,7 @@ class AdaptiveScraperEngine:
                                 source_type="network_intercepted"
                             ))
             except Exception as e:
-                logger.debug(f"[extract_all_raw_images] Browser render warning: {e}")
+                pass
 
         # Strategy 3: Sweep DOM HTML for all images
         soup = DomExtractor.get_soup(rendered_html)

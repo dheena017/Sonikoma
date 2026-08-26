@@ -306,7 +306,6 @@ class UnifiedJobManager:
 
         # Protect terminal states
         if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
-            logger.debug(f"[JobManager] Ignoring progress update for terminal job {job_id} ({job.status})")
             return job
 
         new_progress = max(0.0, min(100.0, progress))
@@ -333,10 +332,8 @@ class UnifiedJobManager:
             )
             conn.commit()
             if cursor.rowcount == 0:
-                logger.debug(f"[JobManager] update_progress skipped for job {job_id} (already terminal)")
                 return self.get_job(job_id)
 
-        logger.debug(f"[JobManager] Job {job_id} progress: {new_progress:.1f}% | stage={new_stage}")
         return self.get_job(job_id)
 
     def complete_job(self, job_id: str, result: Any = None) -> Optional[JobRecord]:
@@ -346,7 +343,6 @@ class UnifiedJobManager:
             return None
 
         if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
-            logger.debug(f"[JobManager] Ignoring complete call for terminal job {job_id} ({job.status})")
             return job
 
         now = datetime.datetime.now().isoformat()
@@ -370,7 +366,6 @@ class UnifiedJobManager:
             )
             conn.commit()
             if cursor.rowcount == 0:
-                logger.debug(f"[JobManager] complete_job skipped for job {job_id} (already terminal)")
                 return self.get_job(job_id)
 
         logger.info(f"[JobManager] Job {job_id} COMPLETED successfully")
@@ -390,7 +385,6 @@ class UnifiedJobManager:
             return None
 
         if job.status in (JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED):
-            logger.debug(f"[JobManager] Ignoring fail call for terminal job {job_id} ({job.status})")
             return job
 
         # Fallback / compatibility handling if error keyword or dict was passed

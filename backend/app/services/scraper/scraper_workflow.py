@@ -56,7 +56,7 @@ def _ensure_chapters_table():
             conn.execute("CREATE INDEX IF NOT EXISTS idx_series_ch_url ON series_chapters_cache(series_url)")
             conn.commit()
     except Exception as e:
-        logger.debug(f"[SeriesChapterCache] DB Init notice: {e}")
+        pass
 
 
 def _ensure_episodes_table():
@@ -112,7 +112,7 @@ def _get_cached_chapters(series_url: str, ttl_seconds: float = 3600.0) -> Option
             except Exception:
                 pass
     except Exception as e:
-        logger.debug(f"[SeriesChapterCache] Read notice: {e}")
+        pass
     return None
 
 
@@ -143,7 +143,7 @@ def _save_cached_chapters(series_url: str, title: str, result_dict: Dict[str, An
             """, (clean_url, title, data_json, total, now))
             conn.commit()
     except Exception as e:
-        logger.debug(f"[SeriesChapterCache] Write notice: {e}")
+        pass
 
 
 def _save_cached_episodes(series_url: str, title: str, result_dict: Dict[str, Any]):
@@ -200,16 +200,14 @@ async def scrape_series_chapters(
             cached = _get_cached_episodes(raw_input)
             cached_chapters = cached.get("chapters") or cached.get("episodes", []) if cached else []
             if cached and cached.get("success") and len(cached_chapters) > 0:
-                logger.debug(f"[Workflow] Cache HIT for '{raw_input}': returning {len(cached_chapters)} cached chapters")
                 return cached
             else:
-                logger.debug(f"[Workflow] Cache MISS for '{raw_input}' (bypass_cache={bypass_cache})")
+                pass
 
         # 1. Analyze site domain & resolve matching adapter
         source_info = SiteAnalyzer.analyze(raw_input)
         adapter = AdapterRegistry.get_adapter(source_info)
         logger.info(f"[Workflow] Dispatching series discovery for {raw_input} to: {adapter.__class__.__name__}")
-        logger.debug(f"[Workflow] Domain: '{source_info.domain}', Platform: '{getattr(source_info, 'platform', 'generic')}'")
 
         # 2. Execute adapter-specific series discovery
         result = await adapter.discover_series(
@@ -231,7 +229,6 @@ async def scrape_series_chapters(
 
         if result and result.get("success"):
             chapter_count = len(result.get("chapters") or result.get("episodes") or [])
-            logger.debug(f"[Workflow] Discovery succeeded: got {chapter_count} chapters from adapter for '{raw_input}'")
             series_dict = result.get("series", {}) or {}
             cover_img = series_dict.get("cover_image") or result.get("cover_image") or ""
             series_title = series_dict.get("title") or result.get("title") or result.get("series_title") or "Comic Series"

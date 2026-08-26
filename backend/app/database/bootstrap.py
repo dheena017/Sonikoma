@@ -65,12 +65,10 @@ def init_db() -> None:
             migrator.init_postgres(conn)
             logger.info("[Database] PostgreSQL ready [OK]")
         else:
-            logger.debug(f"[Database] Opening local SQLite database at: {config.DB_PATH}")
             os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
             os.makedirs(config.DB_DIR, exist_ok=True)
             conn = _create_db_connection()
             migrator.init_sqlite(conn)
-            logger.debug("[Database] SQLite database ready [OK]")
     except Exception as e:
         logger.error(f"[Database] Error during database initialization: {e}")
         with _db_init_lock:

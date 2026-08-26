@@ -105,11 +105,6 @@ async def detect_image_layout_type(url: Optional[str] = None, image_base64: Opti
         edge_complexity = "medium"
         optimal_canny = {"low": 20, "high": 100}
 
-    logger.debug(
-        f"[DEBUG:DetectType] Input Image: {width}x{height}px | Aspect: {aspect_ratio:.3f} | "
-        f"Corner Brightness: {corner_brightness:.1f} (BG: {detected_bg_color}) | "
-        f"Gutter Transitions: {estimated_valleys} | Edge Energy: {edge_energy:.2f} (Complexity: {edge_complexity})"
-    )
 
     # ── 5. Layer 5: Classification & Reading Flow Decision Tree ──────────────
     
@@ -181,7 +176,6 @@ async def detect_image_layout_type(url: Optional[str] = None, image_base64: Opti
 
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
     logger.info(f"[DetectType] Classified as '{crop_type.value}' ({width}x{height}px, ratio {aspect_ratio:.2f}) in {elapsed_ms}ms")
-    logger.debug(f"[DEBUG:DetectType] Output Result: {crop_type.value} | Strategy: {suggested_strategy} | Canny: {optimal_canny} | Conf: {confidence:.2f}")
 
     return DetectTypeResponse(
         success=True,

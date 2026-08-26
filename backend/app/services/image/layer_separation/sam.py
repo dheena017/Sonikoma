@@ -36,7 +36,6 @@ def get_rembg_session():
                 "rembg/onnxruntime is not installed. Character segmentation will return a blank layer."
             )
             return None
-        logger.debug("Initializing rembg session (U-2-Net)")
         try:
             import torch
             use_gpu = torch.cuda.is_available()

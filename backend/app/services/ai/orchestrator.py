@@ -326,7 +326,6 @@ class AIOrchestrator:
                 return False, required_credits, f"Insufficient credits: need {required_credits}, available {available}"
             return True, required_credits, None
         except Exception as e:
-            logger.debug(f"[AI Orchestrator] Credit check notice for user '{user_id}': {e}")
             return True, required_credits, None
 
     @classmethod
@@ -381,7 +380,7 @@ class AIOrchestrator:
             conn.commit()
             conn.close()
         except Exception as e:
-            logger.debug(f"[AI Orchestrator] Ledger insert notice: {e}")
+            pass
 
         # Update in-memory rate limiter usage
         cls.get_rate_limiter().record_usage(provider, model, user_id, total_tokens)
@@ -473,10 +472,6 @@ class AIOrchestrator:
                     if (cp_provider, cp_model) not in candidates:
                         candidates.append((cp_provider, cp_model))
 
-        logger.debug(
-            f"[AI Orchestrator] Execution plan for cap='{cap_clean}': mode={'manual' if model else 'system'}, "
-            f"candidates={candidates}, policy={policy}"
-        )
 
         last_error = None
         attempt = 0
@@ -485,10 +480,8 @@ class AIOrchestrator:
         # 3. Execution Loop across validated candidates
         for p_cand, m_cand in candidates:
             attempt += 1
-            logger.debug(f"[AI Orchestrator] Attempt #{attempt}: evaluating candidate provider='{p_cand}', model='{m_cand}'")
             # Verify provider credentials
             if not cls.is_provider_configured(p_cand, user_keys):
-                logger.debug(f"[AI Orchestrator] Provider '{p_cand}' unconfigured. Skipping candidate '{m_cand}'.")
                 continue
 
             # Verify rate limits

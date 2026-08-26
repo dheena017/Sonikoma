@@ -37,7 +37,6 @@ async def separate_url_post(
 ):
     if not payload.url or not payload.url.strip():
         raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
-    logger.debug(f"[ScraperAPI] POST /separate-url: target='{payload.url}'")
     result = UniversalUrlSeparator.separate(payload.url)
     return SeparateUrlResponse(**result)
 
@@ -53,7 +52,6 @@ async def separate_url_get(
 ):
     if not url or not url.strip():
         raise HTTPException(status_code=400, detail="Target URL parameter 'url' cannot be empty.")
-    logger.debug(f"[ScraperAPI] GET /separate-url: target='{url}'")
     result = UniversalUrlSeparator.separate(url)
     return SeparateUrlResponse(**result)
 
@@ -67,7 +65,6 @@ async def normalize_url_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    logger.debug(f"[ScraperAPI] POST /normalize-url: target='{payload.url}'")
     normalized = UrlNormalizer.normalize_url(payload.url)
     return {"original_url": payload.url, "normalized_url": normalized}
 
@@ -80,7 +77,6 @@ async def resolve_parent_series_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    logger.debug(f"[ScraperAPI] POST /parent-series-url: target='{payload.url}'")
     parent = UrlNormalizer.resolve_parent_series_url(payload.url)
     return {"chapter_url": payload.url, "parent_series_url": parent}
 
@@ -93,7 +89,6 @@ async def detect_platform_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    logger.debug(f"[ScraperAPI] POST /detect-platform: target='{payload.url}'")
     source_info = SiteAnalyzer.analyze(payload.url)
     adapter = AdapterRegistry.get_adapter(source_info)
     sep_data = UniversalUrlSeparator.separate(payload.url)

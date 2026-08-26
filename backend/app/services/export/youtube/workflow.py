@@ -48,7 +48,7 @@ async def execute_youtube_upload_workflow(
                     selected_title = (selected_ch.get("title") if selected_ch else None) or token_title
                     logger.info(f"[YouTube Upload] Publishing to channel '{token_title}' ({token_cid}) | Selected: '{selected_title}'")
             except Exception as guard_err:
-                logger.debug(f"[YouTube Upload] Target channel note: {guard_err}")
+                pass
 
         # Step 2: Format Metadata
         request_body = format_video_metadata(

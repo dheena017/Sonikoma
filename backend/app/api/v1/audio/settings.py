@@ -140,7 +140,7 @@ async def update_audio_settings_endpoint(
             prefs["audio_settings"] = body.model_dump()
             update_user(current_user["user_id"], {"preferences": json.dumps(prefs)})
         except Exception as err:
-            logger.debug(f"[AudioSettings] Could not persist to user profile: {err}")
+            pass
 
     return _global_audio_settings
 

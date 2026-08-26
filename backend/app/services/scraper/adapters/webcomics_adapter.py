@@ -396,10 +396,6 @@ class WebComicsAdapter(BaseSiteAdapter):
             except ValueError:
                 pass
 
-        logger.debug(
-            f"[WebComicsAdapter] Parsed URL — slug={slug!r}, genre={genre!r}, "
-            f"chapter={chapter_str!r}, comic_id={comic_id!r}"
-        )
 
     def _build_headers(self, context: ScrapeContext, url: str) -> dict:
         """Builds request headers with the required Referer for WebComics CDN images."""

@@ -156,7 +156,6 @@ def adjust_to_aspect_ratio(
         h_box = new_h
         y = new_y
         
-    logger.debug(f"[AutoCrop Aspect] Adjusted to '{aspect_ratio_str}': ({orig_x},{orig_y},{orig_w}x{orig_h}) -> ({x},{y},{w_box}x{h_box})")
     return x, y, w_box, h_box
 
 

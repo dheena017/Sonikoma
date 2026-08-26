@@ -1217,7 +1217,7 @@ async def get_models_breakdown(
         for r in rows:
             model_totals[r["model_id"]] = dict(r)
     except Exception as e:
-        logger.debug(f"Failed to query model totals: {e}")
+        pass
     finally:
         conn.close()
 

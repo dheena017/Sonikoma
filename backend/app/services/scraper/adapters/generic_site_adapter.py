@@ -324,7 +324,6 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
             ep["episode_no"] = ch_num
 
         sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
-        logger.debug(f"[GenericAdaptiveAdapter] Discovery complete for '{series_title}': found {len(sorted_eps)} chapters")
 
         description = (series_info.description if series_info else "") or ""
         author = (series_info.author if series_info else "") or ""
@@ -696,7 +695,7 @@ class GenericAdaptiveAdapter(BaseSiteAdapter):
                             context.candidate_images.append(cand)
                         context.selected_reader = best_reader
                 except Exception as e:
-                    logger.debug(f"[GenericAdaptiveAdapter] Reader container extraction error: {e}")
+                    pass
 
             # Strategy B: Universal DOM Candidate sweep
             if not context.candidate_images and soup:

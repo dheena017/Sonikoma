@@ -77,7 +77,7 @@ class ScraperCacheManager:
                 conn.commit()
                 cls._initialized = True
         except Exception as e:
-            logger.debug(f"[ScraperCacheManager] DB init notice: {e}")
+            pass
 
     @classmethod
     def generate_fingerprint(cls, url: str) -> str:
@@ -166,7 +166,7 @@ class ScraperCacheManager:
                         logger.info(f"[ScraperCacheManager] L5 Idempotency Cache HIT (SQLite) for {canonical_url}")
                         return ChapterResult(**res_dict)
             except Exception as e:
-                logger.debug(f"[ScraperCacheManager] L5 DB read error: {e}")
+                pass
 
         # Memory fallback
         if k in cls._mem_l5:
@@ -206,7 +206,7 @@ class ScraperCacheManager:
                     """, (k, canonical_url, res_json, expires))
                     conn.commit()
             except Exception as e:
-                logger.debug(f"[ScraperCacheManager] L5 DB write error: {e}")
+                pass
 
     # ── Session & Incremental Discovery ──────────────────────────────────────
     @classmethod
@@ -225,7 +225,7 @@ class ScraperCacheManager:
             try:
                 previous_session = get_latest_scrape_session(canonical_url)
             except Exception as e:
-                logger.debug(f"[ScraperCacheManager] Session check warning: {e}")
+                pass
 
         if not previous_session:
             for img in current_images:
@@ -250,7 +250,7 @@ class ScraperCacheManager:
             try:
                 save_scrape_session(canonical_url, urls)
             except Exception as e:
-                logger.debug(f"[ScraperCacheManager] Save scrape session warning: {e}")
+                pass
 
     # ── In-Memory Fast Cache Clearing & Session Operations ──────────────────
     @classmethod

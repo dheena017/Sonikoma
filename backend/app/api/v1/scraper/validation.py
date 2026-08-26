@@ -41,12 +41,10 @@ async def validate_images_endpoint(
     pixels, and images below minimum dimension thresholds. Returns accepted
     images plus a rejection report.
     """
-    logger.debug(f"[ScraperAPI] POST /validate-images: {len(body.images)} candidates (filter_banners={body.filter_banners})")
     accepted, rejections = ImageValidator.validate_candidates(
         candidates=body.images,  # type: ignore
         filter_banners=body.filter_banners
     )
-    logger.debug(f"[ScraperAPI] Validation: {len(accepted)} accepted, {len(rejections)} rejected")
     return ValidateImagesResponse(
         success=True,
         valid_count=len(accepted),
@@ -69,7 +67,6 @@ async def sort_images_endpoint(
     Applies natural sort ordering to a list of comic panel image URLs,
     re-indexing them into the correct top-to-bottom reading sequence.
     """
-    logger.debug(f"[ScraperAPI] POST /sort-images: sorting {len(body.images)} images")
     sorted_imgs = OrderResolver.resolve_order(body.images)
     return SortImagesResponse(
         success=True,

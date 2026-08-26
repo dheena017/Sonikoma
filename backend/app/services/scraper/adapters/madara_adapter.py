@@ -199,7 +199,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                         if episodes:
                             break
                 except Exception as e:
-                    logger.debug(f"[MadaraCmsAdapter] AJAX endpoint failed: {e}")
+                    pass
 
         # Fallback to Browser-Authenticated AJAX / DOM if static httpx yielded 0
         if not episodes:
@@ -267,7 +267,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
                             "cover_image": ep_cover or cover_image,
                         })
             except Exception as ex:
-                logger.debug(f"[MadaraCmsAdapter] Browser AJAX evaluation failed: {ex}")
+                pass
 
         # Fallback to Static DOM Chapters if AJAX yielded 0
         if not episodes and soup:

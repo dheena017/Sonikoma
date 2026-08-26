@@ -31,7 +31,6 @@ def upload_to_supabase_bucket(
     """
     node_env = os.getenv("NODE_ENV", "development").lower()
     if node_env != "production":
-        logger.debug(f"Non-production environment ({node_env}): Bypassing Supabase upload for {filename}.")
         return None
 
     if not HAS_SUPABASE:
@@ -45,7 +44,6 @@ def upload_to_supabase_bucket(
             from database.supabase import supabase
 
         if not supabase:
-            logger.debug(f"Supabase client not initialized, bypassing upload to {bucket_name}.")
             return None
         
         # Upload using the bytes payload

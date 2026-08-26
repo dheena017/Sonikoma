@@ -279,7 +279,7 @@ def init_sqlite(conn) -> None:
             else:
                 logger.warning("[Database] schema.sql not found — skipping schema apply.")
         else:
-            logger.debug("[Database] Relational database schema is already initialized.")
+            pass
 
         # ── Column migrations ─────────────────────────────────────────────
         _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN synopsis TEXT",
@@ -342,7 +342,6 @@ def init_sqlite(conn) -> None:
                 "CREATE INDEX IF NOT EXISTS idx_token_logs_created_at ON token_usage_logs(created_at)"
             )
             conn.commit()
-            logger.debug("[Database] Migration: verified token_usage_logs table.")
         except Exception:
             logger.error("[Database] Failed to verify token_usage_logs table.")
 
@@ -397,7 +396,6 @@ def init_sqlite(conn) -> None:
               updated_at          TEXT    NOT NULL DEFAULT (datetime('now')),
               FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )""")
-            logger.debug("[Database] SQLite YouTube tables and credentials checked.")
         except Exception as e:
             logger.error(f"[Database] Error checking SQLite YouTube schema: {e}")
 
@@ -516,7 +514,6 @@ def init_sqlite(conn) -> None:
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_user_yt_channels_user ON user_youtube_channels(user_id)"
         )
-        logger.debug("[Database] Migration: verified youtube_oauth_tokens and user_youtube_channels tables.")
 
         # ── credit_transactions table ─────────────────────────────────────
         cursor.execute("""
@@ -556,7 +553,6 @@ def init_sqlite(conn) -> None:
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_project_id ON jobs(project_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
-        logger.debug("[Database] Migration: verified jobs table.")
 
         conn.commit()
 
@@ -575,6 +571,5 @@ def _run_safe_alter(cursor, conn, sql: str, description: str) -> None:
     try:
         cursor.execute(sql)
         conn.commit()
-        logger.debug(f"[Database] Migration: {description}.")
     except Exception:
         pass  # column/index already exists

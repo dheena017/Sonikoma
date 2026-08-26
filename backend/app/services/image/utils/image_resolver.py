@@ -211,7 +211,6 @@ async def resolve_url_to_buffer(
                 async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as local_client:
                     return await _fetch_local(local_client)
         except Exception as local_err:
-            logger.debug(f"[ImageResolver] Local fetch attempt failed for '{local_url}': {local_err}")
             # If it wasn't a relative path and had no scheme, maybe continue to remote or raise
             if not working_url.startswith('/'):
                 working_url = f"https://{working_url}"
@@ -300,7 +299,7 @@ async def resolve_url_to_buffer(
                                     mime = res.headers.get("Content-Type", "image/webp")
                                     return {"data": res.content, "content_type": mime, "contentType": mime}
                                 elif res.status_code == 403:
-                                    logger.debug(f"[ImageResolver] curl_cffi({profile}) 403 with referer={ref!r} for {working_url[:60]}")
+                                    pass
                             except Exception as ce:
                                 last_err = ce
                 except Exception as e:

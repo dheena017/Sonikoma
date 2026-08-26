@@ -345,7 +345,6 @@ def get_user_youtube_channels(user_id: str) -> List[Dict[str, Any]]:
         """, (user_id,)).fetchall()
         return [dict(r) for r in rows]
     except Exception as e:
-        logger.debug(f"Error querying user_youtube_channels: {e}")
         return []
     finally:
         conn.close()

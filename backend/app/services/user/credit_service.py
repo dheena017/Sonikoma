@@ -74,7 +74,6 @@ def record_credit_transaction(user_id: str, amount: int, feature_name: str) -> i
         tx_id = str(uuid.uuid4())
         conn.execute("INSERT INTO credit_transactions (id, user_id, amount, feature_name) VALUES (?, ?, ?, ?)", (tx_id, user_id, amount, feature_name))
         conn.commit()
-        logger.debug("[Credits] user=%s amount=%+d feature=%s new_balance=%s", user_id, amount, feature_name, new_balance)
         return new_balance
     except Exception:
         try:

@@ -48,7 +48,7 @@ def extract_text_from_image_bytes(image_bytes: bytes, languages: List[str] = ["e
                 if lines:
                     return " ".join(lines)
     except Exception as e:
-        logger.debug(f"[OCR Service] EasyOCR quick pass: {e}")
+        pass
 
     # Fallback to Tesseract
     try:

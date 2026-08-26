@@ -127,7 +127,6 @@ class BrowserPool:
         executes the task, and ensures context destruction afterwards.
         """
         sem = self._get_semaphore()
-        logger.debug(f"[BrowserPool] Waiting for available worker slot (Active: {self._active_jobs}/{self.max_workers})")
 
         async with sem:
             self._active_jobs += 1
@@ -165,11 +164,10 @@ class BrowserPool:
                 )
                 return result
             except (asyncio.TimeoutError, asyncio.CancelledError):
-                logger.debug(f"[BrowserPool] Task timed out or was cancelled after {timeout_seconds}s")
                 return "", [], {}
             except Exception as e:
                 if "TargetClosedError" not in type(e).__name__ and "closed" not in str(e).lower():
-                    logger.debug(f"[BrowserPool] Worker task error: {e}")
+                    pass
                 return "", [], {}
             finally:
                 self._active_jobs = max(0, self._active_jobs - 1)

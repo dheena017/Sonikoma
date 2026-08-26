@@ -133,14 +133,12 @@ class HttpFetcher:
 
         for attempt in range(1, retries + 1):
             client_type = clients[(attempt - 1) % len(clients)]
-            logger.debug(f"[HttpFetcher] Attempt {attempt}/{retries} fetching '{url}' using {client_type}")
             try:
                 if client_type == "httpx" and httpx is not None:
                     async with httpx.AsyncClient(follow_redirects=True, timeout=timeout) as client:
                         resp = await client.get(url, headers=final_headers)
                         duration_ms = (time.time() - start_time) * 1000.0
                         ScraperDiagnosticsLogger.log_fetch("http_get", resp.status_code, duration_ms, "httpx")
-                        logger.debug(f"[HttpFetcher] httpx response: status={resp.status_code}, duration={duration_ms:.1f}ms, size={len(resp.content)} bytes")
                         if resp.status_code == 200:
                             return resp.text, resp.status_code, duration_ms
                         elif resp.status_code in (403, 429):
@@ -152,7 +150,6 @@ class HttpFetcher:
                         async with session.get(url, timeout=aiohttp.ClientTimeout(total=timeout), allow_redirects=True) as resp:
                             duration_ms = (time.time() - start_time) * 1000.0
                             ScraperDiagnosticsLogger.log_fetch("http_get", resp.status, duration_ms, "aiohttp")
-                            logger.debug(f"[HttpFetcher] aiohttp response: status={resp.status}, duration={duration_ms:.1f}ms")
                             if resp.status == 200:
                                 text = await resp.text()
                                 return text, resp.status, duration_ms
@@ -168,7 +165,6 @@ class HttpFetcher:
                     resp = await loop.run_in_executor(None, _sync)
                     duration_ms = (time.time() - start_time) * 1000.0
                     ScraperDiagnosticsLogger.log_fetch("http_get", resp.status_code, duration_ms, "requests")
-                    logger.debug(f"[HttpFetcher] requests response: status={resp.status_code}, duration={duration_ms:.1f}ms, size={len(resp.content)} bytes")
                     if resp.status_code == 200:
                         return resp.text, resp.status_code, duration_ms
                     elif resp.status_code in (403, 429):
@@ -176,7 +172,7 @@ class HttpFetcher:
                         return None, resp.status_code, duration_ms
 
             except Exception as e:
-                logger.debug(f"[HttpFetcher] Attempt {attempt} via {client_type} failed: {e}")
+                pass
 
             if attempt < retries:
                 await asyncio.sleep(0.4 + random.random() * 0.3)

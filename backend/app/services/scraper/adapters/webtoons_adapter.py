@@ -113,7 +113,6 @@ class WebtoonsAdapter(BaseSiteAdapter):
         if not cover_image and series_meta and series_meta.cover_image:
             cover_image = self.extract_image_src(series_meta.cover_image, target_url)
 
-        logger.debug(f"[WebtoonsAdapter] Extracted metadata: title='{series_title}', author='{author}', genre='{genre}', cover='{cover_image[:60]}...'")
 
         # 2. Paginated Episode Extraction Loop
         episodes: List[Dict[str, Any]] = []
@@ -123,28 +122,23 @@ class WebtoonsAdapter(BaseSiteAdapter):
 
         while page_num <= max_pages:
             if max_episodes and len(episodes) >= max_episodes:
-                logger.debug(f"[WebtoonsAdapter] Reached max_episodes limit ({max_episodes}), stopping pagination")
                 break
 
             current_page_url = target_url
             if page_num > 1:
                 current_page_url = f"{target_url}&page={page_num}" if "?" in target_url else f"{target_url}?page={page_num}"
-                logger.debug(f"[WebtoonsAdapter] Crawling pagination page {page_num}: {current_page_url}")
                 p_html, p_status, _ = await HttpFetcher.fetch_html(
                     current_page_url,
                     headers={"Referer": "https://www.webtoons.com/"}
                 )
                 if not p_html or p_status != 200:
-                    logger.debug(f"[WebtoonsAdapter] Page {page_num} fetch returned status={p_status}, ending pagination")
                     break
                 soup = DomExtractor.get_soup(p_html)
                 if not soup:
-                    logger.debug(f"[WebtoonsAdapter] Page {page_num} HTML parse failed, ending pagination")
                     break
 
             list_items = soup.select("#_listUl li, ul#_episodeList li, .detail_lst li")
             if not list_items:
-                logger.debug(f"[WebtoonsAdapter] Page {page_num}: 0 episode items found, ending pagination")
                 break
 
             page_new_count = 0
@@ -201,7 +195,6 @@ class WebtoonsAdapter(BaseSiteAdapter):
                     "language": "en"
                 })
 
-            logger.debug(f"[WebtoonsAdapter] Page {page_num}: parsed {page_new_count} new episodes (running total: {len(episodes)})")
 
             if not found_new:
                 break
@@ -259,10 +252,8 @@ class WebtoonsAdapter(BaseSiteAdapter):
                         "date": "",
                         "language": "en"
                     })
-                logger.debug(f"[WebtoonsAdapter] Browser fallback extracted {len(episodes)} episodes")
 
         sorted_eps = self.deduplicate_and_sort_episodes(episodes, sort_by=sort_by, preferred_language=preferred_language)
-        logger.debug(f"[WebtoonsAdapter] Completed discovery for '{series_title}': total {len(sorted_eps)} episodes sorted and ready")
 
         return {
             "success": True,
@@ -401,7 +392,6 @@ class WebtoonsAdapter(BaseSiteAdapter):
                 ))
 
             if context.candidate_images:
-                logger.debug(f"[WebtoonsAdapter] Extracted {len(context.candidate_images)} panel images in strict DOM order from {target_url}")
                 context.completeness = ScrapeCompleteness.COMPLETE
                 return self._finalize(context, start_time)
 

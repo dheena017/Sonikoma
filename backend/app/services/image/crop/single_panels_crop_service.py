@@ -155,10 +155,6 @@ async def crop_single_panels_margins(request: SinglePanelsCropRequest) -> Single
     crop_w = x2 - x1
     crop_h = y2 - y1
 
-    logger.debug(
-        f"[DEBUG:SinglePanels] Original: {w}x{h}px | Margins: Top={top_px}px, Bot={bot_px}px, Left={left_px}px, Right={right_px}px | "
-        f"Box: ({x1},{y1}) -> ({x2},{y2}) [{crop_w}x{crop_h}px]"
-    )
 
     if crop_w >= 5 and crop_h >= 5:
         img = img.crop((x1, y1, x2, y2))
@@ -168,12 +164,11 @@ async def crop_single_panels_margins(request: SinglePanelsCropRequest) -> Single
     if request.auto_trim:
         img, auto_trimmed = _apply_color_distance_autotrim(img, tolerance=request.color_tolerance)
         if auto_trimmed:
-            logger.debug(f"[DEBUG:SinglePanels] Auto-trimmed to {img.size[0]}x{img.size[1]}px")
+            pass
 
     # 5. Optional Aspect Ratio Snapping
     if request.aspect_ratio and request.aspect_ratio != "free":
         img = _apply_aspect_ratio_snap(img, request.aspect_ratio)
-        logger.debug(f"[DEBUG:SinglePanels] Aspect-snapped ({request.aspect_ratio}) to {img.size[0]}x{img.size[1]}px")
 
     # 6. Optional Padding
     if request.padding_px > 0:
@@ -219,7 +214,6 @@ async def crop_single_panels_margins(request: SinglePanelsCropRequest) -> Single
 
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
     logger.info(f"[SinglePanelsCrop] Cropped image to {final_w}x{final_h}px in {elapsed_ms}ms")
-    logger.debug(f"[DEBUG:SinglePanels] Saved output: {media_url} ({len(output_bytes)} bytes)")
 
     return SinglePanelsCropResponse(
         success=True,

@@ -75,7 +75,6 @@ def get_yolo_speech_bubble_model():
             token=hf_token
         )
         _yolo_model = YOLO(model_path)
-        logger.debug("[YOLO Detector] kitsumed model loaded successfully.")
         return _yolo_model
     except Exception as e:
         logger.warning(f"[YOLO Detector] kitsumed model unavailable: {e}. Trying ogkalu fallback...")
@@ -125,7 +124,6 @@ def detect_yolo_entities(
     """
     pil_img = Image.open(io.BytesIO(image_bytes))
     img_w, img_h = pil_img.size
-    logger.debug(f"[YOLO Detector] Running detect_yolo_entities on {img_w}x{img_h} image (conf_threshold={conf_threshold})")
 
     model = get_yolo_speech_bubble_model()
     # If YOLO model is available and trained on comic entities, use YOLO
@@ -139,14 +137,12 @@ def detect_yolo_entities(
         # Check if model has comic/speech bubble classes
         is_coco = any(c in names_list for c in ["person", "bicycle", "car", "dog", "cat", "chair", "cup"])
         is_comic_yolo = not is_coco and any("bubble" in str(c).lower() or "text" in str(c).lower() or "balloon" in str(c).lower() or "speech" in str(c).lower() for c in names_list)
-        logger.debug(f"[YOLO Detector] Model loaded: is_comic_yolo={is_comic_yolo}, classes={names_list[:5]}")
     else:
-        logger.debug("[YOLO Detector] No dedicated YOLO model available; will rely on adaptive geometric fallback.")
+        pass
 
     if is_comic_yolo and model is not None:
         try:
             results = model.predict(source=pil_img, conf=conf_threshold, verbose=False)
-            logger.debug(f"[YOLO Detector] Raw YOLO predict returned {len(results)} result container(s)")
         except Exception as e:
             logger.error(f"[YOLO Detector] Inference error: {e}", exc_info=True)
             results = []
@@ -156,7 +152,6 @@ def detect_yolo_entities(
     gray_np = np.array(pil_img.convert("L"))
     otsu_val, _ = cv2.threshold(gray_np, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     dyn_white_thresh = max(150.0, min(240.0, float(otsu_val) * 1.12))
-    logger.debug(f"[YOLO Detector] Otsu threshold={otsu_val}, dyn_white_thresh={dyn_white_thresh:.1f}")
 
     entities: List[SpeechBubbleItem] = []
     bubble_counter = 1
@@ -168,17 +163,12 @@ def detect_yolo_entities(
     max_bubble_area = int(img_w * min(img_h, int(img_w * 2.0)) * 0.15)
     min_bubble_w = max(10, int(img_w * 0.02))
     min_bubble_h = max(10, int(img_h * 0.008)) if is_tall_webtoon else max(10, int(img_w * 0.015))
-    logger.debug(
-        f"[YOLO Detector] Thresholds: max_w={max_bubble_w}, max_h={max_bubble_h}, "
-        f"max_area={max_bubble_area}, min_w={min_bubble_w}, min_h={min_bubble_h}"
-    )
 
     if results:
         for r in results:
             boxes = r.boxes.xyxy.cpu().numpy() if r.boxes is not None else []
             confs = r.boxes.conf.cpu().numpy() if r.boxes is not None else []
             masks = r.masks.xy if r.masks is not None else []
-            logger.debug(f"[YOLO Detector] Processing {len(boxes)} candidate box(es) from YOLO output")
 
             for idx, (box, conf) in enumerate(zip(boxes, confs)):
                 x1, y1, x2, y2 = [int(v) for v in box]
@@ -190,7 +180,6 @@ def detect_yolo_entities(
                     polygon = [[int(pt[0]), int(pt[1])] for pt in masks[idx]]
 
                 if w > max_bubble_w or h > max_bubble_h or (w * h) > max_bubble_area or w < min_bubble_w or h < min_bubble_h:
-                    logger.debug(f"[YOLO Detector: Discarded] Box #{idx+1} ({w}x{h}px) outside size limits")
                     continue
 
                 sub_patch = gray_np[y1:y1 + h, x1:x1 + w]
@@ -199,7 +188,6 @@ def detect_yolo_entities(
                 
                 white_ratio = float(np.mean(sub_patch > dyn_white_thresh))
                 if white_ratio < 0.50:
-                    logger.debug(f"[YOLO Detector: Discarded] Box #{idx+1} white_ratio={white_ratio:.2f} < 0.50")
                     continue
 
                 aspect = w / float(h)
@@ -213,7 +201,6 @@ def detect_yolo_entities(
                     bubble_type = "thought"
                     label = EntityLabel.BUBBLE_THOUGHT.value
 
-                logger.debug(f"[YOLO Detector: Accepted] Bubble #{bubble_counter} ({bubble_type}): rect=({x1},{y1},{w},{h}), conf={conf:.2f}")
 
                 entities.append(SpeechBubbleItem(
                     bubble_id=f"bubble_{bubble_counter}",
@@ -293,7 +280,6 @@ def detect_yolo_entities(
     for i, b in enumerate(entities):
         b.reading_order = i + 1
 
-    logger.debug(f"[YOLO Detector] Image {img_w}x{img_h}px -> Detected {len(entities)} speech bubble(s).")
     return entities
 
 

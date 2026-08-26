@@ -43,7 +43,6 @@ async def list_adapters_endpoint(
     supported domains, speed rating, and capability flags.
     """
     raw_meta = AdapterRegistry.get_all_adapters_meta()
-    logger.debug(f"[ScraperAPI] GET /adapters: {len(raw_meta)} adapters")
     adapters = [
         AdapterMetaResponse(
             adapter_id=m.get("adapter_id", m.get("name", "").lower().replace(" ", "_")),
@@ -78,7 +77,6 @@ async def scraper_health_endpoint():
     except Exception:
         pass
 
-    logger.debug(f"[ScraperAPI] GET /health: {active_jobs_count} active jobs")
     return ScraperHealthResponse(
         status="healthy",
         version="2.0.0",
@@ -104,7 +102,6 @@ async def import_to_project_endpoint(
     """
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     target_url = body.url.strip()
-    logger.debug(f"[ScraperAPI] POST /import-to-project: ingesting '{target_url}' for user: {user_id}")
     return await scrape_and_initialize_project(
         url=target_url,
         user_id=user_id,

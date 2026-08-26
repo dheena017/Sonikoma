@@ -200,7 +200,7 @@ async def system_logs_stream_endpoint(request: Request):
                 except asyncio.TimeoutError:
                     yield ": ping\n\n"
         except (asyncio.CancelledError, GeneratorExit):
-            logger.debug("[System Logs Stream] Client disconnected from SSE console logs stream.")
+            pass
         finally:
             remove_log_listener(listener)
 

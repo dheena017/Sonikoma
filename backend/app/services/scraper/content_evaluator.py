@@ -266,7 +266,6 @@ class ScraperDiagnosticsLogger:
         logger.info(f"[SCRAPER] Commencing adaptive scrape: {url}")
         if cls.is_debug_enabled() and options:
             opts_str = ", ".join(f"{k}={v}" for k, v in options.items() if v is not None)
-            logger.debug(f"[SCRAPER] Options: {opts_str}")
 
     @classmethod
     def log_fetch(cls, method: str, status: Optional[int], duration_ms: float, client_type: str = "http") -> None:
@@ -292,7 +291,6 @@ class ScraperDiagnosticsLogger:
     def log_rejection(cls, image_url: str, reason: str) -> None:
         if cls.is_debug_enabled():
             short_url = image_url.split("?")[0].split("/")[-1] or image_url[-20:]
-            logger.debug(f"[REJECT] {short_url} → {reason}")
 
     @classmethod
     def log_result(

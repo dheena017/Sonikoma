@@ -145,7 +145,6 @@ try:
             from google import genai
             genai_client = genai.Client(api_key=api_key)
             ai_initialized = True
-            logger.debug("Gemini client successfully configured server-side via google-genai.")
         except Exception as e:
             try:
                 import warnings
@@ -155,7 +154,6 @@ try:
                 legacy_genai.configure(api_key=api_key)
                 genai_client = legacy_genai
                 ai_initialized = True
-                logger.debug("Gemini client successfully configured server-side via google.generativeai.")
             except Exception as e2:
                 logger.warning(f"Could not initialize google-genai or google.generativeai: {e2}")
 except Exception as e:
@@ -167,7 +165,6 @@ try:
     if HUGGINGFACE_API_KEY:
         from huggingface_hub import InferenceClient
         hf_client = InferenceClient(token=HUGGINGFACE_API_KEY)
-        logger.debug("HuggingFace Inference client successfully initialized.")
 except ImportError:
     pass
 
@@ -231,7 +228,6 @@ async def call_gemini_with_retry(
                 )
 
                 if is_daily_exhausted:
-                    logger.debug(f"[Gemini] Non-retryable error (limit:0 / unsupported): {err}")
                     raise err
 
                 if (is_rate_limit or is_unavailable) and attempt < max_attempts:

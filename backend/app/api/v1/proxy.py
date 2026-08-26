@@ -232,11 +232,9 @@ async def proxy_image_stream_endpoint(
         client_etag = request.headers.get("if-none-match")
         if client_etag == cached["etag"]:
             elapsed = int((time.time() - start_time) * 1000)
-            logger.debug(f"[Proxy] 304 CACHE HIT | {fetch_url[:55]} ({elapsed}ms)")
             return Response(status_code=304)
 
         elapsed = int((time.time() - start_time) * 1000)
-        logger.debug(f"[Proxy] 200 CACHE HIT | {fetch_url[:55]} ({cached['size'] / 1024:.1f}KB) ({elapsed}ms)")
 
         return Response(
             content=cached["data"],
@@ -308,7 +306,6 @@ async def proxy_image_stream_endpoint(
         except Exception:
             pass
 
-        logger.debug(f"[Proxy] Fetching remote image: {fetch_url[:70]} | referer_candidates={referer_candidates}")
 
         headers_base = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -395,7 +392,6 @@ async def proxy_image_stream_endpoint(
         })
 
         elapsed = int((time.time() - start_time) * 1000)
-        logger.debug(f"[Proxy] 200 FETCH | {fetch_url[:55]} ({len(buffer) / 1024:.1f}KB) ({elapsed}ms)")
 
         return Response(
             content=buffer,

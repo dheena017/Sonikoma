@@ -99,7 +99,6 @@ async def scrape_series_sync_endpoint(
         include_ratings=body.include_ratings if body.include_ratings is not None else False,
         bypass_cache=body.bypass_cache or False,
     )
-    logger.debug(f"[ScraperAPI] POST /series/sync: {len(result.get('chapters', []))} chapters found")
     return result
 
 
@@ -139,7 +138,6 @@ async def scrape_batch_endpoint(
     if not body.urls:
         raise HTTPException(status_code=400, detail="Urls list cannot be empty.")
 
-    logger.debug(f"[ScraperAPI] POST /batch: {len(body.urls)} URLs queued")
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     job = job_manager.create_job(
         job_type=JobType.BATCH_SCRAPE,

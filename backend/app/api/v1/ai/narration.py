@@ -95,7 +95,7 @@ async def get_sfx_audio(body: SFXAudioRequest, user_api_key: dict = Depends(get_
                     elif isinstance(res, dict) and "prompt" in res:
                         sfx_suggestion = f"[{res['prompt'][:30]}]"
                 except Exception as skill_err:
-                    logger.debug(f"[SFX Audio Skill] Fallback tag for panel {p.id}: {skill_err}")
+                    pass
 
                 results.append({
                     "id": p.id,

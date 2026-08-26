@@ -135,7 +135,6 @@ class ChapterCacheManager:
                         "from_cache": True
                     }
 
-                logger.debug(f"[ChapterCacheManager] Cache MISS for {title_no}")
                 return None
         except Exception as e:
             logger.warning(f"[ChapterCacheManager] Retrieval failed: {e}")

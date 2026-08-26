@@ -61,7 +61,7 @@ class EmbeddedStateExtractor:
                 for img in img_matches:
                     _add(img, ImageSourceType.EMBEDDED_STATE)
             except Exception as e:
-                logger.debug(f"[EmbeddedStateExtractor] Next.js parse error: {e}")
+                pass
 
         # 2. Nuxt.js window.__NUXT__
         nuxt_index = html.find('window.__NUXT__=')
@@ -185,7 +185,7 @@ class EmbeddedStateExtractor:
                                 "chapters": episodes
                             }
             except Exception as e:
-                logger.debug(f"[EmbeddedStateExtractor] Next.js series extraction error: {e}")
+                pass
 
         return None
 

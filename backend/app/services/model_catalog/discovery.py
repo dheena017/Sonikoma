@@ -115,7 +115,7 @@ class ModelDiscoveryService:
                     cls._last_probe_time[cache_key] = now
                     return models
         except Exception as e:
-            logger.debug(f"[ModelDiscovery] Live Gemini probe notice: {e}")
+            pass
 
         return []
 
@@ -141,7 +141,7 @@ class ModelDiscoveryService:
                     cls._last_probe_time[cache_key] = now
                     return models
         except Exception as e:
-            logger.debug(f"[ModelDiscovery] Live OpenAI probe notice: {e}")
+            pass
 
         return []
 

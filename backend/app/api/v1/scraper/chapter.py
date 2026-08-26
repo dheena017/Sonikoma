@@ -117,7 +117,6 @@ async def scrape_chapter_sync_post(
         filter_banners=body.filter_banners if body.filter_banners is not None else True,
         project_id=body.project_id
     )
-    logger.debug(f"[ScraperAPI] POST /chapter/sync: {len(result.images)} panels returned")
     return result
 
 
@@ -135,7 +134,6 @@ async def scrape_chapter_sync_get(
     if not url or not url.strip():
         raise HTTPException(status_code=400, detail="URL query parameter is required.")
     target_url = url.strip()
-    logger.debug(f"[ScraperAPI] GET /chapter/sync: url='{target_url}'")
     result = await AdaptiveScraperEngine.scrape_url(
         url=target_url,
         proxy_images=proxy_images,
@@ -156,7 +154,6 @@ async def get_reader_chapter_panels_post(
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Chapter URL is required.")
     target_url = body.url.strip()
-    logger.debug(f"[ScraperAPI] POST /reader-chapter: url='{target_url}'")
     result = await AdaptiveScraperEngine.scrape_url(
         url=target_url,
         bypass_cache=bool(body.force_refresh or body.bypass_cache),
@@ -194,7 +191,6 @@ async def get_reader_chapter_panels_get(
     if not url or not url.strip():
         raise HTTPException(status_code=400, detail="URL query parameter is required.")
     target_url = url.strip()
-    logger.debug(f"[ScraperAPI] GET /reader-chapter: url='{target_url}'")
     result = await AdaptiveScraperEngine.scrape_url(
         url=target_url,
         bypass_cache=force_refresh,
@@ -228,7 +224,6 @@ async def scrape_chapter_metadata_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    logger.debug(f"[ScraperAPI] POST /chapter/metadata: url='{payload.url}'")
     html, _, _ = await HttpFetcher.fetch_html(payload.url)
     if not html:
         raise HTTPException(status_code=400, detail="Could not fetch page content.")

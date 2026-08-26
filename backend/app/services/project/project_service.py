@@ -290,10 +290,6 @@ class ProjectService:
             return
 
         if NODE_ENV != "production":
-            logger.debug(
-                f"Supabase sync skipped because NODE_ENV={NODE_ENV}. "
-                "Set NODE_ENV=production to enable Supabase sync."
-            )
             return
 
         try:
