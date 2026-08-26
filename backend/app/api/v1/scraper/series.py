@@ -99,6 +99,10 @@ async def scrape_series_sync_endpoint(
         include_ratings=body.include_ratings if body.include_ratings is not None else False,
         bypass_cache=body.bypass_cache or False,
     )
+    if result.get("success"):
+        logger.info(f"[ScraperAPI] Discovered {len(result.get('chapters', []))} chapter(s) for series '{target_url}'")
+    else:
+        logger.warning(f"[ScraperAPI] Series discovery failed for '{target_url}': {result.get('error')}")
     return result
 
 
@@ -122,6 +126,10 @@ async def scrape_series_sync_get(
         sort_by=sort_by,
         max_chapters=limit
     )
+    if result.get("success"):
+        logger.info(f"[ScraperAPI] Discovered {len(result.get('chapters', []))} chapter(s) for series '{target_url}'")
+    else:
+        logger.warning(f"[ScraperAPI] Series discovery failed for '{target_url}': {result.get('error')}")
     return result
 
 

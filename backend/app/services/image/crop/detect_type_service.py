@@ -175,7 +175,7 @@ async def detect_image_layout_type(url: Optional[str] = None, image_base64: Opti
         message = f"Small panel frame / illustration ({width}x{height}px)."
 
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
-    logger.info(f"[DetectType] Classified as '{crop_type.value}' ({width}x{height}px, ratio {aspect_ratio:.2f}) in {elapsed_ms}ms")
+    logger.info(f"[DetectType] Classified as '{crop_type.value}' ({type_label}, {width}x{height}px, ratio {aspect_ratio:.2f}, conf={confidence:.2f}) in {elapsed_ms}ms")
 
     return DetectTypeResponse(
         success=True,

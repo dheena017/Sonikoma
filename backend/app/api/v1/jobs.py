@@ -26,9 +26,11 @@ async def get_job_status_endpoint(job_id: str, current_user: dict = Depends(get_
     """Canonical job status retrieval endpoint."""
     job = job_manager.get_job(job_id)
     if not job:
+        logger.warning(f"[Jobs API] Job '{job_id}' not found")
         raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     if job.user_id != user_id and current_user.get("role") != "admin":
+        logger.warning(f"[Jobs API] User '{user_id}' unauthorized for job '{job_id}'")
         raise HTTPException(status_code=403, detail="Not authorized to access this job.")
     return job.to_status_response()
 
@@ -42,12 +44,18 @@ async def cancel_job_endpoint(job_id: str, current_user: dict = Depends(get_curr
     """Cancels a running or queued job."""
     job = job_manager.get_job(job_id)
     if not job:
+        logger.warning(f"[Jobs API] Cancel request for non-existent job '{job_id}'")
         raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     if job.user_id != user_id and current_user.get("role") != "admin":
+        logger.warning(f"[Jobs API] User '{user_id}' unauthorized to cancel job '{job_id}'")
         raise HTTPException(status_code=403, detail="Not authorized to cancel this job.")
-    job = job_manager.cancel_job(job_id)
-    return job.to_status_response()
+    logger.info(f"[Jobs API] Cancelling job '{job_id}' (requested by '{user_id}')")
+    cancelled_job = job_manager.cancel_job(job_id)
+    if not cancelled_job:
+        cancelled_job = job_manager.get_job(job_id) or job
+    logger.info(f"[Jobs API] Successfully cancelled job '{job_id}'")
+    return cancelled_job.to_status_response()
 
 @jobs_router.get(
     "/",

@@ -47,7 +47,9 @@ async def block_domain_endpoint(
     body: BlockDomainRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.info(f"[Domains API] Blocking domain '{body.domain}' (reason: {body.reason or 'None'})")
     blocked_domain = domain_block_manager.block_domain(body.domain, reason=body.reason or "Blocked by user")
+    logger.info(f"[Domains API] Domain '{body.domain}' successfully added to blocklist")
     return BlockDomainResponse(
         success=bool(blocked_domain),
         domain=body.domain,
@@ -64,7 +66,9 @@ async def unblock_domain_endpoint(
     domain: str,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.info(f"[Domains API] Unblocking domain '{domain}'")
     success = domain_block_manager.unblock_domain(domain)
+    logger.info(f"[Domains API] Domain '{domain}' unblocked (success={success})")
     return {"success": success, "domain": domain, "message": f"Domain '{domain}' removed from blocklist."}
 
 
@@ -118,6 +122,7 @@ async def update_session_cache_endpoint(
 ):
     extracted_url = UrlNormalizer.extract_first_url(body.url)
     save_scrape_session(extracted_url, body.images)
+    logger.info(f"[Domains API] Saved scrape session with {len(body.images)} panels for '{extracted_url}'")
     return {"success": True, "project_id": body.project_id}
 
 
@@ -128,6 +133,7 @@ async def delete_session_endpoint(
 ):
     extracted_url = UrlNormalizer.extract_first_url(url)
     delete_scrape_session(extracted_url)
+    logger.info(f"[Domains API] Cleared scrape session for '{extracted_url}'")
     return {"success": True, "message": "Session cleared."}
 
 
@@ -136,4 +142,5 @@ async def clear_cache_endpoint(
     current_user: dict = Depends(get_current_user)
 ):
     ScraperCacheManager.clear()
+    logger.info("[Domains API] In-memory scraper cache flushed")
     return {"success": True, "message": "In-memory scraper cache flushed."}

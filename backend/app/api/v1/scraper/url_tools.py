@@ -36,8 +36,11 @@ async def separate_url_post(
     current_user: dict = Depends(get_current_user)
 ):
     if not payload.url or not payload.url.strip():
+        logger.warning("[URL Tools] POST /separate-url called with empty URL")
         raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
+    logger.info(f"[URL Tools] Decomposing URL: {payload.url}")
     result = UniversalUrlSeparator.separate(payload.url)
+    logger.info(f"[URL Tools] Separated '{payload.url}' -> Platform: {result.get('platform', 'generic')}, Domain: {result.get('domain')}")
     return SeparateUrlResponse(**result)
 
 
@@ -51,8 +54,11 @@ async def separate_url_get(
     current_user: dict = Depends(get_current_user)
 ):
     if not url or not url.strip():
+        logger.warning("[URL Tools] GET /separate-url called with empty URL")
         raise HTTPException(status_code=400, detail="Target URL parameter 'url' cannot be empty.")
+    logger.info(f"[URL Tools] Decomposing URL (query): {url}")
     result = UniversalUrlSeparator.separate(url)
+    logger.info(f"[URL Tools] Separated '{url}' -> Platform: {result.get('platform', 'generic')}, Domain: {result.get('domain')}")
     return SeparateUrlResponse(**result)
 
 
@@ -65,7 +71,9 @@ async def normalize_url_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.info(f"[URL Tools] Normalizing URL: {payload.url}")
     normalized = UrlNormalizer.normalize_url(payload.url)
+    logger.info(f"[URL Tools] Normalized URL: {normalized}")
     return {"original_url": payload.url, "normalized_url": normalized}
 
 
@@ -77,7 +85,9 @@ async def resolve_parent_series_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.info(f"[URL Tools] Resolving parent series for: {payload.url}")
     parent = UrlNormalizer.resolve_parent_series_url(payload.url)
+    logger.info(f"[URL Tools] Resolved parent series URL: {parent}")
     return {"chapter_url": payload.url, "parent_series_url": parent}
 
 
@@ -89,9 +99,11 @@ async def detect_platform_endpoint(
     payload: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.info(f"[URL Tools] Detecting platform for: {payload.url}")
     source_info = SiteAnalyzer.analyze(payload.url)
     adapter = AdapterRegistry.get_adapter(source_info)
     sep_data = UniversalUrlSeparator.separate(payload.url)
+    logger.info(f"[URL Tools] Detected platform: {source_info.platform} (Adapter: {adapter.__class__.__name__})")
     return {
         "url": payload.url,
         "domain": source_info.domain,

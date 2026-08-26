@@ -12,6 +12,7 @@ import io
 import time
 import base64
 import logging
+from typing import Any, Dict, List, Optional
 from PIL import Image
 
 from schemas.project import (
@@ -325,8 +326,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
 
     logger.info(
-        f"[LongPanels Detector] Processed {img_w}x{img_h}px in {elapsed_ms}ms -> "
-        f"Detected {len(fused_panels)} panels with {len(all_bubbles)} total speech bubbles via {request.engine_mode}."
+        f"[LongPanels Detector] Successfully extracted {len(fused_panels)} panel(s) and {len(all_bubbles)} bubble(s) in {elapsed_ms}ms (size={img_w}x{img_h}px, mode={request.engine_mode})"
     )
 
     return DetectLongPanelsResponse(

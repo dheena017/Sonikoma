@@ -137,6 +137,7 @@ class AdaptiveScraperEngine:
         # Step 5: Execute scrape workflow
         try:
             res = await adapter.scrape(context)
+            logger.info(f"[AdaptiveScraperEngine] Adapter {adapter.__class__.__name__} returned success={res.success} ({len(res.images) if res.images else 0} images)")
             return res
         except Exception as e:
             logger.error(f"[AdaptiveScraperEngine] Unexpected scraper execution failure: {e}", exc_info=True)
@@ -209,18 +210,25 @@ class AdaptiveScraperEngine:
         # Strategy 2: Browser Fallback if requested or blocked
         if render_js or not html_content or status_code in (403, 429):
             try:
-                browser_res = await BrowserFetcher.render_page(
+                b_html, net_images, _ = await BrowserFetcher.render_page(
                     normalized_url,
                     cookies=cookie_dict,
                     headers=headers,
                     auto_scroll=True
                 )
-                if browser_res and browser_res.get("html"):
-                    rendered_html = browser_res["html"]
+                if b_html:
+                    rendered_html = b_html
                     discovery_methods.append("browser_rendered")
+                if net_images:
                     # Collect network intercepted images
-                    for net_img in browser_res.get("network_images", []):
-                        img_url = net_img.get("url") if isinstance(net_img, dict) else str(net_img)
+                    for net_img in net_images:
+                        if isinstance(net_img, dict):
+                            img_url = net_img.get("url")
+                        elif isinstance(net_img, (list, tuple)):
+                            img_url = str(net_img[0]) if len(net_img) > 0 else None
+                        else:
+                            img_url = str(net_img) if net_img else None
+
                         if img_url and img_url not in seen_urls:
                             seen_urls.add(img_url)
                             raw_images.append(RawImageItem(

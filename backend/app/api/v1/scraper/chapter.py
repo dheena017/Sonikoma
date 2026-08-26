@@ -117,6 +117,10 @@ async def scrape_chapter_sync_post(
         filter_banners=body.filter_banners if body.filter_banners is not None else True,
         project_id=body.project_id
     )
+    if result.success:
+        logger.info(f"[ScraperAPI] Successfully scraped chapter '{target_url}' ({len(result.images)} panels)")
+    else:
+        logger.warning(f"[ScraperAPI] Failed scraping chapter '{target_url}': {result.error_message}")
     return result
 
 
@@ -132,13 +136,19 @@ async def scrape_chapter_sync_get(
     current_user: dict = Depends(get_current_user)
 ):
     if not url or not url.strip():
+        logger.warning("[ScraperAPI] GET /chapter/sync received empty URL")
         raise HTTPException(status_code=400, detail="URL query parameter is required.")
     target_url = url.strip()
+    logger.info(f"[ScraperAPI] GET /chapter/sync: url='{target_url}'")
     result = await AdaptiveScraperEngine.scrape_url(
         url=target_url,
         proxy_images=proxy_images,
         filter_banners=filter_banners
     )
+    if result.success:
+        logger.info(f"[ScraperAPI] Successfully scraped chapter '{target_url}' ({len(result.images)} panels)")
+    else:
+        logger.warning(f"[ScraperAPI] Failed scraping chapter '{target_url}': {result.error_message}")
     return result
 
 

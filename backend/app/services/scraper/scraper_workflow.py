@@ -311,6 +311,7 @@ async def scrape_series_chapters(
             result.pop("total_episodes", None)
 
             _save_cached_chapters(raw_input, series_title, result)
+            logger.info(f"[SeriesWorkflow] Successfully discovered {len(chapter_list)} chapter(s) for series '{series_title}'")
             return result
 
         return result or {

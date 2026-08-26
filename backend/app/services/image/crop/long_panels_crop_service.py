@@ -37,6 +37,31 @@ MEDIA_DIR = os.path.join(PROJECT_ROOT, "data", "local_media")
 os.makedirs(MEDIA_DIR, exist_ok=True)
 
 
+def _box_to_dict(box) -> dict:
+    """Safely converts a PanelBoundingBox (Pydantic model) or dict into a standard dict."""
+    if isinstance(box, dict):
+        return box
+    if hasattr(box, "model_dump") and callable(box.model_dump):
+        return box.model_dump()
+    if hasattr(box, "dict") and callable(box.dict):
+        return box.dict()
+    if hasattr(box, "__dict__"):
+        return vars(box)
+    return {
+        "id": getattr(box, "id", None),
+        "panel_id": getattr(box, "panel_id", None),
+        "x": getattr(box, "x", 0),
+        "y": getattr(box, "y", 0),
+        "width": getattr(box, "width", 0),
+        "height": getattr(box, "height", 0),
+        "crop_top": getattr(box, "crop_top", 0.0),
+        "crop_bottom": getattr(box, "crop_bottom", 0.0),
+        "crop_left": getattr(box, "crop_left", 0.0),
+        "crop_right": getattr(box, "crop_right", 0.0),
+        "padding_px": getattr(box, "padding_px", 0),
+    }
+
+
 def _slice_and_encode_worker(args: Tuple) -> Optional[CroppedSliceItem]:
     """
     Worker function executed in parallel thread:
@@ -45,7 +70,7 @@ def _slice_and_encode_worker(args: Tuple) -> Optional[CroppedSliceItem]:
     """
     (
         img_bytes,
-        box_dict,
+        raw_box,
         order_idx,
         total_boxes,
         gutter_after,
@@ -56,6 +81,7 @@ def _slice_and_encode_worker(args: Tuple) -> Optional[CroppedSliceItem]:
     ) = args
 
     try:
+        box_dict = _box_to_dict(raw_box)
         with Image.open(io.BytesIO(img_bytes)) as parent_img:
             img_w, img_h = parent_img.size
 
@@ -164,18 +190,21 @@ async def crop_long_panels_batch(request: LongPanelsCropRequest) -> LongPanelsCr
     Executes concurrent single-pass in-memory batch panel slicing on a continuous strip.
     """
     start_time = time.perf_counter()
+    logger.info(f"[LongPanelsCrop] Batch slicing {len(request.panels or [])} panels from '{request.url}' (format={request.output_format}, quality={request.quality})")
 
     resolved = await resolve_image_to_buffer(request.url)
     img_bytes = resolved.get("data")
     if not img_bytes:
+        logger.error(f"[LongPanelsCrop] Could not resolve image data from URL: {request.url}")
         raise ValueError(f"Could not resolve image data from URL: {request.url}")
 
     if not request.panels:
+        logger.warning("[LongPanelsCrop] No panel bounding boxes provided for slicing")
         raise ValueError("No panel bounding boxes provided for slicing.")
 
     # 1. Sort panels strictly top-to-bottom, left-to-right to guarantee reading sequence
     sorted_boxes = sorted(
-        [p.dict() if hasattr(p, "dict") else p for p in request.panels],
+        [_box_to_dict(p) for p in request.panels],
         key=lambda b: (b.get("y", 0), b.get("x", 0))
     )
 

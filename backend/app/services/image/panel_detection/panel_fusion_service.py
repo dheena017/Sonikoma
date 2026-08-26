@@ -89,7 +89,10 @@ def fuse_panels_and_bubbles(
     """
     fused_panels: List[PanelBoundingBox] = []
     char_list = list(characters or [])
-
+    logger.info(
+        f"[Panel Fusion] Fusing {len(cv_panels)} CV frame(s), {len(yolo_bubbles)} bubble(s), "
+        f"and {len(char_list)} character(s) on image ({img_w}x{img_h})"
+    )
 
     # If no OpenCV frames detected, synthesize a baseline frame
     if not cv_panels:
@@ -111,10 +114,10 @@ def fuse_panels_and_bubbles(
     max_gutter_reach = max(20, int(img_w * 0.25))
 
     for idx, cp in enumerate(cv_panels):
-        px = int(cp.get("x", 0))
-        py = int(cp.get("y", 0))
-        pw = int(cp.get("w", cp.get("width", img_w)))
-        ph = int(cp.get("h", cp.get("height", 100)))
+        px = int(cp.get("x") or 0)
+        py = int(cp.get("y") or 0)
+        pw = int(cp.get("w") or cp.get("width") or img_w)
+        ph = int(cp.get("h") or cp.get("height") or 100)
         p_id = f"panel_{idx + 1}"
         polygon = cp.get("polygon")
 
@@ -236,4 +239,5 @@ def fuse_panels_and_bubbles(
     else:
         margins = {"unit": "pixels"}
 
+    logger.info(f"[Panel Fusion] Completed fusion: generated {len(fused_panels)} rich bounding box panel(s)")
     return fused_panels, yolo_bubbles, margins

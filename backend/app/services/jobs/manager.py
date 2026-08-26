@@ -13,6 +13,11 @@ import logging
 import datetime
 from typing import Dict, Any, Optional, Callable, Coroutine, List, Union
 
+try:
+    from database import config
+except ImportError:
+    config = None
+
 from database.engine import get_db_connection
 from .models import JobRecord, JobStatus, JobType, JobStage
 
@@ -163,15 +168,25 @@ class UnifiedJobManager:
         with get_db_connection() as conn:
             metadata_json = json.dumps(metadata) if metadata else "{}"
             try:
-                conn.execute(
-                    """
-                    INSERT OR IGNORE INTO users (id, username, email, password_hash, creator_role)
-                    VALUES (?, ?, ?, 'auto_hash', 'creator')
-                    """,
-                    (user_id, f"usr_{user_id[:8]}", f"{user_id}@sonikoma.internal")
-                )
-            except Exception:
-                pass
+                if config and getattr(config, "is_postgres", False):
+                    conn.execute(
+                        """
+                        INSERT INTO users (id, username, email, password_hash, creator_role)
+                        VALUES (?, ?, ?, 'auto_hash', 'creator')
+                        ON CONFLICT (id) DO NOTHING
+                        """,
+                        (user_id, f"usr_{user_id[:8]}", f"{user_id}@sonikoma.internal")
+                    )
+                else:
+                    conn.execute(
+                        """
+                        INSERT OR IGNORE INTO users (id, username, email, password_hash, creator_role)
+                        VALUES (?, ?, ?, 'auto_hash', 'creator')
+                        """,
+                        (user_id, f"usr_{user_id[:8]}", f"{user_id}@sonikoma.internal")
+                    )
+            except Exception as e:
+                logger.debug(f"[JobManager] User provision check notice: {e}")
 
             conn.execute(
                 """
@@ -183,7 +198,20 @@ class UnifiedJobManager:
             conn.commit()
 
         record = self.get_job(job_id)
-        if metadata:
+        if record is None:
+            record = JobRecord(
+                job_id=job_id,
+                user_id=user_id,
+                project_id=project_id,
+                chapter_id=chapter_id,
+                type=job_type,
+                status=JobStatus.QUEUED,
+                progress=0.0,
+                stage=JobStage.QUEUED.value,
+                metadata=metadata or {},
+                created_at=now,
+            )
+        elif metadata:
             record.metadata = metadata
         logger.info(f"[JobManager] Created job {job_id} (type={job_type.value}, user={user_id})")
         return record
@@ -453,8 +481,12 @@ class UnifiedJobManager:
         if task and not task.done():
             task.cancel()
 
+        job.status = JobStatus.CANCELLED
+        job.stage = JobStage.CANCELLED.value
+        job.cancelled_at = now
+
         logger.info(f"[JobManager] Job {job_id} CANCELLED")
-        return self.get_job(job_id)
+        return self.get_job(job_id) or job
 
     def run_in_background(
         self,

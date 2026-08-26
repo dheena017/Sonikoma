@@ -108,6 +108,10 @@ def get_yolo_speech_bubble_model():
         return None
 
 
+# Backward-compatible alias
+get_yolo_model = get_yolo_speech_bubble_model
+
+
 def _set_loaded_yolo_model(model_instance: Any):
     """Allows training workers to inject newly fine-tuned weights directly into cache."""
     global _yolo_model
@@ -166,9 +170,11 @@ def detect_yolo_entities(
 
     if results:
         for r in results:
-            boxes = r.boxes.xyxy.cpu().numpy() if r.boxes is not None else []
-            confs = r.boxes.conf.cpu().numpy() if r.boxes is not None else []
-            masks = r.masks.xy if r.masks is not None else []
+            boxes_obj = getattr(r, "boxes", None)
+            masks_obj = getattr(r, "masks", None)
+            boxes = boxes_obj.xyxy.cpu().numpy() if (boxes_obj is not None and hasattr(boxes_obj, "xyxy")) else []  # type: ignore
+            confs = boxes_obj.conf.cpu().numpy() if (boxes_obj is not None and hasattr(boxes_obj, "conf")) else []  # type: ignore
+            masks = masks_obj.xy if (masks_obj is not None and hasattr(masks_obj, "xy")) else []  # type: ignore
 
             for idx, (box, conf) in enumerate(zip(boxes, confs)):
                 x1, y1, x2, y2 = [int(v) for v in box]
@@ -280,6 +286,7 @@ def detect_yolo_entities(
     for i, b in enumerate(entities):
         b.reading_order = i + 1
 
+    logger.info(f"[SpeechBubble Detector] Detected {len(entities)} speech bubble entity/entities")
     return entities
 
 

@@ -490,8 +490,8 @@ class AIOrchestrator:
                 logger.warning(f"[AI Orchestrator] Candidate '{m_cand}' throttled: {rate_msg}. Trying next fallback candidate...")
                 continue
 
+            attempt_t0 = time.monotonic()
             try:
-                attempt_t0 = time.monotonic()
                 raw_result = await execute_provider_call(
                     skill=skill_obj,
                     provider=p_cand,
@@ -522,6 +522,7 @@ class AIOrchestrator:
                 )
                 cls.finalize_credits(user_id, cap_clean, credit_amount, True)
                 cls.log_execution_attempt(cap_clean, p_cand, m_cand, attempt, "success", attempt_lat, job_id, project_id)
+                logger.info(f"[AI Orchestrator] Capability '{cap_clean}' succeeded via {p_cand}:{m_cand} ({p_tokens}+{c_tokens} tokens, latency={attempt_lat}ms)")
 
                 # Parse JSON if possible
                 try:

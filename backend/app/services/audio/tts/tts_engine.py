@@ -166,7 +166,7 @@ async def generate_panel_audio(
                     continue
 
                 segment = cast(AudioSegment, AudioSegment.from_file(file_path, format="mp3"))
-                normalized_seg: AudioSegment = cast(AudioSegment, segment.set_frame_rate(44100).set_channels(2))
+                normalized_seg: AudioSegment = segment.set_frame_rate(44100).set_channels(2)
 
                 combined_audio += normalized_seg
                 if idx < len(temp_files) - 1:
@@ -182,7 +182,7 @@ async def generate_panel_audio(
                     playback_speed = float(current_duration_ms) / float(target_duration_ms)
                     if playback_speed > 1.0:
                         try:
-                            final_audio = cast(AudioSegment, speedup(combined_audio, playback_speed=playback_speed))
+                            final_audio = cast(AudioSegment, speedup(combined_audio, playback_speed))
                         except Exception:
                             final_audio = combined_audio
                     else:
@@ -204,6 +204,7 @@ async def generate_panel_audio(
             return final_duration_ms / 1000.0
 
         actual_duration = await asyncio.to_thread(process_audio_sync)
+        logger.info(f"[TTS Engine] Synthesized {len(parsed_dialogues)} dialogue segment(s) to '{output_path}' ({actual_duration:.2f}s, voice={actual_voice})")
         return output_path, actual_duration
 
     except Exception as general_err:

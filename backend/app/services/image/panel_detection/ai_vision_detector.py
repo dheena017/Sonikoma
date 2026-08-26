@@ -53,11 +53,13 @@ async def detect_ai_vision(
                 "confidence": 0.95
             })
 
+    logger.info(f"[AI Vision Detector] Analyzed flow={flow.value} (size={width}x{height}px, ratio={aspect_ratio:.2f})")
+
     return {
         "success": True,
         "reading_flow": flow.value if hasattr(flow, "value") else str(flow),
         "aspect_ratio": round(aspect_ratio, 3),
         "image_width": width,
         "image_height": height,
-        "extracted_dialogue": extracted_dialogue
+        "dialogues": extracted_dialogue
     }

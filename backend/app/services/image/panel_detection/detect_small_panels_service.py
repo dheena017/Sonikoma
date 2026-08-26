@@ -143,6 +143,10 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
     primary_panel = fused_panels[0] if fused_panels else None
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
 
+    logger.info(
+        f"[SmallPanels Detector] Detected {len(fused_panels)} panel(s) and {len(bound_bubbles)} bound bubble(s) in {elapsed_ms}ms (size={img_w}x{img_h}px, mode={request.engine_mode})"
+    )
+
     return DetectSmallPanelsResponse(
         success=True,
         crop_type="small_panels",

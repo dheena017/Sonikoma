@@ -46,7 +46,9 @@ async def scrape_all_images_post(
     current_user: dict = Depends(get_current_user)
 ):
     if not body.url or not body.url.strip():
+        logger.warning("[Discovery API] POST /all-images received empty URL")
         raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
+    logger.info(f"[Discovery API] Extracting all raw images from '{body.url}' (render_js={body.render_js}, bypass_cache={body.bypass_cache})")
     res = await AdaptiveScraperEngine.extract_all_raw_images(
         url=body.url.strip(),
         render_js=body.render_js,
@@ -56,6 +58,7 @@ async def scrape_all_images_post(
         cookies=body.cookies,
         headers=body.headers
     )
+    logger.info(f"[Discovery API] Found {len(res.images)} raw image(s) from '{body.url}'")
     return res
 
 
@@ -73,13 +76,16 @@ async def scrape_all_images_get(
     current_user: dict = Depends(get_current_user)
 ):
     if not url or not url.strip():
+        logger.warning("[Discovery API] GET /all-images received empty URL")
         raise HTTPException(status_code=400, detail="URL query parameter is required.")
+    logger.info(f"[Discovery API] Extracting all raw images (GET) from '{url}'")
     res = await AdaptiveScraperEngine.extract_all_raw_images(
         url=url.strip(),
         render_js=render_js,
         include_backgrounds=include_backgrounds,
         include_svg=include_svg
     )
+    logger.info(f"[Discovery API] Found {len(res.images)} raw image(s) from '{url}'")
     return res
 
 
@@ -91,11 +97,14 @@ async def discover_html_dom_endpoint(
     body: ScrapeAllImagesRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.info(f"[Discovery API] Discovering static HTML DOM images from '{body.url}'")
     html, _, _ = await HttpFetcher.fetch_html(body.url)
     if not html:
+        logger.error(f"[Discovery API] Failed to fetch HTML for '{body.url}'")
         raise HTTPException(status_code=400, detail="Could not fetch HTML.")
     soup = DomExtractor.get_soup(html)
     candidates = DomExtractor.extract_manga_images_fallback(soup, body.url) if soup else []
+    logger.info(f"[Discovery API] Extracted {len(candidates)} static DOM images from '{body.url}'")
     return {
         "url": body.url,
         "technology": "static_html_dom",
@@ -120,10 +129,13 @@ async def discover_js_state_endpoint(
     body: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
+    logger.info(f"[Discovery API] Discovering JS AST embedded state images from '{body.url}'")
     html, _, _ = await HttpFetcher.fetch_html(body.url)
     if not html:
+        logger.error(f"[Discovery API] Failed to fetch HTML for '{body.url}'")
         raise HTTPException(status_code=400, detail="Could not fetch HTML.")
     state_candidates = EmbeddedStateExtractor.extract_from_html(html, body.url)
+    logger.info(f"[Discovery API] Extracted {len(state_candidates)} embedded state images from '{body.url}'")
     return {
         "url": body.url,
         "technology": "javascript_embedded_state",
@@ -148,10 +160,9 @@ async def discover_network_traffic_endpoint(
     body: SeparateUrlRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    res = await BrowserFetcher.render_page(body.url, auto_scroll=True)
-    net_images = res.get("network_images", []) if res else []
+    html, net_images, _ = await BrowserFetcher.render_page(body.url, auto_scroll=True)
     formatted_images = []
-    for i, item in enumerate(net_images):
+    for i, item in enumerate(net_images or []):
         img_u = item.get("url") if isinstance(item, dict) else str(item)
         formatted_images.append({
             "index": i,

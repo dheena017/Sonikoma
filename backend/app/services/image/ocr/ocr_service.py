@@ -9,6 +9,7 @@ import io
 import re
 import logging
 from typing import List, Dict, Any
+import numpy as np
 from PIL import Image
 
 logger = logging.getLogger("sonikoma.services.image.ocr.ocr_service")
@@ -142,6 +143,8 @@ async def extract_bubble_guided_ocr(request: DetectTextRequest) -> DetectTextRes
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
     full_text = " ".join(transcripts)
 
+    logger.info(f"[OCR Service] Bubble-guided OCR extracted {len(segments)} segment(s) ({len(full_text)} chars) in {elapsed_ms}ms")
+
     return DetectTextResponse(
         success=True,
         full_transcript=full_text,
@@ -161,6 +164,7 @@ async def extract_direct_image_ocr(request: DetectTextRequest) -> DetectTextResp
         return await extract_bubble_guided_ocr(request)
 
     start_time = time.perf_counter()
+    logger.info(f"[OCR Service] Starting direct OCR extraction (languages={request.languages})")
     raw_bytes = None
     if request.url:
         resolved = await resolve_image_to_buffer(request.url)
@@ -172,6 +176,7 @@ async def extract_direct_image_ocr(request: DetectTextRequest) -> DetectTextResp
         raw_bytes = base64.b64decode(b64)
 
     if not raw_bytes:
+        logger.error("[OCR Service] Could not resolve image data for OCR.")
         raise ValueError("Could not resolve image data for OCR.")
 
     text = extract_text_from_image_bytes(raw_bytes, request.languages)
@@ -192,6 +197,8 @@ async def extract_direct_image_ocr(request: DetectTextRequest) -> DetectTextResp
             reading_order=1
         ))
 
+    logger.info(f"[OCR Service] Direct OCR completed in {elapsed_ms}ms (extracted {len(clean_text)} chars)")
+
     return DetectTextResponse(
         success=True,
         full_transcript=clean_text,
@@ -210,6 +217,7 @@ async def extract_script_from_panels(
     Extracts speech bubble text across multiple panel image buffers.
     Returns structured dialogue list with panel_index, text, and confidence.
     """
+    logger.info(f"[OCR Service] Extracting script across {len(image_buffers)} panel buffers")
     script_results = []
 
     for idx, buf in enumerate(image_buffers):
@@ -240,4 +248,6 @@ async def extract_script_from_panels(
                 "has_dialogue": False
             })
 
+    dialogue_count = sum(1 for s in script_results if s["has_dialogue"])
+    logger.info(f"[OCR Service] Finished script extraction: found dialogue in {dialogue_count}/{len(image_buffers)} panels")
     return script_results

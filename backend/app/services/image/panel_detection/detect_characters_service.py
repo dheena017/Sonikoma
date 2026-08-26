@@ -119,10 +119,15 @@ def detect_character_entities(
                 tile_w, tile_h = tile_img.size
                 results = model.predict(source=tile_img, conf=conf_threshold, verbose=False)
                 for r in results:
-                    boxes = r.boxes.xyxy.cpu().numpy() if r.boxes is not None else []
-                    confs = r.boxes.conf.cpu().numpy() if r.boxes is not None else []
-                    classes = r.boxes.cls.cpu().numpy() if r.boxes is not None else []
-                    masks = r.masks.xy if r.masks is not None else []
+                    r_boxes = getattr(r, "boxes", None)
+                    r_masks = getattr(r, "masks", None)
+
+                    boxes = r_boxes.xyxy.cpu().numpy() if r_boxes is not None and getattr(r_boxes, "xyxy", None) is not None else []
+                    confs = r_boxes.conf.cpu().numpy() if r_boxes is not None and getattr(r_boxes, "conf", None) is not None else []
+                    classes = r_boxes.cls.cpu().numpy() if r_boxes is not None and getattr(r_boxes, "cls", None) is not None else []
+                    masks = getattr(r_masks, "xy", None) if r_masks is not None else []
+                    if masks is None:
+                        masks = []
 
                     for idx, (box, conf, cls_id) in enumerate(zip(boxes, confs, classes)):
                         # COCO class 0 = Person; or any high-confidence foreground subject
@@ -316,6 +321,7 @@ async def detect_characters_boxes(request: DetectCharactersRequest) -> DetectCha
                 pass
 
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
+    logger.info(f"[Character Detector] Found {len(characters)} character(s) on {img_w}x{img_h}px image in {elapsed_ms}ms")
 
     return DetectCharactersResponse(
         success=True,

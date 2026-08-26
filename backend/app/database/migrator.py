@@ -555,6 +555,7 @@ def init_sqlite(conn) -> None:
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
 
         conn.commit()
+        logger.info("[Database] Database schema verification and migrations completed successfully.")
 
     except sqlite3.Error as e:
         logger.error(f"[Database] Error checking or applying schema: {e}")

@@ -38,7 +38,7 @@ def detect_opencv_boxes(
     Executes pure OpenCV geometric contour and gutter analysis on image bytes.
     Returns detected rectangular panels, webtoon gutter valleys, and edge energy.
     """
-    if not HAS_CV:
+    if cv2 is None or not HAS_CV:
         logger.warning("[OpenCV Detector] cv2 module not installed. Returning empty results.")
         return {"panels": [], "gutters": [], "edge_energy": 0.0, "image_width": 0, "image_height": 0}
 
@@ -136,6 +136,7 @@ def detect_opencv_boxes(
         edge_energy = 0.0
 
 
+    logger.info(f"[OpenCV Detector] Analyzing {img_w}x{img_h}px image (canny=[{canny_low}, {canny_high}])")
     return {
         "success": True,
         "panels": panels,

@@ -130,7 +130,7 @@ async def generate_dynamic_panels(
                         "motion_type": p.get("motion_type") or "zoom_in",
                         "visual_description": p.get("visual_description") or f"Recap scene for {title} showing {genre} themed illustration panel."
                     })
-                logger.info(f"[Storyboard AI] Storyboard narration generated successfully for {len(result)} slices.")
+                logger.info(f"[Storyboard AI] Storyboard narrative successfully generated for {len(result)} slices using {target_model}.")
                 return result
         except Exception as parse_err:
             logger.warning(f"[Storyboard AI] Failed to parse skill output: {parse_err}. Using programmatic fallback.")

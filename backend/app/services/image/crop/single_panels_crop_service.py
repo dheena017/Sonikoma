@@ -110,10 +110,12 @@ async def crop_single_panels_margins(request: SinglePanelsCropRequest) -> Single
     Executes directional margin cropping, optional auto-trim, and aspect ratio snapping on a single image.
     """
     start_time = time.perf_counter()
+    logger.info(f"[SinglePanelsCrop] Cropping image from URL: {request.url} (unit={request.unit}, aspect_ratio={request.aspect_ratio})")
 
     resolved = await resolve_image_to_buffer(request.url)
     img_bytes = resolved.get("data")
     if not img_bytes:
+        logger.error(f"[SinglePanelsCrop] Could not resolve image data from URL: {request.url}")
         raise ValueError(f"Could not resolve image data from URL: {request.url}")
 
     with Image.open(io.BytesIO(img_bytes)) as pil_img:
@@ -217,7 +219,7 @@ async def crop_single_panels_margins(request: SinglePanelsCropRequest) -> Single
 
     return SinglePanelsCropResponse(
         success=True,
-        crop_type="single_panels",
+        crop_type="small_panels",
         url=media_url,
         width=final_w,
         height=final_h,

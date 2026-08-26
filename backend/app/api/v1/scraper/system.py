@@ -102,10 +102,16 @@ async def import_to_project_endpoint(
     """
     user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
     target_url = body.url.strip()
-    return await scrape_and_initialize_project(
+    logger.info(f"[Scraper System] Importing '{target_url}' to project (user='{user_id}', project_id='{body.project_id}')")
+    result = await scrape_and_initialize_project(
         url=target_url,
         user_id=user_id,
         project_id=body.project_id,
         limit=body.limit,
         bypass_cache=body.bypass_cache or False
     )
+    if result.get("success"):
+        logger.info(f"[Scraper System] Successfully imported '{target_url}' into project '{result.get('project_id')}'")
+    else:
+        logger.warning(f"[Scraper System] Project import failed for '{target_url}': {result.get('error')}")
+    return result

@@ -279,6 +279,7 @@ class ProjectService:
 
         self.repo.update_project_full(project_id, updates, db_panels)
         updated_project = self.repo.get_project(project_id)
+        logger.info(f"[Project Service] Successfully saved project '{project_id}' with {len(db_panels)} panel(s)")
         return {
             "success": True,
             "series_slug": updated_project.get("series_slug") if updated_project else None,

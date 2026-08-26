@@ -100,10 +100,10 @@ async def lifespan(app: FastAPI):
         )
         if not skip_prewarm:
             try:
-                from services.image.layer_separation.sam import get_rembg_session
-                from services.image.panel_detection.speech_bubble_detector import get_yolo_model
+                from app.services.image.layer_separation.sam import get_rembg_session
+                from app.services.image.panel_detection.speech_bubble_detector import get_yolo_speech_bubble_model
                 await asyncio.to_thread(get_rembg_session)
-                await asyncio.to_thread(get_yolo_model)
+                await asyncio.to_thread(get_yolo_speech_bubble_model)
             except Exception as e:
                 logger.warning(f"[Startup] Model pre-warm failed (non-critical, will lazy-load on first request): {e}")
         else:
@@ -154,7 +154,7 @@ async def lifespan(app: FastAPI):
 
     _print_startup_banner()
 
-    logger.success("Server ready - waiting for requests")
+    logger.info("Server ready - waiting for requests")
 
     yield
     uptime = round(time.time() - SERVER_START, 1)

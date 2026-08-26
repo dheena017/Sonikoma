@@ -61,12 +61,14 @@ async def execute_youtube_upload_workflow(
         )
 
         # Step 3: Upload Video and Thumbnail
+        logger.info(f"[YouTube Export] Uploading video '{video_path}' (title='{title}', is_short={is_short})")
         result = upload_video_and_thumbnail(
             youtube=youtube,
             video_path=video_path,
             request_body=request_body,
             thumbnail_path=thumbnail_path
         )
+        logger.info(f"[YouTube Export] Video published successfully: ID={result.get('video_id')}")
         return result
     except (ResourceNotFoundException, ProcessingException):
         raise
