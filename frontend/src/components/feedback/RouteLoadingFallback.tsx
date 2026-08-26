@@ -9,8 +9,8 @@ export default function RouteLoadingFallback({
 }: RouteLoadingFallbackProps) {
   return (
     <>
-      {/* Top glowing progress line */}
-      <div className="fixed top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-purple-500 via-pink-400 to-amber-300 animate-pulse shadow-[0_0_12px_rgba(168,85,247,0.8)] z-[9999] pointer-events-none" />
+      {/* Top moving animated progress bar */}
+      <div className="route-progress-bar" />
 
       {/* Sleek top-right floating status badge */}
       <div className="fixed top-3.5 right-6 z-[9999] pointer-events-none flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0d0e15]/90 border border-purple-500/30 backdrop-blur-md shadow-xl shadow-purple-950/40 animate-fade-in select-none">

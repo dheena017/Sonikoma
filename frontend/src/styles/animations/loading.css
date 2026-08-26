@@ -300,3 +300,51 @@
   );
   animation: shimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
+
+/* Continuous Moving Top Route Progress Bar */
+@keyframes route-progress-indeterminate {
+  0% {
+    transform: translateX(-100%) scaleX(0.2);
+  }
+  50% {
+    transform: translateX(0%) scaleX(0.7);
+  }
+  100% {
+    transform: translateX(100%) scaleX(0.2);
+  }
+}
+
+.route-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    #a855f7 0%,
+    #ec4899 50%,
+    #f59e0b 100%
+  );
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.9), 0 0 4px rgba(236, 72, 153, 0.6);
+  z-index: 9999;
+  pointer-events-none;
+  overflow: hidden;
+}
+
+.route-progress-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.85),
+    transparent
+  );
+  animation: route-progress-indeterminate 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform-origin: left;
+}
