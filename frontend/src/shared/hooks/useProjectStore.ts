@@ -1033,107 +1033,35 @@ export const useProjectStore = create<ProjectStoreState>()(
       },
 
       // ── Update Project Settings ───────────────────────────────────────────
-      updateProjectSettings: async (settings, fetchClient) => {
+      updateProjectSettings: async (settings) => {
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
-
-        if (isTempProject(activeProjectId)) {
-          set({ activeProjectData: applyLocalSettings(activeProjectData, settings), isDirty: true });
-          return true;
-        }
-
-        try {
-          const data = await sendSettingsUpdate(activeProjectId, "", settings, fetchClient);
-          if (data?.settings) {
-            set({
-              activeProjectData: applyLocalSettings(activeProjectData, {
-                video_settings: data.settings.video_settings,
-                audio_settings: data.settings.audio_settings,
-                autocrop_settings: data.settings.autocrop_settings,
-              }),
-              isDirty: false,
-            });
-          }
-          return true;
-        } catch (err) {
-          console.error("Error updating project settings:", err);
-          return false;
-        }
+        set({ activeProjectData: applyLocalSettings(activeProjectData, settings), isDirty: true });
+        return true;
       },
 
       // ── Update Video Settings ─────────────────────────────────────────────
-      updateVideoSettings: async (videoSettings, fetchClient) => {
+      updateVideoSettings: async (videoSettings) => {
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
-
-        if (isTempProject(activeProjectId)) {
-          set({ activeProjectData: applyLocalSettings(activeProjectData, { video_settings: videoSettings }), isDirty: true });
-          return true;
-        }
-
-        try {
-          const data = await sendSettingsUpdate(activeProjectId, "/video", { video_settings: videoSettings }, fetchClient);
-          if (data?.video_settings) {
-            set({
-              activeProjectData: applyLocalSettings(activeProjectData, { video_settings: data.video_settings }),
-              isDirty: false,
-            });
-          }
-          return true;
-        } catch (err) {
-          console.error("Error updating video settings:", err);
-          return false;
-        }
+        set({ activeProjectData: applyLocalSettings(activeProjectData, { video_settings: videoSettings }), isDirty: true });
+        return true;
       },
 
       // ── Update Audio Settings ─────────────────────────────────────────────
-      updateAudioSettings: async (audioSettings, fetchClient) => {
+      updateAudioSettings: async (audioSettings) => {
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
-
-        if (isTempProject(activeProjectId)) {
-          set({ activeProjectData: applyLocalSettings(activeProjectData, { audio_settings: audioSettings }), isDirty: true });
-          return true;
-        }
-
-        try {
-          const data = await sendSettingsUpdate(activeProjectId, "/audio", { audio_settings: audioSettings }, fetchClient);
-          if (data?.audio_settings) {
-            set({
-              activeProjectData: applyLocalSettings(activeProjectData, { audio_settings: data.audio_settings }),
-              isDirty: false,
-            });
-          }
-          return true;
-        } catch (err) {
-          console.error("Error updating audio settings:", err);
-          return false;
-        }
+        set({ activeProjectData: applyLocalSettings(activeProjectData, { audio_settings: audioSettings }), isDirty: true });
+        return true;
       },
 
       // ── Update AutoCrop Settings ──────────────────────────────────────────
-      updateAutoCropSettings: async (autoCropSettings, fetchClient) => {
+      updateAutoCropSettings: async (autoCropSettings) => {
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
-
-        if (isTempProject(activeProjectId)) {
-          set({ activeProjectData: applyLocalSettings(activeProjectData, { autocrop_settings: autoCropSettings }), isDirty: true });
-          return true;
-        }
-
-        try {
-          const data = await sendSettingsUpdate(activeProjectId, "/autocrop", { autocrop_settings: autoCropSettings }, fetchClient);
-          if (data?.autocrop_settings) {
-            set({
-              activeProjectData: applyLocalSettings(activeProjectData, { autocrop_settings: data.autocrop_settings }),
-              isDirty: false,
-            });
-          }
-          return true;
-        } catch (err) {
-          console.error("Error updating autocrop settings:", err);
-          return false;
-        }
+        set({ activeProjectData: applyLocalSettings(activeProjectData, { autocrop_settings: autoCropSettings }), isDirty: true });
+        return true;
       },
 
       // ── Reset Active Project ──────────────────────────────────────────────
