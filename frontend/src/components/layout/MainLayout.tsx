@@ -328,7 +328,7 @@ export default function MainLayout(props: MainLayoutProps) {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const urlProjectId = params.get("project_id");
+    const urlProjectId = params.get("id") || params.get("project_id");
     if (urlProjectId) {
       useProjectStore.getState().setActiveProjectId(urlProjectId);
       useProjectStore

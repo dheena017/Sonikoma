@@ -29,6 +29,29 @@ export function useAppState() {
     [activeProjectData]
   );
 
+  const scrapedImages = useMemo<string[]>(
+    () => activeProjectData?.scrapedImages ?? scraper.scrapedImages ?? [],
+    [activeProjectData?.scrapedImages, scraper.scrapedImages]
+  );
+
+  const setScrapedImages = useCallback(
+    (val: string[] | ((prev: string[]) => string[])) => {
+      const cur = useProjectStore.getState().activeProjectData;
+      const currentImgs = cur?.scrapedImages ?? scraper.scrapedImages ?? [];
+      const nextImgs = typeof val === "function" ? val(currentImgs) : val;
+
+      scraper.setScrapedImages(nextImgs);
+
+      if (cur) {
+        useProjectStore.getState().setActiveProject({
+          ...cur,
+          scrapedImages: nextImgs,
+        });
+      }
+    },
+    [scraper]
+  );
+
   const setPanels = useCallback(
     (val: GeneratedPanel[] | ((prev: GeneratedPanel[]) => GeneratedPanel[])) => {
       const cur = useProjectStore.getState().activeProjectData;
@@ -37,9 +60,10 @@ export function useAppState() {
       useProjectStore.getState().setActiveProject({
         project: cur?.project ?? { project_id: "", title: "", url: "" },
         panels: nextPanels as any,
+        scrapedImages: cur?.scrapedImages ?? scraper.scrapedImages ?? [],
       });
     },
-    []
+    [scraper.scrapedImages]
   );
 
   const projectId = activeProjectData?.project?.project_id ?? null;
@@ -59,6 +83,7 @@ export function useAppState() {
         job_id: projectChanged ? null : cur?.project?.job_id ?? null,
       },
       panels: projectChanged ? [] : cur?.panels ?? [],
+      scrapedImages: projectChanged ? [] : cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -119,6 +144,7 @@ export function useAppState() {
     useProjectStore.getState().setActiveProject({
       project: { ...(cur?.project ?? { project_id: "", title: "" }), url: val },
       panels: cur?.panels ?? [],
+      scrapedImages: cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -128,6 +154,7 @@ export function useAppState() {
     useProjectStore.getState().setActiveProject({
       project: { ...(cur?.project ?? { project_id: "", url: "" }), title: val },
       panels: cur?.panels ?? [],
+      scrapedImages: cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -140,6 +167,7 @@ export function useAppState() {
         genre: val,
       },
       panels: cur?.panels ?? [],
+      scrapedImages: cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -149,6 +177,7 @@ export function useAppState() {
     useProjectStore.getState().setActiveProject({
       project: { ...(cur?.project ?? { project_id: "", url: "" }), title: val },
       panels: cur?.panels ?? [],
+      scrapedImages: cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -161,6 +190,7 @@ export function useAppState() {
         chapterNumber: val,
       },
       panels: cur?.panels ?? [],
+      scrapedImages: cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -173,6 +203,7 @@ export function useAppState() {
         chapterTitle: val,
       },
       panels: cur?.panels ?? [],
+      scrapedImages: cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -185,6 +216,7 @@ export function useAppState() {
         author: val,
       },
       panels: cur?.panels ?? [],
+      scrapedImages: cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -197,6 +229,7 @@ export function useAppState() {
         cover_image: val,
       },
       panels: cur?.panels ?? [],
+      scrapedImages: cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -209,6 +242,7 @@ export function useAppState() {
         synopsis: val,
       },
       panels: cur?.panels ?? [],
+      scrapedImages: cur?.scrapedImages ?? [],
     });
   }, []);
 
@@ -449,8 +483,8 @@ export function useAppState() {
       resetWorkspace,
 
       // Scraper
-      scrapedImages: scraper.scrapedImages,
-      setScrapedImages: scraper.setScrapedImages,
+      scrapedImages,
+      setScrapedImages,
       selectedScraped: scraper.selectedScraped,
       setSelectedScraped: scraper.setSelectedScraped,
       isScraping: scraper.isScraping,

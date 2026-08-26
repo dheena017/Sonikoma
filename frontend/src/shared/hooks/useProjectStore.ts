@@ -601,7 +601,7 @@ export const useProjectStore = create<ProjectStoreState>()(
 
         // 🌟 Temp projects exist only in localStorage -> Keep active immediately!
         if (isTempProject(idToHydrate)) {
-          if (currentData && currentData.project) {
+          if (currentData && currentData.project && (currentData.project.project_id === idToHydrate || isTempProject(currentData.project.project_id))) {
             set({
               activeProjectId: idToHydrate,
               projectState: "active",
@@ -610,6 +610,45 @@ export const useProjectStore = create<ProjectStoreState>()(
             });
             return;
           }
+
+          try {
+            const raw = localStorage.getItem("sonikoma-active-project-store");
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              const storeData = parsed?.state?.activeProjectData;
+              if (storeData?.project) {
+                set({
+                  activeProjectId: storeData.project.project_id || idToHydrate,
+                  activeProjectData: storeData,
+                  projectState: "active",
+                  missingProjectInfo: null,
+                  isHydrating: false,
+                });
+                return;
+              }
+            }
+          } catch (e) {
+            console.error("Error reading temp project from local storage:", e);
+          }
+
+          // Initialize local draft if not present
+          const draftData: ActiveProjectData = {
+            project: {
+              project_id: idToHydrate,
+              title: "Draft Project",
+              url: "",
+            },
+            panels: [],
+            scrapedImages: [],
+          };
+          set({
+            activeProjectId: idToHydrate,
+            activeProjectData: draftData,
+            projectState: "active",
+            missingProjectInfo: null,
+            isHydrating: false,
+          });
+          return;
         }
 
         // 🌟 Permanent saved projects -> Fetch latest server state
@@ -642,6 +681,11 @@ export const useProjectStore = create<ProjectStoreState>()(
             }
             get().setProjectMissing(idToHydrate, { isJobId: idToHydrate.startsWith("job_") });
             return;
+          }
+
+          // Preserve in-memory scrapedImages if server response doesn't have them
+          if ((!parsed.scrapedImages || parsed.scrapedImages.length === 0) && currentData?.project?.project_id === idToHydrate && currentData?.scrapedImages?.length) {
+            parsed.scrapedImages = currentData.scrapedImages;
           }
 
           const snapshot = pushHistorySnapshot([], -1, parsed);
