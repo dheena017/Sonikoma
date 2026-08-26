@@ -28,6 +28,7 @@ import {
   Film,
   Plus,
 } from "lucide-react";
+import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
 
 export interface YouTubeVideoItem {
   id: string;
@@ -399,18 +400,7 @@ export default function YouTubeChannelHome({
       </div>
 
       {isLoading ? (
-        <div className="space-y-6">
-          {/* Skeleton Loader */}
-          <div className="bg-neutral-900/40 border border-neutral-800/60 rounded-3xl p-6 animate-pulse grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-7 aspect-video bg-neutral-800/80 rounded-2xl" />
-            <div className="lg:col-span-5 space-y-4 justify-center flex flex-col">
-              <div className="h-4 bg-neutral-800/80 rounded-md w-1/3" />
-              <div className="h-6 bg-neutral-800/90 rounded-md w-4/5" />
-              <div className="h-4 bg-neutral-800/50 rounded-md w-full" />
-              <div className="h-10 bg-neutral-800/70 rounded-xl w-1/2 pt-2" />
-            </div>
-          </div>
-        </div>
+        <RouteLoadingFallback />
       ) : (
         <>
           {/* ── 4. FEATURED SPOTLIGHT HERO VIDEO ── */}

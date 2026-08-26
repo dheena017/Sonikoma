@@ -42,11 +42,12 @@ import {
 import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
 import { ChapterReaderModal } from "./ChapterReaderModal";
 import { ChapterScraperEmptyState } from "./ChapterScraperEmptyState";
-import { NotificationType } from "@/features/app_notification";
+import type { NotificationType } from "@/features/app_notification";
 import { getSeriesEpisodes, separateComicUrl } from "@/api/endpoints/scraper";
 import type { Chapter } from "../types/ChapterTypes";
 import { makeSafeFilename } from "@/shared/utils/downloadNaming";
 import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
+import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
 
 interface SeriesMetadata {
   seriesSlug?: string;
@@ -777,82 +778,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
         </div>
       )}
 
-      {/* ── SKELETON LOADING STATE (shown while crawling, before metadata arrives) ── */}
-      {isLoading && !seriesMetadata && (
-        <div className="space-y-6 animate-pulse">
-          {/* Hero Banner Skeleton */}
-          <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-neutral-900/80 backdrop-blur-2xl shadow-2xl p-6 md:p-8">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-950/20 via-neutral-900/60 to-transparent pointer-events-none" />
-            <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
-              {/* Cover Poster Skeleton */}
-              <div className="w-48 h-64 md:w-56 shrink-0 rounded-2xl skeleton-shimmer bg-neutral-800/80 border border-white/5" />
-              {/* Meta Info Skeleton */}
-              <div className="flex flex-col gap-4 flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="h-5 w-20 rounded-full bg-purple-900/50 border border-purple-700/20" />
-                  <div className="h-5 w-32 rounded-full bg-neutral-800" />
-                </div>
-                <div className="space-y-2.5">
-                  <div className="h-10 w-3/4 rounded-xl skeleton-shimmer bg-neutral-800/80" />
-                  <div className="h-4 w-full rounded-lg bg-neutral-800/60" />
-                  <div className="h-4 w-5/6 rounded-lg bg-neutral-800/60" />
-                  <div className="h-4 w-2/3 rounded-lg bg-neutral-800/40" />
-                </div>
-                <div className="flex flex-wrap gap-3 pt-1">
-                  <div className="h-8 w-28 rounded-xl bg-neutral-800" />
-                  <div className="h-8 w-28 rounded-xl bg-neutral-800" />
-                  <div className="h-8 w-24 rounded-xl bg-neutral-800" />
-                </div>
-                <div className="flex flex-wrap gap-3 pt-3 border-t border-white/5">
-                  <div className="h-9 w-40 rounded-xl bg-purple-900/40 border border-purple-700/20" />
-                  <div className="h-9 w-32 rounded-xl bg-neutral-800" />
-                  <div className="h-9 w-28 rounded-xl bg-neutral-800" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Row Skeleton */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
-                <div className="w-12 h-12 rounded-xl skeleton-shimmer bg-neutral-800" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-6 w-10 rounded skeleton-shimmer bg-neutral-700" />
-                  <div className="h-3 w-20 rounded bg-neutral-800" />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Chapters Header Skeleton */}
-          <div className="flex items-center gap-3">
-            <div className="h-7 w-28 rounded-xl skeleton-shimmer bg-neutral-800" />
-            <div className="h-5 w-16 rounded-full bg-neutral-800" />
-          </div>
-
-          {/* Chapter Card Grid Skeleton */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
-            {[...Array(10)].map((_, i) => (
-              <div key={i} className="rounded-2xl bg-neutral-900/80 border border-neutral-800/60 overflow-hidden shadow-lg">
-                {/* Thumbnail */}
-                <div className="relative w-full aspect-[3/4] skeleton-shimmer bg-neutral-800">
-                  <div className="absolute top-2 left-2 h-5 w-14 rounded-lg bg-neutral-700/80" />
-                </div>
-                {/* Info */}
-                <div className="p-3 space-y-2">
-                  <div className="h-4 w-full rounded bg-neutral-800" />
-                  <div className="h-3 w-2/3 rounded bg-neutral-800/70" />
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="h-3 w-12 rounded bg-neutral-800" />
-                    <div className="h-6 w-16 rounded-xl bg-purple-900/40" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* ── LOADING STATE ── */}
+      {isLoading && !seriesMetadata && <RouteLoadingFallback />}
 
       {/* ── 1. AMBIENT GLASSMORPHIC HERO BANNER (MATCHING SERIES DETAILS PAGE) ── */}
       {seriesMetadata && (

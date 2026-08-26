@@ -10,6 +10,7 @@ import {
   Plus,
 } from "lucide-react";
 import ProjectCard from "@/features/workspace_projects/components/ProjectCard";
+import { ProjectCardSkeleton } from "@/shared/ui/loading";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 
 interface StoredProject {
@@ -124,12 +125,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
 
       {loadingProjects ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map((n) => (
-            <div
-              key={n}
-              className="h-48 bg-neutral-900/50 border border-neutral-800 animate-pulse rounded-2xl"
-            />
-          ))}
+          <ProjectCardSkeleton count={3} />
         </div>
       ) : filteredProjects.length === 0 ? (
         <div className="bg-neutral-900/20 border border-neutral-800/60 rounded-2xl p-10 text-center flex flex-col items-center gap-4">

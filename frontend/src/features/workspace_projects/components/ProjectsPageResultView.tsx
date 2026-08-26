@@ -1,5 +1,6 @@
 import React from "react";
 import { FolderOpen, Loader2, Search, Activity } from "lucide-react";
+import { ProjectCardSkeleton, TableSkeleton } from "@/shared/ui/loading";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 import type { Series } from "@/features/workspace_projects/utils/seriesGrouping";
 import SeriesCard from "@/features/workspace_projects/components/SeriesCard";
@@ -56,9 +57,11 @@ export default function ProjectsPageResultView({
   onBulkDelete,
 }: ProjectsPageResultViewProps) {
   if (loading) {
-    return (
-      <div className="flex justify-center items-center py-20 text-neutral-500">
-        <Loader2 className="h-8 w-8 animate-spin" />
+    return viewMode === "list" ? (
+      <TableSkeleton rows={6} columns={5} />
+    ) : (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <ProjectCardSkeleton count={8} />
       </div>
     );
   }
