@@ -57,8 +57,12 @@ logger = logging.getLogger("sonikoma.api")
 
 def setup_logging():
     """Initializes the global logging configuration."""
-    log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
-    log_level = getattr(logging, log_level_name, logging.INFO)
+    try:
+        from app.core.config import IS_PRODUCTION
+    except ImportError:
+        from core.config import IS_PRODUCTION
+    log_level_name = os.getenv("LOG_LEVEL", "INFO" if IS_PRODUCTION else "DEBUG").upper()
+    log_level = getattr(logging, log_level_name, logging.DEBUG if not IS_PRODUCTION else logging.INFO)
 
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))
