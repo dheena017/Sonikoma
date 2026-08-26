@@ -524,14 +524,19 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
         initialDetails={{
-          seriesTitle: seriesTitle ?? "",
-          chapterNumber: chapterNumber ?? "",
-          chapterTitle: chapterTitle ?? "",
-          scrapedGenre: "",
-          seriesAuthor: "",
-          seriesCoverImage: "",
-          seriesSynopsis: "",
-          status: "Draft",
+          seriesTitle: seriesTitle || activeProjectData?.project?.title || "",
+          chapterNumber: chapterNumber || activeProjectData?.project?.chapterNumber || "",
+          chapterTitle: chapterTitle || activeProjectData?.project?.chapterTitle || "",
+          scrapedGenre: activeProjectData?.project?.genre || "",
+          seriesAuthor: activeProjectData?.project?.author || "",
+          seriesCoverImage:
+            activeProjectData?.project?.cover_image ||
+            activeProjectData?.project?.first_panel_image ||
+            activeProjectData?.panels?.[0]?.image_url ||
+            activeProjectData?.scrapedImages?.[0] ||
+            "",
+          seriesSynopsis: activeProjectData?.project?.synopsis || "",
+          status: activeProjectData?.project?.status || "Draft",
         }}
         onConfirm={async (_details, _shouldGenerate) => {
           onSave?.();

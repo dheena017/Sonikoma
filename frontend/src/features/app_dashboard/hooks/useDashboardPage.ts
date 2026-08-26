@@ -25,10 +25,12 @@ export interface OnboardingTask {
   completed: boolean;
 }
 
+let cachedDashboardProjects: Project[] = [];
+
 export default function useDashboardPage() {
   const { themeMode } = useThemeMode();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>(cachedDashboardProjects);
+  const [loading, setLoading] = useState(cachedDashboardProjects.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [latency, setLatency] = useState<number | null>(null);
   const [analytics, setAnalytics] = useState<any>(null);
@@ -75,12 +77,16 @@ export default function useDashboardPage() {
           throw new Error(`Failed to fetch projects (HTTP ${res.status})`);
         }
         const data = await res.json();
-        setProjects(data.projects || []);
+        const list = data.projects || [];
+        cachedDashboardProjects = list;
+        setProjects(list);
       } catch (err: any) {
         console.error("Failed to fetch projects", err);
-        setError(
-          err.message || "An unexpected error occurred while loading projects."
-        );
+        if (cachedDashboardProjects.length === 0) {
+          setError(
+            err.message || "An unexpected error occurred while loading projects."
+          );
+        }
       } finally {
         setLoading(false);
       }

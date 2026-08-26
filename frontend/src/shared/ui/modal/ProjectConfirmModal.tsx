@@ -29,6 +29,8 @@ import {
   ChevronRight,
   Sliders,
 } from "lucide-react";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { getProxyImageUrl, isApiUrl, isProxyUrl } from "@/api/endpoints/image";
 
 interface ProjectConfirmModalProps {
   isOpen: boolean;
@@ -241,7 +243,10 @@ export default function ProjectConfirmModal({
     generateVoice: true,
     generateSFX: true,
   });
-  const [isSaving, setIsSaving] = useState(false);
+  const [submittingAction, setSubmittingAction] = useState<"draft" | "ai" | null>(null);
+  const isSavingDraft = submittingAction === "draft";
+  const isLaunchingAI = submittingAction === "ai";
+  const isSubmitting = submittingAction !== null;
   const [targetLayout, setTargetLayout] = useState("9:16");
   const [narrationTone, setNarrationTone] = useState("Dramatic");
   const [cropSensitivity, setCropSensitivity] = useState("Balanced");
@@ -309,18 +314,27 @@ export default function ProjectConfirmModal({
     setTargetPlatforms(selected.config.targetPlatforms);
   };
 
-  // Sync state dynamically from initialDetails
+  // Sync state dynamically from initialDetails or activeProjectData fallback
   useEffect(() => {
     const container = document.getElementById("main-scroll-container");
     if (isOpen) {
-      setSeriesTitle(initialDetails?.seriesTitle || "");
-      setChapterNumber(initialDetails?.chapterNumber || "");
-      setChapterTitle(initialDetails?.chapterTitle || "");
-      setScrapedGenre(initialDetails?.scrapedGenre || "");
-      setSeriesAuthor(initialDetails?.seriesAuthor || "");
-      setSeriesCoverImage(initialDetails?.seriesCoverImage || "");
-      setSeriesSynopsis(initialDetails?.seriesSynopsis || "");
-      setProjectStatus(initialDetails?.status || "Draft");
+      const activeData = useProjectStore.getState().activeProjectData;
+      const fallbackCover =
+        initialDetails?.seriesCoverImage ||
+        activeData?.project?.cover_image ||
+        activeData?.project?.first_panel_image ||
+        activeData?.panels?.[0]?.image_url ||
+        activeData?.scrapedImages?.[0] ||
+        "";
+
+      setSeriesTitle(initialDetails?.seriesTitle || activeData?.project?.title || "");
+      setChapterNumber(initialDetails?.chapterNumber || activeData?.project?.chapterNumber || "");
+      setChapterTitle(initialDetails?.chapterTitle || activeData?.project?.chapterTitle || "");
+      setScrapedGenre(initialDetails?.scrapedGenre || activeData?.project?.genre || "");
+      setSeriesAuthor(initialDetails?.seriesAuthor || activeData?.project?.author || "");
+      setSeriesCoverImage(fallbackCover);
+      setSeriesSynopsis(initialDetails?.seriesSynopsis || activeData?.project?.synopsis || "");
+      setProjectStatus(initialDetails?.status || activeData?.project?.status || "Draft");
       setActiveTab("metadata");
       document.body.style.overflow = "hidden";
       if (container) container.style.overflow = "hidden";
@@ -334,43 +348,79 @@ export default function ProjectConfirmModal({
     };
   }, [isOpen, initialDetails]);
 
+  const activeProjectData = useProjectStore((s) => s.activeProjectData);
+  const availableImages = React.useMemo(() => {
+    const list: string[] = [];
+    if (activeProjectData?.scrapedImages?.length) {
+      list.push(...activeProjectData.scrapedImages);
+    }
+    if (activeProjectData?.panels?.length) {
+      activeProjectData.panels.forEach((p) => {
+        if (p.image_url && !list.includes(p.image_url)) {
+          list.push(p.image_url);
+        }
+      });
+    }
+    return list.slice(0, 10);
+  }, [activeProjectData]);
+
+  const displayCoverUrl = React.useMemo(() => {
+    if (localCoverImage) return localCoverImage;
+    if (!seriesCoverImage) return "";
+    if (
+      seriesCoverImage.startsWith("data:") ||
+      seriesCoverImage.startsWith("blob:") ||
+      isApiUrl(seriesCoverImage) ||
+      isProxyUrl(seriesCoverImage)
+    ) {
+      return seriesCoverImage;
+    }
+    return getProxyImageUrl(seriesCoverImage);
+  }, [localCoverImage, seriesCoverImage]);
+
   if (!isOpen) return null;
 
   const handleConfirm = async (shouldGenerate: boolean) => {
-    if (isSaving || isSubmittingRef.current) return;
+    if (isSubmitting || isSubmittingRef.current) return;
     isSubmittingRef.current = true;
-    setIsSaving(true);
-    try {
-      const success = await onConfirm(
-        {
-          seriesTitle: seriesTitle.trim(),
-          chapterNumber: chapterNumber.trim(),
-          chapterTitle: chapterTitle.trim(),
-          scrapedGenre: scrapedGenre.trim(),
-          seriesAuthor: seriesAuthor.trim(),
-          seriesCoverImage: seriesCoverImage.trim(),
-          seriesSynopsis: seriesSynopsis.trim(),
-          status: projectStatus,
-          targetLayout,
-          narrationTone,
-          cropSensitivity,
-          splitTallStrips,
-          ageRating,
-          primaryLanguage,
-          subtitleLanguage,
-          customTags,
-          workspaceFolder: workspaceFolder.trim(),
-          episodePrefix: episodePrefix.trim(),
-          localCoverImage,
-          aiTasks,
-        },
-        shouldGenerate
-      );
-      if (success) onClose();
-    } finally {
-      setIsSaving(false);
-      isSubmittingRef.current = false;
-    }
+    setSubmittingAction(shouldGenerate ? "ai" : "draft");
+
+    // Defer heavy async operations by 1 frame so the button loading spinner paints immediately and smoothly
+    setTimeout(async () => {
+      try {
+        const success = await onConfirm(
+          {
+            seriesTitle: seriesTitle.trim(),
+            chapterNumber: chapterNumber.trim(),
+            chapterTitle: chapterTitle.trim(),
+            scrapedGenre: scrapedGenre.trim(),
+            seriesAuthor: seriesAuthor.trim(),
+            seriesCoverImage: seriesCoverImage.trim(),
+            seriesSynopsis: seriesSynopsis.trim(),
+            status: projectStatus,
+            targetLayout,
+            narrationTone,
+            cropSensitivity,
+            splitTallStrips,
+            ageRating,
+            primaryLanguage,
+            subtitleLanguage,
+            customTags,
+            workspaceFolder: workspaceFolder.trim(),
+            episodePrefix: episodePrefix.trim(),
+            localCoverImage,
+            aiTasks,
+          },
+          shouldGenerate
+        );
+        if (success) onClose();
+      } catch (err) {
+        console.error("[ProjectConfirm] Error during confirmation:", err);
+      } finally {
+        setSubmittingAction(null);
+        isSubmittingRef.current = false;
+      }
+    }, 16);
   };
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -588,14 +638,16 @@ export default function ProjectConfirmModal({
                 </div>
 
                 <div className="flex gap-4 items-start">
-                  <div className="w-[80px] h-[108px] shrink-0 rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0a0a12] flex items-center justify-center relative">
-                    {localCoverImage || seriesCoverImage ? (
+                  <div className="w-[80px] h-[108px] shrink-0 rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0a0a12] flex items-center justify-center relative group">
+                    {displayCoverUrl ? (
                       <>
                         <img
-                          src={localCoverImage || seriesCoverImage}
+                          src={displayCoverUrl}
                           alt="Cover"
                           className="w-full h-full object-cover"
-                          onError={(e) => (e.currentTarget.style.display = "none")}
+                          onError={(e) => {
+                            (e.currentTarget as HTMLElement).style.display = "none";
+                          }}
                         />
                         {isExtractingCover && (
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
@@ -604,11 +656,14 @@ export default function ProjectConfirmModal({
                         )}
                       </>
                     ) : (
-                      <div className="flex flex-col items-center justify-center text-neutral-700 gap-1">
+                      <div className="flex flex-col items-center justify-center text-neutral-600 gap-1 text-center p-2">
                         {isExtractingCover ? (
                           <Loader2 className="h-5 w-5 animate-spin text-purple-400" />
                         ) : (
-                          <ImageIcon className="h-5 w-5" />
+                          <>
+                            <ImageIcon className="h-5 w-5 text-neutral-500" />
+                            <span className="text-[9px] font-mono">No cover</span>
+                          </>
                         )}
                       </div>
                     )}
@@ -623,10 +678,10 @@ export default function ProjectConfirmModal({
                           setSeriesCoverImage(e.target.value);
                           if (e.target.value) setLocalCoverImage(null);
                         }}
-                        placeholder="Image URL..."
+                        placeholder="Paste image URL..."
                         className={`${inputCls} text-xs font-mono`}
                       />
-                      {onAutoExtractCover && (
+                      {onAutoExtractCover ? (
                         <button
                           type="button"
                           onClick={handleAutoExtract}
@@ -636,8 +691,23 @@ export default function ProjectConfirmModal({
                           <Sparkles className="w-3.5 h-3.5" />
                           Auto
                         </button>
-                      )}
+                      ) : availableImages.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (availableImages[0]) {
+                              setSeriesCoverImage(availableImages[0]);
+                              setLocalCoverImage(null);
+                            }
+                          }}
+                          className="px-3 py-2.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/25 text-purple-300 rounded-2xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          First Panel
+                        </button>
+                      ) : null}
                     </div>
+
                     <div className="flex items-center gap-3">
                       <label className="cursor-pointer px-3 py-2 bg-white/[0.04] hover:bg-white/[0.07] text-neutral-400 hover:text-white rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border border-white/[0.07] w-fit">
                         <Upload className="w-3 h-3 text-purple-400" />
@@ -653,6 +723,44 @@ export default function ProjectConfirmModal({
                         <span className="text-[10px] text-emerald-400 font-mono">✓ File uploaded</span>
                       )}
                     </div>
+
+                    {availableImages.length > 0 && (
+                      <div className="pt-1">
+                        <span className="text-[10px] text-neutral-500 font-mono block mb-1.5">
+                          Quick Select from Storyboard:
+                        </span>
+                        <div className="flex gap-1.5 overflow-x-auto pb-1 max-w-full">
+                          {availableImages.slice(0, 6).map((imgUrl, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => {
+                                setSeriesCoverImage(imgUrl);
+                                setLocalCoverImage(null);
+                              }}
+                              className={`w-10 h-10 rounded-lg overflow-hidden border shrink-0 transition-all cursor-pointer ${
+                                seriesCoverImage === imgUrl && !localCoverImage
+                                  ? "border-purple-500 ring-2 ring-purple-500/30 scale-105"
+                                  : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
+                              }`}
+                            >
+                              <img
+                                src={
+                                  imgUrl.startsWith("data:") ||
+                                  imgUrl.startsWith("blob:") ||
+                                  isApiUrl(imgUrl) ||
+                                  isProxyUrl(imgUrl)
+                                    ? imgUrl
+                                    : getProxyImageUrl(imgUrl)
+                                }
+                                alt={`Asset ${i + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1007,10 +1115,10 @@ export default function ProjectConfirmModal({
             <button
               type="button"
               onClick={() => handleConfirm(false)}
-              disabled={!seriesTitle.trim() || isSaving}
+              disabled={!seriesTitle.trim() || isSubmitting}
               className="px-4 py-2.5 bg-white/[0.05] hover:bg-white/[0.08] text-neutral-300 hover:text-white border border-white/[0.08] hover:border-white/[0.14] rounded-xl text-xs font-bold tracking-wide transition-all active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {isSaving ? (
+              {isSavingDraft ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-400" />
                   <span>Saving...</span>
@@ -1026,10 +1134,10 @@ export default function ProjectConfirmModal({
             <button
               type="button"
               onClick={() => handleConfirm(true)}
-              disabled={!seriesTitle.trim() || isSaving}
+              disabled={!seriesTitle.trim() || isSubmitting}
               className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-lg shadow-purple-900/30 border border-purple-400/25 active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {isSaving ? (
+              {isLaunchingAI ? (
                 <>
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   <span>Initializing...</span>

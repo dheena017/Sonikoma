@@ -329,13 +329,17 @@ export default function MainLayout(props: MainLayoutProps) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlProjectId = params.get("id") || params.get("project_id");
+    const storeState = useProjectStore.getState();
     if (urlProjectId) {
-      useProjectStore.getState().setActiveProjectId(urlProjectId);
-      useProjectStore
-        .getState()
-        .hydrateActiveProject(urlProjectId, fetchWithInterceptor);
+      if (
+        storeState.activeProjectId !== urlProjectId ||
+        !storeState.activeProjectData ||
+        storeState.projectState !== "active"
+      ) {
+        storeState.setActiveProjectId(urlProjectId);
+        storeState.hydrateActiveProject(urlProjectId, fetchWithInterceptor);
+      }
     } else {
-      const storeState = useProjectStore.getState();
       if (storeState.activeProjectId && !storeState.activeProjectData) {
         storeState.hydrateActiveProject(null, fetchWithInterceptor);
       }
@@ -780,7 +784,11 @@ export default function MainLayout(props: MainLayoutProps) {
               chapterTitle,
               scrapedGenre,
               seriesAuthor,
-              seriesCoverImage,
+              seriesCoverImage:
+                seriesCoverImage ||
+                scrapedImages?.[0] ||
+                panels?.[0]?.image_url ||
+                "",
               seriesSynopsis,
             }}
           />

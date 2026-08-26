@@ -40,13 +40,21 @@ interface SeriesDetailsPageProps {
   fetchWithInterceptor: typeof fetch;
 }
 
+const cachedSeriesMap = new Map<string, Series>();
+
 export default function SeriesDetailsPage({
   onNavigateHome,
   navigateTo,
   fetchWithInterceptor,
 }: SeriesDetailsPageProps) {
-  const [series, setSeries] = useState<Series | null>(null);
-  const [loading, setLoading] = useState(true);
+  const seriesSlug =
+    window.location.pathname.split("/projects/")[1]?.split("/")[0] ||
+    window.location.pathname.split("/series/")[1]?.split("/")[0] ||
+    "";
+
+  const initialSeries = seriesSlug ? cachedSeriesMap.get(seriesSlug) || null : null;
+  const [series, setSeries] = useState<Series | null>(initialSeries);
+  const [loading, setLoading] = useState(!initialSeries);
   const [error, setError] = useState<string | null>(null);
 
   // Filter, Search, Sort & View states
@@ -69,9 +77,6 @@ export default function SeriesDetailsPage({
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [isReaderModalOpen, setIsReaderModalOpen] = useState(false);
 
-  const seriesSlug =
-    window.location.pathname.split("/projects/")[1]?.split("/")[0] || "";
-
   const actions = useProjectsActions();
 
   useEffect(() => {
@@ -82,7 +87,9 @@ export default function SeriesDetailsPage({
         return;
       }
       try {
-        setLoading(true);
+        if (!cachedSeriesMap.has(seriesSlug)) {
+          setLoading(true);
+        }
         const res = await fetchWithInterceptor("/api/projects");
         if (!res.ok) {
           throw new Error("Failed to load projects");
@@ -99,15 +106,22 @@ export default function SeriesDetailsPage({
         );
 
         if (foundSeries) {
+          cachedSeriesMap.set(seriesSlug, foundSeries);
+          if (foundSeries.slug) cachedSeriesMap.set(foundSeries.slug, foundSeries);
+          if (foundSeries.id) cachedSeriesMap.set(foundSeries.id, foundSeries);
           setSeries(foundSeries);
         } else {
-          setError("Series not found.");
+          if (!cachedSeriesMap.has(seriesSlug)) {
+            setError("Series not found.");
+          }
         }
       } catch (err: any) {
         console.error("Failed to fetch series details", err);
-        setError(
-          err.message || "An error occurred while loading series details."
-        );
+        if (!cachedSeriesMap.has(seriesSlug)) {
+          setError(
+            err.message || "An error occurred while loading series details."
+          );
+        }
       } finally {
         setLoading(false);
       }

@@ -11,6 +11,7 @@ import {
   useGlobalShortcuts,
   useBackendHealth,
   useThemeMode,
+  useProjectStore,
 } from "@/shared/hooks";
 import { useAutoSave } from "@/shared/hooks/useAutoSave";
 import * as api from "@/api";
@@ -603,14 +604,24 @@ export default function App() {
       },
       shouldGenerate: boolean
     ) => {
-      // Update all metadata fields
-      setSeriesTitle(details.seriesTitle);
-      setChapterNumber(details.chapterNumber);
-      setChapterTitle(details.chapterTitle);
-      setScrapedGenre(details.scrapedGenre);
-      setSeriesAuthor(details.seriesAuthor);
-      setSeriesCoverImage(details.seriesCoverImage);
-      setSeriesSynopsis(details.seriesSynopsis);
+      // Atomically update all metadata fields in a single store transaction
+      const cur = useProjectStore.getState().activeProjectData;
+      if (cur) {
+        useProjectStore.getState().setActiveProject({
+          ...cur,
+          project: {
+            ...cur.project,
+            title: details.seriesTitle,
+            chapterNumber: details.chapterNumber,
+            chapterTitle: details.chapterTitle,
+            genre: details.scrapedGenre,
+            author: details.seriesAuthor,
+            cover_image: details.seriesCoverImage || details.localCoverImage || cur.project.cover_image,
+            synopsis: details.seriesSynopsis,
+            status: details.status,
+          },
+        });
+      }
 
       // Always save full project state: metadata, timeline panels, imported images, and production details.
       const saved = await saveProject(

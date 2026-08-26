@@ -9,14 +9,18 @@ export interface UseProjectsDataState {
   setProjects: (projects: Project[]) => void;
 }
 
+let cachedProjects: Project[] = [];
+
 export function useProjectsData(): UseProjectsDataState {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>(cachedProjects);
+  const [loading, setLoading] = useState(cachedProjects.length === 0);
   const [error, setError] = useState<string | null>(null);
 
   const fetchProjects = useCallback(async () => {
     try {
-      setLoading(true);
+      if (cachedProjects.length === 0) {
+        setLoading(true);
+      }
       setError(null);
       const res = await fetch("/api/projects", {
         headers: {
@@ -31,16 +35,16 @@ export function useProjectsData(): UseProjectsDataState {
         throw new Error(`Failed to fetch projects (HTTP ${res.status})`);
       }
       const data = await res.json();
-      if (data.projects) {
-        setProjects(data.projects);
-      } else {
-        setProjects([]);
-      }
+      const list = data.projects || [];
+      cachedProjects = list;
+      setProjects(list);
     } catch (err: any) {
       console.error("Failed to fetch projects", err);
-      setError(
-        err.message || "An unexpected error occurred while loading projects."
-      );
+      if (cachedProjects.length === 0) {
+        setError(
+          err.message || "An unexpected error occurred while loading projects."
+        );
+      }
     } finally {
       setLoading(false);
     }
