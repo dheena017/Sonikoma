@@ -57,10 +57,8 @@ logger = logging.getLogger("sonikoma.api")
 
 def setup_logging():
     """Initializes the global logging configuration."""
-    scraper_debug = os.getenv("SCRAPER_DEBUG", "0").lower() in ("1", "true", "yes") or os.getenv("DEBUG", "0").lower() in ("1", "true", "yes")
-    default_level = "DEBUG" if scraper_debug else "INFO"
-    log_level_name = os.getenv("LOG_LEVEL", default_level).upper()
-    log_level = getattr(logging, log_level_name, logging.DEBUG if scraper_debug else logging.INFO)
+    log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+    log_level = getattr(logging, log_level_name, logging.INFO)
 
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(ColoredFormatter(use_colors=_should_use_colors()))

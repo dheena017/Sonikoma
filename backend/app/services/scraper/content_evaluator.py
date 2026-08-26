@@ -259,9 +259,7 @@ class ScraperDiagnosticsLogger:
     @staticmethod
     def is_debug_enabled() -> bool:
         """Checks if verbose scraper diagnostics are enabled."""
-        import os
-        val = os.getenv("SCRAPER_DEBUG", "false").lower()
-        return val in ("true", "1", "yes") or logger.isEnabledFor(logging.DEBUG)
+        return logger.isEnabledFor(logging.DEBUG)
 
     @classmethod
     def log_scraper_start(cls, url: str, options: Optional[Dict[str, Any]] = None) -> None:
