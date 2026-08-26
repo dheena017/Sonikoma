@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useTransition } from "react";
 
 export interface UseAppRouterProps {
   scrapedImages?: string[];
@@ -30,6 +30,45 @@ export interface UseAppRouterProps {
   [key: string]: any;
 }
 
+const ROUTE_PREFETCH_MAP: Record<string, () => Promise<any>> = {
+  "/": () => import("@/features/app_landing/pages/LandingPage"),
+  "/landing": () => import("@/features/app_landing/pages/LandingPage"),
+  "/login": () => import("@/features/app_auth/pages/LoginPage"),
+  "/register": () => import("@/features/app_auth/pages/RegisterPage"),
+  "/forgot-password": () => import("@/features/app_auth/pages/ForgotPasswordPage"),
+  "/dashboard": () => import("@/features/app_dashboard/pages/DashboardPage"),
+  "/projects": () => import("@/features/workspace_projects/pages/ProjectsPage"),
+  "/scraper": () => import("@/features/workspace_scraper/pages/ScraperPage"),
+  "/editor": () => import("@/features/editor_studio/pages/EditorPage"),
+  "/shortcuts": () => import("@/features/app_shortcuts/pages/ShortcutsPage"),
+  "/creative-suite": () => import("@/features/creative_suite/components/CreativeSuiteLayout"),
+  "/creative-suite/ai-voice": () => import("@/features/creative_voice/pages/VoiceStudioPage"),
+  "/creative-suite/ai-optimizer": () => import("@/features/creative_optimizer/pages/AIOptimizerPage"),
+  "/creative-suite/panel-assistant": () => import("@/features/creative_panel_assistant/pages/PanelAssistantPage"),
+  "/creative-suite/youtube": () => import("@/features/creative_youtube/pages/YouTubePage"),
+  "/settings/account": () => import("@/features/user_settings/pages/SettingsAccountPage"),
+  "/settings/audio": () => import("@/features/editor_audio/pages/AudioSettingsPage"),
+  "/notifications": () => import("@/features/app_notification/pages/NotificationsPage"),
+  "/profile": () => import("@/features/user_profile/pages/ProfilePage"),
+  "/admin": () => import("@/features/system_admin/pages/AdminPage"),
+  "/ai-core": () => import("@/features/ai_core/components/AICoreLayout"),
+  "/video-editor": () => import("@/features/editor_video/pages/VideoEditorPage"),
+  "/image-editor": () => import("@/features/editor_image/pages/ImageEditorPage"),
+};
+
+const prefetchedRoutes = new Set<string>();
+
+export function prefetchRoute(path: string) {
+  const cleanPath = path.split("?")[0].split("#")[0].toLowerCase();
+  const loader =
+    ROUTE_PREFETCH_MAP[cleanPath] ||
+    Object.entries(ROUTE_PREFETCH_MAP).find(([k]) => cleanPath.startsWith(k))?.[1];
+  if (loader && !prefetchedRoutes.has(cleanPath)) {
+    prefetchedRoutes.add(cleanPath);
+    loader().catch(() => {});
+  }
+}
+
 export function useAppRouter(props?: UseAppRouterProps) {
   const [currentPath, setCurrentPath] = useState<string>(() => {
     if (typeof window !== "undefined") {
@@ -37,6 +76,10 @@ export function useAppRouter(props?: UseAppRouterProps) {
     }
     return "/";
   });
+
+  const [, startTransition] = useTransition();
+  const propsRef = useRef<UseAppRouterProps | undefined>(props);
+  propsRef.current = props;
 
   const [lastEditorPath, setLastEditorPath] = useState<string>("/editor/adjust?idx=0");
   const [activeTheme, setActiveTheme] = useState<string>(() => {
@@ -63,40 +106,42 @@ export function useAppRouter(props?: UseAppRouterProps) {
     const modelParam = params.get("model");
     const sourceParam = params.get("source");
 
-    if (urlParam && props?.setTargetUrl) props.setTargetUrl(urlParam);
-    if (modelParam && props?.setSelectedModel) props.setSelectedModel(modelParam);
-    if (sourceParam && props?.setSelectedSource) props.setSelectedSource(sourceParam);
+    if (urlParam && propsRef.current?.setTargetUrl) propsRef.current.setTargetUrl(urlParam);
+    if (modelParam && propsRef.current?.setSelectedModel) propsRef.current.setSelectedModel(modelParam);
+    if (sourceParam && propsRef.current?.setSelectedSource) propsRef.current.setSelectedSource(sourceParam);
   }, []);
 
-  // Popstate and navigation listener
+  // Popstate and navigation listener (attached once on mount)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const handleLocationChange = () => {
       const path = window.location.pathname;
-      setCurrentPath(path);
+      startTransition(() => {
+        setCurrentPath(path);
+      });
 
       if (path.includes("/editor")) {
         setLastEditorPath(path + window.location.search);
         const params = new URLSearchParams(window.location.search);
         const idxVal = params.get("idx");
-        if (idxVal !== null && props?.setEditingImageIdx) {
+        if (idxVal !== null && propsRef.current?.setEditingImageIdx) {
           const idx = parseInt(idxVal, 10);
-          props.setEditingImageIdx(isNaN(idx) ? 0 : idx);
+          propsRef.current.setEditingImageIdx(isNaN(idx) ? 0 : idx);
         }
       }
     };
 
     window.addEventListener("popstate", handleLocationChange);
     return () => window.removeEventListener("popstate", handleLocationChange);
-  }, [props]);
+  }, []);
 
   const navigateTo = useCallback(
     (path: string) => {
       if (typeof window === "undefined") return;
 
       let targetPath = path;
-      if (props?.isAuthenticated && (path === "/" || path === "" || path === "/index.html")) {
+      if (propsRef.current?.isAuthenticated && (path === "/" || path === "" || path === "/index.html")) {
         targetPath = "/dashboard";
       }
 
@@ -104,17 +149,32 @@ export function useAppRouter(props?: UseAppRouterProps) {
       if (current === targetPath) return;
 
       window.history.pushState({}, "", targetPath);
-      setCurrentPath(window.location.pathname);
-      window.dispatchEvent(new Event("popstate"));
+      const newPath = window.location.pathname;
+
+      startTransition(() => {
+        setCurrentPath(newPath);
+      });
+
+      if (newPath.includes("/editor")) {
+        setLastEditorPath(newPath + window.location.search);
+        const params = new URLSearchParams(window.location.search);
+        const idxVal = params.get("idx");
+        if (idxVal !== null && propsRef.current?.setEditingImageIdx) {
+          const idx = parseInt(idxVal, 10);
+          propsRef.current.setEditingImageIdx(isNaN(idx) ? 0 : idx);
+        }
+      }
     },
-    [props?.isAuthenticated]
+    []
   );
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       (window as any).navigateTo = navigateTo;
+      (window as any).prefetchRoute = prefetchRoute;
       return () => {
         delete (window as any).navigateTo;
+        delete (window as any).prefetchRoute;
       };
     }
   }, [navigateTo]);
@@ -127,5 +187,6 @@ export function useAppRouter(props?: UseAppRouterProps) {
     isPipMode,
     setIsPipMode,
     navigateTo,
+    prefetchRoute,
   };
 }

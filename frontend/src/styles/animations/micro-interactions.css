@@ -54,12 +54,17 @@
 
 /* Universal Page Entry Animation */
 .page-transition {
-  animation: page-entry 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: page-entry 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .page-view-transition {
-  animation: page-view-entry 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: opacity, transform, filter;
+  animation: page-view-entry 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .animate-float {

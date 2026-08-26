@@ -93,18 +93,21 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           label: "Dashboard",
           icon: LayoutDashboard,
           active: isDashboardOverview,
+          path: "/dashboard",
           onClick: () => navigateTo("/dashboard"),
         },
         {
           label: "Workspace",
           icon: Layout,
           active: isWorkspace,
+          path: "/scraper",
           onClick: handleNavigateToWorkspace,
         },
         {
           label: "Projects",
           icon: FolderOpen,
           active: isProjects,
+          path: "/projects",
           onClick: () => navigateTo("/projects"),
         },
       ],
@@ -121,30 +124,35 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             currentPath.startsWith("/ai-") ||
             currentPath === "/panel-assistant" ||
             currentPath === "/youtube",
+          path: "/creative-suite",
           onClick: () => navigateTo("/creative-suite"),
         },
         {
           label: "AI Core & Multi-Engine",
           icon: Brain,
           active: currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
+          path: "/ai-core",
           onClick: () => navigateTo("/ai-core"),
         },
         {
           label: "Image Editor",
           icon: Image,
           active: isImageEditorPath,
+          path: "/image-editor",
           onClick: () => navigateTo("/image-editor"),
         },
         {
           label: "Video Editor",
           icon: Film,
           active: isVideoEditorPath,
+          path: "/video-editor",
           onClick: () => navigateTo("/video-editor"),
         },
         {
           label: "Admin",
           icon: Shield,
           active: isAdminPath,
+          path: "/admin",
           onClick: () => navigateTo("/admin"),
         },
       ],
@@ -156,6 +164,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           label: "Notifications",
           icon: Bell,
           active: currentPath === "/notifications",
+          path: "/notifications",
           onClick: () => navigateTo("/notifications"),
           badge: notificationsCount > 0 ? notificationsCount : undefined,
         },
@@ -163,6 +172,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           label: "Profile",
           icon: Sparkles,
           active: currentPath === "/profile",
+          path: "/profile",
           onClick: () => navigateTo("/profile"),
         },
       ],
@@ -177,6 +187,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       const r = e.currentTarget.getBoundingClientRect();
       setRect(r);
       setHover(true);
+      if (item.path) {
+        (window as any).prefetchRoute?.(item.path);
+      }
     };
     const handleLeave = () => setHover(false);
 

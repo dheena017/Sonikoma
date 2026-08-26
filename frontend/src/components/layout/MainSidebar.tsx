@@ -241,6 +241,7 @@ const SidebarInner = ({
           label: "Dashboard",
           icon: LayoutDashboard,
           active: isDashboardOverview,
+          path: "/dashboard",
           onClick: handleNavigateToDashboardOverview,
           enabled: true,
         },
@@ -248,6 +249,7 @@ const SidebarInner = ({
           label: "Workspace",
           icon: Layout,
           active: isWorkspace,
+          path: "/scraper",
           onClick: handleNavigateToWorkspace,
           enabled: true,
         },
@@ -255,6 +257,7 @@ const SidebarInner = ({
           label: "Projects",
           icon: FolderOpen,
           active: isProjects,
+          path: "/projects",
           onClick: () => navigateTo("/projects"),
           enabled: true,
         },
@@ -272,6 +275,7 @@ const SidebarInner = ({
             currentPath.startsWith("/ai-") ||
             currentPath === "/panel-assistant" ||
             currentPath === "/youtube",
+          path: "/creative-suite",
           onClick: () => navigateTo("/creative-suite"),
           enabled: true,
         },
@@ -279,6 +283,7 @@ const SidebarInner = ({
           label: "AI Core & Multi-Engine",
           icon: Brain,
           active: currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
+          path: "/ai-core",
           onClick: () => navigateTo("/ai-core"),
           enabled: true,
         },
@@ -286,6 +291,7 @@ const SidebarInner = ({
           label: "Image Editor",
           icon: Image,
           active: isImageEditorPath,
+          path: "/image-editor",
           onClick: () => navigateTo("/image-editor"),
           enabled: true,
         },
@@ -293,6 +299,7 @@ const SidebarInner = ({
           label: "Video Editor",
           icon: Film,
           active: isVideoEditorPath,
+          path: "/video-editor",
           onClick: () => navigateTo("/video-editor"),
           enabled: true,
         },
@@ -300,6 +307,7 @@ const SidebarInner = ({
           label: "Admin",
           icon: Shield,
           active: isAdminDashboardPath || isAdminPath,
+          path: "/admin",
           onClick: () => navigateTo("/admin"),
           enabled: true,
         },
@@ -312,6 +320,7 @@ const SidebarInner = ({
           label: "Notifications",
           icon: Bell,
           active: currentPath === "/notifications",
+          path: "/notifications",
           onClick: () => navigateTo("/notifications"),
           enabled: true,
           badge: unreadCount > 0 ? unreadCount : undefined,
@@ -320,6 +329,7 @@ const SidebarInner = ({
           label: "Profile",
           icon: Sparkles,
           active: currentPath === "/profile",
+          path: "/profile",
           onClick: () => navigateTo("/profile"),
           enabled: true,
         },
@@ -359,23 +369,28 @@ const SidebarInner = ({
                 </span>
               </div>
               <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
-                Vision Pipeline Suite
+                Comic to Video Studio
               </p>
             </div>
           </div>
 
-          {/* Close / toggle button for drawer */}
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
-            title="Close sidebar drawer"
+            className="md:hidden p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 border border-neutral-800 transition-colors"
           >
-            {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Active Project Sidebar Card Widget */}
-        <ActiveProjectSidebarWidget setDrawerOpen={setDrawerOpen} />
+        {/* ACTIVE PROJECT WIDGET (DRAWER TRIGGER) */}
+        <ActiveProjectSidebarWidget
+          setDrawerOpen={(open) => {
+            const event = new CustomEvent("toggle-project-drawer", {
+              detail: { open },
+            });
+            window.dispatchEvent(event);
+          }}
+        />
 
         {/* NAVIGATION MENUS WITH HIDDEN SCROLLBAR */}
         <div className="space-y-6 overflow-y-auto flex-grow min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1">
@@ -394,6 +409,11 @@ const SidebarInner = ({
                     <li key={item.label}>
                       <button
                         onClick={item.onClick}
+                        onMouseEnter={() => {
+                          if ((item as any).path) {
+                            (window as any).prefetchRoute?.((item as any).path);
+                          }
+                        }}
                         disabled={!item.enabled}
                         className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
                           item.active

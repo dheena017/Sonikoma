@@ -167,6 +167,7 @@ const HeaderInner = ({
   useEffect(() => {
     if (!fetchWithInterceptor) return;
     const pollCredits = async () => {
+      if (typeof document !== "undefined" && document.hidden) return;
       try {
         const payload = await getUserCreditsPayload(fetchWithInterceptor);
         if (payload !== null) {
@@ -190,7 +191,14 @@ const HeaderInner = ({
     };
     pollCredits();
     const interval = setInterval(pollCredits, 30_000);
-    return () => clearInterval(interval);
+    const handleVisibilityChange = () => {
+      if (!document.hidden) pollCredits();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [fetchWithInterceptor, addNotification]);
 
   // Also sync with user prop when it changes (e.g., after daily claim)
@@ -269,6 +277,8 @@ const HeaderInner = ({
   const navigateTo = async (path: string) => {
     if (routerNavigateTo) {
       routerNavigateTo(path);
+    } else if ((window as any).navigateTo) {
+      (window as any).navigateTo(path);
     } else {
       if (isDirty) {
         const confirm = (window as any).confirmAsync || window.confirm;
@@ -449,6 +459,7 @@ const HeaderInner = ({
         <div
           className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
           onClick={() => navigateTo("/dashboard")}
+          onMouseEnter={() => (window as any).prefetchRoute?.("/dashboard")}
         >
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 rounded-full bg-purple-600/30 blur-md pointer-events-none" />
@@ -516,6 +527,7 @@ const HeaderInner = ({
                         setShowSearchDropdown(false);
                         setSearchQuery("");
                       }}
+                      onMouseEnter={() => (window as any).prefetchRoute?.(item.path)}
                       className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-center justify-between group transition-colors cursor-pointer"
                     >
                       <div>

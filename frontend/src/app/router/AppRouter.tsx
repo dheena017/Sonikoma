@@ -8,6 +8,7 @@ import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
 // --- Processing & Feedback Components ---
 import PageNotFound from "@/components/feedback/PageNotFound";
 import LoadingPage from "@/components/feedback/LoadingPage";
+import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
 
 // --- Authentication & Landing Views (Lazy Loaded) ---
 const LandingPage = React.lazy(
@@ -1063,11 +1064,7 @@ export default function AppRouter(props: AppRouterProps) {
       showAutoCropModal={showAutoCropModal}
       showBubbleModal={showBubbleModal}
     >
-      <React.Suspense
-        fallback={
-          <LoadingPage status="Loading Studio..." themeMode={themeMode} />
-        }
-      >
+      <React.Suspense fallback={<RouteLoadingFallback />}>
         {/* PAGE VIEW 1: Main Editor Workspace */}
         <div
           className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
@@ -1381,14 +1378,7 @@ export default function AppRouter(props: AppRouterProps) {
 
         {/* PAGE VIEW 16.5: Dedicated Chapter Scraper Page */}
         {isEpisodeScraperPath && (
-          <React.Suspense
-            fallback={
-              <LoadingPage
-                status="Loading Chapter Scraper..."
-                themeMode={themeMode}
-              />
-            }
-          >
+          <React.Suspense fallback={<RouteLoadingFallback />}>
             <ChapterScraperPage
               addNotification={addNotification}
               fetchWithInterceptor={fetchWithInterceptor}

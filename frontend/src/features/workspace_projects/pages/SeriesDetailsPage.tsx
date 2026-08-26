@@ -32,7 +32,7 @@ import { useProjectsActions } from "../hooks";
 import SeriesEditModal from "../components/SeriesEditModal";
 import SeriesPublishModal from "../components/SeriesPublishModal";
 import SeriesReaderModal from "../components/SeriesReaderModal";
-import LoadingPage from "@/components/feedback/LoadingPage";
+import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
 import { notify } from "@/features/app_notification";
 
 interface SeriesDetailsPageProps {
@@ -277,7 +277,7 @@ export default function SeriesDetailsPage({
   };
 
   if (loading) {
-    return <LoadingPage status="Loading Series Dashboard & Chapters..." />;
+    return <RouteLoadingFallback />;
   }
 
   if (error || !series) {
