@@ -10,9 +10,6 @@ export default function RouteLoadingFallback({
 }: RouteLoadingFallbackProps) {
   return (
     <div className="w-full flex-1 min-h-[460px] flex flex-col items-center justify-center p-6 animate-fade-in select-none">
-      {/* Top moving animated progress bar */}
-      <div className="route-progress-bar" />
-
       {/* Prominent, Centered Glassmorphic Loading Card */}
       <div className="relative flex flex-col items-center gap-5 px-10 py-8 rounded-3xl bg-[#0b0c14]/90 border border-purple-500/30 backdrop-blur-2xl shadow-2xl shadow-purple-950/40 max-w-sm w-full text-center">
         {/* Glow ambient background */}
