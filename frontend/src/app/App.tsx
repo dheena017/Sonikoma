@@ -18,6 +18,7 @@ import * as api from "@/api";
 
 // --- Components ---
 import AppRouter from "@/app/router/AppRouter";
+import { NotificationProvider } from "@/features/app_notification";
 
 // ============================================================================
 // SECTION 2: MAIN APP COMPONENT
@@ -859,7 +860,8 @@ export default function App() {
   ]);
 
   return (
-    <AppRouter
+    <NotificationProvider addNotification={addNotification}>
+      <AppRouter
       currentPath={currentPath}
       lastEditorPath={lastEditorPath}
       activeTheme={activeTheme}
@@ -1076,5 +1078,6 @@ export default function App() {
       bubbleCroppingImgUrl={""}
       croppingImgUrl={""}
     />
+    </NotificationProvider>
   );
 }

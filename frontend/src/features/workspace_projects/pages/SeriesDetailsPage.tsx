@@ -33,6 +33,7 @@ import SeriesEditModal from "../components/SeriesEditModal";
 import SeriesPublishModal from "../components/SeriesPublishModal";
 import SeriesReaderModal from "../components/SeriesReaderModal";
 import LoadingPage from "@/components/feedback/LoadingPage";
+import { notify } from "@/features/app_notification";
 
 interface SeriesDetailsPageProps {
   onNavigateHome: () => void;
@@ -247,9 +248,13 @@ export default function SeriesDetailsPage({
               }
             : null
         );
+        notify.success("Series metadata updated successfully!");
+      } else {
+        notify.error("Failed to update series metadata.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update series metadata on backend", err);
+      notify.error(err.message || "Failed to update series metadata.");
     }
   };
 

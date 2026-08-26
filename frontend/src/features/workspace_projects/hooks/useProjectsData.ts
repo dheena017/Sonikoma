@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
+import { notify } from "@/features/app_notification";
 
 export interface UseProjectsDataState {
   projects: Project[];
@@ -40,10 +41,11 @@ export function useProjectsData(): UseProjectsDataState {
       setProjects(list);
     } catch (err: any) {
       console.error("Failed to fetch projects", err);
+      const errMsg =
+        err.message || "An unexpected error occurred while loading projects.";
+      notify.error(errMsg);
       if (cachedProjects.length === 0) {
-        setError(
-          err.message || "An unexpected error occurred while loading projects."
-        );
+        setError(errMsg);
       }
     } finally {
       setLoading(false);

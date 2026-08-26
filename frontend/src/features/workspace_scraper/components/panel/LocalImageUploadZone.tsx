@@ -47,7 +47,9 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
       return;
     }
     if (onUploadImages) {
+      const count = selectedFiles.length;
       onUploadImages(selectedFiles);
+      addNotification(`Queued ${count} image${count > 1 ? "s" : ""} for upload`, "info");
       setSelectedFiles([]);
     }
   };

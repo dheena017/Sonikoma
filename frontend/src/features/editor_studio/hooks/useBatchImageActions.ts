@@ -416,9 +416,7 @@ export function useBatchImageActions({
               ]);
             } else {
               // ── Route 3B: Tall Webtoon Strip Multi-Panel Batch Slicer ─────
-              console.group(`[DBG] detectLongPanels — Tall Strip Request`);
-              console.log("[DBG] URL:", url);
-              console.groupEnd();
+              console.info(`[Auto Cropper] Analyzing tall strip: ${url}`);
 
               let detectedPanelsList: any[] = [];
               try {
