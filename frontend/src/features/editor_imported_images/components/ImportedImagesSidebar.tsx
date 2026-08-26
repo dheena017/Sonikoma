@@ -30,6 +30,7 @@ import { ChapterScraperDeckProps } from "./types";
 import PanelCard from "./PanelCard";
 import ChapterScraperDeckEmptyState from "./ImportedImagesDeckEmptyState";
 import ImportedAssetsHeader from "./ImportedAssetsHeader";
+import { AssetFilterStatus } from "./ImportedAssetsFilterBar";
 
 import { getSourceName, getProxiedImageUrl } from "@/utils";
 import { updateSelection } from "@/shared/utils/selection";
@@ -236,11 +237,165 @@ const ChapterScraperDeck = React.memo(
     const [hoveredEpisodeIdx, setHoveredEpisodeIdx] = useState<number | null>(
       null
     );
+    const [assetSearchQuery, setAssetSearchQuery] = useState("");
+    const [assetFilterStatus, setAssetFilterStatus] =
+      useState<AssetFilterStatus>("all");
+    const [assetSortOrder, setAssetSortOrder] = useState<"asc" | "desc">("asc");
+
+    const imageDimensionsRef = useRef<Map<string, { width: number; height: number }>>(
+      new Map()
+    );
+
+    useEffect(() => {
+      scrapedImages.forEach((imgUrl) => {
+        if (!imageDimensionsRef.current.has(imgUrl)) {
+          const proxied = getProxiedImageUrl(imgUrl, targetUrl);
+          const img = new Image();
+          img.src = proxied;
+          img.onload = () => {
+            if (img.naturalWidth && img.naturalHeight) {
+              imageDimensionsRef.current.set(imgUrl, {
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+              });
+            }
+          };
+        }
+      });
+    }, [scrapedImages, targetUrl]);
+
     const isEpisodeCollapsed = useProjectStore((s) => s.isEpisodeCollapsed);
     const setIsEpisodeCollapsed = useProjectStore(
       (s) => s.setIsEpisodeCollapsed
     );
+    const activePanelsList = useProjectStore(
+      (s) => s.activeProjectData?.panels || []
+    );
     const activeFetch = fetchWithInterceptor || fetch;
+
+    const inStoryboardCount = React.useMemo(() => {
+      return scrapedImages.filter((imgUrl) => {
+        const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+        return activePanelsList.some(
+          (p) =>
+            p.image_url === imgUrl ||
+            p.image_url === proxiedUrl ||
+            p.original_url === imgUrl
+        );
+      }).length;
+    }, [scrapedImages, activePanelsList, targetUrl]);
+
+    const filterAndSortImages = useCallback(
+      (imagesList: string[], startGlobalIdx: number = 0) => {
+        let indexed = imagesList.map((imgUrl, localIdx) => ({
+          imgUrl,
+          localIdx,
+          globalIdx: startGlobalIdx + localIdx,
+        }));
+
+        if (assetSearchQuery.trim()) {
+          const rawQ = assetSearchQuery.trim();
+          const cleanQ = rawQ.replace(/^#/, "").trim().toLowerCase();
+          const isNumeric = /^\d+$/.test(cleanQ);
+
+          indexed = indexed.filter(({ imgUrl, localIdx, globalIdx }) => {
+            const frameNum = globalIdx + 1;
+            const localNum = localIdx + 1;
+
+            if (isNumeric) {
+              const targetNum = parseInt(cleanQ, 10);
+              return (
+                frameNum === targetNum ||
+                localNum === targetNum ||
+                frameNum.toString().startsWith(cleanQ) ||
+                localNum.toString().startsWith(cleanQ)
+              );
+            }
+
+            const searchTerms = [
+              `#${frameNum}`,
+              `frame ${frameNum}`,
+              `page ${frameNum}`,
+              `#${localNum}`,
+            ];
+            const matchesTextTerm = searchTerms.some((t) =>
+              t.includes(cleanQ)
+            );
+            const filename = imgUrl.split("/").pop()?.toLowerCase() || "";
+            const matchesFilename = filename.includes(cleanQ);
+
+            return matchesTextTerm || matchesFilename;
+          });
+        }
+
+        if (assetFilterStatus === "selected") {
+          indexed = indexed.filter(({ imgUrl }) =>
+            selectedScraped.includes(imgUrl)
+          );
+        } else if (assetFilterStatus === "in_storyboard") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+            return activePanelsList.some(
+              (p) =>
+                p.image_url === imgUrl ||
+                p.image_url === proxiedUrl ||
+                p.original_url === imgUrl
+            );
+          });
+        } else if (assetFilterStatus === "not_in_storyboard") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+            return !activePanelsList.some(
+              (p) =>
+                p.image_url === imgUrl ||
+                p.image_url === proxiedUrl ||
+                p.original_url === imgUrl
+            );
+          });
+        } else if (assetFilterStatus === "portrait") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const dim = imageDimensionsRef.current.get(imgUrl);
+            if (!dim) return true;
+            const ratio = dim.width / dim.height;
+            return ratio <= 1.25 && ratio >= 0.6;
+          });
+        } else if (assetFilterStatus === "landscape") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const dim = imageDimensionsRef.current.get(imgUrl);
+            if (!dim) return true;
+            return dim.width / dim.height > 1.25;
+          });
+        } else if (assetFilterStatus === "tall_strip") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const dim = imageDimensionsRef.current.get(imgUrl);
+            if (!dim) return true;
+            const ratio = dim.width / dim.height;
+            return ratio < 0.6 && ratio >= 0.28;
+          });
+        } else if (assetFilterStatus === "too_tall_strip") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const dim = imageDimensionsRef.current.get(imgUrl);
+            if (!dim) return true;
+            const ratio = dim.width / dim.height;
+            return ratio < 0.28;
+          });
+        }
+
+        if (assetSortOrder === "desc") {
+          indexed = [...indexed].reverse();
+        }
+
+        return indexed;
+      },
+      [
+        assetSearchQuery,
+        assetFilterStatus,
+        assetSortOrder,
+        selectedScraped,
+        activePanelsList,
+        targetUrl,
+      ]
+    );
 
     useEffect(() => {
       (window as any).__scrapedImagesList = scrapedImages;
@@ -668,6 +823,14 @@ const ChapterScraperDeck = React.memo(
                 }>) || [];
               return headerEpisodeGroups.length > 1;
             })()}
+            searchQuery={assetSearchQuery}
+            setSearchQuery={setAssetSearchQuery}
+            filterStatus={assetFilterStatus}
+            setFilterStatus={setAssetFilterStatus}
+            sortOrder={assetSortOrder}
+            setSortOrder={setAssetSortOrder}
+            filteredCount={filterAndSortImages(scrapedImages).length}
+            inStoryboardCount={inStoryboardCount}
           />
 
           {showEmptyState ? (
@@ -1002,117 +1165,134 @@ const ChapterScraperDeck = React.memo(
                               className="bg-[#0c0d16]/70 border border-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl scroll-mt-24"
                             >
                               {/* Episode Horizontal / Grid Cards */}
-                              {viewLayout === "scroll" ? (
-                                <HorizontalScrollContainer>
-                                  {grpImages.map((imgUrl, localIdx) => {
-                                    const globalIdx = grp.startIndex + localIdx;
-                                    const isSelected =
-                                      selectedScraped.includes(imgUrl);
-                                    const proxiedUrl = getProxiedImageUrl(
-                                      imgUrl,
-                                      targetUrl
-                                    );
-                                    const activePanels =
-                                      useProjectStore.getState()
-                                        .activeProjectData?.panels || [];
-                                    const isInTimeline = activePanels.some(
-                                      (p) =>
-                                        p.image_url === imgUrl ||
-                                        p.image_url === proxiedUrl ||
-                                        p.original_url === imgUrl
-                                    );
+                              {(() => {
+                                const processedGrp = filterAndSortImages(
+                                  grpImages,
+                                  grp.startIndex
+                                );
 
-                                    return (
-                                      <PanelCard
-                                        key={`${imgUrl}-${globalIdx}`}
-                                        imgUrl={proxiedUrl}
-                                        rawImgUrl={imgUrl}
-                                        idx={globalIdx}
-                                        displayIdx={localIdx}
-                                        isSelected={isSelected}
-                                        isInTimeline={isInTimeline}
-                                        isBatchCropping={isBatchCropping}
-                                        croppingImgUrl={croppingImgUrl}
-                                        bubbleCroppingImgUrl={
-                                          bubbleCroppingImgUrl
-                                        }
-                                        scrapedImages={scrapedImages}
-                                        mergingIndices={mergingIndices}
-                                        handleMergeWithNext={
-                                          handleMergeWithNext
-                                        }
-                                        setScrapedImages={setScrapedImages}
-                                        setSelectedScraped={setSelectedScraped}
-                                        setConsoleLogs={setConsoleLogs}
-                                        addPanelsToStoryboard={
-                                          addPanelsToStoryboard
-                                        }
-                                        addNotification={addNotification}
-                                        onCardClick={handleCardClick}
-                                        onCardDoubleClick={
-                                          handleCardDoubleClick
-                                        }
-                                        viewLayout="scroll"
-                                      />
-                                    );
-                                  })}
-                                </HorizontalScrollContainer>
-                              ) : (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-3.5 px-1 w-full">
-                                  {grpImages.map((imgUrl, localIdx) => {
-                                    const globalIdx = grp.startIndex + localIdx;
-                                    const isSelected =
-                                      selectedScraped.includes(imgUrl);
-                                    const proxiedUrl = getProxiedImageUrl(
-                                      imgUrl,
-                                      targetUrl
-                                    );
-                                    const activePanels =
-                                      useProjectStore.getState()
-                                        .activeProjectData?.panels || [];
-                                    const isInTimeline = activePanels.some(
-                                      (p) =>
-                                        p.image_url === imgUrl ||
-                                        p.image_url === proxiedUrl ||
-                                        p.original_url === imgUrl
-                                    );
+                                if (processedGrp.length === 0) {
+                                  return (
+                                    <div className="p-4 text-center text-xs font-mono text-neutral-500 bg-neutral-950/40 rounded-xl border border-neutral-900">
+                                      No frames match the active filter in this episode.
+                                    </div>
+                                  );
+                                }
 
-                                    return (
-                                      <PanelCard
-                                        key={`${imgUrl}-${globalIdx}`}
-                                        imgUrl={proxiedUrl}
-                                        rawImgUrl={imgUrl}
-                                        idx={globalIdx}
-                                        displayIdx={localIdx}
-                                        isSelected={isSelected}
-                                        isInTimeline={isInTimeline}
-                                        isBatchCropping={isBatchCropping}
-                                        croppingImgUrl={croppingImgUrl}
-                                        bubbleCroppingImgUrl={
-                                          bubbleCroppingImgUrl
-                                        }
-                                        scrapedImages={scrapedImages}
-                                        mergingIndices={mergingIndices}
-                                        handleMergeWithNext={
-                                          handleMergeWithNext
-                                        }
-                                        setScrapedImages={setScrapedImages}
-                                        setSelectedScraped={setSelectedScraped}
-                                        setConsoleLogs={setConsoleLogs}
-                                        addPanelsToStoryboard={
-                                          addPanelsToStoryboard
-                                        }
-                                        addNotification={addNotification}
-                                        onCardClick={handleCardClick}
-                                        onCardDoubleClick={
-                                          handleCardDoubleClick
-                                        }
-                                        viewLayout="grid"
-                                      />
-                                    );
-                                  })}
-                                </div>
-                              )}
+                                return viewLayout === "scroll" ? (
+                                  <HorizontalScrollContainer>
+                                    {processedGrp.map(
+                                      ({ imgUrl, localIdx, globalIdx }) => {
+                                        const isSelected =
+                                          selectedScraped.includes(imgUrl);
+                                        const proxiedUrl = getProxiedImageUrl(
+                                          imgUrl,
+                                          targetUrl
+                                        );
+                                        const isInTimeline =
+                                          activePanelsList.some(
+                                            (p) =>
+                                              p.image_url === imgUrl ||
+                                              p.image_url === proxiedUrl ||
+                                              p.original_url === imgUrl
+                                          );
+
+                                        return (
+                                          <PanelCard
+                                            key={`${imgUrl}-${globalIdx}`}
+                                            imgUrl={proxiedUrl}
+                                            rawImgUrl={imgUrl}
+                                            idx={globalIdx}
+                                            displayIdx={localIdx}
+                                            isSelected={isSelected}
+                                            isInTimeline={isInTimeline}
+                                            isBatchCropping={isBatchCropping}
+                                            croppingImgUrl={croppingImgUrl}
+                                            bubbleCroppingImgUrl={
+                                              bubbleCroppingImgUrl
+                                            }
+                                            scrapedImages={scrapedImages}
+                                            mergingIndices={mergingIndices}
+                                            handleMergeWithNext={
+                                              handleMergeWithNext
+                                            }
+                                            setScrapedImages={setScrapedImages}
+                                            setSelectedScraped={
+                                              setSelectedScraped
+                                            }
+                                            setConsoleLogs={setConsoleLogs}
+                                            addPanelsToStoryboard={
+                                              addPanelsToStoryboard
+                                            }
+                                            addNotification={addNotification}
+                                            onCardClick={handleCardClick}
+                                            onCardDoubleClick={
+                                              handleCardDoubleClick
+                                            }
+                                            viewLayout="scroll"
+                                          />
+                                        );
+                                      }
+                                    )}
+                                  </HorizontalScrollContainer>
+                                ) : (
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-3.5 px-1 w-full">
+                                    {processedGrp.map(
+                                      ({ imgUrl, localIdx, globalIdx }) => {
+                                        const isSelected =
+                                          selectedScraped.includes(imgUrl);
+                                        const proxiedUrl = getProxiedImageUrl(
+                                          imgUrl,
+                                          targetUrl
+                                        );
+                                        const isInTimeline =
+                                          activePanelsList.some(
+                                            (p) =>
+                                              p.image_url === imgUrl ||
+                                              p.image_url === proxiedUrl ||
+                                              p.original_url === imgUrl
+                                          );
+
+                                        return (
+                                          <PanelCard
+                                            key={`${imgUrl}-${globalIdx}`}
+                                            imgUrl={proxiedUrl}
+                                            rawImgUrl={imgUrl}
+                                            idx={globalIdx}
+                                            displayIdx={localIdx}
+                                            isSelected={isSelected}
+                                            isInTimeline={isInTimeline}
+                                            isBatchCropping={isBatchCropping}
+                                            croppingImgUrl={croppingImgUrl}
+                                            bubbleCroppingImgUrl={
+                                              bubbleCroppingImgUrl
+                                            }
+                                            scrapedImages={scrapedImages}
+                                            mergingIndices={mergingIndices}
+                                            handleMergeWithNext={
+                                              handleMergeWithNext
+                                            }
+                                            setScrapedImages={setScrapedImages}
+                                            setSelectedScraped={
+                                              setSelectedScraped
+                                            }
+                                            setConsoleLogs={setConsoleLogs}
+                                            addPanelsToStoryboard={
+                                              addPanelsToStoryboard
+                                            }
+                                            addNotification={addNotification}
+                                            onCardClick={handleCardClick}
+                                            onCardDoubleClick={
+                                              handleCardDoubleClick
+                                            }
+                                            viewLayout="grid"
+                                          />
+                                        );
+                                      }
+                                    )}
+                                  </div>
+                                );
+                              })()}
                             </div>
                           );
                         })}
@@ -1121,17 +1301,35 @@ const ChapterScraperDeck = React.memo(
                   );
                 }
 
+                const processedFlat = filterAndSortImages(scrapedImages, 0);
+
+                if (processedFlat.length === 0 && scrapedImages.length > 0) {
+                  return (
+                    <div className="p-8 text-center text-xs font-mono text-neutral-400 bg-neutral-950/40 rounded-2xl border border-neutral-850 space-y-2">
+                      <p className="text-neutral-300 font-bold">No assets match your search/filter criteria.</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAssetSearchQuery("");
+                          setAssetFilterStatus("all");
+                          setAssetSortOrder("asc");
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60 transition-all text-[11px] font-mono cursor-pointer"
+                      >
+                        Reset All Filters
+                      </button>
+                    </div>
+                  );
+                }
+
                 return viewLayout === "scroll" ? (
                   <HorizontalScrollContainer>
-                    {scrapedImages.map((imgUrl, idx) => {
+                    {processedFlat.map(({ imgUrl, globalIdx }) => {
                       const isSelected = selectedScraped.includes(imgUrl);
                       const proxiedUrl = imgUrl?.startsWith("/api/")
                         ? imgUrl
                         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
-                      const activePanels =
-                        useProjectStore.getState().activeProjectData?.panels ||
-                        [];
-                      const isInTimeline = activePanels.some(
+                      const isInTimeline = activePanelsList.some(
                         (p) =>
                           p.image_url === imgUrl ||
                           p.image_url === proxiedUrl ||
@@ -1140,10 +1338,10 @@ const ChapterScraperDeck = React.memo(
 
                       return (
                         <PanelCard
-                          key={`${imgUrl}-${idx}`}
+                          key={`${imgUrl}-${globalIdx}`}
                           imgUrl={proxiedUrl}
                           rawImgUrl={imgUrl}
-                          idx={idx}
+                          idx={globalIdx}
                           isSelected={isSelected}
                           isInTimeline={isInTimeline}
                           isBatchCropping={isBatchCropping}
@@ -1175,15 +1373,12 @@ const ChapterScraperDeck = React.memo(
                   </HorizontalScrollContainer>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-3.5 px-1 w-full">
-                    {scrapedImages.map((imgUrl, idx) => {
+                    {processedFlat.map(({ imgUrl, globalIdx }) => {
                       const isSelected = selectedScraped.includes(imgUrl);
                       const proxiedUrl = imgUrl?.startsWith("/api/")
                         ? imgUrl
                         : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
-                      const activePanels =
-                        useProjectStore.getState().activeProjectData?.panels ||
-                        [];
-                      const isInTimeline = activePanels.some(
+                      const isInTimeline = activePanelsList.some(
                         (p) =>
                           p.image_url === imgUrl ||
                           p.image_url === proxiedUrl ||
@@ -1192,10 +1387,10 @@ const ChapterScraperDeck = React.memo(
 
                       return (
                         <PanelCard
-                          key={`${imgUrl}-${idx}`}
+                          key={`${imgUrl}-${globalIdx}`}
                           imgUrl={proxiedUrl}
                           rawImgUrl={imgUrl}
-                          idx={idx}
+                          idx={globalIdx}
                           isSelected={isSelected}
                           isInTimeline={isInTimeline}
                           isBatchCropping={isBatchCropping}

@@ -1,7 +1,5 @@
 import React from "react";
 import {
-  LayoutGrid,
-  Rows,
   Save,
   PanelLeft,
   PanelLeftClose,
@@ -15,8 +13,19 @@ import {
   X,
   RefreshCw,
   Images,
+  Search,
+  ArrowDownUp,
+  CheckCircle2,
+  Layers,
+  CircleDashed,
+  ChevronDown,
+  Filter,
 } from "lucide-react";
 import EditorHeaderFrame from "@/features/editor_studio/components/EditorHeaderFrame";
+import ImportedAssetsFilterBar, {
+  AssetFilterStatus,
+  AssetSortOrder,
+} from "./ImportedAssetsFilterBar";
 
 export interface ImportedAssetsHeaderProps {
   scrapedImagesLength: number;
@@ -43,6 +52,14 @@ export interface ImportedAssetsHeaderProps {
   isEpisodeCollapsed?: boolean;
   setIsEpisodeCollapsed?: (collapsed: boolean) => void;
   hasMultipleEpisodes?: boolean;
+  searchQuery?: string;
+  setSearchQuery?: (q: string) => void;
+  filterStatus?: AssetFilterStatus;
+  setFilterStatus?: (status: AssetFilterStatus) => void;
+  sortOrder?: "asc" | "desc";
+  setSortOrder?: (order: "asc" | "desc") => void;
+  filteredCount?: number;
+  inStoryboardCount?: number;
 }
 
 export default function ImportedAssetsHeader({
@@ -70,10 +87,35 @@ export default function ImportedAssetsHeader({
   isEpisodeCollapsed,
   setIsEpisodeCollapsed,
   hasMultipleEpisodes = false,
+  searchQuery = "",
+  setSearchQuery,
+  filterStatus = "all",
+  setFilterStatus,
+  sortOrder = "asc",
+  setSortOrder,
+  filteredCount,
+  inStoryboardCount = 0,
 }: ImportedAssetsHeaderProps) {
   const isAllSelected =
     selectedScrapedLength > 0 && selectedScrapedLength === scrapedImagesLength;
   const isBusy = isBatchCropping || isCleaningBubbles || isBatchMerging;
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsFilterDropdownOpen(false);
+      }
+    };
+    if (isFilterDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isFilterDropdownOpen]);
 
   // ──────────────────────────────────────────────────────────────────────────
   // Contextual Selection Toolbar Mode
@@ -98,22 +140,15 @@ export default function ImportedAssetsHeader({
           </button>
         </div>
 
-        {/* Select / Deselect All */}
-        <button
-          type="button"
-          onClick={handleSelectAllToggle}
-          className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
-        >
-          {isAllSelected ? (
-            <Square className="w-3.5 h-3.5 text-emerald-400" />
-          ) : (
-            <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
-          )}
-          <span>{isAllSelected ? "Deselect All" : "Select All"}</span>
-        </button>
-
-        {/* Filter Quick Actions */}
-        <div className="hidden sm:flex items-center gap-1 bg-neutral-900/80 p-0.5 rounded-xl border border-neutral-800 text-[10px] font-mono">
+        {/* Bulk quick selectors */}
+        <div className="flex items-center gap-1 bg-neutral-900/80 p-0.5 rounded-xl border border-neutral-800 text-[11px] font-mono">
+          <button
+            type="button"
+            onClick={handleSelectAllToggle}
+            className="px-2.5 py-1 rounded-lg hover:bg-neutral-800 text-neutral-300 hover:text-white transition-colors cursor-pointer font-bold"
+          >
+            {isAllSelected ? "Deselect All" : "All"}
+          </button>
           {handleSelectOdd && (
             <button
               type="button"
@@ -222,11 +257,10 @@ export default function ImportedAssetsHeader({
             </button>
           ))}
 
-        {/* Stitch */}
+        {/* Batch Stitch / Merge */}
         {handleBatchMergeSelected && (
           <button
             type="button"
-            disabled={isBusy || selectedScrapedLength < 2}
             onClick={handleBatchMergeSelected}
             className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
           >
@@ -275,44 +309,31 @@ export default function ImportedAssetsHeader({
           </h3>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-300 font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            {scrapedImagesLength}{" "}
+            {filteredCount !== undefined
+              ? `${filteredCount} / ${scrapedImagesLength}`
+              : scrapedImagesLength}{" "}
             {scrapedImagesLength === 1 ? "Asset" : "Assets"}
           </span>
         </div>
-        <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden lg:block">
-          Scraped image pool, OCR speech bubble extractor & AI smart-crop deck
-        </p>
       </div>
     </div>
   );
 
-  const viewToggle = (
-    <div className="flex items-center bg-neutral-950/90 p-0.5 rounded-xl border border-neutral-800 shadow-inner">
-      <button
-        type="button"
-        onClick={() => setViewLayout("scroll")}
-        title="Horizontal Scroll View"
-        className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${viewLayout === "scroll"
-            ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(52,211,153,0.4)]"
-            : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-          }`}
-      >
-        <Rows className="w-3.5 h-3.5" />
-        <span>Scroll</span>
-      </button>
-      <button
-        type="button"
-        onClick={() => setViewLayout("grid")}
-        title="Grid View"
-        className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${viewLayout === "grid"
-            ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_0_12px_rgba(52,211,153,0.4)]"
-            : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-          }`}
-      >
-        <LayoutGrid className="w-3.5 h-3.5" />
-        <span>Grid</span>
-      </button>
-    </div>
+  const centerBlock = (
+    <ImportedAssetsFilterBar
+      searchQuery={searchQuery || ""}
+      setSearchQuery={setSearchQuery || (() => {})}
+      filterStatus={(filterStatus as AssetFilterStatus) || "all"}
+      setFilterStatus={(setFilterStatus as any) || (() => {})}
+      sortOrder={sortOrder || "asc"}
+      setSortOrder={setSortOrder || (() => {})}
+      viewLayout={viewLayout}
+      setViewLayout={setViewLayout}
+      totalAssetsCount={scrapedImagesLength}
+      filteredAssetsCount={filteredCount ?? scrapedImagesLength}
+      selectedCount={selectedScrapedLength}
+      inStoryboardCount={inStoryboardCount ?? 0}
+    />
   );
 
   const rightBlock = (
@@ -341,11 +362,6 @@ export default function ImportedAssetsHeader({
         </button>
       )}
 
-      {/* Resource Pool Badge */}
-      <span className="hidden sm:inline-flex px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-emerald-500/25 text-emerald-300 text-[10px] font-bold uppercase tracking-wider font-mono shadow-inner">
-        Resource Pool
-      </span>
-
       {/* Episode sidebar toggle — only when multiple episodes loaded */}
       {hasMultipleEpisodes && setIsEpisodeCollapsed && (
         <button
@@ -356,10 +372,11 @@ export default function ImportedAssetsHeader({
               ? "Show Episode Navigator"
               : "Hide Episode Navigator"
           }
-          className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${isEpisodeCollapsed
+          className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
+            isEpisodeCollapsed
               ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-emerald-300 hover:border-emerald-700"
               : "bg-emerald-600/20 border-emerald-600/50 text-emerald-300 hover:bg-emerald-600/30"
-            }`}
+          }`}
         >
           {isEpisodeCollapsed ? (
             <>
@@ -391,7 +408,7 @@ export default function ImportedAssetsHeader({
   return (
     <EditorHeaderFrame
       left={titleBlock}
-      center={viewToggle}
+      center={centerBlock}
       right={rightBlock}
       className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-emerald-950/40 border border-emerald-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
     />
