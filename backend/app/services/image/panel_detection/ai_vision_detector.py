@@ -32,6 +32,8 @@ async def detect_ai_vision(
         width, height = pil_img.size
         aspect_ratio = height / float(max(1, width))
 
+    logger.debug(f"[AI Vision Detector] Image: {width}x{height}px (aspect_ratio={aspect_ratio:.3f}), bubble_boxes={len(bubble_boxes) if bubble_boxes else 0}")
+
     # Fast heuristic / CV flow determination
     if aspect_ratio >= 2.2:
         flow = ReadingFlow.TOP_TO_BOTTOM
@@ -40,11 +42,14 @@ async def detect_ai_vision(
     else:
         flow = ReadingFlow.LEFT_TO_RIGHT
 
+    logger.debug(f"[AI Vision Detector] Reading flow resolved to: {flow.value if hasattr(flow, 'value') else flow}")
+
     extracted_dialogue: List[Dict[str, Any]] = []
 
     # If bubble boxes were provided, run OCR on each bubble patch
     if bubble_boxes:
         for idx, box in enumerate(bubble_boxes):
+            logger.debug(f"[AI Vision Detector] Bubble #{idx+1} box patch: {box}")
             extracted_dialogue.append({
                 "bubble_index": idx,
                 "text": "",  # Populated via OCR if active

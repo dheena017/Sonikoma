@@ -54,8 +54,14 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
 
     pil_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
     img_w, img_h = pil_img.size
+    aspect_ratio = img_h / float(max(1, img_w))
 
-    logger.info(f"[LongPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image...")
+    logger.info(f"[LongPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image (aspect_ratio={aspect_ratio:.2f})...")
+    logger.debug(
+        f"[LongPanels Detector] Parameters: min_panel_height={request.min_panel_height}, "
+        f"sensitivity={request.sensitivity}, background_mode={request.background_mode}, "
+        f"auto_split={request.auto_split}, engine_mode={request.engine_mode}, bleed={request.bleed_padding_px}px"
+    )
 
     # ── ENGINE 1: YOLO Deep-Learning Speech Bubble & Entity Segmentation ──────
     # We run YOLO first so bubble locations guide and protect panel seam slicing
@@ -67,16 +73,19 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
             overlap = 300
             step = chunk_h - overlap
             seen_bubbles = []
+            logger.debug(f"[LongPanels: YOLO] Image height {img_h}px > 4000px; activating sliding window chunking (chunk_h={chunk_h}, overlap={overlap}, step={step})...")
             
             for y_offset in range(0, img_h, step):
                 box_top = y_offset
                 box_bottom = min(img_h, y_offset + chunk_h)
+                logger.debug(f"[LongPanels: YOLO] Processing window slice: y=[{box_top}..{box_bottom}]")
                 chunk_img = pil_img.crop((0, box_top, img_w, box_bottom))
                 chunk_buf = io.BytesIO()
                 chunk_img.save(chunk_buf, format="PNG")
                 chunk_bytes = chunk_buf.getvalue()
 
                 chunk_bubbles = detect_yolo_entities(chunk_bytes, conf_threshold=0.25)
+                logger.debug(f"[LongPanels: YOLO] Window y=[{box_top}..{box_bottom}] yielded {len(chunk_bubbles)} raw bubble(s)")
                 for cb in chunk_bubbles:
                     # Offset Y coordinate to absolute image coordinates
                     cb.y += box_top
@@ -90,6 +99,8 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                     )
                     if not is_dup:
                         seen_bubbles.append(cb)
+                    else:
+                        logger.debug(f"[LongPanels: YOLO] Deduplicating overlap bubble at ({cb.x},{cb.y})")
             
             seen_bubbles.sort(key=lambda b: (b.y, b.x))
             for idx, b in enumerate(seen_bubbles):
@@ -98,8 +109,12 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
             yolo_bubbles = seen_bubbles
             logger.info(f"[LongPanels: YOLO] Sliding window detected {len(yolo_bubbles)} speech bubbles.")
         else:
+            logger.debug(f"[LongPanels: YOLO] Running single-pass YOLO entity detection on {len(raw_bytes)} raw bytes...")
             yolo_bubbles = detect_yolo_entities(raw_bytes, conf_threshold=0.25)
             logger.info(f"[LongPanels: YOLO] Single-pass detected {len(yolo_bubbles)} speech bubbles.")
+        
+        for bi, b in enumerate(yolo_bubbles):
+            logger.debug(f"[LongPanels: YOLO Bubble #{bi+1}] id={b.bubble_id}, pos=({b.x},{b.y},{b.width},{b.height}), conf={b.confidence:.2f}")
     except Exception as e:
         logger.warning(f"[LongPanels: YOLO] YOLO detection error: {e}", exc_info=True)
 
@@ -109,6 +124,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
     ]
 
     # ── ENGINE 2: OpenCV & Webtoon Adaptive Gutter Variance Slicing ───────────
+    logger.debug(f"[LongPanels: OpenCV] Running detect_opencv_boxes (min_width_pct=0.15, min_height={request.min_panel_height})...")
     cv_res = detect_opencv_boxes(
         image_bytes=raw_bytes,
         min_width_pct=0.15,
@@ -116,9 +132,11 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
         bleed_padding_px=request.bleed_padding_px
     )
     cv_panels = cv_res.get("panels", [])
+    logger.debug(f"[LongPanels: OpenCV] detect_opencv_boxes yielded {len(cv_panels)} candidate panel(s)")
 
     # Run horizontal projection valley segmenter guided by YOLO speech bubbles
     if (len(cv_panels) <= 1 or img_h > img_w * 2):
+        logger.debug(f"[LongPanels: OpenCV] Triggering vertical strip valley segmenter (panels_count={len(cv_panels)}, aspect_ratio={aspect_ratio:.2f})...")
         try:
             import numpy as np
             from services.image.panel_detection.panel_detector import (
@@ -128,6 +146,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
             gray_arr = np.array(pil_img.convert("L"))
             bg_res = _detect_bg_color_and_threshold(gray_arr, request.background_mode, request.sensitivity)
             is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
+            logger.debug(f"[LongPanels: OpenCV] Background analysis: is_white={is_white_bg}, thresh={threshold_val}, median_bg={median_bg}, bg_std={bg_std:.2f}")
 
             webtoon_res = detect_vertical_strip_panels(
                 gray_arr=gray_arr,
@@ -146,12 +165,15 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
             if webtoon_boxes:
                 cv_panels = webtoon_boxes
                 logger.info(f"[LongPanels: OpenCV] Webtoon gutter segmenter extracted {len(cv_panels)} panel seams (guided by {len(yolo_ocr_boxes)} bubbles).")
+                for wbi, wb in enumerate(cv_panels):
+                    logger.debug(f"[LongPanels: Seam #{wbi+1}] x={wb.get('x')}, y={wb.get('y')}, w={wb.get('w')}, h={wb.get('h')}")
         except Exception as e:
             logger.warning(f"[LongPanels: OpenCV] Webtoon seam segmenter fallback: {e}", exc_info=True)
 
     # ── ENGINE 3: AI Vision Reading Flow & OCR (Optional Mode) ────────────────
     flow = "top_to_bottom"
     if request.engine_mode == "ai_vision":
+        logger.debug("[LongPanels: AI Vision] Classifying reading flow via AI multimodal detector...")
         try:
             from services.image.panel_detection.ai_vision_detector import detect_ai_vision
             ai_res = await detect_ai_vision(raw_bytes)

@@ -473,6 +473,11 @@ class AIOrchestrator:
                     if (cp_provider, cp_model) not in candidates:
                         candidates.append((cp_provider, cp_model))
 
+        logger.debug(
+            f"[AI Orchestrator] Execution plan for cap='{cap_clean}': mode={'manual' if model else 'system'}, "
+            f"candidates={candidates}, policy={policy}"
+        )
+
         last_error = None
         attempt = 0
         from services.ai.skills.coordinator import execute_provider_call, FallbackCoordinator
@@ -480,6 +485,7 @@ class AIOrchestrator:
         # 3. Execution Loop across validated candidates
         for p_cand, m_cand in candidates:
             attempt += 1
+            logger.debug(f"[AI Orchestrator] Attempt #{attempt}: evaluating candidate provider='{p_cand}', model='{m_cand}'")
             # Verify provider credentials
             if not cls.is_provider_configured(p_cand, user_keys):
                 logger.debug(f"[AI Orchestrator] Provider '{p_cand}' unconfigured. Skipping candidate '{m_cand}'.")
