@@ -20,10 +20,37 @@ except ImportError:
     HAS_TESSERACT = False
 
 
-def extract_text_from_image_bytes(image_bytes: bytes) -> str:
-    """Extracts raw dialogue text from an image buffer using Tesseract OCR if available."""
+import time
+import base64
+from schemas.ocr import (
+    DetectTextRequest,
+    DetectTextResponse,
+    OcrTextItem,
+    OcrTextType
+)
+from services.image.utils.image_resolver import resolve_image_to_buffer
+from services.image.panel_detection.speech_bubble_detector import detect_yolo_entities
+
+
+def extract_text_from_image_bytes(image_bytes: bytes, languages: List[str] = ["en"]) -> str:
+    """Extracts raw dialogue text from an image buffer using EasyOCR or Tesseract fallback."""
     if not image_bytes:
         return ""
+    try:
+        from services.image.ocr.ocr_engine import _load_ocr_reader, _HAS_EASYOCR
+        if _HAS_EASYOCR:
+            reader = _load_ocr_reader(languages)
+            if reader is not None:
+                img_pil = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+                img_np = np.array(img_pil)
+                results = reader.readtext(img_np)
+                lines = [r[1].strip() for r in results if r[1].strip() and float(r[2]) >= 0.20]
+                if lines:
+                    return " ".join(lines)
+    except Exception as e:
+        logger.debug(f"[OCR Service] EasyOCR quick pass: {e}")
+
+    # Fallback to Tesseract
     try:
         img = Image.open(io.BytesIO(image_bytes))
         if img.mode not in ("RGB", "L"):
@@ -44,6 +71,136 @@ def extract_text_from_image_bytes(image_bytes: bytes) -> str:
     except Exception as err:
         logger.warning(f"[OCR Service] Tesseract extraction warning: {err}")
     return ""
+
+
+async def extract_bubble_guided_ocr(request: DetectTextRequest) -> DetectTextResponse:
+    """
+    High-precision bubble-guided OCR:
+    1. Detects YOLO speech bubbles.
+    2. Crops image exclusively within each speech bubble frame.
+    3. Runs OCR inside the cropped bubble to eliminate all background art noise.
+    """
+    start_time = time.perf_counter()
+
+    raw_bytes = None
+    if request.url:
+        resolved = await resolve_image_to_buffer(request.url)
+        raw_bytes = resolved.get("data")
+    elif request.image_base64:
+        b64 = request.image_base64
+        if "," in b64:
+            b64 = b64.split(",", 1)[1]
+        raw_bytes = base64.b64decode(b64)
+
+    if not raw_bytes:
+        raise ValueError("Could not resolve image data for OCR extraction.")
+
+    pil_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
+    img_w, img_h = pil_img.size
+
+    # 1. Detect YOLO speech bubbles
+    bubbles = detect_yolo_entities(raw_bytes, conf_threshold=0.20)
+    segments: List[OcrTextItem] = []
+    transcripts: List[str] = []
+
+    for idx, b in enumerate(bubbles):
+        # Dynamically scaled padding proportional to resolution
+        pad = max(2, int(min(b.width, b.height) * 0.05))
+        x1 = max(0, b.x - pad)
+        y1 = max(0, b.y - pad)
+        x2 = min(img_w, b.x + b.width + pad)
+        y2 = min(img_h, b.y + b.height + pad)
+
+        bubble_crop = pil_img.crop((x1, y1, x2, y2))
+        buf = io.BytesIO()
+        bubble_crop.save(buf, format="PNG")
+        crop_bytes = buf.getvalue()
+
+        # Run OCR on the isolated speech bubble
+        extracted_text = extract_text_from_image_bytes(crop_bytes, request.languages)
+        clean_text = re.sub(r'\s+', ' ', extracted_text).strip()
+
+        if clean_text:
+            text_type = OcrTextType.CAPTION if b.sub_type == "caption" else (
+                OcrTextType.THOUGHT if b.sub_type == "thought" else OcrTextType.DIALOGUE
+            )
+            segments.append(OcrTextItem(
+                segment_id=f"text_{idx + 1}",
+                text=clean_text,
+                confidence=b.confidence,
+                text_type=text_type,
+                x=b.x,
+                y=b.y,
+                width=b.width,
+                height=b.height,
+                polygon=b.polygon,
+                bubble_id=b.bubble_id,
+                reading_order=idx + 1
+            ))
+            transcripts.append(clean_text)
+
+    elapsed_ms = int((time.perf_counter() - start_time) * 1000)
+    full_text = " ".join(transcripts)
+
+    return DetectTextResponse(
+        success=True,
+        full_transcript=full_text,
+        total_segments=len(segments),
+        detected_language=request.languages[0] if request.languages else "en",
+        segments=segments,
+        execution_time_ms=elapsed_ms,
+        message=f"Extracted {len(segments)} dialogue block(s) from {len(bubbles)} bubble(s) in {elapsed_ms}ms"
+    )
+
+
+async def extract_direct_image_ocr(request: DetectTextRequest) -> DetectTextResponse:
+    """
+    Direct synchronous OCR extractor across whole image or guided bubbles.
+    """
+    if request.bubble_guided:
+        return await extract_bubble_guided_ocr(request)
+
+    start_time = time.perf_counter()
+    raw_bytes = None
+    if request.url:
+        resolved = await resolve_image_to_buffer(request.url)
+        raw_bytes = resolved.get("data")
+    elif request.image_base64:
+        b64 = request.image_base64
+        if "," in b64:
+            b64 = b64.split(",", 1)[1]
+        raw_bytes = base64.b64decode(b64)
+
+    if not raw_bytes:
+        raise ValueError("Could not resolve image data for OCR.")
+
+    text = extract_text_from_image_bytes(raw_bytes, request.languages)
+    clean_text = re.sub(r'\s+', ' ', text).strip()
+    elapsed_ms = int((time.perf_counter() - start_time) * 1000)
+
+    segments = []
+    if clean_text:
+        segments.append(OcrTextItem(
+            segment_id="text_1",
+            text=clean_text,
+            confidence=0.90,
+            text_type=OcrTextType.DIALOGUE,
+            x=0,
+            y=0,
+            width=100,
+            height=100,
+            reading_order=1
+        ))
+
+    return DetectTextResponse(
+        success=True,
+        full_transcript=clean_text,
+        total_segments=len(segments),
+        detected_language=request.languages[0] if request.languages else "en",
+        segments=segments,
+        execution_time_ms=elapsed_ms,
+        message=f"Direct OCR extracted transcript in {elapsed_ms}ms"
+    )
 
 
 async def extract_script_from_panels(

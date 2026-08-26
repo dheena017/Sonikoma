@@ -129,6 +129,13 @@ from .image import (
     DownloadZipRequest,
 )
 
+from .ocr import (
+    OcrTextType,
+    OcrTextItem,
+    DetectTextRequest,
+    DetectTextResponse,
+)
+
 from .project import (
     ProjectCreateRequest,
     PanelSaveItem,

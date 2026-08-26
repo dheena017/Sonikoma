@@ -126,7 +126,8 @@ def _detect_vertical_subgutters(
         bg_col_counts = np.sum(slice_gray < threshold_val, axis=0)
     col_bg_ratios = bg_col_counts / float(max(1, sh))
 
-    is_col_gutter = (col_bg_ratios >= 0.70) | ((col_stds < 6.0) & (col_bg_ratios >= 0.50))
+    # Column gutter requires near-complete top-to-bottom gutter whitespace
+    is_col_gutter = (col_bg_ratios >= 0.88) & (col_stds < 5.0)
     is_col_content = ~is_col_gutter
 
     sub_cols: List[Tuple[int, int]] = []
@@ -139,14 +140,18 @@ def _detect_vertical_subgutters(
         elif not is_col_content[x] and in_col:
             in_col = False
             col_end = x
-            if col_end - col_start >= int(sw * 0.10):
+            if col_end - col_start >= int(sw * 0.25):
                 sub_cols.append((col_start, col_end))
     if in_col:
         col_end = sw
-        if col_end - col_start >= int(sw * 0.10):
+        if col_end - col_start >= int(sw * 0.25):
             sub_cols.append((col_start, col_end))
 
-    return sub_cols if sub_cols else [(0, sw)]
+    # If there is only 1 detected column spanning across, keep full width
+    if len(sub_cols) <= 1:
+        return [(0, sw)]
+
+    return sub_cols
 
 
 def _classify_content_rows(
@@ -202,11 +207,6 @@ def _classify_content_rows(
                 if by2_rel > by1_rel:
                     content_rows[by1_rel:by2_rel] = True
 
-    if start_y == 0:
-        for r in range(min(15, slice_h)):
-            if center_bg_ratio[r] >= 0.95:
-                content_rows[r] = False
-
     return content_rows
 
 
@@ -225,12 +225,12 @@ def _compute_trim_bounds(
         return 0, slice_h, 0, 0
 
     valid_y_indices = np.where(content_rows)[0]
-    pad = 8 if padding_px is None else padding_px
+    pad = max(2, int(w * 0.005)) if padding_px is None else padding_px
 
     top_pad = max(0, valid_y_indices[0] - pad)
     bot_pad = min(slice_h, valid_y_indices[-1] + pad + 1)
 
-    final_h = max(15, bot_pad - top_pad)
+    final_h = max(10, bot_pad - top_pad)
     top_removed = top_pad
     bottom_removed = slice_h - bot_pad
 
@@ -265,22 +265,22 @@ def detect_vertical_strip_panels(
     gray_center = gray_arr[:, margin:-margin] if w > margin * 2 else gray_arr
     w_center = gray_center.shape[1]
 
-    effective_gutter_bg_ratio = max(0.75, min(0.90, gutter_bg_ratio))
+    effective_gutter_bg_ratio = max(0.35, min(0.65, gutter_bg_ratio))
 
     if high_sensitivity:
-        effective_gutter_bg_ratio = max(0.65, effective_gutter_bg_ratio - 0.10)
-        gutter_flat_bg_ratio = max(0.35, gutter_flat_bg_ratio - 0.10)
-        gutter_std_thresh = gutter_std_thresh + 4.0
+        effective_gutter_bg_ratio = max(0.25, effective_gutter_bg_ratio - 0.10)
+        gutter_flat_bg_ratio = max(0.25, gutter_flat_bg_ratio - 0.10)
+        gutter_std_thresh = gutter_std_thresh + 6.0
 
     # Vectorized row-by-row background estimation
     row_stds = np.std(gray_center, axis=1)
     row_diffs = np.abs(np.diff(gray_center.astype(float), axis=1))
-    stroke_counts = np.sum(row_diffs > 15.0, axis=1)
+    stroke_counts = np.sum(row_diffs > 18.0, axis=1)
     row_grads = np.abs(np.gradient(gray_center.astype(float), axis=1))
-    edge_counts = np.sum(row_grads > 10.0, axis=1)
+    edge_counts = np.sum(row_grads > 12.0, axis=1)
 
     row_medians = np.median(gray_center, axis=1)
-    bg_tolerance = max(15.0, min(35.0, sensitivity * 0.8))
+    bg_tolerance = max(18.0, min(40.0, sensitivity * 0.9))
     bg_pixel_count = np.sum(np.abs(gray_center.astype(float) - row_medians[:, np.newaxis]) <= bg_tolerance, axis=1)
     bg_ratio = bg_pixel_count / float(max(1, w_center))
 
@@ -289,10 +289,10 @@ def detect_vertical_strip_panels(
     mad_norm_std = np.clip((row_stds - med_std) / (1.4826 * mad_std + 1e-5), 0.0, 5.0)
 
     stroke_density = stroke_counts / float(max(1, w_center))
-    stroke_score = np.clip(1.0 - (stroke_density * 12.0), 0.0, 1.0)
+    stroke_score = np.clip(1.0 - (stroke_density * 10.0), 0.0, 1.0)
 
     edge_density = edge_counts / float(max(1, w_center))
-    edge_score = np.clip(1.0 - (edge_density * 10.0), 0.0, 1.0)
+    edge_score = np.clip(1.0 - (edge_density * 8.0), 0.0, 1.0)
 
     mad_score = np.clip(1.0 - (mad_norm_std / 3.0), 0.0, 1.0)
 
@@ -303,18 +303,18 @@ def detect_vertical_strip_panels(
         0.15 * mad_score
     )
 
-    sep_threshold = 0.50 if high_sensitivity else 0.60
+    sep_threshold = 0.35 if high_sensitivity else 0.40
+    max_stroke_count = max(2, int(w_center * 0.015))
     is_gutter_row = (
-        (separator_score >= sep_threshold) &
-        (stroke_counts <= 1) &
-        ((bg_ratio >= 0.65) | (row_stds <= gutter_std_thresh)) &
-        (edge_density <= 0.10)
+        (stroke_counts <= max_stroke_count) &
+        ((separator_score >= sep_threshold) | (bg_ratio >= 0.40) | (row_stds <= gutter_std_thresh * 1.8)) &
+        (edge_density <= 0.15)
     )
     is_content_row = ~is_gutter_row
 
     if ocr_boxes:
-        bubble_pad = max(15, min(40, int(w * 0.05)))
-        max_ocr_h = max(200, int(w * 2.0))
+        bubble_pad = max(4, int(w * 0.02))
+        max_ocr_h = int(w * 1.25)
         sorted_ocr = sorted(ocr_boxes, key=lambda b: int(b.get("y", 0)))
         for idx, box in enumerate(sorted_ocr):
             bh_b = int(box.get("h", 0))
@@ -328,7 +328,8 @@ def detect_vertical_strip_panels(
             if idx + 1 < len(sorted_ocr):
                 nxt_box = sorted_ocr[idx + 1]
                 gap_between = int(nxt_box.get("y", 0)) - (int(box.get("y", 0)) + bh_b)
-                if 0 <= gap_between <= 50:
+                max_bridge_gap = max(6, int(w * 0.03))
+                if 0 <= gap_between <= max_bridge_gap:
                     bridge_start = max(0, int(box.get("y", 0)))
                     bridge_end = min(h, int(nxt_box.get("y", 0)) + int(nxt_box.get("h", 0)))
                     is_content_row[bridge_start:bridge_end] = True
@@ -341,7 +342,7 @@ def detect_vertical_strip_panels(
     
     in_gutter = False
     g_start = 0
-    min_gutter_h = max(16, min(40, int(w * 0.03)))
+    min_gutter_h = max(6, int(w * 0.015))
 
     for i in range(h):
         if is_gutter_row[i] and not in_gutter:
@@ -354,40 +355,22 @@ def detect_vertical_strip_panels(
             if gh >= min_gutter_h:
                 avg_bg_ratio = float(np.mean(bg_ratio[g_start:g_end]))
                 avg_std = float(np.mean(row_stds[g_start:g_end]))
-                if avg_bg_ratio >= effective_gutter_bg_ratio and avg_std <= gutter_std_thresh * 1.25:
-                    above_idx = max(0, g_start - 1)
-                    below_idx = min(h - 1, g_end)
-                    adjacent_content = (
-                        (not is_gutter_row[above_idx]) or
-                        (not is_gutter_row[below_idx]) or
-                        (row_stds[above_idx] > gutter_std_thresh * 0.6) or
-                        (row_stds[below_idx] > gutter_std_thresh * 0.6)
-                    )
-                    if adjacent_content:
-                        cut_y = (g_start + g_end) // 2
-                        cut_points.append(cut_y)
-                        gutter_heights.append(gh)
-                        gutter_ranges_list.append((g_start, g_end))
+                if (avg_bg_ratio >= effective_gutter_bg_ratio or avg_std <= gutter_std_thresh * 2.0):
+                    cut_y = (g_start + g_end) // 2
+                    cut_points.append(cut_y)
+                    gutter_heights.append(gh)
+                    gutter_ranges_list.append((g_start, g_end))
     if in_gutter:
         g_end = h
         gh = g_end - g_start
         if gh >= min_gutter_h:
             avg_bg_ratio = float(np.mean(bg_ratio[g_start:g_end]))
             avg_std = float(np.mean(row_stds[g_start:g_end]))
-            if avg_bg_ratio >= effective_gutter_bg_ratio and avg_std <= gutter_std_thresh * 1.25:
-                above_idx = max(0, g_start - 1)
-                below_idx = min(h - 1, g_end - 1)
-                adjacent_content = (
-                    (not is_gutter_row[above_idx]) or
-                    (not is_gutter_row[below_idx]) or
-                    (row_stds[above_idx] > gutter_std_thresh * 0.6) or
-                    (row_stds[below_idx] > gutter_std_thresh * 0.6)
-                )
-                if adjacent_content:
-                    cut_y = (g_start + g_end) // 2
-                    cut_points.append(cut_y)
-                    gutter_heights.append(gh)
-                    gutter_ranges_list.append((g_start, g_end))
+            if (avg_bg_ratio >= effective_gutter_bg_ratio or avg_std <= gutter_std_thresh * 2.0):
+                cut_y = (g_start + g_end) // 2
+                cut_points.append(cut_y)
+                gutter_heights.append(gh)
+                gutter_ranges_list.append((g_start, g_end))
 
     raw_cuts = [0] + cut_points + [h]
     merged_cuts: List[int] = [0]
@@ -491,15 +474,17 @@ def detect_vertical_strip_panels(
                         by2 = by1 + bh_b
 
                         if not (bx2 < col_x1 or bx1 > col_x2):
-                            if (start_y - 180) <= by1 <= (final_y + 150):
-                                expanded_y1 = max(0, by1 - 25)
+                            reach_dist = max(20, int(w * 0.20))
+                            pad_dist = max(4, int(w * 0.03))
+                            if (start_y - reach_dist) <= by1 <= (final_y + reach_dist):
+                                expanded_y1 = max(0, by1 - pad_dist)
                                 if expanded_y1 < final_y:
                                     diff = final_y - expanded_y1
                                     final_y = expanded_y1
                                     final_h += diff
 
-                            if (final_y + final_h - 150) <= by2 <= (end_y + 180):
-                                expanded_y2 = min(h, by2 + 25)
+                            if (final_y + final_h - reach_dist) <= by2 <= (end_y + reach_dist):
+                                expanded_y2 = min(h, by2 + pad_dist)
                                 if expanded_y2 > (final_y + final_h):
                                     final_h = expanded_y2 - final_y
 
@@ -529,10 +514,10 @@ def detect_vertical_strip_panels(
                         break
 
             bubble_candidate = (
-                final_h < 300 and
+                final_h < int(w * 0.55) and
                 (
                     has_ocr_overlap or
-                    (bubble_bg_ratio >= 0.55 and bubble_stroke_count >= 4)
+                    (bubble_bg_ratio >= 0.50 and bubble_stroke_count >= max(1, int(w * 0.003)))
                 )
             )
 
@@ -563,53 +548,19 @@ def detect_vertical_strip_panels(
 
                 if i + 1 < len(raw_boxes):
                     nxt = raw_boxes[i + 1]
-                    gap_y = nxt["y"] - (curr["y"] + curr["h"])
+                    # Check 2D intersection
+                    ix1 = max(curr["x"], nxt["x"])
+                    iy1 = max(curr["y"], nxt["y"])
+                    ix2 = min(curr["x"] + curr["w"], nxt["x"] + nxt["w"])
+                    iy2 = min(curr["y"] + curr["h"], nxt["y"] + nxt["h"])
 
-                    is_curr_bubble = curr["h"] < 180 or curr.get("bubble_candidate", False)
-                    is_nxt_bubble = nxt["h"] < 180 or nxt.get("bubble_candidate", False)
+                    inter_w = max(0, ix2 - ix1)
+                    inter_h = max(0, iy2 - iy1)
+                    inter_area = inter_w * inter_h
+                    min_area = min(curr["w"] * curr["h"], nxt["w"] * nxt["h"])
 
-                    gap_start = curr["y"] + curr["h"]
-                    gap_end = nxt["y"]
-                    separator_in_gap = False
-                    if gap_start < gap_end:
-                        for cp in cut_points:
-                            if gap_start <= cp <= gap_end:
-                                separator_in_gap = True
-                                break
-                        if not separator_in_gap:
-                            for g_start, g_end in gutter_ranges_list:
-                                if max(gap_start, g_start) < min(gap_end, g_end):
-                                    separator_in_gap = True
-                                    break
-
-                    curr_center = curr["x"] + (curr["w"] / 2.0)
-                    nxt_center = nxt["x"] + (nxt["w"] / 2.0)
-                    center_tolerance = max(30.0, min(curr["w"], nxt["w"]) * 0.12)
-                    same_x_center = abs(curr_center - nxt_center) <= center_tolerance
-                    x_overlap = max(
-                        0,
-                        min(curr["x"] + curr["w"], nxt["x"] + nxt["w"]) - max(curr["x"], nxt["x"])
-                    )
-                    x_overlap_ratio = x_overlap / float(max(1, min(curr["w"], nxt["w"])))
-
-                    is_dark_or_continuous_gap = False
-                    if gap_start < gap_end and gap_end - gap_start <= 180:
-                        gap_sample = gray_arr[gap_start:gap_end, :]
-                        if gap_sample.size > 0 and float(np.median(gap_sample)) < 200.0:
-                            is_dark_or_continuous_gap = True
-
-                    is_ui_or_bubble = (
-                        is_curr_bubble or is_nxt_bubble or is_dark_or_continuous_gap
-                    )
-
-                    should_unify = False
-                    if is_ui_or_bubble and (same_x_center or x_overlap_ratio >= 0.35):
-                        if is_dark_or_continuous_gap and not separator_in_gap:
-                            should_unify = True
-                        elif (is_curr_bubble or is_nxt_bubble) and gap_y <= 140:
-                            should_unify = True
-
-                    if gap_y <= 180 and should_unify:
+                    # ONLY merge if they are true duplicate candidate boxes (>= 75% 2D area overlap)
+                    if min_area > 0 and (inter_area / float(min_area)) >= 0.75:
                         merged_x1 = min(curr["x"], nxt["x"])
                         merged_y1 = min(curr["y"], nxt["y"])
                         merged_x2 = max(curr["x"] + curr["w"], nxt["x"] + nxt["w"])
@@ -700,11 +651,17 @@ def _subdivide_continuous_tall_art_panel(
     Scans continuous artwork scenes for natural visual scene transitions.
     Avoids hardcoded mathematical grid cuts and strictly protects speech bubbles and character artwork.
     """
-    min_split_h = max(900, int(bw * 1.6))
+    min_split_h = max(60, int(bw * 1.1))
     if bh <= min_split_h:
         return [{"x": 0, "y": 0, "w": bw, "h": bh}]
 
-    h, w = sub_gray.shape
+    if len(sub_gray.shape) == 3:
+        if HAS_CV and cv2 is not None:
+            sub_gray = cv2.cvtColor(sub_gray, cv2.COLOR_BGR2GRAY)
+        else:
+            sub_gray = sub_gray[:, :, 0]
+
+    h, w = sub_gray.shape[:2]
 
     if HAS_CV and cv2 is not None:
         sobel_y = cv2.Sobel(sub_gray, cv2.CV_64F, 0, 1, ksize=3)
@@ -721,21 +678,22 @@ def _subdivide_continuous_tall_art_panel(
     
     # Forbidden Cut Zone Mask
     forbidden_mask = np.zeros(h, dtype=bool)
-    min_edge_margin = max(60, int(bw * 0.20))
+    min_edge_margin = max(6, int(bw * 0.08))
     forbidden_mask[:min_edge_margin] = True
     forbidden_mask[-min_edge_margin:] = True
 
     if child_ocr:
+        ocr_pad = max(4, int(bw * 0.02))
         for b in child_ocr:
-            by1 = max(0, int(b.get("y", 0)) - 35)
-            by2 = min(h, int(b.get("y", 0)) + int(b.get("h", 0)) + 35)
+            by1 = max(0, int(b.get("y", 0)) - ocr_pad)
+            by2 = min(h, int(b.get("y", 0)) + int(b.get("h", 0)) + ocr_pad)
             if by2 > by1:
                 forbidden_mask[by1:by2] = True
 
-    artwork_mask = (row_stds > 12.0) | (row_stroke_density > 0.03)
+    artwork_mask = (row_stds > 22.0) | (row_stroke_density > 0.05)
     forbidden_mask = forbidden_mask | artwork_mask
 
-    min_subpanel_h = max(450, int(bw * 1.2))
+    min_subpanel_h = max(40, int(bw * 0.50))
     cut_y_list = [0]
 
     curr_y = 0
@@ -749,19 +707,19 @@ def _subdivide_continuous_tall_art_panel(
         valid_rows = [y for y in range(search_start, search_end) if not forbidden_mask[y]]
 
         if not valid_rows:
-            curr_y += int(min_subpanel_h * 0.6)
+            curr_y += int(min_subpanel_h * 0.5)
             continue
 
         best_y = min(valid_rows, key=lambda y: (row_stds[y] * 0.6) + (row_stroke_density[y] * 100.0) - (0.2 * row_border_strength[y]))
 
-        has_flat_gutter = row_stds[best_y] <= 9.0 and row_stroke_density[best_y] <= 0.02
-        has_clear_border = row_border_strength[best_y] >= 10.0 and row_stds[best_y] <= 14.0
+        has_flat_gutter = row_stds[best_y] <= 18.0 and row_stroke_density[best_y] <= 0.03
+        has_clear_border = row_border_strength[best_y] >= 8.0 and row_stds[best_y] <= 22.0
 
         if has_flat_gutter or has_clear_border:
             cut_y_list.append(best_y)
             curr_y = best_y
         else:
-            curr_y += int(min_subpanel_h * 0.6)
+            curr_y += int(min_subpanel_h * 0.5)
 
     cut_y_list.append(h)
 
@@ -777,11 +735,12 @@ def _subdivide_continuous_tall_art_panel(
         final_cuts.append(h)
 
     subdivided_boxes = []
+    min_box_h = max(10, int(bw * 0.10))
     for k in range(len(final_cuts) - 1):
         sy1 = final_cuts[k]
         sy2 = final_cuts[k + 1]
         sh = sy2 - sy1
-        if sh >= 60:
+        if sh >= min_box_h:
             subdivided_boxes.append({
                 "x": 0,
                 "y": sy1,
@@ -972,8 +931,12 @@ def resolve_overlapping_panels_lineage(
 
             if inter_area > 0:
                 min_area = min(cw * ch, kw * kh)
-                iou = inter_area / float(max(1, min_area))
-                if iou >= iou_thresh:
+                union_area = (cw * ch) + (kw * kh) - inter_area
+                iou = inter_area / float(max(1, union_area))
+                overlap_min = inter_area / float(max(1, min_area))
+                
+                # Only deduplicate true duplicate boxes (>= 75% 2D IoU), never merge vertically stacked separate panels
+                if iou >= 0.75 or overlap_min >= 0.85:
                     k_lineage = set(k.get("lineage", []))
                     k_conf: float = float(k.get("confidence", 0.90) or 0.90)
 
@@ -1011,14 +974,15 @@ def resolve_micro_panels(
     gray_arr: Optional[np.ndarray] = None,
     img_h: int = 1200
 ) -> List[Dict[str, Any]]:
-    """Filters out noise/micro slices below 30px height unless containing speech bubbles."""
+    """Filters out noise/micro slices below scale limit unless containing speech bubbles."""
     if not boxes:
         return boxes
+    min_limit = max(10, int(img_h * 0.005)) if img_h else 10
     cleaned = []
     for b in boxes:
         h = int(b.get("h", 0) or b.get("height", 0) or 0)
         has_bubble = b.get("has_bound_bubbles") or b.get("bubble_candidate") or (len(b.get("speech_bubbles", [])) > 0)
-        if h >= 35 or has_bubble:
+        if h >= min_limit or has_bubble:
             cleaned.append(b)
     return cleaned if cleaned else boxes
 

@@ -188,8 +188,52 @@ class SpeechBubbleItem(BaseModel):
     is_bound: bool = Field(True, description="Whether bubble was bound into panel boundary")
 
 
+class CharacterPoseType(str, Enum):
+    FULL_BODY = "full_body"
+    UPPER_BODY = "upper_body"
+    FACE_CLOSEUP = "face_closeup"
+    SILHOUETTE = "silhouette"
+    UNKNOWN = "unknown"
+
+
+class CharacterFaceItem(BaseModel):
+    """Detected character face and emotional expression."""
+    x: int
+    y: int
+    width: int
+    height: int
+    emotion: Optional[str] = Field("neutral", description="Detected emotion: neutral, happy, angry, shocked, crying, smirking")
+    gaze_direction: Optional[str] = Field("forward", description="Gaze direction: left, right, forward, down, up")
+
+
+class CharacterEntityItem(BaseModel):
+    """Represents a detected comic/manga character entity."""
+    character_id: str = Field(..., description="Unique character identifier e.g. char_1")
+    label: str = Field("character", description="Entity classification label")
+    category: str = Field("character", description="High-level category")
+    pose_type: CharacterPoseType = Field(CharacterPoseType.UNKNOWN, description="Framing pose")
+    x: int = Field(..., description="Top-left X coordinate in pixels")
+    y: int = Field(..., description="Top-left Y coordinate in pixels")
+    width: int = Field(..., description="Width in pixels")
+    height: int = Field(..., description="Height in pixels")
+    polygon: Optional[List[List[int]]] = Field(None, description="Exact silhouette contour polygon points [[x, y], ...]")
+    confidence: float = Field(0.90, description="Detection confidence score 0.0 - 1.0")
+    face: Optional[CharacterFaceItem] = Field(None, description="Optional face detection and expression metadata")
+    panel_id: Optional[str] = Field(None, description="Host panel ID enclosing this character")
+    associated_bubble_ids: List[str] = Field(default_factory=list, description="Bound dialogue bubble IDs")
+    crop_thumbnail_base64: Optional[str] = Field(None, description="Optional avatar preview thumbnail")
+
+
+class PanelCinematography(BaseModel):
+    """Cinematography and camera shot framing metadata."""
+    shot_type: str = Field("medium_shot", description="close_up, extreme_close_up, medium_shot, full_shot, wide_shot")
+    camera_angle: str = Field("eye_level", description="eye_level, low_angle, high_angle, dutch_angle")
+    dominant_mood: str = Field("neutral", description="action, tension, romantic, comedy, dramatic")
+    suggested_camera_motion: str = Field("static", description="slow_zoom_in, pan_down, shake, whip_pan")
+
+
 class PanelBoundingBox(BaseModel):
-    """Detected comic panel bounding box coordinates with rich metadata."""
+    """Detected comic panel bounding box coordinates with rich multimodal metadata."""
     id: Optional[str] = Field(None, description="Panel identifier")
     index: int = Field(0, description="Reading order index")
     x: int = Field(..., description="X pixel coordinate")
@@ -198,14 +242,61 @@ class PanelBoundingBox(BaseModel):
     h: int = Field(..., description="Height in pixels")
     width: Optional[int] = Field(None, description="Width alias in pixels")
     height: Optional[int] = Field(None, description="Height alias in pixels")
+    polygon: Optional[List[List[int]]] = Field(None, description="Exact polygon vertices for diagonal frames")
     confidence: Optional[float] = Field(1.0, description="Detection confidence score")
     label: Optional[str] = Field(EntityLabel.PANEL_STANDARD.value, description="Detected entity label")
     category: Optional[str] = Field(EntityCategory.PANEL.value, description="Entity category")
     type: Optional[str] = Field("panel", description="Entity type")
     sub_type: Optional[str] = Field("standard_framed", description="Panel layout sub-type")
+    depth: int = Field(0, description="0 = root panel, 1 = inset panel")
+    parent_panel_id: Optional[str] = Field(None, description="Parent panel ID if inset")
     has_bound_bubbles: bool = Field(False, description="Whether dialogue bubbles were bound inside")
     speech_bubbles_count: int = Field(0, description="Count of speech bubbles in panel")
     speech_bubbles: List[SpeechBubbleItem] = Field(default_factory=list, description="Bound speech bubble items")
+    characters: List[CharacterEntityItem] = Field(default_factory=list, description="Detected characters inside this panel")
+    characters_count: int = Field(0, description="Count of characters in panel")
+    dialogue_transcript: Optional[str] = Field(None, description="Combined dialogue transcript of this panel")
+    cinematography: Optional[PanelCinematography] = Field(None, description="Cinematography and framing metadata")
+    margins: Optional[Dict[str, int]] = Field(None, description="Directional margins (crop_top, crop_bottom, etc.)")
+
+
+class DetectCharactersRequest(BaseModel):
+    """Request payload for character detection."""
+    url: Optional[str] = Field(None, description="Target image public URL")
+    image_base64: Optional[str] = Field(None, description="Base64-encoded image data")
+    conf_threshold: float = Field(0.25, ge=0.05, le=1.0, description="YOLO confidence threshold")
+    detect_faces: bool = Field(True, description="Whether to extract faces and expressions")
+    extract_thumbnails: bool = Field(False, description="Whether to generate base64 avatar thumbnails")
+    engine_mode: Literal["yolo", "ai_vision", "auto"] = Field("auto", description="Detection engine mode")
+
+
+class DetectCharactersResponse(BaseModel):
+    """Response payload for character detection."""
+    success: bool
+    total_characters: int = 0
+    image_width: int = 0
+    image_height: int = 0
+    characters: List[CharacterEntityItem] = Field(default_factory=list)
+    message: Optional[str] = None
+    execution_time_ms: int = 0
+
+
+class DetectCompositeResponse(BaseModel):
+    """Unified composite detection response (Panels + Speech Bubbles + Characters + Cinematography)."""
+    success: bool
+    crop_type: str = "composite"
+    image_width: int = 0
+    image_height: int = 0
+    reading_flow: str = "top_to_bottom"
+    panels: List[PanelBoundingBox] = Field(default_factory=list)
+    speech_bubbles: List[SpeechBubbleItem] = Field(default_factory=list)
+    characters: List[CharacterEntityItem] = Field(default_factory=list)
+    cinematography: Optional[List[PanelCinematography]] = None
+    total_panels: int = 0
+    total_speech_bubbles: int = 0
+    total_characters: int = 0
+    message: Optional[str] = None
+    execution_time_ms: int = 0
 
 
 class DetectSmallPanelsRequest(BaseModel):

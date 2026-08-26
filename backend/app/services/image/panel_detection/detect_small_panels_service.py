@@ -12,11 +12,13 @@ import io
 import time
 import base64
 import logging
+import numpy as np
 from PIL import Image
 
 from schemas.project import (
     DetectSmallPanelsRequest,
-    DetectSmallPanelsResponse
+    DetectSmallPanelsResponse,
+    PanelBoundingBox
 )
 from services.image.utils.image_resolver import resolve_image_to_buffer
 from services.image.panel_detection.opencv_detector import detect_opencv_boxes
@@ -55,28 +57,34 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
 
     logger.info(f"[SmallPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image...")
 
-    # ── ENGINE 1: OpenCV Geometric Contours & 2D Manga Grid Detection ────────
-    cv_res = detect_opencv_boxes(
-        image_bytes=raw_bytes,
-        min_width_pct=0.15,
-        min_height_px=60,
-        bleed_padding_px=request.bleed_padding_px
-    )
-    cv_panels = cv_res.get("panels", [])
+    # ── ENGINE 1: 2D Manga Grid & OpenCV Geometric Contours ──────────────────
+    prop_min_h = max(15, int(img_h * 0.05))
+    cv_panels = []
 
-    # If standard 2D Manga grid page, run Manga grid detector
-    if len(cv_panels) <= 1 and 0.6 <= (img_h / float(max(1, img_w))) <= 2.2:
+    # If standard 2D Manga grid page, run Manga grid detector first
+    aspect_ratio = img_h / float(max(1, img_w))
+    if 0.5 <= aspect_ratio <= 2.5:
         try:
             from services.image.panel_detection.grid_detector import detect_manga_grid_panels
             gray_arr = np.array(pil_img.convert("L"))
-            grid_boxes = detect_manga_grid_panels(gray_arr, min_width_pct=0.15, min_height_px=60)
-            if grid_boxes and len(grid_boxes) > len(cv_panels):
+            grid_boxes = detect_manga_grid_panels(gray_arr, min_width_pct=0.10, min_height_px=prop_min_h)
+            if grid_boxes and len(grid_boxes) >= 2:
                 cv_panels = grid_boxes
                 logger.info(f"[SmallPanels: Grid] Extracted {len(cv_panels)} Manga 2D grid panel(s).")
         except Exception as e:
             logger.warning(f"[SmallPanels: Grid] Grid detector fallback: {e}")
 
-    logger.info(f"[SmallPanels: OpenCV] Total candidate frames: {len(cv_panels)}")
+    # Fallback to OpenCV contour detection if grid detector found <= 1 panel
+    if not cv_panels:
+        cv_res = detect_opencv_boxes(
+            image_bytes=raw_bytes,
+            min_width_pct=0.15,
+            min_height_px=prop_min_h,
+            bleed_padding_px=request.bleed_padding_px
+        )
+        cv_panels = cv_res.get("panels", [])
+
+    logger.info(f"[SmallPanels: Detected] Total candidate frames: {len(cv_panels)}")
 
     # ── ENGINE 2: YOLO Deep-Learning Speech Bubble Detection ──────────────────
     yolo_bubbles = []
@@ -109,17 +117,18 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
         bleed_padding_px=request.bleed_padding_px
     )
 
-    # ── POST-PROCESSING: Resolve any micro-panel noise ───────────────────────
+    # ── POST-PROCESSING: Resolve any micro-panel noise & deduplication ────────
     try:
         from services.image.panel_detection.panel_detector import resolve_overlapping_panels_lineage
         raw_dicts = [p.model_dump() for p in fused_panels]
         cleaned_dicts = resolve_overlapping_panels_lineage(raw_dicts, iou_thresh=0.40)
-        if len(cleaned_dicts) == len(fused_panels):
-            for idx, cd in enumerate(cleaned_dicts):
-                fused_panels[idx].x = cd.get("x", fused_panels[idx].x)
-                fused_panels[idx].y = cd.get("y", fused_panels[idx].y)
-                fused_panels[idx].w = cd.get("w", fused_panels[idx].w)
-                fused_panels[idx].h = cd.get("h", fused_panels[idx].h)
+        if cleaned_dicts:
+            fused_panels = [
+                PanelBoundingBox(**cd) for cd in cleaned_dicts
+            ]
+            for idx, p in enumerate(fused_panels):
+                p.index = idx
+                p.id = f"panel_{idx + 1}"
     except Exception as e:
         logger.warning(f"[SmallPanels: PostProcessor] Fallback: {e}")
 

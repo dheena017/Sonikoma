@@ -11,14 +11,65 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from api.dependencies.auth import get_current_user
 
 from schemas.scraper import ExtractScriptRequest
+from schemas.ocr import DetectTextRequest, DetectTextResponse
 from services.scraper.scraper_service import scrape_and_initialize_project
-from services.image.ocr.ocr_service import extract_script_from_panels
+from services.image.ocr.ocr_service import (
+    extract_script_from_panels,
+    extract_direct_image_ocr,
+    extract_bubble_guided_ocr
+)
 from services.image.utils.image_resolver import resolve_image_to_buffer
 from services.jobs import job_manager, JobType, JobStage, JobStatusResponse
 
 logger = logging.getLogger("sonikoma.api.ocr")
 
 ocr_router = APIRouter()
+
+
+# ─── 1. Direct Synchronous Image OCR ──────────────────────────────────────────
+
+@ocr_router.post(
+    "/detect-text",
+    response_model=DetectTextResponse,
+    operation_id="detect_ocr_text",
+    summary="Synchronous Direct Image OCR (Extracts dialogue lines and bounding boxes immediately)",
+    description="Runs multi-language OCR on a single image buffer, returning dialogue lines, text coordinates, and transcript without background scraping."
+)
+async def detect_ocr_text_endpoint(body: DetectTextRequest):
+    try:
+        if not body.url and not body.image_base64:
+            raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
+        return await extract_direct_image_ocr(body)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectOCR API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 2. Bubble-Guided Isolated OCR ───────────────────────────────────────────
+
+@ocr_router.post(
+    "/bubble-dialogue",
+    response_model=DetectTextResponse,
+    operation_id="detect_bubble_dialogue_ocr",
+    summary="Bubble-Guided High-Precision Dialogue OCR",
+    description="Fuses YOLO speech bubble localization with OCR to isolate dialogue inside balloons while rejecting background art noise."
+)
+async def detect_bubble_dialogue_endpoint(body: DetectTextRequest):
+    try:
+        if not body.url and not body.image_base64:
+            raise HTTPException(status_code=400, detail="Must provide 'url' or 'image_base64'.")
+        body.bubble_guided = True
+        return await extract_bubble_guided_ocr(body)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"[DetectBubbleOCR API] Error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ─── 3. Full-Chapter Asynchronous OCR Job ────────────────────────────────────
 
 
 @ocr_router.post(

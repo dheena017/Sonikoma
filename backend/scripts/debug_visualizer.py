@@ -154,9 +154,9 @@ def draw_yolo_detections(image_path: str, conf_threshold: float = 0.25,
             logger.error(f"[DebugViz] Image file not found: {image_path}")
             raise FileNotFoundError(f"Image file not found: {image_path}")
             
-        from services.image.panel_detection.speech_bubble_detector import get_yolo_model
+        from services.image.panel_detection.speech_bubble_detector import get_yolo_speech_bubble_model
 
-        model = get_yolo_model()
+        model = get_yolo_speech_bubble_model()
         if model is None:
             logger.warning("[DebugViz] YOLO model not available — cannot draw detections.")
             return None
@@ -314,6 +314,9 @@ def export_multi_stage_debug_images(
     separator_bands: Optional[List[int]] = None,
     raw_candidates: Optional[List[Dict[str, Any]]] = None,
     merged_candidates: Optional[List[Dict[str, Any]]] = None,
+    characters: Optional[List[Any]] = None,
+    speech_bubbles: Optional[List[Any]] = None,
+    ocr_segments: Optional[List[Any]] = None,
     pipeline_summary: Optional[Dict[str, Any]] = None,
     lineage_tracker: Optional[Dict[str, Any]] = None,
     colors: Optional[ColorScheme] = None,
@@ -410,6 +413,16 @@ def export_multi_stage_debug_images(
         if p10:
             saved_files["10_panel_lineage"] = p10
 
+        # 11. 11_characters_and_silhouettes.png
+        p11 = _generate_characters_overlay(frame, characters, colors, config, output_dir, prefix)
+        if p11:
+            saved_files["11_characters_and_silhouettes"] = p11
+
+        # 12. 12_dialogue_ocr_script.png
+        p12 = _generate_dialogue_ocr_overlay(frame, speech_bubbles or [], ocr_segments or [], colors, config, output_dir, prefix)
+        if p12:
+            saved_files["12_dialogue_ocr_script"] = p12
+
         if p01:
             saved_files["debug_01_merged"] = p01
         if p04:
@@ -461,15 +474,17 @@ def _generate_separator_heatmap(frame: np.ndarray, separator_scores: Optional[np
     try:
         heatmap_frame = frame.copy()
         if separator_scores is not None and len(separator_scores) == h:
+            overlay = np.zeros_like(frame)
             for y in range(h):
-                score = separator_scores[y]
-                if score >= 0.70:
-                    color = colors.separator
+                score = float(separator_scores[y])
+                if score >= 0.65:
+                    color = colors.separator  # Green for gutter
                 elif score <= 0.40:
-                    color = colors.content
+                    color = colors.content    # Red for content
                 else:
-                    color = colors.uncertain
-                cv2.line(heatmap_frame, (0, y), (w, y), color, 1)
+                    color = colors.uncertain  # Yellow for transitional
+                overlay[y, :] = color
+            heatmap_frame = cv2.addWeighted(frame, 0.55, overlay, 0.45, 0)
         else:
             _draw_banner(heatmap_frame, "No separator scores available", colors)
 
@@ -662,8 +677,8 @@ def _generate_pipeline_summary(panel_bounds: List[Any], w: int, h: int,
         avg_h = float(np.mean(panel_heights)) if panel_heights else 0.0
         ratio = float(round(max_h / max(1.0, med_h), 2)) if med_h > 0 else 1.0
 
-        density_level = "Optimal" if len(panel_bounds) >= max(5, int(h / 1500)) else (
-            "Medium" if len(panel_bounds) >= 3 else "Low"
+        density_level = "Optimal" if len(panel_bounds) >= max(3, int(h / max(1, w * 2.0))) else (
+            "Medium" if len(panel_bounds) >= 2 else "Low"
         )
         rec = "Optimal segmentation achieved." if ratio <= 3.0 else "Recursive split recommended for oversized slices."
 
@@ -742,6 +757,104 @@ def _generate_panel_lineage(panel_bounds: List[Any],
         return None
 
 
+def _generate_characters_overlay(frame: np.ndarray, characters: Optional[List[Any]],
+                                colors: ColorScheme, config: VisualizationConfig,
+                                output_dir: str, prefix: str) -> Optional[str]:
+    try:
+        char_frame = frame.copy()
+        drawn = 0
+        if characters:
+            overlay = char_frame.copy()
+            for idx, c in enumerate(characters):
+                x, y, w, h = _extract_box_coords(c)
+                pose = getattr(c, "pose_type", None) or (c.get("pose_type") if isinstance(c, dict) else "character")
+                if hasattr(pose, "value"):
+                    pose = pose.value
+                conf = _get_confidence(c)
+
+                # Draw semi-transparent silhouette mask if polygon is available
+                polygon = getattr(c, "polygon", None) or (c.get("polygon") if isinstance(c, dict) else None)
+                if polygon and len(polygon) >= 3:
+                    pts = np.array(polygon, dtype=np.int32).reshape((-1, 1, 2))
+                    cv2.fillPoly(overlay, [pts], (200, 50, 255))
+
+                if w > 0 and h > 0:
+                    cv2.rectangle(char_frame, (x, y), (x + w, y + h), (200, 50, 255), 2)
+                    label = f"CHAR #{idx+1}: {pose} ({conf:.2f})"
+                    _draw_text_with_bg(char_frame, label, (x, max(0, y - 5)),
+                                     font=config.font, font_scale=0.45,
+                                     text_color=(255, 255, 255),
+                                     bg_color=(150, 20, 180), thickness=1)
+                    
+                    # Draw face box if detected
+                    face = getattr(c, "face", None) or (c.get("face") if isinstance(c, dict) else None)
+                    if face:
+                        fx, fy, fw, fh = _extract_box_coords(face)
+                        emotion = getattr(face, "emotion", None) or (face.get("emotion") if isinstance(face, dict) else "face")
+                        if fw > 0 and fh > 0:
+                            cv2.rectangle(char_frame, (fx, fy), (fx + fw, fy + fh), (0, 215, 255), 2)
+                            _draw_text_with_bg(char_frame, str(emotion), (fx, max(0, fy - 3)),
+                                             font=config.font, font_scale=0.4,
+                                             text_color=(0, 0, 0),
+                                             bg_color=(0, 215, 255), thickness=1)
+                    drawn += 1
+
+            char_frame = cv2.addWeighted(char_frame, 0.75, overlay, 0.25, 0)
+
+        if drawn == 0:
+            _draw_banner(char_frame, "No characters detected", colors)
+
+        p11 = os.path.join(output_dir, f"{prefix}11_characters_and_silhouettes.png")
+        cv2.imwrite(p11, char_frame)
+        return p11
+    except Exception as e:
+        logger.debug(f"[DebugViz] Error generating characters overlay: {e}")
+        return None
+
+
+def _generate_dialogue_ocr_overlay(frame: np.ndarray, speech_bubbles: List[Any],
+                                   ocr_segments: List[Any], colors: ColorScheme,
+                                   config: VisualizationConfig,
+                                   output_dir: str, prefix: str) -> Optional[str]:
+    try:
+        ocr_frame = frame.copy()
+        drawn = 0
+
+        # Draw YOLO speech bubbles
+        for idx, b in enumerate(speech_bubbles):
+            bx, by, bw, bh = _extract_box_coords(b)
+            sub_type = getattr(b, "sub_type", None) or (b.get("sub_type") if isinstance(b, dict) else "bubble")
+            if bw > 0 and bh > 0:
+                cv2.rectangle(ocr_frame, (bx, by), (bx + bw, by + bh), (255, 200, 0), 2)
+                _draw_text_with_bg(ocr_frame, f"[{sub_type}]", (bx, max(0, by - 4)),
+                                 font=config.font, font_scale=0.45,
+                                 text_color=(0, 0, 0),
+                                 bg_color=(255, 200, 0), thickness=1)
+                drawn += 1
+
+        # Draw OCR text labels
+        for s in ocr_segments:
+            sx, sy, sw, sh = _extract_box_coords(s)
+            txt = getattr(s, "text", "") or (s.get("text") if isinstance(s, dict) else "")
+            if txt and sx >= 0 and sy >= 0:
+                short_txt = (txt[:32] + "...") if len(txt) > 32 else txt
+                _draw_text_with_bg(ocr_frame, short_txt, (sx + 5, sy + max(15, sh // 2)),
+                                 font=config.font, font_scale=0.45,
+                                 text_color=(255, 255, 255),
+                                 bg_color=(30, 30, 180), thickness=1)
+                drawn += 1
+
+        if drawn == 0:
+            _draw_banner(ocr_frame, "No speech bubbles or OCR dialogue detected", colors)
+
+        p12 = os.path.join(output_dir, f"{prefix}12_dialogue_ocr_script.png")
+        cv2.imwrite(p12, ocr_frame)
+        return p12
+    except Exception as e:
+        logger.debug(f"[DebugViz] Error generating dialogue OCR overlay: {e}")
+        return None
+
+
 def batch_draw_yolo_detections(image_paths: List[str], 
                                conf_threshold: float = 0.25,
                                colors: Optional[ColorScheme] = None,
@@ -801,3 +914,155 @@ def get_quality_metrics(panel_bounds: List[Any]) -> Dict[str, Any]:
         },
         "aspect_ratio_avg": float(round(np.mean(aspect_ratios), 2)) if aspect_ratios else 0.0
     }
+
+
+def main():
+    import argparse
+    import asyncio
+    import sys
+    from pathlib import Path
+
+    # Configure UTF-8 stdout/stderr for Windows console
+    if sys.platform == "win32":
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
+    # Ensure backend and app are on path
+    root_dir = Path(__file__).resolve().parent.parent
+    app_dir = root_dir / "app"
+    for p in (str(root_dir), str(app_dir)):
+        if p not in sys.path:
+            sys.path.insert(0, p)
+
+    parser = argparse.ArgumentParser(description="Multi-Stage Comic & Panel Diagnostic Visualizer")
+    parser.add_argument("--url", type=str, help="Image URL to diagnose")
+    parser.add_argument("--file", type=str, help="Local image file path to diagnose")
+    parser.add_argument("--out-dir", type=str, default="data/debug_output", help="Output directory for diagnostic artifacts")
+    parser.add_argument("--conf", type=float, default=0.25, help="YOLO confidence threshold (default: 0.25)")
+    args = parser.parse_args()
+
+    source = args.url or args.file
+    if not source:
+        print("\n" + "═" * 70)
+        print("  🔬 SONIKOMA MULTI-STAGE DIAGNOSTIC VISUALIZER")
+        print("═" * 70)
+        source = input("\n👉 Enter image URL or local file path: ").strip().strip('"').strip("'")
+
+    if not source:
+        print("❌ No image source provided. Exiting.")
+        return
+
+    print("\n" + "═" * 70)
+    print(f"  🚀 Processing Diagnostic Pipeline for: {source}")
+    print("═" * 70)
+
+    from services.image.utils.image_resolver import resolve_image_to_buffer
+    from services.image.panel_detection.detect_long_panels_service import detect_long_panels_boxes
+    from services.image.panel_detection.detect_small_panels_service import detect_small_panels_boxes
+    from services.image.panel_detection.detect_characters_service import detect_characters_boxes
+    from services.image.ocr.ocr_service import extract_bubble_guided_ocr
+    from services.image.crop.detect_type_service import detect_image_layout_type
+    from schemas.project import DetectLongPanelsRequest, DetectSmallPanelsRequest, DetectCharactersRequest
+    from schemas.ocr import DetectTextRequest
+
+    async def run():
+        if source.startswith("http://") or source.startswith("https://") or source.startswith("data:"):
+            res = await resolve_image_to_buffer(source)
+            raw = res.get("data")
+        else:
+            raw = Path(source).read_bytes()
+
+        if not raw:
+            print("❌ Failed to resolve image buffer.")
+            return
+
+        import base64
+        import io
+        b64 = base64.b64encode(raw).decode("utf-8")
+        pil_img = Image.open(io.BytesIO(raw)).convert("RGB")
+        w, h = pil_img.size
+
+        print(f"\n[1/4] Classifying layout: {w}x{h}px ...")
+        layout_info = await detect_image_layout_type(image_base64=b64)
+        is_small = layout_info.crop_type.value == "small_panels" or (h / float(max(1, w))) < 2.2
+        print(f"  • Layout: {layout_info.crop_type.value} | Background: {layout_info.detected_bg_color}")
+
+        print(f"\n[2/4] Running panel detection ({'small-panels' if is_small else 'long-panels'}) ...")
+        separator_scores = None
+        separator_bands = None
+
+        if is_small:
+            req = DetectSmallPanelsRequest(image_base64=b64)
+            det_res = await detect_small_panels_boxes(req)
+            panels = det_res.panels if (det_res.panels and len(det_res.panels) > 0) else ([det_res.panel] if det_res.panel else [])
+            bubbles = det_res.speech_bubbles or []
+        else:
+            req = DetectLongPanelsRequest(image_base64=b64, auto_split=True)
+            det_res = await detect_long_panels_boxes(req)
+            panels = det_res.panels
+            bubbles = [b for p in det_res.panels for b in (p.speech_bubbles or [])]
+
+            # Extract separator scores and separator bands from the vertical strip analysis
+            try:
+                import numpy as np
+                from services.image.panel_detection.panel_detector import (
+                    detect_vertical_strip_panels,
+                    _detect_bg_color_and_threshold
+                )
+                gray_arr = np.array(pil_img.convert("L"))
+                bg_res = _detect_bg_color_and_threshold(gray_arr, "auto", 30.0)
+                is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
+                webtoon_res = detect_vertical_strip_panels(
+                    gray_arr=gray_arr,
+                    is_white_bg=is_white_bg,
+                    threshold_val=threshold_val,
+                    min_height_px=60,
+                    min_width_pct=0.10,
+                    sensitivity=30.0
+                )
+                if hasattr(webtoon_res, "separator_scores"):
+                    separator_scores = webtoon_res.separator_scores
+                if hasattr(webtoon_res, "separator_bands"):
+                    separator_bands = webtoon_res.separator_bands
+            except Exception as e:
+                logger.debug(f"[DebugViz] Separator calculation: {e}")
+
+        print(f"  ✓ Detected {len(panels)} comic panels.")
+
+        print("\n[3/4] Running Character Detection & Bubble OCR ...")
+        char_req = DetectCharactersRequest(image_base64=b64, detect_faces=True)
+        char_res = await detect_characters_boxes(char_req)
+        print(f"  • Characters: {char_res.total_characters} detected")
+
+        ocr_req = DetectTextRequest(image_base64=b64, bubble_guided=True)
+        ocr_res = await extract_bubble_guided_ocr(ocr_req)
+        print(f"  • Dialogue OCR: {ocr_res.total_segments} text segments extracted")
+
+        print(f"\n[4/4] Exporting 12-Stage Diagnostic Artifacts to '{args.out_dir}' ...")
+        exported = export_multi_stage_debug_images(
+            image_src=pil_img,
+            panel_bounds=panels,
+            characters=char_res.characters,
+            speech_bubbles=bubbles,
+            ocr_segments=ocr_res.segments,
+            output_dir=args.out_dir,
+            job_id="cli_test",
+            separator_scores=separator_scores,
+            separator_bands=separator_bands,
+            enable_timing=True
+        )
+
+        print("\n" + "═" * 70)
+        print("  🎉 All 12 Diagnostic Artifacts Generated:")
+        for name, path in exported.items():
+            print(f"    • {name:28s} -> {path}")
+        print("═" * 70 + "\n")
+
+    asyncio.run(run())
+
+
+if __name__ == "__main__":
+    main()

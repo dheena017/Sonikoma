@@ -267,7 +267,7 @@ class MangaStreamAdapter(BaseSiteAdapter):
                 if len(dom_images) >= 3:
                     context.candidate_images.extend(dom_images)
                     context.checklist.reader_found = True
-                    context.escalation_status = EscalationStatus.STATIC_HTTP
+                    context.escalation_status = EscalationStatus.SUCCESS
                     context.completeness = ScrapeCompleteness.COMPLETE
                     return self._finalize(context, start_time)
 

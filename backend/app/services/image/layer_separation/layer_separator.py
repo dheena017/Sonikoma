@@ -173,7 +173,7 @@ async def debug_yolo_detections_service(url: str, conf: float = 0.25) -> bytes:
             tmp_f.write(resolved["data"])
             tmp_path = tmp_f.name
 
-        from services.image.panel_detection.debug_visualizer import draw_yolo_detections
+        from scripts.debug_visualizer import draw_yolo_detections
         annotated_bytes = await asyncio.to_thread(draw_yolo_detections, tmp_path, conf)
         if annotated_bytes is None:
             raise ValueError("YOLO model is not available.")

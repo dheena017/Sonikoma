@@ -16,6 +16,8 @@ from typing import List, Dict, Any, Tuple, Optional
 from schemas.project import (
     PanelBoundingBox,
     SpeechBubbleItem,
+    CharacterEntityItem,
+    PanelCinematography,
     EntityLabel,
     EntityCategory
 )
@@ -33,20 +35,59 @@ def _box_distance(p_x: int, p_y: int, p_w: int, p_h: int, b_x: int, b_y: int, b_
     return math.sqrt(dx * dx + dy * dy)
 
 
+def _estimate_cinematography(panel_w: int, panel_h: int, characters: List[CharacterEntityItem]) -> PanelCinematography:
+    """Estimates camera shot type and camera motion recommendations based on character framing."""
+    if not characters:
+        return PanelCinematography(
+            shot_type="wide_shot",
+            camera_angle="eye_level",
+            dominant_mood="ambient",
+            suggested_camera_motion="slow_zoom_in"
+        )
+
+    # Find dominant character height ratio relative to panel height
+    max_char_h = max(c.height for c in characters)
+    h_ratio = max_char_h / float(max(1, panel_h))
+
+    if h_ratio >= 0.75:
+        return PanelCinematography(
+            shot_type="close_up",
+            camera_angle="eye_level",
+            dominant_mood="dramatic",
+            suggested_camera_motion="static"
+        )
+    elif h_ratio >= 0.45:
+        return PanelCinematography(
+            shot_type="medium_shot",
+            camera_angle="eye_level",
+            dominant_mood="neutral",
+            suggested_camera_motion="slow_zoom_in"
+        )
+    else:
+        return PanelCinematography(
+            shot_type="wide_shot",
+            camera_angle="high_angle",
+            dominant_mood="action",
+            suggested_camera_motion="pan_down"
+        )
+
+
 def fuse_panels_and_bubbles(
     cv_panels: List[Dict[str, Any]],
     yolo_bubbles: List[SpeechBubbleItem],
     img_w: int,
     img_h: int,
+    characters: Optional[List[CharacterEntityItem]] = None,
     is_small_panel: bool = False,
     snap_to_frame: bool = True,
     max_binding_dist_px: int = 60,
     bleed_padding_px: int = 5
 ) -> Tuple[List[PanelBoundingBox], List[SpeechBubbleItem], Dict[str, Any]]:
     """
-    Fuses OpenCV geometric frames and YOLO speech bubbles into rich PanelBoundingBox models.
+    Fuses OpenCV geometric frames, YOLO speech bubbles, and Characters into rich PanelBoundingBox models.
     """
     fused_panels: List[PanelBoundingBox] = []
+    char_list = list(characters or [])
 
     # If no OpenCV frames detected, synthesize a baseline frame
     if not cv_panels:
@@ -63,76 +104,9 @@ def fuse_panels_and_bubbles(
             "category": EntityCategory.PANEL.value
         }]
 
-    # Case A: Small Image & Single Frame Mode
-    if is_small_panel:
-        # Find dominant panel (largest area framed box)
-        primary_cv = max(cv_panels, key=lambda p: p.get("w", 0) * p.get("h", 0))
-
-        px = int(primary_cv.get("x", 0))
-        py = int(primary_cv.get("y", 0))
-        pw = int(primary_cv.get("w", img_w))
-        ph = int(primary_cv.get("h", img_h))
-
-        bound_bubbles: List[SpeechBubbleItem] = []
-
-        # Bind nearby bubbles
-        for bubble in yolo_bubbles:
-            dist = _box_distance(px, py, pw, ph, bubble.x, bubble.y, bubble.width, bubble.height)
-            # If bubble is near the panel frame or vertically aligned
-            if dist <= max_binding_dist_px or (abs(bubble.x - px) < 80 and bubble.y > py):
-                bubble.parent_panel_id = "panel_1"
-                bubble.is_bound = True
-                bound_bubbles.append(bubble)
-
-                # Expand panel boundary to encompass the speech bubble
-                new_x1 = min(px, bubble.x)
-                new_y1 = min(py, bubble.y)
-                new_x2 = max(px + pw, bubble.x + bubble.width)
-                new_y2 = max(py + ph, bubble.y + bubble.height)
-
-                px, py = new_x1, new_y1
-                pw, ph = new_x2 - new_x1, new_y2 - new_y1
-
-        # Apply bleed padding
-        pad_x1 = max(0, px - bleed_padding_px)
-        pad_y1 = max(0, py - bleed_padding_px)
-        pad_x2 = min(img_w, px + pw + bleed_padding_px)
-        pad_y2 = min(img_h, py + ph + bleed_padding_px)
-
-        final_w = pad_x2 - pad_x1
-        final_h = pad_y2 - pad_y1
-
-        panel_obj = PanelBoundingBox(
-            id="panel_1",
-            index=0,
-            x=pad_x1,
-            y=pad_y1,
-            w=final_w,
-            h=final_h,
-            width=final_w,
-            height=final_h,
-            confidence=round(float(primary_cv.get("confidence", 0.98)), 2),
-            label=primary_cv.get("label", EntityLabel.PANEL_STANDARD.value),
-            category=EntityCategory.PANEL.value,
-            sub_type="single_frame_snapped" if snap_to_frame else "standard",
-            has_bound_bubbles=len(bound_bubbles) > 0,
-            speech_bubbles_count=len(bound_bubbles),
-            speech_bubbles=bound_bubbles
-        )
-        fused_panels.append(panel_obj)
-
-        margins = {
-            "crop_top": int(pad_y1),
-            "crop_bottom": int(max(0, img_h - pad_y2)),
-            "crop_left": int(pad_x1),
-            "crop_right": int(max(0, img_w - pad_x2)),
-            "unit": "pixels"
-        }
-
-        return fused_panels, bound_bubbles, margins
-
-    # Case B: Tall Webtoon Strip Mode
+    # Process all detected frames
     unassigned_bubbles = list(yolo_bubbles)
+    max_gutter_reach = max(20, int(img_w * 0.25))
 
     for idx, cp in enumerate(cv_panels):
         px = int(cp.get("x", 0))
@@ -140,36 +114,74 @@ def fuse_panels_and_bubbles(
         pw = int(cp.get("w", cp.get("width", img_w)))
         ph = int(cp.get("h", cp.get("height", 100)))
         p_id = f"panel_{idx + 1}"
+        polygon = cp.get("polygon")
 
         panel_bubbles: List[SpeechBubbleItem] = []
+        panel_characters: List[CharacterEntityItem] = []
 
-        # Find bubbles belonging to this panel slice
+        # Resolution-adaptive margin tolerances
+        tol_x = max(4, int(pw * 0.03))
+        tol_y = max(4, int(ph * 0.03))
+        dyn_max_dist = max(10, int(pw * 0.08)) if max_binding_dist_px == 60 else max_binding_dist_px
+
+        # 1. Assign characters situated within or overlapping this panel frame
+        for char in char_list:
+            cx = char.x + (char.width // 2)
+            cy = char.y + (char.height // 2)
+            if (px - tol_x) <= cx <= (px + pw + tol_x) and (py - tol_y) <= cy <= (py + ph + tol_y):
+                char.panel_id = p_id
+                panel_characters.append(char)
+
+        # 2. Find bubbles belonging to or adjacent to this OpenCV panel frame
         for bubble in list(unassigned_bubbles):
-            dist = _box_distance(px, py, pw, ph, bubble.x, bubble.y, bubble.width, bubble.height)
-            bubble_center_y = bubble.y + (bubble.height // 2)
+            bc_x = bubble.x + (bubble.width // 2)
+            bc_y = bubble.y + (bubble.height // 2)
 
-            # If inside or very close to this vertical slice
-            if (py <= bubble_center_y <= py + ph) or dist <= max_binding_dist_px:
+            inside_x = (px - tol_x) <= bc_x <= (px + pw + tol_x)
+            
+            # Check if inside panel or immediately adjacent in gutter/margins
+            dist = _box_distance(px, py, pw, ph, bubble.x, bubble.y, bubble.width, bubble.height)
+            is_inside = (py - tol_y) <= bc_y <= (py + ph + tol_y)
+            is_adjacent_above = (0 <= (py - (bubble.y + bubble.height)) <= max_gutter_reach)
+            is_adjacent_below = (0 <= (bubble.y - (py + ph)) <= max_gutter_reach)
+            is_near = dist <= dyn_max_dist
+
+            if inside_x and (is_inside or is_adjacent_above or is_adjacent_below or is_near):
                 bubble.parent_panel_id = p_id
                 bubble.is_bound = True
+
+                # Speaker attribution: Bind bubble to closest character in this panel
+                if panel_characters:
+                    closest_char = min(
+                        panel_characters,
+                        key=lambda c: math.hypot(
+                            (c.x + c.width // 2) - bc_x,
+                            (c.y + c.height // 2) - bc_y
+                        )
+                    )
+                    closest_char.associated_bubble_ids.append(bubble.bubble_id)
+
                 panel_bubbles.append(bubble)
                 unassigned_bubbles.remove(bubble)
 
-        # Expand panel boundary to encompass bound bubbles
-        for b in panel_bubbles:
-            new_x1 = min(px, b.x)
-            new_y1 = min(py, b.y)
-            new_x2 = max(px + pw, b.x + b.width)
-            new_y2 = max(py + ph, b.y + b.height)
+                # Expand panel boundary safely to enclose the speech bubble without crossing neighboring panels
+                max_exp_y = max(10, int(ph * 0.15))
+                max_exp_x = max(10, int(pw * 0.10))
+                new_x1 = max(0, max(px - max_exp_x, min(px, bubble.x)))
+                new_y1 = max(0, max(py - max_exp_y, min(py, bubble.y)))
+                new_x2 = min(img_w, min(px + pw + max_exp_x, max(px + pw, bubble.x + bubble.width)))
+                new_y2 = min(img_h, min(py + ph + max_exp_y, max(py + ph, bubble.y + bubble.height)))
 
-            px, py = new_x1, new_y1
-            pw, ph = new_x2 - new_x1, new_y2 - new_y1
+                px, py = new_x1, new_y1
+                pw, ph = new_x2 - new_x1, new_y2 - new_y1
 
-        # Apply bleed padding
+        # Apply bleed padding if requested
         pad_x1 = max(0, px - bleed_padding_px)
         pad_y1 = max(0, py - bleed_padding_px)
         pad_x2 = min(img_w, px + pw + bleed_padding_px)
         pad_y2 = min(img_h, py + ph + bleed_padding_px)
+
+        cinematography = _estimate_cinematography(pw, ph, panel_characters)
 
         fused_panels.append(PanelBoundingBox(
             id=p_id,
@@ -180,18 +192,43 @@ def fuse_panels_and_bubbles(
             h=max(10, pad_y2 - pad_y1),
             width=pad_x2 - pad_x1,
             height=pad_y2 - pad_y1,
+            polygon=polygon,
             confidence=round(float(cp.get("confidence", 0.95)), 2),
             label=cp.get("label", EntityLabel.PANEL_STANDARD.value),
             category=EntityCategory.PANEL.value,
-            sub_type="webtoon_slice",
+            sub_type="single_frame_snapped" if snap_to_frame else "panel",
             has_bound_bubbles=len(panel_bubbles) > 0,
             speech_bubbles_count=len(panel_bubbles),
-            speech_bubbles=panel_bubbles
+            speech_bubbles=panel_bubbles,
+            characters=panel_characters,
+            characters_count=len(panel_characters),
+            cinematography=cinematography
         ))
+
+    # Detect Inset / Picture-in-Picture Panels (depth lineage)
+    for p in fused_panels:
+        for other in fused_panels:
+            if p.id != other.id and other.x >= p.x and other.y >= p.y:
+                if (other.x + other.w) <= (p.x + p.w) and (other.y + other.h) <= (p.y + p.h):
+                    if (other.w * other.h) < (p.w * p.h * 0.60):
+                        other.depth = 1
+                        other.parent_panel_id = p.id
+                        other.label = EntityLabel.PANEL_INSET.value
 
     fused_panels.sort(key=lambda p: (p.y, p.x))
     for i, p in enumerate(fused_panels):
         p.index = i
+        p.id = f"panel_{i + 1}"
 
-    margins = {"unit": "pixels"}
+    if fused_panels:
+        margins = {
+            "crop_top": int(min(p.y for p in fused_panels)),
+            "crop_bottom": int(max(0, img_h - max(p.y + p.h for p in fused_panels))),
+            "crop_left": int(min(p.x for p in fused_panels)),
+            "crop_right": int(max(0, img_w - max(p.x + p.w for p in fused_panels))),
+            "unit": "pixels"
+        }
+    else:
+        margins = {"unit": "pixels"}
+
     return fused_panels, yolo_bubbles, margins

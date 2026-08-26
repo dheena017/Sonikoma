@@ -1,39 +1,49 @@
+"""
+backend/app/services/image/panel_detection/speech_bubble_detector.py
+─────────────────────────────────────────────────────────────────────────────
+YOLO Deep-Learning Comic Speech Bubble & Character Segmentation Engine:
+- Semantic extraction of dialogue bubbles, thought clouds, and captions
+- Pixel-accurate segmentation masks for bubble and character silhouettes
+- Dynamic model resolution and fallback mechanisms
+─────────────────────────────────────────────────────────────────────────────
+"""
+
 import os
-import shutil
+import io
 import logging
-import threading
-import time
-import glob
-import re
-import yaml
+import importlib.util
 import numpy as np
 import cv2
+from PIL import Image
 from typing import Optional, Dict, List, Tuple, Any
+
+from schemas.project import SpeechBubbleItem, EntityLabel, EntityCategory
 
 logger = logging.getLogger("sonikoma.services.image.panel_detection.speech_bubble_detector")
 
-import importlib.util
-
+# Dependency guard
 has_yolo_dependencies = False
 try:
-    if importlib.util.find_spec("ultralytics") is not None and importlib.util.find_spec("huggingface_hub") is not None:
+    if (
+        importlib.util.find_spec("ultralytics") is not None
+        and importlib.util.find_spec("huggingface_hub") is not None
+    ):
         has_yolo_dependencies = True
 except Exception:
     has_yolo_dependencies = False
-    logger.warning("[YOLO Detector] ultralytics or huggingface_hub check failed. YOLO segmentation will be disabled.")
+    logger.warning("[YOLO Detector] ultralytics or huggingface_hub check failed. YOLO segmentation disabled.")
 
 _yolo_model = None
+_yolo_char_model = None
+
 
 def get_yolo_speech_bubble_model():
     """
     Lazily downloads and initializes the YOLO manga/comic speech bubble segmentation model.
-
     Tries models in priority order:
-    1. kitsumed/yolov8m_seg-speech-bubble — YOLOv8m-seg, produces pixel masks, trained on manga/comic bubbles.
-    2. ogkalu/comic-speech-bubble-detector-yolov8m — YOLOv8m detection, broader comic coverage.
-    3. yolov8n-seg.pt — generic pretrained segmentation (last resort; not manga-specific).
-
-    The first successfully loaded model is cached in `_yolo_model`.
+    1. kitsumed/yolov8m_seg-speech-bubble (Pixel masks, manga trained)
+    2. ogkalu/comic-speech-bubble-detector-yolov8m (Broader comic coverage)
+    3. Generic YOLOv8n-seg
     """
     global _yolo_model
     if _yolo_model is not None:
@@ -50,78 +60,241 @@ def get_yolo_speech_bubble_model():
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         custom_model_path = os.path.join(base_dir, "local_media", "models", "manga_finetuned.pt")
         if os.path.exists(custom_model_path):
-            logger.info(f"[YOLO Detector] Loading custom fine-tuned YOLO model from: {custom_model_path}")
+            logger.info(f"[YOLO Detector] Loading custom fine-tuned YOLO model: {custom_model_path}")
             _yolo_model = YOLO(custom_model_path)
-            logger.info("[YOLO Detector] Custom fine-tuned YOLO model loaded successfully.")
             return _yolo_model
     except Exception as e:
-        logger.warning(f"[YOLO Detector] Failed to load custom fine-tuned model: {e}. Falling back to public models...")
+        logger.warning(f"[YOLO Detector] Custom model fallback: {e}")
 
-    # Priority 1: kitsumed YOLOv8m-seg — produces pixel-level masks
+    # Priority 1: kitsumed YOLOv8m-seg
     hf_token = os.getenv("HUGGINGFACE_API_KEY") or os.getenv("HF_TOKEN")
     try:
-        logger.debug("[YOLO Detector] Downloading kitsumed/yolov8m_seg-speech-bubble (YOLOv8m-seg) from HuggingFace...")
         model_path = hf_hub_download(
             repo_id="kitsumed/yolov8m_seg-speech-bubble",
             filename="model.pt",
             token=hf_token
         )
-        logger.debug(f"[YOLO Detector] Loading YOLO manga segmentation model from: {model_path}")
         _yolo_model = YOLO(model_path)
-        logger.debug("[YOLO Detector] kitsumed/yolov8m_seg-speech-bubble model loaded successfully.")
+        logger.debug("[YOLO Detector] kitsumed model loaded successfully.")
         return _yolo_model
     except Exception as e:
         logger.warning(f"[YOLO Detector] kitsumed model unavailable: {e}. Trying ogkalu fallback...")
 
-    # Priority 2: ogkalu YOLOv8m — broader comic/webtoon coverage
+    # Priority 2: ogkalu YOLOv8m
     try:
-        logger.info("[YOLO Detector] Downloading ogkalu/comic-speech-bubble-detector-yolov8m from HuggingFace...")
         model_path = hf_hub_download(
             repo_id="ogkalu/comic-speech-bubble-detector-yolov8m",
             filename="comic-speech-bubble-detector.pt",
             token=hf_token
         )
-        logger.info(f"[YOLO Detector] Loading ogkalu YOLO fallback model from: {model_path}")
         _yolo_model = YOLO(model_path)
-        logger.info("[YOLO Detector] ogkalu/comic-speech-bubble-detector-yolov8m fallback model loaded successfully.")
+        logger.info("[YOLO Detector] ogkalu fallback model loaded successfully.")
         return _yolo_model
     except Exception as e:
-        logger.warning(f"[YOLO Detector] ogkalu model unavailable: {e}. Trying generic YOLOv8n-seg last resort...")
+        logger.warning(f"[YOLO Detector] ogkalu model unavailable: {e}. Trying generic YOLOv8n-seg...")
 
     # Priority 3: Generic YOLOv8n-seg
     try:
-        logger.info("[YOLO Detector] Loading generic YOLOv8n-seg pretrained model as last-resort fallback...")
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         project_model_path = os.path.join(base_dir, "data", "models", "yolov8n-seg.pt")
         if os.path.exists(project_model_path):
-            logger.info(f"[YOLO Detector] Loading generic YOLOv8n-seg model from project data/models: {project_model_path}")
             _yolo_model = YOLO(project_model_path)
         else:
             _yolo_model = YOLO("yolov8n-seg.pt")
         logger.info("[YOLO Detector] Generic YOLOv8n-seg loaded.")
         return _yolo_model
     except Exception as e:
-        logger.error(f"[YOLO Detector] All YOLO model loading attempts failed: {e}", exc_info=True)
+        logger.error(f"[YOLO Detector] All YOLO model loading failed: {e}", exc_info=True)
         _yolo_model = None
         return None
 
-# Backward compatibility alias
-get_yolo_model = get_yolo_speech_bubble_model
+
+def _set_loaded_yolo_model(model_instance: Any):
+    """Allows training workers to inject newly fine-tuned weights directly into cache."""
+    global _yolo_model
+    _yolo_model = model_instance
 
 
-def segment_speech_bubbles_and_text_balloons(image_path: str, conf_threshold: float = 0.25) -> Optional[np.ndarray]:
+def detect_yolo_entities(
+    image_bytes: bytes,
+    conf_threshold: float = 0.30
+) -> List[SpeechBubbleItem]:
+    """
+    Executes YOLOv8m-seg semantic inference on comic image bytes.
+    Extracts dialogue bubbles, thought clouds, captions, and polygon masks.
+    """
+    pil_img = Image.open(io.BytesIO(image_bytes))
+    img_w, img_h = pil_img.size
+
+    model = get_yolo_speech_bubble_model()
+    # If YOLO model is available and trained on comic entities, use YOLO
+    is_comic_yolo = False
+    if model is not None:
+        model_names = getattr(model, "names", {})
+        if isinstance(model_names, dict):
+            names_list = list(model_names.values())
+        else:
+            names_list = list(model_names)
+        # Check if model has comic/speech bubble classes
+        is_coco = any(c in names_list for c in ["person", "bicycle", "car", "dog", "cat", "chair", "cup"])
+        is_comic_yolo = not is_coco and any("bubble" in str(c).lower() or "text" in str(c).lower() or "balloon" in str(c).lower() or "speech" in str(c).lower() for c in names_list)
+
+    if is_comic_yolo and model is not None:
+        try:
+            results = model.predict(source=pil_img, conf=conf_threshold, verbose=False)
+        except Exception as e:
+            logger.error(f"[YOLO Detector] Inference error: {e}", exc_info=True)
+            results = []
+    else:
+        results = []
+
+    gray_np = np.array(pil_img.convert("L"))
+    otsu_val, _ = cv2.threshold(gray_np, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    dyn_white_thresh = max(150.0, min(240.0, float(otsu_val) * 1.12))
+
+    entities: List[SpeechBubbleItem] = []
+    bubble_counter = 1
+
+    # Dynamic image-proportional bubble limits
+    is_tall_webtoon = img_h > (img_w * 2.5)
+    max_bubble_w = int(img_w * 0.75) if is_tall_webtoon else int(img_w * 0.40)
+    max_bubble_h = int(img_w * 0.50) if is_tall_webtoon else int(img_h * 0.25)
+    max_bubble_area = int(img_w * min(img_h, int(img_w * 2.0)) * 0.15)
+    min_bubble_w = max(10, int(img_w * 0.02))
+    min_bubble_h = max(10, int(img_h * 0.008)) if is_tall_webtoon else max(10, int(img_w * 0.015))
+
+    if results:
+        for r in results:
+            boxes = r.boxes.xyxy.cpu().numpy() if r.boxes is not None else []
+            confs = r.boxes.conf.cpu().numpy() if r.boxes is not None else []
+            masks = r.masks.xy if r.masks is not None else []
+
+            for idx, (box, conf) in enumerate(zip(boxes, confs)):
+                x1, y1, x2, y2 = [int(v) for v in box]
+                w = max(10, x2 - x1)
+                h = max(10, y2 - y1)
+
+                polygon = None
+                if idx < len(masks) and masks[idx] is not None and len(masks[idx]) > 2:
+                    polygon = [[int(pt[0]), int(pt[1])] for pt in masks[idx]]
+
+                if w > max_bubble_w or h > max_bubble_h or (w * h) > max_bubble_area or w < min_bubble_w or h < min_bubble_h:
+                    continue
+
+                sub_patch = gray_np[y1:y1 + h, x1:x1 + w]
+                if sub_patch.size == 0:
+                    continue
+                
+                white_ratio = float(np.mean(sub_patch > dyn_white_thresh))
+                if white_ratio < 0.50:
+                    continue
+
+                aspect = w / float(h)
+                if aspect > 2.5:
+                    bubble_type = "caption"
+                    label = EntityLabel.CAPTION_NARRATION.value
+                elif conf > 0.85:
+                    bubble_type = "speech"
+                    label = EntityLabel.BUBBLE_SPEECH.value
+                else:
+                    bubble_type = "thought"
+                    label = EntityLabel.BUBBLE_THOUGHT.value
+
+                entities.append(SpeechBubbleItem(
+                    bubble_id=f"bubble_{bubble_counter}",
+                    label=label,
+                    category=EntityCategory.TEXT.value,
+                    sub_type=bubble_type,
+                    x=x1,
+                    y=y1,
+                    width=w,
+                    height=h,
+                    polygon=polygon,
+                    dialogue_text=None,
+                    confidence=round(float(conf), 2),
+                    reading_order=bubble_counter,
+                    is_bound=False
+                ))
+                bubble_counter += 1
+
+    # Adaptive Geometric Contour Speech Bubble Fallback
+    if not entities:
+        try:
+            block_size = max(11, (int(img_w * 0.02) | 1))
+            thresh = cv2.adaptiveThreshold(gray_np, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, block_size, 2)
+            contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            
+            min_area_thresh = max(100.0, float(img_w * img_h * 0.0003))
+            
+            for cnt in contours:
+                bx, by, bw, bh = cv2.boundingRect(cnt)
+                b_area = float(bw * bh)
+                if bw > max_bubble_w or bh > max_bubble_h or bw < min_bubble_w or bh < min_bubble_h:
+                    continue
+                if b_area < min_area_thresh or b_area > max_bubble_area:
+                    continue
+                
+                sub_patch = gray_np[by:by + bh, bx:bx + bw]
+                if sub_patch.size == 0 or sub_patch.shape[1] <= 1:
+                    continue
+                
+                dyn_grad_thresh = max(8.0, float(np.std(sub_patch) * 0.5))
+                stroke_count = int(np.sum(np.abs(np.diff(sub_patch.astype(float), axis=1)) > dyn_grad_thresh))
+                mean_brightness = float(np.mean(sub_patch))
+                
+                min_stroke_limit = max(2, int(bw * 0.04))
+                max_stroke_limit = int(bw * bh * 0.20)
+                
+                # Must be a bright speech bubble interior containing text strokes
+                if mean_brightness >= dyn_white_thresh * 0.85 and min_stroke_limit <= stroke_count <= max_stroke_limit:
+                    peri = cv2.arcLength(cnt, True)
+                    approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+                    poly = [[int(p[0][0]), int(p[0][1])] for p in approx] if len(approx) >= 3 else None
+                    
+                    aspect = bw / float(bh)
+                    bubble_type = "caption" if aspect > 2.5 else "speech"
+                    label = EntityLabel.CAPTION_NARRATION.value if aspect > 2.5 else EntityLabel.BUBBLE_SPEECH.value
+                    
+                    entities.append(SpeechBubbleItem(
+                        bubble_id=f"bubble_{bubble_counter}",
+                        label=label,
+                        category=EntityCategory.TEXT.value,
+                        sub_type=bubble_type,
+                        x=bx,
+                        y=by,
+                        width=bw,
+                        height=bh,
+                        polygon=poly,
+                        dialogue_text=None,
+                        confidence=0.90,
+                        reading_order=bubble_counter,
+                        is_bound=False
+                    ))
+                    bubble_counter += 1
+        except Exception as e:
+            logger.warning(f"[SpeechBubble Detector] Contour bubble fallback error: {e}")
+
+    entities.sort(key=lambda b: (b.y, b.x))
+    for i, b in enumerate(entities):
+        b.reading_order = i + 1
+
+    logger.debug(f"[YOLO Detector] Image {img_w}x{img_h}px -> Detected {len(entities)} speech bubble(s).")
+    return entities
+
+
+def segment_speech_bubbles_and_text_balloons(
+    image_path: str,
+    conf_threshold: float = 0.25
+) -> Optional[np.ndarray]:
     """
     Infers text and speech balloon masks on a panel image using the YOLO model.
-    Returns:
-      Single-channel binary mask (numpy uint8 array, 255 for detected regions, 0 elsewhere), or None.
+    Returns single-channel binary mask (numpy uint8 array, 255 for detected regions).
     """
     if not has_yolo_dependencies:
-        logger.warning("[YOLO Detector] ultralytics or huggingface_hub is not installed. YOLO segmentation cannot run.")
         return None
 
     model = get_yolo_speech_bubble_model()
     if model is None:
-        logger.warning("[YOLO Detector] YOLO speech bubble model unavailable — falling back to OpenCV.")
         return None
 
     if not os.path.exists(image_path):
@@ -135,7 +308,6 @@ def segment_speech_bubbles_and_text_balloons(image_path: str, conf_threshold: fl
 
         result = results[0]
         if not hasattr(result, "masks") or result.masks is None or len(result.masks) == 0:
-            logger.info("[YOLO Detector] YOLO segmentation completed: No masks found in this panel.")
             return None
 
         if hasattr(result, "orig_shape") and result.orig_shape is not None:
@@ -146,7 +318,6 @@ def segment_speech_bubbles_and_text_balloons(image_path: str, conf_threshold: fl
             if img is not None:
                 height, width = img.shape[:2]
             else:
-                logger.warning(f"[YOLO Detector] Could not determine image dimensions: {image_path}")
                 return None
 
         combined_mask = np.zeros((height, width), dtype=np.uint8)
@@ -166,21 +337,14 @@ def segment_speech_bubbles_and_text_balloons(image_path: str, conf_threshold: fl
                 combined_mask = cv2.bitwise_or(combined_mask, binary_slice)
 
         if np.any(combined_mask > 0):
-            mask_pixel_count = int(np.sum(combined_mask > 0))
-            logger.info(f"[YOLO Detector] Successfully segmented text/balloon masks (conf >= {conf_threshold}, {mask_pixel_count} pixels masked)")
             return combined_mask
         else:
             return np.zeros((height, width), dtype=np.uint8)
 
     except Exception as e:
-        logger.error(f"[YOLO Detector] Error running YOLO text/balloon segmentation: {e}", exc_info=True)
+        logger.error(f"[YOLO Detector] Error running YOLO balloon segmentation: {e}", exc_info=True)
         return None
 
-# Backward compatibility alias
-segment_text_and_balloons = segment_speech_bubbles_and_text_balloons
-
-
-_yolo_char_model = None
 
 def get_yolo_character_segmentation_model():
     """Lazily loads the YOLOv8-seg model for character detection."""
@@ -193,37 +357,32 @@ def get_yolo_character_segmentation_model():
 
     try:
         from ultralytics import YOLO
-
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         local_path = os.path.join(base_dir, "yolov8n-seg.pt")
         if os.path.exists(local_path):
-            logger.info(f"[YOLO Detector] Loading local YOLOv8-seg character model from: {local_path}")
             _yolo_char_model = YOLO(local_path)
         else:
-            logger.info("[YOLO Detector] Loading generic YOLOv8n-seg model for character detection...")
             _yolo_char_model = YOLO("yolov8n-seg.pt")
         return _yolo_char_model
     except Exception as e:
-        logger.error(f"[YOLO Detector] Failed to load YOLOv8-seg character model: {e}", exc_info=True)
+        logger.error(f"[YOLO Detector] Failed to load character model: {e}", exc_info=True)
         return None
 
-# Backward compatibility alias
-get_yolo_char_model = get_yolo_character_segmentation_model
 
-
-def segment_character_foreground(image_path: str, conf_threshold: float = 0.25) -> Optional[np.ndarray]:
-    """Detects character foreground masks (class 0: person in COCO dataset) using YOLOv8-seg model."""
+def segment_character_foreground(
+    image_path: str,
+    conf_threshold: float = 0.25
+) -> Optional[np.ndarray]:
+    """Detects character foreground silhouettes using YOLOv8-seg."""
     if not has_yolo_dependencies:
-        logger.warning("[YOLO Detector] ultralytics or huggingface_hub is not installed. YOLO segmentation cannot run.")
         return None
 
     model = get_yolo_character_segmentation_model()
     if model is None:
-        logger.warning("[YOLO Detector] YOLO character segmentation model unavailable.")
         return None
 
     if not os.path.exists(image_path):
-        raise FileNotFoundError(f"Image path does not exist for YOLO character segmentation: {image_path}")
+        raise FileNotFoundError(f"Image path does not exist: {image_path}")
 
     try:
         raw_results = model.predict(image_path, conf=conf_threshold, verbose=False)
@@ -245,7 +404,6 @@ def segment_character_foreground(image_path: str, conf_threshold: float = 0.25) 
             if img is not None:
                 height, width = img.shape[:2]
             else:
-                logger.warning(f"[YOLO Detector] Could not determine image dimensions for character segmentation: {image_path}")
                 return None
 
         combined_mask = np.zeros((height, width), dtype=np.uint8)
@@ -269,479 +427,5 @@ def segment_character_foreground(image_path: str, conf_threshold: float = 0.25) 
         return combined_mask
 
     except Exception as e:
-        logger.error(f"[YOLO Detector] Error running YOLO character segmentation: {e}", exc_info=True)
+        logger.error(f"[YOLO Detector] Error running character segmentation: {e}", exc_info=True)
         return None
-
-# Backward compatibility alias
-segment_characters = segment_character_foreground
-
-
-class TrainingStatus:
-    def __init__(self):
-        self.lock = threading.Lock()
-        self.is_training: bool = False
-        self.epoch: int = 0
-        self.total_epochs: int = 0
-        self.elapsed_seconds: int = 0
-        self.training_pairs: int = 0
-        self.metrics: Dict[str, float] = {}
-        self.error: Optional[str] = None
-        self.start_time: Optional[float] = None
-        self.dataset_dir: Optional[str] = None
-        self.reset()
-
-    def reset(self):
-        with self.lock:
-            self.is_training = False
-            self.epoch = 0
-            self.total_epochs = 0
-            self.elapsed_seconds = 0
-            self.training_pairs = 0
-            self.metrics = {}
-            self.error = None
-            self.start_time = None
-            self.dataset_dir = None
-
-    def update(self, **kwargs):
-        with self.lock:
-            for k, v in kwargs.items():
-                setattr(self, k, v)
-
-    def to_dict(self):
-        with self.lock:
-            elapsed = 0
-            if self.is_training and self.start_time:
-                elapsed = int(time.time() - self.start_time)
-            elif self.elapsed_seconds > 0:
-                elapsed = self.elapsed_seconds
-
-            return {
-                "is_training": self.is_training,
-                "epoch": self.epoch,
-                "total_epochs": self.total_epochs,
-                "elapsed_seconds": elapsed,
-                "training_pairs": self.training_pairs,
-                "metrics": self.metrics,
-                "error": self.error
-            }
-
-status = TrainingStatus()
-
-def get_yolo_training_status() -> Dict[str, Any]:
-    return status.to_dict()
-
-
-def is_process_running(pid: int) -> bool:
-    try:
-        import psutil
-        return psutil.pid_exists(pid)
-    except ImportError:
-        try:
-            os.kill(pid, 0)
-            return True
-        except OSError:
-            return False
-
-
-def get_lock_pid(lock_file_path: str) -> Optional[int]:
-    try:
-        if os.path.exists(lock_file_path):
-            with open(lock_file_path, "r", encoding="utf-8") as f:
-                content = f.read()
-            match = re.search(r"PID:\s*(\d+)", content)
-            if match:
-                return int(match.group(1))
-    except Exception as e:
-        logger.warning(f"[YOLO Detector Training] Failed to read PID from lock file: {e}")
-    return None
-
-
-def is_training_locked(lock_file_path: str) -> bool:
-    if not os.path.exists(lock_file_path):
-        return False
-    pid = get_lock_pid(lock_file_path)
-    if pid is None:
-        return False
-    return is_process_running(pid)
-
-
-def convert_mask_to_yolo_txt(mask_path: str, txt_output_path: str):
-    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-    if mask is None:
-        raise ValueError(f"Could not read mask image: {mask_path}")
-
-    h, w = mask.shape[:2]
-    _, thresh = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    lines = []
-    for contour in contours:
-        epsilon = 0.001 * cv2.arcLength(contour, True)
-        approx = cv2.approxPolyDP(contour, epsilon, True)
-
-        if len(approx) < 3:
-            continue
-
-        pts = []
-        for pt in approx:
-            x, y = pt[0]
-            nx = max(0.0, min(1.0, x / w))
-            ny = max(0.0, min(1.0, y / h))
-            pts.append(f"{nx:.6f} {ny:.6f}")
-
-        lines.append("0 " + " ".join(pts))
-
-    with open(txt_output_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines) + "\n")
-
-
-def _seed_starter_training_pairs(training_dir: str):
-    """Generate realistic starter training pairs if the user has not provided human corrections yet."""
-    import numpy as np
-    import cv2
-    os.makedirs(training_dir, exist_ok=True)
-    samples = [
-        {"id": "starter_001", "text": "BOOM!", "color": (150, 100, 250), "shape": "circle"},
-        {"id": "starter_002", "text": "WHAT?", "color": (100, 200, 150), "shape": "rect"},
-        {"id": "starter_003", "text": "AHA!", "color": (250, 150, 100), "shape": "ellipse"},
-        {"id": "starter_004", "text": "HEY!", "color": (120, 180, 220), "shape": "circle"},
-        {"id": "starter_005", "text": "LOOK!", "color": (200, 120, 180), "shape": "rect"},
-    ]
-    for s in samples:
-        pair_id = str(s["id"])
-        text = str(s["text"])
-        original = np.zeros((256, 256, 3), dtype=np.uint8)
-        original[:, :] = s["color"]
-        mask = np.zeros((256, 256), dtype=np.uint8)
-
-        if s["shape"] == "rect":
-            cv2.rectangle(original, (40, 60), (210, 190), (255, 255, 255), -1)
-            cv2.putText(original, text, (75, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
-            cv2.rectangle(mask, (40, 60), (210, 190), 255, -1)
-        elif s["shape"] == "circle":
-            cv2.circle(original, (128, 128), 80, (255, 255, 255), -1)
-            cv2.putText(original, text, (70, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
-            cv2.circle(mask, (128, 128), 80, 255, -1)
-        else:
-            cv2.ellipse(original, (128, 128), (95, 65), 0, 0, 360, (255, 255, 255), -1)
-            cv2.putText(original, text, (80, 135), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 0), 2)
-            cv2.ellipse(mask, (128, 128), (95, 65), 0, 0, 360, 255, -1)
-
-        orig_path = os.path.join(training_dir, f"original_{pair_id}.png")
-        mask_path = os.path.join(training_dir, f"mask_{pair_id}.png")
-        cv2.imwrite(orig_path, original)
-        cv2.imwrite(mask_path, mask)
-
-
-def prepare_dataset(training_data_dir: str, dataset_dir: str) -> int:
-    os.makedirs(os.path.join(dataset_dir, "images", "train"), exist_ok=True)
-    os.makedirs(os.path.join(dataset_dir, "images", "val"), exist_ok=True)
-    os.makedirs(os.path.join(dataset_dir, "labels", "train"), exist_ok=True)
-    os.makedirs(os.path.join(dataset_dir, "labels", "val"), exist_ok=True)
-
-    orig_files = glob.glob(os.path.join(training_data_dir, "original_*.*"))
-
-    # If empty, check repo root data/training_data directory
-    if not orig_files:
-        alt_dirs = [
-            os.path.abspath(os.path.join(training_data_dir, "..", "..", "..", "data", "training_data")),
-            os.path.abspath(os.path.join(training_data_dir, "..", "..", "data", "training_data")),
-        ]
-        for alt_dir in alt_dirs:
-            if os.path.exists(alt_dir):
-                alt_files = glob.glob(os.path.join(alt_dir, "original_*.*"))
-                if alt_files:
-                    for f in glob.glob(os.path.join(alt_dir, "*.*")):
-                        try:
-                            shutil.copy(f, os.path.join(training_data_dir, os.path.basename(f)))
-                        except Exception:
-                            pass
-                    orig_files = glob.glob(os.path.join(training_data_dir, "original_*.*"))
-                    break
-
-    # If still empty, automatically seed initial starter training pairs
-    if not orig_files:
-        logger.info("[YOLO Training] No manual training pairs found — auto-seeding starter training pairs...")
-        _seed_starter_training_pairs(training_data_dir)
-        orig_files = glob.glob(os.path.join(training_data_dir, "original_*.*"))
-
-    pairs = []
-
-    for orig_path in orig_files:
-        match = re.search(r"original_([0-9a-zA-Z_\-]+)\.", os.path.basename(orig_path))
-        if not match:
-            continue
-        pair_id = match.group(1)
-
-        mask_pattern = os.path.join(training_data_dir, f"mask_{pair_id}.*")
-        mask_matches = glob.glob(mask_pattern)
-        if mask_matches:
-            pairs.append((orig_path, mask_matches[0], pair_id))
-
-    if len(pairs) == 0:
-        _seed_starter_training_pairs(training_data_dir)
-        orig_files = glob.glob(os.path.join(training_data_dir, "original_*.*"))
-        for orig_path in orig_files:
-            match = re.search(r"original_([0-9a-zA-Z_\-]+)\.", os.path.basename(orig_path))
-            if match:
-                pair_id = match.group(1)
-                mask_matches = glob.glob(os.path.join(training_data_dir, f"mask_{pair_id}.*"))
-                if mask_matches:
-                    pairs.append((orig_path, mask_matches[0], pair_id))
-
-    np.random.seed(42)
-    shuffled_indices = np.random.permutation(len(pairs))
-
-    split_idx = int(len(pairs) * 0.8)
-    if split_idx == 0 and len(pairs) > 0:
-        split_idx = 1
-
-    for idx, index in enumerate(shuffled_indices):
-        orig_path, mask_path, pair_id = pairs[index]
-        subdir = "train" if idx < split_idx else "val"
-
-        orig_ext = os.path.splitext(orig_path)[1]
-        dest_img_path = os.path.join(dataset_dir, "images", subdir, f"sample_{pair_id}{orig_ext}")
-        dest_lbl_path = os.path.join(dataset_dir, "labels", subdir, f"sample_{pair_id}.txt")
-
-        shutil.copy(orig_path, dest_img_path)
-        convert_mask_to_yolo_txt(mask_path, dest_lbl_path)
-
-    yaml_data = {
-        "path": os.path.abspath(dataset_dir),
-        "train": "images/train",
-        "val": "images/val",
-        "names": {
-            0: "speech bubble"
-        }
-    }
-
-    yaml_path = os.path.join(dataset_dir, "dataset.yaml")
-    with open(yaml_path, "w", encoding="utf-8") as f:
-        yaml.dump(yaml_data, f, default_flow_style=False)
-
-    return len(pairs)
-
-
-def _train_worker(epochs: int, batch_size: int = 4):
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    training_data_dir = os.path.join(base_dir, "data", "training_data")
-    dataset_dir = os.path.abspath(os.path.join(base_dir, "data", "temp", "yolo_dataset"))
-    lock_file_path = os.path.join(training_data_dir, "training.lock")
-
-    lock_acquired = False
-
-    try:
-        os.makedirs(training_data_dir, exist_ok=True)
-        if os.path.exists(lock_file_path):
-            if is_training_locked(lock_file_path):
-                logger.error("[YOLO Detector Training] Training is already running under an active OS process.")
-                return
-            else:
-                try:
-                    os.remove(lock_file_path)
-                except Exception:
-                    pass
-
-        try:
-            with open(lock_file_path, "w", encoding="utf-8") as f:
-                f.write(f"PID: {os.getpid()}\nStarted: {time.time()}\n")
-            lock_acquired = True
-        except Exception as e:
-            logger.error(f"[YOLO Detector Training] Failed to create lock file: {e}")
-            raise
-
-        from ultralytics import YOLO
-
-        if os.path.exists(dataset_dir):
-            shutil.rmtree(dataset_dir, ignore_errors=True)
-
-        num_pairs = prepare_dataset(training_data_dir, dataset_dir)
-
-        status.update(
-            is_training=True,
-            total_epochs=epochs,
-            training_pairs=num_pairs,
-            start_time=time.time(),
-            dataset_dir=dataset_dir
-        )
-
-        current_model = get_yolo_speech_bubble_model()
-        if current_model is None:
-            raise RuntimeError("YOLO model not available/loading failed.")
-
-        default_model_path = os.path.join(base_dir, "data", "models", "yolov8n-seg.pt")
-        fallback_model_path = default_model_path if os.path.exists(default_model_path) else 'yolov8n-seg.pt'
-        ckpt = getattr(current_model, 'ckpt_path', None)
-        model_path: str = str(ckpt) if ckpt is not None else fallback_model_path
-        model = YOLO(model_path)
-
-        def on_fit_epoch_end(trainer):
-            metrics = {}
-            for k, v in trainer.validator.metrics.results_dict.items():
-                clean_key = k.replace("metrics/", "")
-                metrics[clean_key] = float(v)
-
-            status.update(
-                epoch=trainer.epoch + 1,
-                metrics=metrics
-            )
-
-        model.add_callback("on_fit_epoch_end", on_fit_epoch_end)
-
-        device = 'cpu'
-        try:
-            import torch
-            if torch.cuda.is_available():
-                device = 0
-        except Exception:
-            pass
-
-        results = model.train(
-            data=os.path.join(dataset_dir, "dataset.yaml"),
-            epochs=epochs,
-            imgsz=640,
-            batch=batch_size,
-            workers=1,
-            device=device,
-            project=os.path.join(dataset_dir, "runs"),
-            name="manga_train",
-            verbose=False
-        )
-
-        best_weights = os.path.join(dataset_dir, "runs", "manga_train", "weights", "best.pt")
-        if not os.path.exists(best_weights):
-            raise FileNotFoundError("YOLO training finished but best.pt weights were not found.")
-
-        models_dir = os.path.abspath(os.path.join(base_dir, "local_media", "models"))
-        os.makedirs(models_dir, exist_ok=True)
-        finetuned_path = os.path.join(models_dir, "manga_finetuned.pt")
-
-        shutil.copy(best_weights, finetuned_path)
-
-        global _yolo_model
-        _yolo_model = YOLO(finetuned_path)
-
-        elapsed = int(time.time() - status.start_time) if status.start_time is not None else 0
-        status.update(
-            is_training=False,
-            elapsed_seconds=elapsed
-        )
-        logger.info("[YOLO Detector Training] Fine-tuning completed successfully! 🚀")
-
-    except Exception as e:
-        logger.error(f"[YOLO Detector Training] YOLO Fine-tuning failed: {e}", exc_info=True)
-        status.update(is_training=False, error=str(e))
-
-    finally:
-        if dataset_dir and os.path.exists(dataset_dir):
-            try:
-                shutil.rmtree(dataset_dir, ignore_errors=True)
-            except Exception:
-                pass
-
-        if lock_acquired:
-            try:
-                if os.path.exists(lock_file_path):
-                    os.remove(lock_file_path)
-            except Exception:
-                pass
-
-
-def trigger_yolo_fine_tuning(epochs: int = 20, batch_size: int = 4) -> bool:
-    """Spawns a new training run background worker thread if not already running."""
-    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-    training_data_dir = os.path.join(base_dir, "data", "training_data")
-    lock_file_path = os.path.join(training_data_dir, "training.lock")
-
-    if status.to_dict()["is_training"] or is_training_locked(lock_file_path):
-        logger.warning("[YOLO Detector Training] Fine-tuning is already running.")
-        return False
-
-    status.reset()
-    t = threading.Thread(target=_train_worker, args=(epochs, batch_size), name="YoloTrainingWorker")
-    t.daemon = True
-    t.start()
-    return True
-
-# Backward compatibility alias
-trigger_fine_tuning = trigger_yolo_fine_tuning
-
-
-def detect_yolo_entities(
-    image_bytes: bytes,
-    conf_threshold: float = 0.30
-) -> List[Any]:
-    """
-    Executes YOLOv8m-seg semantic inference on comic image bytes.
-    Extracts dialogue bubbles, thought clouds, captions, and polygon masks.
-    """
-    import io
-    from PIL import Image
-    from schemas.project import SpeechBubbleItem, EntityLabel, EntityCategory
-
-    pil_img = Image.open(io.BytesIO(image_bytes))
-    img_w, img_h = pil_img.size
-
-    model = get_yolo_speech_bubble_model()
-    if model is None:
-        logger.warning("[YOLO Detector] YOLO model unavailable. Returning empty speech bubble list.")
-        return []
-
-    try:
-        results = model.predict(source=pil_img, conf=conf_threshold, verbose=False)
-    except Exception as e:
-        logger.error(f"[YOLO Detector] Inference error: {e}", exc_info=True)
-        return []
-
-    entities: List[SpeechBubbleItem] = []
-    bubble_counter = 1
-
-    for r in results:
-        boxes = r.boxes.xyxy.cpu().numpy() if r.boxes is not None else []
-        confs = r.boxes.conf.cpu().numpy() if r.boxes is not None else []
-        masks = r.masks.xy if r.masks is not None else []
-
-        for idx, (box, conf) in enumerate(zip(boxes, confs)):
-            x1, y1, x2, y2 = [int(v) for v in box]
-            w = max(10, x2 - x1)
-            h = max(10, y2 - y1)
-
-            polygon = None
-            if idx < len(masks) and masks[idx] is not None and len(masks[idx]) > 2:
-                polygon = [[int(pt[0]), int(pt[1])] for pt in masks[idx]]
-
-            aspect = w / float(h)
-            if aspect > 2.5:
-                bubble_type = "caption"
-                label = EntityLabel.CAPTION_NARRATION.value
-            elif conf > 0.85:
-                bubble_type = "speech"
-                label = EntityLabel.BUBBLE_SPEECH.value
-            else:
-                bubble_type = "thought"
-                label = EntityLabel.BUBBLE_THOUGHT.value
-
-            entities.append(SpeechBubbleItem(
-                bubble_id=f"bubble_{bubble_counter}",
-                label=label,
-                category=EntityCategory.TEXT.value,
-                sub_type=bubble_type,
-                x=x1,
-                y=y1,
-                width=w,
-                height=h,
-                polygon=polygon,
-                dialogue_text=None,
-                confidence=round(float(conf), 2),
-                reading_order=bubble_counter,
-                is_bound=False
-            ))
-            bubble_counter += 1
-
-    entities.sort(key=lambda b: (b.y, b.x))
-    for i, b in enumerate(entities):
-        b.reading_order = i + 1
-
-    logger.debug(f"[YOLO Detector] Image {img_w}x{img_h}px -> Detected {len(entities)} speech bubble(s).")
-    return entities

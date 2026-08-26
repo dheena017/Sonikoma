@@ -160,56 +160,129 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
         except Exception as e:
             logger.warning(f"[LongPanels: AI Vision] Fallback: {e}")
 
-    # ── SUBDIVIDE OVERSIZED COMPOSITE PANELS ──────────────────────────────────
-    # Break down giant macro-boxes (e.g. >1500px tall continuous scenes) into natural panels
-    try:
-        from services.image.panel_detection.panel_detector import _subdivide_continuous_tall_art_panel
-        import numpy as np
-        gray_arr = np.array(pil_img.convert("L"))
-        subdivided_cv: List[Dict[str, Any]] = []
+    # ── SUBDIVIDE OVERSIZED COMPOSITE PANELS & 2D MANGA GRIDS ─────────────────
+    # Break down macro-page slices into individual separate comic panel frames
+    if request.auto_split:
+        try:
+            import numpy as np
+            gray_arr = np.array(pil_img.convert("L"))
+            subdivided_cv: List[Dict[str, Any]] = []
 
-        for p in cv_panels:
-            px = int(p.get("x", 0))
-            py = int(p.get("y", 0))
-            pw = int(p.get("w", p.get("width", img_w)))
-            ph = int(p.get("h", p.get("height", 100)))
+            for p in cv_panels:
+                px = int(p.get("x", 0))
+                py = int(p.get("y", 0))
+                pw = int(p.get("w", p.get("width", img_w)))
+                ph = int(p.get("h", p.get("height", 100)))
 
-            if ph > max(1500, int(pw * 2.2)):
-                # Find speech bubbles inside this tall slice
-                child_ocr = [
-                    {"x": max(0, b.x - px), "y": max(0, b.y - py), "w": b.width, "h": b.height}
-                    for b in yolo_bubbles
-                    if py <= (b.y + b.height // 2) <= (py + ph)
-                ]
-                sub_gray = gray_arr[py : py + ph, px : px + pw]
-                if sub_gray.shape[0] > 0 and sub_gray.shape[1] > 0:
-                    sub_pieces = _subdivide_continuous_tall_art_panel(
-                        sub_gray=sub_gray,
-                        bx=px,
-                        by=py,
-                        bw=pw,
-                        bh=ph,
-                        child_ocr=child_ocr,
-                        target_card_h=max(600, int(pw * 1.5))
-                    )
-                    for sp in sub_pieces:
-                        subdivided_cv.append({
-                            "x": px + sp.get("x", 0),
-                            "y": py + sp.get("y", 0),
-                            "w": sp.get("w", pw),
-                            "h": sp.get("h", ph),
+                if ph < int(img_w * 0.20):
+                    subdivided_cv.append(p)
+                    continue
+
+                # Crop sub-slice for internal 2D panel grid detection
+                page_crop = pil_img.crop((px, py, px + pw, py + ph))
+                buf = io.BytesIO()
+                page_crop.save(buf, format="PNG")
+                page_bytes = buf.getvalue()
+
+                cv_grid = detect_opencv_boxes(
+                    page_bytes,
+                    min_width_pct=0.20,
+                    min_height_px=max(int(pw * 0.12), int(ph * 0.08)),
+                    bleed_padding_px=request.bleed_padding_px
+                )
+                sub_panels = cv_grid.get("panels", [])
+
+                # Determine whether page slice has multiple distinct closed 2D panels
+                # Check total vertical coverage of detected sub-panels
+                total_covered_h = 0
+                if sub_panels:
+                    min_sub_y = min(sp.get("y", 0) for sp in sub_panels)
+                    max_sub_y2 = max(sp.get("y", 0) + sp.get("h", 0) for sp in sub_panels)
+                    total_covered_h = max_sub_y2 - min_sub_y
+
+                # Only use sub-panels if they cover >= 70% of the slice or if ph is short
+                valid_grid = (len(sub_panels) > 1) and (total_covered_h >= int(ph * 0.70) or ph <= int(pw * 2.0))
+
+                if valid_grid:
+                    # Successfully extracted individual panel frames from this page
+                    # Only merge sub-panels that are true duplicate / subset contours, NEVER vertically stacked panels
+                    cleaned_subs: List[Dict[str, Any]] = []
+                    sub_panels.sort(key=lambda sp: (sp.get("y", 0), sp.get("x", 0)))
+                    for sp in sub_panels:
+                        sp_x = px + sp.get("x", 0)
+                        sp_y = py + sp.get("y", 0)
+                        sp_w = sp.get("w", pw)
+                        sp_h = sp.get("h", ph)
+
+                        # Filter out tiny sliver noise (e.g. < 40px width/height)
+                        if sp_w < max(50, int(pw * 0.15)) or sp_h < max(40, int(ph * 0.05)):
+                            continue
+
+                        if cleaned_subs:
+                            last = cleaned_subs[-1]
+                            last_y2 = last["y"] + last["h"]
+                            last_x2 = last["x"] + last["w"]
+
+                            # Check 2D intersection / overlap
+                            ix1 = max(last["x"], sp_x)
+                            iy1 = max(last["y"], sp_y)
+                            ix2 = min(last_x2, sp_x + sp_w)
+                            iy2 = min(last_y2, sp_y + sp_h)
+                            
+                            inter_w = max(0, ix2 - ix1)
+                            inter_h = max(0, iy2 - iy1)
+                            inter_area = inter_w * inter_h
+                            min_area = min(last["w"] * last["h"], sp_w * sp_h)
+
+                            # ONLY merge if they are essentially the same box (overlap >= 70% of smaller box)
+                            if min_area > 0 and (inter_area / float(min_area)) >= 0.70:
+                                last["x"] = min(last["x"], sp_x)
+                                last["y"] = min(last["y"], sp_y)
+                                last["w"] = max(last_x2, sp_x + sp_w) - last["x"]
+                                last["h"] = max(last_y2, sp_y + sp_h) - last["y"]
+                                continue
+
+                        cleaned_subs.append({
+                            "x": sp_x,
+                            "y": sp_y,
+                            "w": sp_w,
+                            "h": sp_h,
                             "confidence": p.get("confidence", 0.95),
                             "label": p.get("label", "panel")
                         })
-                    continue
+                    subdivided_cv.extend(cleaned_subs)
+                elif ph > int(pw * 1.35):
+                    # Continuous tall webtoon strip without closed borders: subdivide at natural whitespace / gradient valleys
+                    from services.image.panel_detection.panel_detector import _subdivide_continuous_tall_art_panel
+                    child_ocr = [
+                        {"x": max(0, b.x - px), "y": max(0, b.y - py), "w": b.width, "h": b.height}
+                        for b in yolo_bubbles
+                        if py <= (b.y + b.height // 2) <= (py + ph)
+                    ]
+                    sub_gray = gray_arr[py : py + ph, px : px + pw]
+                    if sub_gray.shape[0] > 0 and sub_gray.shape[1] > 0:
+                        sub_pieces = _subdivide_continuous_tall_art_panel(
+                            sub_gray, px, py, pw, ph, child_ocr
+                        )
+                        for piece in sub_pieces:
+                            subdivided_cv.append({
+                                "x": px + piece.get("x", 0),
+                                "y": py + piece.get("y", 0),
+                                "w": piece.get("w", pw),
+                                "h": piece.get("h", ph),
+                                "confidence": p.get("confidence", 0.95),
+                                "label": "webtoon_subpanel"
+                            })
+                    else:
+                        subdivided_cv.append(p)
+                else:
+                    subdivided_cv.append(p)
 
-            subdivided_cv.append(p)
-
-        if len(subdivided_cv) > len(cv_panels):
-            logger.info(f"[LongPanels: Subdivider] Split oversized composite panels: {len(cv_panels)} -> {len(subdivided_cv)} panels.")
-            cv_panels = subdivided_cv
-    except Exception as e:
-        logger.warning(f"[LongPanels: Subdivider] Fallback: {e}", exc_info=True)
+            if len(subdivided_cv) > len(cv_panels):
+                logger.info(f"[LongPanels: Subdivider] Split composite slices into separate panels: {len(cv_panels)} -> {len(subdivided_cv)} panels.")
+                cv_panels = subdivided_cv
+        except Exception as e:
+            logger.warning(f"[LongPanels: Subdivider] Fallback: {e}", exc_info=True)
 
     # ── FUSION: Bind Speech Bubbles into Panel Slices ─────────────────────────
     fused_panels, all_bubbles, _ = fuse_panels_and_bubbles(
@@ -226,11 +299,18 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
         from services.image.panel_detection.panel_detector import resolve_overlapping_panels_lineage
         raw_dicts = [p.model_dump() for p in fused_panels]
         cleaned_dicts = resolve_overlapping_panels_lineage(raw_dicts, iou_thresh=0.40)
-        if cleaned_dicts and len(cleaned_dicts) != len(fused_panels):
-            logger.info(f"[LongPanels: PostProcessor] Deduplicated {len(fused_panels)} -> {len(cleaned_dicts)} panels.")
-            fused_panels = [
-                PanelBoundingBox(**cd) for cd in cleaned_dicts
+        if cleaned_dicts:
+            # Filter out tiny noise slivers (e.g., logo watermarks or border artifacts)
+            valid_dicts = [
+                cd for cd in cleaned_dicts
+                if int(cd.get("w", 0)) >= max(50, int(img_w * 0.25)) and int(cd.get("h", 0)) >= 50
             ]
+            fused_panels = [
+                PanelBoundingBox(**cd) for cd in (valid_dicts if valid_dicts else cleaned_dicts)
+            ]
+            for idx, p in enumerate(fused_panels):
+                p.index = idx
+                p.id = f"panel_{idx + 1}"
     except Exception as e:
         logger.warning(f"[LongPanels: PostProcessor] Fallback: {e}")
 

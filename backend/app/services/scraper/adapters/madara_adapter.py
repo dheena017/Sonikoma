@@ -364,7 +364,7 @@ class MadaraCmsAdapter(BaseSiteAdapter):
             candidates = self._extract_madara_images(html, url)
             if candidates:
                 context.candidate_images = candidates
-                context.escalation_status = EscalationStatus.STATIC_HTTP
+                context.escalation_status = EscalationStatus.SUCCESS
                 context.completeness = ScrapeCompleteness.COMPLETE
                 return self._finalize(context, start_time)
 

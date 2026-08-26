@@ -2,13 +2,14 @@
  * frontend/src/api/endpoints/panels.ts
  * ─────────────────────────────────────────────────────────────────────────────
  * Panel Detection API client methods:
- * - detectSmallPanels: Tight frame snapping & speech bubble binding (Small Images)
+ * - detectSmallPanels: Tight frame snapping & speech bubble binding (Small Images / 2D Manga)
  * - detectLongPanels: Continuous webtoon strip gutter slicing (Tall Strips)
- * - detectWithOpenCV: Standalone OpenCV geometric analysis
- * - detectWithYOLO: Standalone YOLOv8m-seg bubble & character segmentation
- * - detectWithAI: Standalone AI Vision OCR & reading flow
+ * - detectUltraLongPanels: Giant Full-Chapter Continuous Scrolls (Sliding Window)
+ * - detectPanelsCVYOLO: Option 1: OpenCV + YOLO Deep Learning Detector
+ * - detectPanelsAIVision: Option 2: Full Multimodal AI Vision & Reading Flow
  * - detectPanelsBatch: Parallel multi-image detection
  * - detectPanelsUpload: Multipart file upload detector
+ * - detectPanelsByUrl: Generic single URL panel detector
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -139,14 +140,14 @@ export const detectLongPanels = async (
 };
 
 /**
- * Direct OpenCV geometric contour & gutter detector.
+ * Dedicated Ultra-Long Chapter Scroll detector (20-100+ panels).
  */
-export const detectWithOpenCV = async (
+export const detectUltraLongPanels = async (
   fetchWithInterceptor: FetchClient,
-  data: any,
+  data: DetectLongPanelsPayload,
   options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/opencv", {
+): Promise<ApiResponse<DetectLongPanelsResponse>> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/ultra-long-panels", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -187,134 +188,6 @@ export const detectPanelsAIVision = async (
 };
 
 /**
- * Direct YOLOv8m-seg speech bubble & character detector.
- */
-export const detectWithYOLO = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/yolo", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-/**
- * Direct AI Vision OCR & reading flow detector.
- */
-export const detectWithAI = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/ai", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-/**
- * Dedicated Ultra-Long Chapter Scroll detector (20-100+ panels).
- */
-export const detectUltraLongPanels = async (
-  fetchWithInterceptor: FetchClient,
-  data: DetectLongPanelsPayload,
-  options?: RequestInit
-): Promise<ApiResponse<DetectLongPanelsResponse>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/ultra-long-panels", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-/**
- * Dedicated Manga 2D Multi-Panel Grid Detector.
- */
-export const detectMangaGrid = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/grid", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-/**
- * Dedicated Raw Webtoon Gutter Seam Scanner.
- */
-export const detectWebtoonGutters = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/webtoon-gutters", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-/**
- * Dedicated Panel + Speech Bubble Fusion Engine.
- */
-export const detectFusion = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/fusion", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-/**
- * Dedicated Post-Processor for panel deduplication & overlap resolution.
- */
-export const detectPostprocess = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/postprocess", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-/**
- * Dedicated Visual Debug Diagnostic Overlay Generator (Returns JPEG image blob).
- */
-export const detectVisualizeOverlay = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/visualize", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-};
-
-/**
  * Batch multi-image panel detector.
  */
 export const detectPanelsBatch = async (
@@ -346,14 +219,16 @@ export const detectPanelsUpload = async (
 };
 
 /**
- * Generic single URL panel detector.
+ * Generic single URL panel detector (Routes to Option 1 CV+YOLO or Option 2 AI-Vision).
  */
 export const detectPanelsByUrl = async (
   fetchWithInterceptor: FetchClient,
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/url", {
+  const isAIVision = data.engine_mode === "ai_vision" || data.strategy === "ai-vision" || data.strategy === "cloud-ai";
+  const endpoint = isAIVision ? "/api/v1/panels/detect/ai-vision" : "/api/v1/panels/detect/cv-yolo";
+  return apiRequest(fetchWithInterceptor, endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

@@ -5,7 +5,7 @@ import glob
 import logging
 import asyncio
 import threading
-from services.image.panel_detection.speech_bubble_detector import trigger_fine_tuning, status
+from services.training.yolo_training_service import trigger_fine_tuning, status
 
 logger = logging.getLogger("sonikoma.services.training_monitor")
 
