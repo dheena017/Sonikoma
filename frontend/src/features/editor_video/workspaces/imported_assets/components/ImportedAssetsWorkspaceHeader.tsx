@@ -170,7 +170,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
                 title="Auto-crop selected frames"
               >
                 <Scissors className="h-2.5 w-2.5" />
-                <span>Crop</span>
+                <span>Auto Crop</span>
               </button>
             )}
 
