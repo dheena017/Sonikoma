@@ -73,7 +73,11 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
   return (
     <div
       id="section-monitor"
-      className="w-full h-full bg-[#0c0d16]/90 flex flex-col min-w-0 overflow-hidden select-none"
+      className={`w-full bg-[#0c0d16]/90 flex flex-col min-w-0 overflow-hidden select-none ${
+        isEmbedded
+          ? "h-[380px] sm:h-[430px] md:h-[480px] lg:h-[530px] rounded-3xl border border-purple-500/20 shadow-2xl mb-4 shrink-0"
+          : "h-full"
+      }`}
     >
       <MonitorHeader
         videoUrl={videoUrl}

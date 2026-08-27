@@ -9,6 +9,7 @@
 @import "./light-mode.css";
 
 /* --- UI Component & Custom Styles --- */
+@import "./cursor.css";
 @import "./components.css";
 @import "./pills.css";
 @import "./player.css";

@@ -1,0 +1,152 @@
+/* ==========================================================================
+   SONIKOMA UNIVERSAL CURSOR SYSTEM
+   Canonical location: frontend/src/styles/cursor.css
+   
+   Rules:
+   - Base arrow cursor on standard page containers and static text
+   - Hand pointer (cursor: pointer) on all buttons, links, tabs, cards & descendants
+   - Grab / Grabbing on draggable timeline clips, storyboard items & canvas
+   - Directional resize (ew-resize, col-resize, row-resize) on handles & scrubbers
+   - Zoom & crosshair cursors on preview/crop modal tools
+   - I-beam text cursor strictly on editable input & textarea fields
+   - Not-allowed cursor on disabled items
+   ========================================================================== */
+
+/* 1. Base default arrow on root and layout backdrops */
+body {
+  cursor: default;
+}
+
+/* 2. Text words, paragraphs, descriptions & readable content: Change to Text Selection I-beam */
+p,
+article,
+blockquote,
+pre,
+code,
+.text-selectable,
+.selectable-text,
+[data-selectable="true"] {
+  cursor: text;
+  user-select: text;
+}
+
+/* 3. Non-clickable navigation chrome & fixed UI labels: keep default arrow */
+nav,
+aside,
+header,
+footer {
+  user-select: none;
+}
+
+/* 3. Interactive clickable elements & all descendant children */
+button,
+button *,
+a,
+a *,
+select,
+select *,
+summary,
+summary *,
+[role="button"],
+[role="button"] *,
+[role="tab"],
+[role="tab"] *,
+[role="menuitem"],
+[role="menuitem"] *,
+[role="checkbox"],
+[role="checkbox"] *,
+[role="switch"],
+[role="switch"] *,
+[role="option"],
+[role="option"] *,
+.cursor-pointer,
+.cursor-pointer *,
+.btn-clickable,
+.btn-clickable *,
+.clickable-card,
+.clickable-card *,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+input[type="file"] {
+  cursor: pointer !important;
+}
+
+/* 4. Drag & Grab cursors (storyboard items, draggable clips, canvas panning) */
+.cursor-grab,
+.cursor-grab * {
+  cursor: grab !important;
+}
+
+.cursor-grabbing,
+.cursor-grabbing * {
+  cursor: grabbing !important;
+}
+
+/* 5. Directional resize cursors (timeline trim handles, splitters, scrubbers) */
+.cursor-ew-resize,
+.cursor-ew-resize * {
+  cursor: ew-resize !important;
+}
+
+.cursor-col-resize,
+.cursor-col-resize * {
+  cursor: col-resize !important;
+}
+
+.cursor-row-resize,
+.cursor-row-resize * {
+  cursor: row-resize !important;
+}
+
+.cursor-move,
+.cursor-move * {
+  cursor: move !important;
+}
+
+/* 6. Zoom in / Zoom out cursors (image viewers, reader modals, canvas inspect) */
+.cursor-zoom-in,
+.cursor-zoom-in * {
+  cursor: zoom-in !important;
+}
+
+.cursor-zoom-out,
+.cursor-zoom-out * {
+  cursor: zoom-out !important;
+}
+
+/* 7. Crosshair cursor (selection box, canvas crop, bubble bounding box) */
+.cursor-crosshair,
+.cursor-crosshair * {
+  cursor: crosshair !important;
+}
+
+/* 8. Form text editing inputs: text selection cursor */
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+input[type="tel"],
+input:not([type]),
+textarea,
+[contenteditable="true"] {
+  cursor: text !important;
+  user-select: text !important;
+}
+
+/* 9. Disabled elements: not-allowed cursor */
+:disabled,
+:disabled *,
+[aria-disabled="true"],
+[aria-disabled="true"] *,
+.disabled,
+.disabled *,
+.cursor-not-allowed,
+.cursor-not-allowed * {
+  cursor: not-allowed !important;
+}

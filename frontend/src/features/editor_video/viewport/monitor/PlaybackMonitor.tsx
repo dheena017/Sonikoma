@@ -28,6 +28,7 @@ import {
   duckAmbientBackgroundMusic,
   playComicSoundEffect,
 } from "@/shared/utils/audio";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 
 interface PlayerPageProps {
   panels: GeneratedPanel[];
@@ -595,14 +596,7 @@ export default function VideoPreviewCinemaPlayer({
       activePanelNow.layers?.background_url ||
       null;
     if (!raw) return null;
-    if (
-      raw.startsWith("data:") ||
-      raw.startsWith("blob:") ||
-      raw.startsWith("/api/")
-    ) {
-      return raw;
-    }
-    return `/api/proxy-image?url=${encodeURIComponent(raw)}`;
+    return getProxiedImageUrl(raw);
   }, [activePanelNow]);
 
   // BGM Background Music Engine for Adaptation Player
