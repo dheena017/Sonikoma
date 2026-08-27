@@ -15,22 +15,17 @@ export default function EditorHeaderFrame({
 }: EditorHeaderFrameProps) {
   return (
     <div
-      className={`relative grid w-full items-center px-4 min-h-12 shrink-0 bg-neutral-950/70 backdrop-blur-xl border-b border-white/10 select-none gap-3 z-10 shadow-sm ${className}`}
-      style={{
-        gridTemplateColumns: center
-          ? "minmax(0, 1fr) auto minmax(0, 1fr)"
-          : "minmax(0, 1fr) auto",
-      }}
+      className={`relative flex items-center justify-between w-full min-h-11 px-3.5 shrink-0 bg-neutral-950/80 backdrop-blur-xl border-b border-white/10 select-none gap-2 z-10 ${className}`}
     >
-      <div className="flex items-center justify-self-start gap-2.5 min-w-0 overflow-hidden py-1">
+      <div className="flex items-center gap-2 shrink-0 min-w-0">
         {left}
       </div>
       {center && (
-        <div className="flex items-center justify-center gap-1.5 bg-black/50 p-1 rounded-xl border border-white/10 shrink-0 justify-self-center backdrop-blur-md">
+        <div className="flex items-center justify-center gap-1 bg-black/60 p-0.5 rounded-xl border border-white/10 shrink-0 backdrop-blur-md">
           {center}
         </div>
       )}
-      <div className="flex items-center justify-self-end gap-2 min-w-0 overflow-hidden py-1">
+      <div className="flex items-center gap-2 shrink-0 justify-end pr-1">
         {right}
       </div>
     </div>

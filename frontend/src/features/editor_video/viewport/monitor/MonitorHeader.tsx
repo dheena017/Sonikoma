@@ -70,27 +70,20 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   const isFloating = variant !== "embedded";
 
   const leftBlock = (
-    <div className="flex items-center gap-3 min-w-0">
-      <div className="h-9 w-9 rounded-xl bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
-        <Film className="h-4.5 w-4.5 text-purple-400" />
+    <div className="flex items-center gap-2 shrink-0">
+      <div className="h-7 w-7 rounded-lg bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.3)] shrink-0">
+        <Film className="h-3.5 w-3.5 text-purple-400" />
       </div>
-      <div className="min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[10px] font-bold text-purple-300 font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-            Program Monitor
-          </span>
-        </div>
-        <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden lg:block">
-          Video preview player, real-time animation canvas & composition
-        </p>
-      </div>
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-[10px] font-bold text-purple-300 font-mono shrink-0">
+        <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+        Program Monitor
+      </span>
 
       {isFloating && onOpenVideoEditor && (
         <button
           type="button"
           onClick={onOpenVideoEditor}
-          className="hidden md:flex items-center gap-1.5 px-2.5 h-7 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 text-purple-300 text-[10px] font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)] shrink-0"
+          className="hidden md:flex items-center gap-1.5 px-2.5 h-6 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 text-purple-300 text-[10px] font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)] shrink-0"
           title="Open Video Studio"
         >
           <Film className="h-3 w-3 text-purple-400" />
@@ -231,7 +224,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
                 }`}
             >
               <Sparkles className="h-3 w-3 text-purple-200 shrink-0" />
-              <span>{!hasEnoughCredits ? "No Credits" : "Export Video"}</span>
+              <span className="whitespace-nowrap">{!hasEnoughCredits ? "No Credits" : "Export Video"}</span>
             </button>
           )}
         </>

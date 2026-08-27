@@ -203,12 +203,12 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
   return (
     <div className="flex flex-col h-full w-full bg-transparent overflow-hidden relative select-none font-sans">
       {/* ── Canvas Stage Workspace ─────────────────────────────────────── */}
-      <div className="flex-1 h-full flex items-center justify-center relative overflow-hidden bg-black/40 backdrop-blur-md p-4">
+      <div className="flex-1 h-full flex items-center justify-center relative overflow-hidden bg-black/40 backdrop-blur-md">
         {/* Professional Canvas Editor Dot Grid Pattern */}
-        <div className="absolute inset-0 opacity-25 pointer-events-none bg-[radial-gradient(#a855f7_1px,transparent_1px)] [background-size:18px_18px]" />
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#a855f7_1px,transparent_1px)] [background-size:18px_18px]" />
 
-        {/* Canvas Frame — Slate container with distinct purple border & shadow */}
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-[#0e0a20]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl border border-purple-500/35 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] flex items-center justify-center">
+        {/* Canvas Frame — Edge-to-edge flush studio canvas */}
+        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-[#0e0a20]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl rounded-none border-0 flex items-center justify-center">
           {/* Layer 1: Background Plate */}
           {layerVisibility.background && (
             <div
@@ -239,7 +239,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-purple-950/40 via-neutral-950/30 to-indigo-950/40 flex flex-col items-center justify-center gap-2 text-neutral-400 font-mono text-xs select-none p-6 text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
                     <Film className="w-5 h-5" />
                   </div>
                   <span className="font-bold text-neutral-300 tracking-wider">
