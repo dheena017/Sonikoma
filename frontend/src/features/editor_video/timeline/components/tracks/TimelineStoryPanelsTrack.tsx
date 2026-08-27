@@ -352,7 +352,16 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   </div>
 
                   {/* Live Duration Badge & Three-Dots Menu */}
-                  <div className="absolute top-1 right-1.5 flex items-center gap-1 z-20" style={{ cursor: "inherit" }}>
+                  <div className="absolute top-1 right-1.5 flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
+                    {/* Live Drag Delta Display */}
+                    {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
+                      <span className="text-[7.5px] font-mono font-bold text-purple-100 bg-purple-900/90 px-1.5 py-0.5 rounded border border-purple-300 shadow-[0_0_8px_rgba(168,85,247,0.7)] animate-pulse">
+                        {movingInfo.deltaPx > 0
+                          ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
+                          : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
+                      </span>
+                    )}
+
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-purple-200 bg-purple-950/90 px-1 py-0.2 rounded-sm border border-purple-400/50 animate-pulse">
                         {resizingInfo.deltaSecs > 0

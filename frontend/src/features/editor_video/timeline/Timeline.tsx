@@ -593,6 +593,7 @@ const Timeline: React.FC<TimelineProps> = ({
         soloTrack={s.soloTrack}
         pacingScore={`${pacing.pacingScore} (${pacing.avgDuration}s avg)`}
         onOpenMediaPicker={s.openMediaPicker}
+        scrollRef={timelineScrollRef}
       />
 
       {/* ── Keyframe Inspector Slide-over ───────────────────────────────────── */}

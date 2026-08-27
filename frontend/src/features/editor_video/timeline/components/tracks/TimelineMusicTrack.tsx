@@ -242,8 +242,8 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
 
             {/* Track Info Badge */}
             <div className="absolute inset-0 flex items-center justify-between px-2.5 z-10 pointer-events-none">
-              <div className="flex items-center gap-1.5 min-w-0 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/15 shadow-sm">
-                <GripVertical className="h-3 w-3 text-emerald-300/50 group-hover:text-emerald-200 shrink-0 transition-colors" />
+              <div className="flex items-center gap-1.5 min-w-0 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-emerald-400/60 transition-colors">
+                <GripVertical className="h-3.5 w-3.5 text-emerald-300 group-hover:text-white shrink-0 transition-colors" />
                 <Music className="h-3 w-3 text-emerald-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] shrink-0" />
                 <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
                   {displayTheme}
@@ -251,6 +251,15 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
               </div>
 
               <div className="flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
+                {/* Live Drag Delta Display */}
+                {movingInfo && movingInfo.deltaPx !== 0 && (
+                  <span className="text-[7.5px] font-mono font-bold text-emerald-100 bg-emerald-900/90 px-1.5 py-0.5 rounded border border-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse">
+                    {movingInfo.deltaPx > 0
+                      ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
+                      : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
+                  </span>
+                )}
+
                 {resizingSide !== null && deltaSecs !== 0 && (
                   <span className="text-[7px] font-mono font-bold text-emerald-200 bg-emerald-950 px-1.5 py-0.5 rounded-md border border-emerald-400/50 animate-pulse">
                     {deltaSecs > 0 ? `+${deltaSecs.toFixed(1)}s` : `${deltaSecs.toFixed(1)}s`}

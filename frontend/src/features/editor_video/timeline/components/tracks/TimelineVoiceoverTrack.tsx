@@ -324,7 +324,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                 title={`VO #${idx + 1} (${speaker}): ${dialogue}`}
               >
                 {/* Audio Waveform Envelope */}
-                <div className="absolute inset-0 flex items-center px-1">
+                <div className="absolute inset-0 flex items-center px-1 pointer-events-none">
                   <AudioWaveformVisual
                     audioUrl={panel.speech_audio_url || panel.narrative_audio_url || panel.audio_url}
                     seed={`vo-${idx}-${speaker}-${dialogue}`}
@@ -334,36 +334,45 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                 </div>
 
                 {/* Voice dialogue badge */}
-                <div className="absolute inset-0 flex items-center justify-between px-2 z-10 pointer-events-none">
-                  <div className="flex items-center gap-1.5 min-w-0 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/15 shadow-sm">
-                    <GripVertical className="h-3 w-3 text-purple-300/50 group-hover:text-purple-200 shrink-0 transition-colors" />
-                    <Mic className="h-3 w-3 text-purple-200 shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
-                    <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
+                <div className="absolute inset-0 flex items-center justify-between px-1.5 z-10 pointer-events-none">
+                  <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-purple-400/60 transition-colors">
+                    <GripVertical className="h-3 w-3 text-purple-300 group-hover:text-white shrink-0 transition-colors" />
+                    <Mic className="h-2.5 w-2.5 text-purple-200 shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+                    <span className="text-[8.5px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
                       {label}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
+                  <div className="flex items-center gap-0.5 z-20 pointer-events-auto shrink-0" style={{ cursor: "inherit" }}>
+                    {/* Live Drag Delta Display */}
+                    {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
+                      <span className="text-[7px] font-mono font-bold text-purple-100 bg-purple-900/90 px-1 py-0.2 rounded border border-purple-300 shadow-[0_0_8px_rgba(168,85,247,0.7)] animate-pulse">
+                        {movingInfo.deltaPx > 0
+                          ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
+                          : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
+                      </span>
+                    )}
+
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-purple-200 bg-purple-950 px-1 py-0.2 rounded-sm border border-purple-400/50 animate-pulse">
                         {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
-                    {displayWidthPx >= 55 && (
-                    <span className="text-[8px] font-mono font-bold text-purple-100 bg-black/50 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
+                    {displayWidthPx >= 45 && (
+                    <span className="text-[7.5px] font-mono font-bold text-purple-100 bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
                       {dur.toFixed(1)}s
                     </span>
                     )}
 
                     {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
-                    {displayWidthPx >= 55 && (
+                    {displayWidthPx >= 90 && (
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         onContextMenu(e, key, idx);
                       }}
-                      className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#0c0c16]/85 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/20 hover:border-purple-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                      className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#0c0c16]/85 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/20 hover:border-purple-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                       title="Voiceover Options"
                     >
                       <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
