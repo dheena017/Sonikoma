@@ -1,13 +1,17 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
-import { Film, Plus } from "lucide-react";
+import { Film } from "lucide-react";
 import {
   StoryboardWorkspaceHeader,
   StoryboardFilterTab,
 } from "./components/StoryboardWorkspaceHeader";
 import { StoryboardPanelCard } from "./components/StoryboardPanelCard";
 import { StoryboardAiToolbar } from "./components/StoryboardAiToolbar";
+import { StoryboardDialogueView } from "./components/StoryboardDialogueView";
+import { StoryboardPromptsView } from "./components/StoryboardPromptsView";
+import { StoryboardCameraView } from "./components/StoryboardCameraView";
+import { StoryboardAudioView } from "./components/StoryboardAudioView";
 import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
 import { GeneratedPanel } from "@/types";
 
@@ -79,7 +83,7 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
     setSelectedIndices([]);
   }, []);
 
-  // Panel Dialogue updates
+  // Panel Property Updates
   const handleUpdateDialogue = useCallback(
     (idx: number, dialogue: string) => {
       const updated = panels.map((p, i) =>
@@ -89,6 +93,56 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
       onTriggerFeedback?.(`Updated dialogue for Panel #${idx + 1}`);
     },
     [panels, setPanels, onTriggerFeedback]
+  );
+
+  const handleUpdatePrompt = useCallback(
+    (idx: number, prompt: string) => {
+      const updated = panels.map((p, i) =>
+        i === idx ? { ...p, prompt, visual_description: prompt } : p
+      );
+      setPanels(updated);
+    },
+    [panels, setPanels]
+  );
+
+  const handleUpdateCameraMotion = useCallback(
+    (idx: number, motion: string) => {
+      const updated = panels.map((p, i) =>
+        i === idx ? { ...p, motion_type: motion } : p
+      );
+      setPanels(updated);
+    },
+    [panels, setPanels]
+  );
+
+  const handleUpdateDuration = useCallback(
+    (idx: number, duration: number) => {
+      const updated = panels.map((p, i) =>
+        i === idx ? { ...p, duration } : p
+      );
+      setPanels(updated);
+    },
+    [panels, setPanels]
+  );
+
+  const handleUpdateSfx = useCallback(
+    (idx: number, sfx: string) => {
+      const updated = panels.map((p, i) =>
+        i === idx ? { ...p, sfx } : p
+      );
+      setPanels(updated);
+    },
+    [panels, setPanels]
+  );
+
+  const handleUpdateBgm = useCallback(
+    (idx: number, bgm_track: string) => {
+      const updated = panels.map((p, i) =>
+        i === idx ? { ...p, bgm_track } : p
+      );
+      setPanels(updated);
+    },
+    [panels, setPanels]
   );
 
   // Delete Handlers Opening Confirmation Modal
@@ -160,30 +214,6 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
       return { panel, index, isSelected };
     });
 
-    if (activeTab === "dialogue") {
-      list = list.filter(
-        (i) =>
-          !!(
-            i.panel.speech_text ||
-            i.panel.narrative ||
-            (i.panel as any).dialogue
-          )
-      );
-    } else if (activeTab === "camera") {
-      list = list.filter(
-        (i) => !!(i.panel.motion_type || (i.panel as any).camera_motion)
-      );
-    } else if (activeTab === "audio") {
-      list = list.filter(
-        (i) =>
-          !!(
-            i.panel.speech_audio_url ||
-            i.panel.audio_url ||
-            i.panel.sfx
-          )
-      );
-    }
-
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
@@ -202,7 +232,7 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
     }
 
     return list;
-  }, [panels, selectedIndices, activeTab, searchQuery, sortOrder]);
+  }, [panels, selectedIndices, searchQuery, sortOrder]);
 
   const isAllSelected =
     panels.length > 0 && selectedIndices.length === panels.length;
@@ -234,21 +264,61 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
         onTriggerFeedback={(msg) => onTriggerFeedback?.(msg)}
       />
 
-      {/* ── 3. Content Panel List ─────────────────────────────────────────── */}
+      {/* ── 3. Dedicated Tab Views ─────────────────────────────────────────── */}
       <WorkspaceLayout.Content>
-        {filteredPanels.length === 0 ? (
+        {panels.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center text-neutral-400 font-mono text-xs space-y-2.5">
             <div className="h-11 w-11 rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400">
               <Film className="h-5 w-5" />
             </div>
             <p className="font-bold text-neutral-200">No Storyboard Panels</p>
             <p className="text-[10px] text-neutral-500 max-w-[240px]">
-              {panels.length === 0
-                ? "Go to Imported Assets to add frames into your storyboard sequence."
-                : "No panels match the current filter or search criteria."}
+              Go to Imported Assets to add frames into your storyboard sequence.
             </p>
           </div>
+        ) : activeTab === "dialogue" ? (
+          /* 💬 Tab 2: Dialogue & Script Director View */
+          <StoryboardDialogueView
+            panels={filteredPanels.map((p) => p.panel)}
+            selectedIndices={selectedIndices}
+            onSelect={handleCardSelect}
+            onUpdateDialogue={handleUpdateDialogue}
+            onTriggerFeedback={onTriggerFeedback}
+          />
+        ) : activeTab === "prompts" ? (
+          /* 🎨 Tab 3: Visual Prompts & Scene Breakdown View */
+          <StoryboardPromptsView
+            panels={filteredPanels.map((p) => p.panel)}
+            selectedIndices={selectedIndices}
+            onSelect={handleCardSelect}
+            onUpdatePrompt={handleUpdatePrompt}
+            onTriggerFeedback={onTriggerFeedback}
+          />
+        ) : activeTab === "camera" ? (
+          /* 🎥 Tab 4: Camera FX & Motion Presets View */
+          <StoryboardCameraView
+            panels={filteredPanels.map((p) => p.panel)}
+            selectedIndices={selectedIndices}
+            onSelect={handleCardSelect}
+            onUpdateCameraMotion={handleUpdateCameraMotion}
+            onUpdateDuration={handleUpdateDuration}
+            onTriggerFeedback={onTriggerFeedback}
+          />
+        ) : activeTab === "audio" ? (
+          /* 🎵 Tab 4: Audio Studio & Voiceover View */
+          <StoryboardAudioView
+            panels={filteredPanels.map((p) => p.panel)}
+            selectedIndices={selectedIndices}
+            onSelect={handleCardSelect}
+            onUpdateSfx={handleUpdateSfx}
+            onUpdateBgm={handleUpdateBgm}
+            onTriggerVoiceGen={(idx) =>
+              onTriggerFeedback?.(`AI Voice Generator opened for Panel #${idx + 1}`)
+            }
+            onTriggerFeedback={onTriggerFeedback}
+          />
         ) : (
+          /* 🎞️ Tab 1: Default All Panels Overview */
           <div className="space-y-2.5 pt-1 pb-4">
             {filteredPanels.map(({ panel, index, isSelected }) => (
               <StoryboardPanelCard
@@ -256,11 +326,15 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
                 panel={panel}
                 index={index}
                 isSelected={isSelected}
+                activeTab={activeTab}
                 onSelect={handleCardSelect}
                 onPlayPreview={handlePlayPreview}
                 onOpenEditor={handleOpenEditor}
                 onDelete={handleDeleteSingle}
                 onUpdateDialogue={handleUpdateDialogue}
+                onGenerateVoice={(idx) =>
+                  onTriggerFeedback?.(`AI Voice Generator opened for Panel #${idx + 1}`)
+                }
               />
             ))}
           </div>

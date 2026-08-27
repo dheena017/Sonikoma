@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Check,
   Play,
+  Pause,
   Volume2,
+  VolumeX,
   Camera,
   Edit2,
   Trash2,
   Sparkles,
   MessageSquare,
   Clock,
-  ChevronDown,
-  Layers,
+  Music,
+  Zap,
 } from "lucide-react";
 import { getProxiedImageUrl } from "@/utils";
 import { GeneratedPanel } from "@/types";
@@ -19,24 +21,31 @@ export interface StoryboardPanelCardProps {
   panel: GeneratedPanel;
   index: number;
   isSelected: boolean;
+  activeTab?: string;
   onSelect: (index: number, e: React.MouseEvent) => void;
   onPlayPreview?: (panel: GeneratedPanel, index: number) => void;
   onOpenEditor?: (index: number) => void;
   onDelete?: (index: number) => void;
   onUpdateDialogue?: (index: number, dialogue: string) => void;
+  onGenerateVoice?: (index: number) => void;
 }
 
 export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
   panel,
   index,
   isSelected,
+  activeTab = "all",
   onSelect,
   onPlayPreview,
   onOpenEditor,
   onDelete,
   onUpdateDialogue,
+  onGenerateVoice,
 }) => {
   const [isEditingDialogue, setIsEditingDialogue] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const [dialogueText, setDialogueText] = useState(
     panel.speech_text || panel.narrative || (panel as any).dialogue || ""
   );
@@ -45,11 +54,64 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
   const displayUrl = getProxiedImageUrl(imgUrl);
   const duration = panel.duration || 3.5;
   const cameraMotion = panel.motion_type || (panel as any).camera_motion || "Slow Zoom In";
-  const hasAudio = !!(panel.speech_audio_url || panel.audio_url || panel.sfx);
+  const audioUrl =
+    panel.audio_url ||
+    panel.speech_audio_url ||
+    panel.narrative_audio_url ||
+    (panel as any).voice_url;
+  const hasAudio = !!audioUrl || !!dialogueText;
+  const sfx = panel.sfx;
+  const bgm = panel.bgm_track;
 
   const handleDialogueSave = () => {
     setIsEditingDialogue(false);
     onUpdateDialogue?.(index, dialogueText);
+  };
+
+  const handleToggleAudioPlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (isPlayingAudio) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+      setIsPlayingAudio(false);
+      return;
+    }
+
+    if (audioUrl) {
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      audio.onended = () => setIsPlayingAudio(false);
+      audio.onerror = () => {
+        speakFallback(dialogueText);
+      };
+      audio
+        .play()
+        .then(() => setIsPlayingAudio(true))
+        .catch(() => {
+          speakFallback(dialogueText);
+        });
+    } else if (dialogueText) {
+      speakFallback(dialogueText);
+    }
+  };
+
+  const speakFallback = (text: string) => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window && text) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.onend = () => setIsPlayingAudio(false);
+      utterance.onerror = () => setIsPlayingAudio(false);
+      window.speechSynthesis.speak(utterance);
+      setIsPlayingAudio(true);
+    } else {
+      setIsPlayingAudio(false);
+    }
   };
 
   return (
@@ -158,17 +220,52 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
             )}
           </div>
 
-          {/* Status Badges */}
-          <div className="flex items-center gap-1.5">
+          {/* Audio Tracks Row */}
+          <div className="flex items-center gap-1.5 flex-wrap">
             {hasAudio ? (
-              <span className="inline-flex items-center gap-1 text-[8px] font-mono font-bold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-500/30">
-                <Volume2 className="h-2.5 w-2.5" />
-                Audio Synced
-              </span>
+              <button
+                type="button"
+                onClick={handleToggleAudioPlay}
+                className={`inline-flex items-center gap-1 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
+                  isPlayingAudio
+                    ? "bg-purple-600 border-purple-400 text-white shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse"
+                    : "bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border-emerald-500/40"
+                }`}
+                title={isPlayingAudio ? "Pause Audio" : "Play Voice Track"}
+              >
+                {isPlayingAudio ? (
+                  <Pause className="h-2.5 w-2.5 fill-white" />
+                ) : (
+                  <Volume2 className="h-2.5 w-2.5" />
+                )}
+                <span>{isPlayingAudio ? "Playing..." : "Voice Track"}</span>
+              </button>
             ) : (
-              <span className="inline-flex items-center gap-1 text-[8px] font-mono text-neutral-500 bg-neutral-900/60 px-1.5 py-0.5 rounded border border-neutral-800">
-                <Volume2 className="h-2.5 w-2.5" />
-                No Voice
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onGenerateVoice?.(index);
+                }}
+                className="inline-flex items-center gap-1 text-[8px] font-mono font-semibold text-neutral-400 hover:text-purple-300 bg-neutral-900/80 hover:bg-purple-950/40 px-2 py-0.5 rounded-full border border-neutral-800 hover:border-purple-500/30 transition-all cursor-pointer"
+                title="Generate AI TTS Voice for this panel"
+              >
+                <VolumeX className="h-2.5 w-2.5 text-neutral-500" />
+                <span>+ Gen Voice</span>
+              </button>
+            )}
+
+            {sfx && (
+              <span className="inline-flex items-center gap-1 text-[8px] font-mono text-amber-300 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-500/30 truncate max-w-[90px]">
+                <Zap className="h-2 w-2 text-amber-400 shrink-0" />
+                <span className="truncate">{sfx}</span>
+              </span>
+            )}
+
+            {bgm && (
+              <span className="inline-flex items-center gap-1 text-[8px] font-mono text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-500/30 truncate max-w-[90px]">
+                <Music className="h-2 w-2 text-cyan-400 shrink-0" />
+                <span className="truncate">{bgm}</span>
               </span>
             )}
           </div>

@@ -14,7 +14,7 @@ import {
   Play,
 } from "lucide-react";
 
-export type StoryboardFilterTab = "all" | "dialogue" | "camera" | "audio";
+export type StoryboardFilterTab = "all" | "dialogue" | "prompts" | "camera" | "audio";
 
 export interface StoryboardWorkspaceHeaderProps {
   panelCount: number;
@@ -121,8 +121,9 @@ export const StoryboardWorkspaceHeader: React.FC<StoryboardWorkspaceHeaderProps>
         {[
           { id: "all", label: "All Panels" },
           { id: "dialogue", label: "Dialogue" },
+          { id: "prompts", label: "Visual Prompts" },
           { id: "camera", label: "Camera FX" },
-          { id: "audio", label: "Audio/SFX" },
+          { id: "audio", label: "Audio" },
         ].map((tab) => (
           <button
             key={tab.id}
