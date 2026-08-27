@@ -512,19 +512,6 @@ const Timeline: React.FC<TimelineProps> = ({
               />
             )}
 
-            {/* V2 — Camera FX */}
-            {!s.hiddenTracks["V2"] && (
-              <TimelineCameraFxTrack
-                panels={displayPanels}
-                panelTimings={panelTimings}
-                totalPanels={totalPanels}
-                selectedClip={s.selectedClip}
-                {...trackControls("V2")}
-                {...clipCbs}
-                onAddFx={s.openFxPicker}
-              />
-            )}
-
             {/* V1 — Story Panels (Main Video) */}
             {!s.hiddenTracks["V1"] && (
               <TimelineStoryPanelsTrack
@@ -545,6 +532,20 @@ const Timeline: React.FC<TimelineProps> = ({
                 {...trackControls("V1")}
                 {...clipCbs}
                 onAddPanel={s.openPanelsPicker}
+              />
+            )}
+
+            {/* A3 — Voiceover */}
+            {!s.hiddenTracks["A3"] && (
+              <TimelineVoiceoverTrack
+                panels={displayPanels}
+                panelTimings={panelTimings}
+                totalPanels={totalPanels}
+                voiceActor={voiceActor}
+                selectedClip={s.selectedClip}
+                {...trackControls("A3")}
+                {...clipCbs}
+                onAddVoice={s.openVoicePicker}
               />
             )}
 
@@ -573,6 +574,19 @@ const Timeline: React.FC<TimelineProps> = ({
               />
             )}
 
+            {/* V2 — Camera FX */}
+            {!s.hiddenTracks["V2"] && (
+              <TimelineCameraFxTrack
+                panels={displayPanels}
+                panelTimings={panelTimings}
+                totalPanels={totalPanels}
+                selectedClip={s.selectedClip}
+                {...trackControls("V2")}
+                {...clipCbs}
+                onAddFx={s.openFxPicker}
+              />
+            )}
+
             {/* A2 — Sound FX */}
             {!s.hiddenTracks["A2"] && (
               <TimelineSoundFxTrack
@@ -583,20 +597,6 @@ const Timeline: React.FC<TimelineProps> = ({
                 {...trackControls("A2")}
                 {...clipCbs}
                 onAddSfx={s.openSfxPicker}
-              />
-            )}
-
-            {/* A3 — Voiceover */}
-            {!s.hiddenTracks["A3"] && (
-              <TimelineVoiceoverTrack
-                panels={displayPanels}
-                panelTimings={panelTimings}
-                totalPanels={totalPanels}
-                voiceActor={voiceActor}
-                selectedClip={s.selectedClip}
-                {...trackControls("A3")}
-                {...clipCbs}
-                onAddVoice={s.openVoicePicker}
               />
             )}
 
