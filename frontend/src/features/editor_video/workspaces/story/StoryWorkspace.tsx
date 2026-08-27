@@ -40,12 +40,6 @@ export const StoryWorkspace: React.FC<StoryWorkspaceProps> = ({
         onSearchChange={setSearchQuery}
       />
 
-      {/* Visual Narrative Pipeline Breadcrumb Component */}
-      <StoryPipelineBreadcrumb steps={pipelineSteps} />
-
-      {/* Contextual AI Action Bar Component */}
-      <StoryAiToolbar onTriggerFeedback={onTriggerFeedback} />
-
       <WorkspaceLayout.Content>
         {/* Scenes / Storyboard / Script View */}
         {(activeTab === "Scenes" ||
