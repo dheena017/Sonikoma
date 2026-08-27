@@ -27,6 +27,8 @@ import { Notification } from "@/features/app_notification";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { AIModelSelector } from "@/features/ai_core";
+import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
+import { useBackendHealth } from "@/shared/hooks";
 
 interface VideoEditorHeaderProps {
   seriesTitle?: string;
@@ -122,6 +124,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   const { activeProjectId, activeProjectData, setDrawerOpen } =
     useProjectStore();
+  const { status: backendStatus } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement | null>(null);
   const creditsRef = useRef<HTMLDivElement | null>(null);
@@ -222,21 +225,9 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           </div>
         </div>
 
-        <div className="hidden md:flex items-center justify-center">
-          <div
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${
-              backendOnline
-                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                : "bg-red-500/10 border-red-500/30 text-red-400"
-            }`}
-          >
-            {backendOnline ? (
-              <Wifi className="h-3 w-3" />
-            ) : (
-              <WifiOff className="h-3 w-3" />
-            )}
-            <span>{backendOnline ? "ONLINE" : "OFFLINE"}</span>
-          </div>
+        {/* Server Status Indicator */}
+        <div className="flex items-center justify-center">
+          <ServerStatusIndicator status={backendStatus} />
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2.5">
