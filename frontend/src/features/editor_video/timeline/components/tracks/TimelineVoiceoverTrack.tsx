@@ -45,7 +45,8 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
   const [resizingInfo, setResizingInfo] = useState<{
     key: string;
     side: "left" | "right";
-    delta: number;
+    deltaPx: number;
+    deltaSecs: number;
   } | null>(null);
 
   const handleResizeStart = (
@@ -56,7 +57,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setResizingInfo({ key, side, delta: 0 });
+    setResizingInfo({ key, side, deltaPx: 0, deltaSecs: 0 });
 
     const startX = e.clientX;
     const initialDuration = currentDuration;
@@ -67,7 +68,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
       const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
-      setResizingInfo({ key, side, delta: deltaSecs });
+      setResizingInfo({ key, side, deltaPx: deltaX, deltaSecs });
       onDurationChange?.(key, parseFloat(nextDuration.toFixed(1)));
     };
 
@@ -113,7 +114,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
         onAdd={onAddVoice}
       />
 
-      <div className="flex-1 relative h-9 mx-1">
+      <div className="flex-1 relative h-9">
         {!hasAnyVoice ? (
           <button
             type="button"
@@ -157,14 +158,28 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
             const key = `a3-${idx}`;
             const isResizing = resizingInfo?.key === key;
             const dur = panel.voice_duration ?? timing.duration ?? 3.5;
-            const clipWidthPx = dur * 30;
+            
+            const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
+            const baseWidthPx = dur * 30;
+
+            let displayLeftPx = baseLeftPx;
+            let displayWidthPx = baseWidthPx;
+
+            if (isResizing && resizingInfo) {
+              if (resizingInfo.side === "left") {
+                displayLeftPx = Math.max(0, baseLeftPx + resizingInfo.deltaPx);
+                displayWidthPx = Math.max(15, baseWidthPx - resizingInfo.deltaPx);
+              } else {
+                displayWidthPx = Math.max(15, baseWidthPx + resizingInfo.deltaPx);
+              }
+            }
 
             return (
               <div
                 key={key}
                 onClick={() => onClipClick(key, idx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute top-0 bottom-0 rounded-md overflow-hidden cursor-pointer transition-all border select-none ${
+                className={`group absolute inset-y-0 rounded-md overflow-hidden cursor-pointer transition-all border select-none ${
                   isResizing
                     ? "ring-2 ring-purple-300 border-purple-300 shadow-[0_0_24px_rgba(192,132,252,0.8)] z-30 brightness-115"
                     : selectedClip === key
@@ -172,46 +187,33 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                     : "border-purple-600/50 hover:border-purple-300/80"
                 } bg-[#6b21a8]`}
                 style={{
-                  left:
-                    timing.startPx !== undefined
-                      ? `${timing.startPx}px`
-                      : `${timing.startPct}%`,
-                  width: `${Math.max(24, clipWidthPx - 3)}px`,
+                  left: `${displayLeftPx}px`,
+                  width: `${displayWidthPx}px`,
                 }}
-                title={`Panel #${idx + 1} Voice: ${label} (${dur.toFixed(1)}s)`}
+                title={`VO #${idx + 1} (${speaker}): ${dialogue}`}
               >
-                {/* Continuous Lilac Waveform Envelope matching reference */}
+                {/* Audio Waveform Envelope */}
                 <div className="absolute inset-0 flex items-center px-1">
                   <AudioWaveformVisual
-                    audioUrl={
-                      panel.speech_audio_url ||
-                      panel.narrative_audio_url ||
-                      panel.audio_url ||
-                      panel.voice_url
-                    }
-                    seed={`voice-${idx}-${dialogue}`}
-                    color="#d8b4fe"
-                    opacity={0.92}
+                    seed={`vo-${idx}-${speaker}-${dialogue.slice(0, 10)}`}
+                    color="#e9d5ff"
+                    opacity={0.9}
                   />
                 </div>
 
-                {/* Overlay Speaker / Dialogue Label with Drop Shadow */}
-                <div className="absolute inset-0 flex items-center justify-between px-2.5 z-10 pointer-events-none">
-                  <div className="flex items-center gap-1.5 min-w-0 truncate">
-                    {hasVoiceAudio ? (
-                      <Volume2 className="h-3 w-3 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] shrink-0" />
-                    ) : (
-                      <Mic className="h-3 w-3 text-purple-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] shrink-0" />
-                    )}
-                    <span className="truncate text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+                {/* Voice dialogue badge */}
+                <div className="absolute inset-0 flex items-center justify-between px-2 z-10 pointer-events-none">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Mic className="h-3 w-3 text-purple-200 shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+                    <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
                       {label}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-1 z-20 pointer-events-auto">
-                    {isResizing && resizingInfo.delta !== 0 && (
+                    {isResizing && resizingInfo.deltaSecs !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-purple-200 bg-purple-950 px-1 py-0.2 rounded-sm border border-purple-400/50 animate-pulse">
-                        {resizingInfo.delta > 0 ? `+${resizingInfo.delta.toFixed(1)}s` : `${resizingInfo.delta.toFixed(1)}s`}
+                        {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
                     <span className="text-[8px] font-mono font-bold text-purple-100 bg-black/50 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">

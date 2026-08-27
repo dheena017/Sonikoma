@@ -12,6 +12,10 @@ export interface TimelineProps {
 export interface ContextMenuState {
   x: number;
   y: number;
+  buttonTop?: number;
+  buttonBottom?: number;
+  buttonLeft?: number;
+  buttonRight?: number;
   clipKey: string;
   panelIdx: number;
   clipDuration: number;

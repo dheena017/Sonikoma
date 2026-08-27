@@ -254,27 +254,47 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
 
   const HeaderIcon = trackIcon;
   const MENU_W = 230;
-  // Dynamic estimated height based on items count
   const estimatedH = items.length * 32 + 54;
   const MENU_H = Math.min(estimatedH, window.innerHeight - 32);
 
-  // 1. Horizontal: Align top-right corner of menu with button by default
-  let x = contextMenu.x - MENU_W;
-  if (x < 12) {
-    x = Math.min(Math.max(12, contextMenu.x), window.innerWidth - MENU_W - 12);
+  const bTop = contextMenu.buttonTop ?? contextMenu.y;
+  const bBottom = contextMenu.buttonBottom ?? contextMenu.y;
+  const bLeft = contextMenu.buttonLeft ?? contextMenu.x;
+  const bRight = contextMenu.buttonRight ?? contextMenu.x;
+
+  const spaceBelow = window.innerHeight - bBottom;
+  const spaceAbove = bTop;
+  const spaceRight = window.innerWidth - bLeft;
+
+  // 1. Vertical Auto-Positioning (Top vs Bottom):
+  let y: number;
+  if (spaceBelow >= MENU_H + 12 || spaceBelow >= spaceAbove) {
+    // Sufficient room below: open downwards
+    y = bBottom + 4;
+  } else {
+    // Insufficient room below: open upwards
+    y = bTop - MENU_H - 4;
   }
 
-  // 2. Vertical: If it overflows the bottom of the screen, flip above the button
-  let y = contextMenu.y;
-  if (y + MENU_H > window.innerHeight - 16) {
-    y = Math.max(12, contextMenu.y - MENU_H - 24);
+  // 2. Horizontal Auto-Positioning (Left vs Right):
+  let x: number;
+  if (spaceRight >= MENU_W + 12) {
+    // Open aligned to left of trigger
+    x = bLeft;
+  } else {
+    // Open aligned to right of trigger (flow leftward)
+    x = bRight - MENU_W;
   }
+
+  // 3. Strict 4-Way Viewport Boundary Clamp (Zero edge overflow)
+  x = Math.max(12, Math.min(x, window.innerWidth - MENU_W - 12));
+  y = Math.max(12, Math.min(y, window.innerHeight - MENU_H - 12));
 
   return (
     <div
       ref={contextMenuRef}
       className="fixed z-[9999] bg-[#0f0f1c]/95 backdrop-blur-2xl rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/10 py-1.5 overflow-hidden text-neutral-200 select-none animate-in fade-in zoom-in-95 duration-100 max-h-[calc(100vh-28px)] flex flex-col"
-      style={{ left: Math.max(8, x), top: Math.max(8, y), width: MENU_W }}
+      style={{ left: `${x}px`, top: `${y}px`, width: `${MENU_W}px` }}
     >
       {/* Track Category Header */}
       <div className="px-3 py-1.5 flex items-center justify-between border-b border-white/[0.08] mb-1 bg-white/[0.02]">

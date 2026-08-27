@@ -31,37 +31,22 @@ const TrackLabel: React.FC<TrackLabelProps> = ({
   onToggleLock,
   onToggleHide,
   onToggleMute,
-  onAdd,
 }) => (
-  <div className="w-44 shrink-0 h-full sticky left-0 z-20 flex items-center justify-between px-3 border-r border-white/10 group bg-[#0d0d16] shadow-[3px_0_12px_rgba(0,0,0,0.6)] select-none">
-    {/* Track ID & Name (Always prominent & readable) */}
-    <div className="flex items-center gap-1.5 min-w-0 pr-1 overflow-hidden">
+  <div className="w-48 shrink-0 h-full sticky left-0 z-30 flex items-center justify-between px-3 border-r border-white/10 group bg-[#0d0d16] shadow-[4px_0_16px_rgba(0,0,0,0.85)] select-none">
+    {/* Track ID & Name (Always prominent & readable, never truncated) */}
+    <div className="flex items-center gap-2 min-w-0 pr-1 overflow-hidden">
       <span
         className={`text-[9px] font-mono font-black ${color} shrink-0 px-1 py-0.5 rounded bg-white/[0.05] border border-white/10`}
       >
         {id}
       </span>
-      <span className="text-neutral-200 text-[10px] font-mono font-bold truncate group-hover:text-white transition-colors">
+      <span className="text-neutral-200 text-[10.5px] font-mono font-bold whitespace-nowrap group-hover:text-white transition-colors">
         {label}
       </span>
     </div>
 
     {/* Compact Action Icons Toolbar */}
-    <div className="flex items-center gap-0.5 shrink-0 bg-black/50 px-1 py-0.5 rounded border border-white/10 opacity-70 group-hover:opacity-100 transition-opacity">
-      {onAdd && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onAdd();
-          }}
-          title={`Add item to ${label}`}
-          className="p-0.5 rounded hover:bg-purple-600/50 text-purple-400 hover:text-white transition-colors cursor-pointer"
-        >
-          <Plus className="h-2.5 w-2.5" />
-        </button>
-      )}
-
+    <div className="flex items-center gap-1 shrink-0 bg-black/60 px-1.5 py-0.5 rounded border border-white/10 opacity-80 group-hover:opacity-100 transition-opacity">
       <button
         type="button"
         onClick={onToggleLock}

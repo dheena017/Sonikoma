@@ -190,9 +190,8 @@ const Timeline: React.FC<TimelineProps> = ({
     if (!rail) return;
 
     const rect = rail.getBoundingClientRect();
-    const relativeX = clientX - rect.left;
-    const pct = Math.max(0, Math.min(1, relativeX / Math.max(1, rect.width)));
-    const nextTime = pct * totalDuration;
+    const relativeX = Math.max(0, clientX - rect.left);
+    const nextTime = Math.max(0, Math.min(totalDuration, relativeX / 30));
     const nextPanelIndex = getPanelIndexAtTime(nextTime);
 
     currentPanelIndexRef.current = nextPanelIndex;
@@ -380,7 +379,7 @@ const Timeline: React.FC<TimelineProps> = ({
           <div
             className="min-h-full relative"
             style={{
-              minWidth: `${Math.max(1000, totalDuration * 30 + 176 + 130)}px`,
+              minWidth: `${Math.max(1000, totalDuration * 30 + 192 + 130)}px`,
             }}
           >
             {/* Sticky Synchronized Top Ruler */}

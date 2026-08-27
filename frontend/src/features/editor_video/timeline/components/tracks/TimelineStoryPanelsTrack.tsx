@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import TrackLabel from "../TrackLabel";
-import { ImagePlus, Film } from "lucide-react";
+import { ImagePlus, Image as ImageIcon, Film } from "lucide-react";
 import { Keyframe } from "../../types";
 import ClipTrimHandles from "../ClipTrimHandles";
 
@@ -57,30 +57,31 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
   const [resizingInfo, setResizingInfo] = useState<{
     idx: number;
     side: "left" | "right";
-    delta: number;
+    deltaPx: number;
+    deltaSecs: number;
   } | null>(null);
 
   const handleResizeStart = (
     e: React.MouseEvent,
     idx: number,
     side: "left" | "right",
-    initialDuration: number
+    currentDuration: number
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setResizingInfo({ idx, side, delta: 0 });
+    setResizingInfo({ idx, side, deltaPx: 0, deltaSecs: 0 });
 
     const startX = e.clientX;
+    const initialDuration = currentDuration;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      // 30px = 1.0 second of video
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
       const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
       const rounded = parseFloat(nextDuration.toFixed(1));
-      setResizingInfo({ idx, side, delta: deltaSecs });
+      setResizingInfo({ idx, side, deltaPx: deltaX, deltaSecs });
       onDurationChange?.(`v1-${idx}`, rounded);
     };
 
@@ -111,7 +112,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
         onToggleMute={() => {}}
         onAdd={onAddPanel}
       />
-      <div className="flex-1 relative h-14 mx-1">
+      <div className="flex-1 relative h-14">
         {panels.length === 0 ? (
           <div className="h-full flex items-center justify-center text-neutral-600 font-mono text-[10px] italic">
             No story panels created yet. Click "+ Add Frame" to begin.
@@ -138,70 +139,85 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
               const imgUrl = rawUrl
                 ? rawUrl.startsWith("http")
                   ? rawUrl
-                  : `/api/media/${rawUrl}`
-                : null;
+                  : `http://localhost:8000${rawUrl}`
+                : undefined;
 
+              const isSelected =
+                selectedClip === `v1-${idx}` || currentPanelIndex === idx;
+              const dur = panel.duration || 3.5;
               const key = `v1-${idx}`;
               const isResizing = resizingInfo?.idx === idx;
-              const isActive = idx === currentPanelIndex;
-              const dur = timing.duration || 3.5;
+
+              const baseLeftPx =
+                timing.startPx !== undefined
+                  ? timing.startPx
+                  : timing.startTime * 30;
+              const baseWidthPx = dur * 30;
+
+              let displayLeftPx = baseLeftPx;
+              let displayWidthPx = baseWidthPx;
+
+              if (isResizing && resizingInfo) {
+                if (resizingInfo.side === "left") {
+                  displayLeftPx = Math.max(0, baseLeftPx + resizingInfo.deltaPx);
+                  displayWidthPx = Math.max(15, baseWidthPx - resizingInfo.deltaPx);
+                } else {
+                  displayWidthPx = Math.max(15, baseWidthPx + resizingInfo.deltaPx);
+                }
+              }
 
               return (
                 <div
                   key={key}
                   onClick={() => onClipClick(key, idx)}
                   onContextMenu={(e) => onContextMenu(e, key, idx)}
-                  className={`group absolute top-0 bottom-0 rounded-md overflow-hidden cursor-pointer transition-all border select-none ${
-                    isResizing
-                      ? "border-purple-400 ring-2 ring-purple-400/80 shadow-[0_0_24px_rgba(168,85,247,0.8)] z-30 brightness-115"
-                      : isActive
-                      ? "border-purple-400 ring-2 ring-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.5)] z-20"
-                      : selectedClip === key
-                      ? "border-purple-500 ring-1 ring-purple-400 z-10"
-                      : "border-white/10 hover:border-purple-400/50"
-                  } bg-[#090912]`}
+                  className={`group absolute top-1 bottom-1 rounded-md border transition-shadow cursor-pointer select-none overflow-hidden ${
+                    isSelected
+                      ? "border-purple-400/90 shadow-[0_0_12px_rgba(168,85,247,0.5)] z-20"
+                      : "border-purple-500/25 hover:border-purple-400/60 z-10"
+                  } ${isResizing ? "ring-2 ring-purple-400 z-30" : ""}`}
                   style={{
-                    left:
-                      timing.startPx !== undefined
-                        ? `${timing.startPx}px`
-                        : `${timing.startPct}%`,
-                    width:
-                      timing.widthPx !== undefined
-                        ? `${Math.max(24, timing.widthPx - 3)}px`
-                        : `calc(${timing.widthPct}% - 3px)`,
+                    left: `${displayLeftPx}px`,
+                    width: `${displayWidthPx}px`,
+                    backgroundColor: "#0d0b14",
                   }}
                 >
+                  {/* Thumbnail background */}
                   {imgUrl ? (
                     <img
                       src={imgUrl}
                       alt={`Panel ${idx + 1}`}
-                      className="w-full h-full object-cover select-none pointer-events-none"
-                      loading="lazy"
+                      className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-95 transition-opacity pointer-events-none"
                     />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-neutral-600 bg-neutral-900/60 p-1">
-                      <Film className="h-4 w-4 mb-0.5 opacity-40" />
-                      <span className="text-[8px] font-mono opacity-50">
-                        P#{idx + 1}
+                    <div className="absolute inset-0 bg-purple-950/30 flex items-center justify-center pointer-events-none">
+                      <span className="text-[9px] font-mono text-purple-400/60 font-bold">
+                        #{idx + 1}
                       </span>
                     </div>
                   )}
 
-                  {/* Gradient Overlay for Contrast */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
+                  {/* Top Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60 pointer-events-none" />
 
-                  {/* Badge: Panel Index */}
+                  {/* Panel Number Badge */}
                   <div className="absolute top-1 left-1.5 flex items-center gap-1 z-10">
-                    <span className="text-[8px] font-mono font-bold text-white bg-black/70 px-1 py-0.5 rounded-sm border border-white/10">
+                    <span className="text-[8px] font-mono font-bold text-white bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 flex items-center gap-0.5">
+                      <ImageIcon className="h-2.5 w-2.5 text-purple-400" />
                       #{idx + 1}
+                    </span>
+                    <span className="text-[8px] font-mono text-white/90 truncate max-w-[50px] font-semibold drop-shadow-sm">
+                      {panel.title || `Panel ${idx + 1}`}
                     </span>
                   </div>
 
                   {/* Live Duration Badge & Three-Dots Menu */}
                   <div className="absolute top-1 right-1.5 flex items-center gap-1 z-20">
-                    {isResizing && resizingInfo.delta !== 0 && (
+                    {isResizing && resizingInfo.deltaSecs !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-purple-200 bg-purple-950/90 px-1 py-0.2 rounded-sm border border-purple-400/50 animate-pulse">
-                        {resizingInfo.delta > 0 ? `+${resizingInfo.delta.toFixed(1)}s` : `${resizingInfo.delta.toFixed(1)}s`}
+                        {resizingInfo.deltaSecs > 0
+                          ? `+${resizingInfo.deltaSecs.toFixed(1)}s`
+                          : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
                     <span

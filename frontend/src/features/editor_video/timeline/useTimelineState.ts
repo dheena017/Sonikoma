@@ -177,19 +177,29 @@ export function useTimelineState(
 
       let x = e.clientX;
       let y = e.clientY;
+      let buttonTop = y;
+      let buttonBottom = y;
+      let buttonLeft = x;
+      let buttonRight = x;
+
       const target = e.currentTarget as HTMLElement | null;
       if (target && typeof target.getBoundingClientRect === "function") {
         const rect = target.getBoundingClientRect();
-        // If clicking a small action button (like the three-dots button), anchor to its bottom-right
-        if (rect.width < 60) {
-          x = rect.right;
-          y = rect.bottom + 4;
-        }
+        buttonTop = rect.top;
+        buttonBottom = rect.bottom;
+        buttonLeft = rect.left;
+        buttonRight = rect.right;
+        x = rect.right;
+        y = rect.bottom;
       }
 
       setContextMenu({
         x: x || 200,
         y: y || 200,
+        buttonTop,
+        buttonBottom,
+        buttonLeft,
+        buttonRight,
         clipKey,
         panelIdx,
         clipDuration: getClipDuration(clipKey),

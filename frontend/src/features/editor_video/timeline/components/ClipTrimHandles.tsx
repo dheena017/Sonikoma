@@ -71,21 +71,6 @@ export const ClipTrimHandles: React.FC<ClipTrimHandlesProps> = ({
         </div>
       </div>
 
-      {/* ─── Three Dots Quick Action Trigger (Canva Style) ──────────────── */}
-      {onOpenMenu && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenMenu(e);
-          }}
-          className="absolute top-1 right-1 h-4 w-5 z-20 opacity-0 group-hover:opacity-100 flex items-center justify-center rounded bg-black/60 hover:bg-black/90 text-white/70 hover:text-white border border-white/20 transition-opacity cursor-pointer shadow-sm"
-          title="More clip actions (Copy, Duplicate, Delete, Split)"
-        >
-          <MoreHorizontal className="h-3 w-3" />
-        </button>
-      )}
-
       {/* ─── Right Resize Handle ─────────────────────────────────────────── */}
       <div
         onMouseDown={(e) => onResizeStart(e, "right", duration)}

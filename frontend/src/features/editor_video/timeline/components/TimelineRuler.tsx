@@ -160,7 +160,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         className="h-8 flex shrink-0 bg-[#0a0a10] border-b border-white/[0.06] cursor-pointer select-none group/ruler"
       >
         {/* Spacer aligned with the track labels column */}
-        <div className="w-44 shrink-0 sticky left-0 z-20 border-r border-white/10 bg-[#0d0d16] flex items-center justify-between px-3 shadow-[3px_0_12px_rgba(0,0,0,0.6)]">
+        <div className="w-48 shrink-0 sticky left-0 z-30 border-r border-white/10 bg-[#0d0d16] flex items-center justify-between px-3 shadow-[4px_0_16px_rgba(0,0,0,0.85)]">
           <div className="flex items-center gap-1.5 min-w-0">
             <Clock className="h-3.5 w-3.5 text-purple-400 shrink-0" />
             <span className="text-[10px] font-mono font-bold text-neutral-200 truncate">
@@ -175,7 +175,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         {/* High-Precision Subdivided Ruler Rail matching 30px/s */}
         <div
           ref={trackRef}
-          className="relative h-full timeline-ruler-track flex-1 mx-1"
+          className="relative h-full timeline-ruler-track flex-1"
           style={{ minWidth: `${Math.max(600, totalDuration * 30)}px` }}
         >
           {/* Hover Time Scrubber Line & Tooltip */}

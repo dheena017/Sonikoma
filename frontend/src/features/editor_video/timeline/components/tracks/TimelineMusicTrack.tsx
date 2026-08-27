@@ -98,7 +98,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
         onToggleHide={onToggleHide}
         onAdd={onAddMusic}
       />
-      <div className="flex-1 relative h-9 mx-1">
+      <div className="flex-1 relative h-9">
         {hasMusic ? (
           <div
             onClick={() => onClipClick("a1-0", 0)}

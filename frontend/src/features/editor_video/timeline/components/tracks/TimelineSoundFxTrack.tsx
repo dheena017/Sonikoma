@@ -43,7 +43,8 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
   const [resizingInfo, setResizingInfo] = useState<{
     key: string;
     side: "left" | "right";
-    delta: number;
+    deltaPx: number;
+    deltaSecs: number;
   } | null>(null);
 
   const handleResizeStart = (
@@ -54,7 +55,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setResizingInfo({ key, side, delta: 0 });
+    setResizingInfo({ key, side, deltaPx: 0, deltaSecs: 0 });
 
     const startX = e.clientX;
     const initialDuration = currentDuration;
@@ -65,7 +66,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
       const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
-      setResizingInfo({ key, side, delta: deltaSecs });
+      setResizingInfo({ key, side, deltaPx: deltaX, deltaSecs });
       onDurationChange?.(key, parseFloat(nextDuration.toFixed(1)));
     };
 
@@ -102,7 +103,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
         onToggleHide={onToggleHide}
         onAdd={onAddSfx}
       />
-      <div className="flex-1 relative h-9 mx-1">
+      <div className="flex-1 relative h-9">
         {!hasAnySfx ? (
           <button
             type="button"
@@ -110,7 +111,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
             className="h-full flex items-center gap-1 text-[9px] font-mono text-neutral-500 hover:text-cyan-300 italic px-2 hover:bg-cyan-950/20 rounded-md transition-colors cursor-pointer"
           >
             <Plus className="h-2.5 w-2.5" />
-            <span>+ Add sound effect (SFX)</span>
+            <span>+ Add sound effect / ambient SFX</span>
           </button>
         ) : (
           panels.map((panel: any, idx: number) => {
@@ -130,57 +131,58 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
 
             const key = `a2-${idx}`;
             const isResizing = resizingInfo?.key === key;
-            const dur = panel.sfx_duration ?? timing.duration ?? 3.5;
-            const clipWidthPx = dur * 30;
+            const dur = panel.sfx_duration ?? timing.duration ?? 1.5;
+            const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
+            const baseWidthPx = dur * 30;
+
+            let displayLeftPx = baseLeftPx;
+            let displayWidthPx = baseWidthPx;
+
+            if (isResizing && resizingInfo) {
+              if (resizingInfo.side === "left") {
+                displayLeftPx = Math.max(0, baseLeftPx + resizingInfo.deltaPx);
+                displayWidthPx = Math.max(15, baseWidthPx - resizingInfo.deltaPx);
+              } else {
+                displayWidthPx = Math.max(15, baseWidthPx + resizingInfo.deltaPx);
+              }
+            }
 
             return (
               <div
                 key={key}
                 onClick={() => onClipClick(key, idx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute top-0 bottom-0 rounded-md overflow-hidden cursor-pointer transition-all border select-none ${
+                className={`group absolute inset-y-0 rounded-md overflow-hidden cursor-pointer transition-all border select-none ${
                   isResizing
-                    ? "ring-2 ring-cyan-300 border-cyan-300 shadow-[0_0_24px_rgba(103,232,249,0.8)] z-30 brightness-115"
+                    ? "border-cyan-300 ring-2 ring-cyan-400/80 shadow-[0_0_24px_rgba(103,232,249,0.8)] brightness-115 z-30"
                     : selectedClip === key
-                    ? "ring-2 ring-cyan-400 border-cyan-300 shadow-[0_0_12px_rgba(103,232,249,0.4)] z-20"
-                    : "border-cyan-600/50 hover:border-cyan-300/80"
+                    ? "border-cyan-300 ring-2 ring-cyan-400/50 shadow-[0_0_12px_rgba(103,232,249,0.4)] z-20"
+                    : "border-cyan-500/40 hover:border-cyan-300/80 z-10"
                 } bg-[#0e7490]`}
                 style={{
-                  left:
-                    timing.startPx !== undefined
-                      ? `${timing.startPx}px`
-                      : `${timing.startPct}%`,
-                  width: `${Math.max(24, clipWidthPx - 3)}px`,
+                  left: `${displayLeftPx}px`,
+                  width: `${displayWidthPx}px`,
                 }}
-                title={`Panel #${idx + 1} SFX: ${sfx}`}
+                title={`SFX #${idx + 1}: ${sfx}`}
               >
-                {/* Continuous Waveform Envelope */}
+                {/* Audio Waveform Envelope */}
                 <div className="absolute inset-0 flex items-center px-1">
-                  <AudioWaveformVisual
-                    audioUrl={
-                      panel.sfx_audio_url ||
-                      panel.sound_url ||
-                      panel.sfx_url
-                    }
-                    seed={`sfx-${idx}-${sfx}`}
-                    color="#67e8f9"
-                    opacity={0.9}
-                  />
+                  <AudioWaveformVisual seed={`sfx-${idx}-${sfx}`} color="#a5f3fc" opacity={0.9} />
                 </div>
 
-                {/* Content Overlay */}
-                <div className="absolute inset-0 flex items-center justify-between px-2.5 z-10 pointer-events-none">
-                  <div className="flex items-center gap-1.5 min-w-0 truncate">
-                    <Zap className="h-3 w-3 text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] shrink-0" />
-                    <span className="truncate text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
-                      {sfx}
+                {/* SFX Label & Controls */}
+                <div className="absolute inset-0 flex items-center justify-between px-2 z-10 pointer-events-none">
+                  <div className="flex items-center gap-1 min-w-0">
+                    <Zap className="h-3 w-3 text-amber-300 shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+                    <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
+                      [{sfx}]
                     </span>
                   </div>
 
                   <div className="flex items-center gap-1 z-20 pointer-events-auto">
-                    {isResizing && resizingInfo.delta !== 0 && (
+                    {isResizing && resizingInfo.deltaSecs !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-cyan-200 bg-cyan-950 px-1 py-0.2 rounded-sm border border-cyan-400/50 animate-pulse">
-                        {resizingInfo.delta > 0 ? `+${resizingInfo.delta.toFixed(1)}s` : `${resizingInfo.delta.toFixed(1)}s`}
+                        {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
                     <span className="text-[8px] font-mono font-bold text-cyan-100 bg-black/50 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">

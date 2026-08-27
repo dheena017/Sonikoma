@@ -33,12 +33,7 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
     window.addEventListener("mouseup", onMouseUp);
   };
 
-  const left =
-    currentTime !== undefined
-      ? 176 + 4 + currentTime * 30
-      : trackBounds
-      ? trackBounds.left + (playheadPercent / 100) * trackBounds.width
-      : 176 + 4 + (playheadPercent / 100) * 800;
+  const left = 192 + Math.max(0, (currentTime ?? 0)) * 30;
 
   return (
     <div

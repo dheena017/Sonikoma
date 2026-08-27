@@ -16,9 +16,9 @@ export interface TimelineCameraFxTrackProps {
   hidden: boolean;
   onToggleLock: () => void;
   onToggleHide: () => void;
-  onClipClick: (key: string, idx: number) => void;
-  onContextMenu: (e: React.MouseEvent, key: string, idx: number) => void;
-  onDurationChange?: (key: string, duration: number) => void;
+  onClipClick: (clipKey: string, panelIndex: number) => void;
+  onContextMenu: (e: React.MouseEvent, clipKey: string, panelIndex: number) => void;
+  onDurationChange?: (clipKey: string, duration: number) => void;
   onAddFx?: () => void;
 }
 
@@ -38,7 +38,8 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
   const [resizingInfo, setResizingInfo] = useState<{
     key: string;
     side: "left" | "right";
-    delta: number;
+    deltaPx: number;
+    deltaSecs: number;
   } | null>(null);
 
   const handleResizeStart = (
@@ -49,7 +50,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setResizingInfo({ key, side, delta: 0 });
+    setResizingInfo({ key, side, deltaPx: 0, deltaSecs: 0 });
 
     const startX = e.clientX;
     const initialDuration = currentDuration;
@@ -60,7 +61,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
       const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
-      setResizingInfo({ key, side, delta: deltaSecs });
+      setResizingInfo({ key, side, deltaPx: deltaX, deltaSecs });
       onDurationChange?.(key, parseFloat(nextDuration.toFixed(1)));
     };
 
@@ -75,10 +76,6 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
   };
-
-  const hasAnyFx = panels.some(
-    (p: any) => p.motion_type || p.camera_motion || p.effect || p.transition
-  );
 
   return (
     <div className="h-10 border-b border-white/[0.04] flex items-center">
@@ -95,43 +92,57 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
         onToggleMute={() => {}}
         onAdd={onAddFx}
       />
-      <div className="flex-1 relative h-8 mx-1">
-        {!hasAnyFx ? (
-          <button
-            type="button"
-            onClick={onAddFx}
-            className="h-full flex items-center gap-1 text-[9px] font-mono text-neutral-500 hover:text-indigo-300 italic px-2 hover:bg-indigo-950/20 rounded-md transition-colors cursor-pointer"
-          >
-            <Plus className="h-2.5 w-2.5" />
-            <span>+ Add camera motion / transition FX</span>
-          </button>
+      <div className="flex-1 relative h-8">
+        {panels.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-neutral-600 font-mono text-[10px] italic">
+            No camera motion FX. Click "+ Add FX" on the right.
+          </div>
         ) : (
           panels.map((panel: any, idx: number) => {
-            const fx = panel.motion_type || panel.camera_motion || panel.effect || panel.transition;
-            if (!fx) return null;
-
+            const fx =
+              panel.camera_motion ||
+              panel.camera_fx ||
+              (idx % 2 === 0 ? "zoom_in" : "zoom_out");
+            const dur = panel.camera_duration || panel.duration || 3.0;
+            const key = `v2-${idx}`;
             const timing: PanelTiming = panelTimings[idx] ?? {
               index: idx,
-              duration: panel.duration || 3.5,
+              duration: dur,
               startTime: 0,
-              endTime: panel.duration || 3.5,
+              endTime: dur,
               startPct: (idx / Math.max(panels.length, 1)) * 100,
               widthPct: (1 / Math.max(panels.length, 1)) * 100,
               startPx: 0,
-              widthPx: (panel.duration || 3.5) * 30,
+              widthPx: dur * 30,
             };
 
-            const key = `v2-${idx}`;
+            const isSelected = selectedClip === key;
             const isResizing = resizingInfo?.key === key;
-            const dur = panel.camera_duration ?? panel.fx_duration ?? timing.duration ?? 3.5;
-            const clipWidthPx = dur * 30;
+
+            const baseLeftPx =
+              timing.startPx !== undefined
+                ? timing.startPx
+                : timing.startTime * 30;
+            const baseWidthPx = dur * 30;
+
+            let displayLeftPx = baseLeftPx;
+            let displayWidthPx = baseWidthPx;
+
+            if (isResizing && resizingInfo) {
+              if (resizingInfo.side === "left") {
+                displayLeftPx = Math.max(0, baseLeftPx + resizingInfo.deltaPx);
+                displayWidthPx = Math.max(15, baseWidthPx - resizingInfo.deltaPx);
+              } else {
+                displayWidthPx = Math.max(15, baseWidthPx + resizingInfo.deltaPx);
+              }
+            }
 
             return (
               <div
                 key={key}
                 onClick={() => onClipClick(key, idx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute top-0 bottom-0 flex items-center justify-between gap-1 cursor-pointer truncate transition-all rounded-md border text-[9px] font-mono font-bold px-2.5 bg-indigo-950/90 border-indigo-500/40 text-indigo-200 select-none ${
+                className={`group absolute top-0.5 bottom-0.5 flex items-center justify-between gap-1 cursor-pointer truncate transition-all rounded-md border text-[9px] font-mono font-bold px-2.5 bg-indigo-950/90 border-indigo-500/40 text-indigo-200 select-none ${
                   isResizing
                     ? "ring-2 ring-indigo-400 border-indigo-300 shadow-[0_0_24px_rgba(129,140,248,0.8)] z-30 brightness-125"
                     : selectedClip === key
@@ -139,11 +150,8 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                     : "hover:brightness-110 hover:border-indigo-400/60"
                 }`}
                 style={{
-                  left:
-                    timing.startPx !== undefined
-                      ? `${timing.startPx}px`
-                      : `${timing.startPct}%`,
-                  width: `${Math.max(24, clipWidthPx - 3)}px`,
+                  left: `${displayLeftPx}px`,
+                  width: `${displayWidthPx}px`,
                 }}
                 title={`Panel #${idx + 1} Effect: ${fx}`}
               >
@@ -153,9 +161,9 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1 z-20">
-                  {isResizing && resizingInfo.delta !== 0 && (
+                  {isResizing && resizingInfo.deltaSecs !== 0 && (
                     <span className="text-[7px] font-mono font-bold text-indigo-200 bg-indigo-950 px-1 py-0.2 rounded-sm border border-indigo-400/50 animate-pulse">
-                      {resizingInfo.delta > 0 ? `+${resizingInfo.delta.toFixed(1)}s` : `${resizingInfo.delta.toFixed(1)}s`}
+                      {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                     </span>
                   )}
                   <span className="text-[7px] font-mono text-indigo-300/80 bg-black/40 px-1 py-0.2 rounded-sm border border-indigo-500/20 shrink-0">

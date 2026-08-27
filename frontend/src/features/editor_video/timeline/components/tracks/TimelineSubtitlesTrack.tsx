@@ -38,7 +38,8 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
   const [resizingInfo, setResizingInfo] = useState<{
     key: string;
     side: "left" | "right";
-    delta: number;
+    deltaPx: number;
+    deltaSecs: number;
   } | null>(null);
 
   const handleResizeStart = (
@@ -49,7 +50,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setResizingInfo({ key, side, delta: 0 });
+    setResizingInfo({ key, side, deltaPx: 0, deltaSecs: 0 });
 
     const startX = e.clientX;
     const initialDuration = currentDuration;
@@ -60,7 +61,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
       const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
-      setResizingInfo({ key, side, delta: deltaSecs });
+      setResizingInfo({ key, side, deltaPx: deltaX, deltaSecs });
       onDurationChange?.(key, parseFloat(nextDuration.toFixed(1)));
     };
 
@@ -96,7 +97,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
         onToggleMute={() => {}}
         onAdd={onAddSubtitle}
       />
-      <div className="flex-1 relative h-8 mx-1">
+      <div className="flex-1 relative h-8">
         {!hasAnyText ? (
           <button
             type="button"
@@ -129,38 +130,48 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
             const key = `v3-${idx}`;
             const isResizing = resizingInfo?.key === key;
             const dur = panel.subtitle_duration ?? timing.duration ?? 3.5;
-            const clipWidthPx = dur * 30;
+            const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
+            const baseWidthPx = dur * 30;
+
+            let displayLeftPx = baseLeftPx;
+            let displayWidthPx = baseWidthPx;
+
+            if (isResizing && resizingInfo) {
+              if (resizingInfo.side === "left") {
+                displayLeftPx = Math.max(0, baseLeftPx + resizingInfo.deltaPx);
+                displayWidthPx = Math.max(15, baseWidthPx - resizingInfo.deltaPx);
+              } else {
+                displayWidthPx = Math.max(15, baseWidthPx + resizingInfo.deltaPx);
+              }
+            }
 
             return (
               <div
                 key={key}
                 onClick={() => onClipClick(key, idx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute top-0 bottom-0 flex items-center justify-between gap-1 cursor-pointer truncate transition-all rounded-md border text-[9px] font-mono font-bold px-2.5 bg-purple-950/90 border-purple-500/40 text-purple-200 select-none ${
+                className={`group absolute top-0.5 bottom-0.5 flex items-center justify-between gap-1 cursor-pointer truncate transition-all rounded-md border text-[9px] font-mono font-bold px-2.5 bg-purple-950/90 border-purple-500/40 text-purple-200 select-none ${
                   isResizing
-                    ? "ring-2 ring-purple-400 border-purple-300 shadow-[0_0_24px_rgba(192,132,252,0.8)] z-30 brightness-125"
+                    ? "ring-2 ring-purple-400 border-purple-300 shadow-[0_0_24px_rgba(168,85,247,0.8)] z-30 brightness-125"
                     : selectedClip === key
                     ? "ring-2 ring-purple-400/80 brightness-115 z-10"
                     : "hover:brightness-110 hover:border-purple-400/60"
                 }`}
                 style={{
-                  left:
-                    timing.startPx !== undefined
-                      ? `${timing.startPx}px`
-                      : `${timing.startPct}%`,
-                  width: `${Math.max(24, clipWidthPx - 3)}px`,
+                  left: `${displayLeftPx}px`,
+                  width: `${displayWidthPx}px`,
                 }}
-                title={`Subtitle #${idx + 1}: "${text}"`}
+                title={`Panel #${idx + 1} Subtitle: ${text}`}
               >
                 <div className="flex items-center gap-1.5 min-w-0 truncate">
-                  <Type className="h-3 w-3 text-purple-300 shrink-0" />
+                  <Type className="h-3 w-3 text-purple-400 shrink-0" />
                   <span className="truncate">"{text}"</span>
                 </div>
 
                 <div className="flex items-center gap-1 z-20">
-                  {isResizing && resizingInfo.delta !== 0 && (
+                  {isResizing && resizingInfo.deltaSecs !== 0 && (
                     <span className="text-[7px] font-mono font-bold text-purple-200 bg-purple-950 px-1 py-0.2 rounded-sm border border-purple-400/50 animate-pulse">
-                      {resizingInfo.delta > 0 ? `+${resizingInfo.delta.toFixed(1)}s` : `${resizingInfo.delta.toFixed(1)}s`}
+                      {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                     </span>
                   )}
                   <span className="text-[7px] font-mono text-purple-300/80 bg-black/40 px-1 py-0.2 rounded-sm border border-purple-500/20 shrink-0">
