@@ -1,11 +1,12 @@
 // ─── TimelineSubtitlesTrack (V3 Subtitles & Text Overlay Track) ────────────────
 // Canonical location: timeline/components/tracks/TimelineSubtitlesTrack.tsx
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
 import { Type, Plus, MoreHorizontal } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import ClipTrimHandles from "../ClipTrimHandles";
+import { LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
 
 export interface TimelineSubtitlesTrackProps {
   panels: any[];
@@ -44,6 +45,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
 
   // State for tracking per‑clip position offsets
   const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
+  const [clipLanes, setClipLanes] = useState<Record<string, number>>({});
   const [movingInfo, setMovingInfo] = useState<{ key: string; idx: number; baseLeftPx: number; widthPx: number; deltaPx: number } | null>(null);
   const movingInfoRef = React.useRef(movingInfo);
   React.useEffect(() => { movingInfoRef.current = movingInfo; }, [movingInfo]);
@@ -73,25 +75,20 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
       if (!hasMoved) {
         onClipClick(key, idx);
       } else {
-        // Desired new left position
         const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
-        // Build positions of all other clips
-        const otherClips = panels.map((p: any, i: number) => {
+        const newOffset = desiredLeft - baseLeftPx;
+        const newOffsets = { ...clipOffsets, [key]: (clipOffsets[key] ?? 0) + newOffset };
+        setClipOffsets(newOffsets);
+
+        const allClips = panels.map((p: any, i: number) => {
           const t: PanelTiming | undefined = panelTimings[i];
           const k = `v3-${i}`;
-          const offset = clipOffsets[k] ?? 0;
+          const offset = newOffsets[k] ?? 0;
           const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
           const width = (p.subtitle_duration ?? t?.duration ?? 3.5) * 30;
           return { key: k, left, width };
-        }).filter(c => c.key !== key);
-        // Find nearest neighbours
-        const leftNeighbors = otherClips.filter(c => c.left < baseLeftPx).sort((a, b) => b.left - a.left);
-        const rightNeighbors = otherClips.filter(c => c.left > baseLeftPx).sort((a, b) => a.left - b.left);
-        const leftBound = leftNeighbors.length ? leftNeighbors[0].left + leftNeighbors[0].width : 0;
-        const rightBound = rightNeighbors.length ? rightNeighbors[0].left - widthPx : Infinity;
-        const clampedLeft = Math.max(leftBound, Math.min(desiredLeft, rightBound));
-        const finalOffset = clampedLeft - baseLeftPx;
-        setClipOffsets(prev => ({ ...prev, [key]: (prev[key] ?? 0) + finalOffset }));
+        });
+        setClipLanes(assignLanes(allClips));
       }
       setMovingInfo(null);
       document.body.style.cursor = "";
@@ -160,8 +157,17 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
       p.text_narration || p.caption || p.speech_text || p.narrative
   );
 
+  const maxLane = useMemo(() => {
+    const vals = Object.values(clipLanes);
+    return vals.length > 0 ? Math.max(...vals) : 0;
+  }, [clipLanes]);
+  const innerHeightPx = trackInnerHeight(maxLane);
+
   return (
-    <div className="h-10 border-b border-white/[0.04] flex items-center">
+    <div
+      className="border-b border-white/[0.04] flex items-center transition-all duration-300"
+      style={{ height: `${Math.max(40, innerHeightPx + 8)}px` }}
+    >
       <TrackLabel
         id="V3"
         label="Subtitles"
@@ -175,7 +181,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
         onToggleMute={() => {}}
         onAdd={onAddSubtitle}
       />
-      <div className="flex-1 relative h-8">
+      <div className="flex-1 relative transition-all duration-300" style={{ height: `${Math.max(32, innerHeightPx)}px` }}>
         {!hasAnyText ? (
           <button
             type="button"
@@ -223,6 +229,10 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
             const finalLeftPx =
               displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
+            const lane = clipLanes[key] ?? 0;
+            const clipTop = lane * LANE_HEIGHT + 1;
+            const clipHeight = LANE_HEIGHT - 2;
+
             return (
               <div
                 key={key}
@@ -236,7 +246,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                   )
                 }
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute top-0.5 bottom-0.5 flex items-center justify-between gap-1 select-none rounded-md border text-[9px] font-mono font-bold px-2.5 bg-purple-950/90 border-purple-500/40 text-purple-200 z-10 ${
+                className={`group absolute flex items-center justify-between gap-1 select-none rounded-md border text-[9px] font-mono font-bold px-2.5 bg-purple-950/90 border-purple-500/40 text-purple-200 z-10 ${
                   isMoving
                     ? "cursor-grabbing shadow-[0_4px_20px_rgba(168,85,247,0.4)] z-40"
                     : isResizing
@@ -248,8 +258,10 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                 style={{
                   left: `${finalLeftPx}px`,
                   width: `${displayWidthPx}px`,
+                  top: `${clipTop}px`,
+                  height: `${clipHeight}px`,
                   cursor: isMoving ? "grabbing" : isResizing ? "col-resize" : "grab",
-                  transition: isMoving ? "none" : undefined,
+                  transition: isMoving ? "none" : "top 0.2s ease",
                 }}
                 title={`Panel #${idx + 1} Subtitle: ${text}`}
               >

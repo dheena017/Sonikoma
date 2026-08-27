@@ -1,12 +1,13 @@
 // ─── TimelineStoryPanelsTrack (V1 Video / Story Panels Track) ─────────────────
 // Canonical location: timeline/components/tracks/TimelineStoryPanelsTrack.tsx
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
 import { ImagePlus, Image as ImageIcon, Film, MoreHorizontal } from "lucide-react";
 import { Keyframe } from "../../types";
 import ClipTrimHandles from "../ClipTrimHandles";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
+import { LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
 
 export interface PanelTiming {
   index: number;
@@ -64,6 +65,8 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
 
   // Per-clip position offsets for move dragging
   const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
+  // Per-clip lane (row) assignments to avoid overlap
+  const [clipLanes, setClipLanes] = useState<Record<string, number>>({});
   const [movingInfo, setMovingInfo] = useState<{
     key: string;
     idx: number;
@@ -104,37 +107,20 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
         onClipClick(key, idx);
       } else {
         const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
-        // Build list of other panel positions
-        const otherClips = panels
-          .map((p: any, i: number) => {
-            const t: PanelTiming | undefined = panelTimings[i];
-            const k = `v1-${i}`;
-            const offset = clipOffsets[k] ?? 0;
-            const left =
-              (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
-            const width = (p.duration || 3.5) * 30;
-            return { key: k, left, width };
-          })
-          .filter((c) => c.key !== key);
+        const newOffset = desiredLeft - baseLeftPx;
+        const newOffsets = { ...clipOffsets, [key]: (clipOffsets[key] ?? 0) + newOffset };
+        setClipOffsets(newOffsets);
 
-        const leftNeighbors = otherClips
-          .filter((c) => c.left < baseLeftPx)
-          .sort((a, b) => b.left - a.left);
-        const rightNeighbors = otherClips
-          .filter((c) => c.left > baseLeftPx)
-          .sort((a, b) => a.left - b.left);
-        const leftBound = leftNeighbors.length
-          ? leftNeighbors[0].left + leftNeighbors[0].width
-          : 0;
-        const rightBound = rightNeighbors.length
-          ? rightNeighbors[0].left - widthPx
-          : Infinity;
-        const clampedLeft = Math.max(leftBound, Math.min(desiredLeft, rightBound));
-        const finalOffset = clampedLeft - baseLeftPx;
-        setClipOffsets((prev) => ({
-          ...prev,
-          [key]: (prev[key] ?? 0) + finalOffset,
-        }));
+        // Recalculate lanes for all clips after the move
+        const allClips = panels.map((p: any, i: number) => {
+          const t: PanelTiming | undefined = panelTimings[i];
+          const k = `v1-${i}`;
+          const offset = newOffsets[k] ?? 0;
+          const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
+          const width = (p.duration || 3.5) * 30;
+          return { key: k, left, width };
+        });
+        setClipLanes(assignLanes(allClips));
       }
       setMovingInfo(null);
       document.body.style.cursor = "";
@@ -199,8 +185,19 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  // Compute max lane to size track height dynamically
+  const maxLane = useMemo(() => {
+    const vals = Object.values(clipLanes);
+    return vals.length > 0 ? Math.max(...vals) : 0;
+  }, [clipLanes]);
+  const innerHeightPx = trackInnerHeight(maxLane);
+  const outerHeightPx = innerHeightPx + 8;
+
   return (
-    <div className="h-16 border-b border-white/[0.04] flex items-center">
+    <div
+      className="border-b border-white/[0.04] flex items-center transition-all duration-300"
+      style={{ height: `${Math.max(64, outerHeightPx)}px` }}
+    >
       <TrackLabel
         id="V1"
         label="Story Panels"
@@ -214,13 +211,13 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
         onToggleMute={() => {}}
         onAdd={onAddPanel}
       />
-      <div className="flex-1 relative h-14">
+      <div className="flex-1 relative transition-all duration-300" style={{ height: `${Math.max(56, innerHeightPx)}px` }}>
         {panels.length === 0 ? (
           <div className="h-full flex items-center justify-center text-neutral-600 font-mono text-[10px] italic">
             No story panels created yet. Click "+ Add Frame" to begin.
           </div>
         ) : (
-          <div className="relative w-full h-full flex items-center">
+          <div className="relative w-full h-full">
             {panels.map((panel: any, idx: number) => {
               const timing: PanelTiming = panelTimings[idx] ?? {
                 index: idx,
@@ -273,6 +270,10 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
               const finalLeftPx =
                 displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
+              const lane = clipLanes[key] ?? 0;
+              const clipTop = lane * LANE_HEIGHT + 2;
+              const clipHeight = LANE_HEIGHT - 4;
+
               return (
                 <div
                   key={key}
@@ -286,7 +287,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     )
                   }
                   onContextMenu={(e) => onContextMenu(e, key, idx)}
-                  className={`group absolute top-1 bottom-1 rounded-md border select-none overflow-hidden z-10 ${
+                  className={`group absolute rounded-md border select-none overflow-hidden z-10 ${
                     isMoving
                       ? "cursor-grabbing shadow-[0_4px_20px_rgba(168,85,247,0.5)] z-40 border-purple-300"
                       : isResizing
@@ -298,9 +299,11 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   style={{
                     left: `${finalLeftPx}px`,
                     width: `${displayWidthPx}px`,
+                    top: `${clipTop}px`,
+                    height: `${clipHeight}px`,
                     cursor: isMoving ? "grabbing" : isResizing ? "col-resize" : "grab",
                     backgroundColor: "#0d0b14",
-                    transition: isMoving ? "none" : undefined,
+                    transition: isMoving ? "none" : "top 0.2s ease",
                   }}
                 >
                   {/* Thumbnail background */}

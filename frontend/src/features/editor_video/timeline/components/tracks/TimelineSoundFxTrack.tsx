@@ -1,12 +1,13 @@
 // ─── TimelineSoundFxTrack (A2 Sound FX Track) ─────────────────────────────────
 // Canonical location: timeline/components/tracks/TimelineSoundFxTrack.tsx
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
 import { Zap, Plus, MoreHorizontal } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import AudioWaveformVisual from "../AudioWaveformVisual";
 import ClipTrimHandles from "../ClipTrimHandles";
+import { LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
 
 export interface TimelineSoundFxTrackProps {
   panels: any[];
@@ -48,6 +49,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
   } | null>(null);
 
   const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
+  const [clipLanes, setClipLanes] = useState<Record<string, number>>({});
   const [movingInfo, setMovingInfo] = useState<{ key: string; idx: number; deltaPx: number } | null>(null);
   const movingInfoRef = React.useRef(movingInfo);
   React.useEffect(() => { movingInfoRef.current = movingInfo; }, [movingInfo]);
@@ -80,29 +82,21 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
         onClipClick(key, idx);
       } else {
         const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
-        // Build list of other SFX clips
-        const otherClips = panels.map((p: any, i: number) => {
+        const newOffset = desiredLeft - baseLeftPx;
+        const newOffsets = { ...clipOffsets, [key]: (clipOffsets[key] ?? 0) + newOffset };
+        setClipOffsets(newOffsets);
+
+        const allClips = panels.map((p: any, i: number) => {
           const sfx = p.sfx || p.sfx_name || p.sound_fx;
           if (!sfx) return null;
           const t: PanelTiming | undefined = panelTimings[i];
           const k = `a2-${i}`;
-          const offset = clipOffsets[k] ?? 0;
+          const offset = newOffsets[k] ?? 0;
           const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
           const width = (p.sfx_duration ?? t?.duration ?? 1.5) * 30;
           return { key: k, left, width };
-        }).filter((c): c is { key: string; left: number; width: number } => c !== null && c.key !== key);
-
-        const leftNeighbors = otherClips.filter((c) => c.left < baseLeftPx).sort((a, b) => b.left - a.left);
-        const rightNeighbors = otherClips.filter((c) => c.left > baseLeftPx).sort((a, b) => a.left - b.left);
-        const leftBound = leftNeighbors.length ? leftNeighbors[0].left + leftNeighbors[0].width : 0;
-        const rightBound = rightNeighbors.length ? rightNeighbors[0].left - widthPx : Infinity;
-        const clampedLeft = Math.max(leftBound, Math.min(desiredLeft, rightBound));
-        const finalOffset = clampedLeft - baseLeftPx;
-
-        setClipOffsets((p) => ({
-          ...p,
-          [key]: (p[key] ?? 0) + finalOffset,
-        }));
+        }).filter((c): c is { key: string; left: number; width: number } => c !== null);
+        setClipLanes(assignLanes(allClips));
       }
       setMovingInfo(null);
       document.body.style.cursor = "";
@@ -168,11 +162,18 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
 
   const hasAnySfx = panels.some((p: any) => p.sfx || p.sfx_name || p.sound_fx);
 
+  const maxLane = useMemo(() => {
+    const vals = Object.values(clipLanes);
+    return vals.length > 0 ? Math.max(...vals) : 0;
+  }, [clipLanes]);
+  const innerHeightPx = trackInnerHeight(maxLane);
+
   return (
     <div
-      className={`h-11 border-b border-white/[0.04] flex items-center ${
+      className={`border-b border-white/[0.04] flex items-center transition-all duration-300 ${
         muted ? "opacity-40" : ""
       }`}
+      style={{ height: `${Math.max(44, innerHeightPx + 8)}px` }}
     >
       <TrackLabel
         id="A2"
@@ -187,7 +188,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
         onToggleHide={onToggleHide}
         onAdd={onAddSfx}
       />
-      <div className="flex-1 relative h-9">
+      <div className="flex-1 relative transition-all duration-300" style={{ height: `${Math.max(36, innerHeightPx)}px` }}>
         {!hasAnySfx ? (
           <button
             type="button"
@@ -232,12 +233,16 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
             const finalLeftPx =
               displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
+            const lane = clipLanes[key] ?? 0;
+            const clipTop = lane * LANE_HEIGHT + 1;
+            const clipHeight = LANE_HEIGHT - 2;
+
             return (
               <div
                 key={key}
                 onMouseDown={(e) => handleMoveStart(e, key, idx, baseLeftPx + offsetPx, displayWidthPx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute inset-y-0 rounded-md overflow-hidden select-none border z-10 ${
+                className={`group absolute rounded-md overflow-hidden select-none border z-10 ${
                   isMoving
                     ? "cursor-grabbing shadow-[0_4px_20px_rgba(103,232,249,0.4)] z-40"
                     : isResizing
@@ -249,8 +254,10 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                 style={{
                   left: `${finalLeftPx}px`,
                   width: `${displayWidthPx}px`,
+                  top: `${clipTop}px`,
+                  height: `${clipHeight}px`,
                   cursor: isMoving ? "grabbing" : isResizing ? "col-resize" : "grab",
-                  transition: isMoving ? "none" : undefined,
+                  transition: isMoving ? "none" : "top 0.2s ease",
                 }}
                 title={`SFX #${idx + 1}: ${sfx}`}
               >
