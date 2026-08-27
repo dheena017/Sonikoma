@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
-import { Zap, Plus, MoreHorizontal } from "lucide-react";
+import { Zap, Plus, MoreHorizontal, GripVertical } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import AudioWaveformVisual from "../AudioWaveformVisual";
 import ClipTrimHandles from "../ClipTrimHandles";
@@ -159,7 +159,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
         if (!sfx) return null;
         const t: PanelTiming | undefined = panelTimings[i];
         const k = `a2-${i}`;
-        const dur = p.sfx_duration ?? t?.duration ?? 0;
+        const dur = p.sfx_duration ?? 2.0;
         const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
         const offset = clipOffsets[k] ?? 0;
         const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
@@ -221,20 +221,20 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
             // Normalize: strip any existing outer brackets like [KLATTER] -> KLATTER
             const sfx = String(rawSfx).replace(/^\[+|\]+$/g, "").trim();
 
+            const dur = panel.sfx_duration ?? 2.0;
             const timing: PanelTiming = panelTimings[idx] ?? {
               index: idx,
-              duration: panel.duration || 3.5,
-              startTime: 0,
-              endTime: panel.duration || 3.5,
+              duration: dur,
+              startTime: idx * dur,
+              endTime: (idx + 1) * dur,
               startPct: (idx / Math.max(panels.length, 1)) * 100,
               widthPct: (1 / Math.max(panels.length, 1)) * 100,
-              startPx: 0,
-              widthPx: (panel.duration || 3.5) * 30,
+              startPx: idx * dur * 30,
+              widthPx: dur * 30,
             };
 
             const key = `a2-${idx}`;
             const isResizing = resizingInfo?.key === key;
-            const dur = panel.sfx_duration ?? timing.duration ?? 0;
             const baseLeftPx =
               timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
             const offsetPx = clipOffsets[key] ?? 0;
@@ -292,6 +292,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                 {/* SFX Label & Controls */}
                 <div className="absolute inset-0 flex items-center justify-between px-2 z-10 pointer-events-none">
                   <div className="flex items-center gap-1.5 min-w-0 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/15 shadow-sm">
+                    <GripVertical className="h-3 w-3 text-cyan-300/50 group-hover:text-cyan-200 shrink-0 transition-colors" />
                     <Zap className="h-3 w-3 text-amber-300 shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                     <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
                       {sfx}

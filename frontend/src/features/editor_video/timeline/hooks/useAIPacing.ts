@@ -2,7 +2,6 @@
 // Canonical location: timeline/hooks/useAIPacing.ts
 
 import { useMemo } from "react";
-import { DEFAULT_PANEL_DURATION } from "../types";
 
 export interface AIPacingMetrics {
   avgDuration: number;
@@ -22,7 +21,7 @@ export function useAIPacing(
     const total = Math.max(panels.length, 1);
     let sum = 0;
     for (let i = 0; i < total; i++) {
-      const d = clipDurations[`v1-${i}`] ?? DEFAULT_PANEL_DURATION;
+      const d = clipDurations[`v1-${i}`] ?? panels[i]?.duration ?? 0;
       sum += d;
     }
     const avgDuration = parseFloat((sum / total).toFixed(1));

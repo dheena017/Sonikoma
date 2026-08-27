@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import TrackLabel from "../TrackLabel";
-import { Music, Plus, MoreHorizontal } from "lucide-react";
+import { Music, Plus, MoreHorizontal, GripVertical } from "lucide-react";
 import AudioWaveformVisual from "../AudioWaveformVisual";
 import ClipTrimHandles from "../ClipTrimHandles";
 
@@ -52,7 +52,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
     movingInfoRef.current = movingInfo;
   }, [movingInfo]);
 
-  const clipDuration = duration ?? (totalDuration > 0 ? totalDuration : 15.0);
+  const clipDuration = (duration && duration > 0 ? duration : (totalDuration > 0 ? totalDuration : 0));
 
   const handleMoveStart = (
     e: React.MouseEvent,
@@ -147,14 +147,29 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
   };
 
   const hasMusic =
-    !!musicTheme && musicTheme !== "none" && musicTheme !== "No Music";
+    (!!musicTheme && musicTheme !== "none" && musicTheme !== "No Music") ||
+    !!musicUrl;
 
-  const displayWidthPx = Math.max(15, (clipDuration + (resizingSide === "right" ? deltaSecs : 0)) * 30);
+  const displayTheme =
+    musicTheme &&
+    musicTheme !== "none" &&
+    musicTheme !== "No Music" &&
+    !musicTheme.startsWith("http") &&
+    !musicTheme.startsWith("blob:") &&
+    !musicTheme.startsWith("/")
+      ? musicTheme
+      : "BGM Track";
+
+  const displayWidthPx = Math.max(
+    30,
+    (clipDuration + (resizingSide === "right" ? deltaSecs : 0)) * 30
+  );
 
   return (
     <div
-      className={`h-[46px] border-b border-white/[0.04] flex items-center ${muted ? "opacity-40" : ""
-        }`}
+      className={`h-[46px] border-b border-white/[0.04] flex items-center ${
+        muted ? "opacity-40" : ""
+      }`}
     >
       <TrackLabel
         id="A1"
@@ -169,10 +184,18 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
         onToggleHide={onToggleHide}
         onAdd={onAddMusic}
       />
-      <div className="flex-1 relative h-[38px] overflow-hidden">
+      <div className="flex-1 relative h-[38px] overflow-hidden" style={{ clipPath: "inset(0)" }}>
         {hasMusic ? (
           <div
-            onMouseDown={(e) => handleMoveStart(e, "a1-0", 0, clipOffsets["a1-0"] ?? 0, displayWidthPx)}
+            onMouseDown={(e) =>
+              handleMoveStart(
+                e,
+                "a1-0",
+                0,
+                clipOffsets["a1-0"] ?? 0,
+                displayWidthPx
+              )
+            }
             onContextMenu={(e) => onContextMenu(e, "a1-0", 0)}
             className={`group absolute inset-y-0 rounded-md overflow-hidden select-none border z-10 ${
               movingInfo?.key === "a1-0"
@@ -192,11 +215,16 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                 ) + (movingInfo?.key === "a1-0" ? movingInfo.deltaPx : 0)
               }px`,
               width: `${displayWidthPx}px`,
-              cursor: movingInfo?.key === "a1-0" ? "grabbing" : resizingSide !== null ? "col-resize" : "grab",
+              cursor:
+                movingInfo?.key === "a1-0"
+                  ? "grabbing"
+                  : resizingSide !== null
+                  ? "col-resize"
+                  : "grab",
             }}
           >
             {/* Continuous Waveform Envelope */}
-            <div className="absolute inset-0 flex items-center px-1">
+            <div className="absolute inset-0 flex items-center px-1 pointer-events-none">
               <AudioWaveformVisual
                 audioUrl={
                   musicUrl ||
@@ -206,7 +234,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                     ? musicTheme
                     : undefined)
                 }
-                seed={`bgm-${musicTheme || "default"}`}
+                seed={`bgm-${musicTheme || musicUrl || "default"}`}
                 color="#a7f3d0"
                 opacity={0.92}
               />
@@ -215,9 +243,10 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
             {/* Track Info Badge */}
             <div className="absolute inset-0 flex items-center justify-between px-2.5 z-10 pointer-events-none">
               <div className="flex items-center gap-1.5 min-w-0 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/15 shadow-sm">
+                <GripVertical className="h-3 w-3 text-emerald-300/50 group-hover:text-emerald-200 shrink-0 transition-colors" />
                 <Music className="h-3 w-3 text-emerald-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] shrink-0" />
                 <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
-                  {musicTheme}
+                  {displayTheme}
                 </span>
               </div>
 

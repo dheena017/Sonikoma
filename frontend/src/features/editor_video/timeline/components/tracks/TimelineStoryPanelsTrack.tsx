@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
-import { ImagePlus, Image as ImageIcon, Film, MoreHorizontal } from "lucide-react";
+import { ImagePlus, Image as ImageIcon, Film, MoreHorizontal, GripVertical } from "lucide-react";
 import { Keyframe } from "../../types";
 import ClipTrimHandles from "../ClipTrimHandles";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
@@ -179,7 +179,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     const allClips = panels.map((p: any, i: number) => {
       const t: PanelTiming | undefined = panelTimings[i];
       const k = `v1-${i}`;
-      const dur = p.duration || 3.5;
+      const dur = t?.duration || p.duration || 3.0;
       const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
       const offset = clipOffsets[k] ?? 0;
       const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
@@ -230,15 +230,16 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
         ) : (
           <div className="relative w-full h-full overflow-hidden">
             {panels.map((panel: any, idx: number) => {
+              const dur = panelTimings[idx]?.duration || panel.duration || 3.0;
               const timing: PanelTiming = panelTimings[idx] ?? {
                 index: idx,
-                duration: panel.duration || 3.5,
-                startTime: 0,
-                endTime: panel.duration || 3.5,
+                duration: dur,
+                startTime: idx * dur,
+                endTime: (idx + 1) * dur,
                 startPct: (idx / Math.max(panels.length, 1)) * 100,
                 widthPct: (1 / Math.max(panels.length, 1)) * 100,
-                startPx: 0,
-                widthPx: (panel.duration || 3.5) * 30,
+                startPx: idx * dur * 30,
+                widthPx: dur * 30,
               };
 
               const rawUrl =
@@ -259,7 +260,6 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
 
               const isSelected =
                 selectedClip === `v1-${idx}` || currentPanelIndex === idx;
-              const dur = panel.duration || 3.5;
               const key = `v1-${idx}`;
               const isResizing = resizingInfo?.idx === idx;
 
@@ -336,7 +336,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/60 pointer-events-none" />
 
                   {/* Panel Number Badge */}
-                  <div className="absolute top-1 left-1.5 flex items-center gap-1 z-10">
+                  <div className="absolute top-1 left-1.5 flex items-center gap-1 z-10 pointer-events-none">
                     <span className="text-[8px] font-mono font-bold text-white bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 flex items-center gap-0.5">
                       <ImageIcon className="h-2.5 w-2.5 text-purple-400" />
                       #{idx + 1}
@@ -344,6 +344,11 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     <span className="text-[8px] font-mono text-white/90 truncate max-w-[50px] font-semibold drop-shadow-sm">
                       {panel.title || `Panel ${idx + 1}`}
                     </span>
+                  </div>
+
+                  {/* Centered Move Grip Icon Indicator on Hover */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none z-10">
+                    <GripVertical className="h-4 w-4 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]" />
                   </div>
 
                   {/* Live Duration Badge & Three-Dots Menu */}

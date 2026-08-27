@@ -62,8 +62,6 @@ export const WAVEFORM: number[] = [
   60, 45, 85, 52, 100, 40, 74, 32, 90, 56, 70,
 ];
 
-/** Default clip duration in seconds when no explicit duration is set. */
-export const DEFAULT_PANEL_DURATION = 2.1;
 
 /** Colour map for keyframe properties — used by diamonds and panel badges. */
 export const KEYFRAME_COLORS: Record<KeyframeProperty, string> = {

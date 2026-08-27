@@ -45,9 +45,11 @@ const Timeline: React.FC<TimelineProps> = ({
   const panelTimings = useMemo(() => {
     let currentTime = 0;
     const durations = panels.map((p, idx) => {
-      return s.clipDurations[`v1-${idx}`] ?? p.duration ?? 0;
+      const explicit = s.clipDurations[`v1-${idx}`];
+      if (explicit !== undefined && explicit > 0) return explicit;
+      return p.duration || (p as any).duration_sec || p.voice_duration || 3.0;
     });
-    const total = durations.reduce((acc, d) => acc + d, 0) || 1;
+    const total = durations.reduce((acc, d) => acc + d, 0) || panels.length * 3.0 || 1;
 
     const pxPerSec = 30;
     return panels.map((panel, index) => {
@@ -73,16 +75,39 @@ const Timeline: React.FC<TimelineProps> = ({
   }, [panels, s.clipDurations]);
 
   const totalDuration = useMemo(() => {
-    let max = panelTimings.reduce((acc, t) => acc + t.duration, 0) || 1;
+    let max =
+      panelTimings.reduce((acc, t) => acc + t.duration, 0) ||
+      panels.length * 3.0 ||
+      1;
 
     // Check all tracks for clips extending beyond panels
     panelTimings.forEach((t, idx) => {
       const p = panels[idx] || {};
       const baseStart = t.startTime;
-      const v2End = baseStart + (s.clipDurations[`v2-${idx}`] ?? p.camera_duration ?? p.duration ?? 0);
-      const v3End = baseStart + (s.clipDurations[`v3-${idx}`] ?? p.subtitle_duration ?? p.duration ?? 0);
-      const a2End = baseStart + (s.clipDurations[`a2-${idx}`] ?? p.sfx_duration ?? p.duration ?? 0);
-      const a3End = baseStart + (s.clipDurations[`a3-${idx}`] ?? p.voice_duration ?? p.duration ?? 0);
+      const v2End =
+        baseStart +
+        (s.clipDurations[`v2-${idx}`] ??
+          p.camera_duration ??
+          p.fx_duration ??
+          t.duration ??
+          3.0);
+      const v3End =
+        baseStart +
+        (s.clipDurations[`v3-${idx}`] ??
+          p.subtitle_duration ??
+          t.duration ??
+          3.0);
+      const a2End =
+        baseStart +
+        (s.clipDurations[`a2-${idx}`] ??
+          p.sfx_duration ??
+          2.0);
+      const a3End =
+        baseStart +
+        (s.clipDurations[`a3-${idx}`] ??
+          p.voice_duration ??
+          t.duration ??
+          3.0);
       max = Math.max(max, v2End, v3End, a2End, a3End);
     });
 
@@ -503,7 +528,14 @@ const Timeline: React.FC<TimelineProps> = ({
             {/* A1 — Music (BGM) */}
             {!s.hiddenTracks["A1"] && (
               <TimelineMusicTrack
-                musicTheme={musicTheme}
+                musicTheme={
+                  musicTheme ||
+                  (projectStore?.activeProjectData as any)?.music_theme ||
+                  (projectStore?.activeProjectData as any)?.bgm_theme ||
+                  (projectStore?.activeProjectData as any)?.bgm_name ||
+                  (projectStore?.activeProjectData as any)?.bgm ||
+                  (projectStore?.activeProjectData as any)?.music
+                }
                 musicUrl={
                   (projectStore?.activeProjectData as any)?.bgm_url ||
                   (projectStore?.activeProjectData as any)?.music_url ||

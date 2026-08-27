@@ -5,7 +5,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import {
   ContextMenuState,
-  DEFAULT_PANEL_DURATION,
   MediaItem,
   AISuggestion,
 } from "./types";
@@ -126,7 +125,7 @@ export function useTimelineState(
   const contextMenuRef = useRef<HTMLDivElement>(null);
 
   const getClipDuration = useCallback(
-    (key: string) => clipDurations[key] ?? DEFAULT_PANEL_DURATION,
+    (key: string) => clipDurations[key] ?? 0,
     [clipDurations]
   );
 

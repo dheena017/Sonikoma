@@ -6,7 +6,7 @@ import { Music, Sparkles } from "lucide-react";
 
 interface TimelineBottomBarProps {
   currentPanelIndex: number;
-  /** Actual accumulated time (seconds) for the current panel — replaces index×DEFAULT_PANEL_DURATION */
+  /** Actual accumulated time (seconds) for the current panel */
   currentTimeSecs?: number;
   totalDuration: number;
   snapEnabled: boolean;

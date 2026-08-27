@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
-import { Camera, Plus, MoreHorizontal } from "lucide-react";
+import { Camera, Plus, MoreHorizontal, GripVertical } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import ClipTrimHandles from "../ClipTrimHandles";
 import { AUDIO_FX_LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
@@ -162,7 +162,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
     const allClips = panels.map((p: any, i: number) => {
       const t: PanelTiming | undefined = panelTimings[i];
       const k = `v2-${i}`;
-      const dur = p.camera_duration ?? t?.duration ?? 0;
+      const dur = p.camera_duration || p.fx_duration || t?.duration || p.duration || 3.0;
       const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
       const offset = clipOffsets[k] ?? 0;
       const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
@@ -215,16 +215,21 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
               panel.camera_motion ||
               panel.camera_fx ||
               (idx % 2 === 0 ? "zoom_in" : "zoom_out");
-            const dur = panel.camera_duration || panel.duration || 0;
+            const dur =
+              panel.camera_duration ||
+              panel.fx_duration ||
+              panelTimings[idx]?.duration ||
+              panel.duration ||
+              3.0;
             const key = `v2-${idx}`;
             const timing: PanelTiming = panelTimings[idx] ?? {
               index: idx,
               duration: dur,
-              startTime: 0,
-              endTime: dur,
+              startTime: idx * dur,
+              endTime: (idx + 1) * dur,
               startPct: (idx / Math.max(panels.length, 1)) * 100,
               widthPct: (1 / Math.max(panels.length, 1)) * 100,
-              startPx: 0,
+              startPx: idx * dur * 30,
               widthPx: dur * 30,
             };
 
@@ -277,7 +282,8 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 }}
                 title={`Panel #${idx + 1} Effect: ${fx}`}
               >
-                <div className="flex items-center gap-1.5 min-w-0 truncate">
+                <div className="flex items-center gap-1.5 min-w-0 truncate pointer-events-none">
+                  <GripVertical className="h-3 w-3 text-indigo-400/50 group-hover:text-indigo-300 shrink-0 transition-colors" />
                   <Camera className="h-3 w-3 text-indigo-400 shrink-0" />
                   <span className="truncate">{fx}</span>
                 </div>

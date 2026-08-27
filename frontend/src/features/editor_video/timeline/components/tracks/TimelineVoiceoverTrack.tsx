@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
-import { Mic, Volume2, Plus, MoreHorizontal } from "lucide-react";
+import { Mic, Volume2, Plus, MoreHorizontal, GripVertical } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import AudioWaveformVisual from "../AudioWaveformVisual";
 import ClipTrimHandles from "../ClipTrimHandles";
@@ -176,7 +176,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
         if (!hasVoiceAudio) return null;
         const t: PanelTiming | undefined = panelTimings[i];
         const k = `a3-${i}`;
-        const dur = p.voice_duration ?? t?.duration ?? 0;
+        const dur = p.voice_duration ?? t?.duration ?? p.duration ?? 3.0;
         const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
         const offset = clipOffsets[k] ?? 0;
         const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
@@ -247,25 +247,30 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
 
             if (!hasVoiceAudio && !dialogue) return null;
 
+            const dur =
+              panel.voice_duration ??
+              panelTimings[idx]?.duration ??
+              panel.duration ??
+              3.0;
+
             const timing: PanelTiming = panelTimings[idx] ?? {
               index: idx,
-              duration: panel.duration || 3.5,
-              startTime: 0,
-              endTime: panel.duration || 3.5,
+              duration: dur,
+              startTime: idx * dur,
+              endTime: (idx + 1) * dur,
               startPct: (idx / Math.max(panels.length, 1)) * 100,
               widthPct: (1 / Math.max(panels.length, 1)) * 100,
-              startPx: 0,
-              widthPx: (panel.duration || 3.5) * 30,
+              startPx: idx * dur * 30,
+              widthPx: dur * 30,
             };
 
             const speaker =
               panel.speaker_name ||
               panel.character_name ||
               (voiceActor ? voiceActor.split("—")[0].trim() : "VO");
-            const label = dialogue ? `"${dialogue}"` : `${speaker} P#${idx + 1}`;
+            const label = `${speaker} #${idx + 1}`;
             const key = `a3-${idx}`;
             const isResizing = resizingInfo?.key === key;
-            const dur = panel.voice_duration ?? timing.duration ?? 0;
             
             const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
             const offsetPx = clipOffsets[key] ?? 0;
@@ -331,6 +336,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                 {/* Voice dialogue badge */}
                 <div className="absolute inset-0 flex items-center justify-between px-2 z-10 pointer-events-none">
                   <div className="flex items-center gap-1.5 min-w-0 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/15 shadow-sm">
+                    <GripVertical className="h-3 w-3 text-purple-300/50 group-hover:text-purple-200 shrink-0 transition-colors" />
                     <Mic className="h-3 w-3 text-purple-200 shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                     <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
                       {label}

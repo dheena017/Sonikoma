@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
-import { Type, Plus, MoreHorizontal } from "lucide-react";
+import { Type, Plus, MoreHorizontal, GripVertical } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import ClipTrimHandles from "../ClipTrimHandles";
 import { AUDIO_FX_LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
@@ -157,7 +157,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
         if (!hasText) return null;
         const t: PanelTiming | undefined = panelTimings[i];
         const k = `v3-${i}`;
-        const dur = p.subtitle_duration ?? t?.duration ?? 0;
+        const dur = p.subtitle_duration || t?.duration || p.duration || 3.0;
         const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
         const offset = clipOffsets[k] ?? 0;
         const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
@@ -219,20 +219,25 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
               panel.narrative;
             if (!text) return null;
 
+            const dur =
+              panel.subtitle_duration ||
+              panelTimings[idx]?.duration ||
+              panel.duration ||
+              3.0;
+
             const timing: PanelTiming = panelTimings[idx] ?? {
               index: idx,
-              duration: panel.duration || 3.5,
-              startTime: 0,
-              endTime: panel.duration || 3.5,
+              duration: dur,
+              startTime: idx * dur,
+              endTime: (idx + 1) * dur,
               startPct: (idx / Math.max(panels.length, 1)) * 100,
               widthPct: (1 / Math.max(panels.length, 1)) * 100,
-              startPx: 0,
-              widthPx: (panel.duration || 3.5) * 30,
+              startPx: idx * dur * 30,
+              widthPx: dur * 30,
             };
 
             const key = `v3-${idx}`;
             const isResizing = resizingInfo?.key === key;
-            const dur = panel.subtitle_duration ?? timing.duration ?? 0;
             const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
             const offsetPx = clipOffsets[key] ?? 0;
 
@@ -284,7 +289,8 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                 }}
                 title={`Panel #${idx + 1} Subtitle: ${text}`}
               >
-                <div className="flex items-center gap-1.5 min-w-0 truncate">
+                <div className="flex items-center gap-1.5 min-w-0 truncate pointer-events-none">
+                  <GripVertical className="h-3 w-3 text-purple-300/50 group-hover:text-purple-200 shrink-0 transition-colors" />
                   <Type className="h-3 w-3 text-purple-400 shrink-0" />
                   <span className="truncate">"{text}"</span>
                 </div>
