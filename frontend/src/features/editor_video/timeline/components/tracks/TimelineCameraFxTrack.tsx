@@ -38,7 +38,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
   const [resizingInfo, setResizingInfo] = useState<{
     key: string;
     side: "left" | "right";
-    deltaPx: number;
+    initialDuration: number;
     deltaSecs: number;
   } | null>(null);
 
@@ -118,26 +118,47 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
     e: React.MouseEvent,
     key: string,
     side: "left" | "right",
-    currentDuration: number
+    currentDuration: number,
+    currentLeftPx: number
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setResizingInfo({ key, side, deltaPx: 0, deltaSecs: 0 });
-
     const startX = e.clientX;
     const initialDuration = currentDuration;
+    let latestDuration = currentDuration;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
+    setResizingInfo({
+      key,
+      side,
+      initialDuration,
+      deltaSecs: 0,
+    });
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
       const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
-      setResizingInfo({ key, side, deltaPx: deltaX, deltaSecs });
-      onDurationChange?.(key, parseFloat(nextDuration.toFixed(1)));
+      const rounded = parseFloat(nextDuration.toFixed(1));
+      latestDuration = rounded;
+      setResizingInfo({
+        key,
+        side,
+        initialDuration,
+        deltaSecs: parseFloat((rounded - initialDuration).toFixed(1)),
+      });
+      onDurationChange?.(key, rounded);
     };
 
     const onMouseUp = () => {
+      if (side === "left") {
+        const durDiff = initialDuration - latestDuration;
+        const shiftPx = durDiff * 30;
+        setClipOffsets((prev) => ({
+          ...prev,
+          [key]: (prev[key] ?? 0) + shiftPx,
+        }));
+      }
       setResizingInfo(null);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
@@ -195,23 +216,19 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
               timing.startPx !== undefined
                 ? timing.startPx
                 : timing.startTime * 30;
-            const baseWidthPx = dur * 30;
+            const offsetPx = clipOffsets[key] ?? 0;
 
-            let displayLeftPx = baseLeftPx;
-            let displayWidthPx = baseWidthPx;
+            let displayLeftPx = baseLeftPx + offsetPx;
+            let displayWidthPx = dur * 30;
 
-            if (isResizing && resizingInfo) {
-              if (resizingInfo.side === "left") {
-                displayLeftPx = Math.max(0, baseLeftPx + resizingInfo.deltaPx);
-                displayWidthPx = Math.max(15, baseWidthPx - resizingInfo.deltaPx);
-              } else {
-                displayWidthPx = Math.max(15, baseWidthPx + resizingInfo.deltaPx);
-              }
+            if (isResizing && resizingInfo && resizingInfo.side === "left") {
+              const durDelta = (dur - resizingInfo.initialDuration) * 30;
+              displayLeftPx = Math.max(0, baseLeftPx + offsetPx - durDelta);
             }
 
             const isMoving = movingInfo?.key === key;
-            const offsetPx = clipOffsets[key] ?? 0;
-            const finalLeftPx = displayLeftPx + offsetPx + (isMoving ? movingInfo!.deltaPx : 0);
+            const finalLeftPx =
+              displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
             return (
               <div
@@ -230,6 +247,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 style={{
                   left: `${finalLeftPx}px`,
                   width: `${displayWidthPx}px`,
+                  cursor: isMoving ? "grabbing" : isResizing ? "col-resize" : "grab",
                   transition: isMoving ? "none" : undefined,
                 }}
                 title={`Panel #${idx + 1} Effect: ${fx}`}
@@ -239,7 +257,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                   <span className="truncate">{fx}</span>
                 </div>
 
-                <div className="flex items-center gap-1 z-20">
+                <div className="flex items-center gap-1 z-20" style={{ cursor: "inherit" }}>
                   {isResizing && resizingInfo.deltaSecs !== 0 && (
                     <span className="text-[7px] font-mono font-bold text-indigo-200 bg-indigo-950 px-1 py-0.2 rounded-sm border border-indigo-400/50 animate-pulse">
                       {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
@@ -269,7 +287,9 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                   duration={dur}
                   isResizing={isResizing}
                   activeSide={isResizing ? resizingInfo.side : null}
-                  onResizeStart={(e, side, d) => handleResizeStart(e, key, side, d)}
+                  onResizeStart={(e, side, d) =>
+                    handleResizeStart(e, key, side, d, baseLeftPx + offsetPx)
+                  }
                   accentColor="indigo"
                 />
               </div>

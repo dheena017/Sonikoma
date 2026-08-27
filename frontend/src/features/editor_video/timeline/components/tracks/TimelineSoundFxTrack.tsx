@@ -43,7 +43,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
   const [resizingInfo, setResizingInfo] = useState<{
     key: string;
     side: "left" | "right";
-    deltaPx: number;
+    initialDuration: number;
     deltaSecs: number;
   } | null>(null);
 
@@ -119,29 +119,49 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
     e: React.MouseEvent,
     key: string,
     side: "left" | "right",
-    currentDuration: number
+    currentDuration: number,
+    currentLeftPx: number
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setResizingInfo({ key, side, deltaPx: 0, deltaSecs: 0 });
     const startX = e.clientX;
     const initialDuration = currentDuration;
+    let latestDuration = currentDuration;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
+    setResizingInfo({ key, side, initialDuration, deltaSecs: 0 });
+
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
       const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
-      setResizingInfo({ key, side, deltaPx: deltaX, deltaSecs });
-      onDurationChange?.(key, parseFloat(nextDuration.toFixed(1)));
+      const rounded = parseFloat(nextDuration.toFixed(1));
+      latestDuration = rounded;
+      setResizingInfo({
+        key,
+        side,
+        initialDuration,
+        deltaSecs: parseFloat((rounded - initialDuration).toFixed(1)),
+      });
+      onDurationChange?.(key, rounded);
     };
+
     const onMouseUp = () => {
+      if (side === "left") {
+        const durDiff = initialDuration - latestDuration;
+        const shiftPx = durDiff * 30;
+        setClipOffsets((prev) => ({
+          ...prev,
+          [key]: (prev[key] ?? 0) + shiftPx,
+        }));
+      }
       setResizingInfo(null);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
+
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
   };
@@ -196,29 +216,26 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
             const key = `a2-${idx}`;
             const isResizing = resizingInfo?.key === key;
             const dur = panel.sfx_duration ?? timing.duration ?? 1.5;
-            const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
-            const baseWidthPx = dur * 30;
+            const baseLeftPx =
+              timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
+            const offsetPx = clipOffsets[key] ?? 0;
 
-            let displayLeftPx = baseLeftPx;
-            let displayWidthPx = baseWidthPx;
+            let displayLeftPx = baseLeftPx + offsetPx;
+            let displayWidthPx = dur * 30;
 
-            if (isResizing && resizingInfo) {
-              if (resizingInfo.side === "left") {
-                displayLeftPx = Math.max(0, baseLeftPx + resizingInfo.deltaPx);
-                displayWidthPx = Math.max(15, baseWidthPx - resizingInfo.deltaPx);
-              } else {
-                displayWidthPx = Math.max(15, baseWidthPx + resizingInfo.deltaPx);
-              }
+            if (isResizing && resizingInfo && resizingInfo.side === "left") {
+              const durDelta = (dur - resizingInfo.initialDuration) * 30;
+              displayLeftPx = Math.max(0, baseLeftPx + offsetPx - durDelta);
             }
 
             const isMoving = movingInfo?.key === key;
-            const offsetPx = clipOffsets[key] ?? 0;
-            const finalLeftPx = displayLeftPx + offsetPx + (isMoving ? movingInfo!.deltaPx : 0);
+            const finalLeftPx =
+              displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
             return (
               <div
                 key={key}
-                onMouseDown={(e) => handleMoveStart(e, key, idx, baseLeftPx + offsetPx, baseWidthPx)}
+                onMouseDown={(e) => handleMoveStart(e, key, idx, baseLeftPx + offsetPx, displayWidthPx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
                 className={`group absolute inset-y-0 rounded-md overflow-hidden select-none border z-10 ${
                   isMoving
@@ -232,6 +249,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                 style={{
                   left: `${finalLeftPx}px`,
                   width: `${displayWidthPx}px`,
+                  cursor: isMoving ? "grabbing" : isResizing ? "col-resize" : "grab",
                   transition: isMoving ? "none" : undefined,
                 }}
                 title={`SFX #${idx + 1}: ${sfx}`}
@@ -250,7 +268,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1 z-20 pointer-events-auto">
+                  <div className="flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-cyan-200 bg-cyan-950 px-1 py-0.2 rounded-sm border border-cyan-400/50 animate-pulse">
                         {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
@@ -281,7 +299,9 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                   duration={dur}
                   isResizing={isResizing}
                   activeSide={isResizing ? resizingInfo.side : null}
-                  onResizeStart={(e, side, d) => handleResizeStart(e, key, side, d)}
+                  onResizeStart={(e, side, d) =>
+                    handleResizeStart(e, key, side, d, baseLeftPx + offsetPx)
+                  }
                   accentColor="cyan"
                 />
               </div>

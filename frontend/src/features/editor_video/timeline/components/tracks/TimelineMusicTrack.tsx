@@ -105,6 +105,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
     setDeltaSecs(0);
 
     const startX = e.clientX;
+    let latestDuration = initialDuration;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
 
@@ -112,11 +113,21 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
       const deltaX = moveEvent.clientX - startX;
       const delta = side === "right" ? deltaX / 30 : -deltaX / 30;
       const nextDuration = Math.max(1, initialDuration + delta);
-      setDeltaSecs(delta);
-      onDurationChange?.("a1-0", parseFloat(nextDuration.toFixed(1)));
+      const rounded = parseFloat(nextDuration.toFixed(1));
+      latestDuration = rounded;
+      setDeltaSecs(parseFloat((rounded - initialDuration).toFixed(1)));
+      onDurationChange?.("a1-0", rounded);
     };
 
     const onMouseUp = () => {
+      if (side === "left") {
+        const durDiff = initialDuration - latestDuration;
+        const shiftPx = durDiff * 30;
+        setClipOffsets((prev) => ({
+          ...prev,
+          ["a1-0"]: (prev["a1-0"] ?? 0) + shiftPx,
+        }));
+      }
       setResizingSide(null);
       setDeltaSecs(0);
       document.body.style.cursor = "";
@@ -155,14 +166,21 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
           <div
             onMouseDown={(e) => handleMoveStart(e, "a1-0", 0, 0, totalDuration * 30)}
             onContextMenu={(e) => onContextMenu(e, "a1-0", 0)}
-            className={`group absolute inset-y-0 rounded-md overflow-hidden cursor-pointer bg-[#064e3b] ${
-              movingInfo?.key === "a1-0" ? 'cursor-grabbing shadow-[0_4px_20px_rgba(52,211,153,0.4)] z-40' :
-                selectedClip === "a1-0" ? 'cursor-grab border border-[#34d399] shadow-[0_0_8px_rgba(52,211,153,0.3)] z-20' :
-                'cursor-grab border border-[#34d399]/50 hover:border-[#34d399]/80'
+            className={`group absolute inset-y-0 rounded-md overflow-hidden bg-[#064e3b] select-none ${
+              movingInfo?.key === "a1-0" ? 'shadow-[0_4px_20px_rgba(52,211,153,0.4)] z-40' :
+                selectedClip === "a1-0" ? 'border border-[#34d399] shadow-[0_0_8px_rgba(52,211,153,0.3)] z-20' :
+                'border border-[#34d399]/50 hover:border-[#34d399]/80'
             }`}
             style={{
-              left: `${(clipOffsets["a1-0"] ?? 0) + (movingInfo?.key === "a1-0" ? movingInfo.deltaPx : 0)}px`,
+              left: `${
+                Math.max(
+                  0,
+                  (clipOffsets["a1-0"] ?? 0) -
+                    (resizingSide === "left" ? deltaSecs * 30 : 0)
+                ) + (movingInfo?.key === "a1-0" ? movingInfo.deltaPx : 0)
+              }px`,
               width: `${totalDuration * 30}px`,
+              cursor: movingInfo?.key === "a1-0" ? "grabbing" : resizingSide !== null ? "col-resize" : "grab",
               outline:
                 selectedClip === "a1-0"
                   ? "1.5px solid #34d399"
@@ -192,7 +210,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                 </span>
               </div>
 
-              <div className="flex items-center gap-1 z-20 pointer-events-auto">
+              <div className="flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
                 {resizingSide !== null && deltaSecs !== 0 && (
                   <span className="text-[7px] font-mono font-bold text-emerald-200 bg-emerald-950 px-1 py-0.2 rounded-sm border border-emerald-400/50 animate-pulse">
                     {deltaSecs > 0 ? `+${deltaSecs.toFixed(1)}s` : `${deltaSecs.toFixed(1)}s`}

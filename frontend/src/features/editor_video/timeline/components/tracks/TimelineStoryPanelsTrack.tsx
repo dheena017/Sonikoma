@@ -58,7 +58,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
   const [resizingInfo, setResizingInfo] = useState<{
     idx: number;
     side: "left" | "right";
-    deltaPx: number;
+    initialDuration: number;
     deltaSecs: number;
   } | null>(null);
 
@@ -151,27 +151,43 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     e: React.MouseEvent,
     idx: number,
     side: "left" | "right",
-    currentDuration: number
+    currentDuration: number,
+    currentLeftPx: number
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    setResizingInfo({ idx, side, deltaPx: 0, deltaSecs: 0 });
-
     const startX = e.clientX;
     const initialDuration = currentDuration;
+    let latestDuration = currentDuration;
+    const key = `v1-${idx}`;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
+    setResizingInfo({ idx, side, initialDuration, deltaSecs: 0 });
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
       const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
       const rounded = parseFloat(nextDuration.toFixed(1));
-      setResizingInfo({ idx, side, deltaPx: deltaX, deltaSecs });
-      onDurationChange?.(`v1-${idx}`, rounded);
+      latestDuration = rounded;
+      setResizingInfo({
+        idx,
+        side,
+        initialDuration,
+        deltaSecs: parseFloat((rounded - initialDuration).toFixed(1)),
+      });
+      onDurationChange?.(key, rounded);
     };
 
     const onMouseUp = () => {
+      if (side === "left") {
+        const durDiff = initialDuration - latestDuration;
+        const shiftPx = durDiff * 30;
+        setClipOffsets((prev) => ({
+          ...prev,
+          [key]: (prev[key] ?? 0) + shiftPx,
+        }));
+      }
       setResizingInfo(null);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
@@ -243,24 +259,19 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                 timing.startPx !== undefined
                   ? timing.startPx
                   : timing.startTime * 30;
-              const baseWidthPx = dur * 30;
+              const offsetPx = clipOffsets[key] ?? 0;
 
-              let displayLeftPx = baseLeftPx;
-              let displayWidthPx = baseWidthPx;
+              let displayLeftPx = baseLeftPx + offsetPx;
+              let displayWidthPx = dur * 30;
 
-              if (isResizing && resizingInfo) {
-                if (resizingInfo.side === "left") {
-                  displayLeftPx = Math.max(0, baseLeftPx + resizingInfo.deltaPx);
-                  displayWidthPx = Math.max(15, baseWidthPx - resizingInfo.deltaPx);
-                } else {
-                  displayWidthPx = Math.max(15, baseWidthPx + resizingInfo.deltaPx);
-                }
+              if (isResizing && resizingInfo && resizingInfo.side === "left") {
+                const durDelta = (dur - resizingInfo.initialDuration) * 30;
+                displayLeftPx = Math.max(0, baseLeftPx + offsetPx - durDelta);
               }
 
               const isMoving = movingInfo?.key === key;
-              const offsetPx = clipOffsets[key] ?? 0;
               const finalLeftPx =
-                displayLeftPx + offsetPx + (isMoving ? movingInfo!.deltaPx : 0);
+                displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
               return (
                 <div
@@ -271,7 +282,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                       key,
                       idx,
                       baseLeftPx + offsetPx,
-                      baseWidthPx
+                      displayWidthPx
                     )
                   }
                   onContextMenu={(e) => onContextMenu(e, key, idx)}
@@ -287,6 +298,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   style={{
                     left: `${finalLeftPx}px`,
                     width: `${displayWidthPx}px`,
+                    cursor: isMoving ? "grabbing" : isResizing ? "col-resize" : "grab",
                     backgroundColor: "#0d0b14",
                     transition: isMoving ? "none" : undefined,
                   }}
@@ -321,7 +333,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   </div>
 
                   {/* Live Duration Badge & Three-Dots Menu */}
-                  <div className="absolute top-1 right-1.5 flex items-center gap-1 z-20">
+                  <div className="absolute top-1 right-1.5 flex items-center gap-1 z-20" style={{ cursor: "inherit" }}>
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-purple-200 bg-purple-950/90 px-1 py-0.2 rounded-sm border border-purple-400/50 animate-pulse">
                         {resizingInfo.deltaSecs > 0
@@ -359,7 +371,9 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     duration={dur}
                     isResizing={isResizing}
                     activeSide={isResizing ? resizingInfo.side : null}
-                    onResizeStart={(e, side, d) => handleResizeStart(e, idx, side, d)}
+                    onResizeStart={(e, side, d) =>
+                      handleResizeStart(e, idx, side, d, baseLeftPx + offsetPx)
+                    }
                     accentColor="purple"
                   />
                 </div>
