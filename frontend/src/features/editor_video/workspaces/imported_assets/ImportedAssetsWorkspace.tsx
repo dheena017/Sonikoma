@@ -125,20 +125,27 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
     [appLogic, projectStore, panels.length, onTriggerFeedback]
   );
 
-  const handleAddSelectedToTimeline = useCallback(() => {
+  const [isAddingSelected, setIsAddingSelected] = useState(false);
+
+  const handleAddSelectedToTimeline = useCallback(async () => {
     if (selectedUrls.length === 0) return;
-    if (appLogic?.addPanelsToStoryboard) {
-      appLogic.addPanelsToStoryboard(selectedUrls);
-    } else if (projectStore?.addPanel) {
-      selectedUrls.forEach((url, idx) => {
-        projectStore.addPanel({
-          image_url: url,
-          panel_index: panels.length + idx + 1,
+    setIsAddingSelected(true);
+    try {
+      if (appLogic?.addPanelsToStoryboard) {
+        await appLogic.addPanelsToStoryboard(selectedUrls);
+      } else if (projectStore?.addPanel) {
+        selectedUrls.forEach((url, idx) => {
+          projectStore.addPanel({
+            image_url: url,
+            panel_index: panels.length + idx + 1,
+          });
         });
-      });
+      }
+      onTriggerFeedback?.(`Added ${selectedUrls.length} frames to timeline`);
+      setSelectedUrls([]);
+    } finally {
+      setTimeout(() => setIsAddingSelected(false), 400);
     }
-    onTriggerFeedback?.(`Added ${selectedUrls.length} frames to timeline`);
-    setSelectedUrls([]);
   }, [selectedUrls, appLogic, projectStore, panels.length, onTriggerFeedback]);
 
   // Delete Handlers Opening Confirmation Modal
@@ -212,6 +219,30 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
     [appLogic, onTriggerFeedback]
   );
 
+  const handleTriggerAutoCrop = useCallback(() => {
+    if (appLogic?.setSelectedScraped && selectedUrls.length > 0) {
+      appLogic.setSelectedScraped(selectedUrls);
+    }
+    if (appLogic?.handleAutoCropSelected) {
+      appLogic.handleAutoCropSelected();
+      onTriggerFeedback?.(`Auto Crop triggered for ${selectedUrls.length} frames`);
+    } else {
+      onTriggerFeedback?.("Auto Crop triggered");
+    }
+  }, [appLogic, selectedUrls, onTriggerFeedback]);
+
+  const handleTriggerCleanBubbles = useCallback(() => {
+    if (appLogic?.setSelectedScraped && selectedUrls.length > 0) {
+      appLogic.setSelectedScraped(selectedUrls);
+    }
+    if (appLogic?.handleCleanBubblesSelected) {
+      appLogic.handleCleanBubblesSelected();
+      onTriggerFeedback?.(`Clean Bubbles triggered for ${selectedUrls.length} frames`);
+    } else {
+      onTriggerFeedback?.("Clean Bubbles triggered");
+    }
+  }, [appLogic, selectedUrls, onTriggerFeedback]);
+
   // Filter & Sort Assets
   const filteredAssets = useMemo(() => {
     let list = scrapedImages.map((url, index) => {
@@ -244,6 +275,11 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
   const isAllSelected =
     scrapedImages.length > 0 && selectedUrls.length === scrapedImages.length;
 
+  const isBatchCropping = !!appLogic?.isBatchCropping;
+  const isCleaningBubbles = !!appLogic?.isCleaningBubbles;
+  const croppingImgUrl = appLogic?.croppingImgUrl;
+  const bubbleCroppingImgUrl = appLogic?.bubbleCroppingImgUrl;
+
   return (
     <WorkspaceLayout>
       {/* ── 1. Workspace Toolbar Header ───────────────────────────────────── */}
@@ -260,10 +296,13 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
         isAllSelected={isAllSelected}
         onToggleSelectAll={handleSelectAllToggle}
         onAddSelectedToTimeline={handleAddSelectedToTimeline}
-        onAutoCropSelected={appLogic?.handleAutoCropSelected}
-        onCleanBubblesSelected={appLogic?.handleCleanBubblesSelected}
+        onAutoCropSelected={handleTriggerAutoCrop}
+        onCleanBubblesSelected={handleTriggerCleanBubbles}
         onDeleteSelected={handleDeleteSelected}
         onClearSelection={handleClearSelection}
+        isBatchCropping={isBatchCropping}
+        isCleaningBubbles={isCleaningBubbles}
+        isAddingSelected={isAddingSelected}
       />
 
       {/* ── 2. Contextual AI Action Toolbar ───────────────────────────────── */}
@@ -280,24 +319,35 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
           />
         ) : (
           <div className="grid grid-cols-2 gap-2.5 pt-1 pb-4">
-            {filteredAssets.map(({ url, index, isAssigned, isSelected, isFav }) => (
-              <ImportedAssetsCard
-                key={`${url}-${index}`}
-                url={url}
-                index={index}
-                isAssigned={isAssigned}
-                isSelected={isSelected}
-                isFav={isFav}
-                isMerging={mergingIndex === index}
-                totalImagesCount={scrapedImages.length}
-                onSelect={handleCardSelect}
-                onToggleFavorite={toggleFavorite}
-                onAddToTimeline={handleAddToTimelineSingle}
-                onMergeWithNext={handleMergeWithNext}
-                onOpenEditor={handleOpenEditor}
-                onDelete={handleDeleteSingle}
-              />
-            ))}
+            {filteredAssets.map(({ url, index, isAssigned, isSelected, isFav }) => {
+              const isCardCropping =
+                croppingImgUrl === url ||
+                (isBatchCropping && selectedUrls.includes(url));
+              const isCardCleaning =
+                bubbleCroppingImgUrl === url ||
+                (isCleaningBubbles && selectedUrls.includes(url));
+
+              return (
+                <ImportedAssetsCard
+                  key={`${url}-${index}`}
+                  url={url}
+                  index={index}
+                  isAssigned={isAssigned}
+                  isSelected={isSelected}
+                  isFav={isFav}
+                  isMerging={mergingIndex === index}
+                  isCropping={isCardCropping}
+                  isCleaning={isCardCleaning}
+                  totalImagesCount={scrapedImages.length}
+                  onSelect={handleCardSelect}
+                  onToggleFavorite={toggleFavorite}
+                  onAddToTimeline={handleAddToTimelineSingle}
+                  onMergeWithNext={handleMergeWithNext}
+                  onOpenEditor={handleOpenEditor}
+                  onDelete={handleDeleteSingle}
+                />
+              );
+            })}
           </div>
         )}
       </WorkspaceLayout.Content>

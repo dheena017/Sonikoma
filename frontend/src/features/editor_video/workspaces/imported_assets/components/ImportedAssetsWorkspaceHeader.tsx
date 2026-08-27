@@ -9,6 +9,7 @@ import {
   Scissors,
   Sparkles,
   Trash2,
+  Loader2,
 } from "lucide-react";
 
 export type AssetFilterTab = "all" | "timeline" | "unassigned" | "favorites";
@@ -30,6 +31,9 @@ export interface ImportedAssetsWorkspaceHeaderProps {
   onCleanBubblesSelected?: () => void;
   onDeleteSelected?: () => void;
   onClearSelection?: () => void;
+  isBatchCropping?: boolean;
+  isCleaningBubbles?: boolean;
+  isAddingSelected?: boolean;
 }
 
 export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHeaderProps> = ({
@@ -49,6 +53,9 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
   onCleanBubblesSelected,
   onDeleteSelected,
   onClearSelection,
+  isBatchCropping = false,
+  isCleaningBubbles = false,
+  isAddingSelected = false,
 }) => {
   return (
     <div className="shrink-0 border-b border-purple-900/20 bg-[#0c0d18]/95 backdrop-blur-2xl">
@@ -154,11 +161,16 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
               <button
                 type="button"
                 onClick={onAddSelectedToTimeline}
-                className="px-2 py-0.5 rounded-md bg-purple-600 hover:bg-purple-500 text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer"
+                disabled={isAddingSelected}
+                className="px-2 py-0.5 rounded-md bg-purple-600 hover:bg-purple-500 text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
                 title="Add selected frames to storyboard timeline"
               >
-                <Plus className="h-2.5 w-2.5" />
-                <span>Add ({selectedCount})</span>
+                {isAddingSelected ? (
+                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                ) : (
+                  <Plus className="h-2.5 w-2.5" />
+                )}
+                <span>{isAddingSelected ? "Adding..." : `Add (${selectedCount})`}</span>
               </button>
             )}
 
@@ -166,11 +178,16 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
               <button
                 type="button"
                 onClick={onAutoCropSelected}
-                className="px-2 py-0.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer"
+                disabled={isBatchCropping}
+                className="px-2 py-0.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
                 title="Auto-crop selected frames"
               >
-                <Scissors className="h-2.5 w-2.5" />
-                <span>Auto Crop</span>
+                {isBatchCropping ? (
+                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                ) : (
+                  <Scissors className="h-2.5 w-2.5" />
+                )}
+                <span>{isBatchCropping ? "Cropping..." : "Auto Crop"}</span>
               </button>
             )}
 
@@ -178,11 +195,16 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
               <button
                 type="button"
                 onClick={onCleanBubblesSelected}
-                className="px-2 py-0.5 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer"
+                disabled={isCleaningBubbles}
+                className="px-2 py-0.5 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
                 title="Clean speech bubbles in selected frames"
               >
-                <Sparkles className="h-2.5 w-2.5" />
-                <span>Clean</span>
+                {isCleaningBubbles ? (
+                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-2.5 w-2.5" />
+                )}
+                <span>{isCleaningBubbles ? "Cleaning..." : "Clean"}</span>
               </button>
             )}
 
