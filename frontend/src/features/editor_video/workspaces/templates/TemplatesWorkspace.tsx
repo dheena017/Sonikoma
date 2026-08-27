@@ -1,36 +1,59 @@
 import React, { useState } from "react";
 import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
-import { TEMPLATE_SUB_TABS, MOCK_TEMPLATES } from "../../data/templateData";
+import { TEMPLATE_SUB_TABS, PRESET_TEMPLATES } from "../../data/templateData";
 import { TemplatesWorkspaceHeader } from "./components/TemplatesWorkspaceHeader";
 import { TemplateProjectCard } from "./components/TemplateProjectCard";
 import { TemplateInfoBanner } from "./components/TemplateInfoBanner";
+import { editorEventBus } from "../../events/editorEventBus";
 
 interface TemplatesWorkspaceProps {
-  onTriggerFeedback: (msg: string) => void;
+  onTriggerFeedback?: (msg: string) => void;
+  appLogic?: any;
 }
 
 export const TemplatesWorkspace: React.FC<TemplatesWorkspaceProps> = ({
-  onTriggerFeedback,
+  onTriggerFeedback = () => {},
+  appLogic,
 }) => {
-  const [activeTab, setActiveTab] = useState("Manga");
+  const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const activeTabKey = activeTab.toLowerCase().replace(" ", "-");
-  const filtered = MOCK_TEMPLATES.filter((t) => {
+  const filtered = PRESET_TEMPLATES.filter((t) => {
     const matchTab =
-      t.category === activeTabKey ||
-      !MOCK_TEMPLATES.find((x) => x.category === activeTabKey);
+      activeTab === "All" ||
+      t.category.toLowerCase().replace("-", " ") === activeTab.toLowerCase().replace("-", " ");
     const matchSearch =
       !searchQuery.trim() ||
-      t.title.toLowerCase().includes(searchQuery.toLowerCase());
+      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.desc.toLowerCase().includes(searchQuery.toLowerCase());
     return matchTab && matchSearch;
   });
+
+  const handleApplyTemplate = (tpl: any) => {
+    // Dynamically adjust Aspect Ratio and Pacing in Studio
+    if (tpl.category === "shorts" || tpl.badge.includes("9:16")) {
+      if (appLogic?.setAspectRatio) {
+        appLogic.setAspectRatio("9:16");
+      }
+    } else if (tpl.category === "webtoon" || tpl.badge.includes("16:9")) {
+      if (appLogic?.setAspectRatio) {
+        appLogic.setAspectRatio("16:9");
+      }
+    }
+
+    editorEventBus.publish("TIMELINE_UPDATED", {
+      trackId: "global",
+      duration: tpl.badge,
+    });
+
+    onTriggerFeedback(`Applied template layout: "${tpl.title}"`);
+  };
 
   return (
     <WorkspaceLayout>
       {/* Dedicated Separated Header — contains Tabs + Search inside */}
       <TemplatesWorkspaceHeader
-        tabs={TEMPLATE_SUB_TABS}
+        tabs={["All", ...TEMPLATE_SUB_TABS]}
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         searchQuery={searchQuery}
@@ -46,20 +69,18 @@ export const TemplatesWorkspace: React.FC<TemplatesWorkspaceProps> = ({
             <TemplateProjectCard
               key={tpl.id}
               template={tpl}
-              onApply={() =>
-                onTriggerFeedback(`Applied template: "${tpl.title}"`)
-              }
+              onApply={() => handleApplyTemplate(tpl)}
             />
           ))}
 
           {filtered.length === 0 && (
-            <div className="text-center py-8 text-neutral-500 text-xs">
-              No templates for "{activeTab}" yet — check back soon!
+            <div className="text-center py-8 text-neutral-500 text-xs font-mono">
+              No templates found for "{activeTab}".
             </div>
           )}
         </div>
       </WorkspaceLayout.Content>
-      <WorkspaceLayout.Footer text="Sonikoma Template Studio" />
+      <WorkspaceLayout.Footer text="Sonikoma Production Template Engine" />
     </WorkspaceLayout>
   );
 };

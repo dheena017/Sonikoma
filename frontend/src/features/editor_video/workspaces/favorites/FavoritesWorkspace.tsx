@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
 import { Star } from "lucide-react";
 import {
@@ -21,15 +21,34 @@ export interface FavoriteItem {
 }
 
 interface FavoritesWorkspaceProps {
-  onTriggerFeedback: (msg: string) => void;
+  onTriggerFeedback?: (msg: string) => void;
+  appLogic?: any;
 }
 
+const STORAGE_KEY = "sonikoma_editor_favorites";
+
 export const FavoritesWorkspace: React.FC<FavoritesWorkspaceProps> = ({
-  onTriggerFeedback,
+  onTriggerFeedback = () => {},
+  appLogic,
 }) => {
-  const [favorites, setFavorites] = useState<FavoriteItem[]>(DEFAULT_FAVORITES);
+  const [favorites, setFavorites] = useState<FavoriteItem[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return DEFAULT_FAVORITES;
+  });
+
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+    }
+  }, [favorites]);
 
   const removeFavorite = (id: string, title: string) => {
     setFavorites((prev) => prev.filter((f) => f.id !== id));
@@ -87,14 +106,7 @@ export const FavoritesWorkspace: React.FC<FavoritesWorkspaceProps> = ({
           />
         );
       default:
-        return (
-          <FavoriteCharacterCard
-            key={item.id}
-            item={item}
-            onUse={handleUse}
-            onRemove={handleRemove}
-          />
-        );
+        return null;
     }
   };
 
@@ -109,22 +121,16 @@ export const FavoritesWorkspace: React.FC<FavoritesWorkspaceProps> = ({
         onSearchChange={setSearchQuery}
       />
       <WorkspaceLayout.Content>
-        <div className="space-y-2">
-          {filtered.length === 0 && (
-            <div className="text-center py-12 space-y-2">
-              <Star className="h-8 w-8 text-neutral-700 mx-auto" />
-              <p className="text-xs text-neutral-500 font-mono">
-                No favorited items here yet.
-              </p>
-              <p className="text-[10px] text-neutral-600 font-mono">
-                Click ⭐ in any workspace to save items!
-              </p>
-            </div>
-          )}
-          {filtered.map((item) => renderCard(item))}
-        </div>
+        {filtered.length === 0 ? (
+          <div className="text-center py-12 text-neutral-500 text-xs font-mono">
+            <Star className="h-6 w-6 mx-auto mb-2 text-neutral-600" />
+            No favorites found in this section.
+          </div>
+        ) : (
+          <div className="space-y-2">{filtered.map(renderCard)}</div>
+        )}
       </WorkspaceLayout.Content>
-      <WorkspaceLayout.Footer text="Sonikoma Creator Quick Vault" />
+      <WorkspaceLayout.Footer text="Sonikoma Persistent Favorites Engine" />
     </WorkspaceLayout>
   );
 };

@@ -1,60 +1,51 @@
+// ─── characterData ────────────────────────────────────────────────────────────
+// Canonical location: features/editor_video/data/characterData.ts
+// Character generation utilities with DiceBear Open Source Anime/Comic Avatar API
+
 import { CharacterItem } from "../types/workspace.types";
 
 export const CHARACTER_SUB_TABS = [
-  "Library",
+  "Roster",
   "Expressions",
-  "Poses",
-  "Voice",
-  "Consistency",
-  "AI Character",
-  "Relationships",
+  "Voice Cast",
+  "Character Creator",
 ];
 
-export const MOCK_CHARACTERS: CharacterItem[] = [
+export const getDicebearAvatar = (seed: string, style: "adventurer" | "lorelei" | "bottts" = "adventurer") => {
+  return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+};
+
+export const DEFAULT_PROJECT_CHARACTERS: CharacterItem[] = [
   {
-    id: "c-1",
-    name: "Jin-Woo (Shadow Monarch)",
+    id: "char-jinwoo",
+    name: "Jin-Woo (Shadow Lord)",
     role: "Protagonist",
-    avatar: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=300&auto=format&fit=crop&q=80",
-    voiceActor: "Kokoro Voice (EN Male)",
+    avatar: getDicebearAvatar("JinWooShadow", "adventurer"),
+    voiceActor: "Hiroshi (Anime Protagonist)",
     badge: "Main Lead",
   },
   {
-    id: "c-2",
-    name: "Chae-In (S-Rank Hunter)",
+    id: "char-cha-hae",
+    name: "Cha Hae-In (Swordmaster)",
     role: "Sidekick",
-    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&auto=format&fit=crop&q=80",
-    voiceActor: "Anime Female Energetic",
-    badge: "S-Rank",
+    avatar: getDicebearAvatar("ChaHaeIn", "lorelei"),
+    voiceActor: "Aoi (Cool Heroine)",
+    badge: "S-Rank Hunter",
   },
   {
-    id: "c-3",
+    id: "char-baran",
     name: "Demon King Baran",
     role: "Antagonist",
-    avatar: "https://images.unsplash.com/photo-1563089145-599997674d42?w=300&auto=format&fit=crop&q=80",
-    voiceActor: "Cinematic Deep Narrator",
-    badge: "Boss Enemy",
+    avatar: getDicebearAvatar("DemonBaran", "bottts"),
+    voiceActor: "Kurogane (Dark Boss)",
+    badge: "Monarch Boss",
   },
   {
-    id: "c-4",
-    name: "System Systemic Narrator",
+    id: "char-system",
+    name: "Systemic AI Guide",
     role: "Narrator",
-    avatar: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=300&auto=format&fit=crop&q=80",
-    voiceActor: "Sci-Fi AI Assistant",
+    avatar: getDicebearAvatar("SystemGuideAI", "bottts"),
+    voiceActor: "Narrator (Storyteller)",
     badge: "System Voice",
   },
-];
-
-export const CHARACTER_EXPRESSIONS = [
-  { id: "e-1", name: "Aggressive Battle Smile", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=200&auto=format&fit=crop&q=80" },
-  { id: "e-2", name: "Shocked / Eyes Wide", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80" },
-  { id: "e-3", name: "Cold Shadow Stare", img: "https://images.unsplash.com/photo-1563089145-599997674d42?w=200&auto=format&fit=crop&q=80" },
-  { id: "e-4", name: "Determined Grint", img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=200&auto=format&fit=crop&q=80" },
-];
-
-export const CHARACTER_POSES = [
-  { id: "p-1", title: "Dual Dagger Slash", tag: "Combat" },
-  { id: "p-2", title: "Shadow Extraction Summon", tag: "Ultimate" },
-  { id: "p-3", title: "Mid-Air Dodge", tag: "Evasion" },
-  { id: "p-4", title: "Standing Cape Flutter", tag: "Idle Stance" },
 ];

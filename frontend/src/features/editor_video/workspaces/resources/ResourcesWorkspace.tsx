@@ -1,35 +1,55 @@
 import React, { useState } from "react";
 import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
-import { RESOURCE_SUB_TABS, MOCK_RESOURCES } from "../../data/resourceData";
+import {
+  RESOURCE_SUB_TABS,
+  REAL_RESOURCES,
+  REAL_LUT_FILTERS,
+} from "../../data/resourceData";
 import { ResourcesWorkspaceHeader } from "./components/ResourcesWorkspaceHeader";
 import { ResourceItemCard } from "./components/ResourceItemCard";
+import { Sparkles, Sliders, Check } from "lucide-react";
+import { editorEventBus } from "../../events/editorEventBus";
 
 interface ResourcesWorkspaceProps {
-  onTriggerFeedback: (msg: string) => void;
+  onTriggerFeedback?: (msg: string) => void;
+  appLogic?: any;
 }
 
 export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
-  onTriggerFeedback,
+  onTriggerFeedback = () => {},
+  appLogic,
 }) => {
-  const [activeTab, setActiveTab] = useState("Fonts");
+  const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [activeLutId, setActiveLutId] = useState<string | null>(null);
 
-  const filtered = MOCK_RESOURCES.filter((r) => {
+  const filtered = REAL_RESOURCES.filter((r) => {
     const tabMatch =
       activeTab === "All" ||
       r.category.toLowerCase() === activeTab.toLowerCase();
     const searchMatch =
       !searchQuery.trim() ||
-      r.title.toLowerCase().includes(searchQuery.toLowerCase());
+      r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.detail.toLowerCase().includes(searchQuery.toLowerCase());
     return tabMatch && searchMatch;
   });
 
   const handleCopyColor = (id: string, hex: string) => {
-    navigator.clipboard.writeText(hex);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(hex);
+    }
     setCopiedId(id);
-    onTriggerFeedback(`Copied color ${hex}`);
+    onTriggerFeedback(`Copied color ${hex} to clipboard!`);
     setTimeout(() => setCopiedId(null), 1500);
+  };
+
+  const handleApplyLut = (lut: any) => {
+    setActiveLutId(lut.id);
+    editorEventBus.publish("INSPECTOR_REFRESH", {
+      layerName: lut.name,
+    });
+    onTriggerFeedback(`Applied LUT Color Grade: "${lut.name}"`);
   };
 
   return (
@@ -43,6 +63,46 @@ export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
         onSearchChange={setSearchQuery}
       />
       <WorkspaceLayout.Content>
+        {/* Real LUT Color Grading Shaders Section */}
+        {(activeTab === "All" || activeTab === "LUTs") && (
+          <div className="space-y-2 mb-4">
+            <h4 className="text-xs font-bold text-white font-mono uppercase flex items-center gap-1.5">
+              <Sliders className="h-3.5 w-3.5 text-purple-400" />
+              Anime Color Grading LUTs
+            </h4>
+            <div className="grid grid-cols-1 gap-2">
+              {REAL_LUT_FILTERS.map((lut) => (
+                <div
+                  key={lut.id}
+                  onClick={() => handleApplyLut(lut)}
+                  className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between group shadow-sm ${
+                    activeLutId === lut.id
+                      ? "bg-purple-950/60 border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+                      : "bg-neutral-900/80 border-neutral-800 hover:border-purple-500/60"
+                  }`}
+                >
+                  <div>
+                    <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
+                      {lut.name}
+                    </p>
+                    <p className="text-[9px] text-neutral-400 font-mono mt-0.5">{lut.desc}</p>
+                  </div>
+
+                  <span className={`px-2 py-1 rounded-lg text-[9px] font-mono font-bold shrink-0 flex items-center gap-1 ${
+                    activeLutId === lut.id
+                      ? "bg-purple-600 text-white"
+                      : "bg-neutral-800 text-neutral-300 group-hover:bg-purple-600 group-hover:text-white"
+                  }`}>
+                    {activeLutId === lut.id && <Check className="h-3 w-3" />}
+                    {activeLutId === lut.id ? "Active" : "Apply LUT"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Resources List (Colors, Textures, Overlays) */}
         <div className="space-y-2">
           {filtered.map((res) => (
             <ResourceItemCard
@@ -50,14 +110,14 @@ export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
               resource={res}
               copiedId={copiedId}
               onCopyColor={handleCopyColor}
-              onApply={(title) =>
-                onTriggerFeedback(`Applied resource: ${title}`)
-              }
+              onApply={(title) => {
+                onTriggerFeedback(`Applied resource: ${title}`);
+              }}
             />
           ))}
         </div>
       </WorkspaceLayout.Content>
-      <WorkspaceLayout.Footer text="Sonikoma Creator Brand Kit Workspace" />
+      <WorkspaceLayout.Footer text="Sonikoma Creator Brand Kit • Real Color Grading Engine" />
     </WorkspaceLayout>
   );
 };

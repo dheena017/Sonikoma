@@ -1,80 +1,111 @@
-import { ElementItem } from "../types/workspace.types";
+// ─── elementData ──────────────────────────────────────────────────────────────
+// Canonical location: features/editor_video/data/elementData.ts
+// Real Manga & Comic Vector SVGs for speech bubbles, action speedlines, and FX
+
+export interface VectorElementItem {
+  id: string;
+  title: string;
+  category: "speech-bubbles" | "speed-lines" | "manga-fx" | "screen-tones" | "comic-frames";
+  badge: string;
+  desc: string;
+  svgType: "shout-bubble" | "oval-bubble" | "thought-cloud" | "system-box" | "radial-zoom" | "linear-speed" | "boom-sfx" | "slash-sfx" | "pow-sfx" | "halftone-dots";
+}
 
 export const ELEMENT_SUB_TABS = [
+  "All",
   "Speech Bubbles",
-  "Comic Frames",
-  "Manga FX",
   "Speed Lines",
-  "Panel Borders",
-  "Motion Lines",
-  "Dialogue Boxes",
+  "Manga FX",
   "Screen Tones",
-  "Comic Icons",
+  "Comic Frames",
 ];
 
-export const MOCK_ELEMENTS: ElementItem[] = [
+export const REAL_ELEMENTS: VectorElementItem[] = [
+  // ── Speech Bubbles ────────────────────────────────────────────────────────
   {
-    id: "el-1",
-    title: "Shout Action Bubble",
+    id: "elem-bubble-shout",
+    title: "Manga Jagged Shout Bubble",
     category: "speech-bubbles",
-    img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80",
-    badge: "Jagged Edge",
-    desc: "Use for loud battle shouts & surprises",
+    badge: "Battle Shout",
+    desc: "Spiky action bubble for screams and attacks",
+    svgType: "shout-bubble",
   },
   {
-    id: "el-2",
-    title: "Radial Burst Speedlines",
+    id: "elem-bubble-oval",
+    title: "Smooth Dialogue Bubble",
+    category: "speech-bubbles",
+    badge: "Standard Speech",
+    desc: "Clean classic oval speech balloon",
+    svgType: "oval-bubble",
+  },
+  {
+    id: "elem-bubble-thought",
+    title: "Inner Monologue Cloud",
+    category: "speech-bubbles",
+    badge: "Thought Bubble",
+    desc: "Cloud bubbles for unspoken thoughts",
+    svgType: "thought-cloud",
+  },
+  {
+    id: "elem-box-system",
+    title: "Sci-Fi System Prompt Box",
+    category: "speech-bubbles",
+    badge: "System UI",
+    desc: "Futuristic glowing rectangular prompt box",
+    svgType: "system-box",
+  },
+
+  // ── Action Speed Lines ────────────────────────────────────────────────────
+  {
+    id: "elem-speed-radial",
+    title: "Dramatic Radial Zoom Burst",
     category: "speed-lines",
-    img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=300&auto=format&fit=crop&q=80",
     badge: "Focus Zoom",
-    desc: "Dramatic center zoom focus effect",
+    desc: "High intensity radial action speedlines",
+    svgType: "radial-zoom",
   },
   {
-    id: "el-3",
-    title: "POW! Impact Burst",
+    id: "elem-speed-linear",
+    title: "Horizontal Dash Speedlines",
+    category: "speed-lines",
+    badge: "Fast Motion",
+    desc: "Directional dash lines for high speed movement",
+    svgType: "linear-speed",
+  },
+
+  // ── Manga FX Onomatopoeia ────────────────────────────────────────────────
+  {
+    id: "elem-fx-boom",
+    title: "BOOM! Explosion Comic Burst",
     category: "manga-fx",
-    img: "https://images.unsplash.com/photo-1563089145-599997674d42?w=300&auto=format&fit=crop&q=80",
-    badge: "Action Onomatopoeia",
-    desc: "High energy punch sound visualizer",
+    badge: "Explosion FX",
+    desc: "Explosive impact typography sticker",
+    svgType: "boom-sfx",
   },
   {
-    id: "el-4",
-    title: "Webtoon Diagonal Split Frame",
-    category: "comic-frames",
-    img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=300&auto=format&fit=crop&q=80",
-    badge: "2-Panel Cut",
-    desc: "Diagonal panel separator frame",
+    id: "elem-fx-slash",
+    title: "SLASH! Katana Sword Cut",
+    category: "manga-fx",
+    badge: "Blade Attack",
+    desc: "Sharp blade slash impact visualizer",
+    svgType: "slash-sfx",
   },
   {
-    id: "el-5",
-    title: "Paper Halftone Screen Tone",
+    id: "elem-fx-pow",
+    title: "POW! Heavy Punch Strike",
+    category: "manga-fx",
+    badge: "Punch Impact",
+    desc: "Comic punch impact starburst sticker",
+    svgType: "pow-sfx",
+  },
+
+  // ── Screen Tones ──────────────────────────────────────────────────────────
+  {
+    id: "elem-tone-halftone",
+    title: "Manga Halftone Dot Matrix",
     category: "screen-tones",
-    img: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=300&auto=format&fit=crop&q=80",
-    badge: "Dot Texture",
-    desc: "Classic manga shadow screen tone",
-  },
-  {
-    id: "el-6",
-    title: "Ink Splatter Border",
-    category: "panel-borders",
-    img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80",
-    badge: "Grunge Ink",
-    desc: "Raw hand-drawn comic ink outline",
-  },
-  {
-    id: "el-7",
-    title: "Thought Cloud Bubble",
-    category: "speech-bubbles",
-    img: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&auto=format&fit=crop&q=80",
-    badge: "Internal Monologue",
-    desc: "Soft cloud for internal thoughts",
-  },
-  {
-    id: "el-8",
-    title: "Anime Sweat Drop & Anger Vein",
-    category: "comic-icons",
-    emoji: "💢",
-    badge: "Anime Icon",
-    desc: "Expressive emotional manga symbols",
+    badge: "Dot Pattern",
+    desc: "Traditional manga printed screen tone",
+    svgType: "halftone-dots",
   },
 ];

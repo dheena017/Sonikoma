@@ -1,8 +1,10 @@
 import React from "react";
-import { ElementItem } from "../../../types/workspace.types";
+import { VectorElementItem } from "../../../data/elementData";
+import { MangaVectorGraphic } from "./MangaVectorGraphic";
+import { Plus } from "lucide-react";
 
 interface ElementGridCardProps {
-  element: ElementItem;
+  element: VectorElementItem;
   onAdd: () => void;
 }
 
@@ -13,35 +15,33 @@ export const ElementGridCard: React.FC<ElementGridCardProps> = ({
   return (
     <div
       onClick={onAdd}
-      className="relative rounded-xl overflow-hidden border border-neutral-800 bg-neutral-900 h-32 cursor-pointer group hover:border-purple-500/60 transition-all flex flex-col justify-between p-2 shadow-sm"
+      className="relative rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950/90 h-36 cursor-pointer group hover:border-purple-500/80 hover:bg-neutral-900 transition-all flex flex-col justify-between p-2.5 shadow-md"
     >
-      {element.img && (
-        <img
-          src={element.img}
-          alt={element.title}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-80"
-        />
-      )}
-      {element.emoji && (
-        <div className="absolute inset-0 flex items-center justify-center text-4xl select-none group-hover:scale-110 transition-transform">
-          {element.emoji}
-        </div>
-      )}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
-      <div className="relative z-10 flex justify-between items-center">
-        {element.badge && (
-          <span className="text-[8px] font-mono font-bold bg-black/80 text-white px-1.5 py-0.5 rounded border border-white/10">
-            {element.badge}
-          </span>
-        )}
+      {/* SVG Graphic Canvas */}
+      <div className="flex-1 flex items-center justify-center p-1 group-hover:scale-105 transition-transform duration-300">
+        <MangaVectorGraphic type={element.svgType} className="w-full h-20" />
       </div>
-      <div className="relative z-10">
-        <p className="text-[10px] font-bold text-white truncate drop-shadow">
-          {element.title}
-        </p>
-        {element.desc && (
-          <p className="text-[8px] text-neutral-300 truncate">{element.desc}</p>
-        )}
+
+      {/* Badges & Description */}
+      <div className="relative z-10 pt-1 border-t border-white/5 flex items-center justify-between">
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold text-white truncate group-hover:text-purple-300 transition-colors">
+            {element.title}
+          </p>
+          <p className="text-[8px] text-neutral-400 font-mono truncate">{element.badge}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdd();
+          }}
+          className="h-6 w-6 rounded-lg bg-neutral-800 hover:bg-purple-600 text-white flex items-center justify-center shrink-0 transition-colors shadow-sm cursor-pointer ml-1"
+          title="Add to Current Frame"
+        >
+          <Plus className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
 import { MOCK_RECENT_ITEMS, RECENT_SUB_TABS } from "../../data/recentData";
 import { RecentWorkspaceHeader } from "./components/RecentWorkspaceHeader";
@@ -7,6 +7,7 @@ import { RecentAiCard } from "./components/RecentAiCard";
 import { RecentTemplateCard } from "./components/RecentTemplateCard";
 import { RecentFontCard } from "./components/RecentFontCard";
 import { RecentAudioCard } from "./components/RecentAudioCard";
+import { Clock } from "lucide-react";
 
 export interface RecentItem {
   id: string;
@@ -24,16 +25,36 @@ export interface RecentItem {
 }
 
 interface RecentWorkspaceProps {
-  onTriggerFeedback: (msg: string) => void;
+  onTriggerFeedback?: (msg: string) => void;
+  appLogic?: any;
 }
 
+const STORAGE_KEY = "sonikoma_editor_recents";
+
 export const RecentWorkspace: React.FC<RecentWorkspaceProps> = ({
-  onTriggerFeedback,
+  onTriggerFeedback = () => {},
+  appLogic,
 }) => {
+  const [recentItems, setRecentItems] = useState<RecentItem[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch {}
+    }
+    return MOCK_RECENT_ITEMS;
+  });
+
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = MOCK_RECENT_ITEMS.filter((item) => {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(recentItems));
+    }
+  }, [recentItems]);
+
+  const filtered = recentItems.filter((item) => {
     const matchTab =
       activeTab === "All" ||
       item.category.toLowerCase() === activeTab.toLowerCase();
@@ -72,9 +93,7 @@ export const RecentWorkspace: React.FC<RecentWorkspaceProps> = ({
           <RecentAudioCard key={item.id} item={item} onAction={handleAction} />
         );
       default:
-        return (
-          <RecentMediaCard key={item.id} item={item} onAction={handleAction} />
-        );
+        return null;
     }
   };
 
@@ -89,16 +108,16 @@ export const RecentWorkspace: React.FC<RecentWorkspaceProps> = ({
         onSearchChange={setSearchQuery}
       />
       <WorkspaceLayout.Content>
-        <div className="space-y-2">
-          {filtered.length === 0 && (
-            <div className="text-center py-10 text-neutral-500 text-xs font-mono">
-              No recent activity found.
-            </div>
-          )}
-          {filtered.map((item) => renderCard(item))}
-        </div>
+        {filtered.length === 0 ? (
+          <div className="text-center py-12 text-neutral-500 text-xs font-mono">
+            <Clock className="h-6 w-6 mx-auto mb-2 text-neutral-600" />
+            No recent history items found.
+          </div>
+        ) : (
+          <div className="space-y-2">{filtered.map(renderCard)}</div>
+        )}
       </WorkspaceLayout.Content>
-      <WorkspaceLayout.Footer text="Sonikoma Activity History" />
+      <WorkspaceLayout.Footer text="Sonikoma Real History Tracker" />
     </WorkspaceLayout>
   );
 };

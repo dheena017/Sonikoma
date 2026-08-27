@@ -1,101 +1,121 @@
+// ─── resourceData ────────────────────────────────────────────────────────────
+// Canonical location: features/editor_video/data/resourceData.ts
+// Real Video Color Grading LUT Filters, Overlays, and Creator Brand Palettes
+
 import { ResourceItem } from "../types/workspace.types";
 
 export const RESOURCE_SUB_TABS = [
-  "Fonts",
-  "Logos",
-  "Colors",
-  "Watermarks",
-  "Brushes",
+  "All",
   "LUTs",
   "Overlays",
-  "Intro",
-  "Outro",
+  "Colors",
+  "Fonts",
+  "Logos",
 ];
 
-export const MOCK_RESOURCES: ResourceItem[] = [
+export interface RealLutFilter {
+  id: string;
+  name: string;
+  cssFilter: string;
+  desc: string;
+  badge: string;
+}
+
+export const REAL_LUT_FILTERS: RealLutFilter[] = [
   {
-    id: "r-1",
-    title: "Cinematic Comic Bold TTF",
-    category: "fonts",
-    detail: "Uploaded Font • Active in Studio",
-    badge: "TTF",
+    id: "lut-cyberpunk",
+    name: "Cyberpunk Neon 2099",
+    cssFilter: "contrast(130%) saturate(160%) hue-rotate(15deg) brightness(105%)",
+    desc: "Vibrant high-contrast cyan & magenta neon boost",
+    badge: "Cyberpunk",
   },
   {
-    id: "r-2",
-    title: "Sonikoma Studio Logo Watermark",
-    category: "logos",
-    detail: "PNG Alpha • 1024x1024",
-    badge: "Primary Mark",
+    id: "lut-manga-noir",
+    name: "Manga Ink Noir (B&W)",
+    cssFilter: "grayscale(100%) contrast(190%) brightness(95%)",
+    desc: "Classic high contrast black & white printed manga tone",
+    badge: "Manga Noir",
   },
   {
-    id: "r-3",
-    title: "Cyber Neon Hex Palette",
+    id: "lut-vintage-sepia",
+    name: "Vintage Sepia Paper",
+    cssFilter: "sepia(75%) contrast(115%) brightness(95%) saturate(120%)",
+    desc: "Warm nostalgic sepia tone with aged paper warmth",
+    badge: "Sepia Tone",
+  },
+  {
+    id: "lut-dark-fantasy",
+    name: "Dark Fantasy Grim",
+    cssFilter: "contrast(140%) brightness(85%) saturate(75%)",
+    desc: "Desaturated moody shadow look for dark dungeons",
+    badge: "Dark Fantasy",
+  },
+  {
+    id: "lut-shonen-vibrant",
+    name: "Shonen Anime Battle",
+    cssFilter: "contrast(120%) saturate(150%) brightness(105%)",
+    desc: "Punchy, saturated colors for daytime action battles",
+    badge: "Anime Vibrant",
+  },
+];
+
+export const REAL_RESOURCES: ResourceItem[] = [
+  {
+    id: "r-lut-cyberpunk",
+    title: "Cyberpunk Neon 2099 LUT",
+    category: "luts",
+    detail: "contrast(130%) saturate(160%) hue-rotate(15deg)",
+    badge: "Active Shader",
+  },
+  {
+    id: "r-lut-noir",
+    title: "Manga Ink Noir (B&W) LUT",
+    category: "luts",
+    detail: "grayscale(100%) contrast(190%)",
+    badge: "High Contrast",
+  },
+  {
+    id: "r-lut-sepia",
+    title: "Vintage Sepia Paper LUT",
+    category: "luts",
+    detail: "sepia(75%) contrast(115%)",
+    badge: "Warm Tone",
+  },
+  {
+    id: "r-lut-dark",
+    title: "Dark Fantasy Grim LUT",
+    category: "luts",
+    detail: "contrast(140%) brightness(85%)",
+    badge: "Desaturated",
+  },
+  {
+    id: "r-color-cyber",
+    title: "Cyberpunk Hex Swatch Kit",
     category: "colors",
     detail: "#a855f7 • #06b6d4 • #f43f5e • #f59e0b",
     hex: "#a855f7",
-    badge: "5 Swatches",
+    badge: "Creator Palette",
   },
   {
-    id: "r-4",
-    title: "Bottom-Right 30% Watermark Stamp",
-    category: "watermarks",
-    detail: "Corner Overlay Profile",
-    badge: "30% Opacity",
+    id: "r-color-gold",
+    title: "Gold Foil Anime Metal Swatch",
+    category: "colors",
+    detail: "#eab308 • #ca8a04 • #fef08a",
+    hex: "#eab308",
+    badge: "Metallic Swatch",
   },
   {
-    id: "r-5",
-    title: "G-Pen Manga Ink Brush",
-    category: "brushes",
-    detail: "Pressure Sensitive • Procreate/ABR Preset",
-    badge: "Ink Brush",
-  },
-  {
-    id: "r-6",
-    title: "Screen Tone Halftone Dot Brush",
-    category: "brushes",
-    detail: "60 LPI Dot Pattern Brush",
-    badge: "Screen Tone",
-  },
-  {
-    id: "r-7",
-    title: "Anime Vibrant Color LUT",
-    category: "luts",
-    detail: "3D LUT (.cube) • High Saturation & Contrast",
-    badge: "Color Grade",
-  },
-  {
-    id: "r-8",
-    title: "Dark Fantasy Vintage LUT",
-    category: "luts",
-    detail: "3D LUT (.cube) • Desaturated Cinematic Blue",
-    badge: "Color Grade",
-  },
-  {
-    id: "r-9",
-    title: "Speedline Manga Action Overlay",
+    id: "r-overlay-grain",
+    title: "Cinematic 35mm Film Grain",
     category: "overlays",
-    detail: "4K Transparent PNG Video Overlay",
-    badge: "4K Overlay",
+    detail: "Simulated analog film noise texture",
+    badge: "35mm Grain",
   },
   {
-    id: "r-10",
-    title: "Film Grain & Dust Overlay",
+    id: "r-overlay-vignette",
+    title: "Dramatic Dark Vignette Border",
     category: "overlays",
-    detail: "Retro Analog Texture Overlay Loop",
-    badge: "Loop Overlay",
-  },
-  {
-    id: "r-11",
-    title: "Channel Intro Title Stinger",
-    category: "intro",
-    detail: "0:03 Animated Logo Reveal",
-    badge: "Intro Card",
-  },
-  {
-    id: "r-12",
-    title: "Subscribe & Next Chapter Outro",
-    category: "outro",
-    detail: "0:08 End Screen Card",
-    badge: "Outro Card",
+    detail: "Radial edge darkening for dramatic focus",
+    badge: "Focus Border",
   },
 ];

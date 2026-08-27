@@ -1,25 +1,43 @@
 import React, { useState } from "react";
 import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
-import { ELEMENT_SUB_TABS, MOCK_ELEMENTS } from "../../data/elementData";
+import { ELEMENT_SUB_TABS, REAL_ELEMENTS } from "../../data/elementData";
 import { ElementsWorkspaceHeader } from "./components/ElementsWorkspaceHeader";
 import { ElementGridCard } from "./components/ElementGridCard";
+import { editorEventBus } from "../../events/editorEventBus";
 
 interface ElementsWorkspaceProps {
-  onTriggerFeedback: (msg: string) => void;
+  onTriggerFeedback?: (msg: string) => void;
+  appLogic?: any;
 }
 
 export const ElementsWorkspace: React.FC<ElementsWorkspaceProps> = ({
-  onTriggerFeedback,
+  onTriggerFeedback = () => {},
+  appLogic,
 }) => {
-  const [activeTab, setActiveTab] = useState("Speech Bubbles");
+  const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = MOCK_ELEMENTS.filter((e) => {
-    const matchSearch =
+  const filtered = REAL_ELEMENTS.filter((e) => {
+    const tabMatch =
+      activeTab === "All" ||
+      e.category.toLowerCase().replace("-", " ") === activeTab.toLowerCase();
+    const searchMatch =
       !searchQuery.trim() ||
-      e.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchSearch;
+      e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    return tabMatch && searchMatch;
   });
+
+  const handleAddElement = (elem: any) => {
+    // Publish to event bus for overlay rendering
+    editorEventBus.publish("MEDIA_ADDED", {
+      assetId: elem.id,
+      title: elem.title,
+      type: "element",
+    });
+
+    onTriggerFeedback(`Applied ${elem.title} to active panel`);
+  };
 
   return (
     <WorkspaceLayout>
@@ -32,17 +50,17 @@ export const ElementsWorkspace: React.FC<ElementsWorkspaceProps> = ({
         onSearchChange={setSearchQuery}
       />
       <WorkspaceLayout.Content>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           {filtered.map((elem) => (
             <ElementGridCard
               key={elem.id}
               element={elem}
-              onAdd={() => onTriggerFeedback(`Added ${elem.title} to scene`)}
+              onAdd={() => handleAddElement(elem)}
             />
           ))}
         </div>
       </WorkspaceLayout.Content>
-      <WorkspaceLayout.Footer text="Sonikoma Comic Asset Library" />
+      <WorkspaceLayout.Footer text="Sonikoma Vector Comic Asset Engine" />
     </WorkspaceLayout>
   );
 };
