@@ -68,7 +68,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   const ActiveWorkspaceComponent = config.component;
 
   return (
-    <div className="flex h-full overflow-hidden relative">
+    <div className="w-full flex h-full overflow-hidden relative">
       <div className="pointer-events-none absolute bottom-4 left-16 right-0 z-50 flex flex-col gap-2 items-start px-3">
         {toasts.map((t) => (
           <div
@@ -88,10 +88,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
 
       {showContent && (
         <div
-          className="flex-1 overflow-y-auto overflow-x-hidden bg-[#0c0d16]/75 backdrop-blur-2xl border-r border-white/10 shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]"
-          style={{
-            width: config.defaultWidth ? config.defaultWidth - 64 : undefined,
-          }}
+          className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden bg-[#0c0d16]/75 backdrop-blur-2xl border-r border-white/10 shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]"
         >
           <ActiveWorkspaceComponent
             onTriggerFeedback={(msg) => {

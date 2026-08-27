@@ -16,6 +16,10 @@ interface VideoEditorPageProps {
   user?: any;
 }
 
+const DEFAULT_LEFT_WIDTH = 380;
+const DEFAULT_RIGHT_WIDTH = 260;
+const DEFAULT_TIMELINE_HEIGHT = 280;
+
 const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   appLogic,
   navigateTo,
@@ -31,6 +35,126 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
     timeline: true,
   });
   const [viewportZoom, setViewportZoom] = useState(100);
+
+  // ── Panel Resizing Dimensions & Persistence ──────────────────────────────
+  const [leftWidth, setLeftWidth] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sonikoma_left_panel_w");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 260 && parsed <= 650) return parsed;
+      }
+    }
+    return DEFAULT_LEFT_WIDTH;
+  });
+
+  const [rightWidth, setRightWidth] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sonikoma_right_panel_w");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 180 && parsed <= 500) return parsed;
+      }
+    }
+    return DEFAULT_RIGHT_WIDTH;
+  });
+
+  const [timelineHeight, setTimelineHeight] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sonikoma_timeline_h");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 160 && parsed <= 650) return parsed;
+      }
+    }
+    return DEFAULT_TIMELINE_HEIGHT;
+  });
+
+  const [isDraggingLeft, setIsDraggingLeft] = useState(false);
+  const [isDraggingRight, setIsDraggingRight] = useState(false);
+  const [isDraggingTimeline, setIsDraggingTimeline] = useState(false);
+
+  // ── Mouse Drag Handlers for Smooth Studio-Grade Resizing ─────────────────
+  const handleLeftResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingLeft(true);
+    const startX = e.clientX;
+    const startW = leftWidth;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const nextW = Math.min(650, Math.max(260, startW + delta));
+      setLeftWidth(nextW);
+      localStorage.setItem("sonikoma_left_panel_w", String(nextW));
+    };
+
+    const onMouseUp = () => {
+      setIsDraggingLeft(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  const handleRightResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingRight(true);
+    const startX = e.clientX;
+    const startW = rightWidth;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = startX - moveEvent.clientX;
+      const nextW = Math.min(500, Math.max(180, startW + delta));
+      setRightWidth(nextW);
+      localStorage.setItem("sonikoma_right_panel_w", String(nextW));
+    };
+
+    const onMouseUp = () => {
+      setIsDraggingRight(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  const handleTimelineResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingTimeline(true);
+    const startY = e.clientY;
+    const startH = timelineHeight;
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = startY - moveEvent.clientY;
+      const nextH = Math.min(650, Math.max(160, startH + delta));
+      setTimelineHeight(nextH);
+      localStorage.setItem("sonikoma_timeline_h", String(nextH));
+    };
+
+    const onMouseUp = () => {
+      setIsDraggingTimeline(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
 
   const handleZoomLevelChange = (nextZoom: number) => {
     setViewportZoom(Math.min(300, Math.max(20, nextZoom)));
@@ -160,11 +284,11 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
       />
 
       {/* ── Main Workspace Row ───────────────────────────────────────────────── */}
-      <div className="flex-1 flex min-h-0 relative">
+      <div className="flex-1 flex min-h-0 relative select-none">
         {/* Left: Workspace Panel (MiniSidebar + active workspace) */}
         <div
-          className="h-full flex"
-          style={{ width: layoutConfig.mediaBin ? 380 : 96 }}
+          className="h-full flex shrink-0 overflow-hidden"
+          style={{ width: layoutConfig.mediaBin ? leftWidth : 96 }}
         >
           <WorkspacePanel
             defaultWorkspace="story"
@@ -172,6 +296,25 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
             showContent={layoutConfig.mediaBin}
           />
         </div>
+
+        {/* Left Vertical Resizer Splitter */}
+        {layoutConfig.mediaBin && (
+          <div
+            onMouseDown={handleLeftResizeStart}
+            onDoubleClick={() => {
+              setLeftWidth(DEFAULT_LEFT_WIDTH);
+              localStorage.setItem("sonikoma_left_panel_w", String(DEFAULT_LEFT_WIDTH));
+            }}
+            className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
+              isDraggingLeft
+                ? "bg-purple-500/80 shadow-[0_0_8px_rgba(168,85,247,0.8)]"
+                : "bg-white/[0.04] hover:bg-purple-500/50"
+            }`}
+            title="Drag to resize Left Panel (Double click to reset)"
+          >
+            <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-purple-300 transition-colors" />
+          </div>
+        )}
 
         {/* Studio Content Column (Preview Player Top + Timeline Bottom) */}
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
@@ -209,26 +352,69 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               onZoomReset={handleZoomReset}
             />
 
+            {/* Right Vertical Resizer Splitter */}
+            {layoutConfig.rightInspector && (
+              <div
+                onMouseDown={handleRightResizeStart}
+                onDoubleClick={() => {
+                  setRightWidth(DEFAULT_RIGHT_WIDTH);
+                  localStorage.setItem("sonikoma_right_panel_w", String(DEFAULT_RIGHT_WIDTH));
+                }}
+                className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
+                  isDraggingRight
+                    ? "bg-purple-500/80 shadow-[0_0_8px_rgba(168,85,247,0.8)]"
+                    : "bg-white/[0.04] hover:bg-purple-500/50"
+                }`}
+                title="Drag to resize Inspector Panel (Double click to reset)"
+              >
+                <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-purple-300 transition-colors" />
+              </div>
+            )}
+
             {/* Right: Inspector Panel */}
             {layoutConfig.rightInspector && (
               <div
                 className="h-full shrink-0 overflow-hidden"
-                style={{ width: 240 }}
+                style={{ width: rightWidth }}
               >
                 <InspectorPanel />
               </div>
             )}
           </div>
 
+          {/* Bottom Horizontal Resizer Splitter */}
+          {layoutConfig.timeline && (
+            <div
+              onMouseDown={handleTimelineResizeStart}
+              onDoubleClick={() => {
+                setTimelineHeight(DEFAULT_TIMELINE_HEIGHT);
+                localStorage.setItem("sonikoma_timeline_h", String(DEFAULT_TIMELINE_HEIGHT));
+              }}
+              className={`h-2 w-full relative cursor-row-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-t border-b border-white/[0.06] ${
+                isDraggingTimeline
+                  ? "bg-purple-500/80 shadow-[0_0_8px_rgba(168,85,247,0.8)]"
+                  : "bg-[#0c0c14] hover:bg-purple-500/30"
+              }`}
+              title="Drag to resize Timeline (Double click to reset)"
+            >
+              <div className="h-[2px] w-12 rounded-full bg-white/20 group-hover:bg-purple-300 transition-colors" />
+            </div>
+          )}
+
           {/* ── Bottom Multi-Track NLE Timeline ─────────────────────────────── */}
           {layoutConfig.timeline && (
-            <Timeline
-              panels={panels}
-              currentPanelIndex={currentPanelIndex}
-              setCurrentPanelIndex={setCurrentPanelIndex}
-              musicTheme={musicTheme}
-              voiceActor={voiceActor}
-            />
+            <div
+              className="w-full shrink-0 overflow-hidden"
+              style={{ height: timelineHeight }}
+            >
+              <Timeline
+                panels={panels}
+                currentPanelIndex={currentPanelIndex}
+                setCurrentPanelIndex={setCurrentPanelIndex}
+                musicTheme={musicTheme}
+                voiceActor={voiceActor}
+              />
+            </div>
           )}
         </div>
       </div>

@@ -229,7 +229,7 @@ const Timeline: React.FC<TimelineProps> = ({
   const rulerRef = useRef<HTMLDivElement | null>(null);
 
   return (
-    <div className="w-full bg-[#0c0d16]/80 backdrop-blur-2xl border-t border-white/10 flex flex-col shrink-0 select-none h-[280px] z-20 font-sans relative shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
+    <div className="w-full h-full bg-[#0c0d16]/80 backdrop-blur-2xl border-t border-white/10 flex flex-col shrink-0 select-none z-20 font-sans relative shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <TimelineToolbar
         currentPanelIndex={currentPanelIndex}
