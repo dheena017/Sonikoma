@@ -9,6 +9,7 @@ import ClipTrimHandles from "../ClipTrimHandles";
 
 export interface TimelineMusicTrackProps {
   musicTheme?: string;
+  musicUrl?: string;
   totalDuration: number;
   selectedClip: string | null;
   muted: boolean;
@@ -25,6 +26,7 @@ export interface TimelineMusicTrackProps {
 
 export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
   musicTheme,
+  musicUrl,
   totalDuration,
   selectedClip,
   muted,
@@ -166,11 +168,15 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
           <div
             onMouseDown={(e) => handleMoveStart(e, "a1-0", 0, 0, totalDuration * 30)}
             onContextMenu={(e) => onContextMenu(e, "a1-0", 0)}
-            className={`group absolute inset-y-0 rounded-md overflow-hidden bg-[#064e3b] select-none ${
-              movingInfo?.key === "a1-0" ? 'shadow-[0_4px_20px_rgba(52,211,153,0.4)] z-40' :
-                selectedClip === "a1-0" ? 'border border-[#34d399] shadow-[0_0_8px_rgba(52,211,153,0.3)] z-20' :
-                'border border-[#34d399]/50 hover:border-[#34d399]/80'
-            }`}
+            className={`group absolute inset-y-0 rounded-md overflow-hidden select-none border z-10 ${
+              movingInfo?.key === "a1-0"
+                ? "cursor-grabbing shadow-[0_4px_20px_rgba(52,211,153,0.4)] z-40 border-emerald-300"
+                : resizingSide !== null
+                ? "cursor-col-resize border-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.5)] z-30"
+                : selectedClip === "a1-0"
+                ? "cursor-grab border-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.3)] z-20"
+                : "cursor-grab border-emerald-500/40 hover:border-emerald-300/80 z-10"
+            } bg-[#047857]`}
             style={{
               left: `${
                 Math.max(
@@ -181,30 +187,28 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
               }px`,
               width: `${totalDuration * 30}px`,
               cursor: movingInfo?.key === "a1-0" ? "grabbing" : resizingSide !== null ? "col-resize" : "grab",
-              outline:
-                selectedClip === "a1-0"
-                  ? "1.5px solid #34d399"
-                  : "1px solid rgba(16,185,129,0.35)",
-              outlineOffset: "-1px",
-              boxShadow:
-                selectedClip === "a1-0"
-                  ? "0 0 8px rgba(52,211,153,0.3)"
-                  : undefined,
             }}
           >
             {/* Continuous Waveform Envelope */}
             <div className="absolute inset-0 flex items-center px-1">
               <AudioWaveformVisual
-                seed={`bgm-${musicTheme}`}
-                color="#6ee7b7"
-                opacity={0.9}
+                audioUrl={
+                  musicUrl ||
+                  (musicTheme?.startsWith("http") ||
+                  musicTheme?.startsWith("/") ||
+                  musicTheme?.startsWith("blob:")
+                    ? musicTheme
+                    : undefined)
+                }
+                color="#a7f3d0"
+                opacity={0.92}
               />
             </div>
 
             {/* Track Info Badge */}
             <div className="absolute inset-0 flex items-center justify-between px-2.5 z-10 pointer-events-none">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <Music className="h-3 w-3 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] shrink-0" />
+              <div className="flex items-center gap-1.5 min-w-0 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/15 shadow-sm">
+                <Music className="h-3 w-3 text-emerald-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] shrink-0" />
                 <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
                   {musicTheme}
                 </span>
@@ -212,11 +216,11 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
 
               <div className="flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
                 {resizingSide !== null && deltaSecs !== 0 && (
-                  <span className="text-[7px] font-mono font-bold text-emerald-200 bg-emerald-950 px-1 py-0.2 rounded-sm border border-emerald-400/50 animate-pulse">
+                  <span className="text-[7px] font-mono font-bold text-emerald-200 bg-emerald-950 px-1.5 py-0.5 rounded-md border border-emerald-400/50 animate-pulse">
                     {deltaSecs > 0 ? `+${deltaSecs.toFixed(1)}s` : `${deltaSecs.toFixed(1)}s`}
                   </span>
                 )}
-                <span className="text-[8px] font-mono text-emerald-100 bg-black/50 px-1 py-0.2 rounded-sm border border-white/10 shrink-0 font-bold">
+                <span className="text-[8px] font-mono text-emerald-100 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/15 shrink-0 font-bold">
                   {totalDuration.toFixed(1)}s
                 </span>
 
@@ -227,7 +231,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                     e.stopPropagation();
                     onContextMenu(e, "a1-0", 0);
                   }}
-                  className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#0c0c16]/85 hover:bg-emerald-600 text-neutral-300 hover:text-white border border-white/20 hover:border-emerald-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(110,231,183,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                  className="group/btn h-5 px-1.5 flex items-center justify-center rounded-md bg-[#0c0c16]/85 hover:bg-emerald-600 text-neutral-300 hover:text-white border border-white/20 hover:border-emerald-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(110,231,183,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                   title="Music Options"
                 >
                   <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />

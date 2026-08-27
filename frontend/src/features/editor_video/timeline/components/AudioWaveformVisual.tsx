@@ -3,11 +3,12 @@
 // Extracts and renders REAL PCM audio waveform peak data via Web Audio API AudioContext.
 
 import React, { useState, useEffect, useMemo } from "react";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 
 interface AudioWaveformVisualProps {
   audioUrl?: string;
   seed?: number | string;
-  color?: string; // Light lavender/lilac default matching user design
+  color?: string;
   opacity?: number;
   className?: string;
 }
@@ -16,13 +17,13 @@ interface AudioWaveformVisualProps {
 const audioPeaksCache = new Map<string, number[]>();
 
 /** Extracts real acoustic PCM amplitude peaks from an audio file using Web Audio API */
-async function extractRealPeaks(url: string, numBuckets = 220): Promise<number[]> {
+async function extractRealPeaks(url: string, numBuckets = 300): Promise<number[]> {
   if (audioPeaksCache.has(url)) {
     return audioPeaksCache.get(url)!;
   }
 
-  try {
-    const response = await fetch(url);
+  const tryDecode = async (targetUrl: string): Promise<number[]> => {
+    const response = await fetch(targetUrl);
     if (!response.ok) throw new Error(`Failed to load audio: ${response.status}`);
     const arrayBuffer = await response.arrayBuffer();
 
@@ -50,23 +51,37 @@ async function extractRealPeaks(url: string, numBuckets = 220): Promise<number[]
       if (peak > maxPeak) maxPeak = peak;
     }
 
-    // Normalize peaks between 0.06 and 1.0
+    // Normalize peaks between 0.04 and 1.0
     const normalized = rawPeaks.map((p) =>
-      Math.min(1.0, Math.max(0.06, p / maxPeak))
+      Math.min(1.0, Math.max(0.04, p / maxPeak))
     );
 
-    audioPeaksCache.set(url, normalized);
     audioCtx.close().catch(() => {});
     return normalized;
+  };
+
+  try {
+    const peaks = await tryDecode(url);
+    audioPeaksCache.set(url, peaks);
+    return peaks;
   } catch (err) {
-    // If fetching or decoding fails, return fallback
+    // If direct fetch fails (e.g. CORS on remote CDN), try via backend proxy
+    try {
+      const proxied = getProxiedImageUrl(url);
+      if (proxied && proxied !== url) {
+        const peaks = await tryDecode(proxied);
+        audioPeaksCache.set(url, peaks);
+        return peaks;
+      }
+    } catch {
+      // Ignored
+    }
     return [];
   }
 }
 
 export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
   audioUrl,
-  seed = 1,
   color = "#d8b4fe",
   opacity = 0.95,
   className = "",
@@ -76,22 +91,32 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
       ? audioPeaksCache.get(audioUrl)!
       : null
   );
+  const [isLoading, setIsLoading] = useState<boolean>(() => Boolean(audioUrl && !audioPeaksCache.has(audioUrl)));
 
   useEffect(() => {
     if (!audioUrl) {
       setRealPeaks(null);
+      setIsLoading(false);
       return;
     }
 
     if (audioPeaksCache.has(audioUrl)) {
       setRealPeaks(audioPeaksCache.get(audioUrl)!);
+      setIsLoading(false);
       return;
     }
 
     let isMounted = true;
+    setIsLoading(true);
     extractRealPeaks(audioUrl).then((peaks) => {
-      if (isMounted && peaks.length > 0) {
-        setRealPeaks(peaks);
+      if (isMounted) {
+        setRealPeaks(peaks.length > 0 ? peaks : null);
+        setIsLoading(false);
+      }
+    }).catch(() => {
+      if (isMounted) {
+        setRealPeaks(null);
+        setIsLoading(false);
       }
     });
 
@@ -100,59 +125,31 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
     };
   }, [audioUrl]);
 
-  // Construct continuous SVG path from either real decoded peaks or synthesized speech cadence
+  // Construct continuous SVG path from REAL decoded audio peaks
   const pathD = useMemo(() => {
-    const width = 500;
+    const width = 1000;
     const height = 36;
     const midY = height / 2;
-    const maxAmp = midY - 2;
+    const maxAmp = midY - 2.5;
 
+    if (!realPeaks || realPeaks.length === 0) {
+      return null;
+    }
+
+    const numPoints = realPeaks.length;
     const topPoints: [number, number][] = [];
     const bottomPoints: [number, number][] = [];
 
-    if (realPeaks && realPeaks.length > 0) {
-      // ── Render REAL Decoded PCM Audio Peaks ───────────────────────────────
-      const numPoints = realPeaks.length;
-      for (let i = 0; i < numPoints; i++) {
-        const x = (i / (numPoints - 1)) * width;
-        const normalizedAmp = realPeaks[i];
-        const amp = Math.max(0.8, normalizedAmp * maxAmp);
+    for (let i = 0; i < numPoints; i++) {
+      const x = (i / (numPoints - 1)) * width;
+      const normalizedAmp = realPeaks[i];
+      const amp = Math.max(0.6, normalizedAmp * maxAmp);
 
-        topPoints.push([x, midY - amp]);
-        bottomPoints.push([x, midY + amp]);
-      }
-    } else {
-      // ── Acoustic Cadence Approximation while decoding or offline ─────────
-      const str = String(seed);
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = (hash << 5) - hash + str.charCodeAt(i);
-        hash |= 0;
-      }
-      const pseudoRandom = (n: number) => {
-        const x = Math.sin(hash + n * 137.5) * 10000;
-        return x - Math.floor(x);
-      };
-
-      const step = 2; // 250 sample points
-      for (let x = 0; x <= width; x += step) {
-        const progress = x / width;
-        const envelope1 = Math.sin(progress * Math.PI * 7.5 + hash % 3) * 0.45 + 0.55;
-        const envelope2 = Math.sin(progress * Math.PI * 3.2 + 0.8) * 0.35 + 0.65;
-        const wordEnvelope = Math.max(0.12, envelope1 * envelope2);
-
-        const noise = pseudoRandom(x) * 0.65 + 0.35;
-        const amp = Math.min(maxAmp, wordEnvelope * noise * (maxAmp - 1));
-
-        const edgeTaper = Math.sin(Math.min(1, Math.max(0, progress)) * Math.PI);
-        const finalAmp = Math.max(0.8, amp * Math.pow(edgeTaper, 0.4));
-
-        topPoints.push([x, midY - finalAmp]);
-        bottomPoints.push([x, midY + finalAmp]);
-      }
+      topPoints.push([x, midY - amp]);
+      bottomPoints.push([x, midY + amp]);
     }
 
-    // Build SVG path
+    // Build closed polygon for waveform fill
     let d = `M 0,${midY}`;
     topPoints.forEach(([x, y]) => {
       d += ` L ${x.toFixed(1)},${y.toFixed(1)}`;
@@ -165,26 +162,53 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
     d += " Z";
 
     return d;
-  }, [realPeaks, seed]);
+  }, [realPeaks]);
 
   return (
     <svg
-      viewBox="0 0 500 36"
+      viewBox="0 0 1000 36"
       preserveAspectRatio="none"
       className={`w-full h-full pointer-events-none ${className}`}
       fill={color}
       opacity={opacity}
     >
-      <path d={pathD} />
-      {/* Zero crossing line for silence intervals */}
+      {pathD ? (
+        <path d={pathD} />
+      ) : isLoading ? (
+        // Subtle loading audio pulse
+        <line
+          x1="0"
+          y1="18"
+          x2="1000"
+          y2="18"
+          stroke={color}
+          strokeWidth="1.5"
+          strokeDasharray="8 6"
+          opacity={0.6}
+          className="animate-pulse"
+        />
+      ) : (
+        // Clean authentic silence center-line (no fake hardcoded waves)
+        <line
+          x1="0"
+          y1="18"
+          x2="1000"
+          y2="18"
+          stroke={color}
+          strokeWidth="1"
+          opacity={0.35}
+        />
+      )}
+
+      {/* Subtle zero-crossing guide */}
       <line
         x1="0"
         y1="18"
-        x2="500"
+        x2="1000"
         y2="18"
         stroke={color}
-        strokeWidth="0.6"
-        opacity={0.4}
+        strokeWidth="0.5"
+        opacity={0.25}
       />
     </svg>
   );

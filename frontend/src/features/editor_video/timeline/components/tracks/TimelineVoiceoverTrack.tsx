@@ -295,15 +295,15 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                 {/* Audio Waveform Envelope */}
                 <div className="absolute inset-0 flex items-center px-1">
                   <AudioWaveformVisual
-                    seed={`vo-${idx}-${speaker}-${dialogue.slice(0, 10)}`}
+                    audioUrl={panel.speech_audio_url || panel.narrative_audio_url || panel.audio_url}
                     color="#e9d5ff"
-                    opacity={0.9}
+                    opacity={0.92}
                   />
                 </div>
 
                 {/* Voice dialogue badge */}
                 <div className="absolute inset-0 flex items-center justify-between px-2 z-10 pointer-events-none">
-                  <div className="flex items-center gap-1.5 min-w-0">
+                  <div className="flex items-center gap-1.5 min-w-0 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/15 shadow-sm">
                     <Mic className="h-3 w-3 text-purple-200 shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                     <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
                       {label}

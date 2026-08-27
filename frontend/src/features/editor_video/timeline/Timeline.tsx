@@ -492,6 +492,13 @@ const Timeline: React.FC<TimelineProps> = ({
             {!s.hiddenTracks["A1"] && (
               <TimelineMusicTrack
                 musicTheme={musicTheme}
+                musicUrl={
+                  (projectStore?.activeProjectData as any)?.bgm_url ||
+                  (projectStore?.activeProjectData as any)?.music_url ||
+                  (musicTheme?.startsWith("http") || musicTheme?.startsWith("/")
+                    ? musicTheme
+                    : undefined)
+                }
                 totalDuration={totalDuration}
                 selectedClip={s.selectedClip}
                 {...trackControls("A1")}
