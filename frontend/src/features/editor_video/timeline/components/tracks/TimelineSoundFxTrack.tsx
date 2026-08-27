@@ -131,7 +131,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                 key={key}
                 onClick={() => onClipClick(key, idx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group/clip absolute top-0 bottom-0 rounded-2xl overflow-hidden cursor-pointer transition-all border select-none ${
+                className={`group/clip absolute top-0 bottom-0 rounded-md overflow-hidden cursor-pointer transition-all border select-none ${
                   isResizing
                     ? "ring-2 ring-cyan-300 border-cyan-300 shadow-[0_0_20px_rgba(103,232,249,0.7)] z-30 brightness-115"
                     : selectedClip === key
@@ -173,7 +173,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                     </span>
                   </div>
 
-                  <span className="text-[8px] font-mono font-bold text-cyan-100 bg-black/50 px-1 py-0.2 rounded border border-white/10 shrink-0 ml-1">
+                  <span className="text-[8px] font-mono font-bold text-cyan-100 bg-black/50 px-1 py-0.2 rounded-sm border border-white/10 shrink-0 ml-1">
                     {dur.toFixed(1)}s
                   </span>
                 </div>
@@ -181,7 +181,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                 {/* Left Trim Handle - Wide Grab Area */}
                 <div
                   onMouseDown={(e) => handleResizeStart(e, key, "left", dur)}
-                  className="absolute top-0 bottom-0 left-0 w-3 z-30 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 flex items-center justify-center bg-cyan-400/40 hover:bg-cyan-300/90 rounded-l transition-opacity"
+                  className="absolute top-0 bottom-0 left-0 w-3 z-30 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 flex items-center justify-center bg-cyan-400/40 hover:bg-cyan-300/90 rounded-l-sm transition-opacity"
                   title="Drag to trim start"
                 >
                   <div className="w-[1.5px] h-3.5 bg-white rounded-full shadow" />
@@ -190,7 +190,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                 {/* Right Trim Handle - Wide Grab Area */}
                 <div
                   onMouseDown={(e) => handleResizeStart(e, key, "right", dur)}
-                  className="absolute top-0 bottom-0 right-0 w-3 z-30 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 flex items-center justify-center bg-cyan-400/40 hover:bg-cyan-300/90 rounded-r transition-opacity"
+                  className="absolute top-0 bottom-0 right-0 w-3 z-30 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 flex items-center justify-center bg-cyan-400/40 hover:bg-cyan-300/90 rounded-r-sm transition-opacity"
                   title="Drag to resize duration"
                 >
                   <div className="w-[1.5px] h-3.5 bg-white rounded-full shadow" />
@@ -205,7 +205,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
           <button
             type="button"
             onClick={onAddSfx}
-            className="absolute top-0 bottom-0 px-2 rounded-xl border border-dashed border-cyan-500/40 hover:border-cyan-400 bg-cyan-950/20 hover:bg-cyan-900/40 text-cyan-300 hover:text-white flex items-center gap-1 transition-all cursor-pointer z-10 select-none text-[8px] font-mono font-bold shrink-0"
+            className="absolute top-0 bottom-0 w-24 rounded-md border border-dashed border-cyan-500/40 hover:border-cyan-400 bg-cyan-950/25 hover:bg-cyan-900/40 text-cyan-300 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer z-10 select-none text-[9px] font-mono font-bold shrink-0 shadow-sm hover:shadow-cyan-500/20"
             style={{
               left:
                 panelTimings.length > 0 &&
@@ -213,14 +213,14 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                   ? `${
                       panelTimings[panelTimings.length - 1].startPx! +
                       panelTimings[panelTimings.length - 1].widthPx! +
-                      6
+                      8
                     }px`
-                  : `calc(100% + 4px)`,
+                  : `calc(100% + 8px)`,
             }}
             title="Add sound effect"
           >
-            <Plus className="h-2.5 w-2.5 text-cyan-400" />
-            <span>+ Add SFX</span>
+            <Plus className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+            <span>Add SFX</span>
           </button>
         )}
       </div>

@@ -124,7 +124,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 key={key}
                 onClick={() => onClipClick(key, idx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group/clip absolute top-0 bottom-0 flex items-center justify-between gap-1 cursor-pointer truncate transition-all rounded-lg border text-[9px] font-mono font-bold px-2.5 bg-indigo-950/90 border-indigo-500/40 text-indigo-200 select-none ${
+                className={`group/clip absolute top-0 bottom-0 flex items-center justify-between gap-1 cursor-pointer truncate transition-all rounded-md border text-[9px] font-mono font-bold px-2.5 bg-indigo-950/90 border-indigo-500/40 text-indigo-200 select-none ${
                   isResizing
                     ? "ring-2 ring-indigo-400 brightness-125 z-30 shadow-lg"
                     : selectedClip === key
@@ -148,14 +148,14 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                   <span className="truncate">{fx}</span>
                 </div>
 
-                <span className="text-[7px] font-mono text-indigo-300/80 bg-black/40 px-1 py-0.2 rounded border border-indigo-500/20 shrink-0 ml-1">
+                <span className="text-[7px] font-mono text-indigo-300/80 bg-black/40 px-1 py-0.2 rounded-sm border border-indigo-500/20 shrink-0 ml-1">
                   {dur.toFixed(1)}s
                 </span>
 
                 {/* Left Trim Handle - Wide Grab Area */}
                 <div
                   onMouseDown={(e) => handleResizeStart(e, key, "left", dur)}
-                  className="absolute top-0 bottom-0 left-0 w-3 z-30 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 flex items-center justify-center bg-indigo-500/30 hover:bg-indigo-400/80 rounded-l transition-opacity"
+                  className="absolute top-0 bottom-0 left-0 w-3 z-30 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 flex items-center justify-center bg-indigo-500/30 hover:bg-indigo-400/80 rounded-l-sm transition-opacity"
                   title="Drag to trim start"
                 >
                   <div className="w-[1.5px] h-3.5 bg-white/90 rounded-full" />
@@ -164,7 +164,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 {/* Right Trim Handle - Wide Grab Area */}
                 <div
                   onMouseDown={(e) => handleResizeStart(e, key, "right", dur)}
-                  className="absolute top-0 bottom-0 right-0 w-3 z-30 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 flex items-center justify-center bg-indigo-500/30 hover:bg-indigo-400/80 rounded-r transition-opacity"
+                  className="absolute top-0 bottom-0 right-0 w-3 z-30 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 flex items-center justify-center bg-indigo-500/30 hover:bg-indigo-400/80 rounded-r-sm transition-opacity"
                   title="Drag to resize duration"
                 >
                   <div className="w-[1.5px] h-3.5 bg-white/90 rounded-full" />
@@ -179,7 +179,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
           <button
             type="button"
             onClick={onAddFx}
-            className="absolute top-0 bottom-0 px-2 rounded-lg border border-dashed border-indigo-500/40 hover:border-indigo-400 bg-indigo-950/20 hover:bg-indigo-900/40 text-indigo-300 hover:text-white flex items-center gap-1 transition-all cursor-pointer z-10 select-none text-[8px] font-mono font-bold shrink-0"
+            className="absolute top-0 bottom-0 w-24 rounded-md border border-dashed border-indigo-500/40 hover:border-indigo-400 bg-indigo-950/25 hover:bg-indigo-900/40 text-indigo-300 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer z-10 select-none text-[9px] font-mono font-bold shrink-0 shadow-sm hover:shadow-indigo-500/20"
             style={{
               left:
                 panelTimings.length > 0 &&
@@ -187,14 +187,14 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                   ? `${
                       panelTimings[panelTimings.length - 1].startPx! +
                       panelTimings[panelTimings.length - 1].widthPx! +
-                      6
+                      8
                     }px`
-                  : `calc(100% + 4px)`,
+                  : `calc(100% + 8px)`,
             }}
             title="Add new camera motion FX"
           >
-            <Plus className="h-2.5 w-2.5 text-indigo-400" />
-            <span>+ Add FX</span>
+            <Plus className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+            <span>Add FX</span>
           </button>
         )}
       </div>

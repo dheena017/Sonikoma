@@ -95,7 +95,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
           <div
             onClick={() => onClipClick("a1-0", 0)}
             onContextMenu={(e) => onContextMenu(e, "a1-0", 0)}
-            className={`group/music absolute inset-y-0 inset-x-0 rounded-2xl overflow-hidden cursor-pointer transition-all border ${
+            className={`group/music absolute inset-y-0 inset-x-0 rounded-md overflow-hidden cursor-pointer transition-all border ${
               isResizing
                 ? "border-emerald-300 ring-2 ring-emerald-400/80 shadow-[0_0_20px_rgba(52,211,153,0.7)] brightness-115"
                 : selectedClip === "a1-0"
@@ -120,7 +120,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                   {musicTheme}
                 </span>
               </div>
-              <span className="text-[8px] font-mono text-emerald-100 bg-black/50 px-1 py-0.2 rounded border border-white/10 shrink-0 font-bold">
+              <span className="text-[8px] font-mono text-emerald-100 bg-black/50 px-1 py-0.2 rounded-sm border border-white/10 shrink-0 font-bold">
                 {totalDuration.toFixed(1)}s
               </span>
             </div>
@@ -128,7 +128,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
             {/* Right Trim Handle */}
             <div
               onMouseDown={(e) => handleResizeStart(e, "right")}
-              className="absolute top-0 bottom-0 right-0 w-2.5 z-30 cursor-ew-resize opacity-0 group-hover/music:opacity-100 flex items-center justify-center bg-white/30 hover:bg-white/60 rounded-r transition-opacity"
+              className="absolute top-0 bottom-0 right-0 w-3 z-30 cursor-ew-resize opacity-0 group-hover/music:opacity-100 flex items-center justify-center bg-white/30 hover:bg-white/60 rounded-r-sm transition-opacity"
               title="Drag to trim music track"
             >
               <div className="w-[1.5px] h-3.5 bg-white rounded-full shadow" />
@@ -138,7 +138,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
           <button
             type="button"
             onClick={onAddMusic}
-            className="h-full flex items-center gap-1 text-[9px] font-mono text-neutral-500 hover:text-emerald-300 italic px-2 hover:bg-emerald-950/20 rounded-lg transition-colors cursor-pointer"
+            className="h-full flex items-center gap-1 text-[9px] font-mono text-neutral-500 hover:text-emerald-300 italic px-2 hover:bg-emerald-950/20 rounded-md transition-colors cursor-pointer"
           >
             <Plus className="h-2.5 w-2.5" />
             <span>+ Add background music / audio soundtrack</span>
@@ -150,12 +150,17 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
           <button
             type="button"
             onClick={onAddMusic}
-            className="absolute top-0 bottom-0 px-2 rounded-xl border border-dashed border-emerald-500/40 hover:border-emerald-400 bg-emerald-950/20 hover:bg-emerald-900/40 text-emerald-300 hover:text-white flex items-center gap-1 transition-all cursor-pointer z-10 select-none text-[8px] font-mono font-bold shrink-0"
-            style={{ left: `calc(100% + 4px)` }}
+            className="absolute top-0 bottom-0 w-24 rounded-md border border-dashed border-emerald-500/40 hover:border-emerald-400 bg-emerald-950/25 hover:bg-emerald-900/40 text-emerald-300 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer z-10 select-none text-[9px] font-mono font-bold shrink-0 shadow-sm hover:shadow-emerald-500/20"
+            style={{
+              left:
+                totalDuration > 0
+                  ? `${totalDuration * 30 + 8}px`
+                  : `calc(100% + 8px)`,
+            }}
             title="Add background music"
           >
-            <Plus className="h-2.5 w-2.5 text-emerald-400" />
-            <span>+ Add BGM</span>
+            <Plus className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+            <span>Add BGM</span>
           </button>
         )}
       </div>

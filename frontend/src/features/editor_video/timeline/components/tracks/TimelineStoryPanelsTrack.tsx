@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import TrackLabel from "../TrackLabel";
 import { Keyframe } from "../../types";
 import { getProxiedImageUrl } from "@/utils";
-import { ImagePlus } from "lucide-react";
+import { Film, ImagePlus } from "lucide-react";
 
 export interface PanelTiming {
   index: number;
@@ -149,7 +149,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     key={key}
                     onClick={() => onClipClick(key, idx)}
                     onContextMenu={(e) => onContextMenu(e, key, idx)}
-                    className={`absolute top-0 bottom-0 rounded-xl overflow-hidden cursor-pointer transition-all border group/panel select-none ${
+                    className={`absolute top-0 bottom-0 rounded-md overflow-hidden cursor-pointer transition-all border group/panel select-none ${
                       isResizing
                         ? "border-purple-400 ring-2 ring-purple-400/80 shadow-[0_0_20px_rgba(168,85,247,0.7)] z-30 brightness-110"
                         : isActive
@@ -172,25 +172,32 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     {imgUrl ? (
                       <img
                         src={imgUrl}
-                        alt={`P${idx + 1}`}
-                        className="w-full h-full object-cover group-hover/panel:scale-105 transition-transform duration-300 pointer-events-none"
+                        alt={`Panel ${idx + 1}`}
+                        className="w-full h-full object-cover select-none pointer-events-none"
+                        loading="lazy"
                       />
                     ) : (
-                      <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-[9px] font-mono text-neutral-500">
-                        #{idx + 1}
+                      <div className="w-full h-full flex flex-col items-center justify-center text-neutral-600 bg-neutral-900/60 p-1">
+                        <Film className="h-4 w-4 mb-0.5 opacity-40" />
+                        <span className="text-[8px] font-mono opacity-50">
+                          P#{idx + 1}
+                        </span>
                       </div>
                     )}
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+                    {/* Gradient Overlay for Contrast */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
 
-                    {/* Panel # Badge */}
-                    <span className="absolute bottom-1 left-1 text-[8px] font-mono font-black bg-black/80 text-purple-200 px-1 py-0.2 rounded border border-purple-500/30 leading-tight">
-                      #{idx + 1}
-                    </span>
+                    {/* Badge: Panel Index */}
+                    <div className="absolute top-1 left-1 flex items-center gap-1 z-10">
+                      <span className="text-[8px] font-mono font-bold text-white bg-black/70 px-1 py-0.5 rounded-sm border border-white/10">
+                        #{idx + 1}
+                      </span>
+                    </div>
 
-                    {/* Duration Tag */}
+                    {/* Live Duration Badge */}
                     <span
-                      className={`absolute top-1 right-1 text-[7px] font-mono px-1 rounded transition-colors ${
+                      className={`absolute top-1 right-1 text-[7px] font-mono px-1 rounded-sm transition-colors ${
                         isResizing
                           ? "bg-purple-600 text-white font-bold shadow"
                           : "bg-black/80 text-neutral-300"
@@ -202,7 +209,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     {/* Left Drag Resize Handle - Wide Grab Area */}
                     <div
                       onMouseDown={(e) => handleResizeStart(e, idx, "left", dur)}
-                      className="absolute top-0 bottom-0 left-0 w-3.5 z-30 cursor-ew-resize opacity-0 group-hover/panel:opacity-100 flex items-center justify-center bg-purple-500/40 hover:bg-purple-400/90 rounded-l transition-opacity"
+                      className="absolute top-0 bottom-0 left-0 w-3.5 z-30 cursor-ew-resize opacity-0 group-hover/panel:opacity-100 flex items-center justify-center bg-purple-500/40 hover:bg-purple-400/90 rounded-l-sm transition-opacity"
                       title="Drag to trim start duration"
                     >
                       <div className="w-[1.5px] h-4 bg-white rounded-full shadow" />
@@ -211,7 +218,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     {/* Right Drag Resize Handle - Wide Grab Area */}
                     <div
                       onMouseDown={(e) => handleResizeStart(e, idx, "right", dur)}
-                      className="absolute top-0 bottom-0 right-0 w-3.5 z-30 cursor-ew-resize opacity-0 group-hover/panel:opacity-100 flex items-center justify-center bg-purple-500/40 hover:bg-purple-400/90 rounded-r transition-opacity"
+                      className="absolute top-0 bottom-0 right-0 w-3.5 z-30 cursor-ew-resize opacity-0 group-hover/panel:opacity-100 flex items-center justify-center bg-purple-500/40 hover:bg-purple-400/90 rounded-r-sm transition-opacity"
                       title="Drag to increase / decrease duration"
                     >
                       <div className="w-[1.5px] h-4 bg-white rounded-full shadow" />
@@ -224,7 +231,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
               <button
                 type="button"
                 onClick={onAddPanel}
-                className="absolute top-0 bottom-0 w-24 rounded-xl border border-dashed border-purple-500/40 hover:border-purple-400 bg-purple-950/20 hover:bg-purple-900/40 text-purple-300 hover:text-white flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer z-10 select-none shadow-sm hover:shadow-purple-500/20 shrink-0"
+                className="absolute top-0 bottom-0 w-24 rounded-md border border-dashed border-purple-500/40 hover:border-purple-400 bg-purple-950/25 hover:bg-purple-900/40 text-purple-300 hover:text-white flex flex-col items-center justify-center gap-1 transition-all cursor-pointer z-10 select-none shadow-sm hover:shadow-purple-500/20 shrink-0"
                 style={{
                   left:
                     panelTimings.length > 0 &&
@@ -232,14 +239,14 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                       ? `${
                           panelTimings[panelTimings.length - 1].startPx! +
                           panelTimings[panelTimings.length - 1].widthPx! +
-                          6
+                          8
                         }px`
-                      : `calc(100% + 4px)`,
+                      : `calc(100% + 8px)`,
                 }}
                 title="Add new panel / frame"
               >
                 <ImagePlus className="h-4 w-4 text-purple-400" />
-                <span className="text-[8px] font-mono font-bold">+ Add Frame</span>
+                <span className="text-[9px] font-mono font-bold">Add Frame</span>
               </button>
             </div>
           )}
