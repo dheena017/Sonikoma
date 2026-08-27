@@ -58,12 +58,25 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   user,
   addNotification,
 }) => {
+  // Resolve live user from prop or LocalStorage session cache
+  const activeUser = React.useMemo(() => {
+    if (user && Object.keys(user).length > 0) return user;
+    try {
+      const stored =
+        localStorage.getItem("sonikoma_user") ||
+        localStorage.getItem("user") ||
+        sessionStorage.getItem("sonikoma_user");
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return null;
+  }, [user]);
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [credits, setCredits] = useState<number | null>(
-    user?.credits !== undefined ? user.credits : null
+    activeUser?.credits !== undefined ? activeUser.credits : null
   );
 
   const { activeProjectId, activeProjectData, projectState, setDrawerOpen } =
@@ -381,22 +394,28 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           aria-label="Open User profile"
         >
           <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
-            {user?.full_name ||
-              user?.username ||
-              (user?.email ? user.email.split("@")[0] : "Studio Creator")}
+            {activeUser?.full_name ||
+              activeUser?.username ||
+              (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}
           </span>
           <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
             <img
-              key={user?.avatar_url || user?.full_name || "avatar"}
-              src={getUserAvatarUrl(user)}
+              key={activeUser?.avatar_url || activeUser?.full_name || "avatar"}
+              src={getUserAvatarUrl(activeUser)}
               referrerPolicy="no-referrer"
+              onLoad={(e) => {
+                e.currentTarget.classList.remove("opacity-0");
+                e.currentTarget.classList.add("opacity-100");
+              }}
               onError={(e) => {
                 const target = e.currentTarget as HTMLImageElement;
                 target.onerror = null;
                 target.src = DEFAULT_USER_AVATAR_DATA_URI;
+                target.classList.remove("opacity-0");
+                target.classList.add("opacity-100");
               }}
               alt="User Avatar"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
             />
           </div>
         </button>

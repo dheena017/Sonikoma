@@ -13,6 +13,7 @@ interface VideoEditorPageProps {
   navigateTo?: (path: string) => void;
   onBackToApp?: () => void;
   projectTitle?: string;
+  user?: any;
 }
 
 const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
@@ -20,6 +21,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   navigateTo,
   onBackToApp,
   projectTitle,
+  user,
 }) => {
   const [activeNav, setActiveNav] = useState("project");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -141,6 +143,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
         onTogglePanel={handleTogglePanel}
         panelsCount={panels.length}
         navigateTo={navigateTo}
+        user={user || appLogic?.user}
       />
 
       {/* ── Slide-Out Full Sidebar Drawer ───────────────────────────────────── */}

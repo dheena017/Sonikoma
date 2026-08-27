@@ -95,6 +95,19 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
   user,
   addNotification,
 }) => {
+  // Resolve live user from prop or LocalStorage session cache
+  const activeUser = React.useMemo(() => {
+    if (user && Object.keys(user).length > 0) return user;
+    try {
+      const stored =
+        localStorage.getItem("sonikoma_user") ||
+        localStorage.getItem("user") ||
+        sessionStorage.getItem("sonikoma_user");
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return null;
+  }, [user]);
+
   const [showCustomizeLayout, setShowCustomizeLayout] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
@@ -102,8 +115,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
   const [credits, setCredits] = useState<number | null>(
     userCredits !== undefined && userCredits !== null
       ? userCredits
-      : user?.credits !== undefined
-      ? user.credits
+      : activeUser?.credits !== undefined
+      ? activeUser.credits
       : null
   );
 
@@ -206,16 +219,6 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             <span className="font-black text-base sm:text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
               Sonikoma
             </span>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-2 ml-1 bg-[#121218] border border-neutral-800 px-3 py-1 rounded-lg text-xs font-semibold text-neutral-200 cursor-pointer hover:border-neutral-700 transition-all max-w-[240px] truncate">
-            <span className="text-neutral-400 font-normal shrink-0">
-              Project:
-            </span>
-            <span className="font-semibold text-white truncate">
-              {displayTitle}
-            </span>
-            <ChevronDown className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
           </div>
         </div>
 
@@ -437,33 +440,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           </div>
 
-          {/* User Profile Pill at Far Right End (Image 3 Style) */}
-          <button
-            onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-2 p-1.5 pl-3 rounded-full bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-850 transition-all cursor-pointer select-none group shrink-0 ml-1 shadow-sm active:scale-95"
-            title="View Profile & Account Settings"
-            aria-label="Open User profile"
-          >
-            <span className="text-xs font-bold text-neutral-300 group-hover:text-white truncate max-w-[120px] hidden sm:inline font-sans px-2 py-0.5 rounded-md bg-neutral-800 border border-neutral-750">
-              {user?.full_name ||
-                user?.username ||
-                (user?.email ? user.email.split("@")[0] : "Studio Creator")}
-            </span>
-            <img
-              key={user?.avatar_url || user?.full_name || "avatar"}
-              src={getUserAvatarUrl(user)}
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                const target = e.currentTarget as HTMLImageElement;
-                target.onerror = null;
-                target.src = DEFAULT_USER_AVATAR_DATA_URI;
-              }}
-              alt="User Avatar"
-              className="w-6 h-6 rounded-full object-cover border border-purple-500/40 shrink-0 shadow-xs bg-purple-950/40"
-            />
-          </button>
-
-          {/* Save Button */}
+          {/* Save Button (to the left of Profile Picture & Name) */}
           {onSave && (
             <button
               onClick={onSave}
@@ -490,27 +467,38 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           )}
 
-          {/* Export Button */}
+          {/* User Profile Pill at Far Right End (Matches MainHeader) */}
           <button
-            onClick={onExport}
-            disabled={isRendering}
-            className={`relative overflow-hidden px-4 h-8 rounded-lg font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 border shrink-0 ${
-              isRendering
-                ? "bg-purple-900/60 text-purple-200 cursor-wait border-purple-500/30"
-                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-white/10 cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
-            }`}
+            onClick={() => navigateTo && navigateTo("/profile")}
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
+            title="View Profile & Account Settings"
+            aria-label="Open User profile"
           >
-            {isRendering ? (
-              <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-300" />
-                <span>Exporting {renderProgress}%</span>
-              </>
-            ) : (
-              <>
-                <Film className="h-3.5 w-3.5 text-purple-200" />
-                <span>EXPORT</span>
-              </>
-            )}
+            <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+              {activeUser?.full_name ||
+                activeUser?.username ||
+                (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}
+            </span>
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+              <img
+                key={activeUser?.avatar_url || activeUser?.full_name || "avatar"}
+                src={getUserAvatarUrl(activeUser)}
+                referrerPolicy="no-referrer"
+                onLoad={(e) => {
+                  e.currentTarget.classList.remove("opacity-0");
+                  e.currentTarget.classList.add("opacity-100");
+                }}
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = DEFAULT_USER_AVATAR_DATA_URI;
+                  target.classList.remove("opacity-0");
+                  target.classList.add("opacity-100");
+                }}
+                alt="User Avatar"
+                className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
+              />
+            </div>
           </button>
         </div>
       </header>

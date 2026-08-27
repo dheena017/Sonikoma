@@ -1558,6 +1558,7 @@ export default function AppRouter(props: AppRouterProps) {
                 appLogic={memoizedAppLogic}
                 navigateTo={navigateTo}
                 onBackToApp={handleNavigateHome}
+                user={user}
               />
             </React.Suspense>
           </div>
