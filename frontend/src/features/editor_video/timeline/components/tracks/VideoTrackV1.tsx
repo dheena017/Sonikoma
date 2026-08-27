@@ -3,9 +3,8 @@
 
 import React from "react";
 import TrackLabel from "../TrackLabel";
-import ClipBlock from "../clips/ClipBlock";
-import KeyframeTrack from "../keyframes/KeyframeTrack";
 import { Keyframe } from "../../types";
+import { getProxiedImageUrl } from "@/utils";
 
 interface VideoTrackV1Props {
   panels: any[];
@@ -28,7 +27,7 @@ interface VideoTrackV1Props {
 }
 
 const VideoTrackV1: React.FC<VideoTrackV1Props> = ({
-  panels,
+  panels = [],
   currentPanelIndex,
   selectedClip,
   locked,
@@ -41,10 +40,6 @@ const VideoTrackV1: React.FC<VideoTrackV1Props> = ({
   onClipClick,
   onContextMenu,
   getClipDuration,
-  onDurationChange,
-  onSelectKeyframe,
-  onCycleEasing,
-  onAddKeyframe,
 }) => (
   <div className="flex flex-col border-b border-white/[0.04]">
     <div className="h-14 flex items-center">
@@ -61,92 +56,68 @@ const VideoTrackV1: React.FC<VideoTrackV1Props> = ({
         onToggleMute={() => {}}
       />
       <div className="flex-1 relative h-11 mx-1 overflow-x-auto [scrollbar-width:none]">
-        <div className="flex items-center gap-1 h-full">
-          {panels.map((panel: any, idx: number) => {
-            const imgUrl =
-              panel.thumbnail ||
-              panel.image_url ||
-              panel.img_url ||
-              panel.panel_url ||
-              panel.imageUrl ||
-              panel.url ||
-              panel.original_url ||
-              panel.src ||
-              `https://placehold.co/100x160/1a1a24/a855f7?text=${idx + 1}`;
-            const isActive = idx === currentPanelIndex;
-            const key = `v1-${idx}`;
-            const dur = getClipDuration(key);
-            const clipKeyframes = keyframesByClip[key] ?? [];
+        {panels.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-[10px] font-mono text-neutral-500 border border-dashed border-white/10 rounded-lg px-4 bg-black/20">
+            No video panels in storyboard — Add frames from Imported Assets
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 h-full">
+            {panels.map((panel: any, idx: number) => {
+              const rawUrl =
+                panel.image_url ||
+                panel.imageUrl ||
+                panel.url ||
+                panel.original_url ||
+                panel.thumbnail ||
+                "";
+              const imgUrl = rawUrl ? getProxiedImageUrl(rawUrl) : "";
+              const isActive = idx === currentPanelIndex;
+              const key = `v1-${idx}`;
+              const dur = panel.duration || getClipDuration(key) || 3.5;
 
-            return (
-              <React.Fragment key={key}>
+              return (
                 <div
+                  key={key}
                   onClick={() => onClipClick(key, idx)}
                   onContextMenu={(e) => onContextMenu(e, key, idx)}
-                  className={`h-full rounded-lg overflow-hidden relative flex-none cursor-pointer transition-all border group ${
+                  className={`h-full rounded-xl overflow-hidden relative flex-none cursor-pointer transition-all border group select-none ${
                     isActive
-                      ? "border-purple-400 ring-2 ring-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.45)] w-16"
-                      : "border-white/10 hover:border-purple-400/50 w-11"
-                  }`}
+                      ? "border-purple-400 ring-2 ring-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.5)] w-20"
+                      : selectedClip === key
+                      ? "border-purple-500 ring-1 ring-purple-400 w-16"
+                      : "border-white/10 hover:border-purple-400/50 w-14"
+                  } bg-[#090912]`}
                 >
-                  <img
-                    src={imgUrl}
-                    alt={`P${idx + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                  <span className="absolute bottom-0.5 left-0.5 text-[7px] font-mono font-black bg-black/60 text-purple-300 px-0.5 rounded leading-tight">
+                  {imgUrl ? (
+                    <img
+                      src={imgUrl}
+                      alt={`P${idx + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-neutral-900 flex items-center justify-center text-[9px] font-mono text-neutral-500">
+                      #{idx + 1}
+                    </div>
+                  )}
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+
+                  {/* Panel # Badge */}
+                  <span className="absolute bottom-1 left-1 text-[8px] font-mono font-black bg-black/80 text-purple-200 px-1 py-0.2 rounded border border-purple-500/30 leading-tight">
                     #{idx + 1}
                   </span>
-                  {isActive && (
-                    <div className="absolute inset-0 bg-purple-500/10" />
-                  )}
-                  <span className="absolute top-0.5 right-0.5 text-[7px] font-mono bg-black/80 text-white px-0.5 rounded leading-tight font-bold">
-                    {dur.toFixed(1)}s
+
+                  {/* Duration Tag */}
+                  <span className="absolute top-1 right-1 text-[7px] font-mono bg-black/80 text-neutral-300 px-1 rounded">
+                    {dur}s
                   </span>
                 </div>
-
-                {/* Transition gap marker */}
-                {idx < panels.length - 1 && (
-                  <div className="w-2.5 h-2.5 rounded-sm bg-[#1a1a24] border border-white/10 text-[7px] font-bold text-neutral-600 flex items-center justify-center cursor-pointer hover:text-purple-300 hover:border-purple-500/50 shrink-0 transition-colors">
-                    ?
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
-
-    {/* Keyframe Sub-row */}
-    {keyframesVisible && (
-      <div className="flex items-center">
-        <div className="w-28 shrink-0 border-r border-white/5 h-3 bg-black/50 text-[8px] font-mono text-neutral-500 flex items-center px-3">
-          <span>Keyframes</span>
-        </div>
-        <div className="flex-1 mx-1">
-          {panels.map((_, idx) => {
-            const key = `v1-${idx}`;
-            const dur = getClipDuration(key);
-            const kfs = keyframesByClip[key] ?? [];
-
-            return (
-              <KeyframeTrack
-                key={key}
-                clipKey={key}
-                clipDuration={dur}
-                keyframes={kfs}
-                selectedKeyframeId={selectedKeyframeId}
-                onSelectKeyframe={(id) => onSelectKeyframe?.(id)}
-                onCycleEasing={(kfId) => onCycleEasing?.(key, kfId)}
-                onAddKeyframe={(t) => onAddKeyframe?.(key, t)}
-              />
-            );
-          })}
-        </div>
-      </div>
-    )}
   </div>
 );
 

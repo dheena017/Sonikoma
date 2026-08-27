@@ -15,7 +15,6 @@ import {
   Play,
   Pause,
 } from "lucide-react";
-import RepoRefChip from "./RepoRefChip";
 
 interface TimelineToolbarProps {
   currentPanelIndex: number;
@@ -174,13 +173,13 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         </ToolBtn>
       </div>
 
-      {/* ── Centre: panel info + repo ref ────────────────────────────────────── */}
+      {/* ── Centre: panel info & controls ───────────────────────────────────── */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 text-[10px] font-mono text-neutral-500">
           <span>
             Panel{" "}
             <span className="text-purple-300 font-bold">
-              {currentPanelIndex + 1}
+              {totalPanels > 0 ? currentPanelIndex + 1 : 0}
             </span>{" "}
             / {totalPanels}
           </span>
@@ -211,8 +210,6 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
             )}
           </button>
         </div>
-
-        <RepoRefChip gitHash="main@a3f9c1" cacheAge="2m ago" />
       </div>
 
       {/* ── Progress Bar aligned to timeline track ─────────────────────────── */}

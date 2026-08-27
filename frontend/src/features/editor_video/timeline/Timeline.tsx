@@ -23,17 +23,22 @@ import AudioTrackA1 from "./components/tracks/AudioTrackA1";
 import AudioTrackA2 from "./components/tracks/AudioTrackA2";
 import AudioTrackA3 from "./components/tracks/AudioTrackA3";
 import { DEFAULT_PANEL_DURATION } from "./types";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 export type { TimelineProps };
 
 /** Multi-track NLE timeline subsystem. */
 const Timeline: React.FC<TimelineProps> = ({
-  panels = [],
+  panels: propsPanels = [],
   currentPanelIndex = 0,
   setCurrentPanelIndex,
-  musicTheme = "Orchestral Battle Theme",
-  voiceActor = "Standard Comic Narrator",
+  musicTheme = "",
+  voiceActor = "",
 }) => {
+  const projectStore = useProjectStore();
+  const activePanels = projectStore?.activeProjectData?.panels ?? [];
+  const panels = propsPanels.length > 0 ? propsPanels : activePanels;
+
   const s = useTimelineState(setCurrentPanelIndex);
   const pacing = useAIPacing(panels, s.clipDurations);
 
@@ -48,11 +53,12 @@ const Timeline: React.FC<TimelineProps> = ({
     width: number;
   } | null>(null);
 
-  // Always show at least 1 panel slot — empty array = 1 placeholder panel
-  const displayPanels = panels.length > 0 ? panels : [{}];
-
+  const displayPanels = panels;
   const totalPanels = displayPanels.length;
-  const totalDuration = totalPanels * DEFAULT_PANEL_DURATION;
+  const totalDuration = panels.reduce(
+    (acc, p: any) => acc + (p.duration || DEFAULT_PANEL_DURATION),
+    0
+  );
   const playheadPct =
     totalDuration > 0
       ? Math.min(Math.max((timelineTime / totalDuration) * 100, 0), 100)

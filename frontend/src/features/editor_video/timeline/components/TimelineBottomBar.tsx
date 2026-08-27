@@ -51,11 +51,11 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
       {soloTrack && (
         <span className="text-amber-400/70 font-bold">SOLO: {soloTrack}</span>
       )}
-      <span className="text-neutral-600">
-        {formatTime((currentPanelIndex + 0.5) * DEFAULT_PANEL_DURATION)}
+      <span className="text-neutral-300 font-bold">
+        {formatTime(totalDuration > 0 ? currentPanelIndex * DEFAULT_PANEL_DURATION : 0)}
       </span>
       <span className="text-neutral-700">/</span>
-      <span className="text-neutral-500">{formatTime(totalDuration)}</span>
+      <span className="text-neutral-400">{formatTime(totalDuration)}</span>
     </div>
 
     <div className="flex items-center gap-2 text-[10px] font-mono text-neutral-600">
