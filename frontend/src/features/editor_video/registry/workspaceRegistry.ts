@@ -18,13 +18,12 @@ import {
 import { WorkspaceId } from "../types/workspace.types";
 import { FavoritesWorkspace } from "../workspaces/favorites/FavoritesWorkspace";
 import { RecentWorkspace } from "../workspaces/recent/RecentWorkspace";
-import { MediaWorkspace } from "../workspaces/media/MediaWorkspace";
+import { ImportedAssetsWorkspace } from "../workspaces/imported_assets/ImportedAssetsWorkspace";
 import { CharactersWorkspace } from "../workspaces/characters/CharactersWorkspace";
 import { StoryWorkspace } from "../workspaces/story/StoryWorkspace";
 import { ElementsWorkspace } from "../workspaces/elements/ElementsWorkspace";
 import { TextWorkspace } from "../workspaces/text/TextWorkspace";
 import { AudioWorkspace } from "../workspaces/audio/AudioWorkspace";
-import { AiWorkspace } from "../workspaces/ai/AiWorkspace";
 import { TemplatesWorkspace } from "../workspaces/templates/TemplatesWorkspace";
 import { ResourcesWorkspace } from "../workspaces/resources/ResourcesWorkspace";
 import { MarketplaceWorkspace } from "../workspaces/marketplace/MarketplaceWorkspace";
@@ -37,7 +36,10 @@ export interface WorkspaceConfig {
   title: string;
   group: WorkspaceGroup;
   icon: React.ElementType;
-  component: React.ComponentType<{ onTriggerFeedback: (msg: string) => void }>;
+  component: React.ComponentType<{
+    onTriggerFeedback: (msg: string) => void;
+    appLogic?: any;
+  }>;
   defaultWidth?: number;
   supportsSearch?: boolean;
   supportsDragDrop?: boolean;
@@ -45,12 +47,23 @@ export interface WorkspaceConfig {
 }
 
 export const WORKSPACE_REGISTRY: Record<WorkspaceId, WorkspaceConfig> = {
+  imported_assets: {
+    id: "imported_assets",
+    title: "Imported Assets",
+    group: "primary",
+    icon: Image,
+    component: ImportedAssetsWorkspace,
+    defaultWidth: 380,
+    supportsSearch: true,
+    supportsDragDrop: true,
+    supportsAI: true,
+  },
   media: {
     id: "media",
     title: "Imported Assets",
     group: "primary",
     icon: Image,
-    component: MediaWorkspace,
+    component: ImportedAssetsWorkspace,
     defaultWidth: 380,
     supportsSearch: true,
     supportsDragDrop: true,
@@ -70,7 +83,7 @@ export const WORKSPACE_REGISTRY: Record<WorkspaceId, WorkspaceConfig> = {
   characters: {
     id: "characters",
     title: "Characters",
-    group: "primary",
+    group: "secondary",
     icon: Users,
     component: CharactersWorkspace,
     defaultWidth: 380,
@@ -78,21 +91,10 @@ export const WORKSPACE_REGISTRY: Record<WorkspaceId, WorkspaceConfig> = {
     supportsDragDrop: true,
     supportsAI: true,
   },
-  ai: {
-    id: "ai",
-    title: "AI Studio",
-    group: "primary",
-    icon: Wand2,
-    component: AiWorkspace,
-    defaultWidth: 380,
-    supportsSearch: true,
-    supportsDragDrop: false,
-    supportsAI: true,
-  },
   text: {
     id: "text",
     title: "Text",
-    group: "primary",
+    group: "secondary",
     icon: Type,
     component: TextWorkspace,
     defaultWidth: 380,
@@ -194,7 +196,9 @@ export const WORKSPACE_REGISTRY: Record<WorkspaceId, WorkspaceConfig> = {
  * Returns workspaces grouped by Primary, Secondary, Utility
  */
 export const getGroupedWorkspaces = () => {
-  const configs = Object.values(WORKSPACE_REGISTRY);
+  const configs = Object.values(WORKSPACE_REGISTRY).filter(
+    (c) => c.id !== "media"
+  );
   return [
     {
       name: "Primary",

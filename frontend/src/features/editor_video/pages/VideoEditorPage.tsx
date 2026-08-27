@@ -291,9 +291,10 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
           style={{ width: layoutConfig.mediaBin ? leftWidth : 96 }}
         >
           <WorkspacePanel
-            defaultWorkspace="media"
+            defaultWorkspace="imported_assets"
             onBackToApp={handleReturn}
             showContent={layoutConfig.mediaBin}
+            appLogic={appLogic}
           />
         </div>
 

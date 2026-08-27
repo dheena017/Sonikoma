@@ -13,18 +13,22 @@ interface WorkspacePanelProps {
   defaultWorkspace?: WorkspaceId;
   onBackToApp?: () => void;
   showContent?: boolean;
+  appLogic?: any;
 }
 
 export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
-  defaultWorkspace = "media",
+  defaultWorkspace = "imported_assets",
   onBackToApp,
   showContent = true,
+  appLogic,
 }) => {
   const [activeWorkspace, setActiveWorkspace] =
     useState<WorkspaceId>(defaultWorkspace);
 
   const config =
-    WORKSPACE_REGISTRY[activeWorkspace] || WORKSPACE_REGISTRY["media"];
+    WORKSPACE_REGISTRY[activeWorkspace] ||
+    WORKSPACE_REGISTRY["imported_assets"] ||
+    WORKSPACE_REGISTRY["media"];
   const ActiveWorkspaceComponent = config.component;
 
   return (
@@ -41,6 +45,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
           className="flex-1 w-full min-w-0 overflow-y-auto overflow-x-hidden bg-[#0c0d16]/75 backdrop-blur-2xl border-r border-white/10 shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]"
         >
           <ActiveWorkspaceComponent
+            appLogic={appLogic}
             onTriggerFeedback={(msg) => {
               editorEventBus.publish("MEDIA_ADDED", {
                 assetId: "ast-" + Date.now(),
