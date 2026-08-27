@@ -16,7 +16,7 @@ interface WorkspacePanelProps {
 }
 
 export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
-  defaultWorkspace = "story",
+  defaultWorkspace = "media",
   onBackToApp,
   showContent = true,
 }) => {
@@ -24,7 +24,7 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
     useState<WorkspaceId>(defaultWorkspace);
 
   const config =
-    WORKSPACE_REGISTRY[activeWorkspace] || WORKSPACE_REGISTRY["story"];
+    WORKSPACE_REGISTRY[activeWorkspace] || WORKSPACE_REGISTRY["media"];
   const ActiveWorkspaceComponent = config.component;
 
   return (

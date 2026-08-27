@@ -30,7 +30,7 @@ import { ResourcesWorkspace } from "../workspaces/resources/ResourcesWorkspace";
 import { MarketplaceWorkspace } from "../workspaces/marketplace/MarketplaceWorkspace";
 import { AppsWorkspace } from "../workspaces/apps/AppsWorkspace";
 
-export type WorkspaceGroup = "primary" | "secondary" | "utility";
+export type WorkspaceGroup = "primary" | "favorites" | "secondary" | "utility";
 
 export interface WorkspaceConfig {
   id: WorkspaceId;
@@ -45,27 +45,16 @@ export interface WorkspaceConfig {
 }
 
 export const WORKSPACE_REGISTRY: Record<WorkspaceId, WorkspaceConfig> = {
-  favorites: {
-    id: "favorites",
-    title: "Favorites",
+  media: {
+    id: "media",
+    title: "Media",
     group: "primary",
-    icon: Star,
-    component: FavoritesWorkspace,
+    icon: Image,
+    component: MediaWorkspace,
     defaultWidth: 380,
     supportsSearch: true,
-    supportsDragDrop: false,
-    supportsAI: false,
-  },
-  recent: {
-    id: "recent",
-    title: "Recent",
-    group: "primary",
-    icon: History,
-    component: RecentWorkspace,
-    defaultWidth: 380,
-    supportsSearch: true,
-    supportsDragDrop: false,
-    supportsAI: false,
+    supportsDragDrop: true,
+    supportsAI: true,
   },
   story: {
     id: "story",
@@ -76,17 +65,6 @@ export const WORKSPACE_REGISTRY: Record<WorkspaceId, WorkspaceConfig> = {
     defaultWidth: 380,
     supportsSearch: true,
     supportsDragDrop: false,
-    supportsAI: true,
-  },
-  media: {
-    id: "media",
-    title: "Media",
-    group: "primary",
-    icon: Image,
-    component: MediaWorkspace,
-    defaultWidth: 380,
-    supportsSearch: true,
-    supportsDragDrop: true,
     supportsAI: true,
   },
   characters: {
@@ -121,6 +99,28 @@ export const WORKSPACE_REGISTRY: Record<WorkspaceId, WorkspaceConfig> = {
     supportsSearch: true,
     supportsDragDrop: true,
     supportsAI: true,
+  },
+  favorites: {
+    id: "favorites",
+    title: "Favorites",
+    group: "favorites",
+    icon: Star,
+    component: FavoritesWorkspace,
+    defaultWidth: 380,
+    supportsSearch: true,
+    supportsDragDrop: false,
+    supportsAI: false,
+  },
+  recent: {
+    id: "recent",
+    title: "Recent",
+    group: "favorites",
+    icon: History,
+    component: RecentWorkspace,
+    defaultWidth: 380,
+    supportsSearch: true,
+    supportsDragDrop: false,
+    supportsAI: false,
   },
   elements: {
     id: "elements",
@@ -199,6 +199,10 @@ export const getGroupedWorkspaces = () => {
     {
       name: "Primary",
       items: configs.filter((c) => c.group === "primary"),
+    },
+    {
+      name: "Saved",
+      items: configs.filter((c) => c.group === "favorites"),
     },
     {
       name: "Secondary",

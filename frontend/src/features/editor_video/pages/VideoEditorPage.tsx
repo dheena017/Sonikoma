@@ -291,7 +291,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
           style={{ width: layoutConfig.mediaBin ? leftWidth : 96 }}
         >
           <WorkspacePanel
-            defaultWorkspace="story"
+            defaultWorkspace="media"
             onBackToApp={handleReturn}
             showContent={layoutConfig.mediaBin}
           />
