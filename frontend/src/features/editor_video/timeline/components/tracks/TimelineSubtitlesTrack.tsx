@@ -125,6 +125,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
     };
 
     const onMouseUp = () => {
+      onDurationChange?.(key, latestDuration);
       if (side === "left") {
         const durDiff = initialDuration - latestDuration;
         const shiftPx = durDiff * 30;
@@ -157,7 +158,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
         if (!hasText) return null;
         const t: PanelTiming | undefined = panelTimings[i];
         const k = `v3-${i}`;
-        const dur = p.subtitle_duration || t?.duration || p.duration || 3.0;
+        const dur = p.subtitle_duration || t?.duration || p.duration || 0;
         const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
         const offset = clipOffsets[k] ?? 0;
         const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
@@ -219,11 +220,12 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
               panel.narrative;
             if (!text) return null;
 
+            // subtitle_duration may trim the clip; otherwise matches the frame from panelTimings
             const dur =
               panel.subtitle_duration ||
-              panelTimings[idx]?.duration ||
-              panel.duration ||
-              3.0;
+              (panelTimings[idx]?.duration ??
+                panel.duration ??
+                0);
 
             const timing: PanelTiming = panelTimings[idx] ?? {
               index: idx,
@@ -241,11 +243,15 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
             const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
             const offsetPx = clipOffsets[key] ?? 0;
 
+            const activeDur = isResizing && resizingInfo
+              ? Math.max(0.5, resizingInfo.initialDuration + resizingInfo.deltaSecs)
+              : dur;
+
             let displayLeftPx = baseLeftPx + offsetPx;
-            let displayWidthPx = dur * 30;
+            let displayWidthPx = activeDur * 30;
 
             if (isResizing && resizingInfo && resizingInfo.side === "left") {
-              const durDelta = (dur - resizingInfo.initialDuration) * 30;
+              const durDelta = resizingInfo.deltaSecs * 30;
               displayLeftPx = Math.max(0, baseLeftPx + offsetPx - durDelta);
             }
 
@@ -313,7 +319,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                     </span>
                   )}
                   <span className="text-[7.5px] font-mono font-bold text-purple-100 bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
-                    {dur.toFixed(1)}s
+                    {activeDur.toFixed(1)}s
                   </span>
 
                   {/* Three-Dots Action Menu Button — hidden on very narrow clips */}

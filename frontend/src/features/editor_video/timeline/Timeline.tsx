@@ -80,10 +80,15 @@ const Timeline: React.FC<TimelineProps> = ({
       panels.length * 3.0 ||
       1;
 
-    // Check all tracks for clips extending beyond panels
+    // Check all tracks for clips extending beyond panels (including drag offsets)
     panelTimings.forEach((t, idx) => {
       const p = panels[idx] || {};
       const baseStart = t.startTime;
+
+      // Account for drag offset on V1 (story panels)
+      const v1OffsetSecs = (s.clipOffsets[`v1-${idx}`] ?? 0) / 30;
+      const v1End = baseStart + v1OffsetSecs + t.duration;
+
       const v2End =
         baseStart +
         (s.clipDurations[`v2-${idx}`] ??
@@ -101,6 +106,7 @@ const Timeline: React.FC<TimelineProps> = ({
         baseStart +
         (s.clipDurations[`a2-${idx}`] ??
           p.sfx_duration ??
+          t.duration ??
           2.0);
       const a3End =
         baseStart +
@@ -108,7 +114,7 @@ const Timeline: React.FC<TimelineProps> = ({
           p.voice_duration ??
           t.duration ??
           3.0);
-      max = Math.max(max, v2End, v3End, a2End, a3End);
+      max = Math.max(max, v1End, v2End, v3End, a2End, a3End);
     });
 
     // Check music track duration
@@ -117,8 +123,8 @@ const Timeline: React.FC<TimelineProps> = ({
       max = musicDur;
     }
 
-    return Math.max(max, 1);
-  }, [panelTimings, panels, s.clipDurations]);
+    return Math.max(max + 2, 1); // +2s buffer at the end
+  }, [panelTimings, panels, s.clipDurations, s.clipOffsets]);
 
   const getPanelIndexAtTime = useCallback(
     (time: number): number => {
@@ -396,6 +402,9 @@ const Timeline: React.FC<TimelineProps> = ({
     },
     onContextMenu: s.openContextMenu,
     onDurationChange: handleDurationChange,
+    onOffsetChange: (key: string, offsetPx: number) => {
+      s.updateClipOffset(key, offsetPx);
+    },
   };
 
   // ── Shared track-control factory ─────────────────────────────────────────────
@@ -444,10 +453,16 @@ const Timeline: React.FC<TimelineProps> = ({
         {/* ── Track Scroll Area: vertical + horizontal scrollbars ─────── */}
         <div
           ref={timelineScrollRef}
+          onWheel={(e) => {
+            if (e.ctrlKey || e.metaKey) return;
+            if (timelineScrollRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+              timelineScrollRef.current.scrollLeft += e.deltaY;
+            }
+          }}
           className="timeline-scroll-area flex-1 overflow-auto min-h-0 relative"
           style={{
             scrollbarWidth: "thin",
-            scrollbarColor: "#6d28d9 #0d0d14",
+            scrollbarColor: "#7c3aed #0d0d14",
           }}
         >
           {/* Inner wrapper with flush right edge, generous end-buffer and synchronized tracks */}

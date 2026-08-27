@@ -130,6 +130,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
     };
 
     const onMouseUp = () => {
+      onDurationChange?.(key, latestDuration);
       if (side === "left") {
         const durDiff = initialDuration - latestDuration;
         const shiftPx = durDiff * 30;
@@ -159,7 +160,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
         if (!sfx) return null;
         const t: PanelTiming | undefined = panelTimings[i];
         const k = `a2-${i}`;
-        const dur = p.sfx_duration ?? 2.0;
+        const dur = p.sfx_duration ?? t?.duration ?? 0;
         const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
         const offset = clipOffsets[k] ?? 0;
         const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
@@ -221,7 +222,8 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
             // Normalize: strip any existing outer brackets like [KLATTER] -> KLATTER
             const sfx = String(rawSfx).replace(/^\[+|\]+$/g, "").trim();
 
-            const dur = panel.sfx_duration ?? 2.0;
+            // sfx_duration may trim the clip; otherwise matches frame duration from panelTimings
+            const dur = panel.sfx_duration ?? panelTimings[idx]?.duration ?? 0;
             const timing: PanelTiming = panelTimings[idx] ?? {
               index: idx,
               duration: dur,
@@ -239,11 +241,15 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
               timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
             const offsetPx = clipOffsets[key] ?? 0;
 
+            const activeDur = isResizing && resizingInfo
+              ? Math.max(0.5, resizingInfo.initialDuration + resizingInfo.deltaSecs)
+              : dur;
+
             let displayLeftPx = baseLeftPx + offsetPx;
-            let displayWidthPx = dur * 30;
+            let displayWidthPx = activeDur * 30;
 
             if (isResizing && resizingInfo && resizingInfo.side === "left") {
-              const durDelta = (dur - resizingInfo.initialDuration) * 30;
+              const durDelta = resizingInfo.deltaSecs * 30;
               displayLeftPx = Math.max(0, baseLeftPx + offsetPx - durDelta);
             }
 
@@ -316,7 +322,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                     )}
                     {displayWidthPx >= 45 && (
                     <span className="text-[7.5px] font-mono font-bold text-cyan-100 bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
-                      {dur.toFixed(1)}s
+                      {activeDur.toFixed(1)}s
                     </span>
                     )}
 

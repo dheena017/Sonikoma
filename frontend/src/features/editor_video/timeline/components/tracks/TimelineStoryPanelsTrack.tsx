@@ -40,6 +40,7 @@ export interface TimelineStoryPanelsTrackProps {
   onCycleEasing?: (clipKey: string, keyframeId: string) => void;
   onAddKeyframe?: (clipKey: string, time: number) => void;
   onAddPanel?: () => void;
+  onOffsetChange?: (key: string, offsetPx: number) => void;
 }
 
 export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> = ({
@@ -55,6 +56,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
   onContextMenu,
   onDurationChange,
   onAddPanel,
+  onOffsetChange,
 }) => {
   const [resizingInfo, setResizingInfo] = useState<{
     idx: number;
@@ -63,8 +65,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     deltaSecs: number;
   } | null>(null);
 
-  // Per-clip position offsets for move dragging
-  const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
+  // Visual-only move state (snaps back on mouseUp — story panels are always contiguous)
   const [movingInfo, setMovingInfo] = useState<{
     key: string;
     idx: number;
@@ -98,19 +99,15 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
         hasMoved = true;
       }
       setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx });
+      // NOTE: Story panels are contiguous — we do NOT report offsets here.
+      // The drag is a visual-only preview; position is always set by panelTimings.
     };
 
     const onMouseUp = () => {
       if (!hasMoved) {
         onClipClick(key, idx);
-      } else {
-        const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
-        const newOffset = desiredLeft - baseLeftPx;
-        setClipOffsets((prev) => ({
-          ...prev,
-          [key]: (prev[key] ?? 0) + newOffset,
-        }));
       }
+      // Snap back — story panels are always contiguous (positioned by panelTimings)
       setMovingInfo(null);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
@@ -155,14 +152,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     };
 
     const onMouseUp = () => {
-      if (side === "left") {
-        const durDiff = initialDuration - latestDuration;
-        const shiftPx = durDiff * 30;
-        setClipOffsets((prev) => ({
-          ...prev,
-          [key]: (prev[key] ?? 0) + shiftPx,
-        }));
-      }
+      onDurationChange?.(key, latestDuration);
       setResizingInfo(null);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
@@ -179,9 +169,8 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     const allClips = panels.map((p: any, i: number) => {
       const t: PanelTiming | undefined = panelTimings[i];
       const k = `v1-${i}`;
-      const dur = t?.duration || p.duration || 3.0;
+      const dur = t?.duration ?? p.duration ?? 0;
       const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
-      const offset = clipOffsets[k] ?? 0;
       const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
       const isResizingThis = resizingInfo?.idx === i;
       const resizeLeftDelta =
@@ -189,12 +178,12 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
           ? (dur - resizingInfo.initialDuration) * 30
           : 0;
 
-      const left = Math.max(0, baseLeft + offset + moveDelta - resizeLeftDelta);
+      const left = Math.max(0, baseLeft + moveDelta - resizeLeftDelta);
       const width = dur * 30;
       return { key: k, left, width };
     });
     return assignLanes(allClips);
-  }, [panels, panelTimings, clipOffsets, movingInfo, resizingInfo]);
+  }, [panels, panelTimings, movingInfo, resizingInfo]);
 
   // Compute max lane to size track height dynamically
   const maxLane = useMemo(() => {
@@ -230,7 +219,8 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
         ) : (
           <div className="relative w-full h-full overflow-hidden">
             {panels.map((panel: any, idx: number) => {
-              const dur = panelTimings[idx]?.duration || panel.duration || 3.0;
+              // Duration comes from the authoritative panelTimings calculated in Timeline.tsx
+              const dur = panelTimings[idx]?.duration ?? panel.duration ?? 0;
               const timing: PanelTiming = panelTimings[idx] ?? {
                 index: idx,
                 duration: dur,
@@ -267,17 +257,23 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                 timing.startPx !== undefined
                   ? timing.startPx
                   : timing.startTime * 30;
-              const offsetPx = clipOffsets[key] ?? 0;
 
-              let displayLeftPx = baseLeftPx + offsetPx;
-              let displayWidthPx = dur * 30;
+              const activeDur = isResizing && resizingInfo
+                ? Math.max(0.5, resizingInfo.initialDuration + resizingInfo.deltaSecs)
+                : dur;
+
+              // Story panels are ALWAYS contiguous — no independent offsets.
+              // displayLeftPx is authoritative from panelTimings only.
+              let displayLeftPx = baseLeftPx;
+              let displayWidthPx = activeDur * 30;
 
               if (isResizing && resizingInfo && resizingInfo.side === "left") {
-                const durDelta = (dur - resizingInfo.initialDuration) * 30;
-                displayLeftPx = Math.max(0, baseLeftPx + offsetPx - durDelta);
+                const durDelta = resizingInfo.deltaSecs * 30;
+                displayLeftPx = Math.max(0, baseLeftPx - durDelta);
               }
 
               const isMoving = movingInfo?.key === key;
+              // Only apply deltaPx during live drag preview (visual only)
               const finalLeftPx =
                 displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
@@ -293,7 +289,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                       e,
                       key,
                       idx,
-                      baseLeftPx + offsetPx,
+                      baseLeftPx,
                       displayWidthPx
                     )
                   }
@@ -376,7 +372,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                           : "bg-black/80 text-neutral-300"
                       }`}
                     >
-                      {dur.toFixed(1)}s
+                      {activeDur.toFixed(1)}s
                     </span>
 
                     {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
@@ -402,7 +398,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     isResizing={isResizing}
                     activeSide={isResizing ? resizingInfo.side : null}
                     onResizeStart={(e, side, d) =>
-                      handleResizeStart(e, idx, side, d, baseLeftPx + offsetPx)
+                      handleResizeStart(e, idx, side, d, baseLeftPx)
                     }
                     accentColor="purple"
                   />

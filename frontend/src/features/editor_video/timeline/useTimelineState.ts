@@ -23,6 +23,7 @@ export interface TimelineState {
   contextMenu: ContextMenuState | null;
   clipboard: string | null;
   clipDurations: Record<string, number>;
+  clipOffsets: Record<string, number>;
 
   // Sub-systems
   keyframesState: KeyframesState;
@@ -41,6 +42,7 @@ export interface TimelineState {
 
   getClipDuration: (key: string) => number;
   updateClipDuration: (key: string, duration: number) => void;
+  updateClipOffset: (key: string, offsetPx: number) => void;
 
   // Track controls
   toggleMute: (id: string) => void;
@@ -96,6 +98,7 @@ export function useTimelineState(
   const [clipDurations, setClipDurations] = useState<Record<string, number>>(
     {}
   );
+  const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
 
   // Sub-states
   const keyframesState = useKeyframes();
@@ -131,6 +134,10 @@ export function useTimelineState(
 
   const updateClipDuration = useCallback((key: string, duration: number) => {
     setClipDurations((prev) => ({ ...prev, [key]: duration }));
+  }, []);
+
+  const updateClipOffset = useCallback((key: string, offsetPx: number) => {
+    setClipOffsets((prev) => ({ ...prev, [key]: offsetPx }));
   }, []);
 
   const selectedDuration = selectedClip ? getClipDuration(selectedClip) : null;
@@ -330,6 +337,7 @@ export function useTimelineState(
     contextMenu,
     clipboard,
     clipDurations,
+    clipOffsets,
     keyframesState,
     isMediaPickerOpen,
     aiSuggestions,
@@ -341,6 +349,7 @@ export function useTimelineState(
     setSoloTrack,
     getClipDuration,
     updateClipDuration,
+    updateClipOffset,
     toggleMute,
     toggleLock,
     toggleHide,

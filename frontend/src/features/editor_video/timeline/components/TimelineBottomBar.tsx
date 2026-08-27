@@ -85,20 +85,20 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
         </span>
 
         {/* Left / Right Scroll Navigation Buttons */}
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-1">
           <button
             onClick={handleScrollLeft}
-            title="Scroll timeline left"
-            className="h-5 w-5 flex items-center justify-center rounded bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/50 text-neutral-500 hover:text-purple-200 transition-all cursor-pointer active:scale-90"
+            title="Scroll timeline left (◀)"
+            className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-purple-600 border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
           >
-            <ChevronLeft className="h-3 w-3 stroke-[2.5]" />
+            <ChevronLeft className="h-3.5 w-3.5 stroke-[2.5]" />
           </button>
           <button
             onClick={handleScrollRight}
-            title="Scroll timeline right"
-            className="h-5 w-5 flex items-center justify-center rounded bg-white/5 hover:bg-purple-500/20 border border-white/10 hover:border-purple-400/50 text-neutral-500 hover:text-purple-200 transition-all cursor-pointer active:scale-90"
+            title="Scroll timeline right (▶)"
+            className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-purple-600 border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
           >
-            <ChevronRight className="h-3 w-3 stroke-[2.5]" />
+            <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
           </button>
         </div>
       </div>

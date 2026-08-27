@@ -162,7 +162,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
 
   const displayWidthPx = Math.max(
     30,
-    (clipDuration + (resizingSide === "right" ? deltaSecs : 0)) * 30
+    (clipDuration + (resizingSide === "right" ? deltaSecs : resizingSide === "left" ? -deltaSecs : 0)) * 30
   );
 
   return (
